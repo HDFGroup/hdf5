@@ -29,6 +29,7 @@
 #include "H5ACprivate.h"        /* Metadata Cache                       */
 #include "H5Eprivate.h"         /* Error Handling                       */
 #include "H5FDprivate.h"        /* File Driver                          */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5Pprivate.h"         /* Property List                        */
 #include "H5Rprivate.h"         /* References                           */

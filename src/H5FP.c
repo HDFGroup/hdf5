@@ -15,6 +15,7 @@
 /* Private header files */
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
