@@ -6278,7 +6278,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t * UNUSED iter, void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
+H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         void *op_data)
 {
     H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */

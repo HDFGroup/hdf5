@@ -92,7 +92,7 @@ static const char *multi_letters = "msbrglo";
  *-------------------------------------------------------------------------
  */
 herr_t
-h5_errors(void * UNUSED client_data)
+h5_errors(void UNUSED *client_data)
 {
     H5_FAILED();
     H5Eprint (stdout);

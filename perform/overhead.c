@@ -43,8 +43,12 @@
 #endif
 
 #define FILE_NAME_1	"overhead.h5"
+#ifndef FALSE
 #define FALSE		0
+#endif /* FALSE */
+#ifndef TRUE
 #define TRUE		1
+#endif /* TRUE */
  
 typedef enum fill_t {
     FILL_ALL,

@@ -25,7 +25,7 @@ const char *FILENAME[] = {
 #endif
 
 /* Protocols */
-void usage(void);
+static void usage(void);
 
 
 /*-------------------------------------------------------------------------
@@ -403,6 +403,7 @@ main (int ac, char **av)
     hid_t	fapl=-1;
     hsize_t	family_size;
     hsize_t	family_size_def;	/* default family file size */
+    double	family_size_def_dbl;	/* default family file size */
     int		cflag=1;		/* check file system before test */
     
     /* parameters setup */
@@ -414,7 +415,8 @@ main (int ac, char **av)
 	    /* specify a different family file size */
 	    ac--; av++;
 	    if (ac > 0){
-		family_size_def = (hsize_t) atof(*av);
+		family_size_def_dbl = atof(*av);
+                H5_ASSIGN_OVERFLOW(family_size_def,family_size_def_dbl,double,hsize_t);
 		if (family_size_def <= 0)
 		    family_size_def = (hsize_t)FAMILY_SIZE;
 	    }

@@ -2308,7 +2308,7 @@ printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,
     if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve data pipeline");
     if(H5P_fill_value_defined(dc_plist, &fill_status)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
     if((fill_status==H5D_FILL_VALUE_DEFAULT || fill_status==H5D_FILL_VALUE_USER_DEFINED) && H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,"can't retrieve fill value");
     if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
@@ -3387,6 +3387,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
                 if ((buf=H5FL_BLK_ALLOC(fill_conv,bufsize,0))==NULL)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
 
+                /* Fill the buffer with the fill value */
                 H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
                 
                 /* Start at the beginning of the dataset */

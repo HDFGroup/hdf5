@@ -1926,7 +1926,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void * UNUSED key)
+H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void UNUSED *key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
     
@@ -4099,7 +4099,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     int         ret_value = FAIL;
     int         nmembs, i;
 
-    FUNC_ENTER(H5Tget_member_index, NULL);
+    FUNC_ENTER(H5Tget_member_index, FAIL);
     H5TRACE2("Is","is",type_id,name);
 
     /* Check arguments */
