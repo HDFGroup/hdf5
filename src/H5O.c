@@ -67,7 +67,11 @@ static const H5O_class_t *const message_type_g[] = {
     NULL,		/*0x0006 Data storage -- compact object		*/
     H5O_EFL,		/*0x0007 Data storage -- external data files	*/
     H5O_LAYOUT,		/*0x0008 Data Layout				*/
-    NULL,		/*0x0009 Not assigned				*/
+#ifdef H5O_ENABLE_BOGUS
+    H5O_BOGUS,		/*0x0009 "Bogus"				*/
+#else /* H5O_ENABLE_BOGUS */
+    NULL,		/*0x0009 "Bogus"				*/
+#endif /* H5O_ENABLE_BOGUS */
     NULL,		/*0x000A Not assigned				*/
     H5O_PLINE,		/*0x000B Data storage -- filter pipeline	*/
     H5O_ATTR,		/*0x000C Attribute list				*/
@@ -502,10 +506,15 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED _udata1,
 	    flags = *p++;
 	    p += 3; /*reserved*/
 
-	    if (id >= NELMTS(message_type_g) || NULL == message_type_g[id])
-		HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "corrupt object header");
+            /* Try to detect invalidly formatted object header messages */
 	    if (p + mesg_size > oh->chunk[chunkno].image + chunk_size)
 		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "corrupt object header");
+
+            /* Skip header messages we don't know about */
+            /* (Usually from future versions of the library */
+	    if (id >= NELMTS(message_type_g) || NULL == message_type_g[id])
+                continue;
+
 	    if (H5O_NULL_ID == id && oh->nmesgs > 0 &&
 		H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
 		oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
@@ -1718,6 +1727,111 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+#ifdef H5O_ENABLE_BOGUS
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_bogus_oh
+ *
+ * Purpose:	Create a "bogus" message unless one already exists.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              <koziol@ncsa.uiuc.edu>
+ *              Tuesday, January 21, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_bogus_oh(H5F_t *f, H5O_t *oh)
+{
+    int	idx;
+    size_t	size;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER(H5O_bogus_oh, FAIL);
+
+    assert(f);
+    assert(oh);
+
+    /* Look for existing message */
+    for (idx=0; idx<oh->nmesgs; idx++)
+	if (H5O_BOGUS==oh->mesg[idx].type)
+            break;
+
+    /* Create a new message */
+    if (idx==oh->nmesgs) {
+	size = (H5O_BOGUS->raw_size)(f, NULL);
+	if ((idx=H5O_alloc(f, oh, H5O_BOGUS, size))<0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message");
+
+        /* Allocate the native message in memory */
+	if (NULL==(oh->mesg[idx].native = H5MM_malloc(sizeof(H5O_bogus_t))))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for 'bogus' message");
+
+        /* Update the native part */
+        ((H5O_bogus_t *)(oh->mesg[idx].native))->u = H5O_BOGUS_VALUE;
+
+        /* Mark the message and object header as dirty */
+        oh->mesg[idx].dirty = TRUE;
+        oh->dirty = TRUE;
+    } /* end if */
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5O_bogus_oh() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_bogus
+ *
+ * Purpose:	Create a "bogus" message in an object.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              <koziol@ncsa.uiuc.edu>
+ *              Tuesday, January 21, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_bogus(H5G_entry_t *ent)
+{
+    H5O_t	*oh = NULL;
+    herr_t	ret_value = SUCCEED;
+    
+    FUNC_ENTER(H5O_bogus, FAIL);
+
+    /* check args */
+    assert(ent);
+    assert(ent->file);
+    assert(H5F_addr_defined(ent->header));
+
+    /* Verify write access to the file */
+    if (0==(ent->file->intent & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file");
+
+    /* Get the object header */
+    if (NULL==(oh=H5AC_protect(ent->file, H5AC_OHDR, ent->header, NULL, NULL)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
+
+    /* Create the "bogus" message */
+    if (H5O_bogus_oh(ent->file, oh)<0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object 'bogus' message");
+
+done:
+    if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh)<0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+
+    FUNC_LEAVE(ret_value);
+} /* end H5O_bogus() */
+#endif /* H5O_ENABLE_BOGUS */
 
 
 /*-------------------------------------------------------------------------

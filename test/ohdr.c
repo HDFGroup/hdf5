@@ -20,6 +20,11 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* The tbogus.h5 is generated from gen_bogus.c in HDF5 'test' directory.
+ * To get this data file, define H5O_ENABLE_BOGUS in src/H5Oprivate, rebuild
+ * the library and simply compile gen_bogus.c with that HDF5 library and run it. */
+#define FILE_BOGUS "tbogus.h5"
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -41,6 +46,7 @@ int
 main(void)
 {
     hid_t	fapl=-1, file=-1;
+    hid_t	dset=-1;
     H5F_t	*f=NULL;
     char	filename[1024];
     H5G_entry_t	oh_ent;
@@ -265,6 +271,31 @@ main(void)
 	goto error;
     }
     if (H5Fclose(file)<0) goto error;
+    PASSED();
+
+    /* Test reading dataset with undefined object header message */
+    TESTING("reading object with unknown header message");
+    {
+        char testfile[512]="";
+        char *srcdir = getenv("srcdir");
+
+        /* Build path to test file */
+        if (srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_BOGUS) + 1) < sizeof(testfile))){
+            HDstrcpy(testfile, srcdir);
+            HDstrcat(testfile, "/");
+        }
+        HDstrcat(testfile, FILE_BOGUS);
+
+        if ((file=H5Fopen(testfile, H5F_ACC_RDONLY, fapl))<0)
+            goto error;
+
+        /* Open the dataset with the unknown header message (generated with gen_bogus.c) */
+        if((dset=H5Dopen(file,"/Dataset1"))<0)
+            goto error;
+        if (H5Dclose(dset)<0) goto error;
+
+        if (H5Fclose(file)<0) goto error;
+    }
     PASSED();
 
     puts("All object header tests passed.");

@@ -1671,6 +1671,14 @@ H5D_update_entry_info(H5F_t *file, H5D_t *dset, H5P_genplist_t *plist)
     if (H5D_COMPACT != layout->type && H5O_append(file, oh, H5O_LAYOUT, 0, layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout"); 
 
+#ifdef H5O_ENABLE_BOGUS
+    /*
+     * Add a "bogus" message.
+     */
+    if (H5O_bogus_oh(file, oh))<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update 'bogus' message");
+#endif /* H5O_ENABLE_BOGUS */
+    
     /* Add a modification time message. */
     if (H5O_touch_oh(file, oh, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message");
