@@ -581,6 +581,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     MPI_Datatype mpi_buf_type, mpi_file_type;
     hbool_t	 mbt_is_derived=0,
 		 mft_is_derived=0;
+    hbool_t	 plist_is_setup=0;      /* Whether the dxpl has been customized */
 
     FUNC_ENTER (H5S_mpio_spaces_xfer, FAIL);
 
@@ -665,7 +666,9 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
      * Pass buf type, file type to the file driver. Request an MPI type
      * transfer (instead of an elementary byteblock transfer).
      */
-    H5FD_mpio_setup(f->shared->lf, mpi_buf_type, mpi_file_type, 1);
+    if(H5FD_mpio_setup(dxpl_id, mpi_buf_type, mpi_file_type)<0)
+    	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O type properties0");
+    plist_is_setup=1;
 
     /* transfer the data */
     mpi_count = (size_t)mpi_buf_count;
@@ -686,6 +689,12 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     }
 
 done:
+    /* Reset the dxpl settings */
+    if(plist_is_setup) {
+        if(H5FD_mpio_teardown(dxpl_id)<0)
+    	    HRETURN_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to reset dxpl values");
+    } /* end if */
+
     /* free the MPI buf and file types */
     if (mbt_is_derived) {
 	err = MPI_Type_free( &mpi_buf_type );

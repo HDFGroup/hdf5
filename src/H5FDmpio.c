@@ -36,6 +36,7 @@
 #include "H5Fprivate.h"		/*files					*/
 #include "H5FDprivate.h"	/*file driver			        */
 #include "H5FDmpio.h"           /*MPI I/O file driver                   */
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"        /*memory allocation                     */
 #include "H5Pprivate.h"		/*property lists			*/
 
@@ -69,12 +70,7 @@ typedef struct H5FD_mpio_t {
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
-    MPI_Datatype btype;		/*buffer type for xfers			*/
-    MPI_Datatype ftype;		/*file type for xfers			*/
-    int		 use_types;	/*if !0, use btype, ftype, disp.else do
-				 * simple byteblk xfer		
-				 */
-    int		old_use_types; /*remember value of use_types		*/
+    int		old_use_types;  /*remember value of use_types		*/
 } H5FD_mpio_t;
 
 /* Prototypes */
@@ -518,21 +514,68 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
  *              the address of the dataset in MPI_File_set_view() calls, as
  *              necessary.
  *
+ *              Quincey Koziol - 2002/06/17
+ *              Changed to use dataset transfer property list instead of setting
+ *              values in the file struct.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpio_setup(H5FD_t *_file, MPI_Datatype btype, MPI_Datatype ftype,
-		hbool_t use_types)
+H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
 {
-    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+    H5D_xfer_t	*xfer_parms = NULL;
 
     FUNC_ENTER(H5FD_mpio_setup, FAIL);
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
 
-    file->btype = btype;
-    file->ftype = ftype;
-    file->use_types = use_types;
+    /* Get the dataset transfer property list */
+    assert(H5P_DEFAULT != dxpl_id);
+
+    if (H5P_DATASET_XFER != H5P_get_class(dxpl_id) ||
+	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    }
+
+    xfer_parms->btype = btype;
+    xfer_parms->ftype = ftype;
+    xfer_parms->use_types = 1;
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_teardown
+ *
+ * Purpose:	Reset the MPI-I/O type information in the dxpl
+ *
+ * Return:	Success:        non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, June 17, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_mpio_teardown(hid_t dxpl_id)
+{
+    H5D_xfer_t	*xfer_parms = NULL;
+
+    FUNC_ENTER(H5FD_mpio_teardown, FAIL);
+
+    /* Get the dataset transfer property list */
+    assert(H5P_DEFAULT != dxpl_id);
+
+    if (H5P_DATASET_XFER != H5P_get_class(dxpl_id) ||
+	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    }
+
+    xfer_parms->btype = MPI_DATATYPE_NULL;
+    xfer_parms->ftype = MPI_DATATYPE_NULL;
+    xfer_parms->use_types = 0;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -868,10 +911,6 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->mpi_size = mpi_size;
     file->mpi_round = 0;        /* Start metadata writes with process 0 */
     file->closing = FALSE;      /* Not closing yet */
-    file->btype = MPI_DATATYPE_NULL;
-    file->ftype = MPI_DATATYPE_NULL;
-
-
     file->eof = MPIOff_to_haddr(size);
 
 #ifdef H5FDmpio_DEBUG
@@ -1147,6 +1186,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 	       void *buf/*out*/)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
+    const H5D_xfer_t	*xfer_parms = NULL;     /* Dataset transfer plist */
     const H5FD_mpio_dxpl_t	*dx=NULL;
     H5FD_mpio_dxpl_t		_dx;
     MPI_Offset			mpi_off, mpi_disp;
@@ -1181,6 +1221,14 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 		(long)mpi_off, size_i );
 #endif
 
+    /* Get the dataset transfer property list */
+    if (H5P_DEFAULT == dxpl_id) {
+        xfer_parms = &H5D_xfer_dflt;
+    } else if (H5P_DATASET_XFER != H5P_get_class(dxpl_id) ||
+	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    }
+
     /* Obtain the data transfer properties */
     if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
@@ -1196,11 +1244,11 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
      * could mean "use MPI_BYTE" by convention).
      */
-    use_types_this_time = file->use_types;
+    use_types_this_time = xfer_parms->use_types;
     if (use_types_this_time) {
         /* prepare for a full-blown xfer using btype, ftype, and disp */
-        buf_type = file->btype;
-        file_type = file->ftype;
+        buf_type = xfer_parms->btype;
+        file_type = xfer_parms->ftype;
 
         /* When using types, use the address as the displacement for
          * MPI_File_set_view and reset the address for the read to zero
@@ -1235,7 +1283,6 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * this flag to !=0.
      */
     file->old_use_types = use_types_this_time;
-    file->use_types = 0;
 
     /* Read the data. */
     assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
@@ -1429,10 +1476,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t addr,
+H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 		hsize_t size, const void *buf)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
+    const H5D_xfer_t	*xfer_parms = NULL;     /* Dataset transfer plist */
     const H5FD_mpio_dxpl_t	*dx=NULL;
     H5FD_mpio_dxpl_t		_dx;
     MPI_Offset 		 	mpi_off, mpi_disp;
@@ -1467,6 +1515,14 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
                 (long)mpi_off, size_i);
 #endif
 
+    /* Get the dataset transfer property list */
+    if (H5P_DEFAULT == dxpl_id) {
+        xfer_parms = &H5D_xfer_dflt;
+    } else if (H5P_DATASET_XFER != H5P_get_class(dxpl_id) ||
+	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    }
+
     /* Obtain the data transfer properties */
     if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
@@ -1482,11 +1538,11 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
      * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
      * could mean "use MPI_BYTE" by convention).
      */
-    use_types_this_time = file->use_types;
+    use_types_this_time = xfer_parms->use_types;
     if (use_types_this_time) {
         /* prepare for a full-blown xfer using btype, ftype, and disp */
-        buf_type = file->btype;
-        file_type = file->ftype;
+        buf_type = xfer_parms->btype;
+        file_type = xfer_parms->ftype;
 
         /* When using types, use the address as the displacement for
          * MPI_File_set_view and reset the address for the read to zero
@@ -1521,7 +1577,6 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
      * this flag to !=0.
      */
     file->old_use_types = use_types_this_time;
-    file->use_types = 0;
 
     /* Only p<round> will do the actual write if all procs in comm write same data */
     if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
