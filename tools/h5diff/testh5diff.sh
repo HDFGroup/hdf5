@@ -38,7 +38,7 @@ TESTING() {
 #
 TOOLTEST() {
    # Run test.
-   $RUNSERIAL $DUMPER_BIN "$@"
+   TESTING $RUNSERIAL $DUMPER_BIN "$@"
 }
 
 ##############################################################################
@@ -50,3 +50,4 @@ TOOLTEST() {
 # test 
 TOOLTEST -d dset h5diff_test1.h5 h5diff_test2.h5
 
+exit $nerrors
