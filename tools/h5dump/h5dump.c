@@ -225,6 +225,16 @@ static const dump_header standardformat = {
     "",				/*dataend */
     SOFTLINK,			/*softlinkbegin */
     "",				/*softlinkend */
+    SUBSET,			/*subsettingbegin */
+    "",				/*subsettingend */
+    START,			/*startbegin */
+    "",				/*startend */
+    STRIDE,			/*stridebegin */
+    "",				/*strideend */
+    COUNT,			/*countbegin */
+    "",				/*countend */
+    BLOCK,			/*blockbegin */
+    "",				/*blockend */
 
     "{",			/*fileblockbegin */
     "}",			/*fileblockend */
@@ -252,6 +262,16 @@ static const dump_header standardformat = {
     "}",			/*structblockend */
     "{",			/*vlenblockbegin */
     "}",			/*vlenblockend */
+    "{",                        /*subsettingblockbegin */
+    "}",                        /*subsettingblockend */
+    "(",                        /*startblockbegin */
+    ");",                       /*startblockend */
+    "(",                        /*strideblockbegin */
+    ");",                       /*strideblockend */
+    "(",                        /*countblockbegin */
+    ");",                       /*countblockend */
+    "(",                        /*blockblockbegin */
+    ");",                       /*blockblockend */
 
     "",				/*dataspacedescriptionbegin */
     "",				/*dataspacedescriptionend */
@@ -287,6 +307,16 @@ static const dump_header xmlformat = {
     "</Data>",			/*dataend */
     "",				/*softlinkbegin */
     "",				/*softlinkend */
+    "", 			/*subsettingbegin */
+    "",				/*subsettingend */
+    "", 			/*startbegin */
+    "",				/*startend */
+    "", 			/*stridebegin */
+    "",				/*strideend */
+    "", 			/*countbegin */
+    "",				/*countend */
+    "", 			/*blockbegin */
+    "",				/*blockend */
 
     "",				/*fileblockbegin */
     "",				/*fileblockend */
@@ -314,6 +344,16 @@ static const dump_header xmlformat = {
     "",				/*structblockend */
     "",				/*vlenblockbegin */
     "",				/*vlenblockend */
+    "",                         /*subsettingblockbegin */
+    "",                         /*subsettingblockend */
+    "",                         /*startblockbegin */
+    "",                         /*startblockend */
+    "",                         /*strideblockbegin */
+    "",                         /*strideblockend */
+    "",                         /*countblockbegin */
+    "",                         /*countblockend */
+    "",                         /*blockblockbegin */
+    "",                         /*blockblockend */
 
     "",				/*dataspacedescriptionbegin */
     "",				/*dataspacedescriptionend */
@@ -334,85 +374,6 @@ static int              xml_print_strs(hid_t, int);
 static hobj_ref_t      *ref_path_table_put(hid_t, const char *);
 static char            *xml_escape_the_string(const char *, int);
 static char            *xml_escape_the_name(const char *);
-
-/**
- **  Change for XML  **
- **
- **  The 'dump_xxx' functions have two versions, standard and XML.
- **
- **    They are called indirectly through the 'dump_function_table'.
- **    e.g., dump_group(...) becomes dump_functions->dump_group(...);
- **
- **    The standard functions are unchanged except for the way
- **    they are called
- **/
-
-/* The dump functions of the dump_function_table */
-
-/* standard format:  no change */
-static void             dump_group(hid_t, const char *);
-static void             dump_dataset(hid_t, const char *);
-static void             dump_data(hid_t, int);
-static void             dump_named_datatype(hid_t, const char *);
-static void             dump_dataspace(hid_t space);
-static void             dump_datatype(hid_t type);
-static herr_t           dump_attr(hid_t attr, const char *attr_name,
-				  void UNUSED * op_data);
-
-/* XML format:   same interface, alternative output */
-
-static void             xml_dump_group(hid_t, const char *);
-static void             xml_dump_dataset(hid_t ds, const char *dsname);
-static void             xml_dump_data(hid_t, int);
-static void             xml_dump_named_datatype(hid_t, const char *);
-static void             xml_dump_dataspace(hid_t space);
-static void             xml_dump_datatype(hid_t type);
-static herr_t           xml_dump_attr(hid_t attr, const char *attr_name,
-				      void UNUSED * op_data);
-
-/** 
- ** Added for XML **
- **
- **  This is the global dispatch table for the dump functions.
- **/
-/* the table of dump functions */
-typedef struct dump_functions_t {
-    void                (*dump_group_function) (hid_t, const char *);
-    void                (*dump_named_datatype_function) (hid_t, const char *);
-    void                (*dump_dataset_function) (hid_t, const char *);
-    void                (*dump_dataspace_function) (hid_t);
-    void                (*dump_datatype_function) (hid_t);
-    herr_t              (*dump_attribute_function) (hid_t, const char *, void *);
-    void                (*dump_data_function) (hid_t, int);
-} dump_functions;
-
-/* Standard DDL output */
-static const dump_functions ddl_function_table = {
-    dump_group,
-    dump_named_datatype,
-    dump_dataset,
-    dump_dataspace,
-    dump_datatype,
-    dump_attr,
-    dump_data
-};
-
-/* XML output */
-static const dump_functions xml_function_table = {
-    xml_dump_group,
-    xml_dump_named_datatype,
-    xml_dump_dataset,
-    xml_dump_dataspace,
-    xml_dump_datatype,
-    xml_dump_attr,
-    xml_dump_data
-};
-
-/*
- * The global table is set to either ddl_function_table or 
- * xml_function_table in the initialization.
- */
-static const dump_functions *dump_function_table;
 
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {
@@ -534,6 +495,83 @@ static struct long_options l_opts[] = {
     { "xml-d", require_arg, 'D' },
     { NULL, 0, '\0' }
 };
+
+/**
+ **  Change for XML  **
+ **
+ **  The 'dump_xxx' functions have two versions, standard and XML.
+ **
+ **    They are called indirectly through the 'dump_function_table'.
+ **    e.g., dump_group(...) becomes dump_functions->dump_group(...);
+ **
+ **    The standard functions are unchanged except for the way
+ **    they are called
+ **/
+
+/* The dump functions of the dump_function_table */
+
+/* standard format:  no change */
+static void             dump_group(hid_t, const char *);
+static void             dump_named_datatype(hid_t, const char *);
+static void             dump_dataset(hid_t, const char *, struct subset_t *);
+static void             dump_dataspace(hid_t space);
+static void             dump_datatype(hid_t type);
+static herr_t           dump_attr(hid_t, const char *, void UNUSED *);
+static void             dump_data(hid_t, int, struct subset_t *);
+
+/* XML format:   same interface, alternative output */
+
+static void             xml_dump_group(hid_t, const char *);
+static void             xml_dump_named_datatype(hid_t, const char *);
+static void             xml_dump_dataset(hid_t, const char *, struct subset_t UNUSED *);
+static void             xml_dump_dataspace(hid_t space);
+static void             xml_dump_datatype(hid_t type);
+static herr_t           xml_dump_attr(hid_t, const char *, void UNUSED *);
+static void             xml_dump_data(hid_t, int, struct subset_t UNUSED *);
+
+/** 
+ ** Added for XML **
+ **
+ **  This is the global dispatch table for the dump functions.
+ **/
+/* the table of dump functions */
+typedef struct dump_functions_t {
+    void                (*dump_group_function) (hid_t, const char *);
+    void                (*dump_named_datatype_function) (hid_t, const char *);
+    void                (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
+    void                (*dump_dataspace_function) (hid_t);
+    void                (*dump_datatype_function) (hid_t);
+    herr_t              (*dump_attribute_function) (hid_t, const char *, void *);
+    void                (*dump_data_function) (hid_t, int, struct subset_t *);
+} dump_functions;
+
+/* Standard DDL output */
+static const dump_functions ddl_function_table = {
+    dump_group,
+    dump_named_datatype,
+    dump_dataset,
+    dump_dataspace,
+    dump_datatype,
+    dump_attr,
+    dump_data
+};
+
+/* XML output */
+static const dump_functions xml_function_table = {
+    xml_dump_group,
+    xml_dump_named_datatype,
+    xml_dump_dataset,
+    xml_dump_dataspace,
+    xml_dump_datatype,
+    xml_dump_attr,
+    xml_dump_data
+};
+
+/*
+ * The global table is set to either ddl_function_table or 
+ * xml_function_table in the initialization.
+ */
+static const dump_functions *dump_function_table;
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -1030,7 +1068,7 @@ dump_dataspace(hid_t space)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
+dump_attr(hid_t attr, const char *attr_name, void UNUSED *op_data)
 {
     hid_t       attr_id, type, space;
     herr_t      ret = SUCCEED;
@@ -1057,7 +1095,7 @@ dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    dump_oid(attr_id);
 
 	if (display_data)
-	    dump_data(attr_id, ATTRIBUTE_DATA);
+	    dump_data(attr_id, ATTRIBUTE_DATA, NULL);
 
 	H5Tclose(type);
 	H5Sclose(space);
@@ -1167,7 +1205,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
 	    dump_oid(attr_id);
 
 	if (display_data)
-	    dump_data(attr_id, ATTRIBUTE_DATA);
+	    dump_data(attr_id, ATTRIBUTE_DATA, NULL);
 
 	H5Tclose(type);
 	H5Sclose(space);
@@ -1388,7 +1426,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 		}
 	    }
 
-	    dump_function_table->dump_dataset_function(obj, name);
+	    dump_function_table->dump_dataset_function(obj, name, NULL);
 	    H5Dclose(obj);
 	} else {
             error_msg(progname, "unable to dump dataset \"%s\"\n", name);
@@ -1548,7 +1586,7 @@ dump_group(hid_t gid, const char *name)
  *-------------------------------------------------------------------------
  */
 static void
-dump_dataset(hid_t did, const char *name)
+dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 {
     hid_t   type, space;
 
@@ -1580,7 +1618,7 @@ dump_dataset(hid_t did, const char *name)
 	case H5T_ENUM:
 	case H5T_VLEN:
 	case H5T_ARRAY:
-	    dump_data(did, DATASET_DATA);
+	    dump_data(did, DATASET_DATA, sset);
 	    break;
 
 	default:
@@ -1658,7 +1696,7 @@ dump_tables(void)
  *-------------------------------------------------------------------------
  */
 static void
-dump_data(hid_t obj_id, int obj_data)
+dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
 {
     h5dump_t               *outputformat = &dataformat;
     int                     status = -1;
@@ -1679,8 +1717,85 @@ dump_data(hid_t obj_id, int obj_data)
      * so when we don't need any extra indentation, depth will be 0.
      */
     depth = indent / stdindent + 1;
+
+    if (sset && obj_data == DATASET_DATA) {
+        hid_t f_space = H5Dget_space(obj_id);
+        int dims = H5Sget_simple_extent_ndims(f_space);
+
+        indentation(indent);
+        begin_obj(dump_header_format->subsettingbegin, (const char *)NULL,
+                  dump_header_format->subsettingblockbegin);
+        indent += COL;
+
+        indentation(indent);
+        printf("%s %s ", dump_header_format->startbegin,
+               dump_header_format->startblockbegin);
+
+        for (i = 0; i < dims; i++) {
+            printf("%u", sset->start[i]);
+            
+            if (i + 1 != dims)
+                printf(", ");
+        }
+
+        printf("%s %s\n", dump_header_format->startend,
+               dump_header_format->startblockend);
+
+        indentation(indent);
+        printf("%s %s ", dump_header_format->stridebegin,
+               dump_header_format->strideblockbegin);
+
+        for (i = 0; i < dims; i++) {
+            printf("%u", sset->stride[i]);
+            
+            if (i + 1 != dims)
+                printf(", ");
+        }
+
+        printf("%s %s\n", dump_header_format->strideend,
+               dump_header_format->strideblockend);
+
+        indentation(indent);
+        printf("%s %s ", dump_header_format->countbegin,
+               dump_header_format->countblockbegin);
+
+        if (sset->count)
+            for (i = 0; i < dims; i++) {
+                printf("%u", sset->count[i]);
+            
+                if (i + 1 != dims)
+                    printf(", ");
+            }
+        else
+            printf("DEFAULT");
+
+        printf("%s %s\n", dump_header_format->countend,
+               dump_header_format->countblockend);
+
+        indentation(indent);
+        printf("%s %s ", dump_header_format->blockbegin,
+               dump_header_format->blockblockbegin);
+
+        if (sset->block)
+            for (i = 0; i < dims; i++) {
+                printf("%u", sset->block[i]);
+            
+                if (i + 1 != dims)
+                    printf(", ");
+            }
+        else
+            printf("DEFAULT");
+
+        printf("%s %s\n", dump_header_format->blockend,
+               dump_header_format->blockblockend);
+        H5Sclose(f_space);
+
+        /* recalculate the depth of the data */
+        depth = indent / stdindent + 1;
+    }
+
     indentation(indent);
-    begin_obj(dump_header_format->databegin, (const char *) NULL,
+    begin_obj(dump_header_format->databegin, (const char *)NULL,
 	      dump_header_format->datablockbegin);
 
     /* Print all the values. */
@@ -1719,6 +1834,13 @@ dump_data(hid_t obj_id, int obj_data)
     indentation(indent);
     end_obj(dump_header_format->dataend, dump_header_format->datablockend);
     indent -= COL;
+
+    if (sset && obj_data == DATASET_DATA) {
+        indentation(indent);
+        end_obj(dump_header_format->subsettingend,
+                dump_header_format->subsettingblockend);
+        indent -= COL;
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -1884,7 +2006,6 @@ parse_subset_params(char *dset)
             *brace++ = '\0';
             s = calloc(1, sizeof(struct subset_t));
 
-            printf("start\n");
             s->start = parse_hsize_list(brace);
 
             while (*brace && *brace != ';')
@@ -1893,7 +2014,6 @@ parse_subset_params(char *dset)
             if (*brace)
                 brace++;
 
-            printf("stride\n");
             s->stride = parse_hsize_list(brace);
 
             while (*brace && *brace != ';')
@@ -1902,7 +2022,6 @@ parse_subset_params(char *dset)
             if (*brace)
                 brace++;
 
-            printf("count\n");
             s->count = parse_hsize_list(brace);
 
             while (*brace && *brace != ';')
@@ -1911,7 +2030,6 @@ parse_subset_params(char *dset)
             if (*brace)
                 brace++;
 
-            printf("block\n");
             s->block = parse_hsize_list(brace);
         }
     }
@@ -1948,37 +2066,38 @@ handle_datasets(hid_t fid, char *dset, void *data)
         end_obj(dump_header_format->datasetend,
                 dump_header_format->datasetblockend);
         d_status = EXIT_FAILURE;
-    } else {
-        H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
+        return;
+    }
 
-        if (statbuf.nlink > 1) {
-            int index = search_obj(dset_table, statbuf.objno);
+    H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
 
-            if (index >= 0) {
-                if (dset_table->objs[index].displayed) {
-                    begin_obj(dump_header_format->datasetbegin, dset,
-                              dump_header_format->datasetblockbegin);
-                    indentation(indent + COL);
-                    printf("%s \"%s\"\n", HARDLINK,
-                           dset_table->objs[index].objname);
-                    indentation(indent);
-                    end_obj(dump_header_format->datasetend,
-                            dump_header_format->datasetblockend);
-                } else {
-                    strcpy(dset_table->objs[index].objname, dset);
-                    dset_table->objs[index].displayed = 1;
-                    dump_dataset(dsetid, dset);
-                }
+    if (statbuf.nlink > 1) {
+        int index = search_obj(dset_table, statbuf.objno);
+
+        if (index >= 0) {
+            if (dset_table->objs[index].displayed) {
+                begin_obj(dump_header_format->datasetbegin, dset,
+                          dump_header_format->datasetblockbegin);
+                indentation(indent + COL);
+                printf("%s \"%s\"\n", HARDLINK,
+                       dset_table->objs[index].objname);
+                indentation(indent);
+                end_obj(dump_header_format->datasetend,
+                        dump_header_format->datasetblockend);
             } else {
-                d_status = EXIT_FAILURE;
+                strcpy(dset_table->objs[index].objname, dset);
+                dset_table->objs[index].displayed = 1;
+                dump_dataset(dsetid, dset, sset);
             }
         } else {
-            dump_dataset(dsetid, dset);
-        }
-
-        if (H5Dclose(dsetid) < 1)
             d_status = EXIT_FAILURE;
+        }
+    } else {
+        dump_dataset(dsetid, dset, sset);
     }
+
+    if (H5Dclose(dsetid) < 1)
+        d_status = EXIT_FAILURE;
 }
 
 /*-------------------------------------------------------------------------
@@ -3684,7 +3803,7 @@ xml_dump_dataspace(hid_t space)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_data(hid_t obj_id, int obj_data)
+xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED *sset)
 {
     h5dump_t               *outputformat = &xml_dataformat;
     int                     status = -1;
@@ -3814,7 +3933,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    case H5T_OPAQUE:
 	    case H5T_ENUM:
 	    case H5T_ARRAY:
-		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA);
+		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL);
 		break;
 
 	    case H5T_TIME:
@@ -3833,7 +3952,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    case H5T_COMPOUND:
 		indentation(indent);
 		printf("<!-- Note: format of compound data not specified -->\n");
-		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA);
+		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL);
 		break;
 
 	    case H5T_REFERENCE:
@@ -3850,7 +3969,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 
 	    case H5T_VLEN:
 		printf("<!-- Note: format of VL data not specified -->\n");
-		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA);
+		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL);
 		break;
 	    default:
 		indentation(indent);
@@ -4417,7 +4536,7 @@ check_compression(hid_t dcpl)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_dataset(hid_t did, const char *name)
+xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED *sset)
 {
     hid_t                   type, space;
     hid_t                   dcpl;
@@ -4501,7 +4620,7 @@ xml_dump_dataset(hid_t did, const char *name)
 	case H5T_OPAQUE:
 	case H5T_ENUM:
 	case H5T_ARRAY:
-	    dump_function_table->dump_data_function(did, DATASET_DATA);
+	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL);
 	    break;
 
 	case H5T_TIME:
@@ -4520,7 +4639,7 @@ xml_dump_dataset(hid_t did, const char *name)
 	case H5T_COMPOUND:
 	    indentation(indent);
 	    printf("<!-- Note: format of compound data not specified -->\n");
-	    dump_function_table->dump_data_function(did, DATASET_DATA);
+	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL);
 	    break;
 
 	case H5T_REFERENCE:
@@ -4537,7 +4656,7 @@ xml_dump_dataset(hid_t did, const char *name)
 
 	case H5T_VLEN:
 	    printf("<!-- Note: format of VL data not specified -->\n");
-	    dump_function_table->dump_data_function(did, DATASET_DATA);
+	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL);
 	    break;
 	default:
 	    indentation(indent);

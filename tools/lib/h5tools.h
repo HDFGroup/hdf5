@@ -329,6 +329,16 @@ typedef struct dump_header{
     const char *dataend;
     const char *softlinkbegin;
     const char *softlinkend;
+    const char *subsettingbegin;
+    const char *subsettingend;
+    const char *startbegin;
+    const char *startend;
+    const char *stridebegin;
+    const char *strideend;
+    const char *countbegin;
+    const char *countend;
+    const char *blockbegin;
+    const char *blockend;
 
     const char *fileblockbegin;
     const char *fileblockend;
@@ -356,6 +366,16 @@ typedef struct dump_header{
     const char *structblockend;
     const char *vlenblockbegin;
     const char *vlenblockend;
+    const char *subsettingblockbegin;
+    const char *subsettingblockend;
+    const char *startblockbegin;
+    const char *startblockend;
+    const char *strideblockbegin;
+    const char *strideblockend;
+    const char *countblockbegin;
+    const char *countblockend;
+    const char *blockblockbegin;
+    const char *blockblockend;
 
     const char *dataspacedescriptionbegin;
     const char *dataspacedescriptionend;
@@ -479,31 +499,36 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 extern void    indentation(int);
 
 /* taken from h5dump.h*/
-#define BOOT_BLOCK      "BOOT_BLOCK"
-#define GROUPNAME       "GROUP"
-#define DATASET         "DATASET"
 #define ATTRIBUTE       "ATTRIBUTE"
-#define DATATYPE        "DATATYPE"
-#define DATASPACE       "DATASPACE"
-#define DATA            "DATA"
-#define SCALAR          "SCALAR"
-#define SIMPLE          "SIMPLE"
-#define COMPLEX         "COMPLEX"
-#define STORAGELAYOUT   "STORAGELAYOUT"
+#define BLOCK           "BLOCK"
+#define BOOT_BLOCK      "BOOT_BLOCK"
 #define COMPRESSION     "COMPRESSION"
-#define EXTERNAL        "EXTERNAL"
-#define SOFTLINK        "SOFTLINK"
-#define HARDLINK        "HARDLINK"
-#define NLINK           "NLINK"
-#define FILENO          "FILENO"
-#define OBJNO           "OBJNO"
-#define STRSIZE         "STRSIZE"
-#define STRPAD          "STRPAD"
+#define CONCATENATOR    "//"
+#define COMPLEX         "COMPLEX"
+#define COUNT           "COUNT"
 #define CSET            "CSET"
 #define CTYPE           "CTYPE"
-#define CONCATENATOR    "//"
+#define DATA            "DATA"
 #define DATASET         "DATASET"
+#define DATASPACE       "DATASPACE"
+#define DATATYPE        "DATATYPE"
+#define EXTERNAL        "EXTERNAL"
+#define FILENO          "FILENO"
+#define GROUPNAME       "GROUP"
+#define HARDLINK        "HARDLINK"
+#define NLINK           "NLINK"
 #define OBJID           "OBJECTID"
+#define OBJNO           "OBJNO"
+#define SCALAR          "SCALAR"
+#define SIMPLE          "SIMPLE"
+#define SOFTLINK        "SOFTLINK"
+#define STORAGELAYOUT   "STORAGELAYOUT"
+#define START           "START"
+#define STRIDE          "STRIDE"
+#define STRSIZE         "STRSIZE"
+#define STRPAD          "STRPAD"
+#define SUBSET          "SUBSET"
+
 #define BEGIN           "{"
 #define END             "}"
 
