@@ -48,7 +48,8 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
             tattr.h5 tselect.h5 mtime.h5 unlink.h5 \
             fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 \
             ttime.h5 trefer[12].h5 tvltypes.h5 tvlstr.h5 flush.h5 enum1.h5 \
-            titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5 tmisc.h5
+            titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5 tmisc.h5 tmisc2a.h5 \
+            tmisc2b.h5
 CLEAN=$(TIMINGS)
 
 ## Source and object files for programs...  The TEST_SRC list contains all the
