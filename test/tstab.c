@@ -102,7 +102,7 @@ test_2(void)
      * Create a directory that has so many entries that the root
      * of the B-tree ends up splitting.
      */
-    dir = H5Gcreate(fid, "/big", nsyms * 16 + 2);
+    dir = H5Gcreate(fid, "/big", (size_t)nsyms*16+2);
     CHECK_I(dir, "H5Gcreate");
     status = H5Gclose(dir);
     CHECK_I(status, "H5Gclose");

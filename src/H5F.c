@@ -213,10 +213,10 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
     /*
      * For non-little-endian platforms, encode each byte in memory backwards.
      */
-    for (; i >= 0; i--, (*p)++) *(*p) = *(l + i);
+    for (/*void*/; i>=0; i--, (*p)++)*(*p) = *(l+i);
 #else
     /* platform has little-endian integers */
-    HDmemcpy(*p,l,i+1);
+    HDmemcpy(*p,l,(size_t)(i+1));
     *p+=(i+1);
 #endif
 
@@ -914,7 +914,7 @@ H5F_open(const char *name, uintn flags,
 	
 	/* nothing to check for consistency flags */
 
-	assert(p - buf == fixed_size);
+	assert((size_t)(p-buf) == fixed_size);
 
 	/* Read the variable length part of the boot block... */
 	variable_size = H5F_SIZEOF_ADDR(f) +	/*base address */
@@ -1275,13 +1275,13 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     /* update file length if necessary */
     if (!H5F_addr_defined(&(f->shared->hdf5_eof))) {
 	H5F_addr_reset(&(f->shared->hdf5_eof));
-	H5F_addr_inc(&(f->shared->hdf5_eof), p - buf);
+	H5F_addr_inc(&(f->shared->hdf5_eof), (size_t)(p-buf));
 	H5F_low_seteof(f->shared->lf, &(f->shared->hdf5_eof));
     }
     
     /* write the boot block to disk */
     if (H5F_low_write(f->shared->lf, &(f->shared->access_parms),
-		      &(f->shared->boot_addr), p-buf, buf)<0) {
+		      &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't write header");
     }
     

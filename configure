@@ -952,8 +952,12 @@ else
    echo "$ac_t""no" 1>&6
 fi
 
+if test Xyes = "X$GCC"; then
+   CFLAGS="$CFLAGS -Wall -W -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline"
+fi
+
 echo $ac_n "checking for production mode""... $ac_c" 1>&6
-echo "configure:957: checking for production mode" >&5
+echo "configure:961: checking for production mode" >&5
 # Check whether --enable-production or --disable-production was given.
 if test "${enable_production+set}" = set; then
   enableval="$enable_production"
@@ -982,10 +986,6 @@ case "X-$enableval" in
       ;;
 esac
 
-
-if test Xyes = "X$GCC"; then
-   CFLAGS="$CFLAGS -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
-fi
 
 echo $ac_n "checking for main in -lcoug""... $ac_c" 1>&6
 echo "configure:992: checking for main in -lcoug" >&5

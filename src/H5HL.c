@@ -889,7 +889,7 @@ H5HL_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
      * the heap and that no two free blocks point to the same region of
      * the heap.
      */
-    marker = H5MM_xcalloc(h->mem_alloc, 1);
+    marker = H5MM_xcalloc(1, h->mem_alloc);
     for (freelist = h->freelist; freelist; freelist = freelist->next) {
 	fprintf(stream, "%*s%-*s %8lu, %8lu\n", indent, "", fwidth,
 		"Free Block (offset,size):",
@@ -898,7 +898,7 @@ H5HL_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 	if (freelist->offset + freelist->size > h->mem_alloc) {
 	    fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
 	} else {
-	    for (i = overlap = 0; i < freelist->size; i++) {
+	    for (i=overlap=0; i<(intn)(freelist->size); i++) {
 		if (marker[freelist->offset + i])
 		    overlap++;
 		marker[freelist->offset + i] = 1;
@@ -923,10 +923,10 @@ H5HL_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
      */
     fprintf(stream, "%*sData follows (`__' indicates free region)...\n",
 	    indent, "");
-    for (i = 0; i < h->disk_alloc; i += 16) {
+    for (i=0; i<(intn)(h->disk_alloc); i+=16) {
 	fprintf(stream, "%*s %8d: ", indent, "", i);
 	for (j = 0; j < 16; j++) {
-	    if (i + j < h->disk_alloc) {
+	    if (i+j<(intn)(h->disk_alloc)) {
 		if (marker[i + j]) {
 		    fprintf(stream, "__ ");
 		} else {
@@ -941,7 +941,7 @@ H5HL_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 	}
 
 	for (j = 0; j < 16; j++) {
-	    if (i + j < h->disk_alloc) {
+	    if (i+j < (intn)(h->disk_alloc)) {
 		if (marker[i + j]) {
 		    HDfputc(' ', stream);
 		} else {

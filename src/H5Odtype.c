@@ -157,7 +157,7 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
         assert(dt->u.compnd.nmembs > 0);
         dt->u.compnd.nalloc = dt->u.compnd.nmembs;
         dt->u.compnd.memb = H5MM_xcalloc(dt->u.compnd.nalloc,
-                                         sizeof(H5T_member_t));
+					 sizeof(H5T_member_t));
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
             dt->u.compnd.memb[i].name = H5MM_xstrdup((const char *)*pp);
             *pp += ((HDstrlen((const char *)*pp) + 8) / 8) * 8;         /*multiple of 8 w/ null terminator */

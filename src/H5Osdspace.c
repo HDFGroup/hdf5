@@ -72,7 +72,7 @@ static void *
 H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
-    uintn               u;  		/* local counting variable */
+    intn                u;  		/* local counting variable */
     uintn		flags;
     
     FUNC_ENTER(H5O_sdspace_decode, NULL);
@@ -134,7 +134,7 @@ static herr_t
 H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *mesg)
 {
     const H5S_simple_t  *sdim = (const H5S_simple_t *) mesg;
-    uintn               u;  /* Local counting variable */
+    intn                u;  /* Local counting variable */
     uintn		flags = 0;
 
     FUNC_ENTER(H5O_sdspace_encode, FAIL);
@@ -230,7 +230,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sdspace_size(H5F_t *f, const void *mesg)
+H5O_sdspace_size(H5F_t *f __attribute__((unused)), const void *mesg)
 {
     const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
     size_t                  ret_value = 8;      /* all dimensionality messages are at least 8 bytes long (rank and flags) */
@@ -267,7 +267,7 @@ H5O_sdspace_debug(H5F_t *f, const void *mesg, FILE * stream,
                   intn indent, intn fwidth)
 {
     const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
-    uintn                   u;  /* local counting variable */
+    intn                    u;  /* local counting variable */
 
     FUNC_ENTER(H5O_sdspace_debug, FAIL);
 

@@ -15,6 +15,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <H5config.h>
+#ifndef HAVE_ATTRIBUTE
+#   undef __attribute__
+#   define __attribute__(X) /*void*/
+#endif
+
 static int nerrors_g = 0;
 
 
@@ -35,7 +41,7 @@ static int nerrors_g = 0;
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void *client_data)
+display_error_cb (void *client_data __attribute__((unused)))
 {
     puts ("*FAILED*");
     H5Eprint (stdout);
@@ -74,9 +80,12 @@ same_contents (const char *name1, const char *name2)
     while (1) {
 	n1 = read (fd1, buf1, sizeof(buf1));
 	n2 = read (fd2, buf2, sizeof(buf2));
+	assert (n1>=0 && (size_t)n1<=sizeof(buf1));
+	assert (n2>=0 && (size_t)n2<=sizeof(buf2));
 	assert (n1==n2);
+	
 	if (n1<=0 && n2<=0) break;
-	if (memcmp (buf1, buf2, n1)) {
+	if (memcmp (buf1, buf2, (size_t)n1)) {
 	    close (fd1);
 	    close (fd2);
 	    return 0;
@@ -480,7 +489,8 @@ test_2 (void)
 {
     hid_t	file, plist, space, dset, grp;
     herr_t	status;
-    int		fd,i, j;
+    int		fd;
+    unsigned	i, j;
     ssize_t	n;
     char	fname[64];
     int		part[25], whole[100];
@@ -495,8 +505,8 @@ test_2 (void)
 	sprintf (fname, "extern_%d.raw", i+1);
 	fd = open (fname, O_RDWR|O_CREAT|O_TRUNC, 0666);
 	assert (fd>=0);
-	n = lseek (fd, i*10, SEEK_SET);
-	assert (n==i*10);
+	n = lseek (fd, (ssize_t)(i*10), SEEK_SET);
+	assert (n>=0 && (size_t)n==i*10);
 	n = write (fd, part, sizeof(part));
 	assert (n==sizeof(part));
 	close (fd);
@@ -550,7 +560,7 @@ test_2 (void)
 	}
 
 	for (i=0; i<100; i++) {
-	    if (whole[i]!=i) {
+	    if (whole[i]!=(signed)i) {
 		puts ("*FAILED*");
 		puts ("   Incorrect value(s) read.");
 		nerrors_g++;
@@ -596,7 +606,7 @@ test_2 (void)
 #endif
 
 	for (i=hs_start; i<hs_start+hs_count; i++) {
-	    if (whole[i]!=i) {
+	    if (whole[i]!=(signed)i) {
 		puts ("*FAILED*");
 		puts ("   Incorrect value(s) read.");
 		nerrors_g++;
@@ -632,7 +642,8 @@ test_3 (void)
 {
     hid_t	file, plist, mem_space, file_space, dset;
     herr_t	status;
-    int		i, fd;
+    unsigned	i;
+    int		fd;
     int		part[25], whole[100], hs_start=100;
     size_t	size=100, max_size=200, hs_count=100;
 

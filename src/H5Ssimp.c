@@ -383,7 +383,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
     /* Argument type problems to be fixed later..... -RPM */
     if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset_signed,
 					hsize, sample))<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
     for (i=0; i<space_ndims; i++) {

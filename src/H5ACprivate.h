@@ -92,7 +92,7 @@ typedef struct H5AC_slot_t {
 } H5AC_slot_t;
 
 typedef struct H5AC_t {
-    intn	nslots;			/*number of cache slots		     */
+    uintn	nslots;			/*number of cache slots		     */
     H5AC_slot_t *slot;			/*the cache slots		     */
     intn	nprots;			/*number of protected objects	     */
     struct {

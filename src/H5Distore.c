@@ -119,7 +119,7 @@ H5B_class_t H5B_ISTORE[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata)
+H5F_istore_sizeof_rkey(H5F_t *f __attribute__((unused)), const void *_udata)
 {
     const H5F_istore_ud1_t *udata = (const H5F_istore_ud1_t *) _udata;
     size_t		    nbytes;
@@ -245,7 +245,8 @@ H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static intn
-H5F_istore_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
+H5F_istore_cmp2(H5F_t *f __attribute__((unused)), void *_lt_key,
+		void *_udata, void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
@@ -296,7 +297,8 @@ H5F_istore_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static intn
-H5F_istore_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
+H5F_istore_cmp3(H5F_t *f __attribute__((unused)),
+		void *_lt_key, void *_udata, void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
@@ -422,7 +424,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
  */
 static herr_t
 H5F_istore_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
-		 void *_udata, const void *_rt_key)
+		 void *_udata, const void *_rt_key __attribute__((unused)))
 {
     H5F_istore_ud1_t	   *udata = (H5F_istore_ud1_t *) _udata;
     const H5F_istore_key_t *lt_key = (const H5F_istore_key_t *) _lt_key;

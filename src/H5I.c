@@ -133,7 +133,7 @@ H5I_init_interface(void)
 ******************************************************************************/
 intn 
 H5I_init_group(H5I_group_t grp,	 /* IN: Group to initialize */
-	       intn hash_size,	 /* IN: Minimum hash table size to use for group */
+	       size_t hash_size, /* IN: Minimum hash table size to use for group */
 	       uintn reserved,	 /* IN: Number of hash table entries to reserve */
 	       herr_t (*free_func) (void *)	/* IN: Function to call when releasing ref counted objects */
 )
@@ -183,7 +183,8 @@ H5I_init_group(H5I_group_t grp,	 /* IN: Group to initialize */
 	grp_ptr->ids = 0;
 	grp_ptr->nextid = reserved;
 	grp_ptr->free_func = free_func;
-	grp_ptr->id_list = H5MM_xcalloc(hash_size, sizeof(H5I_id_info_t *));
+	grp_ptr->id_list = H5MM_xcalloc((intn)hash_size,
+					sizeof(H5I_id_info_t *));
     }
     
     /* Increment the count of the times this group has been initialized */
@@ -232,7 +233,7 @@ H5I_destroy_group(H5I_group_t grp)
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
     H5I_id_info_t	*cur=NULL, *next=NULL;
     intn		ret_value = SUCCEED;
-    intn		i;
+    uintn		i;
 
     FUNC_ENTER(H5I_destroy_group, FAIL);
 
@@ -674,7 +675,7 @@ H5I_search(H5I_group_t grp,	    /* IN: Group to search for the object in */
 {
     H5I_id_group_t	   *grp_ptr = NULL;	/* ptr to the group */
     H5I_id_info_t		   *id_ptr = NULL;	/* ptr to the new ID */
-    intn		    i;	/* local counting variable */
+    uintn		    i;	/* local counting variable */
     void *	      ret_value = NULL;
 
     FUNC_ENTER(H5I_search, NULL);

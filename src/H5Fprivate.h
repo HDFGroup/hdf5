@@ -55,9 +55,9 @@
 /*
  * Private file open flags.
  */
-#define H5F_ACC_PUBLIC_FLAGS 	0x00ff
+#define H5F_ACC_PUBLIC_FLAGS 	0x00ffu
 
-#define H5F_ACC_CREAT	0x0100	/* Create non-existing files		  */
+#define H5F_ACC_CREAT	0x0100u	/* Create non-existing files		  */
 
 /*
  * Encode and decode macros for file meta-data.
@@ -351,7 +351,7 @@ typedef struct H5F_low_t {
 #ifdef HAVE_FSEEK64
 	    int64	cur;	/* Current file position		*/
 #else
-	    off_t	cur;	/* Current file position		*/
+	    long	cur;	/* Current file position		*/
 #endif
 	} stdio;
 
@@ -537,7 +537,8 @@ void H5F_addr_encode(H5F_t *, uint8 **, const haddr_t *);
 void H5F_addr_decode(H5F_t *, const uint8 **, haddr_t *);
 void H5F_addr_print(FILE *, const haddr_t *);
 void H5F_addr_pow2(uintn, haddr_t *);
-void H5F_addr_inc(haddr_t *, size_t);
+void H5F_addr_inc(haddr_t *addr/*in,out*/, size_t inc);
+void H5F_addr_adj(haddr_t *addr/*in,out*/, ssize_t adj);
 void H5F_addr_add(haddr_t *, const haddr_t *);
 uintn H5F_addr_hash(const haddr_t *, uintn mod);
 

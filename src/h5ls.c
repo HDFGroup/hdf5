@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <H5config.h>
+#ifndef HAVE_ATTRIBUTE
+#   undef __attribute__
+#   define __attribute__(X) /*void*/
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -29,7 +34,7 @@
  *-------------------------------------------------------------------------
  */
 static herr_t
-list (hid_t group, const char *name, void *op_data)
+list (hid_t group, const char *name, void *op_data __attribute__((unused)))
 {
     hid_t	obj;
     hid_t	(*func)(void*);

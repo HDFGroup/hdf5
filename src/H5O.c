@@ -1714,7 +1714,7 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 
 	/* check for bad message id */
 	if (oh->mesg[i].type->id < 0 ||
-	    oh->mesg[i].type->id >= NELMTS(message_type_g)) {
+	    oh->mesg[i].type->id >= (intn)NELMTS(message_type_g)) {
 	    fprintf(stream, "*** BAD MESSAGE ID 0x%04x\n",
 		    oh->mesg[i].type->id);
 	    continue;

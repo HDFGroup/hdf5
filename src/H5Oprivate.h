@@ -42,9 +42,9 @@
 #define H5O_ALL		(-1)		/*delete all messages of type	     */
 
 /* Flags which are part of a message */
-#define H5O_FLAG_CONSTANT	0x01
-#define H5O_FLAG_SHARED		0x02
-#define H5O_FLAG_BITS		0x03
+#define H5O_FLAG_CONSTANT	0x01u
+#define H5O_FLAG_SHARED		0x02u
+#define H5O_FLAG_BITS		0x03u
 #define H5O_VERSION		1
 
 /*
@@ -146,8 +146,8 @@ typedef struct H5O_efl_entry_t {
 
 typedef struct H5O_efl_t {
     haddr_t	heap_addr;		/*address of name heap		     */
-    uintn	nalloc;			/*number of slots allocated	     */
-    uintn	nused;			/*number of slots used		     */
+    intn	nalloc;			/*number of slots allocated	     */
+    intn	nused;			/*number of slots used		     */
     H5O_efl_entry_t *slot;		/*array of external file entries     */
 } H5O_efl_t;
 
@@ -161,7 +161,7 @@ extern const H5O_class_t H5O_LAYOUT[1];
 typedef struct H5O_layout_t {
     int		type;			/*type of layout, H5D_layout_t	     */
     haddr_t	addr;			/*file address of data or B-tree     */
-    uintn	ndims;			/*num dimensions in stored data	     */
+    intn	ndims;			/*num dimensions in stored data	     */
     size_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		     */
 } H5O_layout_t;
 

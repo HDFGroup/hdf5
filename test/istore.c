@@ -60,7 +60,7 @@ size_t zero[H5O_LAYOUT_NDIMS];
 static void
 print_array(uint8 *array, size_t nx, size_t ny, size_t nz)
 {
-    int                     i, j, k;
+    size_t	i, j, k;
 
     for (i = 0; i < nx; i++) {
         if (nz > 1) {
@@ -118,7 +118,7 @@ new_object(H5F_t *f, const char *name, intn ndims, H5G_entry_t *ent/*out*/)
     layout.type = H5D_CHUNKED;
     layout.ndims = ndims;
     for (i = 0; i < ndims; i++) {
-        if (i < NELMTS(align_g)) {
+        if (i < (int)NELMTS(align_g)) {
             layout.dim[i] = align_g[i];
         } else {
             layout.dim[i] = 2;
@@ -206,16 +206,17 @@ static herr_t
 test_extend(H5F_t *f, const char *prefix,
             size_t nx, size_t ny, size_t nz)
 {
-    H5G_entry_t             handle;
-    int                     i, j, k, ndims, ctr;
-    uint8                  *buf = NULL, *check = NULL, *whole = NULL;
-    char                    dims[64], s[256], name[256];
-    size_t                  offset[3];
-    size_t                  max_corner[3];
-    size_t                  size[3];
-    size_t                  whole_size[3];
-    size_t                  nelmts;
-    H5O_layout_t            layout;
+    H5G_entry_t         handle;
+    size_t              i, j, k, ctr;
+    int			ndims;
+    uint8               *buf = NULL, *check = NULL, *whole = NULL;
+    char                dims[64], s[256], name[256];
+    size_t              offset[3];
+    size_t              max_corner[3];
+    size_t              size[3];
+    size_t              whole_size[3];
+    size_t              nelmts;
+    H5O_layout_t        layout;
 
     if (!nz) {
         if (!ny) {
@@ -237,7 +238,7 @@ test_extend(H5F_t *f, const char *prefix,
     printf("%-70s", s);
     buf = H5MM_xmalloc(nx * ny * nz);
     check = H5MM_xmalloc(nx * ny * nz);
-    whole = H5MM_xcalloc(nx * ny * nz, 1);
+    whole = H5MM_xcalloc(1, nx*ny*nz);
 
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
@@ -279,7 +280,7 @@ test_extend(H5F_t *f, const char *prefix,
             size[0] = size[1] = size[2] = 1;
             nelmts = 1;
         } else {
-            for (i = 0, nelmts = 1; i < ndims; i++) {
+            for (i=0, nelmts=1; i<(size_t)ndims; i++) {
                 if (ctr % ndims == i) {
                     offset[i] = max_corner[i];
                     size[i] = MIN(1, whole_size[i] - offset[i]);
@@ -311,9 +312,8 @@ test_extend(H5F_t *f, const char *prefix,
 #endif
 
         /* Fill the source array */
-        if (0 == nelmts)
-            continue;
-        memset(buf, 128 + ctr, nelmts);
+        if (0 == nelmts) continue;
+        memset(buf, (signed)(128+ctr), nelmts);
 
         /* Write to disk */
         if (H5F_arr_write(f, &layout, NULL, size, size, zero, offset, buf)<0) {
@@ -353,7 +353,7 @@ test_extend(H5F_t *f, const char *prefix,
                        size, H5V_ZERO, buf);    /*src */
 
         /* Update max corner */
-        for (i = 0; i < ndims; i++) {
+        for (i=0; i<(size_t)ndims; i++) {
             max_corner[i] = MAX(max_corner[i], offset[i] + size[i]);
         }
     }
@@ -426,12 +426,13 @@ static herr_t
 test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
             size_t nx, size_t ny, size_t nz)
 {
-    intn                    ndims, ctr;
-    char                    dims[64], s[256], name[256];
-    size_t                  offset[3], size[3], total = 0;
-    H5G_entry_t             handle;
-    H5O_layout_t            layout;
-    uint8                  *buf = NULL;
+    intn                ndims;
+    size_t		ctr;
+    char                dims[64], s[256], name[256];
+    size_t              offset[3], size[3], total = 0;
+    H5G_entry_t         handle;
+    H5O_layout_t        layout;
+    uint8               *buf = NULL;
 
     if (!nz) {
         if (!ny) {
@@ -470,14 +471,14 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
         }
         goto error;
     }
-    for (ctr = 0; ctr < nblocks; ctr++) {
+    for (ctr=0; ctr<nblocks; ctr++) {
         offset[0] = rand() % 1000000;
         offset[1] = rand() % 1000000;
         offset[2] = rand() % 1000000;
         size[0] = nx;
         size[1] = ny;
         size[2] = nz;
-        memset(buf, 128 + ctr, nx * ny * nz);
+        memset(buf, (signed)(128+ctr), nx * ny * nz);
 
         /* write to disk */
         if (H5F_arr_write(f, &layout, NULL, size, size, zero, offset, buf)<0) {

@@ -1122,7 +1122,7 @@ H5Sset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t 
 
     /* Range check arguments */
     for (u=0; u<space->u.simple.rank; u++) {
-	if (start[u]<0 || start[u]>=space->u.simple.size[u]) {
+	if (start[u]<0 || (size_t)(start[u])>=space->u.simple.size[u]) {
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			"hyperslab bounds out of range");
 	}
@@ -1135,9 +1135,9 @@ H5Sset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t 
 
     /* Allocate space for the hyperslab information */
     if (NULL==space->h.start) {
-	space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(intn));
-	space->h.count= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
-	space->h.stride= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+	space->h.start= H5MM_xcalloc(space->u.simple.rank, sizeof(intn));
+	space->h.count= H5MM_xcalloc(space->u.simple.rank, sizeof(size_t));
+	space->h.stride= H5MM_xcalloc(space->u.simple.rank, sizeof(size_t));
     }
 
     /* Build hyperslab */

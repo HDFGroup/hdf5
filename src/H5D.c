@@ -749,7 +749,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     /* Total raw data size */
     new_dset->layout.type = new_dset->create_parms->layout;
     new_dset->layout.ndims = H5S_get_ndims(space) + 1;
-    assert(new_dset->layout.ndims <= NELMTS(new_dset->layout.dim));
+    assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
     new_dset->layout.dim[new_dset->layout.ndims - 1] = H5T_get_size(type);
 
     switch (new_dset->create_parms->layout) {

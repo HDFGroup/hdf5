@@ -587,7 +587,7 @@ H5F_addr_undef(haddr_t *addr /*out */ )
 {
     assert(addr);
 
-    addr->offset = -1;
+    addr->offset = (uint64)(-1);
 }
 
 /*-------------------------------------------------------------------------
@@ -676,7 +676,7 @@ H5F_addr_zerop(const haddr_t *addr)
 void
 H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
 {
-    int                     i;
+    uint                    i;
     haddr_t                 tmp;
 
     assert(f);
@@ -685,14 +685,14 @@ H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
 
     if (addr_defined(addr)) {
         tmp = *addr;
-        for (i = 0; i < H5F_SIZEOF_ADDR(f); i++) {
+        for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
             *(*pp)++ = (uint8)(tmp.offset & 0xff);
             tmp.offset >>= 8;
         }
         assert("overflow" && 0 == tmp.offset);
 
     } else {
-        for (i = 0; i < H5F_SIZEOF_ADDR(f); i++) {
+        for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
             *(*pp)++ = 0xff;
         }
     }
@@ -720,7 +720,7 @@ H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
 void
 H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr/*out*/)
 {
-    int                     i;
+    uint                    i;
     haddr_t                 tmp;
     uint8                   c;
     hbool_t                 all_zero = TRUE;
@@ -731,12 +731,11 @@ H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr/*out*/)
 
     addr->offset = 0;
 
-    for (i = 0; i < H5F_SIZEOF_ADDR(f); i++) {
+    for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
         c = *(*pp)++;
-        if (c != 0xff)
-            all_zero = FALSE;
+        if (c != 0xff) all_zero = FALSE;
 
-        if (i < sizeof(addr->offset)) {
+        if (i<sizeof(addr->offset)) {
             tmp.offset = c;
             tmp.offset <<= i * 8;       /*use tmp to get casting right */
             addr->offset |= tmp.offset;
@@ -744,8 +743,7 @@ H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr/*out*/)
             assert(0 == **pp);  /*overflow */
         }
     }
-    if (all_zero)
-        H5F_addr_undef(addr);
+    if (all_zero) H5F_addr_undef(addr);
 }
 
 /*-------------------------------------------------------------------------
@@ -830,12 +828,44 @@ H5F_addr_pow2(uintn n, haddr_t *addr /*out */ )
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_inc(haddr_t *addr /*in,out */ , size_t inc)
+H5F_addr_inc(haddr_t *addr/*in,out */, size_t inc)
 {
     assert(addr && addr_defined(addr));
     assert(addr->offset <= addr->offset + inc);
+    
     addr->offset += inc;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_addr_adj
+ *
+ * Purpose:	Adjusts an address by adding or subtracting some amount.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_addr_adj(haddr_t *addr/*in,out */, ssize_t adj)
+{
+#ifndef NDEBUG
+    assert(addr && addr_defined(addr));
+    if (adj>=0) {
+	assert(addr->offset <= addr->offset + adj);
+    } else {
+	assert (addr->offset > addr->offset + adj);
+    }
+#endif
+    
+    addr->offset += adj;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_addr_add

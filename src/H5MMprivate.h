@@ -26,7 +26,7 @@
  * Library prototypes...
  */
 void *H5MM_xmalloc (size_t size);
-void *H5MM_xcalloc (size_t n, size_t size);
+void *H5MM_xcalloc (intn n, size_t size);
 void *H5MM_xrealloc (void *mem, size_t size);
 char *H5MM_xstrdup (const char *s);
 void *H5MM_xfree (const void *mem);

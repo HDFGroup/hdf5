@@ -14,10 +14,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifndef HAVE_FUNCTION
-#undef __FUNCTION__
-#define __FUNCTION__ ""
+#include <H5config.h>
+#ifndef HAVE_ATTRIBUTE
+#   undef __attribute__
+#   define __attribute__(X) /*void*/
 #endif
+
+#ifndef HAVE_FUNCTION
+#   undef __FUNCTION__
+#   define __FUNCTION__ ""
+#endif
+
 #define AT() printf ("	 at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
 
@@ -44,7 +51,7 @@
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void *client_data)
+display_error_cb (void *client_data __attribute__((unused)))
 {
     puts ("*FAILED*");
     H5Eprint (stdout);

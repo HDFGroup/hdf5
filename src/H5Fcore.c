@@ -69,8 +69,10 @@ const H5F_low_class_t   H5F_LOW_CORE_g[1] = {{
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5F_core_access(const char *name, const H5F_access_t *access_parms,
-		int mode, H5F_search_t *key/*out*/)
+H5F_core_access(const char *name __attribute__((unused)),
+		const H5F_access_t *access_parms __attribute__((unused)),
+		int mode __attribute__((unused)),
+		H5F_search_t *key/*out*/ __attribute__((unused)))
 {
     FUNC_ENTER(H5F_core_access, FAIL);
     FUNC_LEAVE(FALSE);
@@ -99,7 +101,8 @@ H5F_core_access(const char *name, const H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_core_open(const char *name, const H5F_access_t *access_parms,
+H5F_core_open(const char *name __attribute__((unused)),
+	      const H5F_access_t *access_parms __attribute__((unused)),
 	      uintn flags, H5F_search_t *key/*out*/)
 {
     H5F_low_t              *lf = NULL;
@@ -146,7 +149,8 @@ H5F_core_open(const char *name, const H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_close(H5F_low_t *lf, const H5F_access_t *access_parms)
+H5F_core_close(H5F_low_t *lf,
+	       const H5F_access_t *access_parms __attribute__((unused)))
 {
     FUNC_ENTER(H5F_core_close, FAIL);
 
@@ -179,7 +183,8 @@ H5F_core_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+H5F_core_read(H5F_low_t *lf,
+	      const H5F_access_t *access_parms __attribute__((unused)),
 	      const haddr_t *addr, size_t size, uint8 *buf)
 {
     size_t                  n;

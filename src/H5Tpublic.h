@@ -20,8 +20,8 @@
 #include <H5public.h>
 #include <H5Ipublic.h>
 
-#define HOFFSET(S,M)    ((const char*)&S.M-(const char*)&S)
-#define HPOFFSET(P,M)   ((const char*)&(P->M)-(const char*)P)
+#define HOFFSET(S,M)    ((size_t)((const char*)&S.M-(const char*)&S))
+#define HPOFFSET(P,M)   ((size_t)((const char*)&(P->M)-(const char*)P))
 
 /* These are the various classes of data types */
 typedef enum H5T_class_t {
@@ -188,7 +188,7 @@ herr_t H5Tshare (hid_t location_id, hid_t type_id);
 hbool_t H5Tis_shared (hid_t location_id, hid_t type_id);
 
 /* Operations defined on compound data types */
-herr_t H5Tinsert (hid_t parent_id, const char *name, off_t offset,
+herr_t H5Tinsert (hid_t parent_id, const char *name, size_t offset,
                   hid_t member_id);
 herr_t H5Tpack (hid_t type_id);
 

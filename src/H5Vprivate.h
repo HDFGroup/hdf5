@@ -36,13 +36,13 @@ hbool_t H5V_hyper_disjointp(intn n, const size_t *offset1,
 hbool_t H5V_hyper_eq(intn n, const size_t *offset1, const size_t *size1,
 		     const size_t *offset2, const size_t *size2);
 herr_t H5V_hyper_fill(intn n, const size_t *total_size, const size_t *offset,
-		      const size_t *size, void *buf, uint8 val);
+		      const size_t *size, void *buf, uintn val);
 herr_t H5V_hyper_copy(intn n, const size_t *size,
 		      const size_t *dst_total_size, const size_t *dst_offset,
 		      void *_dst, const size_t *src_total_size,
 		      const size_t *src_offset, const void *_src);
 herr_t H5V_stride_fill(intn n, size_t elmt_size, const size_t *size,
-		       const ssize_t *stride, void *_dst, uint8 fill_value);
+		       const ssize_t *stride, void *_dst, uintn fill_value);
 herr_t H5V_stride_copy(intn n, size_t elmt_size, const size_t *_size,
 		       const ssize_t *dst_stride, void *_dst,
 		       const ssize_t *src_stride, const void *_src);
@@ -77,7 +77,7 @@ herr_t H5V_stride_optimize2(intn *np, size_t *elmt_size, size_t *size,
  */
 static inline size_t 
 __attribute__((unused))
-H5V_vector_reduce_product(size_t n, const size_t *v)
+H5V_vector_reduce_product(intn n, const size_t *v)
 {
     size_t                  ans = 1;
 
@@ -105,13 +105,12 @@ H5V_vector_reduce_product(size_t n, const size_t *v)
  */
 static inline hbool_t 
 __attribute__((unused))
-H5V_vector_zerop(size_t n, const size_t *v)
+H5V_vector_zerop(intn n, const size_t *v)
 {
-    if (!v)
-        return TRUE;
-    while (n--)
-        if (*v++)
-            return FALSE;
+    if (!v) return TRUE;
+    while (n--) {
+	if (*v++) return FALSE;
+    }
     return TRUE;
 }
 
@@ -136,19 +135,14 @@ H5V_vector_zerop(size_t n, const size_t *v)
  */
 static inline intn 
 __attribute__((unused))
-H5V_vector_cmp(size_t n, const size_t *v1, const size_t *v2)
+H5V_vector_cmp(intn n, const size_t *v1, const size_t *v2)
 {
-    if (v1 == v2)
-        return 0;
+    if (v1 == v2) return 0;
     while (n--) {
-        if ((v1 ? *v1 : 0) < (v2 ? *v2 : 0))
-            return -1;
-        if ((v1 ? *v1 : 0) > (v2 ? *v2 : 0))
-            return 1;
-        if (v1)
-            v1++;
-        if (v2)
-            v2++;
+        if ((v1 ? *v1 : 0) < (v2 ? *v2 : 0)) return -1;
+        if ((v1 ? *v1 : 0) > (v2 ? *v2 : 0)) return 1;
+        if (v1) v1++;
+        if (v2) v2++;
     }
     return 0;
 }
@@ -169,10 +163,9 @@ H5V_vector_cmp(size_t n, const size_t *v1, const size_t *v2)
  */
 static inline void 
 __attribute__((unused))
-H5V_vector_inc(size_t n, size_t *v1, const size_t *v2)
+H5V_vector_inc(intn n, size_t *v1, const size_t *v2)
 {
-    while (n--)
-        *v1++ += *v2++;
+    while (n--) *v1++ += *v2++;
 }
 
 #endif

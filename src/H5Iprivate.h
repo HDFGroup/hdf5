@@ -49,7 +49,7 @@
  * Map an ID to a hash location (assumes s is a power of 2 and smaller
  * than the ID_MASK constant).
  */
-#  define ID_TO_LOC(a,s)    ((hid_t)(a)&((s)-1))
+#  define ID_TO_LOC(a,s)	((hid_t)((size_t)(a)&((s)-1)))
 #else
 
 /*
@@ -81,7 +81,7 @@ typedef struct {
     uintn       count;          /*# of times this group has been initialized */
     uintn       reserved;       /*# of IDs to reserve for constant IDs   */
     uintn       wrapped;	    /*whether the id count has wrapped around    */
-    intn        hash_size;      /*sizeof the hash table to store the IDs in*/
+    size_t      hash_size;      /*sizeof the hash table to store the IDs in*/
     uintn       ids;            /*current number of IDs held               */
     uintn       nextid;         /*ID to use for the next atom           */
     herr_t      (*free_func)(void*);/*func to call to release object	     */
@@ -92,7 +92,7 @@ typedef struct {
 typedef intn (*H5I_search_func_t) (void * obj, const void * key);
 
 /* Private Functions in H5I.c */
-intn H5I_init_group (H5I_group_t grp, intn hash_size, uintn reserved,
+intn H5I_init_group (H5I_group_t grp, size_t hash_size, uintn reserved,
 		     herr_t (*free_func)(void *));
 herr_t H5I_destroy_group (H5I_group_t grp);
 hid_t H5I_register (H5I_group_t grp, void *object);

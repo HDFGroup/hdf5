@@ -492,6 +492,131 @@ H5Giterate (hid_t loc_id, const char *name, int *idx,
     FUNC_LEAVE (ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gmove
+ *
+ * Purpose:	Renames an object within an HDF5 file.  The original name SRC
+ *		is unlinked from the group graph and the new name DST is
+ *		inserted as an atomic operation.  Both names are interpreted
+ *		relative to LOC_ID which is either a file ID or a group ID.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gmove (hid_t loc_id __attribute__((unused)),
+	 const char *src __attribute__((unused)),
+	 const char *dst __attribute__((unused)))
+{
+    FUNC_ENTER (H5Gmove, FAIL);
+
+    HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
+		   "unable to rename object (not implemented yet)");
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Glink
+ *
+ * Purpose:	Creates a link of the specified type from NEW_NAME to
+ *		CUR_NAME.
+ *
+ *		If TYPE is H5G_LINK_HARD then CUR_NAME must name an existing
+ *		object and both names are interpreted relative to LOC_ID
+ *		which is either a file ID or a group ID.
+ *
+ * 		If TYPE is H5G_LINK_SOFT then CUR_NAME can be anything and is
+ *		interpreted at lookup time relative to the group which
+ *		contains the final component of NEW_NAME.  For instance, if
+ *		CUR_NAME is `./foo' and NEW_NAME is `./x/y/bar' and a request
+ *		is made for `./x/y/bar' then the actual object looked up is
+ *		`./x/y/./foo'.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
+	 const char *new_name)
+{
+    H5G_t	*loc = NULL;
+    
+    FUNC_ENTER (H5Glink, FAIL);
+
+    if (NULL==(loc=H5G_loc (loc_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (type!=H5G_LINK_HARD && type!=H5G_LINK_SOFT) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unrecognized link type");
+    }
+    if (!cur_name || !*cur_name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "no current name specified");
+    }
+    if (!new_name || !*new_name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "no new name specified");
+    }
+    if (H5G_link (loc, type, cur_name, new_name)<0) {
+	HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL, "unable to create link");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gunlink
+ *
+ * Purpose:	Removes the specified NAME from the group graph and
+ *		decrements the link count for the object to which NAME
+ *		points.  If the link count reaches zero then all file-space
+ *		associated with the object will be reclaimed (but if the
+ *		object is open, then the reclamation of the file space is
+ *		delayed until all handles to the object are closed).
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gunlink (hid_t loc_id __attribute__((unused)),
+	   const char *name __attribute__((unused)))
+{
+    FUNC_ENTER (H5Gunlink, FAIL);
+
+    HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
+		   "unable to unlink name (not implemented yet)");
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 /*
  *-------------------------------------------------------------------------
  *-------------------------------------------------------------------------
@@ -1384,4 +1509,59 @@ H5G_loc (hid_t loc_id)
     }
 
     FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_link
+ *
+ * Purpose:	Creates a link from NEW_NAME to CUR_NAME.  See H5Glink() for
+ *		full documentation.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
+	  const char *new_name)
+{
+    H5G_entry_t		cur_obj;
+    
+    FUNC_ENTER (H5G_link, FAIL);
+
+    /* Check args */
+    assert (loc);
+    assert (cur_name && *cur_name);
+    assert (new_name && *new_name);
+
+    switch (type) {
+    case H5G_LINK_SOFT:
+	HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
+		       "unable to create soft link (not implemented yet)");
+
+    case H5G_LINK_HARD:
+	if (H5G_find (loc, cur_name, NULL, &cur_obj)<0) {
+	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+			   "source object not found");
+	}
+	if (H5G_insert (loc, new_name, &cur_obj)<0) {
+	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+			   "unable to create new name/link for object");
+	}
+	break;
+
+    default:
+	HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, FAIL,
+		       "unrecognized link type");
+    }
+
+    FUNC_LEAVE (SUCCEED);
 }

@@ -59,11 +59,18 @@ H5MM_xmalloc(size_t size)
  *
  *-------------------------------------------------------------------------
  */
-void                   *
-H5MM_xcalloc(size_t n, size_t size)
+void *
+H5MM_xcalloc(intn n, size_t size)
 {
-    void                   *mem = HDcalloc(n, size);
-    assert(mem);
+    void *mem = NULL;
+
+    assert (n>=0);
+
+    if (n>0) {
+	mem = HDcalloc((size_t)n, size);
+	assert(mem);
+    }
+    
     return mem;
 }
 

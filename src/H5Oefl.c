@@ -369,8 +369,8 @@ H5O_efl_total_size (H5O_efl_t *efl)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
-	      uint8 *buf)
+H5O_efl_read (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
+	      haddr_t *addr, size_t size, uint8 *buf)
 {
     int		i, fd=-1;
     size_t	to_read, cur, skip=0;
@@ -416,7 +416,7 @@ H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 	if ((n=read (fd, buf, to_read))<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "read error in external raw data file");
-	} else if (n<to_read) {
+	} else if ((size_t)n<to_read) {
 	    HDmemset (buf+n, 0, to_read-n);
 	}
 	close (fd);
@@ -454,8 +454,8 @@ H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
-	       const uint8 *buf)
+H5O_efl_write (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
+	       haddr_t *addr, size_t size, const uint8 *buf)
 {
     int		i, fd=-1;
     size_t	to_write, cur, skip=0;
@@ -502,7 +502,7 @@ H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 			 "unable to seek in external raw data file");
 	}
 	to_write = MIN(efl->slot[i].size-skip, size);
-	if (write (fd, buf, to_write)!=to_write) {
+	if ((size_t)write (fd, buf, to_write)!=to_write) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "write error in external raw data file");
 	} 

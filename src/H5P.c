@@ -460,12 +460,11 @@ H5Pset_userblock(hid_t tid, size_t size)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
-    for (i = 8; i < 8 * sizeof(int); i++) {
-	uintn			p2 = 8 == i ? 0 : 1 << i;
-	if (size == p2)
-	    break;
+    for (i=8; i<8*(intn)sizeof(int); i++) {
+	uintn p2 = 8 == i ? 0 : 1 << i;
+	if (size == p2) break;
     }
-    if (i >= 8 * sizeof(int)) {
+    if (i>=8*(intn)sizeof(int)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "userblock size is not valid");
     }
@@ -888,7 +887,7 @@ H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality must be positive");
     }
-    if (ndims > NELMTS(tmpl->chunk_size)) {
+    if (ndims > (intn)NELMTS(tmpl->chunk_size)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality is too large");
     }

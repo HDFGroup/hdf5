@@ -132,7 +132,8 @@ H5G_node_sizeof_rkey(H5F_t *f, const void *udata __attribute__((unused)))
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
+H5G_node_decode_key(H5F_t *f, H5B_t *bt __attribute__((unused)), uint8 *raw,
+		    void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -166,7 +167,8 @@ H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
+H5G_node_encode_key(H5F_t *f, H5B_t *bt __attribute__((unused)),
+		    uint8 *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -230,7 +232,8 @@ H5G_node_size(H5F_t *f)
  */
 static herr_t
 H5G_node_create(H5F_t *f, H5B_ins_t op,
-		void *_lt_key, void *_udata, void *_rt_key,
+		void *_lt_key, void *_udata __attribute__((unused)),
+		void *_rt_key,
 		haddr_t *addr/*out*/)
 {
     H5G_node_key_t	   *lt_key = (H5G_node_key_t *) _lt_key;
@@ -254,7 +257,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t op,
 		      "unable to allocate file space");
     }
     sym->dirty = TRUE;
-    sym->entry = H5MM_xcalloc(2 * H5G_NODE_K(f), sizeof(H5G_entry_t));
+    sym->entry = H5MM_xcalloc((intn)(2*H5G_NODE_K(f)), sizeof(H5G_entry_t));
     if (H5AC_set(f, H5AC_SNODE, addr, sym) < 0) {
 	H5MM_xfree(sym->entry);
 	H5MM_xfree(sym);
@@ -403,7 +406,7 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void *_udata1,
     size = H5G_node_size(f);
     p = buf = H5MM_xmalloc(size);
     sym = H5MM_xcalloc(1, sizeof(H5G_node_t));
-    sym->entry = H5MM_xcalloc(2 * H5G_NODE_K(f), sizeof(H5G_entry_t));
+    sym->entry = H5MM_xcalloc((intn)(2*H5G_NODE_K(f)), sizeof(H5G_entry_t));
 
     if (H5F_block_read(f, addr, size, buf) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL,
@@ -586,8 +589,9 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
-	       void *_udata, const void *_rt_key)
+H5G_node_found(H5F_t *f, const haddr_t *addr,
+	       const void *_lt_key __attribute__((unused)),
+	       void *_udata, const void *_rt_key __attribute__((unused)))
 {
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
     H5G_node_t		*sn = NULL;
@@ -696,9 +700,10 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
  */
 static H5B_ins_t
 H5G_node_insert(H5F_t *f, const haddr_t *addr,
-		void *_lt_key, hbool_t *lt_key_changed,
+		void *_lt_key __attribute__((unused)),
+		hbool_t *lt_key_changed __attribute__((unused)),
 		void *_md_key, void *_udata,
-		void *_rt_key, hbool_t *rt_key_changed,
+		void *_rt_key, hbool_t *rt_key_changed __attribute__((unused)),
 		haddr_t *new_node)
 {
     H5G_node_key_t	*md_key = (H5G_node_key_t *) _md_key;
@@ -767,7 +772,7 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR,
 		    "unable to insert symbol name into heap");
     }
-    if (sn->nsyms >= 2 * H5G_NODE_K(f)) {
+    if ((size_t)(sn->nsyms) >= 2*H5G_NODE_K(f)) {
 	/*
 	 * The node is full.  Split it into a left and right
 	 * node and return the address of the new right node (the
@@ -800,14 +805,14 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
 	md_key->offset = sn->entry[sn->nsyms - 1].name_off;
 
 	/* Where to insert the new entry? */
-	if (idx <= H5G_NODE_K(f)) {
+	if (idx <= (intn)H5G_NODE_K(f)) {
 	    insert_into = sn;
-	    if (idx == H5G_NODE_K(f))
+	    if (idx == (intn)H5G_NODE_K(f))
 		md_key->offset = offset;
 	} else {
 	    idx -= H5G_NODE_K(f);
 	    insert_into = snrt;
-	    if (idx == H5G_NODE_K (f)) {
+	    if (idx == (intn)H5G_NODE_K (f)) {
 		rt_key->offset = offset;
 		*rt_key_changed = TRUE;
 	    }

@@ -131,7 +131,7 @@ H5HG_create (H5F_t *f, size_t size)
     UINT16ENCODE (p, 0);	/*object ID*/
     UINT16ENCODE (p, 0);	/*reference count*/
     H5F_encode_length (f, p, heap->obj[0].size);
-    HDmemset (p, 0, (heap->chunk+heap->nalloc) - p);
+    HDmemset (p, 0, (size_t)((heap->chunk+heap->nalloc) - p));
 
     /* Add the heap to the cache */
     if (H5AC_set (f, H5AC_GHEAP, &addr, heap)<0) {
@@ -845,7 +845,8 @@ herr_t
 H5HG_debug(H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 	  intn fwidth)
 {
-    int			i, j, k, nused, maxobj;
+    int			i, nused, maxobj;
+    uintn		j, k;
     H5HG_heap_t		*h = NULL;
     char		buf[64];
     size_t		size;
@@ -855,7 +856,7 @@ H5HG_debug(H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 
     /* check arguments */
     assert(f);
-    if (addr && H5F_addr_defined (addr));
+    assert(addr && H5F_addr_defined (addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);

@@ -102,8 +102,7 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
     FUNC_ENTER(H5G_ent_modified, FAIL);
     assert(ent);
-    if (H5G_NO_CHANGE != ent->type)
-        ent->type = cache_type;
+    if (H5G_NO_CHANGE != ent->type) ent->type = cache_type;
     ent->dirty = TRUE;
     FUNC_LEAVE(SUCCEED);
 }
@@ -350,8 +349,8 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t *f, H5G_entry_t *ent, FILE * stream, intn indent,
-              intn fwidth)
+H5G_ent_debug(H5F_t *f __attribute__((unused)), H5G_entry_t *ent,
+	      FILE * stream, intn indent, intn fwidth)
 {
     FUNC_ENTER(H5G_ent_debug, FAIL);
 

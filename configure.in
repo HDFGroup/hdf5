@@ -87,6 +87,13 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Turn on warning flags for gcc.
+dnl
+if test Xyes = "X$GCC"; then
+   CFLAGS="$CFLAGS -Wall -W -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline"
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Production flags?
 dnl
 AC_MSG_CHECKING(for production mode)
@@ -114,13 +121,6 @@ case "X-$enableval" in
       ;;
 esac
 
-
-dnl ----------------------------------------------------------------------
-dnl Turn on warning flags for gcc.
-dnl
-if test Xyes = "X$GCC"; then
-   CFLAGS="$CFLAGS -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
-fi
 
 dnl ----------------------------------------------------------------------
 dnl Check for libraries.  (none required yet)

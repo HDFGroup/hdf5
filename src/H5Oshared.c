@@ -133,7 +133,7 @@ H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shared_size (H5F_t *f, const void *_mesg)
+H5O_shared_size (H5F_t *f, const void *_mesg __attribute__((unused)))
 {
     FUNC_ENTER (H5O_shared_size, 0);
     FUNC_LEAVE (H5F_SIZEOF_ADDR(f)+4);

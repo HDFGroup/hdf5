@@ -2080,7 +2080,7 @@ H5Tget_member_type(hid_t type_id, int membno)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tinsert(hid_t parent_id, const char *name, off_t offset, hid_t member_id)
+H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
 {
     H5T_t	*parent = NULL;		/*the compound parent data type */
     H5T_t	*member = NULL;		/*the atomic member type	*/
@@ -2935,7 +2935,7 @@ H5T_get_size(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_insert(H5T_t *parent, const char *name, off_t offset, const H5T_t *member)
+H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
     intn		    i;
 

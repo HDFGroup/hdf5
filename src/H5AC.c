@@ -75,7 +75,7 @@ H5AC_create(H5F_t *f, intn size_hint)
 
     f->shared->cache = cache = H5MM_xcalloc(1, sizeof(H5AC_t));
     cache->nslots = size_hint;
-    cache->slot = H5MM_xcalloc(cache->nslots, sizeof(H5AC_slot_t));
+    cache->slot = H5MM_xcalloc((intn)(cache->nslots), sizeof(H5AC_slot_t));
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -115,8 +115,8 @@ H5AC_dest(H5F_t *f)
     }
 #ifdef H5AC_DEBUG
     {
-        intn                    i;
-        for (i = 0; i < cache->nslots; i++) {
+        uintn i;
+        for (i=0; i<cache->nslots; i++) {
             cache->slot[i].prot = H5MM_xfree(cache->slot[i].prot);
             cache->slot[i].aprots = 0;
             cache->slot[i].nprots = 0;
@@ -345,7 +345,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 				      void *) = NULL;
     H5AC_slot_t            *slot;
     intn                   *map = NULL;
-    intn                    nslots;
+    uintn                   nslots;
     H5AC_t                 *cache = NULL;
 
     FUNC_ENTER(H5AC_flush, FAIL);

@@ -195,7 +195,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	    /* Decrement indices and advance pointers */
 	    for (j=ndims-1, carray=TRUE; j>=0 && carray; --j) {
 		
-		H5F_addr_inc (&addr, file_stride[j]);
+		H5F_addr_adj (&addr, file_stride[j]);
 		buf += mem_stride[j];
 
 		if (--idx[j]) carray = FALSE;
@@ -346,7 +346,7 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	    /* Decrement indices and advance pointers */
 	    for (j=ndims-1, carray=TRUE; j>=0 && carray; --j) {
 		
-		H5F_addr_inc (&addr, file_stride[j]);
+		H5F_addr_adj (&addr, file_stride[j]);
 		buf += mem_stride[j];
 		
 		if (--idx[j]) carray = FALSE;

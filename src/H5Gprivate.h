@@ -51,10 +51,11 @@
  * symbol table entry.
  */
 typedef enum H5G_type_t {
-    H5G_NOTHING_CACHED   = 0,   /*nothing is cached, must be 0               */
-    H5G_CACHED_STAB      = 1,   /*symbol table, `stab'                       */
+    H5G_CACHED_ERROR	= -1, 	/*force enum to be signed		     */
+    H5G_NOTHING_CACHED  = 0,    /*nothing is cached, must be 0               */
+    H5G_CACHED_STAB     = 1,    /*symbol table, `stab'                       */
 
-    H5G_NCACHED          = 2    /*THIS MUST BE LAST                          */
+    H5G_NCACHED         = 2     /*THIS MUST BE LAST                          */
 } H5G_type_t;
 
 /*
@@ -103,6 +104,8 @@ herr_t H5G_set (H5G_t *grp);
 herr_t H5G_push (H5G_t *grp);
 herr_t H5G_pop (H5F_t *f);
 H5G_t *H5G_getcwg(H5F_t *f);
+herr_t H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
+		 const char *new_name);
 herr_t H5G_insert (H5G_t *cwg, const char *name, H5G_entry_t *ent);
 herr_t H5G_find (H5G_t *cwg, const char *name, H5G_entry_t *grp_ent/*out*/,
                  H5G_entry_t *ent/*out*/);

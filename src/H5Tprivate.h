@@ -38,7 +38,7 @@ intn H5T_invalidate_cb (void *obj, const void *call_data);
 size_t H5T_get_size (const H5T_t *dt);
 intn H5T_cmp (const H5T_t *dt1, const H5T_t *dt2);
 hbool_t H5T_is_atomic (const H5T_t *dt);
-herr_t H5T_insert (H5T_t *parent, const char *name, off_t offset,
+herr_t H5T_insert (H5T_t *parent, const char *name, size_t offset,
                    const H5T_t *member);
 herr_t H5T_sort_by_offset (H5T_t *dt);
 herr_t H5T_pack (H5T_t *dt);

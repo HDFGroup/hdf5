@@ -9,6 +9,7 @@
 # Compiler flags. The CPPFLAGS values should not include package debug
 # flags like `-DH5G_DEBUG' since these are added with the
 # `--enable-debug' switch of configure.
+CC=${CC:-gcc}
 
 # What must *always* be present for things to compile correctly?
 CFLAGS="$CFLAGS -ansi"
@@ -17,6 +18,15 @@ CFLAGS="$CFLAGS -ansi"
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS="-g -fverbose-asm"
 DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+case `$CC -v 2>&1 |tail -1 |sed 's/gcc version //'` in
+   2.7.*)
+       echo "You have an old version of gcc, please upgrade to 2.8.1 or better"
+       ;;
+   2.8.*)
+       CFLAGS="$CFLAGS -Wundef -Wsign-compare"
+       ;;
+esac
 
 # What compiler flags should be used for building a production
 # library?

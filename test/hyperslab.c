@@ -45,13 +45,13 @@
 static uintn
 init_full(uint8 *array, size_t nx, size_t ny, size_t nz)
 {
-    int			    i, j, k;
+    size_t		    i, j, k;
     uint8		    acc = 128;
     uintn		    total = 0;
 
-    for (i = 0; i < nx; i++) {
-	for (j = 0; j < ny; j++) {
-	    for (k = 0; k < nz; k++) {
+    for (i=0; i<nx; i++) {
+	for (j=0; j<ny; j++) {
+	    for (k=0; k<nz; k++) {
 		total += acc;
 		*array++ = acc++;
 	    }
@@ -77,22 +77,22 @@ init_full(uint8 *array, size_t nx, size_t ny, size_t nz)
 static void
 print_array(uint8 *array, size_t nx, size_t ny, size_t nz)
 {
-    int			    i, j, k;
+    size_t	i, j, k;
 
-    for (i = 0; i < nx; i++) {
-	if (nz > 1) {
+    for (i=0; i<nx; i++) {
+	if (nz>1) {
 	    printf("i=%d:\n", i);
 	} else {
 	    printf("%03d:", i);
 	}
 
-	for (j = 0; j < ny; j++) {
-	    if (nz > 1)
+	for (j=0; j<ny; j++) {
+	    if (nz>1)
 		printf("%03d:", j);
-	    for (k = 0; k < nz; k++) {
+	    for (k=0; k<nz; k++) {
 		printf(" %3d", *array++);
 	    }
-	    if (nz > 1)
+	    if (nz>1)
 		printf("\n");
 	}
 	printf("\n");
@@ -120,7 +120,7 @@ print_ref(size_t nx, size_t ny, size_t nz)
 {
     uint8		   *array;
 
-    array = H5MM_xcalloc(nx * ny * nz, sizeof(uint8));
+    array = H5MM_xcalloc((intn)(nx*ny*nz), sizeof(uint8));
 
     printf("Reference array:\n");
     init_full(array, nx, ny, nz);
@@ -154,7 +154,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     size_t	dst_offset[3];	    	/*offset of hyperslab in dest   */
     uintn	ref_value;  		/*reference value		*/
     uintn	acc;	    		/*accumulator		    	*/
-    int		i, j, k, dx, dy, dz;	/*counters		   	*/
+    size_t	i, j, k, dx, dy, dz;	/*counters		   	*/
     size_t	u, v, w;
     int		ndims;			/*hyperslab dimensionality	*/
     char	dim[64], s[256];    	/*temp string		    	*/
@@ -183,7 +183,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     fflush(stdout);
 
     /* Allocate array */
-    dst = H5MM_xcalloc(nx * ny * nz, 1);
+    dst = H5MM_xcalloc(1, nx*ny*nz);
     init_full(dst, nx, ny, nz);
 
     for (i = 0; i < nx; i += di) {
@@ -321,7 +321,7 @@ test_copy(int mode,
     size_t	src_offset[3];		/*offset of hyperslab in source */
     uintn	ref_value;		/*reference value		*/
     uintn	acc;			/*accumulator			*/
-    int		i, j, k, dx, dy, dz;	/*counters		     	*/
+    size_t	i, j, k, dx, dy, dz;	/*counters		     	*/
     size_t	u, v, w;
     int		ndims;			/*hyperslab dimensionality	*/
     char	dim[64], s[256];	/*temp string			*/
@@ -380,8 +380,8 @@ test_copy(int mode,
     /*
      * Allocate arrays
      */
-    src = H5MM_xcalloc(nx * ny * nz, 1);
-    dst = H5MM_xcalloc(nx * ny * nz, 1);
+    src = H5MM_xcalloc(1, nx*ny*nz);
+    dst = H5MM_xcalloc(1, nx*ny*nz);
     init_full(src, nx, ny, nz);
 
     for (i = 0; i < nx; i += di) {
@@ -571,9 +571,9 @@ test_copy(int mode,
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_multifill(int nx)
+test_multifill(size_t nx)
 {
-    int			    i, j;
+    size_t		    i, j;
     size_t		    size;
     ssize_t		    src_stride;
     ssize_t		    dst_stride;
@@ -690,7 +690,7 @@ test_endian(size_t nx)
     ssize_t	src_stride[2];		/*source strides		*/
     ssize_t	dst_stride[2];		/*destination strides		*/
     size_t	size[2];		/*size vector			*/
-    int		i, j;
+    size_t	i, j;
 
     printf("%-70s", "Testing endian conversion by stride");
     fflush(stdout);
@@ -698,7 +698,7 @@ test_endian(size_t nx)
     /* Initialize arrays */
     src = H5MM_xmalloc(nx * 4);
     init_full(src, nx, 4, 1);
-    dst = H5MM_xcalloc(nx, 4);
+    dst = H5MM_xcalloc(4, nx);
 
     /* Initialize strides */
     src_stride[0] = 0;
@@ -766,7 +766,7 @@ test_transpose(size_t nx, size_t ny)
 {
     intn	*src = NULL;
     intn	*dst = NULL;
-    int		i, j;
+    size_t	i, j;
     ssize_t	src_stride[2], dst_stride[2];
     size_t	size[2];
     char	s[256];
@@ -783,7 +783,7 @@ test_transpose(size_t nx, size_t ny)
 	    src[i * ny + j] = (intn)(i * ny + j);
 	}
     }
-    dst = H5MM_xcalloc(nx * ny, sizeof(*dst));
+    dst = H5MM_xcalloc((intn)(nx*ny), sizeof(*dst));
 
     /* Build stride info */
     size[0] = nx;
@@ -873,7 +873,7 @@ test_sub_super(size_t nx, size_t ny)
     ssize_t	src_stride[4];	/*source stride info		*/
     ssize_t	dst_stride[4];	/*destination stride info	*/
     size_t	size[4];	/*number of sample points	*/
-    int		i, j;
+    size_t	i, j;
     char	s[256];
 
     sprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
@@ -885,8 +885,8 @@ test_sub_super(size_t nx, size_t ny)
     /* Initialize */
     full = H5MM_xmalloc(4 * nx * ny);
     init_full(full, 2 * nx, 2 * ny, 1);
-    half = H5MM_xcalloc(nx * ny, 1);
-    twice = H5MM_xcalloc(4 * nx * ny, 1);
+    half = H5MM_xcalloc(1, nx*ny);
+    twice = H5MM_xcalloc(1, 4*nx*ny);
 
     /* Setup */
     size[0] = nx;

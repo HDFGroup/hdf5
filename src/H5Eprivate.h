@@ -96,7 +96,7 @@ typedef struct H5E_minor_mesg_t {
 
 /* An error stack */
 typedef struct H5E_t {
-    uintn	nused;			/*num slots currently used in stack  */
+    intn	nused;			/*num slots currently used in stack  */
     H5E_error_t slot[H5E_NSLOTS];	/*array of error records	     */
 } H5E_t;
 

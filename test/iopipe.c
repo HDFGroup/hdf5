@@ -213,7 +213,7 @@ main (void)
 	offset = lseek (fd, 0, SEEK_SET);
 	assert (0==offset);
 	n = write (fd, the_data, size[0]*size[1]);
-	assert (n==size[0]*size[1]);
+	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
     getrusage (RUSAGE_SELF, &r_stop);
     gettimeofday (&t_stop, NULL);
@@ -252,7 +252,7 @@ main (void)
 	offset = lseek (fd, 0, SEEK_SET);
 	assert (0==offset);
 	n = read (fd, the_data, size[0]*size[1]);
-	assert (n==size[0]*size[1]);
+	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
     getrusage (RUSAGE_SELF, &r_stop);
     gettimeofday (&t_stop, NULL);

@@ -14,11 +14,11 @@
 
 /* The first dataset */
 typedef struct s1_t {
-    int		a;
-    int		b;
-    int		c;
-    int		d;
-    int		e;
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+    unsigned int d;
+    unsigned int e;
 } s1_t;
 
 /* The second dataset (same as first) */
@@ -26,39 +26,39 @@ typedef s1_t s2_t;
 
 /* The third dataset (reversed fields of s1) */
 typedef struct s3_t {
-    int		e;
-    int		d;
-    int		c;
-    int		b;
-    int		a;
+    unsigned int e;
+    unsigned int d;
+    unsigned int c;
+    unsigned int b;
+    unsigned int a;
 } s3_t;
 
 /* The fourth dataset (a subset of s1) */
 typedef struct s4_t {
-    int		b;
-    int		d;
+    unsigned int b;
+    unsigned int d;
 } s4_t;
 
 /* The fifth dataset (a superset of s1) */
 typedef struct s5_t {
-    int		pre;
-    int		a;
-    int		b;
-    int		mid1;
-    int		c;
-    int		mid2;
-    int		d;
-    int		e;
-    int		post;
+    unsigned int pre;
+    unsigned int a;
+    unsigned int b;
+    unsigned int mid1;
+    unsigned int c;
+    unsigned int mid2;
+    unsigned int d;
+    unsigned int e;
+    unsigned int post;
 } s5_t;
 
 
 #if 1
-#  define NX	100
-#  define NY	2000
+#  define NX	100u
+#  define NY	2000u
 #else
-#  define NX	12
-#  define NY    9
+#  define NX	12u
+#  define NY    9u
 #endif
 
 
@@ -118,14 +118,16 @@ main (void)
     /* Tenth dataset */
 
     /* Eleventh dataset */
-    s5_t		*s11 = NULL;
+    s4_t		*s11 = NULL;
 
     /* Other variables */
-    int			i, j, ndims;
+    unsigned int	i, j;
+    int			ndims;
     hid_t		file, dataset, space, PRESERVE;
     herr_t		status;
     static size_t	dim[] = {NX, NY};
-    int 		f_offset[2];	/*offset of hyperslab in file	*/
+    size_t 		f_offset[2];	/*offset of hyperslab in file	*/
+    int			f_temp_offset[2];
     size_t 		h_size[2];	/*size of hyperslab		*/
     size_t 		h_sample[2];	/*hyperslab sampling		*/
 
@@ -396,7 +398,9 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     h_size[1] = 2*NY/3 - f_offset[1];
     h_sample[0] = 1;
     h_sample[1] = 1;
-    status = H5Sset_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
+    f_temp_offset[0] = (int)(f_offset[0]);
+    f_temp_offset[1] = (int)(f_offset[1]);
+    status = H5Sset_hyperslab (s8_f_sid, f_temp_offset, h_size, h_sample);
     assert (status>=0);
 
     /* Create memory data space */
@@ -436,8 +440,10 @@ STEP  8: Read middle third hyperslab into memory array.\n");
 STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
     fflush (stdout);
 
-    /* Initialize with some bit pattern */
-    memset (s2, 0xFF, NX*NY*sizeof(s2_t));
+    /* Initialize */
+    for (i=0; i<NX*NY; i++) {
+	s2[i].a = s2[i].b = s2[i].c = s2[i].d = s2[i].e = (unsigned)(-1);
+    }
     
     /* Read the hyperslab */
     status = H5Dread (dataset, s2_tid, s8_f_sid, s8_f_sid, H5P_DEFAULT, s2);
@@ -456,11 +462,11 @@ STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
 		assert (ps2->d == ps1->d);
 		assert (ps2->e == ps1->e);
 	    } else {
-		assert (ps2->a == -1);
-		assert (ps2->b == -1);
-		assert (ps2->c == -1);
-		assert (ps2->d == -1);
-		assert (ps2->e == -1);
+		assert (ps2->a == (unsigned)(-1));
+		assert (ps2->b == (unsigned)(-1));
+		assert (ps2->c == (unsigned)(-1));
+		assert (ps2->d == (unsigned)(-1));
+		assert (ps2->e == (unsigned)(-1));
 	    }
 	}
     }
@@ -475,8 +481,11 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
          where some of the struct members are already initialized.\n");
     fflush (stdout);
 
-    /* Initialize with some bit pattern */
-    memset (s5, 0xFF, NX*NY*sizeof(s5_t));
+    /* Initialize */
+    for (i=0; i<NX*NY; i++) {
+	s5[i].a = s5[i].b = s5[i].c = s5[i].d = s5[i].e = (unsigned)(-1);
+	s5[i].pre = s5[i].mid1 = s5[i].mid2 = s5[i].post = (unsigned)(-1);
+    }
     
     /* Read the hyperslab */
     status = H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, PRESERVE, s5);
@@ -489,25 +498,25 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 	    s5_t *ps5 = s5 + i*NY + j;
 	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
 		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
-		assert (ps5->pre == -1);
+		assert (ps5->pre == (unsigned)(-1));
 		assert (ps5->a == ps1->a);
 		assert (ps5->b == ps1->b);
-		assert (ps5->mid1 == -1);
+		assert (ps5->mid1 == (unsigned)(-1));
 		assert (ps5->c == ps1->c);
-		assert (ps5->mid2 == -1);
+		assert (ps5->mid2 == (unsigned)(-1));
 		assert (ps5->d == ps1->d);
 		assert (ps5->e == ps1->e);
-		assert (ps5->post == -1);
+		assert (ps5->post == (unsigned)(-1));
 	    } else {
-		assert (ps5->pre == -1);
-		assert (ps5->a == -1);
-		assert (ps5->b == -1);
-		assert (ps5->mid1 == -1);
-		assert (ps5->c == -1);
-		assert (ps5->mid2 == -1);
-		assert (ps5->d == -1);
-		assert (ps5->e == -1);
-		assert (ps5->post == -1);
+		assert (ps5->pre == (unsigned)(-1));
+		assert (ps5->a == (unsigned)(-1));
+		assert (ps5->b == (unsigned)(-1));
+		assert (ps5->mid1 == (unsigned)(-1));
+		assert (ps5->c == (unsigned)(-1));
+		assert (ps5->mid2 == (unsigned)(-1));
+		assert (ps5->d == (unsigned)(-1));
+		assert (ps5->e == (unsigned)(-1));
+		assert (ps5->post == (unsigned)(-1));
 	    }
 	}
     }
@@ -523,11 +532,17 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     fflush (stdout);
     
     /* Create the memory array and initialize all fields to zero */
-    ndims = H5Sget_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
+    f_temp_offset[0] = (int)(f_offset[0]);
+    f_temp_offset[1] = (int)(f_offset[1]);
+    ndims = H5Sget_hyperslab (s8_f_sid, f_temp_offset, h_size, h_sample);
     assert (ndims==2);
     s11 = malloc (h_size[0]*h_size[1]*sizeof(s4_t));
     assert (s11);
-    memset (s11, 0xff, h_size[0]*h_size[1]*sizeof(s4_t));
+
+    /* Initialize */
+    for (i=0; i<h_size[0]*h_size[1]; i++) {
+	s11[i].b = s11[i].d = (unsigned)(-1);
+    }
     
     /* Write to disk */
     status = H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11);
@@ -547,8 +562,8 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
 	    assert (ps1->e == 5*(i*NY+j)+4);
 	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
 		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
-		assert (ps1->b == -1);
-		assert (ps1->d == -1);
+		assert (ps1->b == (unsigned)(-1));
+		assert (ps1->d == (unsigned)(-1));
 	    } else {
 		assert (ps1->b == 5*(i*NY+j)+1);
 		assert (ps1->d == 5*(i*NY+j)+3);

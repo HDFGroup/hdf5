@@ -27,6 +27,12 @@
 extern "C" {
 #endif
 
+typedef enum H5G_link_t {
+    H5G_LINK_ERROR	= -1,
+    H5G_LINK_HARD	= 0,
+    H5G_LINK_SOFT	= 1
+} H5G_link_t;
+
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *group_name,
 				void *op_data);
 
@@ -38,6 +44,10 @@ herr_t H5Gpush (hid_t file, const char *name);
 herr_t H5Gpop (hid_t file);
 herr_t H5Giterate (hid_t file, const char *name, int *idx, H5G_iterate_t op,
 		   void *op_data);
+herr_t H5Gmove (hid_t loc_id, const char *src, const char *dst);
+herr_t H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
+		const char *new_name);
+herr_t H5Gunlink (hid_t loc_id, const char *name);
 
 #ifdef __cplusplus
 }

@@ -45,8 +45,12 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-              void *buf, void *background)
+H5T_conv_noop(hid_t src_id __attribute__((unused)),
+	      hid_t dst_id __attribute__((unused)),
+	      H5T_cdata_t *cdata,
+	      size_t nelmts __attribute__((unused)),
+              void *buf __attribute__((unused)),
+	      void *background __attribute__((unused)))
 {
     FUNC_ENTER(H5T_conv_noop, FAIL);
 
@@ -98,7 +102,7 @@ H5T_conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  */
 herr_t
 H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-               void *_buf, void *background)
+               void *_buf, void *background __attribute__((unused)))
 {
     uint8       *buf = (uint8 *) _buf;
     uint8       tmp;
@@ -344,7 +348,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_member_t *dst_memb = NULL;	/*destination struct memb desc.	*/
     size_t	offset;			/*byte offset wrt struct	*/
     size_t	src_delta, dst_delta;	/*source & destination stride	*/
-    intn	elmtno, i;		/*counters			*/
+    uintn	elmtno;
+    intn	i;			/*counters			*/
     H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
 
     FUNC_ENTER (H5T_conv_struct, FAIL);

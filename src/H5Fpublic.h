@@ -25,11 +25,11 @@
  * H5Fcreate() and H5Fopen(). Use the bit-wise OR operator (|) to combine
  * them as needed.
  */
-#define H5F_ACC_RDONLY	0x0000	/*absence of write implies read only	*/
-#define H5F_ACC_RDWR	0x0001	/*open file for reading and writing	*/
-#define H5F_ACC_TRUNC	0x0002	/*overwrite existing files during create*/
-#define H5F_ACC_EXCL	0x0004	/*create fails if file already exists	*/
-#define H5F_ACC_DEBUG	0x0008  /*print debug info			*/
+#define H5F_ACC_RDONLY	0x0000u	/*absence of write implies read only	*/
+#define H5F_ACC_RDWR	0x0001u	/*open file for reading and writing	*/
+#define H5F_ACC_TRUNC	0x0002u	/*overwrite existing files during create*/
+#define H5F_ACC_EXCL	0x0004u	/*create fails if file already exists	*/
+#define H5F_ACC_DEBUG	0x0008u  /*print debug info			*/
 
 
 #ifdef LATER

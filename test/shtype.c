@@ -10,6 +10,12 @@
 #include <assert.h>
 #include <hdf5.h>
 
+#include <H5config.h>
+#ifndef HAVE_ATTRIBUTE
+#   undef __attribute__
+#   define __attribute__(X) /*void*/
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:	display_error_cb
@@ -28,7 +34,7 @@
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void *client_data)
+display_error_cb (void *client_data __attribute__((unused)))
 {
     puts ("*FAILED*");
     H5Eprint (stdout);

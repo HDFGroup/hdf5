@@ -29,7 +29,6 @@ static const char *FileHeader = "\n\
  *
  *-------------------------------------------------------------------------
  */
-
 #include <assert.h>
 #include <math.h>
 #include <pwd.h>
@@ -163,7 +162,7 @@ static detected_t       Known[] =
    INFO.varname = #VAR;                                                       \
    INFO.size = sizeof(TYPE);                                                  \
    for (_i=sizeof(TYPE),_v=0; _i>0; --_i) _v = (_v<<8) + _i;                  \
-   for (_i=0,_x=(unsigned char *)&_v; _i<sizeof(TYPE); _i++) {                \
+   for (_i=0,_x=(unsigned char *)&_v; _i<(signed)sizeof(TYPE); _i++) {        \
       _j = (*_x++)-1;                                                         \
       assert (_j<(signed)sizeof(TYPE));                                       \
       INFO.perm[_i] = _j;                                                     \
@@ -209,7 +208,7 @@ static detected_t       Known[] =
    INFO.padding = 0;                                                          \
                                                                               \
    /* Byte Order */                                                           \
-   for (_i=0,_v1=0.0,_v2=1.0; _i<sizeof(TYPE); _i++) {                        \
+   for (_i=0,_v1=0.0,_v2=1.0; _i<(signed)sizeof(TYPE); _i++) {                \
       _v3 = _v1; _v1 += _v2; _v2 /= 256.0;                                    \
       if ((_j=byte_cmp(sizeof(TYPE), &_v3, &_v1))>=0) {                       \
          if (0==_i || INFO.perm[_i-1]!=_j) {                                  \
@@ -870,7 +869,7 @@ bit.\n";
 	char *comma;
 	if ((pwd = getpwuid(getuid()))) {
 	    if ((comma = strchr(pwd->pw_gecos, ','))) {
-		n = MIN(sizeof(real_name) - 1, comma - pwd->pw_gecos);
+		n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
 		strncpy(real_name, pwd->pw_gecos, n);
 		real_name[n] = '\0';
 	    } else {
@@ -953,9 +952,8 @@ bit.\n";
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, char *argv[])
+main(void)
 {
-
     detected_t              d[MAXDETECT];
     int                     nd = 0;
 

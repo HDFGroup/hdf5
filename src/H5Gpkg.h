@@ -21,7 +21,7 @@
 
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
 #define H5G_SIZE_HINT   1024            /*default root grp size hint         */
-#define H5G_NODE_K(F) ((F)->shared->create_parms.sym_leaf_k)
+#define H5G_NODE_K(F) ((unsigned)((F)->shared->create_parms.sym_leaf_k))
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 
 #define H5G_DEFAULT_ROOT_SIZE  32

@@ -298,7 +298,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 {
     size_t		    nbytes;
     haddr_t		    cur_addr;
-    uintn		    membno;
+    intn		    membno;
     off_t		    offset;
     size_t		    member_size;
 
@@ -361,7 +361,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 {
     size_t		   	nbytes;
     haddr_t		    	cur_addr, max_addr;
-    uintn		    	membno;
+    intn		    	membno;
     off_t		    	offset;
     H5F_low_t		   	*member = NULL;
     char		    	member_name[4096];

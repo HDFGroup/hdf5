@@ -70,7 +70,8 @@ const H5F_low_class_t H5F_LOW_STDIO_g[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_stdio_open(const char *name, const H5F_access_t *access_parms,
+H5F_stdio_open(const char *name,
+	       const H5F_access_t *access_parms __attribute__((unused)),
 	       uintn flags, H5F_search_t *key/*out*/)
 {
     H5F_low_t		   *lf = NULL;
@@ -112,7 +113,9 @@ H5F_stdio_open(const char *name, const H5F_access_t *access_parms,
     if (fseek(lf->u.stdio.f, 0, SEEK_END) < 0) {
 	lf->u.stdio.op = H5F_OP_UNKNOWN;
     } else {
-	H5F_addr_inc(&(lf->eof), ftell(lf->u.stdio.f));
+	ssize_t x = ftell (lf->u.stdio.f);
+	assert (x>=0);
+	H5F_addr_inc(&(lf->eof), (size_t)x);
     }
 
     /* The unique key */
@@ -144,7 +147,8 @@ H5F_stdio_open(const char *name, const H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_close(H5F_low_t *lf, const H5F_access_t *access_parms)
+H5F_stdio_close(H5F_low_t *lf,
+		const H5F_access_t *access_parms __attribute__((unused)))
 {
     FUNC_ENTER(H5F_stdio_close, FAIL);
 
@@ -179,7 +183,8 @@ H5F_stdio_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+H5F_stdio_read(H5F_low_t *lf,
+	       const H5F_access_t *access_parms __attribute__((unused)),
 	       const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     size_t		n;
@@ -187,7 +192,7 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 #ifdef HAVE_FSEEK64
     int64		offset;
 #else
-    off_t		offset;
+    long		offset;
 #endif
 
     FUNC_ENTER(H5F_stdio_read, FAIL);
@@ -202,12 +207,12 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 #ifdef HAVE_FSEEK64
     offset = (int64)(addr->offset); /*checked for overflow*/
 #else
-    offset = (off_t)(addr->offset); /*checked for overflow*/
+    offset = (long)(addr->offset); /*checked for overflow*/
 #endif
 
     /* Check easy cases */
     if (0 == size) HRETURN(SUCCEED);
-    if (offset >= lf->eof.offset) {
+    if ((uint64)offset >= lf->eof.offset) {
 	HDmemset(buf, 0, size);
 	HRETURN(SUCCEED);
     }
@@ -287,16 +292,18 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+H5F_stdio_write(H5F_low_t *lf,
+		const H5F_access_t *access_parms __attribute__((unused)),
 		const haddr_t *addr, size_t size,
 		const uint8 *buf)
 {
-    ssize_t		n;
     uint64		mask;
 #ifdef HAVE_FSEEK64
     int64		offset;
+    uint64		n;
 #else
-    off_t		offset;
+    long		offset;
+    size_t		n;
 #endif
 
     FUNC_ENTER(H5F_stdio_write, FAIL);
@@ -310,10 +317,10 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     }
 #ifdef HAVE_FSEEK64
     offset = (int64)(addr->offset); /*checked for overflow*/
-    n = (int64)size; /*checked for overflow*/
+    n = size; /*checked for overflow*/
 #else
     offset = (long)(addr->offset); /*checked for overflow*/
-    n = (off_t)size; /*checked for overflow*/
+    n = size; /*checked for overflow*/
 #endif
 
     /*
@@ -333,6 +340,7 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 #endif
 	lf->u.stdio.cur = offset;
     }
+    
     /*
      * Write the buffer.  On successful return, the file position will be
      * advanced by the number of bytes read.  Otherwise nobody knows where it
@@ -342,11 +350,12 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	lf->u.stdio.op = H5F_OP_UNKNOWN;
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fwrite failed");
     }
+    
     /*
      * Update seek optimizing data.
      */
     lf->u.stdio.op = H5F_OP_WRITE;
-    lf->u.stdio.cur = offset + n;
+    lf->u.stdio.cur = offset + (int64)n;
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -371,7 +380,8 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
+H5F_stdio_flush(H5F_low_t *lf,
+		const H5F_access_t *access_parms __attribute__((unused)))
 {
     FUNC_ENTER(H5F_stdio_flush, FAIL);
 
