@@ -1,4 +1,4 @@
-HDF5 version 1.6.2-post2 released on Sun Mar  7 21:17:31 CST 2004
+HDF5 version 1.6.2-post3 released on Sun Apr 25 21:10:52 CDT 2004
 ================================================================================
 
 
@@ -41,6 +41,10 @@ New Features
 
     Library:
     --------
+	- Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
+	  will suppress all library version mismatch warning messages.
+	  AKC - 2004/4/14
+
 
     Parallel Library:
     -----------------
@@ -60,6 +64,9 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+	- Fixed dtypes "sw long double -> double" failure in QSC class
+	  machines.  AKC - 2004/4/16
+
 
     Configuration
     -------------
@@ -73,6 +80,20 @@ Bug Fixes since HDF5-1.6.2 release
     Documentation 
     ------------- 
 
+    F90 API
+    -------
+    
+    Fortran functions h5dwrite/read_f and h5awrite/read_f do not
+    accept dims parameter of INTEGER type anymore. Code was removed.
+                                                    2004/04/15
+    C++ API
+    -------
+	- H5::Exception's and its subclasses' constructors that were 
+	  overloaded to take char pointers are removed and constructors
+	  that passed in reference of 'string' are changed to pass 
+	  by value.  In addition, the default value of the data member
+	  H5::Exception::detailMessage is changed from 0/NULL to 
+	  DEFAULT_MSG ("No detailed information provided".)
 
 Documentation
 =============
