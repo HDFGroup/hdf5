@@ -80,6 +80,11 @@
 #  define MAX(a,b)    (((a)>(b)) ? (a) : (b))
 #endif
 
+/* absolute value */
+#ifndef ABS
+#  define ABS(a)    (((a)>=0) ? (a) : -(a))
+#endif
+
 /* maximum of three values */
 #ifndef MAX3
 #  define MAX3(a,b,c)   MAX(MAX(a,b),c)
