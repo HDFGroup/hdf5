@@ -162,10 +162,10 @@ typedef ssize_t			hssize_t;
 /*
  * File addresses have there own types.
  */
-#if H5_SIZEOF_UINT64_T>=8
+#if H5_SIZEOF_INT64_T>=8
     typedef uint64_t                haddr_t;
 #   define HADDR_UNDEF              ((haddr_t)(int64_t)(-1))
-#   define H5_SIZEOF_HADDR_T        H5_SIZEOF_UINT64_T
+#   define H5_SIZEOF_HADDR_T        H5_SIZEOF_INT64_T
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
 #   endif  /* H5_HAVE_PARALLEL */
