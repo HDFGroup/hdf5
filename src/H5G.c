@@ -660,7 +660,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 
     if ((retval=H5G_get_comment(loc, name, bufsize, buf))<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to set comment value");
+		      "unable to get comment value");
     }
 
     FUNC_LEAVE(retval);

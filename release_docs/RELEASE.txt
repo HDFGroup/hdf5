@@ -57,10 +57,12 @@ New Features
     * Parallel HDF5 now works on HP-UX platforms.
     * Can use just enable-threadsafe if the C compiler has builtin pthreads
       support.
+    * The H5Dumper can now dump comments associated with groups. -WCW 01-05-02
 
 
 Bug Fixes since HDF5-1.4.2 Release
 ==================================
+
     * Fixed a bug when reading chunked datasets where the edge of the dataset
       would be incorrectly detected and generate an assertion failure.
     * Fixed a bug where reading an entire dataset wasn't being handled

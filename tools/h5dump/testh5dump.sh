@@ -147,6 +147,9 @@ TOOLTEST tarray7.ddl tarray7.h5
 # test for files with empty data
 TOOLTEST tempty.ddl tempty.h5
 
+# test for files with groups that have comments
+TOOLTEST tgrp_comments.ddl tgrp_comments.h5
+
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
 TOOLTEST tattr.h5.xml --xml tattr.h5

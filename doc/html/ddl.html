@@ -6,7 +6,6 @@
 
 <body bgcolor="#FFFFFF">
 
-
 <hr>
 <center>
 <table border=0 width=98%>
@@ -84,8 +83,13 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;super_block_content&gt; ::= TBD
 
-&lt;root_group&gt; ::= GROUP "/" { &lt;unamed_datatype&gt;* &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
-                 &lt;group_attribute&gt;* &lt;group_member&gt;* }  
+&lt;root_group&gt; ::= GROUP "/" {
+                           &lt;unamed_datatype&gt;*
+                           &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
+                           &lt;group_comment&gt;<FONT SIZE=1.7>opt</FONT>
+                           &lt;group_attribute&gt;*
+                           &lt;group_member&gt;*
+                       }
 
 &lt;datatype&gt; ::= &lt;atomic_type&gt; | &lt;compound_type&gt; | &lt;variable_length_type&gt; | &lt;array_type&gt;
 
@@ -272,10 +276,12 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;hardlink&gt; ::= HARDLINK &lt;path_name&gt; 
 
 &lt;group&gt; ::= GROUP &lt;group_name&gt; { &lt;hardlink&gt; | &lt;group_info&gt; }
+
+&lt;group_comment&gt; ::= COMMENT &lt;string_data&gt;
             
 &lt;group_name&gt; ::= &lt;identifier&gt;
 
-&lt;group_info&gt; ::= &lt;group_attribute&gt;* &lt;group_member&gt;* 
+&lt;group_info&gt; ::= &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_comment&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_attribute&gt;* &lt;group_member&gt;* 
             
 &lt;group_attribute&gt; ::= &lt;attribute&gt; 
 
@@ -404,6 +410,7 @@ GROUP "/" {
       }
    }
    GROUP "group1" {
+      COMMENT "This is a comment for group1";
       DATASET "dset3" {
          DATATYPE "/type1"
          DATASPACE SIMPLE { ( 5 ) / ( 5 ) }
@@ -519,7 +526,7 @@ GROUP "/" {
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 </address>
 
-Last modified:  11 December 2000
+Last modified:  05 January 2002
 
 <br>
 Describes HDF5 Release 1.4.2, July 2001

@@ -44,6 +44,7 @@
 #define FILE30	"tarray6.h5"
 #define FILE31	"tarray7.h5"
 #define FILE32	"tempty.h5"
+#define FILE33  "tgrp_comments.h5"
 
 #define LENSTR		50
 #define LENSTR2		11
@@ -2529,6 +2530,64 @@ static void test_empty(void)
     ret = H5Fclose(file);
 }
 
+static void test_group_comments(void)
+{
+    hid_t fid, group;
+  
+    fid = H5Fcreate(FILE33, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  
+    /* / */
+    group = H5Gcreate (fid, "/g1", 0);
+    H5Gset_comment(group, "/g1", "Comment for group /g1");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g2", 0);
+    H5Gset_comment(group, "/g2", "Comment for group /g2");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g3", 0);
+    H5Gset_comment(group, "/g3", "Comment for group /g3");
+    H5Gclose(group);
+  
+    /* /g1 */
+    group = H5Gcreate (fid, "/g1/g1.1", 0);
+    H5Gset_comment(group, "/g1/g1.1", "Comment for group /g1/g1.1");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g1/g1.2", 0);
+    H5Gset_comment(group, "/g1/g1.2", "Comment for group /g1/g1.2");
+    H5Gclose(group);
+  
+    /* /g2 */
+    group = H5Gcreate (fid, "/g2/g2.1", 0);
+    H5Gset_comment(group, "/g2/g2.1", "Comment for group /g2/g2.1");
+    H5Gclose(group);
+  
+    /* /g3 */
+    group = H5Gcreate (fid, "/g3/g3.1", 0);
+    H5Gset_comment(group, "/g3/g3.1", "Comment for group /g3/g3.1");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g3/g3.2", 0);
+    H5Gset_comment(group, "/g3/g3.2", "Comment for group /g3/g3.2");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g3/g3.3", 0);
+    H5Gset_comment(group, "/g3/g3.3", "Comment for group /g3/g3.3");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g3/g3.4", 0);
+    H5Gset_comment(group, "/g3/g3.4", "Comment for group /g3/g3.4");
+    H5Gclose(group);
+  
+    /* /g2/g2.1 */
+    group = H5Gcreate (fid, "/g2/g2.1/g2.1.1", 0);
+    H5Gset_comment(group, "/g2/g2.1/g2.1.1", "Comment for group /g2/g2.1/g2.1.1");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g2/g2.1/g2.1.2", 0);
+    H5Gset_comment(group, "/g2/g2.1/g2.1.2", "Comment for group /g2/g2.1/g2.1.2");
+    H5Gclose(group);
+    group = H5Gcreate (fid, "/g2/g2.1/g2.1.3", 0);
+    H5Gset_comment(group, "/g2/g2.1/g2.1.3", "Comment for group /g2/g2.1/g2.1.3");
+    H5Gclose(group);
+  
+    H5Fclose(fid);
+}
+
 int main(void)
 {
     test_group();
@@ -2573,6 +2632,7 @@ int main(void)
     test_array7();
 
     test_empty();
+    test_group_comments();
 
     return 0;
 }
