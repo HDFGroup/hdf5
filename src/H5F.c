@@ -4704,3 +4704,42 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_freespace() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_filesize
+ *
+ * Purpose:     Retrieves the file size of the HDF5 file. This function 
+ *              is called after an existing file is opened in order
+ *		to learn the true size of the underlying file.
+ *
+ * Return:      Success:        File size
+ *              Failure:        Negative
+ *
+ * Programmer:  David Pitt
+ *              david.pitt@bigpond.com
+ *              Apr 27, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5Fget_filesize(hid_t file_id)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    haddr_t    ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Fget_filesize, FAIL)
+    H5TRACE1("a","i",file_id);
+
+    /* Check args */
+    if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Go get the actual file size */
+    if((ret_value = H5FDget_eof(file->shared->lf))<0)
+         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_filesize() */

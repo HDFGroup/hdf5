@@ -44,6 +44,8 @@ New Features
 
     Library:
     --------
+        - A new API function H5Fget_filesize was added.  It returns the
+            actual file size of the opened file.  SLU - 2004/06/24
 	- New Feature of Data transformation is added.  AKC - 2004/05/03.
         - New exception handler for datatype conversion is put in to 
             replace the old overflow callback function.  This exception
