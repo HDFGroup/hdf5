@@ -3482,7 +3482,7 @@ test_misc20(void)
     /* Get the layout contiguous storage size */
     ret = H5D_layout_contig_size_test(did,&contig_size);
     CHECK(ret, FAIL, "H5D_layout_contig_size_test");
-    VERIFY(contig_size, MISC20_SPACE_DIM0*MISC20_SPACE_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5D_layout_contig_size_test");
+    VERIFY(contig_size, MISC20_SPACE_DIM0*MISC20_SPACE_DIM1*H5Tget_size(H5T_STD_I32LE), "H5D_layout_contig_size_test");
 
     /* Close datasset */
     ret=H5Dclose(did);
