@@ -187,9 +187,9 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///\param	user_op - IN: User's function to operate on each attribute
 ///\param	idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
 ///\param	op_data - IN: User's data to pass to user's operator function 
-///\return	<need fix>
+///\return	Returned value of the last operator if it was non-zero, or 
+///		zero if all attributes were processed
 ///\exception	H5::AttributeIException
-///\par Description
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_data )
@@ -284,28 +284,53 @@ void H5Object::flush(H5F_scope_t scope ) const
 
 //--------------------------------------------------------------------------
 // Function:	H5Object::Reference
+///\brief	Creates a reference to an Hdf5 object.
+///\param	name - IN: Name of the object to be referenced
+///\return	A reference
+///\exception	H5::ReferenceIException
+///\par Description
+//		This function passes H5R_OBJECT and -1 to the C API H5Rcreate
+//		to create a reference to the named object.  The next function
+//		will create a reference to a dataset region.
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* H5Object::Reference(const char* name) const
+{
+   void *ref;
+   herr_t ret_value = H5Rcreate(ref, id, name, H5R_OBJECT, -1);
+   if (ret_value < 0)
+   {
+      throw AttributeIException("H5Object::Reference", 
+		"H5Rcreate failed");
+   }
+   return(ref);
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::Reference
 ///\brief	Creates a reference.
 ///\param	name - IN: Name of the object to be referenced
+///\param	dataspace - IN: Dataspace with selection
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
 ///\exception	H5::ReferenceIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-void* H5Object::Reference(const char* name, H5R_type_t ref_type, DataSpace& dataspace) const
+void* H5Object::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
 {
    void *ref;
    herr_t ret_value = H5Rcreate(ref, id, name, ref_type, dataspace.getId());
    if (ret_value < 0)
    {
-      throw AttributeIException("H5Object::getNumAttrs", 
-		"H5Aget_num_attrs failed - returned negative number of attributes");
+      throw AttributeIException("H5Object::Reference", 
+		"H5Rcreate failed");
    }
    return(ref);
 }
 
 //--------------------------------------------------------------------------
 // Function:	H5Object destructor
-///\brief	Subclasses destructors will properly terminate access to 
-///		this H5 object.
+///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::~H5Object() {}
