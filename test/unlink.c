@@ -60,34 +60,6 @@ const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
- * Function:	get_file_size
- *
- * Purpose:	Get the current size of a file (in bytes)
- *
- * Return:	Success:	Size of file in bytes (could be 0)
- *		Failure:	0
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 22, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static off_t
-get_file_size(const char *filename)
-{
-    h5_stat_t	sb;
-
-    /* Get the file's statistics */
-    if (HDstat(filename, &sb)>=0)
-        return(sb.st_size);
-
-    return(0);
-} /* end get_file_size() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	test_one
  *
  * Purpose:	Creates a group that has just one entry and then unlinks that
@@ -550,6 +522,7 @@ test_filespace(void)
     int        *tmp_data;       /* Temporary pointer to dataset buffer */
     off_t       empty_size;     /* Size of an empty file */
     off_t       file_size;      /* Size of each file created */
+    herr_t	status;         /* Function status return value */
     unsigned u,v,w;             /* Local index variables */
 
     /* Metadata cache parameters */
@@ -563,7 +536,7 @@ test_filespace(void)
     double rdcc_w0;
 
 
-    puts("Testing file space gets reused");
+    puts("Testing file space gets reused:");
 
     /* Open file */
     fapl = h5_fileaccess();
@@ -590,7 +563,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of an empty file */
-    if((empty_size=get_file_size(filename))==0) TEST_ERROR;
+    if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
 /* Create common objects for datasets */
 
@@ -615,7 +588,7 @@ test_filespace(void)
     /* Create dataset creation property list for compressed, chunked storage & early allocation */
     if ((comp_dcpl=H5Pcopy(early_chunk_dcpl))<0) TEST_ERROR;
 
-    /* Make certain that space is allocated early */
+    /* Enable compression & set level */
     if(H5Pset_deflate(comp_dcpl, FILESPACE_DEFLATE_LEVEL) < 0) TEST_ERROR;
 
     /* Create dataset creation property list for compact storage */
@@ -647,7 +620,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -671,7 +644,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -695,7 +668,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -719,7 +692,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -743,7 +716,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -789,7 +762,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -813,7 +786,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -876,7 +849,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -892,7 +865,7 @@ test_filespace(void)
     /* Create datatype to commit */
     if((type = H5Tcopy (H5T_NATIVE_INT))<0) TEST_ERROR;
 
-    /* Create a single name datatype to remove */
+    /* Create a single named datatype to remove */
     if(H5Tcommit (file, TYPENAME, type)<0) TEST_ERROR;
     if(H5Tclose (type)<0) TEST_ERROR;
 
@@ -903,7 +876,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -927,7 +900,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -957,7 +930,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -986,7 +959,7 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
@@ -1066,14 +1039,166 @@ test_filespace(void)
     if(H5Fclose(file)<0) TEST_ERROR;
 
     /* Get the size of the file */
-    if((file_size=get_file_size(filename))==0) TEST_ERROR;
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
     /* Verify the file is correct size */
     if(file_size!=empty_size) TEST_ERROR;
 
     PASSED();
 
-    /* Cleanup common objects */
+/* Create dataset and duplicate dataset, remove original & verify file size */
+    TESTING("    duplicate dataset");
+
+    /* Create file */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create a single dataset to remove */
+    if((dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT))<0) TEST_ERROR;
+    if(H5Dclose (dataset)<0) TEST_ERROR;
+
+    /* Create another dataset with same name */
+    H5E_BEGIN_TRY {
+        dataset=H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if (dataset>=0) {
+        H5Dclose(dataset);
+        TEST_ERROR;
+    } /* end if */
+
+    /* Remove the dataset */
+    if(H5Gunlink (file, DATASETNAME)<0) TEST_ERROR;
+
+    /* Close file */
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+/* Create group and duplicate group, remove original & verify file size */
+    TESTING("    duplicate group");
+
+    /* Create file */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create a single group to remove */
+    if((group = H5Gcreate (file, GROUPNAME, 0))<0) TEST_ERROR;
+    if(H5Gclose (group)<0) TEST_ERROR;
+
+    /* Create another group with same name */
+    H5E_BEGIN_TRY {
+        group = H5Gcreate (file, GROUPNAME, 0);
+    } H5E_END_TRY;
+    if (group>=0) {
+        H5Gclose(group);
+        TEST_ERROR;
+    } /* end if */
+
+    /* Remove the group */
+    if(H5Gunlink (file, GROUPNAME)<0) TEST_ERROR;
+
+    /* Close file */
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+/* Create named datatype and duplicate named datatype, remove original & verify file size */
+    TESTING("    duplicate named datatype");
+
+    /* Create file */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create datatype to commit */
+    if((type = H5Tcopy (H5T_NATIVE_INT))<0) TEST_ERROR;
+
+    /* Create a single named datatype to remove */
+    if(H5Tcommit (file, TYPENAME, type)<0) TEST_ERROR;
+    if(H5Tclose (type)<0) TEST_ERROR;
+
+    /* Create datatype to commit */
+    if((type = H5Tcopy (H5T_NATIVE_INT))<0) TEST_ERROR;
+
+    /* Create another named datatype with same name */
+    H5E_BEGIN_TRY {
+        status = H5Tcommit (file, TYPENAME, type);
+    } H5E_END_TRY;
+    if (status>=0) TEST_ERROR;
+    if(H5Tclose (type)<0) TEST_ERROR;
+
+    /* Remove the named datatype */
+    if(H5Gunlink (file, TYPENAME)<0) TEST_ERROR;
+
+    /* Close file */
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+/* Create named datatype and duplicate named datatype, remove original & verify file size */
+    TESTING("    duplicate attribute");
+
+    /* Create file */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create datasets to remove */
+    if((dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, space, contig_dcpl))<0) TEST_ERROR;
+
+    /* Create a dataspace for the attributes */
+    if((attr_space = H5Screate_simple(FILESPACE_ATTR_NDIMS, attr_dims, NULL))<0) TEST_ERROR;
+
+    /* Create an attribute on the dataset */
+    if((attr = H5Acreate (dataset, ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Don't worry about writing the attribute - it will have a fill value */
+
+    /* Close the attribute on the dataset */
+    if(H5Aclose (attr)<0) TEST_ERROR;
+
+    /* Create another attribute with same name */
+    H5E_BEGIN_TRY {
+        attr = H5Acreate (dataset, ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if (attr>=0) {
+        H5Aclose(attr);
+        TEST_ERROR;
+    } /* end if */
+
+    /* Close the dataspace for the attributes */
+    if(H5Sclose (attr_space)<0) TEST_ERROR;
+
+    /* Close dataset */
+    if(H5Dclose (dataset)<0) TEST_ERROR;
+
+    /* Remove the dataset */
+    if(H5Gunlink (file, DATASETNAME)<0) TEST_ERROR;
+
+    /* Close file */
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+/* Cleanup common objects */
 
     /* Release dataset buffer */
     HDfree(data);
