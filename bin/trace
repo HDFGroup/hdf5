@@ -119,7 +119,7 @@ sub argstring ($$$) {
     --$ptr;
     $tstr = $TypeString{"$atype*"};
   } elsif (!exists $TypeString{$atype}) {
-    errmesg $file, $func, "unknown type \`$atype", '*'x$ptr, "\'";
+    errmesg $file, $func, "untraceable type \`$atype", '*'x$ptr, "\'";
   } else {
     $tstr = $TypeString{$atype};
   }
