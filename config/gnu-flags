@@ -115,6 +115,11 @@ esac
 # Host-specific flags
 case "`hostname`" in
     sleipnir.ncsa.uiuc.edu)
+#        case "$cc_vendor-$cc_version" in
+#            gcc-3.2*)
+#                ARCH="`echo $ARCH | sed -e 's/i686/athlon-mp/g'`"
+#            ;;
+#        esac
         ARCH="$ARCH -pipe"
         ;;
 esac
@@ -174,6 +179,25 @@ case "$cc_vendor-$cc_version" in
     gcc-2.95*)
         # Append some extra warning flags that only gcc2.95+ know about
 	CFLAGS="$CFLAGS -Wno-long-long"
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-3.2*)
+        # Replace -ansi flag with -std=c99 flag
+	CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
+
+        # Append warning flags from gcc-2.95.* case
+	CFLAGS="$CFLAGS -Wno-long-long"
+
+        # Append warning flags from gcc-3* case
+	CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+
+        # Append more extra warning flags that only gcc3.2+ know about
+	CFLAGS="$CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wcomments"
+        # The "unreachable code" warning does not appear to be reliable yet...
+	#CFLAGS="$CFLAGS -Wunreachable-code"
 
 	# Flags are set
 	cc_flags_set=yes
