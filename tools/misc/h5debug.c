@@ -27,6 +27,7 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
+#define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"
@@ -69,10 +70,9 @@ main(int argc, char *argv[])
 {
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
-    haddr_t     addr=0, extra=0;
+    haddr_t     addr=0, extra=0, extra2=0;
     uint8_t     sig[16];
     int         i;
-    unsigned    ndims;
     herr_t      status = SUCCEED;
 
     if (argc == 1) {
@@ -120,6 +120,9 @@ main(int argc, char *argv[])
     if (argc > 3) {
         extra = HDstrtoll(argv[3], NULL, 0);
     }
+    if (argc > 4) {
+        extra2 = HDstrtoll(argv[4], NULL, 0);
+    }
     /*
      * Read the signature at the specified file position.
      */
@@ -159,6 +162,7 @@ main(int argc, char *argv[])
          * after the B-tree signature.
          */
         H5B_subid_t subtype = (H5B_subid_t)sig[H5B_SIZEOF_MAGIC];
+        unsigned    ndims;
 	
         switch (subtype) {
         case H5B_SNODE_ID:
@@ -184,6 +188,8 @@ main(int argc, char *argv[])
         H5B2_subid_t subtype = (H5B_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
 	
 #ifdef NOT_YET
+        unsigned    ndims;
+
         switch (subtype) {
             case H5B_SNODE_ID:
                 status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
@@ -199,10 +205,72 @@ main(int argc, char *argv[])
                 HDexit(4);
         }
 #else /* NOT_YET */
-H5B2_class_t type={0,sizeof(hsize_t),NULL,NULL,NULL};            /* B-tree class information */
-
 fprintf(stderr,"B-tree subtype=%u\n",(unsigned)subtype);
-        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, &type);
+        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST);
+#endif /* NOT_YET */
+
+    } else if (!HDmemcmp(sig, H5B2_INT_MAGIC, H5B2_SIZEOF_MAGIC)) {
+        /*
+         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
+         * subclass.  The subclass identifier is two bytes after the
+         * B-tree signature.
+         */
+        H5B2_subid_t subtype = (H5B_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+        unsigned nrecs;
+	
+#ifdef NOT_YET
+        unsigned    ndims;
+
+        switch (subtype) {
+            case H5B_SNODE_ID:
+                status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+                break;
+
+            case H5B_ISTORE_ID:
+                ndims = (unsigned)extra;
+                status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
+                break;
+
+            default:
+                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDexit(4);
+        }
+#else /* NOT_YET */
+fprintf(stderr,"B-tree subtype=%u\n",(unsigned)subtype);
+        nrecs = (unsigned)extra2;
+        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, nrecs);
+#endif /* NOT_YET */
+
+    } else if (!HDmemcmp(sig, H5B2_LEAF_MAGIC, H5B2_SIZEOF_MAGIC)) {
+        /*
+         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
+         * subclass.  The subclass identifier is two bytes after the
+         * B-tree signature.
+         */
+        H5B2_subid_t subtype = (H5B_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+        unsigned nrecs;
+	
+#ifdef NOT_YET
+        unsigned    ndims;
+
+        switch (subtype) {
+            case H5B_SNODE_ID:
+                status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+                break;
+
+            case H5B_ISTORE_ID:
+                ndims = (unsigned)extra;
+                status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
+                break;
+
+            default:
+                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDexit(4);
+        }
+#else /* NOT_YET */
+fprintf(stderr,"B-tree subtype=%u\n",(unsigned)subtype);
+        nrecs = (unsigned)extra2;
+        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, nrecs);
 #endif /* NOT_YET */
 
     } else if (sig[0] == H5O_VERSION) {

@@ -39,7 +39,8 @@ MOSTLYCLEANFILES=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
 DISTCLEAN=libhdf5.settings
 
 # library sources
-libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c H5C.c \
+libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
+        H5B2test.c H5C.c \
         H5D.c \
         H5Dcontig.c \
         H5Dcompact.c \

@@ -65,6 +65,11 @@
     2 + /* Merge % of full (as integer, ie. "98" means 98%) */                \
     H5B2_NODE_POINTER_SIZE(f))  /* Node pointer to root node in tree */
 
+/* Macro to retrieve pointer to i'th native key for leaf node */
+#define H5B2_INT_NREC(i,shared,idx)  ((i)->int_native+(shared)->nat_off[(idx)])
+#define H5B2_LEAF_NREC(l,shared,idx)  ((l)->leaf_native+(shared)->nat_off[(idx)])
+
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -160,6 +165,11 @@ H5FL_EXTERN(H5B2_internal_t);
 /* Declare a free list to manage the H5B2_leaf_t struct */
 H5FL_EXTERN(H5B2_leaf_t);
 
+/* Internal v2 B-tree testing class */
+#ifdef H5B2_TESTING
+H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
+#endif /* H5B2_TESTING */
+
 
 /******************************/
 /* Package Private Prototypes */
@@ -172,6 +182,12 @@ H5_DLL herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *l);
 H5_DLL herr_t H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *i);
 H5_DLL herr_t H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type);
+H5_DLL herr_t H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth, const H5B2_class_t *type,
+    haddr_t hdr_addr, unsigned nrec);
+H5_DLL herr_t H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth, const H5B2_class_t *type,
+    haddr_t hdr_addr, unsigned nrec);
 
 #endif /* _H5B2pkg_H */
 

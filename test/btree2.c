@@ -19,8 +19,10 @@
 
 /*
  * This file needs to access private datatypes from the H5B2 package.
+ * This file also needs to access the v2 B-tree testing code.
  */
 #define H5B2_PACKAGE
+#define H5B2_TESTING
 #include "H5B2pkg.h"
 
 /* Other private headers that this test requires */
@@ -32,125 +34,6 @@ const char *FILENAME[] = {
 };
 
 #define INSERT_SPLIT_ROOT_NREC    80
-
-
-/*-------------------------------------------------------------------------
- * Function:	store
- *
- * Purpose:	Store native information into record for B-tree
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, February  3, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-store(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *udata, void *nrecord)
-{
-    *(hsize_t *)nrecord=*(const hsize_t *)udata;
-
-#ifdef QAK
-HDfprintf(stderr,"store: udata=%Hu\n",*(const hsize_t *)udata);
-#endif /* QAK */
-    return(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	compare
- *
- * Purpose:	Compare two native information records, according to some key
- *
- * Return:	<0 if rec1 < rec2
- *              =0 if rec1 == rec2
- *              >0 if rec1 > rec2
- *
- * Programmer:	Quincey Koziol
- *              Thursday, February  3, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-compare(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *rec1, const void *rec2)
-{
-#ifdef QAK
-HDfprintf(stderr,"compare: *rec1=%Hu, *rec2=%Hu\n",*(const hsize_t *)rec1,*(const hsize_t *)rec2);
-#endif /* QAK */
-    return(*(const hssize_t *)rec1-*(const hssize_t *)rec2);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	encode
- *
- * Purpose:	Encode native information into raw form for storing on disk
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, February  3, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-encode(const H5F_t *f, uint8_t *raw, const void *nrecord)
-{
-    H5F_ENCODE_LENGTH(f, raw, *(const hsize_t *)nrecord);
-
-#ifdef QAK
-HDfprintf(stderr,"encode: data=%Hu\n",*(const hsize_t *)nrecord);
-#endif /* QAK */
-    return(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	decode
- *
- * Purpose:	Decode raw disk form of record into native form
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, February  4, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-decode(const H5F_t *f, const uint8_t *raw, void *nrecord)
-{
-    H5F_DECODE_LENGTH(f, raw, *(hsize_t *)nrecord);
-
-#ifdef QAK
-HDfprintf(stderr,"encode: data=%Hu\n",*(const hsize_t *)nrecord);
-#endif /* QAK */
-    return(SUCCEED);
-}
-
-H5B2_class_t type={                 /* B-tree class information */
-    0,                              /* Type of B-tree */
-    sizeof(hsize_t),                /* Size of native key */
-    store,                          /* Record storage callback */
-    compare,                        /* Record comparison callback */
-    encode,                         /* Record encoding callback */
-    decode                          /* Record decoding callback */
-};
 
 
 /*-------------------------------------------------------------------------
@@ -193,7 +76,7 @@ test_insert_basic(hid_t fapl)
      * Test v2 B-tree creation
      */
     TESTING("B-tree creation");
-    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &type, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -205,7 +88,7 @@ test_insert_basic(hid_t fapl)
      */
     TESTING("B-tree insert");
     record=42;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, &type, bt2_addr, &record)<0) {
+    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -215,7 +98,7 @@ test_insert_basic(hid_t fapl)
      * Test inserting second record into v2 B-tree, before all other records
      */
     record=34;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, &type, bt2_addr, &record)<0) {
+    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -225,7 +108,7 @@ test_insert_basic(hid_t fapl)
      * Test inserting third record into v2 B-tree, after all other records
      */
     record=56;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, &type, bt2_addr, &record)<0) {
+    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -235,7 +118,7 @@ test_insert_basic(hid_t fapl)
      * Test inserting fourth record into v2 B-tree, in the middle of other records
      */
     record=38;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, &type, bt2_addr, &record)<0) {
+    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -297,7 +180,7 @@ test_insert_split_root(hid_t fapl)
     /*
      * Test v2 B-tree creation
      */
-    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &type, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -310,20 +193,20 @@ test_insert_split_root(hid_t fapl)
 
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
         record=u+10;
-        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, &type, bt2_addr, &record)<0) {
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         }
     }
     record=0;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, &type, bt2_addr, &record)<0) {
+    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
     }
     record=1;
-    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, &type, bt2_addr, &record)<0) {
+    if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;

@@ -780,6 +780,7 @@
 ./src/H5B2pkg.h
 ./src/H5B2private.h
 ./src/H5B2public.h
+./src/H5B2test.c
 ./src/H5C.c
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h

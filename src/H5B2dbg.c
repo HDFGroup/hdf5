@@ -79,12 +79,14 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      ((shared->type->id)==H5B2_GRP_NAME_ID ? "H5B2_GRP_NAME_ID" : "Unknown!"));
+	      ((shared->type->id)==H5B2_TEST_ID ? "H5B2_TEST_ID" :
+	      ((shared->type->id)==H5B2_GRP_NAME_ID ? "H5B2_GRP_NAME_ID" :
+              "Unknown!")));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->node_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Size of raw (disk) key:",
+	      "Size of raw (disk) record:",
 	      shared->rkey_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
@@ -129,6 +131,214 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 done:
     if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_int_debug
+ *
+ * Purpose:	Prints debugging info about a B-tree internal node
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb  4 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
+    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec)
+{
+    H5B2_t	*bt2 = NULL;
+    H5B2_internal_t	*internal = NULL;
+    H5B2_shared_t 	*shared;        /* Shared B-tree information */
+    unsigned		u;              /* Local index variable */
+    char                temp_str[128];  /* Temporary string, for formatting */
+    herr_t      ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B2_int_debug, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    assert(f);
+    assert(H5F_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+
+    /*
+     * Load the B-tree header.
+     */
+    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
+
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2->shared);
+    assert(shared);
+
+    /*
+     * Load the B-tree internal node
+     */
+    if (NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, &nrec, bt2->shared, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
+
+    /* Release the B-tree header */
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
+    bt2 = NULL;
+
+    /*
+     * Print the values.
+     */
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "Tree type ID:",
+	      ((shared->type->id)==H5B2_TEST_ID ? "H5B2_TEST_ID" :
+	      ((shared->type->id)==H5B2_GRP_NAME_ID ? "H5B2_GRP_NAME_ID" :
+              "Unknown!")));
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Size of node:",
+	      shared->node_size);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Size of raw (disk) record:",
+	      shared->rkey_size);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "Dirty flag:",
+	      internal->cache_info.is_dirty ? "True" : "False");
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Number of records in node:",
+	      internal->nrec);
+
+    /* Print all node pointers and records */
+    for(u=0; u<internal->nrec; u++) {
+        /* Print node pointer */
+        sprintf(temp_str,"Node pointer #%u: (all/node/addr)",u);
+        HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3),
+                  temp_str,
+                  internal->node_ptrs[u].all_nrec,
+                  internal->node_ptrs[u].node_nrec,
+                  internal->node_ptrs[u].addr);
+
+        /* Print record */
+        sprintf(temp_str,"Record #%u:",u);
+        HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
+                  temp_str);
+        assert(H5B2_INT_NREC(internal,shared,u));
+        (void)(type->debug)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
+            H5B2_INT_NREC(internal,shared,u), NULL);
+    } /* end for */
+
+    /* Print final node pointer */
+    sprintf(temp_str,"Node pointer #%u: (all/node/addr)",u);
+    HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3),
+              temp_str,
+              internal->node_ptrs[u].all_nrec,
+              internal->node_ptrs[u].node_nrec,
+              internal->node_ptrs[u].addr);
+
+done:
+    if (internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, addr, internal, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_leaf_debug
+ *
+ * Purpose:	Prints debugging info about a B-tree leaf node
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb  7 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
+    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec)
+{
+    H5B2_t	*bt2 = NULL;
+    H5B2_leaf_t	*leaf = NULL;
+    H5B2_shared_t 	*shared;        /* Shared B-tree information */
+    unsigned		u;              /* Local index variable */
+    char                temp_str[128];  /* Temporary string, for formatting */
+    herr_t      ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B2_leaf_debug, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    assert(f);
+    assert(H5F_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+
+    /*
+     * Load the B-tree header.
+     */
+    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
+
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2->shared);
+    assert(shared);
+
+    /*
+     * Load the B-tree leaf node
+     */
+    if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, bt2->shared, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
+
+    /* Release the B-tree header */
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
+    bt2 = NULL;
+
+    /*
+     * Print the values.
+     */
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "Tree type ID:",
+	      ((shared->type->id)==H5B2_TEST_ID ? "H5B2_TEST_ID" :
+	      ((shared->type->id)==H5B2_GRP_NAME_ID ? "H5B2_GRP_NAME_ID" :
+              "Unknown!")));
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Size of node:",
+	      shared->node_size);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Size of raw (disk) record:",
+	      shared->rkey_size);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "Dirty flag:",
+	      leaf->cache_info.is_dirty ? "True" : "False");
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Number of records in node:",
+	      leaf->nrec);
+
+    /* Print all node pointers and records */
+    for(u=0; u<leaf->nrec; u++) {
+        /* Print record */
+        sprintf(temp_str,"Record #%u:",u);
+        HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
+                  temp_str);
+        assert(H5B2_LEAF_NREC(leaf,shared,u));
+        (void)(type->debug)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
+            H5B2_LEAF_NREC(leaf,shared,u), NULL);
+    } /* end for */
+
+done:
+    if (leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

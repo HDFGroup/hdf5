@@ -49,12 +49,9 @@
 /****************************/
 
 /* B-tree IDs for various internal things. */
-/* Not really a "public" symbol, but that should be OK -QAK */
-/* Note - if more of these are added, any 'K' values (for internal or leaf
- * nodes) they use will need to be stored in the file somewhere. -QAK
- */
 typedef enum H5B2_subid_t {
-    H5B2_GRP_NAME_ID	 = 0,	/* B-tree is for group links, ordered by name	*/
+    H5B2_TEST_ID	 = 0,	/* B-tree is for testing (do not use for actual data) */
+    H5B2_GRP_NAME_ID,		/* B-tree is for group links, ordered by name	*/
     H5B2_NUM_BTREE_ID           /* Number of B-tree key IDs (must be last)   */
 } H5B2_subid_t;
 
@@ -77,6 +74,8 @@ typedef struct H5B2_class_t {
     herr_t (*decode)(const H5F_t *f, const uint8_t *raw, void *record);  /*  Decode record from disk storage form to native form */
 
     /* Debug record values */
+    herr_t (*debug) (FILE *stream, const H5F_t *f, hid_t dxpl_id,       /* Print a record for debugging */
+        int indent, int fwidth, const void *record, const void *udata);
 
 } H5B2_class_t;
 

@@ -14,16 +14,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5B2.c
+ * Created:		H5B2cache.c
  *			Jan 31 2005
  *			Quincey Koziol <koziol@ncsa.uiuc.edu>
  *
- * Purpose:		Implements a B-tree, with several modifications from
- *                      the "standard" methods.
- *
- *                      Please see the documentation in:
- *                      doc/html/TechNotes/Btrees.html for a full description
- *                      of how they work, etc.
+ * Purpose:		Implement v2 B-tree metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */
@@ -52,11 +47,11 @@ static H5B2_t *H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const 
 static herr_t H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_t *b);
 static herr_t H5B2_cache_hdr_clear(H5F_t *f, H5B2_t *b, hbool_t destroy);
 static herr_t H5B2_cache_hdr_size(const H5F_t *f, const H5B2_t *bt, size_t *size_ptr);
-static H5B2_leaf_t *H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
+static H5B2_leaf_t *H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_shared);
 static herr_t H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l);
 static herr_t H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
 static herr_t H5B2_cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t *size_ptr);
-static H5B2_internal_t *H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
+static H5B2_internal_t *H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_shared);
 static herr_t H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i);
 static herr_t H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *i, hbool_t destroy);
 static herr_t H5B2_cache_internal_size(const H5F_t *f, const H5B2_internal_t *i, size_t *size_ptr);
@@ -407,12 +402,12 @@ H5B2_cache_hdr_size(const H5F_t *f, const H5B2_t UNUSED *bt2, size_t *size_ptr)
  *-------------------------------------------------------------------------
  */
 static H5B2_leaf_t *
-H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_bt2, void *_node_ptr)
+H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_bt2_shared)
 {
-    const H5B2_t	*bt2 = (const H5B2_t *)_bt2;
-    H5B2_node_ptr_t     *node_ptr = (H5B2_node_ptr_t *)_node_ptr;
-    H5B2_leaf_t		*leaf = NULL;
+    const unsigned      *nrec = (const unsigned *)_nrec;
+    H5RC_t 		*bt2_shared=(H5RC_t *)_bt2_shared;        /* Shared B-tree information */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
+    H5B2_leaf_t		*leaf = NULL;
     uint8_t		*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
     unsigned		u;              /* Local index variable */
@@ -423,14 +418,14 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_bt2, vo
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(bt2);
+    HDassert(bt2_shared);
 
     if (NULL==(leaf = H5FL_MALLOC(H5B2_leaf_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&leaf->cache_info,0,sizeof(H5AC_info_t));
 
     /* Share common B-tree information */
-    leaf->shared = bt2->shared;
+    leaf->shared = bt2_shared;
     H5RC_INC(leaf->shared);
 
     /* Get the pointer to the shared B-tree info */
@@ -461,7 +456,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_bt2, vo
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree leaf native keys")
 
     /* Set the number of records in the leaf */
-    leaf->nrec = node_ptr->node_nrec;
+    leaf->nrec = *nrec;
 
     /* Deserialize records for leaf node */
     native=leaf->leaf_native;
@@ -695,12 +690,12 @@ H5B2_cache_leaf_size(const H5F_t UNUSED *f, const H5B2_leaf_t *leaf, size_t *siz
  *-------------------------------------------------------------------------
  */
 static H5B2_internal_t *
-H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_bt2, void *_node_ptr)
+H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_bt2_shared)
 {
-    const H5B2_t	*bt2 = (const H5B2_t *)_bt2;
-    H5B2_node_ptr_t     *node_ptr = (H5B2_node_ptr_t *)_node_ptr;
-    H5B2_internal_t	*internal = NULL;
+    const unsigned      *nrec = (const unsigned *)_nrec;
+    H5RC_t 		*bt2_shared = (H5RC_t *)_bt2_shared;       /* Ref counter for shared B-tree info */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
+    H5B2_internal_t	*internal = NULL;
     uint8_t		*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
@@ -712,14 +707,14 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_bt2
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(bt2);
+    HDassert(bt2_shared);
 
     if (NULL==(internal = H5FL_MALLOC(H5B2_internal_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&internal->cache_info,0,sizeof(H5AC_info_t));
 
     /* Share common B-tree information */
-    internal->shared = bt2->shared;
+    internal->shared = bt2_shared;
     H5RC_INC(internal->shared);
 
     /* Get the pointer to the shared B-tree info */
@@ -754,7 +749,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_bt2
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree internal node pointers")
 
     /* Set the number of records in the leaf */
-    internal->nrec = node_ptr->node_nrec;
+    internal->nrec = *nrec;
 
     /* Deserialize records for internal node */
     native=internal->int_native;
@@ -768,7 +763,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_bt2
         native += shared->type->nkey_size;
     } /* end for */
 
-    /* Serialize node pointers for internal node */
+    /* Deserialize node pointers for internal node */
     int_node_ptr=internal->node_ptrs;
     for(u=0; u<internal->nrec+1; u++) {
         /* Decode node pointer */

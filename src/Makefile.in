@@ -219,7 +219,8 @@ MOSTLYCLEANFILES = H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.
 DISTCLEAN = libhdf5.settings
 
 # library sources
-libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c H5C.c \
+libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
+        H5B2test.c H5C.c \
         H5D.c \
         H5Dcontig.c \
         H5Dcompact.c \
@@ -290,11 +291,11 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_la_LDFLAGS =
 libhdf5_la_LIBADD =
 am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo H5B2cache.lo \
-	H5B2dbg.lo H5C.lo H5D.lo H5Dcontig.lo H5Dcompact.lo H5Defl.lo \
-	H5Dio.lo H5Distore.lo H5Dmpio.lo H5Dselect.lo H5Dtest.lo H5E.lo \
-	H5F.lo H5Fdbg.lo H5FD.lo H5FDcore.lo H5FDfamily.lo \
-	H5FDfphdf5.lo H5FDgass.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
-	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDsrb.lo \
+	H5B2dbg.lo H5B2test.lo H5C.lo H5D.lo H5Dcontig.lo H5Dcompact.lo \
+	H5Defl.lo H5Dio.lo H5Distore.lo H5Dmpio.lo H5Dselect.lo \
+	H5Dtest.lo H5E.lo H5F.lo H5Fdbg.lo H5FD.lo H5FDcore.lo \
+	H5FDfamily.lo H5FDfphdf5.lo H5FDgass.lo H5FDlog.lo H5FDmpi.lo \
+	H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDsrb.lo \
 	H5FDstdio.lo H5FDstream.lo H5FL.lo H5FO.lo H5FP.lo \
 	H5FPclient.lo H5FPserver.lo H5FS.lo H5G.lo H5Gent.lo H5Gnode.lo \
 	H5Gstab.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo \
@@ -329,8 +330,9 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/H5.Plo ./$(DEPDIR)/H5A.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5AC.Plo ./$(DEPDIR)/H5B.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5B2.Plo ./$(DEPDIR)/H5B2cache.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5B2dbg.Plo ./$(DEPDIR)/H5C.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5D.Plo ./$(DEPDIR)/H5Dcompact.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5B2dbg.Plo ./$(DEPDIR)/H5B2test.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5C.Plo ./$(DEPDIR)/H5D.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5Dcompact.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Dcontig.Plo ./$(DEPDIR)/H5Defl.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Dio.Plo ./$(DEPDIR)/H5Distore.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Dmpio.Plo ./$(DEPDIR)/H5Dselect.Plo \
@@ -487,6 +489,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2dbg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5C.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5D.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dcompact.Plo@am__quote@
