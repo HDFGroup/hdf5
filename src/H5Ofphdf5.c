@@ -169,6 +169,15 @@ H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     /* jump past the dataset name part */
     p += H5O_NAME[0].raw_size(f, fmeta->dset);
 
+    /* decode the external file layout for the dataset */
+    fmeta->efl = H5O_EFL[0].decode(f, p, NULL);
+
+    if (!fmeta->efl)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* jump past the dataset name part */
+    p += H5O_EFL[0].raw_size(f, fmeta->efl);
+
     /* decode the property list last */
     fmeta->plist = H5O_PLIST[0].decode(f, p, NULL);
 
@@ -192,6 +201,15 @@ done:
 
         if (H5O_LAYOUT[0].free)
             H5O_LAYOUT[0].free(fmeta->layout);
+
+        if (H5O_NAME[0].free)
+            H5O_NAME[0].free(fmeta->group);
+
+        if (H5O_NAME[0].free)
+            H5O_NAME[0].free(fmeta->dset);
+
+        if (H5O_EFL[0].free)
+            H5O_EFL[0].free(fmeta->efl);
 
         if (H5O_PLIST[0].free)
             H5O_PLIST[0].free(fmeta->plist);
@@ -292,6 +310,15 @@ H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *mesg)
     /* jump past the dataset name part */
     p += H5O_NAME[0].raw_size(f, fmeta->dset);
 
+    /* encode the external file layout stuff next */
+    ret_value = H5O_EFL[0].encode(f, p, fmeta->efl);
+
+    if (ret_value < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* jump past the external file layout part */
+    p += H5O_EFL[0].raw_size(f, fmeta->efl);
+
     /* decode the property list last */
     ret_value = H5O_PLIST[0].encode(f, p, fmeta->plist);
 
@@ -340,6 +367,7 @@ H5O_fphdf5_copy(const void *mesg, void *dest)
     H5O_LAYOUT[0].copy(src->layout, dst->layout);
     H5O_NAME[0].copy(src->group, dst->group);
     H5O_NAME[0].copy(src->dset, dst->dset);
+    H5O_EFL[0].copy(src->efl, dst->efl);
 
     if (H5O_PLIST[0].copy)
         H5O_PLIST[0].copy(src->plist, dst->plist);
@@ -386,6 +414,7 @@ H5O_fphdf5_size(H5F_t *f, const void *mesg)
     ret_value += H5O_LAYOUT[0].raw_size(f, fmeta->layout);
     ret_value += H5O_NAME[0].raw_size(f, fmeta->group);
     ret_value += H5O_NAME[0].raw_size(f, fmeta->dset);
+    ret_value += H5O_EFL[0].raw_size(f, fmeta->efl);
     ret_value += H5O_PLIST[0].raw_size(f, fmeta->plist);
 
 done:
@@ -435,6 +464,9 @@ H5O_fphdf5_reset(void *mesg)
     if (H5O_NAME[0].reset)
         ret_value = H5O_NAME[0].reset(fmeta->dset);
 
+    if (H5O_EFL[0].reset)
+        ret_value = H5O_EFL[0].reset(fmeta->efl);
+
     if (H5O_PLIST[0].reset)
         ret_value = H5O_PLIST[0].reset(fmeta->plist);
 
@@ -479,6 +511,9 @@ H5O_fphdf5_free(void *mesg)
 
     if (H5O_NAME[0].free)
         ret_value = H5O_NAME[0].free(fmeta->dset);
+
+    if (H5O_EFL[0].free)
+        ret_value = H5O_EFL[0].free(fmeta->efl);
 
     if (H5O_PLIST[0].free)
         ret_value = H5O_PLIST[0].free(fmeta->plist);
@@ -536,6 +571,7 @@ H5O_fphdf5_debug(H5F_t UNUSED *f, const void *mesg,
     ret_value = H5O_LAYOUT[0].debug(f, fmeta->layout, stream, indent + 1, fwidth);
     ret_value = H5O_NAME[0].debug(f, fmeta->group, stream, indent + 1, fwidth);
     ret_value = H5O_NAME[0].debug(f, fmeta->dset, stream, indent + 1, fwidth);
+    ret_value = H5O_EFL[0].debug(f, fmeta->efl, stream, indent + 1, fwidth);
     ret_value = H5O_PLIST[0].debug(f, fmeta->plist, stream, indent + 1, fwidth);
 
     HDfprintf(stream, "}\n");
