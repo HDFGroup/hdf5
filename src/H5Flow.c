@@ -481,10 +481,7 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 {
     htri_t		ret_value;
     struct stat		sb;
-#ifdef WIN32
-    int			fid;
-#endif
-
+	
     FUNC_ENTER(H5F_low_size, FAIL);
     assert(type);
 
@@ -493,20 +490,52 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
     } else {
 	ret_value = (0 == HDaccess(name, mode) ? TRUE : FALSE);
 	if (key) {
+
 #ifdef WIN32
-	    /*
-	     * This extra block is needed because windows sets the st_dev
-	     * member of sb to be 0 if it is a file which makes the comparison
-	     * below wrong
-	     */
-	    fid=open(name,mode|_O_BINARY);
-	    HDfstat(fid,&sb);
-	    close(fid);
+
+/*
+	some windows specific types. the LPSTR is just a char*  
+*/
+		LPSTR pathbuf = NULL; 
+		LPSTR *namebuf = NULL; 
+		int bufsize = 0;
+
+
+		/*
+			gets the full path of the file name.  the if statement below is to try
+			to distinguish if we have the ablosute path already
+		*/
+
+		if ((*(name+1) != ':') && (*(name+2)!= '\\')){ 
+			/*
+				if the size of the buffer is too small it will return
+				the appropriate size of the buffer not including the null
+            */
+			bufsize = GetFullPathName(name,bufsize,pathbuf,namebuf);
+			if (bufsize != 0){
+				pathbuf = malloc(sizeof(char) * (bufsize + 1));
+				namebuf = malloc(sizeof(char) * (bufsize + 1));
+				bufsize++;
+				GetFullPathName(name,bufsize,pathbuf,namebuf); 
+			}
+			else {
+				pathbuf = NULL;
+			}
+		}
+		else {
+			pathbuf = malloc(strlen(name));
+			strcpy(pathbuf,name);
+		}
+
+		key->path = pathbuf;
+		key->dev = 0;
+		key->ino = 0;
 #else
 	    HDstat(name, &sb);
-#endif
+		key->path = NULL;
 	    key->dev = sb.st_dev;
 	    key->ino = sb.st_ino;
+#endif
 	}
     }
 

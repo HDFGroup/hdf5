@@ -98,6 +98,45 @@ H5F_sec2_open(const char *name, const H5F_access_t __unused__ *access_parms,
     lf->eof.offset = sb.st_size;
 
     if (key) {
+#if WIN32
+/*
+	some windows specific types. the LPSTR is just a char*  
+*/
+		LPSTR pathbuf = NULL; 
+		LPSTR *namebuf = NULL; 
+		int bufsize = 0;
+
+
+		/*
+			gets the full path of the file name.  the if statement below is to try
+			to distinguish if we have the ablosute path already
+		*/
+
+		if ((*(name+1) != ':') && (*(name+2)!= '\\')){ 
+			/*
+				if the size of the buffer is too small it will return
+				the appropriate size of the buffer not including the null
+            */
+			bufsize = GetFullPathName(name,bufsize,pathbuf,namebuf);
+			if (bufsize != 0){
+				pathbuf = malloc(sizeof(char) * (bufsize + 1));
+				namebuf = malloc(sizeof(char) * (bufsize + 1));
+				bufsize++;
+				GetFullPathName(name,bufsize,pathbuf,namebuf); 
+			}
+			else {
+				pathbuf = NULL;
+			}
+		}
+		else {
+			pathbuf = malloc(strlen(name));
+			strcpy(pathbuf,name);
+		}
+
+		key->path = pathbuf;
+#else
+	key->path = NULL;
+#endif
 	key->dev = sb.st_dev;
 	key->ino = sb.st_ino;
     }
