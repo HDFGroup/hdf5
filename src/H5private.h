@@ -430,8 +430,14 @@
 #   define SIZET_MAX	((hsize_t)(size_t)(ssize_t)(-1))
 #   define SSIZET_MAX	((hsize_t)(ssize_t)((size_t)1<<(8*sizeof(ssize_t)-1)))
 #endif
-#define HSIZET_MAX	((hsize_t)(hssize_t)(-1))
-#define HSSIZET_MAX	((hsize_t)1<<(8*sizeof(hssize_t)-1))
+#ifdef H5_HAVE_LARGE_HSIZET
+#define	HSIZET_MAX	0xffffffffffffffffULL
+#define	HSSIZET_MAX	0x7fffffffffffffffLL
+#else /* H5_HAVE_LARGE_HSIZET */
+#define HSIZET_MAX	SIZET_MAX
+#define HSSIZET_MAX	SSIZET_MAX
+#endif /* H5_HAVE_LARGE_HSIZET */
+#define HSSIZET_MIN	((-HSSIZET_MAX)-1)
 
 /*
  * Some compilers have problems declaring auto variables that point
