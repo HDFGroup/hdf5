@@ -655,7 +655,7 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* write raw data */
     if (H5D_write(dataset, mem_type, mem_space, file_space, xfer_parms,
 		  buf) < 0) {
-	HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't write data");
+	HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -1162,6 +1162,42 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (!mem_space) mem_space = file_space;
     nelmts = H5S_get_npoints(mem_space);
 
+#ifdef HAVE_PARALLEL
+    /*
+     * Check if collective data transfer requested.
+     */
+    if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
+	/* verify that the file can support collective access. */
+	/* The check may not be necessarily since collective access */
+	/* can always be simulated by independent access. */
+	/* Nevertheless, must check driver is MPIO before using those */
+	/* access_mode which exists only for MPIO case. */
+	if (dataset->ent.file->shared->access_parms.driver == H5F_LOW_MPIO){
+	    /* 
+	     * -AKC-
+	     * "plant" the collective access mode into the file information
+	     * so that the lower level mpio routines know to use collective
+	     * access.
+	     * This is not thread-safe, is a klutch for now.
+	     * Should change all the I/O routines to pass along the xfer
+	     * property list to the low level I/O for proper execution.
+	     * Make it to work now.  Must fix it later.
+	     * -AKC-
+	     */
+#ifdef AKC
+	    printf("%s: collective access requested\n", FUNC);
+#endif
+	    access_mode_saved =
+		    dataset->ent.file->shared->access_parms.u.mpio.access_mode;
+	    dataset->ent.file->shared->access_parms.u.mpio.access_mode =
+		    H5D_XFER_COLLECTIVE;
+	}else{
+	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "collective access not permissible");
+	}
+    }
+#endif /*HAVE_PARALLEL*/
+
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
@@ -1195,33 +1231,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * Check if collective data transfer requested.
      */
     if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	/* verify that the file can support collective access. */
-	/* The check may not be necessarily since collective access */
-	/* can always be simulated by independent access. */
-	/* Nevertheless, must check driver is MPIO before using those */
-	/* access_mode which exists only for MPIO case. */
-	if (dataset->ent.file->shared->access_parms.driver == H5F_LOW_MPIO){
 	    /* Supports only no conversion, type or space, for now. */
 	    if (H5T_conv_noop==tconv_func &&
 		NULL!=sconv_func->read) {
-		/* 
-		 * -AKC-
-		 * "plant" the collective access mode into the file information
-		 * so that the lower level mpio routines know to use collective
-		 * access.
-		 * This is not thread-safe, is a klutch for now.
-		 * Should change all the I/O routines to pass along the xfer
-		 * property list to the low level I/O for proper execution.
-		 * Make it to work now.  Must fix it later.
-		 * -AKC-
-		 */
-#ifdef AKC
-		printf("%s: collective access requested\n", FUNC);
-		printf("%s: current f->access_mode = %x\n", FUNC,
-		    dataset->ent.file->shared->access_parms.u.mpio.access_mode);
-#endif
-		access_mode_saved = dataset->ent.file->shared->access_parms.u.mpio.access_mode;
-		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5D_XFER_COLLECTIVE;
 		status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
 					     &(dataset->create_parms->compress),
 					     &(dataset->create_parms->efl),
@@ -1231,9 +1243,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
 		    "collective read failed");
 	    }
-	}
-	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		 "collective access not permissible");
     }
 #endif /*HAVE_PARALLEL*/
 
@@ -1457,6 +1466,43 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (!mem_space) mem_space = file_space;
     nelmts = H5S_get_npoints(mem_space);
 
+#ifdef HAVE_PARALLEL
+    /*
+     * Check if collective data transfer requested.
+     */
+    if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
+	/* verify that the file can support collective access. */
+	/* The check may not be necessarily since collective access */
+	/* can always be simulated by independent access. */
+	/* Nevertheless, must check driver is MPIO before using those */
+	/* access_mode which exists only for MPIO case. */
+	if (dataset->ent.file->shared->access_parms.driver == H5F_LOW_MPIO){
+	    /* 
+	     * -AKC-
+	     * "plant" the collective access mode into the file information
+	     * so that the lower level mpio routines know to use collective
+	     * access.
+	     * This is not thread-safe, is a klutch for now.
+	     * Should change all the I/O routines to pass along the xfer
+	     * property list to the low level I/O for proper execution.
+	     * Make it to work now.  Must fix it later.
+	     * -AKC-
+	     */
+#ifdef AKC
+	    printf("%s: collective access requested\n", FUNC);
+#endif
+	    access_mode_saved =
+		    dataset->ent.file->shared->access_parms.u.mpio.access_mode;
+	    dataset->ent.file->shared->access_parms.u.mpio.access_mode =
+		    H5D_XFER_COLLECTIVE;
+	}
+	else{
+	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "collective access not permissible");
+	}
+    }
+#endif /*HAVE_PARALLEL*/
+
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
@@ -1485,38 +1531,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		     "unable to convert from memory to file data space");
     }
     
+#ifdef NO
 #ifdef HAVE_PARALLEL
     /*
      * Check if collective data transfer requested.
      */
     if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	/* verify that the file can support collective access. */
-	/* The check may not be necessarily since collective access */
-	/* can always be simulated by independent access. */
-	/* Nevertheless, must check driver is MPIO before using those */
-	/* access_mode which exists only for MPIO case. */
-	if (dataset->ent.file->shared->access_parms.driver == H5F_LOW_MPIO){
 	    /* Supports only no conversion, type or space, for now. */
 	    if (H5T_conv_noop==tconv_func &&
 		NULL!=sconv_func->write) {
-		/* 
-		 * -AKC-
-		 * "plant" the collective access mode into the file information
-		 * so that the lower level mpio routines know to use collective
-		 * access.
-		 * This is not thread-safe, is a klutch for now.
-		 * Should change all the I/O routines to pass along the xfer
-		 * property list to the low level I/O for proper execution.
-		 * Make it to work now.  Must fix it later.
-		 * -AKC-
-		 */
-#ifdef AKC
-		printf("%s: collective access requested\n", FUNC);
-		printf("%s: current f->access_mode = %x\n", FUNC,
-		    dataset->ent.file->shared->access_parms.u.mpio.access_mode);
-#endif
-		access_mode_saved = dataset->ent.file->shared->access_parms.u.mpio.access_mode;
-		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5D_XFER_COLLECTIVE;
 		status = (sconv_func->write)(dataset->ent.file, &(dataset->layout),
 				             &(dataset->create_parms->compress),
 					     &(dataset->create_parms->efl),
@@ -1526,11 +1549,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		    "collective write failed");
 	    }
-	}
-	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		 "collective access not permissible");
     }
 #endif /*HAVE_PARALLEL*/
+#endif
 
     
     /*
