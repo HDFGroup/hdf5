@@ -1148,6 +1148,10 @@
 ./tools/h5repack/testh5repack_filters.c
 ./tools/h5repack/testh5repack_make.c
 ./tools/h5repack/testh5repack_main.c
+./tools/h5repack/testh5repack_layout.c
+./tools/h5repack/testh5repack_util.c
+
+
 
 
 ./tools/h5ls/Dependencies

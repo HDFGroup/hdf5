@@ -274,7 +274,6 @@ int         parse_number(char *str);
 
 int make_testfiles(void);
 
-int make_attr(hid_t fid);
 int write_dset( hid_t loc_id, 
                 int rank, 
                 hsize_t *dims, 
@@ -297,6 +296,25 @@ void write_dset_in(hid_t loc_id,
                    int make_diffs /* flag to modify data buffers */);
 
 int make_filters(hid_t loc_id);
+int make_layout(hid_t loc_id);
+
+
+/*-------------------------------------------------------------------------
+ * tests utils
+ *-------------------------------------------------------------------------
+ */
+int make_dset(hid_t loc_id,
+              const char *name,
+              hid_t sid, 
+              hid_t dcpl,
+              void *buf);
+
+int make_attr(hid_t loc_id, 
+               int rank, 
+               hsize_t *dims, 
+               const char *attr_name,
+               hid_t type_id, 
+               void *buf);
 
 
 

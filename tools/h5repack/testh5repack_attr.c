@@ -126,7 +126,7 @@ void write_attr_in(hid_t loc_id,
  */
  type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
- write_attr(loc_id,1,dims,"string",type_id,buf1);
+ make_attr(loc_id,1,dims,"string",type_id,buf1);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -152,7 +152,7 @@ void write_attr_in(hid_t loc_id,
  */
 
  type_id = H5Tcopy(H5T_STD_B8LE);
- write_attr(loc_id,1,dims,"bitfield",type_id,buf2);
+ make_attr(loc_id,1,dims,"bitfield",type_id,buf2);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -174,7 +174,7 @@ void write_attr_in(hid_t loc_id,
 
  type_id = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
- write_attr(loc_id,1,dims,"opaque",type_id,buf2);
+ make_attr(loc_id,1,dims,"opaque",type_id,buf2);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -206,7 +206,7 @@ void write_attr_in(hid_t loc_id,
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
- write_attr(loc_id,1,dims,"compound",type_id,buf3);
+ make_attr(loc_id,1,dims,"compound",type_id,buf3);
  status = H5Tclose(type_id);
  
 /*-------------------------------------------------------------------------
@@ -218,7 +218,7 @@ void write_attr_in(hid_t loc_id,
  {
   status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
   status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
-  write_attr(loc_id,1,dims,"reference to object",H5T_STD_REF_OBJ,buf4);
+  make_attr(loc_id,1,dims,"reference to object",H5T_STD_REF_OBJ,buf4);
  }
 
 
@@ -246,7 +246,7 @@ void write_attr_in(hid_t loc_id,
  type_id = H5Tcreate(H5T_ENUM, sizeof(e_t));
  H5Tenum_insert(type_id, "RED",   (val = 0, &val));
  H5Tenum_insert(type_id, "GREEN", (val = 1, &val));
- write_attr(loc_id,1,dims,"enum",type_id,buf45);
+ make_attr(loc_id,1,dims,"enum",type_id,buf45);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -319,7 +319,7 @@ position        array of </g1>  array of </g1>  difference
 [ 1 ]          6               0               6
  */
  type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
- write_attr(loc_id,1,dims,"array",type_id,buf6);
+ make_attr(loc_id,1,dims,"array",type_id,buf6);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -349,8 +349,8 @@ position        array of </g1>  array of </g1>  difference
  [ 0 ]          1               0               1
  [ 1 ]          2               0               2
  */
- write_attr(loc_id,1,dims,"integer",H5T_NATIVE_INT,buf7);
- write_attr(loc_id,1,dims,"float",H5T_NATIVE_FLOAT,buf8);
+ make_attr(loc_id,1,dims,"integer",H5T_NATIVE_INT,buf7);
+ make_attr(loc_id,1,dims,"float",H5T_NATIVE_FLOAT,buf8);
 
 
 /*-------------------------------------------------------------------------
@@ -389,7 +389,7 @@ position        array of </g1>  array of </g1>  difference
 
  type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
- write_attr(loc_id,2,dims2,"string2D",type_id,buf12);
+ make_attr(loc_id,2,dims2,"string2D",type_id,buf12);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -418,7 +418,7 @@ position        array of </g1>  array of </g1>  difference
 
 
  type_id = H5Tcopy(H5T_STD_B8LE);
- write_attr(loc_id,2,dims2,"bitfield2D",type_id,buf22);
+ make_attr(loc_id,2,dims2,"bitfield2D",type_id,buf22);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -441,7 +441,7 @@ position        array of </g1>  array of </g1>  difference
  */
  type_id = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
- write_attr(loc_id,2,dims2,"opaque2D",type_id,buf22);
+ make_attr(loc_id,2,dims2,"opaque2D",type_id,buf22);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -471,7 +471,7 @@ position        array of </g1>  array of </g1>  difference
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
- write_attr(loc_id,2,dims2,"compound2D",type_id,buf32);
+ make_attr(loc_id,2,dims2,"compound2D",type_id,buf32);
  status = H5Tclose(type_id);
  
 /*-------------------------------------------------------------------------
@@ -486,7 +486,7 @@ position        array of </g1>  array of </g1>  difference
     status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1);
    }
   }
-  write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
+  make_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
  }
 
 /*-------------------------------------------------------------------------
@@ -514,7 +514,7 @@ position        enum2D of </g1> enum2D of </g1> difference
  type_id = H5Tcreate(H5T_ENUM, sizeof(e_t));
  H5Tenum_insert(type_id, "RED",   (val = 0, &val));
  H5Tenum_insert(type_id, "GREEN", (val = 1, &val));
- write_attr(loc_id,2,dims2,"enum2D",type_id,buf452);
+ make_attr(loc_id,2,dims2,"enum2D",type_id,buf452);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -598,7 +598,7 @@ position        array2D of </g1> array2D of </g1> difference
 [ 2 1 ]          18              0               18
  */
  type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
- write_attr(loc_id,2,dims2,"array2D",type_id,buf62);
+ make_attr(loc_id,2,dims2,"array2D",type_id,buf62);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -633,8 +633,8 @@ position        float2D of </g1> float2D of </g1> difference
 [ 2 1 ]          6               0               6
 */
 
- write_attr(loc_id,2,dims2,"integer2D",H5T_NATIVE_INT,buf72);
- write_attr(loc_id,2,dims2,"float2D",H5T_NATIVE_FLOAT,buf82);
+ make_attr(loc_id,2,dims2,"integer2D",H5T_NATIVE_INT,buf72);
+ make_attr(loc_id,2,dims2,"float2D",H5T_NATIVE_FLOAT,buf82);
 
  
 /*-------------------------------------------------------------------------
@@ -711,7 +711,7 @@ position        string3D of </g1> string3D of </g1> difference
 
  type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
- write_attr(loc_id,3,dims3,"string3D",type_id,buf13);
+ make_attr(loc_id,3,dims3,"string3D",type_id,buf13);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -759,7 +759,7 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
 */
 
  type_id = H5Tcopy(H5T_STD_B8LE);
- write_attr(loc_id,3,dims3,"bitfield3D",type_id,buf23);
+ make_attr(loc_id,3,dims3,"bitfield3D",type_id,buf23);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -768,7 +768,7 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
  */
  type_id = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
- write_attr(loc_id,3,dims3,"opaque3D",type_id,buf23);
+ make_attr(loc_id,3,dims3,"opaque3D",type_id,buf23);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -848,7 +848,7 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
  H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
- write_attr(loc_id,3,dims3,"compound3D",type_id,buf33);
+ make_attr(loc_id,3,dims3,"compound3D",type_id,buf33);
  status = H5Tclose(type_id);
  
 /*-------------------------------------------------------------------------
@@ -864,7 +864,7 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
      status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1);
    }
   }
- write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
+ make_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
  }
 
 /*-------------------------------------------------------------------------
@@ -913,7 +913,7 @@ position        enum3D of </g1> enum3D of </g1> difference
  type_id = H5Tcreate(H5T_ENUM, sizeof(e_t));
  H5Tenum_insert(type_id, "RED",   (val = 0, &val));
  H5Tenum_insert(type_id, "GREEN", (val = 1, &val));
- write_attr(loc_id,3,dims3,"enum3D",type_id,buf453);
+ make_attr(loc_id,3,dims3,"enum3D",type_id,buf453);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -986,7 +986,7 @@ etc
 */
 
  type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
- write_attr(loc_id,3,dims3,"array3D",type_id,buf63);
+ make_attr(loc_id,3,dims3,"array3D",type_id,buf63);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -1024,52 +1024,9 @@ etc
 [ 1 1 1 ]          10              0               10
 etc
 */     
- write_attr(loc_id,3,dims3,"integer3D",H5T_NATIVE_INT,buf73);
- write_attr(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
+ make_attr(loc_id,3,dims3,"integer3D",H5T_NATIVE_INT,buf73);
+ make_attr(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }
 
 
-
-
-
-
-/*-------------------------------------------------------------------------
- * Function: write_attr
- *
- * Purpose: utility function to write an attribute in LOC_ID
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 12, 2003
- *
- *-------------------------------------------------------------------------
- */
-
- 
-int write_attr(hid_t loc_id, 
-               int rank, 
-               hsize_t *dims, 
-               const char *attr_name,
-               hid_t type_id, 
-               void *buf)
-{
- hid_t   attr_id;
- hid_t   space_id;  
- herr_t  status;
-
- /* Create a buf space  */
- space_id = H5Screate_simple(rank,dims,NULL);
-
- /* Create the attribute */
- attr_id = H5Acreate(loc_id,attr_name,type_id,space_id,H5P_DEFAULT);
-  
- /* Write the buf */
- if ( buf )
-  status = H5Awrite(attr_id,type_id,buf);
-
- /* Close */
- status = H5Aclose(attr_id);
- status = H5Sclose(space_id);
- return status;
-}
 

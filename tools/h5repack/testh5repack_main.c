@@ -17,32 +17,49 @@
 #include "h5repack.h"
 #include "h5diff.h"
 
+#if 0
+#define PACK_DEBUG
+#endif
+
 /*-------------------------------------------------------------------------
- * Function: test_copy
+ * Function: main
  *
+ * Purpose: Executes h5repack tests
+ *
+ * Return: Success: zero
+ *  Failure: non-zero
+ *
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *             January, 6, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+int main (void)
+{
+ pack_opt_t  pack_options;
+ diff_opt_t  diff_options;
+ memset(&diff_options, 0, sizeof (diff_opt_t));
+ memset(&pack_options, 0, sizeof (pack_opt_t));
+
+ /* run tests  */
+ puts("Testing h5repack:");
+
+ /* make the test files */
+ if (make_testfiles()<0)
+  goto error;
+
+/*-------------------------------------------------------------------------
  * Purpose: 
  *
  * 1) make a copy with no filters 
  * 2) use the h5diff utility to compare the input and output file; 
  *     it returns RET==0 if the objects have the same data
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
  *-------------------------------------------------------------------------
  */
-static int
-test_copy(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
-
-
- TESTING("    copy with no input filters");
+ 
+ TESTING("    copy of datasets");
 
 /*-------------------------------------------------------------------------
  * file with all kinds of dataset datatypes
@@ -61,6 +78,9 @@ test_copy(void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
+ PASSED();
+ 
+ TESTING("    copy of attributes");
 /*-------------------------------------------------------------------------
  * file with attributes
  *-------------------------------------------------------------------------
@@ -78,11 +98,13 @@ test_copy(void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
+ PASSED();
+ TESTING("    copy of hardlinks");
+
 /*-------------------------------------------------------------------------
  * file with hardlinks
  *-------------------------------------------------------------------------
  */
-
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack(FNAME3,FNAME3OUT,&pack_options)<0)
@@ -101,6 +123,8 @@ test_copy(void)
  * configuration might not have saved datasets with deflate and SZIP filters
  *-------------------------------------------------------------------------
  */
+ PASSED();
+ TESTING("    copy of datasets with filters");
  
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -112,46 +136,10 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-/*-------------------------------------------------------------------------
- * end
- *-------------------------------------------------------------------------
- */
- PASSED();          
- return 0; 
- 
-error:                                                       
- return 1;
 
-}
+ PASSED();
 
-/*-------------------------------------------------------------------------
- * Function: test_filter_none
- *
- * Purpose: 
- *
- * 1) remove filters form the filter pipeline
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the compression/chunking input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_filter_none(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
-
- TESTING("    removing filters");
+ TESTING("    removing all filters");
 
 /*-------------------------------------------------------------------------
  * test the NONE global option
@@ -170,6 +158,10 @@ test_filter_none(void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+
+ PASSED();
+
+ TESTING("    removing one filter");
 
 /*-------------------------------------------------------------------------
  * test the NONE specific option; uncompress a dataset
@@ -191,41 +183,12 @@ test_filter_none(void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
-#endif
- 
- PASSED();  
- return 0; 
- 
-error:                                                       
- return 1;
-}
 
-/*-------------------------------------------------------------------------
- * Function: test_filter_deflate
- *
- * Purpose: 
- *
- * 1) compress/chunk FILENAME with the DEFLATE filter
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the compression/chunking input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_filter_deflate(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
 
  TESTING("    deflate filter");
 
@@ -288,45 +251,12 @@ test_filter_deflate(void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
-
  PASSED();  
 #else
  SKIPPED();
 #endif
- return 0; 
- 
-#ifdef H5_HAVE_FILTER_DEFLATE
-error:                                                       
- return 1;
-#endif
-}
 
-/*-------------------------------------------------------------------------
- * Function: test_filter_szip
- *
- * Purpose: 
- *
- * 1) compress/chunk FILENAME with the SZIP filter
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the compression/chunking input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             December, 19, 2003
- *
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_filter_szip(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
+
 
  TESTING("    szip filter");
 
@@ -374,43 +304,7 @@ test_filter_szip(void)
 #else
  SKIPPED();
 #endif
- return 0; 
- 
-#ifdef H5_HAVE_FILTER_SZIP
-error:                                                       
- return 1;
-#endif
 
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: test_filter_shuffle
- *
- * Purpose: 
- *
- * 1) compress/chunk FILENAME with the shuffle filter
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the compression/chunking input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_filter_shuffle(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
 
  TESTING("    shuffle filter");
 
@@ -460,41 +354,9 @@ test_filter_shuffle(void)
 #else
  SKIPPED();
 #endif
- return 0; 
+
+
  
-#ifdef H5_HAVE_FILTER_SHUFFLE
-error:                                                       
- return 1;
-#endif
-
-}
-
-/*-------------------------------------------------------------------------
- * Function: test_filter_checksum 
- *
- * Purpose: 
- *
- * 1) compress/chunk FILENAME with the checksum filter
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the compression/chunking input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_filter_checksum(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
-
  TESTING("    checksum filter");
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
@@ -543,42 +405,6 @@ test_filter_checksum(void)
 #else
  SKIPPED();
 #endif
- return 0; 
- 
-#ifdef H5_HAVE_FILTER_FLETCHER32
-error:                                                       
- return 1;
-#endif
-
-
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: test_layout_chunked 
- *
- * Purpose: 
- *
- * 1) test the CHUNK layout options
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the layout input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             December 30, 2003
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_layout_chunked(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
 
  TESTING("    layout chunked");
 
@@ -619,37 +445,6 @@ test_layout_chunked(void)
   TEST_ERROR;
 
  PASSED();  
- return 0; 
- 
-error:                                                       
- return 1;
-}
-
-/*-------------------------------------------------------------------------
- * Function: test_layout_contiguous
- *
- * Purpose: 
- *
- * 1) test the CONTI layout options
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the layout input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             December 30, 2003
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_layout_contiguous(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
 
  TESTING("    layout contiguous");
 
@@ -674,7 +469,6 @@ test_layout_contiguous(void)
  * test all objects option
  *-------------------------------------------------------------------------
  */
-
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addlayout("CONTI",&pack_options)<0)
@@ -685,44 +479,10 @@ test_layout_contiguous(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   TEST_ERROR;
-  if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  
  PASSED();  
- return 0; 
- 
-error:                                                       
- return 1;
-
-
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: test_layout_compact
- *
- * Purpose: 
- *
- * 1) test the COMPA layout options
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the layout input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             December 30, 2003
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_layout_compact(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
 
  TESTING("    layout compact");
 
@@ -763,38 +523,184 @@ test_layout_compact(void)
   TEST_ERROR;
  
  PASSED();  
- return 0; 
- 
-error:                                                       
- return 1;
-}
 
+
+ TESTING("    layout compact to contiguous conversion");
 
 /*-------------------------------------------------------------------------
- * Function: test_filterqueue
- *
- * Purpose: 
- *
- * 1) test several filters 
- * 2) use the h5diff utility to compare the input and output file; 
- *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the input on the output file
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             January 5, 2004
- *
+ * layout compact to contiguous conversion
  *-------------------------------------------------------------------------
  */
-static int
-test_filterqueue(void)
-{
- pack_opt_t  pack_options;
- diff_opt_t  diff_options;
- memset(&diff_options, 0, sizeof (diff_opt_t));
- memset(&pack_options, 0, sizeof (pack_opt_t));
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_compact:CONTI",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED(); 
+  
+ TESTING("    layout compact to chunk conversion");
+
+/*-------------------------------------------------------------------------
+ * layout compact to chunk conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_compact:CHUNK=2x5",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED();
+
+  TESTING("    layout compact to compact conversion");
+  
+/*-------------------------------------------------------------------------
+ * layout compact to compact conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_compact:COMPA",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED(); 
+  
+ TESTING("    layout contiguous to compact conversion");
+/*-------------------------------------------------------------------------
+ * layout contiguous to compact conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_contiguous:COMPA",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED(); 
+  
+ TESTING("    layout contiguous to chunk conversion");
+/*-------------------------------------------------------------------------
+ * layout contiguous to chunk conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_contiguous:CHUNK=3x6",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED();  
+
+  TESTING("    layout contiguous to contiguous conversion");
+
+/*-------------------------------------------------------------------------
+ * layout contiguous to contiguous conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_contiguous:CONTI",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED(); 
+
+ TESTING("    layout chunked to compact conversion");
+/*-------------------------------------------------------------------------
+ * layout chunked to compact conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_chunk:COMPA",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED();  
+
+ TESTING("    layout chunked to contiguous conversion");
+
+/*-------------------------------------------------------------------------
+ * layout chunked to contiguous conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_chunk:CONTI",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED();  
+
+ TESTING("    layout chunked to chunk conversion");
+/*-------------------------------------------------------------------------
+ * layout chunked to chunked conversion
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset_chunk:CHUNK=18x13",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED();  
+
 
  TESTING("    filter queue");
 
@@ -827,72 +733,7 @@ test_filterqueue(void)
   TEST_ERROR;
 
  PASSED();  
- return 0; 
- 
-error:                                                       
- return 1;
-}
 
-
-/*-------------------------------------------------------------------------
- * Function: main
- *
- * Purpose: Executes h5repack tests
- *
- * Return: Success: zero
- *  Failure: non-zero
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             January, 6, 2004
- *
- *-------------------------------------------------------------------------
- */
-
-
-int main (void)
-{
- int  nerrors=0;
-
- /* run tests  */
- puts("Testing h5repack:");
-
- /* make the test files */
- if (make_testfiles()<0)
-  goto error;
-
- /* test a copy with no filters */
- nerrors += test_copy();
-
- /* test a copy with the delete filters option */
- nerrors += test_filter_none();
-
- /* test a copy with the deflate filter */
- nerrors += test_filter_deflate();
-
- /* test a copy with the szip filter */
- nerrors += test_filter_szip();
-
- /* test a copy with the shuffle filter */
- nerrors += test_filter_shuffle();
-
- /* test a copy with the checksum filter */
- nerrors += test_filter_checksum();
-
- /* test a copy with layout CHUNK options */
- nerrors += test_layout_chunked();
-
- /* test a copy with layout CONTI options */
- nerrors += test_layout_contiguous();
-
- /* test a copy with layout COMPA options */
- nerrors += test_layout_compact();
- 
- /* test a copy with all available filters */
- nerrors += test_filterqueue();
-
- /* check for errors */
- if (nerrors)
-  goto error;
  puts("All h5repack tests passed.");
  
  return 0;

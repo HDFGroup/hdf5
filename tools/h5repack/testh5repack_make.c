@@ -44,7 +44,6 @@ int make_testfiles(void)
   return -1;
  if (make_all_objects(loc_id)<0)
   goto out;
-  /* close */
  if(H5Fclose(loc_id)<0)
   return -1;
 
@@ -56,7 +55,6 @@ int make_testfiles(void)
   return -1;
  if (make_attributes(loc_id)<0)
   goto out;
-  /* close */
  if(H5Fclose(loc_id)<0)
   return -1;
 /*-------------------------------------------------------------------------
@@ -67,18 +65,18 @@ int make_testfiles(void)
   return -1;
  if (make_special_objects(loc_id)<0)
   goto out;
- /* close */
  if(H5Fclose(loc_id)<0)
   return -1;
 /*-------------------------------------------------------------------------
- * create a file for the filters test
+ * create a file for the filters and layouts test
  *-------------------------------------------------------------------------
  */
  if((loc_id = H5Fcreate(FNAME4,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
  if (make_filters(loc_id)<0)
   goto out;
- /* close */
+ if (make_layout(loc_id)<0)
+  goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
  
@@ -120,7 +118,6 @@ int make_all_objects(hid_t loc_id)
  * H5G_DATASET
  *-------------------------------------------------------------------------
  */
-
  space_id = H5Screate_simple(1,dims,NULL);
  dset_id  = H5Dcreate(loc_id,"dset_referenced",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
  H5Sclose(space_id);

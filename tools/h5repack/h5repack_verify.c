@@ -199,14 +199,11 @@ int h5repack_verify(const char *fname,
   }
 
 /*-------------------------------------------------------------------------
- * layout check; check only if a filter exists
+ * layout check
  *-------------------------------------------------------------------------
  */
-  if (obj->filter[j].filtn>H5Z_FILTER_NONE )
-  {
-   if (has_layout(dcpl_id,obj)==0)
-    ret=0;
-  }
+  if ((obj->layout!=-1) && (has_layout(dcpl_id,obj)==0))
+   ret=0;
 
 /*-------------------------------------------------------------------------
  * close

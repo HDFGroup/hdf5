@@ -20,51 +20,6 @@ static void make_dset_reg_ref(hid_t loc_id);
 static void read_dset_reg_ref(hid_t loc_id);
 
 
-/*-------------------------------------------------------------------------
- * Function: write_dset
- *
- * Purpose: utility function to create and write a dataset in LOC_ID
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 12, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-int write_dset( hid_t loc_id, 
-                int rank, 
-                hsize_t *dims, 
-                const char *dset_name,
-                hid_t type_id, 
-                void *buf )
-{
- hid_t   dset_id;
- hid_t   space_id;  
- 
- /* Create a buf space  */
- if ((space_id = H5Screate_simple(rank,dims,NULL))<0)
-  return -1;
- 
- /* Create a dataset */
- if ((dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT))<0)
-  return -1;
- 
- /* Write the buf */
- if ( buf )
-  if (H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
-   return -1;
-  
- /* Close */
- if (H5Dclose(dset_id)<0)
-  return -1;
- if (H5Sclose(space_id)<0)
-  return -1;
-  
- return 0;
-  
-}
-
 
 /*-------------------------------------------------------------------------
  * Function: write_dset_in
