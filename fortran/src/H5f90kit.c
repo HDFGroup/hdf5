@@ -21,35 +21,9 @@
 /*
  * Routines from HDF4 to deal with C-FORTRAN issues.
  *
- * HD5c2fstr      -- convert a C string into a Fortran string IN PLACE
  * HD5f2cstring   -- convert a Fortran string to a C string
+ * HD5packFstring -- convert a C string into a Fortran string
  */
-
-/* ------------------------------- HDc2fstr ------------------------------- 
-NAME
-   HD5c2fstr -- convert a C string into a Fortran string IN PLACE
-USAGE
-   int HD5c2fstr(str, len)
-   char * str;       IN: string to convert
-   int   len;       IN: length of Fortran string
-RETURNS
-   SUCCEED
-DESCRIPTION
-   Change a C string (NULL terminated) into a Fortran string.
-   Basically, all that is done is that the NULL is ripped out
-   and the string is padded with spaces
-
----------------------------------------------------------------------------*/
-int 
-HD5c2fstr(char *str, int len)
-{
-    int         i;
-
-    i=(int)HDstrlen(str);
-    for (; i < len; i++)
-        str[i] = ' ';
-    return 0;
-}   /* HD5c2fstr */
 
 /* ----------------------------- HDf2cstring ------------------------------ */
 /*
@@ -68,20 +42,27 @@ DESCRIPTION
 
 ---------------------------------------------------------------------------*/
 char *
-HD5f2cstring(_fcd fdesc, int len)
+HD5f2cstring(_fcd fdesc, size_t len)
 {
-    char       *cstr = NULL;
-    char       *str;
-    int         i;
+    char       *cstr;   /* C string to return */
+    char       *str;    /* Pointer to FORTRAN string */
+    int         i;      /* Local index variable */
 
+    /* Search for the end of the string */
     str = _fcdtocp(fdesc);
-    /* This should be equivalent to the above test -QAK */
-    for(i=len-1; i>=0 && !isgraph((int)str[i]); i--)
+    for(i=(int)len-1; i>=0 && !isgraph((int)str[i]); i--)
         /*EMPTY*/;
-    cstr = (char *) HDmalloc( (size_t)(i + 2));
-    if (cstr == NULL) return NULL;
-    cstr[i + 1] = '\0';
+
+    /* Allocate C string */
+    if ((cstr = HDmalloc( (size_t)(i + 2))) == NULL)
+        return NULL;
+
+    /* Copy text from FORTRAN to C string */
     HDmemcpy(cstr,str,(size_t)(i+1));
+
+    /* Terminate C string */
+    cstr[i + 1] = '\0';
+
     return cstr;
 }   /* HD5f2cstring */
 
@@ -105,17 +86,17 @@ DESCRIPTION
    support one of these.
 
 ---------------------------------------------------------------------------*/
-int 
-HD5packFstring(char *src, char *dest, int len)
+void
+HD5packFstring(char *src, char *dest, size_t dst_len)
 {
-    int        sofar;
+    size_t src_len=HDstrlen(src);
 
-    for (sofar = 0; (sofar < len) && (*src != '\0'); sofar++)
-        *dest++ = *src++;
+    /* Copy over the string information, up to the length of the src */
+    /* (Don't copy the NUL terminator from the C string to the FORTRAN string */
+    HDmemcpy(dest,src,MIN(src_len,dst_len));
 
-    while (sofar++ < len)
-        *dest++ = ' ';
-
-    return 0;
-}	/* HD5packFstring */
+    /* Pad out any remaining space in the FORTRAN string with ' 's */
+    if(src_len<dst_len)
+        HDmemset(&dest[src_len],' ',dst_len-src_len);
+}   /* HD5packFstring */
 
