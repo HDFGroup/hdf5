@@ -23,6 +23,7 @@ typedef struct parameters_ {
     unsigned long num_dsets;        /* Number of datasets to create         */
     unsigned long num_elmts;        /* Number of native ints in each dset   */
     unsigned int num_iters;         /* Number of times to loop doing the IO */
+    unsigned long buf_size;         /* Buffer size                          */
 } parameters;
 
 typedef struct results_ {

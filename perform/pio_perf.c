@@ -69,13 +69,8 @@
 
 #define ONE_GB              1073741824UL
 
-#if 0
-#define MIN_HDF5_BUF_SIZE   1024
-#define MAX_HDF5_BUF_SIZE   (ONE_GB / 2)
-#else
-#define MIN_HDF5_BUF_SIZE   1024*1024*8
-#define MAX_HDF5_BUF_SIZE   MIN_HDF5_BUF_SIZE*4
-#endif
+#define MIN_HDF5_BUF_SIZE   (1024 * 1024 * 8)
+#define MAX_HDF5_BUF_SIZE   (MIN_HDF5_BUF_SIZE * 4)
 
 /* local variables */
 static const char  *progname = "pio_perf";
@@ -232,6 +227,7 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
             for (j = MIN_HDF5_BUF_SIZE; j <= MAX_HDF5_BUF_SIZE; j <<= 1) {
                 results res;
 
+                parms.buf_size = j;
                 parms.num_dsets = ONE_GB / j;
                 parms.num_elmts = (max_size * j) / sizeof(int);
 
@@ -245,6 +241,7 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
 
                 print_indent(output, TAB_SPACE * 3);
                 fprintf(output, "Write Results = %f MB/s\n",
+                        /* WRONG */
                         (parms.num_dsets * parms.num_elmts * sizeof(int)) /
                         get_time(res.timers, HDF5_WRITE_FIXED_DIMS));
 

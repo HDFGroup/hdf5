@@ -196,7 +196,7 @@ do_pio(parameters param)
 
     if (maxprocs <= 0 ) {
         fprintf(stderr,
-                "maximun number of process to use must be > 0 (%u)\n",
+                "maximum number of process to use must be > 0 (%u)\n",
                 maxprocs);
         GOTOERROR(FAIL);
     }
@@ -205,14 +205,14 @@ do_pio(parameters param)
 
     if (maxprocs > nprocs) {
         fprintf(stderr,
-                "maximun number of process(%d) must be <= process in MPI_COMM_WORLD(%d)\n",
+                "maximum number of process(%d) must be <= process in MPI_COMM_WORLD(%d)\n",
                 maxprocs, nprocs);
         GOTOERROR(FAIL);
     }
 
     /* Create a sub communicator for this run. Easier to use the first N
      * processes. */
-    MPI_Comm_rank(comm, &myrank);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
     color = (myrank < maxprocs);
     mrc = MPI_Comm_split(MPI_COMM_WORLD, color, myrank, &comm);
 
@@ -259,29 +259,28 @@ do_pio(parameters param)
         sprintf(base_name, "#pio_tmp_%u", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
 
-
         set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         rc = do_fopen(iot, fname, fd, PIO_CREATE | PIO_WRITE, comm);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
-        VRFY((rc == SUCCESS), "do_fopen failed\n");
+        VRFY((rc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_WRITE_FIXED_DIMS, START);
         rc = do_write(fd, iot, ndsets, nelmts, h5dset_space_id, buffer);
         set_time(res.timers, HDF5_WRITE_FIXED_DIMS, STOP);
 
-        VRFY((rc == SUCCESS), "do_write failed\n");
+        VRFY((rc == SUCCESS), "do_write failed");
 
         /* Close file for write */
         set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         rc = do_fclose(iot, fd);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
-        VRFY((rc == SUCCESS), "do_fclose failed\n");
+        VRFY((rc == SUCCESS), "do_fclose failed");
 
         /* Open file for read */
         hrc = do_fopen(iot, fname, fd, PIO_READ, comm);
-        VRFY((rc == SUCCESS), "do_fopen failed\n");
+        VRFY((rc == SUCCESS), "do_fopen failed");
 
         /* Calculate dataset offset within a file */
 
@@ -299,7 +298,7 @@ do_pio(parameters param)
 
         /* Close file for read */
         rc = do_fclose(iot, fd);
-        VRFY((rc == SUCCESS), "do_fclose failed\n");
+        VRFY((rc == SUCCESS), "do_fclose failed");
         remove(fname);
     }
 
@@ -531,7 +530,6 @@ do_write(file_descr fd, iotype iot, long ndsets,
             }
 
             nelmts_written += nelmts_towrite;
-fprintf(stderr, "wrote %lu elmts, %lu written\n", nelmts_towrite, nelmts_written);
         }
 
         /* Calculate write time */
