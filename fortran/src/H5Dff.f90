@@ -137,13 +137,14 @@
 
           END SUBROUTINE h5dclose_f
 
-          SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, hdferr, &
+          SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, n, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE(hobj_ref_t_f), DIMENSION(:), INTENT(IN) :: buf ! Data buffer
+            TYPE(hobj_ref_t_f), DIMENSION(N), INTENT(IN) :: buf ! Data buffer
+            INTEGER, INTENT(IN) :: n ! size of the bufffer buf
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                                 ! Memory dataspace identfier 
@@ -155,7 +156,9 @@
             INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
-            INTEGER, EXTERNAL :: h5dwrite_c
+            INTEGER, ALLOCATABLE, DIMENSION(:) :: ref_buf
+            INTEGER :: i,j
+            INTEGER, EXTERNAL :: h5dwrite_ref_obj_c
 
             xfer_prp_default = H5P_DEFAULT_F
             mem_space_id_default = H5S_ALL_F
@@ -164,19 +167,32 @@
             if (present(xfer_prp)) xfer_prp_default = xfer_prp 
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf)
+            
+            allocate(ref_buf(REF_OBJ_BUF_LEN*n), stat=hdferr)
+            if (hdferr .NE. 0 ) then
+                hdferr = -1
+                return
+            else
+                do j = 1, n
+                  do i = 1, REF_OBJ_BUF_LEN  
+                   ref_buf(REF_OBJ_BUF_LEN*(j-1) + i ) = buf(j)%ref(i)
+                 enddo  
+                enddo  
+            endif
+            hdferr = h5dwrite_ref_obj_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, ref_buf, n)
+            deallocate(ref_buf)
 
           END SUBROUTINE h5dwrite_reference_obj
 
-          SUBROUTINE h5dwrite_reference_dsetreg(dset_id, mem_type_id, buf, hdferr, &
+          SUBROUTINE h5dwrite_reference_dsetreg(dset_id, mem_type_id, buf, n, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
             TYPE(hdset_reg_ref_t_f), DIMENSION(:), INTENT(IN) :: buf ! Data buffer
+            INTEGER, INTENT(IN) :: n ! size of the bufffer buf  
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                                 ! Memory dataspace identfier 
@@ -188,7 +204,9 @@
             INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
-            INTEGER, EXTERNAL :: h5dwrite_c
+            INTEGER, ALLOCATABLE, DIMENSION(:) :: ref_buf
+            INTEGER :: i,j
+            INTEGER, EXTERNAL :: h5dwrite_ref_reg_c
 
             xfer_prp_default = H5P_DEFAULT_F
             mem_space_id_default = H5S_ALL_F
@@ -198,8 +216,20 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dwrite_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf)
+            allocate(ref_buf(REF_REG_BUF_LEN*n), stat=hdferr)
+            if (hdferr .NE. 0 ) then
+                hdferr = -1
+                return
+            else
+                do j = 1, n
+                  do i = 1, REF_REG_BUF_LEN  
+                   ref_buf(REF_REG_BUF_LEN*(j-1) + i) = buf(j)%ref(i)
+                 enddo
+                enddo
+            endif
+            hdferr = h5dwrite_ref_reg_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, ref_buf, n)
+            deallocate(ref_buf)
 
           END SUBROUTINE h5dwrite_reference_dsetreg
            
@@ -1265,13 +1295,14 @@
            
           END SUBROUTINE h5dwrite_double_7
 
-          SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, hdferr, &
+          SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, n, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE(hobj_ref_t_f), DIMENSION(:), INTENT(INOUT) :: buf ! Data buffer
+            TYPE(hobj_ref_t_f), DIMENSION(N), INTENT(INOUT) :: buf ! Data buffer
+            INTEGER, INTENT(IN) :: n      ! Size of the budffer buf
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                                 ! Memory dataspace identfier 
@@ -1283,7 +1314,14 @@
             INTEGER(HID_T) :: xfer_prp_default 
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
-            INTEGER, EXTERNAL :: h5dread_c
+            INTEGER, EXTERNAL :: h5dread_ref_obj_c
+            INTEGER, ALLOCATABLE, DIMENSION(:) :: ref_buf
+            INTEGER :: i,j  
+            allocate(ref_buf(REF_OBJ_BUF_LEN*n), stat=hdferr)
+            if (hdferr .NE. 0) then
+                hdferr = -1
+                return
+            endif 
 
             xfer_prp_default = H5P_DEFAULT_F
             mem_space_id_default = H5S_ALL_F
@@ -1293,18 +1331,24 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf)
-           
+            hdferr = h5dread_ref_obj_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, ref_buf, n)
+             do j = 1, n
+              do i = 1, REF_OBJ_BUF_LEN  
+                    buf(j)%ref(i) = ref_buf(REF_OBJ_BUF_LEN*(j-1) + i)
+              enddo
+             enddo  
+             deallocate(ref_buf) 
           END SUBROUTINE h5dread_reference_obj
 
-          SUBROUTINE h5dread_reference_dsetreg(dset_id, mem_type_id, buf, hdferr, &
+          SUBROUTINE h5dread_reference_dsetreg(dset_id, mem_type_id, buf, n, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
             TYPE(hdset_reg_ref_t_f), DIMENSION(:), INTENT(INOUT) :: buf ! Data buffer
+            INTEGER, INTENT(IN) :: n ! Size of the buffer buf 
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                                 ! Memory dataspace identfier 
@@ -1316,7 +1360,14 @@
             INTEGER(HID_T) :: xfer_prp_default 
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default 
-            INTEGER, EXTERNAL :: h5dread_c
+            INTEGER, ALLOCATABLE, DIMENSION(:) :: ref_buf
+            INTEGER :: i,j 
+            INTEGER, EXTERNAL :: h5dread_ref_reg_c
+            allocate(ref_buf(REF_REG_BUF_LEN*n), stat=hdferr)
+            if (hdferr .NE. 0) then
+                hdferr = -1
+                return
+            endif
 
             xfer_prp_default = H5P_DEFAULT_F
             mem_space_id_default = H5S_ALL_F
@@ -1326,9 +1377,15 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
 
-            hdferr = h5dread_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf)
+            hdferr = h5dread_ref_reg_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, ref_buf, n)
            
+            do j = 1, n
+             do i = 1, REF_REG_BUF_LEN  
+                   buf(j)%ref(i) = ref_buf(REF_REG_BUF_LEN*(j-1) + i)
+             enddo
+            enddo   
+            deallocate(ref_buf)
           END SUBROUTINE h5dread_reference_dsetreg
 
 

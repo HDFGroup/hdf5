@@ -173,8 +173,12 @@ extern int_f nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *ne
 #   define nh5dclose_c       FNAME(H5DCLOSE_C)
 #   define nh5dopen_c        FNAME(H5DOPEN_C)
 #   define nh5dwrite_c       FNAME(H5DWRITE_C)
+#   define nh5dwrite_ref_obj_c       FNAME(H5DWRITE_REF_OBJ_C)
+#   define nh5dwrite_ref_reg_c       FNAME(H5DWRITE_REF_REG_C)
 #   define nh5dwritec_c      FNAME(H5DWRITEC_C)
 #   define nh5dread_c        FNAME(H5DREAD_C)
+#   define nh5dread_ref_reg_c        FNAME(H5DREAD_REF_REG_C)
+#   define nh5dread_ref_obj_c        FNAME(H5DREAD_REF_OBJ_C)
 #   define nh5dreadc_c       FNAME(H5DREADC_C)
 #   define nh5dget_space_c   FNAME(H5DGET_SPACE_C)
 #   define nh5dget_type_c    FNAME(H5DGET_TYPE_C)
@@ -186,7 +190,11 @@ extern int_f nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *ne
 #   define nh5dopen_c        FNAME(h5dopen_c)
 #   define nh5dwrite_c       FNAME(h5dwrite_c)
 #   define nh5dwritec_c      FNAME(h5dwritec_c)
+#   define nh5dwrite_ref_obj_c       FNAME(h5dwrite_ref_obj_c)
+#   define nh5dwrite_ref_reg_c       FNAME(h5dwrite_ref_reg_c)
 #   define nh5dread_c        FNAME(h5dread_c)
+#   define nh5dread_ref_reg_c        FNAME(h5dread_ref_reg_c)
+#   define nh5dread_ref_obj_c        FNAME(h5dread_ref_obj_c)
 #   define nh5dreadc_c       FNAME(h5dreadc_c)
 #   define nh5dget_space_c   FNAME(h5dget_space_c)
 #   define nh5dget_type_c    FNAME(h5dget_type_c)
@@ -205,6 +213,11 @@ extern int_f nh5dclose_c ( hid_t_f *dset_id );
 extern int_f nh5dwrite_c
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf);
 
+extern int_f nh5dwrite_ref_obj_c
+(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *n);
+
+extern int_f nh5dwrite_ref_reg_c
+(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *n);
 
 extern int_f nh5dwritec_c
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf);
@@ -212,6 +225,12 @@ extern int_f nh5dwritec_c
 extern int_f nh5dread_c
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf);
 
+
+extern int_f nh5dread_ref_obj_c
+(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *n);
+
+extern int_f nh5dread_ref_reg_c
+(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *n);
 
 extern int_f nh5dreadc_c
 (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf);
@@ -793,23 +812,23 @@ nh5pset_xfer_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 #endif                                             /* H5Rf90_FNAMES */
 
 extern int_f
-nh5rcreate_object_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen);
+nh5rcreate_object_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen);
 
 
 extern int_f
-nh5rcreate_region_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id);
+nh5rcreate_region_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id);
 
 extern int_f
-nh5rdereference_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id);
+nh5rdereference_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id);
 
 extern int_f
-nh5rdereference_object_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id);
+nh5rdereference_object_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id);
 
 extern int_f
-nh5rget_region_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *space_id);
+nh5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id);
 
 extern int_f
-nh5rget_object_type_obj_c (hid_t_f *dset_id, _fcd ref, int_f *obj_type);
+nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type);
 
 /*
  * Functions from H5If.c

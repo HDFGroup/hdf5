@@ -32,6 +32,11 @@
 
 #define H5S_ALL_F    -2
 
+/* Constants used in H5Rff.f90 and H5Rf.c files */
+
+#define REF_OBJ_BUF_LEN_F    2
+#define REF_REG_BUF_LEN_F    3 
+
 /* Constants used in  H5Sf.c and H5Sff.f90 files */
 
 #define H5S_NO_CLASS_F -1 

@@ -4,15 +4,17 @@
       MODULE H5R
         USE H5FORTRAN_TYPES 
         USE H5FORTRAN_FLAGS
+! If you change the value of these parameters, do not forget to change corresponding
+! values in the H5f90.h file. 
+        INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2 
+        INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
 
         TYPE hobj_ref_t_f
-             !INTEGER(KIND=4) ref(2)   could cause trouble on Crays
-             CHARACTER ref(8)
+             INTEGER ref(REF_OBJ_BUF_LEN)  
         END TYPE 
 
         TYPE hdset_reg_ref_t_f
-             !INTEGER(KIND=4) reg_ref(3)  could cause troubles on Crays
-             CHARACTER ref(12)
+             INTEGER ref(REF_REG_BUF_LEN) 
         END TYPE 
 
           INTERFACE h5rcreate_f
@@ -54,11 +56,15 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
 
             INTEGER :: namelen                     ! Name length
+            INTEGER :: ref_f(REF_OBJ_BUF_LEN)          ! Local buffer to pass reference
             INTEGER, EXTERNAL :: h5rcreate_object_c
             namelen = LEN(name)
-            hdferr = h5rcreate_object_c(ref, loc_id, name, namelen )
-
+            ref_f = 0
+            hdferr = h5rcreate_object_c(ref_f, loc_id, name, namelen )
+            ref%ref = ref_f
+        
           END SUBROUTINE h5rcreate_object_f
+
           
           SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr) 
             IMPLICIT NONE
@@ -70,9 +76,12 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
 
             INTEGER :: namelen                     ! Name length
+            INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
             INTEGER, EXTERNAL :: h5rcreate_region_c
             namelen = LEN(name)
-            hdferr = h5rcreate_region_c(ref, loc_id, name, namelen, space_id )
+            ref_f = 0
+            hdferr = h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id )
+            ref%ref = ref_f
 
           END SUBROUTINE h5rcreate_region_f
           
@@ -84,9 +93,10 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
 
             INTEGER :: ref_type     ! Reference type 
+            INTEGER :: ref_f(REF_OBJ_BUF_LEN)          ! Local buffer to pass reference
             INTEGER, EXTERNAL :: h5rdereference_object_c
-            ref_type = H5R_OBJECT_F
-            hdferr = h5rdereference_object_c(dset_id, ref, obj_id )
+            ref_f = ref%ref
+            hdferr = h5rdereference_object_c(dset_id, ref_f, obj_id )
 
           END SUBROUTINE h5rdereference_object_f
           
@@ -98,9 +108,11 @@
             INTEGER, INTENT(OUT) :: hdferr          ! Error code 
 
             INTEGER :: ref_type      ! Reference type 
+            INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
             INTEGER, EXTERNAL :: h5rdereference_region_c
             ref_type = H5R_DATASET_REGION_F
-            hdferr = h5rdereference_region_c(dset_id, ref, obj_id )
+            ref_f = ref%ref
+            hdferr = h5rdereference_region_c(dset_id, ref_f, obj_id )
 
           END SUBROUTINE h5rdereference_region_f
           
@@ -111,9 +123,11 @@
             TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref   ! Dataset region reference 
             INTEGER(HID_T), INTENT(OUT) :: space_id   ! Space identifier 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code 
+            INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
 
             INTEGER, EXTERNAL :: h5rget_region_region_c
-            hdferr = h5rget_region_region_c(dset_id, ref, space_id )
+            ref_f = ref%ref
+            hdferr = h5rget_region_region_c(dset_id, ref_f, space_id )
 
           END SUBROUTINE h5rget_region_region_f
 
@@ -129,9 +143,11 @@
                                                !  H5G_TYPE_F         3
 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code 
+            INTEGER :: ref_f(REF_OBJ_BUF_LEN)          ! Local buffer to pass reference
 
             INTEGER, EXTERNAL :: h5rget_object_type_obj_c
-            hdferr = h5rget_object_type_obj_c(dset_id, ref, obj_type )
+            ref_f = ref%ref
+            hdferr = h5rget_object_type_obj_c(dset_id, ref_f, obj_type )
 
           END SUBROUTINE h5rget_object_type_obj_f
 

@@ -735,16 +735,20 @@ int_f
 nh5pget_driver_c (hid_t_f *prp_id, int_f* driver)
 {
      int ret_value = -1;
+     /*
      hid_t c_prp_id;
      H5F_driver_t c_driver;
+     */
 
      /*
       * Call H5Pget_driver function.
       */
+     /*
      c_prp_id = *prp_id;
      c_driver = H5Pget_driver(c_prp_id);
      *driver = (int_f) c_driver;
      if (c_driver < 0) return ret_value;
+     */
      ret_value = 0;
      return ret_value;
 } 
@@ -769,7 +773,7 @@ nh5pset_stdio_c (hid_t_f *prp_id)
       * Call H5Pset_stdio function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pset_stdio(c_prp_id);
+     /* ret = H5Pset_stdio(c_prp_id); */
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
@@ -797,7 +801,7 @@ nh5pget_stdio_c (hid_t_f *prp_id, int_f* io)
       * Call H5Pget_stdio function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pget_stdio(c_prp_id);
+     /* ret = H5Pget_stdio(c_prp_id); */
      if (ret < 0) return ret_value;
      *io = (int_f)ret;
      ret_value = 0;
@@ -824,7 +828,7 @@ nh5pset_sec2_c (hid_t_f *prp_id)
       * Call H5Pset_sec2 function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pset_sec2(c_prp_id);
+     /* ret = H5Pset_sec2(c_prp_id); */
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
@@ -852,7 +856,7 @@ nh5pget_sec2_c (hid_t_f *prp_id, int_f* sec2)
       * Call H5Pget_sec2 function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pget_sec2(c_prp_id);
+     /* ret = H5Pget_sec2(c_prp_id); */
      if (ret < 0) return ret_value;
      *sec2 = (int_f)ret;
      ret_value = 0;
@@ -945,7 +949,7 @@ nh5pset_core_c (hid_t_f *prp_id, size_t_f* increment)
       * Call H5Pset_core function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pset_core(c_prp_id, c_increment);
+     /* ret = H5Pset_core(c_prp_id, c_increment); */
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
@@ -973,7 +977,7 @@ nh5pget_core_c (hid_t_f *prp_id, size_t_f* increment)
       * Call H5Pset_increment function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pget_core(c_prp_id, &c_increment);
+     /* ret = H5Pget_core(c_prp_id, &c_increment); */
      if (ret < 0) return ret_value;
      *increment = (size_t_f)c_increment;
      ret_value = 0;
@@ -1007,7 +1011,7 @@ nh5pset_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist )
       * Call H5Pset_family function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pset_family(c_prp_id, c_memb_size, c_memb_plist);
+     /* ret = H5Pset_family(c_prp_id, c_memb_size, c_memb_plist); */
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
@@ -1038,7 +1042,7 @@ nh5pget_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist)
       * Call H5Pget_family function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pget_family(c_prp_id, &c_memb_size, &c_memb_plist);
+     /* ret = H5Pget_family(c_prp_id, &c_memb_size, &c_memb_plist); */
      if (ret < 0) return ret_value;
      *memb_size = (hsize_t_f)c_memb_size;
      *memb_plist = (hsize_t_f)c_memb_plist;
@@ -1166,7 +1170,7 @@ nh5pset_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_p
      c_prp_id = *prp_id;
      c_meta_plist = *meta_plist;
      c_raw_plist = *raw_plist; 
-     ret = H5Pset_split(c_prp_id, c_meta_ext, c_meta_plist, c_raw_ext, c_raw_plist );
+     /*ret = H5Pset_split(c_prp_id, c_meta_ext, c_meta_plist, c_raw_ext, c_raw_plist );*/
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
@@ -1213,7 +1217,7 @@ nh5pget_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_
       * Call H5Pget_split function.
       */
      c_prp_id = *prp_id;
-     ret = H5Pget_split(c_prp_id, c_meta_ext_size, c_meta_ext,&c_meta_plist, c_raw_ext_size, c_raw_ext, &c_raw_plist );
+     /*ret = H5Pget_split(c_prp_id, c_meta_ext_size, c_meta_ext,&c_meta_plist, c_raw_ext_size, c_raw_ext, &c_raw_plist ); */
 
      if (ret < 0) return ret_value;
      *meta_plist = c_meta_plist;

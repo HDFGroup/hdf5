@@ -13,7 +13,7 @@
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rcreate_object_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
+nh5rcreate_object_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
 {
      int ret_value = -1;
      hid_t c_loc_id;
@@ -35,18 +35,14 @@ nh5rcreate_object_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
       */
      c_loc_id = *loc_id;
      ret_value_c = H5Rcreate(&ref_c, c_loc_id, c_name, H5R_OBJECT, -1);
+
      HDfree(c_name);
-     if (ret_value_c >= 0) {
-         for(i=0; i < H5R_OBJ_REF_BUF_SIZE; i++) 
-         {
-#if defined(_UNICOS)
-              ref.c_pointer[i]=ref_c.oid[i];
-#else
-              ref[i]=ref_c.oid[i];
-#endif
-         } 
+     if (ret_value_c >= 0)  {
+         HDmemcpy(ref, ref_c.oid, H5R_OBJ_REF_BUF_SIZE);
          ret_value = 0;
      }
+       
+     ret_value = 0;
      return ret_value;
 }      
 
@@ -65,7 +61,7 @@ nh5rcreate_object_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rcreate_region_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id)
+nh5rcreate_region_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id)
 {
      int ret_value = -1;
      hid_t c_loc_id;
@@ -89,16 +85,10 @@ nh5rcreate_region_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t
      c_loc_id = *loc_id;
      c_space_id = *space_id;
      ret_value_c = H5Rcreate(&ref_c, c_loc_id, c_name, H5R_DATASET_REGION, c_space_id);
+
      HDfree(c_name);
      if (ret_value_c >= 0) {
-         for(i=0; i < H5R_DSET_REG_REF_BUF_SIZE; i++) 
-         {
-#if defined(_UNICOS)
-              ref.c_pointer[i]=ref_c.heapid[i];
-#else
-              ref[i]=ref_c.heapid[i];
-#endif
-         } 
+         HDmemcpy (ref, ref_c.heapid, H5R_DSET_REG_REF_BUF_SIZE);
          ret_value = 0;
      }
      return ret_value;
@@ -116,7 +106,7 @@ nh5rcreate_region_c (_fcd ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rdereference_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id)
+nh5rdereference_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
 {
      int ret_value = -1;
      hid_t c_dset_id;
@@ -124,14 +114,7 @@ nh5rdereference_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id)
      hid_t c_obj_id;
      int i;
 
-     for(i=0; i < H5R_DSET_REG_REF_BUF_SIZE; i++) {
-
-#if defined(_UNICOS)
-                  ref_c.heapid[i]=ref.c_pointer[i];
-#else
-                  ref_c.heapid[i]=ref[i];
-#endif
-      }
+     HDmemcpy (ref_c.heapid, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
      /*
       * Call H5Rdereference function.
@@ -157,7 +140,7 @@ nh5rdereference_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rdereference_object_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id)
+nh5rdereference_object_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
 {
      int ret_value = -1;
      hid_t c_dset_id;
@@ -165,14 +148,7 @@ nh5rdereference_object_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id)
      hobj_ref_t ref_c;
      int i;
 
-     for(i=0; i < H5R_OBJ_REF_BUF_SIZE; i++) {
-
-#if defined(_UNICOS)
-                   ref_c.oid[i]=ref.c_pointer[i];
-#else
-                   ref_c.oid[i]=ref[i];
-#endif
-      }
+     HDmemcpy (ref_c.oid, ref, H5R_OBJ_REF_BUF_SIZE);
 
      /*
       * Call H5Rdereference function.
@@ -197,7 +173,7 @@ nh5rdereference_object_c (hid_t_f *dset_id, _fcd ref, hid_t_f *obj_id)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rget_region_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *space_id)
+nh5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
 {
      int ret_value = -1;
      hid_t c_dset_id;
@@ -205,14 +181,7 @@ nh5rget_region_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *space_id)
      hdset_reg_ref_t ref_c;
      int i;
 
-     for(i=0; i < H5R_DSET_REG_REF_BUF_SIZE; i++) {
-
-#if defined(_UNICOS)
-                  ref_c.heapid[i]=ref.c_pointer[i];
-#else
-                  ref_c.heapid[i]=ref[i];
-#endif
-      }
+     HDmemcpy (ref_c.heapid, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
      /*
       * Call H5Rget_region function.
@@ -238,7 +207,7 @@ nh5rget_region_region_c (hid_t_f *dset_id, _fcd ref, hid_t_f *space_id)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rget_object_type_obj_c (hid_t_f *dset_id, _fcd ref, int_f *obj_type)
+nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type)
 {
      int ret_value = -1;
      hid_t c_dset_id;
@@ -246,14 +215,7 @@ nh5rget_object_type_obj_c (hid_t_f *dset_id, _fcd ref, int_f *obj_type)
      hobj_ref_t ref_c;
      int i;
 
-     for(i=0; i < H5R_OBJ_REF_BUF_SIZE; i++) {
-
-#if defined(_UNICOS)
-                  ref_c.oid[i]=ref.c_pointer[i];
-#else
-                  ref_c.oid[i]=ref[i];
-#endif
-      }
+     HDmemcpy (ref_c.oid, ref, H5R_OBJ_REF_BUF_SIZE);
 
      /*
       * Call H5Rget_object_type function.
