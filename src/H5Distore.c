@@ -85,7 +85,7 @@ typedef struct H5F_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     H5O_layout_t *layout;	/*the layout message			*/
-    double	split_ratios[3];/*B-tree node splitting ratios		*/
+    float	split_ratios[3];/*B-tree node splitting ratios		*/
     H5O_pline_t	*pline;		/*filter pipeline message		*/
     hssize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     size_t	rd_count;	/*bytes remaining to be read		*/

@@ -1170,7 +1170,7 @@ H5S_point_select_contiguous(const H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
+static herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     const hssize_t **coord)
 {
     herr_t ret_value=SUCCEED;  /* return value */

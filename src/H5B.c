@@ -106,7 +106,7 @@
 /* PRIVATE PROTOTYPES */
 static H5B_ins_t H5B_insert_helper(H5F_t *f, haddr_t addr,
 				   const H5B_class_t *type,
-				   const double split_ratios[],
+				   const float split_ratios[],
 				   uint8_t *lt_key,
 				   hbool_t *lt_key_changed,
 				   uint8_t *md_key, void *udata,
@@ -124,7 +124,7 @@ static size_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 			   size_t *total_nkey_size, size_t sizeof_rkey);
 static herr_t H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
 			haddr_t old_addr, intn idx,
-			const double split_ratios[], void *udata,
+			const float split_ratios[], void *udata,
 			haddr_t *new_addr/*out*/);
 #ifdef H5B_DEBUG
 static herr_t H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type,
@@ -628,7 +628,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
  */
 static herr_t
 H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt, haddr_t old_addr,
-	  intn idx, const double split_ratios[], void *udata,
+	  intn idx, const float split_ratios[], void *udata,
 	  haddr_t *new_addr_p/*out*/)
 {
     H5B_t	*new_bt = NULL, *tmp_bt = NULL;
@@ -865,7 +865,7 @@ H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx)
  */
 herr_t
 H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
-	   const double split_ratios[], void *udata)
+	   const float split_ratios[], void *udata)
 {
     /*
      * These are defined this way to satisfy alignment constraints.
@@ -1160,7 +1160,7 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
  */
 static H5B_ins_t
 H5B_insert_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
-		  const double split_ratios[], uint8_t *lt_key,
+		  const float split_ratios[], uint8_t *lt_key,
 		  hbool_t *lt_key_changed, uint8_t *md_key, void *udata,
 		  uint8_t *rt_key, hbool_t *rt_key_changed,
 		  haddr_t *new_node_p/*out*/)
@@ -1604,8 +1604,10 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     }
 
 done:
-    H5FL_ARR_FREE(haddr_t,child);
-    H5MM_xfree(key);
+    if(child!=NULL)
+        H5FL_ARR_FREE(haddr_t,child);
+    if(key!=NULL)
+        H5MM_xfree(key);
     FUNC_LEAVE(ret_value);
 }
 
