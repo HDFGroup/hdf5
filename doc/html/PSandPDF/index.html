@@ -56,6 +56,7 @@ bug reports to the HDF Help Desk at
 </font>
 
 <!-- Comment out first table for use on HDF5 Doc Dev website. -->
+<p>
 <hr>
 
 <CENTER>
@@ -145,72 +146,162 @@ HDF5 Reference Manual
 -->
 
 <hr>
+<p>
 The PS and PDF formatted documents presented here are from Release 1.2.  
 Several small but important changes (see below) were made for Release 1.2.1 
-and are reflected in the HTML version of the documents that are available 
-from the <a href="../index.html">HDF5 documents index</a>.
+and Release 1.2.2 
+and are included in the HTML document set that is distributed with the HDF5 
+software and is available from the <a href="../index.html">HDF5 documents 
+index</a>.
 
 <p>
-<h3>Significant Changes in Release 1.2.1 Document Set</h3>
+<h3>Significant Changes in Release 1.2.1 and Release 1.2.2 Document Sets</h3>
 
-This section lists the changes in the HDF5 documents, from release 1.2 
-to Release 1.2.1, that affect technical understanding.  
+This section lists the changes in the HDF5 documents, from Release 1.2 
+to Release 1.2.1 and Release 1.2.2, that affect technical understanding.  
 Minor grammatical and formatting changes are not included.
-None of these changes are reflected in the PS and PDF versions of the
-documents referenced above.
+None of these changes below are reflected in the PS and PDF versions 
+referenced above.
 
 <dl>
-<dt><b>In the <cite>HDF5 Reference Manual</cite></b>:
+<dt><b>New documents:</b>:
+<dt><cite>HDF5 Application Developer's Guide</cite>, which includes the following:
+    <dd><cite>HDF5 Image and Palette Specification</cite>
+    <dd><cite>HDF5 File XML DTD: Design Notes</cite> and 
+        a link to the HDF5 file XML DTD
+    <dd><cite>Mapping HDF4 Objects to HDF5 Objects</cite>
+<dt><cite>HDF5 Technical Notes</cite>
+    <dd>An informal but highly technical document intended for
+        HDF5 library developers.
+
+<br><br>
+<dt><b>General change:</b>
+    <dd>Changed references to the HDF5 file's &nbsp;<i>boot block</i> to
+        refer to the &nbsp;<i>super block</i>.
+
+<br><br>
+<dt><b>In the <cite>HDF5 Reference Manual:</cite></b>
+<dt>H5 -- General Library Functions
+    <dd><code>H5garbage_collect</code>: 
+        New function.
 <dt>H5A -- Attributes Interface
     <dd><code>H5Acreate</code>: 
-        Restructured and expanded the Description section, 
+        Restructured and expanded the description section, 
         with particular attention to the fact that the attribute name
         specified in <code>H5Acreate</code> must be unique.
+    <dd><code>H5Aiterate</code>:
+        Corrected function return type to <code>herr_t</code>.
 <dt>H5D -- Dataset Interface
     <dd><code>H5Dcreate</code>: 
         Added paragraph explaining that <em>name</em> must be unique.
     <dd><code>H5Dopen</code>:
         Corrected description of <em>loc_id</em> parameter.
-
+    <dd><code>H5Dclose</code>:
+        Corrected return type to <code>herr_t</code>.
+    <dd><code>H5Dcreate</code>:
+        Inserted missing spaces in function syntax statement.
+<dt>H5E -- Error Interface
+    <dd><code>H5Ewalk</code>: 
+        Added <code>H5E_walk_t</code> prototype and prototype parameter 
+	    descriptions.
 <dt>H5F -- File Interface
+    <dd><code>H5Fclose</code>:
+        Corrected behavior description.
     <dd><code>H5Fcreate</code> and <code> H5Fopen</code>: 
-        Clarified description of file access flags in <b>Parameters</b>
-        section and removed reference to <code>H5Fpublic.h</code>.
+        Clarified description of file access flags in parameters section. 
+    <dd><code>H5Freopen</code>:
+        Corrected description of <code>file_id</code> parameter.
+        Added comment about eventually closing returned identifier.
+        Added clarification that function cannot open closed files.
 <dt>H5G -- Group Interface
     <dd><code>H5Giterate</code>: Corrected <em>operator</em> parameter 
-        datatype to read <code>H5G_iterate_t</code>.
+        datatype to <code>H5G_iterate_t</code>.
 	Made minor corrections to <code>H5G_iterate_t</code> prototype syntax.
-	Added note that <code>H5Giterate</code>'s behavior is undefined 
-        if the group structure or membership changes.
+	Added note that <code>H5Giterate</code> behavior is undefined 
+        if the group structure or membership changes during the iteration.
 <dt>H5P -- Property List Interface
     <dd><code>H5Pset/get_cache</code>: 
         Added missing <em>rdcc_nelmts</em> parameter.
 	Corrected inconsistent references to <em>rdcc_wo</em> parameter.
-	Clarified <b>Purpose</b> and <b>Description</b> sections.
+	Clarified purpose and description sections.
     <dd><code>H5Pget_sec2</code>:
-        Corrected return type from <code>returntype</code> to 
-        <code>herr_t</code>.
+        Corrected return type to <code>herr_t</code>.
+    <dd><code>H5Pget_chunk</code>:
+        Changed <em>max_ndims</em> parameter description to IN.
+    <dd><code>H5Pget/set_gc_references</code>:
+        Corrected signature errors. 
+	Added missing parameter description and values.
+    <dd><code>H5Pget/set_family</code>:
+         These functions were removed; they have not been implemented.
+    <dd><code>H5Pget/set_hyper_cache</code>:
+        Corrected signature and parameter expressions.
+        Added missing parameter description.
+    <dd><code>H5Pset_buffer</code>:
+        Added units for parameter <em>size</em>.
+    <dd><code>H5Pget/set_split</code>:
+        Corrected misnamed parameters.
+    <dd><code>H5Pset_alignment</code> and <code>H5Pset_core</code>:
+        Added statement regarding "special case" effect of 
+        setting <em>threshold</em> to <code>0</code> (zero).   
+        Added clarification that <em>threshold</em> is non-negative and 
+        <em>alignment</em> and <em>increment</em> are both positive.
+    <dd><code>H5Pget/set_vlen_mem_manager</code>:
+        Corrected cross-reference to <code>H5Dvlen_reclaim</code>.
+        Clarified circumstances under which the contents of a parameter 
+        are ignored.
 <dt>H5S -- Dataspace Interface
     <dd><code>H5Sget_simple_extent_dims</code>:  
         Added statement that either or both of <em>dims</em> 
-        and <em>maxdims</em> may be NULL.
+        and <em>maxdims</em> may be <code>NULL</code>.
 <dt>H5T-- Datatype Interface
-    <dd><code>H5Tget/set_fields</code>:  
-        Added missing <em>spos</em> parameter. 
     <dd><code>H5Tconvert</code>:  
         Added missing <em>plist_id</em> parameter.
+    <dd><code>H5Tget_class</code>:
+        Added <code>H5T_VLEN</code> to class identifiers list.
+        Corrected <code>H5T_ENUM</code> and <code>H5T_REFERENCE</code> 
+            entries in class identifiers table (they were reversed).
+    <dd><code>H5Tget/set_fields</code>:  
+        Added missing <em>spos</em> parameter. 
+    <dd><code>H5Tregister</code>:
+        Corrected possible <em>pers</em> values to <code>H5T_PERS_HARD</code>
+        (was <code>HARD</code>) and <code>H5T_PERS_SOFT</code> 
+        (was <code>SOFT</code>).
+    <dd><code>H5Tfind</code>:
+        Corrected <em>pcdata</em> parameter IN/OUT designation.
 <dt>HDF5 Tools
     <dd><code>h5dump</code>:
         Added <code>-V</code> option, which displays version information.
 
 <br><br>
-<dt><b>In the <cite>HDF5 User's Guide</cite></b>:
+<dt><b>In the <cite>HDF5 User's Guide</cite>:</b>
+<dt>The Dataset Interface (H5D)
+    <dd>Removed <code>H5Pset_compression</code> and changed the example 
+        which used it to use <code>H5Pset_deflate</code>.
 <dt>The Datatype Interface (H5T)
     <dd><code>H5Tconvert</code>: 
 	Added <em>plist_id</em> parameter where this function is used in 
         code examples.  
+    <dd>Reviewed confusing references to <cite>simple datatypes</cite>;
+        where the intended meaning is <cite>atomic datatypes</cite>, 
+        that term is now used.
+<dt>The Attribute Interface (H5A)
+    <dd><code>H5Aiterate</code>: 
+        Corrected function return type to <code>herr_t</code>.
 <dt>Filters in HDF5
-    <dd>Added reference in section 4 to the <code>zlib</code> website.
+    <dd>Added reference in Section 4 to the <code>zlib</code> website.
+<dt>Palette Specification
+    <dd>This specification was moved to 
+        <cite>HDF5 Image and Palette Specification</cite> in the 
+        <cite>HDF5 Application Developer's Guide</cite>.
+
+<br><br>
+<dt><b>In the <cite>Introduction to HDF5</cite>:</b>
+    <dd>Reviewed confusing references to <cite>simple datatypes</cite>;
+        where the intended meaning is <cite>atomic datatypes</cite>, 
+        that term is now used.
+
+
+
 </dl>
 
 
