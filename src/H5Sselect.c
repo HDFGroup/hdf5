@@ -334,19 +334,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 	block = _block;
     }
 
-    /* Copy all the per-dimension selection info into the space descriptor */
-    if((diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*space->extent.u.simple.rank))==NULL) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "can't allocate per-dimension vector");
-    } /* end if */
-    for(i=0; i<space->extent.u.simple.rank; i++) {
-	diminfo[i].start = start[i];
-	diminfo[i].stride = stride[i];
-	diminfo[i].count = count[i];
-	diminfo[i].block = block[i];
-    } /* end for */
-    space->select.sel_info.hyper.diminfo = diminfo;
-
     /*
      * Check for overlapping blocks (remove when real block-merging algorithm
      * is in place).
