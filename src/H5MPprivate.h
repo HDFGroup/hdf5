@@ -253,6 +253,8 @@
 #define color_H5Pget_fapl_mpiposix "red"
 #define color_H5Pset_fapl_sec2 "red"
 #define color_H5Pget_fapl_sec2 "red"
+#define color_H5Pset_fapl_stream "red"
+#define color_H5Pget_fapl_stream "red"
 #define color_H5Pget_filter "red"
 #define color_H5Pset_btree_ratios "red"
 #define color_H5Pget_btree_ratios "red"
