@@ -84,9 +84,9 @@ herr_t H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
 herr_t H5Pset_family (hid_t tid, hid_t memb_tid);
 herr_t H5Pget_family (hid_t tid, hid_t *memb_tid/*out*/);
 #ifdef HAVE_PARALLEL
-herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode);
+herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode);
 herr_t H5Pget_mpi (hid_t tid, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/,
-		   uintn *access_mode/*out*/);
+		   unsigned *access_mode/*out*/);
 #endif
 
 #ifdef __cplusplus
