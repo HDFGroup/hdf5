@@ -1725,7 +1725,7 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t operat
     assert(buf);
     assert(space);
     assert(operator);
-    assert(H5I_DATATYPE != H5I_get_type(type_id));
+    assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     switch(space->select.type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
@@ -1749,6 +1749,6 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t operat
             break;
     }
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }   /* end H5S_select_iterate() */
 

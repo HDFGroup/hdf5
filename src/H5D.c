@@ -2350,15 +2350,15 @@ H5D_typeof (H5D_t *dset)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_get_file
+ * Function:  H5D_get_file
  *
- * Purpose:	Returns the dataset's file pointer.
+ * Purpose:   Returns the dataset's file pointer.
  *
- * Return:	Success:	Ptr to the dataset's file pointer.
+ * Return:    Success:        Ptr to the dataset's file pointer.
  *
- *		Failure:	NULL
+ *            Failure:        NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:        Quincey Koziol
  *              Thursday, October 22, 1998
  *
  * Modifications:

@@ -9,6 +9,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5Iprivate.h>
 #include <H5Sprivate.h>
 #include <H5Vprivate.h>
 #include <H5Dprivate.h>
@@ -967,7 +968,7 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     assert(buf);
     assert(space);
     assert(operator);
-    assert(H5I_DATATYPE != H5I_get_type(type_id));
+    assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Get the dataspace extent rank */
     rank=space->extent.u.simple.rank;

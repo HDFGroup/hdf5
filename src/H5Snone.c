@@ -133,7 +133,7 @@ H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t o
     assert(buf);
     assert(space);
     assert(operator);
-    assert(H5I_DATATYPE != H5I_get_type(type_id));
+    assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_select_iterate() */

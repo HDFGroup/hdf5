@@ -2992,7 +2992,7 @@ H5S_hyper_select_iterate_mem (intn dim, H5S_hyper_iter_info_t *iter_info)
     size_t i;                   /* Counters */
     intn j;
 
-    FUNC_ENTER (H5S_hyper_mwrite, 0);
+    FUNC_ENTER (H5S_hyper_select_iterate_mem, 0);
 
     assert(iter_info);
 
@@ -3010,6 +3010,8 @@ H5S_hyper_select_iterate_mem (intn dim, H5S_hyper_iter_info_t *iter_info)
         /*  (Which means that we've got a list of the regions in the fastest */
         /*   changing dimension and should input those regions) */
         if((dim+2)==iter_info->space->extent.u.simple.rank) {
+            HDmemcpy(iter_info->mem_offset, iter_info->iter->hyp.pos,(iter_info->space->extent.u.simple.rank*sizeof(hssize_t)));
+            iter_info->mem_offset[iter_info->space->extent.u.simple.rank]=0;
 
             /* Iterate over data from regions */
             for(i=0; i<num_regions && user_ret==0; i++) {
@@ -3027,6 +3029,9 @@ H5S_hyper_select_iterate_mem (intn dim, H5S_hyper_iter_info_t *iter_info)
                     user_ret=(*(iter_info->op))(tmp_buf,iter_info->dt,iter_info->space->extent.u.simple.rank,iter_info->mem_offset,iter_info->op_data);
 
                     /* Subtract the element from the selected region (not implemented yet) */
+
+                    /* Increment the coordinate offset */
+                    iter_info->mem_offset[iter_info->space->extent.u.simple.rank-1]=j;
 
                     /* Advance the pointer in the buffer */
                     tmp_buf=((char *)tmp_buf+iter_info->elem_size);
@@ -3122,7 +3127,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     assert(buf);
     assert(space);
     assert(operator);
-    assert(H5I_DATATYPE != H5I_get_type(type_id));
+    assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Initialize these before any errors can occur */
     HDmemset(&iter,0,sizeof(H5S_sel_iter_t));
@@ -3159,8 +3164,6 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     HDmemcpy(iter_info.mem_size, space->extent.u.simple.size, space->extent.u.simple.rank*sizeof(hsize_t));
     iter_info.mem_size[space->extent.u.simple.rank]=iter_info.elem_size;
     /* Copy the location of the region in the file */
-    HDmemcpy(iter_info.mem_offset, iter.hyp.pos,(space->extent.u.simple.rank*sizeof(hssize_t)));
-    iter_info.mem_offset[space->extent.u.simple.rank]=0;
     iter_info.op=operator;
     iter_info.op_data=operator_data;
 
