@@ -399,7 +399,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
 
     FUNC_ENTER(H5F_istore_new_node, FAIL);
 #ifdef AKC
-printf("%s: Called\n", FUNC);
+    printf("%s: Called\n", FUNC);
 #endif
     /* check args */
     assert(f);
@@ -412,7 +412,7 @@ printf("%s: Called\n", FUNC);
     /* Allocate new storage */
     assert (udata->key.nbytes > 0);
 #ifdef AKC
-printf("calling H5MF_alloc for new chunk\n");
+    printf("calling H5MF_alloc for new chunk\n");
 #endif
     if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, addr /*out */ ) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
@@ -545,7 +545,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 
     FUNC_ENTER(H5F_istore_insert, H5B_INS_ERROR);
 #ifdef AKC
-printf("%s: Called\n", FUNC);
+    printf("%s: Called\n", FUNC);
 #endif
 
     /* check args */
@@ -577,7 +577,7 @@ printf("%s: Called\n", FUNC);
 	 */
 	if (lt_key->nbytes != udata->key.nbytes) {
 #ifdef AKC
-printf("calling H5MF_realloc for new chunk\n");
+	    printf("calling H5MF_realloc for new chunk\n");
 #endif
 	    if (H5MF_realloc (f, H5MF_RAW, lt_key->nbytes, addr,
 			      udata->key.nbytes, new_node/*out*/)<0) {
@@ -613,7 +613,7 @@ printf("calling H5MF_realloc for new chunk\n");
 	 * Allocate storage for the new chunk
 	 */
 #ifdef AKC
-printf("calling H5MF_alloc for new chunk\n");
+	printf("calling H5MF_alloc for new chunk\n");
 #endif
 	if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, new_node/*out*/)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR,
@@ -1380,11 +1380,11 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 #endif
 
 #ifdef AKC
-printf("Locking chunk( ");
-for (i=0; i<layout->ndims; i++){
-printf("%ld ", chunk_offset[i]);
-}
-printf(")\n");
+	    printf("Locking chunk( ");
+	    for (i=0; i<layout->ndims; i++){
+		printf("%ld ", chunk_offset[i]);
+	    }
+	    printf(")\n");
 #endif
 
 	/*
@@ -1555,29 +1555,30 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 #endif
 
 #ifdef AKC
-printf("Locking chunk( ");
-for (i=0; i<layout->ndims; i++){
-printf("%ld ", chunk_offset[i]);
-}
-printf(")\n");
+	    printf("Locking chunk( ");
+	    for (i=0; i<layout->ndims; i++){
+		printf("%ld ", chunk_offset[i]);
+	    }
+	    printf(")\n");
 #endif
-	/*
-	 * Lock the chunk, copy from application to chunk, then unlock the
-	 * chunk.
-	 */
-	if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
-					  naccessed==chunk_size, &idx_hint))) {
-	    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-			   "unable to read raw data chunk");
-	}
-	H5V_hyper_copy(layout->ndims, sub_size,
-		       layout->dim, offset_wrt_chunk, chunk,
-		       size_m, sub_offset_m, buf);
-	if (H5F_istore_unlock (f, layout, comp, TRUE, chunk_offset, &idx_hint,
-			       chunk, naccessed)<0) {
-	    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-			   "uanble to unlock raw data chunk");
-	}
+	    /*
+	     * Lock the chunk, copy from application to chunk, then unlock the
+	     * chunk.
+	     */
+	    if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
+					      naccessed==chunk_size,
+					      &idx_hint))) {
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			       "unable to read raw data chunk");
+	    }
+	    H5V_hyper_copy(layout->ndims, sub_size,
+			   layout->dim, offset_wrt_chunk, chunk,
+			   size_m, sub_offset_m, buf);
+	    if (H5F_istore_unlock (f, layout, comp, TRUE, chunk_offset,
+				   &idx_hint, chunk, naccessed)<0) {
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			       "uanble to unlock raw data chunk");
+	    }
 #ifdef HAVE_PARALLEL
 	}
 #endif
@@ -1637,7 +1638,7 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
 #endif
 
     udata.mesg.ndims = layout->ndims;
-    if (H5B_create(f, H5B_ISTORE, &udata, &(layout->addr) /*out */ ) < 0) {
+    if (H5B_create(f, H5B_ISTORE, &udata, &(layout->addr)/*out*/) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't create B-tree");
     }
     
@@ -1821,7 +1822,7 @@ H5F_istore_allocate (H5D_t *dataset, H5F_t *f, const H5O_layout_t *layout,
     
     FUNC_ENTER(H5F_istore_allocate, FAIL);
 #ifdef AKC
-printf("Enter %s:\n", FUNC);
+    printf("Enter %s:\n", FUNC);
 #endif
 
     /* Check args */
@@ -1858,11 +1859,11 @@ printf("Enter %s:\n", FUNC);
     while (1) {
 	
 #ifdef AKC
-printf("Checking allocation for chunk( ");
-for (i=0; i<layout->ndims; i++){
-printf("%ld ", chunk_offset[i]);
-}
-printf(")\n");
+	printf("Checking allocation for chunk( ");
+	for (i=0; i<layout->ndims; i++){
+	    printf("%ld ", chunk_offset[i]);
+	}
+	printf(")\n");
 #endif
 #ifdef NO
 	if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)==FAIL){
@@ -1873,7 +1874,7 @@ printf(")\n");
 	    /* allocation effect in the unlock process. */
 
 #ifdef AKC
-printf("need allocation\n");
+	    printf("need allocation\n");
 #endif
 	    /*
 	     * Lock the chunk, copy from application to chunk, then unlock the
@@ -1890,11 +1891,10 @@ printf("need allocation\n");
 			       "uanble to unlock raw data chunk");
 	    }
 #ifdef NO
-	}
-	else{
+	} else {
 #ifdef AKC
-printf("NO need for allocation\n");
-printf("udata.addr.offset=%d\n", udata.addr.offset);
+	    printf("NO need for allocation\n");
+	    printf("udata.addr.offset=%d\n", udata.addr.offset);
 #endif
 	}
 #endif
