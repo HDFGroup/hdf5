@@ -3634,6 +3634,7 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER (H5Dfill, FAIL);
+    H5TRACE5("e","xixii",fill,fill_type_id,buf,buf_type_id,space_id);
 
     /* Check args */
     if (fill==NULL)
