@@ -81,6 +81,10 @@ hsize_t  h5diff(const char *fname1,
                 const char *objname1, 
                 const char *objname2, 
                 diff_opt_t *options);
+void print_manager_output(void);
+#ifdef H5_HAVE_PARALLEL
+void phdiff_dismiss_workers(void);
+#endif
 
 #ifdef __cplusplus
 }
