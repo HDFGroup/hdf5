@@ -63,6 +63,8 @@ int diff_dataset( hid_t file1_id,
  int          maxdim_diff=0;          /* maximum dimensions are different */
  int          dim_diff=0;             /* current dimensions are different */
  int          can1, can2;             /* supported diff */
+ hsize_t      storage_size1;
+ hsize_t      storage_size2;
  int          i;
 
 
@@ -156,17 +158,21 @@ int diff_dataset( hid_t file1_id,
  assert(tclass1==tclass2);
  switch (tclass1) 
  {
- case H5T_TIME:
- case H5T_STRING:
- case H5T_BITFIELD:
- case H5T_OPAQUE:
 #if 0
  case H5T_COMPOUND:
+ case H5T_STRING:
+ case H5T_ARRAY:
+
 #endif
+
+
+ case H5T_TIME:
+ case H5T_BITFIELD:
+ case H5T_OPAQUE:
+
  case H5T_REFERENCE:
  case H5T_ENUM:
  case H5T_VLEN:
- case H5T_ARRAY:
   if (options->verbose ) {
    printf("Comparison not supported\n");
    printf("<%s> is of class %s and <%s> is of class %s\n", 
@@ -177,6 +183,19 @@ int diff_dataset( hid_t file1_id,
  default:
   break;
  }
+
+
+ 
+/*-------------------------------------------------------------------------
+ * check for empty datasets
+ *-------------------------------------------------------------------------
+ */
+
+ storage_size1=H5Dget_storage_size(dset1_id);
+ storage_size2=H5Dget_storage_size(dset2_id);
+ if (storage_size1<=0 && storage_size2<=0)
+  goto out;
+
 
 /*-------------------------------------------------------------------------
  * check for the same rank
@@ -374,6 +393,8 @@ int diff_dataset( hid_t file1_id,
   printf( "cannot read into memory\n" );
   goto out;
  }
+
+
 
 /*-------------------------------------------------------------------------
  * read

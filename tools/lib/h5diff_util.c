@@ -25,7 +25,7 @@
  * Date: May 30, 2003
  *
  * Modifications: October 29, 2003
- *  Added support for H5T_COMPOUND types; 
+ *  Added support for H5T_COMPOUND, H5T_STRING, H5T_ARRAY types; 
  *
  *-------------------------------------------------------------------------
  */
@@ -34,6 +34,9 @@ int diff_can(hid_t type_id)
  int ret=0;
 
  if ( ((H5Tget_class(type_id) == H5T_COMPOUND)==1)|| /* get class */
+      ((H5Tget_class(type_id) == H5T_STRING)==1)||   /* get class */
+      ((H5Tget_class(type_id) == H5T_ARRAY)==1)||   /* get class */
+    
       (H5Tequal(type_id, H5T_NATIVE_FLOAT)==1)||
       (H5Tequal(type_id, H5T_NATIVE_DOUBLE)==1)||
       (H5Tequal(type_id, H5T_NATIVE_INT)==1)||

@@ -19,15 +19,29 @@
 #include <math.h>
 
 static 
-int diff_array_mem( void *_mem1, 
-                    void *_mem2, 
-                    hid_t m_type,
-																				unsigned i, 
-                    int rank, 
-                    hsize_t *dims, 
+int diff_array_mem( void       *_mem1, 
+                    void       *_mem2, 
+                    hid_t      m_type,
+                    unsigned   i, 
+                    int        rank, 
+                    int        *acc,  
+                    int        *pos, 
                     diff_opt_t *options, 
-																				const char *name1, 
-                    const char *name2);
+                    const char *obj1, 
+                    const char *obj2);
+
+static
+int diff_native_uchar(unsigned char *mem1,
+                      unsigned char *mem2,
+                      size_t        type_size,
+                      unsigned      i, 
+                      int           rank, 
+                      int           *acc,  
+                      int           *pos, 
+                      diff_opt_t    *options, 
+                      const char    *obj1, 
+                      const char    *obj2,
+                      int           ph);
 
 
 /*-------------------------------------------------------------------------
@@ -60,33 +74,43 @@ int diff_array( void *_mem1,
                 const char *name1, 
                 const char *name2,
                 hid_t m_type )
-{	
+{ 
  int           nfound=0;          /* number of differences found */
-	size_t        size;              /* size of datum */
-	unsigned char	*mem1 = (unsigned char*)_mem1;
-	unsigned char	*mem2 = (unsigned char*)_mem2;
-	unsigned      i;
+ size_t        size;              /* size of datum */
+ unsigned char *mem1 = (unsigned char*)_mem1;
+ unsigned char *mem2 = (unsigned char*)_mem2;
+ int           acc[32];           /* accumulator and matrix position */
+ int           pos[32];
+ unsigned      i;
+ int           j;
+
+ acc[rank-1]=1;
+ for(j=(rank-2); j>=0; j--)
+ {
+  acc[j]=acc[j+1]*(int)dims[j+1];
+ }
  
-	 /* Get the size. */
+  /* Get the size. */
  size = H5Tget_size( m_type );
-		
-	for ( i = 0; i < nelmts; i++)
+  
+ for ( i = 0; i < nelmts; i++)
  {
   nfound+=diff_array_mem(
-			mem1 + i * size,
-			mem2 + i * size, /* offset */
-			m_type,
+   mem1 + i * size,
+   mem2 + i * size, /* offset */
+   m_type,
    i,
    rank,
-   dims,
+   acc,
+   pos,
    options,
    name1,
    name2);
-		if (options->n && nfound>=options->count)
-			return nfound;
-	}
-		
-	return nfound;
+  if (options->n && nfound>=options->count)
+   return nfound;
+ }
+  
+ return nfound;
 }
 
 
@@ -106,31 +130,34 @@ int diff_array( void *_mem1,
  */
 
 static 
-int diff_array_mem( void *_mem1, 
-                    void *_mem2, 
-                    hid_t m_type,
-																				unsigned i, 
-                    int rank, 
-                    hsize_t *dims, 
+int diff_array_mem( void       *_mem1, 
+                    void       *_mem2, 
+                    hid_t      m_type,
+                    unsigned   i, 
+                    int        rank, 
+                    int        *acc,  
+                    int        *pos, 
                     diff_opt_t *options, 
-																				const char *obj1, 
+                    const char *obj1, 
                     const char *obj2)
 {
  char          fmt_llong[255],  fmt_ullong[255];
  char          fmt_llongp[255], fmt_ullongp[255];
- size_t        type_size;/* just check */
-	static int    ph=1;     /* print header  */
-	int           nfound=0;  /* difference found */
-	unsigned char	*mem1 = (unsigned char*)_mem1;
-	unsigned char	*mem2 = (unsigned char*)_mem2;
-	hid_t         memb_type;
+ size_t        type_size; 
+ static int    ph=1;      /* print header  */
+ int           nfound=0;  /* differences found */
+ unsigned char *mem1 = (unsigned char*)_mem1;
+ unsigned char *mem2 = (unsigned char*)_mem2;
+ unsigned      u;
+ hid_t         memb_type;
  size_t        offset;
- int	          nmembs;
- int           acc[32];  /* accumulator and matrix position */
- int           pos[32];
+ int           nmembs;
  int           j;
-  
- 
+ /* for H5T_ARRAY */
+ hsize_t       adims[H5S_MAX_RANK],anelmts,andims;
+ hid_t         amemb_id;
+ size_t        asize;
+
  /* Build default formats for long long types */
  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
@@ -141,12 +168,6 @@ int diff_array_mem( void *_mem1,
  sprintf(fmt_ullongp, "%%%su             %%%su               %%%su               %%%su\n", 
   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
 
-
- acc[rank-1]=1;
- for(j=(rank-2); j>=0; j--)
- {
-  acc[j]=acc[j+1]*(int)dims[j+1];
- }
 
  /* Get the size. */
  type_size = H5Tget_size( m_type );
@@ -167,14 +188,77 @@ int diff_array_mem( void *_mem1,
   {
    offset    = H5Tget_member_offset(m_type, j);
    memb_type = H5Tget_member_type(m_type, j);
-   nfound+=diff_array_mem(mem1+offset,mem2+offset,memb_type,i,rank,dims,options,obj1,obj2);
+   nfound+=diff_array_mem(mem1+offset,
+                          mem2+offset,
+                          memb_type,
+                          i,
+                          rank,
+                          acc,
+                          pos,
+                          options,
+                          obj1,
+                          obj2);
    H5Tclose(memb_type);
   }
   break;
  case H5T_TIME:
   break;
+/*-------------------------------------------------------------------------
+ * H5T_STRING
+ *-------------------------------------------------------------------------
+ */
  case H5T_STRING:
+
+  for (u=0; u<type_size; u++)
+   nfound+=diff_native_uchar(
+                    mem1 + u,
+                    mem2 + u, /* offset */
+                    type_size,
+                    u, 
+                    rank, 
+                    acc,
+                    pos,
+                    options, 
+                    obj1, 
+                    obj2,
+                    ph);
+
+  
   break;
+/*-------------------------------------------------------------------------
+ * H5T_ARRAY
+ *-------------------------------------------------------------------------
+ */
+ case H5T_ARRAY:
+  /* get the array's base datatype for each element */
+  amemb_id = H5Tget_super(m_type);
+  asize    = H5Tget_size(amemb_id);
+  andims   = H5Tget_array_ndims(m_type);
+  H5Tget_array_dims(m_type, adims, NULL);
+  assert(andims >= 1 && andims <= H5S_MAX_RANK);
+  
+  /* calculate the number of array elements */
+  for (u = 0, anelmts = 1; u <andims; u++){
+   anelmts *= adims[u];
+  } 
+
+  for (u = 0; u < anelmts; u++) 
+  {
+   nfound+=diff_array_mem(
+    mem1+u*asize,
+    mem2+u*asize,
+    amemb_id,
+    u,
+    rank,
+    acc,
+    pos,
+    options,
+    obj1,
+    obj2);
+  }
+  H5Tclose(amemb_id);
+  break;
+
  case H5T_BITFIELD:
   break;
  case H5T_OPAQUE:
@@ -185,9 +269,8 @@ int diff_array_mem( void *_mem1,
   break;
  case H5T_VLEN:
   break;
- case H5T_ARRAY:
-  break;
  case H5T_INTEGER:
+
 
 /*-------------------------------------------------------------------------
  * H5T_NATIVE_SCHAR
@@ -958,6 +1041,8 @@ int diff_array_mem( void *_mem1,
   
     memcpy(&temp1_float, mem1, sizeof(float));
     memcpy(&temp2_float, mem2, sizeof(float));
+
+
     /* -d and !-p */
     if (options->d && !options->p)
     {
@@ -1100,7 +1185,104 @@ int diff_array_mem( void *_mem1,
   
   } /* switch */
   
-		
+  
   return nfound;
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: diff_native_uchar
+ *
+ * Purpose: compare H5T_NATIVE_UCHAR (used in H5T_NATIVE_UCHAR 
+ *  and H5T_STRING class)
+ *
+ * Return: number of differences found
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: October 29, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+static
+int diff_native_uchar(unsigned char *mem1,
+                      unsigned char *mem2,
+                      size_t        type_size,
+                      unsigned      i, 
+                      int           rank, 
+                      int           *acc,  
+                      int           *pos, 
+                      diff_opt_t    *options, 
+                      const char    *obj1, 
+                      const char    *obj2,
+                      int           ph)
+{
+ int                nfound=0;  /* differences found */
+ unsigned char      temp1_uchar;
+ unsigned char      temp2_uchar;
+ 
+ 
+ memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+ memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+
+ /* -d and !-p */
+ if (options->d && !options->p)
+ {
+  if (abs(temp1_uchar-temp2_uchar) > options->delta)
+  {
+   if ( options->r==0 ) 
+   {
+    print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+    printf(SPACES);
+    printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
+   }
+   nfound++;
+  }
+ }
+ /* !-d and -p */
+ else if (!options->d && options->p)
+ {
+  if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent )
+  {
+   if ( options->r==0 ) 
+   {
+    print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+    printf(SPACES);
+    printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
+     abs(1-temp2_uchar/temp1_uchar));
+   }
+   nfound++;
+  }
+ }
+ /* -d and -p */
+ else if ( options->d && options->p)
+ {
+  if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent && 
+   abs(temp1_uchar-temp2_uchar) > options->delta )
+  {
+   if ( options->r==0 ) 
+   {
+    print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+    printf(SPACES);
+    printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
+     abs(1-temp2_uchar/temp1_uchar));
+   }
+   nfound++;
+  }
+ }
+ else if (temp1_uchar != temp2_uchar)
+ {
+  if ( options->r==0 ) 
+  {
+   print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+   printf(SPACES);
+   printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
+  }
+  nfound++;
+ }
+ 
+ return nfound;
+} 

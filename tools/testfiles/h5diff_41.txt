@@ -2,7 +2,5 @@
 Expected output for 'h5diff file5.h5 file5.h5 -v dset3 dset4'
 #############################
 $h5diff file5.h5 file5.h5 -v dset3 dset4
-Comparing </dset4> with </dset4>
-0 differences found
 
 
