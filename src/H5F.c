@@ -1334,7 +1334,7 @@ H5F_close(H5F_t *f)
     Close an open HDF5 file.
 
  USAGE
-    int32 H5Fclose(fid)
+    herr_t H5Fclose(fid)
         int32 fid;      IN: File ID of file to close
 
  ERRORS
