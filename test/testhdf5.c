@@ -173,6 +173,7 @@ main(int argc, char *argv[])
     InitTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes");
     InitTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings");
     InitTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration");
+    InitTest("array", test_array, cleanup_array,  "Array Datatypes");
 
     Verbosity = 4;              /* Default Verbosity is Low */
     H5get_libversion(&major, &minor, &release);

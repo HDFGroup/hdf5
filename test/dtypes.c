@@ -440,9 +440,10 @@ test_compound_2(void)
     } *d_ptr;
 
     const int		nelmts = NTESTELEM;
-    const size_t	four = 4;
+    const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
+    hid_t       array_dt;
     int			i;
 
     TESTING("compound element reordering");
@@ -465,23 +466,25 @@ test_compound_2(void)
     memcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
+    array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
     if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-	H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-	H5Tinsert_array(st, "c", HOFFSET(struct st, c), 1, &four, NULL,
-			H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
-	goto error;
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+        goto error;
+    H5Tclose(array_dt);
     
+    array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
     if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-	H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
-	H5Tinsert_array(dt, "c", HOFFSET(struct dt, c), 1, &four, NULL,
-			H5T_NATIVE_INT)<0 ||
-	H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
-	goto error;
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+        goto error;
+    H5Tclose(array_dt);
     
     /* Perform the conversion */
     if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
@@ -554,9 +557,10 @@ test_compound_3(void)
     } *d_ptr;
 
     const int		nelmts = NTESTELEM;
-    const size_t	four = 4;
+    const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
+    hid_t       array_dt;
     int			i;
 
     TESTING("compound subset conversions");
@@ -566,37 +570,40 @@ test_compound_3(void)
     bkg = malloc(nelmts * sizeof(struct dt));
     orig = malloc(nelmts * sizeof(struct st));
     for (i=0; i<nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	s_ptr->a    = i*8+0;
-	s_ptr->b    = i*8+1;
-	s_ptr->c[0] = i*8+2;
-	s_ptr->c[1] = i*8+3;
-	s_ptr->c[2] = i*8+4;
-	s_ptr->c[3] = i*8+5;
-	s_ptr->d    = i*8+6;
-	s_ptr->e    = i*8+7;
+        s_ptr = ((struct st*)orig) + i;
+        s_ptr->a    = i*8+0;
+        s_ptr->b    = i*8+1;
+        s_ptr->c[0] = i*8+2;
+        s_ptr->c[1] = i*8+3;
+        s_ptr->c[2] = i*8+4;
+        s_ptr->c[3] = i*8+5;
+        s_ptr->d    = i*8+6;
+        s_ptr->e    = i*8+7;
     }
     memcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
+    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-	H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-	H5Tinsert_array(st, "c", HOFFSET(struct st, c), 1, &four, NULL,
-			H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
-	goto error;
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+        goto error;
+    H5Tclose(array_dt);
     
+    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-	H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-	H5Tinsert_array(dt, "c", HOFFSET(struct dt, c), 1, &four, NULL,
-			H5T_NATIVE_INT)<0 ||
-	H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
-	goto error;
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+        goto error;
+    H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
+        goto error;
 
     /* Compare results */
     for (i=0; i<nelmts; i++) {
@@ -668,9 +675,10 @@ test_compound_4(void)
     } *d_ptr;
 
     const int		nelmts = NTESTELEM;
-    const size_t	four = 4;
+    const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
+    hid_t       array_dt;
     int			i;
 
     TESTING("compound element shrinking & reordering");
@@ -680,39 +688,42 @@ test_compound_4(void)
     bkg = malloc(nelmts * sizeof(struct dt));
     orig = malloc(nelmts * sizeof(struct st));
     for (i=0; i<nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	s_ptr->a    = i*8+0;
-	s_ptr->b    = (i*8+1) & 0x7fff;
-	s_ptr->c[0] = i*8+2;
-	s_ptr->c[1] = i*8+3;
-	s_ptr->c[2] = i*8+4;
-	s_ptr->c[3] = i*8+5;
-	s_ptr->d    = (i*8+6) & 0x7fff;
-	s_ptr->e    = i*8+7;
+        s_ptr = ((struct st*)orig) + i;
+        s_ptr->a    = i*8+0;
+        s_ptr->b    = (i*8+1) & 0x7fff;
+        s_ptr->c[0] = i*8+2;
+        s_ptr->c[1] = i*8+3;
+        s_ptr->c[2] = i*8+4;
+        s_ptr->c[3] = i*8+5;
+        s_ptr->d    = (i*8+6) & 0x7fff;
+        s_ptr->e    = i*8+7;
     }
     memcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
+    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-	H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-	H5Tinsert_array(st, "c", HOFFSET(struct st, c), 1, &four, NULL,
-			H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
-	goto error;
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+        goto error;
+    H5Tclose(array_dt);
     
+    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
     if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-	H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-	H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
-	H5Tinsert_array(dt, "c", HOFFSET(struct dt, c), 1, &four, NULL,
-			H5T_NATIVE_INT)<0 ||
-	H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
-	H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
-	goto error;
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+        goto error;
+    H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
+        goto error;
 
     /* Compare results */
     for (i=0; i<nelmts; i++) {
@@ -787,8 +798,9 @@ test_compound_5(void)
         int     coll_ids[4];
     } dst_type_t;
 
-    size_t      dims[1] = {4};
+    hsize_t      dims[1] = {4};
     hid_t       src_type, dst_type, short_array, int_array, string;
+    hid_t       array_dt;
     src_type_t  src[2] = {{"one", 102, {104, 105, 106, 107}},
                           {"two", 202, {204, 205, 206, 207}}};
     
@@ -807,10 +819,14 @@ test_compound_5(void)
 
     /* Build datatypes */
     short_array = H5Tcreate(H5T_COMPOUND, 4*sizeof(short));
-    H5Tinsert_array(short_array, "_", 0, 1, dims, NULL, H5T_NATIVE_SHORT);
+    array_dt=H5Tarray_create(H5T_NATIVE_SHORT, 1, dims, NULL);
+    H5Tinsert(short_array, "_", 0, array_dt);
+    H5Tclose(array_dt);
 
     int_array   = H5Tcreate(H5T_COMPOUND, 4*sizeof(int));
-    H5Tinsert_array(int_array, "_", 0, 1, dims, NULL, H5T_NATIVE_INT);
+    array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, dims, NULL);
+    H5Tinsert(int_array, "_", 0, array_dt);
+    H5Tclose(array_dt);
 
     string = H5Tcopy(H5T_C_S1);
     H5Tset_size(string, 16);

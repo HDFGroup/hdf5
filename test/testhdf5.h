@@ -130,6 +130,7 @@ void                    test_reference(void);
 void                    test_vltypes(void);
 void                    test_vlstrings(void);
 void                    test_iterate(void);
+void                    test_array(void);
 
 /* Prototypes for the cleanup routines */
 void                    cleanup_metadata(void);
@@ -142,5 +143,6 @@ void                    cleanup_reference(void);
 void                    cleanup_vltypes(void);
 void                    cleanup_vlstrings(void);
 void                    cleanup_iterate(void);
+void                    cleanup_array(void);
 
 #endif /* HDF5cleanup_H */
