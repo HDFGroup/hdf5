@@ -1,4 +1,3 @@
-
 /*
  * Example of using the parallel HDF5 library to access datasets.
  *
@@ -289,7 +288,8 @@ if (verbose)
     file_dataspace = H5Dget_space (dataset1);				    
     assert(file_dataspace != FAIL);					    
     MESG("H5Dget_space succeed");
-    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
+	    count, NULL);
     assert(ret != FAIL);
     MESG("H5Sset_hyperslab succeed");
 
@@ -399,7 +399,8 @@ if (verbose)
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);
     assert(file_dataspace != FAIL);
-    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
+	    count, NULL);
     assert(ret != FAIL);
 
     /* create a memory dataspace independently */
@@ -537,7 +538,8 @@ if (verbose)
     file_dataspace = H5Dget_space (dataset1);				    
     assert(file_dataspace != FAIL);					    
     MESG("H5Dget_space succeed");
-    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
+	    count, NULL);
     assert(ret != FAIL);
     MESG("H5Sset_hyperslab succeed");
 
@@ -591,7 +593,8 @@ if (verbose)
     file_dataspace = H5Dget_space (dataset1);				    
     assert(file_dataspace != FAIL);					    
     MESG("H5Dget_space succeed");
-    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
+	    count, NULL);
     assert(ret != FAIL);
     MESG("H5Sset_hyperslab succeed");
 
@@ -732,7 +735,8 @@ if (verbose)
     file_dataspace = H5Dget_space (dataset1);				    
     assert(file_dataspace != FAIL);					    
     MESG("H5Dget_space succeed");
-    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
+	    count, NULL);
     assert(ret != FAIL);
     MESG("H5Sset_hyperslab succeed");
 
@@ -782,7 +786,8 @@ if (verbose)
     file_dataspace = H5Dget_space (dataset1);				    
     assert(file_dataspace != FAIL);					    
     MESG("H5Dget_space succeed");
-    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride,
+	    count, NULL);
     assert(ret != FAIL);
     MESG("H5Sset_hyperslab succeed");
 
