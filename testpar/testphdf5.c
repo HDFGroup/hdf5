@@ -470,13 +470,17 @@ int main(int argc, char **argv)
         MPI_BANNER("Independent test skipped");
     }
         
+#ifdef LATER
     if (dobig && sizeof(MPI_Offset)>4){
         MPI_BANNER("big dataset test...");
         big_dataset(filenames[7]); 
     }
     else {
+#endif /* LATER */
         MPI_BANNER("big dataset test skipped");
+#ifdef LATER
     }
+#endif /* LATER */
     
     if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig)){
 	usage();
