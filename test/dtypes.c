@@ -60,6 +60,7 @@ const char *FILENAME[] = {
     "dtypes1",
     "dtypes2",
     "dtypes3",
+    "dtypes4",
     NULL
 };
 
@@ -1459,6 +1460,207 @@ test_compound_8(void)
     return 0;
 
   error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_9
+ *
+ * Purpose:     Tests compound data type with VL string as field.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, June 9, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_9(void)
+{
+    typedef struct cmpd_struct {
+       int          i1;
+       const char*  str;
+       int          i2;
+    } cmpd_struct;
+
+    cmpd_struct wdata = {11, "variable-length string", 22};
+    cmpd_struct rdata;
+    hid_t       file;
+    hid_t       cmpd_tid, str_id, dup_tid;
+    hid_t       space_id;
+    hid_t       dset_id;
+    hsize_t     dim1[1];
+    char        filename[1024];
+    
+    TESTING("compound data type with VL string");
+    
+    /* Create File */
+    h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create file!\n");
+        goto error;
+    } /* end if */
+
+    /* Create first compound datatype */ 
+    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct)))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT)<0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i1'\n");
+        goto error;
+    } /* end if */
+    
+    str_id = H5Tcopy(H5T_C_S1);
+    if(H5Tset_size(str_id,H5T_VARIABLE)<0) {
+        H5_FAILED(); AT();
+        printf("Can't set size for VL string\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_tid,"vl_string",HOFFSET(cmpd_struct,str),str_id)<0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i1'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_tid,"i2",HOFFSET(struct cmpd_struct,i2),H5T_NATIVE_INT)<0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i2'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tcommit(file,"compound",cmpd_tid)<0) {
+        H5_FAILED(); AT();
+        printf("Can't commit datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tclose(cmpd_tid)<0) {
+        H5_FAILED(); AT();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
+    if((cmpd_tid = H5Topen(file, "compound"))<0) {
+        H5_FAILED(); AT();
+        printf("Can't open datatype\n");
+        goto error;
+    } /* end if */
+
+    if((dup_tid = H5Tcopy(cmpd_tid))<0) { 
+        H5_FAILED(); AT();
+        printf("Can't copy datatype\n");
+        goto error;
+    } /* end if */
+
+    dim1[0] = 1;
+    if((space_id=H5Screate_simple(1,dim1,NULL))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create space\n");
+        goto error;
+    } /* end if */
+
+    if((dset_id = H5Dcreate(file,"Dataset",dup_tid,space_id,H5P_DEFAULT))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create dataset\n");
+        goto error;
+    } /* end if */
+
+    if(H5Dwrite(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata)<0) {
+        H5_FAILED(); AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+        H5_FAILED(); AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || strcmp(rdata.str, wdata.str)) {
+        H5_FAILED(); AT();
+        printf("incorrect read data\n");
+        goto error;
+    } /* end if */
+
+    if(H5Dclose(dset_id)<0)
+        goto error;      
+    if(H5Tclose(cmpd_tid)<0)
+        goto error;      
+    /*if(H5Tclose(dup_tid)<0)
+        goto error;*/      
+    if(H5Tclose(str_id)<0)
+        goto error;      
+    if(H5Sclose(space_id)<0)
+        goto error;      
+    if(H5Fclose(file)<0)
+        goto error;      
+
+
+    if((file=H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT))<0) {
+        H5_FAILED(); AT();
+        printf("cannot open file\n");
+        goto error;
+    } /* end if */
+
+    if((dset_id = H5Dopen(file, "Dataset"))<0) {
+        H5_FAILED(); AT();
+        printf("cannot open dataset\n");
+        goto error;
+    } /* end if */
+
+    if((cmpd_tid = H5Dget_type(dset_id))<0) {
+         H5_FAILED(); AT();
+        printf("cannot open dataset\n");
+        goto error;
+    } /* end if */
+    
+    if((dup_tid = H5Tcopy(cmpd_tid))<0) { 
+        H5_FAILED(); AT();
+        printf("Can't copy datatype\n");
+        goto error;
+    } /* end if */
+
+    rdata.i1 = rdata.i2 = 0;
+    free(rdata.str);
+
+    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+        H5_FAILED(); AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || strcmp(rdata.str, wdata.str)) {
+        H5_FAILED(); AT();
+        printf("incorrect read data\n");
+        goto error;
+    } /* end if */
+
+    if(H5Dclose(dset_id)<0)
+        goto error;      
+    if(H5Tclose(cmpd_tid)<0)
+        goto error;      
+    if(H5Tclose(dup_tid)<0)
+        goto error;      
+    if(H5Fclose(file)<0)
+        goto error;      
+
+    PASSED();
+    return 0;
+
+ error:
     return 1;
 }
 
@@ -5801,6 +6003,7 @@ main(void)
     nerrors += test_compound_6();
     nerrors += test_compound_7();
     nerrors += test_compound_8();
+    nerrors += test_compound_9();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();

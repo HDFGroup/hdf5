@@ -2727,6 +2727,14 @@ H5T_open (H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     /* Open the datatype object */
     if ((dt=H5T_open_oid(&ent, dxpl_id)) ==NULL)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
+    
+    /* Mark any datatypes as being in memory now */
+    if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+            
+    /* Unlock data type */
+    if (H5T_lock (dt, FALSE)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to lock transient data type")
 
     /* Set return value */
     ret_value=dt;
@@ -4347,7 +4355,7 @@ done:
  USAGE
     htri_t H5T_set_loc(dt,f,loc)
         H5T_t *dt;              IN/OUT: Pointer to the datatype to mark
-        H5F_t *dt;              IN: Pointer to the file the datatype is in
+        H5F_t *f;               IN: Pointer to the file the datatype is in
         H5T_vlen_type_t loc     IN: location of type
         
  RETURNS

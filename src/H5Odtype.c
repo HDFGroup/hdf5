@@ -1122,7 +1122,9 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
     assert (sh);
 
     if (H5F_addr_defined (dt->ent.header)) {
-	assert (H5T_STATE_NAMED==dt->state || H5T_STATE_OPEN==dt->state);
+	if(H5T_STATE_NAMED!=dt->state && H5T_STATE_OPEN!=dt->state && H5T_STATE_TRANSIENT!=dt->state)
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "datatype state is not valid");
+
 	sh->in_gh = FALSE;
 	sh->u.ent = dt->ent;
     } else
