@@ -1391,6 +1391,11 @@ H5Z_xform_create(const char *expr)
     if((data_xform_prop->parse_root = H5Z_xform_parse(expr, data_xform_prop->dat_val_pointers))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to generate parse tree from expression")
 
+    /* Sanity check
+     * count should be the same num_ptrs */
+    if(count != data_xform_prop->dat_val_pointers->num_ptrs)
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "error copying the parse tree, did not find correct number of \"variables\"")
+
     /* Assign return value */
     ret_value=data_xform_prop;
 
@@ -1513,10 +1518,16 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 	   
 	/* Zero out num_pointers prior to H5Z_xform_cop_tree call; that call will increment it to the right amount */
 	new_data_xform_prop->dat_val_pointers->num_ptrs = 0;
-		
+    
+
         /* Copy parse tree */
         if((new_data_xform_prop->parse_root = (H5Z_node*)H5Z_xform_copy_tree((*data_xform_prop)->parse_root, (*data_xform_prop)->dat_val_pointers, new_data_xform_prop->dat_val_pointers)) == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "error copying the parse tree")
+	
+	/* Sanity check
+	 * count should be the same num_ptrs */
+	if(count != new_data_xform_prop->dat_val_pointers->num_ptrs)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "error copying the parse tree, did not find correct number of \"variables\"")
 
         /* Copy new information on top of old information */
         *data_xform_prop=new_data_xform_prop;
@@ -1591,8 +1602,8 @@ H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
 
     FUNC_ENTER_NOAPI_NOFUNC(H5Z_xform_extract_xform_str)
 
-    /* There should be no way that these can be NULL since the function
-     * that calls this one checks to make sure they aren't before
+    /* There should be no way that this can be NULL since the function
+     * that calls this one checks to make sure it isn't before
      * pasing them */
     assert(data_xform_prop);
   

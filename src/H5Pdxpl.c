@@ -115,7 +115,6 @@ ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t s
     size_t	len;
     char*	pexp;
 
-  
     FUNC_ENTER_API(H5Pget_data_transform, FAIL);
 
     /* Get the plist structure */
@@ -134,6 +133,8 @@ ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t s
     if(!pexp)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Failed to retrieve transform expression");
     
+    
+    
     len = HDstrlen(pexp);
     if(expression)
     {
@@ -142,7 +143,7 @@ ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t s
             expression[size-1]='\0';
     }
     
-    ret_value = (ssize_t)len;
+    ret_value = (ssize_t)len + 1;
     
 done:
     if(ret_value<0) {
