@@ -8543,60 +8543,6 @@ rm -rf conftest*
     fi
     ;;
 
-  X-mpich)
-                    echo "$as_me:$LINENO: result: mpich" >&5
-echo "${ECHO_T}mpich" >&6
-    { echo "$as_me:$LINENO: WARNING: *** Why aren't you using an mpicc compiler? ***" >&5
-echo "$as_me: WARNING: *** Why aren't you using an mpicc compiler? ***" >&2;}
-
-                        PARALLEL=mpich
-
-
-ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
-cross_compiling=$ac_cv_prog_f9x_cross
-
-
-test -d conftestdir || mkdir conftestdir
-cd conftestdir
-rm -rf *
-
-cat >conftest.$ac_ext <<EOF
-        program conftest
-
-        include 'mpif.h'
-        call mpi_file_open( ierr )
-        end
-EOF
-
-if test -n "fmpich"; then
-  saved_LDFLAGS="$LDFLAGS"
-  LDFLAGS="$LDFLAGS -lfmpich"
-fi
-
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
-  :
-
-else
-  LDFLAGS="$saved_LDFLAGS"
-  { { echo "$as_me:$LINENO: error: no mpich library" >&5
-echo "$as_me: error: no mpich library" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-cd ..
-rm -rf conftest*
-
-    ;;
-
   *)
     echo "$as_me:$LINENO: result: error" >&5
 echo "${ECHO_T}error" >&6
@@ -8897,7 +8843,7 @@ fi
 
 saved_no_create=$no_create
 no_create=yes
-ac_config_files="$ac_config_files config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/H5fortran_types.f90 src/Makefile test/Makefile $PARALLEL_MAKE examples/Makefile"
+ac_config_files="$ac_config_files config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/h5fc src/H5fortran_types.f90 src/Makefile test/Makefile $PARALLEL_MAKE examples/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9388,6 +9334,7 @@ do
   "config/commence" ) CONFIG_FILES="$CONFIG_FILES config/commence" ;;
   "config/conclude" ) CONFIG_FILES="$CONFIG_FILES config/conclude" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "src/h5fc" ) CONFIG_FILES="$CONFIG_FILES src/h5fc" ;;
   "src/H5fortran_types.f90" ) CONFIG_FILES="$CONFIG_FILES src/H5fortran_types.f90" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
@@ -10056,3 +10003,5 @@ no_create=$saved_no_create
 touch ./config/stamp2
 
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+
+chmod 755 src/h5fc
