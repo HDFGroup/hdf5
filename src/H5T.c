@@ -1915,7 +1915,7 @@ H5T_term_interface(void)
 				 (unsigned long)(path->func), path->name);
 		    }
 #endif
-		    H5E_clear(H5E_get_my_stack()); /*ignore the error*/
+		    H5E_clear(NULL); /*ignore the error*/
 		}
 	    }
 
@@ -2852,7 +2852,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                 H5I_dec_ref(tmp_sid);
                 H5I_dec_ref(tmp_did);
                 tmp_sid = tmp_did = -1;
-                H5E_clear(H5E_get_my_stack());
+                H5E_clear(NULL);
                 continue;
             } /* end if */
 
@@ -2894,7 +2894,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             tmp_sid = tmp_did = -1;
 
             /* We don't care about any failures during the freeing process */
-	    H5E_clear(H5E_get_my_stack());
+	    H5E_clear(NULL);
         } /* end for */
     } /* end else */
     
@@ -3049,7 +3049,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
         H5T_close(path->src);
         H5T_close(path->dst);
         H5FL_FREE(H5T_path_t,path);
-        H5E_clear(H5E_get_my_stack()); /*ignore all shutdown errors*/
+        H5E_clear(NULL); /*ignore all shutdown errors*/
     }
 
 done:
@@ -4556,7 +4556,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 			"conversion function (ignored)\n");
 	    }
 #endif
-	    H5E_clear(H5E_get_my_stack()); /*ignore the error*/
+	    H5E_clear(NULL); /*ignore the error*/
 	}
 	H5T_g.npaths = 1;
     }
@@ -4666,7 +4666,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	if ((H5T_g.soft[i].func) (src_id, dst_id, &(path->cdata),
                                   (hsize_t)0, 0, 0, NULL, NULL, dxpl_id)<0) {
 	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
-	    H5E_clear(H5E_get_my_stack()); /*ignore the error*/
+	    H5E_clear(NULL); /*ignore the error*/
 	} else {
 	    HDstrcpy (path->name, H5T_g.soft[i].name);
 	    path->func = H5T_g.soft[i].func;
@@ -4716,7 +4716,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 			(unsigned long)(path->func), path->name);
 	    }
 #endif
-	    H5E_clear(H5E_get_my_stack()); /*ignore the failure*/
+	    H5E_clear(NULL); /*ignore the failure*/
 	}
 	if (table->src) H5T_close(table->src);
 	if (table->dst) H5T_close(table->dst);

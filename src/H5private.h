@@ -1165,7 +1165,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     FUNC_ENTER_API_THREADSAFE;                                                \
     FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                      \
     /* Clear thread error stack entering public functions */		      \
-    H5E_clear(H5E_get_my_stack());				      \
+    H5E_clear(NULL);				      \
     {
 
 /*

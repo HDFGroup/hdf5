@@ -509,7 +509,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                     if (NULL==(fclass=H5Z_find(dcpl_pline.filter[u].id))) {
                         /* Ignore errors from optional filters */
                         if (dcpl_pline.filter[u].flags & H5Z_FLAG_OPTIONAL)
-                            H5E_clear(H5E_get_my_stack());
+                            H5E_clear(NULL);
                         else
                             HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "required filter was not located")
                     } /* end if */
@@ -942,7 +942,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 
                 *nbytes = *buf_size;
                 failed |= (unsigned)1 << idx;
-                H5E_clear(H5E_get_my_stack());
+                H5E_clear(NULL);
             } else {
                 *nbytes = new_nbytes;
             }
@@ -959,7 +959,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 		    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered")
 
 		failed |= (unsigned)1 << idx;
-                H5E_clear(H5E_get_my_stack());
+                H5E_clear(NULL);
 		continue; /*filter excluded*/
 	    }
             fclass=&H5Z_table_g[fclass_idx];
@@ -984,7 +984,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 }
 
                 failed |= (unsigned)1 << idx;
-                H5E_clear(H5E_get_my_stack());
+                H5E_clear(NULL);
             } else {
                 *nbytes = new_nbytes;
             }

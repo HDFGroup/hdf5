@@ -433,7 +433,7 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
             /* Release old space on disk */
             H5_CHECK_OVERFLOW(heap->disk_alloc,size_t,hsize_t);
 	    H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, old_addr, (hsize_t)heap->disk_alloc);
-	    H5E_clear(H5E_get_my_stack()); /*don't really care if the free failed */
+	    H5E_clear(NULL); /*don't really care if the free failed */
 
             /* Allocate new space on disk */
             H5_CHECK_OVERFLOW(heap->mem_alloc,size_t,hsize_t);

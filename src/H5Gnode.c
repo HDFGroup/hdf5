@@ -1115,7 +1115,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             /* Remove the symbolic link value */
             if ((s=H5HL_peek(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].cache.slink.lval_offset)))
                 H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].cache.slink.lval_offset, HDstrlen(s)+1);
-            H5E_clear(H5E_get_my_stack()); /* no big deal */
+            H5E_clear(NULL); /* no big deal */
         } else {
             /* Decrement the reference count */
             assert(H5F_addr_defined(sn->entry[idx].header));
@@ -1126,7 +1126,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         /* Remove the name from the local heap */
         if ((s=H5HL_peek(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].name_off)))
             H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].name_off, HDstrlen(s)+1);
-        H5E_clear(H5E_get_my_stack()); /* no big deal */
+        H5E_clear(NULL); /* no big deal */
 
         /* Remove the entry from the symbol table node */
         if (1==sn->nsyms) {
@@ -1504,7 +1504,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL))) {
         H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
 
-        H5E_clear(H5E_get_my_stack()); /* discard that error */
+        H5E_clear(NULL); /* discard that error */
         udata.heap_addr = heap;
 	if ( H5B_debug(f, dxpl_id, addr, stream, indent, fwidth, H5B_SNODE, &udata) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to debug B-tree node");

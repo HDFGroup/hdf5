@@ -276,7 +276,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 	seq++;
     }
-    H5E_clear(H5E_get_my_stack());				      \
+    H5E_clear(NULL);
 
     /* Create the attribute message and save the attribute index */
     if (H5O_modify(&(attr->ent), H5O_ATTR_ID, H5O_NEW_MESG, 0, 1, attr, dxpl_id) < 0) 
@@ -348,7 +348,7 @@ H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 	i++;
     }
-    H5E_clear(H5E_get_my_stack());				      \
+    H5E_clear(NULL);
     
     if(ret_value<0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
@@ -1326,7 +1326,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 	    if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 	}
-        H5E_clear(H5E_get_my_stack());				      \
+        H5E_clear(NULL);
     }
     else
         if(start_idx>0)
@@ -1401,7 +1401,7 @@ H5Adelete(hid_t loc_id, const char *name)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 	idx++;
     }
-    H5E_clear(H5E_get_my_stack());				      \
+    H5E_clear(NULL);
     if (found<0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
 
