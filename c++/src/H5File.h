@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class H5File : public IdComponent, public CommonFG {
+class __DLLCPP__ H5File : public IdComponent, public CommonFG {
    public:
 	// copy constructor: makes a copy of the original H5File object.
 	H5File(const H5File& original );

@@ -1,3 +1,4 @@
+#include "H5Include.h"
 #include "H5RefCounter.h"
 
 #ifndef H5_NO_NAMESPACE

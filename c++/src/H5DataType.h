@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class DataType : public H5Object {
+class __DLLCPP__ DataType : public H5Object {
    public:
 	// Creates a datatype given its class and size
 	DataType( const H5T_class_t type_class, size_t size );

@@ -10,7 +10,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
-class AtomType : public DataType {
+class __DLLCPP__ AtomType : public DataType {
    public:
 	// Sets the total size for an atomic datatype. 
 	void setSize( size_t size ) const;

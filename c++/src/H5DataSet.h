@@ -8,7 +8,7 @@
 namespace H5 {
 #endif
 
-class DataSet : public AbstractDs {
+class __DLLCPP__ DataSet : public AbstractDs {
    public:
 	// Gets the dataspace of this dataset.
 	virtual DataSpace getSpace() const;

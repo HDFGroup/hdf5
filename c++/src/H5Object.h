@@ -13,7 +13,7 @@
 namespace H5 {
 #endif
 
-class H5Object;  // forward declaration for UserData4Aiterate
+class  __DLLCPP__ H5Object;  // forward declaration for UserData4Aiterate
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)( H5Object& loc/*in*/, 

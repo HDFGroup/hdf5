@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class DataSpace : public IdComponent {
+class __DLLCPP__ DataSpace : public IdComponent {
    public:
 	// Default DataSpace objects
 	static const DataSpace ALL;
