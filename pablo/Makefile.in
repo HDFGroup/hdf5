@@ -68,17 +68,21 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5Dio.c H5E.c H5F.c H5FD.c \
 
 PABLO_OBJ=PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o PabloHDF_MPIO.o
 
-LIB_XOBJ=$(LIB_SRC:.c=.x)
-LIB_COBJ=$(LIB_XOBJ:.x=.o)
+PABLO_INCLUDES=HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h   \
+               ProcTrace.inc
+
+LIB_COBJ=$(LIB_SRC:.c=.o)
 LIB_OBJ=$(PABLO_OBJ) $(LIB_COBJ)
 
-.c.x:
+$(LIB_COBJ): $(PABLO_INCLUDES)
+$(PABLO_OBJ): $(PABLO_INCLUDES)
+.c.o:
 	if test "$*" != "H5Tinit"; then                                  \
 	  $(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c -o $*.o; \
 	else                                                             \
 	  $(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_builddir)/src/$*.c -o $*.o; \
 	fi;
-	cp $*.o $@
+#	cp $*.o $@
 
 # 'vpath' directive is only supported in gmake, take out - QAK
 #vpath %.c   $(shell echo $(SRCDIRS) | sed 's/ /:/g')
@@ -93,11 +97,12 @@ PABLO_HDR=HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h   \
 ## from `./config/conclude.in'.
 ##-----------------------------------------------------------------------------
 
+
 ## This is the target for the library described in the main body of the
 ## makefile.
 ##
 lib: $(PABLO_INCLUDES) $(LIB)
-$(LIB): $(PABLO_OBJ) $(LIB_XOBJ) 
+$(LIB): $(PABLO_OBJ) $(LIB_COBJ) 
 	$(AR) -rc $@ $(LIB_OBJ)
 	$(RANLIB) $@
 ##
@@ -116,7 +121,7 @@ TAGS: $(LIB_SRC)
 tests: 
 
 ## Install the library, the public header files, and programs.
-install: $(LIB) 
+install: $(LIB) $(PABLO_HDR)
 	@test -d $(libdir) || mkdir $(libdir)
 	@for f in X $(LIB); do                                                 \
 	  if test $$f != X; then                                               \
@@ -125,9 +130,14 @@ install: $(LIB)
 	done
 	@test -d $(includedir) || mkdir $(includedir)
 	@for f in X $(PABLO_HDR); do                                           \
-	  if test $$f != X; then                                               \
-	    (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);           \
-	  fi                                                                   \
+	    if test $$f != X; then                                             \
+	       if test -f $$f; then                                            \
+	          (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);     \
+	       else                                                            \
+	          (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(includedir)/. ||    \
+	             exit 1);                                                  \
+	       fi;                                                             \
+	    fi;                                                                \
 	done
 
 ## Removes those things that `make install' (would have) installed.
@@ -146,7 +156,7 @@ mostlyclean:
 ## libraries and executables.  This target doesn't remove any file that
 ## is part of the HDF5 distribution.
 ##
-clean: mostlyclean
+clean: mostlyclean pablo_clean
 	$(RM) $(LIB) $(TESTS) $(PROGS) $(CLEAN) H*.c 
 
 pablo_clean: clean
@@ -173,10 +183,7 @@ maintainer-clean: distclean
 .c.lo:
 	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c $<
 
-.PHONY: all progs test _test check dep depend
-
-PABLO_INCLUDES=HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h   \
-               ProcTrace.inc
+.PHONY: progs test _test check dep depend
 
 PABLO_CLEAN=HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt            \
             ProcTrace.inc
@@ -186,27 +193,27 @@ PABLO_CLEAN=HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt            \
 # create HDFentryNames.h, HDFidList.h, ProcMask.h and ProcTrace.inc whenever
 # new procedures are added.
 #
-#HDFentries.txt: $(top_srcdir)/src/*.c
-#	grep "FUNC_ENTER[_INITNOAPICLEARFS ]*(" $(top_srcdir)/src/*.[ch] |   \
-#       sed "s/.*FUNC_ENTER[_INITNOAPICLEARFS ]*( *//;s/[,)].*//" | sort -u > $@
-#
-#HDFentryNames.h: HDFentries.txt
-#	sed "s/.*/\"&\",/" $? > $@
-#
-#HDFidList.h: HDFentries.txt
-#	sed "s/.*/ID_&,/" $? > $@
-#	echo ID_ALLHDF, >> $@
-#	grep "#define[ 	]*PABLO_MASK" $(top_srcdir)/src/*.c |                 \
-#           sed "s/.*H5/ID_H5/;s/mask.*/c,/" | sort -u >> $@
-#
-#ProcMasks.h: $(top_srcdir)/src/*.c
-#	grep "#define[ 	]*PABLO_MASK" $(top_srcdir)/src/*.c |                 \
-#           sed "s/.*[ 	]H5/H5/;s/_mask.*//;s/.*/#define &_mask ID_&_c/" >$@
-#
-#ProcIDs.h: HDFidList.h ProcMasks.h
-#
-#ProcTrace.inc: HDFidList.h
-#	sed "=" $? | sed -f $(top_srcdir)/pablo/PabloSedscr > $@
+HDFentries.txt: $(top_srcdir)/src/*.c
+	grep "FUNC_ENTER[_INITNOAPICLEARFS ]*(" $(top_srcdir)/src/*.[ch] |   \
+       sed "s/.*FUNC_ENTER[_INITNOAPICLEARFS ]*( *//;s/[,)].*//" | sort -u > $@
+
+HDFentryNames.h: HDFentries.txt
+	sed "s/.*/\"&\",/" $? > $@
+
+HDFidList.h: HDFentries.txt
+	sed "s/.*/ID_&,/" $? > $@
+	echo ID_ALLHDF, >> $@
+	grep "#define[ 	]*PABLO_MASK" $(top_srcdir)/src/*.c |                 \
+           sed "s/.*H5/ID_H5/;s/mask.*/c,/" | sort -u >> $@
+
+ProcMasks.h: $(top_srcdir)/src/*.c
+	grep "#define[ 	]*PABLO_MASK" $(top_srcdir)/src/*.c |                 \
+           sed "s/.*[ 	]H5/H5/;s/_mask.*//;s/.*/#define &_mask ID_&_c/" >$@
+
+ProcIDs.h: HDFidList.h ProcMasks.h
+
+ProcTrace.inc: HDFidList.h
+	sed "=" $? | sed -f $(top_srcdir)/pablo/PabloSedscr > $@
 
 PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES) 
 	$(CC) -g $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
