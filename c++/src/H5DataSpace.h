@@ -21,7 +21,7 @@ class DataSpace : public IdComponent {
 	void copy( const DataSpace& like_space ); // H5Scopy
 
 	// Assignment operator
-	virtual DataSpace& operator=( const DataSpace& rhs );
+	DataSpace& operator=( const DataSpace& rhs );
 
 	// Determines if this dataspace is a simple one.
 	bool isSimple() const;
