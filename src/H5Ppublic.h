@@ -67,10 +67,6 @@ typedef herr_t (*H5P_prp_close_func_t)(const char *name, size_t size, void *valu
 /* Define property list iteration function type */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*
  * The library created property list classes
  */
@@ -108,6 +104,13 @@ H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_g;
 H5_DLLVAR hid_t H5P_LST_DATASET_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_DATASET_XFER_g;
 H5_DLLVAR hid_t H5P_LST_MOUNT_g;
+
+/* Default hash table size */
+#define H5P_DEFAULT_HASH_SIZE           17
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Public functions */
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
