@@ -723,7 +723,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                 } /* end else */
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->dst = ((uint8 *)fhyper_info->dst) +
+                fhyper_info->dst = ((uint8_t *)fhyper_info->dst) +
 				   region_size*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
@@ -989,7 +989,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                 } /* end else */
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->src = ((const uint8 *)fhyper_info->src) +
+                fhyper_info->src = ((const uint8_t *)fhyper_info->src) +
 				   region_size*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
@@ -1243,7 +1243,7 @@ H5S_hyper_mread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                 }
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->dst = ((uint8 *)fhyper_info->dst) +
+                fhyper_info->dst = ((uint8_t *)fhyper_info->dst) +
 				   region_size*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
@@ -1514,7 +1514,7 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                 }
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->src = ((const uint8 *)fhyper_info->src) +
+                fhyper_info->src = ((const uint8_t *)fhyper_info->src) +
 				   region_size*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
@@ -2737,11 +2737,11 @@ H5S_hyper_select_serial_size (const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_select_serialize (const H5S_t *space, uint8 *buf)
+H5S_hyper_select_serialize (const H5S_t *space, uint8_t *buf)
 {
     H5S_hyper_node_t *curr;     /* Hyperslab information nodes */
-    uint8 *lenp;            /* pointer to length location for later storage */
-    uint32 len=0;           /* number of bytes used */
+    uint8_t *lenp;          /* pointer to length location for later storage */
+    uint32_t len=0;         /* number of bytes used */
     intn i;                 /* local counting variable */
     herr_t ret_value=FAIL;  /* return value */
 
@@ -2750,18 +2750,18 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8 *buf)
     assert(space);
 
     /* Store the preamble information */
-    UINT32ENCODE(buf, (uint32)space->select.type);  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32)1);  /* Store the version number */
-    UINT32ENCODE(buf, (uint32)0);  /* Store the un-used padding */
+    UINT32ENCODE(buf, (uint32_t)space->select.type);  /* Store the type of selection */
+    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     lenp=buf;           /* keep the pointer to the length location for later */
     buf+=4;             /* skip over space for length */
 
     /* Encode number of dimensions */
-    UINT32ENCODE(buf, (uint32)space->extent.u.simple.rank);
+    UINT32ENCODE(buf, (uint32_t)space->extent.u.simple.rank);
     len+=4;
 
     /* Encode number of elements */
-    UINT32ENCODE(buf, (uint32)space->select.sel_info.hslab.hyper_lst->count);
+    UINT32ENCODE(buf, (uint32_t)space->select.sel_info.hslab.hyper_lst->count);
     len+=4;
 
     /* Encode each point in selection */
@@ -2772,17 +2772,17 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8 *buf)
 
         /* Encode starting point */
         for(i=0; i<space->extent.u.simple.rank; i++)
-            UINT32ENCODE(buf, (uint32)curr->start[i]);
+            UINT32ENCODE(buf, (uint32_t)curr->start[i]);
 
         /* Encode starting point */
         for(i=0; i<space->extent.u.simple.rank; i++)
-            UINT32ENCODE(buf, (uint32)curr->end[i]);
+            UINT32ENCODE(buf, (uint32_t)curr->end[i]);
 
         curr=curr->next;
     } /* end while */
 
     /* Encode length */
-    UINT32ENCODE(lenp, (uint32)len);  /* Store the length of the extra information */
+    UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
     
     /* Set success */
     ret_value=SUCCEED;

@@ -43,10 +43,10 @@
  *-------------------------------------------------------------------------
  */
 static uintn
-init_full(uint8 *array, size_t nx, size_t ny, size_t nz)
+init_full(uint8_t *array, size_t nx, size_t ny, size_t nz)
 {
     size_t		    i, j, k;
-    uint8		    acc = 128;
+    uint8_t		    acc = 128;
     uintn		    total = 0;
 
     for (i=0; i<nx; i++) {
@@ -75,7 +75,7 @@ init_full(uint8 *array, size_t nx, size_t ny, size_t nz)
  *-------------------------------------------------------------------------
  */
 static void
-print_array(uint8 *array, size_t nx, size_t ny, size_t nz)
+print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 {
     size_t	i, j, k;
 
@@ -118,9 +118,9 @@ print_array(uint8 *array, size_t nx, size_t ny, size_t nz)
 static void
 print_ref(size_t nx, size_t ny, size_t nz)
 {
-    uint8		   *array;
+    uint8_t		   *array;
 
-    array = H5MM_calloc(nx*ny*nz*sizeof(uint8));
+    array = H5MM_calloc(nx*ny*nz*sizeof(uint8_t));
 
     printf("Reference array:\n");
     init_full(array, nx, ny, nz);
@@ -148,7 +148,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
 	  size_t di, size_t dj, size_t dk,
 	  size_t ddx, size_t ddy, size_t ddz)
 {
-    uint8	*dst = NULL;		/*destination array		*/
+    uint8_t	*dst = NULL;		/*destination array		*/
     hsize_t	hs_size[3];	    	/*hyperslab size		*/
     hsize_t	dst_size[3];	    	/*destination total size	*/
     hssize_t	dst_offset[3];	    	/*offset of hyperslab in dest   */
@@ -312,8 +312,8 @@ test_copy(int mode,
 	  size_t di, size_t dj, size_t dk,
 	  size_t ddx, size_t ddy, size_t ddz)
 {
-    uint8	*src = NULL;		/*source array			*/
-    uint8	*dst = NULL;		/*destination array		*/
+    uint8_t	*src = NULL;		/*source array			*/
+    uint8_t	*dst = NULL;		/*destination array		*/
     hsize_t	hs_size[3];		/*hyperslab size		*/
     hsize_t	dst_size[3];		/*destination total size	*/
     hsize_t	src_size[3];		/*source total size		*/
@@ -650,13 +650,13 @@ test_multifill(size_t nx)
 		printf("   fill={%d,%g,%d}\n   ",
 		       fill.left, fill.mid, fill.right);
 		for (j = 0; j < sizeof(fill); j++) {
-		    printf(" %02x", ((uint8 *) &fill)[j]);
+		    printf(" %02x", ((uint8_t *) &fill)[j]);
 		}
 		printf("\n   dst[%lu]={%d,%g,%d}\n   ",
 		       (unsigned long)i,
 		       dst[i].left, dst[i].mid, dst[i].right);
 		for (j = 0; j < sizeof(dst[i]); j++) {
-		    printf(" %02x", ((uint8 *) (dst + i))[j]);
+		    printf(" %02x", ((uint8_t *) (dst + i))[j]);
 		}
 		printf("\n");
 	    }
@@ -696,8 +696,8 @@ test_multifill(size_t nx)
 static herr_t
 test_endian(size_t nx)
 {
-    uint8	*src = NULL;		/*source array			*/
-    uint8	*dst = NULL;		/*destination array		*/
+    uint8_t	*src = NULL;		/*source array			*/
+    uint8_t	*dst = NULL;		/*destination array		*/
     hssize_t	src_stride[2];		/*source strides		*/
     hssize_t	dst_stride[2];		/*destination strides		*/
     hsize_t	size[2];		/*size vector			*/
@@ -880,9 +880,9 @@ test_transpose(size_t nx, size_t ny)
 static herr_t
 test_sub_super(size_t nx, size_t ny)
 {
-    uint8	*full = NULL;	/*original image		*/
-    uint8	*half = NULL;	/*image at 1/2 resolution	*/
-    uint8	*twice = NULL;	/*2x2 pixels			*/
+    uint8_t	*full = NULL;	/*original image		*/
+    uint8_t	*half = NULL;	/*image at 1/2 resolution	*/
+    uint8_t	*twice = NULL;	/*2x2 pixels			*/
     hssize_t	src_stride[4];	/*source stride info		*/
     hssize_t	dst_stride[4];	/*destination stride info	*/
     hsize_t	size[4];	/*number of sample points	*/
@@ -910,7 +910,7 @@ test_sub_super(size_t nx, size_t ny)
     dst_stride[1] = 1;
 
     /* Copy */
-    H5V_stride_copy(2, (hsize_t)sizeof(uint8), size,
+    H5V_stride_copy(2, (hsize_t)sizeof(uint8_t), size,
 		    dst_stride, half, src_stride, full);
 
     /* Check */
@@ -956,12 +956,12 @@ test_sub_super(size_t nx, size_t ny)
     src_stride[2] = 0;
     src_stride[3] = 0;
     dst_stride[0] = (ssize_t)(2 * ny);
-    dst_stride[1] = (ssize_t)(2 * sizeof(uint8) - 4 * ny);
-    dst_stride[2] = (ssize_t)(2 * ny - 2 * sizeof(uint8));
-    dst_stride[3] = sizeof(uint8);
+    dst_stride[1] = (ssize_t)(2 * sizeof(uint8_t) - 4 * ny);
+    dst_stride[2] = (ssize_t)(2 * ny - 2 * sizeof(uint8_t));
+    dst_stride[3] = sizeof(uint8_t);
 
     /* Copy */
-    H5V_stride_copy(4, (hsize_t)sizeof(uint8), size,
+    H5V_stride_copy(4, (hsize_t)sizeof(uint8_t), size,
 		    dst_stride, twice, src_stride, half);
 
     /* Check */

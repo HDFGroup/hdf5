@@ -257,7 +257,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    strcpy(fmt, "%");
 	    strcat(fmt, PRINTF_LL_WIDTH);
 	    strcat(fmt, "d");
-	    sprintf(temp, fmt, *((int64*)vp));
+	    sprintf(temp, fmt, *((int64_t*)vp));
 	}
 	
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
@@ -270,7 +270,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    strcpy(fmt, "%");
 	    strcat(fmt, PRINTF_LL_WIDTH);
 	    strcat(fmt, "u");
-	    sprintf(temp, fmt, *((uint64*)vp));
+	    sprintf(temp, fmt, *((uint64_t*)vp));
 	}
 	
     } else if (H5T_COMPOUND==H5Tget_class(type)) {

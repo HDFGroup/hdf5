@@ -89,8 +89,8 @@ typedef struct H5B_class_t {
 			  void*, void*, hbool_t*);
     
     herr_t	(*list)(H5F_t*, const haddr_t*, void*); /*walk leaf nodes*/
-    herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8*, void*);
-    herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8*, void*);
+    herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
+    herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*debug_key)(FILE*, intn, intn, const void*, const void*);
 } H5B_class_t;
 
@@ -99,7 +99,7 @@ typedef struct H5B_class_t {
  */
 typedef struct H5B_key_t {
     hbool_t	dirty;	/*native key is more recent than raw key	     */
-    uint8	*rkey;	/*ptr into node->page for raw key		     */
+    uint8_t	*rkey;	/*ptr into node->page for raw key		     */
     void	*nkey;	/*null or ptr into node->native for key		     */
 } H5B_key_t;
 
@@ -112,8 +112,8 @@ typedef struct H5B_t {
     haddr_t		left;		/*address of left sibling	     */
     haddr_t		right;		/*address of right sibling	     */
     intn		nchildren;	/*number of child pointers	     */
-    uint8		*page;		/*disk page			     */
-    uint8		*native;	/*array of keys in native format     */
+    uint8_t		*page;		/*disk page			     */
+    uint8_t		*native;	/*array of keys in native format     */
     H5B_key_t		*key;		/*2k+1 key entries		     */
     haddr_t		*child;		/*2k child pointers		     */
 } H5B_t;

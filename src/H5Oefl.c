@@ -14,8 +14,8 @@
 #define PABLO_MASK	H5O_efl_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
-static herr_t H5O_efl_encode(H5F_t *f, uint8 *p, const void *_mesg);
+static void *H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static herr_t H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest);
 static size_t H5O_efl_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
@@ -64,7 +64,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
+H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
 {
     H5O_efl_t		*mesg = NULL;
     intn		i, version;
@@ -148,7 +148,7 @@ H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_efl_encode(H5F_t *f, uint8 *p, const void *_mesg)
+H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     int			i;
@@ -406,7 +406,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
  */
 herr_t
 H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
-	      hsize_t size, uint8 *buf)
+	      hsize_t size, uint8_t *buf)
 {
     int		i, fd=-1;
     size_t	to_read, cur, skip=0;
@@ -418,7 +418,7 @@ H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
     /* Check args */
     assert (efl && efl->nused>0);
     assert (addr && H5F_addr_defined (addr));
-    assert (size < MAX_SIZET);
+    assert (size < SIZET_MAX);
     assert (buf || 0==size);
 
     /* Find the first efl member from which to read */
@@ -490,7 +490,7 @@ H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
  */
 herr_t
 H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
-	       hsize_t size, const uint8 *buf)
+	       hsize_t size, const uint8_t *buf)
 {
     int		i, fd=-1;
     size_t	to_write, cur, skip=0;
@@ -501,7 +501,7 @@ H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
     /* Check args */
     assert (efl && efl->nused>0);
     assert (addr && H5F_addr_defined (addr));
-    assert (size < MAX_SIZET);
+    assert (size < SIZET_MAX);
     assert (buf || 0==size);
 
     /* Find the first efl member in which to write */

@@ -34,11 +34,11 @@ static H5F_low_t *H5F_core_open(const char *name,
 static herr_t H5F_core_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_core_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 			    const H5D_transfer_t xfer_mode,
-			    const haddr_t *addr, size_t size, uint8 *buf);
+			    const haddr_t *addr, size_t size, uint8_t *buf);
 static herr_t H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 			     const H5D_transfer_t xfer_mode,
 			     const haddr_t *addr, size_t size,
-			     const uint8 *buf);
+			     const uint8_t *buf);
 
 const H5F_low_class_t	H5F_LOW_CORE_g[1] = {{
     H5F_core_access,		/*access method				*/
@@ -185,7 +185,7 @@ H5F_core_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 static herr_t
 H5F_core_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	      const H5D_transfer_t __unused__ xfer_mode,
-	      const haddr_t *addr, size_t size, uint8 *buf)
+	      const haddr_t *addr, size_t size, uint8_t *buf)
 {
     size_t		n;
     size_t		eof;
@@ -233,11 +233,11 @@ H5F_core_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 static herr_t
 H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	       const H5D_transfer_t __unused__ xfer_mode,
-	       const haddr_t *addr, size_t size, const uint8 *buf)
+	       const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     size_t		need_more, na;
     size_t		increment = 1;
-    uint8		*x = NULL;
+    uint8_t		*x = NULL;
 
     FUNC_ENTER(H5F_core_write, FAIL);
 

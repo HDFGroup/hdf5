@@ -207,6 +207,7 @@ H5S_term_interface(void)
     for (i=0; i<H5S_nconv_g; i++) H5MM_xfree(H5S_conv_g[i]);
     H5S_conv_g = H5MM_xfree(H5S_conv_g);
     H5S_nconv_g = H5S_aconv_g = 0;
+    interface_initialize_g = FALSE;
 }
 
 
@@ -795,7 +796,7 @@ H5S_get_npoints_max(const H5S_t *ds)
             if (ds->extent.u.simple.max) {
                 for (ret_value=1, i=0; i<ds->extent.u.simple.rank; i++) {
                     if (H5S_UNLIMITED==ds->extent.u.simple.max[i]) {
-                        ret_value = MAX_HSIZET;
+                        ret_value = HSIZET_MAX;
                         break;
                     } else {
                         ret_value *= ds->extent.u.simple.max[i];

@@ -108,12 +108,12 @@ static herr_t H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 			    const H5D_transfer_t xfer_mode,
 			    const haddr_t *addr, size_t size,
-			    uint8 *buf/*out*/);
+			    uint8_t *buf/*out*/);
 htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
 static herr_t H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 			     const H5D_transfer_t xfer_mode,
 			     const haddr_t *addr, size_t size,
-			     const uint8 *buf);
+			     const uint8_t *buf);
 static herr_t H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr);
 static herr_t H5F_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off);
@@ -127,14 +127,14 @@ const H5F_low_class_t	H5F_LOW_MPIO_g[1] = {{
      * this is ugly, but removing the const modifier from access_parms
      * in the parameter list of the write function in H5F_low_class_t
      * would propagate to a lot of functions that don't change that param */
-    (int(*)(struct H5F_low_t *lf, const H5F_access_t *access_parms, const H5D_transfer_t xfer_mode, const haddr_t *addr, size_t size, uint8 *buf))
+    (int(*)(struct H5F_low_t *lf, const H5F_access_t *access_parms, const H5D_transfer_t xfer_mode, const haddr_t *addr, size_t size, uint8_t *buf))
     H5F_mpio_read,		/*read method				*/
 
     /* rky 980816
      * this is ugly, but removing the const modifier from access_parms
      * in the parameter list of the write function in H5F_low_class_t
      * would propagate to a lot of functions that don't change that param */
-    (int(*)(struct H5F_low_t *lf, const H5F_access_t *access_parms, const H5D_transfer_t xfer_mode, const haddr_t *addr, size_t size, const uint8 *buf))
+    (int(*)(struct H5F_low_t *lf, const H5F_access_t *access_parms, const H5D_transfer_t xfer_mode, const haddr_t *addr, size_t size, const uint8_t *buf))
     H5F_mpio_write,		/*write method				*/
 
     H5F_mpio_flush,		/*flush method				*/
@@ -492,7 +492,7 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 static herr_t
 H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 	      const H5D_transfer_t xfer_mode,
-	      const haddr_t *addr, size_t size, uint8 *buf/*out*/)
+	      const haddr_t *addr, size_t size, uint8_t *buf/*out*/)
 {
     MPI_Offset  mpi_off, mpi_disp;
     MPI_Status  mpi_stat;
@@ -739,7 +739,7 @@ H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval )
 static herr_t
 H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 	       const H5D_transfer_t xfer_mode,
-	       const haddr_t *addr, size_t size, const uint8 *buf)
+	       const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     MPI_Offset  mpi_off, mpi_disp;
     MPI_Status  mpi_stat;
@@ -957,7 +957,7 @@ H5F_MPIOff_to_haddr( MPI_Offset mpi_off, haddr_t *addr )
 {
     herr_t ret_val = FAIL;
 
-    addr->offset = (uint64) mpi_off;
+    addr->offset = (uint64_t) mpi_off;
     if (addr->offset == mpi_off)
 	ret_val = SUCCEED;
 

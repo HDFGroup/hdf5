@@ -25,8 +25,8 @@
 #define PABLO_MASK      H5O_cont_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_cont_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
-static herr_t H5O_cont_encode(H5F_t *f, uint8 *p, const void *_mesg);
+static void *H5O_cont_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static herr_t H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static herr_t H5O_cont_debug(H5F_t *f, const void *_mesg, FILE * stream,
 			     intn indent, intn fwidth);
 
@@ -67,7 +67,7 @@ static intn             interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cont_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
+H5O_cont_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
 {
     H5O_cont_t             *cont = NULL;
 
@@ -105,7 +105,7 @@ H5O_cont_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_encode(H5F_t *f, uint8 *p, const void *_mesg)
+H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
 

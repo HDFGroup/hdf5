@@ -81,7 +81,7 @@ test_select_hyper(void)
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -93,13 +93,13 @@ test_select_hyper(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -211,7 +211,7 @@ test_select_point(void)
     hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
     hssize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -222,13 +222,13 @@ test_select_point(void)
     MESSAGE(5, ("Testing Element Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -352,7 +352,7 @@ test_select_all(void)
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -364,13 +364,13 @@ test_select_all(void)
     MESSAGE(5, ("Testing 'All' Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -492,7 +492,7 @@ test_select_combo(void)
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -503,13 +503,13 @@ test_select_combo(void)
     MESSAGE(5, ("Testing Combination of Hyperslab & Element Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -633,7 +633,7 @@ test_select_hyper_stride(void)
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
-    uint16     *wbuf,       /* buffer to write to disk */
+    uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -668,13 +668,13 @@ test_select_hyper_stride(void)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint16)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint16),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint16_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint16_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint16)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint16_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -787,7 +787,7 @@ test_select_hyper_copy(void)
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
-    uint16     *wbuf,       /* buffer to write to disk */
+    uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* 1st buffer read from disk */
                *rbuf2,      /* 2nd buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
@@ -798,14 +798,14 @@ test_select_hyper_copy(void)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint16)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint16),SPACE3_DIM1*SPACE3_DIM2);
-    rbuf2=calloc(sizeof(uint16),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint16_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint16_t),SPACE3_DIM1*SPACE3_DIM2);
+    rbuf2=calloc(sizeof(uint16_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint16)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint16_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -886,7 +886,7 @@ test_select_hyper_copy(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if(HDmemcmp(rbuf,rbuf2,sizeof(uint16)*SPACE3_DIM1*SPACE3_DIM2)) {
+    if(HDmemcmp(rbuf,rbuf2,sizeof(uint16_t)*SPACE3_DIM1*SPACE3_DIM2)) {
         printf("hyperslab values don't match!\n");
     } /* end if */
 
@@ -938,7 +938,7 @@ test_select_point_copy(void)
     hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
     hssize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
-    uint16     *wbuf,       /* buffer to write to disk */
+    uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* 1st buffer read from disk */
                *rbuf2,      /* 2nd buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
@@ -949,14 +949,14 @@ test_select_point_copy(void)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint16)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint16),SPACE3_DIM1*SPACE3_DIM2);
-    rbuf2=calloc(sizeof(uint16),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint16_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint16_t),SPACE3_DIM1*SPACE3_DIM2);
+    rbuf2=calloc(sizeof(uint16_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint16)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint16_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1055,7 +1055,7 @@ test_select_point_copy(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if(HDmemcmp(rbuf,rbuf2,sizeof(uint16)*SPACE3_DIM1*SPACE3_DIM2)) {
+    if(HDmemcmp(rbuf,rbuf2,sizeof(uint16_t)*SPACE3_DIM1*SPACE3_DIM2)) {
         printf("hyperslab values don't match!\n");
     } /* end if */
 
@@ -1110,7 +1110,7 @@ test_select_hyper_offset(void)
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
     hssize_t	offset[SPACE1_RANK];    /* Offset of selection */
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -1123,13 +1123,13 @@ test_select_hyper_offset(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with Offsets\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1270,7 +1270,7 @@ test_select_point_offset(void)
     hssize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     hssize_t	offset[SPACE1_RANK];    /* Offset of selection */
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -1282,13 +1282,13 @@ test_select_point_offset(void)
     MESSAGE(5, ("Testing Element Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1448,7 +1448,7 @@ test_select_hyper_union(void)
         {10,10,10,10,10,10,10,10,       /* First eight rows are 10 long */
          20,20,                         /* Next two rows are 20 long */
         15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}; /* Next eighteen rows are 15 long */
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -1460,13 +1460,13 @@ test_select_hyper_union(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with unions of hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
         for(j=0; j<SPACE2_DIM2; j++)
-            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+            *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2011,7 +2011,7 @@ test_select_hyper_union_3d(void)
         {7,4,2,8},
         {7,5,2,8},
         {7,6,2,8}};
-    uint8      *wbuf,       /* buffer to write to disk */
+    uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
@@ -2023,14 +2023,14 @@ test_select_hyper_union_3d(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with unions of 3-D hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(uint8)*SPACE4_DIM1*SPACE4_DIM2*SPACE4_DIM3);
-    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+    wbuf=malloc(sizeof(uint8_t)*SPACE4_DIM1*SPACE4_DIM2*SPACE4_DIM3);
+    rbuf=calloc(sizeof(uint8_t),SPACE3_DIM1*SPACE3_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE4_DIM1; i++)
         for(j=0; j<SPACE4_DIM2; j++)
             for(k=0; k<SPACE4_DIM3; k++)
-                *tbuf++=(uint8)((((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k);
+                *tbuf++=(uint8_t)((((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

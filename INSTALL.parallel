@@ -1,0 +1,28 @@
+This file contains instructions for the installation a version of HDF5 
+that uses the parallel file I/O facilities of the MPI-IO library. A
+parallel version of HDF5 can run in a serial environment as long as
+the appropriate MPI-IO and MPI header files and libraries are
+available.
+
+The parallel version of hdf5 can be build by generally following the
+instructions in the INSTALL file for building a serial version and
+using `mpicc' as the C compiler.  This can be done by setting the CC
+environment variable before invoking configure as with:
+
+    $ CC=mpicc ./configure
+
+If the mpicc compiler is not available then a parallel library can
+still be built as long as the appropriate header files and libraries
+can be found.  If these files are part of the default compiler search
+paths then configuration is as simple as:
+
+    $ ./configure --enable-parallel
+
+Otherwise, if the MPI and MPI-IO header files or library cannot be
+found then the compiler search paths can be corrected, the files can
+be moved, or configure can be told about the file locations.  The
+latter is done with something like:
+
+    $ CPPFLAGS=-I/usr/local/mpi/include \
+      LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
+      ./configure --enable-parallel

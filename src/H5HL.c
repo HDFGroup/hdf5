@@ -41,7 +41,7 @@ typedef struct H5HL_t {
     haddr_t		    addr;	/*address of data		*/
     size_t		    disk_alloc;	/*data bytes allocated on disk	*/
     size_t		    mem_alloc;	/*data bytes allocated in mem	*/
-    uint8		   *chunk;	/*the chunk, including header	*/
+    uint8_t		   *chunk;	/*the chunk, including header	*/
     H5HL_free_t		   *freelist;	/*the free list			*/
 } H5HL_t;
 
@@ -188,8 +188,8 @@ static H5HL_t *
 H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	  void __unused__ *udata2)
 {
-    uint8		hdr[52];
-    const uint8		*p = NULL;
+    uint8_t		hdr[52];
+    const uint8_t	*p = NULL;
     H5HL_t		*heap = NULL;
     H5HL_free_t		*fl = NULL, *tail = NULL;
     size_t		free_block = H5HL_FREE_NULL;
@@ -311,7 +311,7 @@ H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 static herr_t
 H5HL_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5HL_t *heap)
 {
-    uint8	*p = heap->chunk;
+    uint8_t	*p = heap->chunk;
     H5HL_free_t	*fl = heap->freelist;
     haddr_t	hdr_end_addr;
 
@@ -918,9 +918,9 @@ H5HL_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 {
     H5HL_t		*h = NULL;
     int			i, j, overlap;
-    uint8		c;
+    uint8_t		c;
     H5HL_free_t		*freelist = NULL;
-    uint8		*marker = NULL;
+    uint8_t		*marker = NULL;
     size_t		amount_free = 0;
 
     FUNC_ENTER(H5HL_debug, FAIL);

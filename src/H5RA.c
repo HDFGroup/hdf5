@@ -122,6 +122,7 @@ H5RA_term_interface(void)
     H5I_destroy_group(H5I_RAGGED);
     H5T_close(H5RA_meta_type_g);
     H5RA_meta_type_g = NULL;
+    interface_initialize_g = FALSE;
 }
 
 
@@ -690,7 +691,7 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     hsize_t	raw_cur_size[2];	/*raw data current size		*/
     hssize_t	hs_offset[2];		/*hyperslab offset		*/
     hsize_t	hs_size[2];		/*hyperslab size		*/
-    uint8	*raw_buf=NULL;		/*raw buffer			*/
+    uint8_t	*raw_buf=NULL;		/*raw buffer			*/
     size_t	type_size;		/*size of the TYPE argument	*/
     hsize_t	i;
     
@@ -778,7 +779,7 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     for (i=0; i<nrows; i++) {
 	if (size[i]>raw_cur_size[1]) {
 	    H5RA_fix_overflow(ra, type, meta+i, size[i]-raw_cur_size[1],
-			     (uint8*)(buf[i])+raw_cur_size[1]*type_size);
+			     (uint8_t*)(buf[i])+raw_cur_size[1]*type_size);
 	}
 	meta[i].nelmts = size[i];
     }
@@ -1041,7 +1042,7 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     hsize_t	raw_read_size[2];	/*amount of raw data to read	*/
     hssize_t	hs_offset[2];		/*hyperslab offset		*/
     hsize_t	hs_size[2];		/*hyperslab size		*/
-    uint8	*raw_buf=NULL;		/*raw buffer			*/
+    uint8_t	*raw_buf=NULL;		/*raw buffer			*/
     size_t	type_size;		/*size of the TYPE argument	*/
     void	**buf_out=NULL;		/*output BUF values		*/
     hsize_t	i;			/*counter			*/

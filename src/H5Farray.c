@@ -8,7 +8,7 @@
  * Purpose:	Provides I/O facilities for multi-dimensional arrays of bytes
  *		stored with various layout policies.  If the caller is
  *		interested in arrays of elements >1 byte then add an extra
- *		dimension.  For example, a 10x20 array of int32 would
+ *		dimension.  For example, a 10x20 array of int would
  *		translate to a 10x20x4 array of bytes at this level.
  */
 #include <H5private.h>
@@ -120,7 +120,7 @@ H5F_arr_read (H5F_t *f, const H5D_xfer_t *xfer,
 	      const hsize_t mem_size[], const hssize_t mem_offset[],
 	      const hssize_t file_offset[], void *_buf/*out*/)
 {
-    uint8	*buf = (uint8 *)_buf;		/*cast for arithmetic	*/
+    uint8_t	*buf = (uint8_t*)_buf;		/*cast for arithmetic	*/
     hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
     hssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
@@ -164,7 +164,7 @@ H5F_arr_read (H5F_t *f, const H5D_xfer_t *xfer,
     for(i=0; i<layout->ndims; i++)
         printf("%s: %d: hslab_size=%d, mem_size=%d, mem_offset=%d, file_offset=%d\n",FUNC,i,(int)_hslab_size[i],(int)mem_size[i],(int)mem_offset[i],(int)file_offset[i]);
     if(qak_debug) {
-        printf("%s: *buf=%d, *(buf+1)=%d\n", FUNC,(int)*(const uint16 *)buf,(int)*((const uint16 *)buf+1));
+        printf("%s: *buf=%d, *(buf+1)=%d\n", FUNC,(int)*(const uint16_t *)buf,(int)*((const uint16 *)buf+1));
     }
 }
 #endif /* QAK */
@@ -343,7 +343,7 @@ H5F_arr_write (H5F_t *f, const H5D_xfer_t *xfer,
 	       const hssize_t mem_offset[], const hssize_t file_offset[],
 	       const void *_buf)
 {
-    const uint8	*buf = (const uint8 *)_buf;	/*cast for arithmetic	*/
+    const uint8_t *buf = (const uint8_t *)_buf;	/*cast for arithmetic	*/
     hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
     hssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
@@ -391,7 +391,7 @@ H5F_arr_write (H5F_t *f, const H5D_xfer_t *xfer,
 		   (int)mem_size[i],(int)mem_offset[i],(int)file_offset[i]);
 	if(qak_debug) {
 	    printf("%s: *buf=%d, *(buf+1)=%d\n", FUNC,
-		   (int)*(const uint16 *)buf, (int)*((const uint16 *)buf+1));
+		   (int)*(const uint16_t *)buf, (int)*((const uint16_t *)buf+1));
 	}
     }
 #endif /* QAK */

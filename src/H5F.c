@@ -215,6 +215,7 @@ static void
 H5F_term_interface(void)
 {
     H5I_destroy_group(H5I_FILE);
+    interface_initialize_g = FALSE;
 }
 
 
@@ -224,8 +225,8 @@ H5F_term_interface(void)
  USAGE
        void H5F_encode_length_unusual(f, p, l)
        const H5F_t *f;		   IN: pointer to the file record
-       uint8 **p;		IN: pointer to buffer pointer to encode length in
-       uint8 *l;		IN: pointer to length to encode
+       uint8_t **p;		IN: pointer to buffer pointer to encode length in
+       uint8_t *l;		IN: pointer to length to encode
 
  ERRORS
 
@@ -235,7 +236,7 @@ H5F_term_interface(void)
     Encode non-standard (i.e. not 2, 4 or 8-byte) lengths in file meta-data.
 --------------------------------------------------------------------------*/
 void 
-H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
+H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l)
 {
     intn		    i = (intn)H5F_SIZEOF_SIZE(f)-1;
 
@@ -411,9 +412,9 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
 		     haddr_t *addr/*out*/)
 {
     herr_t          ret_value=FAIL;
-    haddr_t		    max_addr;
-    uint8		    buf[H5F_SIGNATURE_LEN];
-    uintn		    n = 9;
+    haddr_t	    max_addr;
+    uint8_t	    buf[H5F_SIGNATURE_LEN];
+    uintn	    n = 9;
 
     FUNC_ENTER(H5F_locate_signature, FAIL);
 
@@ -765,8 +766,8 @@ H5F_open(const char *name, uintn flags,
     H5F_low_t		*fd = NULL;	/*low level file desc		*/
     hbool_t		empty_file = FALSE; /*is file empty?		*/
     hbool_t		file_exists = FALSE; /*file already exists	*/
-    uint8		buf[256];	/*I/O buffer..			*/
-    const uint8		*p = NULL;	/*        ..and pointer into it */
+    uint8_t		buf[256];	/*I/O buffer..			*/
+    const uint8_t	*p = NULL;	/*        ..and pointer into it */
     size_t		fixed_size = 24; /*size of fixed part of boot blk*/
     size_t		variable_size;	/*variable part of boot block	*/
     H5F_create_t	*cp = NULL;	/*file creation parameters	*/
@@ -1453,7 +1454,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 static herr_t
 H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 {
-    uint8		buf[2048], *p = buf;
+    uint8_t		buf[2048], *p = buf;
     haddr_t		reserved_addr;
     uintn		nerrors=0, i;
     
@@ -1504,9 +1505,9 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
     *p++ = 0;			/*reserved*/
     *p++ = f->shared->create_parms->sharedheader_ver;
     assert (H5F_SIZEOF_ADDR(f)<=255);
-    *p++ = (uint8)H5F_SIZEOF_ADDR(f);
+    *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
     assert (H5F_SIZEOF_SIZE(f)<=255);
-    *p++ = (uint8)H5F_SIZEOF_SIZE(f);
+    *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
     *p++ = 0;			/*reserved */
     UINT16ENCODE(p, f->shared->create_parms->sym_leaf_k);
     UINT16ENCODE(p, f->shared->create_parms->btree_k[H5B_SNODE_ID]);
@@ -1675,7 +1676,7 @@ H5F_close(H5F_t *f)
 
  USAGE
     herr_t H5Fclose(file_id)
-	int32 file_id;	IN: File ID of file to close
+	int32_t file_id;	IN: File ID of file to close
 
  ERRORS
     ARGS      BADTYPE	    Not a file atom. 
@@ -2196,7 +2197,7 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
 
     FUNC_ENTER(H5F_block_read, FAIL);
 
-    assert (size < MAX_SIZET);
+    assert (size < SIZET_MAX);
 
     /* convert the relative address to an absolute address */
     abs_addr = f->shared->base_addr;
@@ -2241,7 +2242,7 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
 
     FUNC_ENTER(H5F_block_write, FAIL);
 
-    assert (size < MAX_SIZET);
+    assert (size < SIZET_MAX);
 
     if (0 == (f->intent & H5F_ACC_RDWR)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "no write intent");

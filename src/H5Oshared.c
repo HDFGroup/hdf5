@@ -18,8 +18,8 @@
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
-static void *H5O_shared_decode (H5F_t*, const uint8*, H5O_shared_t *sh);
-static herr_t H5O_shared_encode (H5F_t*, uint8*, const void*);
+static void *H5O_shared_decode (H5F_t*, const uint8_t*, H5O_shared_t *sh);
+static herr_t H5O_shared_encode (H5F_t*, uint8_t*, const void*);
 static size_t H5O_shared_size (H5F_t*, const void*);
 static herr_t H5O_shared_debug (H5F_t*, const void*, FILE*, intn, intn);
 
@@ -64,7 +64,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
+H5O_shared_decode (H5F_t *f, const uint8_t *buf, H5O_shared_t __unused__ *sh)
 {
     H5O_shared_t	*mesg;
     uintn		flags, version;
@@ -125,7 +125,7 @@ H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
+H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
     uintn		flags;

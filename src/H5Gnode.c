@@ -34,9 +34,9 @@
 #define PABLO_MASK	H5G_node_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
+static herr_t H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				  void *_key);
-static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
+static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				  void *_key);
 static size_t H5G_node_size(H5F_t *f);
 static herr_t H5G_node_create(H5F_t *f, H5B_ins_t op, void *_lt_key,
@@ -136,7 +136,7 @@ H5G_node_sizeof_rkey(H5F_t *f, const void __unused__ *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_decode_key(H5F_t *f, H5B_t __unused__ *bt, uint8 *raw, void *_key)
+H5G_node_decode_key(H5F_t *f, H5B_t __unused__ *bt, uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -168,7 +168,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t __unused__ *bt, uint8 *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_encode_key(H5F_t *f, H5B_t __unused__ *bt, uint8 *raw, void *_key)
+H5G_node_encode_key(H5F_t *f, H5B_t __unused__ *bt, uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -303,7 +303,7 @@ static herr_t
 H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
 	       H5G_node_t *sym)
 {
-    uint8	*buf = NULL, *p = NULL;
+    uint8_t	*buf = NULL, *p = NULL;
     size_t	size;
     herr_t	status;
     int		i;
@@ -395,8 +395,8 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 {
     H5G_node_t		   *sym = NULL;
     size_t		    size = 0;
-    uint8		   *buf = NULL;
-    const uint8		   *p = NULL;
+    uint8_t		   *buf = NULL;
+    const uint8_t	   *p = NULL;
     H5G_node_t		   *ret_value = NULL;	/*for error handling */
 
     FUNC_ENTER(H5G_node_load, NULL);

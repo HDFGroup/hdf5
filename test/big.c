@@ -36,7 +36,7 @@
 #elif SIZEOF_LONG >= 8
 #define GB8LL		((unsigned long)8*1024*1024*1024)
 #else
-#define GB8LL		((unsigned long)0)	/* can not do the test */
+#define GB8LL		((unsigned long)0)	/* cannot do the test */
 #endif
 
 static hsize_t

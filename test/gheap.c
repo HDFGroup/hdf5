@@ -86,8 +86,8 @@ test_1 (void)
 {
     H5F_t 	*f;
     H5HG_t	obj[1024];
-    uint8	out[1024];
-    uint8	in[1024];
+    uint8_t	out[1024];
+    uint8_t	in[1024];
     int		i;
     size_t	size;
     herr_t	status;
@@ -169,8 +169,8 @@ test_2 (void)
 {
     H5F_t 	*f;
     H5HG_t	obj[1024];
-    uint8	out[1024];
-    uint8	in[1024];
+    uint8_t	out[1024];
+    uint8_t	in[1024];
     int		i;
     size_t	size;
     herr_t	status;
@@ -247,7 +247,7 @@ test_3 (void)
 {
     H5F_t 	*f;
     H5HG_t	obj[1024];
-    uint8	out[1024];
+    uint8_t	out[1024];
     int		i;
     size_t	size;
     herr_t	status;
@@ -316,7 +316,7 @@ test_4 (void)
 {
     H5F_t 	*f;
     H5HG_t	obj[1024];
-    uint8	out[1024];
+    uint8_t	out[1024];
     int		i;
     size_t	size;
     herr_t	status;

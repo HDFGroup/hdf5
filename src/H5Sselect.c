@@ -1007,7 +1007,7 @@ H5S_select_serial_size (const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_serialize (const H5S_t *space, uint8 *buf)
+H5S_select_serialize (const H5S_t *space, uint8_t *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 

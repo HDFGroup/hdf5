@@ -61,20 +61,31 @@ typedef struct complex_t {
 
 /*
  * Count up or down depending on whether the machine is big endian or little
- * endian.  If `E' is H5T_ORDER_BE then the result will be I, otherwise the
- * result will be Z-(I+1).
+ * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
+ * be I, otherwise the result will be Z-(I+1).
  */
-#define ENDIAN(E,Z,I)	(H5T_ORDER_BE==(E)?(I):(Z)-((I)+1))
+#define ENDIAN(Z,I)	(H5T_ORDER_BE==endian?(I):(Z)-((I)+1))
 
 typedef enum flt_t {
     FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER
 } flt_t;
+
+typedef enum int_t {
+    INT_CHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
+    INT_LONG, INT_ULONG, INT_OTHER
+} int_t;
 
 /* Count the number of overflows */
 static int noverflows_g = 0;
 
 /* Skip overflow tests if non-zero */
 static int skip_overflow_tests_g = 0;
+
+/*
+ * If set then all known hardware conversion functions are unregistered when
+ * the library is reset.
+ */
+static int without_hardware_g = 0;
 
 /*
  * Although we check whether a floating point overflow generates a SIGFPE and
@@ -270,6 +281,101 @@ display_error_cb (void __unused__ *client_data)
     puts ("*FAILED*");
     H5Eprint (stdout);
     return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	reset_hdf5
+ *
+ * Purpose:	Reset the hdf5 library.  This causes statistics to be printed
+ *		and counters to be reset.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+reset_hdf5(void)
+{
+    fflush(stdout);
+    fflush(stderr);
+    H5close();
+    H5Eset_auto (display_error_cb, NULL);
+    H5Tset_overflow(overflow_handler);
+
+    if (without_hardware_g) {
+	H5Tunregister(H5T_conv_char_uchar);
+	H5Tunregister(H5T_conv_char_short);
+	H5Tunregister(H5T_conv_char_ushort);
+	H5Tunregister(H5T_conv_char_int);
+	H5Tunregister(H5T_conv_char_uint);
+	H5Tunregister(H5T_conv_char_long);
+	H5Tunregister(H5T_conv_char_ulong);
+
+	H5Tunregister(H5T_conv_uchar_char);
+	H5Tunregister(H5T_conv_uchar_short);
+	H5Tunregister(H5T_conv_uchar_ushort);
+	H5Tunregister(H5T_conv_uchar_int);
+	H5Tunregister(H5T_conv_uchar_uint);
+	H5Tunregister(H5T_conv_uchar_long);
+	H5Tunregister(H5T_conv_uchar_ulong);
+
+	H5Tunregister(H5T_conv_short_char);
+	H5Tunregister(H5T_conv_short_uchar);
+	H5Tunregister(H5T_conv_short_ushort);
+	H5Tunregister(H5T_conv_short_int);
+	H5Tunregister(H5T_conv_short_uint);
+	H5Tunregister(H5T_conv_short_long);
+	H5Tunregister(H5T_conv_short_ulong);
+
+	H5Tunregister(H5T_conv_ushort_char);
+	H5Tunregister(H5T_conv_ushort_uchar);
+	H5Tunregister(H5T_conv_ushort_short);
+	H5Tunregister(H5T_conv_ushort_int);
+	H5Tunregister(H5T_conv_ushort_uint);
+	H5Tunregister(H5T_conv_ushort_long);
+	H5Tunregister(H5T_conv_ushort_ulong);
+
+	H5Tunregister(H5T_conv_int_char);
+	H5Tunregister(H5T_conv_int_uchar);
+	H5Tunregister(H5T_conv_int_short);
+	H5Tunregister(H5T_conv_int_ushort);
+	H5Tunregister(H5T_conv_int_uint);
+	H5Tunregister(H5T_conv_int_long);
+	H5Tunregister(H5T_conv_int_ulong);
+
+	H5Tunregister(H5T_conv_uint_char);
+	H5Tunregister(H5T_conv_uint_uchar);
+	H5Tunregister(H5T_conv_uint_short);
+	H5Tunregister(H5T_conv_uint_ushort);
+	H5Tunregister(H5T_conv_uint_int);
+	H5Tunregister(H5T_conv_uint_long);
+	H5Tunregister(H5T_conv_uint_ulong);
+
+	H5Tunregister(H5T_conv_long_char);
+	H5Tunregister(H5T_conv_long_uchar);
+	H5Tunregister(H5T_conv_long_short);
+	H5Tunregister(H5T_conv_long_ushort);
+	H5Tunregister(H5T_conv_long_int);
+	H5Tunregister(H5T_conv_long_uint);
+	H5Tunregister(H5T_conv_long_ulong);
+
+	H5Tunregister(H5T_conv_ulong_char);
+	H5Tunregister(H5T_conv_ulong_uchar);
+	H5Tunregister(H5T_conv_ulong_short);
+	H5Tunregister(H5T_conv_ulong_ushort);
+	H5Tunregister(H5T_conv_ulong_int);
+	H5Tunregister(H5T_conv_ulong_uint);
+	H5Tunregister(H5T_conv_ulong_long);
+	
+	H5Tunregister(H5T_conv_float_double);
+	H5Tunregister(H5T_conv_double_float);
+    }
 }
 
 
@@ -962,9 +1068,11 @@ test_conv_str_1(void)
     H5Tclose(dst_type);
 
     puts(" PASSED");
+    reset_hdf5();
     return 0;
 
  error:
+    reset_hdf5();
     return -1;
 }
 
@@ -1023,6 +1131,7 @@ test_conv_str_2(void)
 
  error:
     if (buf) free(buf);
+    reset_hdf5();
     return ret_value;
 }
 
@@ -1070,7 +1179,9 @@ test_conv_int (void)
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
 	puts ("*FAILED*");
-	puts ("   (unsigned)0x80000000 -> (unsigned)0xffff");
+	printf("   src: 0x80000000 unsigned\n");
+	printf("   dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
+	printf("   ans: 0xffff     unsigned\n");
 	goto error;
     }
 
@@ -1081,7 +1192,9 @@ test_conv_int (void)
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
 	puts ("*FAILED*");
-	puts ("   (unsigned)0xffffffff -> (signed)0x7f");
+	printf("   src: 0xffffffff unsigned\n");
+	printf("   dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
+	printf("   ans: 0x7fff     signed\n");
 	goto error;
     }
 
@@ -1092,7 +1205,9 @@ test_conv_int (void)
     }
     if (byte[0]!=0x00 || byte[1]!=0x00) {
 	puts ("*FAILED*");
-	puts ("   (signed)0xffffffff -> (unsigned)0x00");
+	printf("   src: 0xffffffff signed\n");
+	printf("   dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
+	printf("   ans: 0x0000     unsigned\n");
 	goto error;
     }
 
@@ -1104,7 +1219,9 @@ test_conv_int (void)
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
 	puts ("*FAILED*");
-	puts ("   (signed)0x7fffffff -> (unsigned)0xffff");
+	printf("   src: 0x7fffffff signed\n");
+	printf("   dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
+	printf("   ans: 0xffff     unsigned\n");
 	goto error;
     }
 
@@ -1116,7 +1233,9 @@ test_conv_int (void)
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
 	puts ("*FAILED*");
-	puts ("   (signed)0x7fffffff -> (signed)0x7fff");
+	printf("   src: 0x7fffffff signed\n");
+	printf("   dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
+	printf("   ans: 0x7fff     signed\n");
 	goto error;
     }
 
@@ -1128,7 +1247,9 @@ test_conv_int (void)
     }
     if (byte[0]!=0x00 || byte[1]!=0x80) {
 	puts ("*FAILED*");
-	puts ("   (signed)0xbfffffff -> (signed)0x8000");
+	printf("   src: 0xbfffffff signed\n");
+	printf("   dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
+	printf("   ans: 0x8000     signed\n");
 	goto error;
     }
 
@@ -1173,12 +1294,660 @@ test_conv_int (void)
     puts (" PASSED");
     free (buf);
     free (saved);
+    reset_hdf5();
     return 0;
 
  error:
     if (buf) free (buf);
     if (saved) free (saved);
+    reset_hdf5();
     return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_conv_int_1
+ *
+ * Purpose:	Test conversion of random integer values from SRC to DST.
+ *		These types should be any combination of:
+ *
+ * 			H5T_NATIVE_CHAR		H5T_NATIVE_UCHAR
+ *			H5T_NATIVE_SHORT	H5T_NATIVE_USHORT
+ *			H5T_NATIVE_INT		H5T_NATIVE_UINT
+ *			H5T_NATIVE_LONG		H5T_NATIVE_ULONG
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_1(const char *name, hid_t src, hid_t dst)
+{
+    const size_t	ntests=5;		/*number of tests	*/
+    const size_t	nelmts=200000;		/*num values per test	*/
+    const size_t	max_fails=8;		/*max number of failures*/
+    size_t		fails_all_tests=0;	/*number of failures	*/
+    size_t		fails_this_test;	/*fails for this test	*/
+    char		str[256];		/*hello string		*/
+    int_t		src_type, dst_type;	/*data types		*/
+    const char		*src_type_name=NULL;	/*source type name	*/
+    const char		*dst_type_name=NULL;	/*destination type name	*/
+    int			endian;			/*machine endianess	*/
+    size_t		src_size, dst_size;	/*type sizes		*/
+    unsigned char	*buf=NULL;		/*buffer for conversion	*/
+    unsigned char	*saved=NULL;		/*original values	*/
+    size_t		i, j, k;		/*counters		*/
+    unsigned char	*hw=NULL;		/*hardware conv result	*/
+    unsigned char	src_bits[32];		/*src value in LE order	*/
+    unsigned char	dst_bits[32];		/*dest value in LE order*/
+    size_t		src_nbits;		/*source length in bits	*/
+    size_t		dst_nbits;		/*dst length in bits	*/
+    signed char		hw_char;
+    unsigned char	hw_uchar;
+    short		hw_short;
+    unsigned short	hw_ushort;
+    int			hw_int;
+    unsigned		hw_uint;
+    long		hw_long;
+    unsigned long	hw_ulong;
+    
+    
+    /* What are the names of the source and destination types */
+    if (H5Tequal(src, H5T_NATIVE_CHAR)) {
+	src_type_name = "signed char";
+	src_type = INT_CHAR;
+    } else if (H5Tequal(src, H5T_NATIVE_UCHAR)) {
+	src_type_name = "unsigned char";
+	src_type = INT_UCHAR;
+    } else if (H5Tequal(src, H5T_NATIVE_SHORT)) {
+	src_type_name = "short";
+	src_type = INT_SHORT;
+    } else if (H5Tequal(src, H5T_NATIVE_USHORT)) {
+	src_type_name = "unsigned short";
+	src_type = INT_USHORT;
+    } else if (H5Tequal(src, H5T_NATIVE_INT)) {
+	src_type_name = "int";
+	src_type = INT_INT;
+    } else if (H5Tequal(src, H5T_NATIVE_UINT)) {
+	src_type_name = "unsigned int";
+	src_type = INT_UINT;
+    } else if (H5Tequal(src, H5T_NATIVE_LONG)) {
+	src_type_name = "long";
+	src_type = INT_LONG;
+    } else if (H5Tequal(src, H5T_NATIVE_ULONG)) {
+	src_type_name = "unsigned long";
+	src_type = INT_ULONG;
+    } else {
+	src_type_name = "UNKNOWN";
+	src_type = INT_OTHER;
+    }
+    
+    if (H5Tequal(dst, H5T_NATIVE_CHAR)) {
+	dst_type_name = "signed char";
+	dst_type = INT_CHAR;
+    } else if (H5Tequal(dst, H5T_NATIVE_UCHAR)) {
+	dst_type_name = "unsigned char";
+	dst_type = INT_UCHAR;
+    } else if (H5Tequal(dst, H5T_NATIVE_SHORT)) {
+	dst_type_name = "short";
+	dst_type = INT_SHORT;
+    } else if (H5Tequal(dst, H5T_NATIVE_USHORT)) {
+	dst_type_name = "unsigned short";
+	dst_type = INT_USHORT;
+    } else if (H5Tequal(dst, H5T_NATIVE_INT)) {
+	dst_type_name = "int";
+	dst_type = INT_INT;
+    } else if (H5Tequal(dst, H5T_NATIVE_UINT)) {
+	dst_type_name = "unsigned int";
+	dst_type = INT_UINT;
+    } else if (H5Tequal(dst, H5T_NATIVE_LONG)) {
+	dst_type_name = "long";
+	dst_type = INT_LONG;
+    } else if (H5Tequal(dst, H5T_NATIVE_ULONG)) {
+	dst_type_name = "unsigned long";
+	dst_type = INT_ULONG;
+    } else {
+	dst_type_name = "UNKNOWN";
+	dst_type = INT_OTHER;
+    }
+
+    /* Sanity checks */
+    if (INT_OTHER==src_type || INT_OTHER==dst_type) {
+	sprintf(str, "Testing random %s %s -> %s conversions",
+		name, src_type_name, dst_type_name);
+	printf("%-70s", str);
+	puts("*FAILED*");
+	puts("   Unknown data type.");
+	goto error;
+    }
+
+    /* Allocate buffers */
+    endian = H5Tget_order(H5T_NATIVE_INT);
+    src_size = H5Tget_size(src);
+    dst_size = H5Tget_size(dst);
+    buf = malloc(nelmts*MAX(src_size, dst_size));
+    saved = malloc(nelmts*MAX(src_size, dst_size));
+    noverflows_g = 0;
+
+    /* The tests */
+    for (i=0; i<ntests; i++) {
+	sprintf(str, "Testing random %s %s -> %s conversions (test %d/%d)",
+		name, src_type_name, dst_type_name, (int)i+1, (int)ntests);
+	printf("%-70s", str);
+	fflush(stdout);
+	fails_this_test=0;
+
+	/*
+	 * Initialize the source buffers to random bits.  The `buf' buffer
+	 * will be used for the conversion while the `saved' buffer will be
+	 * sed for the comparison later.
+	 */
+	for (j=0; j<nelmts*src_size; j++) buf[j] = saved[j] = rand();
+
+	/* Perform the conversion */
+	if (H5Tconvert(src, dst, nelmts, buf, NULL)<0) goto error;
+
+	/* Check the results from the library against hardware */
+	for (j=0; j<nelmts; j++) {
+	    if (INT_CHAR==dst_type) {
+		hw = (unsigned char*)&hw_char;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_char = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_char = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_char = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_char = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_char = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_char = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_char = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_char = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    } else if (INT_UCHAR==dst_type) {
+		hw = (unsigned char*)&hw_uchar;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_uchar = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_uchar = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_uchar = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_uchar = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_uchar = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_uchar = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_uchar = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_uchar = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    } else if (INT_SHORT==dst_type) {
+		hw = (unsigned char*)&hw_short;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_short = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_short = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_short = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_short = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_short = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_short = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_short = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_short = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    } else if (INT_USHORT==dst_type) {
+		hw = (unsigned char*)&hw_ushort;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_ushort = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_ushort = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_ushort = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_ushort = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_ushort = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_ushort = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_ushort = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_ushort = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    } else if (INT_INT==dst_type) {
+		hw = (unsigned char*)&hw_int;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_int = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_int = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_int = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_int = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_int = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_int = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_int = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_int = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    } else if (INT_UINT==dst_type) {
+		hw = (unsigned char*)&hw_uint;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_uint = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_uint = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_uint = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_uint = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_uint = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_uint = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_uint = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_uint = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    } else if (INT_LONG==dst_type) {
+		hw = (unsigned char*)&hw_long;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_long = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_long = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_long = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_long = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_long = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_long = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_long = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_long = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    } else if (INT_ULONG==dst_type) {
+		hw = (unsigned char*)&hw_ulong;
+		switch (src_type) {
+		case INT_CHAR:
+		    hw_ulong = ((signed char*)saved)[j];
+		    break;
+		case INT_UCHAR:
+		    hw_ulong = ((unsigned char*)saved)[j];
+		    break;
+		case INT_SHORT:
+		    hw_ulong = ((short*)saved)[j];
+		    break;
+		case INT_USHORT:
+		    hw_ulong = ((unsigned short*)saved)[j];
+		    break;
+		case INT_INT:
+		    hw_ulong = ((int*)saved)[j];
+		    break;
+		case INT_UINT:
+		    hw_ulong = ((unsigned*)saved)[j];
+		    break;
+		case INT_LONG:
+		    hw_ulong = ((long*)saved)[j];
+		    break;
+		case INT_ULONG:
+		    hw_ulong = ((unsigned long*)saved)[j];
+		    break;
+		case INT_OTHER:
+		    break;
+		}
+	    }
+
+	    /* Are the two results the same */
+	    for (k=0; k<dst_size; k++) {
+		if (buf[j*dst_size+k]!=hw[k]) break;
+	    }
+	    if (k==dst_size) continue; /*no error*/
+
+	    /*
+	     * Convert the source and destination values to little endian
+	     * order so we can use the HDF5 bit vector operations to test
+	     * certain things.  These routines have already been tested by
+	     * the `bittests' program.
+	     */
+	    src_nbits = 8*src_size;
+	    for (k=0; k<src_size; k++) {
+		src_bits[src_size-(k+1)] = saved[j*src_size+
+						 ENDIAN(src_size, k)];
+	    }
+	    
+	    dst_nbits = 8*dst_size;
+	    for (k=0; k<dst_size; k++) {
+		dst_bits[dst_size-(k+1)] = buf[j*dst_size+
+					       ENDIAN(dst_size, k)];
+	    }
+
+
+	    /*
+	     * Hardware usually doesn't handle overflows too gracefully. The
+	     * hardware conversion result during overflows is usually garbage
+	     * so we must handle those cases differetly when checking results.
+	     */
+	    if (H5T_SGN_2==H5Tget_sign(src) &&
+		H5T_SGN_2==H5Tget_sign(dst)) {
+		if (src_size>dst_size &&
+		    0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
+		    H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
+				 H5T_BIT_MSB, 1)>=0) {
+		    /*
+		     * Source is positive and the magnitude is too large for
+		     * the destination.  The destination should be set to the
+		     * maximum possible value: 0x7f...f
+		     */
+		    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+			H5T_bit_find(dst_bits, 0, dst_nbits-1,
+				     H5T_BIT_LSB, 0)<0) {
+			continue; /*no error*/
+		    }
+		} else if (src_size>dst_size &&
+			   1==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
+			   H5T_bit_find(src_bits, 0, src_nbits-1, H5T_BIT_MSB,
+					0)+1>=(ssize_t)dst_nbits) {
+		    /*
+		     * Source is negative but the magnitude is too large for
+		     * the destination. The destination should be set to the
+		     * smallest possible value: 0x80...0
+		     */
+		    if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+			H5T_bit_find(dst_bits, 0, dst_nbits-1,
+				     H5T_BIT_LSB, 1)<0) {
+			continue; /*no error*/
+		    }
+		}
+		
+	    } else if (H5T_SGN_2==H5Tget_sign(src) &&
+		       H5T_SGN_NONE==H5Tget_sign(dst)) {
+		if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
+		    /*
+		     * The source is negative so the result should be zero.
+		     * The source is negative if the most significant bit is
+		     * set.  The destination is zero if all bits are zero.
+		     */
+		    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 1)<0)
+			continue; /*no error*/
+		} else if (src_size>dst_size &&
+			   H5T_bit_find(src_bits, dst_nbits-1,
+					src_nbits-dst_nbits, H5T_BIT_LSB,
+					1)>=0) {
+		    /*
+		     * The source is a value with a magnitude too large for
+		     * the destination.  The destination should be the
+		     * largest possible value: 0xff...f
+		     */
+		    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB,
+				     0)<0) {
+			continue; /*no error*/
+		    }
+		}
+		
+	    } else if (H5T_SGN_NONE==H5Tget_sign(src) &&
+		       H5T_SGN_2==H5Tget_sign(dst)) {
+		if (src_size>=dst_size &&
+		    H5T_bit_find(src_bits, dst_nbits-1,
+				 (src_nbits-dst_nbits)+1, H5T_BIT_LSB, 1)>=0) {
+		    /*
+		     * The source value has a magnitude that is larger than
+		     * the destination can handle.  The destination should be
+		     * set to the largest possible positive value: 0x7f...f
+		     */
+		    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+			H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB,
+				     0)<0) {
+			continue; /*no error*/
+		    }
+		}
+		
+	    } else {
+		if (src_size>dst_size &&
+		    H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
+				 H5T_BIT_LSB, 1)>=0) {
+		    /*
+		     * The unsigned source has a value which is too large for
+		     * the unsigned destination.  The destination should be
+		     * set to the largest possible value: 0xff...f
+		     */
+		    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB,
+				     0)<0) {
+			continue; /*no error*/
+		    }
+		}
+	    }
+
+	    /* Print errors */
+	    if (0==fails_this_test++) puts("*FAILED*");
+	    printf("   test %u elmt %u\n", (unsigned)i+1, (unsigned)j);
+
+	    printf("      src = ");
+	    for (k=0; k<src_size; k++) {
+		printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
+	    }
+	    printf("%*s", 3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size), "");
+	    switch (src_type) {
+	    case INT_CHAR:
+		printf(" %29d\n", ((signed char*)saved)[j]);
+		break;
+	    case INT_UCHAR:
+		printf(" %29u\n", ((unsigned char*)saved)[j]);
+		break;
+	    case INT_SHORT:
+		printf(" %29d\n", ((short*)saved)[j]);
+		break;
+	    case INT_USHORT:
+		printf(" %29u\n", ((unsigned short*)saved)[j]);
+		break;
+	    case INT_INT:
+		printf(" %29d\n", ((int*)saved)[j]);
+		break;
+	    case INT_UINT:
+		printf(" %29u\n", ((unsigned*)saved)[j]);
+		break;
+	    case INT_LONG:
+		printf(" %29ld\n", ((long*)saved)[j]);
+		break;
+	    case INT_ULONG:
+		printf(" %29lu\n", ((unsigned long*)saved)[j]);
+		break;
+	    case INT_OTHER:
+		break;
+	    }
+	    
+	    printf("      dst = ");
+	    for (k=0; k<dst_size; k++) {
+		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
+	    }
+	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    switch (dst_type) {
+	    case INT_CHAR:
+		printf(" %29d\n", ((signed char*)buf)[j]);
+		break;
+	    case INT_UCHAR:
+		printf(" %29u\n", ((unsigned char*)buf)[j]);
+		break;
+	    case INT_SHORT:
+		printf(" %29d\n", ((short*)buf)[j]);
+		break;
+	    case INT_USHORT:
+		printf(" %29u\n", ((unsigned short*)buf)[j]);
+		break;
+	    case INT_INT:
+		printf(" %29d\n", ((int*)buf)[j]);
+		break;
+	    case INT_UINT:
+		printf(" %29u\n", ((unsigned*)buf)[j]);
+		break;
+	    case INT_LONG:
+		printf(" %29ld\n", ((long*)buf)[j]);
+		break;
+	    case INT_ULONG:
+		printf(" %29lu\n", ((unsigned long*)buf)[j]);
+		break;
+	    case INT_OTHER:
+		break;
+	    }
+	    
+	    printf("      ans = ");
+	    for (k=0; k<dst_size; k++) {
+		printf(" %02x", hw[ENDIAN(dst_size, k)]);
+	    }
+	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    switch (dst_type) {
+	    case INT_CHAR:
+		printf(" %29d\n", *((signed char*)hw));
+		break;
+	    case INT_UCHAR:
+		printf(" %29u\n", *((unsigned char*)hw));
+		break;
+	    case INT_SHORT:
+		printf(" %29d\n", *((short*)hw));
+		break;
+	    case INT_USHORT:
+		printf(" %29u\n", *((unsigned short*)hw));
+		break;
+	    case INT_INT:
+		printf(" %29d\n", *((int*)hw));
+		break;
+	    case INT_UINT:
+		printf(" %29u\n", *((unsigned*)hw));
+		break;
+	    case INT_LONG:
+		printf(" %29ld\n", *((long*)hw));
+		break;
+	    case INT_ULONG:
+		printf(" %29lu\n", *((unsigned long*)hw));
+		break;
+	    case INT_OTHER:
+		break;
+	    }
+
+	    if (++fails_all_tests>=max_fails) {
+		puts("   maximum failures reached, aborting test...");
+		goto done;
+	    }
+	}
+	puts(" PASSED");
+    }
+    if (noverflows_g>0) {
+	printf("   %d overflow%s\n", noverflows_g, 1==noverflows_g?"":"s");
+    }
+
+ done:
+    if (buf) free(buf);
+    if (saved) free(saved);
+    fflush(stdout);
+    reset_hdf5();	/*print statistics*/
+    return (int)fails_all_tests;
+
+ error:
+    if (buf) free(buf);
+    if (saved) free(saved);
+    fflush(stdout);
+    reset_hdf5();	/*print statistics*/
+    return MAX((int)fails_all_tests, 1);
 }
 
 
@@ -1403,15 +2172,11 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    for (j=0; j<nelmts*src_size; j++) buf[j] = saved[j] = rand();
 	} else {
 	    for (j=0; j<nelmts; j++) {
-#if 0
-		unsigned char temp[32];
-#else
 		/* Do it this way for alignment reasons */
 #ifdef USE_LDOUBLE
 		long double temp[1];
 #else
 		double temp[1];
-#endif
 #endif
 		if (src_size<=dst_size) {
 		    for (k=0; k<dst_size; k++) buf[j*src_size+k] = rand();
@@ -1563,7 +2328,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    
 	    printf("      src =");
 	    for (k=0; k<src_size; k++) {
-		printf(" %02x", saved[j*src_size+ENDIAN(endian,src_size,k)]);
+		printf(" %02x", saved[j*src_size+ENDIAN(src_size,k)]);
 	    }
 	    printf("%*s", 3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size), "");
 	    if (FLT_FLOAT==src_type) {
@@ -1578,7 +2343,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 
 	    printf("      dst =");
 	    for (k=0; k<dst_size; k++) {
-		printf(" %02x", buf[j*dst_size+ENDIAN(endian,dst_size,k)]);
+		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k)]);
 	    }
 	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
 	    if (FLT_FLOAT==dst_type) {
@@ -1593,7 +2358,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 
 	    printf("      ans =");
 	    for (k=0; k<dst_size; k++) {
-		printf(" %02x", hw[ENDIAN(endian,dst_size,k)]);
+		printf(" %02x", hw[ENDIAN(dst_size,k)]);
 	    }
 	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
 	    if (FLT_FLOAT==dst_type) {
@@ -1620,18 +2385,22 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
  done:
     if (buf) free (buf);
     if (saved) free (saved);
+    fflush(stdout);
 #ifdef HANDLE_SIGFPE
     exit(MIN((int)fails_all_tests, 254));
 #else
+    reset_hdf5();
     return (int)fails_all_tests;
 #endif
 
  error:
     if (buf) free (buf);
+    fflush(stdout);
     if (saved) free (saved);
 #ifdef HANDLE_SIGFPE
     exit(MIN(MAX((int)fails_all_tests, 1), 254));
 #else
+    reset_hdf5();
     return MAX((int)fails_all_tests, 1);
 #endif
 }
@@ -1658,11 +2427,7 @@ main(void)
 {
     unsigned long	nerrors = 0;
 
-    /* Set the error handler */
-    H5Eset_auto (display_error_cb, NULL);
-
-    /* Set the overflow handler */
-    H5Tset_overflow(overflow_handler);
+    reset_hdf5();
 
     /* Do the tests */
     nerrors += test_classes()<0 ? 1 : 0;
@@ -1670,6 +2435,8 @@ main(void)
     nerrors += test_compound()<0 ? 1 : 0;
     nerrors += test_transient ()<0 ? 1 : 0;
     nerrors += test_named ()<0 ? 1 : 0;
+    reset_hdf5();
+    
     nerrors += test_conv_str_1()<0 ? 1 : 0;
     nerrors += test_conv_str_2()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
@@ -1681,13 +2448,180 @@ main(void)
     nerrors += test_conv_flt_1("noop", H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1("noop", H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE);
 
-    /* Test hardware conversion functions */
+    /* Test hardware integer conversion functions */
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_CHAR, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_CHAR, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_CHAR, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_CHAR, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_CHAR, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_CHAR, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_CHAR, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UCHAR, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UCHAR, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UCHAR, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UCHAR, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UCHAR, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UCHAR, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UCHAR, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_SHORT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_SHORT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_SHORT, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_SHORT, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_SHORT, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_SHORT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_SHORT, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_USHORT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_USHORT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_USHORT, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_USHORT, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_USHORT, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_USHORT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_USHORT, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_INT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_INT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_INT, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_INT, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_INT, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_INT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_INT, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UINT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UINT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UINT, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UINT, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UINT, H5T_NATIVE_INT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UINT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_UINT, H5T_NATIVE_ULONG);
+#endif
+    
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_LONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_LONG, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_LONG, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_LONG, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_LONG, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_LONG, H5T_NATIVE_UINT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_LONG, H5T_NATIVE_ULONG);
+#endif
+    
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_ULONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_ULONG, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_ULONG, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_ULONG, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_ULONG, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_ULONG, H5T_NATIVE_UINT);
+    nerrors += test_conv_int_1("hw", H5T_NATIVE_ULONG, H5T_NATIVE_LONG);
+#endif
+
+    /* Test hardware floating-point conversion functions */
     nerrors += test_conv_flt_1("hw", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1("hw", H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
 
-    /* Test software conversion functions */
-    H5Tunregister(H5T_conv_float_double);
-    H5Tunregister(H5T_conv_double_float);
+    /*----------------------------------------------------------------------
+     * Software tests follow
+     *---------------------------------------------------------------------- 
+     */
+    without_hardware_g = TRUE;
+    reset_hdf5();
+
+    /* Test software integer conversion functions */
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_CHAR, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_CHAR, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_CHAR, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_CHAR, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_CHAR, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_CHAR, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_CHAR, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UCHAR, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UCHAR, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UCHAR, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UCHAR, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UCHAR, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UCHAR, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UCHAR, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_SHORT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_SHORT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_SHORT, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_SHORT, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_SHORT, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_SHORT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_SHORT, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_USHORT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_USHORT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_USHORT, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_USHORT, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_USHORT, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_USHORT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_USHORT, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_INT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_INT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_INT, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_INT, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_INT, H5T_NATIVE_UINT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_INT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_INT, H5T_NATIVE_ULONG);
+#endif
+    
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UINT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UINT, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UINT, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UINT, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UINT, H5T_NATIVE_INT);
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UINT, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_UINT, H5T_NATIVE_ULONG);
+#endif
+    
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_LONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_LONG, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_LONG, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_LONG, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_LONG, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_LONG, H5T_NATIVE_UINT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_LONG, H5T_NATIVE_ULONG);
+#endif
+    
+#if SIZEOF_INT != SIZEOF_LONG
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_ULONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_ULONG, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_ULONG, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_ULONG, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_ULONG, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_ULONG, H5T_NATIVE_UINT);
+    nerrors += test_conv_int_1("sw", H5T_NATIVE_ULONG, H5T_NATIVE_LONG);
+#endif
+
+    /* Test software floating-point conversion functions */
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
 #ifdef USE_LDOUBLE

@@ -141,8 +141,8 @@ H5F_t *H5G_insertion_file(H5G_entry_t *loc, const char *name);
 herr_t H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 			   H5G_entry_t *obj_ent/*in,out*/,
 			   intn *nlinks/*in,out*/);
-herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, const H5G_entry_t *ent);
-herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent/*out*/);
+herr_t H5G_ent_encode (H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
+herr_t H5G_ent_decode (H5F_t *f, const uint8_t **pp, H5G_entry_t *ent/*out*/);
 
 /*
  * These functions operate on symbol table nodes.

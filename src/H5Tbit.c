@@ -36,7 +36,7 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_copy (uint8 *dst, size_t dst_offset, const uint8 *src,
+H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
 	      size_t src_offset, size_t size)
 {
     intn	shift;
@@ -165,7 +165,7 @@ H5T_bit_copy (uint8 *dst, size_t dst_offset, const uint8 *src,
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5T_bit_get_d (uint8 *buf, size_t offset, size_t size)
+H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
 {
     hsize_t	val=0;
     size_t	i, hs;
@@ -173,16 +173,16 @@ H5T_bit_get_d (uint8 *buf, size_t offset, size_t size)
     FUNC_ENTER (H5T_bit_get_d, 0);
     assert (8*sizeof(val)>=size);
 
-    H5T_bit_copy ((uint8*)&val, 0, buf, offset, size);
+    H5T_bit_copy ((uint8_t*)&val, 0, buf, offset, size);
     switch (((H5T_t*)(H5I_object(H5T_NATIVE_INT_g)))->u.atomic.order) {
     case H5T_ORDER_LE:
 	break;
 
     case H5T_ORDER_BE:
 	for (i=0, hs=sizeof(val)/2; i<hs; i++) {
-	    uint8 tmp = ((uint8*)&val)[i];
-	    ((uint8*)&val)[i] = ((uint8*)&val)[sizeof(val)-(i+1)];
-	    ((uint8*)&val)[sizeof(val)-(i+1)] = tmp;
+	    uint8_t tmp = ((uint8_t*)&val)[i];
+	    ((uint8_t*)&val)[i] = ((uint8_t*)&val)[sizeof(val)-(i+1)];
+	    ((uint8_t*)&val)[sizeof(val)-(i+1)] = tmp;
 	}
 	break;
 
@@ -209,7 +209,7 @@ H5T_bit_get_d (uint8 *buf, size_t offset, size_t size)
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_set_d (uint8 *buf, size_t offset, size_t size, hsize_t val)
+H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, hsize_t val)
 {
     size_t	i, hs;
     
@@ -221,9 +221,9 @@ H5T_bit_set_d (uint8 *buf, size_t offset, size_t size, hsize_t val)
 
     case H5T_ORDER_BE:
 	for (i=0, hs=sizeof(val)/2; i<hs; i++) {
-	    uint8 tmp = ((uint8*)&val)[i];
-	    ((uint8*)&val)[i] = ((uint8*)&val)[sizeof(val)-(i+1)];
-	    ((uint8*)&val)[sizeof(val)-(i+1)] = tmp;
+	    uint8_t tmp = ((uint8_t*)&val)[i];
+	    ((uint8_t*)&val)[i] = ((uint8_t*)&val)[sizeof(val)-(i+1)];
+	    ((uint8_t*)&val)[sizeof(val)-(i+1)] = tmp;
 	}
 	break;
 
@@ -231,7 +231,7 @@ H5T_bit_set_d (uint8 *buf, size_t offset, size_t size, hsize_t val)
 	HDabort ();
     }
 
-    H5T_bit_copy (buf, offset, (uint8*)&val, 0, size);
+    H5T_bit_copy (buf, offset, (uint8_t*)&val, 0, size);
 }
 
 
@@ -251,7 +251,7 @@ H5T_bit_set_d (uint8 *buf, size_t offset, size_t size, hsize_t val)
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_set (uint8 *buf, size_t offset, size_t size, hbool_t value)
+H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value)
 {
     intn	idx;
 
@@ -309,7 +309,7 @@ H5T_bit_set (uint8 *buf, size_t offset, size_t size, hbool_t value)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
+H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	      hbool_t value)
 {
     ssize_t	base=(ssize_t)offset;
@@ -415,7 +415,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_bit_inc(uint8 *buf, size_t start, size_t size)
+H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
 {
     size_t	idx = start / 8;
     unsigned	carry = 1;

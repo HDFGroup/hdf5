@@ -68,77 +68,77 @@
 /* For non-little-endian platforms, encode each byte by itself */
 #ifdef WORDS_BIGENDIAN
 #  define INT16ENCODE(p, i) {						      \
-   *(p) = (uint8)( (uintn)(i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uintn)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)( (uintn)(i)	    & 0xff); (p)++;			      \
+   *(p) = (uint8_t)(((uintn)(i) >> 8) & 0xff); (p)++;			      \
 }
 
 #  define UINT16ENCODE(p, i) {						      \
-   *(p) = (uint8)(	  (i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uintn)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)(	    (i)	    & 0xff); (p)++;			      \
+   *(p) = (uint8_t)(((uintn)(i) >> 8) & 0xff); (p)++;			      \
 }
 
 #  define INT32ENCODE(p, i) {						      \
-   *(p) = (uint8)( (uint32)(i)	      & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint32)(i) >>  8) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint32)(i) >> 16) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint32)(i) >> 24) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)( (uint32_t)(i)	  & 0xff); (p)++;		      \
+   *(p) = (uint8_t)(((uint32_t)(i) >>  8) & 0xff); (p)++;		      \
+   *(p) = (uint8_t)(((uint32_t)(i) >> 16) & 0xff); (p)++;		      \
+   *(p) = (uint8_t)(((uint32_t)(i) >> 24) & 0xff); (p)++;		      \
 }
 
 #  define UINT32ENCODE(p, i) {						      \
-   *(p) = (uint8)( (i)	      & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >>  8) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 16) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 24) & 0xff); (p)++;				      \
+   *(p) = (uint8_t)( (i)        & 0xff); (p)++;				      \
+   *(p) = (uint8_t)(((i) >>  8) & 0xff); (p)++;				      \
+   *(p) = (uint8_t)(((i) >> 16) & 0xff); (p)++;				      \
+   *(p) = (uint8_t)(((i) >> 24) & 0xff); (p)++;				      \
 }
 
 #  define INT64ENCODE(p, n) {						      \
-   int64 _n = (n);							      \
+   int64_t _n = (n);							      \
    size_t _i;								      \
-   uint8 *_p = (uint8*)(p);						      \
-   for (_i=0; _i<sizeof(int64); _i++, _n>>=8) {				      \
-      *_p++ = (uint8)(_n & 0xff);					      \
+   uint8_t *_p = (uint8_t*)(p);						      \
+   for (_i=0; _i<sizeof(int64_t); _i++, _n>>=8) {			      \
+      *_p++ = (uint8_t)(_n & 0xff);					      \
    }									      \
    for (/*void*/; _i<8; _i++) {						      \
       *_p++ = (n)<0 ? 0xff : 0;						      \
    }									      \
-   (p) = (uint8*)(p)+8;							      \
+   (p) = (uint8_t*)(p)+8;						      \
 }
 
 #  define UINT64ENCODE(p, n) {						      \
-   uint64 _n = (n);							      \
+   uint64_t _n = (n);							      \
    size_t _i;								      \
-   uint8 *_p = (uint8*)(p);						      \
-   for (_i=0; _i<sizeof(uint64); _i++, _n>>=8) {			      \
-      *_p++ = (uint8)(_n & 0xff);					      \
+   uint8_t *_p = (uint8_t*)(p);						      \
+   for (_i=0; _i<sizeof(uint64_t); _i++, _n>>=8) {			      \
+      *_p++ = (uint8_t)(_n & 0xff);					      \
    }									      \
    for (/*void*/; _i<8; _i++) {						      \
       *_p++ = 0;							      \
    }									      \
-   (p) = (uint8*)(p)+8;							      \
+   (p) = (uint8_t*)(p)+8;						      \
 }
 
 #  define INT16DECODE(p, i) {						      \
-   (i)	= (int16)((*(p) & 0xff));      (p)++;				      \
-   (i) |= (int16)((*(p) & 0xff) << 8); (p)++;				      \
+   (i)	= (int16_t)((*(p) & 0xff));      (p)++;				      \
+   (i) |= (int16_t)((*(p) & 0xff) << 8); (p)++;				      \
 }
 
 #  define UINT16DECODE(p, i) {						      \
-   (i)	= (uint16) (*(p) & 0xff);	(p)++;				      \
-   (i) |= (uint16)((*(p) & 0xff) << 8); (p)++;				      \
+   (i)	= (uint16_t) (*(p) & 0xff);	  (p)++;			      \
+   (i) |= (uint16_t)((*(p) & 0xff) << 8); (p)++;			      \
 }
 
 #  define INT32DECODE(p, i) {						      \
-   (i)	= (	   *(p) & 0xff);	(p)++;				      \
-   (i) |= ((int32)(*(p) & 0xff) <<  8); (p)++;				      \
-   (i) |= ((int32)(*(p) & 0xff) << 16); (p)++;				      \
-   (i) |= ((int32)(*(p) & 0xff) << 24); (p)++;				      \
+   (i)	= (	     *(p) & 0xff);	  (p)++;			      \
+   (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;			      \
+   (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;			      \
+   (i) |= ((int32_t)(*(p) & 0xff) << 24); (p)++;			      \
 }
 
 #  define UINT32DECODE(p, i) {						      \
-   (i)	=  (uint32)(*(p) & 0xff);	 (p)++;				      \
-   (i) |= ((uint32)(*(p) & 0xff) <<  8); (p)++;				      \
-   (i) |= ((uint32)(*(p) & 0xff) << 16); (p)++;				      \
-   (i) |= ((uint32)(*(p) & 0xff) << 24); (p)++;				      \
+   (i)	=  (uint32_t)(*(p) & 0xff);	   (p)++;			      \
+   (i) |= ((uint32_t)(*(p) & 0xff) <<  8); (p)++;			      \
+   (i) |= ((uint32_t)(*(p) & 0xff) << 16); (p)++;			      \
+   (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;			      \
 }
 
 #  define INT64DECODE(p, n) {						      \
@@ -146,7 +146,7 @@
    size_t _i;								      \
    n = 0;								      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(int64); _i++) {					      \
+   for (_i=0; _i<sizeof(int64_t); _i++) {				      \
       n = (n<<8) | *(--p);						      \
    }									      \
    (p) += 8;								      \
@@ -157,7 +157,7 @@
    size_t _i;								      \
    n = 0;								      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(uint64); _i++) {				      \
+   for (_i=0; _i<sizeof(uint64_t); _i++) {				      \
       n = (n<<8) | *(--p);						      \
    }									      \
    (p) += 8;								      \
@@ -165,15 +165,15 @@
 
 #else
    /* For little-endian platforms, make the compiler do the work */
-#  define INT16ENCODE(p, i)  { *((int16 *)(p)) = (int16)(i); (p)+=2; }
-#  define UINT16ENCODE(p, i) { *((uint16 *)(p)) = (uint16)(i); (p)+=2; }
-#  define INT32ENCODE(p, i)  { *((int32 *)(p)) = (int32)(i); (p)+=4; }
-#  define UINT32ENCODE(p, i) { *((uint32 *)(p)) = (uint32)(i); (p)+=4; }
+#  define INT16ENCODE(p, i) {*((int16_t*)(p))=(int16_t)(i);(p)+=2;}
+#  define UINT16ENCODE(p, i) {*((uint16_t*)(p))=(uint16_t)(i);(p)+=2;}
+#  define INT32ENCODE(p, i)  {*((int32_t*)(p))=(int32_t)(i);(p)+=4;}
+#  define UINT32ENCODE(p, i) {*((uint32_t*)(p))=(uint32_t)(i);(p)+=4;}
 
 #  define INT64ENCODE(p, i)  {						      \
-   *((int64 *)(p)) = (int64)(i);					      \
-   (p) += sizeof(int64);						      \
-   if (4==sizeof(int64)) {						      \
+   *((int64_t *)(p)) = (int64_t)(i);					      \
+   (p) += sizeof(int64_t);						      \
+   if (4==sizeof(int64_t)) {						      \
       *(p)++ = (i)<0?0xff:0x00;						      \
       *(p)++ = (i)<0?0xff:0x00;						      \
       *(p)++ = (i)<0?0xff:0x00;						      \
@@ -182,9 +182,9 @@
 }
 
 #  define UINT64ENCODE(p, i) {						      \
-   *((uint64 *)(p)) = (uint64)(i);					      \
-   (p) += sizeof(uint64);						      \
-   if (4==sizeof(uint64)) {						      \
+   *((uint64_t *)(p)) = (uint64_t)(i);					      \
+   (p) += sizeof(uint64_t);						      \
+   if (4==sizeof(uint64_t)) {						      \
       *(p)++ = 0x00;							      \
       *(p)++ = 0x00;							      \
       *(p)++ = 0x00;							      \
@@ -192,12 +192,12 @@
    }									      \
 }
 
-#  define INT16DECODE(p, i)  { (i) = (int16)(*(const int16 *)(p)); (p)+=2; }
-#  define UINT16DECODE(p, i) { (i) = (uint16)(*(const uint16 *)(p)); (p)+=2; }
-#  define INT32DECODE(p, i)  { (i) = (int32)(*(const int32 *)(p)); (p)+=4; }
-#  define UINT32DECODE(p, i) { (i) = (uint32)(*(const uint32 *)(p)); (p)+=4; }
-#  define INT64DECODE(p, i)  { (i) = (int64)(*(const int64 *)(p)); (p)+=8; }
-#  define UINT64DECODE(p, i) { (i) = (uint64)(*(const uint64 *)(p)); (p)+=8; }
+#  define INT16DECODE(p, i)  {(i)=(int16_t)(*(const int16_t*)(p));(p)+=2;}
+#  define UINT16DECODE(p, i) {(i)=(uint16_t)(*(const uint16_t*)(p));(p)+=2;}
+#  define INT32DECODE(p, i)  {(i)=(int32_t)(*(const int32_t*)(p));(p)+=4;}
+#  define UINT32DECODE(p, i) {(i)=(uint32_t)(*(const uint32_t*)(p));(p)+=4;}
+#  define INT64DECODE(p, i)  {(i)=(int64_t)(*(const int64_t*)(p));(p)+=8;}
+#  define UINT64DECODE(p, i) {(i)=(uint64_t)(*(const uint64_t*)(p));(p)+=8;}
 
 #endif
 
@@ -321,10 +321,10 @@ typedef struct H5F_low_class_t {
 			 const H5F_access_t *access_parms);
     herr_t	(*read)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
     			const H5D_transfer_t xfer_mode,
-			const haddr_t *addr, size_t size, uint8 *buf);
+			const haddr_t *addr, size_t size, uint8_t *buf);
     herr_t	(*write)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
 			 const H5D_transfer_t xfer_mode,
-			 const haddr_t *addr, size_t size, const uint8 *buf);
+			 const haddr_t *addr, size_t size, const uint8_t *buf);
     herr_t	(*flush)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms);
     herr_t	(*extend)(struct H5F_low_t *lf,
@@ -353,7 +353,7 @@ typedef struct H5F_low_t {
 	/* Split meta/raw data */
 	struct {
 	    char	*name;	/* Base name w/o extension		*/
-	    uint64	mask;	/* Bit that determines which file to use*/
+	    uint64_t	mask;	/* Bit that determines which file to use*/
 	    struct H5F_low_t *meta; /* Meta data file			*/
 	    struct H5F_low_t *raw; /* Raw data file			*/
 	} split;
@@ -374,7 +374,7 @@ typedef struct H5F_low_t {
 	    FILE	*f;	/* Posix stdio file			*/
 	    H5F_fileop_t op;	/* Previous file operation		*/
 #ifdef HAVE_FSEEK64
-	    int64	cur;	/* Current file position		*/
+	    int64_t	cur;	/* Current file position		*/
 #else
 	    long	cur;	/* Current file position		*/
 #endif
@@ -382,7 +382,7 @@ typedef struct H5F_low_t {
 
 	/* In-core temp file */
 	struct {
-	    uint8	*mem;	/* Mem image of the file		*/
+	    uint8_t	*mem;	/* Mem image of the file		*/
 	    size_t	size;	/* Current file size			*/
 	    size_t	alloc;	/* Current size of MEM buffer		*/
 	} core;
@@ -454,7 +454,7 @@ typedef struct H5F_file_t {
     uintn	flags;		/* Access Permissions for file		*/
     H5F_low_t	*lf; 		/* Lower level file handle for I/O	*/
     uintn	nrefs;		/* Ref count for times file is opened	*/
-    uint32	consist_flags;	/* File Consistency Flags		*/
+    uint32_t	consist_flags;	/* File Consistency Flags		*/
     haddr_t	boot_addr;	/* Absolute address of boot block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
@@ -489,7 +489,7 @@ typedef struct H5F_t {
 #define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_ADDR(f)==4 ? UINT32ENCODE(p,o) \
     : H5F_SIZEOF_ADDR(f)==8 ? UINT64ENCODE(p,o) \
     : H5F_SIZEOF_ADDR(f)==2 ? UINT16ENCODE(p,o) \
-    : H5FPencode_unusual_offset(f,&(p),(uint8 *)&(o)))
+    : H5FPencode_unusual_offset(f,&(p),(uint8_t*)&(o)))
 #else /* NOT_YET */
 #define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_ADDR(f)) {		      \
     case 4: UINT32ENCODE(p,o); break;					      \
@@ -544,7 +544,7 @@ extern  hbool_t H5_mpi_1_metawrite_g;
 
 /* Private functions, not part of the publicly documented API */
 herr_t H5F_init_interface(void);
-void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
+void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 H5F_t *H5F_open(const char *name, uintn flags,
 		const H5F_create_t *create_parms,
 		const H5F_access_t *access_parms);
@@ -621,10 +621,10 @@ H5F_low_t *H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
 herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 		    const H5D_transfer_t xfer_mode,
-		    const haddr_t *addr, size_t size, uint8 *buf);
+		    const haddr_t *addr, size_t size, uint8_t *buf);
 herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 		     const H5D_transfer_t xfer_mode,
-		     const haddr_t *addr, size_t size, const uint8 *buf);
+		     const haddr_t *addr, size_t size, const uint8_t *buf);
 herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 /* Functions that operate on addresses */
@@ -640,8 +640,8 @@ htri_t H5F_addr_defined(const haddr_t *);
 void H5F_addr_undef(haddr_t *);
 void H5F_addr_reset(haddr_t *);
 htri_t H5F_addr_zerop(const haddr_t *);
-void H5F_addr_encode(H5F_t *, uint8 **, const haddr_t *);
-void H5F_addr_decode(H5F_t *, const uint8 **, haddr_t *);
+void H5F_addr_encode(H5F_t *, uint8_t **, const haddr_t *);
+void H5F_addr_decode(H5F_t *, const uint8_t **, haddr_t *);
 void H5F_addr_print(FILE *, const haddr_t *);
 void H5F_addr_pow2(uintn, haddr_t *);
 void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);

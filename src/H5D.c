@@ -148,6 +148,7 @@ static void
 H5D_term_interface(void)
 {
     H5I_destroy_group(H5I_DATASET);
+    interface_initialize_g = FALSE;
 }
 
 /*-------------------------------------------------------------------------
@@ -1448,8 +1449,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
     hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
-    uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
-    uint8		*bkg_buf = NULL;	/*background buffer	*/
+    uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t		*sconv=NULL;		/*space conversion funcs*/
@@ -1684,7 +1685,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	printf("%s: check 6.5\n",FUNC);
 	{
 	    int i;
-	    uint16 *b;
+	    uint16_t *b;
 
 	    if(qak_debug) {
 		b=tconv_buf;
@@ -1807,8 +1808,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
     hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
-    uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
-    uint8		*bkg_buf = NULL;	/*background buffer	*/
+    uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t		*sconv=NULL;		/*space conversion funcs*/
@@ -2050,7 +2051,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef QAK
 	{
 	    int i;
-	    uint16 *b;
+	    uint16_t *b;
 
 	    if(qak_debug) {
 		b=tconv_buf;

@@ -34,7 +34,7 @@
 static herr_t
 test_find (void)
 {
-    uint8	v1[8];
+    uint8_t	v1[8];
     intn	i;
     ssize_t	n;
     
@@ -154,7 +154,7 @@ test_find (void)
 static herr_t
 test_copy (void)
 {
-    uint8	v1[8], v2[8];
+    uint8_t	v1[8], v2[8];
     size_t	s_offset, d_offset, size;
     intn	i, j;
     ssize_t	n;
@@ -277,7 +277,7 @@ test_copy (void)
 static herr_t
 test_set (void)
 {
-    uint8	v2[8];
+    uint8_t	v2[8];
     size_t	d_offset, size;
     intn	i, j;
     ssize_t	n;
@@ -395,7 +395,7 @@ test_set (void)
 static herr_t
 test_clear (void)
 {
-    uint8	v2[8];
+    uint8_t	v2[8];
     size_t	d_offset, size;
     intn	i, j;
     ssize_t	n;

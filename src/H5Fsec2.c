@@ -30,11 +30,11 @@ static herr_t H5F_sec2_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_sec2_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 			    const H5D_transfer_t xfer_mode,
 			    const haddr_t *addr, size_t size,
-			    uint8 *buf/*out*/);
+			    uint8_t *buf/*out*/);
 static herr_t H5F_sec2_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 			    const H5D_transfer_t xfer_mode,
 			     const haddr_t *addr, size_t size,
-			     const uint8 *buf);
+			     const uint8_t *buf);
 
 const H5F_low_class_t	H5F_LOW_SEC2_g[1] = {{
     NULL,			/* access method			*/
@@ -159,10 +159,10 @@ H5F_sec2_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 static herr_t
 H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	      const H5D_transfer_t __unused__ xfer_mode,
-	      const haddr_t *addr, size_t size, uint8 *buf)
+	      const haddr_t *addr, size_t size, uint8_t *buf)
 {
     ssize_t		n;
-    uint64		mask;
+    uint64_t		mask;
 #ifdef HAVE_LSEEK64
     off64_t		offset;
 #else
@@ -172,7 +172,7 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
     FUNC_ENTER(H5F_sec2_read, FAIL);
 
     /* Check for overflow */
-    mask = (uint64)1 << (8*sizeof(offset)-1);
+    mask = (uint64_t)1 << (8*sizeof(offset)-1);
     if (addr->offset >= mask ||
 	addr->offset+size < addr->offset ||
 	addr->offset+size >= mask) {
@@ -186,7 +186,7 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 
     /* Check easy cases */
     if (0 == size) HRETURN(SUCCEED);
-    if ((uint64)offset >= lf->eof.offset) {
+    if ((uint64_t)offset >= lf->eof.offset) {
 	HDmemset(buf, 0, size);
 	HRETURN(SUCCEED);
     }
@@ -264,9 +264,9 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 static herr_t
 H5F_sec2_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	       const H5D_transfer_t __unused__ xfer_mode,
-	       const haddr_t *addr, size_t size, const uint8 *buf)
+	       const haddr_t *addr, size_t size, const uint8_t *buf)
 {
-    uint64	mask;
+    uint64_t	mask;
     ssize_t	n;
 #ifdef HAVE_LSEEK64
     off64_t	offset;
@@ -277,7 +277,7 @@ H5F_sec2_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
     FUNC_ENTER(H5F_sec2_write, FAIL);
 
     /* Check for overflow */
-    mask = (uint64)1 << (8*sizeof(offset)-1);
+    mask = (uint64_t)1 << (8*sizeof(offset)-1);
     if (addr->offset >= mask ||
 	addr->offset+size < addr->offset ||
 	addr->offset+size >= mask) {

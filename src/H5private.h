@@ -23,14 +23,13 @@
 #   include <errno.h>
 #   include <fcntl.h>
 #   include <float.h>
+#   include <limits.h>
 #   include <math.h>
 #   include <stdarg.h>
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
-#   include <limits.h>
 #endif
-
 
 /*
  * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
@@ -186,12 +185,6 @@
 #   define SIGN(a)		((a)>0 ? 1 : (a)<0 ? -1 : 0)
 #endif
 
-/* maximum value of various types */
-#define MAX_SIZET	((hsize_t)(size_t)(ssize_t)(-1))
-#define MAX_SSIZET	((hsize_t)(ssize_t)((size_t)1<<(8*sizeof(ssize_t)-1)))
-#define MAX_HSIZET	((hsize_t)(hssize_t)(-1))
-#define MAX_HSSIZET	((hsize_t)1<<(8*sizeof(hssize_t)-1))
-
 /*
  * HDF Boolean type.
  */
@@ -203,45 +196,80 @@
 #endif
 
 /*
- * Numeric data types
+ * Numeric data types.  Some of these might be defined in Posix.1g, otherwise
+ * we define them with the closest available type which is at least as large
+ * as the number of bits indicated in the type name.
  */
-typedef char            char8;
-typedef signed char int8;
-typedef unsigned char   uchar8, uint8;
-
-#if SIZEOF_SHORT==2
-typedef short int16;
-typedef unsigned short uint16;
-#else
-typedef int int16;              /*not really */
-typedef unsigned uint16;        /*not really */
+#if SIZEOF_INT8_T==0
+typedef signed char int8_t;
 #endif
 
-#if SIZEOF_INT==4
-typedef int int32;
-typedef unsigned int uint32;
-#elif SIZEOF_LONG==4
-typedef long int32;
-typedef unsigned long uint32;
-#else
-typedef int int32;              /*not really */
-typedef unsigned uint32;        /*not really */
+#if SIZEOF_UINT8_T==0
+typedef unsigned char uint8_t;
 #endif
 
-#if SIZEOF_INT==8
-typedef int             int64;
-typedef unsigned        uint64;
-#elif SIZEOF_LONG==8
-typedef long            int64;
-typedef unsigned long   uint64;
-#elif SIZEOF_LONG_LONG==8
-typedef long long       int64;
-typedef unsigned long long uint64;
-#elif SIZEOF___INT64==8
-typedef __int64		int64;
-typedef unsigned __int64 uint64;
-#else
-#  error "no 64-bit integer type"
+#if SIZEOF_INT16_T==0
+#   if SIZEOF_SHORT==2
+typedef short int16_t;
+#   else
+typedef int int16_t;		/*not really */
+#   endif
+#endif
+
+#if SIZEOF_UINT16_T==0
+#   if SIZEOF_SHORT==2
+typedef unsigned short uint16_t;
+#   else
+typedef unsigned uint16_t;	/*not really */
+#   endif
+#endif
+
+#if SIZEOF_INT32_T==0
+#   if SIZEOF_INT==4
+typedef int int32_t;
+#   elif SIZEOF_LONG==4
+typedef long int32_t;
+#   else
+typedef int int32_t;		/*not really */
+#   endif
+#endif
+
+#if SIZEOF_UINT32_T==0
+#   if SIZEOF_INT==4
+typedef unsigned int uint32_t;
+#   elif SIZEOF_LONG==4
+typedef unsigned long uint32_t;
+#   else
+typedef unsigned uint32_t;	/*not really */
+#   endif
+#endif
+
+#if SIZEOF_INT64_T==0
+#   if SIZEOF_INT==8
+typedef int int64_t;
+#   elif SIZEOF_LONG==8
+typedef long int64_t;
+#   elif SIZEOF_LONG_LONG==8
+typedef long long int64_t;
+#   elif SIZEOF___INT64==8
+typedef __int64 int64_t;
+#   else
+#       error "no signed 64-bit integer type"
+#   endif
+#endif
+
+#if SIZEOF_UINT64_T==0
+#   if SIZEOF_INT==8
+typedef unsigned uint64_t;
+#   elif SIZEOF_LONG==8
+typedef unsigned long uint64_t;
+#   elif SIZEOF_LONG_LONG==8
+typedef unsigned long long uint64_t;
+#   elif SIZEOF___INT64==8
+typedef unsigned __int64 uint64_t;
+#   else
+#       error "no unsigned 64-bit integer type"
+#   endif
 #endif
 
 #if SIZEOF_FLOAT==4
@@ -269,10 +297,26 @@ typedef unsigned uintn;
  * File addresses.
  */
 typedef struct {
-    uint64                  offset;     /*offset within an HDF5 file    */
+    uint64_t		offset;     /*offset within an HDF5 file    */
 } haddr_t;
 
-#define H5F_ADDR_UNDEF {((uint64)(-1L))}
+#define H5F_ADDR_UNDEF {((uint64_t)(-1L))}
+
+/*
+ * Maximum and minimum values.  These should be defined in <limits.h> for the
+ * most part.
+ */
+#ifndef LLONG_MAX
+#   define LLONG_MAX	((long long)(((unsigned long long)1		      \
+				      <<(8*sizeof(long long)-1))-1))
+#   define ULLONG_MAX	((unsigned long long)((long long)(-1)))
+#endif
+#ifndef SIZET_MAX
+#   define SIZET_MAX	((hsize_t)(size_t)(ssize_t)(-1))
+#   define SSIZET_MAX	((hsize_t)(ssize_t)((size_t)1<<(8*sizeof(ssize_t)-1)))
+#endif
+#define HSIZET_MAX	((hsize_t)(hssize_t)(-1))
+#define HSSIZET_MAX	((hsize_t)1<<(8*sizeof(hssize_t)-1))
 
 /*
  * Some compilers have problems declaring auto variables that point
@@ -510,7 +554,7 @@ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDstrtod(S,R)           strtod(S,R)
 #define HDstrtok(X,Y)           strtok(X,Y)
 #define HDstrtol(S,R,N)         strtol(S,R,N)
-int64 HDstrtoll (const char *s, const char **rest, int base);
+int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDstrtoul(S,R,N)        strtoul(S,R,N)
 #define HDstrxfrm(X,Y,Z)        strxfrm(X,Y,Z)
 #define HDsysconf(N)            sysconf(N)

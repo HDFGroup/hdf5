@@ -83,6 +83,18 @@
 /* The number of bytes in a int.  */
 #undef SIZEOF_INT
 
+/* The number of bytes in a int16_t.  */
+#undef SIZEOF_INT16_T
+
+/* The number of bytes in a int32_t.  */
+#undef SIZEOF_INT32_T
+
+/* The number of bytes in a int64_t.  */
+#undef SIZEOF_INT64_T
+
+/* The number of bytes in a int8_t.  */
+#undef SIZEOF_INT8_T
+
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG
 
@@ -101,6 +113,18 @@
 /* The number of bytes in a size_t.  */
 #undef SIZEOF_SIZE_T
 
+/* The number of bytes in a uint16_t.  */
+#undef SIZEOF_UINT16_T
+
+/* The number of bytes in a uint32_t.  */
+#undef SIZEOF_UINT32_T
+
+/* The number of bytes in a uint64_t.  */
+#undef SIZEOF_UINT64_T
+
+/* The number of bytes in a uint8_t.  */
+#undef SIZEOF_UINT8_T
+
 /* Define if you have the BSDgettimeofday function.  */
 #undef HAVE_BSDGETTIMEOFDAY
 
@@ -112,6 +136,9 @@
 
 /* Define if you have the _scrsize function.  */
 #undef HAVE__SCRSIZE
+
+/* Define if you have the compress2 function.  */
+#undef HAVE_COMPRESS2
 
 /* Define if you have the difftime function.  */
 #undef HAVE_DIFFTIME
@@ -199,6 +226,9 @@
 
 /* Define if you have the mpio library (-lmpio).  */
 #undef HAVE_LIBMPIO
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ

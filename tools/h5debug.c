@@ -48,13 +48,13 @@
 int
 main(int argc, char *argv[])
 {
-    hid_t                   fid, plist=H5P_DEFAULT;
-    H5F_t                  *f;
-    haddr_t                 addr;
-    uint8                   sig[16];
-    intn                    i, ndims;
-    herr_t                  status = SUCCEED;
-    haddr_t                 extra;
+    hid_t	fid, plist=H5P_DEFAULT;
+    H5F_t       *f;
+    haddr_t     addr;
+    uint8_t     sig[16];
+    intn        i, ndims;
+    herr_t      status = SUCCEED;
+    haddr_t     extra;
 
     /*
      * Open the file and get the file descriptor.
@@ -90,7 +90,7 @@ main(int argc, char *argv[])
     printf("Reading signature at address ");
     H5F_addr_print(stdout, &addr);
     printf(" (rel)\n");
-    if (H5F_block_read(f, &addr, (hsize_t)sizeof(sig), H5D_XFER_DFLT, sig) < 0) {
+    if (H5F_block_read(f, &addr, (hsize_t)sizeof(sig), H5D_XFER_DFLT, sig)<0) {
         fprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }
@@ -137,7 +137,8 @@ main(int argc, char *argv[])
 	    break;
 
         default:
-            fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned) (subtype));
+            fprintf(stderr, "Unknown B-tree subtype %u\n",
+		    (unsigned)(subtype));
             HDexit(4);
         }
 

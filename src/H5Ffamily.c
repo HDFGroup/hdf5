@@ -44,11 +44,11 @@ static H5F_low_t *H5F_fam_open(const char *name,
 static herr_t H5F_fam_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 			   const H5D_transfer_t xfer_mode,
-			   const haddr_t *addr, size_t size, uint8 *buf);
+			   const haddr_t *addr, size_t size, uint8_t *buf);
 static herr_t H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 			    const H5D_transfer_t xfer_mode,
 			    const haddr_t *addr, size_t size,
-			    const uint8 *buf);
+			    const uint8_t *buf);
 static herr_t H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 const H5F_low_class_t H5F_LOW_FAMILY_g[1] = {{
@@ -314,7 +314,7 @@ H5F_fam_close(H5F_low_t *lf, const H5F_access_t *access_parms)
 static herr_t
 H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	     const H5D_transfer_t xfer_mode,
-	     const haddr_t *addr, size_t size, uint8 *buf)
+	     const haddr_t *addr, size_t size, uint8_t *buf)
 {
     size_t		nbytes;
     haddr_t		cur_addr;
@@ -379,7 +379,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 static herr_t
 H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	      const H5D_transfer_t xfer_mode,
-	      const haddr_t *addr, size_t size, const uint8 *buf)
+	      const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     size_t		   	nbytes;
     haddr_t		    	cur_addr, max_addr;
@@ -497,7 +497,7 @@ static herr_t
 H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
 {
     int			    membno, nerrors = 0;
-    uint8		    buf[1];
+    uint8_t		    buf[1];
     haddr_t		    addr1, addr2, addr3;
     hsize_t		    max_offset;
 

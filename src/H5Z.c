@@ -137,6 +137,7 @@ H5Z_term_interface (void)
     }
     H5Z_table_g = H5MM_xfree(H5Z_table_g);
     H5Z_table_used_g = H5Z_table_alloc_g = 0;
+    interface_initialize_g = FALSE;
 }
 
 
@@ -501,7 +502,7 @@ H5Z_filter_deflate (uintn flags, size_t cd_nelmts, const uintn cd_values[],
     size_t	ret_value = 0;
     int		aggression = 6;
     void	*outbuf = NULL;
-#if defined(HAVE_LIBZ) && defined(HAVE_ZLIB_H)
+#if defined(HAVE_COMPRESS2)
     int		status;
 #endif
     
@@ -514,7 +515,7 @@ H5Z_filter_deflate (uintn flags, size_t cd_nelmts, const uintn cd_values[],
     }
     aggression = cd_values[0];
 
-#if defined(HAVE_LIBZ) && defined (HAVE_ZLIB_H)
+#if defined(HAVE_COMPRESS2)
     if (flags & H5Z_FLAG_REVERSE) {
 	/* Input; uncompress */
 	z_stream	z_strm;

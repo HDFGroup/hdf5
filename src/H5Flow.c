@@ -15,7 +15,7 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
-#define addr_defined(X) (((uint64)(-1)!=(X)->offset) ? TRUE : FALSE)
+#define addr_defined(X) (((uint64_t)(-1)!=(X)->offset) ? TRUE : FALSE)
 
 #define PABLO_MASK	H5F_low
 static hbool_t		interface_initialize_g = FALSE;
@@ -217,7 +217,7 @@ H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms)
 herr_t
 H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	     const H5D_transfer_t xfer_mode,
-	     const haddr_t *addr, size_t size, uint8 *buf/*out*/)
+	     const haddr_t *addr, size_t size, uint8_t *buf/*out*/)
 {
     herr_t		    ret_value = FAIL;
 
@@ -272,7 +272,7 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 herr_t
 H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	      const H5D_transfer_t xfer_mode,
-	      const haddr_t *addr, size_t size, const uint8 *buf)
+	      const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     herr_t		ret_value = FAIL;
     haddr_t		tmp_addr;
@@ -359,7 +359,7 @@ herr_t
 H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
 {
     haddr_t		    last_byte;
-    uint8		    buf[1];
+    uint8_t		    buf[1];
 
     FUNC_ENTER(H5F_low_flush, FAIL);
 
@@ -689,7 +689,7 @@ H5F_addr_undef(haddr_t *addr/*out*/)
 {
     assert(addr);
 
-    addr->offset = (uint64)(-1);
+    addr->offset = (uint64_t)(-1);
 }
 
 /*-------------------------------------------------------------------------
@@ -776,7 +776,7 @@ H5F_addr_zerop(const haddr_t *addr)
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
+H5F_addr_encode(H5F_t *f, uint8_t **pp, const haddr_t *addr)
 {
     uintn		    i;
     haddr_t		    tmp;
@@ -788,7 +788,7 @@ H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
     if (addr_defined(addr)) {
 	tmp = *addr;
 	for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
-	    *(*pp)++ = (uint8)(tmp.offset & 0xff);
+	    *(*pp)++ = (uint8_t)(tmp.offset & 0xff);
 	    tmp.offset >>= 8;
 	}
 	assert("overflow" && 0 == tmp.offset);
@@ -820,11 +820,11 @@ H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr/*out*/)
+H5F_addr_decode(H5F_t *f, const uint8_t **pp, haddr_t *addr/*out*/)
 {
     uintn		    i;
     haddr_t		    tmp;
-    uint8		    c;
+    uint8_t		    c;
     hbool_t		    all_zero = TRUE;
 
     assert(f);
@@ -1021,7 +1021,7 @@ H5F_addr_pack(H5F_t __unused__ *f, haddr_t *addr, const long objno[2])
     assert(addr);
 
     addr->offset=objno[0];
-    addr->offset|=((uint64)objno[1])<<(8*sizeof(long));
+    addr->offset|=((uint64_t)objno[1])<<(8*sizeof(long));
     
     return(SUCCEED);
 }

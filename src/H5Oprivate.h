@@ -71,8 +71,8 @@ typedef struct H5O_class_t {
     intn	id;				 /*message type ID on disk   */
     const char	*name;				 /*for debugging             */
     size_t	native_size;			 /*size of native message    */
-    void	*(*decode)(H5F_t*, const uint8*, struct H5O_shared_t*);
-    herr_t	(*encode)(H5F_t*, uint8*, const void*);
+    void	*(*decode)(H5F_t*, const uint8_t*, struct H5O_shared_t*);
+    herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
     void	*(*copy)(const void*, void*);    /*copy native value         */
     size_t	(*raw_size)(H5F_t*, const void*);/*sizeof raw val	     */
     herr_t	(*reset)(void *);		 /*free nested data structs  */
@@ -84,9 +84,9 @@ typedef struct H5O_class_t {
 typedef struct H5O_mesg_t {
     const H5O_class_t	*type;		/*type of message		     */
     hbool_t		dirty;		/*raw out of date wrt native	     */
-    uint8		flags;		/*message flags			     */
+    uint8_t		flags;		/*message flags			     */
     void		*native;	/*native format message		     */
-    uint8		*raw;		/*ptr to raw data		     */
+    uint8_t		*raw;		/*ptr to raw data		     */
     size_t		raw_size;	/*size with alignment		     */
     intn		chunkno;	/*chunk number for this mesg	     */
 } H5O_mesg_t;
@@ -95,7 +95,7 @@ typedef struct H5O_chunk_t {
     hbool_t	dirty;			/*dirty flag			     */
     haddr_t	addr;			/*chunk file address		     */
     size_t	size;			/*chunk size			     */
-    uint8	*image;			/*image of file			     */
+    uint8_t	*image;			/*image of file			     */
 } H5O_chunk_t;
 
 typedef struct H5O_t {
@@ -291,9 +291,9 @@ herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 /* EFL operators */
 hsize_t H5O_efl_total_size (H5O_efl_t *efl);
 herr_t H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
-		     hsize_t size, uint8 *buf);
+		     hsize_t size, uint8_t *buf);
 herr_t H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
-		      hsize_t size, const uint8 *buf);
+		      hsize_t size, const uint8_t *buf);
 
 /* Fill value operators */
 herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type);

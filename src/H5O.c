@@ -318,14 +318,14 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 {
     H5O_t	*oh = NULL;
     H5O_t	*ret_value = NULL;
-    uint8	buf[16], *p;
+    uint8_t	buf[16], *p;
     size_t	hdr_size, mesg_size;
     uintn	id;
     intn	mesgno, chunkno, curmesg = 0, nmesgs;
     haddr_t	chunk_addr;
     size_t	chunk_size;
     H5O_cont_t	*cont = NULL;
-    uint8	flags;
+    uint8_t	flags;
 
     FUNC_ENTER(H5O_load, NULL);
 
@@ -454,7 +454,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 	     !H5F_addr_defined(&chunk_addr) && curmesg < oh->nmesgs;
 	     curmesg++) {
 	    if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
-		uint8 *p2 = oh->mesg[curmesg].raw;
+		uint8_t *p2 = oh->mesg[curmesg].raw;
 		cont = (H5O_CONT->decode) (f, p2, NULL);
 		oh->mesg[curmesg].native = cont;
 		chunk_addr = cont->addr;
@@ -505,10 +505,10 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 static herr_t
 H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 {
-    uint8	buf[16], *p;
+    uint8_t	buf[16], *p;
     intn	i, id;
     H5O_cont_t	*cont = NULL;
-    herr_t	(*encode)(H5F_t*, uint8*, const void*) = NULL;
+    herr_t	(*encode)(H5F_t*, uint8_t*, const void*) = NULL;
 
     FUNC_ENTER(H5O_flush, FAIL);
 
@@ -1573,7 +1573,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 {
     intn	idx, i;
     size_t	delta;
-    uint8	*old_addr;
+    uint8_t	*old_addr;
 
     FUNC_ENTER(H5O_alloc_extend_chunk, FAIL);
 
@@ -1702,7 +1702,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     intn	found_null = (-1);	/*best fit null message		*/
     intn	found_other = (-1);	/*best fit other message	*/
     intn	idx = FAIL;		/*message number return value	*/
-    uint8	*p = NULL;		/*ptr into new chunk		*/
+    uint8_t	*p = NULL;		/*ptr into new chunk		*/
     H5O_cont_t	*cont = NULL;		/*native continuation message	*/
     intn	i, chunkno;
 
@@ -2059,7 +2059,7 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
     int		*sequence;
     haddr_t	tmp_addr;
     herr_t	ret_value = FAIL;
-    void	*(*decode)(H5F_t*, const uint8*, H5O_shared_t*);
+    void	*(*decode)(H5F_t*, const uint8_t*, H5O_shared_t*);
     herr_t      (*debug)(H5F_t*, const void*, FILE*, intn, intn)=NULL;
 
     FUNC_ENTER(H5O_debug, FAIL);

@@ -28,8 +28,8 @@ static char             RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK      H5O_dtype_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_dtype_encode (H5F_t *f, uint8 *p, const void *mesg);
-static void *H5O_dtype_decode (H5F_t *f, const uint8 *p, H5O_shared_t *sh);
+static herr_t H5O_dtype_encode (H5F_t *f, uint8_t *p, const void *mesg);
+static void *H5O_dtype_decode (H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_dtype_copy (const void *_mesg, void *_dest);
 static size_t H5O_dtype_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset (void *_mesg);
@@ -76,7 +76,7 @@ static hbool_t          interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
+H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 {
     uintn                   flags, perm_word, version;
     intn                    i, j;
@@ -251,7 +251,7 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
+H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
     uintn               flags = 0;
     uintn               perm_word;
@@ -403,13 +403,13 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
         UINT16ENCODE(*pp, dt->u.atomic.offset);
         UINT16ENCODE(*pp, dt->u.atomic.prec);
 	assert (dt->u.atomic.u.f.epos<=255);
-        *(*pp)++ = (uint8)(dt->u.atomic.u.f.epos);
+        *(*pp)++ = (uint8_t)(dt->u.atomic.u.f.epos);
 	assert (dt->u.atomic.u.f.esize<=255);
-        *(*pp)++ = (uint8)(dt->u.atomic.u.f.esize);
+        *(*pp)++ = (uint8_t)(dt->u.atomic.u.f.esize);
 	assert (dt->u.atomic.u.f.mpos<=255);
-        *(*pp)++ = (uint8)(dt->u.atomic.u.f.mpos);
+        *(*pp)++ = (uint8_t)(dt->u.atomic.u.f.mpos);
 	assert (dt->u.atomic.u.f.msize<=255);
-        *(*pp)++ = (uint8)(dt->u.atomic.u.f.msize);
+        *(*pp)++ = (uint8_t)(dt->u.atomic.u.f.msize);
         UINT32ENCODE(*pp, dt->u.atomic.u.f.ebias);
         break;
 
@@ -498,7 +498,7 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t __unused__ *f, const uint8 *p,
+H5O_dtype_decode(H5F_t __unused__ *f, const uint8_t *p,
 		 H5O_shared_t __unused__ *sh)
 {
     H5T_t                  *dt = NULL;
@@ -540,7 +540,7 @@ H5O_dtype_decode(H5F_t __unused__ *f, const uint8 *p,
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_dtype_encode(H5F_t __unused__ *f, uint8 *p, const void *mesg)
+H5O_dtype_encode(H5F_t __unused__ *f, uint8_t *p, const void *mesg)
 {
     const H5T_t            *dt = (const H5T_t *) mesg;
 

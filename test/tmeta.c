@@ -34,21 +34,21 @@ static char             RcsId[] = "$Revision$";
 #define TEST_INT32_VALUE    -981236
 #define TEST_UINT32_VALUE   3476589
 
-uint8                   compar_buffer[] =
+uint8_t                   compar_buffer[] =
 {
     /* Little-endian encoded version of the 16-bit signed integer */
-    (uint8) ((TEST_INT16_VALUE) & 0xff), (uint8) ((TEST_INT16_VALUE >> 8) & 0xff),
+    (uint8_t) ((TEST_INT16_VALUE) & 0xff), (uint8_t) ((TEST_INT16_VALUE >> 8) & 0xff),
     /* Little-endian encoded version of the 16-bit unsigned integer */
-    (uint8) ((TEST_UINT16_VALUE) & 0xff), (uint8) ((TEST_UINT16_VALUE >> 8) & 0xff),
+    (uint8_t) ((TEST_UINT16_VALUE) & 0xff), (uint8_t) ((TEST_UINT16_VALUE >> 8) & 0xff),
     /* Little-endian encoded version of the 32-bit signed integer */
-    (uint8) ((TEST_INT32_VALUE) & 0xff), (uint8) ((TEST_INT32_VALUE >> 8) & 0xff),
-    (uint8) ((TEST_INT32_VALUE >> 16) & 0xff), (uint8) ((TEST_INT32_VALUE >> 24) & 0xff),
+    (uint8_t) ((TEST_INT32_VALUE) & 0xff), (uint8_t) ((TEST_INT32_VALUE >> 8) & 0xff),
+    (uint8_t) ((TEST_INT32_VALUE >> 16) & 0xff), (uint8_t) ((TEST_INT32_VALUE >> 24) & 0xff),
     /* Little-endian encoded version of the 32-bit unsigned integer */
-    (uint8) ((TEST_UINT32_VALUE) & 0xff), (uint8) ((TEST_UINT32_VALUE >> 8) & 0xff),
-    (uint8) ((TEST_UINT32_VALUE >> 16) & 0xff), (uint8) ((TEST_UINT32_VALUE >> 24) & 0xff),
+    (uint8_t) ((TEST_UINT32_VALUE) & 0xff), (uint8_t) ((TEST_UINT32_VALUE >> 8) & 0xff),
+    (uint8_t) ((TEST_UINT32_VALUE >> 16) & 0xff), (uint8_t) ((TEST_UINT32_VALUE >> 24) & 0xff),
 };
 
-uint8                   encode_buffer[sizeof(compar_buffer)];
+uint8_t                   encode_buffer[sizeof(compar_buffer)];
 
 /****************************************************************
 **
@@ -58,15 +58,15 @@ uint8                   encode_buffer[sizeof(compar_buffer)];
 void 
 test_metadata(void)
 {
-    int16                   ei16 = TEST_INT16_VALUE;    /* variables to hold the values to encode */
-    uint16                  eu16 = TEST_UINT16_VALUE;
-    int32                   ei32 = TEST_INT32_VALUE;
-    uint32                  eu32 = TEST_UINT32_VALUE;
-    int16                   di16;       /* variables to hold the decoded values */
-    uint16                  du16;
-    int32                   di32;
-    uint32                  du32;
-    uint8                  *p;  /* pointer into the buffer being en/de-coded */
+    int16_t     ei16 = TEST_INT16_VALUE;    /* variables to hold the values to encode */
+    uint16_t    eu16 = TEST_UINT16_VALUE;
+    int32_t     ei32 = TEST_INT32_VALUE;
+    uint32_t    eu32 = TEST_UINT32_VALUE;
+    int16_t     di16;       /* variables to hold the decoded values */
+    uint16_t    du16;
+    int32_t     di32;
+    uint32_t    du32;
+    uint8_t	*p;  /* pointer into the buffer being en/de-coded */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Metadata encode/decode code\n"));

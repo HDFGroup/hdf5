@@ -35,11 +35,11 @@ static herr_t H5F_split_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 			     const H5D_transfer_t xfer_mode,
 			     const haddr_t *addr, size_t size,
-			     uint8 *buf/*out*/);
+			     uint8_t *buf/*out*/);
 static herr_t H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 			      const H5D_transfer_t xfer_mode,
 			      const haddr_t *addr, size_t size,
-			      const uint8 *buf);
+			      const uint8_t *buf);
 static herr_t H5F_split_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
 			       intn op, hsize_t size, haddr_t *addr/*out*/);
@@ -213,7 +213,7 @@ H5F_split_close(H5F_low_t *lf, const H5F_access_t *access_parms)
 static herr_t
 H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	       const H5D_transfer_t xfer_mode,
-	       const haddr_t *addr, size_t size, uint8 *buf/*out*/)
+	       const haddr_t *addr, size_t size, uint8_t *buf/*out*/)
 {
     haddr_t             tmp_addr;
     H5F_low_t           *sub = NULL;
@@ -263,7 +263,7 @@ H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 static herr_t
 H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	        const H5D_transfer_t xfer_mode,
-		const haddr_t *addr, size_t size, const uint8 *buf)
+		const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     haddr_t             tmp_addr;
     H5F_low_t           *sub = NULL;

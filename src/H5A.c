@@ -107,6 +107,7 @@ static void
 H5A_term_interface(void)
 {
     H5I_destroy_group(H5I_ATTR);
+    interface_initialize_g = FALSE;
 }
 
 
@@ -609,7 +610,7 @@ H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
 static herr_t
 H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
 {
-    uint8		*tconv_buf = NULL;	/* data type conv buffer */
+    uint8_t		*tconv_buf = NULL;	/* data type conv buffer */
     size_t		nelmts;		    	/* elements in attribute */
     H5T_conv_t		tconv_func = NULL;	/* conversion function	*/
     H5T_cdata_t		*cdata = NULL;		/* type conversion data	*/
@@ -780,7 +781,7 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
 static herr_t
 H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
 {
-    uint8		*tconv_buf = NULL;	/* data type conv buffer*/
+    uint8_t		*tconv_buf = NULL;	/* data type conv buffer*/
     size_t		nelmts;			/* elements in attribute*/
     H5T_conv_t		tconv_func = NULL;	/* conversion function 	*/
     H5T_cdata_t		*cdata = NULL;		/* type conversion data	*/
@@ -1389,7 +1390,7 @@ H5A_close(H5A_t *attr)
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
     if(attr->ent_opened && !attr->initialized) {
-        uint8 *tmp_buf=H5MM_calloc(attr->data_size);
+        uint8_t *tmp_buf=H5MM_calloc(attr->data_size);
         if (NULL == tmp_buf) {
             HRETURN_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL,
 			  "memory allocation failed for attribute fill-value");

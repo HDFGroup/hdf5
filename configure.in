@@ -124,8 +124,9 @@ esac
 dnl ----------------------------------------------------------------------
 dnl Check for system libraries.
 dnl
-AC_CHECK_LIB(m, ceil)
-AC_CHECK_LIB(coug, main)	dnl ...for ASCI/Red
+AC_CHECK_LIB(m,ceil)
+AC_CHECK_LIB(nsl,xdr_int)	dnl ...for Solaris and hdf4
+AC_CHECK_LIB(coug,main)		dnl ...for ASCI/Red
 AC_CHECK_LIB(jpeg,main)		dnl ...required for linking hdf4 apps
 
 dnl ----------------------------------------------------------------------
@@ -151,6 +152,20 @@ AC_CHECK_SIZEOF(__int64, 8)
 AC_CHECK_SIZEOF(float, 4)
 AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF(long double, 8)
+
+dnl Posix.1g types
+cat >>confdefs.h <<\EOF
+#include <sys/types.h>
+EOF
+AC_CHECK_SIZEOF(  int8_t, 1)
+AC_CHECK_SIZEOF( uint8_t, 1)
+AC_CHECK_SIZEOF( int16_t, 2)
+AC_CHECK_SIZEOF(uint16_t, 2)
+AC_CHECK_SIZEOF( int32_t, 4)
+AC_CHECK_SIZEOF(uint32_t, 4)
+AC_CHECK_SIZEOF( int64_t, 8)
+AC_CHECK_SIZEOF(uint64_t, 8)
+
 AC_CHECK_SIZEOF(size_t, 4)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/
@@ -188,7 +203,7 @@ AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
 case $withval in
     yes)
 	AC_CHECK_HEADERS(zlib.h)
-	AC_CHECK_LIB(z, compress2)
+	AC_CHECK_LIB(z, compress)
 	;;
     no)
 	AC_MSG_CHECKING(for GNU zlib)
@@ -208,9 +223,9 @@ case $withval in
 	if test "X" != "$zlb_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
 	    LDFLAGS="$LDFLAGS -L$zlib_lib"
-	    AC_CHECK_LIB(z, compress2,,LDFLAGS="$saved_LDFLAGS")
+	    AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
 	else
-	    AC_CHECK_LIB(z, compress2)
+	    AC_CHECK_LIB(z, compress)
 	fi
 	;;
 esac
@@ -229,8 +244,8 @@ AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case $withval in
     yes)
 	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
 	AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
 	;;
     no)
 	AC_MSG_CHECKING(for HDF4)
@@ -254,11 +269,11 @@ case $withval in
 	if test "X" != "$hdf4_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
 	    LDFLAGS="$LDFLAGS -L$hdf4_lib"
-	    AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
 	    AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
 	else
-	    AC_CHECK_LIB(mfhdf,main)
 	    AC_CHECK_LIB(df,main)
+	    AC_CHECK_LIB(mfhdf,main)
 	fi
 	;;
 esac
@@ -312,7 +327,7 @@ dnl ----------------------------------------------------------------------
 dnl How do we figure out the width of a tty in characters?
 dnl
 AC_CHECK_FUNCS(_getvideoconfig gettextinfo GetConsoleScreenBufferInfo)
-AC_CHECK_FUNCS(_scrsize ioctl)
+AC_CHECK_FUNCS(_scrsize ioctl compress2)
 
 AC_MSG_CHECKING(for struct videoconfig)
 AC_TRY_COMPILE(,[struct videoconfig w; w.numtextcols=0;],

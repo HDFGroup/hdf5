@@ -103,10 +103,10 @@
 static H5B_ins_t H5B_insert_helper(H5F_t *f, const haddr_t *addr,
 				   const H5B_class_t *type,
 				   const double split_ratios[],
-				   uint8 *lt_key,
+				   uint8_t *lt_key,
 				   hbool_t *lt_key_changed,
-				   uint8 *md_key, void *udata,
-				   uint8 *rt_key,
+				   uint8_t *md_key, void *udata,
+				   uint8_t *rt_key,
 				   hbool_t *rt_key_changed,
 				   haddr_t *retval);
 static herr_t H5B_insert_child(H5F_t *f, const H5B_class_t *type,
@@ -285,7 +285,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
     size_t		size, total_nkey_size;
     H5B_t		*bt = NULL;
     intn		i;
-    uint8		*p;
+    uint8_t		*p;
     H5B_t		*ret_value = NULL;
 
     FUNC_ENTER(H5B_load, NULL);
@@ -336,8 +336,8 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
     UINT16DECODE(p, bt->nchildren);
 
     /* sibling pointers */
-    H5F_addr_decode(f, (const uint8 **) &p, &(bt->left));
-    H5F_addr_decode(f, (const uint8 **) &p, &(bt->right));
+    H5F_addr_decode(f, (const uint8_t **) &p, &(bt->left));
+    H5F_addr_decode(f, (const uint8_t **) &p, &(bt->right));
 
     /* the child/key pairs */
     for (i = 0; i < 2 * H5B_K(f, type); i++) {
@@ -348,7 +348,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
 	bt->key[i].nkey = NULL;
 
 	if (i < bt->nchildren) {
-	    H5F_addr_decode(f, (const uint8 **) &p, bt->child + i);
+	    H5F_addr_decode(f, (const uint8_t **) &p, bt->child + i);
 	} else {
 	    H5F_addr_undef(bt->child + i);
 	    p += H5F_SIZEOF_ADDR(f);
@@ -392,7 +392,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 {
     intn	i;
     size_t	size = 0;
-    uint8	*p = bt->page;
+    uint8_t	*p = bt->page;
 
     FUNC_ENTER(H5B_flush, FAIL);
 
@@ -840,17 +840,17 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     /*
      * These are defined this way to satisfy alignment constraints.
      */
-    uint64	_lt_key[128], _md_key[128], _rt_key[128];
-    uint8	*lt_key=(uint8*)_lt_key;
-    uint8	*md_key=(uint8*)_md_key;
-    uint8	*rt_key=(uint8*)_rt_key;
+    uint64_t	_lt_key[128], _md_key[128], _rt_key[128];
+    uint8_t	*lt_key=(uint8_t*)_lt_key;
+    uint8_t	*md_key=(uint8_t*)_md_key;
+    uint8_t	*rt_key=(uint8_t*)_rt_key;
 
     hbool_t	lt_key_changed = FALSE, rt_key_changed = FALSE;
     haddr_t	child, old_root;
     intn	level;
     H5B_t	*bt;
     size_t	size;
-    uint8	*buf = NULL;
+    uint8_t	*buf = NULL;
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     herr_t	ret_value = FAIL;
 
@@ -1128,9 +1128,9 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
  */
 static H5B_ins_t
 H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
-		  const double split_ratios[], uint8 *lt_key,
-		  hbool_t *lt_key_changed, uint8 *md_key, void *udata,
-		  uint8 *rt_key, hbool_t *rt_key_changed,
+		  const double split_ratios[], uint8_t *lt_key,
+		  hbool_t *lt_key_changed, uint8_t *md_key, void *udata,
+		  uint8_t *rt_key, hbool_t *rt_key_changed,
 		  haddr_t *new_node/*out*/)
 {
     H5B_t	*bt = NULL, *twin = NULL, *tmp_bt = NULL;
@@ -1590,9 +1590,9 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
  */
 static H5B_ins_t
 H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
-		  intn level, uint8 *lt_key/*out*/,
+		  intn level, uint8_t *lt_key/*out*/,
 		  hbool_t *lt_key_changed/*out*/, void *udata,
-		  uint8 *rt_key/*out*/, hbool_t *rt_key_changed/*out*/)
+		  uint8_t *rt_key/*out*/, hbool_t *rt_key_changed/*out*/)
 {
     H5B_t	*bt = NULL, *sibling = NULL;
     H5B_ins_t	ret_value = H5B_INS_ERROR;
@@ -1874,9 +1874,9 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	   void *udata)
 {
     /* These are defined this way to satisfy alignment constraints */
-    uint64	_lt_key[128], _rt_key[128];
-    uint8	*lt_key = (uint8*)_lt_key;	/*left key*/
-    uint8	*rt_key = (uint8*)_rt_key;	/*right key*/
+    uint64_t	_lt_key[128], _rt_key[128];
+    uint8_t	*lt_key = (uint8_t*)_lt_key;	/*left key*/
+    uint8_t	*rt_key = (uint8_t*)_rt_key;	/*right key*/
     hbool_t	lt_key_changed = FALSE;		/*left key changed?*/
     hbool_t	rt_key_changed = FALSE;		/*right key changed?*/
     H5B_t	*bt = NULL;			/*btree node */

@@ -131,6 +131,7 @@ H5TB_term_interface(void)
 
     /* Reset head & tail pointers */
     H5TB_list_head=H5TB_list_tail=NULL;
+    interface_initialize_g = FALSE;
 }
 
 /*-------------------------------------------------------------------------

@@ -39,7 +39,7 @@ static intn             interface_initialize_g = FALSE;
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_select_serialize (const H5S_t *space, uint8 *buf)
+H5S_none_select_serialize (const H5S_t *space, uint8_t *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 
@@ -48,10 +48,10 @@ H5S_none_select_serialize (const H5S_t *space, uint8 *buf)
     assert(space);
 
     /* Store the preamble information */
-    UINT32ENCODE(buf, (uint32)space->select.type);  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32)1);  /* Store the version number */
-    UINT32ENCODE(buf, (uint32)0);  /* Store the un-used padding */
-    UINT32ENCODE(buf, (uint32)0);  /* Store the additional information length */
+    UINT32ENCODE(buf, (uint32_t)space->select.type);  /* Store the type of selection */
+    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
+    UINT32ENCODE(buf, (uint32_t)0);  /* Store the additional information length */
 
     /* Set success */
     ret_value=SUCCEED;

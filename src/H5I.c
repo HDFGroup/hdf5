@@ -941,4 +941,7 @@ H5I_term_interface(void)
 	    id_group_list[i] = NULL;
 	}
     }
+
+    /* Indicate interface closed */
+    interface_initialize_g = FALSE;
 }

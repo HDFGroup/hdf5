@@ -62,7 +62,7 @@ test_reference_obj(void)
     hobj_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temp. buffer read from disk */
-    uint32      *tu32;      /* Temporary pointer to uint32 data */
+    uint32_t   *tu32;      /* Temporary pointer to uint32 data */
     intn        i;          /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
@@ -94,7 +94,7 @@ test_reference_obj(void)
     dataset=H5Dcreate(fid1,"Dataset1",H5T_STD_U32LE,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    for(tu32=(uint32 *)wbuf,i=0; i<SPACE1_DIM1; i++)
+    for(tu32=(uint32_t *)wbuf,i=0; i<SPACE1_DIM1; i++)
         *tu32++=i*3;
 
     /* Write selection to disk */
@@ -170,8 +170,8 @@ test_reference_obj(void)
     ret=H5Dread(dset2,H5T_STD_U32LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,tbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    for(tu32=(uint32 *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
-        VERIFY(*tu32, (uint32)(i*3), "Data");
+    for(tu32=(uint32_t *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
+        VERIFY(*tu32, (uint32_t)(i*3), "Data");
 
     /* Close dereferenced Dataset */
     ret = H5Dclose(dset2);
@@ -215,9 +215,9 @@ test_reference_region(void)
     hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hdset_reg_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
-    uint8      *dwbuf,      /* Buffer for writing numeric data to disk */
+    uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
                *drbuf;      /* Buffer for reading numeric data from disk */
-    uint8      *tu8;        /* Temporary pointer to uint8 data */
+    uint8_t    *tu8;        /* Temporary pointer to uint8 data */
     intn        i;          /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
@@ -227,8 +227,8 @@ test_reference_region(void)
     /* Allocate write & read buffers */
     wbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
     rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
-    dwbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
-    drbuf=calloc(sizeof(uint8),SPACE2_DIM1*SPACE2_DIM2);
+    dwbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
 
     /* Create file */
     fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

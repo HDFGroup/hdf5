@@ -357,18 +357,23 @@ static hbool_t interface_initialize_g = FALSE;\n\
 #define INTERFACE_INIT NULL\n\
 \n");
 
-    /* Function declaration */
+    /* The interface termination function */
+    printf("\n\
+static void\n\
+H5T_native_close(void)\n\
+{\n\
+    interface_initialize_g = FALSE;\n\
+}\n");
+
+    /* The interface initialization function */
     printf("\n\
 herr_t\n\
-H5T_init (void)\n\
+H5T_native_open (void)\n\
 {\n\
    H5T_t        *dt = NULL;\n\
-   static intn  ncalls = 0;\n\
 \n\
    FUNC_ENTER (H5T_init, FAIL);\n\
-\n\
-   if (ncalls++) return SUCCEED; /*already initialized*/\n\
-\n");
+   H5_add_exit(&H5T_native_close);\n");
 
     for (i = 0; i < nd; i++) {
 

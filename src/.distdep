@@ -1019,6 +1019,32 @@ H5Smpio.o: \
    H5Opublic.h \
    H5HGprivate.h \
    H5HGpublic.h
+H5Snone.o: \
+   H5Snone.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5Ipublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Dpublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5Tprivate.h \
+   H5Tpublic.h \
+   H5Zprivate.h \
+   H5Zpublic.h \
+   H5Vprivate.h
 H5Spoint.o: \
    H5Spoint.c \
    H5private.h \

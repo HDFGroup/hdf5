@@ -251,8 +251,8 @@ H5V_hyper_disjointp(intn n,
     if (!n || !size1 || !size2)	return TRUE;
 
     for (i=0; i<n; i++) {
-	assert (size1[i]<MAX_HSSIZET);
-	assert (size2[i]<MAX_HSSIZET);
+	assert (size1[i]<HSSIZET_MAX);
+	assert (size2[i]<HSSIZET_MAX);
 
 	if (0==size1[i] || 0==size2[i]) return TRUE;
 	if (((offset1?offset1[i]:0) < (offset2?offset2[i]:0) &&
@@ -293,7 +293,7 @@ H5V_hyper_fill(intn n, const hsize_t *_size,
 	       const hsize_t *total_size, const hssize_t *offset, void *_dst,
 	       uintn fill_value)
 {
-    uint8	*dst = (uint8 *) _dst;	/*cast for ptr arithmetic	*/
+    uint8_t	*dst = (uint8_t*)_dst;	/*cast for ptr arithmetic	*/
     hsize_t	size[H5V_HYPER_NDIMS];	/*a modifiable copy of _size	*/
     hssize_t	dst_stride[H5V_HYPER_NDIMS]; /*destination stride info  */
     hsize_t	dst_start;		/*byte offset to start of stride*/
@@ -374,8 +374,8 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
 	       const hsize_t *src_size, const hssize_t *src_offset,
 	       const void *_src)
 {
-    const uint8	*src = (const uint8 *)_src;	/*cast for ptr arithmtc */
-    uint8	*dst = (uint8 *) _dst;		/*cast for ptr arithmtc */
+    const uint8_t *src = (const uint8_t*)_src;	/*cast for ptr arithmtc */
+    uint8_t	*dst = (uint8_t*) _dst;		/*cast for ptr arithmtc */
     hsize_t	size[H5V_HYPER_NDIMS];		/*a modifiable _size	*/
     hssize_t	src_stride[H5V_HYPER_NDIMS];	/*source stride info	*/
     hssize_t	dst_stride[H5V_HYPER_NDIMS];	/*dest stride info	*/
@@ -469,7 +469,7 @@ herr_t
 H5V_stride_fill(intn n, hsize_t elmt_size, const hsize_t *size,
 		const hssize_t *stride, void *_dst, uintn fill_value)
 {
-    uint8	*dst = (uint8 *) _dst; 	/*cast for ptr arithmetic	*/
+    uint8_t	*dst = (uint8_t*)_dst; 	/*cast for ptr arithmetic	*/
     hsize_t	idx[H5V_HYPER_NDIMS]; 	/*1-origin indices		*/
     hsize_t	nelmts;			/*number of elements to fill	*/
     hsize_t	i;			/*counter			*/
@@ -477,7 +477,7 @@ H5V_stride_fill(intn n, hsize_t elmt_size, const hsize_t *size,
     hbool_t	carry;			/*subtraction carray value	*/
 
     FUNC_ENTER(H5V_stride_fill, FAIL);
-    assert (elmt_size < MAX_SIZET);
+    assert (elmt_size < SIZET_MAX);
 
     H5V_vector_cpy(n, idx, size);
     nelmts = H5V_vector_reduce_product(n, size);
@@ -524,8 +524,8 @@ H5V_stride_copy(int n, hsize_t elmt_size, const hsize_t *size,
 		const hssize_t *dst_stride, void *_dst,
 		const hssize_t *src_stride, const void *_src)
 {
-    uint8	*dst = (uint8 *) _dst;		/*cast for ptr arithmetic*/
-    const uint8	*src = (const uint8 *) _src;	/*cast for ptr arithmetic*/
+    uint8_t	*dst = (uint8_t*)_dst;		/*cast for ptr arithmetic*/
+    const uint8_t *src = (const uint8_t*) _src;	/*cast for ptr arithmetic*/
     hsize_t	idx[H5V_HYPER_NDIMS];		/*1-origin indices	*/
     hsize_t	nelmts;				/*num elements to copy	*/
     hsize_t	i;				/*counter		*/
@@ -533,7 +533,7 @@ H5V_stride_copy(int n, hsize_t elmt_size, const hsize_t *size,
     hbool_t	carry;				/*carray for subtraction*/
 
     FUNC_ENTER(H5V_stride_copy, FAIL);
-    assert (elmt_size<MAX_SIZET);
+    assert (elmt_size<SIZET_MAX);
 
     if (n) {
 	H5V_vector_cpy(n, idx, size);
@@ -591,8 +591,8 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 		 const hssize_t *src_stride,
 		 const void *_src)
 {
-    uint8	*dst = (uint8 *) _dst;
-    const uint8	*src = (const uint8 *) _src;
+    uint8_t	*dst = (uint8_t *) _dst;
+    const uint8_t *src = (const uint8_t *) _src;
     hsize_t	dst_idx[H5V_HYPER_NDIMS];
     hsize_t	src_idx[H5V_HYPER_NDIMS];
     hsize_t	i;
@@ -600,7 +600,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
     hbool_t	carry;
 
     FUNC_ENTER(H5V_stride_copy2, FAIL);
-    assert (elmt_size < MAX_SIZET);
+    assert (elmt_size < SIZET_MAX);
 
     H5V_vector_cpy(dst_n, dst_idx, dst_size);
     H5V_vector_cpy(src_n, src_idx, src_size);
@@ -645,16 +645,16 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 herr_t
 H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
 {
-    size_t      copy_size;          /* size of the buffer to copy */
-    size_t      copy_items;         /* number of items currently copying */
-    size_t      items_left;         /* number of items left to copy */
-    uint8      *dst=(uint8 *)_dst;  /* alias for pointer arithmetic */
+    size_t      copy_size;          /* size of the buffer to copy	*/
+    size_t      copy_items;         /* number of items currently copying*/
+    size_t      items_left;         /* number of items left to copy 	*/
+    uint8_t     *dst=(uint8_t*)_dst;/* alias for pointer arithmetic	*/
 
     FUNC_ENTER(H5V_array_fill, FAIL);
     assert (dst);
     assert (src);
-    assert (size < MAX_SIZET && size > 0);
-    assert (count < MAX_SIZET && count > 0);
+    assert (size < SIZET_MAX && size > 0);
+    assert (count < SIZET_MAX && count > 0);
 
     HDmemcpy(dst, src, size);   /* copy first item */
 

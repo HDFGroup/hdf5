@@ -709,7 +709,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    long x = va_arg (ap, long);
 		    n = fprintf (stream, template, x);
 		} else {
-		    int64 x = va_arg(ap, int64);
+		    int64_t x = va_arg(ap, int64_t);
 		    n = fprintf (stream, template, x);
 		}
 		break;
@@ -728,7 +728,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    unsigned long x = va_arg (ap, unsigned long);
 		    n = fprintf (stream, template, x);
 		} else {
-		    uint64 x = va_arg(ap, uint64);
+		    uint64_t x = va_arg(ap, uint64_t);
 		    n = fprintf (stream, template, x);
 		}
 		break;
@@ -837,7 +837,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 /*-------------------------------------------------------------------------
  * Function:	HDstrtoll
  *
- * Purpose:	Converts the string S to an int64 value according to the
+ * Purpose:	Converts the string S to an int64_t value according to the
  *		given BASE, which must be between 2 and 36 inclusive, or be
  *		the special value zero.
  *
@@ -849,7 +849,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
  *		unless the next character is a `0', in which case it is taken
  *		as 8 (octal).
  *
- *		The remainder of the string is converted to an int64 in the
+ *		The remainder of the string is converted to an int64_t in the
  *		obvious manner, stopping at the first character which is not
  *		a valid digit in the given base.  (In bases above 10, the
  *		letter `A' in either upper or lower case represetns 10, `B'
@@ -878,10 +878,10 @@ HDfprintf (FILE *stream, const char *fmt, ...)
  *
  *-------------------------------------------------------------------------
  */
-int64
+int64_t
 HDstrtoll (const char *s, const char **rest, int base)
 {
-    int64	sign=1, acc=0;
+    int64_t	sign=1, acc=0;
     hbool_t	overflow = FALSE;
     
     errno = 0;
@@ -918,7 +918,7 @@ HDstrtoll (const char *s, const char **rest, int base)
 			(*s>='a' && *s<'a'+base-10) ||
 			(*s>='A' && *s<'A'+base-10)))) {
 	if (!overflow) {
-	    int64 digit = 0;
+	    int64_t digit = 0;
 	    if (*s>='0' && *s<='9') digit = *s - '0';
 	    else if (*s>='a' && *s<='z') digit = *s-'a'+10;
 	    else digit = *s-'A'+10;
@@ -935,9 +935,9 @@ HDstrtoll (const char *s, const char **rest, int base)
     /* Overflow */
     if (overflow) {
 	if (sign>0) {
-	    acc = ((uint64)1<<(8*sizeof(int64)-1))-1;
+	    acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
 	} else {
-	    acc = (uint64)1<<(8*sizeof(int64)-1);
+	    acc = (uint64_t)1<<(8*sizeof(int64_t)-1);
 	}
 	errno = ERANGE;
     }

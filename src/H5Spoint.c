@@ -275,10 +275,10 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
-    uint8 *buf=(uint8 *)_buf;   /* Alias for pointer arithmetic */
-    uintn   ndims;          /* Number of dimensions of dataset */
+    uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
+    uintn   	ndims;          /* Number of dimensions of dataset */
     intn	i;				/*counters		*/
-    size_t  num_read;       /* number of elements read into buffer */
+    size_t  	num_read;       /* number of elements read into buffer */
 
     FUNC_ENTER (H5S_point_fgath, 0);
 
@@ -382,7 +382,7 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
-    const uint8 *buf=(const uint8 *)_buf;   /* Alias for pointer arithmetic */
+    const uint8_t *buf=(const uint8_t *)_buf;   /* Alias for pointer arithmetic */
     uintn   ndims;          /* Number of dimensions of dataset */
     intn	i;				/*counters		*/
     size_t  num_written;    /* number of elements written from buffer */
@@ -494,8 +494,8 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
 		 size_t nelmts, void *_tconv_buf/*out*/)
 {
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
-    const uint8 *buf=(const uint8 *)_buf;   /* Get local copies for address arithmetic */
-    uint8 *tconv_buf=(uint8 *)_tconv_buf;
+    const uint8_t *buf=(const uint8_t *)_buf;   /* Get local copies for address arithmetic */
+    uint8_t *tconv_buf=(uint8_t *)_tconv_buf;
     hsize_t	acc;				/* coordinate accumulator */
     hsize_t	off;				/* coordinate offset */
     intn	space_ndims;			/*dimensionality of space*/
@@ -570,8 +570,8 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 		 size_t nelmts, void *_buf/*out*/)
 {
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
-    uint8 *buf=(uint8 *)_buf;   /* Get local copies for address arithmetic */
-    const uint8 *tconv_buf=(const uint8 *)_tconv_buf;
+    uint8_t *buf=(uint8_t *)_buf;   /* Get local copies for address arithmetic */
+    const uint8_t *tconv_buf=(const uint8_t *)_tconv_buf;
     hsize_t	acc;				/* coordinate accumulator */
     hsize_t	off;				/* coordinate offset */
     intn	space_ndims;		/*dimensionality of space*/
@@ -898,11 +898,11 @@ H5S_point_select_serial_size (const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_point_select_serialize (const H5S_t *space, uint8 *buf)
+H5S_point_select_serialize (const H5S_t *space, uint8_t *buf)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
-    uint8 *lenp;            /* pointer to length location for later storage */
-    uint32 len=0;           /* number of bytes used */
+    uint8_t *lenp;            /* pointer to length location for later storage */
+    uint32_t len=0;           /* number of bytes used */
     intn i;                 /* local counting variable */
     herr_t ret_value=FAIL;  /* return value */
 
@@ -911,18 +911,18 @@ H5S_point_select_serialize (const H5S_t *space, uint8 *buf)
     assert(space);
 
     /* Store the preamble information */
-    UINT32ENCODE(buf, (uint32)space->select.type);  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32)1);  /* Store the version number */
-    UINT32ENCODE(buf, (uint32)0);  /* Store the un-used padding */
+    UINT32ENCODE(buf, (uint32_t)space->select.type);  /* Store the type of selection */
+    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     lenp=buf;           /* keep the pointer to the length location for later */
     buf+=4;             /* skip over space for length */
 
     /* Encode number of dimensions */
-    UINT32ENCODE(buf, (uint32)space->extent.u.simple.rank);
+    UINT32ENCODE(buf, (uint32_t)space->extent.u.simple.rank);
     len+=4;
 
     /* Encode number of elements */
-    UINT32ENCODE(buf, (uint32)space->select.num_elem);
+    UINT32ENCODE(buf, (uint32_t)space->select.num_elem);
     len+=4;
 
     /* Encode each point in selection */
@@ -933,13 +933,13 @@ H5S_point_select_serialize (const H5S_t *space, uint8 *buf)
 
         /* Encode each point */
         for(i=0; i<space->extent.u.simple.rank; i++)
-            UINT32ENCODE(buf, (uint32)curr->pnt[i]);
+            UINT32ENCODE(buf, (uint32_t)curr->pnt[i]);
 
         curr=curr->next;
     } /* end while */
 
     /* Encode length */
-    UINT32ENCODE(lenp, (uint32)len);  /* Store the length of the extra information */
+    UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
     
     /* Set success */
     ret_value=SUCCEED;

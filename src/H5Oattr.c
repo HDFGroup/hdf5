@@ -28,8 +28,8 @@ static char             RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK      H5O_attr_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_attr_encode (H5F_t *f, uint8 *p, const void *mesg);
-static void *H5O_attr_decode (H5F_t *f, const uint8 *p, H5O_shared_t *sh);
+static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
+static void *H5O_attr_decode (H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_attr_copy (const void *_mesg, void *_dest);
 static size_t H5O_attr_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
@@ -67,7 +67,7 @@ static hbool_t          interface_initialize_g = FALSE;
     void *H5O_attr_decode(f, raw_size, p)
         H5F_t *f;               IN: pointer to the HDF5 file struct
         size_t raw_size;        IN: size of the raw information buffer
-        const uint8 *p;         IN: the raw information buffer
+        const uint8_t *p;         IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
  DESCRIPTION
@@ -83,7 +83,7 @@ static hbool_t          interface_initialize_g = FALSE;
  *	Added a version number at the beginning.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
+H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
 {
     H5A_t		*attr = NULL;
     H5S_simple_t	*simple;	/*simple dimensionality information  */
@@ -195,7 +195,7 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *	Added a version number at the beginning.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
+H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
     const H5A_t    *attr = (const H5A_t *) mesg;
     size_t          name_len;   /* Attribute name length */

@@ -90,6 +90,7 @@ H5R_term_interface(void)
 {
     /* Free ID group */
     H5I_destroy_group(H5I_REFERENCE);
+    interface_initialize_g = FALSE;
 }   /* end H5R_term_interface() */
 
 
@@ -141,10 +142,10 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
         {
             haddr_t addr;
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Get pointer to correct type of reference struct */
-            uint8 *p;       /* Pointer to OID to store */
+            uint8_t *p;       /* Pointer to OID to store */
 
             /* Set information for reference */
-            p=(uint8 *)ref->oid;
+            p=(uint8_t *)ref->oid;
             H5F_addr_pack(loc->file,&addr,&sb.objno[0]);
             H5F_addr_encode(loc->file,&p,&addr);
             break;
@@ -155,11 +156,11 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
             haddr_t addr;
             hdset_reg_ref_t *ref=(hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
             hssize_t buf_size;  /* Size of buffer needed to serialize selection */
-            uint8 *p;       /* Pointer to OID to store */
-            uint8 *buf;     /* Buffer to store serialized selection in */
+            uint8_t *p;       /* Pointer to OID to store */
+            uint8_t *buf;     /* Buffer to store serialized selection in */
 
             /* Set information for dataset OID */
-            p=(uint8 *)ref->oid;
+            p=(uint8_t *)ref->oid;
             H5F_addr_pack(loc->file,&addr,&sb.objno[0]);
             H5F_addr_encode(loc->file,&p,&addr);
 
@@ -292,7 +293,7 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
     H5D_t *dataset;             /* Pointer to dataset to open */
     hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
     H5G_entry_t ent;            /* Symbol table entry */
-    uint8 *p;                   /* Pointer to OID to store */
+    uint8_t *p;                 /* Pointer to OID to store */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5R_dereference, FAIL);
@@ -308,8 +309,8 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
     HDmemset(&ent,0,sizeof(H5G_entry_t));
     ent.type=H5G_NOTHING_CACHED;
     ent.file=H5D_get_file(dset);
-    p=(uint8 *)ref->oid;
-    H5F_addr_decode(ent.file,(const uint8 **)&p,&(ent.header));
+    p=(uint8_t *)ref->oid;
+    H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
 
     /* Open the dataset object */
     if ((dataset=H5D_open_oid(&ent)) == NULL) {

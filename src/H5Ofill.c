@@ -16,8 +16,8 @@
 
 #define PABLO_MASK	H5O_fill_mask
 
-static void *H5O_fill_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
-static herr_t H5O_fill_encode(H5F_t *f, uint8 *p, const void *_mesg);
+static void *H5O_fill_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static herr_t H5O_fill_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_fill_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
@@ -61,7 +61,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_decode(H5F_t __unused__ *f, const uint8 *p,
+H5O_fill_decode(H5F_t __unused__ *f, const uint8_t *p,
 		H5O_shared_t __unused__ *sh)
 {
     H5O_fill_t	*mesg=NULL;
@@ -111,7 +111,7 @@ H5O_fill_decode(H5F_t __unused__ *f, const uint8 *p,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_encode(H5F_t __unused__ *f, uint8 *p, const void *_mesg)
+H5O_fill_encode(H5F_t __unused__ *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
     

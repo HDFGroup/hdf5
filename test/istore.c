@@ -59,7 +59,7 @@ hssize_t zero[H5O_LAYOUT_NDIMS];
  *-------------------------------------------------------------------------
  */
 static void
-print_array(uint8 *array, size_t nx, size_t ny, size_t nz)
+print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 {
     size_t	i, j, k;
 
@@ -210,7 +210,7 @@ test_extend(H5F_t *f, const char *prefix,
     H5G_entry_t		handle;
     hsize_t		i, j, k, ctr;
     int			ndims;
-    uint8		*buf = NULL, *check = NULL, *whole = NULL;
+    uint8_t		*buf = NULL, *check = NULL, *whole = NULL;
     char		dims[64], s[256], name[256];
     hssize_t		offset[3];
     hssize_t		max_corner[3];
@@ -441,7 +441,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
     hsize_t		size[3], total = 0;
     H5G_entry_t		handle;
     H5O_layout_t	layout;
-    uint8		*buf = NULL;
+    uint8_t		*buf = NULL;
 
     if (!nz) {
 	if (!ny) {
@@ -617,8 +617,8 @@ main(int argc, char *argv[])
 
     /* Create the test file */
     if (NULL == (f = H5F_open(FILENAME,
-			    (H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_TRUNC |
-			     H5F_ACC_DEBUG),
+			      (H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_TRUNC |
+			       H5F_ACC_DEBUG),
 			      creation_template, NULL))) {
 	printf("Cannot create file %s; test aborted\n", FILENAME);
 	exit(1);

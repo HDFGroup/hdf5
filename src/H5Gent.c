@@ -101,7 +101,7 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec(H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
+H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, intn n)
 {
     intn                    i;
 
@@ -146,10 +146,10 @@ H5G_ent_decode_vec(H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
+H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 {
-    const uint8            *p_ret = *pp;
-    uint32  tmp;
+    const uint8_t	*p_ret = *pp;
+    uint32_t		tmp;
 
     FUNC_ENTER(H5G_ent_decode, FAIL);
 
@@ -213,7 +213,7 @@ H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec(H5F_t *f, uint8 **pp, const H5G_entry_t *ent, intn n)
+H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, intn n)
 {
     intn                    i;
 
@@ -261,9 +261,9 @@ H5G_ent_encode_vec(H5F_t *f, uint8 **pp, const H5G_entry_t *ent, intn n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode(H5F_t *f, uint8 **pp, const H5G_entry_t *ent)
+H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 {
-    uint8                  *p_ret = *pp + H5G_SIZEOF_ENTRY(f);
+    uint8_t		*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
     FUNC_ENTER(H5G_ent_encode, FAIL);
 

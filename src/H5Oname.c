@@ -22,8 +22,8 @@
 #define PABLO_MASK      H5O_name_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_name_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
-static herr_t H5O_name_encode(H5F_t *f, uint8 *p, const void *_mesg);
+static void *H5O_name_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static herr_t H5O_name_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_name_copy(const void *_mesg, void *_dest);
 static size_t H5O_name_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_name_reset(void *_mesg);
@@ -69,7 +69,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_name_decode(H5F_t __unused__ *f, const uint8 *p,
+H5O_name_decode(H5F_t __unused__ *f, const uint8_t *p,
 		H5O_shared_t __unused__ *sh)
 {
     H5O_name_t             *mesg;
@@ -109,7 +109,7 @@ H5O_name_decode(H5F_t __unused__ *f, const uint8 *p,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_name_encode(H5F_t __unused__ *f, uint8 *p, const void *_mesg)
+H5O_name_encode(H5F_t __unused__ *f, uint8_t *p, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
 

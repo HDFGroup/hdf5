@@ -731,6 +731,7 @@ H5G_term_interface(void)
     
     /* Destroy the group object id group */
     H5I_destroy_group(H5I_GROUP);
+    interface_initialize_g = FALSE;
 }
 
 
