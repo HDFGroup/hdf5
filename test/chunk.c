@@ -214,7 +214,7 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
 	    hs_offset[1] = j;
 	    hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-j);
 	    mem_space = H5Screate_simple (2, hs_size, hs_size);
-	    H5Sset_hyperslab (file_space, hs_offset, hs_size, NULL);
+	    H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
 
 	    if (READ==op) {
 		H5Dread (dset, H5T_NATIVE_CHAR, mem_space, file_space,
@@ -274,7 +274,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
 	hs_offset[0] = hs_offset[1] = i;
 	hs_size[0] = hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-i);
 	mem_space = H5Screate_simple (2, hs_size, hs_size);
-	H5Sset_hyperslab (file_space, hs_offset, hs_size, NULL);
+	H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
 	if (READ==op) {
 	    H5Dread (dset, H5T_NATIVE_CHAR, mem_space, file_space,
 		     H5P_DEFAULT, buf);

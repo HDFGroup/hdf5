@@ -85,7 +85,7 @@ writer (int wrt_n)
     for (i=0; i<wrt_n; i++) {
 	hs_start[0] = randll (size2[0]);
 	HDfprintf (stdout, "#%03d 0x%016Hx\n", i, hs_start[0]);
-	H5Sset_hyperslab (space2, hs_start, hs_size, NULL);
+	H5Sselect_hyperslab (space2, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL);
 	for (j=0; j<WRT_SIZE; j++) {
 	    buf[j] = i+1;
 	}
@@ -151,7 +151,7 @@ reader (const char *script_name)
 	HDfprintf (stdout, "#%03d 0x%016Hx", i, hs_offset[0]);
 	fflush (stdout);
 
-	H5Sset_hyperslab (fspace, hs_offset, hs_size, NULL);
+	H5Sselect_hyperslab (fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
 	H5Dread (d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf);
 
 	/* Check */

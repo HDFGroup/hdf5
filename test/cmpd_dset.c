@@ -420,9 +420,7 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];
     h_size[1] = 2*NY/3 - f_offset[1];
-    h_sample[0] = 1;
-    h_sample[1] = 1;
-    status = H5Sset_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
+    status = H5Sselect_hyperslab (s8_f_sid, H5S_SELECT_SET, f_offset, NULL, h_size, NULL);
     assert (status>=0);
 
     /* Create memory data space */
@@ -547,6 +545,7 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 	}
     }
 		
+#ifdef OLD_WAY
     /*
      *######################################################################
      * Step 11: Write an array into the middle third of the dataset
@@ -598,6 +597,7 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
 	    }
 	}
     }
+#endif /* OLD_WAY */
     
 
 

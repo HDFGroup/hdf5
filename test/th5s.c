@@ -47,6 +47,10 @@ static char		RcsId[] = "$Revision$";
 #define SPACE2_DIM2	15
 #define SPACE2_DIM3	13
 #define SPACE2_DIM4	23
+#define SPACE2_MAX1	H5S_UNLIMITED
+#define SPACE2_MAX2	15
+#define SPACE2_MAX3	13
+#define SPACE2_MAX4	23
 
 /* Scalar dataset with simple datatype */
 #define SPACE3_NAME  "Scalar1"
@@ -83,9 +87,10 @@ test_h5s_basic(void)
     hid_t		sid1, sid2;	/* Dataspace ID			*/
     unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3,
-				   SPACE2_DIM4};
+    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3, SPACE2_DIM4};
+    hsize_t		max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
     hsize_t		tdims[4];	/* Dimension array to test with */
+    hsize_t		tmax[4];
     size_t		n;	 	/* Number of dataspace elements */
     herr_t		ret;		/* Generic return value		*/
 
@@ -112,7 +117,7 @@ test_h5s_basic(void)
     VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
 	   "H5Sget_ldims");
 
-    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, max2);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     n = H5Sget_npoints(sid2);
@@ -124,9 +129,11 @@ test_h5s_basic(void)
     CHECK(rank, UFAIL, "H5Sget_lrank");
     VERIFY(rank, SPACE2_RANK, "H5Sget_lrank");
 
-    ret = H5Sget_dims(sid2, tdims, NULL);
+    ret = H5Sget_dims(sid2, tdims, tmax);
     CHECK(ret, FAIL, "H5Sget_ldims");
     VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
+	   "H5Sget_ldims");
+    VERIFY(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0,
 	   "H5Sget_ldims");
 
     ret = H5Sclose(sid1);

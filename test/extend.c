@@ -107,7 +107,7 @@ main (void)
 	    /* Select a hyperslab */
 	    file_space = H5Dget_space (dataset);
 	    assert (file_space>=0);
-	    status = H5Sset_hyperslab (file_space, offset, dims, NULL);
+	    status = H5Sselect_hyperslab (file_space, H5S_SELECT_SET, offset, NULL, dims, NULL);
 	    assert (status>=0);
 
 	    /* Write to the hyperslab */
@@ -130,7 +130,7 @@ main (void)
 	    offset[0] = i * NX/2;
 	    offset[1] = j * NY/2;
 	    assert (file_space>=0);
-	    status = H5Sset_hyperslab (file_space, offset, half_dims, NULL);
+	    status = H5Sselect_hyperslab (file_space, H5S_SELECT_SET, offset, NULL, half_dims, NULL);
 	    assert (status>=0);
 	    
 	    /* Read */
@@ -155,5 +155,3 @@ main (void)
     return 0;
 }
 
-    
-    

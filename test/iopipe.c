@@ -318,7 +318,7 @@ main (void)
     assert (size[0]>20 && size[1]>20);
     start[0] = start[1] = 10;
     count[0] = count[1] = size[0]-20;
-    status = H5Sset_hyperslab (file_space, start, count, NULL);
+    status = H5Sselect_hyperslab (file_space, H5S_SELECT_SET, start, NULL, count, NULL);
     assert (status>=0);
     synchronize ();
 #ifdef HAVE_GETRUSAGE

@@ -599,7 +599,7 @@ test_2 (void)
 
 	hs_space = H5Scopy (space);
 	assert (hs_space>=0);
-	status = H5Sset_hyperslab (hs_space, &hs_start, &hs_count, NULL);
+	status = H5Sselect_hyperslab (hs_space, H5S_SELECT_SET, &hs_start, NULL, &hs_count, NULL);
 	assert (status>=0);
 
 	memset (whole, 0, sizeof(whole));
@@ -751,7 +751,7 @@ test_3 (void)
 	for (i=0; i<hs_count; i++) {
 	    whole[i] = 100+i;
 	}
-	status = H5Sset_hyperslab (file_space, &hs_start, &hs_count, NULL);
+	status = H5Sselect_hyperslab (file_space, H5S_SELECT_SET, &hs_start, NULL, &hs_count, NULL);
 	assert (status>=0);
 	status = H5Dwrite (dset, H5T_NATIVE_INT, mem_space, file_space,
 			   H5P_DEFAULT, whole);

@@ -582,7 +582,7 @@ test_compression(hid_t file)
 	    points[hs_offset[0]+i][hs_offset[1]+j] = rand ();
 	}
     }
-    H5Sset_hyperslab (space, hs_offset, hs_size, NULL);
+    H5Sselect_hyperslab (space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
 
     status = H5Dwrite (dataset, H5T_NATIVE_INT, space, space, xfer, points);
     if (status<0) goto error;
@@ -599,6 +599,8 @@ test_compression(hid_t file)
 		printf("   At index %lu,%lu\n",
 		       (unsigned long)(hs_offset[0]+i),
 		       (unsigned long)(hs_offset[1]+j));
+		printf("   At original: %d\n", (int)points[hs_offset[0]+i][hs_offset[1]+j]);
+		printf("   At returned: %d\n", (int)check[hs_offset[0]+i][hs_offset[1]+j]);
 		goto error;
 	    }
 	}
