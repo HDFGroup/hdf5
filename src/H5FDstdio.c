@@ -564,7 +564,7 @@ H5FD_stdio_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
      */
     if (!(file->op == H5FD_STDIO_OP_READ || file->op==H5FD_STDIO_OP_SEEK) ||
             file->pos != addr) {
-        if (fseek(file->fp, addr, SEEK_SET) < 0) {
+        if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
@@ -653,7 +653,7 @@ H5FD_stdio_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr,
      */
     if (!(file->op == H5FD_STDIO_OP_WRITE || file->op==H5FD_STDIO_OP_SEEK) ||
                 file->pos != addr) {
-        if (fseek(file->fp, addr, SEEK_SET) < 0) {
+        if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
@@ -718,7 +718,7 @@ H5FD_stdio_flush(H5FD_t *_file)
     if(file->write_access) {
          /* Makes sure that the true file size is the same (or larger) than the end-of-address. */
         if (file->eoa>file->eof) {
-            if (fseek(file->fp, file->eoa-1, SEEK_SET)<0)
+            if (fseek(file->fp, (long)(file->eoa-1), SEEK_SET)<0)
                 H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
             if (fwrite("", 1, 1, file->fp)!=1)
                 H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "EOF fwrite failed", -1);

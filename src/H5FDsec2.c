@@ -657,7 +657,7 @@ H5FD_sec2_flush(H5FD_t *_file)
     FUNC_ENTER(H5FD_sec2_seek, FAIL);
 
     if (file->eoa>file->eof) {
-        if (-1==file_seek(file->fd, file->eoa-1, SEEK_SET))
+        if (-1==file_seek(file->fd, (file_offset_t)(file->eoa-1), SEEK_SET))
             HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
 			  "unable to seek to proper position");
         if (write(file->fd, "", 1)!=1)

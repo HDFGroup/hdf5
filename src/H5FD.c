@@ -182,7 +182,7 @@ H5FDregister(const H5FD_class_t *cls)
 	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
 		      "`read' and/or `write' method is not defined");
     }
-    for (type=0; type<H5FD_MEM_NTYPES; type++) {
+    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; type++) {
 	if (cls->fl_map[type]<H5FD_MEM_NOLIST ||
 	    cls->fl_map[type]>=H5FD_MEM_NTYPES) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -856,7 +856,7 @@ H5FD_close(H5FD_t *file)
     assert(file && file->cls);
 
     /* Free all free-lists, leaking any memory thus described */
-    for (i=0; i<H5FD_MEM_NTYPES; i++) {
+    for (i=H5FD_MEM_DEFAULT; i<H5FD_MEM_NTYPES; i++) {
 	for (cur=file->fl[i]; cur; cur=next) {
 #ifdef H5F_DEBUG
 	    nblocks++;

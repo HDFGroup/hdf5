@@ -1161,7 +1161,7 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
 
     assert(space);
 
-    ret_value = space->select.sel_info.hslab.hyper_lst->count;
+    ret_value = (hssize_t)space->select.sel_info.hslab.hyper_lst->count;
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_hyper_nblocks() */

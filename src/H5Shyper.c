@@ -486,7 +486,7 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node,
     } /* end else */
     
     /* Set up parameters for accessing block (starting the read and write information at the same point) */
-    node->cinfo.wleft=node->cinfo.rleft=node->cinfo.size;
+    node->cinfo.wleft=node->cinfo.rleft=(uintn)node->cinfo.size;
     node->cinfo.wpos=node->cinfo.rpos=node->cinfo.block;
 
     /* Set cached flag */
@@ -3002,7 +3002,7 @@ H5S_hyper_select_contiguous(const H5S_t *space)
  *
  *-------------------------------------------------------------------------
  */
-static size_t
+static herr_t
 H5S_hyper_select_iterate_mem (intn dim, H5S_hyper_iter_info_t *iter_info)
 {
     hsize_t offset;             /* offset of region in buffer */
