@@ -2432,6 +2432,10 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
     ret_value = dataset;
 
 done:
+    /* Release fill value information */
+    if (H5O_reset(H5O_FILL_ID, &fill) <0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to release fill-value info")
+
     if (ret_value==NULL && dataset) {
         if (H5F_addr_defined(dataset->ent.header)) {
             if(H5O_close(&(dataset->ent))<0)
@@ -2449,7 +2453,7 @@ done:
         H5FL_FREE(H5D_t,dataset);
     } /* end if */
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D_open_oid() */
 
 
 /*-------------------------------------------------------------------------
