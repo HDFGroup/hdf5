@@ -117,21 +117,23 @@ H5_init_library(void)
      * Initialize interfaces that might not be able to initialize themselves
      * soon enough.  The file & dataset interfaces must be initialized because
      * calling H5Pcreate() might require the file/dataset property classes to be
-     * initialized.  The property lists are be initialized during the H5F/H5D
-     * init calls (because they call H5P functions, which initialize the H5P
-     * API, before using the properties).
+     * initialized.
      */
     if (H5F_init()<0) {
-	HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-		      "unable to initialize file interface");
+        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                  "unable to initialize file interface");
     }
     if (H5T_init()<0) {
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                      "unable to initialize type interface");
+              "unable to initialize type interface");
     }
     if (H5D_init()<0) {
-	HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-		      "unable to initialize file interface");
+        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                  "unable to initialize dataset interface");
+    }
+    if (H5P_init()<0) {
+        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                  "unable to initialize property list interface");
     }
 
     /* Debugging? */
