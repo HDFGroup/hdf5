@@ -62,6 +62,21 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
 #define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 
+/*
+ * Definitions for the InitTest().
+ */
+#define MAXNUMOFTESTS 30
+extern int Index;
+typedef struct TestStruct {
+	int    NumErrors;
+	char   Description[64];
+	int    SkipFlag;
+	char   Name[16];
+	void (*Call)(void);
+	void (*Cleanup)(void);
+} TestStruct;
+extern TestStruct Test[];
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,6 +90,8 @@ H5TEST_DLL hid_t h5_fileaccess(void);
 H5TEST_DLL void h5_no_hwconv(void);
 H5TEST_DLL void h5_reset(void);
 H5TEST_DLL void h5_show_hostname(void);
+H5TEST_DLL void InitTest(const char *TheName, void (*TheCall) (void),
+		     void (*Cleanup) (void), const char *TheDescr);
 #ifdef H5_HAVE_PARALLEL
 int h5_set_info_object(void);
 void h5_dump_info_object(MPI_Info info);
