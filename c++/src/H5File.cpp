@@ -492,11 +492,12 @@ hid_t H5File::getLocId() const
 //--------------------------------------------------------------------------
 haddr_t H5File::getFileSize(void) const
 {
-   haddr_t ret_value = H5Fget_filesize(id);
-   if( ret_value < 0 )
+   haddr_t file_size = H5Fget_filesize(id);
+   if( file_size < 0 )
    {
       throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
    }
+   return(file_size);
 }
 
 //--------------------------------------------------------------------------
