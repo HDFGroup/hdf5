@@ -30,7 +30,7 @@ TESTING()
 # non-zero value.
 DUMP()
 {
-    expect=testfiles/$1
+    expect=$srcdir/testfiles/$1
     actual="testfiles/`basename $1 .ddl`.out"
     shift
     full=`pwd`/$h5dump
@@ -45,14 +45,7 @@ DUMP()
         $RUNSERIAL $full "$@" 2>/dev/null
     ) >$actual
     
-    # Results. We normalize the result to account for different output 
-    # widths.  That is, the test should succeed if the only
-    # differences are in white space. We have to do this the hard way
-    # because diff isn't always smart enough.
-    tr '\n' ' ' <$actual |tr -s ' \t' |fold >$actual-norm
-    tr '\n' ' ' <$srcdir/$expect |tr -s ' \t' |fold >$expect-norm
-
-    if $cmp $expect-norm $actual-norm; then
+    if $cmp $expect $actual; then
 	echo " PASSED"
     else
 	echo "*FAILED*"
@@ -62,7 +55,6 @@ DUMP()
     fi
 
     # Clean up output file
-    rm -f $expect-norm $actual-norm
     if [ X = ${HDF5_NOCLEANUP:-X} ]; then
 	rm -f $actual
     fi
