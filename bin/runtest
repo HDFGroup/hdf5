@@ -456,7 +456,8 @@ while [ $# -gt 0 ]; do
 	    PROGNAME="$PROGNAME $H5VER"
 	    ;;
 	-all)
-	    TESTHOST=$ALLHOSTS
+	    # cannot assign ALLHOSTS yet.
+	    TESTHOST=-all
 	    ;;
 	-nocvs)
 	    # do not do cvs commands
@@ -487,6 +488,18 @@ CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
 CVSLOG_LOCK=${SNAPYARD}/log/CVS_LOG_LOCK_${TODAY}
 # Snap Test Configuration file
 SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
+
+
+#################################
+# Setup test host(s)
+#################################
+ALLHOSTSFILE=${SNAPYARD}/allhostfile
+if [ -f $ALLHOSTSFILE ]; then
+    ALLHOSTS=`grep -v '#' $ALLHOSTSFILE`
+fi
+if [ "$TESTHOST" = -all ]; then
+    TESTHOST=$ALLHOSTS
+fi
 
 
 #################################
