@@ -45,7 +45,12 @@ test_mpio_overlap_writes(char *filename[])
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* Need at least 2 processes */
-    VRFY((mpi_size >= 2), "Has at least 2 processes");
+    if (mpi_size < 2) {
+	if (MAINPROCESS)
+	    printf("Need at least 2 processes to run MPIO test.\n");
+	    printf(" -SKIP- \n");
+	return;
+    }
 
     /* splits processes 0 to n-2 into one comm. and the last one into another */
     color = ((mpi_rank < (mpi_size - 1)) ? 0 : 1);
@@ -112,9 +117,11 @@ test_mpio_overlap_writes(char *filename[])
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
 	    for (i=0; i<stride; i++){
-		if (buf[i] != ((mpi_off+i) & 0x7f))
-		    printf("proc %d: found data error at [%d], expect %d, got %d\n",
-		    mpi_rank, mpi_off+i, mpi_off & 0x7f, buf[0]);
+		char expected;
+		expected = (mpi_off+i) & 0x7f;
+		if (buf[i] != expected)
+		    printf("proc %d: found data error at [%ld], expect %d, got %d\n",
+		    mpi_rank, mpi_off+i, expected, buf[i]);
 	    }
 	}
 

@@ -64,6 +64,7 @@ typedef int DATATYPE;
 
 /* shared global variables */
 extern int dim0, dim1;				/* Dataset dimensions */
+extern int chunkdim0, chunkdim1;		/* Chunk dimensions */
 extern int nerrors;				/* errors count */
 extern int verbose;				/* verbose, default as no. */
 extern herr_t (*old_func)(void*);		/* previous error handler */

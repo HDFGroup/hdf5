@@ -842,8 +842,8 @@ extend_writeInd(char *filename)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* setup chunk-size. Make sure sizes are > 0 */
-    chunk_dims[0] = (dim0+9)/10;
-    chunk_dims[1] = (dim1+9)/10;
+    chunk_dims[0] = chunkdim0;
+    chunk_dims[1] = chunkdim1;
 
     /* allocate memory for data buffer */
     data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));

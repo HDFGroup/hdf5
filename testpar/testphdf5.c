@@ -9,10 +9,13 @@
 /* global variables */
 int dim0 = DIM0;
 int dim1 = DIM1;
+int chunkdim0;
+int chunkdim1;
 int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
 
 #ifdef POOMA_ARCH
+/* For the PFS of TFLOPS */
 char *fileprefix = "pfs:/pfs_grande/multi/tmp_1/";
 #else
 char *fileprefix = NULL;		/* file prefix, default as NULL */
@@ -89,6 +92,7 @@ usage(void)
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-d <dim0> <dim1>\tdataset dimensions\n");
+    printf("\t-c <dim0> <dim1>\tdataset chunk dimensions\n");
     printf("\tDefault: do write then read with dimensions %dx%d\n",
 	DIM0, DIM1);
     printf("\n");
@@ -105,6 +109,10 @@ parse_options(int argc, char **argv)
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* setup default chunk-size. Make sure sizes are > 0 */
+    chunkdim0 = (dim0+9)/10;
+    chunkdim1 = (dim1+9)/10;
 
     while (--argc){
 	if (**(++argv) != '-'){
@@ -135,6 +143,18 @@ parse_options(int argc, char **argv)
 			    dim0 = atoi(*(++argv));
 			    argc--;
 			    dim1 = atoi(*(++argv));
+			    /* set default chunkdim sizes too */
+			    chunkdim0 = (dim0+9)/10;
+			    chunkdim1 = (dim1+9)/10;
+			    break;
+		case 'c':   /* chunk dimensions */
+			    if (--argc < 2){
+				nerrors++;
+				return(1);
+			    }
+			    chunkdim0 = atoi(*(++argv));
+			    argc--;
+			    chunkdim1 = atoi(*(++argv));
 			    break;
 		case 'h':   /* print help message--return with nerrors set */
 			    return(1);
@@ -144,9 +164,14 @@ parse_options(int argc, char **argv)
 	}
     } /*while*/
 
-    /* check validity of dimension sizes */
+    /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0){
 	printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+	nerrors++;
+	return(1);
+    }
+    if (chunkdim0 <= 0 || chunkdim1 <= 0){
+	printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
 	nerrors++;
 	return(1);
     }
