@@ -30,8 +30,6 @@
 
    BUGS/LIMITATIONS
 
-   EXPORTED ROUTINES/VARIABLES:
-   Two variables are exported: num_errs, and Verbosity.
 
  */
 
