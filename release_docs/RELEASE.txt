@@ -56,6 +56,10 @@ New Features
 
     Tools:
     ------
+        - Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
+	  AKC - 2004/01/08
+	- Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
+	  respectively if library is built in parallel mode.  AKC - 2004/01/07
         - Added metadata benchmark (perform/perf_meta).  SLU - 2003/10/03
 
     C++ API:
