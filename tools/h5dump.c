@@ -3,7 +3,6 @@
 #include "H5private.h"
 
 int indent = 0;
-int ischar=0;
 static int display_data = 1;
 static int status = 0;
 static int unamedtype = 0;  /* shared data type with no name */
@@ -30,6 +29,9 @@ static void dump_dataset (hid_t, const  char*);
 static void dump_data (hid_t, int);
 static void dump_named_datatype (hid_t , const char *);
 static int search_obj (table_t, unsigned long *);
+void indentation(int);
+
+extern int print_data(hid_t, hid_t, int);
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -75,7 +77,7 @@ h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-static void indentation(int x) {
+void indentation(int x) {
 
   while (x>0) { printf(" "); x--; }
 
@@ -250,7 +252,7 @@ H5G_stat_t statbuf;
           H5Tclose(str_type);
         }
         indentation (indent+col);
-        printf("%s\n", END);
+        printf("%s", END);
 
         break;
 
@@ -313,7 +315,8 @@ H5G_stat_t statbuf;
 
                  ndims = H5Tget_member_dims(type, i, dims, perm);
 
-                 indentation (indent+col);
+                 if (H5Tget_class(mtype) != H5T_STRING)
+                     indentation (indent+col);
 
                  print_datatype(mtype);
 
@@ -379,10 +382,15 @@ dump_datatype (hid_t type) {
 
     indent += col;
     indentation (indent);
-    if (H5Tget_class(type) == H5T_COMPOUND || 
-        H5Tget_class(type) == H5T_STRING ) {
+    if (H5Tget_class(type) == H5T_COMPOUND) {
         printf ("%s %s\n", DATATYPE, BEGIN);
         print_datatype(type);
+        indentation (indent);
+        printf ("%s\n", END);
+    } else if (H5Tget_class(type) == H5T_STRING) {
+        printf ("%s %s\n", DATATYPE, BEGIN);
+        print_datatype(type);
+        printf("\n");
         indentation (indent);
         printf ("%s\n", END);
     } else {
@@ -590,7 +598,6 @@ H5G_stat_t statbuf;
         printf("h5dump error: unable to open attribute.\n");
         end_obj();
         status = 1;
-        return FAIL;
     }
 
     switch (statbuf.type) {
@@ -922,10 +929,7 @@ hid_t  type, space;
          printf("DATA{ not yet implemented.}\n");
          break;
     case H5T_STRING:
-         indent += col;
-         indentation (indent);
-         indent -= col;
-         printf("DATA{ not yet implemented.}\n");
+         dump_data(did, DATASET_DATA);
          break;
     case H5T_BITFIELD:
          indent += col;
@@ -1002,9 +1006,6 @@ int i;
 
     prefix = (char *) malloc(prefix_len * sizeof (char));
     *prefix = '\0';
-/*
-    strcpy(prefix, "");
-*/
 }
 
 
@@ -1231,62 +1232,20 @@ int i;
 static void
 dump_data (hid_t obj_id, int obj_data) {
 
-    hid_t               f_type ;
-    size_t              size ;
-    h5dump_t            info;
-
     indent += col;
     indentation (indent);
     printf("%s %s\n", DATA, BEGIN);
 
-    if (obj_data == DATASET_DATA)
-        f_type = H5Dget_type(obj_id);
-    else
-        f_type = H5Aget_type(obj_id);
-
-    size = H5Tget_size(f_type);
-
-    /* Set to all default values and then override */
-    memset(&info, 0, sizeof info);
-    info.idx_fmt = "        (%s) ";
-    info.line_ncols = 70 - indent;
-
-    /*
-     * If the dataset is a 1-byte integer type then format it as an ASCI
-     * character string instead of integers.
-     */
-    if ((1==size && H5T_INTEGER==H5Tget_class(f_type)) || 
-        (H5T_STRING == H5Tget_class(f_type))) {
-        info.elmt_suf1 = "";
-        info.elmt_suf2 = "";
-        info.idx_fmt = "        (%s) \"";
-/*
-        info.line_suf = "\"";
-*/
-        info.line_suf = "";
-        ischar = 1;
-    }
-
-   
-    /*
-     * Print all the values.
-     */
-
-    if (h5dump1(stdout, &info, obj_id, -1, obj_data)<0) {
+    /* Print all the values. */
+    if (print_data(obj_id, -1, obj_data) < 0) {
         indentation(indent+col);
         printf("Unable to print data.\n");
         status = 1;
     }
 
-    if (1==size && H5T_INTEGER==H5Tget_class(f_type)) 
-        ischar = 0;
-
     indentation(indent);
     printf("%s\n", END);
     indent -= col;
-
-    H5Tclose(f_type);
-
 }
 
 

@@ -1,14 +1,10 @@
 /*
- * Copyright © 1998 NCSA
- *                  All rights reserved.
  *
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Thursday, July 23, 1998
+ * Purpose:	A library for displaying the values of a dataset or an attribute
+ *              in a human readable format.
  *
- * Purpose:	A library for displaying the values of a dataset in a human
- *		readable format.
+ * Note:        h5dumputil is a modification of h5tools.c 
  */
-/* Note: h5dumputil is a modification of h5tools.c */
 #include <assert.h>
 #include <ctype.h>
 #include <h5dump.h>
@@ -28,13 +24,14 @@
 #define H5DUMP_BUFSIZE	(1024)
 #endif
 
-#define OPT(X,S)	((X)?(X):(S))
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
 #define NELMTS(X)	(sizeof(X)/sizeof(*X))
 #define ALIGN(A,Z)	((((A)+(Z)-1)/(Z))*(Z))
 
 extern int indent;
-extern int ischar;
+extern void indentation(int);
+int compound_data=0;
+int print_data(hid_t , hid_t , int);
 
 /*-------------------------------------------------------------------------
  * Function:	h5dump_sprint
@@ -44,152 +41,489 @@ extern int ischar;
  *
  * Return:	void
  *
- * Programmer:	Robb Matzke
- *              Thursday, July 23, 1998
- *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static void
-h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
+h5dump_sprint(char *s/*out*/, hid_t type, void *vp)
 {
-    size_t	i, n, offset, size, dims[4], nelmts;
-    char	temp[1024], *name;
-    hid_t	memb;
-    int		nmembs, j, k, ndims;
+    size_t	i, n;
+    char	temp[1024];
+    int		j;
+    H5T_str_t   str_pad;
 
     if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-	sprintf(temp, "%g", *((double*)vp));
+	sprintf(s, "%g", *((double*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-	sprintf(temp, "%g", *((float*)vp));
+	sprintf(s, "%g", *((float*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-	sprintf(temp, "%d", *((short*)vp));
+	sprintf(s, "%d", *((short*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-	sprintf(temp, "%u", *((unsigned short*)vp));
+	sprintf(s, "%u", *((unsigned short*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {
-	sprintf(temp, "%d", *((int*)vp));
+	sprintf(s, "%d", *((int*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-	sprintf(temp, "%u", *((unsigned*)vp));
+	sprintf(s, "%u", *((unsigned*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
-	sprintf(temp, "%ld", *((long*)vp));
+	sprintf(s, "%ld", *((long*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
-	sprintf(temp, "%lu", *((unsigned long*)vp));
-    } else if (H5Tequal(type, H5T_NATIVE_SCHAR) ||
-	       H5Tequal(type, H5T_NATIVE_UCHAR)) {
-	switch (*((char*)vp)) {
-	case '"':
-	    strcpy(temp, "\\\"");
-	    break;
-	case '\\':
-	    strcpy(temp, "\\\\");
-	    break;
-	case '\b':
-	    strcpy(temp, "\\b");
-	    break;
-	case '\f':
-	    strcpy(temp, "\\f");
-	    break;
-	case '\n':
-	    strcpy(temp, "\\n");
-	    break;
-	case '\r':
-	    strcpy(temp, "\\r");
-	    break;
-	case '\t':
-	    strcpy(temp, "\\t");
-	    break;
-	default:
-	    if (isprint(*((char*)vp))) sprintf(temp, "%c", *((char*)vp));
-	    else sprintf(temp, "\\%03o", *((unsigned char*)vp));
-	    break;
-	}
-    }  else if (H5T_COMPOUND==H5Tget_class(type)) {
-	nmembs = H5Tget_nmembers(type);
-	strcpy(temp, OPT(info->cmpd_pre, "{"));
-	for (j=0; j<nmembs; j++) {
-	    if (j) strcat(temp, OPT(info->cmpd_sep, ","));
-
-	    /* The name */
-	    name = H5Tget_member_name(type, j);
-	    sprintf(temp+strlen(temp), OPT(info->cmpd_name, ""), name);
-	    free(name);
-
-	    /* The value */
-	    offset = H5Tget_member_offset(type, j);
-	    memb = H5Tget_member_type(type, j);
-	    size = H5Tget_size(memb);
-	    ndims = H5Tget_member_dims(type, j, dims, NULL);
-	    assert(ndims>=0 && ndims<=4);
-	    for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
-
-	    if (nelmts>1) strcat(temp, OPT(info->arr_pre, "["));
-	    for (i=0; i<nelmts; i++) {
-		if (i) strcat(temp, OPT(info->arr_sep, ","));
-		h5dump_sprint(temp+strlen(temp), info, memb,
-			      (char*)vp+offset+i*size);
-	    }
-	    if (nelmts>1) strcat(temp, OPT(info->arr_suf, "]"));
-	    H5Tclose(memb);
-	}
-	strcat(temp, OPT(info->cmpd_suf, "}"));
+	sprintf(s, "%lu", *((unsigned long*)vp));
+    } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+        sprintf(s, "%d", *((signed char*)vp));
+    } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+        sprintf(s, "%u", *((unsigned char*)vp));
     } else if (H5T_STRING==H5Tget_class(type)) {
-           for (i = 0; i < H5Tget_size(type); i++)
-	        h5dump_sprint(s+i, info, H5T_NATIVE_SCHAR, (char*)vp+i); 
-           goto done;
+           str_pad = H5Tget_strpad(type) ;
+           j = 0;
+           for (i = 0; i < H5Tget_size(type); i++) {
+	        switch (*((char*)vp+i)) {
+	        case '"':
+	              strcpy(s+j, "\\\"");
+                      j += strlen("\\\"");
+	              break;
+	        case '\\':
+	              strcpy(s+j, "\\\\");
+                      j += strlen("\\\\");
+	              break;
+	        case '\b':
+	             strcpy(s+j, "\\b");
+                      j += strlen("\\b");
+	             break;
+	        case '\f':
+	             strcpy(s+j, "\\f");
+                      j += strlen("\\f");
+	             break;
+	        case '\n':
+	             strcpy(s+j, "\\n");
+                      j += strlen("\\n");
+	             break;
+	        case '\r':
+	             strcpy(s+j, "\\r");
+                      j += strlen("\\r");
+	             break;
+	        case '\t':
+	             strcpy(s+j, "\\t");
+                      j += strlen("\\t");
+	             break;
+	        default:
+                    if (isprint(*((char*)vp+i))){
+                        sprintf(s+j, "%c", *((char*)vp+i));
+                        j += strlen(s+j);
+                    } else { 
+                        if (str_pad == H5T_STR_NULLTERM &&
+                            *((unsigned char*)vp+i) == '\0' ) {
+                            sprintf(s+j, "%c", *((unsigned char*)vp+i));
+                            i = H5Tget_size(type);
+                        } else {
+                            sprintf(s+j, "\\%03o", *((unsigned char*)vp+i));
+                            j += strlen(s+j);
+                        }
+                    }
+                   break;
+	        }
+           }
     } else {
 	strcpy(temp, "0x");
 	n = H5Tget_size(type);
 	for (i=0; i<n; i++) {
 	    sprintf(temp+strlen(temp), "%02x", ((unsigned char*)vp)[i]);
 	}
+       sprintf(s,  "%s", temp);
     }
-
-    sprintf(s, OPT(info->elmt_fmt, "%s"), temp);
-done:
-     ;
 
 }
 
 
-
 /*-------------------------------------------------------------------------
- * Function:	h5dump_simple
+ * Function:	display_numeric_data
  *
- * Purpose:	Print some values from a dataset with a simple data space.
- *		This is a special case of h5dump().
+ * Purpose:	Display numeric data in ddl format.
  *
- * Return:	Success:	0
+ * Return:	void
  *
- *		Failure:	-1
+ * Comment:     hs_nelmts     number of elements to be printed
+ *              p_type        memory data type
+ *              sm_buf        data buffer
+ *              p_type_nbytes size of p_type
+ *              p_nelmts      total number of elements
+ *              dim_n_size    size of dimemsion n
+ *              elmtno        element index
  *
- * Programmer:	Robb Matzke
- *              Thursday, July 23, 1998
+ *-------------------------------------------------------------------------
+ */
+static void display_numeric_data 
+(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
+ hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno) {
+
+hsize_t i;
+char p_buf[256];		
+char out_buf[ncols];
+
+    out_buf[0] = '\0';
+    if ((indent+col) > ncols) indent = 0;
+
+    for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
+         h5dump_sprint(p_buf, p_type, sm_buf+i*p_type_nbytes);
+
+         if ((int)(strlen(out_buf)+strlen(p_buf)+1) > (ncols-indent-col)) {
+             /* first row of member */
+             if (compound_data && (elmtno+i+1) == dim_n_size)
+                 printf("%s\n", out_buf);
+             else {
+                 indentation(indent+col);
+                 printf("%s\n", out_buf);
+             }
+             strcpy(out_buf, p_buf);
+             if ((elmtno+i+1) % dim_n_size) 
+                 strcat(out_buf, ", ");
+             else { /* end of a row, flush out_buf */
+                 indentation(indent+col);
+                 printf("%s", out_buf);
+                 if ((elmtno+i+1) != p_nelmts) /* not last element */
+                     printf(",\n");
+                 else if (compound_data) { /* last element of member data*/
+                     if ((ncols-strlen(out_buf)-indent-col) < 2) { 
+                          /* 2 for space and ] */
+                         printf("\n");
+                         indentation(indent+col-3);
+                     }
+                 } else
+                     printf("\n"); /* last row */
+                 *out_buf = '\0';
+             }
+        } else {
+             strcat(out_buf, p_buf);
+             if ((elmtno+i+1) % dim_n_size) {
+                  if ((ncols-strlen(out_buf)-indent-col-1) > 0)
+                      strcat(out_buf, ", ");
+                  else 
+                      strcat(out_buf, ",");
+             } else { /* end of a row */
+                 /* 1st row of member data */
+                 if (compound_data && (elmtno+i+1) == dim_n_size) 
+                     printf("%s", out_buf);
+                 else {
+                     indentation(indent+col);
+                     printf("%s", out_buf);
+                 }
+
+                 /* if it's the last element */
+                 if ((elmtno+i+1) != p_nelmts)
+                     printf(",\n");
+                 else if (compound_data) { /* last row of member data*/
+                     /* 2 for space and ] */
+                     if ((ncols-strlen(out_buf)-indent-col) < 2) { 
+                         printf("\n");
+                         indentation(indent+col-3);
+                     }
+                 } else
+                     printf("\n"); /* last row */
+                 *out_buf = '\0';
+             }
+        }
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_string
+ *
+ * Purpose:	Display string in ddl format
+ *
+ * Return:	void
+ *
+ * Comment:     concatenator operator : '//'
+ *              separator between elements: ','
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
+static void display_string
+(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
+ hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno) {
+hsize_t i, row_size=0;
+int j, m, x, y, z,  first_row=1;
+int free_space, long_string = 0;
+char p_buf[256], out_buf[ncols];
+
+    out_buf[0] = '\0';
+    if ((indent+col) > ncols) indent = 0;
+
+    for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
+         row_size++;
+         h5dump_sprint(p_buf, p_type, sm_buf+i*p_type_nbytes);
+
+         free_space = ncols - indent - col - strlen(out_buf);
+
+         if ((elmtno+i+1) == p_nelmts) { /* last element */
+            /* 2 for double quotes */
+            if (((int)strlen(p_buf) + 2) > free_space) long_string = 1;
+         } else 
+            /* 3 for double quotes and one comma */
+            if (((int)strlen(p_buf) + 3) > free_space) long_string = 1;
+
+         if (long_string) {
+
+             if (free_space < 5) {  /* 5 for double quotes, one space and two '/'s */
+                 /* flush out_buf */
+                 if (compound_data && first_row) {
+                     printf("%s\n", out_buf);
+                     first_row = 0;
+                 } else {
+                     indentation(indent+col); 
+                     printf("%s\n", out_buf);
+                 }
+                 out_buf[0] = '\0';
+                 x = 0 ;
+             } else {
+                 x = free_space - 5;
+                 if (compound_data && first_row) {
+                     printf("%s\"", out_buf);
+                     strncpy(out_buf, p_buf, x);
+                     out_buf[x] = '\0';
+                     printf("%s\" //\n", out_buf);
+                     first_row = 0;
+                 } else {
+                     indentation(indent+col); 
+                     printf("%s\"", out_buf);
+                     strncpy(out_buf, p_buf, x);
+                     out_buf[x] = '\0';
+                     printf("%s\" //\n", out_buf);
+                 }
+                 out_buf[0] = '\0';
+             }
+
+             y = ncols - indent -col - 5;
+
+             m = (strlen(p_buf) - x)/y;
+
+             z = (strlen(p_buf) - x) % y;
+
+
+             for (j = 0; j < m - 1 ; j++) {
+                  indentation(indent+col);
+                  strncpy(out_buf, p_buf+x+j*y, y);
+                  out_buf[y] = '\0';
+                  printf("\"%s\" //\n", out_buf);
+             }
+
+             if ((elmtno+i+1) == p_nelmts) { /* last element */
+                  if ((int)strlen(p_buf+x+j*y) > (ncols - indent - col -2)) { /* 2 for double quotes */
+                     indentation(indent+col);
+                     strncpy(out_buf, p_buf+x+j*y, y);
+                     out_buf[y] = '\0';
+                     printf("\"%s\" //\n", out_buf);
+                     indentation(indent+col);
+                     printf("\"%s\"", p_buf+x+m*y);
+                     if (compound_data) {
+                         if ((ncols-strlen(out_buf)-indent-col) < 2) {
+                              printf("\n");
+                              indentation(indent+col-3);
+                         }
+                     } else 
+                         printf("\n");
+
+                  } else {
+                     indentation(indent+col);
+                     printf("\"%s\"", p_buf+x+j*y);
+                     if (compound_data) {
+                         if ((ncols-strlen(out_buf)-indent-col) < 2) {
+                              printf("\n");
+                              indentation(indent+col-3);
+                         }
+  
+                     } else
+                         printf("\n");
+                  }
+                  out_buf[0] = '\0';
+             } else if ( row_size == dim_n_size) {
+                  if ((int)strlen(p_buf+x+j*y) > (ncols - indent - col -3)) { /* 3 for 2 "'s and 1 , */
+                     indentation(indent+col);
+                     strncpy(out_buf, p_buf+x+j*y, y);
+                     out_buf[y] = '\0';
+                     printf("\"%s\" //\n", out_buf);
+                     indentation(indent+col);
+                     printf("\"%s\",\n", p_buf+x+m*y);
+                  } else {
+                     indentation(indent+col);
+                     printf("\"%s\",\n", p_buf+x+j*y);
+                  }
+                  out_buf[0] = '\0';
+                  row_size = 0;
+
+             } else {
+                  if ((int)strlen(p_buf+x+j*y) > (ncols - indent - col -3)) { /* 3 for 2 "'s and 1 , */
+                     indentation(indent+col);
+                     strncpy(out_buf, p_buf+x+j*y, y);
+                     out_buf[y] = '\0';
+                     printf("\"%s\" //\n", out_buf);
+                     strcpy(out_buf, "\"");
+                     strcat(out_buf, p_buf+x+m*y);
+                     strcat(out_buf, "\",");
+                     if ((int)strlen(out_buf) < (ncols-indent-col)) strcat(out_buf, " "); 
+                  } else {
+                     strcpy(out_buf, "\"");
+                     strcat (out_buf, p_buf+x+j*y);
+                     strcat(out_buf, "\",");
+                     if ((int)strlen(out_buf) < (ncols-indent-col)) strcat(out_buf, " "); 
+                  }
+             }
+             long_string = 0;
+
+         } else {
+
+            /* flush out_buf if it's end of a row */
+            if (row_size == dim_n_size) {
+                if (compound_data && (elmtno+i+1) == dim_n_size) { /* 1st row */
+                    printf("%s\"%s\"", out_buf, p_buf);
+                    first_row = 0;
+                } else {
+                    indentation(indent+col); 
+                    printf("%s\"%s\"", out_buf, p_buf);
+                }
+
+               if ((elmtno+i+1) != p_nelmts) 
+                   printf(",\n");
+               else if (compound_data) {
+                       if ((ncols-strlen(out_buf)-strlen(p_buf)-indent-col) < 2) {
+                           /* 2 for space and ] */
+                           printf("\n");
+                           indentation(indent+col-3);
+                       }
+               } else
+                   printf("\n");
+   
+               out_buf[0] = '\0';
+               row_size = 0;
+            } else {
+                 strcat(out_buf, "\"");
+                 strcat(out_buf, p_buf);
+                 strcat(out_buf, "\",");
+                 if ((int)strlen(out_buf) < (ncols-indent-col)) strcat(out_buf, " ");
+            }
+
+         }
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_compound_data
+ *
+ * Purpose:	Display compound data in ddl format
+ *
+ * Return:	void
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void display_compound_data
+(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
+ hsize_t p_nelmts, hsize_t elmtno) {
+size_t  offset, size, dims[4]; 
+hsize_t nelmts, dim_n_size=0;
+hid_t   memb;
+int     nmembs, i, j, k, ndims, perm[4];
+
+    if ((indent+col) > ncols) indent = 0;
+
+    for (i=0; i<(int)hs_nelmts && (elmtno+i) < p_nelmts; i++) {
+
+       nmembs = H5Tget_nmembers(p_type);
+
+       indentation(indent+col); 
+       printf("{\n");
+
+       indent+= col;
+       for (j=0; j<nmembs; j++) {
+
+	    offset = H5Tget_member_offset(p_type, j);
+	    memb = H5Tget_member_type(p_type, j);
+	    size = H5Tget_size(memb);
+	    ndims = H5Tget_member_dims(p_type, j, dims, perm);
+            if (ndims > 0) dim_n_size = dims[ndims-1];
+            else dim_n_size = 1;
+	    for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
+
+            indentation(indent+col);
+	    printf("[ ");
+
+            indent+=2;
+            switch (H5Tget_class(memb)) {
+            case H5T_INTEGER:
+                 display_numeric_data
+                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0) ;
+                 break;
+
+            case H5T_FLOAT:
+                 display_numeric_data
+                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0) ;
+                 break;
+
+            case H5T_TIME:
+                 break;
+
+            case H5T_STRING:
+                 display_string
+                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0 ) ;
+                 break;
+
+            case H5T_BITFIELD:
+                 break;
+
+            case H5T_OPAQUE:
+                 break;
+
+            default: break;
+
+            }
+            indent-=2;
+
+            if ( j == nmembs-1) printf(" ]\n");
+            else printf(" ],\n");
+
+	    H5Tclose(memb);
+       }
+       indent-= col;
+
+       indentation(indent+col);
+       if ((elmtno+i+1) == p_nelmts) printf("}\n");
+       else printf("},\n");
+    }
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	h5dump_simple
+ *
+ * Purpose:	Print some values from a dataset or an attribute with a 
+ *              simple data space.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Modifications: 
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
-h5dump_simple(FILE *stream, const h5dump_t *info, hid_t oid, hid_t p_type, int obj_type)
+h5dump_simple(hid_t oid, hid_t p_type, int obj_data)
 {
     hid_t		f_space;		/*file data space	*/
     int			ndims;			/*dimensionality	*/
     hsize_t		elmtno, i;		/*counters		*/
-    /*int			carry;*/			/*counter carry value	*/
     hssize_t		zero[8];		/*vector of zeros	*/
-    /* int			need_prefix=1;*/		/*indices need printing	*/
 
     /* Print info */
     hsize_t		p_min_idx[8];		/*min selected index	*/
     hsize_t		p_max_idx[8];		/*max selected index	*/
     size_t		p_type_nbytes;		/*size of memory type	*/
     hsize_t		p_nelmts;		/*total selected elmts	*/
-    char		p_buf[256];		/*output string		*/
-/*    size_t		p_column=0;*/		/*output column		*/
-    size_t		p_ncolumns=80;		/*default num columns	*/
-/*
-    char 		p_prefix[1024];	*/	/*line prefix string	*/
 
     /* Stripmine info */
     hsize_t		sm_size[8];		/*stripmine size	*/
@@ -202,19 +536,10 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t oid, hid_t p_type, int o
     hssize_t		hs_offset[8];		/*starting offset	*/
     hsize_t		hs_size[8];		/*size this pass	*/
     hsize_t		hs_nelmts;		/*elements in request	*/
-int j, row_size, ntokens;
-char out_buf[80], prefix[80];
+    hsize_t             dim_n_size;
 
-/*
-    prefix[0] = NULL;
-    out_buf[0] = NULL;
-*/
-    prefix[0] = '\0';
-    out_buf[0] = '\0';
-    if ((indent+col) > 80) indent = 0;
-    for (j=0;j<indent+col;j++) strcat (prefix, " ");
 
-    if (obj_type == DATASET_DATA) 
+    if (obj_data == DATASET_DATA) 
         f_space = H5Dget_space(oid);
     else 
         f_space = H5Aget_space(oid);
@@ -252,196 +577,82 @@ char out_buf[80], prefix[80];
     sm_nelmts = sm_nbytes/p_type_nbytes;
     sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
-    /* Local things */
-    if (info->line_ncols>0) p_ncolumns = info->line_ncols;
-
     /* The stripmine loop */
     memset(hs_offset, 0, sizeof hs_offset);
     memset(zero, 0, sizeof zero);
 
-    if (ndims == 0) { /* scalar space */
 
-        if (obj_type == DATASET_DATA) {
-            if (H5Dread(oid, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf)<0) 
-                return -1;
-        } else {
-            if  (H5Aread(oid, p_type, sm_buf) < 0) return -1;
-        }
-
-        if (ischar)  {
-
-           for (j = 0; j < (int)p_type_nbytes; j++) {
-                h5dump_sprint(p_buf, info, H5T_NATIVE_SCHAR, sm_buf+j);
-                if ((strlen(out_buf)+strlen(p_buf)+5) > (80-strlen(prefix))) {
-                    printf("%s\"%s\" //\n", prefix, out_buf);
-                    strcpy(out_buf, p_buf);
-                    if ( j+1 == (int)p_type_nbytes )
-                        printf("%s\"%s\"\n", prefix, out_buf);
-                } else {
-                    strcat(out_buf, p_buf);
-                    if ( j+1 == (int)p_type_nbytes )
-                        printf("%s\"%s\"\n", prefix, out_buf);
-                }
-           }
-        } else {
-            h5dump_sprint(p_buf, info, p_type, sm_buf);
-            printf("%s%s\n", prefix, p_buf);
-        }
-
-        return 0 ;
-    }
-
-row_size = 0;
     for (elmtno=0; elmtno<p_nelmts; elmtno+=hs_nelmts) {
 
-	/* Calculate the hyperslab size */
-	for (i=0, hs_nelmts=1; i<(hsize_t)ndims; i++) {
-	    hs_size[i] = MIN(sm_size[i], p_max_idx[i]-hs_offset[i]);
-	    hs_nelmts *= hs_size[i];
-	}
-	
-	/* Read the data */
-	H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL,
-			    hs_size, NULL);
-	H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
-			    &hs_nelmts, NULL);
 
-        if (obj_type == DATASET_DATA) {
-            if (H5Dread(oid, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf)<0) {
-                return -1;
+        /* Calculate the hyperslab size */
+        if (ndims > 0) {
+            for (i=0, hs_nelmts=1; i<(hsize_t)ndims; i++) {
+                hs_size[i] = MIN(sm_size[i], p_max_idx[i]-hs_offset[i]);
+                hs_nelmts *= hs_size[i];
             }
+            H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL,
+                                hs_size, NULL);
+            H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
+                                &hs_nelmts, NULL);
+            dim_n_size = p_max_idx[ndims-1];
         } else {
-           if  (H5Aread(oid, p_type, sm_buf) < 0) 
+            H5Sselect_all(f_space);
+            H5Sselect_all(sm_space);
+            hs_nelmts = 1;
+            dim_n_size = 1;
+        }
+
+        if (obj_data == DATASET_DATA) {
+            if (H5Dread(oid, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) <0)
+                return -1;
+        } else {
+            if (H5Aread(oid, p_type, sm_buf) < 0) 
                 return -1;
         }
 
 	/* Print the data */
+        switch (H5Tget_class(p_type)) {
+        case H5T_INTEGER:
+             display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
+                                   p_nelmts, dim_n_size, elmtno);
+             break;
 
-             if (ischar) 
-                 ntokens = 5;
-             else 
-                 ntokens = 1;
+        case H5T_FLOAT:
+             display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
+                                   p_nelmts, dim_n_size, elmtno);
+             break;
 
-	for (i=0; i<hs_nelmts; i++) {
-             row_size++;
-	     h5dump_sprint(p_buf, info, p_type, sm_buf+i*p_type_nbytes);
+        case H5T_TIME:
+             break;
 
-     if (H5T_COMPOUND==H5Tget_class(p_type)) 
-         printf("%s%s\n", prefix, p_buf);
+        case H5T_STRING:
+             display_string (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
+                             p_nelmts, dim_n_size, elmtno);
+             break;
 
-     else {
-             if ((strlen(out_buf)+strlen(p_buf)+ntokens) > (80-strlen(prefix))) {
-                 printf("%s", prefix);
-                 if (ischar) printf("\"");
-                 printf("%s", out_buf);
-                 if (ischar) printf("\" //");
-                 printf("\n");
+        case H5T_BITFIELD:
+             break;
 
-                 strcpy(out_buf, p_buf);
-                 if (row_size == (int)p_max_idx[ndims-1]) {
-                     printf("%s", prefix);
-                     if (ischar) printf("\"");
-                     printf("%s", out_buf);
-                     *out_buf = '\0';
-                     if (ischar) printf("\"");
-                     if ((i+1) != hs_nelmts) {
-                         if (ischar) printf(" //");
-                         else printf(",");
-                     }
-                     printf("\n");
-                     row_size = 0;
-                 } else
-                     if (!ischar) strcat(out_buf, ", ");
-            } else {
-                 strcat(out_buf, p_buf);
-                 if (row_size == (int)p_max_idx[ndims-1]) {
-                     printf("%s", prefix);
-                     if (ischar) printf("\"");
-                     printf("%s", out_buf);
-                     if (ischar) printf("\"");
-                     if ((i+1) != hs_nelmts) {
-                         if (ischar) printf(" //");
-                         else printf(",");
-                     }
-                     printf("\n");
-                     *out_buf = '\0';
-                     row_size = 0;
-                 } else
-                     if (!ischar) strcat(out_buf, ", ");
+        case H5T_OPAQUE:
+             break;
 
-            }
-   }
+        case H5T_COMPOUND:
+             compound_data = 1;
+             display_compound_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, p_nelmts, elmtno);
+             compound_data = 0;
+             break;
 
+        default: break;
         }
-/*
-	for (i=0; i<hs_nelmts; i++) {
-	     Render the element
-	    h5dump_sprint(p_buf, info, p_type, sm_buf+i*p_type_nbytes);
-	    if (elmtno+i+1<p_nelmts) {
-		strcat(p_buf, OPT(info->elmt_suf1, ","));
-	    }
-
-	    if ((p_column +
-		 strlen(p_buf) +
-		 strlen(OPT(info->elmt_suf2, " ")) +
-		 strlen(OPT(info->line_suf, ""))) > p_ncolumns) {
-		need_prefix = 1;
-	    }
-	    if (need_prefix) {
-
-		if (p_column) {
-		    fputs(OPT(info->line_suf, ""), stream);
-		    putc('\n', stream);
-		    fputs(OPT(info->line_sep, ""), stream);
-                    
-		}
-                for (j=0;j<indent+col;j++) putc(' ', stream);
-                if (ischar && print_once) {
-                    putc('"', stream);
-                    print_once=0;
-                }
-		fputs(p_prefix, stream);
-		p_column = strlen(p_prefix);
-		need_prefix = 0;
-	    } else {
-		fputs(OPT(info->elmt_suf2, " "), stream);
-		p_column += strlen(OPT(info->elmt_suf2, " "));
-	    }
-	    
-	    fputs(p_buf, stream);
-	    p_column += strlen(p_buf);
-
-	}
-*/
-	
-	/* Calculate the next hyperslab offset */
-/*
-	for (i=ndims, carry=1; i>0 && carry; --i) {
-	    hs_offset[i-1] += hs_size[i-1];
-	    if (hs_offset[i-1]==(hssize_t)p_max_idx[i-1]) {
-		hs_offset[i-1] = p_min_idx[i-1];
-	    } else {
-		carry = 0;
-	    }
-	}
-*/
     }
 
-/*
-    if (p_column) {
-	fputs(OPT(info->line_suf, ""), stream);
-        if (ischar) 
-            putc('"',stream);
-	putc('\n', stream);
-	fputs(OPT(info->line_sep, ""), stream);
-    }
-*/
     H5Sclose(sm_space);
     H5Sclose(f_space);
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	h5dump_fixtype
  *
@@ -556,7 +767,6 @@ h5dump_fixtype(hid_t f_type)
 	    offset = ALIGN(offset, H5Tget_size(memb[i])) +
 		     nelmts * H5Tget_size(memb[i]);
 	}
-/* free name */
 	break;
 
     case H5T_TIME:
@@ -606,45 +816,35 @@ h5dump_fixtype(hid_t f_type)
     return m_type;
 }
 
-
 /*-------------------------------------------------------------------------
- * Function:	h5dump1
+ * Function:	print_data	
  *
- * Purpose:	Print some values from a dataset DSET to the file STREAM
- *		after converting all types to P_TYPE (which should be a
- *		native type).  If P_TYPE is a negative value then it will be
- *		computed from the dataset type using only native types.
+ * Purpose:	Print some values from a dataset or an attribute to the 
+ *              file STREAM after converting all types to P_TYPE (which
+ *              should be a native type).  If P_TYPE is a negative value 
+ *              then it will be computed from the dataset/attribute type 
+ *              using only native types.
  *
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Thursday, July 23, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
-h5dump1 (FILE *stream, const h5dump_t *info, hid_t oid, hid_t _p_type, int obj_type)
+print_data(hid_t oid, hid_t _p_type, int obj_data)
 {
     hid_t	f_space;
     hid_t	p_type = _p_type;
     hid_t	f_type;
     int		status = -1;
-    h5dump_t	info_dflt;
 
-    /* Use default values */
-    if (!stream) stream = stdout;
-    if (!info) {
-	memset(&info_dflt, 0, sizeof info_dflt);
-	info = &info_dflt;
-    }
 
     if (p_type < 0) {
 
-        if (obj_type == DATASET_DATA) 
+        if (obj_data == DATASET_DATA) 
             f_type = H5Dget_type(oid);
         else
             f_type = H5Aget_type(oid);
@@ -659,7 +859,7 @@ h5dump1 (FILE *stream, const h5dump_t *info, hid_t oid, hid_t _p_type, int obj_t
     }
 
     /* Check the data space */
-    if (obj_type == DATASET_DATA) 
+    if (obj_data == DATASET_DATA) 
         f_space = H5Dget_space(oid);
     else
         f_space = H5Aget_space(oid);
@@ -667,10 +867,11 @@ h5dump1 (FILE *stream, const h5dump_t *info, hid_t oid, hid_t _p_type, int obj_t
     if (f_space < 0) return status;
  
     if (H5Sis_simple(f_space) >= 0) 
-        status = h5dump_simple(stream, info, oid, p_type, obj_type);
+        status = h5dump_simple(oid, p_type, obj_data);
 
     H5Sclose(f_space);
 
     if (p_type != _p_type) H5Tclose(p_type);
+
     return status;
 }
