@@ -14,7 +14,7 @@
 
 
 #include <stdlib.h>
-#include "h5repack_opttable.h"
+#include "h5repack.h"
 
 
 

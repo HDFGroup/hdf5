@@ -50,10 +50,10 @@ MOSTLYCLEAN=*.h5
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5repack.c h5repack_list.c h5repack_main.c h5repack_opttable.c h5repack_parse.c test_h5repack_add.c test_h5repack_main.c
+PROG_SRC=h5repack.c h5repack_copy.c h5repack_list.c h5repack_main.c h5repack_opttable.c h5repack_parse.c test_h5repack_add.c test_h5repack_main.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
-OBJS=h5repack.lo h5repack_list.lo h5repack_main.lo h5repack_opttable.lo h5repack_parse.lo 	
-TEST_OBJS=h5repack.lo h5repack_list.lo h5repack_opttable.lo h5repack_parse.lo test_h5repack_add.lo test_h5repack_main.lo
+OBJS=h5repack.lo h5repack_copy.lo h5repack_list.lo h5repack_main.lo h5repack_opttable.lo h5repack_parse.lo 	
+TEST_OBJS=h5repack.lo h5repack_copy.lo h5repack_list.lo h5repack_opttable.lo h5repack_parse.lo test_h5repack_add.lo test_h5repack_main.lo
 
 PRIVATE_HDR=
 

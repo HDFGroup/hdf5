@@ -417,8 +417,13 @@ int diff( hid_t      file1_id,
   /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
   nfound = (ret>0) ? 0 : 1;
   
-  /* compare attributes */
-  nfound=diff_attr(type1_id,type2_id,path1,path2,options);
+/*-------------------------------------------------------------------------
+ * compare attributes
+ * the if condition refers to cases when the dataset is a referenced object
+ *-------------------------------------------------------------------------
+ */
+  if (path1)  
+   nfound=diff_attr(type1_id,type2_id,path1,path2,options);
   
   if ( H5Tclose(type1_id)<0)
    goto out;
@@ -445,8 +450,13 @@ int diff( hid_t      file1_id,
   /* if "path1" != "path2" then the groups are "different" */
   nfound = (ret!=0) ? 1 : 0;
   
-  /* compare attributes */
-  nfound=diff_attr(grp1_id,grp2_id,path1,path2,options);
+ /*-------------------------------------------------------------------------
+  * compare attributes
+  * the if condition refers to cases when the dataset is a referenced object
+  *-------------------------------------------------------------------------
+  */
+  if (path1) 
+   nfound=diff_attr(grp1_id,grp2_id,path1,path2,options);
   
   if ( H5Gclose(grp1_id)<0)
    goto out;

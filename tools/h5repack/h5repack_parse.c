@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "h5repack_parse.h"
+#include "h5repack.h"
 
 
 /*-------------------------------------------------------------------------

@@ -16,48 +16,40 @@
 #include "h5test.h"
 #include "h5repack.h"
 #include "h5diff.h"
-#include "test_h5repack_add.h"
 
 /*-------------------------------------------------------------------------
- * Function:	test
+ * Function: test_copy
  *
- * Purpose:	
+ * Purpose: 
  *
- * 1) compress/chunk FILENAME with some compression/chunking options
+ * 1) make a copy with no filters 
  * 2) use the h5diff utility to compare the input and output file; 
  *     it returns RET==0 if the objects have the same data
- * 3) use API functions to verify the compression/chunking input on the otput file
  *
- * Return:	Success:	zero
- *		Failure:	1
+ * Return: Success: zero
+ *  Failure: 1
  *
- * Programmer:	Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
  *             September, 19, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static int
-test(void)
+test_copy(void)
 {
  pack_opt_t  pack_options;
  diff_opt_t  diff_options;
  memset(&diff_options, 0, sizeof (diff_opt_t));
 
- TESTING("    deflate filter");
+ TESTING("    copy with no filters");
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addcomp("dset1:GZIP 9",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack_addchunk("dset1:5x4",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack(FILENAME,FILENAME_OUT,&pack_options)<0)
+ if (h5repack(FNAME1,FNAME1OUT,&pack_options)<0)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- if (h5diff(FILENAME,FILENAME,NULL,NULL,&diff_options) == 1)
+ if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  
  PASSED();                                                 
@@ -69,15 +61,70 @@ error:
 }
 
 
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function: test_filter_deflate
  *
- * Purpose:	Executes h5repack tests
+ * Purpose: 
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * 1) compress/chunk FILENAME with teh DEFLATE filter
+ * 2) use the h5diff utility to compare the input and output file; 
+ *     it returns RET==0 if the objects have the same data
+ * 3) use API functions to verify the compression/chunking input on the otput file
  *
- * Programmer:	Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Return: Success: zero
+ *  Failure: 1
+ *
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *             September, 19, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_filter_deflate(void)
+{
+ pack_opt_t  pack_options;
+ diff_opt_t  diff_options;
+ memset(&diff_options, 0, sizeof (diff_opt_t));
+
+ TESTING("    deflate filter");
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addcomp("dset_gzip:GZIP 9",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addchunk("dset_gzip:5x4",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME2,FNAME2OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME2,FNAME2OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ 
+ PASSED();                                                 
+ return 0; 
+ 
+error:                                                       
+ return 1;
+
+}
+
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: main
+ *
+ * Purpose: Executes h5repack tests
+ *
+ * Return: Success: zero
+ *  Failure: non-zero
+ *
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
  *             September, 19, 2003
  *
  * Modifications:
@@ -87,12 +134,19 @@ error:
 
 int main (void)
 {
- int		nerrors=0;
+ int  nerrors=0;
 
  /* run tests  */
  puts("Testing h5repack:");
- nerrors += make_dsets();
- nerrors += test();
+
+ /* make the test files */
+ nerrors += make_testfiles();
+
+ /* test a copy with no filters */
+ nerrors += test_copy();
+
+ /* test a copy with the deflate filter */
+ nerrors += test_filter_deflate();
 
 
  /* check for errors */

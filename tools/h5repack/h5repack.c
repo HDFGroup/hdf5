@@ -14,14 +14,14 @@
 
 #include <stdlib.h>
 #include "h5repack.h"
-#include "h5repack_opttable.h"
-#include "h5repack_parse.h"
-#include "h5repack_list.h"
 
+/*-------------------------------------------------------------------------
+ * File: h5repack.c
+ * Purpose: Public API functions 
+ *-------------------------------------------------------------------------
+ */
 
-
-
-static void print_options(pack_opt_t *options);
+static int check_options(pack_opt_t *options);
 
 /*-------------------------------------------------------------------------
  * Function: h5repack
@@ -46,25 +46,18 @@ int h5repack(const char* infile,
              const char* outfile, 
              pack_opt_t *options)
 {
- options->trip=0;
-
- /* also checks input */
- print_options(options);
-
- /* first check for objects in input that are in the file */
- if (get_objlist(infile,options)==0)
- {
-  /* the real deal now */
-  options->trip=1;
-  
-  if (options->verbose)
-   printf("Making file <%s>...\n",outfile);
-
-  if (copy_file(infile,outfile,options)<0)
-   return -1;
-  
- }
-
+ /* check input */
+ if (check_options(options)<0)
+  return -1;
+ 
+ /* check for objects in input that are in the file */
+ if (check_objects(infile,options)<0)
+  return -1;
+ 
+ /* copy the file  */
+ if (copy_file(infile,outfile,options)<0)
+  return -1;
+ 
  return 0;
 }
 
@@ -108,7 +101,7 @@ int h5repack_end  (pack_opt_t *options)
  * Purpose: add a compression -t option to table 
  *   Example: -t "*:GZIP 6" , STR = "*:GZIP 6"
  *
- * Return: 0, ok, exit, fail
+ * Return: 0, ok, -1, fail
  *
  *-------------------------------------------------------------------------
  */
@@ -123,7 +116,7 @@ int h5repack_addcomp(const char* str,
 
  if (options->all_comp==1){
   printf("Error: Invalid compression input: '*' is present with other objects <%s>\n",str);
-  exit(1);
+  return -1;
  }
 
  /* parse the -t option */
@@ -147,7 +140,7 @@ int h5repack_addcomp(const char* str,
   printf("\nError: '*' cannot be with other objects, <%s>. Exiting...\n",str);
   free(obj_list);
   options_table_free(options->op_tbl);
-  exit(1);
+  return -1;
  }
 
  if (options->all_comp==0)
@@ -182,7 +175,7 @@ int h5repack_addchunk(const char* str,
 
  if (options->all_chunk==1){
   printf("Error: Invalid chunking input: '*' is present with other objects <%s>\n",str);
-  exit(1);
+  return -1;
  }
  
  /* parse the -c option */
@@ -208,7 +201,7 @@ int h5repack_addchunk(const char* str,
   printf("\nError: '*' cannot be with other objects, <%s>. Exiting...\n",str);
   free(obj_list);
   options_table_free(options->op_tbl);
-  exit(1);
+  return -1;
  }
 
  if (options->all_chunk==0)
@@ -220,11 +213,11 @@ int h5repack_addchunk(const char* str,
 
 
 /*-------------------------------------------------------------------------
- * Function: print_options
+ * Function: check_options
  *
  * Purpose: print options, checks for invalid options
  *
- * Return: void, exit on error
+ * Return: void, return -1 on error
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -232,8 +225,7 @@ int h5repack_addchunk(const char* str,
  *
  *-------------------------------------------------------------------------
  */
-static
-void print_options(pack_opt_t *options)
+static int check_options(pack_opt_t *options)
 {
  int   i, k, j, has_cp=0, has_ck=0;
 
@@ -277,7 +269,7 @@ void print_options(pack_opt_t *options)
  
  if (options->all_chunk==1 && has_ck){
   printf("Error: Invalid chunking input: '*' is present with other objects\n");
-  exit(1);
+  return -1;
  }
  
 /*-------------------------------------------------------------------------
@@ -327,8 +319,9 @@ void print_options(pack_opt_t *options)
  
  if (options->all_comp==1 && has_cp){
   printf("Error: Invalid compression input: * is present with other objects\n");
-  exit(1);
+  return -1;
  }
+ return 0;
 }
 
 /*-------------------------------------------------------------------------

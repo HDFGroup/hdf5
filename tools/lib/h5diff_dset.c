@@ -347,10 +347,12 @@ int diff_datasetid( hid_t dset1_id,
 
 /*-------------------------------------------------------------------------
  * compare attributes
+ * the if condition refers to cases when the dataset is a referenced object
  *-------------------------------------------------------------------------
  */
 
- nfound=diff_attr(dset1_id,dset2_id,obj1_name,obj2_name,options);
+ if (obj1_name)
+  nfound=diff_attr(dset1_id,dset2_id,obj1_name,obj2_name,options);
 
 /*-------------------------------------------------------------------------
  * close

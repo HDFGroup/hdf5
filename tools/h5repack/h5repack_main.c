@@ -12,9 +12,9 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "h5repack.h"
-#include "h5repack_parse.h"
 #include <stdlib.h>
+#include "h5repack.h"
+
 
 
 static void usage(void);
