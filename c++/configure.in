@@ -1,8 +1,9 @@
 dnl ----------------------------------------------------------------------
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 2000 National Center for Supercomputing Applications.
-dnl                    All rights reserved.
+dnl Copyright (C) 2000, 2001
+dnl     National Center for Supercomputing Applications.
+dnl     All rights reserved.
 dnl ----------------------------------------------------------------------
 
 dnl ----------------------------------------------------------------------
@@ -268,8 +269,26 @@ dnl Checks for compiler characteristics.
 dnl
 AC_LANG_CPLUSPLUS
 
+AC_MSG_CHECKING(if $CXX needs old style header files in includes)
+AC_TRY_RUN([
+#include <iostream>
+
+int main(void) { return 0; }
+], [
+   echo no
+], [
+   echo yes
+   CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
+])
+
 AC_MSG_CHECKING(if $CXX can handle namespaces)
 AC_TRY_RUN([
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
+
 using namespace std;
 
 namespace H5 {
@@ -286,18 +305,6 @@ int main(void) {
 ], [
    echo no
    CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-])
-
-AC_MSG_CHECKING(if $CXX needs old style header files in includes)
-AC_TRY_RUN([
-#include <iostream>
-
-int main(void) { return 0; }
-], [
-   echo no
-], [
-   echo yes
-   CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
 ])
 
 AC_MSG_CHECKING(if $CXX supports bool types)

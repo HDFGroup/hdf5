@@ -1894,8 +1894,8 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
 
-echo $ac_n "checking if $CXX can handle namespaces""... $ac_c" 1>&6
-echo "configure:1899: checking if $CXX can handle namespaces" >&5
+echo $ac_n "checking if $CXX needs old style header files in includes""... $ac_c" 1>&6
+echo "configure:1899: checking if $CXX needs old style header files in includes" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
@@ -1903,50 +1903,7 @@ else
 #line 1904 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int);
-#endif
-
-using namespace std;
-
-namespace H5 {
-int fnord;
-}
-
-int main(void) {
-   using namespace H5;
-   fnord = 37;
-   return 0;
-} 
-
-EOF
-if { (eval echo configure:1923: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
-then
-  
-   echo yes
-
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -fr conftest*
-  
-   echo no
-   CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-
-fi
-rm -fr conftest*
-fi
-
-
-echo $ac_n "checking if $CXX needs old style header files in includes""... $ac_c" 1>&6
-echo "configure:1942: checking if $CXX needs old style header files in includes" >&5
-if test "$cross_compiling" = yes; then
-    { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
-else
-  cat > conftest.$ac_ext <<EOF
-#line 1947 "configure"
-#include "confdefs.h"
-#ifdef __cplusplus
-extern "C" void exit(int);
+extern "C" void exit(int) throw();
 #endif
 
 #include <iostream>
@@ -1954,7 +1911,7 @@ extern "C" void exit(int);
 int main(void) { return 0; }
 
 EOF
-if { (eval echo configure:1958: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1915: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
    echo no
@@ -1972,16 +1929,65 @@ rm -fr conftest*
 fi
 
 
-echo $ac_n "checking if $CXX supports bool types""... $ac_c" 1>&6
-echo "configure:1977: checking if $CXX supports bool types" >&5
+echo $ac_n "checking if $CXX can handle namespaces""... $ac_c" 1>&6
+echo "configure:1934: checking if $CXX can handle namespaces" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1982 "configure"
+#line 1939 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int);
+extern "C" void exit(int) throw();
+#endif
+
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
+
+using namespace std;
+
+namespace H5 {
+int fnord;
+}
+
+int main(void) {
+   using namespace H5;
+   fnord = 37;
+   return 0;
+} 
+
+EOF
+if { (eval echo configure:1964: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+then
+  
+   echo yes
+
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -fr conftest*
+  
+   echo no
+   CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
+
+fi
+rm -fr conftest*
+fi
+
+
+echo $ac_n "checking if $CXX supports bool types""... $ac_c" 1>&6
+echo "configure:1983: checking if $CXX supports bool types" >&5
+if test "$cross_compiling" = yes; then
+    { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1988 "configure"
+#include "confdefs.h"
+#ifdef __cplusplus
+extern "C" void exit(int) throw();
 #endif
 
 int main(void) {
@@ -1990,7 +1996,7 @@ int main(void) {
 }
 
 EOF
-if { (eval echo configure:1994: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2000: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
    echo yes
@@ -2009,15 +2015,15 @@ fi
 
 
 echo $ac_n "checking if $CXX can handle static cast""... $ac_c" 1>&6
-echo "configure:2013: checking if $CXX can handle static cast" >&5
+echo "configure:2019: checking if $CXX can handle static cast" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 2018 "configure"
+#line 2024 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int);
+extern "C" void exit(int) throw();
 #endif
 
 int main(void) {
@@ -2029,7 +2035,7 @@ int main(void) {
 }
 
 EOF
-if { (eval echo configure:2033: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2039: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
    echo yes
@@ -2097,7 +2103,7 @@ rm -f confcache
 
 
 echo $ac_n "checking make""... $ac_c" 1>&6
-echo "configure:2101: checking make" >&5
+echo "configure:2107: checking make" >&5
 
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
 	sed -n 1p|cut -c1-8`" = "GNU Make"; then
@@ -2114,7 +2120,7 @@ fi
 
 if test -z "$DEPEND"; then
    echo $ac_n "checking how to include a makefile""... $ac_c" 1>&6
-echo "configure:2118: checking how to include a makefile" >&5
+echo "configure:2124: checking how to include a makefile" >&5
 
       cat >makeinc <<EOF
 foo:
