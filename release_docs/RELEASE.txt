@@ -131,6 +131,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed failure to read data back from file of compound type with
+          variable-length string as field.  SLU - 2004/06/10
         - Fixed potential file corruption bug when a block of metadata could
            overlap the end of the internal metadata accumulator buffer and
            the buffer would be extended correctly, but would incorrectly 
