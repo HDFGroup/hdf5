@@ -48,7 +48,7 @@
 #define H5B2_NUM_LEAF_REC(n,r)          (((n)-H5B2_OVERHEAD_SIZE)/(r))
 
 /* Uncomment this macro to enable extra sanity checking */
-/* #define H5B2_DEBUG */
+#define H5B2_DEBUG
 
 
 /* Local typedefs */
@@ -77,15 +77,15 @@ static herr_t H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
 static herr_t H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_node_ptr_t *curr_node_ptr, H5AC_info_t *parent_cache_info,
     H5B2_internal_t *internal, unsigned idx);
-static herr_t H5B2_swap_child(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_internal_t *internal, unsigned idx);
+static herr_t H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
+    H5B2_internal_t *internal, unsigned idx, void *swap_loc);
 static herr_t H5B2_insert_internal(H5F_t *f, hid_t dxpl_id,
     H5RC_t *bt2_shared, unsigned depth, H5AC_info_t *parent_cache_info,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    hbool_t *depth_decreased, unsigned depth, H5AC_info_t *parent_cache_info,
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 static herr_t H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
@@ -2207,9 +2207,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_swap_child
+ * Function:	H5B2_swap_leaf
  *
- * Purpose:	Swap a record in a node with a record in a child node
+ * Purpose:	Swap a record in a node with a record in a leaf node
  *
  * Return:	Success:	Non-negative
  *
@@ -2222,8 +2222,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_swap_child(H5F_t *f, hid_t dxpl_id, unsigned depth,
-    H5B2_internal_t *internal, unsigned idx)
+H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
+    H5B2_internal_t *internal, unsigned idx, void *swap_loc)
 {
     const H5AC_class_t *child_class;    /* Pointer to child node's class info */
     haddr_t child_addr;                 /* Address of child node */
@@ -2233,10 +2233,11 @@ H5B2_swap_child(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_shared_t *shared;              /* B-tree's shared info */
     herr_t ret_value=SUCCEED;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_swap_child)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_swap_leaf)
 
     HDassert(f);
     HDassert(internal);
+    HDassert(idx <= internal->nrec);
 
     /* Get the pointer to the shared B-tree info */
     shared=H5RC_GET_OBJ(internal->shared);
@@ -2248,10 +2249,8 @@ H5B2_swap_child(H5F_t *f, hid_t dxpl_id, unsigned depth,
 
         /* Setup information for unlocking child node */
         child_class = H5AC_BT2_INT;
-        child_addr = child_internal->node_ptrs[idx].addr;
+        child_addr = internal->node_ptrs[idx].addr;
 
-HDfprintf(stderr,"%s: Swapping with internal node in B-tree, untested!\n",FUNC);
-HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
         /* Lock B-tree child nodes */
         if (NULL == (child_internal = H5AC_protect(f, dxpl_id, child_class, child_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
@@ -2286,8 +2285,8 @@ HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
 
     /* Swap records (use disk page as temporary buffer) */
     HDmemcpy(shared->page, H5B2_NAT_NREC(child_native,shared,0), shared->type->nrec_size);
-    HDmemcpy(H5B2_NAT_NREC(child_native,shared,0), H5B2_INT_NREC(internal,shared,idx-1), shared->type->nrec_size);
-    HDmemcpy(H5B2_INT_NREC(internal,shared,idx-1), shared->page, shared->type->nrec_size);
+    HDmemcpy(H5B2_NAT_NREC(child_native,shared,0), swap_loc, shared->type->nrec_size);
+    HDmemcpy(swap_loc, shared->page, shared->type->nrec_size);
 
     /* Mark parent as dirty */
     internal->cache_info.is_dirty = TRUE;
@@ -2306,7 +2305,7 @@ HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5B2_swap_child */
+} /* end H5B2_swap_leaf */
 
 
 /*-------------------------------------------------------------------------
@@ -3374,8 +3373,8 @@ done:
  */
 static herr_t
 H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    hbool_t *depth_decreased, unsigned depth, H5AC_info_t *parent_cache_info,
-    H5B2_node_ptr_t *curr_node_ptr, void *udata)
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth,
+    H5AC_info_t *parent_cache_info, H5B2_node_ptr_t *curr_node_ptr, void *udata)
 {
     H5AC_info_t *new_cache_info;        /* Pointer to new cache info */
     H5B2_node_ptr_t *new_node_ptr;      /* Pointer to new node pointer */
@@ -3450,9 +3449,13 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         unsigned retries;       /* Number of times to attempt redistribution */
 
         /* Locate node pointer for child */
-        cmp=H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx);
-        if(cmp >= 0)
-            idx++;
+        if(swap_loc)
+            idx = 0;
+        else {
+            cmp=H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx);
+            if(cmp >= 0)
+                idx++;
+        } /* end else */
 
         /* Set the number of redistribution retries */
         /* This takes care of the case where a B-tree node needs to be
@@ -3498,10 +3501,14 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
             } /* end else */
 
             /* Locate node pointer for child (after merge/redistribute) */
+            if(swap_loc)
+                idx = 0;
+            else {
 /* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching */
-            cmp=H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx);
-            if(cmp >= 0)
-                idx++;
+                cmp=H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx);
+                if(cmp >= 0)
+                    idx++;
+            } /* end else */
 
             /* Decrement the number of redistribution retries left */
             retries--;
@@ -3509,10 +3516,14 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
         /* Handle deleting a record from an internal node */
         if(cmp==0) {
-            /* Swap record to delete with record from child */
-            if(H5B2_swap_child(f,dxpl_id,depth,internal,idx) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree")
+            HDassert(swap_loc==NULL);
+            swap_loc = H5B2_INT_NREC(internal,shared,idx-1);
         } /* end if */
+
+        /* Swap record to delete with record from leaf, if we are the last internal node */
+        if(swap_loc && depth==1)
+            if(H5B2_swap_leaf(f,dxpl_id,depth,internal,idx,swap_loc) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree")
 
         /* Set pointers for advancing to child node */
         new_cache_info = &internal->cache_info;
@@ -3521,7 +3532,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Attempt to remove node */
     if(depth>1) {
-        if(H5B2_remove_internal(f,dxpl_id,bt2_shared,depth_decreased,depth-1,new_cache_info,new_node_ptr,udata)<0)
+        if(H5B2_remove_internal(f,dxpl_id,bt2_shared,depth_decreased, swap_loc, depth-1,new_cache_info,new_node_ptr,udata)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to remove record from B-tree internal node")
     } /* end if */
     else {
@@ -3593,7 +3604,7 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     if(bt2->depth>0) {
         hbool_t depth_decreased=FALSE;  /* Flag to indicate whether the depth of the B-tree decreased */
 
-        if(H5B2_remove_internal(f,dxpl_id,bt2->shared, &depth_decreased, bt2->depth,&(bt2->cache_info),&bt2->root,udata)<0)
+        if(H5B2_remove_internal(f,dxpl_id,bt2->shared, &depth_decreased, NULL, bt2->depth,&(bt2->cache_info),&bt2->root,udata)<0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to remove record from B-tree internal node")
 
         bt2->depth -= depth_decreased;

@@ -3616,7 +3616,7 @@ test_remove_level1_collapse(hid_t fapl)
 
     /* Attempt to remove records from B-tree to force a single leaf for the B-tree */
     TESTING("B-tree remove: collapse level-1 B-tree back to level-0");
-    for(u=0; u < 29; u++) {
+    for(u=0; u < 30; u++) {
         record = INSERT_SPLIT_ROOT_NREC - (u+1);
         if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
             H5_FAILED();
@@ -3653,6 +3653,212 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_remove_level2_promote
+ *
+ * Purpose:	Basic tests for the B-tree v2 code
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March  4, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_remove_level2_promote(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     nrec;                   /* Number of records in B-tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    haddr_t     root_addr;              /* Address of root of B-tree created */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	TEST_ERROR;
+    }
+
+    /*
+     * Test v2 B-tree creation
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Create level-2 B-tree with 3 internal nodes */
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC*21; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)) TEST_ERROR;
+
+    /* Query the address of the root node in the B-tree */
+    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the address of the root node is defined */
+    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+
+    /* Attempt to remove record from right internal node of a level-2 B-tree to force promotion */
+    TESTING("B-tree remove: promote from right internal of level-2 B-tree");
+    record = 1632;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /* Make certain that the record value is correct */
+    if(record != 1632) TEST_ERROR;
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-1) TEST_ERROR;
+
+    PASSED();
+
+    /* Attempt to remove record from left internal node of a level-2 B-tree to force promotion */
+    TESTING("B-tree remove: promote from left internal of level-2 B-tree");
+    record = 1117;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /* Make certain that the record value is correct */
+    if(record != 1117) TEST_ERROR;
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-2) TEST_ERROR;
+
+    PASSED();
+
+    /* Attempt to remove record from middle internal node of a level-2 B-tree to force promotion */
+    TESTING("B-tree remove: promote from middle internal of level-2 B-tree");
+    record = 1246;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /* Make certain that the record value is correct */
+    if(record != 1246) TEST_ERROR;
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-3) TEST_ERROR;
+
+    PASSED();
+
+    /* Attempt to remove record from root node of a level-2 B-tree to force promotion */
+    TESTING("B-tree remove: promote from root of level-2 B-tree");
+    record = 1074;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /* Make certain that the record value is correct */
+    if(record != 1074) TEST_ERROR;
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-4) TEST_ERROR;
+
+    record = 558;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /* Make certain that the record value is correct */
+    if(record != 558) TEST_ERROR;
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != (INSERT_SPLIT_ROOT_NREC*21)-5) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_remove_level2_promote() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the B-tree v2 code
@@ -3680,7 +3886,7 @@ main(void)
 
     /* Test B-tree record insertion */
     /* Iteration, find & index routines tested in these routines as well */
-#ifndef QAK
+#ifdef QAK
     nerrors += test_insert_basic(fapl);
     nerrors += test_insert_split_root(fapl);
     nerrors += test_insert_level1_2leaf_redistrib(fapl);
@@ -3713,13 +3919,14 @@ HDfprintf(stderr,"Uncomment tests!\n");
     nerrors += test_remove_level1_promote_2leaf_merge(fapl);
     nerrors += test_remove_level1_promote_3leaf_merge(fapl);
     nerrors += test_remove_level1_collapse(fapl);
+    nerrors += test_remove_level2_promote(fapl);
 #else /* QAK */
 HDfprintf(stderr,"Uncomment tests!\n");
 #endif /* QAK */
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");
-#ifndef QAK
+#ifdef QAK
     h5_cleanup(FILENAME, fapl);
 #else /* QAK */
 HDfprintf(stderr,"Uncomment cleanup!\n");
