@@ -40,7 +40,7 @@ static herr_t		H5A_init_interface(void);
 static hid_t H5A_create(const H5G_entry_t *ent, const char *name,
 			const H5T_t *type, const H5S_t *space);
 static hid_t H5A_open(H5G_entry_t *ent, unsigned idx);
-static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf);
+static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf);
 static herr_t H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf);
 static int H5A_get_index(H5G_entry_t *ent, const char *name);
 
@@ -558,7 +558,7 @@ done:
         This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
+H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
 {
     H5A_t		   *attr = NULL;
     const H5T_t    *mem_type = NULL;
@@ -609,7 +609,7 @@ H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
     This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
 static herr_t
-H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
+H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
 {
     uint8_t		*tconv_buf = NULL;	/* data type conv buffer */
     uint8_t		*bkg_buf = NULL;	/* temp conversion buffer */

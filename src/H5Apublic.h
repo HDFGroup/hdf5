@@ -31,7 +31,7 @@ __DLL__ hid_t H5Acreate(hid_t loc_id, const char *name, hid_t type_id,
 			hid_t space_id, hid_t plist_id);
 __DLL__ hid_t H5Aopen_name(hid_t loc_id, const char *name);
 __DLL__ hid_t H5Aopen_idx(hid_t loc_id, unsigned idx);
-__DLL__ herr_t H5Awrite(hid_t attr_id, hid_t type_id, void *buf);
+__DLL__ herr_t H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
 __DLL__ herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 __DLL__ herr_t H5Aclose(hid_t attr_id);
 __DLL__ hid_t H5Aget_space(hid_t attr_id);
