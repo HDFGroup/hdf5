@@ -69,7 +69,7 @@ static int             interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cont_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
+H5O_cont_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_cont_t             *cont = NULL;
     void                   *ret_value;
@@ -148,7 +148,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
+H5O_cont_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * stream,
 	       int indent, int fwidth)
 {
     const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;

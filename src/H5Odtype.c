@@ -783,7 +783,7 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p,
+H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
     H5T_t		   *dt = NULL;

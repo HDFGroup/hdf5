@@ -640,8 +640,7 @@ corrupt_data(unsigned int flags, size_t cd_nelmts,
     unsigned int   offset;
     unsigned int   length;
     unsigned int   value;
-    unsigned char  *corrupt_data;
-    int      i; 
+    void  *data;
     
     if (cd_nelmts!=3 || !cd_values)
         return 0;
@@ -651,23 +650,23 @@ corrupt_data(unsigned int flags, size_t cd_nelmts,
     if(offset>nbytes || (offset+length)>nbytes || length<sizeof(unsigned int))
         return 0;
 
-    corrupt_data = (unsigned char*)HDmalloc(length);
-    HDmemset((void*)corrupt_data, value, length);
+    data = HDmalloc(length);
+    HDmemset(data, (int)value, length);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Varify data is actually corrupted during read */
         dst += offset;
-        if(HDmemcmp(corrupt_data, dst, length)!=0) return 0; 
+        if(HDmemcmp(data, dst, length)!=0) return 0; 
         *buf_size = nbytes;
         ret_value = nbytes;
     } else { /* Write corrupted data */
         dst += offset;
-        HDmemcpy(dst, corrupt_data, length);
+        HDmemcpy(dst, data, length);
         *buf_size = nbytes;
 	ret_value = *buf_size; 
     }
 
-    if(corrupt_data)
-        HDfree(corrupt_data);
+    if(data)
+        HDfree(data);
 
     return ret_value;
 }
@@ -693,6 +692,8 @@ filter_cb_cont(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size,
 {
     if(H5Z_FILTER_ADLER32==filter)
        return H5Z_CB_CONT; 
+    else
+        return H5Z_CB_FAIL; 
 }
 
 
@@ -716,6 +717,8 @@ filter_cb_fail(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size,
 {
     if(H5Z_FILTER_ADLER32==filter)
        return H5Z_CB_FAIL; 
+    else
+       return H5Z_CB_CONT; 
 }
 
 
@@ -1184,7 +1187,6 @@ test_filters(hid_t file)
     if(shuffle_size!=null_size) {
         H5_FAILED();
         puts("    Shuffled size not the same as uncompressed size.");
-printf("shuffle_size=%ld, null_size=%ld\n", shuffle_size, null_size);
         goto error;
     } /* end if */
 

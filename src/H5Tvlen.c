@@ -309,7 +309,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf, size_t len)
+H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *vl_addr, void *buf, size_t len)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -446,7 +446,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf, size_t len)
+H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *vl_addr, void *buf, size_t len)
 {
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -459,7 +459,7 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf, 
 
     if(s && buf && len>0)
         HDmemcpy(buf,s,len);
-    if(!s && len==-1)
+    if(!s && len==(size_t)-1)
         buf = NULL;
 
 done:

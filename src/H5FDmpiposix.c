@@ -1266,7 +1266,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpiposix_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
+H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
     H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
 #ifdef WIN32

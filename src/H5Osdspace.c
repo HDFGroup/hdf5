@@ -90,7 +90,7 @@ H5FL_ARR_EXTERN(hsize_t);
         Added a version number and reformatted the message for aligment.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
+H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     void		*ret_value;
@@ -414,7 +414,7 @@ done:
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *mesg,
+H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
 		  FILE * stream, int indent, int fwidth)
 {
     const H5S_simple_t	   *sdim = (const H5S_simple_t *) mesg;

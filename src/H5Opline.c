@@ -67,7 +67,7 @@ H5FL_DEFINE(H5O_pline_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_pline_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
+H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 		H5O_shared_t UNUSED *sh)
 {
     H5O_pline_t		*pline = NULL;
@@ -437,7 +437,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_debug (H5F_t UNUSED *f, hid_t dxpl_id, const void *mesg, FILE *stream,
+H5O_pline_debug (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg, FILE *stream,
 		int indent, int fwidth)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t *)mesg;

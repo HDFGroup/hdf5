@@ -693,7 +693,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stream_flush (H5FD_t *_stream, hid_t dxpl_id, unsigned UNUSED closing)
+H5FD_stream_flush (H5FD_t *_stream, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
   size_t size;

@@ -836,6 +836,9 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
     static const char *func="H5FD_stdio_flush";  /* Function Name for error reporting */
 
+    /* Shut compiler up */
+    dxpl_id=dxpl_id;
+
     /* Clear the error stack */
     H5Eclear();
 

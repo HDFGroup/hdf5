@@ -387,7 +387,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_istore_cmp2(H5F_t UNUSED *f, hid_t dxpl_id, void *_lt_key, void *_udata,
+H5F_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
 		void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
@@ -440,7 +440,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_istore_cmp3(H5F_t UNUSED *f, hid_t dxpl_id, void *_lt_key, void *_udata,
+H5F_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
 		void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
@@ -574,7 +574,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_found(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, const void *_lt_key,
+H5F_istore_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void *_lt_key,
 		 void *_udata, const void UNUSED *_rt_key)
 {
     H5F_istore_ud1_t	   *udata = (H5F_istore_ud1_t *) _udata;
@@ -773,7 +773,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_iterate_t 
-H5F_istore_iter_allocated (H5F_t UNUSED *f, hid_t dxpl_id, void *_lt_key, haddr_t UNUSED addr,
+H5F_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
@@ -809,7 +809,7 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, hid_t dxpl_id, void *_lt_key, haddr_
  *-------------------------------------------------------------------------
  */
 static H5B_iterate_t
-H5F_istore_iter_dump (H5F_t UNUSED *f, hid_t dxpl_id, void *_lt_key, haddr_t UNUSED addr,
+H5F_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;

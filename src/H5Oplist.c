@@ -131,7 +131,7 @@ H5FL_EXTERN(H5P_genplist_t);
  * Modifications:
  */
 static void *
-H5O_plist_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
+H5O_plist_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5P_genplist_t *new_plist = NULL;
     H5P_genclass_t *pclass; /* property list class to modify        */
@@ -483,7 +483,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5O_plist_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *mesg, FILE *stream,
+H5O_plist_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg, FILE *stream,
                 int indent, int fwidth)
 {
     const H5P_genplist_t *plist = (const H5P_genplist_t *)mesg;

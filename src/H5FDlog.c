@@ -820,7 +820,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
+H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t size)
 {
     H5FD_log_t	*file = (H5FD_log_t*)_file;
     haddr_t		addr;
@@ -1296,7 +1296,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
+H5FD_log_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
     H5FD_log_t	*file = (H5FD_log_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */

@@ -518,7 +518,7 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
             if (ctx->size_last_dim && (ctx->cur_elmt % ctx->size_last_dim) == 0)
                 ctx->need_prefix = TRUE;
 
-            if (elmt_counter == ctx->size_last_dim) {
+            if ((hsize_t)elmt_counter == ctx->size_last_dim) {
                 ctx->need_prefix = TRUE;
                 elmt_counter = 0;
             }

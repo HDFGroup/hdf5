@@ -66,7 +66,7 @@ static int interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *buf, H5O_shared_t UNUSED *sh)
+H5O_shared_decode (H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *buf, H5O_shared_t UNUSED *sh)
 {
     H5O_shared_t	*mesg=NULL;
     unsigned		flags, version;

@@ -100,7 +100,7 @@ H5FL_DEFINE(H5O_fill_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_new_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
+H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 		H5O_shared_t UNUSED *sh)
 {
     H5O_fill_new_t	*mesg=NULL;
@@ -170,7 +170,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
+H5O_fill_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
                 H5O_shared_t UNUSED *sh)
 {
     H5O_fill_t  *mesg=NULL;
@@ -664,7 +664,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
+H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
@@ -708,7 +708,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
+H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;

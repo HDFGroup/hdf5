@@ -72,7 +72,7 @@ static unsigned int H5Z_filter_adler32_compute(unsigned char *buf, size_t len)
  *-------------------------------------------------------------------------
  */
 size_t
-H5Z_filter_adler32 (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
+H5Z_filter_adler32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[], 
                      size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t	ret_value = 0;

@@ -780,7 +780,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
+H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 #ifdef WIN32

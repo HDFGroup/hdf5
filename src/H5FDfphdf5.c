@@ -1741,7 +1741,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
+H5FD_fphdf5_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 {
 #if 0
     H5FP_fphdf5_t		*file = (H5FP_fphdf5_t*)_file;
