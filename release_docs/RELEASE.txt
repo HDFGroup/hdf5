@@ -62,6 +62,9 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed data corruption bug in hyperslab routines when contiguous
+        hyperslab that spans entire dimension and is larger than type
+        conversion buffer is attempted to be read.  QAK - 3/26/02
 
 
 Documentation
