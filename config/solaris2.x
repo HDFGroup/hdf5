@@ -16,7 +16,7 @@ fi
 . ./config/gnu-flags
 
 # Try solaris native compiler flags
-if test "X-" = "X-$cc_flags_set; then
+if test "X-" = "X-$cc_flags_set"; then
     CFLAGS="-erroff=%none"
     DEBUG_CFLAGS=-g
     DEBUG_CPPFLAGS="-DH5F_LOW_DFLT=H5F_LOW_SEC2"
