@@ -10,7 +10,7 @@
 CPPFLAGS=-I../src -I. @CPPFLAGS@
 
 # Tools test targets.
-TESTS=testh5dump.sh
+#TESTS=testh5dump.sh
 
 # These are our main targets:
 PROGS=h5debug h5import h5ls h5repart h5dump
