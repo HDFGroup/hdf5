@@ -1,4 +1,4 @@
-HDF5 version 1.7.21 released on Wed Apr 14 04:46:46 CDT 2004
+HDF5 version 1.7.22 released on Sun Apr 18 04:08:41 CDT 2004
 ================================================================================
 
 
@@ -42,7 +42,10 @@ New Features
 
     Library:
     --------
-        - A new type of dataspace, null dataspace(dataspace without any 
+        - Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
+	    will suppress all library version mismatch warning messages.
+	    AKC - 2004/4/14
+	- A new type of dataspace, null dataspace(dataspace without any 
             element) was added.  SLU - 2004/3/24
         - Data type conversion(software) from integer to float was added.
             SLU - 2004/3/13 
@@ -116,6 +119,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+	- Fixed dtypes "sw long double -> double" failure in QSC class
+	  machines.  AKC - 2004/4/16
         - Fixed problem with fletcher32 filter when converting data of different
 	    endianess. PVN 2004/03/10
         - Fixed problem with H5Tget_native_type() not handling opaque fields
