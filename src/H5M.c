@@ -117,7 +117,7 @@ static meta_func_t meta_func_arr[]={
         H5D_create,             /* Dataset Create */
         H5D_access,             /* Dataset Access */
         NULL,                   /* Dataset Copy */
-        NULL,                   /* Dataset FindName */
+        H5D_find_name,          /* Dataset FindName */
         NULL,                   /* Dataset NameLen */
         NULL,                   /* Dataset GetName */
         NULL,                   /* Dataset SetName */
@@ -128,6 +128,23 @@ static meta_func_t meta_func_arr[]={
         NULL,                   /* Dataset GetParent */
         NULL,                   /* Dataset GetFile */
         H5D_release             /* Dataset Release */
+    },
+    {   /* Dataset object meta-functions (defined in H5D.c) */
+        H5_OID,                 /* OID Type ID */
+        NULL,                   /* OID Create */
+        H5D_access,             /* OID Access (calls dataset access routine) */
+        NULL,                   /* OID Copy */
+        NULL,                   /* OID FindName */
+        NULL,                   /* OID NameLen */
+        NULL,                   /* OID GetName */
+        NULL,                   /* OID SetName */
+        NULL,                   /* OID Search */
+        NULL,                   /* OID Index */
+        NULL,                   /* OID Flush */
+        NULL,                   /* OID Delete */
+        NULL,                   /* OID GetParent */
+        NULL,                   /* OID GetFile */
+        NULL                    /* OID Release */
     }
   };
 
@@ -350,7 +367,9 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5Mfind_name(hatom_t owner_id, hobjtype_t type, const char *name)
 {
+#ifdef OLD_WAY
     group_t group=H5Aatom_group(owner_id);   /* Atom group for incoming object */
+#endif /* OLD_WAY */
     intn i;         /* local counting variable */
     hatom_t        ret_value = SUCCEED;
 
@@ -358,10 +377,17 @@ hatom_t H5Mfind_name(hatom_t owner_id, hobjtype_t type, const char *name)
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
+#ifdef OLD_WAY
     if(group<=BADGROUP || group>=MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
 
     i=H5M_find_type(group);
+#else /* OLD_WAY */
+    if(type<=BADGROUP || type>=MAXGROUP)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+
+    i=H5M_find_type(type);
+#endif /* OLD_WAY */
     if(meta_func_arr[i].find_name==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
     ret_value=(meta_func_arr[i].find_name)(owner_id,type,name);

@@ -171,16 +171,16 @@ H5O_sim_dim_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mesg)
     UINT32ENCODE(p,sdim->dim_flags);
     if(sdim->rank>0)
       {
-        for(u=0; u<sdim->rank; u++);
+        for(u=0; u<sdim->rank; u++)
             UINT32ENCODE(p,sdim->size[u]);
         if(sdim->dim_flags&0x01)
           {
-            for(u=0; u<sdim->rank; u++);
+            for(u=0; u<sdim->rank; u++)
                 UINT32ENCODE(p,sdim->max[u]);
           } /* end if */
         if(sdim->dim_flags&0x02)
           {
-            for(u=0; u<sdim->rank; u++);
+            for(u=0; u<sdim->rank; u++)
                 UINT32ENCODE(p,sdim->perm[u]);
           } /* end if */
       } /* end if */
@@ -338,6 +338,23 @@ H5O_sim_dim_copy (const void *mesg, void *dest)
 
    /* copy */
    HDmemcpy(dst,src,sizeof(H5O_sim_dim_t));
+   if(src->rank>0)
+     {
+       dst->size = H5MM_xcalloc (src->rank, sizeof(uint32));
+       HDmemcpy(dst->size,src->size,src->rank*sizeof(uint32));
+       /* Check for maximum dimensions and copy those */
+       if((src->dim_flags&0x01)>0)
+         {
+           dst->max = H5MM_xcalloc (src->rank, sizeof(uint32));
+           HDmemcpy(dst->max,src->max,src->rank*sizeof(uint32));
+         } /* end if */
+       /* Check for dimension permutation and copy those */
+       if((src->dim_flags&0x02)>0)
+         {
+           dst->perm = H5MM_xcalloc (src->rank, sizeof(uint32));
+           HDmemcpy(dst->perm,src->perm,src->rank*sizeof(uint32));
+         } /* end if */
+     } /* end if */
 
    FUNC_LEAVE ((void*)dst);
 } /* end H5O_sim_dim_copy() */

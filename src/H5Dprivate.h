@@ -32,8 +32,8 @@
 typedef struct {
     hatom_t fid;        /* File Id for object */
     haddr_t ohdr;       /* Offset of the object header */
-    H5G_entry_t *dir;   /* directory entry for the directory the object is located in */
-    H5G_entry_t *ent;   /* directory entry for the object itself */
+    H5G_entry_t dir;    /* directory entry for the directory the object is located in */
+    H5G_entry_t ent;    /* directory entry for the object itself */
   } H5D_oid_t;
 
 typedef struct {
@@ -54,6 +54,7 @@ typedef struct {
 /*-----------------_-- Local function prototypes ----------------------------*/
 hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name);
 hatom_t H5D_access(hatom_t oid);
+hatom_t H5D_find_name(hatom_t owner_id, hobjtype_t type, const char *name);
 herr_t H5D_flush(hatom_t oid);
 herr_t H5D_release(hatom_t oid);
 

@@ -102,6 +102,7 @@ H5O_sim_dtype_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
         sdtype->len=*p++;
         sdtype->arch=*p++;
         UINT16DECODE(p,sdtype->base);
+        sdtype->base=MAKE_ATOM(H5_DATATYPE,sdtype->base);   /* convert into atomic base type */
       } /* end if */
 
     FUNC_LEAVE (sdtype);

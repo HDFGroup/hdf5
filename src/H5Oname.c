@@ -196,7 +196,7 @@ H5O_name_size (hdf5_file_t *f, const void *_mesg)
    const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
    size_t		size;
    
-   FUNC_ENTER (H5O_stab_size, NULL, FAIL);
+   FUNC_ENTER (H5O_name_size, NULL, FAIL);
 
    /* check args */
    assert (f);
