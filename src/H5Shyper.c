@@ -5064,11 +5064,14 @@ done:
  PURPOSE
     Merge new hyperslab spans to existing hyperslab selection
  USAGE
-    herr_t H5S_hyper_merge_spans(space, new_spans)
+    herr_t H5S_hyper_merge_spans(space, new_spans, can_own)
         H5S_t *space;             IN: Dataspace to add new spans to hyperslab
                                         selection.
         H5S_hyper_span_t *new_spans;    IN: Span tree of new spans to add to
                                             hyperslab selection
+        hbool_t can_own;        IN: Flag to indicate that it is OK to point
+                                    directly to the new spans, instead of
+                                    copying them.
  RETURNS
     non-negative on success, negative on failure
  DESCRIPTION
@@ -5081,7 +5084,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans)
+H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans, hbool_t can_own)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_merge_spans);
 
@@ -5091,7 +5094,10 @@ H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans)
 
     /* If this is the first span tree in the hyperslab selection, just use it */
     if(space->select.sel_info.hslab.span_lst==NULL) {
-        space->select.sel_info.hslab.span_lst=H5S_hyper_copy_span(new_spans);
+        if(can_own)
+            space->select.sel_info.hslab.span_lst=new_spans;
+        else
+            space->select.sel_info.hslab.span_lst=H5S_hyper_copy_span(new_spans);
     } /* end if */
     else {
         H5S_hyper_span_info_t *merged_spans;
@@ -5476,13 +5482,16 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     /* Generate list of blocks to add/remove based on selection operation */
     if(op==H5S_SELECT_SET) {
         /* Add new spans to current selection */
-        if(H5S_hyper_merge_spans(space,new_spans)<0)
+        if(H5S_hyper_merge_spans(space,new_spans,TRUE)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslabs");
 
         /* Set the number of elements in current selection */
         if((nelem=H5S_hyper_spans_nelem(new_spans))<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't count hyperslab span elements");
         space->select.num_elem=nelem;
+
+        /* Indicate that the new_spans are owned */
+        new_spans=NULL;
     } /* end if */
     else {
         /* Generate lists of spans which overlap and don't overlap */
@@ -5493,7 +5502,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
             case H5S_SELECT_OR:
                 /* Add any new spans from b_not_a to current selection */
                 if(b_not_a!=NULL) {
-                    if(H5S_hyper_merge_spans(space,b_not_a)<0)
+                    if(H5S_hyper_merge_spans(space,b_not_a,FALSE)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslabs");
 
                     /* Update the number of elements in current selection */
@@ -5514,13 +5523,16 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                 /* Check if there are any overlapped selections */
                 if(a_and_b!=NULL) {
-                    if(H5S_hyper_merge_spans(space,a_and_b)<0)
+                    if(H5S_hyper_merge_spans(space,a_and_b,TRUE)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslabs");
 
                     /* Update the number of elements in current selection */
                     if((nelem=H5S_hyper_spans_nelem(a_and_b))<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't count hyperslab span elements");
                     space->select.num_elem=nelem;
+
+                    /* Indicate that the a_and_b spans are owned */
+                    a_and_b=NULL;
                 } /* end if */
                 break;
 
@@ -5535,7 +5547,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                 /* Check if there are any non-overlapped selections */
                 if(a_not_b!=NULL) {
-                    if(H5S_hyper_merge_spans(space,a_not_b)<0)
+                    if(H5S_hyper_merge_spans(space,a_not_b,FALSE)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslabs");
 
                     /* Update the number of elements in current selection */
@@ -5544,7 +5556,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
                     space->select.num_elem=nelem;
                 } /* end if */
                 if(b_not_a!=NULL) {
-                    if(H5S_hyper_merge_spans(space,b_not_a)<0)
+                    if(H5S_hyper_merge_spans(space,b_not_a,FALSE)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslabs");
 
                     /* Update the number of elements in current selection */
@@ -5565,13 +5577,16 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                 /* Check if there are any non-overlapped selections */
                 if(a_not_b!=NULL) {
-                    if(H5S_hyper_merge_spans(space,a_not_b)<0)
+                    if(H5S_hyper_merge_spans(space,a_not_b,TRUE)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslabs");
 
                     /* Update the number of elements in current selection */
                     if((nelem=H5S_hyper_spans_nelem(a_not_b))<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't count hyperslab span elements");
                     space->select.num_elem=nelem;
+
+                    /* Indicate that the a_not_b are owned */
+                    a_not_b=NULL;
                 } /* end if */
                 break;
 
@@ -5586,13 +5601,16 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                 /* Check if there are any non-overlapped selections */
                 if(b_not_a!=NULL) {
-                    if(H5S_hyper_merge_spans(space,b_not_a)<0)
+                    if(H5S_hyper_merge_spans(space,b_not_a,TRUE)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslabs");
 
                     /* Update the number of elements in current selection */
                     if((nelem=H5S_hyper_spans_nelem(b_not_a))<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't count hyperslab span elements");
                     space->select.num_elem=nelem;
+
+                    /* Indicate that the b_not_a are owned */
+                    b_not_a=NULL;
                 } /* end if */
                 break;
 
