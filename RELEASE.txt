@@ -212,7 +212,3 @@ Known Problems
 
      http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
 
-* The test_compression in ./c++/test/dsets.cpp failed on Linux.  A size
-  value that is passed to a memcpy mysteriously becomes very large resulting 
-  in a Segnmentation Fault. This specific test is disabled until we can 
-  figure out the problem and come up with a solution.
