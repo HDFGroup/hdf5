@@ -12,11 +12,9 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
-* Test program:	 th5p
+* Test program:	 th5s
 *
 * Test the dataspace functionality
 *
