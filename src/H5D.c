@@ -846,6 +846,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "space conversion not supported yet");
     }
+    assert (!mem_space || H5P_SIMPLE==mem_space->type);
     
     /*
      * Convert data types to atoms because the conversion functions are
@@ -857,25 +858,45 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 		    "unable to register types for conversion");
     }
 
-    /* Compute the size of the request and allocate scratch buffers */
+    /*
+     * Compute the size of the request and allocate scratch buffers.
+     */
+#ifndef LATER
+    /*
+     * Note: this prototype version allocates a buffer large enough to
+     *	     satisfy the entire request; strip mining is not implemented.
+     */
     nelmts = H5P_get_npoints(dataset->space);
     src_size = nelmts * H5T_get_size(dataset->type);
     dst_size = nelmts * H5T_get_size(mem_type);
     conv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+#endif
+
+    /*
+     * Locate the type conversion function.
+     */
     if (NULL == (conv_func = H5T_find(dataset->type, mem_type))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     }
 
     /*
-     * Read data into the data type conversion buffer.
-     * (We only support complete reads currently)
+     * Gather the data from disk into the data type conversion buffer.
+     */
+#ifndef LATER
+    /*
+     * Note: We only support complete reads currently.  That is, the
+     *	     hyperslab must begin at zero in memory and on disk and the
+     *	     size of the hyperslab must be the same as the array on disk.
      */
     for (i = 0; i < dataset->layout.ndims; i++) {
 	zero[i] = 0;
 	offset[i] = 0;
-	size[i] = dataset->layout.dim[i];
     }
+    i = H5P_get_dims (dataset->space, size);
+    assert (i+1==dataset->layout.ndims);
+    size[i] = H5T_get_size (dataset->type);
+#endif
     if (H5F_arr_read(dataset->ent.file, &(dataset->layout), size, offset,
 		     zero, size, conv_buf) < 0) {
 	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read failed");
@@ -953,26 +974,42 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	HRETURN_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		      "space conversion not supported yet");
     }
+    assert (!mem_space || H5P_SIMPLE==mem_space->type);
+
     /*
      * Convert data types to atoms because the conversion functions are
      * application-level functions.
      */
-    if ((src_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(mem_type))) < 0 ||
-    (dst_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(dataset->type))) < 0) {
+    if ((src_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(mem_type)))<0 ||
+	(dst_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(dataset->type)))<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 		    "unable to register types for conversion");
     }
-    /* Compute the size of the request and allocate scratch buffers */
+    
+    /*
+     * Compute the size of the request and allocate scratch buffers.
+     */
+#ifndef LATER
+    /*
+     * Note: This prototype version allocates a buffer large enough to
+     *	     satisfy the entire request; strip mining is not implemented.
+     */
     nelmts = H5P_get_npoints(dataset->space);
     src_size = nelmts * H5T_get_size(mem_type);
     dst_size = nelmts * H5T_get_size(dataset->type);
     conv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+#endif
+
+    /*
+     * Locate the type conversion function.
+     */
     if (NULL == (conv_func = H5T_find(mem_type, dataset->type))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     }
+
     /*
-     * Read data into the data type conversion buffer.
+     * Gather data into the data type conversion buffer.
      */
     HDmemcpy(conv_buf, buf, src_size);
 
@@ -983,25 +1020,33 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
+
     /*
-     * Write data into the file.
-     * (We only support complete writes currently.)
+     * Scatter the data out to the file.
+     */
+#ifndef LATER
+    /*
+     * Note:  We only support complete writes currently. That si, the
+     *	      hyperslab must begin at zero in memory and on disk and the size
+     *	      of the hyperslab must be the same as the array on disk.
      */
     for (i = 0; i < dataset->layout.ndims; i++) {
 	zero[i] = 0;
 	offset[i] = 0;
-	size[i] = dataset->layout.dim[i];
     }
+    i = H5P_get_dims (dataset->space, size);
+    assert (i+1==dataset->layout.ndims);
+    size[i] = H5T_get_size (dataset->type);
+#endif
     if (H5F_arr_write(dataset->ent.file, &(dataset->layout), size, offset,
 		      zero, size, conv_buf) < 0) {
 	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
     }
     ret_value = SUCCEED;
+    
   done:
-    if (src_id >= 0)
-	H5A_dec_ref(src_id);
-    if (dst_id >= 0)
-	H5A_dec_ref(dst_id);
+    if (src_id >= 0) H5A_dec_ref(src_id);
+    if (dst_id >= 0) H5A_dec_ref(dst_id);
     conv_buf = H5MM_xfree(conv_buf);
     FUNC_LEAVE(ret_value);
 }
