@@ -170,36 +170,6 @@ MS doesn't recognize it yet (as of April 2001)
 
 #endif /*WIN32*/
 
-/*
- * This driver supports systems that have the lseek64() function by defining
- * some macros here so we don't have to have conditional compilations later
- * throughout the code.
- *
- * file_offset_t:	The datatype for file offsets, the second argument of
- *			the lseek() or lseek64() call.
- *
- * file_seek:		The function which adjusts the current file position,
- *			either lseek() or lseek64().
- *
- * adding for windows NT file system support. 
- */
-
-#ifdef H5_HAVE_LSEEK64
-#   define file_offset_t	off64_t
-#   define file_seek		lseek64
-#elif defined (WIN32)
-# ifdef __MWERKS__
-# define file_offset_t off_t
-# define file_seek lseek
-# else /*MSVC*/
-# define file_offset_t __int64
-# define file_seek _lseeki64
-# endif
-#else
-#   define file_offset_t	off_t
-#   define file_seek		lseek
-#endif
-
 #ifndef F_OK
 #   define F_OK	00
 #   define W_OK 02
