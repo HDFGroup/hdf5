@@ -105,8 +105,8 @@ if [ "$cmd" = help ]; then
     echo "    test:     Run test"
     echo "    release:  Run release"
     echo "    srcdir:   Use srcdir option (does not imply other commands)"
-    echo '                "snapshot srcdir" is equivalent to "snapshot srcdir all"'
-    echo '                "snapshot srcdir checkout" is equivalent to "snapshot checkout"'
+    echo '              "snapshot srcdir" is equivalent to "snapshot srcdir all"'
+    echo '              "snapshot srcdir checkout" is equivalent to "snapshot checkout"'
     echo "    help:     Print this message"
     echo "    hdf4 <hdf4lib_path>:"
     echo "              Use <hdf4lib_path> as the HDF4LIB locations"
