@@ -78,6 +78,7 @@ H5S_init_interface(void)
 		      "unable to register one or more conversion functions");
     }
     
+#ifdef HAVE_PARALLEL
     {
         /* Allow MPI buf-and-file-type optimizations? */
         const char *s = getenv ("HDF5_MPI_OPT_TYPES");
@@ -85,6 +86,7 @@ H5S_init_interface(void)
             H5_mpi_opt_types_g = (int)HDstrtol (s, NULL, 0);
         }
     }
+#endif
 
     FUNC_LEAVE(ret_value);
 }
