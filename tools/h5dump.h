@@ -15,8 +15,8 @@
 #define STORAGELAYOUT	"STORAGELAYOUT"
 #define COMPRESSION	"COMPRESSION"
 #define EXTERNAL	"EXTERNAL"
-#define HARDLINK	"HARDLINK"
 #define SOFTLINK	"SOFTLINK"
+#define NLINK		"NLINK"
 
 #define BEGIN		"{"
 #define END		"}"
@@ -29,11 +29,6 @@
 #define end_obj()	printf("%s\n", END);
 
 #define col 3;
-
-static void dump_group (hid_t , const char* );
-static void dump_dataset (hid_t, const  char* );
-static void dump_data (hid_t, int);
-static void dump_named_datatype (hid_t , const char *);
 
 #endif
 
@@ -50,7 +45,6 @@ static void dump_named_datatype (hid_t , const char *);
 #ifndef _H5TOOLS_H
 #define _H5TOOLS_H
 
-#include <stdio.h>
 
 /*
  * Information about how to format output.

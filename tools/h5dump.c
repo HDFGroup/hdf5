@@ -3,6 +3,12 @@
 
 static int indent = 0;
 
+static void dump_group (hid_t , const char* );
+static void dump_dataset (hid_t, const  char* );
+static void dump_data (hid_t, int);
+static void dump_named_datatype (hid_t , const char *);
+
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -16,20 +22,30 @@ static int indent = 0;
  *
  *-----------------------------------------------------------------------*/
 static void
-usage()
+usage(void)
 {
 
-printf("Usage: dumper <filename>\n");
+printf("Usage: h5dump <file>\n");
 
 /*
-    printf(" Usage: h5dumper [options] <file>\n");
-    printf(" options\n");
-    printf("  -H         Print a usage message \n");
-    printf("  -nobb      No boot block\n");
-    printf("  -nodata    No data\n");
-    printf("  -g <name>  Dump everything in the group with name <name>\n");
-    printf("  -d <name>  Dump everything in the dataset with name <name>\n");
-    printf("  -l <name>  Dump the target of the link with name <link>\n");
+     h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>] 
+            [-l <names>] <files>
+
+     -h               Print information on this command.
+
+     -bb              Display the conent of boot block. The default is not to
+                      display.
+
+     -header          Display header only; that is, no data displayed.
+
+     -a <names>       Display the specified attribute.
+
+     -d <names>       Display the specified dataset.
+
+     -g <names>       Display all the objects within the specified group.
+
+     -l <names>       Display the specified link value.
+
 */
 }
 
@@ -68,7 +84,7 @@ static void indentation(int x) {
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-static char*
+static const char*
 datatype_name(hid_t type) {
 
     switch (H5Tget_class(type)) {
@@ -202,12 +218,14 @@ datatype_name(hid_t type) {
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
+/*
 static void
 dump_bb() {
 
     printf ("%s %s %s\n", BOOT_BLOCK, BEGIN, END);
 
 }
+*/
 
 
 /*-------------------------------------------------------------------------
@@ -225,11 +243,7 @@ dump_bb() {
  *-----------------------------------------------------------------------*/
 static void
 dump_datatype (hid_t type) {
-char *pt;
-char *fname ;
-hid_t nmembers, mtype;
-int i, ndims, perm[512]; 
-size_t dims[512];
+const char *pt;
 
     indent += col;
     indentation (indent);
@@ -253,7 +267,7 @@ size_t dims[512];
  *
  *-----------------------------------------------------------------------*/
 static void
-dump_dataspace (hid_t dataset_id, hid_t space) {
+dump_dataspace (hid_t space) {
 hsize_t size[64];
 hsize_t maxsize[64];  /* check max dims size */
 int ndims = H5Sextent_dims(space, size, maxsize);
@@ -321,7 +335,7 @@ hid_t  attr_id, type, space;
         type = H5Aget_type(attr_id);
         space = H5Aget_space(attr_id);
         dump_datatype(type);
-        dump_dataspace(attr_id, space);
+        dump_dataspace(space);
         dump_data(attr_id, ATTRIBUTE_DATA);
         H5Tclose(type);
         H5Sclose(space);
@@ -330,7 +344,7 @@ hid_t  attr_id, type, space;
     } else {
         indent += col;
         indentation (indent);
-        printf("Unable to open attribute.\n", attr_name);
+        printf("Unable to open attribute %s.\n", attr_name);
         indent -= col;
         return FAIL;
     }
@@ -363,46 +377,69 @@ dump_all (hid_t group, const char *name, void __unused__ *op_data)
 hid_t obj;
 hid_t (*func)(void*);
 void *edata;
-char buf[512]; /* Is 512 large enough? */
+char *buf;
+H5G_stat_t statbuf;
 
     /* Disable error reporting */
     H5Eget_auto (&func, &edata);
     H5Eset_auto (NULL, NULL);
 
 
-    if (H5Gget_linkval (group, name, sizeof(buf), buf)>=0) {  
+    H5Gstat(group, name, FALSE, &statbuf);
+
+    switch (statbuf.type) {
+    case H5G_LINK:
 
         indentation (indent);
+
+        buf = malloc (statbuf.linklen*sizeof(char));
+
         begin_obj(SOFTLINK, name);
         indent += col;
         indentation (indent);
-        printf ("linktarget \"%s\"\n", buf);
+        if (H5Gget_linkval (group, name, statbuf.linklen, buf)>=0) 
+            printf ("linktarget \"%s\"\n", buf);
+        else
+            printf ("unable to get link value.\n");
+
         indent -= col;
         indentation (indent);
         end_obj();
+        free (buf);
+        break;
 
-    } else if ((obj=H5Dopen (group, name))>=0) {              
+    case H5G_GROUP:
+         if ((obj=H5Gopen (group, name))>=0) {
+             dump_group (obj, name);
+             H5Gclose (obj);
+         } else 
+             printf ("unable to dump group %s\n",name);
 
-        dump_dataset (obj, name);
-        H5Dclose (obj);
+         break;
 
-    } else if ((obj=H5Gopen (group, name))>=0) {
+    case H5G_DATASET:
 
-           dump_group (obj, name);
-           H5Gclose (obj);
+         if ((obj=H5Dopen (group, name))>=0) {              
+             dump_dataset (obj, name);
+             H5Dclose (obj);
+         } else 
+             printf ("unable to dump dataset %s\n",name);
 
-    } else if ((obj=H5Topen(group, name))>=0) {
-    
-           dump_named_datatype (obj, name);
-           H5Tclose(obj);
+         break;
 
-    } else {
+    case H5G_TYPE:
+         dump_named_datatype (obj, name);
+         H5Tclose(obj);
+         break;
 
-        printf ("Unknown Object %s\n", name);
-        H5Eset_auto (func, edata);
-        return FAIL;
+    default:
+         printf ("Unknown Object %s\n", name);
+         H5Eset_auto (func, edata);
+         return FAIL;
+         break;
 
     }
+
 
     /* Restore error reporting */
     H5Eset_auto (func, edata);
@@ -421,15 +458,19 @@ char buf[512]; /* Is 512 large enough? */
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications:
+ * Modifications: Comments: not yet implemented.
  *
  *-----------------------------------------------------------------------*/
 static void
 dump_named_datatype (hid_t type_id, const char *name) {
+hid_t id;
+/*
 char *fname ;
 hid_t nmembers, mtype;
-int i, ndims, perm[512]; /* dimensionality */
-size_t dims[512];
+int i, ndims, perm[512];
+*/
+
+id = type_id; /*doesn't like warning message */
 
     indentation (indent);
     begin_obj(DATATYPE, name);
@@ -490,13 +531,10 @@ hid_t  type, space;
 
     indentation (indent);
     begin_obj(DATASET, name);
-    indent += col;
-    H5Aiterate (did, NULL, dump_attr, NULL);
-    indent -= col;
     type = H5Dget_type (did);
     space = H5Dget_space (did);
     dump_datatype(type);
-    dump_dataspace(did, space);
+    dump_dataspace(space);
 
     switch (H5Tget_class(type)) {
     case H5T_INTEGER:
@@ -537,6 +575,10 @@ hid_t  type, space;
          break;
     default: break;
     }
+
+    indent += col;
+    H5Aiterate (did, NULL, dump_attr, NULL);
+    indent -= col;
 
     H5Tclose(type);
     H5Sclose(space);
