@@ -41,7 +41,8 @@ $(TEST_OBJ): $(TEST_HDR)
 
 ## Put in dependencies to the THDF5 module so that things will be built
 ## in the correct order.
-thyperslab_wr.lo:   $(srcdir)/thyperslab_wr.f90 thdf5.lo
+thyperslab_wr.lo:	    $(srcdir)/thyperslab_wr.f90 thdf5.lo
+ptesthdf5_fortran.lo:	    $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
 
 ptesthdf5_fortran: thdf5.lo thyperslab_wr.lo tcheck.lo ptesthdf5_fortran.lo
 	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ ptesthdf5_fortran.lo thdf5.lo thyperslab_wr.lo tcheck.lo $(LIBFORTRAN) $(LIBHDF5) $(LIBS)
