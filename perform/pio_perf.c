@@ -85,9 +85,9 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ho:";
+static const char *s_opts = "ho:m:";
 #else
-static const char *s_opts = "hbo:";
+static const char *s_opts = "hbo:m:";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
