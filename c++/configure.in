@@ -203,6 +203,39 @@ EOF
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Production flags?  Save the value in $CONFIG_MODE so we have it for
+dnl the record.
+dnl
+AC_MSG_CHECKING(for production mode)
+AC_ARG_ENABLE(production,
+  [  --enable-production     Determines how to run the compiler.])
+
+case "X-$enable_production" in
+   X-yes)
+      AC_MSG_RESULT("production")
+      CONFIG_MODE=production
+      CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
+      CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
+      ;;
+   X-|X-no)
+      AC_MSG_RESULT("development")
+      CONFIG_MODE=development
+      CXXFLAGS="$CFLAGS $DEBUG_CXXFLAGS"
+      CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
+      ;;
+   X-pg|X-profile)
+      AC_MSG_RESULT("profile")
+      CONFIG_MODE=profile
+      CXXFLAGS="$CFLAGS $PROFILE_CXXFLAGS"
+      CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
+      ;;
+   *)
+      AC_MSG_RESULT("user-defined")
+      CONFIG_MODE="$X-enableval"
+      ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl If we should build only static executables
 dnl
 AC_MSG_CHECKING(if should build only statically linked executables)
