@@ -157,8 +157,8 @@ typedef struct {
 //======================================================================*/
 typedef struct fileRec {
 	struct fileRec *ptr;
-	int    hdfID;
-	int    PabloID;
+	long    hdfID;
+	long    PabloID;
 	char   *fileName;
 } fileRec_t;
 /*=======================================================================
