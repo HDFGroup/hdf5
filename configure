@@ -7284,9 +7284,11 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 case $host_os in
   linux*)
-    # If an Intel compiler is used, it needs to set $wl to use "-Wl,"
-    if $CC -V 2>&1 | grep '^Intel(R)' > /dev/null ; then
-    echo 'fix $wl in' $ofile
+    # If gcc is not used, need to set $wl to use "-Wl,"
+    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
+      : using gcc
+    else
+      echo 'fix $wl in' $ofile
 ed - $ofile <<EOF 2> /dev/null
 /^wl=""/s//wl="-Wl,"/
 w
