@@ -1,4 +1,4 @@
-HDF5 version 1.6.1-post4 released on Sun Dec  7 20:47:29 CST 2003
+HDF5 version 1.6.1-post6 released on Sat Dec 13 13:17:43 CST 2003
 ================================================================================
 
 
@@ -43,6 +43,9 @@ New Features
 
     Library:
     --------
+        - Added H5Iget_ref, H5Iinc_ref and H5Idec_ref routines to the C
+          library and the FORTRAN wrapper.  See the reference manual for a
+          full description of these new routines.  QAK - 2003/12/11
 
     Parallel Library:
     -----------------
@@ -68,6 +71,9 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Fixed problem with selection offsets of hyperslab selections in
+            chunked datasets causing the library to go into an infinite loop.
+            QAK - 2003/12/06
         - Fixed H5Giterate to avoid re-using index parameter after iteration
             callback has been called (allows iteration callback to modify the
             index parameter itself).  QAK - 2003/12/06

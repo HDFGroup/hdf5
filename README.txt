@@ -1,4 +1,4 @@
-HDF5 version 1.6.1-post5 currently under development
+HDF5 version 1.6.1-post6 released on Sat Dec 13 13:17:43 CST 2003
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
