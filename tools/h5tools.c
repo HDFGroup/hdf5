@@ -14,7 +14,6 @@
  * by Don Libes, copyright (c) 1993 by John Wiley & Sons, Inc.
  */
 
-#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -135,7 +134,7 @@ int
 get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
 {
     static int sp = 1;    /* character index in current token */
-    int opt_opt;          /* option character passed back to user */
+    int opt_opt='?';      /* option character passed back to user */
 
     if (sp == 1) {
         /* check for more flag-like tokens */
@@ -153,7 +152,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         register int i;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            int len = strlen(l_opts[i].name);
+            size_t len = strlen(l_opts[i].name);
 
             if (strncmp(arg, l_opts[i].name, len) == 0) {
                 /* we've found a matching long command line flag */
@@ -2643,7 +2642,7 @@ h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
 #ifndef VERSION12
         driver[ndrivers].name = "family";
         driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
+        H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
         ndrivers++;
 
         driver[ndrivers].name = "split";

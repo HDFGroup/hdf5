@@ -841,7 +841,8 @@ static herr_t
 dump_selected_attr(hid_t loc_id, const char *name)
 {
     int j;
-    char *obj_name, *attr_name;
+    char *obj_name;
+    const char *attr_name;
     hid_t  oid, attr_id, type, space;
     H5G_stat_t statbuf;
 
@@ -1708,7 +1709,7 @@ main(int argc, const char *argv[])
     h5tools_init();
 
     /* this will be plenty big enough for holding the info */
-    hand = calloc(argc, sizeof(struct handler_t));
+    hand = calloc((size_t)argc, sizeof(struct handler_t));
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
