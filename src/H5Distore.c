@@ -939,7 +939,6 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
     
     FUNC_ENTER_NOAPI(H5D_istore_init, FAIL);
 
-    HDmemset (rdcc, 0, sizeof(H5D_rdcc_t));
     if (H5F_RDCC_NBYTES(f)>0 && H5F_RDCC_NELMTS(f)>0) {
         rdcc->nbytes=H5F_RDCC_NBYTES(f);
 	rdcc->nslots = H5F_RDCC_NELMTS(f);
@@ -1613,7 +1612,7 @@ else
     }
     assert (found || chunk_size>0);
     
-    if (!found && rdcc->nslots>0 && chunk_size<=dset->cache.chunk.nbytes &&
+    if (!found && rdcc->nslots>0 && chunk_size<=rdcc->nbytes &&
             (!ent || !ent->locked)) {
         /*
          * Add the chunk to the cache only if the slot is not already locked.
@@ -1852,13 +1851,13 @@ H5D_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxp
     
     /* Get the address of this chunk on disk */
 #ifdef QAK
-HDfprintf(stderr,"%s: chunk_coords={",FUNC);
+HDfprintf(stderr,"%s: store->chunk.offset={",FUNC);
 for(u=0; u<dset->layout.u.chunk.ndims; u++)
-    HDfprintf(stderr,"%Hd%s",chunk_coords[u],(u<(dset->layout.u.chunk.ndims-1) ? ", " : "}\n"));
+    HDfprintf(stderr,"%Hd%s",store->chunk.offset[u],(u<(dset->layout.u.chunk.ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
     chunk_addr=H5D_istore_get_addr(f, dxpl_id, &(dset->layout), store->chunk.offset, &udata);
 #ifdef QAK
-HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,dset->layout.u.chunk.size);
+HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Zu\n",FUNC,chunk_addr,dset->layout.u.chunk.size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
 HDfprintf(stderr,"%s: chunk_offset_arr[%Zu]=%Hu\n",FUNC,*chunk_curr_seq,chunk_offset_arr[*chunk_curr_seq]);
 HDfprintf(stderr,"%s: mem_len_arr[%Zu]=%Zu\n",FUNC,*mem_curr_seq,mem_len_arr[*mem_curr_seq]);
@@ -1967,13 +1966,13 @@ H5D_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     
     /* Get the address of this chunk on disk */
 #ifdef QAK
-HDfprintf(stderr,"%s: chunk_coords={",FUNC);
+HDfprintf(stderr,"%s: store->chunk.offset={",FUNC);
 for(u=0; u<dset->layout.u.chunk.ndims; u++)
-    HDfprintf(stderr,"%Hd%s",chunk_coords[u],(u<(dset->layout.u.chunk.ndims-1) ? ", " : "}\n"));
+    HDfprintf(stderr,"%Hd%s",store->chunk.offset[u],(u<(dset->layout.u.chunk.ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
     chunk_addr=H5D_istore_get_addr(f, dxpl_id, &(dset->layout), store->chunk.offset, &udata);
 #ifdef QAK
-HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,dset->layout.u.chunk.size);
+HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Zu\n",FUNC,chunk_addr,dset->layout.u.chunk.size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
 HDfprintf(stderr,"%s: chunk_offset_arr[%Zu]=%Hu\n",FUNC,*chunk_curr_seq,chunk_offset_arr[*chunk_curr_seq]);
 HDfprintf(stderr,"%s: mem_len_arr[%Zu]=%Zu\n",FUNC,*mem_curr_seq,mem_len_arr[*mem_curr_seq]);

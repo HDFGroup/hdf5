@@ -406,10 +406,7 @@ H5D_contig_readvv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
     void *_buf)
 {
     unsigned char *buf=(unsigned char *)_buf;      /* Pointer to buffer to fill */
-    haddr_t abs_eoa;	        /* Absolute end of file address		*/
-    haddr_t rel_eoa;	        /* Relative end of file address		*/
     haddr_t addr;               /* Actual address to read */
-    hsize_t max_data;           /* Actual maximum size of data to cache */
     size_t size;                /* Size of sequence in bytes */
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
@@ -427,82 +424,20 @@ H5D_contig_readvv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
         haddr_t sieve_start, sieve_end;     /* Start & end locations of sieve buffer */
         haddr_t contig_end;             /* End locations of block to write */
         size_t sieve_size;              /* size of sieve buffer */
+        haddr_t abs_eoa;	        /* Absolute end of file address		*/
+        haddr_t rel_eoa;	        /* Relative end of file address		*/
+        hsize_t max_data;               /* Actual maximum size of data to cache */
 
         /* Set offsets in sequence lists */
         u=*dset_curr_seq;
         v=*mem_curr_seq;
 
-        /* No data sieve buffer yet, go allocate one */
-        if(dset->cache.contig.sieve_buf==NULL) {
-            /* Choose smallest buffer to write */
-            if(mem_len_arr[v]<dset_len_arr[u])
-                size=mem_len_arr[v];
-            else
-                size=dset_len_arr[u];
-
-            /* Compute offset on disk */
-            addr=dset_addr+dset_offset_arr[u];
-
-            /* Compute offset in memory */
-            buf = (unsigned char *)_buf + mem_offset_arr[v];
-
-            /* Set up the buffer parameters */
-            max_data=dset_size-dset_offset_arr[u];
-
-            /* Check if we can actually hold the I/O request in the sieve buffer */
-            if(size>dset->cache.contig.sieve_buf_size) {
-                if (H5F_block_read(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
-            } /* end if */
-            else {
-                /* Allocate room for the data sieve buffer */
-                if (NULL==(dset->cache.contig.sieve_buf=H5FL_BLK_MALLOC(sieve_buf,dset->cache.contig.sieve_buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-                /* Determine the new sieve buffer size & location */
-                dset->cache.contig.sieve_loc=addr;
-
-                /* Make certain we don't read off the end of the file */
-                if (HADDR_UNDEF==(abs_eoa=H5F_get_eoa(f)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size");
-
-                /* Adjust absolute EOA address to relative EOA address */
-                rel_eoa=abs_eoa-H5F_get_base_addr(f);
-
-                /* Compute the size of the sieve buffer */
-                H5_ASSIGN_OVERFLOW(dset->cache.contig.sieve_size,MIN3(rel_eoa-dset->cache.contig.sieve_loc,max_data,dset->cache.contig.sieve_buf_size),hsize_t,size_t);
-
-                /* Read the new sieve buffer */
-                if (H5F_block_read(f, H5FD_MEM_DRAW, dset->cache.contig.sieve_loc, dset->cache.contig.sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
-
-                /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-                HDmemcpy(buf,dset->cache.contig.sieve_buf,size);
-
-                /* Reset sieve buffer dirty flag */
-                dset->cache.contig.sieve_dirty=0;
-            } /* end else */
-
-            /* Update memory information */
-            mem_len_arr[v]-=size;
-            mem_offset_arr[v]+=size;
-            if(mem_len_arr[v]==0)
-                v++;
-
-            /* Update file information */
-            dset_len_arr[u]-=size;
-            dset_offset_arr[u]+=size;
-            if(dset_len_arr[u]==0)
-                u++;
-
-            /* Increment number of bytes copied */
-            ret_value+=size;
-        } /* end if */
-
         /* Stash local copies of these value */
-        sieve_start=dset->cache.contig.sieve_loc;
-        sieve_size=dset->cache.contig.sieve_size;
-        sieve_end=sieve_start+sieve_size;
+        if(dset->cache.contig.sieve_buf!=NULL) {
+            sieve_start=dset->cache.contig.sieve_loc;
+            sieve_size=dset->cache.contig.sieve_size;
+            sieve_end=sieve_start+sieve_size;
+        } /* end if */
         
         /* Works through sequences as fast as possible */
         for(; u<dset_max_nseq && v<mem_max_nseq; ) {
@@ -518,49 +453,17 @@ H5D_contig_readvv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
             /* Compute offset in memory */
             buf = (unsigned char *)_buf + mem_offset_arr[v];
 
-            /* Compute end of sequence to retrieve */
-            contig_end=addr+size-1;
-
-            /* If entire read is within the sieve buffer, read it from the buffer */
-            if(addr>=sieve_start && contig_end<sieve_end) {
-                unsigned char *base_sieve_buf=dset->cache.contig.sieve_buf+(addr-sieve_start);
-
-                /* Grab the data out of the buffer */
-                HDmemcpy(buf,base_sieve_buf,size);
-            } /* end if */
-            /* Entire request is not within this data sieve buffer */
-            else {
+            /* No data sieve buffer yet, go allocate one */
+            if(dset->cache.contig.sieve_buf==NULL) {
                 /* Check if we can actually hold the I/O request in the sieve buffer */
                 if(size>dset->cache.contig.sieve_buf_size) {
-                    /* Check for any overlap with the current sieve buffer */
-                    if((sieve_start>=addr && sieve_start<(contig_end+1))
-                            || ((sieve_end-1)>=addr && (sieve_end-1)<(contig_end+1))) {
-                        /* Flush the sieve buffer, if it's dirty */
-                        if(dset->cache.contig.sieve_dirty) {
-                            /* Write to file */
-                            if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
-                                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
-
-                            /* Reset sieve buffer dirty flag */
-                            dset->cache.contig.sieve_dirty=0;
-                        } /* end if */
-                    } /* end if */
-
-                    /* Read directly into the user's buffer */
                     if (H5F_block_read(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
                 } /* end if */
-                /* Element size fits within the buffer size */
                 else {
-                    /* Flush the sieve buffer if it's dirty */
-                    if(dset->cache.contig.sieve_dirty) {
-                        /* Write to file */
-                        if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
-                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
-
-                        /* Reset sieve buffer dirty flag */
-                        dset->cache.contig.sieve_dirty=0;
-                    } /* end if */
+                    /* Allocate room for the data sieve buffer */
+                    if (NULL==(dset->cache.contig.sieve_buf=H5FL_BLK_MALLOC(sieve_buf,dset->cache.contig.sieve_buf_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* Determine the new sieve buffer size & location */
                     dset->cache.contig.sieve_loc=addr;
@@ -572,17 +475,11 @@ H5D_contig_readvv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
                     /* Adjust absolute EOA address to relative EOA address */
                     rel_eoa=abs_eoa-H5F_get_base_addr(f);
 
-                    /* Only need this when resizing sieve buffer */
+                    /* Set up the buffer parameters */
                     max_data=dset_size-dset_offset_arr[u];
 
                     /* Compute the size of the sieve buffer */
-                    /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
                     H5_ASSIGN_OVERFLOW(dset->cache.contig.sieve_size,MIN3(rel_eoa-dset->cache.contig.sieve_loc,max_data,dset->cache.contig.sieve_buf_size),hsize_t,size_t);
-
-                    /* Update local copies of sieve information */
-                    sieve_start=dset->cache.contig.sieve_loc;
-                    sieve_size=dset->cache.contig.sieve_size;
-                    sieve_end=sieve_start+sieve_size;
 
                     /* Read the new sieve buffer */
                     if (H5F_block_read(f, H5FD_MEM_DRAW, dset->cache.contig.sieve_loc, dset->cache.contig.sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
@@ -593,6 +490,90 @@ H5D_contig_readvv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
 
                     /* Reset sieve buffer dirty flag */
                     dset->cache.contig.sieve_dirty=0;
+
+                    /* Stash local copies of these value */
+                    sieve_start=dset->cache.contig.sieve_loc;
+                    sieve_size=dset->cache.contig.sieve_size;
+                    sieve_end=sieve_start+sieve_size;
+                } /* end else */
+            } /* end if */
+            else {
+                /* Compute end of sequence to retrieve */
+                contig_end=addr+size-1;
+
+                /* If entire read is within the sieve buffer, read it from the buffer */
+                if(addr>=sieve_start && contig_end<sieve_end) {
+                    unsigned char *base_sieve_buf=dset->cache.contig.sieve_buf+(addr-sieve_start);
+
+                    /* Grab the data out of the buffer */
+                    HDmemcpy(buf,base_sieve_buf,size);
+                } /* end if */
+                /* Entire request is not within this data sieve buffer */
+                else {
+                    /* Check if we can actually hold the I/O request in the sieve buffer */
+                    if(size>dset->cache.contig.sieve_buf_size) {
+                        /* Check for any overlap with the current sieve buffer */
+                        if((sieve_start>=addr && sieve_start<(contig_end+1))
+                                || ((sieve_end-1)>=addr && (sieve_end-1)<(contig_end+1))) {
+                            /* Flush the sieve buffer, if it's dirty */
+                            if(dset->cache.contig.sieve_dirty) {
+                                /* Write to file */
+                                if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
+                                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+
+                                /* Reset sieve buffer dirty flag */
+                                dset->cache.contig.sieve_dirty=0;
+                            } /* end if */
+                        } /* end if */
+
+                        /* Read directly into the user's buffer */
+                        if (H5F_block_read(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0)
+                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
+                    } /* end if */
+                    /* Element size fits within the buffer size */
+                    else {
+                        /* Flush the sieve buffer if it's dirty */
+                        if(dset->cache.contig.sieve_dirty) {
+                            /* Write to file */
+                            if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
+                                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+
+                            /* Reset sieve buffer dirty flag */
+                            dset->cache.contig.sieve_dirty=0;
+                        } /* end if */
+
+                        /* Determine the new sieve buffer size & location */
+                        dset->cache.contig.sieve_loc=addr;
+
+                        /* Make certain we don't read off the end of the file */
+                        if (HADDR_UNDEF==(abs_eoa=H5F_get_eoa(f)))
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size");
+
+                        /* Adjust absolute EOA address to relative EOA address */
+                        rel_eoa=abs_eoa-H5F_get_base_addr(f);
+
+                        /* Only need this when resizing sieve buffer */
+                        max_data=dset_size-dset_offset_arr[u];
+
+                        /* Compute the size of the sieve buffer */
+                        /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
+                        H5_ASSIGN_OVERFLOW(dset->cache.contig.sieve_size,MIN3(rel_eoa-dset->cache.contig.sieve_loc,max_data,dset->cache.contig.sieve_buf_size),hsize_t,size_t);
+
+                        /* Update local copies of sieve information */
+                        sieve_start=dset->cache.contig.sieve_loc;
+                        sieve_size=dset->cache.contig.sieve_size;
+                        sieve_end=sieve_start+sieve_size;
+
+                        /* Read the new sieve buffer */
+                        if (H5F_block_read(f, H5FD_MEM_DRAW, dset->cache.contig.sieve_loc, dset->cache.contig.sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
+                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
+
+                        /* Grab the data out of the buffer (must be first piece of data in buffer ) */
+                        HDmemcpy(buf,dset->cache.contig.sieve_buf,size);
+
+                        /* Reset sieve buffer dirty flag */
+                        dset->cache.contig.sieve_dirty=0;
+                    } /* end else */
                 } /* end else */
             } /* end else */
 
@@ -685,10 +666,7 @@ H5D_contig_writevv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
     const void *_buf)
 {
     const unsigned char *buf=_buf;      /* Pointer to buffer to fill */
-    haddr_t abs_eoa;	        /* Absolute end of file address		*/
-    haddr_t rel_eoa;	        /* Relative end of file address		*/
     haddr_t addr;               /* Actual address to read */
-    hsize_t max_data;           /* Actual maximum size of data to cache */
     size_t size;                /* Size of sequence in bytes */
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
@@ -706,85 +684,20 @@ H5D_contig_writevv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
         haddr_t sieve_start, sieve_end;     /* Start & end locations of sieve buffer */
         haddr_t contig_end;             /* End locations of block to write */
         size_t sieve_size;              /* size of sieve buffer */
+        haddr_t abs_eoa;	        /* Absolute end of file address		*/
+        haddr_t rel_eoa;	        /* Relative end of file address		*/
+        hsize_t max_data;               /* Actual maximum size of data to cache */
 
         /* Set offsets in sequence lists */
         u=*dset_curr_seq;
         v=*mem_curr_seq;
 
-        /* No data sieve buffer yet, go allocate one */
-        if(dset->cache.contig.sieve_buf==NULL) {
-            /* Choose smallest buffer to write */
-            if(mem_len_arr[v]<dset_len_arr[u])
-                size=mem_len_arr[v];
-            else
-                size=dset_len_arr[u];
-
-            /* Compute offset on disk */
-            addr=dset_addr+dset_offset_arr[u];
-
-            /* Compute offset in memory */
-            buf = (const unsigned char *)_buf + mem_offset_arr[v];
-
-            /* Set up the buffer parameters */
-            max_data=dset_size-dset_offset_arr[u];
-
-            /* Check if we can actually hold the I/O request in the sieve buffer */
-            if(size>dset->cache.contig.sieve_buf_size) {
-                if (H5F_block_write(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0)
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
-            } /* end if */
-            else {
-                /* Allocate room for the data sieve buffer */
-                if (NULL==(dset->cache.contig.sieve_buf=H5FL_BLK_MALLOC(sieve_buf,dset->cache.contig.sieve_buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-                /* Determine the new sieve buffer size & location */
-                dset->cache.contig.sieve_loc=addr;
-
-                /* Make certain we don't read off the end of the file */
-                if (HADDR_UNDEF==(abs_eoa=H5F_get_eoa(f)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size");
-
-                /* Adjust absolute EOA address to relative EOA address */
-                rel_eoa=abs_eoa-H5F_get_base_addr(f);
-
-                /* Compute the size of the sieve buffer */
-                H5_ASSIGN_OVERFLOW(dset->cache.contig.sieve_size,MIN3(rel_eoa-dset->cache.contig.sieve_loc,max_data,dset->cache.contig.sieve_buf_size),hsize_t,size_t);
-
-                /* Check if there is any point in reading the data from the file */
-                if(dset->cache.contig.sieve_size>size) {
-                    /* Read the new sieve buffer */
-                    if (H5F_block_read(f, H5FD_MEM_DRAW, dset->cache.contig.sieve_loc, dset->cache.contig.sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
-                        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
-                } /* end if */
-
-                /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-                HDmemcpy(dset->cache.contig.sieve_buf,buf,size);
-
-                /* Set sieve buffer dirty flag */
-                dset->cache.contig.sieve_dirty=1;
-            } /* end else */
-
-            /* Update memory information */
-            mem_len_arr[v]-=size;
-            mem_offset_arr[v]+=size;
-            if(mem_len_arr[v]==0)
-                v++;
-
-            /* Update file information */
-            dset_len_arr[u]-=size;
-            dset_offset_arr[u]+=size;
-            if(dset_len_arr[u]==0)
-                u++;
-
-            /* Increment number of bytes copied */
-            ret_value+=size;
-        } /* end if */
-
         /* Stash local copies of these value */
-        sieve_start=dset->cache.contig.sieve_loc;
-        sieve_size=dset->cache.contig.sieve_size;
-        sieve_end=sieve_start+sieve_size;
+        if(dset->cache.contig.sieve_buf!=NULL) {
+            sieve_start=dset->cache.contig.sieve_loc;
+            sieve_size=dset->cache.contig.sieve_size;
+            sieve_end=sieve_start+sieve_size;
+        } /* end if */
         
         /* Works through sequences as fast as possible */
         for(; u<dset_max_nseq && v<mem_max_nseq; ) {
@@ -800,126 +713,175 @@ H5D_contig_writevv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
             /* Compute offset in memory */
             buf = (const unsigned char *)_buf + mem_offset_arr[v];
 
-            /* Compute end of sequence to retrieve */
-            contig_end=addr+size-1;
-
-            /* If entire write is within the sieve buffer, write it to the buffer */
-            if(addr>=sieve_start && contig_end<sieve_end) {
-                unsigned char *base_sieve_buf=dset->cache.contig.sieve_buf+(addr-sieve_start);
-
-                /* Put the data into the sieve buffer */
-                HDmemcpy(base_sieve_buf,buf,size);
-
-                /* Set sieve buffer dirty flag */
-                dset->cache.contig.sieve_dirty=1;
-
-            } /* end if */
-            /* Entire request is not within this data sieve buffer */
-            else {
+            /* No data sieve buffer yet, go allocate one */
+            if(dset->cache.contig.sieve_buf==NULL) {
                 /* Check if we can actually hold the I/O request in the sieve buffer */
                 if(size>dset->cache.contig.sieve_buf_size) {
-                    /* Check for any overlap with the current sieve buffer */
-                    if((sieve_start>=addr && sieve_start<(contig_end+1))
-                            || ((sieve_end-1)>=addr && (sieve_end-1)<(contig_end+1))) {
-                        /* Flush the sieve buffer, if it's dirty */
-                        if(dset->cache.contig.sieve_dirty) {
-                            /* Write to file */
-                            if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
-                                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
-
-                            /* Reset sieve buffer dirty flag */
-                            dset->cache.contig.sieve_dirty=0;
-                        } /* end if */
-
-                        /* Force the sieve buffer to be re-read the next time */
-                        dset->cache.contig.sieve_loc=HADDR_UNDEF;
-                        dset->cache.contig.sieve_size=0;
-                    } /* end if */
-
-                    /* Write directly from the user's buffer */
                     if (H5F_block_write(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
                 } /* end if */
-                /* Element size fits within the buffer size */
                 else {
-                    /* Check if it is possible to (exactly) prepend or append to existing (dirty) sieve buffer */
-                    if(((addr+size)==sieve_start || addr==sieve_end) &&
-                            (size+sieve_size)<=dset->cache.contig.sieve_buf_size &&
-                            dset->cache.contig.sieve_dirty) {
-                        /* Prepend to existing sieve buffer */
-                        if((addr+size)==sieve_start) {
-                            /* Move existing sieve information to correct location */
-                            HDmemmove(dset->cache.contig.sieve_buf+size,dset->cache.contig.sieve_buf,sieve_size);
+                    /* Allocate room for the data sieve buffer */
+                    if (NULL==(dset->cache.contig.sieve_buf=H5FL_BLK_MALLOC(sieve_buf,dset->cache.contig.sieve_buf_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-                            /* Copy in new information (must be first in sieve buffer) */
+                    /* Determine the new sieve buffer size & location */
+                    dset->cache.contig.sieve_loc=addr;
+
+                    /* Make certain we don't read off the end of the file */
+                    if (HADDR_UNDEF==(abs_eoa=H5F_get_eoa(f)))
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size");
+
+                    /* Adjust absolute EOA address to relative EOA address */
+                    rel_eoa=abs_eoa-H5F_get_base_addr(f);
+
+                    /* Set up the buffer parameters */
+                    max_data=dset_size-dset_offset_arr[u];
+
+                    /* Compute the size of the sieve buffer */
+                    H5_ASSIGN_OVERFLOW(dset->cache.contig.sieve_size,MIN3(rel_eoa-dset->cache.contig.sieve_loc,max_data,dset->cache.contig.sieve_buf_size),hsize_t,size_t);
+
+                    /* Check if there is any point in reading the data from the file */
+                    if(dset->cache.contig.sieve_size>size) {
+                        /* Read the new sieve buffer */
+                        if (H5F_block_read(f, H5FD_MEM_DRAW, dset->cache.contig.sieve_loc, dset->cache.contig.sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
+                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
+                    } /* end if */
+
+                    /* Grab the data out of the buffer (must be first piece of data in buffer ) */
+                    HDmemcpy(dset->cache.contig.sieve_buf,buf,size);
+
+                    /* Set sieve buffer dirty flag */
+                    dset->cache.contig.sieve_dirty=1;
+
+                    /* Stash local copies of these value */
+                    sieve_start=dset->cache.contig.sieve_loc;
+                    sieve_size=dset->cache.contig.sieve_size;
+                    sieve_end=sieve_start+sieve_size;
+                } /* end else */
+            } /* end if */
+            else {
+                /* Compute end of sequence to retrieve */
+                contig_end=addr+size-1;
+
+                /* If entire write is within the sieve buffer, write it to the buffer */
+                if(addr>=sieve_start && contig_end<sieve_end) {
+                    unsigned char *base_sieve_buf=dset->cache.contig.sieve_buf+(addr-sieve_start);
+
+                    /* Put the data into the sieve buffer */
+                    HDmemcpy(base_sieve_buf,buf,size);
+
+                    /* Set sieve buffer dirty flag */
+                    dset->cache.contig.sieve_dirty=1;
+
+                } /* end if */
+                /* Entire request is not within this data sieve buffer */
+                else {
+                    /* Check if we can actually hold the I/O request in the sieve buffer */
+                    if(size>dset->cache.contig.sieve_buf_size) {
+                        /* Check for any overlap with the current sieve buffer */
+                        if((sieve_start>=addr && sieve_start<(contig_end+1))
+                                || ((sieve_end-1)>=addr && (sieve_end-1)<(contig_end+1))) {
+                            /* Flush the sieve buffer, if it's dirty */
+                            if(dset->cache.contig.sieve_dirty) {
+                                /* Write to file */
+                                if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
+                                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+
+                                /* Reset sieve buffer dirty flag */
+                                dset->cache.contig.sieve_dirty=0;
+                            } /* end if */
+
+                            /* Force the sieve buffer to be re-read the next time */
+                            dset->cache.contig.sieve_loc=HADDR_UNDEF;
+                            dset->cache.contig.sieve_size=0;
+                        } /* end if */
+
+                        /* Write directly from the user's buffer */
+                        if (H5F_block_write(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0)
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+                    } /* end if */
+                    /* Element size fits within the buffer size */
+                    else {
+                        /* Check if it is possible to (exactly) prepend or append to existing (dirty) sieve buffer */
+                        if(((addr+size)==sieve_start || addr==sieve_end) &&
+                                (size+sieve_size)<=dset->cache.contig.sieve_buf_size &&
+                                dset->cache.contig.sieve_dirty) {
+                            /* Prepend to existing sieve buffer */
+                            if((addr+size)==sieve_start) {
+                                /* Move existing sieve information to correct location */
+                                HDmemmove(dset->cache.contig.sieve_buf+size,dset->cache.contig.sieve_buf,sieve_size);
+
+                                /* Copy in new information (must be first in sieve buffer) */
+                                HDmemcpy(dset->cache.contig.sieve_buf,buf,size);
+
+                                /* Adjust sieve location */
+                                dset->cache.contig.sieve_loc=addr;
+                                
+                            } /* end if */
+                            /* Append to existing sieve buffer */
+                            else {
+                                /* Copy in new information */
+                                HDmemcpy(dset->cache.contig.sieve_buf+sieve_size,buf,size);
+                            } /* end else */
+
+                            /* Adjust sieve size */
+                            dset->cache.contig.sieve_size += size;
+                            
+                            /* Update local copies of sieve information */
+                            sieve_start=dset->cache.contig.sieve_loc;
+                            sieve_size=dset->cache.contig.sieve_size;
+                            sieve_end=sieve_start+sieve_size;
+
+                        } /* end if */
+                        /* Can't add the new data onto the existing sieve buffer */
+                        else {
+                            /* Flush the sieve buffer if it's dirty */
+                            if(dset->cache.contig.sieve_dirty) {
+                                /* Write to file */
+                                if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
+                                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+
+                                /* Reset sieve buffer dirty flag */
+                                dset->cache.contig.sieve_dirty=0;
+                            } /* end if */
+
+                            /* Determine the new sieve buffer size & location */
+                            dset->cache.contig.sieve_loc=addr;
+
+                            /* Make certain we don't read off the end of the file */
+                            if (HADDR_UNDEF==(abs_eoa=H5F_get_eoa(f)))
+                                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size");
+
+                            /* Adjust absolute EOA address to relative EOA address */
+                            rel_eoa=abs_eoa-H5F_get_base_addr(f);
+
+                            /* Only need this when resizing sieve buffer */
+                            max_data=dset_size-dset_offset_arr[u];
+
+                            /* Compute the size of the sieve buffer */
+                            /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
+                            H5_ASSIGN_OVERFLOW(dset->cache.contig.sieve_size,MIN3(rel_eoa-dset->cache.contig.sieve_loc,max_data,dset->cache.contig.sieve_buf_size),hsize_t,size_t);
+
+                            /* Update local copies of sieve information */
+                            sieve_start=dset->cache.contig.sieve_loc;
+                            sieve_size=dset->cache.contig.sieve_size;
+                            sieve_end=sieve_start+sieve_size;
+
+                            /* Check if there is any point in reading the data from the file */
+                            if(dset->cache.contig.sieve_size>size) {
+                                /* Read the new sieve buffer */
+                                if (H5F_block_read(f, H5FD_MEM_DRAW, dset->cache.contig.sieve_loc, dset->cache.contig.sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
+                                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
+                            } /* end if */
+
+                            /* Grab the data out of the buffer (must be first piece of data in buffer ) */
                             HDmemcpy(dset->cache.contig.sieve_buf,buf,size);
 
-                            /* Adjust sieve location */
-                            dset->cache.contig.sieve_loc=addr;
-                            
-                        } /* end if */
-                        /* Append to existing sieve buffer */
-                        else {
-                            /* Copy in new information */
-                            HDmemcpy(dset->cache.contig.sieve_buf+sieve_size,buf,size);
+                            /* Set sieve buffer dirty flag */
+                            dset->cache.contig.sieve_dirty=1;
+
                         } /* end else */
-
-                        /* Adjust sieve size */
-                        dset->cache.contig.sieve_size += size;
-                        
-                        /* Update local copies of sieve information */
-                        sieve_start=dset->cache.contig.sieve_loc;
-                        sieve_size=dset->cache.contig.sieve_size;
-                        sieve_end=sieve_start+sieve_size;
-
-                    } /* end if */
-                    /* Can't add the new data onto the existing sieve buffer */
-                    else {
-                        /* Flush the sieve buffer if it's dirty */
-                        if(dset->cache.contig.sieve_dirty) {
-                            /* Write to file */
-                            if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
-                                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
-
-                            /* Reset sieve buffer dirty flag */
-                            dset->cache.contig.sieve_dirty=0;
-                        } /* end if */
-
-                        /* Determine the new sieve buffer size & location */
-                        dset->cache.contig.sieve_loc=addr;
-
-                        /* Make certain we don't read off the end of the file */
-                        if (HADDR_UNDEF==(abs_eoa=H5F_get_eoa(f)))
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size");
-
-                        /* Adjust absolute EOA address to relative EOA address */
-                        rel_eoa=abs_eoa-H5F_get_base_addr(f);
-
-                        /* Only need this when resizing sieve buffer */
-                        max_data=dset_size-dset_offset_arr[u];
-
-                        /* Compute the size of the sieve buffer */
-                        /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
-                        H5_ASSIGN_OVERFLOW(dset->cache.contig.sieve_size,MIN3(rel_eoa-dset->cache.contig.sieve_loc,max_data,dset->cache.contig.sieve_buf_size),hsize_t,size_t);
-
-                        /* Update local copies of sieve information */
-                        sieve_start=dset->cache.contig.sieve_loc;
-                        sieve_size=dset->cache.contig.sieve_size;
-                        sieve_end=sieve_start+sieve_size;
-
-                        /* Check if there is any point in reading the data from the file */
-                        if(dset->cache.contig.sieve_size>size) {
-                            /* Read the new sieve buffer */
-                            if (H5F_block_read(f, H5FD_MEM_DRAW, dset->cache.contig.sieve_loc, dset->cache.contig.sieve_size, dxpl_id, dset->cache.contig.sieve_buf)<0)
-                                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
-                        } /* end if */
-
-                        /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-                        HDmemcpy(dset->cache.contig.sieve_buf,buf,size);
-
-                        /* Set sieve buffer dirty flag */
-                        dset->cache.contig.sieve_dirty=1;
-
                     } /* end else */
                 } /* end else */
             } /* end else */

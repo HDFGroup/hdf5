@@ -2705,14 +2705,16 @@ H5D_close(H5D_t *dataset)
     H5D_istore_stats(dataset, FALSE);
 #endif /* H5F_ISTORE_DEBUG */
 
+    /* Free the data sieve buffer, if it's been allocated */
+    if(dataset->cache.contig.sieve_buf) {
+        assert(dataset->layout.type!=H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
+        assert(dataset->cache.contig.sieve_dirty==0);    /* The buffer had better be flushed... */
+        dataset->cache.contig.sieve_buf = H5FL_BLK_FREE (sieve_buf,dataset->cache.contig.sieve_buf);
+    } /* end if */
+
     /* Free cached information for each kind of dataset */
     switch(dataset->layout.type) {
         case H5D_CONTIGUOUS:
-            /* Free the data sieve buffer, if it's been allocated */
-            if(dataset->cache.contig.sieve_buf) {
-                assert(dataset->cache.contig.sieve_dirty==0);    /* The buffer had better be flushed... */
-                dataset->cache.contig.sieve_buf = H5FL_BLK_FREE (sieve_buf,dataset->cache.contig.sieve_buf);
-            } /* end if */
             break;
 
         case H5D_CHUNKED:
@@ -3929,19 +3931,22 @@ H5D_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
             if(NULL==(dataset=H5I_object_verify(id_list[j], H5I_DATASET)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset object")
 
+            /* flush the raw data buffer, if we have a dirty one */
+            if (dataset->cache.contig.sieve_buf && dataset->cache.contig.sieve_dirty) {
+                assert(dataset->layout.type!=H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
+
+                /* Write dirty data sieve buffer to file */
+                if (H5F_block_write(f, H5FD_MEM_DRAW, dataset->cache.contig.sieve_loc,
+                        dataset->cache.contig.sieve_size, dxpl_id, dataset->cache.contig.sieve_buf) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
+
+                /* Reset sieve buffer dirty flag */
+                dataset->cache.contig.sieve_dirty=0;
+            } /* end if */
+
             /* Flush cached information for each kind of dataset */
             switch(dataset->layout.type) {
                 case H5D_CONTIGUOUS:
-                    /* flush the raw data buffer, if we have a dirty one */
-                    if (dataset->cache.contig.sieve_buf && dataset->cache.contig.sieve_dirty) {
-                        /* Write dirty data sieve buffer to file */
-                        if (H5F_block_write(f, H5FD_MEM_DRAW, dataset->cache.contig.sieve_loc,
-                                dataset->cache.contig.sieve_size, dxpl_id, dataset->cache.contig.sieve_buf) < 0)
-                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
-
-                        /* Reset sieve buffer dirty flag */
-                        dataset->cache.contig.sieve_dirty=0;
-                    } /* end if */
                     break;
 
                 case H5D_CHUNKED:
