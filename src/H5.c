@@ -213,20 +213,35 @@ H5_term_library(void)
     
     do {
 	pending = 0;
-	pending += DOWN(F);
-	pending += DOWN(FD);
-	pending += DOWN(D);
-	pending += DOWN(Z);
-	pending += DOWN(G);
-	pending += DOWN(FL);
+        /* Try to organize these so the "higher" level components get shut
+         * down before "lower" level components that they might rely on. -QAK
+         */
 	pending += DOWN(R);
+	pending += DOWN(D);
+	pending += DOWN(G);
+	pending += DOWN(A);
 	pending += DOWN(S);
 	pending += DOWN(TN);
 	pending += DOWN(T);
-	pending += DOWN(A);
-	pending += DOWN(AC);
-	pending += DOWN(P);
-	pending += DOWN(I);
+        /* Don't shut down the file code until objects in files are shut down */
+        if(pending==0)
+            pending += DOWN(F);
+
+        /* Don't shut down "low-level" components until "high-level" components
+         * have successfully shut down.  This prevents property lists and IDs
+         * from being closed "out from underneath" of the high-level objects
+         * that depend on them. -QAK
+         */
+        if(pending==0) {
+            pending += DOWN(AC);
+            pending += DOWN(Z);
+            pending += DOWN(FD);
+            pending += DOWN(P);
+            pending += DOWN(I);
+            /* Don't shut down the free list code until _everything_ else is down */
+            if(pending==0)
+                pending += DOWN(FL);
+        }
     } while (pending && ntries++ < 100);
 
     if (pending) {
