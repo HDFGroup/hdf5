@@ -212,6 +212,8 @@
 ./doc/html/TechNotes/SWControls.html
 ./doc/html/TechNotes/SymbolTables.html
 ./doc/html/TechNotes/TestReview.html
+./doc/html/TechNotes/TestReview/H5Dget_offset.html
+./doc/html/TechNotes/TestReview/H5Tget_native_type.html
 ./doc/html/TechNotes/ThreadSafeLibrary.html
 ./doc/html/TechNotes/VFL.html
 ./doc/html/TechNotes/VFLfunc.html
