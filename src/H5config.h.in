@@ -80,7 +80,10 @@
 /* Define if we have Globus GASS support */
 #undef HAVE_GASS
 
-/* Define if we have Globus Grid Storage support */
+/* Define if we have SRB support */ 
+#undef HAVE_SRB
+
+/* Define if we have Globus Grid Storage support */ 
 #undef HAVE_GRIDSTORAGE
 
 /* The number of bytes in a __int64.  */
@@ -278,6 +281,9 @@
 /* Define if you have the <setjmp.h> header file.  */
 #undef HAVE_SETJMP_H
 
+/* Define if you have the <srbClient.h> header file.  */
+#undef HAVE_SRBCLIENT_H
+
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H
 
@@ -314,11 +320,17 @@
 /* Define if you have the <zlib.h> header file.  */
 #undef HAVE_ZLIB_H
 
+/* Define if you have the SrbClient library (-lSrbClient).  */
+#undef HAVE_LIBSRBCLIENT
+
 /* Define if you have the crypto library (-lcrypto).  */
 #undef HAVE_LIBCRYPTO
 
 /* Define if you have the df library (-ldf).  */
 #undef HAVE_LIBDF
+
+/* Define if you have the elf library (-lelf).  */
+#undef HAVE_LIBELF
 
 /* Define if you have the globus_common library (-lglobus_common).  */
 #undef HAVE_LIBGLOBUS_COMMON
@@ -382,6 +394,9 @@
 
 /* Define if you have the silo library (-lsilo).  */
 #undef HAVE_LIBSILO
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET
 
 /* Define if you have the ssl library (-lssl).  */
 #undef HAVE_LIBSSL

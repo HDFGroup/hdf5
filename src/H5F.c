@@ -26,9 +26,10 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDmpio.h>		/*MPI-2 I/O				  */
 #include <H5FDgass.h>           /*GASS I/O                                */
 #include <H5FDdpss.h>           /*Grid Storage I/O                        */
+#include <H5FDsrb.h>            /*SRB I/O                                 */
 #include <H5FDmulti.h>		/*multiple files partitioned by mem usage */
-#include <H5FDsec2.h>		/*Posix unbuffered I/O			*/
-#include <H5FDstdio.h>		/* Standard C buffered I/O		*/
+#include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
+#include <H5FDstdio.h>		/* Standard C buffered I/O		  */
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
@@ -170,6 +171,9 @@ H5F_init(void)
  *
  * 	Robb Matzke, 1999-02-19
  *	Added initialization for the H5I_FILE_CLOSING ID group.
+ *
+ *      Raymond Lu, April 10, 2000
+ *      Put SRB into the 'Register predefined file drivers' list.
  *-------------------------------------------------------------------------
  */
 static herr_t 
@@ -216,6 +220,9 @@ H5F_init_interface(void)
 #endif
 #ifdef H5_HAVE_GRIDSTORAGE
 	if ((status=H5FD_DPSS)<0) goto end_registration;
+#endif
+#ifdef H5_HAVE_SRB
+	if ((status=H5FD_SRB)<0) goto end_registration;
 #endif
 	if ((status=H5FD_CORE)<0) goto end_registration;
 	if ((status=H5FD_MULTI)<0) goto end_registration;

@@ -37,14 +37,18 @@ static char             RcsId[] = "@(#)$Revision$";
 #endif
 #ifdef H5_HAVE_PARALLEL
 #   include <mpi.h>
-#ifndef MPI_FILE_NULL		/*MPIO may be defined in mpi.h already*/
+#ifndef MPI_FILE_NULL		/*MPIO may be defined in mpi.h already       */
 #   include <mpio.h>
 #endif
 #endif
 
-#ifdef H5_HAVE_GASS
+#ifdef H5_HAVE_GASS             /*for Globus GASS I/O                        */
 #include "globus_common.h"
 #include "globus_gass_file.h"
+#endif
+
+#ifdef H5_HAVE_SRB              /*for SRB I/O                                */
+#include <srbClient.h>
 #endif
 
 #include <H5api_adpt.h>
