@@ -1,627 +1,904 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
-<head><title>
-HDF5/Tools API Specification
-</title></head>
-
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.61 [en] (WinNT; I) [Netscape]">
+   <title>HDF5/Tools API Specification
+</title>
+</head>
 <body bgcolor="#FFFFFF">
 
-
 <hr>
-<center>
-<table border=0 width=98%>
-<tr><td valign=top align=left>
-<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
-<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
-<!--
+<center><table BORDER=0 WIDTH="98%" >
+<tr>
+<td ALIGN=LEFT VALIGN=TOP><a href="H5.intro.html">Introduction to HDF5</a>
+<br><a href="H5.user.html">HDF5 User Guide</a>
+<br><a href="index.html">Other HDF5 documents and links</a>
+<br><!--
 <a href="Glossary.html">Glossary</a><br>
--->
-</td>
-<td valign=top align=right>
-And in this document, the 
-<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
-<br>
-<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
-<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
-<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
-<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
-<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
-<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
-<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
-<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-<br>
-<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
-<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
-<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
-<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
-Tools&nbsp;&nbsp;
-<a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
-</td></tr>
-</table>
-</center>
+--></td>
+
+<td ALIGN=RIGHT VALIGN=TOP>And in this document, the <a href="RM_H5Front.html">HDF5
+Reference Manual</a>
+<br><a href="RM_H5.html">H5</a>&nbsp; <a href="RM_H5A.html">H5A</a> 
+<a href="RM_H5D.html">H5D</a>&nbsp;
+<a href="RM_H5E.html">H5E</a> 
+<a href="RM_H5F.html">H5F</a>&nbsp; <a href="RM_H5G.html">H5G</a>
+
+<a href="RM_H5I.html">H5I</a>&nbsp; <a href="RM_H5P.html">H5P</a>
+<br><a href="RM_H5R.html">H5R</a>&nbsp; <a href="RM_H5S.html">H5S</a> 
+<a href="RM_H5T.html">H5T</a>&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp; Tools&nbsp; <a href="PredefDTypes.html">Datatypes</a></td>
+</tr>
+</table></center>
+
 <hr>
-
-
 <center>
-<h1>HDF5 Tools</h1>
-</center>
+<h1>
+HDF5 Tools</h1></center>
 
-<h2>HDF5 Tool Interfaces</h2>
-<p>
+<h2>
+HDF5 Tool Interfaces</h2>
 These tools enable the user to examine HDF5 files interactively.
-
-
-<table border=0>
-<tr><td valign=top>
+<table BORDER=0 >
+<tr>
+<td VALIGN=TOP>
 <ul>
-    <li><a href="#Tools-Dump">h5dump</a> -- 
-        A tool for displaying HDF5 file contents
-    <li><a href="#Tools-Ls">h5ls</a> -- 
-        A tool for listing specified features of HDF5 file contents
-    <li><a href="#Tools-Repart">h5repart</a> -- 
-        A tool for repartitioning a file, creating a family of files
-    <li><a href="#Tools-H5toh4">h5toh4</a> -- 
-        A tool for converting an HDF5 file to an HDF4 file
-    <li><a href="#Tools-H4toh5">h4toh5</a> -- 
-        A tool for converting an HDF4 file to an HDF5 file
+<li>
+<a href="#Tools-Dump">h5dump</a> -- A tool for displaying HDF5 file contents&nbsp;</li>
+
+<li>
+<a href="#Tools-Ls">h5ls</a> -- A tool for listing specified features of
+HDF5 file contents&nbsp;</li>
+
+<li>
+<a href="#Tools-Repart">h5repart</a> -- A tool for repartitioning a file,
+creating a family of files&nbsp;</li>
+
+<li>
+<a href="#Tools-H5toh4">h5toh4</a> -- A tool for converting an HDF5 file
+to an HDF4 file&nbsp;</li>
+
+<li>
+<a href="#Tools-H4toh5">h4toh5</a> -- A tool for converting an HDF4 file
+to an HDF5 file</li>
 </ul>
-</td></tr>
+</td>
+</tr>
 </table>
 
 <p>
-
-
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-Dump">h5dump</a>
-<dt><strong>Syntax:</strong>
-    <dd><code>h5dump
-        [</code><em>OPTIONS</em><code>]</code> <em>file</em>
-<dt><strong>Purpose:</strong>
-    <dd>Displays HDF5 file contents.
-<dt><strong>Description:</strong>
-    <dd><code>h5dump</code> enables the user to interactively examine 
-        the contents of an HDF5 file and dump those contents, in human
-        readable form, to an ASCII file.
-        <p>
-        <code>h5dump</code> displays HDF5 file content on standard
-        output. It may display the content of the whole HDF5 file or
-        selected objects, which can be groups, datasets, links,
-        attributes, or data types. 
-        </p>
-        <p>
-        The <code>--header</code> option displays object header
-        information only.
-        </p>
-        <p>
-        Names are the absolute names of the objects. <code>h5dump</code>
-        displays objects in the order same as the command order. If a
-        name does not start with a slash, <code>h5dump</code> begins
-        searching for the specified object starting at the root group.
-        </p>
-        <p>
-        If an object is hard linked with multiple names,
-        <code>h5dump</code> displays the content of the object in the
-        first occurrence. Only the link information is displayed in later
-        occurrences.
-        </p>
-        <p>
-        <code>h5dump</code> assigns a name for any unnamed data type in
-        the form of
-        <code>#</code><em>oid1</em><code>:</code><em>oid2</em>, where
-        <em>oid1</em> and <em>oid2</em> are the object identifiers
-        assigned by the library. The unnamed types are displayed within
-        the root group.
-        </p>
-        <p>
-        Data types are displayed with standard type names. For example,
-        if a data set is created with <code>H5T_NATIVE_INT</code> type
-        and the standard type name for integer on that machine is
-        <code>H5T_STD_I32BE</code>, <code>h5dump</code> displays
-        <code>H5T_STD_I32BE</code> as the type of the data set.
-        </p>
-        <p>
-        The <code>h5dump</code> output is described in detail in the <a
-        href="ddl.html"><cite>DDL for HDF5</cite></a>, the <cite>Data
-        Description Language</cite> document. 
-        </p>
-        <p>
-        <em>Note</em>: It is no longer permissable to specify multiple
-        attributes, datasets, data types, groups, or soft links with one
-        flag. For example, before one could issue the command:
-        </p>
-          <blockquote>
-            <code>h5dump -a /attr1 /attr2 foo.h5</code>
-          </blockquote>
-        <p>
-        and both <code>/attr1</code> and <code>/attr2</code> would be
-        dumped. In order to do this now, one must issue the command:
-        </p>
-          <blockquote>
-            <code>h5dump -a /attr1 -a /attr2 foo.h5</code>
-          </blockquote>
-<dt><strong>Options and Parameters:</strong>
-    <dl>
-        <dt><code>-h</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--help</code></dt>
-            <dd>Print a usage message and exit.</dd>
-        <dt><code>-B</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--bootblock</code></dt>
-            <dd>Print the content of the boot block.<br>
-                <em>(This option is not yet implemented.)</em></dd>
-        <dt><code>-H</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--header</code></dt>
-            <dd>Print the header only; no data is displayed.</dd>
-        <dt><code>-i</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--object-ids</code></dt>
-            <dd>Print the object ids.</dd>
-        <dt><code>-V</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--version</code></dt>
-            <dd>Print version number and exit.</dd>
-        <dt><code>-a <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--attribute=<em>P</em></code></dt>
-            <dd>Print the specified attribute.</dd>
-        <dt><code>-d <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--dataset=<em>P</em></code></dt>
-            <dd>Print the specified dataset.</dd>
-        <dt><code>-g <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--group=<em>P</em></code></dt>
-            <dd>Print the specified group and all members.</dd>
-        <dt><code>-l <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--soft-link=<em>P</em></code></dt>
-            <dd>Print the value(s) of the specified soft link.</dd>
-        <dt><code>-o <em>F</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--output=<em>F</em></code></dt>
-            <dd>Output raw data into file F.</dd>
-        <dt><code>-t <em>T</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--datatype=<em>T</em></code></dt>
-            <dd>Print the specified named data type.</dd>
-        <dt><code>-w <em>#</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--width=<em>#</em></code></dt>
-            <dd>Set the number of columns of output.</dd>
-        <dt><em>file</em></dt>
-            <dd>The file to be examined.</dd>
-    </dl>
-    <ul>
-      <li><em>P</em> - is the full path from the root group to the
-          object.</li>
-      <li><em>T</em> - is the name of the data type.</li>
-      <li><em>F</em> - is a filename.</li>
-      <li><em>#</em> - is an integer greater than 1.</li>
-    </ul>
-<dt><strong>Examples:</strong>
-    <ol>
-       <li>Dumping the group <code>/GroupFoo/GroupBar</code> in the file
-          <code>quux.h5</code>:
-          <blockquote>
-             <code>h5dump -g /GroupFoo/GroupBar quux.h5</code>
-          </blockquote>
-       <li>Dumping the dataset <code>Fnord</code> in the group
-          <code>/GroupFoo/GroupBar</code> in the file <code>quux.h5</code>:
-          <blockquote>
-             <code>h5dump -d /GroupFoo/GroupBar/Fnord quux.h5</code>
-          </blockquote>
-       <li>Dumping the attribute <code>metadata</code> of the dataset
-          <code>Fnord</code> which is in group
-          <code>/GroupFoo/GroupBar</code> in the file <code>quux.h5</code>:
-          <blockquote>
-             <code>h5dump -a /GroupFoo/GroupBar/Fnord/metadata quux.h5</code>
-          </blockquote>
-       <li>Dumping the attribute <code>metadata</code> which is an
-          attribute of the root group in the file <code>quux.h5</code>:
-          <blockquote>
-              <code>h5dump -a /metadata quux.h5</code>
-          </blockquote>
-    </ol>
-<dt><strong>Current Status:</strong>
-    <dd>The current version of <code>h5dump</code> displays the
-        following information:
-        <ul>
-          <li>Group
-            <ul>
-               <li>group attribute (see Attribute)
-               <li>group member
-            </ul>
-          <li>Dataset
-            <ul>
-               <li>dataset attribute (see Attribute)
-               <li>dataset type (see Data type)
-               <li>dataset space (see Data space)
-               <li>dataset data
-            </ul>
-          <li>Attribute
-            <ul>
-               <li>attribute type (see Data type)
-               <li>attribute space (see Data space)
-               <li>attribute data
-            </ul>
-          <li>Data type
-            <ul>
-               <li>integer type
-                   <dt>- H5T_STD_I8BE, H5T_STD_I8LE, H5T_STD_I16BE, ...
-               <li>floating point type
-                   <dt>- H5T_IEEE_F32BE, H5T_IEEE_F32LE, H5T_IEEE_F64BE, ...
-               <li>string type
-               <li>compound type 
-                   <dt>- named, unnamed and transient compound type
-                   <dt>- integer, floating or string type member
-               <li>opaque types
-               <li>reference type
-                   <dt>- object references 
-                   <dt>- data regions
-               <li>enum type
-               <li>variable-length datatypes
-                   <dt>- atomic types only
-                   <dt>- scalar or single dimensional array of variable-length
-                         types supported
-            </ul>
-          <li>Data space 
-            <ul>
-               <li>scalar and simple space
-            </ul>
-          <li>Soft link
-          <li>Hard link
-          <li>Loop detection
-        </ul>
-     
-<dt><strong>See Also:</strong>
-    <dd>HDF5 Data Description Language syntax 
-        (<a href="ddl.html"><cite>DDL for HDF5</cite></a>)
+<dt>
+<b>Tool Name:</b>&nbsp;<a NAME="Tools-Dump"></a>h5dump</dt>
+
+<dt>
+<b>Syntax:</b></dt>
+
+<dd>
+<tt>h5dump [</tt><i>OPTIONS</i><tt>]</tt> <i>file</i></dd>
+
+<dt>
+<b>Purpose:</b></dt>
+
+<dd>
+Displays HDF5 file contents in HDF5 DDL or XML.</dd>
+
+<dt>
+<b>Description:</b></dt>
+
+<dd>
+<tt>h5dump</tt> enables the user to interactively examine the contents
+of an HDF5 file and dump those contents, in human readable form, to an
+ASCII file.&nbsp; Optionally, the contents of the file may be dumped as
+XML.</dd>
+
+<br>&nbsp;
+<p>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><tt>h5dump</tt> displays HDF5 file content on standard output. It may
+display the content of the whole HDF5 file or selected objects, which can
+be groups, datasets, links, attributes, or data types.
+<p>The <tt>--header</tt> option displays object header information only.
+<p>Names are the absolute names of the objects. <tt>h5dump</tt> displays
+objects in the order same as the command order. If a name does not start
+with a slash, <tt>h5dump</tt> begins searching for the specified object
+starting at the root group.
+<p>If an object is hard linked with multiple names, <tt>h5dump</tt> displays
+the content of the object in the first occurrence. Only the link information
+is displayed in later occurrences.
+<p><tt>h5dump</tt> assigns a name for any unnamed data type in the form
+of <tt>#</tt><i>oid1</i><tt>:</tt><i>oid2</i>, where <i>oid1</i> and <i>oid2</i>
+are the object identifiers assigned by the library. The unnamed types are
+displayed within the root group.
+<p>Data types are displayed with standard type names. For example, if a
+data set is created with <tt>H5T_NATIVE_INT</tt> type and the standard
+type name for integer on that machine is <tt>H5T_STD_I32BE</tt>, <tt>h5dump</tt>
+displays <tt>H5T_STD_I32BE</tt> as the type of the data set.
+<p>The <tt>h5dump</tt> output is described in detail in the <i><a href="ddl.html">DDL
+for HDF5</a></i>, the <i>Data Description Language</i> document.
+<p><i>Note</i>: It is no longer permissable to specify multiple attributes,
+datasets, data types, groups, or soft links with one flag. For example,
+before one could issue the command:
+<blockquote><tt>h5dump -a /attr1 /attr2 foo.h5</tt></blockquote>
+and both <tt>/attr1</tt> and <tt>/attr2</tt> would be dumped. In order
+to do this now, one must issue the command:
+<blockquote><tt>h5dump -a /attr1 -a /attr2 foo.h5</tt></blockquote>
+
+<dt>
+<b>XML Output</b></dt>
+
+<br>The <tt>--xml </tt>option selects output in XML. The XML output contains
+a complete description of the file, marked up in XML. The XML conforms
+to the HDF5 Document Type Definition (DTD), which is available at:
+<dl><a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd</a></dl>
+
+<p><br>The XML output is suitable for use with other tools, including the
+<a href="http://hdf.ncsa.uiuc.edu/java-hdf5-html">HDF5
+Java Tools</a>.
+<br>&nbsp;
+<dt>
+<b>Options and Parameters:</b></dt>
+
+<dl>
+<dt>
+<tt>-h</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--help</tt></dt>
+
+<dd>
+Print a usage message and exit.</dd>
+
+<dt>
+<tt>-B</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--bootblock</tt></dt>
+
+<dd>
+Print the content of the boot block.</dd>
+
+<br><i>(This option is not yet implemented.)</i>
+<dt>
+<tt>-H</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--header</tt></dt>
+
+<dd>
+Print the header only; no data is displayed.</dd>
+
+<dt>
+<tt>-i</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--object-ids</tt></dt>
+
+<dd>
+Print the object ids.</dd>
+
+<dt>
+<tt>-V</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--version</tt></dt>
+
+<dd>
+Print version number and exit.</dd>
+
+<dt>
+<tt>-a <i>P</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--attribute=<i>P</i></tt></dt>
+
+<dd>
+Print the specified attribute.</dd>
+
+<dt>
+<tt>-d <i>P</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--dataset=<i>P</i></tt></dt>
+
+<dd>
+Print the specified dataset.</dd>
+
+<dt>
+<tt>-g <i>P</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--group=<i>P</i></tt></dt>
+
+<dd>
+Print the specified group and all members.</dd>
+
+<dt>
+<tt>-l <i>P</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--soft-link=<i>P</i></tt></dt>
+
+<dd>
+Print the value(s) of the specified soft link.</dd>
+
+<dt>
+<tt>-o <i>F</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--output=<i>F</i></tt></dt>
+
+<dd>
+Output raw data into file F.</dd>
+
+<dt>
+<tt>-t <i>T</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--datatype=<i>T</i></tt></dt>
+
+<dd>
+Print the specified named data type.</dd>
+
+<dt>
+<tt>-w <i>#</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--width=<i>#</i></tt></dt>
+
+<dd>
+Set the number of columns of output.</dd>
+
+<dt>
+<tt>-x <i>#</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--xml</tt></dt>
+
+<dd>
+Output XML instead of DDL.</dd>
+
+<dt>
+<tt>-D <i>#</i></tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--xml-dtd=<i>URI</i></tt></dt>
+
+<dd>
+In XML output, refer to the DTD at URI instead of the default DTD.</dd>
+
+<dt>
+<i>file</i></dt>
+
+<dd>
+The file to be examined.</dd>
+</dl>
+
+<ul>
+<li>
+<i>P</i> - is the full path from the root group to the object.</li>
+
+<li>
+<i>T</i> - is the name of the data type.</li>
+
+<li>
+<i>F</i> - is a filename.</li>
+
+<li>
+<i>#</i> - is an integer greater than 1.</li>
+
+<li>
+<i>URI</i> - is a URI (as defined in [<a href="http://www.ietf.org/rfc/rfc2396.txt">IETF
+RFC 2396</a>], updated by [<a href="http://www.ietf.org/rfc/rfc2732.txt">IETF
+RFC 2732</a>]) that refers to the DTD to be used to validate the XML.</li>
+</ul>
+
+<dt>
+<b>Examples:</b></dt>
+
+<ol>
+<li>
+Dumping the group <tt>/GroupFoo/GroupBar</tt> in the file <tt>quux.h5</tt>:</li>
+
+<blockquote><tt>h5dump -g /GroupFoo/GroupBar quux.h5</tt></blockquote>
+
+<li>
+Dumping the dataset <tt>Fnord</tt> in the group <tt>/GroupFoo/GroupBar</tt>
+in the file <tt>quux.h5</tt>:</li>
+
+<blockquote><tt>h5dump -d /GroupFoo/GroupBar/Fnord quux.h5</tt></blockquote>
+
+<li>
+Dumping the attribute <tt>metadata</tt> of the dataset <tt>Fnord</tt> which
+is in group <tt>/GroupFoo/GroupBar</tt> in the file <tt>quux.h5</tt>:</li>
+
+<blockquote><tt>h5dump -a /GroupFoo/GroupBar/Fnord/metadata quux.h5</tt></blockquote>
+
+<li>
+Dumping the attribute <tt>metadata</tt> which is an attribute of the root
+group in the file <tt>quux.h5</tt>:</li>
+
+<p><br><tt>&nbsp;&nbsp;&nbsp; h5dump -a /metadata quux.h5</tt>
+<br>&nbsp;
+<li>
+Producing an XML listing of the file bobo.h5:</li>
+
+<br><tt>&nbsp;&nbsp;&nbsp; h5dump --xml bobo.h5 > bobo.h5.xml</tt></ol>
+
+<dt>
+<b></b></dt>
+
+<dt>
+<b>Current Status:</b></dt>
+
+<dd>
+The current version of <tt>h5dump</tt> displays the following information:</dd>
+
+<ul>
+<li>
+Group</li>
+
+<ul>
+<li>
+group attribute (see Attribute)</li>
+
+<li>
+group member</li>
+</ul>
+
+<li>
+Dataset</li>
+
+<ul>
+<li>
+dataset attribute (see Attribute)</li>
+
+<li>
+dataset type (see Data type)</li>
+
+<li>
+dataset space (see Data space)</li>
+
+<li>
+dataset data</li>
+</ul>
+
+<li>
+Attribute</li>
+
+<ul>
+<li>
+attribute type (see Data type)</li>
+
+<li>
+attribute space (see Data space)</li>
+
+<li>
+attribute data</li>
+</ul>
+
+<li>
+Data type</li>
+
+<ul>
+<li>
+integer type</li>
+
+<dt>
+- H5T_STD_I8BE, H5T_STD_I8LE, H5T_STD_I16BE, ...</dt>
+
+<li>
+floating point type</li>
+
+<dt>
+- H5T_IEEE_F32BE, H5T_IEEE_F32LE, H5T_IEEE_F64BE, ...</dt>
+
+<li>
+string type</li>
+
+<li>
+compound type</li>
+
+<dt>
+- named, unnamed and transient compound type</dt>
+
+<dt>
+- integer, floating or string type member</dt>
+
+<li>
+opaque types</li>
+
+<li>
+reference type</li>
+
+<dt>
+- object references</dt>
+
+<dt>
+- data regions</dt>
+
+<li>
+enum type</li>
+
+<li>
+variable-length datatypes</li>
+
+<dt>
+- atomic types only</dt>
+
+<dt>
+- scalar or single dimensional array of variable-length types supported</dt>
+</ul>
+
+<li>
+Data space</li>
+
+<ul>
+<li>
+scalar and simple space</li>
+</ul>
+
+<li>
+Soft link</li>
+
+<li>
+Hard link</li>
+
+<li>
+Loop detection</li>
+</ul>
+
+<dt>
+<b>See Also:</b></dt>
+
+<dd>
+HDF5 Data Description Language syntax (<i><a href="ddl.html">DDL for HDF5</a></i>)</dd>
+
+<dd>
+HDF5 XML DTD:&nbsp; <a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd</a></dd>
+
+<dd>
+HDF5 XML information: <a href="http://hdf.ncsa.uiuc.edu/HDF5/XML">http://hdf.ncsa.uiuc.edu/HDF5/XML</a>/</dd>
 </dl>
 
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-Ls">h5ls</a>
-<dt><strong>Syntax:</strong>
-    <dd><code>h5ls
-        [</code><em>OPTIONS</em><code>]</code><em>
-        file</em><code> 
-        [</code><em>OBJECTS...</em><code>]</code>
-<dt><strong>Purpose:</strong>
-    <dd>Prints information about a file or dataset.
-<dt><strong>Description:</strong>
-    <dd><code>h5ls</code> prints selected information about file objects 
-        in the specified format.
-<dt><strong>Options and Parameters:</strong>
-    <dl>
-        <dt><code>-h</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>-?</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--help</code>
-            <dd>Print a usage message and exit.
-        <dt><code>-a</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--address</code>
-            <dd>Print addresses for raw data.
-        <dt><code>-d</code> &nbsp;&nbsp;or&nbsp;&nbsp; <code>--data</code>
-            <dd>Print the values of datasets.
-        <dt><code>-e</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--errors</code>
-            <dd>Show all HDF5 error reporting.
-        <dt><code>-f</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--full</code>
-            <dd>Print full path names instead of base names.
-       	<dt><code>-g</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--group</code>
-            <dd>Show information about a group, not its contents.
-        <dt><code>-l</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--label</code>
-            <dd>Label members of compound datasets.
-        <dt><code>-r</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--recursive</code>
-            <dd>List all groups recursively, avoiding cycles.
-        <dt><code>-s</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--string</code>
-            <dd>Print 1-bytes integer datasets as ASCII.
-        <dt><code>-S</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--simple</code>
-            <dd>Use a machine-readable output format.
-        <dt><code>-w</code><em>N</em> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--width=</code><em>N</em>
-            <dd>Set the number of columns of output.
-        <dt><code>-v</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--verbose</code>
-            <dd>Generate more verbose output.
-        <dt><code>-V</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--version</code>
-            <dd>Print version number and exit.
-        <dt><code>-x</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
-              <code>--hexdump</code>
-            <dd>Show raw data in hexadecimal format.
-        <dt><em>file</em>
-            <dd>The file name may include a printf(3C) integer format 
-                such as <code>%%05d</code> to open a file family.
-        <dt><em>objects</em>
-            <dd>Each object consists of an HDF5 file name optionally
-                followed by a slash and an object name within the file
-                (if no object is specified within the file then the
-                contents of the root group are displayed). The file name
-                may include a <code>printf(3C)</code> integer format such
-                as "%05d" to open a file family.
-    </dl>
+<dt>
+<b>Tool Name:</b>&nbsp;<a NAME="Tools-Ls"></a>h5ls</dt>
+
+<dt>
+<b>Syntax:</b></dt>
+
+<dd>
+<tt>h5ls [</tt><i>OPTIONS</i><tt>]</tt><i> file</i><tt> [</tt><i>OBJECTS...</i><tt>]</tt></dd>
+
+<dt>
+<b>Purpose:</b></dt>
+
+<dd>
+Prints information about a file or dataset.</dd>
+
+<dt>
+<b>Description:</b></dt>
+
+<dd>
+<tt>h5ls</tt> prints selected information about file objects in the specified
+format.</dd>
+
+<dt>
+<b>Options and Parameters:</b></dt>
+
+<dl>
+<dt>
+<tt>-h</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>-?</tt>&nbsp;&nbsp; or&nbsp;
+<tt>--help</tt></dt>
+
+<dd>
+Print a usage message and exit.</dd>
+
+<dt>
+<tt>-a</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--address</tt></dt>
+
+<dd>
+Print addresses for raw data.</dd>
+
+<dt>
+<tt>-d</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--data</tt></dt>
+
+<dd>
+Print the values of datasets.</dd>
+
+<dt>
+<tt>-e</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--errors</tt></dt>
+
+<dd>
+Show all HDF5 error reporting.</dd>
+
+<dt>
+<tt>-f</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--full</tt></dt>
+
+<dd>
+Print full path names instead of base names.</dd>
+
+<dt>
+<tt>-g</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--group</tt></dt>
+
+<dd>
+Show information about a group, not its contents.</dd>
+
+<dt>
+<tt>-l</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--label</tt></dt>
+
+<dd>
+Label members of compound datasets.</dd>
+
+<dt>
+<tt>-r</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--recursive</tt></dt>
+
+<dd>
+List all groups recursively, avoiding cycles.</dd>
+
+<dt>
+<tt>-s</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--string</tt></dt>
+
+<dd>
+Print 1-bytes integer datasets as ASCII.</dd>
+
+<dt>
+<tt>-S</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--simple</tt></dt>
+
+<dd>
+Use a machine-readable output format.</dd>
+
+<dt>
+<tt>-w</tt><i>N</i>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--width=</tt><i>N</i></dt>
+
+<dd>
+Set the number of columns of output.</dd>
+
+<dt>
+<tt>-v</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--verbose</tt></dt>
+
+<dd>
+Generate more verbose output.</dd>
+
+<dt>
+<tt>-V</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--version</tt></dt>
+
+<dd>
+Print version number and exit.</dd>
+
+<dt>
+<tt>-x</tt>&nbsp;&nbsp; or&nbsp;&nbsp; <tt>--hexdump</tt></dt>
+
+<dd>
+Show raw data in hexadecimal format.</dd>
+
+<dt>
+<i>file</i></dt>
+
+<dd>
+The file name may include a printf(3C) integer format such as <tt>%%05d</tt>
+to open a file family.</dd>
+
+<dt>
+<i>objects</i></dt>
+
+<dd>
+Each object consists of an HDF5 file name optionally followed by a slash
+and an object name within the file (if no object is specified within the
+file then the contents of the root group are displayed). The file name
+may include a <tt>printf(3C)</tt> integer format such as "%05d" to open
+a file family.</dd>
+</dl>
 <!--
 <dt><strong>Current Status:</strong>
     <dd>
 <dt><strong>See Also:</strong>
     <dd>
--->
-</dl>
+--></dl>
 
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-Repart">h5repart</a>
-<dt><strong>Syntax:</strong>
-    <dd><code>h5repart
-        [-v] 
-        [-V] 
-        [-[b|m]</code><em>N</em><code>[g|m|k]]</code>
-        <em>source_file
-        dest_file</em>
-<dt><strong>Purpose:</strong>
-    <dd>Repartitions a file or family of files.
-<dt><strong>Description:</strong>
-    <dd><code>h5repart</code> splits a single file into a family of 
-        files, joins a family of files into a single file, or copies 
-        one family of files to another while changing the size of the 
-        family members.  <code>h5repart</code> can also be used to 
-        copy a single file to a single file with holes.
-        <p>
-        Sizes associated with the <code>-b</code> and <code>-m</code> 
-        options may be suffixed with <code>g</code> for gigabytes, 
-        <code>m</code> for megabytes, or <code>k</code> for kilobytes.
-        <p>
-        File family names include an integer <code>printf</code> 
-        format such as <code>%d</code>.
+<dt>
+<b>Tool Name:</b>&nbsp;<a NAME="Tools-Repart"></a>h5repart</dt>
 
-<dt><strong>Options and Parameters:</strong>
-    <dl>
-        <dt><code>-v</code>
-            <dd>Produce verbose output.
-        <dt><code>-V</code>
-            <dd>Print a version number and exit.
-        <dt><code>-b</code><em>N</em>
-            <dd>The I/O block size, defaults to 1kB
-        <dt><code>-m</code><em>N</em>
-            <dd>The destination member size or 1GB
-        <dt><em>source_file</em>
-            <dd>The name of the source file
-        <dt><em>dest_file</em>
-            <dd>The name of the destination files
-    </dl>
+<dt>
+<b>Syntax:</b></dt>
+
+<dd>
+<tt>h5repart [-v] [-V] [-[b|m]</tt><i>N</i><tt>[g|m|k]]</tt> <i>source_file
+dest_file</i></dd>
+
+<dt>
+<b>Purpose:</b></dt>
+
+<dd>
+Repartitions a file or family of files.</dd>
+
+<dt>
+<b>Description:</b></dt>
+
+<dd>
+<tt>h5repart</tt> splits a single file into a family of files, joins a
+family of files into a single file, or copies one family of files to another
+while changing the size of the family members. <tt>h5repart</tt> can also
+be used to copy a single file to a single file with holes.</dd>
+
+<br>&nbsp;
+<p>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p>Sizes associated with the <tt>-b</tt> and <tt>-m</tt> options may be
+suffixed with <tt>g</tt> for gigabytes, <tt>m</tt> for megabytes, or
+<tt>k</tt>
+for kilobytes.
+<p>File family names include an integer <tt>printf</tt> format such as
+<tt>%d</tt>.
+<dt>
+<b>Options and Parameters:</b></dt>
+
+<dl>
+<dt>
+<tt>-v</tt></dt>
+
+<dd>
+Produce verbose output.</dd>
+
+<dt>
+<tt>-V</tt></dt>
+
+<dd>
+Print a version number and exit.</dd>
+
+<dt>
+<tt>-b</tt><i>N</i></dt>
+
+<dd>
+The I/O block size, defaults to 1kB</dd>
+
+<dt>
+<tt>-m</tt><i>N</i></dt>
+
+<dd>
+The destination member size or 1GB</dd>
+
+<dt>
+<i>source_file</i></dt>
+
+<dd>
+The name of the source file</dd>
+
+<dt>
+<i>dest_file</i></dt>
+
+<dd>
+The name of the destination files</dd>
+</dl>
 <!--
 <dt><strong>Current Status:</strong>
     <dd>
 <dt><strong>See Also:</strong>
     <dd>
--->
-</dl>
-
+--></dl>
 
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-H5toh4">h5toh4</a>
-<dt><strong>Syntax:</strong>
-    <dd><code>h5toh4 -h</code><br>
-        <code>h5toh4 </code><em>
-            h5file
-            h4file</em><br>
-        <code>h5toh4 </code><em>
-            h5file</em><br>
-        <code>h5toh4 -m </code><em>
-            h5file1
-            h5file2
-            h5file3</em> ...
-<dt><strong>Purpose:</strong>
-    <dd>Converts an HDF5 file into an HDF4 file.
-<dt><strong>Description:</strong>
-    <dd><code>h5toh4</code> is an HDF5 utility which reads 
-        an HDF5 file, <em>h5file</em>, and converts all 
-        supported objects and pathways to produce an HDF4 file, 
-        <em>h4file</em>.  If <em>h4file</em> already exists, 
-        it will be replaced.
-        <p>
-        If only one file name is given, the name must end in 
-        <code>.h5</code> and is assumed to represent the 
-        HDF5 input file.  <code>h5toh4</code> replaces the 
-        <code>.h5</code> suffix with <code>.hdf</code> to form 
-        the name of the resulting HDF4 file and proceeds as above.  
-        If a file with the name of the intended HDF4 file already 
-        exists, <code>h5toh4</code> exits with an error without 
-        changing the contents of any file.
-        <p>
-        The <code>-m</code> option allows multiple HDF5 file 
-        arguments.  Each file name is treated the same as the 
-        single file name case above.
-        <p>
-        The <code>-h</code> option causes the following
-        syntax summary to be displayed:
-        <pre>              h5toh4 file.h5 file.hdf
-              h5toh4 file.h5
-              h5toh4 -m file1.h5 file2.h5 ...</pre>
-        
-        <p>
+<dt>
+<b>Tool Name:</b>&nbsp;<a NAME="Tools-H5toh4"></a>h5toh4</dt>
 
-        The following HDF5 objects occurring in an HDF5 file are 
-        converted to HDF4 objects in the HDF4 file:
+<dt>
+<b>Syntax:</b></dt>
 
-        <ul>
-          <li>HDF5 group objects are converted into HDF4 Vgroup 
-              objects.  HDF5 hardlinks and softlinks pointing to 
-              objects are converted to HDF4 Vgroup references.
-          <li>HDF5 dataset objects of integer datatype are 
-              converted into HDF4 SDS objects.  These datasets 
-              may have up to 32 fixed dimensions.  
-              The slowest varying dimension may be extendable.  
-              8-bit, 16-bit, and 32-bit integer datatypes are 
-              supported.
-          <li>HDF5 dataset objects of floating point datatype 
-              are converted into HDF4 SDS objects.  
-              These datasets may have up to 32 fixed dimensions.  
-              The slowest varying dimension may be extendable.  
-              32-bit and 64-bit floating point datatypes are 
-              supported.
-          <li>HDF5 dataset objects of single dimension and 
-              compound datatype are converted into HDF4 Vdata 
-              objects. The length of that single dimension may 
-              be fixed or extendable.  The members of the 
-              compound datatype are constrained to be no more 
-              than rank 4.
-          <li>HDF5 dataset objects of single dimension and fixed length string
-              datatype are converted into HDF4 Vdata objects.  The HDF4 Vdata 
-              is a single field whose order is the length of the HDF5 string 
-              type.  The number of records of the Vdata is the length of the 
-              single dimension which may be fixed or extendable.
-        </ul>
+<dd>
+<tt>h5toh4 -h</tt></dd>
 
-        Other objects are not converted and are not recorded
-        in the resulting <em>h4file</em>.
-        <p>
-        Attributes associated with any of the supported HDF5 
-        objects are carried over to the HDF4 objects.  
-        Attributes may be of integer, floating point, or fixed length 
-        string datatype and they may have up to 32 fixed dimensions.
-        <p>
-        All datatypes are converted to big-endian.  
-        Floating point datatypes are converted to IEEE format.
-        
+<br><tt>h5toh4 </tt><i>h5file h4file</i>
+<br><tt>h5toh4 </tt><i>h5file</i>
+<br><tt>h5toh4 -m </tt><i>h5file1 h5file2 h5file3</i> ...
+<dt>
+<b>Purpose:</b></dt>
 
-<dt><strong>Options and Parameters:</strong>
-    <dl>
-        <dt><code>-h</code>
-            <dd>Displays a syntax summary.
-        <dt><code>-m</code>
-            <dd>Converts multiple HDF5 files to multiple HDF4 files.
-        <dt><em>h5file</em>
-            <dd>The HDF5 file to be converted.
-        <dt><em>h4file</em>
-            <dd>The HDF4 file to be created.
-    </dl>
+<dd>
+Converts an HDF5 file into an HDF4 file.</dd>
+
+<dt>
+<b>Description:</b></dt>
+
+<dd>
+<tt>h5toh4</tt> is an HDF5 utility which reads an HDF5 file, <i>h5file</i>,
+and converts all supported objects and pathways to produce an HDF4 file,
+<i>h4file</i>.
+If <i>h4file</i> already exists, it will be replaced.</dd>
+
+<br>&nbsp;
+<p>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p>If only one file name is given, the name must end in <tt>.h5</tt> and
+is assumed to represent the HDF5 input file. <tt>h5toh4</tt> replaces the
+<tt>.h5</tt>
+suffix with <tt>.hdf</tt> to form the name of the resulting HDF4 file and
+proceeds as above. If a file with the name of the intended HDF4 file already
+exists, <tt>h5toh4</tt> exits with an error without changing the contents
+of any file.
+<p>The <tt>-m</tt> option allows multiple HDF5 file arguments. Each file
+name is treated the same as the single file name case above.
+<p>The <tt>-h</tt> option causes the following syntax summary to be displayed:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; h5toh4 file.h5 file.hdf
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; h5toh4 file.h5
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; h5toh4 -m file1.h5 file2.h5 ...</pre>
+The following HDF5 objects occurring in an HDF5 file are converted to HDF4
+objects in the HDF4 file:
+<ul>
+<li>
+HDF5 group objects are converted into HDF4 Vgroup objects. HDF5 hardlinks
+and softlinks pointing to objects are converted to HDF4 Vgroup references.</li>
+
+<li>
+HDF5 dataset objects of integer datatype are converted into HDF4 SDS objects.
+These datasets may have up to 32 fixed dimensions. The slowest varying
+dimension may be extendable. 8-bit, 16-bit, and 32-bit integer datatypes
+are supported.</li>
+
+<li>
+HDF5 dataset objects of floating point datatype are converted into HDF4
+SDS objects. These datasets may have up to 32 fixed dimensions. The slowest
+varying dimension may be extendable. 32-bit and 64-bit floating point datatypes
+are supported.</li>
+
+<li>
+HDF5 dataset objects of single dimension and compound datatype are converted
+into HDF4 Vdata objects. The length of that single dimension may be fixed
+or extendable. The members of the compound datatype are constrained to
+be no more than rank 4.</li>
+
+<li>
+HDF5 dataset objects of single dimension and fixed length string datatype
+are converted into HDF4 Vdata objects. The HDF4 Vdata is a single field
+whose order is the length of the HDF5 string type. The number of records
+of the Vdata is the length of the single dimension which may be fixed or
+extendable.</li>
+</ul>
+Other objects are not converted and are not recorded in the resulting <i>h4file</i>.
+<p>Attributes associated with any of the supported HDF5 objects are carried
+over to the HDF4 objects. Attributes may be of integer, floating point,
+or fixed length string datatype and they may have up to 32 fixed dimensions.
+<p>All datatypes are converted to big-endian. Floating point datatypes
+are converted to IEEE format.
+<dt>
+<b>Options and Parameters:</b></dt>
+
+<dl>
+<dt>
+<tt>-h</tt></dt>
+
+<dd>
+Displays a syntax summary.</dd>
+
+<dt>
+<tt>-m</tt></dt>
+
+<dd>
+Converts multiple HDF5 files to multiple HDF4 files.</dd>
+
+<dt>
+<i>h5file</i></dt>
+
+<dd>
+The HDF5 file to be converted.</dd>
+
+<dt>
+<i>h4file</i></dt>
+
+<dd>
+The HDF4 file to be created.</dd>
+</dl>
 <!--
 <dt><strong>Current Status:</strong>
     <dd>
 <dt><strong>See Also:</strong>
     <dd>
--->
-</dl>
-
+--></dl>
 
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-H4toh5">h4toh5</a>
-<dt><strong>Syntax:</strong>
-    <dd><code>h4toh5 -h</code><br>
-        <code>h4toh5 </code><em>
-            h4file
-            h5file</em><br>
-        <code>h4toh5 </code><em>
-            h4file</em><br>
-        <!--  currently no -m option
+<dt>
+<b>Tool Name:</b>&nbsp;<a NAME="Tools-H4toh5"></a>h4toh5</dt>
+
+<dt>
+<b>Syntax:</b></dt>
+
+<dd>
+<tt>h4toh5 -h</tt></dd>
+
+<br><tt>h4toh5 </tt><i>h4file h5file</i>
+<br><tt>h4toh5 </tt><i>h4file</i>
+<br><!--  currently no -m option
         <code>h4toh5 -m </code><em>
             h4file1
             h4file2
             h4file3</em> ...
         -->
-<dt><strong>Purpose:</strong>
-    <dd>Converts an HDF4 file to an HDF5 file.
-<dt><strong>Description:</strong>
-    <dd><code>h4toh5</code> is a file conversion utility that reads 
-        an HDF4 file, <em>h4file</em> (<code>input.hdf</code> for example),
-        and writes an HDF5 file, <em>h5file</em> (<code>output.h5</code>
-        for example), containing the same data.
-        <p>
-        If no output file <em>h5file</em> is specified, 
-        <code>h4toh5</code> uses the input filename to designate
-        the output file, replacing the extension <code>.hdf</code>
-        with <code>.h5</code>.
-        For example, if the input file <code>scheme3.hdf</code> is 
-        specified with no output filename, <code>h4toh5</code> will 
-        name the output file <code>scheme3.h5</code>.
-        <p>
-        <!--  currently no -m option
+<dt>
+<b>Purpose:</b></dt>
+
+<dd>
+Converts an HDF4 file to an HDF5 file.</dd>
+
+<dt>
+<b>Description:</b></dt>
+
+<dd>
+<tt>h4toh5</tt> is a file conversion utility that reads an HDF4 file, <i>h4file</i>
+(<tt>input.hdf</tt> for example), and writes an HDF5 file, <i>h5file</i>
+(<tt>output.h5</tt> for example), containing the same data.</dd>
+
+<br>&nbsp;
+<p>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p>If no output file <i>h5file</i> is specified, <tt>h4toh5</tt> uses the
+input filename to designate the output file, replacing the extension
+<tt>.hdf</tt>
+with <tt>.h5</tt>. For example, if the input file <tt>scheme3.hdf</tt>
+is specified with no output filename, <tt>h4toh5</tt> will name the output
+file <tt>scheme3.h5</tt>.
+<p><!--  currently no -m option
         The <code>-m</code> option allows multiple HDF5 file 
         arguments.  Each file name is treated the same as the 
         single file name case above.
         <p>
-        -->
-        The <code>-h</code> option causes a syntax summary 
-        similar to the following to be displayed:
-        <pre>              h4toh5 inputfile.hdf outputfile.h5
-              h5toh4 inputfile.hdf                    <!--  currently no -m option
-              h5toh4 -m inputfile1.hdf inputfile2.hdf ...  --> </pre>
-        <p>
-        Each object in the HDF4 file is converted to an equivalent 
-        HDF5 object, according to the mapping described in
-        <a href="ADGuide/H4toH5Mapping.pdf" target=ExternalWinA>
-        <cite>Mapping HDF4 Objects to HDF5 Objects</cite></a>.
-        (If this mapping changes between HDF5 Library releases, a more up-to-date
-        version may be available at
-        <a href="http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5/H4-to-H5MappingGuidelines.pdf" target=ExternalWinB>
-        <cite>Mapping HDF4 Objects to HDF5 Objects</cite> on the HDF FTP server</a>.)
-        <p>
-        In this inital version, <code>h4toh5</code> converts the following 
-        HDF4 objects:
-        <center>
-	<table width=75% border=0>
-          <tr><th width=40% valign=top align=left>
-            HDF4 Object
-            </td><th width=60% valign=top align=left>
-            Resulting HDF5 Object
-          </td></tr>
-          <tr><td width=40% valign=top align=left>
-            SDS
-            </td><td width=60% valign=top align=left>
-            Dataset
-          </td></tr>
-          <tr><td width=40% valign=top align=left>
-            GR, RI8, and RI24 image
-            </td><td width=60% valign=top align=left>
-            Dataset 
-          </td></tr>
-          <tr><td width=40% valign=top align=left>
-            Vdata
-            </td><td width=60% valign=top align=left>
-            Dataset
-          </td></tr>
-          <tr><td width=40% valign=top align=left>
-            Vgroup
-            </td><td width=60% valign=top align=left>
-            Group
-          </td></tr>
-          <tr><td width=40% valign=top align=left>
-            Annotation
-            </td><td width=60% valign=top align=left>
-            Attribute
-          </td></tr>
-          <tr><td width=40% valign=top align=left>
-            Palette
-            </td><td width=60% valign=top align=left>
-            Dataset
-          </td></tr>
-        </table>
-        </center>
-<dt><strong>Options and Parameters:</strong>
-    <dl>
-        <dt><code>-h</code>
-            <dd>Displays a syntax summary.
-        <!--  currently no -m option
+        -->The
+<tt>-h</tt>
+option causes a syntax summary similar to the following to be displayed:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; h4toh5 inputfile.hdf outputfile.h5
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; h5toh4 inputfile.hdf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<!--  currently no -m option
+              h5toh4 -m inputfile1.hdf inputfile2.hdf ...  --></pre>
+Each object in the HDF4 file is converted to an equivalent HDF5 object,
+according to the mapping described in <i><a href="ADGuide/H4toH5Mapping.pdf" target="ExternalWinA">Mapping
+HDF4 Objects to HDF5 Objects</a></i>. (If this mapping changes between
+HDF5 Library releases, a more up-to-date version may be available at <a href="http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5/H4-to-H5MappingGuidelines.pdf" target="ExternalWinB"><i>Mapping
+HDF4 Objects to HDF5 Objects</i> on the HDF FTP server</a>.)
+<p>In this inital version, <tt>h4toh5</tt> converts the following HDF4
+objects:
+<center><table BORDER=0 WIDTH="75%" >
+<tr>
+<th ALIGN=LEFT VALIGN=TOP WIDTH="40%">HDF4 Object&nbsp;</th>
+
+<th ALIGN=LEFT VALIGN=TOP WIDTH="60%">Resulting HDF5 Object&nbsp;</th>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP WIDTH="40%">SDS&nbsp;</td>
+
+<td ALIGN=LEFT VALIGN=TOP WIDTH="60%">Dataset&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP WIDTH="40%">GR, RI8, and RI24 image&nbsp;</td>
+
+<td ALIGN=LEFT VALIGN=TOP WIDTH="60%">Dataset&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP WIDTH="40%">Vdata&nbsp;</td>
+
+<td ALIGN=LEFT VALIGN=TOP WIDTH="60%">Dataset&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP WIDTH="40%">Vgroup&nbsp;</td>
+
+<td ALIGN=LEFT VALIGN=TOP WIDTH="60%">Group&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP WIDTH="40%">Annotation&nbsp;</td>
+
+<td ALIGN=LEFT VALIGN=TOP WIDTH="60%">Attribute&nbsp;</td>
+</tr>
+
+<tr>
+<td ALIGN=LEFT VALIGN=TOP WIDTH="40%">Palette&nbsp;</td>
+
+<td ALIGN=LEFT VALIGN=TOP WIDTH="60%">Dataset&nbsp;</td>
+</tr>
+</table></center>
+
+<dt>
+<b>Options and Parameters:</b></dt>
+
+<dl>
+<dt>
+<tt>-h</tt></dt>
+
+<dd>
+Displays a syntax summary.&nbsp;<!--  currently no -m option
         <dt><code>-m</code>
             <dd>Converts multiple HDF4 files to multiple HDF5 files.
-        -->
-        <dt><em>h4file</em>
-            <dd>The HDF4 file to be converted.
-        <dt><em>h5file</em>
-            <dd>The HDF5 file to be created.
-    </dl>
+        --></dd>
+
+<dt>
+<i>h4file</i></dt>
+
+<dd>
+The HDF4 file to be converted.</dd>
+
+<dt>
+<i>h5file</i></dt>
+
+<dd>
+The HDF5 file to be created.</dd>
+</dl>
 <!--
 <dt><strong>Current Status:</strong>
     <dd>
 <dt><strong>See Also:</strong>
     <dd>
--->
-</dl>
-
-
-<!--                     Template, next 40 lines            -->
-<!--                     Template, next 40 lines            -->
-<!--                     Template, next 40 lines
+--></dl>
+<!--                     Template, next 40 lines            --><!--                     Template, next 40 lines            --><!--                     Template, next 40 lines
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-H5toh4">h5toh4</a>
@@ -663,53 +940,35 @@ These tools enable the user to examine HDF5 files interactively.
 
 
 -->
-
-
 <hr>
-<center>
-<table border=0 width=98%>
-<tr><td valign=top align=left>
-<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
-<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
-<!--
+<center><table BORDER=0 WIDTH="98%" >
+<tr>
+<td ALIGN=LEFT VALIGN=TOP><a href="H5.intro.html">Introduction to HDF5</a>
+<br><a href="H5.user.html">HDF5 User Guide</a>
+<br><a href="index.html">Other HDF5 documents and links</a>
+<br><!--
 <a href="Glossary.html">Glossary</a><br>
--->
-</td>
-<td valign=top align=right>
-And in this document, the 
-<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
-<br>
-<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
-<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
-<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
-<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
-<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
-<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
-<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
-<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-<br>
-<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
-<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
-<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
-<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
-Tools&nbsp;&nbsp;
-<a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
-</td></tr>
-</table>
-</center>
+--></td>
+
+<td ALIGN=RIGHT VALIGN=TOP>And in this document, the <a href="RM_H5Front.html">HDF5
+Reference Manual</a>
+<br><a href="RM_H5.html">H5</a>&nbsp; <a href="RM_H5A.html">H5A</a> 
+<a href="RM_H5D.html">H5D</a>&nbsp;
+<a href="RM_H5E.html">H5E</a> 
+<a href="RM_H5F.html">H5F</a>&nbsp; <a href="RM_H5G.html">H5G</a>
+
+<a href="RM_H5I.html">H5I</a>&nbsp; <a href="RM_H5P.html">H5P</a>
+<br><a href="RM_H5R.html">H5R</a>&nbsp; <a href="RM_H5S.html">H5S</a> 
+<a href="RM_H5T.html">H5T</a>&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp; Tools&nbsp; <a href="PredefDTypes.html">Datatypes</a></td>
+</tr>
+</table></center>
+
 <hr>
-
-
 <address>
-<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a></address>
 
-<br>
-Last modified:  15 December 2000
-
-<br>
-Describes HDF5 Release 1.4, February 2001
-
-
+<br>Last modified: 15 December 2000
+<br>Describes HDF5 Release 1.4, February 2001
 </body>
 </html>
