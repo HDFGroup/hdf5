@@ -344,8 +344,8 @@ run_test_loop(FILE *output, struct options *opts)
             parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
 
             print_indent(output, TAB_SPACE * 1);
-            output_report(output, "Transfer Buffer Size: %.2f KBs, File size: %.2f MBs\n",
-                          ((double)buf_size) / ONE_KB,
+            output_report(output, "Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
+                          buf_size,
                           ((double)parms.num_dsets * parms.num_elmts * sizeof(int)) / ONE_MB);
             print_indent(output, TAB_SPACE * 1);
             output_report(output,
