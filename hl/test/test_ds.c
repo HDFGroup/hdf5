@@ -11,14 +11,11 @@
  *                                                                          *
  ****************************************************************************/
 
-
-
 #include "H5DS.h"
 #include "H5LT.h"
 #include <stdlib.h>
 #include <string.h>
 #include "H5IM.h"
-
 
 /* operator functions */
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
@@ -26,16 +23,12 @@ static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_da
 static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
 static herr_t op_bogus(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
 
-
-
 /* prototypes */
 static int test_simple(void);
 static int test_errors(void);
 static int test_rank(void);
+static int test_types(void);
 static int test_iterators(void);
-
-
-
 
 #define RANK          2
 #define DIM_DATA      12
@@ -46,13 +39,12 @@ static int test_iterators(void);
 #define DIM1          1
 #define DIM2          2
 
-#define DS_1_NAME   "ds_a_1"
-#define DS_11_NAME  "ds_a_11"
-#define DS_2_NAME   "ds_a_2"
-#define DS_21_NAME  "ds_a_21"
-#define DS_22_NAME  "ds_a_22"
-#define DS_3_NAME   "ds_a_3"
-
+#define DS_1_NAME      "ds_a_1"
+#define DS_11_NAME     "ds_a_11"
+#define DS_2_NAME      "ds_a_2"
+#define DS_21_NAME     "ds_a_21"
+#define DS_22_NAME     "ds_a_22"
+#define DS_3_NAME      "ds_a_3"
 
 #define SCALE_1_NAME   "Latitude set 0"
 #define SCALE_11_NAME  "Latitude set 1"
@@ -60,13 +52,15 @@ static int test_iterators(void);
 #define SCALE_21_NAME  "Longitude set 1"
 #define SCALE_22_NAME  "Longitude set 2"
 
-#define DIM0_LABEL   "Latitude"
-#define DIM1_LABEL   "Longitude"
+#define DIM0_LABEL     "Latitude"
+#define DIM1_LABEL     "Longitude"
 
-#define FILE1 "test_ds1.h5"
-#define FILE2 "test_ds2.h5"
-#define FILE3 "test_ds3.h5"
-#define FILE4 "test_ds4.h5"
+#define FILE1          "test_ds1.h5"
+#define FILE2          "test_ds2.h5"
+#define FILE3          "test_ds3.h5"
+#define FILE4          "test_ds4.h5"
+#define FILE5          "test_ds5.h5"
+
 
 /*-------------------------------------------------------------------------
  * the main program
@@ -80,6 +74,7 @@ int main(void)
  nerrors += test_errors()<0 	?1:0;
  nerrors += test_rank()<0 	?1:0;
  nerrors += test_iterators()<0 	?1:0;
+ nerrors += test_types()<0 	?1:0;
 
  if (nerrors) goto error;
  printf("All dimension scales tests passed.\n");
@@ -2263,7 +2258,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * test several rank and types
+ * test several ranks 
  *-------------------------------------------------------------------------
  */
 
@@ -2311,7 +2306,6 @@ static int test_rank(void)
  /* make a 3D scale dataset  */
  if (H5LTmake_dataset_int(fid,"ds_a_2",3,dims3,NULL)<0)
   goto out;
-
  
 /*-------------------------------------------------------------------------
  * attach 
@@ -2364,12 +2358,10 @@ static int test_rank(void)
   if (H5Dclose(dsid)<0)
    goto out;
  }
- 
  if (H5Dclose(did)<0)
   goto out;
  
  PASSED();
-
 
 /*-------------------------------------------------------------------------
  * attach, set, get names, labels
@@ -2452,10 +2444,6 @@ static int test_rank(void)
  
  PASSED();
 
-
-
-
-
 /*-------------------------------------------------------------------------
  * close 
  *-------------------------------------------------------------------------
@@ -2475,3 +2463,181 @@ out:
  H5_FAILED();
  return FAIL;
 }
+
+
+/*-------------------------------------------------------------------------
+ * attach scales with several datatypes
+ *-------------------------------------------------------------------------
+ */ 
+
+static int test_types(void)
+{
+ hid_t          fid;                                              /* file ID */
+ hid_t          did;                                              /* dataset ID */
+ hid_t          dsid;                                             /* DS dataset ID */
+ int            rank     = RANK;                                  /* rank of data dataset */
+ int            rankds   = 1;                                     /* rank of DS dataset */
+ hsize_t        dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
+ int            buf[DIM_DATA] = {1,2,3,4,5,6,7,8,9,10,11,12};     /* data of data dataset */
+ hsize_t        s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
+ hsize_t        s2_dim[1]  = {DIM2_SIZE};                         /* size of DS 2 dataset */
+ float          s1_float[DIM1_SIZE] = {10,20,30};                 /* data of DS 1 dataset */
+ unsigned short s2_ushort[DIM2_SIZE] = {10,20,30,40};             /* data of DS 2 dataset */
+ char           *s1_str = "ABC";
+ char           *s2_str = "ABCD";
+   
+ printf("Testing scales with several datatypes\n");
+ 	
+/*-------------------------------------------------------------------------
+ * create a file for the test
+ *-------------------------------------------------------------------------
+ */  
+ /* create a file using default properties */
+ if ((fid=H5Fcreate(FILE5,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  goto out;
+	
+/*-------------------------------------------------------------------------
+ * create datasets: 1 "data" dataset and 2 dimension scales
+ *-------------------------------------------------------------------------
+ */  
+
+ /* make a dataset */
+ if (H5LTmake_dataset_int(fid,"dset_a",rank,dims,buf)<0)
+  goto out;
+
+ /* make a DS dataset for the first dimension */
+ if (H5LTmake_dataset_float(fid,DS_1_NAME,rankds,s1_dim,s1_float)<0)
+  goto out;
+
+ /* make a DS dataset for the second dimension */
+ if (H5LTmake_dataset(fid,DS_2_NAME,rankds,s2_dim,H5T_NATIVE_USHORT,s2_ushort)<0)
+  goto out;
+	
+/*-------------------------------------------------------------------------
+ * floating point and short scales
+ *-------------------------------------------------------------------------
+ */  
+
+ TESTING2("floating point and short scales");
+
+ /* get the dataset id for "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,DS_1_NAME))<0)
+  goto out;
+ /* attach the DS_1_NAME dimension scale to "dset_a" at dimension 0 */
+ if (H5DSattach_scale(did,dsid,DIM0)<0)
+  goto out;
+ /* set name */  
+ if (H5DSset_scale(dsid,SCALE_1_NAME)<0)
+  goto out;
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,DS_2_NAME))<0)
+  goto out;
+ /* attach the DS_2_NAME dimension scale to "dset_a" at dimension 1 */
+ if (H5DSattach_scale(did,dsid,DIM1)<0)
+  goto out;
+ /* set name */  
+ if (H5DSset_scale(dsid,SCALE_2_NAME)<0)
+  goto out;
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ /* set a label */
+ if (H5DSset_label(did,DIM0,DIM0_LABEL)<0)
+  goto out;
+ if (H5DSset_label(did,DIM1,DIM1_LABEL)<0)
+  goto out;
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+ 	
+/*-------------------------------------------------------------------------
+ * create datasets: 1 "data" dataset and 2 dimension scales
+ *-------------------------------------------------------------------------
+ */  
+
+ /* make a dataset */
+ if (H5LTmake_dataset_int(fid,"dset_b",rank,dims,buf)<0)
+  goto out;
+
+ /* make a DS dataset for the first dimension */
+ if (H5LTmake_dataset_string(fid,"ds_b_1",s1_str)<0)
+  goto out;
+
+ /* make a DS dataset for the second dimension */
+ if (H5LTmake_dataset_string(fid,"ds_b_2",s2_str)<0)
+  goto out;
+	
+/*-------------------------------------------------------------------------
+ * floating point and short scales
+ *-------------------------------------------------------------------------
+ */  
+
+ TESTING2("string scales");
+
+ /* get the dataset id for "dset_b" */
+ if ((did = H5Dopen(fid,"dset_b"))<0)
+  goto out;
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"ds_b_1"))<0)
+  goto out;
+ /* attach the DS_1_NAME dimension scale to "dset_b" at dimension 0 */
+ if (H5DSattach_scale(did,dsid,DIM0)<0)
+  goto out;
+ /* set name */  
+ if (H5DSset_scale(dsid,SCALE_1_NAME)<0)
+  goto out;
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"ds_b_2"))<0)
+  goto out;
+ /* attach the DS_2_NAME dimension scale to "dset_b" at dimension 1 */
+ if (H5DSattach_scale(did,dsid,DIM1)<0)
+  goto out;
+ /* set name */  
+ if (H5DSset_scale(dsid,SCALE_2_NAME)<0)
+  goto out;
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ /* set a label */
+ if (H5DSset_label(did,DIM0,DIM0_LABEL)<0)
+  goto out;
+ if (H5DSset_label(did,DIM1,DIM1_LABEL)<0)
+  goto out;
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * close 
+ *-------------------------------------------------------------------------
+ */ 
+ if (H5Fclose(fid)<0)
+  goto out;
+
+ return 0;
+  
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Fclose(fid);
+ } H5E_END_TRY;
+ H5_FAILED();
+ return FAIL;
+}
+
+
+
