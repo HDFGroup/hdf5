@@ -618,7 +618,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	cat $TMP_OUTPUT
 	# Verify test script did complete by checking the last lines
 	(tail -2 $TMP_OUTPUT | grep -s '^Total time' > /dev/null 2>&1) ||
-	    (REPORT_ERR "****FAILED ${HOSTNAME}: snaptest did not complete****" &&
+	    (REPORT_ERR "****FAILED ${h}: snaptest did not complete****" &&
 		PRINT_BLANK)
 	rm $TMP_OUTPUT
     done
