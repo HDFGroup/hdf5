@@ -72,7 +72,7 @@ lib progs check test _test uninstall:
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
-##	@@SETX@; for d in $(SUBDIRS) examples; do			      \
+##	@@SETX@; for d in $(SUBDIRS) examples; do
 tests TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
@@ -87,14 +87,14 @@ install:
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
-##	@@SETX@; for d in $(SUBDIRS) examples; do			      \
+##	@@SETX@; for d in $(SUBDIRS) examples; do
 clean mostlyclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) conftest conftest.c
 
-##	@@SETX@; for d in $(SUBDIRS) examples; do			      \
+##	@@SETX@; for d in $(SUBDIRS) examples; do
 distclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@);					      \
