@@ -1451,7 +1451,6 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
       } /* end while */
 
     /* Iterate through the node, copying each hyperslab's information */
-    node=space->select.sel_info.pnt_lst->head;
     while(node!=NULL && numpoints>0) {
         HDmemcpy(buf,node->pnt,sizeof(hsize_t)*rank);
         buf+=rank;
