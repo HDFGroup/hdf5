@@ -1177,7 +1177,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     
 #ifdef H5F_DEBUG
     if (H5DEBUG(F)) {
-	fprintf(H5DEBUG(F), "%s: alignment=%ld, threshold=%ld, size=%ld\n",
+	HDfprintf(H5DEBUG(F), "%s: alignment=%Hd, threshold=%Hd, size=%Hd\n",
 	    FUNC, file->alignment, file->threshold, size);
     }
 #endif
@@ -1288,15 +1288,15 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 		ret_value = best->addr + head;
 #ifdef H5F_DEBUG
 		if (H5DEBUG(F)) {
-		    fprintf(H5DEBUG(F),
-		    "%s: 3 pieces, begin best->addr=%ld, best->size=%ld, "
-		    "head=%ld, size=%ld\n",
+		    HDfprintf(H5DEBUG(F),
+		    "%s: 3 pieces, begin best->addr=%a, best->size=%Hd, "
+		    "head=%Hd, size=%Hd\n",
 		    FUNC, best->addr, best->size, head, size);
 		}
 #endif
 		assert(tmp);		/* bark in debug mode */
 		if (tmp){
-		    if (tmp->size = best->size - head - size){
+		    if (tmp->size = (best->size - head - size)){
 			tmp->addr = best->addr + head + size;
 			tmp->next = best->next;
 			best->next = tmp;
@@ -1406,14 +1406,14 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                   "driver allocation request failed");
         }
     } else {
-	hsize_t	wasted, tmpsize;
+	hsize_t	wasted;
         haddr_t oldeoa;
 	haddr_t eoa = (file->cls->get_eoa)(file);
 
 #ifdef H5F_DEBUG
 	if (file->alignment * file->threshold != 1 && H5DEBUG(F)) {
-	    fprintf(H5DEBUG(F),
-		"%s: alignment=%ld, threshold=%ld, size=%ld, Begin eoa=%ld\n",
+	    HDfprintf(H5DEBUG(F),
+		"%s: alignment=%Hd, threshold=%Hd, size=%Hd, Begin eoa=%a\n",
 		FUNC, file->alignment, file->threshold, size, eoa);
 	}
 #endif
@@ -1452,8 +1452,8 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 
 #ifdef H5F_DEBUG
 	if (file->alignment * file->threshold != 1 && H5DEBUG(F)) {
-	    fprintf(H5DEBUG(F),
-		"%s: ret_value=%ld, wasted=%ld, Ended eoa=%ld\n",
+	    HDfprintf(H5DEBUG(F),
+		"%s: ret_value=%a, wasted=%Hd, Ended eoa=%a\n",
 		FUNC, ret_value, wasted, eoa);
 	}
 #endif

@@ -637,7 +637,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     while (size>0) {
         do {
             assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            nbytes = HDwrite(file->fd, (void*)buf, (size_t)size);
+            nbytes = HDwrite(file->fd, buf, (size_t)size);
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */

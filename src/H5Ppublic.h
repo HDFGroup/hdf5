@@ -20,7 +20,6 @@
 /* Default Template for creation, access, etc. templates */
 #define H5P_DEFAULT     0
 
-#include "H5private.h"
 /* Public headers needed by this file */
 #include "H5public.h"
 #include "H5Ipublic.h"
