@@ -2235,6 +2235,9 @@ get_objectname(table_t* table, int idx)
  *              Robb Matzke, 2000-06-23
  *              Changed name from H5ToolsFopen() so it jives better with
  *              the names we already have at the top of this source file.
+ *
+ *              Thomas Radke, 2000-09-12
+ *              Added Stream VFD to the driver[] array.
  *-----------------------------------------------------------------------*/
 hid_t
 h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
@@ -2271,6 +2274,13 @@ h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
         driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
         ndrivers++;
+
+#ifdef H5_HAVE_STREAM
+        driver[ndrivers].name = "stream";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_stream(fapl, NULL);
+        ndrivers++;
+#endif
 #endif
     }
 
