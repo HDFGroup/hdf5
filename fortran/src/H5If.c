@@ -27,3 +27,48 @@ nh5iget_type_c (hid_t_f *obj_id, int_f *type)
      ret_value = 0;
      return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5iget_name_c
+ * Purpose:     Call H5Iget_name to get object's name 
+ * Inputs:      obj_id - object identifier 
+ *              buf_size - size of the buffer 
+ * Outputs:     buf - buffer to hold the name
+ * Returns:     length of the name on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, March 12, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size)
+{
+     int ret_value = -1;
+     hid_t c_obj_id;
+     ssize_t c_size;
+     size_t c_buf_size;
+     char *c_buf =NULL;
+
+     /*
+      * Allocate buffer to hold name of an attribute
+      */
+     c_buf_size = (size_t)*buf_size;
+     c_buf = (char *)HDmalloc((int)c_buf_size +1);
+     if (c_buf == NULL) return ret_value; 
+ 
+     /*
+      * Call H5IAget_name function
+      */
+     c_obj_id = (hid_t)*obj_id;
+     c_size = H5Iget_name(c_obj_id, c_buf, c_buf_size);
+     if (c_size < 0) goto DONE;
+
+     /*
+      * Convert C name to FORTRAN and place it in the given buffer
+      */
+      HD5packFstring(c_buf, _fcdtocp(buf), (int)c_buf_size);
+      *name_size = (size_t_f)c_size;
+      ret_value = 0;
+
+DONE:
+      HDfree(c_buf);
+      return ret_value;
+}

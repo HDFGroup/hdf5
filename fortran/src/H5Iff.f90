@@ -72,6 +72,65 @@
             END INTERFACE
             hdferr = h5iget_type_c(obj_id, type)
           END SUBROUTINE h5iget_type_f
+!----------------------------------------------------------------------
+! Name:		h5iget_name_f 
+!
+! Purpose: 	Gets a name of an object specified by its idetifier.  
+!
+! Inputs:  
+!		obj_id		- attribute identifier
+!		buf_size	- size of a buffer to read name in
+! Outputs:  
+!		buf		- buffer to read name in, name will be truncated if
+!                                 buffer is not big enough
+!               name_size       - name size
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+! Modifications: 	
+!
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr) 
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5iget_name_f
+!DEC$endif
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id     ! Object identifier 
+            INTEGER(SIZE_T), INTENT(IN) :: buf_size  ! Buffer size 
+            CHARACTER(LEN=*), INTENT(OUT) :: buf   ! Buffer to hold object name
+            INTEGER(SIZE_T), INTENT(OUT) :: name_size ! Actual name size
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code:
+                                                   ! 0 if successful,
+                                                   ! -1 if fail
+!            INTEGER, EXTERNAL :: h5iget_name_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5iget_name_c(obj_id, buf, buf_size, name_size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5IGET_NAME_C'::h5iget_name_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf
+              INTEGER(HID_T), INTENT(IN) :: obj_id
+              CHARACTER(LEN=*), INTENT(OUT) :: buf
+              INTEGER(SIZE_T), INTENT(IN) :: buf_size
+              INTEGER(SIZE_T), INTENT(OUT) :: name_size
+              END FUNCTION h5iget_name_c
+            END INTERFACE
+
+            hdferr = h5iget_name_c(obj_id, buf, buf_size, name_size)
+          END SUBROUTINE h5iget_name_f
+
 
       END MODULE H5I
             

@@ -156,17 +156,18 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  *                    h5r_flags    - H5R interface flags
  *                    h5s_flags    - H5S interface flags
  *                    h5t_flags    - H5T interface flags
+ *                    h5z_flags    - H5Z interface flags
  * Outputs:           None 
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal  
  *                    Tuesday, August 3, 1999
- * Modifications:
+ * Modifications:     Added Z flags. EIP,  March 12, 2003
  *---------------------------------------------------------------------------*/
 int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, int_f *h5g_flags, int_f *h5i_flags,
                  int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
-                 int_f *h5t_flags)
+                 int_f *h5t_flags, int_f *h5z_flags)
 {
     int ret_value = -1;
 /*
@@ -354,6 +355,20 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5t_flags[27] = H5T_STR_ERROR;
       h5t_flags[28] = H5T_VLEN;
       h5t_flags[29] = H5T_ARRAY;
+/*
+ *  H5Z flags
+ */
+
+      h5z_flags[0] = H5Z_FILTER_ERROR;
+      h5z_flags[1] = H5Z_FILTER_NONE;
+      h5z_flags[2] = H5Z_FILTER_DEFLATE;
+      h5z_flags[3] = H5Z_FILTER_SHUFFLE;
+      h5z_flags[4] = H5Z_FILTER_FLETCHER32;
+      h5z_flags[5] = H5Z_ERROR_EDC;
+      h5z_flags[6] = H5Z_DISABLE_EDC;
+      h5z_flags[7] = H5Z_ENABLE_EDC;
+      h5z_flags[8] = H5Z_NO_EDC;
+
 
     ret_value = 0; 
     return ret_value;

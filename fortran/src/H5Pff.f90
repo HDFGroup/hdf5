@@ -2552,11 +2552,9 @@
 !				NONE
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		February, 2003
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
-!			called C functions (it is needed for Windows
-!			port).  March 14, 2001 
+! Modifications: 	
 !
 ! Comment:		
 !----------------------------------------------------------------------
@@ -5679,5 +5677,220 @@
             value_len = LEN(value)
             hdferr = h5pinsertc_c(plist, name , name_len, size, value, value_len)
           END SUBROUTINE h5pinsert_char
+
+!----------------------------------------------------------------------
+! Name:		h5pset_shuffle_f 
+!
+! Purpose: 	Sets shuffling filter
+!
+! Inputs:  
+!		prp_id		- dataset creation property list identifier
+!		type_size	- size of the datatype
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pset_shuffle_f(prp_id, type_size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_shuffle_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(IN) :: type_size     ! iSize in bytes of the datatype
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!            INTEGER, EXTERNAL :: h5pset_shuffle_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pset_shuffle_c(prp_id, type_size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_SHUFFLE_C'::h5pset_shuffle_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              INTEGER, INTENT(IN) :: type_size
+              END FUNCTION h5pset_shuffle_c
+            END INTERFACE
+            hdferr = h5pset_shuffle_c(prp_id, type_size)
+
+          END SUBROUTINE h5pset_shuffle_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_edc_check_f 
+!
+! Purpose: 	Enables/disables error detecting  
+!
+! Inputs:  
+!		prp_id		- dataset creation property list identifier
+!               flag            - EDC flag; possible values:
+!                                   H5Z_DISABLE_EDC_F
+!                                   H5Z_ENABLE_EDC_F
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		March 13, 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_edc_check_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(IN) :: flag          ! Checksum filter flag
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!            INTEGER, EXTERNAL :: h5pset_edc_check_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pset_edc_check_c(prp_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_EDC_CHECK_C'::h5pset_edc_check_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              INTEGER, INTENT(IN) :: flag 
+              END FUNCTION h5pset_edc_check_c
+            END INTERFACE
+            hdferr = h5pset_edc_check_c(prp_id, flag)
+
+          END SUBROUTINE h5pset_edc_check_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_edc_check_f 
+!
+! Purpose: 	Queries error detecting  
+!
+! Inputs:  
+!		prp_id		- dataset creation property list identifier
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		March 13, 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_edc_check_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset transfer property list identifier 
+            INTEGER, INTENT(OUT) :: flag        ! Checksum filter flag
+                                                 ! May have one of the following values:
+                                                 ! H5Z_ERROR_EDC_F
+                                                 ! H5Z_DISABLE_EDC_F
+                                                 ! H5Z_ENABLE_EDC_F
+                                                 ! H5Z_NO_EDC_F
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!            INTEGER, EXTERNAL :: h5pget_edc_check_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pget_edc_check_c(prp_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_EDC_CHECK_C'::h5pget_edc_check_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              INTEGER, INTENT(OUT) :: flag
+              END FUNCTION h5pget_edc_check_c
+            END INTERFACE
+            hdferr = h5pget_edc_check_c(prp_id, flag)
+
+          END SUBROUTINE h5pget_edc_check_f
+!----------------------------------------------------------------------
+! Name:		h5pset_fletcher32_f 
+!
+! Purpose: 	Sets Fletcher32 checksum of EDC for a dataset creation 
+!               property list.
+!
+! Inputs:  
+!		prp_id		- dataset creation property list identifier
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		March 13, 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_fletcher32_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!            INTEGER, EXTERNAL :: h5pset_fletcher32_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pset_fletcher32_c(prp_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FLETCHER32_C'::h5pset_fletcher32_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              END FUNCTION h5pset_fletcher32_c
+            END INTERFACE
+            hdferr = h5pset_fletcher32_c(prp_id)
+
+          END SUBROUTINE h5pset_fletcher32_f
 
      END MODULE H5P

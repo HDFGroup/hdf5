@@ -200,6 +200,14 @@
             MODULE PROCEDURE h5dread_vl_string
           END INTERFACE
 
+          INTERFACE h5dfill_f
+            MODULE PROCEDURE h5dfill_integer
+            MODULE PROCEDURE h5dfill_real
+            MODULE PROCEDURE h5dfill_double
+            MODULE PROCEDURE h5dfill_char
+          END INTERFACE
+
+
         CONTAINS
           
 !----------------------------------------------------------------------
@@ -9772,4 +9780,311 @@
                                 buf, dims, str_len)
           RETURN 
           END SUBROUTINE h5dread_vl_string
+
+!----------------------------------------------------------------------
+! Name:		h5dfill_integer
+!
+! Purpose:      Fills dataspace elements with a fill value in a memory buffer.	
+!               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes 
+!               of the fillvalues and buffers are supported. Buffer and fillvalue
+!               are assumed to have the same datatype.
+!               Only one-dimesional buffers are supported.
+!
+! Inputs:  
+!		fill_value	- fill value
+!		space_id	- memory space selection identifier
+!		buf		- data buffer iin memory ro apply selection to
+!				- of k-th dimension of the buf array
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_integer
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER, INTENT(IN) :: fill_value  ! Fill value
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+            INTEGER, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            
+            INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+            INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+            
+!            INTEGER, EXTERNAL :: h5dfill_c
+! MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5dfill_c(fill_value, fill_type_id, space_id, &
+                                         buf, mem_type_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !DEC$ ENDIF
+              INTEGER, INTENT(IN) :: fill_value  ! Fill value
+              INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+              INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+              INTEGER, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+              INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+              END FUNCTION h5dfill_c
+            END INTERFACE 
+            fill_type_id = H5T_NATIVE_INTEGER
+            mem_type_id  = H5T_NATIVE_INTEGER
+
+            hdferr = h5dfill_c(fill_value, fill_type_id, space_id, & 
+                               buf, mem_type_id)
+
+          END SUBROUTINE h5dfill_integer
+
+!----------------------------------------------------------------------
+! Name:		h5dfill_real
+!
+! Purpose:      Fills dataspace elements with a fill value in a memory buffer.	
+!               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes 
+!               of the fillvalues and buffers are supported. Buffer and fillvalue
+!               are assumed to have the same datatype.
+!               Only one-dimesional buffers are supported.
+!
+! Inputs:  
+!		fill_value	- fill value
+!		space_id	- memory space selection identifier
+!		buf		- data buffer iin memory ro apply selection to
+!				- of k-th dimension of the buf array
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5dfill_real(fill_valuer, space_id, buf,  hdferr)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_real
+!DEC$endif
+
+            IMPLICIT NONE
+            REAL, INTENT(IN) :: fill_valuer  ! Fill value
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+            REAL, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            
+            INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+            INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+            
+!            INTEGER, EXTERNAL :: h5dfill_c
+! MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5dfill_c(fill_valuer, fill_type_id, space_id, &
+                                         buf, mem_type_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !DEC$ ENDIF
+              REAL, INTENT(IN) :: fill_valuer  ! Fill value
+              INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+              INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+              REAL, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+              INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+              END FUNCTION h5dfill_c
+            END INTERFACE 
+            fill_type_id = H5T_NATIVE_REAL
+            mem_type_id  = H5T_NATIVE_REAL
+
+            hdferr = h5dfill_c(fill_valuer, fill_type_id, space_id, & 
+                               buf, mem_type_id)
+          END SUBROUTINE h5dfill_real
+
+!----------------------------------------------------------------------
+! Name:		h5dfill_double
+!
+! Purpose:      Fills dataspace elements with a fill value in a memory buffer.	
+!               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes 
+!               of the fillvalues and buffers are supported. Buffer and fillvalue
+!               are assumed to have the same datatype.
+!               Only one-dimesional buffers are supported.
+!
+! Inputs:  
+!		fill_value	- fill value
+!		space_id	- memory space selection identifier
+!		buf		- data buffer iin memory ro apply selection to
+!				- of k-th dimension of the buf array
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5dfill_double(fill_value, space_id, buf,  hdferr)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_double
+!DEC$endif
+
+            IMPLICIT NONE
+            DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+            DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            
+            INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+            INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+            
+!            INTEGER, EXTERNAL :: h5dfill_c
+! MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5dfill_c(fill_value, fill_type_id, space_id, &
+                                         buf, mem_type_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !DEC$ ENDIF
+              DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
+              INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+              INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+              DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+              INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+              END FUNCTION h5dfill_c
+            END INTERFACE 
+            fill_type_id = H5T_NATIVE_DOUBLE
+            mem_type_id  = H5T_NATIVE_DOUBLE
+
+            hdferr = h5dfill_c(fill_value, fill_type_id, space_id, & 
+                               buf, mem_type_id)
+
+
+          END SUBROUTINE h5dfill_double
+
+!----------------------------------------------------------------------
+! Name:		h5dfill_char
+!
+! Purpose:      Fills dataspace elements with a fill value in a memory buffer.	
+!               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes 
+!               of the fillvalues and buffers are supported. Buffer and fillvalue
+!               are assumed to have the same datatype.
+!               Only one-dimesional buffers are supported.
+!
+! Inputs:  
+!		fill_value	- fill value
+!		space_id	- memory space selection identifier
+!		buf		- data buffer iin memory ro apply selection to
+!				- of k-th dimension of the buf array
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_integer
+!DEC$endif
+
+            IMPLICIT NONE
+            CHARACTER, INTENT(IN) :: fill_value  ! Fill value
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+            CHARACTER, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            
+            INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+            INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+            
+!            INTEGER, EXTERNAL :: h5dfillc_c
+! MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5dfillc_c(fill_value, fill_type_id, space_id, &
+                                         buf, mem_type_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILLC_C'::h5dfillc_c  
+              !DEC$ ENDIF
+              CHARACTER, INTENT(IN) :: fill_value  ! Fill value
+              INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+              INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+              CHARACTER, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
+              INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+              END FUNCTION h5dfillc_c
+            END INTERFACE 
+            fill_type_id = H5T_NATIVE_CHARACTER
+            mem_type_id  = H5T_NATIVE_CHARACTER
+
+            hdferr = h5dfillc_c(fill_value, fill_type_id, space_id, & 
+                               buf, mem_type_id)
+
+          END SUBROUTINE h5dfill_char
+
+!----------------------------------------------------------------------
+! Name:		h5dget_space_status_f
+!
+! Purpose:      Returns the status of data space allocation. 
+!
+! Inputs:  
+!		dset_id		- dataset identifier
+! Outputs:  
+!               flag            - status; may have one of the following values:
+!				  H5D_SPACE_STS_ERROR_F
+!				  H5D_SPACE_STS_NOT_ALLOCATED_F
+!				  H5D_SPACE_STS_PART_ALLOCATED_F
+!				  H5D_SPACE_STS_ALLOCATED_F
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dget_space_status_f
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataspace identifier
+            INTEGER, INTENT(IN)        :: flag     ! Memory buffer to fill in
+            INTEGER, INTENT(OUT)       :: hdferr   ! Error code 
+            
+!            INTEGER, EXTERNAL :: h5dget_space_status_c
+! MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5dget_space_status_c(dset_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DGET_SPACE_STATUS_C'::h5dget_space_status_c  
+              !DEC$ ENDIF
+              INTEGER(HID_T) :: dset_id
+              INTEGER        :: flag
+              END FUNCTION h5dget_space_status_c
+            END INTERFACE 
+
+            hdferr = h5dget_space_status_c(dset_id, flag)
+          END SUBROUTINE h5dget_space_status_f
+
       END MODULE H5D

@@ -3,6 +3,15 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define if support for deflate filter is enabled */
+#undef HAVE_FILTER_DEFLATE
+
+/* Define if support for Fletcher32 checksum is enabled */
+#undef HAVE_FILTER_FLETCHER32
+
+/* Define if support for shuffle filter is enabled */
+#undef HAVE_FILTER_SHUFFLE
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

@@ -70,7 +70,8 @@
                                 i_H5P_flags, &
                                 i_H5R_flags, &
                                 i_H5S_flags, &
-                                i_H5T_flags  )
+                                i_H5T_flags, &               
+                                i_H5Z_flags )
           USE H5GLOBAL
           INTEGER i_H5F_flags(H5F_FLAGS_LEN)
           INTEGER i_H5G_flags(H5G_FLAGS_LEN)
@@ -82,6 +83,7 @@
           INTEGER i_H5R_flags(H5R_FLAGS_LEN)
           INTEGER i_H5S_flags(H5S_FLAGS_LEN)
           INTEGER i_H5T_flags(H5T_FLAGS_LEN)
+          INTEGER i_H5Z_flags(H5Z_FLAGS_LEN)
 
           !DEC$ IF DEFINED(HDF5F90_WINDOWS)
           !MS$ATTRIBUTES C,reference,alias:'_H5INIT_FLAGS_C'::h5init_flags_c
@@ -99,7 +101,8 @@
                                 H5P_flags, &
                                 H5R_flags, &
                                 H5S_flags, &
-                                H5T_flags  )
+                                H5T_flags, &
+                                H5Z_flags  )
         error = error_0 + error_1 + error_2
 
       END SUBROUTINE h5open_f

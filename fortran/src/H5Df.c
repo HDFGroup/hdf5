@@ -1507,3 +1507,97 @@ DONE:
   return ret_value;
 }
 
+/*----------------------------------------------------------------------------
+ * Name:        h5dfillc_c
+ * Purpose:     Call h5fill_c to fill memory buffer with a fill value
+ * Inputs:      fill_value - fill value
+ *              fill_type_id - fill value datatype identifier
+ *              space_id - memory space selection identifier
+ *              buf      - memory buffer to fill
+ *              mem_type_id - memory buffer dtatype identifier
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, March 12, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5dfillc_c (_fcd fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, _fcd buf, hid_t_f *mem_type_id)
+{
+     int ret_value = -1;
+     
+     /*
+      * Call h5dfill_c  function.
+      */
+     ret_value = nh5dfill_c(_fcdtocp(fill_value), fill_type_id, space_id, _fcdtocp(buf), mem_type_id);
+
+     return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5dfill_c
+ * Purpose:     Call H5Dfill to fill memory buffer with a fill value
+ * Inputs:      fill_value - fill value
+ *              fill_type_id - fill value datatype identifier
+ *              space_id - memory space selection identifier
+ *              buf      - memory buffer to fill
+ *              mem_type_id - memory buffer dtatype identifier
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, March 12, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5dfill_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void * buf, hid_t_f *mem_type_id)
+
+{
+     int ret_value = -1;
+     herr_t ret;
+     hid_t c_fill_type_id;
+     hid_t c_mem_type_id;
+     hid_t c_space_id;
+
+     c_fill_type_id = (hid_t)*fill_type_id;
+     c_mem_type_id = (hid_t)*mem_type_id;
+     c_space_id = (hid_t)*space_id;
+     
+     /*
+      * Call H5Dfill function.
+      */
+     ret = H5Dfill(fill_value, c_fill_type_id, buf, c_mem_type_id, c_space_id);
+
+     if (ret < 0) return ret_value;
+     ret_value = 0;
+     return ret_value;
+}      
+
+/*----------------------------------------------------------------------------
+ * Name:        h5dget_space_status_c
+ * Purpose:     Call H5Dget_space_status to request dataspace allocation status
+ * Inputs:      dset_id - dataset identifier
+ * Outputs:     flag - status flag
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, March 12, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5dget_space_status_c ( hid_t_f *dset_id, int_f *flag)
+
+{
+     int ret_value = -1;
+     herr_t ret;
+     hid_t c_dset_id;
+     H5D_space_status_t c_flag;
+
+     c_dset_id = (hid_t)*dset_id;
+     
+     /*
+      * Call H5Dget_space_status
+      */
+     ret = H5Dget_space_status(c_dset_id, &c_flag);
+
+     if (ret < 0) return ret_value;
+     *flag = (int_f)c_flag;
+     ret_value = 0;
+     return ret_value;
+}      
+

@@ -3104,4 +3104,65 @@
             hdferr = h5tvlen_create_c(type_id, vltype_id)
           END SUBROUTINE h5tvlen_create_f
 
+!----------------------------------------------------------------------
+! Name:		h5tis_variable_str_f 
+!
+! Purpose: 	Determines whether a dattype is a variable string.
+!
+! Inputs:  
+!		type_id	-  	- datartpe identifier
+! Outputs:  
+!		status		- flag to indicate if datatype
+!				  is a variable string
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		March 12, 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tis_variable_str_f
+!DEC$endif
+!
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+            LOGICAL, INTENT(OUT) :: status      ! Flag, idicates if datatype
+                                                ! is a variable string or not ( TRUE or
+                                                ! FALSE)  
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+            INTEGER :: flag                     ! "TRUE/FALSE/ERROR from C" 
+
+!            INTEGER, EXTERNAL :: h5tis_variable_str_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5tis_variable_str_c(type_id, flag) 
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5TIS_VARIABLE_STR_C'::h5tis_variable_str_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: type_id
+              INTEGER :: flag
+              END FUNCTION h5tis_variable_str_c
+            END INTERFACE
+
+            hdferr = h5tis_variable_str_c(type_id, flag)
+            status = .TRUE.
+            if (flag .EQ. 0) status = .FALSE.
+ 
+          END SUBROUTINE h5tis_variable_str_f
+
+!----------------------------------------------------------------------
       END MODULE H5T

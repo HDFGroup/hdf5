@@ -2807,3 +2807,102 @@ DONE:
      if(c_name != NULL) HDfree(c_name);
      return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_shuffle_c
+ * Purpose:     Call H5Pset_shuffle 
+ * Inputs:      prp_id - property list identifier 
+ *              type_size - size of the datatype in bytes
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, March 12, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_shuffle_c ( hid_t_f *prp_id , int_f *type_size)
+{
+  int ret_value = 0;
+  hid_t c_prp_id;
+  int c_type_size;
+  herr_t status;
+
+  c_prp_id = (hid_t)*prp_id;
+  c_type_size = (int)*type_size ;
+  status = H5Pset_shuffle(c_prp_id, c_type_size);
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_fletcher32_c
+ * Purpose:     Call H5Pset_fletcher32 to enable EDC
+ * Inputs:      prp_id - dataset creation property list identifier 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, March 13, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_fletcher32_c ( hid_t_f *prp_id )
+{
+  int ret_value = 0;
+  hid_t c_prp_id;
+  herr_t status;
+
+  c_prp_id = (hid_t)*prp_id;
+  status = H5Pset_fletcher32(c_prp_id);
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_edc_check_c
+ * Purpose:     Call H5Pset_edc_check to enable EDC
+ * Inputs:      prp_id - dataset transfer property list identifier 
+ *              flag   - EDC flag
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, March 13, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_edc_check_c ( hid_t_f *prp_id, int_f *flag )
+{
+  int ret_value = 0;
+  hid_t c_prp_id;
+  H5Z_EDC_t c_flag;
+  herr_t status;
+
+  c_prp_id = (hid_t)*prp_id;
+  c_flag = (H5Z_EDC_t)*flag;
+  status = H5Pset_edc_check(c_prp_id, c_flag);
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_edc_check_c
+ * Purpose:     Call H5Pget_edc_check to query EDC
+ * Inputs:      prp_id - dataset transfer property list identifier 
+ * Outouts:     flag   - EDC flag
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, March 13, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
+{
+  int ret_value = 0;
+  hid_t c_prp_id;
+  H5Z_EDC_t c_flag;
+  herr_t status;
+
+  c_prp_id = (hid_t)*prp_id;
+  c_flag = H5Pget_edc_check(c_prp_id);
+  if ( status < 0  ) ret_value = -1;
+  *flag = (int_f)c_flag;
+  return ret_value;
+}

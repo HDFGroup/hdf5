@@ -1596,3 +1596,29 @@ nh5tvlen_create_c(hid_t_f* type_id, hid_t_f *vltype_id)
   ret_value = 0; 
   return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5tis_variable_str_c
+ * Purpose:     Call H5Tis_variable_str to detrmine if the datatype
+ *              is a variable string.
+ * Inputs:      type_id - identifier of the dataspace 
+ * Outputs:     flag - 0 if not VL str, 1 if is not
+ *              and negative on failure.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, March 12 , 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag )
+{
+  int ret_value = 0;
+  hid_t c_type_id;
+  htri_t status;
+
+  c_type_id = (hid_t)*type_id;
+  status = H5Tis_variable_str(c_type_id);
+  *flag = (int_f)status;
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
