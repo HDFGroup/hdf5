@@ -1,0 +1,192 @@
+<html>
+<head><title>
+HDF5/H5F Draft API Specification
+</title></head>
+
+<body>
+
+<center>
+<h1>H5F: File Interface</h1>
+</center>
+
+<h2>File API Functions</h2>
+
+These functions are designed to provide file-level access to HDF5 files.
+Further manipulation of objects inside a file is performed through one of APIs
+documented below.
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#File-Open">H5Fopen</a>
+    <li><a href="#File-Create">H5Fcreate</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
+    <li><a href="#File-GetCreateTemplate">H5Fget_create_template</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#File-Close">H5Fclose</a>
+</ul>
+</td></tr>
+</table>
+
+<hr>
+
+<dl>
+<dt><strong>Name:</strong> <a name="File-Open">H5Fopen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fopen</code>(<em>const char *</em><code>name</code>,
+            <em>uintn</em> <code>flags</code>,
+            <em>hid_t</em> <code>access_template</code>
+        )
+<dt><strong>Description:</strong>
+        <dd>This is the primary function for opening existing HDF5 files.
+            The <code>flags</code> parameter determines the file access mode.
+            There is no read flag, all open files are implicitily opened for
+            read access.
+            All flags may be combined with the '|' (boolean OR operator) to
+            change the behavior of the file open call.
+            The <code>access_template</code> parameter is a template containing
+            additional information required for specific methods of access,
+            parallel I/O for example.  The paramters for access templates are
+            described in the H5P API documentation.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>const char *</em><code>name</code>
+            <dd>Name of the file to access.
+        <dt><em>uintn</em> <code>flags</code>
+            <dd>File access flags:
+                <ul><dl>
+                    <dt>H5F_ACC_RDWR
+                        <dd>Allow read and write access to file.
+                </dl></ul>
+        <dt><em>hid_t</em><code>access_template</code>
+            <dd>Template indicating the file access properties.
+                If parallel file access is desired, this is a collective
+                call according to the communicator stored in the
+                access_template.  Use 0 for default access template.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>An ID (of type <em>hid_t</em>) for the file upon success,
+        otherwise negative
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Create">H5Fcreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fcreate</code>(<em>const char *</em><code>name</code>,
+            <em>uintn</em> <code>flags</code>,
+            <em>hid_t</em> <code>create_template</code>,
+            <em>hid_t</em> <code>access_template</code>
+        )
+<dt><strong>Description:</strong>
+        <dd>This is the primary function for opening and creating HDF5 files.
+            The <code>flags</code> parameter determines whether an existing
+            file will be overwritten or not.  All newly created files are opened
+            for both reading and writing.
+            All flags may be combined with the '|' (boolean OR operator) to
+            change the behavior of the file open call.
+            The <code>create_template</code> and <code>access_template</code>
+            parameters are templates containing additional information required
+            for specific methods of access or particular aspects of the file
+            to set when creating a file.
+            The parameters for creation and access templates are
+            described in the H5P API documentation.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>const char *</em><code>name</code>
+            <dd>Name of the file to access.
+        <dt><em>uintn</em> <code>flags</code>
+            <dd>File access flags:
+                <ul><dl>
+                    <dt>H5F_ACC_TRUNC
+                        <dd>Truncate file, if it already exists.  The file will
+                            be truncated, erasing all data previously stored in
+                            the file.
+                </dl></ul>
+        <dt><em>hid_t</em><code>create_template</code>
+            <dd>File creation template ID, used when modifying default file meta-data
+        <dt><em>hid_t</em><code>access_template</code>
+            <dd>Template indicating the file access properties.
+                If parallel file access is desired, this is a collective
+                call according to the communicator stored in the
+                access_template.  Use 0 for default access template.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>An ID (of type <em>hid_t</em>) for the file upon success,
+        otherwise negative
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-IsHDF5">H5Fis_hdf5</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hbool_t </em><code>H5Fis_hdf5</code>(<em>const char *</em><code>name</code>
+        )
+<dt><strong>Description:</strong>
+        <dd>This function determines whether a file is in the HDF5 format.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>const char *</em><code>name</code>
+            <dd>File name to check format.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>TRUE/FALSE/negative
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetCreateTemplate">H5Fget_create_template</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fget_create_template</code>(<em>hid_t</em> <code>file_id</code>
+        )
+<dt><strong>Description:</strong>
+        <dd>This function returns an template ID with a copy of the parameters
+            used to create this file.  Useful for duplicating the parameters
+            when creating another file.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>File ID to get creation template of
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>zero/negative
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Close">H5Fclose</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Fclose</code>(<em>hid_t</em> <code>file_id</code>
+        )
+<dt><strong>Description:</strong>
+        <dd>This function terminates access to an HDF5 file.  If this is the
+            last file ID open for a file and if access IDs are still in use,
+            this function will fail.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>File ID to terminate access to.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>zero/negative
+</dl>
+
+<hr>
+
+<hr>
+
+<address>
+<a href="mailto:fbaker@ncsa.uiuc.edu">Frank Baker</a>
+<br>
+<a href="mailto:h5docs@ncsa.uiuc.edu">HDF5 Documentation</a>
+
+<br>
+Last modified:  29 June 1998
+
+</body>
+</html>

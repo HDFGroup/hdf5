@@ -1,0 +1,377 @@
+<html>
+<head><title>
+HDF5/H5E Draft API Specification
+</title></head>
+
+<body>
+
+<center>
+<h1>H5E: Error Interface</h1>
+</center>
+
+<h2>Error API Functions</h2>
+
+These functions provide error handling capabilities in the HDF5 environment.
+<p>
+Provides error handling in the form of a stack.  The FUNC_ENTER() macro 
+clears the error stack whenever an API function is entered.  When an error 
+is detected, an entry is pushed onto the stack.  As the functions unwind 
+additional entries are pushed onto the stack. The API function will return 
+some indication that an error occurred and the application can print the 
+error stack.
+<p>
+Certain API functions in the H5E package (such as H5Eprint())
+do not clear the error stack.  Otherwise, any function which
+doesn't have an underscore immediately after the package name
+will clear the error stack.  For instance, H5Fopen() clears
+the error stack while H5F_open() does not.
+<p>
+An error stack has a fixed maximum size.  If this size is
+exceeded then the stack will be truncated and only the
+inner-most functions will have entries on the stack. This is
+expected to be a rare condition. 
+<p>
+Each thread has its own error stack, but since
+multi-threading has not been added to the library yet, this
+package maintains a single error stack. The error stack is
+statically allocated to reduce the complexity of handling
+errors within the H5E package.    
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Error-SetAuto">H5Eset_auto</a>
+    <li><a href="#Error-GetAuto">H5Eget_auto</a>
+    <li><a href="#Error-Clear">H5Eclear</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Error-Print">H5Eprint</a>
+    <li><a href="#Error-Walk">H5Ewalk</a>
+    <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Error-GetMajor">H5Eget_major</a>
+    <li><a href="#Error-GetMinor">H5Eget_minor</a>
+</ul>
+</td></tr>
+</table>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-SetAuto">H5Eset_auto</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eset_auto</code>(<em>H5E_auto_t</em> <code>func</code>,
+        <em>void *</em><code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Turns automatic error printing on or off.
+<dt><strong>Description:</strong>
+    <dd>SC: H5Eset_auto turns on or off automatic printing of errors.  
+        When turned on (non-null <code>func</code> pointer), 
+        any API function which returns an error indication will 
+        first call <code>func</code>, passing it <code>client_data</code>
+        as an argument.
+        <p>
+        The default values before this function is called are
+        H5Eprint() with client data being the standard error stream,
+        stderr.
+        <p>
+        Automatic stack traversal is always in the H5E_WALK_DOWNWARD
+        direction. 
+        <p>
+        UG: If <em>func</em> is not a null pointer, then the function to
+	which it points will be called automatically when an API
+	function is about to return an indication of failure.  The
+	function is called with a single argument, the
+	<em>client_data</em> pointer.  When the library is first
+	initialized the auto printing function is set to
+	<code>H5Eprint()</code> (cast appropriately) and
+	<em>client_data</em> is the standard error stream pointer,
+	<code>stderr</code>.
+        <p>
+        <b>UG signature line reads</b>
+        <br><code>herr_t H5Eset_auto (herr_t(*<em>func</em>)(void*),
+	  void *<em>client_data</em>)</code>.
+        <br><b>The UG signature line for H5Eget_auto reads similarly.</b>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5E_auto_t</em> <code>func</code>
+            <dd>Function to be called upon an error condition.
+        <dt><em>void *</em><code>client_data</code>
+            <dd>Data passed to the error function.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetAuto">H5Eget_auto</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eget_auto</code>(<em>H5E_auto_t *</em> <code>func</code>,
+        <em>void **</em><code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the current settings for the automatic error stack
+        traversal function and its data.  
+<dt><strong>Description:</strong>
+    <dd>SC: H5Eget_auto returns the current settings for the automatic error stack
+        traversal function and its data.  Either (or both) arguments
+        may be null in which case the value is not returned.
+        <p>
+        UG: This function returns the current automatic error traversal
+	settings through the <em>func</em> and <em>client_data</em>
+	arguments. Either (or both) arguments may be null pointers in
+	which case the corresponding information is not returned.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5E_auto_t *</em> <code>func</code>
+            <dd>Current setting for the function to be called upon an 
+                error condition.
+        <dt><em>void **</em><code>client_data</code>
+            <dd>Current setting for the data passed to the error function.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-Clear">H5Eclear</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eclear</code>(<code>void</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Clears the error stack for the current thread.
+<dt><strong>Description:</strong>
+    <dd>SC: H5Eclear clears the error stack for the current thread.
+        <p>
+        This function can fail if there are problems initializing the library.
+        <p>
+        UG: The error stack can be explicitly cleared by calling this
+	function.  The stack is also cleared whenever an API function
+	is called, with certain exceptions (for instance,
+	<code>H5Eprint()</code>).
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>paramtype</em> <code>param</code>
+            <dd>xxx
+        <dt><i>Should this say "None"?</i>
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-Print">H5Eprint</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eprint</code>(<em>FILE *</em> <code>stream</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Prints the error stack in a default manner.  
+<dt><strong>Description:</strong>
+    <dd>SC: H5Eprint prints the error stack in some default way.  This is just a
+        convenience function for H5Ewalk() with a function that
+        prints error messages.  Users are encouraged to write there
+        own more specific error handlers.
+        <p>
+        UG: The error stack is printed on the specified stream. Even if
+	the error stack is empty a one-line message will be printed:
+	<code>HDF5-DIAG: Error detected in thread 0.</code>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>FILE *</em> <code>stream</code>
+            <dd>xxx
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-Walk">H5Ewalk</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Ewalk</code>(<em>H5E_direction_t</em> <code>direction</code>,
+        <em>H5E_walk_t</em> <code>func</code>,
+        <em>void *</em> <code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Walks the error stack for the current thread, calling a specified
+        function.
+<dt><strong>Description:</strong>
+    <dd>SC: <code>H5Ewalk</code> walks the error stack for the current thread 
+        and calls the specified function for each error along the way.
+        <p>
+        <code>direction</code> determines whether the stack is walked 
+        from the inside out or the outside in.  
+        A value of <code>H5E_WALK_UPWARD</code> means begin with the
+        most specific error and end at the API; 
+        a value of <code>H5E_WALK_DOWNWARD</code> means to start at the 
+        API and end at the inner-most function where the error was first 
+        detected.
+        <p>
+        <code>func</code> will be called for each error in the error stack. 
+        It's arguments will include an index number (beginning at zero 
+        regardless of stack traversal direction), an error stack entry, 
+        and the <code>client_data</code> pointer passed to 
+        <code>H5E_print</code>.
+        <p>
+        <code>H5Ewalk</code> can fail if there are problems initializing the library.
+        <p>
+        UG: The error stack is traversed and <em>func</em> is called for
+	each member of the stack.  Its arguments are an integer
+	sequence number beginning at zero (regardless of
+	<em>direction</em>), a pointer to an error description record,
+	and the <em>client_data</em> pointer.  If <em>direction</em>
+	is <code>H5E_WALK_UPWARD</code> then traversal begins at the
+	inner-most function that detected the error and concludes with
+	the API function.  The opposite order is
+	<code>H5E_WALK_DOWNWARD</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5E_direction_t</em> <code>direction</code>
+            <dd>Direction in which the error stack is to be walked.
+        <dt><em>H5E_walk_t</em> <code>func</code>
+            <dd>Function to be called for each error encountered.
+        <dt><em>void *</em> <code>client_data</code>
+            <dd>Data to be passed with <code>func</code>.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-WalkCB">H5Ewalk_cb</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Ewalk_cb</code>(<em>int</em> <code>n</code>,
+        <em>H5E_error_t *</em><code>err_desc</code>,
+        <em>void</em> <code>*client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Default error stack traversal callback function
+        that prints error messages to the specified output stream.
+<dt><strong>Description:</strong>
+    <dd><code>H5Ewalk_cb</code> is a default error stack traversal callback function
+        that prints error messages to the specified output stream.
+        It is not meant to be called directly but rather as an
+        argument to the H5Ewalk() function.  This function is called
+        also by H5Eprint().  Application writers are encouraged to
+        use this function as a model for their own error stack
+        walking functions.
+        <p>
+        <code>n</code> is a counter for how many times this function has been
+        called for this particular traversal of the stack.  It always
+        begins at zero for the first error on the stack (either the
+        top or bottom error, or even both, depending on the traversal
+        direction and the size of the stack).
+        <p>
+        ERR_DESC is an error description.  It contains all the
+        information about a particular error. 
+        <p>
+        CLIENT_DATA is the same pointer that was passed as the
+        CLIENT_DATA argument of H5Ewalk().  It is expected to be a
+        file pointer (or stderr if null). 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>int</em> <code>n</code>
+            <dd>Number of times this function has been called 
+                for this traversal of the stack.
+        <dt><em>H5E_error_t *</em><code>err_desc</code>
+            <dd>Error description.
+        <dt><em>void</em> <code>*client_data</code>
+            <dd>A file pointer, or <code>stderr</code> if null.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetMajor">H5Eget_major</a>
+<dt><strong>Signature:</strong>
+    <dd><em>const char *</em> <code>H5Eget_major</code>(<em>H5E_major_t</em> <code>n</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns a character string describing a major error.
+<dt><strong>Description:</strong>
+    <dd>Given a major error number, H5Eget_major returns a constant character string
+        that describes the error.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5E_major_t</em> <code>n</code>
+            <dd>Major error number.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd> Returns a pointer to a character string if successful.
+         Otherwise returns a pointer to "Invalid major error number".
+         <br>
+         <i> ...or how about... </i>
+         <br>
+         Returns a pointer to a character string describing the error if successful.
+         Otherwise returns a pointer to "Invalid major error number".
+         <br>
+         <i> ...or ... </i>
+         <br>
+         Returns a character string describing the error if successful.
+         Otherwise returns "Invalid major error number."
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetMinor">H5Eget_minor</a>
+<dt><strong>Signature:</strong>
+    <dd><em>const char *</em> <code>H5Eget_minor</code>(<em>H5E_minor_t</em> <code>n</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns a character string describing a minor error.
+<dt><strong>Description:</strong>
+    <dd>Given a minor error number, H5Eget_minor returns a constant character string
+        that describes the error.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5E_minor_t</em> <code>n</code>
+            <dd>Minor error number.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd> Returns a pointer to a character string if successful.
+         Otherwise returns a pointer to "Invalid minor error number".
+         <br>
+         <i> ...or how about... </i>
+         <br>
+         Returns a pointer to a character string describing the error if successful.
+         Otherwise returns a pointer to "Invalid minor error number".
+         <br>
+         <i> ...or ... </i>
+         <br>
+         Returns a character string describing the error if successful.
+         Otherwise returns "Invalid minor error number."
+</dl>
+
+
+<hr>
+
+<address>
+<a href="mailto:fbaker@ncsa.uiuc.edu">Frank Baker</a>
+<br>
+<a href="mailto:h5docs@ncsa.uiuc.edu">HDF5 Documentation</a>
+
+<br>
+Last modified:  6 July 1998
+
+</body>
+</html>

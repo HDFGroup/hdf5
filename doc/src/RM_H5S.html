@@ -1,0 +1,291 @@
+<html>
+<head><title>
+HDF5/H5S Draft API Specification
+</title></head>
+
+<body>
+
+<center>
+<h1>H5S: Dataspace Interface</h1>
+</center>
+
+<h2>Dataspace Object API Functions</h2>
+
+These functions create and manipulate the dataspace in which to store the
+elements of a dataset.
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Dataspace-CreateSimple">H5Screate_simple</a>
+    <li><a href="#Dataspace-Copy">H5Scopy</a>
+    <li><a href="#Dataspace-GetNpoints">H5Sget_npoints</a>
+    <li><a href="#Dataspace-GetNdims">H5Sget_ndims</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Dataspace-GetDims">H5Sget_dims</a>
+    <li><a href="#Dataspace-IsSimple">H5Sis_simple</a>
+    <li><a href="#Dataspace-SetSpace">H5Sset_space</a>
+    <li><a href="#Dataspace-SetHyperslab">H5Sset_hyperslab</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Dataspace-GetHyperslab">H5Sget_hyperslab</a>
+    <li><a href="#Dataspace-Close">H5Sclose</a>
+</ul>
+</td></tr>
+</table>
+
+<hr>
+
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-CreateSimple">H5Screate_simple</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Screate_simple</code>(<em>int</em> <code>rank</code>,
+        <em>const hsize_t *</em> <code>dims</code>,
+        <em>const hsize_t *</em> <code>maxdims</code>
+    )
+<dt><strong>Description:</strong>
+    <dd>This function creates a new simple data space object and opens it for
+        access. The <code>rank</code> is the number of dimensions used in the
+        dataspace.  The <code>dims</code> argument is the size of the simple
+        dataset and the <code>maxdims</code> argument is the upper limit on the
+        size of the dataset.  <code>maxdims</code> may be the null pointer in
+        which case the upper limit is the same as <code>dims</code>.  If an
+        element of <code>maxdims</code> is zero then the corresponding dimension
+        is unlimited, otherwise no element of <code>maxdims</code> should be
+        smaller than the corresponding element of <code>dims</code>.  The
+        dataspace ID returned from this function should be released with
+        H5Sclose or resource leaks will occur.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>int</em> <code>rank</code>
+            <dd>Number of dimensions of dataspace.
+        <dt><em>const hsize_t *</em> <code>dims</code>
+            <dd>An array of the size of each dimension.
+        <dt><em>const hsize_t *</em> <code>maxdims</code>
+            <dd>An array of the maximum size of each dimension.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>A dataspace ID on success, negative on failure.
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-Copy">H5Scopy</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Scopy</code>(<em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Description:</strong>
+    <dd>This function copies a dataspace.  The dataspace ID returned from this
+        function should be released with H5Sclose or resource leaks will occur.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of dataspace to copy.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>A dataspace ID on success, negative on failure.
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-GetNpoints">H5Sget_npoints</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hsize_t</em> <code>H5Sget_npoints</code>(<em>hid_t </em><code>space_id</code>)
+<dt><strong>Description:</strong>
+    <dd>This function determines the number of elements in a dataspace.  For
+        example, a simple 3-dimensional dataspace with dimensions 2, 3 and 4
+        would have 24 elements.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of the dataspace object to query
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Number of elements in the dataspace, 0 on failure
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-GetNdims">H5Sget_ndims</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Sget_ndims</code>(<em>hid_t</em> <code>space_id</code>)
+<dt><strong>Description:</strong>
+    <dd>This function determines the dimensionality (or rank) of a dataspace.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of the dataspace object to query
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Number of dimensions in the dataspace, negative on failure
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-GetDims">H5Sget_dims</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Sget_dims</code>(<em>hid_t</em> <code>space_id</code>,
+        <em>hsize_t *</em><code>dims</code>,
+        <em>hsize_t *</em><code>maxdims</code>
+    )
+<dt><strong>Description:</strong>
+    <dd>This function returns the size of each dimension in a dataspace through
+       the <code>dims</code> parameter.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of the dataspace object to query
+        <dt><em>hsize_t *</em><code>dims</code>
+            <dd>Pointer to array to store the size of each dimension.
+        <dt><em>hsize_t *</em><code>maxdims</code>
+            <dd>Pointer to array to store the maximum size of each dimension.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Number of dimensions in the dataspace, negative on failure
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-IsSimple">H5Sis_simple</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hbool_t </em><code>H5Sis_simple</code>(<em>hid_t </em><code>space_id</code>)
+<dt><strong>Description:</strong>
+    <dd>This function determines whether a dataspace object is a simple
+        dataspace or not.  [Currently, all dataspace objects are simple
+        dataspaces, complex dataspace support will be added in the future]
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of the dataspace object to query
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>TRUE or FALSE on success, negative on failure
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SetSpace">H5Sset_space</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sset_space</code>(<em>hid_t </em><code>space_id</code>,
+        <em>uint32 </em><code>rank</code>,
+        <em>uint32 *</em><code>dims</code>
+    )
+<dt><strong>Description:</strong>
+    <dd>This function determines the number of dimensions and the size of each
+        dimension for the space that a dataset is stored within.  This function
+        only creates simple dataspace objects.  Setting the rank to a
+        value of zero allows scalar objects to be created.  Dimensions are
+        specified from slowest to fastest changing in the <code>dims</code>
+        array (i.e. 'C' order).  Setting the size of a dimension to zero
+        indicates that the dimension is of unlimited size and should be allowed
+        to expand.  Currently, only the first dimension in the array (the
+        slowest) may be unlimited in size.
+        [Currently, all dataspace objects are simple
+        dataspaces, complex dataspace support will be added in the future]
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of the dataspace object.
+        <dt><em>uint32</em> <code>rank</code>
+            <dd>The number of dimensions the object is composed of.
+        <dt><em>uint32 *</em> <code>dims</code>
+            <dd>An array of the size of each dimension. (NULL for scalar objects)
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>zero/negative
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SetHyperslab">H5Sset_hyperslab</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Sset_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
+        <em>const hssize_t *</em><code>start</code>,
+        <em>const hsize_t *</em><code>count</code>,
+        <em>const hsize_t *</em><code>stride</code>
+    )
+<dt><strong>Description:</strong>
+    <dd>This function selects a hyperslab from a simple dataspace.  The stride
+        array may be used to sub-sample the hyperslab chosen, a value of 1 in each
+        position of the stride array selects contiguous elements in the array,
+        a value of 2 selects every other element, etc.  If the stride parameter is
+        set to NULL, a contiguous hyperslab is chosen.  The values in the start and
+        count arrays may be negative, to allow for selecting hyperslabs in chunked
+        datasets which extend in arbitrary directions.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of the dataspace object to set hyperslab in.
+        <dt><em>const hssize_t *</em><code>start</code>
+            <dd>Pointer to array of starting location for hyperslab.
+        <dt><em>const hsize_t *</em><code>count</code>
+            <dd>Pointer to array of magnitude of hyperslab.
+        <dt><em>const hsize_t *</em><code>stride</code>
+            <dd>Pointer to array of stride of hyperslab.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>zero/negative
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-GetHyperslab">H5Sget_hyperslab</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Sget_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
+        <em>hssize_t *</em><code>start</code>,
+        <em>hsize_t *</em><code>count</code>,
+        <em>hsize_t *</em><code>stride</code>
+    )
+<dt><strong>Description:</strong>
+    <dd>This function retrieves information about the hyperslab from a simple
+        dataspace.  If no hyperslab has been defined then the hyperslab is the
+        same as the entire array.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of the dataspace object to set hyperslab in.
+        <dt><em>hssize_t *</em><code>start</code>
+            <dd>Pointer to array to store starting location of hyperslab.
+        <dt><em>hsize_t *</em><code>count</code>
+            <dd>Pointer to array to store magnitude of hyperslab.
+        <dt><em>hsize_t *</em><code>stride</code>
+            <dd>Pointer to array to store stride of hyperslab.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Hyperslab dimensionality on success, negative on failure.
+</dl>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-Close">H5Sclose</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sclose</code>(<em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Description:</strong>
+    <dd>This function releases a dataspace.  Further access through the dataspace
+        ID is illegal.  Failure to release a dataspace with this call will
+        result in resource leaks.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>ID of dataspace to release.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>zero/negative
+</dl>
+
+<hr>
+
+<address>
+<a href="mailto:fbaker@ncsa.uiuc.edu">Frank Baker</a>
+<br>
+<a href="mailto:h5docs@ncsa.uiuc.edu">HDF5 Documentation</a>
+
+<br>
+Last modified:  29 June 1998
+
+</body>
+</html>

@@ -1,0 +1,506 @@
+<html>
+<head><title>
+HDF5/H5A Draft API Specification
+</title></head>
+
+<body>
+
+<center>
+<h1>H5A: Attribute Interface</h1>
+</center>
+
+<h2>Attribute API Functions</h2>
+
+These functions create and manipulate attributes 
+and information about attributes.
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Annot-Create">H5Acreate</a>
+    <li><a href="#Annot-Write">H5Awrite</a>
+    <li><a href="#Annot-Read">H5Aread</a>
+    <li><a href="#Annot-Close">H5Aclose</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Annot-GetName">H5Aget_name</a>
+    <li><a href="#Annot-OpenName">H5Aopen_name</a>
+    <li><a href="#Annot-OpenIdx">H5Aopen_idx</a>
+    <li><a href="#Annot-GetSpace">H5Aget_space</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Annot-GetType">H5Aget_type</a>
+    <li><a href="#Annot-NumAttrs">H5Anum_attrs</a>
+    <li><a href="#Annot-Iterate">H5Aiterate</a>
+    <li><a href="#Annot-Delete">H5Adelete</a>
+</ul>
+</td></tr>
+</table>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Create">H5Acreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Acreate</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>hid_t</em> <code>datatype</code>,
+        <em>hid_t</em> <code>dataspace</code>,
+        <em>hid_t</em> <code>create_plist</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a dataset as an attribute of another dataset or group.
+<dt><strong>Description:</strong>
+    <dd>SC: <code>H5Acreate</code> creates an attribute which is attached to the object
+        specified with 'location_id'.  The name specified with 'name' for each
+        attribute for an object must be unique for that object.  The 'type_id'
+        and 'space_id' are created with the H5T and H5S interfaces respectively.
+        Currently only simple dataspaces are allowed for attribute dataspaces.
+        The 'create_plist_id' property list is currently un-used, but will be
+        used int the future for optional properties of attributes.  The attribute
+        identifier returned from this function must be released with H5Aclose or resource
+        leaks will develop.
+        <p>
+        The link created (see H5G API documentation for more information on
+        link types) is a hard link, so the attribute may be shared among datasets
+        and will not be removed from the file until the reference count for the
+        attribute is reduced to zero.
+        <p>
+        The location object may be either a group or a dataset, both of
+        which may have any sort of attribute.  
+        <p>
+        UG: <code>H5Acreate</code> creates an attribute which is attached to the object
+    specified with <em>loc_id</em>.  The name specified with <em>name</em>
+    for each attribute for an object must be unique for that object.  The <em>type_id</em>
+    and <em>space_id</em> are created with the H5T and H5S interfaces
+    respectively.  Currently only simple dataspaces are allowed for attribute
+    dataspaces.  The <em>create_plist_id</em> property list is currently
+    unused, but will be used int the future for optional properties of
+    attributes.  The attribute identifier returned from this function must be released
+    with H5Aclose or resource leaks will develop.  Attempting to create an
+    attribute with the same name as an already existing attribute will fail,
+    leaving the pre-existing attribute in place.
+        <p>
+        <b>datatype, dataspace, create_plist in the UG are
+        type_id, space_id, and create_plist_id, respectively, in the SC</b>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: Object (dataset or group) to be attached to
+        <dt><em>const char *</em><code>name</code>
+            <dd>IN: Name of attribute to create
+        <dt><em>hid_t</em> <code>datatype</code>
+            <dd>IN: Identifier of datatype for attribute
+        <dt><em>hid_t</em> <code>dataspace</code>
+            <dd>IN: Identifier of dataspace for attribute
+        <dt><em>hid_t</em> <code>create_plist</code>
+            <dd>IN: Identifier of creation property list (currently not used)
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns an attribute identifier if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-OpenName">H5Aopen_name</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Aopen_name</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd> Opens an attribute for an object by looking up the attribute name.
+<dt><strong>Description:</strong>
+    <dd> SC: <code>H5Aopen_name</code> opens an existing attribute for access.  The attribute
+         name specified is used to look up the corresponding attribute for the
+         object.  The attribute identifier returned from this function must be released with
+         H5Aclose or resource leaks will develop.
+         <p>
+         The location object may be either a group or a dataset, both of
+         which may have any sort of attribute.
+         <p>
+         UG: <code>H5Aopen_name</code> opens an attribute which is attached to the object 
+         specified with loc_id. The name specified with name indicates the 
+         attribute to access. The attribute identifier returned from this function must 
+         be released with H5Aclose or resource leaks will develop. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: Object (dataset or group) to be attached to
+        <dt><em>const char *</em><code>name</code>
+            <dd>IN: Name of attribute to locate and open 
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns attribute identifier if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-OpenIdx">H5Aopen_idx</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Aopen_idx</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>unsigned int</em> <code>idx</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Opens the <i>n</i>th attribute for an object.
+<dt><strong>Description:</strong>
+    <dd>SC: <code>H5Aopen_idx</code> opens an existing attribute for access.  The attribute
+        index specified is used to look up the corresponding attribute for the
+        object.  The attribute identifier returned from this function must be released with
+        H5Aclose or resource leaks will develop.
+        <p>
+        The location object may be either a group or a dataset, both of
+        which may have any sort of attribute.
+        <p>
+        UG: <code>H5Aopen_idx</code> opens an attribute which is attached to the object 
+        specified with loc_id. The attribute specified with idx indicates the 
+        <i>idx</i>th attribute to access, starting with '0'. 
+        The attribute identifier returned from this function must be released with 
+        H5Aclose or resource leaks will develop. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: Object (dataset or group) to be attached to
+        <dt><em>unsigned int</em> <code>idx</code>
+            <dd>IN: Index (0-based) attribute to open
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns attribute identifier if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Write">H5Awrite</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Awrite</code>(<em>hid_t</em> <code>attr_id</code>,
+        <em>hid_t</em> <code>mem_dt</code>,
+        <em>void *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Write out data to an attribute.
+<dt><strong>Description:</strong>
+    <dd>SC: <code>H5Awrite</code> writes a complete attribute to disk.
+        <p>
+        UG: <code>H5Awrite</code> writes an attribute, specified with attr_id, 
+        with mem_type_id specifying the datatype in memory. 
+        The entire attribute is written from buf to the file. 
+        This function returns non-negative on success, negative on failure. 
+        <p>
+        <b>mem_dt in SC is mem_type_id in UG.</b>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Attribute to write
+        <dt><em>hid_t</em> <code>mem_dt</code>
+            <dd>IN: Memory datatype of buffer
+        <dt><em>void *</em><code>buf</code>
+            <dd>IN: Buffer of data to write
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Read">H5Aread</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Aread</code>(<em>hid_t</em> <code>attr_id</code>,
+        <em>hid_t</em> <code>mem_dt</code>,
+        <em>void *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Read in data from an attribute.
+<dt><strong>Description:</strong>
+    <dd>SC: <code>H5Aread</code> reads a complete attribute from disk.
+        <p>
+        UG: <code>H5Aread</code> reads an attribute, specified with attr_id, 
+        with mem_type_id specifying the datatype in memory. 
+        The entire attribute is read into buf from the file. 
+        This function returns non-negative on success, negative on failure.
+        <p>
+        <b>mem_dt in SC is mem_type_id in UG.</b>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Attribute to read
+        <dt><em>hid_t</em> <code>mem_dt</code>
+            <dd>IN: Memory datatype of buffer
+        <dt><em>void *</em><code>buf</code>
+            <dd>IN: Buffer for data to read
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-GetSpace">H5Aget_space</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Aget_space</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Gets a copy of the dataspace for an attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_space</code> retrieves a copy of the dataspace for an attribute.
+        The dataspace identifier returned from this function must be released with H5Sclose
+        or resource leaks will develop.
+        <p>
+        <i>(Identical desc in UG and SC.)</i>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Attribute to get dataspace of 
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns dataspace identifier if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-GetType">H5Aget_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Aget_type</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Gets a copy of the datatype for an attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_type</code> retrieves a copy of the datatype for an attribute.
+        The datatype identifier returned from this function must be released with 
+        H5Tclose or resource leaks will develop.
+        <p>
+        <i>(Identical desc in UG and SC.)</i>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Attribute to get datatype of
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a datatype identifier if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-GetName">H5Aget_name</a>
+<dt><strong>Signature:</strong>
+    <dd><em>size_t</em> <code>H5Aget_name</code>(<em>hid_t</em> <code>attr_id</code>,
+        <em>char *</em><code>buf</code>,
+        <em>size_t</em> <code>buf_size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets a copy of the name for an attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_name</code> retrieves the name of an attribute for an attribute identifier.
+        Up to 'buf_size' characters are stored in 'buf' followed by a '\0' string
+        terminator.  If the name of the attribute is longer than 'buf_size'-1,
+        the string terminator is stored in the last position of the buffer to
+        properly terminate the string.
+        <p>
+        <i>(Identical desc in UG and SC.)</i>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Attribute to get name of
+        <dt><em>char *</em><code>buf</code>
+            <dd>IN: Buffer to store name in 
+        <dt><em>size_t</em> <code>buf_size</code>
+            <dd>IN: The size of the buffer to store the string in
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the length of the attribute's name, which may be
+        longer than <code>buf_size</code>, if successful.
+        Otherwise returns FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-NumAttrs">H5Anum_attrs</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Anum_attrs</code>(<em>hid_t</em> <code>loc_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines the number of attributes attached to an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Anum_attrs</code> returns the number of attributes attached to the dataset or
+        group, <code>loc_id</code>.
+        <p>
+        <i>(Identical desc in UG and SC.)</i>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: The object, a dataset or group, to be queried
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of attributes if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Iterate">H5Aiterate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Aiterate</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>unsigned *</em> <code>attr_num</code>,
+        <em>H5A_operator_t</em> <code>op</code>,
+        <em>void *</em><code>op_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Calls a user's function for each attribute on an object.
+<dt><strong>Description:</strong>
+    <dd>SC: H5Aiterate interates over the attributes of dataset or group
+        specified with 'loc_id'.  For each attribute of the object, the
+        'op_data' and some additional information (specified below) are passed
+        to the 'op' function.  The iteration begins with the '*attr_number'
+        object in the group and the next attribute to be processed by the operator
+        is returned in '*attr_number'.
+        <p>
+        The operation receives the identifier for the group or dataset being iterated
+        over ('loc_id'), the name of the current attribute about the object
+        ('attr_name') and the pointer to the operator data passed in to H5Aiterate
+        ('op_data').  The return values from an operator are:
+        <ul>
+            <li>Zero causes the iterator to continue, returning zero when all
+                attributes have been processed.
+            <li>Positive causes the iterator to immediately return that positive
+                value, indicating short-circuit success.  The iterator can be
+                restarted at the next attribute.
+            <li>Negative causes the iterator to immediately return that value,
+                indicating failure.  The iterator can be restarted at the next
+                attribute.   
+        </ul>  
+    <dd>UG: <code>H5Aiterate</code> interates over the attributes of dataset or group 
+        specified with loc_id. For each attribute of the object, 
+        the operator_data and some additional information (specified below) 
+        are passed to the operator function.  The iteration begins with 
+        the *attr_number object in the group and the next attribute to be 
+        processed by the operator is returned in *attr_number. 
+        <p>
+        The prototype for H5A_operator_t is: <br>
+            <code>typedef herr_t (*H5A_operator_t)(hid_t <em>loc_id</em>,
+                const char *<em>attr_name</em>, void *<em>operator_data</em>);</code>
+        <p>
+        The operation receives the identifier for the group or dataset being iterated over
+        (<em>loc_id</em>), the name of the current attribute about the object (<em>attr_name</em>)
+        and the pointer to the operator data passed in to H5Aiterate
+        (<em>operator_data</em>).  The return values from an operator are:
+        <ul>
+        <li>Zero causes the iterator to continue, returning zero when all 
+            attributes have been processed.
+        <li>Positive causes the iterator to immediately return that positive
+            value, indicating short-circuit success.  The iterator can be
+            restarted at the next attribute.
+        <li>Negative causes the iterator to immediately return that value,
+            indicating failure.  The iterator can be restarted at the next
+            attribute.
+        </ul>
+    <dd><b>attr_num, op, and op_data in SC are
+        attr_number, operator, and operator_data, respectively, in UG.</b>
+        <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: Object (dataset or group) to be iterated over
+        <dt><em>unsigned *</em> <code>attr_num</code>
+            <dd>IN/OUT: Starting (IN) & Ending (OUT) attribute number
+        <dt><em>H5A_operator_t</em> <code>op</code>
+            <dd>IN: User's function to pass each attribute to
+        <dt><em>void *</em><code>op_data</code>
+            <dd>IN/OUT: User's data to pass through to iterator operator function
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>If successful, returns the return value of the last operator 
+        if it was non-zero, or zero if all attributes were processed.
+        Otherwise returns FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Delete">H5Adelete</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Adelete</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Deletes an attribute from a location.
+<dt><strong>Description:</strong>
+    <dd>SC: <code>H5Adelete</code> removes the named attribute from a dataset or group.
+        This function should not be used when attribute identifiers are open on 'loc_id'
+        as it may cause the internal indexes of the attributes to change and future
+        writes to the open attributes to produce incorrect results.
+        <p>
+        UG: <code>H5Adelete</code> removes the named attribute from a dataset or group. 
+        This function should not be used when attribute identifiers are open on loc_id as 
+        it may cause the internal indexes of the attributes to change and future 
+        writes to the open attributes to produce incorrect results. 
+        Returns non-negative on success, negative on failure. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: Object (dataset or group) to have attribute deleted from
+        <dt><em>const char *</em><code>name</code>
+            <dd>IN: Name of attribute to delete
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Close">H5Aclose</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Aclose</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Close an attribute identifier.
+<dt><strong>Description:</strong>
+    <dd>SC: <code>H5Aclose</code> releases an attribute from use.  Further use of the
+        attribute identifier will result in undefined behavior.
+        <p>
+        UG: <code>H5Aclose</code> releases an attribute from use. 
+        Further use of the attribute identifier will result in undefined behavior. 
+        This function returns non-negative on success, negative on failure. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>attr_id</code>
+            <dd>IN: Attribute to release access to
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+
+<address>
+<a href="mailto:fbaker@ncsa.uiuc.edu">Frank Baker</a>
+<br>
+<a href="mailto:h5docs@ncsa.uiuc.edu">HDF5 Documentation</a>
+
+<br>
+Last modified:  6 July 1998
+
+</body>
+</html>
