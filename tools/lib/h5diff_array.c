@@ -18,7 +18,11 @@
 
 
 /* local functions */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+static void    close_obj(int obj_type, hid_t obj_id);
+#else /* H5_WANT_H5_V1_4_COMPAT */
 static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 static int     diff_region(hid_t region1_id, hid_t region2_id);
 static hbool_t is_zero(const void *_mem, size_t size);
 
@@ -254,8 +258,13 @@ hsize_t diff_datum(void       *_mem1,
  size_t        size;
  int           iszero1;
  int           iszero2;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+ int            obj1_type;
+ int            obj2_type;
+#else /* H5_WANT_H5_V1_4_COMPAT */
  H5G_obj_t     obj1_type;
  H5G_obj_t     obj2_type;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
  hid_t         obj1_id;
  hid_t         obj2_id;
  H5G_stat_t    sb1;
@@ -1714,8 +1723,13 @@ is_zero(const void *_mem, size_t size)
  *-------------------------------------------------------------------------
  */
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
+static 
+void close_obj(int obj_type, hid_t obj_id)
+#else /* H5_WANT_H5_V1_4_COMPAT */
 static 
 void close_obj(H5G_obj_t obj_type, hid_t obj_id)
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 {
  
  switch (obj_type) {
