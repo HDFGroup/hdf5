@@ -108,6 +108,25 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-CloseClass">H5Pclose_class</a> 
     </ul>
 
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;
+  <i>Indicates functions <br> 
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  available only in <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  the parallel HDF5</i>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  library.</i>
+
+
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+
     <p><i>File Creation Properties</i>
     <ul>
     <li><a href="#Property-GetVersion">H5Pget_version</a>
@@ -121,18 +140,10 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
     </ul>
 
-    <i>File Close Properties</i>
+    <p></p><i>File Access Properties</i>
     <ul>
     <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
     <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
-	</ul>
-
-
-
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-
-    <p></p><i>File Access Properties</i>
-    <ul>
     <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
     <li><a href="#Property-GetFaplCore">H5Pget_fapl_core</a>
     <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
@@ -176,19 +187,6 @@ which require many different parameters to be easily manipulated.
     -->
     </ul>
 
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;
-  <i>Indicates functions <br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  available only in the <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  parallel HDF5 library.</i>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -2831,7 +2829,7 @@ SUBROUTINE
   <dt><strong>Name:</strong> <a name="Property-GetFcloseDegree">H5Pget_fclose_degree</a> 
   <dt><strong>Signature:</strong> 
   <dd><em>herr_t</em> <code>H5Pget_fclose_degree</code>(<em>hid_t</em> <code>fapl_id</code>, 
-    <em>H5F_close_degree_t</em> <code>fc_degree</code>) 
+    <em>H5F_close_degree_t *</em><code>fc_degree</code>) 
   <dt><strong>Purpose:</strong> 
   <dd>Returns the file close degree. 
   <dt><strong>Description:</strong> 
@@ -2846,7 +2844,7 @@ SUBROUTINE
     <dl>
       <dt><em>hid_t</em> <code>fapl_id</code> 
       <dd>IN: File access property list identifier. 
-      <dt><em>H5F_close_degree_t</em> <code>fc_degree</code> 
+      <dt><em>H5F_close_degree_t *</em><code>fc_degree</code> 
       <dd>OUT: Pointer to a location to which to return the file close degree 
         property, the value of <code>fc_degree</code>.
     </dl>
@@ -3040,7 +3038,7 @@ END SUBROUTINE h5pget_fill_value_f
         <em>size_t *</em><code>cd_nelmts</code>,
         <em>unsigned int *</em><code>cd_values</code>,
         <em>size_t</em> <code>namelen</code>,
-        <em>char</em> <code>name[]</code>
+        <em>char</em> <code>name[]</code>		
     )
   <dt><strong>Purpose:</strong>
     <dd>Returns information about a filter in a pipeline.
@@ -7598,7 +7596,7 @@ END SUBROUTINE h5pset_fill_value_f
         </center>
 	<p>
 	The <code>filter</code> parameter specifies the filter to be set.  
-	Valid values are as follows:
+	Valid filter identifers are as follows:
 
         <center>
         <table width=75%>
@@ -7640,7 +7638,8 @@ END SUBROUTINE h5pset_fill_value_f
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Property list identifier.
         <dt><em>H5Z_filter_t</em> <code>filter</code>
-            <dd>IN: Filter to be added to the pipeline.
+            <dd>IN: Filter identifier 
+                for the filter to be added to the pipeline.
         <dt><em>unsigned int</em> <code>flags</code>
             <dd>IN:  Bit vector specifying certain general properties
                 of the filter.
@@ -8658,7 +8657,7 @@ END SUBROUTINE h5pset_sym_k_f
 	<p>
         In the text below, the term <em>pixel</em> refers to
         an HDF5 data element. 
-	This terminology derives from SZIP compression's use with image data, 
+        This terminology derives from SZIP compression's use with image data, 
         where pixel referred to an image pixel.
 	<p>
 	The SZIP <code>bits_per_pixel</code> value (see <b>Notes</b>, below) 
@@ -8756,10 +8755,15 @@ END SUBROUTINE h5pset_sym_k_f
         To achieve optimal performance for SZIP compression, 
         it is recommended that a chunk's fastest-changing dimension 
         be equal to <em>N</em> times <code>pixels_per_block</code>
-        where <em>N</em> is maximum number of blocks per scan line
+        where <em>N</em> is the maximum number of blocks per scan line
         allowed by the SZIP library.
         In the current version of SZIP, <em>N</em> is set to 128.
-
+        <p>
+		<code>H5Pset_szip</code> will fail if SZIP encoding is 
+		disabled in the available copy of the SZIP library.
+		<a href="RM_H5Z.html#Compression-GetFilterInfo">
+		<code>H5Zget_filter_info</code></a> can be employed 
+		to avoid such a failure.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -9389,7 +9393,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 26 August 2004");
+document.writeln("Last modified: 13 September 2004");
 -->
 </SCRIPT>
  
