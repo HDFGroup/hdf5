@@ -42,19 +42,19 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include "H5private.h"
-#include "H5Bprivate.h"		/*B-link trees				*/
-#include "H5Dprivate.h"
-#include "H5Eprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Bprivate.h"		/* B-link trees				*/
+#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"
-#include "H5MFprivate.h"
-#include "H5MMprivate.h"
-#include "H5Oprivate.h"
-#include "H5Pprivate.h"         /* Property lists */
-#include "H5Sprivate.h"         /* Dataspaces */
-#include "H5Vprivate.h"
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File space management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5Sprivate.h"         /* Dataspaces                           */
+#include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /* MPIO, MPIPOSIX, & FPHDF5 drivers needed for special checks */
 #include "H5FDfphdf5.h"
@@ -971,7 +971,7 @@ H5F_istore_flush_entry(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t *ent, hbool_t res
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get edc information");
             if(H5P_get(plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get filter callback struct");
-            if (H5Z_pipeline(f, ent->pline, 0, &(udata.key.filter_mask), edc, 
+            if (H5Z_pipeline(ent->pline, 0, &(udata.key.filter_mask), edc, 
                              cb_struct, &(udata.key.nbytes), &alloc, &buf)<0) {
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
                     "output pipeline failed");
@@ -1447,7 +1447,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get edc information");
             if(H5P_get(plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get filter callback struct");
-            if (H5Z_pipeline(f, pline, H5Z_FLAG_REVERSE, &(udata.key.filter_mask), edc, 
+            if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata.key.filter_mask), edc, 
                      cb_struct, &(udata.key.nbytes), &chunk_alloc, &chunk)<0) {
                 HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed");
             }
@@ -2507,7 +2507,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             size_t nbytes=(size_t)chunk_size;
 
             /* Push the chunk through the filters */
-            if (H5Z_pipeline(f, &pline, 0, &filter_mask, edc, cb_struct, &nbytes, &buf_size, &chunk)<0)
+            if (H5Z_pipeline(&pline, 0, &filter_mask, edc, cb_struct, &nbytes, &buf_size, &chunk)<0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed");
 
             /* Keep the number of bytes the chunk turned in to */
@@ -2972,10 +2972,8 @@ H5F_istore_initialize_by_extent(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *lay
     size[i] = layout->dim[i];
 
     /* Create a data space for a chunk & set the extent */
-    if(NULL == (space_chunk = H5S_create(H5S_SIMPLE)))
+    if(NULL == (space_chunk = H5S_create_simple(rank,layout->dim,NULL)))
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if(H5S_set_extent_simple(space_chunk, (unsigned)rank, layout->dim, NULL) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions");
 
 /*
  * Set up multi-dimensional counters (idx_min, idx_max, and idx_cur) and
