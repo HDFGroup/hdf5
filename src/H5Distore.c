@@ -1094,7 +1094,8 @@ done:
 herr_t
 H5D_istore_flush (H5F_t *f, hid_t dxpl_id, H5D_t *dset, unsigned flags)
 {
-    H5D_dxpl_cache_t    dxpl_cache;     /* Cached data transfer properties */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     H5D_rdcc_t *rdcc = &(dset->cache.chunk);
     int		nerrors=0;
     H5D_rdcc_ent_t	*ent=NULL, *next=NULL;
@@ -1113,10 +1114,10 @@ H5D_istore_flush (H5F_t *f, hid_t dxpl_id, H5D_t *dset, unsigned flags)
             ent->dirty = FALSE;
         } /* end if */
 	else if ((flags&H5F_FLUSH_INVALIDATE)) {
-	    if (H5D_istore_preempt(f, &dxpl_cache, dxpl_id, dset, ent, TRUE )<0)
+	    if (H5D_istore_preempt(f, dxpl_cache, dxpl_id, dset, ent, TRUE )<0)
 		nerrors++;
 	} else {
-	    if (H5D_istore_flush_entry(f, &dxpl_cache, dxpl_id, dset, ent, FALSE)<0)
+	    if (H5D_istore_flush_entry(f, dxpl_cache, dxpl_id, dset, ent, FALSE)<0)
 		nerrors++;
 	}
     } /* end for */
@@ -1149,7 +1150,8 @@ done:
 herr_t
 H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 {
-    H5D_dxpl_cache_t    dxpl_cache;     /* Cached data transfer properties */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     H5D_rdcc_t		*rdcc = &(dset->cache.chunk);
     int		nerrors=0;
     H5D_rdcc_ent_t	*ent=NULL, *next=NULL;
@@ -1167,7 +1169,7 @@ H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 	HDfflush(stderr);
 #endif
 	next = ent->next;
-	if (H5D_istore_preempt(f, &dxpl_cache, dxpl_id, dset, ent, TRUE )<0)
+	if (H5D_istore_preempt(f, dxpl_cache, dxpl_id, dset, ent, TRUE )<0)
 	    nerrors++;
     }
     if (nerrors)
@@ -1959,7 +1961,8 @@ H5D_istore_allocated(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 {
     H5D_rdcc_t   *rdcc = &(dset->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t     *ent;    /*cache entry  */
-    H5D_dxpl_cache_t    dxpl_cache;     /* Cached data transfer properties */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     H5D_istore_ud1_t	udata;
     hsize_t      ret_value;       /* Return value */
 
@@ -1972,7 +1975,7 @@ H5D_istore_allocated(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
     /* Search for cached chunks that haven't been written out */
     for(ent = rdcc->head; ent; ent = ent->next) {
         /* Flush the chunk out to disk, to make certain the size is correct later */
-        if (H5D_istore_flush_entry(f, &dxpl_cache, dxpl_id, dset, ent, FALSE)<0)
+        if (H5D_istore_flush_entry(f, dxpl_cache, dxpl_id, dset, ent, FALSE)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, 0, "cannot flush indexed storage buffer");
     } /* end for */
 
@@ -2499,7 +2502,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_prune_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
+H5D_istore_prune_by_extent(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id, H5D_t *dset)
 {
     H5D_rdcc_t             *rdcc = &(dset->cache.chunk);	/*raw data chunk cache */
@@ -2937,7 +2940,8 @@ H5D_istore_update_cache(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
     H5D_rdcc_t         *rdcc = &(dset->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t     *ent, *next;	/*cache entry  */
     H5D_rdcc_ent_t     *old_ent;	/* Old cache entry  */
-    H5D_dxpl_cache_t    dxpl_cache;     /* Cached data transfer properties */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     int                 srank;	/*current # of dimensions (signed) */
     unsigned            rank;	/*current # of dimensions */
     hsize_t             curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
@@ -2995,7 +2999,7 @@ H5D_istore_update_cache(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
                     next=old_ent->next;
 
                 /* Remove the old entry from the cache */
-                if (H5D_istore_preempt(f, &dxpl_cache, dxpl_id, dset, old_ent, TRUE )<0)
+                if (H5D_istore_preempt(f, dxpl_cache, dxpl_id, dset, old_ent, TRUE )<0)
                     HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks");
             } /* end if */
 

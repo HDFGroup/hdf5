@@ -207,7 +207,7 @@ H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id,
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5D_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
-H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
+H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
 
 /* Functions that operate on byte sequences in memory and on disk */
