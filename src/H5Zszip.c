@@ -89,6 +89,10 @@ H5Z_can_apply_szip(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 
     FUNC_ENTER_NOAPI(H5Z_can_apply_szip, FAIL)
 
+    /* If this is the Szip filter, make sure it can encode */
+    if (SZ_encoder_enabled()<=0)
+        HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled.");
+
     /* Get datatype's size, for checking the "bits-per-pixel" */
     if((dtype_size=(8*H5Tget_size(type_id)))==0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")

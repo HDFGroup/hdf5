@@ -573,11 +573,6 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                                 /* Check if there is a "can apply" callback */
                                 if(fclass->can_apply) {
                                     herr_t status;
-#ifndef H5_SZIP_CAN_ENCODE
-                                    /* If this is the Szip filter, make sure it can encode */
-                                    if (dcpl_pline.filter[u].id == H5Z_FILTER_SZIP)
-                                        HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled");
-#endif
 
                                     /* Make callback to filter's "can apply" function */
                                     status=(fclass->can_apply)(dcpl_id, type_id, space_id);
@@ -1242,9 +1237,10 @@ herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags
         if (filter == H5Z_FILTER_SZIP)
         {
             *filter_config_flags = 0;
-#ifdef H5_SZIP_CAN_ENCODE
-            *filter_config_flags |= H5Z_FILTER_CONFIG_ENCODE_ENABLED;
-#endif
+#ifdef H5_HAVE_FILTER_SZIP
+            if(SZ_encoder_enabled()>0)
+                *filter_config_flags |= H5Z_FILTER_CONFIG_ENCODE_ENABLED;
+#endif /* H5_HAVE_FILTER_SZIP */
             *filter_config_flags |= H5Z_FILTER_CONFIG_DECODE_ENABLED;
         }
         else

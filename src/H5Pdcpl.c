@@ -27,6 +27,12 @@
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Zprivate.h"		/* Data filters				*/
 
+#ifdef H5_HAVE_FILTER_SZIP
+#ifdef H5_HAVE_SZLIB_H
+#   include "szlib.h"
+#endif /* H5_HAVE_SZLIB_H */
+#endif /* H5_HAVE_FILTER_SZIP */
+
 /* Local datatypes */
 
 /* Static function prototypes */
@@ -1083,9 +1089,11 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     H5TRACE3("e","iIuIu",plist_id,options_mask,pixels_per_block);
 
     /* Check arguments */
-#if !defined( H5_SZIP_CAN_ENCODE) && defined(H5_HAVE_FILTER_SZIP)
-    HGOTO_ERROR (H5E_PLINE, H5E_NOENCODER, FAIL, "Szip filter present but encoding disabled");
-#endif
+#ifdef H5_HAVE_FILTER_SZIP
+    if(SZ_encoder_enabled()<=0)
+        HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled.");
+#endif /* H5_HAVE_FILTER_SZIP */
+
     if ((pixels_per_block%2)==1)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even");
     if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
