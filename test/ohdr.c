@@ -98,7 +98,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -126,7 +126,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -155,7 +155,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -183,7 +183,7 @@ main(void)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -218,7 +218,7 @@ main(void)
 	    goto error;
 	}
     }
-    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
@@ -237,7 +237,7 @@ main(void)
             H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
-        if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
+        if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	    H5_FAILED();
 #ifdef H5_WANT_H5_V1_6_COMPAT
             H5Eprint(stdout);

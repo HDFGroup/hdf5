@@ -1130,7 +1130,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     	if( (!olist->shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
                 || (!olist->shared && olist->obj_type!=H5I_DATATYPE) 
-                || (ent && ent->file->shared == olist->shared) ) {
+                || (ent && ent->file && ent->file->shared == olist->shared) ) {
             /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
             	olist->obj_id_list[olist->list_index] = obj_id;
@@ -3033,7 +3033,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
      * allocates object headers (calls the H5O_init function...via a
      * lot of other functions first)....
      */
-    if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
+    if (H5AC_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
 
     /* Write the superblock to disk */
@@ -3306,7 +3306,7 @@ H5F_close(H5F_t *f)
             if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
                           H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-        }
+        } /* end if */
 #endif  /* H5_HAVE_FPHDF5 */
     } /* end if */
 
@@ -3426,8 +3426,8 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     parent = H5G_fileof(mount_point);
     mp_ent = H5G_entof(mount_point);
     for (ancestor=parent; ancestor; ancestor=ancestor->mtab.parent) {
-        if (ancestor==child)
-            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
+	if (ancestor==child)
+	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
     }
     
     /*
@@ -3439,29 +3439,29 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     rt=parent->mtab.nmounts;
     cmp = -1;
     while (lt<rt && cmp) {
-        md = (lt+rt)/2;
-        ent = H5G_entof(parent->mtab.child[md].group);
-        cmp = H5F_addr_cmp(mp_ent->header, ent->header);
-        if (cmp<0) {
-            rt = md;
-        } else if (cmp>0) {
-            lt = md+1;
-        }
+	md = (lt+rt)/2;
+	ent = H5G_entof(parent->mtab.child[md].group);
+	cmp = H5F_addr_cmp(mp_ent->header, ent->header);
+	if (cmp<0) {
+	    rt = md;
+	} else if (cmp>0) {
+	    lt = md+1;
+	}
     }
     if (cmp>0)
         md++;
     if (!cmp)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
+	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
     
     /* Make room in the table */
     if (parent->mtab.nmounts>=parent->mtab.nalloc) {
-        unsigned n = MAX(16, 2*parent->mtab.nalloc);
-        H5F_mount_t *x = H5MM_realloc(parent->mtab.child,
+	unsigned n = MAX(16, 2*parent->mtab.nalloc);
+	H5F_mount_t *x = H5MM_realloc(parent->mtab.child,
 				      n*sizeof(parent->mtab.child[0]));
-        if (!x)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
-        parent->mtab.child = x;
-        parent->mtab.nalloc = n;
+	if (!x)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
+	parent->mtab.child = x;
+	parent->mtab.nalloc = n;
     }
 
     /* Insert into table */
@@ -3478,9 +3478,9 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     name_r=H5RS_wrap(name);
     assert(name_r);
     if (H5G_replace_name( H5G_UNKNOWN, loc, name_r, NULL, NULL, NULL, OP_MOUNT )<0)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
+	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
     if(H5RS_decr(name_r)<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement name string")
+	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement name string")
 
 done:
     if (ret_value<0 && mount_point)
@@ -3550,7 +3550,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     ent = H5G_entof(child->shared->root_grp);
 
     if (child->mtab.parent &&
-        H5F_addr_eq(mnt_ent->header, ent->header)) {
+	H5F_addr_eq(mnt_ent->header, ent->header)) {
 	/*
 	 * We've been given the root group of the child.  We do a reverse
 	 * lookup in the parent's mount table to find the correct entry.
@@ -4805,4 +4805,3 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Fget_name() */
-

@@ -179,7 +179,7 @@ H5O_bogus_size(H5F_t UNUSED *f, const void UNUSED *mesg)
     /* check args */
     assert(f);
 
-    FUNC_LEAVE(4);
+    FUNC_LEAVE_NOAPI(4);
 } /* end H5O_bogus_size() */
 
 

@@ -610,7 +610,7 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
     assert(sym);
 
     /* Verify that node is clean */
-    assert (sym->cache_info.is_dirty==0);
+    assert (sym->cache_info.is_dirty==FALSE);
 
     if(sym->entry)
         sym->entry = H5FL_SEQ_FREE(H5G_entry_t,sym->entry);

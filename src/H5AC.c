@@ -37,7 +37,7 @@
  *
  *	John Mainzer, 6/4/04
  *	Factored the new cache code into a separate file (H5C.c) to
- *	faciltate re-use.  Re-worked this file again to use H5C.
+ *	facilitate re-use.  Re-worked this file again to use H5C.
  *
  *-------------------------------------------------------------------------
  */
@@ -70,8 +70,7 @@
  */
 
 /* Default dataset transfer property list for metadata I/O calls */
-/* (Collective set, "block before metadata write" set and */
-/* "library internal" set) */
+/* (Collective set, "block before metadata write" set and "library internal" set) */
 /* (Global variable definition, declaration is in H5ACprivate.h also) */
 hid_t H5AC_dxpl_id=(-1);
 
@@ -96,15 +95,15 @@ static herr_t H5AC_check_if_write_permitted(H5F_t *f,
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_init
+ * Function:	H5AC_init
  *
- * Purpose:     Initialize the interface from some other layer.
+ * Purpose:	Initialize the interface from some other layer.
  *
- * Return:      Success:        non-negative
+ * Return:	Success:	non-negative
  *
- *              Failure:        negative
+ *		Failure:	negative
  *
- * Programmer:  Quincey Koziol
+ * Programmer:	Quincey Koziol
  *              Saturday, January 18, 2003
  *
  * Modifications:
@@ -351,11 +350,10 @@ const char * H5AC_entry_type_names[H5AC_NTYPES] =
 };
 
 int
-H5AC_create(const H5F_t *f, 
-            int UNUSED size_hint)
+H5AC_create(const H5F_t *f, int UNUSED size_hint)
 {
-    H5AC_t * cache_ptr = NULL;
-    int ret_value=1;      /* Return value */
+    H5AC_t *cache = NULL;
+    int ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_create, FAIL)
 
@@ -366,19 +364,19 @@ H5AC_create(const H5F_t *f,
      * in proper size hints.
      *                                             -- JRM
      */
-    cache_ptr = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
+    cache = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
                            H5C__DEFAULT_MIN_CLEAN_SIZE,
                            (H5AC_NTYPES - 1),
                            (const char **)H5AC_entry_type_names,
                            H5AC_check_if_write_permitted);
 
-    if ( NULL == cache_ptr ) {
+    if ( NULL == cache ) {
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     } else {
 
-        f->shared->cache = (H5AC_t *)cache_ptr;
+        f->shared->cache = cache;
 
     }
 
@@ -386,9 +384,9 @@ done:
 
     if ( ret_value < 0 ) {
 
-        if ( cache_ptr != NULL ) {
+        if ( cache != NULL ) {
 
-            H5C_dest_empty(cache_ptr);
+            H5C_dest_empty(cache);
             f->shared->cache = NULL;
 
         } /* end if */
@@ -427,21 +425,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_dest(H5F_t *f, 
-          hid_t dxpl_id)
+H5AC_dest(H5F_t *f, hid_t dxpl_id)
 {
-    H5AC_t *cache_ptr = NULL;
+    H5AC_t *cache = NULL;
     herr_t ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_dest, FAIL)
 
     assert(f);
     assert(f->shared->cache);
-    cache_ptr = (H5AC_t *)(f->shared->cache);
+    cache = f->shared->cache;
 
     f->shared->cache = NULL;
 
-    if ( H5C_dest(f, dxpl_id, H5AC_noblock_dxpl_id, cache_ptr) < 0 ) {
+    if ( H5C_dest(f, dxpl_id, H5AC_noblock_dxpl_id, cache) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
     }
@@ -517,29 +514,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_flush(H5F_t *f, 
-           hid_t dxpl_id, 
-           const H5AC_class_t *type, 
-           haddr_t addr, 
-           unsigned flags)
+H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 {
-    herr_t              status;
-    herr_t		ret_value = SUCCEED;
-    H5AC_t *            cache_ptr;
+    herr_t status;
+    herr_t ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_flush, FAIL)
 
     HDassert(f);
     HDassert(f->shared->cache);
-    HDassert(type == NULL);
-    HDassert(!H5F_addr_defined(addr));
-
-    cache_ptr = (H5AC_t *)(f->shared->cache);
 
     status = H5C_flush_cache(f, 
                              dxpl_id, 
                              H5AC_noblock_dxpl_id, 
-                             cache_ptr, 
+                             f->shared->cache, 
                              flags);
 
     if ( status < 0 ) {
@@ -592,18 +580,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5AC_set(H5F_t *f, 
-         hid_t dxpl_id, 
-         const H5AC_class_t *type, 
-         haddr_t addr, 
-         void *thing)
+H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
     herr_t		result;
-    herr_t		ret_value = SUCCEED;    /* Return value */
-    H5AC_info_t *	info_ptr;
-    H5AC_t *		cache_ptr;
+    H5AC_info_t        *info;
+    H5AC_t             *cache;
+    herr_t ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_set, FAIL)
 
@@ -615,12 +598,13 @@ H5AC_set(H5F_t *f,
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
 
-    cache_ptr = (H5AC_t *)(f->shared->cache);
-    info_ptr = (H5AC_info_t *)thing;
+    /* Get local copy of this information */
+    cache = f->shared->cache;
+    info = (H5AC_info_t *)thing;
 
-    info_ptr->addr = addr;
-    info_ptr->type = type;
-    info_ptr->is_protected = FALSE;
+    info->addr = addr;
+    info->type = type;
+    info->is_protected = FALSE;
 
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_FPHDF5
@@ -668,8 +652,8 @@ H5AC_set(H5F_t *f,
 
             /* write the metadata to the SAP. */
 
-            result = (info_ptr->type->flush)(f, dxpl_id, TRUE,
-                                             info_ptr->addr, info_ptr);
+            result = (info->type->flush)(f, dxpl_id, TRUE,
+                                             info->addr, info);
 
             if ( result < 0 ) {
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
@@ -695,7 +679,7 @@ H5AC_set(H5F_t *f,
     result = H5C_insert_entry(f,
                               dxpl_id,
                               H5AC_noblock_dxpl_id, 
-                              cache_ptr,
+                              cache,
                               type,
                               addr,
                               thing);
@@ -742,17 +726,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5AC_rename(H5F_t *f, 
-            hid_t UNUSED dxpl_id, 
-            const H5AC_class_t *type, 
-            haddr_t old_addr,
+H5AC_rename(H5F_t *f, hid_t UNUSED dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
 	    haddr_t new_addr)
 {
     herr_t		result;
-    herr_t		ret_value = SUCCEED;      /* Return value */
-    H5AC_t *		cache_ptr;
+    herr_t ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_rename, FAIL)
 
@@ -762,8 +741,6 @@ H5AC_rename(H5F_t *f,
     HDassert(H5F_addr_defined(old_addr));
     HDassert(H5F_addr_defined(new_addr));
     HDassert(H5F_addr_ne(old_addr, new_addr));
-
-    cache_ptr = (H5AC_t *)(f->shared->cache);
 
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_FPHDF5
@@ -786,7 +763,7 @@ H5AC_rename(H5F_t *f,
 #endif  /* H5_HAVE_PARALLEL */
 
     result = H5C_rename_entry(f,
-                              cache_ptr,
+                              f->shared->cache,
                               type,
                               old_addr,
                               new_addr);
@@ -863,7 +840,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 void *
 H5AC_protect(H5F_t *f, 
              hid_t dxpl_id, 
@@ -878,7 +854,6 @@ H5AC_protect(H5F_t *f,
              rw)
 {
     void *		thing = NULL;
-    H5AC_t *		cache_ptr = NULL;
     void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_protect, NULL)
@@ -891,8 +866,6 @@ H5AC_protect(H5F_t *f,
     HDassert(type->load);
     HDassert(H5F_addr_defined(addr));
 
-    cache_ptr = (H5AC_t *)(f->shared->cache);
-
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_FPHDF5
     /* The following code to support flexible parallel is a direct copy
@@ -904,7 +877,7 @@ H5AC_protect(H5F_t *f,
         H5FD_t *	lf;
         unsigned	req_id;
         H5FP_status_t	status;
-        H5AC_info_t *	info_ptr;
+        H5AC_info_t *	info;
 
         HDassert(f->shared->lf);
 
@@ -960,26 +933,26 @@ H5AC_protect(H5F_t *f,
                 HGOTO_DONE(NULL);
             }
         
-            info_ptr = (H5AC_info_t *)thing;
+            info = (H5AC_info_t *)thing;
 
-            HDassert(info_ptr->is_dirty == FALSE);
+            HDassert(info->is_dirty == FALSE);
 
-            info_ptr->addr = addr;
-            info_ptr->type = type;
-            info_ptr->is_protected = TRUE;
+            info->addr = addr;
+            info->type = type;
+            info->is_protected = TRUE;
 
-            if ( (type->size)(f, thing, &(info_ptr->size)) < 0 ) {
+            if ( (type->size)(f, thing, &(info->size)) < 0 ) {
 
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, NULL, \
                             "Can't get size of thing")
             }
 
-            HDassert(info_ptr->size < H5C_MAX_ENTRY_SIZE); 
+            HDassert(info->size < H5C_MAX_ENTRY_SIZE); 
 
-            info_ptr->next = NULL;
-            info_ptr->prev = NULL;
-            info_ptr->aux_next = NULL;
-            info_ptr->aux_prev = NULL;
+            info->next = NULL;
+            info->prev = NULL;
+            info->aux_next = NULL;
+            info->aux_prev = NULL;
 
             HGOTO_DONE(thing);
         }
@@ -990,7 +963,7 @@ H5AC_protect(H5F_t *f,
     thing = H5C_protect(f,
                         dxpl_id,
                         H5AC_noblock_dxpl_id, 
-                        cache_ptr,
+                        f->shared->cache,
                         type,
                         addr,
                         udata1,
@@ -1052,11 +1025,11 @@ done:
  *              Sep  2 1997
  *
  * Modifications:
- *              Robb Matzke, 1999-07-27
- *              The ADDR argument is passed by value.
+ *		Robb Matzke, 1999-07-27
+ *		The ADDR argument is passed by value.
  *
- *              Quincey Koziol, 2003-03-19
- *              Added "deleted" argument
+ *		Quincey Koziol, 2003-03-19
+ *		Added "deleted" argument
  *
  *              Bill Wendling, 2003-09-18
  *              If this is an FPHDF5 driver and the data is dirty,
@@ -1073,17 +1046,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_unprotect(H5F_t *f, 
-               hid_t dxpl_id, 
-               const H5AC_class_t *type, 
-               haddr_t addr,
-               void *thing, 
-               hbool_t deleted)
+H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, hbool_t deleted)
 {
     herr_t		result;
-    herr_t              ret_value = SUCCEED;    /* Return value */
-    H5AC_info_t *	info_ptr;
-    H5AC_t *		cache_ptr = NULL;
+    herr_t                  ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_unprotect, FAIL)
 
@@ -1094,12 +1060,8 @@ H5AC_unprotect(H5F_t *f,
     HDassert(type->flush);
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
-
-    cache_ptr = (H5AC_t *)(f->shared->cache);
-    info_ptr = (H5AC_info_t *)thing;
-
-    HDassert( info_ptr->addr == addr );
-    HDassert( info_ptr->type == type );
+    HDassert( ((H5AC_info_t *)thing)->addr == addr );
+    HDassert( ((H5AC_info_t *)thing)->type == type );
 
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_FPHDF5
@@ -1119,9 +1081,9 @@ H5AC_unprotect(H5F_t *f,
 
         if ( H5FD_is_fphdf5_driver(lf) ) {
 
-            HDassert( info_ptr->is_protected );
+            HDassert( ((H5AC_info_t *)thing)->is_protected );
 
-            info_ptr->is_protected = FALSE;
+            ((H5AC_info_t *)thing)->is_protected = FALSE;
 
             /*
              * FIXME: If the metadata is *really* deleted at this point
@@ -1155,7 +1117,7 @@ H5AC_unprotect(H5F_t *f,
             }
 
             /* Exit now. The FPHDF5 stuff is finished. */
-            HGOTO_DONE(SUCCEED);
+            HGOTO_DONE(SUCCEED)
         }
     }
 #endif  /* H5_HAVE_FPHDF5 */
@@ -1164,7 +1126,7 @@ H5AC_unprotect(H5F_t *f,
     result = H5C_unprotect(f,
                            dxpl_id,
                            H5AC_noblock_dxpl_id, 
-                           cache_ptr,
+                           f->shared->cache,
                            type,
                            addr,
                            thing,
@@ -1204,21 +1166,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_stats(H5F_t UNUSED *f)
 {
     herr_t		ret_value = SUCCEED;   /* Return value */
-    H5AC_t *		cache_ptr;
 
     FUNC_ENTER_NOAPI(H5AC_stats, FAIL)
 
     HDassert(f);
     HDassert(f->shared->cache);
 
-    cache_ptr = (H5AC_t *)(f->shared->cache);
-
-    H5C_stats(cache_ptr, f->name, FALSE); /* at present, this can't fail */
+    H5C_stats(f->shared->cache, f->name, FALSE); /* at present, this can't fail */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1312,4 +1270,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_check_if_write_permitted() */
-
