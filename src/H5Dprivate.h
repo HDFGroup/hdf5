@@ -41,17 +41,34 @@
 /* Set the minimum object header size to create objects with */
 #define H5D_MINHDR_SIZE 512
 
-/* Dataset creation property list */
-typedef struct H5D_create_t {
-    H5D_layout_t	layout;		/*storage layout		     */
-    int		chunk_ndims;	/*chunk dimensionality		     */
-    hsize_t		chunk_size[32];	/*chunk size if chunked storage	     */
-    H5O_fill_t		fill;		/*fill value			     */
-    H5O_efl_t		efl;		/*external file list		     */
-    H5O_pline_t		pline;		/*data filter pipeline		     */
-} H5D_create_t;
+/* ========  Dataset creation properties ======== */
+/* Definitions for storage layout property */
+#define H5D_CRT_LAYOUT_NAME        "layout"
+#define H5D_CRT_LAYOUT_SIZE        sizeof(H5D_layout_t)
+#define H5D_CRT_LAYOUT_DEF         H5D_CONTIGUOUS    
+/* Definitions for chunk dimensionality property */
+#define H5D_CRT_CHUNK_DIM_NAME     "chunk_ndims"
+#define H5D_CRT_CHUNK_DIM_SIZE     sizeof(int)
+#define H5D_CRT_CHUNK_DIM_DEF      1
+/* Definitions for chunk size */
+#define H5D_CRT_CHUNK_SIZE_NAME    "chunk_size"
+#define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(hsize_t[32])
+#define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
+                                   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+/* Definitions for fill value */
+#define H5D_CRT_FILL_VALUE_NAME    "fill"
+#define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
+#define H5D_CRT_FILL_VALUE_DEF     {NULL, 0, NULL}
+/* Definitions for external file list */
+#define H5D_CRT_EXT_FILE_LIST_NAME "efl"
+#define H5D_CRT_EXT_FILE_LIST_SIZE sizeof(H5O_efl_t)
+#define H5D_CRT_EXT_FILE_LIST_DEF  {HADDR_UNDEF, 0, 0, NULL}
+/* Definitions for data filter pipeline */
+#define H5D_CRT_DATA_PIPELINE_NAME "pline"
+#define H5D_CRT_DATA_PIPELINE_SIZE sizeof(H5O_pline_t)
+#define H5D_CRT_DATA_PIPELINE_DEF  {0, 0, NULL} 
 
-/* Data transfer properties */
+/* ======== Data transfer properties ======== */
 /* Definitions for maximum temp buffer size property */
 #define H5D_XFER_MAX_TEMP_BUF_NAME       "max_temp_buf"
 #define H5D_XFER_MAX_TEMP_BUF_SIZE       sizeof(size_t)
@@ -125,14 +142,11 @@ typedef struct H5D_create_t {
 
 typedef struct H5D_t H5D_t;
 
-/* library variables */
-__DLLVAR__ const H5D_create_t H5D_create_dflt;
-
 /* Functions defined in H5D.c */
 __DLL__ herr_t H5D_init(void);
-__DLL__ H5D_t *H5D_create(H5G_entry_t *loc, const char *name,
-			  const H5T_t *type, const H5S_t *space,
-			  const H5D_create_t *create_parms);
+__DLL__ H5D_t *H5D_create(H5G_entry_t *loc, const char *name, 
+                          const H5T_t *type, const H5S_t *space, 
+                          hid_t dcpl_id);
 __DLL__ H5D_t *H5D_open(H5G_entry_t *loc, const char *name);
 __DLL__ herr_t H5D_close(H5D_t *dataset);
 __DLL__ htri_t H5D_isa(H5G_entry_t *ent);
@@ -150,8 +164,14 @@ __DLL__ H5D_t * H5D_open_oid(H5G_entry_t *ent);
 __DLL__ H5F_t * H5D_get_file(const H5D_t *dset);
 __DLL__ hsize_t H5D_get_storage_size(H5D_t *dset);
 __DLL__ void *H5D_vlen_get_buf_size_alloc(size_t size, void *info);
-__DLL__ herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, hsize_t ndim, hssize_t *point, void *op_data);
+__DLL__ herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, hsize_t ndim, 
+                                     hssize_t *point, void *op_data);
+__DLL__ herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t, 
+                            void *copy_data);
+__DLL__ herr_t H5D_crt_close(hid_t dxpl_id, void *close_data);
 __DLL__ herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
+__DLL__ herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
+                             void *copy_data);
 __DLL__ herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 
 #endif

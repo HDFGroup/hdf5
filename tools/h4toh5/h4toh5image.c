@@ -424,7 +424,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
  By default, we will compress HDF5 dataset by using gzip compression if HDF5 file is compressed. */
 
   /* we don't use data transfer property list. 
- write_plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
+ write_plist = H5Pcreate(H5P_DATASET_XFER);
  bufsize = h4memsize *h5dims[1]*ncomp;
 
   if(H5Pset_buffer(write_plist,bufsize,NULL,NULL)<0) {

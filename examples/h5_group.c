@@ -78,6 +78,7 @@ main(void)
      */
     H5Sclose(dataspace);
     H5Dclose(dataset);
+    H5Pclose(plist);
     H5Fclose(file);
 
     /*

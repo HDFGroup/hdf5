@@ -40,7 +40,6 @@ static herr_t		H5P_init_interface(void);
 hid_t H5P_NO_CLASS=(hid_t)H5P_NO_CLASS_OLD;
 hid_t H5P_FILE_CREATE=(hid_t)H5P_FILE_CREATE_OLD;
 hid_t H5P_FILE_ACCESS=(hid_t)H5P_FILE_ACCESS_OLD;
-hid_t H5P_DATASET_CREATE=(hid_t)H5P_DATASET_CREATE_OLD;
 hid_t H5P_MOUNT=(hid_t)H5P_MOUNT_OLD;
 
 /*
@@ -234,7 +233,7 @@ H5P_init_interface(void)
     /* Register the dataset creation and data xfer property classes */
 
     /* Allocate the dataset creation class */
-    if (NULL==(pclass = H5P_create_class (root_class,"dataset create",H5P_DATASET_CREATE_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"dataset create",H5P_DATASET_CREATE_HASH_SIZE,1,NULL,NULL,H5D_crt_copy,NULL,H5D_crt_close,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the dataset creation class */
@@ -242,7 +241,7 @@ H5P_init_interface(void)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the data xfer class */
-    if (NULL==(pclass = H5P_create_class (root_class,"data xfer",H5P_DATASET_XFER_HASH_SIZE,1,H5D_xfer_create,NULL,H5D_xfer_create,NULL,H5D_xfer_close,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"data xfer",H5P_DATASET_XFER_HASH_SIZE,1,H5D_xfer_create,NULL,H5D_xfer_copy,NULL,H5D_xfer_close,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the data xfer class */
@@ -347,7 +346,6 @@ H5Pcreate(hid_t type)
         old_type=(H5P_class_t_old)type;
 assert( old_type==H5P_FILE_CREATE_OLD ||
         old_type==H5P_FILE_ACCESS_OLD ||
-        old_type==H5P_DATASET_CREATE_OLD ||
         old_type==H5P_MOUNT_OLD);
 
         /* Allocate a new property list and initialize it with default values */
@@ -357,9 +355,6 @@ assert( old_type==H5P_FILE_CREATE_OLD ||
                 break;
             case H5P_FILE_ACCESS_OLD:
                 src = &H5F_access_dflt;
-                break;
-            case H5P_DATASET_CREATE_OLD:
-                src = &H5D_create_dflt;
                 break;
             case H5P_MOUNT_OLD:
                 src = &H5F_mount_dflt;
@@ -487,6 +482,10 @@ H5Pclose(hid_t plist_id)
  * Modifications:
  *		Robb Matzke, 1999-08-03
  *		Modified to work with the virtual file layer.
+ *          
+ *              Raymond Lu, 2001-10-02
+ *              Took out case H5P_DATASET_CREATE for generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -494,7 +493,6 @@ H5P_close(void *_plist)
 {
     H5P_t           *plist=(H5P_t *)_plist;
     H5F_access_t	*fa_list = &(plist->u.faccess);
-    H5D_create_t	*dc_list = &(plist->u.dcreate);
     
     FUNC_ENTER (H5P_close, FAIL);
 
@@ -516,12 +514,6 @@ H5P_close(void *_plist)
         case H5P_FILE_CREATE_OLD:
             break;
         
-        case H5P_DATASET_CREATE_OLD:
-            H5O_reset(H5O_FILL, &(dc_list->fill));
-            H5O_reset(H5O_EFL, &(dc_list->efl));
-            H5O_reset(H5O_PLINE, &(dc_list->pline));
-            break;
-
         case H5P_MOUNT_OLD:
             break;
 
@@ -690,8 +682,9 @@ done:
  PURPOSE
     Internal routine to copy a generic property lists
  USAGE
-    hid_t H5P_copy_plist(plist)
-        H5P_genplist_t *plist;      IN: Property list to copy
+        hid_t H5P_copy_plist(old_plist, old_plist_id)
+        H5P_genplist_t *old_plist;      IN: Property list to copy
+        hid_t old_plist_id;             IN: Property list ID to copy
  RETURNS
     Success: valid property list ID on success (non-negative)
     Failure: negative
@@ -705,35 +698,35 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static hid_t H5P_copy_plist(H5P_genplist_t *plist)
+static hid_t H5P_copy_plist(H5P_genplist_t *old_plist, hid_t old_plist_id)
 {
     H5P_genplist_t *new_plist;  /* New property list generated from copy */
     H5P_genprop_t *tprop;       /* Temporary pointer to properties */
     H5P_genprop_t *new_prop;    /* New property created for copy */
-    hid_t plist_id;             /* Property list ID of new list created */
-    unsigned u;                    /* Local index variable */
+    hid_t new_plist_id;         /* Property list ID of new list created */
+    unsigned u;                 /* Local index variable */
     hid_t ret_value=FAIL;       /* return value */
-
+ 
     FUNC_ENTER (H5P_copy_plist, FAIL);
 
-    assert(plist);
+    assert(old_plist);
 
     /* 
      * Create new property list object
      */
 
     /* Allocate room for the property list & it's hash table of properties */
-    if (NULL==(new_plist = H5MM_calloc (sizeof(H5P_genplist_t)+((plist->pclass->hashsize-1)*sizeof(H5P_genprop_t *)))))
+    if (NULL==(new_plist = H5MM_calloc (sizeof(H5P_genplist_t)+((old_plist->pclass->hashsize-1)*sizeof(H5P_genprop_t *)))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed");
 
     /* Set class state */
-    new_plist->pclass = plist->pclass;
+    new_plist->pclass = old_plist->pclass;
     new_plist->nprops = 0;      /* Initially the plist has the same number of properties as the class */
     new_plist->class_init = 0;  /* Initially, wait until the class callback finishes to set */
 
     /* Cycle through the properties and copy them also */
-    for(u=0; u<plist->pclass->hashsize; u++) {
-        tprop=plist->props[u];
+    for(u=0; u<old_plist->pclass->hashsize; u++) {
+        tprop=old_plist->props[u];
 
         /* Walk through the list of properties at each hash location */
         while(tprop!=NULL) {
@@ -766,14 +759,14 @@ static hid_t H5P_copy_plist(H5P_genplist_t *plist)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ref count");
 
     /* Get an atom for the property list */
-    if ((plist_id = H5I_register(H5I_GENPROP_LST, new_plist))<0)
+    if ((new_plist_id = H5I_register(H5I_GENPROP_LST, new_plist))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list");
 
     /* Call the class callback (if it exists) now that we have the property list ID */
     if(new_plist->pclass->copy_func!=NULL) {
-        if((new_plist->pclass->copy_func)(plist_id,plist->pclass->copy_data)<0) {
+        if((new_plist->pclass->copy_func)(new_plist_id,old_plist_id,old_plist->pclass->copy_data)<0) {
             /* Delete ID, ignore return value */
-            H5I_remove(plist_id);
+            H5I_remove(new_plist_id);
             HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property");
         } /* end if */
     } /* end if */
@@ -782,7 +775,7 @@ static hid_t H5P_copy_plist(H5P_genplist_t *plist)
     new_plist->class_init=1;
 
     /* Set the return value */
-    ret_value=plist_id;
+    ret_value=new_plist_id;
 
 done:
     if (ret_value<0 && new_plist)
@@ -813,7 +806,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static hid_t H5P_copy_new(hid_t id)
+hid_t H5P_copy_new(hid_t id)
 {
     void *obj;                 /* Property object to copy */
     hid_t ret_value=FALSE;      /* return value */
@@ -828,7 +821,7 @@ static hid_t H5P_copy_new(hid_t id)
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
-        if((ret_value=H5P_copy_plist(obj))<0)
+        if((ret_value=H5P_copy_plist(obj, id))<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
     } /* end if */
     /* Must be property classes */
@@ -931,6 +924,10 @@ H5Pcopy(hid_t plist_id)
  * Modifications:
  *		Robb Matzke, 1999-08-03
  *		Modified to use the virtual file layer.
+ *            
+ *              Raymond Lu, 2001-10-02
+ *              Took out case H5P_DATASET_CREATE for generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -938,8 +935,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
 {
     size_t		size;
     H5P_t		*dst = NULL;
-    const H5D_create_t	*dc_src = NULL;
-    H5D_create_t	*dc_dst = NULL;
     H5F_access_t	*fa_dst = NULL;
     
     FUNC_ENTER (H5P_copy, NULL);
@@ -952,10 +947,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
 
         case H5P_FILE_ACCESS_OLD:
             size = sizeof(H5F_access_t);
-            break;
-
-        case H5P_DATASET_CREATE_OLD:
-            size = sizeof(H5D_create_t);
             break;
 
         case H5P_MOUNT_OLD:
@@ -991,30 +982,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
                 H5I_inc_ref(fa_dst->driver_id);
                 fa_dst->driver_info = H5FD_fapl_copy(fa_dst->driver_id,
                                 fa_dst->driver_info);
-            }
-            break;
-        
-        case H5P_DATASET_CREATE_OLD:
-            dc_src = (const H5D_create_t*)src;
-            dc_dst = (H5D_create_t*)dst;
-
-            /* Copy the fill value */
-            if (NULL==H5O_copy(H5O_FILL, &(dc_src->fill), &(dc_dst->fill))) {
-                HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
-                      "unabe to copy fill value message");
-            }
-            
-            /* Copy the external file list */
-            HDmemset(&(dc_dst->efl), 0, sizeof(dc_dst->efl));
-            if (NULL==H5O_copy(H5O_EFL, &(dc_src->efl), &(dc_dst->efl))) {
-                HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
-                      "unable to copy external file list message");
-            }
-
-            /* Copy the filter pipeline */
-            if (NULL==H5O_copy(H5O_PLINE, &(dc_src->pline), &(dc_dst->pline))) {
-                HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
-                      "unable to copy filter pipeline message");
             }
             break;
         
@@ -1552,19 +1519,21 @@ H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
 {
-    H5D_create_t	   *plist = NULL;
-
     FUNC_ENTER(H5Pset_layout, FAIL);
     H5TRACE2("e","iDl",plist_id,layout);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
@@ -1574,7 +1543,8 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
     }
 
     /* Set value */
-    plist->layout = layout;
+    if(H5P_set(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1593,24 +1563,30 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and get property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
 H5Pget_layout(hid_t plist_id)
 {
-    H5D_create_t	   *plist = NULL;
+    H5D_layout_t           layout;
 
     FUNC_ENTER(H5Pget_layout, H5D_LAYOUT_ERROR);
     H5TRACE1("Dl","i",plist_id);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
 		      "not a dataset creation property list");
-    }
 
-    FUNC_LEAVE(plist->layout);
+    if(H5P_get(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, H5D_LAYOUT_ERROR, 
+                      "can't get layout");
+    FUNC_LEAVE(layout);
 }
 
 /*-------------------------------------------------------------------------
@@ -1630,23 +1606,27 @@ H5Pget_layout(hid_t plist_id)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
     int			    i;
-    H5D_create_t	   *plist = NULL;
+    H5D_layout_t           layout;
 
     FUNC_ENTER(H5Pset_chunk, FAIL);
     H5TRACE3("e","iIs*[a1]h",plist_id,ndims,dim);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
-    }
+  
     if (ndims <= 0) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality must be positive");
@@ -1666,11 +1646,14 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         }
     }
 
-    /* Set value */
-    plist->layout = H5D_CHUNKED;
-    plist->chunk_ndims = ndims;
-    for (i = 0; i < ndims; i++)
-        plist->chunk_size[i] = dim[i];
+    layout = H5D_CHUNKED;
+    if(H5P_set(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
+    if(H5P_set(plist_id, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, 
+                      "can't set chunk dimensionanlity");
+    if(H5P_set(plist_id, H5D_CRT_CHUNK_SIZE_NAME, (void*)dim) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk size");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1692,32 +1675,45 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 int
 H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
 {
     int			i;
-    H5D_create_t	*plist = NULL;
+    int                 ndims;
+    H5D_layout_t        layout;
+    hsize_t             chunk_size[32];
 
     FUNC_ENTER(H5Pget_chunk, FAIL);
     H5TRACE3("Is","iIsx",plist_id,max_ndims,dim);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
-    }
-    if (H5D_CHUNKED != plist->layout) {
+   
+    if(H5P_get(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout"); 
+    if(H5D_CHUNKED != layout) 
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "not a chunked storage layout");
-    }
+                      "not a chunked storage layout");
+   
+    if(H5P_get(plist_id, H5D_CRT_CHUNK_SIZE_NAME, chunk_size) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk size");
+    if(H5P_get(plist_id, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                      "can't get chunk dimensionality");
 
-    for (i=0; i<plist->chunk_ndims && i<max_ndims && dim; i++)
-        dim[i] = plist->chunk_size[i];
+    for (i=0; i<ndims && i<max_ndims && dim; i++)
+        dim[i] = chunk_size[i];
 
-    FUNC_LEAVE(plist->chunk_ndims);
+    FUNC_LEAVE(ndims);
 }
 
 
@@ -1744,6 +1740,11 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1751,17 +1752,16 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
 {
     int			idx;
     size_t		total, tmp;
-    H5D_create_t	*plist = NULL;
+    H5O_efl_t           efl;
 
     FUNC_ENTER(H5Pset_external, FAIL);
     H5TRACE4("e","isoh",plist_id,name,offset,size);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
-    }
+   
     if (!name || !*name) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
     }
@@ -1772,40 +1772,47 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     if (size<=0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "zero size");
     }
-    if (plist->efl.nused>0 &&
-            H5O_EFL_UNLIMITED==plist->efl.slot[plist->efl.nused-1].size) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "previous file size is unlimited");
-    }
+    if(H5P_get(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                      "can't get external file list");
+    if(efl.nused > 0 && H5O_EFL_UNLIMITED==efl.slot[efl.nused-1].size)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+                      "previous file size is unlimited");
+
     if (H5O_EFL_UNLIMITED!=size) {
-        for (idx=0, total=size; idx<plist->efl.nused; idx++, total=tmp) {
-            tmp = total + plist->efl.slot[idx].size;
+        for (idx=0, total=size; idx<efl.nused; idx++, total=tmp) {
+            tmp = total + efl.slot[idx].size;
             if (tmp <= total) {
                 HRETURN_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
-                       "total external data size overflowed");
+                               "total external data size overflowed");
             }
         }
     }
     
+
     /* Add to the list */
-    if (plist->efl.nused>=plist->efl.nalloc) {
-        int na = plist->efl.nalloc + H5O_EFL_ALLOC;
-        H5O_efl_entry_t *x = H5MM_realloc (plist->efl.slot,
+    if (efl.nused >= efl.nalloc) {
+        int na = efl.nalloc + H5O_EFL_ALLOC;
+        H5O_efl_entry_t *x = H5MM_realloc (efl.slot,
                            na*sizeof(H5O_efl_entry_t));
 
         if (!x) {
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                   "memory allocation failed");
+                           "memory allocation failed");
         }
-        plist->efl.nalloc = na;
-        plist->efl.slot = x;
+        efl.nalloc = na;
+        efl.slot = x;
     }
-    idx = plist->efl.nused;
-    plist->efl.slot[idx].name_offset = 0; /*not entered into heap yet*/
-    plist->efl.slot[idx].name = H5MM_xstrdup (name);
-    plist->efl.slot[idx].offset = offset;
-    plist->efl.slot[idx].size = size;
-    plist->efl.nused++;
+    idx = efl.nused;
+    efl.slot[idx].name_offset = 0; /*not entered into heap yet*/
+    efl.slot[idx].name = H5MM_xstrdup (name);
+    efl.slot[idx].offset = offset;
+    efl.slot[idx].size = size;
+    efl.nused++;
+    
+    if(H5P_set(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,
+                       "can't set external file list");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1825,25 +1832,32 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 int
 H5Pget_external_count(hid_t plist_id)
 {
-    H5D_create_t	*plist = NULL;
-    
+    H5O_efl_t           efl;
+
     FUNC_ENTER (H5Pget_external_count, FAIL);
     H5TRACE1("Is","i",plist_id);
     
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
-    }
 
+    if(H5P_get(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                      "can't get external file list");
+    
     /* Return */
-    FUNC_LEAVE (plist->efl.nused);
+    FUNC_LEAVE (efl.nused);
 }
 
 
@@ -1871,35 +1885,43 @@ H5Pget_external_count(hid_t plist_id)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and get property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
 		 off_t *offset/*out*/, hsize_t *size/*out*/)
 {
-    H5D_create_t	*plist = NULL;
-    
+    H5O_efl_t           efl;
+
     FUNC_ENTER (H5Pget_external, FAIL);
     H5TRACE6("e","iIszxxx",plist_id,idx,name_size,name,offset,size);
     
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
-    }
-    if (idx<0 || idx>=plist->efl.nused) {
+   
+    if(H5P_get(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                      "can't get external file list");
+    
+    if (idx<0 || idx>=efl.nused) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
 		       "external file index is out of range");
     }
 
     /* Return values */
     if (name_size>0 && name)
-        HDstrncpy (name, plist->efl.slot[idx].name, name_size);
+        HDstrncpy (name, efl.slot[idx].name, name_size);
     if (offset)
-        *offset = plist->efl.slot[idx].offset;
+        *offset = efl.slot[idx].offset;
     if (size)
-        *size = plist->efl.slot[idx].size;
+        *size = efl.slot[idx].size;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -2548,27 +2570,30 @@ H5Pget_preserve(hid_t plist_id)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for  
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
 	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
-    H5D_create_t	*plist = NULL;
-    
+    H5O_pline_t         pline;
+
     FUNC_ENTER (H5Pset_filter, FAIL);
     H5TRACE5("e","iZfIuz*[a3]Iu",plist_id,filter,flags,cd_nelmts,cd_values);
 
     /* Check arguments */
-    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
-        HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
-		      "transient pipelines are not supported yet");
-    }
-    if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
-            NULL==(plist=H5I_object (plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset creation property list");
-    }
+   
+    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
     if (filter<0 || filter>H5Z_FILTER_MAX) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "invalid filter identifier");
@@ -2583,10 +2608,11 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     }
 
     /* Do it */
-    if (H5Z_append(&(plist->pline), filter, flags, cd_nelmts, cd_values)<0) {
-        HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
-		      "unable to add filter to pipeline");
-    }
+    if(H5Z_append(&pline, filter, flags, cd_nelmts, cd_values) < 0)
+        HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, 
+                      "unable to add filter to pipeline");
+    if(H5P_set(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -2619,22 +2645,19 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
 int
 H5Pget_nfilters(hid_t plist_id)
 {
-    H5D_create_t	*plist = NULL;
-    
+    H5O_pline_t         pline;
+
     FUNC_ENTER(H5Pget_nfilters, FAIL);
     H5TRACE1("Is","i",plist_id);
 
-    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
-        HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
-		      "transient pipelines are not supported yet");
-    }
-    if (H5P_DATASET_CREATE!=H5P_get_class(plist_id) ||
-            NULL==(plist=H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
-    }
+   
+    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
-    FUNC_LEAVE((int)(plist->pline.nfilters));
+    FUNC_LEAVE((int)(pline.nfilters));
 }
 
 
@@ -2661,6 +2684,11 @@ H5Pget_nfilters(hid_t plist_id)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check paramter and set property for 
+ *              generic property list. 
+ *
  *-------------------------------------------------------------------------
  */
 H5Z_filter_t
@@ -2668,7 +2696,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
 	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
 	       size_t namelen, char name[]/*out*/)
 {
-    H5D_create_t	*plist = NULL;
+    H5O_pline_t         pline;
     size_t		i;
     
     FUNC_ENTER (H5Pget_filter, H5Z_FILTER_ERROR);
@@ -2676,16 +2704,14 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
              name);
     
     /* Check arguments */
-    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
-        HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, H5Z_FILTER_ERROR,
-		      "transient filters are not supported yet");
-    }
-    if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
-            NULL==(plist=H5I_object (plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5Z_FILTER_ERROR,
 		       "not a dataset creation property list");
-    }
-    if (idx<0 || (size_t)idx>=plist->pline.nfilters) {
+   
+    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+    if (idx<0 || (size_t)idx>=pline.nfilters) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
 		      "filter number is invalid");
     }
@@ -2713,21 +2739,20 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
             cd_values = NULL;
     }
 
-    /* Output values */
     if (flags)
-        *flags = plist->pline.filter[idx].flags;
+        *flags = pline.filter[idx].flags;
     if (cd_values) {
-        for (i=0; i<plist->pline.filter[idx].cd_nelmts && i<*cd_nelmts; i++) {
-            cd_values[i] = plist->pline.filter[idx].cd_values[i];
+        for (i=0; i<pline.filter[idx].cd_nelmts && i<*cd_nelmts; i++) {
+            cd_values[i] = pline.filter[idx].cd_values[i];
         }
     }
     if (cd_nelmts)
-        *cd_nelmts = plist->pline.filter[idx].cd_nelmts;
+        *cd_nelmts = pline.filter[idx].cd_nelmts;
 
     if (namelen>0 && name) {
-        const char *s = plist->pline.filter[idx].name;
+        const char *s = pline.filter[idx].name;
         if (!s) {
-            H5Z_class_t *cls = H5Z_find(plist->pline.filter[idx].id);
+            H5Z_class_t *cls = H5Z_find(pline.filter[idx].id);
 
             if (cls)
                 s = cls->name;
@@ -2738,7 +2763,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
             name[0] = '\0';
     }
     
-    FUNC_LEAVE (plist->pline.filter[idx].id);
+    FUNC_LEAVE (pline.filter[idx].id);
 }
 
 
@@ -2760,37 +2785,41 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list. 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_deflate(hid_t plist_id, unsigned level)
 {
-    H5D_create_t	*plist = NULL;
+    H5O_pline_t         pline;
     
     FUNC_ENTER (H5Pset_deflate, FAIL);
     H5TRACE2("e","iIu",plist_id,level);
 
     /* Check arguments */
-    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
-        HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
-		      "transient filter pipelines are not supported yet");
-    }
-    if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
-            NULL==(plist=H5I_object (plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset creation property list");
-    }
+   
     if (level>9) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "invalid deflate level");
     }
 
     /* Add the filter */
-    if (H5Z_append(&(plist->pline), H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL,
+    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if (H5Z_append(&pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL,
 		   1, &level)<0) {
         HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
-		      "unable to add deflate filter to pipeline");
+	 	      "unable to add deflate filter to pipeline");
     }
+    if(H5P_set(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -2911,23 +2940,30 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list. 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 {
-    H5D_create_t	*plist = NULL;
+    H5O_fill_t          fill;
     H5T_t		*type = NULL;
     
     FUNC_ENTER(H5Pset_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE!=H5P_get_class(plist_id) ||
-            NULL==(plist=H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
-    }
+   
+    if(H5P_get(plist_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
+
     if (H5I_DATATYPE!=H5I_get_type(type_id) ||
             NULL==(type=H5I_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
@@ -2937,17 +2973,20 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     }
 
     /* Set the fill value */
-    H5O_reset(H5O_FILL, &(plist->fill));
-    if (NULL==(plist->fill.type=H5T_copy(type, H5T_COPY_TRANSIENT))) {
+    H5O_reset(H5O_FILL, &fill);
+    if (NULL==(fill.type=H5T_copy(type, H5T_COPY_TRANSIENT))) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to copy data type");
     }
-    plist->fill.size = H5T_get_size(type);
-    if (NULL==(plist->fill.buf=H5MM_malloc(plist->fill.size))) {
+    fill.size = H5T_get_size(type);
+    if (NULL==(fill.buf=H5MM_malloc(fill.size))) {
         HRETURN_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
 		      "memory allocation failed for fill value");
     }
-    HDmemcpy(plist->fill.buf, value, plist->fill.size);
+    HDmemcpy(fill.buf, value, fill.size);
+
+    if(H5P_set(plist_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set fill value");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -2969,12 +3008,17 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and get property for 
+ *              generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
 {
-    H5D_create_t	*plist = NULL;		/*property list		*/
+    H5O_fill_t          fill;
     H5T_t		*type = NULL;		/*data type		*/
     H5T_path_t		*tpath = NULL;		/*type conversion info	*/
     void		*buf = NULL;		/*conversion buffer	*/
@@ -2986,11 +3030,10 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     H5TRACE3("e","iix",plist_id,type_id,value);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE!=H5P_get_class(plist_id) ||
-            NULL==(plist=H5I_object(plist_id))) {
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a dataset creation proprety list");
-    }
+    
     if (H5I_DATATYPE!=H5I_get_type(type_id) ||
             NULL==(type=H5I_object(type_id))) {
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
@@ -3005,19 +3048,21 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
      * return zero because we don't know the data type of the dataset and
      * data type conversion might not have resulted in zero.
      */
-    if (NULL==plist->fill.buf) {
+    if(H5P_get(plist_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
+    if(NULL == fill.buf) {
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no fill value defined");
     }
 
     /*
      * Can we convert between the source and destination data types?
      */
-    if (NULL==(tpath=H5T_path_find(plist->fill.type, type, NULL, NULL))) {
+    if(NULL==(tpath=H5T_path_find(fill.type, type, NULL, NULL))) {
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to convert between src and dst data types");
     }
     src_id = H5I_register(H5I_DATATYPE,
-			  H5T_copy (plist->fill.type, H5T_COPY_TRANSIENT));
+                          H5T_copy (fill.type, H5T_COPY_TRANSIENT));
     if (src_id<0) {
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to copy/register data type");
@@ -3028,7 +3073,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
      * other than the fill value buffer that is large enough for both source
      * and destination.  The app-supplied buffer might do okay.
      */
-    if (H5T_get_size(type)>=H5T_get_size(plist->fill.type)) {
+    if (H5T_get_size(type)>=H5T_get_size(fill.type)) {    
         buf = value;
         if (tpath->cdata.need_bkg>=H5T_BKG_TEMP &&
                 NULL==(bkg=H5MM_malloc(H5T_get_size(type)))) {
@@ -3036,14 +3081,14 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
                 "memory allocation failed for type conversion");
         }
     } else {
-        if (NULL==(buf=H5MM_malloc(H5T_get_size(plist->fill.type)))) {
+        if (NULL==(buf=H5MM_malloc(H5T_get_size(fill.type)))) {
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "memory allocation failed for type conversion");
         }
         if (tpath->cdata.need_bkg>=H5T_BKG_TEMP)
             bkg = value;
     }
-    HDmemcpy(buf, plist->fill.buf, H5T_get_size(plist->fill.type));
+    HDmemcpy(buf, fill.buf, H5T_get_size(fill.type));
         
     /* Do the conversion */
     if (H5T_convert(tpath, src_id, type_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DEFAULT)<0) {

@@ -41,8 +41,7 @@ typedef enum H5P_class_t_old {
     H5P_NO_CLASS_OLD     = -1,  /*error return value                 */
     H5P_FILE_CREATE_OLD  = 0,   /*file creation properties           */
     H5P_FILE_ACCESS_OLD  = 1,   /*file access properties             */
-    H5P_DATASET_CREATE_OLD= 2,   /*dataset creation properties        */
-    H5P_MOUNT_OLD        = 3,   /*file mounting properties           */
+    H5P_MOUNT_OLD        = 2,   /*file mounting properties           */
     H5P_NCLASSES_OLD            /*this must be last!                 */
 } H5P_class_t_old;
 
@@ -59,7 +58,6 @@ typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
 __DLLVAR__ hid_t H5P_NO_CLASS;
 __DLLVAR__ hid_t H5P_FILE_CREATE;
 __DLLVAR__ hid_t H5P_FILE_ACCESS;
-__DLLVAR__ hid_t H5P_DATASET_CREATE;
 __DLLVAR__ hid_t H5P_MOUNT;
 
 /* H5P_DATASET_XFER was the name from the beginning through 1.2.  It was
@@ -72,7 +70,8 @@ __DLLVAR__ hid_t H5P_MOUNT;
 
 /* Define property list class callback function pointer types */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
-typedef herr_t (*H5P_cls_copy_func_t)(hid_t prop_id, void *copy_data);
+typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, 
+                                      void *copy_data);
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 
 /* Define property list callback function pointer types */
@@ -99,7 +98,7 @@ extern "C" {
 #define H5P_FILE_CREATE_HASH_SIZE   17
 #define H5P_FILE_ACCESS_NEW (H5open(), H5P_CLS_FILE_ACCESS_g)
 #define H5P_FILE_ACCESS_HASH_SIZE   17
-#define H5P_DATASET_CREATE_NEW  (H5open(), H5P_CLS_DATASET_CREATE_g)
+#define H5P_DATASET_CREATE     (H5open(), H5P_CLS_DATASET_CREATE_g)
 #define H5P_DATASET_CREATE_HASH_SIZE   17
 #define H5P_DATASET_XFER       (H5open(), H5P_CLS_DATASET_XFER_g)
 #define H5P_DATASET_XFER_HASH_SIZE   17

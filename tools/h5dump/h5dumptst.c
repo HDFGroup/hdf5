@@ -215,6 +215,7 @@ static void test_dataset2(void)
 
     H5Sclose(space);
     H5Dclose(dataset);
+    H5Pclose(create_plist);
     H5Fclose(fid);
 }
 
@@ -705,6 +706,7 @@ static void test_compound_dt2(void) {       /* test compound data type */
   H5Dclose(dataset);
   H5Sclose(space);
   H5Gclose(group);
+  H5Pclose(create_plist);
 
   H5Fclose(fid);
 
@@ -1089,6 +1091,7 @@ static void test_many(void) {
   group = H5Gopen(fid, "/g5");
   H5Glink (group, H5G_LINK_SOFT, "/g6/dset3", "slink4");
   H5Gclose(group);
+  H5Pclose(create_plist);
 
   H5Fclose(fid);
 

@@ -95,7 +95,6 @@ typedef struct {
     union {
         H5F_create_t fcreate;   /* File creation properties */
         H5F_access_t faccess;   /* File access properties */
-        H5D_create_t dcreate;   /* Dataset creation properties */
         H5F_mprop_t mount;      /* Mounting properties */
     } u;
     H5P_class_t_old cls;        /* Property list class */
@@ -105,6 +104,7 @@ typedef struct {
 __DLL__ herr_t H5P_init(void);
 __DLL__ hid_t H5P_create(H5P_class_t_old type, H5P_t *plist);
 __DLL__ void *H5P_copy(H5P_class_t_old type, const void *src);
+__DLL__ hid_t H5P_copy_new(hid_t id);
 __DLL__ herr_t H5P_close(void *plist);
 __DLL__ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,

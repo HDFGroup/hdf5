@@ -57,7 +57,7 @@ main (void)
     /* 
      * Modify dataset creation properties, i.e. enable chunking.
      */
-    cparms = H5Pcreate (H5P_DATASET_CREATE);
+    cparms = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk( cparms, RANK, chunk_dims);
 
     /*
@@ -165,6 +165,7 @@ main (void)
     H5Dclose(dataset);
     H5Sclose(dataspace);
     H5Sclose(filespace);
+    H5Pclose(cparms);
     H5Fclose(file);
 
     return 0;

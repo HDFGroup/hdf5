@@ -1980,9 +1980,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
                             case H5P_FILE_ACCESS_OLD:
                                 fprintf(out, "H5P_FILE_ACCESS");
                                 break;
-                            case H5P_DATASET_CREATE_OLD:
-                                fprintf(out, "H5P_DATASET_CREATE");
-                                break;
                             case H5P_MOUNT_OLD:
                                 fprintf(out, "H5P_MOUNT");
                                 break;
@@ -2148,9 +2145,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
                         break;
                     case H5P_FILE_ACCESS_OLD:
                         fprintf (out, "H5P_FILE_ACCESS");
-                        break;
-                    case H5P_DATASET_CREATE_OLD:
-                        fprintf (out, "H5P_DATASET_CREATE");
                         break;
                     case H5P_MOUNT_OLD:
                         fprintf (out, "H5P_MOUNT");

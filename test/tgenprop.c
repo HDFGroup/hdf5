@@ -380,6 +380,19 @@ test_genprop_cls_cb1(hid_t list_id, void *create_data)
     return(SUCCEED);
 }
 
+static herr_t 
+test_genprop_cls_cb2(hid_t new_list_id, hid_t old_list_id, void *create_data)
+{
+    struct {                /* Struct for iterations */
+        int count;
+        hid_t id;
+    } *count_struct=create_data;
+
+    count_struct->count++;
+    count_struct->id=new_list_id;
+
+    return(SUCCEED);
+}
 /****************************************************************
 **
 **  test_genprop_class_callback(): Test basic generic property list code.
@@ -998,7 +1011,7 @@ test_genprop_list_callback(void)
     MESSAGE(5, ("Testing Basic Generic Property List Property Callback Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,test_genprop_cls_cb1,&cop_cb_struct,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,test_genprop_cls_cb2,&cop_cb_struct,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with callbacks) */

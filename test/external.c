@@ -96,7 +96,7 @@ test_1a(hid_t file)
     TESTING("fixed-size data space, exact storage");
 
     /* Create the dataset */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     cur_size[0] = max_size[0] = 100;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0,
 	(hsize_t)(max_size[0]*sizeof(int)))<0) goto error;
@@ -175,7 +175,7 @@ test_1b(hid_t file)
     hsize_t	max_size[1];		/*maximum data space size	*/
 
     TESTING("external storage is too small");
-    if ((dcpl = H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     cur_size[0] = max_size[0] = 100;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0,
 	(hsize_t)(max_size[0]*sizeof(int)-1))<0) goto error;
@@ -231,7 +231,7 @@ test_1c(hid_t file)
     hsize_t	max_size[1];		/*maximum data space size	*/
 
     TESTING("extendible dataspace, exact external size");
-    if ((dcpl=H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
     cur_size[0] = 100;
     max_size[0] = 200;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0,
@@ -282,7 +282,7 @@ test_1d(hid_t file)
     hsize_t	max_size[1];		/*maximum data space size	*/
 
     TESTING("extendible dataspace, external storage is too small");
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     cur_size[0] = 100;
     max_size[0] = 200;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0,
@@ -344,7 +344,7 @@ test_1e(hid_t file)
     TESTING("unlimited dataspace, unlimited external storage");
 
     /* Create dataset */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED)<0) goto error;
     cur_size[0] = 100;
     max_size[0] = H5S_UNLIMITED;
@@ -421,7 +421,7 @@ test_1f(hid_t file)
     hsize_t	max_size[1];		/*data space maximum size	*/
 
     TESTING("multiple external files");
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     cur_size[0] = max_size[0] = 100;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0,
 	(hsize_t)(max_size[0]*sizeof(int)/4))<0) goto error;
@@ -527,7 +527,7 @@ test_1h(void)
     herr_t	status;			/*return status			*/
     
     TESTING("address overflow in external files");
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED-1)<0) goto error;
     H5E_BEGIN_TRY {
 	status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
@@ -616,7 +616,7 @@ test_2 (hid_t fapl)
     if (H5Gclose(grp)<0) goto error;
 
     /* Create the dataset */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_external (dcpl, "extern_1a.raw",  (off_t)0, (hsize_t)sizeof part)<0 ||
 	H5Pset_external (dcpl, "extern_2a.raw", (off_t)10, (hsize_t)sizeof part)<0 ||
 	H5Pset_external (dcpl, "extern_3a.raw", (off_t)20, (hsize_t)sizeof part)<0 ||
@@ -720,7 +720,7 @@ test_3 (hid_t fapl)
     }
 
     /* Create the external file list */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_external(dcpl, "extern_1b.raw", (off_t)0, (hsize_t)sizeof part)<0 ||
 	H5Pset_external(dcpl, "extern_2b.raw", (off_t)10, (hsize_t)sizeof part)<0 ||
 	H5Pset_external(dcpl, "extern_3b.raw", (off_t)20, (hsize_t)sizeof part)<0 ||

@@ -388,7 +388,7 @@ test_compression(hid_t file)
     if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
 
     /* Use chunked storage with compression */
-    if ((dc = H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_deflate (dc, 6)<0) goto error;
 
@@ -678,7 +678,7 @@ test_multiopen (hid_t file)
     TESTING("multi-open with extending");
 
     /* Create the dataset and open it twice */
-    if ((dcpl=H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dcpl, 1, cur_size)<0) goto error;
     if ((space=H5Screate_simple (1, cur_size, max_size))<0) goto error;
     if ((dset1=H5Dcreate (file, "multiopen", H5T_NATIVE_INT, space,

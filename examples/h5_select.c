@@ -302,6 +302,11 @@ main (void)
      * Close dataset.
      */  
     ret = H5Dclose(dataset);
+
+    /*
+     * Close property list
+     */
+    ret = H5Pclose(plist);
  
     /*
      * Close the file.

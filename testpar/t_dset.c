@@ -1023,6 +1023,7 @@ extend_writeInd(char *filename)
 
     /* release resource */
     H5Sclose(sid);
+    H5Pclose(dataset_pl);
 
 
 

@@ -84,7 +84,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   int16           special_code;
   int32           access_id;
   uint16          sd_ref;
-  int             gzip_level;
+ int             gzip_level;
   /* define varibles for hdf5. */
 
   hid_t   h5dset;
@@ -443,9 +443,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     return FAIL;							      
   }									      
   /* comment this out.
-     write_plist = H5Pcreate(H5P_DATASET_XFER);
-
-  write_plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
+  write_plist = H5Pcreate(H5P_DATASET_XFER);
   bufsize = h4memsize;
   for(i=1;i<sds_rank;i++)
     bufsize *= h5dims[i];
@@ -458,7 +456,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     free(chunk_dims);
     H5Sclose(h5d_sid);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
+    H5Pclose(write_plist);
     return FAIL;		
   }
   if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,write_plist,	    
@@ -1482,7 +1480,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
    chunk_dims   = malloc(sizeof(hsize_t)*sds_rank);
 
   if(chunk_dims == NULL) {
-    H5Pclose(H5P_DATASET_CREATE);
+    H5Pclose(create_plist);
     free(sds_start);
     free(sds_edge);
     free(sds_stride);
@@ -1529,7 +1527,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   }									      
   /* Before HDF5 library make the optimzation of dealing with fill value
      data, leave this alone. */
-  /*  write_plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
+  /*  write_plist = H5Pcreate(H5P_DATASET_XFER);
   bufsize = h4memsize;
   for(i=1;i<sds_rank;i++)
     bufsize *= h5dims[i];
@@ -1542,7 +1540,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
      free(chunk_dims);
     H5Sclose(h5d_sid);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
+    H5Pclose(write_plist);
     return FAIL;		
   }
 
@@ -1553,7 +1551,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
+    H5Pclose(write_plist);
     free(sds_start);
     free(sds_edge);
     free(sds_stride);
@@ -1677,7 +1675,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   H5Sclose(h5d_sid);
   H5Dclose(h5dset);
   H5Pclose(create_plist);
-/*  H5Pclose_list(write_plist); */
+/*  H5Pclose(write_plist); */
   return SUCCEED;
 }
 

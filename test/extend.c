@@ -69,7 +69,7 @@ main (void)
     }
     
     /* Create the dataset which is originally NX by NY */
-    if ((cparms = H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
+    if((cparms = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (cparms, 2, chunk_dims)<0) goto error;
     if ((dataset = H5Dcreate (file, "dataset", H5T_NATIVE_INT, mem_space,
 			      cparms))<0) goto error;
