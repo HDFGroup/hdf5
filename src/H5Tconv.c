@@ -3035,10 +3035,11 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_atomic_t src;			/*atomic source info		*/
     H5T_atomic_t dst;			/*atomic destination info	*/
     int	direction;		        /*forward or backward traversal	*/
+    hbool_t     denormalized=FALSE;     /*is either source or destination denormalized?*/
     size_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
     size_t	olap;			/*num overlapping elements	*/
-    ssize_t	bitno;			/*bit number			*/
+    ssize_t	bitno=-1;		/*bit number			*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t	dbuf[64];		/*temp destination buffer	*/
 
@@ -3181,11 +3182,14 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 /*
                  * Get the exponent as an unsigned quantity from the section of
-                 * the source bit field where it's located.	 Don't worry about
+                 * the source bit field where it's located.  Don't worry about
                  * the exponent bias yet.
                  */
                 expo = H5T_bit_get_d(s, src.u.f.epos, src.u.f.esize);
-                
+
+                if(expo==0)
+                    denormalized=TRUE;
+               
                 /*
                  * Set markers for the source mantissa, excluding the leading `1'
                  * (might be implied).
@@ -3199,8 +3203,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         msize = bitno;
                     } else if (0==bitno) {
                         msize = 1;
-                        /* This line was moved to line 3229 */
-                        /* H5T_bit_set(s, src.u.f.mpos, 1, FALSE);  - Why do this? */
+                        H5T_bit_set(s, src.u.f.mpos, 1, FALSE);
                     }
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     msize = src.u.f.msize;
@@ -3220,13 +3223,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * the source exponent bias.
                  */
                 if (0==expo || H5T_NORM_NONE==src.u.f.norm) {
-                    bitno = H5T_bit_find(s, src.u.f.mpos, src.u.f.msize,
-                                         H5T_BIT_MSB, TRUE);
                     assert(bitno>=0);
                     expo -= (src.u.f.ebias-1) + (src.u.f.msize-bitno);
-                    if(0==bitno)
-                        /* This line was moved from line 3203 */
-                        H5T_bit_set(s, src.u.f.mpos, 1, FALSE); /* - Why do this? */
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     expo -= src.u.f.ebias;
                 } else {
@@ -3252,7 +3250,6 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     expo = 0;
                     H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     msize = 0;
-
                 } else if (expo<=0) {
                     /*
                      * The exponent is too small to fit in the exponent field,
@@ -3261,9 +3258,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * longer normalized.
                      */
                     H5_ASSIGN_OVERFLOW(mrsh,(mrsh+1-expo),hssize_t,size_t);
-                    /*mrsh += 1-expo;*/
                     expo = 0;
-                    
+                    denormalized=TRUE;
                 } else if (expo>=expo_max) {
                     /*
                      * The exponent is too large to fit in the available region
@@ -3304,9 +3300,18 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (msize>0 && mrsh<=dst.u.f.msize && mrsh+msize>dst.u.f.msize) {
                     bitno = (ssize_t)(mrsh+msize - dst.u.f.msize);
                     assert(bitno>=0 && (size_t)bitno<=msize);
-                    carry = H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
-                    if (carry)
-                        implied = 2;
+                    /*If the 1st bit being cut off is set and source isn't denormalized.*/
+                    if(H5T_bit_get_d(s, mpos+bitno-1, 1) && !denormalized) {
+                        /*Don't do rounding if exponent is 111...110 and mantissa is 111...11.
+                         *To do rounding and increment exponent in this case will create an infinity value.*/
+                        if((H5T_bit_find(s, mpos+bitno, msize-bitno, H5T_BIT_LSB, FALSE)>=0 || expo<expo_max-1)) {
+                            carry = H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
+                            if (carry)
+                                implied = 2;
+                        }
+                    } else if(H5T_bit_get_d(s, mpos+bitno-1, 1) && denormalized)
+                        /*For either source or destination, denormalized value doesn't increment carry.*/  
+                        H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
                 }
                 else
                     carry=0;
@@ -3342,8 +3347,6 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
                     
                 /* Write the exponent */
-#ifdef OLD_WAY  
-/* It appears to be incorrect to increment the exponent when the carry is set -QAK */
                 if (carry) {
                     expo++;
                     if (expo>=expo_max) {
@@ -3372,17 +3375,11 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     }
                 }
-#endif /* OLD_WAY */
+
                 H5_CHECK_OVERFLOW(expo,hssize_t,hsize_t);
                 H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
 
             padding:
-#ifndef LATER
-                /*
-                 * Set internal padding areas
-                 */
-#endif
-
                 /*
                  * Set external padding areas
                  */
