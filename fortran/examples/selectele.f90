@@ -73,9 +73,9 @@
      end do
  
      !
-     ! Initialize FORTRAN predefined datatypes
+     ! Initialize FORTRAN interface. 
      !
-     CALL h5init_types_f(error) 
+     CALL h5init_fortran_f(error) 
 
      !
      ! Create file1, file2  using default properties.
@@ -275,8 +275,8 @@
      CALL h5fclose_f(file2_id, error)
 
      !
-     ! Close FORTRAN predefined datatypes.
+     ! Close FORTRAN interface.
      !
-     CALL h5close_types_f(error)
+     CALL h5close_fortran_f(error)
 
      END PROGRAM SELECTEXAMPLE

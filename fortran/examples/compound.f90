@@ -62,9 +62,9 @@
      enddo
 
      !
-     ! Initialize FORTRAN predefined datatypes.
+     ! Initialize FORTRAN interface.
      !
-     CALL h5init_types_f(error)
+     CALL h5init_fortran_f(error)
      !
      ! Set dataset transfer property to preserve partially initialized fields
      ! during write/read to/from dataset with compound datatype.
@@ -206,9 +206,9 @@
      CALL h5tclose_f(dt2_id, error)
      CALL h5fclose_f(file_id, error)
      !
-     ! Close FORTRAN predefined datatypes.
+     ! Close FORTRAN interface.
      !
-     CALL h5close_types_f(error)
+     CALL h5close_fortran_f(error)
 
      END PROGRAM COMPOUNDEXAMPLE 
      

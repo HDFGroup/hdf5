@@ -40,9 +40,9 @@
      coord = reshape((/1,1,2,7,1,9/), (/2,3/))   ! Coordinates of selected points
      data = reshape ((/1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6/), (/2,9/))
      !
-     !  Initialize FORTRAN predefined datatypes.
+     !  Initialize FORTRAN interface.
      !
-     CALL h5init_types_f(error)
+     CALL h5init_fortran_f(error)
      !
      !  Create a new file.
      !
@@ -153,9 +153,9 @@
      CALL h5dclose_f(dsetv_id, error)
      CALL h5dclose_f(dsetr_id, error)
      !
-     ! Close FORTRAN predefined datatypes.
+     ! Close FORTRAN interface.
      !
-     CALL h5close_types_f(error) 
+     CALL h5close_fortran_f(error) 
 
      END PROGRAM REG_REFERENCE 
 

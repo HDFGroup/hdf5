@@ -13,7 +13,11 @@
      INTEGER(HID_T) :: file_id                            ! File identifier
  
      INTEGER     ::   error  ! Error flag
-
+     
+!
+!    Initialize FORTRAN interface.
+!
+     CALL h5init_fortran_f (error)
      !
      ! Create a new file using default properties.
      ! 
@@ -23,5 +27,8 @@
      ! Terminate access to the file.
      !
      CALL h5fclose_f(file_id, error)
-
+!
+!    Close FORTRAN interface.
+!
+     CALL h5close_fortran_f(error)
      END PROGRAM FILEEXAMPLE 

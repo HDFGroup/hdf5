@@ -37,9 +37,9 @@
      INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
      INTEGER :: class, ref_size
      !
-     !  Initialize FORTRAN predefined datatypes
+     !  Initialize FORTRAN interface. 
      !
-     CALL h5init_types_f(error)
+     CALL h5init_fortran_f(error)
      !
      !  Create a file
      !
@@ -132,6 +132,10 @@
      CALL h5tclose_f(type_id, error)
      CALL h5dclose_f(dsetr_id, error)
      CALL h5fclose_f(file_id, error)
+     !
+     !  Close FORTRAN interface. 
+     !
+     CALL h5close_fortran_f(error)
 
      END PROGRAM OBJ_REFERENCES 
 

@@ -12,7 +12,7 @@
      IMPLICIT NONE
 
      !
-     !the respective filename is "mount1.h5" and "mount2.h5"
+     ! Filenames are "mount1.h5" and "mount2.h5"
      !
      CHARACTER(LEN=9), PARAMETER :: filename1 = "mount1.h5"
      CHARACTER(LEN=9), PARAMETER :: filename2 = "mount2.h5"
@@ -35,47 +35,47 @@
      INTEGER(HID_T) :: gid 
 
      !
-     ! dataset identifier
+     ! Dataset identifier
      !
      INTEGER(HID_T) :: dset_id
  
      !
-     ! data space identifier
+     ! Data space identifier
      !
      INTEGER(HID_T) :: dataspace
  
      !
-     ! data type identifier
+     ! Data type identifier
      !
      INTEGER(HID_T) :: dtype_id
 
      ! 
-     !The dimensions for the dataset.
+     ! The dimensions for the dataset.
      !
      INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NX,NY/)
 
      !
-     !flag to check operation success 
+     ! Flag to check operation success 
      !         
      INTEGER     ::   error
 
      !
-     !general purpose integer 
+     ! General purpose integer 
      !         
      INTEGER     ::   i, j
 
      !
-     !data buffers 
+     ! Data buffers 
      !         
      INTEGER, DIMENSION(NX,NY) :: data_in, data_out
 
      !
-     !Initialize FORTRAN predifined datatypes
+     ! Initialize FORTRAN interface. 
      !
-     CALL h5init_types_f(error) 
+     CALL h5init_fortran_f(error) 
 
      !
-     !Initialize data_in buffer
+     ! Initialize data_in buffer
      !
      do i = 1, NX
           do j = 1, NY
@@ -84,33 +84,33 @@
      end do
 
      !
-     !Create first file "mount1.h5" using default properties.
+     ! Create first file "mount1.h5" using default properties.
      ! 
      CALL h5fcreate_f(filename1, H5F_ACC_TRUNC_F, file1_id, error)
 
      !
-     !Create group "/G" inside file "mount1.h5".
+     ! Create group "/G" inside file "mount1.h5".
      ! 
      CALL h5gcreate_f(file1_id, "/G", gid, error)
 
      !
-     !close file and group identifiers.
+     ! Close file and group identifiers.
      ! 
      CALL h5gclose_f(gid, error)
      CALL h5fclose_f(file1_id, error)
 
      !
-     !Create second file "mount2.h5" using default properties.
+     ! Create second file "mount2.h5" using default properties.
      ! 
      CALL h5fcreate_f(filename2, H5F_ACC_TRUNC_F, file2_id, error)
 
      !
-     !Create data space for the dataset. 
+     ! Create data space for the dataset. 
      !
      CALL h5screate_simple_f(RANK, dims, dataspace, error)
 
      !
-     !Create dataset "/D" inside file "mount2.h5".
+     ! Create dataset "/D" inside file "mount2.h5".
      ! 
      CALL h5dcreate_f(file2_id, "/D", H5T_NATIVE_INTEGER, dataspace, &
                       dset_id, error)
@@ -121,41 +121,41 @@
      CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, error)
 
      !
-     !close file, dataset and dataspace identifiers.
+     ! Close file, dataset and dataspace identifiers.
      ! 
      CALL h5sclose_f(dataspace, error)
      CALL h5dclose_f(dset_id, error)
      CALL h5fclose_f(file2_id, error)
 
      !
-     !reopen both files.
+     ! Reopen both files.
      ! 
      CALL h5fopen_f (filename1, H5F_ACC_RDWR_F, file1_id, error)
      CALL h5fopen_f (filename2, H5F_ACC_RDWR_F, file2_id, error)
 
      !
-     !mount the second file under the first file's "/G" group.
+     ! Mount the second file under the first file's "/G" group.
      ! 
      CALL h5fmount_f (file1_id, "/G", file2_id, error)
 
 
      !
-     !Access dataset D in the first file under /G/D name.
+     ! Access dataset D in the first file under /G/D name.
      ! 
      CALL h5dopen_f(file1_id, "/G/D", dset_id, error)
 
      !
-     !Get dataset's data type.
+     ! Get dataset's data type.
      ! 
      CALL h5dget_type_f(dset_id, dtype_id, error)
 
      !
-     !Read the dataset.
+     ! Read the dataset.
      ! 
      CALL h5dread_f(dset_id, dtype_id, data_out, error)
 
      !
-     !Print out the data.
+     ! Print out the data.
      ! 
      do i = 1, NX
           print *, (data_out(i,j), j = 1, NY)
@@ -169,15 +169,19 @@
      CALL h5tclose_f(dtype_id, error)
 
      !
-     !unmount the second file.
+     ! Unmount the second file.
      ! 
      CALL h5funmount_f(file1_id, "/G", error);
 
      !
-     !Close both files.
+     ! Close both files.
      ! 
      CALL h5fclose_f(file1_id, error)
      CALL h5fclose_f(file2_id, error)
+     !
+     ! Close FORTRAN interface. 
+     !
+     CALL h5close_fortran_f(error) 
 
      END PROGRAM MOUNTEXAMPLE
 

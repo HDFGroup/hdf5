@@ -52,9 +52,9 @@
      end do
 
      !
-     ! Initialize FORTRAN predefined datatypes.
+     ! Initialize FORTRAN interface.
      !
-     CALL h5init_types_f(error) 
+     CALL h5init_fortran_f(error) 
 
      !
      ! Open an existing file.
@@ -129,8 +129,8 @@
      CALL h5fclose_f(file_id, error)
 
      !
-     ! Close FORTRAN predefined datatypes.
+     ! Close FORTRAN interface.
      !
-     CALL h5close_types_f(error)
+     CALL h5close_fortran_f(error)
 
      END PROGRAM GRPDSETEXAMPLE 
