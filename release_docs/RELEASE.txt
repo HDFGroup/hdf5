@@ -438,11 +438,15 @@ Supported Configuration Features Summary
 
 Known Problems
 ==============
+
+* PGI C++ compiler fails when compiling the C++ library's tests.
+  Therefore, we cannot verify that the C++ library built with the PGI C++
+  compiler is correct.
+
 * The h5dump tests may fail to match the expected output on some platforms
   (e.g. parallel jobs, Windows) where the error messages directed to
   "stderr" do not appear in the "right order" with output from stdout.
   This is not an error.
-
 
 * The stream-vfd test uses ip port 10007 for testing. If another
   application is already using that port address, the test will hang
