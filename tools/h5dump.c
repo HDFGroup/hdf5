@@ -66,6 +66,11 @@ static h5dump_t dataformat = {
     "}",      /*cmpd_suf*/
     "\n",     /*cmpd_end*/
 
+    ",",      /*vlen_sep*/
+    "(",      /*vlen_pre*/
+    ")",      /*vlen_suf*/
+    "",       /*vlen_end*/
+
     "%s",     /*elmt_fmt*/
     ",",      /*elmt_suf1*/
     " ",      /*elmt_suf2*/
@@ -127,10 +132,10 @@ static const dump_header standardformat = {
     "}",        /*datasetblockend*/
     "{",        /*attributeblockbegin*/
     "}",        /*attributeblockend*/
-    "{",        /*datatypeblockbegin*/
-    "}",        /*datatypeblockend*/
-    "{",        /*dataspaceblockbegin*/
-    "}",        /*dataspaceblockend*/
+    "",         /*datatypeblockbegin*/
+    "",         /*datatypeblockend*/
+    "",         /*dataspaceblockbegin*/
+    "",         /*dataspaceblockend*/
     "{",        /*datablockbegin*/
     "}",        /*datablockend*/
     "{",        /*softlinkblockbegin*/
@@ -139,9 +144,13 @@ static const dump_header standardformat = {
     "}",        /*strblockend*/
     "{",        /*enumblockbegin*/
     "}",        /*enumblockend*/
+    "{",        /*structblockbegin*/
+    "}",        /*structblockend*/
+    "{",        /*vlenblockbegin*/
+    "}",        /*vlenblockend*/
 
-    "{",        /*dataspacedescriptionbegin*/
-    "}",        /*dataspacedescriptionend*/
+    "",         /*dataspacedescriptionbegin*/
+    "",         /*dataspacedescriptionend*/
     "(",        /*dataspacedimbegin*/
     ")",        /*dataspacedimend*/
 };
@@ -189,6 +198,10 @@ static const dump_header xmlformat = {
     "",            /*strblockend*/
     "",            /*enumblockbegin*/
     "",            /*enumblockend*/
+    "",            /*structblockbegin*/
+    "",            /*structblockend*/
+    "",            /*vlenblockbegin*/
+    "",            /*vlenblockend*/
 
     "",            /*dataspacedescriptionbegin*/
     "",            /*dataspacedescriptionend*/
@@ -356,12 +369,14 @@ print_datatype(hid_t type)
             str_pad = H5Tget_strpad(type);
             cset = H5Tget_cset(type);
 
-            indentation (indent + COL);
-            printf("%s %s %d;\n", dump_header_format->strblockbegin,
-                   STRSIZE, (int)size);
-            indentation(indent + COL);
-            printf("  %s ", STRPAD);
+            printf("H5T_STRING %s\n", dump_header_format->strblockbegin);
+            indent += COL;
 
+            indentation(indent + COL);
+            printf("%s %d;\n", STRSIZE, (int)size);
+
+            indentation(indent + COL);
+            printf("%s ", STRPAD);
             if (str_pad == H5T_STR_NULLTERM )
                 printf("H5T_STR_NULLTERM;\n");
             else if (str_pad == H5T_STR_NULLPAD )
@@ -372,8 +387,7 @@ print_datatype(hid_t type)
                 printf("H5T_STR_ERROR;\n");
 
             indentation(indent + COL);
-            printf("  %s ", CSET);
-
+            printf("%s ", CSET);
             if (cset == H5T_CSET_ASCII)
                 printf("H5T_CSET_ASCII;\n");
             else 
@@ -383,8 +397,9 @@ print_datatype(hid_t type)
             H5Tset_cset(str_type, cset);
             H5Tset_size(str_type, size);
             H5Tset_strpad(str_type, str_pad);
+
             indentation(indent + COL);
-            printf("  %s ", CTYPE);
+            printf("%s ", CTYPE);
 
             if (H5Tequal(type,str_type)) {
                 printf("H5T_C_S1;\n");
@@ -406,6 +421,7 @@ print_datatype(hid_t type)
                 H5Tclose(str_type);
             }
 
+            indent -= COL;
             indentation(indent + COL);
             printf("%s", dump_header_format->strblockend);
             break;
@@ -461,30 +477,29 @@ print_datatype(hid_t type)
             } else {
                 nmembers = H5Tget_nmembers(type);
      
+                printf("H5T_COMPOUND %s\n", dump_header_format->structblockbegin);    
                 for (i = 0; i < nmembers; i++) {
                     fname = H5Tget_member_name(type, i);
                     mtype = H5Tget_member_type(type, i);
 
-                    if (H5Tget_class(mtype) != H5T_STRING)
-                        indentation (indent + COL);
+                    indentation (indent + COL);
 
                     if (H5Tget_class(mtype) == H5T_COMPOUND) {
                         indent += COL; 
-                        printf("{\n");
                     }
 
                     print_datatype(mtype);
 
                     if (H5Tget_class(mtype) == H5T_COMPOUND) {
                         indent -= COL;
-                        indentation(indent + COL);
-                        printf("}");
                     }
 
                     printf (" \"%s\";\n", fname);
 
                     free(fname);
                 }
+                indentation(indent);
+                printf("%s", dump_header_format->structblockend);    
             }
             break;
 
@@ -493,24 +508,27 @@ print_datatype(hid_t type)
             break;
 
         case H5T_ENUM:
-            printf("H5T_ENUM\n");
+            printf("H5T_ENUM %s\n",dump_header_format->enumblockbegin);
+            indent += COL;
             indentation(indent + COL);
-            printf("%s ", dump_header_format->enumblockbegin);    
             super = H5Tget_super(type);
             print_datatype(super);
-            printf(";");
+            printf(";\n");
             print_enum(type);
-            printf("\n");
+            indent -= COL;
             indentation(indent + COL);
             printf("%s", dump_header_format->enumblockend);
             break;
 
         case H5T_VLEN:
-            super = H5Tget_super(type);
+            printf("H5T_VLEN %s ",dump_header_format->vlenblockbegin);
 
-            printf("H5T_VLEN of ");
+            super = H5Tget_super(type);
             print_datatype(super);
             H5Tclose(super);
+
+            /* Print closing */
+            printf("%s", dump_header_format->vlenblockend);
             break;
 
         case H5T_ARRAY:
@@ -518,7 +536,7 @@ print_datatype(hid_t type)
             super = H5Tget_super(type);
             
             /* Print lead-in */
-            printf("H5T_ARRAY ");
+            printf("H5T_ARRAY { ");
 
             /* Get array information */
             ndims = H5Tget_array_ndims(type);
@@ -528,13 +546,17 @@ print_datatype(hid_t type)
             for (j = 0; j < ndims; j++) 
                  printf("[%d]",(int)dims[j]);
 
-            printf(" of ");
+            printf(" ");
 
             /* Print base type */
             print_datatype(super);
 
             /* Close array base type */
             H5Tclose(super);
+
+            /* Print closing */
+            printf(" }");
+
             break;
 
         default:
@@ -580,30 +602,17 @@ static void
 dump_datatype(hid_t type)
 {
     indent += COL;
-    indentation(indent);
 
-    if (H5Tget_class(type) == H5T_COMPOUND) {
-        printf("%s %s\n", dump_header_format->datatypebegin,
-               dump_header_format->datatypeblockbegin);
-        print_datatype(type);
+    indentation(indent);
+    printf("%s %s ", dump_header_format->datatypebegin,
+           dump_header_format->datatypeblockbegin);
+
+    print_datatype(type);
+
+    if (H5Tget_class(type) == H5T_COMPOUND || H5Tget_class(type) == H5T_STRING)
         indentation(indent);
-        printf("%s %s\n", dump_header_format->datatypeblockend,
-               dump_header_format->datatypeend);
-    } else if (H5Tget_class(type) == H5T_STRING) {
-        printf("%s %s\n", dump_header_format->datatypebegin,
-               dump_header_format->datatypeblockbegin);
-        print_datatype(type);
-        printf("\n");
-        indentation(indent);
-        printf("%s %s\n", dump_header_format->datatypeblockend,
-               dump_header_format->datatypeend);
-    } else {
-        printf("%s %s ", dump_header_format->datatypebegin,
-               dump_header_format->datatypeblockbegin);
-        print_datatype(type);
-        printf(" %s %s\n", dump_header_format->datatypeblockend,
-               dump_header_format->datatypeend);
-    }
+    printf(" %s %s\n", dump_header_format->datatypeblockend,
+           dump_header_format->datatypeend);
 
     indent -= COL;
 }
@@ -640,7 +649,7 @@ dump_dataspace(hid_t space)
               SCALAR);
     } else {
         /* simple dataspace */
-        HDfprintf(stdout, "%s %s %s %Hu",
+        HDfprintf(stdout, "%s %s { %s %Hu",
                   dump_header_format->dataspacedescriptionbegin, SIMPLE, 
                   dump_header_format->dataspacedimbegin,size[0]);
 
@@ -663,7 +672,7 @@ dump_dataspace(hid_t space)
             else
                 HDfprintf(stdout, ", %Hu", maxsize[i]);
 
-            printf(" %s ", dump_header_format->dataspacedimend);
+        printf(" %s }", dump_header_format->dataspacedimend);
         }
     } else {
         printf("%s not yet implemented %s\n", BEGIN, END);
@@ -1161,6 +1170,7 @@ dump_dataset(hid_t did, const char *name)
         case H5T_REFERENCE:
         case H5T_ENUM:
         case H5T_VLEN:
+        case H5T_ARRAY:
              dump_data(did,DATASET_DATA);
              break;
 
@@ -1810,7 +1820,7 @@ print_enum(hid_t type)
 
     /* Print members */
     for (i = 0; i < nmembs; i++) {
-        printf("\n%*s", indent + 4, "");
+        indentation(indent + COL);
         nchars = printf("\"%s\"", name[i]);/*display_string(stdout, name[i], TRUE);*/
         printf("%*s   ", MAX(0, 16 - nchars), "");
 
@@ -1827,7 +1837,7 @@ print_enum(hid_t type)
                     *((long_long *)((void *)(value + i * dst_size))));
         }
 
-        printf(";");
+        printf(";\n");
     }
 
     /* Release resources */

@@ -165,6 +165,28 @@ typedef struct h5dump_t {
     const char  *cmpd_end;
 
     /*
+     * Fields associated with vlen data types.
+     *
+     *   sep:       A string that separates one member from another.  The
+     *              default is ", \001" (the \001 indicates an optional
+     *              line break to allow structs to span multiple lines of
+     *              output).
+     *
+     *   pre:       A string to print at the beginning of a vlen type.
+     *              The default is a left parentheses.
+     *
+     *   suf:       A string to print at the end of each vlen type.  The
+     *              default is a right parentheses.
+     *              
+     *   end:       a string to print after we reach the last element of 
+     *              each compound type. prints out before the suf.
+     */
+    const char  *vlen_sep;
+    const char  *vlen_pre;
+    const char  *vlen_suf;
+    const char  *vlen_end;
+
+    /*
      * Fields associated with the individual elements.
      *
      *   fmt:       A printf(3c) format to use to print the value string
@@ -332,6 +354,10 @@ typedef struct dump_header{
     const char *strblockend;
     const char *enumblockbegin;
     const char *enumblockend;
+    const char *structblockbegin;
+    const char *structblockend;
+    const char *vlenblockbegin;
+    const char *vlenblockend;
 
     const char *dataspacedescriptionbegin;
     const char *dataspacedescriptionend;
@@ -432,10 +458,10 @@ extern FILE *rawdatastream;             /* output stream for raw data */
 #define OBJID           "OBJECTID"
 #define BEGIN           "{"
 #define END             "}"
-#endif
 
 /* Definitions of useful routines */
 void print_version(const char *program_name);
 void h5tools_init(void);
 void h5tools_close(void);
 
+#endif
