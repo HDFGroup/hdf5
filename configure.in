@@ -778,6 +778,8 @@ esac
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
   AC_DEFINE(HAVE_COMPRESSION, 1,
             [Define if we have zlib compression support])
+  AC_DEFINE(HAVE_FILTER_GZIP, 1,
+            [Define if support for gzip filter is enabled])
 fi
 
 dnl ----------------------------------------------------------------------
@@ -1723,6 +1725,9 @@ int main(int argc, char **argv)
   AC_MSG_RESULT(yes)
   CPPFLAGS="$CPPFLAGS -DMPI_GET_COUNT_WORKS",AC_MSG_RESULT(no))
 
+dnl ----------------------------------------------------------------------
+dnl Check if they would like the "Flexible parallel" functions compiled in
+dnl
   AC_MSG_CHECKING([if Flexible Parallel HDF5 interface enabled])
   AC_ARG_ENABLE([fphdf5],
                 [AC_HELP_STRING([--enable-fphdf5],
@@ -1736,6 +1741,53 @@ int main(int argc, char **argv)
   else
     echo "no"
   fi
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Turn on internal I/O filters by setting macros in header files
+dnl Internal I/O filters are contained entirely within the library and do
+dnl not depend on external headers or libraries.  The shuffle filter is
+dnl an example of an internal filter, while the gzip filter is an example of
+dnl an external filter.  Each external filter is controlled with an
+dnl "--with-foo=" configure flag.
+dnl
+AC_MSG_CHECKING(for I/O filters)
+AC_ARG_ENABLE([filters],
+              [AC_HELP_STRING([--enable-filters=all],
+                              [Turn on all internal I/O filters. One may
+                               also specify a comma-separated list of filters
+                               or the word no.  The default is all internal
+                               I/O filters.])],
+              [FILTERS=$enableval])
+
+AC_SUBST([FILTERS])
+dnl Eventually: all_filters="shuffle,foo,bar,baz"
+all_filters="shuffle"
+case "X-$FILTERS" in
+  X-|X-all)
+    FILTERS=$all_filters
+    AC_MSG_RESULT(all ($FILTERS))
+    ;;
+  X-no|X-none)
+    AC_MSG_RESULT(none)
+    FILTERS="none"
+    ;;
+  *)
+    AC_MSG_RESULT($FILTERS)
+    ;;
+esac
+
+if test -n "$FILTERS"; then
+  for filter in `echo $FILTERS | tr 'a-z,' 'A-Z '`; do
+dnl ----------------------------------------------------------------------
+dnl Have to use separate 'if' construct for each filter, so that autoheader
+dnl can detect the AC_DEFINE for each one...
+dnl
+    if test $filter = "SHUFFLE"; then
+        AC_DEFINE(HAVE_FILTER_SHUFFLE, 1,
+                [Define if support for shuffle filter is enabled])
+    fi
+  done
 fi
 
 dnl ----------------------------------------------------------------------
@@ -2093,6 +2145,9 @@ PRINT "Features:"
 
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
+
+PRINT_N "           internal I/O filters"
+PRINT "$FILTERS"
 
 PRINT_N "                           GASS"
 IF_YES_NO "$GASS"
