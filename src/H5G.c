@@ -363,6 +363,143 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Gget_num_objs
+ *
+ * Purpose:     Returns the number of objects in the group.  It iterates 
+ *              all B-tree leaves and sum up total number of group members.
+ *
+ * Return:	Success:        Non-negative	
+ *
+ *		Failure:	Negative 
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gget_num_objs(hid_t group_id, hsize_t *num_objs)
+{
+    H5G_t		*group = NULL;
+    herr_t		ret_value;
+    
+    FUNC_ENTER_API(H5Gget_num_objs, FAIL);
+    H5TRACE2("e","i*h",group_id,num_objs);
+
+    /* Check args */
+    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+    if (!num_objs)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "nil pointer");
+
+    /* Call private function. */
+    ret_value = H5G_get_num_objs(group, num_objs);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_objname_by_idx
+ *
+ * Purpose:     Returns the name of objects in the group by giving index.
+ *              If `name' is non-NULL then write up to `size' bytes into that
+ *              buffer and always return the length of the entry name.
+ *              Otherwise `size' is ignored and the function does not store the name,
+ *              just returning the number of characters required to store the name.
+ *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
+ *              is unchanged and the function returns a negative value.
+ *              If a zero is returned for the name's length, then there is no name
+ *              associated with the ID.
+ *
+ * Return:	Success:        Non-negative	
+ *
+ *		Failure:	Negative 
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Gget_objname_by_idx(hid_t group_id, hsize_t idx, char* name/*out*/, size_t size)
+{
+    H5G_t		*group = NULL;
+    hsize_t             num_objs;
+    ssize_t		ret_value = FAIL;
+    
+    FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL);
+
+    /* Check args */
+    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+    if (!name)   
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "nil pointer for name");
+        
+    if (H5G_get_num_objs(group, &num_objs)<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
+    if(idx >= num_objs)    
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
+        
+    /*call private function*/
+    ret_value = H5G_get_objname_by_idx(group, idx, name, size);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_objtype_by_idx
+ *
+ * Purpose:     Returns the type of objects in the group by giving index.
+ *              
+ *
+ * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)	
+ *
+ *		Failure:	H5G_UNKNOWN 
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
+{
+    H5G_t		*group = NULL;
+    hsize_t             num_objs;
+    int		        ret_value = FAIL;
+    
+    FUNC_ENTER_API(H5Gget_objtype_by_idx, FAIL);
+    H5TRACE2("Is","ih",group_id,idx);
+
+    /* Check args */
+    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+        
+    if (H5G_get_num_objs(group, &num_objs)<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
+    if(idx >= num_objs)    
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
+        
+    /*call private function*/
+    ret_value = H5G_get_objtype_by_idx(group, idx);
+
+done:
+    FUNC_LEAVE(ret_value);
+
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Gmove2
  *
  * Purpose:	Renames an object within an HDF5 file.  The original name SRC
@@ -2254,6 +2391,130 @@ done:
     H5G_free_ent_name(&obj_ent);
 
     FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_num_objs
+ *
+ * Purpose:     Private function for H5Gget_num_objs.  Returns the number 
+ *              of objects in the group.  It iterates all B-tree leaves 
+ *              and sum up total number of group members.
+ *
+ * Return:	Success:        Non-negative	
+ *
+ *		Failure:	Negative 
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs)
+{
+    herr_t		ret_value;
+    
+    FUNC_ENTER_NOAPI(H5G_get_num_objs, FAIL);
+
+    *num_objs = 0;
+    /* Iterate over the group members */
+    if ((ret_value = H5B_iterate (H5G_fileof(grp), H5B_SNODE,
+              H5G_node_sumup, grp->ent.cache.stab.btree_addr, num_objs))<0)
+        HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
+        
+done:
+    FUNC_LEAVE(ret_value);   
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_objname_by_idx
+ *
+ * Purpose:     Private function for H5Gget_objname_by_idx.
+ *              Returns the name of objects in the group by giving index.
+ *
+ * Return:	Success:        Non-negative	
+ *
+ *		Failure:	Negative 
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t 
+H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size)
+{
+    ssize_t		ret_value = FAIL;
+    H5G_bt_ud3_t	udata;
+    
+    FUNC_ENTER_NOAPI(H5G_get_objname_by_idx, FAIL);
+
+    udata.idx = idx;
+    udata.num_objs = 0;
+    udata.group = grp;
+    udata.name = NULL;
+
+    /* Iterate over the group members */
+    if ((ret_value = H5B_iterate (H5G_fileof(grp), H5B_SNODE,
+              H5G_node_name, grp->ent.cache.stab.btree_addr, &udata))<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
+    
+    ret_value = HDstrlen(udata.name);
+    if(name && size>0) {
+        HDstrncpy(name, udata.name, MIN(ret_value+1,size-1));
+        if(ret_value >= size)
+            name[size-1]='\0';
+    }
+    
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_objtype_by_idx
+ *
+ * Purpose:     Private function for H5Gget_objtype_by_idx.
+ *              Returns the type of objects in the group by giving index.
+ *
+ * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)	
+ *
+ *		Failure:	UNKNOWN 
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx)
+{
+    int		        ret_value = FAIL;
+    H5G_bt_ud3_t	udata;
+    
+    FUNC_ENTER_NOAPI(H5G_get_objname_by_idx, FAIL);
+    
+    udata.idx = idx;
+    udata.num_objs = 0;
+    udata.group = grp;
+    
+    /* Iterate over the group members */
+    if ((ret_value = H5B_iterate (H5G_fileof(grp), H5B_SNODE,
+              H5G_node_type, grp->ent.cache.stab.btree_addr, &udata))<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
+    
+    ret_value = udata.type;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

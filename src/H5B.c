@@ -1473,9 +1473,10 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
     haddr_t		cur_addr = HADDR_UNDEF;
     haddr_t		*child = NULL;
     uint8_t		*key = NULL;
-    int		i, nchildren;
+    int		        i, nchildren;
     herr_t		ret_value = SUCCEED;
-
+    H5B_iterate_t       ret_flag = H5B_ITER_CONT;
+    
     FUNC_ENTER_NOAPI(H5B_iterate, FAIL);
 
     /*
@@ -1526,11 +1527,16 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
 	     * Perform the iteration operator, which might invoke an
 	     * application callback.
 	     */
-	    for (i=0; i<nchildren && !ret_value; i++) {
-		ret_value = (*op)(f, key+i*type->sizeof_nkey,
+	    for (i=0; i<nchildren && ret_flag==H5B_ITER_CONT; i++) {
+		ret_flag = (*op)(f, key+i*type->sizeof_nkey,
                          child[i], key+(i+1)*type->sizeof_nkey, udata);
-		if (ret_value<0)
+		if (ret_flag==H5B_ITER_ERROR) {
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed");
+                } else if(ret_flag==H5B_ITER_STOP) {
+                    HGOTO_DONE(SUCCEED);
+                } else {
+                    ;
+                }
 	    } /* end for */
 	} /* end for */
     } /* end else */

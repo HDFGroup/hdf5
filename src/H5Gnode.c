@@ -1045,7 +1045,7 @@ done:
  *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
-herr_t
+H5B_iterate_t
 H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata)
 {
@@ -1055,9 +1055,9 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
     size_t		n, *name_off=NULL;
     const char		*name;
     char		buf[1024], *s;
-    herr_t		ret_value = FAIL;
+    H5B_iterate_t	ret_value = H5B_ITER_ERROR;
 
-    FUNC_ENTER_NOAPI(H5G_node_iterate, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_iterate, H5B_ITER_ERROR);
 
     /*
      * Check arguments.
@@ -1071,10 +1071,10 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
      * because we're about to call an application function.
      */
     if (NULL == (sn = H5AC_find(f, H5AC_SNODE, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to load symbol table node");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
     nsyms = sn->nsyms;
     if (NULL==(name_off = H5MM_malloc (nsyms*sizeof(name_off[0]))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
     for (i=0; i<nsyms; i++)
         name_off[i] = sn->entry[i].name_off;
     sn = NULL;
@@ -1092,7 +1092,7 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
             n = HDstrlen (name);
             if (n+1>sizeof(buf)) {
                 if (NULL==(s = H5MM_malloc (n+1)))
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
             } else {
                 s = buf;
             }
@@ -1117,12 +1117,159 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_node_sumup
+ *
+ * Purpose:	This function gets called during a group iterate operation
+ *              to return total number of members in the group. 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Nov 20, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5B_iterate_t
+H5G_node_sumup(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+		  void UNUSED *_rt_key, void *_udata)
+{
+    hsize_t	        *num_objs = (hsize_t *)_udata;
+    H5G_node_t		*sn = NULL;
+    H5B_iterate_t	ret_value = H5B_ITER_CONT;
+
+    FUNC_ENTER_NOAPI(H5G_node_sumup, H5B_ITER_ERROR);
+
+    /*
+     * Check arguments.
+     */
+    assert(f);
+    assert(H5F_addr_defined(addr));
+    assert(num_objs);
+
+    /* Find the object node and add the number of symbol entries. */
+    if (NULL == (sn = H5AC_find(f, H5AC_SNODE, addr, NULL, NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
+    *num_objs += sn->nsyms;
+    
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_name
+ *
+ * Purpose:	This function gets called during a group iterate operation
+ *              to return object name by giving idx.
+ *
+ * Return:	0 if object isn't found in this node; 1 if object is found; 
+ *              Negative on failure
+ *
+ * Programmer:  Raymond Lu	
+ *              Nov 20, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5B_iterate_t
+H5G_node_name(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+		  void UNUSED *_rt_key, void *_udata)
+{
+    H5G_bt_ud3_t	*bt_udata = (H5G_bt_ud3_t *)_udata;
+    size_t		name_off;
+    hsize_t             loc_idx;
+    char		*name;   
+    H5G_node_t		*sn = NULL;
+    H5B_iterate_t	ret_value = H5B_ITER_CONT;
+
+    FUNC_ENTER_NOAPI(H5G_node_name, H5B_ITER_ERROR);
+
+    /*
+     * Check arguments.
+     */
+    assert(f);
+    assert(H5F_addr_defined(addr));
+    assert(bt_udata);
+
+
+    if (NULL == (sn = H5AC_find(f, H5AC_SNODE, addr, NULL, NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
+    
+    /* Find the node, locate the object symbol table entry and retrieve the name */ 
+    if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
+            loc_idx = bt_udata->idx - bt_udata->num_objs; 
+            name_off = sn->entry[loc_idx].name_off;  
+            name = (char*)H5HL_peek (f, bt_udata->group->ent.cache.stab.heap_addr, name_off);
+            assert (name);
+            bt_udata->name = HDstrdup (name);
+            HGOTO_DONE(H5B_ITER_STOP);
+    }
+
+    bt_udata->num_objs += sn->nsyms;
+    
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_type
+ *
+ * Purpose:	This function gets called during a group iterate operation
+ *              to return object type by given idx.
+ *
+ * Return:	0 if object isn't found in this node; 1 if found;
+ *              Negative on failure
+ *
+ * Programmer:  Raymond Lu	
+ *              Nov 20, 2002
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+H5B_iterate_t
+H5G_node_type(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+		  void UNUSED *_rt_key, void *_udata)
+{
+    H5G_bt_ud3_t	*bt_udata = (H5G_bt_ud3_t*)_udata;
+    hsize_t             loc_idx;
+    H5G_node_t		*sn = NULL;
+    H5B_iterate_t	ret_value = H5B_ITER_CONT;
+
+    FUNC_ENTER_NOAPI(H5G_node_name, H5B_ITER_ERROR);
+
+    /* Check arguments. */
+    assert(f);
+    assert(H5F_addr_defined(addr));
+    assert(bt_udata);
+
+    /* Find the node, locate the object symbol table entry and retrieve the type */ 
+    if (NULL == (sn = H5AC_find(f, H5AC_SNODE, addr, NULL, NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
+
+    if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
+            loc_idx = bt_udata->idx - bt_udata->num_objs; 
+            bt_udata->type = H5G_get_type(&(sn->entry[loc_idx]));  
+            HGOTO_DONE(H5B_ITER_STOP);
+    }
+
+    bt_udata->num_objs += sn->nsyms;
+    
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_node_debug
  *
  * Purpose:	Prints debugging information about a symbol table node
  *		or a B-tree node for a symbol table B-tree.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	0(zero) on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

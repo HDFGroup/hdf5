@@ -145,6 +145,9 @@ H5_DLL H5G_t *H5G_open_oid(H5G_entry_t *ent);
 H5_DLL H5G_t *H5G_reopen(H5G_t *grp);
 H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL H5G_t *H5G_rootof(H5F_t *f);
+H5_DLL herr_t H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs);
+H5_DLL ssize_t H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size);
+H5_DLL int H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx);
 H5_DLL htri_t H5G_isa(H5G_entry_t *ent);
 H5_DLL herr_t H5G_link(H5G_entry_t *cur_loc, const char *cur_name, 
 			H5G_entry_t *new_loc, const char *new_name, 

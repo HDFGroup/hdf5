@@ -50,9 +50,16 @@ typedef enum H5B_ins_t {
     H5B_INS_REMOVE	 = 5	/*remove current node			     */
 } H5B_ins_t;
 
+/* Define return values from operator callback function for H5B_iterate */
+typedef enum H5B_iterate_t {
+    H5B_ITER_ERROR       = -1,  /*error return value                         */
+    H5B_ITER_CONT        = 0,   /*continue the loop                          */
+    H5B_ITER_STOP        = 1    /*stop and break the loop                    */
+} H5B_iterate_t;
+
 /* Define the operator callback function pointer for H5B_iterate() */
-typedef herr_t (*H5B_operator_t)(H5F_t *f, void *_lt_key, haddr_t addr,
-    void *_rt_key, void *_udata);
+typedef H5B_iterate_t (*H5B_operator_t)(H5F_t *f, void *_lt_key, haddr_t addr,
+                                        void *_rt_key, void *_udata);
 
 /*
  * Each class of object that can be pointed to by a B-link tree has a

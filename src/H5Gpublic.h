@@ -81,6 +81,9 @@ H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);
 H5_DLL herr_t H5Gclose(hid_t group_id);
 H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
 			  H5G_iterate_t op, void *op_data);
+H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
+H5_DLL ssize_t H5Gget_objname_by_idx(hid_t group_id, hsize_t idx, char* name, size_t size);
+H5_DLL int H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx);
 H5_DLL herr_t H5Gmove2(hid_t src_loc, const char *src, hid_t dst_loc, 
 			const char *dst);
 H5_DLL herr_t H5Glink2(hid_t src_loc, const char *cur_name, H5G_link_t type,

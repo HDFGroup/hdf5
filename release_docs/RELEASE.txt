@@ -239,6 +239,8 @@ Documentation
 New Features
 ============
 
+    * New functions H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx 
+      are added to the library.  SLU - 2002/11/25
     * H5Dget_offset is added to return the offset of a dataset's data relative
       to the beginning of the file.  SLU - 2002/11/7
     * Functions H5Tget_native_type and H5Tis_variable_str are added.  The first

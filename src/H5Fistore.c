@@ -122,9 +122,9 @@ static H5B_ins_t H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 				   void *_udata, void *_rt_key,
 				   hbool_t *rt_key_changed,
 				   haddr_t *new_node/*out*/);
-static herr_t H5F_istore_iter_allocated(H5F_t *f, void *left_key, haddr_t addr,
+static H5B_iterate_t H5F_istore_iter_allocated(H5F_t *f, void *left_key, haddr_t addr,
 				 void *right_key, void *_udata);
-static herr_t H5F_istore_iter_dump(H5F_t *f, void *left_key, haddr_t addr,
+static H5B_iterate_t H5F_istore_iter_dump(H5F_t *f, void *left_key, haddr_t addr,
 				 void *right_key, void *_udata);
 static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
@@ -134,7 +134,7 @@ static herr_t H5F_istore_debug_key(FILE *stream, int indent, int fwidth,
 				   const void *key, const void *udata);
 static haddr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 				  const hssize_t offset[]);
-static herr_t H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t addr,
+static H5B_iterate_t H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t addr,
         void *_rt_key, void *_udata);
 static H5B_ins_t H5F_istore_remove( H5F_t *f, haddr_t addr, void *_lt_key,
                   hbool_t *lt_key_changed, void *_udata, void *_rt_key,
@@ -768,7 +768,7 @@ done:
  *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
-static herr_t
+static H5B_iterate_t 
 H5F_istore_iter_allocated (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
@@ -779,7 +779,7 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
 
     bt_udata->total_storage += lt_key->nbytes;
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(H5B_ITER_CONT);
 } /* H5F_istore_iter_allocated() */
 
 
@@ -804,7 +804,7 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
  *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
-static herr_t
+static H5B_iterate_t
 H5F_istore_iter_dump (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
@@ -832,7 +832,7 @@ H5F_istore_iter_dump (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
         bt_udata->total_storage++;
     }
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(H5B_ITER_CONT);
 } /* H5F_istore_iter_dump() */
 
 
@@ -2737,7 +2737,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static H5B_iterate_t
 H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t UNUSED addr,
         void UNUSED *_rt_key, void *_udata)
 {
@@ -2745,7 +2745,7 @@ H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t UNUSED addr,
     H5F_istore_key_t       *lt_key = (H5F_istore_key_t *)_lt_key;
     unsigned                u;
     H5F_istore_ud1_t        udata;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5B_iterate_t           ret_value=H5B_ITER_CONT;       /* Return value */
 
     /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of 
      * storage that contains the beginning of the logical address space represented by UDATA.
@@ -2771,7 +2771,7 @@ H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t UNUSED addr,
 
             /* Remove */
             if(H5B_remove(f, H5B_ISTORE, bt_udata->mesg.addr, &udata) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry");
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_ITER_ERROR, "unable to remove entry");
 	    break;
 	} /* end if */
 

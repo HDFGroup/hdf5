@@ -110,6 +110,18 @@ typedef struct H5G_bt_ud2_t {
 } H5G_bt_ud2_t;
 
 /*
+ * Data exchange structure to pass through the B-tree layer for the
+ * H5B_iterate function.
+ */
+typedef struct H5G_bt_ud3_t {
+    struct H5G_t *group;	/*the group to which group_id points	     */
+    hsize_t      idx;           /*index of group member to be querried       */
+    char         *name;         /*member name to be returned                 */
+    hsize_t      num_objs;      /*the number of objects having been traversed*/
+    int          type;          /*member type to be returned                 */
+} H5G_bt_ud3_t;
+
+/*
  * This is the class identifier to give to the B-tree functions.
  */
 H5_DLLVAR H5B_class_t H5B_SNODE[1];
@@ -140,7 +152,12 @@ H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 
 /* Functions that understand symbol table nodes */
 H5_DLL unsigned H5G_node_k(const H5F_t *f);
-H5_DLL herr_t H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
-		  void UNUSED *_rt_key, void *_udata);
-
+H5_DLL H5B_iterate_t H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+		     void UNUSED *_rt_key, void *_udata);
+H5_DLL H5B_iterate_t H5G_node_sumup(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+		     void UNUSED *_rt_key, void *_udata);
+H5_DLL H5B_iterate_t H5G_node_name(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+		     void UNUSED *_rt_key, void *_udata);
+H5_DLL H5B_iterate_t H5G_node_type(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+		     void UNUSED *_rt_key, void *_udata);
 #endif

@@ -1,13 +1,13 @@
 /****************************************************************************
- * NCSA HDF								                                    *
- * Software Development Group						                        *
- * National Center for Supercomputing Applications			                *
- * University of Illinois at Urbana-Champaign				                *
- * 605 E. Springfield, Champaign IL 61820				                    *
- *									                                        *
- * For conditions of distribution and use, see the accompanying		        *
- * hdf/COPYING file.							                            *
- *									                                        *
+ * NCSA HDF						                    *	
+ * Software Development Group				                    *
+ * National Center for Supercomputing Applications                          *
+ * University of Illinois at Urbana-Champaign                               *
+ * 605 E. Springfield, Champaign IL 61820                                   *
+ *					                                    *
+ * For conditions of distribution and use, see the accompanying		    *
+ * hdf/COPYING file.							    *
+ *									    *
  ****************************************************************************/
 
 /* $Id$ */
@@ -113,12 +113,15 @@ static void test_iter_group(void)
     hid_t dataset;          /* Dataset ID */
     hid_t datatype;         /* Common datatype ID */
     hid_t filespace;        /* Common dataspace ID */
+    hid_t root_group,grp;   /* Root group ID */
     int i;                  /* counting variable */
     int idx;                /* Index in the group */
     char name[NAMELEN];     /* temporary name buffer */
     char *dnames[NDATASETS];/* Names of the datasets created */
+    char dataset_name[16];  /* dataset name */
     iter_info info;         /* Custom iteration information */
-    herr_t		ret;		/* Generic return value		*/
+    hsize_t num_membs;      /* Number of group members */
+    herr_t ret;		    /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Group Iteration Functionality\n"));
@@ -146,10 +149,22 @@ static void test_iter_group(void)
         CHECK(ret, FAIL, "H5Dclose");
     }
 
+    /* Create a group and named datatype under root group for testing 
+     * H5Gget_objtype_by_idx.
+     */
+    grp = H5Gcreate(file, "grp", 0);
+    CHECK(ret, FAIL, "H5Gcreate");
+
+    ret = H5Tcommit(file, "dtype", datatype); 
+    CHECK(ret, FAIL, "H5Tcommit");
+    
     /* Close everything up */
     ret=H5Tclose(datatype);
     CHECK(ret, FAIL, "H5Tclose");
-
+    
+    ret=H5Gclose(grp);
+    CHECK(ret, FAIL, "H5Gclose");
+    
     ret=H5Sclose(filespace);
     CHECK(ret, FAIL, "H5Sclose");
 
@@ -159,9 +174,38 @@ static void test_iter_group(void)
     /* Sort the dataset names */
     qsort(dnames,NDATASETS,sizeof(char *),iter_strcmp);
 
+
     /* Iterate through the datasets in the root group in various ways */
     file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
+
+    /* These twp functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+     * iterate through B-tree for group members in internal library design.
+     */
+    {
+        root_group = H5Gopen(file, "/");
+        CHECK(root_group, FAIL, "H5Gopen");
+
+        ret = H5Gget_num_objs(root_group, &num_membs);
+        CHECK(ret, FAIL, "H5Gget_num_objs");
+        VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
+  
+        for(i=0; i< num_membs; i++) {
+            ret = H5Gget_objname_by_idx(root_group, i, dataset_name, 32);
+            CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
+            
+            ret = H5Gget_objtype_by_idx(root_group, i);
+            CHECK(ret, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
+        }
+    
+        H5E_BEGIN_TRY {
+            ret = H5Gget_objname_by_idx(root_group, NDATASETS+3, dataset_name, 16);
+        } H5E_END_TRY;   
+        VERIFY(ret, FAIL, "H5Gget_objsname_by_idx");
+
+        ret = H5Gclose(root_group);
+        CHECK(ret, FAIL, "H5Gclose");
+    }
 
     /* Test all objects in group, when callback always returns 0 */
     info.command=RET_ZERO;
@@ -528,6 +572,147 @@ static void test_iter_group_large(void)
 
 /****************************************************************
 **
+**  test_grp_memb_funcs(): Test group member information 
+**                         functionality
+** 
+****************************************************************/
+static void test_grp_memb_funcs(void)
+{
+    hid_t file;             /* File ID */
+    hid_t dataset;          /* Dataset ID */
+    hid_t datatype;         /* Common datatype ID */
+    hid_t filespace;        /* Common dataspace ID */
+    hid_t root_group,grp;   /* Root group ID */
+    int i;                  /* counting variable */
+    int idx;                /* Index in the group */
+    char name[NAMELEN];     /* temporary name buffer */
+    char *dnames[NDATASETS+2];/* Names of the datasets created */
+    char *obj_names[NDATASETS+2];/* Names of the objects in group */
+    char dataset_name[16];  /* dataset name */
+    iter_info info;         /* Custom iteration information */
+    hsize_t num_membs;      /* Number of group members */
+    herr_t ret;		    /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Group Member Information Functionality\n"));
+
+    /* Create the test file with the datasets */
+    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    datatype = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(datatype, FAIL, "H5Tcopy");
+
+    filespace=H5Screate(H5S_SCALAR);
+    CHECK(filespace, FAIL, "H5Screate");
+
+    for(i=0; i< NDATASETS; i++) {
+        sprintf(name,"Dataset %d",i);
+        dataset = H5Dcreate(file, name, datatype, filespace, H5P_DEFAULT);
+        CHECK(dataset, FAIL, "H5Dcreate");
+
+        /* Keep a copy of the dataset names around for later */
+        dnames[i]=HDstrdup(name);
+        CHECK(dnames[i], NULL, "strdup");
+
+        ret=H5Dclose(dataset);
+        CHECK(ret, FAIL, "H5Dclose");
+    }
+
+    /* Create a group and named datatype under root group for testing 
+     * H5Gget_objtype_by_idx.
+     */
+    grp = H5Gcreate(file, "grp", 0);
+    CHECK(ret, FAIL, "H5Gcreate");
+    
+    dnames[NDATASETS]=HDstrdup("grp");
+    CHECK(dnames[NDATASETS], NULL, "strdup");
+        
+    ret = H5Tcommit(file, "dtype", datatype); 
+    CHECK(ret, FAIL, "H5Tcommit");
+    
+    dnames[NDATASETS+1]=HDstrdup("dtype");
+    CHECK(dnames[NDATASETS], NULL, "strdup");   
+        
+    /* Close everything up */
+    ret=H5Tclose(datatype);
+    CHECK(ret, FAIL, "H5Tclose");
+    
+    ret=H5Gclose(grp);
+    CHECK(ret, FAIL, "H5Gclose");
+    
+    ret=H5Sclose(filespace);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret=H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Sort the dataset names */
+    qsort(dnames,NDATASETS+2,sizeof(char *),iter_strcmp);
+
+
+    /* Iterate through the datasets in the root group in various ways */
+    file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
+
+    /* These twp functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+     * iterate through B-tree for group members in internal library design.
+     */
+    root_group = H5Gopen(file, "/");
+    CHECK(root_group, FAIL, "H5Gopen");
+
+    ret = H5Gget_num_objs(root_group, &num_membs);
+    CHECK(ret, FAIL, "H5Gget_num_objs");
+    VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
+  
+    for(i=0; i< num_membs; i++) {
+        ret = H5Gget_objname_by_idx(root_group, i, dataset_name, 32);
+        CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
+        
+        /* Keep a copy of the dataset names around for later */
+        obj_names[i]=HDstrdup(dataset_name);
+        CHECK(dnames[i], NULL, "strdup");           
+        
+        ret = H5Gget_objtype_by_idx(root_group, i);
+        CHECK(ret, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
+
+        if(!HDstrcmp(dataset_name, "grp"))
+            VERIFY(ret, H5G_GROUP, "H5Gget_objsname_by_idx");
+        if(!HDstrcmp(dataset_name, "dtype"))
+            VERIFY(ret, H5G_TYPE, "H5Gget_objsname_by_idx");
+        if(!HDstrncmp(dataset_name, "Dataset", 7))
+            VERIFY(ret, H5G_DATASET, "H5Gget_objsname_by_idx");
+    }
+    
+    H5E_BEGIN_TRY {
+        ret = H5Gget_objname_by_idx(root_group, NDATASETS+3, dataset_name, 16);
+    } H5E_END_TRY;   
+    VERIFY(ret, FAIL, "H5Gget_objsname_by_idx");
+
+    /* Sort the dataset names */
+    qsort(obj_names,NDATASETS+2,sizeof(char *),iter_strcmp);
+   
+    /* Compare object names */
+    for(i=0; i< num_membs; i++) {
+        ret = HDstrcmp(dnames[i], obj_names[i]);
+        VERIFY(ret, 0, "HDstrcmp");
+    }
+    
+    ret = H5Gclose(root_group);
+    CHECK(ret, FAIL, "H5Gclose");
+   
+
+    ret=H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free the dataset names */
+    for(i=0; i< NDATASETS+2; i++)
+        free(dnames[i]);
+
+} /* test_grp_memb_funcs() */
+
+/****************************************************************
+**
 **  test_iterate(): Main iteration testing routine.
 ** 
 ****************************************************************/
@@ -541,6 +726,7 @@ test_iterate(void)
     test_iter_group();       /* Test group iteration */
     test_iter_group_large(); /* Test group iteration for large # of objects */
     test_iter_attr();        /* Test attribute iteration */
+    test_grp_memb_funcs();   /* Test group member information functions */
 }   /* test_iterate() */
 
 
