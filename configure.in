@@ -94,7 +94,7 @@ AC_ARG_ENABLE(hsizet,
   [  --disable-hsizet        Datasets can normally be larger than memory
                           and/or files but some compilers are unable to
                           handle this (including versions of GCC before
-                          2.8.0).  Disabling the feature causes dataset
+                          2.8.0). Disabling the feature causes dataset
                           sizes to be restricted to the size of core memory,
                           or 'size_t'.],
   HSIZET=$enableval)
@@ -458,7 +458,8 @@ case "$host_cpu-$host_vendor-$host_os" in
     dnl Enable large file support on linux? Store the result in the LINUX_LFS
     dnl variable for posterity
     AC_ARG_ENABLE(linux-lfs,
-      [  --enable-linux-lfs      Enable support for large (64-bit) files on linux. [default=check]])
+      [  --enable-linux-lfs      Enable support for large (64-bit) files on Linux.
+                          [default=check]])
 
     case "X-$enable_linux_lfs" in
       X-yes)
@@ -620,12 +621,11 @@ AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 
 AC_ARG_WITH(hdf4,
-  [  --with-hdf4=DIR         Use the HDF4 library. DIR can be either a
-                          single directory off of which the \`include/'
-                          and \`lib/' subdirectories are located. Or you
-                          can specify the include and library directories
-                          separated by a comma.],,
+  [  --with-hdf4[=DIR]       Use the HDF4 library where DIR is the directory
+                          containing the include/ and lib/ subdirectories which
+                          have the HDF4 header files and libraries [default=no]],,
   withval=no)
+
 case "$withval" in
   yes)
     failed="no"
@@ -655,8 +655,8 @@ case "$withval" in
   *)
     case "$withval" in
       *,*)
-        hdf4_inc="`echo $withval |cut -f1 -d,`"
-        hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+        hdf4_inc="`echo $withval | cut -f1 -d,`"
+        hdf4_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
@@ -710,11 +710,7 @@ dnl command-line switch. The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
 AC_ARG_WITH(zlib,
-  [  --with-zlib=DIR         Use the GNU zlib compression. DIR can
-                          be either a single directory off of which the
-                          \`include/' and \`lib/' subdirectories are
-                          located. Or you can specify the include and
-                          library directories separated by a comma.],,
+  [  --with-zlib[=DIR]       Use GNU zlib compression [default=yes]],,
   withval=yes)
 
 case $withval in
@@ -763,8 +759,10 @@ esac
 dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage
 dnl driver.  SSL must be tested before them.
 AC_SUBST(SSL) SSL=yes
-AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB [default=no]],
-	    ,withval=no)
+AC_ARG_WITH(ssl,
+  [  --with-ssl[=LIB]        Use the SSL library [default=no]],,
+  withval=no)
+
 case "$withval" in
    yes)
       AC_CHECK_LIB(crypto,main,,unset SSL)
@@ -787,10 +785,10 @@ dnl ----------------------------------------------------------------------
 dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present? It is also needed by 
 dnl the Grid Storage driver.
 dnl
-AC_SUBST(GASS) GASS=yes
+AC_SUBST(GASS) GASS="yes"
 AC_SUBST(TESTGASS) TESTGASS='$(srcdir)/testgass'
 AC_ARG_WITH(gass,
-  [  --with-gass=INC,LIB     Use the GASS Library [default=no]],,
+  [  --with-gass[=DIR]       Use the GASS library [default=no]],,
   withval=no)
 
 case "$withval" in
@@ -814,7 +812,18 @@ case "$withval" in
     ;;
 
   *)
-    gass_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        gass_inc="`echo $withval | cut -f1 -d,`"
+        gass_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          gass_inc="$withval/include"
+          gass_lib="$withval/lib"
+        fi
+        ;;
+    esac
 
     if test -n "$gass_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
@@ -825,8 +834,6 @@ case "$withval" in
     else
       AC_CHECK_HEADERS(globus_common.h)
     fi
-
-    gass_lib="`echo $withval |cut -f2 -d, -s`"
 
     if test -n "$gass_lib"; then
       saved_LDFLAGS="$LDFLAGS"
@@ -862,10 +869,10 @@ dnl ----------------------------------------------------------------------
 dnl Is Grid Storage present? If so then we can compile in the Grid
 dnl Storage driver.
 dnl
-AC_SUBST(GRIDSTORAGE) GRIDSTORAGE=yes
+AC_SUBST(GRIDSTORAGE) GRIDSTORAGE="yes"
 AC_SUBST(TESTGRIDSTORAGE) TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
 AC_ARG_WITH(gridstorage,
-  [  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]],,
+  [  --with-gridstorage[=DIR] Use the Globus Grid Storage driver [default=no]],,
   withval=no)
 
 case "$withval" in
@@ -881,7 +888,18 @@ case "$withval" in
     unset GRIDSTORAGE TESTGRIDSTORAGE
     ;;
   *)
-    gridstorage_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        gridstorage_inc="`echo $withval | cut -f1 -d,`"
+        gridstorage_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          gridstorage_inc="$withval/include"
+          gridstorage_lib="$withval/lib"
+        fi
+        ;;
+    esac
 
     if test -n "$gridstorage_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
@@ -892,8 +910,6 @@ case "$withval" in
     else
       AC_CHECK_HEADERS(grid_storage_file.h)
     fi
-
-    gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
 
     if test -n "$gridstorage_lib"; then
       saved_LDFLAGS="$LDFLAGS"
@@ -918,10 +934,11 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Are SRB Client and other system libraries(socket, elf) present?  
 dnl
-AC_SUBST(SRB) SRB=yes
+AC_SUBST(SRB) SRB="yes"
 AC_SUBST(TESTSRB) TESTSRB='$(srcdir)/testsrb'
-AC_ARG_WITH(srb, [  --with-srb=INC,LIB      Use the SRB Library [default=no]],,
-            withval=no)
+AC_ARG_WITH(srb,
+  [  --with-srb[=DIR]        Use the SRB library [default=no]],,
+  withval=no)
 
 case "$withval" in
   yes)
@@ -936,7 +953,19 @@ case "$withval" in
     unset SRB TESTSRB
     ;;
   *)
-    srb_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        srb_inc="`echo $withval | cut -f1 -d,`"
+        srb_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          srb_inc="$withval/include"
+          srb_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
     if test -n "$srb_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$srb_inc"
@@ -946,8 +975,6 @@ case "$withval" in
     else
       AC_CHECK_HEADERS(srbClient.h)
     fi
-
-    srb_lib="`echo $withval |cut -f2 -d, -s`"
 
     if test -n "$srb_lib"; then
       saved_LDFLAGS="$LDFLAGS"
@@ -972,9 +999,9 @@ dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
 dnl translator.
 dnl
 AC_SUBST(PDB2HDF)
-AC_CHECK_LIB(pdb,PD_open)
-AC_CHECK_LIB(silo,lite_PD_open)
-AC_CHECK_HEADERS(pdb.h,PDB2HDF=pdb2hdf)
+AC_CHECK_LIB(pdb, PD_open)
+AC_CHECK_LIB(silo, lite_PD_open)
+AC_CHECK_HEADERS(pdb.h, PDB2HDF=pdb2hdf)
 
 dnl Checkpoint the cache
 AC_CACHE_SAVE
@@ -989,7 +1016,7 @@ dnl
 AC_SUBST(PTHREAD) PTHREAD=yes
 
 AC_ARG_WITH(pthread,
-  [  --with-pthread=INC,LIB  Use the Pthreads library],,
+  [  --with-pthread[=DIR]    Use the Pthreads library [default=no]],,
   withval=no)
 
 case "$withval" in
@@ -1009,7 +1036,19 @@ case "$withval" in
     unset PTHREAD
     ;;
   *)
-    pthread_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        pthread_inc="`echo $withval | cut -f1 -d,`"
+        pthread_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          pthread_inc="$withval/include"
+          pthread_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
     if test -n "$pthread_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$pthread_inc"
@@ -1018,7 +1057,6 @@ case "$withval" in
       AC_CHECK_HEADERS(pthread.h,,unset PTHREAD)
     fi
 
-    pthread_lib="`echo $withval |cut -f2 -d, -s`"
     if test -n "$pthread_lib"; then
       saved_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS -L$pthread_lib"
@@ -1067,7 +1105,8 @@ dnl compiled in
 dnl
 AC_MSG_CHECKING(whether HDF5 v1.4 compatibility functions enabled)
 AC_ARG_ENABLE(hdf5v1_4,
-  [  --enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface [default=no]],
+  [  --enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface
+                          [default=no]],
   HDF5_V1_4_COMPAT=$enableval)
 
 if test "$HDF5_V1_4_COMPAT" = "yes"; then
@@ -1082,7 +1121,7 @@ dnl Should the Stream Virtual File Driver be compiled in ?
 dnl
 AC_MSG_CHECKING(for Stream Virtual File Driver support)
 AC_ARG_ENABLE(stream-vfd,
-  [  --enable-stream-vfd     Build the Stream Virtual File Driver. [default=no]],
+  [  --enable-stream-vfd     Build the Stream Virtual File Driver [default=no]],
   STREAM_VFD=$enableval)
 
 if test "$STREAM_VFD" = "yes"; then
@@ -1212,15 +1251,15 @@ AC_C_INLINE
 
 AC_MSG_CHECKING(for __attribute__ extension)
 AC_TRY_COMPILE(,[int __attribute__((unused)) x],
-	       AC_DEFINE(HAVE_ATTRIBUTE)
-	       AC_MSG_RESULT(yes),
-	       AC_MSG_RESULT(no))
+               AC_DEFINE(HAVE_ATTRIBUTE)
+               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(for __FUNCTION__ extension)
 AC_TRY_COMPILE(,[(void)__FUNCTION__],
-	       AC_DEFINE(HAVE_FUNCTION)
-	       AC_MSG_RESULT(yes),
-	       AC_MSG_RESULT(no))
+               AC_DEFINE(HAVE_FUNCTION)
+               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(no))
 
 dnl ----------------------------------------------------------------------
 dnl Try to figure out how to print `long long'.  Some machines use `%lld'
@@ -1243,7 +1282,7 @@ for hdf5_cv_printf_ll in l L q ll unknown; do
 
 int main(void)
 {
-	char *s=malloc(128);
+	char *s = malloc(128);
 	long long x = (long long)1048576 * (long long)1048576;
 	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
 	exit(strcmp(s,"1099511627776"));
@@ -1373,11 +1412,11 @@ case "$CC_BASENAME" in
     AC_MSG_CHECKING(for mpirun)
 
     dnl Find the path where mpicc is located.
-    cmd=`echo $CC |cut -f1 -d' '`
-    if (echo $cmd |grep / >/dev/null); then
-      path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+    cmd=`echo $CC | cut -f1 -d' '`
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH |tr : ' '`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -1388,6 +1427,7 @@ case "$CC_BASENAME" in
     if test -x $path/mpirun; then
       AC_MSG_RESULT($path/mpirun)
       RUNSERIAL="${RUNSERIAL:-none}"
+
       if test -z "$RUNPARALLEL"; then
         RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
       fi
@@ -1403,11 +1443,11 @@ case "$CC_BASENAME" in
     AC_MSG_CHECKING(for mpirun_lam or mpirun)
 
     dnl Find the path where hcc is located
-    cmd=`echo $CC |cut -f1 -d' '`
-    if (echo $cmd |grep / >/dev/null); then
-      path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+    cmd=`echo $CC | cut -f1 -d' '`
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH |tr : ' '`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -1485,21 +1525,21 @@ case "X-$enable_parallel" in
     ;;
 
   X-mpich)
-     dnl For normal mpich installation the compiler, mpicc, should know
-     dnl where the MPI and MPI-IO header files are located and know which
-     dnl extra libraries need to be linked and will supply appropriate
-     dnl flags to the underlying compiler.
-     AC_MSG_RESULT(mpich)
-     AC_MSG_WARN(*** Why aren't you using an mpicc compiler? ***)
+    dnl For normal mpich installation the compiler, mpicc, should know
+    dnl where the MPI and MPI-IO header files are located and know which
+    dnl extra libraries need to be linked and will supply appropriate
+    dnl flags to the underlying compiler.
+    AC_MSG_RESULT(mpich)
+    AC_MSG_WARN(*** Why aren't you using an mpicc compiler? ***)
 
-     dnl Apparently mpicc isn't installed correctly so configure must search
-     dnl for the header files and libraries. Actually we only have to search
-     dnl for the libraries in order to get the onto the link line, the user
-     dnl will have already told us about the locations. Fail if something
-     dnl is missing.
-     PARALLEL=mpich
-     AC_CHECK_LIB(mpich,MPI_Init,,AC_MSG_ERROR(no mpich library))
-     ;;
+    dnl Apparently mpicc isn't installed correctly so configure must search
+    dnl for the header files and libraries. Actually we only have to search
+    dnl for the libraries in order to get the onto the link line, the user
+    dnl will have already told us about the locations. Fail if something
+    dnl is missing.
+    PARALLEL=mpich
+    AC_CHECK_LIB(mpich,MPI_Init,,AC_MSG_ERROR(no mpich library))
+    ;;
 
   *)
     AC_MSG_RESULT(error)
@@ -1654,9 +1694,9 @@ if test -n "$cc_vendor" && test -n "$cc_version"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Where is the root of the source tree.  Give an absolute address so
+dnl Where is the root of the source tree. Give an absolute address so
 dnl we can find it no matter which directory of the distribution is our
-dnl current directory.  The built-in pwd fails on some systems, but the
+dnl current directory. The built-in pwd fails on some systems, but the
 dnl /bin/pwd version works OK.
 dnl
 if test -x /bin/pwd; then
@@ -1745,13 +1785,13 @@ touch ./config/stamp1
 saved_no_create=$no_create
 no_create=yes
 
-PARALLEL_MAKE=
+PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
   PARALLEL_MAKE="$TESTPARALLEL/Makefile"
 fi
 
-EXTRA_H4_MAKEFILES=
+EXTRA_H4_MAKEFILES=""
 
 if test -n "$H4TOH5"; then
   EXTRA_H4_MAKEFILES="$EXTRA_H4_MAKEFILES tools/h4toh5/Makefile"
