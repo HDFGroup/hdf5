@@ -1,35 +1,20 @@
 #############################
-Expected output for 'h5dump -n tfilters.h5'
+Expected output for 'h5dump -n tfcontents1.h5'
 #############################
-HDF5 "tfilters.h5" {
+HDF5 "tfcontents1.h5" {
 FILE_CONTENTS {
- dataset    /all
- dataset    /alloc_time_early
- dataset    /alloc_time_incr
- dataset    /alloc_time_late
- dataset    /bitfield
- dataset    /char
- dataset    /chunked
- dataset    /compact
- dataset    /contiguous
- dataset    /deflate
- dataset    /enum
- dataset    /external
- dataset    /fill_time_alloc
- dataset    /fill_time_ifset
- dataset    /fill_time_never
- dataset    /fletcher32
+ datatype   /#5696
+ dataset    /dset
+ dataset    /dset3 -> /dset
+ dataset    /dset4 -> /dset
+ dataset    /dsetmytype2
  group      /g1
- dataset    /g1/mydset
- dataset    /hlink to all -> /all
- dataset    /myfilter
+ dataset    /g1/dset1 -> /dset
+ group      /g1/g1.1
+ dataset    /g1/g1.1/dset2 -> /dset
+ group      /g2 -> /g1/g1.1
+ link       /mylink -> mylink
  datatype   /mytype
- datatype   /myvlen
- dataset    /reference
- dataset    /shuffle
- link       /slink to all -> all
- dataset    /string
- dataset    /szip
- dataset    /vlen
+ link       /softlink -> /dset
  }
 }

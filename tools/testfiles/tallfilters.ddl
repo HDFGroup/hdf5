@@ -13,7 +13,7 @@ DATASET "all" {
       PREPROCESSING SHUFFLE
       COMPRESSION SZIP {
          PIXELS_PER_BLOCK 4
-         MODE HARDWARE
+         MODE K13
          CODING ENTROPY
          BYTE_ORDER LSB
          HEADER RAW

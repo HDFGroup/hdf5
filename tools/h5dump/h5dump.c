@@ -2068,10 +2068,9 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
 
  memset(&ctx, 0, sizeof(ctx));
  ctx.indent_level=2;
-	size = H5Tget_size(type_id);
-	buf = malloc(size);
-
  n_type = H5Tget_native_type(type_id,H5T_DIR_DEFAULT);
+ size = H5Tget_size(n_type);
+	buf = malloc(size);
 
  H5Pget_fill_value(dcpl, n_type, buf);
     

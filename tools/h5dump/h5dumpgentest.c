@@ -3080,7 +3080,7 @@ static void gent_char(void)
  *
  * Return: 
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: May 28, 2003
  *
@@ -3520,7 +3520,7 @@ static void write_attr_in(hid_t loc_id,
  *
  * Return: 
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: May 28, 2003
  *
@@ -3976,7 +3976,7 @@ static void write_dset_in(hid_t loc_id,
  *
  * Return: void
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: May 19, 2003
  *
@@ -4045,7 +4045,7 @@ static void gent_attr_all(void)
  *
  * Purpose: utility function to write an attribute
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: May 19, 2003
  *
@@ -4083,7 +4083,7 @@ int write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
  *
  * Return: 
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: May 27, 2003
  *
@@ -4393,6 +4393,7 @@ static void gent_null_space(void)
 }
 
 
+
 /*-------------------------------------------------------------------------
  * Function: make_dset
  *
@@ -4403,18 +4404,19 @@ static void gent_null_space(void)
 static 
 int make_dset(hid_t loc_id,
               const char *name,
-              hid_t sid, 
+              hid_t sid,
+              hid_t tid,
               hid_t dcpl,
               void *buf)
 {
  hid_t   dsid;
 
  /* create the dataset */
- if((dsid = H5Dcreate (loc_id,name,H5T_NATIVE_INT,sid,dcpl))<0)
+ if((dsid = H5Dcreate (loc_id,name,tid,sid,dcpl))<0)
   return -1;
 
  /* write */
- if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if(H5Dwrite(dsid,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
   goto out;
 
  /* close */
@@ -4428,6 +4430,8 @@ int make_dset(hid_t loc_id,
  } H5E_END_TRY;
  return -1;
 }
+
+
 
 
 
@@ -4485,6 +4489,12 @@ make_external(hid_t fid)
  */
 static void gent_filters(void)
 {
+ typedef enum 
+ {
+  E_RED,
+  E_GREEN
+ } e_t;
+
  hid_t    fid;  /* file id */
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
@@ -4507,18 +4517,21 @@ static void gent_filters(void)
  char     buf4[6]={"abcdef"};
  hobj_ref_t buf5[1]; 
  hsize_t  dims5[1]={1};
- int      i, j, n, ret, val;
+ int      i, j, k, n, ret, val;
  int      fillval = -99;
-
- typedef enum 
- {
-  E_RED,
-  E_GREEN
- } e_t;
+ int      buf6[2][2][100];
+ hsize_t  dims6[3]={2,2,100};
 
  for (i=n=0; i<DIM1; i++){
   for (j=0; j<DIM2; j++){
    buf1[i][j]=n++;
+  }
+ }
+ for (i=n=0; i<2; i++){
+  for (j=0; j<2; j++){
+   for (k=0; k<100; k++){
+    buf6[i][j][k]=n++;
+   }
   }
  }
  
@@ -4544,7 +4557,7 @@ static void gent_filters(void)
  ret=H5Pset_layout(dcpl, H5D_COMPACT);
  assert(ret>=0);
 
- ret=make_dset(fid,"compact",sid,dcpl,buf1);
+ ret=make_dset(fid,"compact",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
  ret=H5Gset_comment(fid,"compact", "This is a dataset with compact storage");
@@ -4553,7 +4566,7 @@ static void gent_filters(void)
  ret=H5Pset_layout(dcpl, H5D_CONTIGUOUS);
  assert(ret>=0);
 
- ret=make_dset(fid,"contiguous",sid,dcpl,buf1);
+ ret=make_dset(fid,"contiguous",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
  ret=H5Gset_comment(fid,"contiguous", "This is a dataset with contiguous storage");
@@ -4565,7 +4578,7 @@ static void gent_filters(void)
  ret=H5Pset_chunk(dcpl, SPACE2_RANK, chunk_dims);
  assert(ret>=0);
 
- ret=make_dset(fid,"chunked",sid,dcpl,buf1);
+ ret=make_dset(fid,"chunked",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
  ret=H5Gset_comment(fid,"chunked", "This is a dataset with chunked storage");
@@ -4593,7 +4606,7 @@ static void gent_filters(void)
  ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
  assert(ret>=0);
 
- ret=make_dset(fid,"szip",sid,dcpl,buf1);
+ ret=make_dset(fid,"szip",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 #endif
 
@@ -4610,7 +4623,7 @@ static void gent_filters(void)
  ret=H5Pset_deflate(dcpl, 9);
  assert(ret>=0);
 
- ret=make_dset(fid,"deflate",sid,dcpl,buf1);
+ ret=make_dset(fid,"deflate",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 #endif
 
@@ -4628,7 +4641,7 @@ static void gent_filters(void)
  ret=H5Pset_shuffle(dcpl);
  assert(ret>=0);
 
- ret=make_dset(fid,"shuffle",sid,dcpl,buf1);
+ ret=make_dset(fid,"shuffle",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 #endif
 
@@ -4646,7 +4659,7 @@ static void gent_filters(void)
  ret=H5Pset_fletcher32(dcpl);
  assert(ret>=0);
 
- ret=make_dset(fid,"fletcher32",sid,dcpl,buf1);
+ ret=make_dset(fid,"fletcher32",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 #endif
 
@@ -4683,7 +4696,7 @@ static void gent_filters(void)
  assert(ret>=0);
 #endif
 
- ret=make_dset(fid,"all",sid,dcpl,buf1);
+ ret=make_dset(fid,"all",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
  
@@ -4705,7 +4718,7 @@ static void gent_filters(void)
  ret=H5Pset_filter (dcpl, MYFILTER_ID, 0, 0, NULL);
  assert(ret>=0);
 
- ret=make_dset(fid,"myfilter",sid,dcpl,buf1);
+ ret=make_dset(fid,"myfilter",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
  /* remove the filters from the dcpl */
@@ -4724,7 +4737,7 @@ static void gent_filters(void)
  */
  ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
  assert(ret>=0);
- ret=make_dset(fid,"alloc_time_early",sid,dcpl,buf1);
+ ret=make_dset(fid,"alloc_time_early",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
@@ -4733,7 +4746,7 @@ static void gent_filters(void)
  */
  ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_INCR);
  assert(ret>=0);
- ret=make_dset(fid,"alloc_time_incr",sid,dcpl,buf1);
+ ret=make_dset(fid,"alloc_time_incr",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
@@ -4742,7 +4755,7 @@ static void gent_filters(void)
  */
  ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
  assert(ret>=0);
- ret=make_dset(fid,"alloc_time_late",sid,dcpl,buf1);
+ ret=make_dset(fid,"alloc_time_late",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
@@ -4850,6 +4863,12 @@ static void gent_filters(void)
  ret=H5Rcreate(&buf5[0],fid,"g1/mydset",H5R_OBJECT,-1);
  assert(ret>=0);
  write_dset(fid,1,dims5,"reference",H5T_STD_REF_OBJ,buf5);
+
+/*-------------------------------------------------------------------------
+ * a large 3D dataset
+ *-------------------------------------------------------------------------
+ */
+ write_dset(fid,3,dims6,"3d",H5T_NATIVE_INT,buf6);
  
 /*-------------------------------------------------------------------------
  * close
@@ -5045,12 +5064,30 @@ static void gent_fcontents(void)
  */
 static void gent_fvalues(void)
 {
- hid_t    fid;  /* file id */
- hid_t    dcpl; /* dataset creation property list */
- hid_t    sid;  /* dataspace ID */
- hsize_t  dims[1]={4};
- int      buf[4]={1,2,3,4};
- int      ret, fillval = -99;
+ /* compound datatype */
+ typedef struct c_t 
+ {
+  char   a;
+  double b;
+ } c_t;
+
+
+ hid_t      fid;  /* file id */
+ hid_t      dcpl; /* dataset creation property list */
+ hid_t      sid;  /* dataspace ID */
+ hid_t      tid;  /* datatype ID */
+ hid_t      did;  /* datasetID */
+ hsize_t    dims[1]={2};
+ int        buf[2]={1,2};                   /* integer */
+ int        fillval1=-99;                   /* integer fill value */
+ c_t        buf2[2]={{1,2},{3,4}};          /* compound */
+ c_t        fillval2[1]={{1,2}};            /* compound fill value */
+ hvl_t      buf3[2];                        /* vlen */
+ hvl_t      fillval3;                       /* vlen fill value */
+ hsize_t    dimarray[1]={3};                /* array dimension */
+ int        buf4[2][3]= {{1,2,3},{4,5,6}};  /* array */
+ int        fillval4[1][3]= {{1,2,3}};      /* array fill value */
+ int        ret;
 
  /* create a file */
  fid  = H5Fcreate(FILE48, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -5059,7 +5096,7 @@ static void gent_fvalues(void)
  /* create a space */
  sid = H5Screate_simple(1, dims, NULL);
 
- /* create a dataset creation property list; the same DCPL is used for all dsets */
+ /* create a dataset creation property list */
  dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
 /*-------------------------------------------------------------------------
@@ -5070,23 +5107,10 @@ static void gent_fvalues(void)
  ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
  assert(ret>=0);
 
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval1);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill_time_ifset",sid,dcpl,buf);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * H5D_FILL_TIME_ALLOC
- *-------------------------------------------------------------------------
- */
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
- assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
- 
- ret=make_dset(fid,"fill_time_alloc",sid,dcpl,buf);
+ ret=make_dset(fid,"fill_time_ifset",sid,H5T_NATIVE_INT,dcpl,buf);
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
@@ -5096,11 +5120,88 @@ static void gent_fvalues(void)
  ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
  assert(ret>=0);
 
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval1);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill_time_never",sid,dcpl,buf);
+ ret=make_dset(fid,"fill_time_never",sid,H5T_NATIVE_INT,dcpl,buf);
  assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * H5D_FILL_TIME_ALLOC
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval1);
+ assert(ret>=0);
+ 
+ ret=make_dset(fid,"fill_time_alloc",sid,H5T_NATIVE_INT,dcpl,buf);
+ assert(ret>=0);
+
+ ret=H5Pclose(dcpl);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * dataset with no fill value
+ *-------------------------------------------------------------------------
+ */
+ write_dset(fid,1,dims,"no_fill",H5T_NATIVE_INT,buf);
+
+/*-------------------------------------------------------------------------
+ * dataset with a H5T_COMPOUND fill value
+ *-------------------------------------------------------------------------
+ */
+ dcpl = H5Pcreate(H5P_DATASET_CREATE);
+ tid = H5Tcreate (H5T_COMPOUND, sizeof(c_t));
+ H5Tinsert(tid, "a", HOFFSET(c_t, a), H5T_NATIVE_CHAR);
+ H5Tinsert(tid, "b", HOFFSET(c_t, b), H5T_NATIVE_DOUBLE);
+ ret=H5Pset_fill_value(dcpl, tid, &fillval2);
+ assert(ret>=0);
+ ret=make_dset(fid,"fill_compound",sid,tid,dcpl,buf2);
+ assert(ret>=0);
+ ret = H5Tclose(tid);
+ assert(ret>=0);
+ ret=H5Pclose(dcpl);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * dataset with a H5T_VLEN fill value 
+ *-------------------------------------------------------------------------
+ */
+ buf3[0].len = 1;
+ buf3[0].p = malloc( 1 * sizeof(int));
+ ((int *)buf3[0].p)[0]=1;
+ buf3[1].len = 2;
+ buf3[1].p = malloc( 2 * sizeof(int));
+ ((int *)buf3[1].p)[0]=2;
+ ((int *)buf3[1].p)[1]=3;
+
+ tid = H5Tvlen_create(H5T_NATIVE_INT);
+ dcpl = H5Pcreate(H5P_DATASET_CREATE);
+ 
+ fillval3.p=NULL; fillval3.len=0;
+ ret = H5Pset_fill_value(dcpl, tid, &fillval3);
+ assert(ret>=0);
+
+ did = H5Dcreate(fid,"fill_vlen",tid,sid,H5P_DEFAULT);
+ ret = H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf3);
+ assert(ret>=0);
+ ret = H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf3);
+ assert(ret>=0);
+ ret = H5Dclose(did);
+ ret = H5Tclose(tid);
+ ret = H5Pclose(dcpl);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * dataset with a H5T_ARRAY fill value  
+ *-------------------------------------------------------------------------
+ */
+ tid = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
+ write_dset(fid,1,dims,"fill_array",tid,buf4);
+ ret = H5Tclose(tid);
+
 
 /*-------------------------------------------------------------------------
  * close
@@ -5108,11 +5209,11 @@ static void gent_fvalues(void)
  */
  ret=H5Sclose(sid);
  assert(ret>=0);
- ret=H5Pclose(dcpl);
- assert(ret>=0);
  ret=H5Fclose(fid);
  assert(ret>=0);
 }
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -5170,6 +5271,7 @@ int main(void)
     gent_filters();
     gent_null_space();
     gent_fcontents();
+    gent_fvalues();
 
     return 0;
 }

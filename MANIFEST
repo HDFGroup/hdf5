@@ -1323,7 +1323,6 @@
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
-./tools/testfiles/tboot.ddl
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tchunked.ddl
@@ -1331,9 +1330,6 @@
 ./tools/testfiles/tcontiguos.ddl
 ./tools/testfiles/tdeflate.ddl
 ./tools/testfiles/texternal.ddl
-./tools/testfiles/tfillearly.ddl
-./tools/testfiles/tfillifset.ddl
-./tools/testfiles/tfillnever.ddl
 ./tools/testfiles/tfletcher32.ddl
 ./tools/testfiles/treference.ddl
 ./tools/testfiles/tshuffle.ddl
@@ -1341,12 +1337,19 @@
 ./tools/testfiles/tszip.ddl
 ./tools/testfiles/tuserfilter.ddl
 ./tools/testfiles/tallfilters.ddl
-./tools/testfiles/tfillalloc.ddl
-./tools/testfiles/tfillincr.ddl
-./tools/testfiles/tfilllate.ddl
 ./tools/testfiles/tstringe.ddl
 ./tools/testfiles/tindicesyes.ddl
 ./tools/testfiles/tindicesno.ddl
+./tools/testfiles/tfcontents1.h5
+./tools/testfiles/tfcontents2.h5
+./tools/testfiles/tboot1.ddl
+./tools/testfiles/tboot2.ddl
+./tools/testfiles/tperror.ddl
+./tools/testfiles/tindiceslarge.ddl
+./tools/testfiles/tfill.ddl
+./tools/testfiles/tfvalues.h5
+
+
 
 
 
