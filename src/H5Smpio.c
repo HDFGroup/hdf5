@@ -63,8 +63,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_fill_t UNUSED *fill,
                      const struct H5O_efl_t UNUSED *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     hid_t dxpl_id, void *buf/*out*/,
-		     hbool_t *must_convert/*out*/, const hbool_t do_write);
+                     hid_t dxpl_id, void *buf/*out*/, const hbool_t do_write);
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_mpio_all_type
@@ -533,9 +532,6 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *		directly between app buffer and file.
  *
  * Return:	non-negative on success, negative on failure.
- *		If MPI-IO is indeed used, must_convert is set to 0;
- *		otherwise it is set to 1 with return code succeed (so that the
- *		calling routine may try other means.)
  *
  * Programmer:	rky 980813
  *
@@ -547,6 +543,10 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *	Albert Cheng, 001123
  *	Include the MPI_type freeing as part of cleanup code.
  *
+ *      QAK - 2002/04/02
+ *      Removed the must_convert parameter and move preconditions to
+ *      H5S_mpio_opt_possible() routine
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -556,7 +556,6 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_efl_t UNUSED *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
 		     hid_t dxpl_id, void *buf /*out*/,
-		     hbool_t *must_convert /*out*/,
 		     const hbool_t do_write )
 {
     herr_t	 ret_value = SUCCEED;
@@ -571,8 +570,6 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_ENTER (H5S_mpio_spaces_xfer, FAIL);
 
-    *must_convert = 0;	/* means we at least tried to do optimized xfer */
-
     /* Check args */
     assert (f);
     assert (layout);
@@ -583,18 +580,6 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     /* Make certain we have the correct type of property list */
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-
-    /* INCOMPLETE!!!  rky 980816 */
-    /* Currently can only handle H5D_CONTIGUOUS layout */
-    if (layout->type != H5D_CONTIGUOUS) {
-#ifdef H5S_DEBUG
-	if (H5DEBUG(S)) {
-            HDfprintf (H5DEBUG(S), "H5S: can only create MPI datatype for hyperslab when layout is contiguous.\n" );
-	}
-#endif
-	*must_convert = 1;      /* can't do optimized xfer; do the old way */
-	HGOTO_DONE(SUCCEED);
-    }
 
     /*
      * For collective data transfer only since this would eventually
@@ -624,12 +609,6 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
         /* Get the driver information */
         if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
-
-        /* Check if we are using the MPIO driver */
-        if(H5FD_MPIO!=driver_id || H5FD_MPIO_COLLECTIVE!=dx->xfer_mode) {
-	    *must_convert = 1;	/* can't do optimized xfer; do the old way */
-	    HGOTO_DONE(SUCCEED);
-        } /* end if */
     }
 #endif
 
@@ -717,6 +696,10 @@ done:
  * rky 980918
  * Added must_convert parameter to let caller know we can't optimize the xfer.
  *
+ *      QAK - 2002/04/02
+ *      Removed the must_convert parameter and move preconditions to
+ *      H5S_mpio_opt_possible() routine
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -725,8 +708,7 @@ H5S_mpio_spaces_read(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_fill_t *fill,
                      const struct H5O_efl_t *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     hid_t dxpl_id, void *buf/*out*/,
-		     hbool_t *must_convert/*out*/)
+                     hid_t dxpl_id, void *buf/*out*/)
 {
     herr_t ret_value = FAIL;
 
@@ -734,7 +716,7 @@ H5S_mpio_spaces_read(H5F_t *f, const struct H5O_layout_t *layout,
 
     ret_value = H5S_mpio_spaces_xfer(f, layout, pline, fill, efl, elmt_size,
 				     file_space, mem_space, dxpl_id,
-				     buf, must_convert/*out*/, 0/*read*/);
+				     buf, 0/*read*/);
 
     FUNC_LEAVE (ret_value);
 }
@@ -754,6 +736,10 @@ H5S_mpio_spaces_read(H5F_t *f, const struct H5O_layout_t *layout,
  * rky 980918
  * Added must_convert parameter to let caller know we can't optimize the xfer.
  *
+ *      QAK - 2002/04/02
+ *      Removed the must_convert parameter and move preconditions to
+ *      H5S_mpio_opt_possible() routine
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -762,8 +748,7 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_fill_t *fill,
 		     const struct H5O_efl_t *efl, size_t elmt_size,
 		     const H5S_t *file_space, const H5S_t *mem_space,
-		     hid_t dxpl_id, const void *buf,
-		     hbool_t *must_convert/*out*/)
+		     hid_t dxpl_id, const void *buf)
 {
     herr_t ret_value = FAIL;
 
@@ -771,10 +756,66 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
 
     ret_value = H5S_mpio_spaces_xfer(f, layout, pline, fill, efl, elmt_size,
 				     file_space, mem_space, dxpl_id,
-				     (void*)buf, must_convert/*out*/,
-				     1/*write*/);
+				     (void*)buf, 1/*write*/);
 
     FUNC_LEAVE (ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_mpio_opt_possible
+ *
+ * Purpose:	Checks if an direct I/O transfer is possible between memory and
+ *                  the file.
+ *
+ * Return:	Success:        Non-negative: TRUE or FALSE
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, April 3, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags)
+{
+    htri_t c1,c2;               /* Flags whether a selection is optimizable */
+    htri_t ret_value=TRUE;
+
+    FUNC_ENTER(H5S_all_opt_possible, FAIL);
+
+    /* Check args */
+    assert(mem_space);
+    assert(file_space);
+
+    /* Check whether these are both simple dataspaces */
+    if (H5S_SIMPLE!=mem_space->extent.type || H5S_SIMPLE!=file_space->extent.type)
+        HGOTO_DONE(FALSE);
+
+    /* Check whether both selections are "regular" */
+    c1=H5S_select_regular(file_space);
+    c2=H5S_select_regular(mem_space);
+    if(c1==FAIL || c2==FAIL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
+    if(c1==FALSE || c2==FALSE)
+        HGOTO_DONE(FALSE);
+
+    /* Can't currently handle point selections */
+    if (H5S_SEL_POINTS==mem_space->select.type || H5S_SEL_POINTS==file_space->select.type)
+        HGOTO_DONE(FALSE);
+
+    /* Dataset storage must be contiguous currently */
+    if ((sconv_flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS)
+        HGOTO_DONE(FALSE);
+
+    /* Parallel I/O conversion flag must be set */
+    if(!(flags&H5S_CONV_PAR_IO_POSSIBLE))
+        HGOTO_DONE(FALSE);
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* H5S_mpio_opt_possible() */
 
 #endif  /* H5_HAVE_PARALLEL */

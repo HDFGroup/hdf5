@@ -133,11 +133,11 @@ __DLL__ herr_t H5S_point_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 __DLL__ htri_t H5S_point_select_contiguous(const H5S_t *space);
 __DLL__ htri_t H5S_point_select_single(const H5S_t *space);
+__DLL__ htri_t H5S_point_select_regular(const H5S_t *space);
 __DLL__ herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op,
             size_t num_elem, const hssize_t **coord);
 __DLL__ herr_t H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-					H5D_operator_t op,
-					void *operator_data);
+                            H5D_operator_t op, void *operator_data);
 
 /* "All" select functions */
 __DLL__ herr_t H5S_all_release(H5S_t *space);
@@ -150,17 +150,17 @@ __DLL__ herr_t H5S_all_read(H5F_t *f, const struct H5O_layout_t *layout,
                             const struct H5O_fill_t *fill,
 			    const struct H5O_efl_t *efl, size_t elmt_size,
 			    const H5S_t *file_space, const H5S_t *mem_space,
-			    hid_t dxpl_id, void *buf/*out*/,
-			    hbool_t *must_convert/*out*/);
+			    hid_t dxpl_id, void *buf/*out*/);
 __DLL__ herr_t H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 			    const struct H5O_pline_t *pline,
                             const struct H5O_fill_t *fill,
 			    const struct H5O_efl_t *efl, size_t elmt_size,
 			    const H5S_t *file_space, const H5S_t *mem_space,
-			    hid_t dxpl_id, const void *buf,
-			    hbool_t *must_convert/*out*/);
+			    hid_t dxpl_id, const void *buf);
 __DLL__ herr_t H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-				      H5D_operator_t op, void *operator_data);
+                            H5D_operator_t op, void *operator_data);
+__DLL__ htri_t H5S_all_opt_possible(const H5S_t *mem_space,
+                            const H5S_t *file_space, const unsigned flags);
 
 /* Hyperslab selection functions */
 __DLL__ herr_t H5S_hyper_release(H5S_t *space);
@@ -176,6 +176,7 @@ __DLL__ herr_t H5S_hyper_span_blocklist(H5S_hyper_span_info_t *spans, hssize_t s
 __DLL__ herr_t H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 __DLL__ htri_t H5S_hyper_select_contiguous(const H5S_t *space);
 __DLL__ htri_t H5S_hyper_select_single(const H5S_t *space);
+__DLL__ htri_t H5S_hyper_select_regular(const H5S_t *space);
 __DLL__ herr_t H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space,
                 H5D_operator_t op, void *operator_data);
 

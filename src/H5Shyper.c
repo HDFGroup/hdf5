@@ -5963,7 +5963,7 @@ H5S_hyper_select_single(const H5S_t *space)
 
     assert(space);
 
-    /* Check for a "regular" hyperslab selection */
+    /* Check for a "single" hyperslab selection */
     if(space->select.sel_info.hslab.diminfo != NULL) {
         /*
          * For a regular hyperslab to be single, it must have only one
@@ -6009,6 +6009,47 @@ H5S_hyper_select_single(const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_select_single() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_regular
+ PURPOSE
+    Check if a hyperslab selection is "regular"
+ USAGE
+    htri_t H5S_hyper_select_regular(space)
+        const H5S_t *space;     IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in a dataspace is the a regular
+    pattern.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Doesn't check for "regular" hyperslab selections composed of spans
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_hyper_select_regular(const H5S_t *space)
+{
+    htri_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_hyper_select_regular, FAIL);
+
+    /* Check args */
+    assert(space);
+
+    /* Only simple check for regular hyperslabs for now... */
+    if(space->select.sel_info.hslab.diminfo != NULL)
+        ret_value=TRUE;
+    else
+        ret_value=FALSE;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_select_regular() */
 
 
 /*--------------------------------------------------------------------------

@@ -156,6 +156,8 @@ Documentation
 New Features
 ============
 
+    * Improved performance of "regular" hyperslab I/O when using MPI-IO and the
+      datatype conversion is unneccessary.  QAK - 2002/04/02
     * Improved performance of single hyperslab I/O when datatype conversion is
       unneccessary.  QAK - 2002/04/02
     * Added new "H5Sget_select_type" API function to determine which type of

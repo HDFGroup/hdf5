@@ -1497,7 +1497,7 @@ H5S_conv_t *
 H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
 {
     H5S_conv_t	*path;  /* Space conversion path */
-    htri_t c1,c2;       /* Flags whether a selection is contiguous */
+    htri_t opt;         /* Flag whether a selection is optimizable */
     size_t	i;      /* Index variable */
     
     FUNC_ENTER (H5S_find, NULL);
@@ -1522,33 +1522,41 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
     for (i=0; i<H5S_nconv_g; i++) {
         if (H5S_conv_g[i]->f->type==file_space->select.type &&
                 H5S_conv_g[i]->m->type==mem_space->select.type) {
+
+#ifdef H5_HAVE_PARALLEL
             /*
-             * Initialize direct read/write functions
+             * Check if we can set direct MPI-IO read/write functions
              */
-            c1=H5S_select_single(file_space);
-            c2=H5S_select_single(mem_space);
-            if(c1==FAIL || c2==FAIL)
+            opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
+            if(opt==FAIL)
                 HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
-            if (c1==TRUE && c2==TRUE) {
-#ifdef H5_HAVE_PARALLEL
-                if(flags&H5S_CONV_PAR_IO_POSSIBLE) {
-                    H5S_conv_g[i]->read = H5S_mpio_spaces_read;
-                    H5S_conv_g[i]->write = H5S_mpio_spaces_write;
-                } /* end if */
-                else {
+            /* Check if we can use the optimized parallel I/O routines */
+            if(opt==TRUE) {
+                H5S_conv_g[i]->read = H5S_mpio_spaces_read;
+                H5S_conv_g[i]->write = H5S_mpio_spaces_write;
+            } /* end if */
+            else {
+#endif /* H5_HAVE_PARALLEL */
+                /*
+                 * Check if we can set direct "all" read/write functions
+                 */
+                opt=H5S_all_opt_possible(mem_space,file_space,flags);
+                if(opt==FAIL)
+                    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+
+                /* Check if we can use the optimized "all" I/O routines */
+                if(opt==TRUE) {
                     H5S_conv_g[i]->read = H5S_all_read;
                     H5S_conv_g[i]->write = H5S_all_write;
+                } /* end if */
+                else {
+                    H5S_conv_g[i]->read = NULL;
+                    H5S_conv_g[i]->write = NULL;
                 } /* end else */
-#else /* H5_HAVE_PARALLEL */
-                H5S_conv_g[i]->read = H5S_all_read;
-                H5S_conv_g[i]->write = H5S_all_write;
+#ifdef H5_HAVE_PARALLEL
+            } /* end else */
 #endif /* H5_HAVE_PARALLEL */
-            }
-            else {
-                H5S_conv_g[i]->read = NULL;
-                H5S_conv_g[i]->write = NULL;
-            }
 
             HRETURN(H5S_conv_g[i]);
         }
@@ -1571,29 +1579,40 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
     path->f = H5S_fconv_g[file_space->select.type];
     path->m = H5S_mconv_g[mem_space->select.type];
 
+#ifdef H5_HAVE_PARALLEL
     /*
-     * Initialize direct read/write functions
+     * Check if we can set direct MPI-IO read/write functions
      */
-    c1=H5S_select_single(file_space);
-    c2=H5S_select_single(mem_space);
-    if(c1==FAIL || c2==FAIL)
+    opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
+    if(opt==FAIL)
         HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
-    if (c1==TRUE && c2==TRUE) {
-#ifdef H5_HAVE_PARALLEL
-        if(flags&H5S_CONV_PAR_IO_POSSIBLE) {
-            path->read = H5S_mpio_spaces_read;
-            path->write = H5S_mpio_spaces_write;
-        } /* end if */
-        else {
+    /* Check if we can use the optimized parallel I/O routines */
+    if(opt==TRUE) {
+        path->read = H5S_mpio_spaces_read;
+        path->write = H5S_mpio_spaces_write;
+    } /* end if */
+    else {
+#endif /* H5_HAVE_PARALLEL */
+        /*
+         * Check if we can set direct "all" read/write functions
+         */
+        opt=H5S_all_opt_possible(mem_space,file_space,flags);
+        if(opt==FAIL)
+            HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+
+        /* Check if we can use the optimized "all" I/O routines */
+        if(opt==TRUE) {
             path->read = H5S_all_read;
             path->write = H5S_all_write;
+        } /* end if */
+        else {
+            path->read = NULL;
+            path->write = NULL;
         } /* end else */
-#else /* H5_HAVE_PARALLEL */
-        path->read = H5S_all_read;
-        path->write = H5S_all_write;
+#ifdef H5_HAVE_PARALLEL
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
-    } /* end if */
     
     /*
      * Add the new path to the table.

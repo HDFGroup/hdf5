@@ -1969,6 +1969,10 @@ H5D_close(H5D_t *dataset)
  *      Raymond Lu, 2001-10-2
  *      Changed the way to retrieve property for generic property list.
  *
+ *      QAK - 2002/04/02
+ *      Removed the must_convert parameter and move preconditions to
+ *      H5S_<foo>_opt_possible() routine
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1994,7 +1998,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hsize_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t	need_bkg;		    /*type of background buf*/
     H5S_t		*free_this_space=NULL;  /*data space to free	*/
-    hbool_t     must_convert;       /*have to xfer the slow way*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_dxpl_t	*dx = NULL;
     H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
@@ -2089,6 +2092,24 @@ printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
     } /* end if */
 
+    /* Set the storage flags for the space conversion check */
+    switch(dataset->layout.type) {
+        case H5D_COMPACT:
+            sconv_flags |= H5S_CONV_STORAGE_COMPACT;
+            break;
+
+        case H5D_CONTIGUOUS:
+            sconv_flags |= H5S_CONV_STORAGE_CONTIGUOUS;
+            break;
+
+        case H5D_CHUNKED:
+            sconv_flags |= H5S_CONV_STORAGE_CHUNKED;
+            break;
+
+        default:
+            assert(0 && "Unhandled layout type!");
+    } /* end switch */
+
     /* Get dataspace functions */
     if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space");
@@ -2112,15 +2133,11 @@ printf("%s: check 1.1, \n",FUNC);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
         status = (sconv->read)(dataset->ent.file, &(dataset->layout), &pline, 
                        &fill, &efl, H5T_get_size(dataset->type), file_space, 
-                       mem_space, dxpl_id, buf/*out*/, &must_convert);
+                       mem_space, dxpl_id, buf/*out*/);
 
         /* Supports only no conversion, type or space, for now. */
-        if (status<0)
+        if (status<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed");
-
-        if (must_convert) {
-            /* sconv->read cannot do a direct transfer;
-             * fall through and xfer the data in the more roundabout way */
         } else {
             /* direct xfer accomplished successfully */
 #ifdef H5S_DEBUG
@@ -2424,6 +2441,10 @@ done:
  *      Raymond Lu, 2001-10-2
  *      Changed the way to retrieve property for generic property list.
  *
+ *      QAK - 2002/04/02
+ *      Removed the must_convert parameter and move preconditions to
+ *      H5S_<foo>_opt_possible() routine
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2449,7 +2470,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hsize_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t	need_bkg;		    /*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
-    hbool_t     must_convert;       /*have to xfer the slow way*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_dxpl_t	*dx = NULL;
     H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
@@ -2571,6 +2591,24 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     printf("%s: check 0.6, after H5T_find, tpath=%p, tpath->name=%s\n",FUNC,tpath,tpath->name);
 #endif /* QAK */
 
+    /* Set the storage flags for the space conversion check */
+    switch(dataset->layout.type) {
+        case H5D_COMPACT:
+            sconv_flags |= H5S_CONV_STORAGE_COMPACT;
+            break;
+
+        case H5D_CONTIGUOUS:
+            sconv_flags |= H5S_CONV_STORAGE_CONTIGUOUS;
+            break;
+
+        case H5D_CHUNKED:
+            sconv_flags |= H5S_CONV_STORAGE_CHUNKED;
+            break;
+
+        default:
+            assert(0 && "Unhandled layout type!");
+    } /* end switch */
+
     /* Get dataspace functions */
     if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space");
@@ -2594,14 +2632,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
         status = (sconv->write)(dataset->ent.file, &(dataset->layout), &pline, 
                         &fill, &efl, H5T_get_size(dataset->type), file_space,
-                        mem_space, dxpl_id, buf/*out*/, &must_convert);
+                        mem_space, dxpl_id, buf/*out*/);
 
         /* Supports only no conversion, type or space, for now. */
-        if (status<0)
+        if (status<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed");
-	if (must_convert) {
-	    /* sconv->write cannot do a direct transfer;
-	     * fall through and xfer the data in the more roundabout way */
 	} else {
 	    /* direct xfer accomplished successfully */
 #ifdef H5S_DEBUG

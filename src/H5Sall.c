@@ -368,6 +368,58 @@ H5S_all_mscat (const void *tconv_buf, size_t elmt_size,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5S_all_opt_possible
+ *
+ * Purpose:	Checks if an direct I/O transfer is possible between memory and
+ *                  the file.
+ *
+ * Return:	Success:        Non-negative: TRUE or FALSE
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, April 3, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5S_all_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const unsigned UNUSED flags)
+{
+    htri_t c1,c2;               /* Flags whether a selection is optimizable */
+    htri_t ret_value=TRUE;
+
+    FUNC_ENTER(H5S_all_opt_possible, FAIL);
+
+    /* Check args */
+    assert(mem_space);
+    assert(file_space);
+
+    /* Check whether these are both simple dataspaces */
+    if (H5S_SIMPLE!=mem_space->extent.type || H5S_SIMPLE!=file_space->extent.type)
+        HGOTO_DONE(FALSE);
+
+    /* Check whether both selections are single blocks */
+    c1=H5S_select_single(file_space);
+    c2=H5S_select_single(mem_space);
+    if(c1==FAIL || c2==FAIL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
+    if(c1==FALSE || c2==FALSE)
+        HGOTO_DONE(FALSE);
+
+    /* Check whether the shape of each block is the same */
+    c1=H5S_select_shape_same(mem_space,file_space);
+    if(c1==FAIL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for selection blocks same");
+    if(c1==FALSE)
+        HGOTO_DONE(FALSE);
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* H5S_all_opt_possible() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5S_all_read
  *
  * Purpose:	Reads directly from file into application memory if possible.
@@ -395,12 +447,11 @@ herr_t
 H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
              const struct H5O_fill_t *fill,
 	     const H5O_efl_t *efl, size_t elmt_size, const H5S_t *file_space,
-	     const H5S_t *mem_space, hid_t dxpl_id, void *_buf/*out*/,
-	     hbool_t *must_convert/*out*/)
+	     const H5S_t *mem_space, hid_t dxpl_id, void *_buf/*out*/)
 {
     H5S_hyper_span_t *file_span=NULL,*mem_span=NULL;     /* Hyperslab span node */
     char       *buf=(char*)_buf;        /* Get pointer to buffer */
-    hsize_t	mem_elmts,file_elmts;   /* Number of elements in each dimension of selection */
+    hsize_t	file_elmts;             /* Number of elements in each dimension of selection */
     hssize_t	file_off,mem_off;       /* Offset (in elements) of selection */
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];     /* Size of memory buffer */
     hsize_t	size[H5O_LAYOUT_NDIMS];         /* Size of selection */
@@ -410,30 +461,19 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     herr_t      ret_value=SUCCEED;
 
     FUNC_ENTER(H5S_all_read, FAIL);
-    *must_convert = TRUE;
 
 #ifdef QAK
 printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
-    /* Check whether we can handle this */
-    if (H5S_SIMPLE!=mem_space->extent.type)
-        HGOTO_DONE(SUCCEED);
-    if (H5S_SIMPLE!=file_space->extent.type)
-        HGOTO_DONE(SUCCEED);
-    if (mem_space->extent.u.simple.rank!=file_space->extent.u.simple.rank)
-        HGOTO_DONE(SUCCEED);
-
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
         switch(mem_space->select.type) {
             case H5S_SEL_HYPERSLABS:
                 /* Check for a "regular" hyperslab selection */
                 if(mem_space->select.sel_info.hslab.diminfo != NULL) {
-                    mem_elmts=mem_space->select.sel_info.hslab.diminfo[u].block;
                     mem_off=mem_space->select.sel_info.hslab.diminfo[u].start;
                 } /* end if */
                 else {
-                    mem_elmts=(mem_span->high-mem_span->low)+1;
                     mem_off=mem_span->low;
                     mem_span=mem_span->down->head;
                 } /* end else */
@@ -441,12 +481,10 @@ printf("%s: check 1.0\n",FUNC);
                 break;
 
             case H5S_SEL_ALL:
-                mem_elmts=mem_space->extent.u.simple.size[u];
                 mem_off=0;
                 break;
 
             case H5S_SEL_POINTS:
-                mem_elmts=1;
                 mem_off=mem_space->select.sel_info.pnt_lst->head->pnt[u]
                             +mem_space->select.offset[u];
                 break;
@@ -485,9 +523,6 @@ printf("%s: check 1.0\n",FUNC);
                 assert(0 && "Invalid selection type!");
         } /* end switch */
 
-        if (mem_elmts!=file_elmts)
-            HGOTO_DONE(SUCCEED);
-
         mem_size[u]=mem_space->extent.u.simple.size[u];
         size[u] = file_elmts;
         file_offset[u] = file_off;
@@ -511,11 +546,8 @@ for (u=0; u<=mem_space->extent.u.simple.rank; u++)
 #endif /* QAK */
     /* Read data from the file */
     if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, size,
-		     mem_size, mem_offset, file_offset, buf/*out*/)<0) {
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
-		      "unable to read data from the file");
-    }
-    *must_convert = FALSE;
+            mem_size, mem_offset, file_offset, buf/*out*/)<0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read data from the file");
 
 done:
     FUNC_LEAVE(ret_value);
@@ -552,8 +584,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
              const struct H5O_fill_t *fill,
              const H5O_efl_t *efl,
 	     size_t elmt_size, const H5S_t *file_space,
-	     const H5S_t *mem_space, hid_t dxpl_id, const void *_buf,
-	     hbool_t *must_convert/*out*/)
+	     const H5S_t *mem_space, hid_t dxpl_id, const void *_buf)
 {
     H5S_hyper_span_t *file_span=NULL,*mem_span=NULL;     /* Hyperslab span node */
     const char *buf=(const char*)_buf;  /* Get pointer to buffer */
@@ -567,18 +598,10 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     herr_t      ret_value=SUCCEED;
     
     FUNC_ENTER(H5S_all_write, FAIL);
-    *must_convert = TRUE;
 
 #ifdef QAK
 printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
-    /* Check whether we can handle this */
-    if (H5S_SIMPLE!=mem_space->extent.type)
-        HGOTO_DONE(SUCCEED);
-    if (H5S_SIMPLE!=file_space->extent.type)
-        HGOTO_DONE(SUCCEED);
-    if (mem_space->extent.u.simple.rank!=file_space->extent.u.simple.rank)
-        HGOTO_DONE(SUCCEED);
 
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
@@ -642,9 +665,6 @@ printf("%s: check 1.0\n",FUNC);
                 assert(0 && "Invalid selection type!");
         } /* end switch */
 
-        if (mem_elmts!=file_elmts)
-            HGOTO_DONE(SUCCEED);
-
         mem_size[u]=mem_space->extent.u.simple.size[u];
         size[u] = file_elmts;
         file_offset[u] = file_off;
@@ -668,11 +688,8 @@ for (u=0; u<=mem_space->extent.u.simple.rank; u++)
 #endif /* QAK */
     /* Write data to the file */
     if (H5F_arr_write(f, dxpl_id, layout, pline, fill, efl, size,
-		      mem_size, mem_offset, file_offset, buf)<0) {
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-		      "unable to write data to the file");
-    }
-    *must_convert = FALSE;
+            mem_size, mem_offset, file_offset, buf)<0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write data to the file");
 
 done:
     FUNC_LEAVE(ret_value);

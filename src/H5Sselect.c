@@ -1342,6 +1342,7 @@ H5S_select_single(const H5S_t *space)
 
     FUNC_ENTER (H5S_select_single, FAIL);
 
+    /* Check args */
     assert(space);
 
     switch(space->select.type) {
@@ -1368,4 +1369,174 @@ H5S_select_single(const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_single() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_shape_same
+ PURPOSE
+    Check if two selections are the same shape
+ USAGE
+    htri_t H5S_select_shape_same(space1, space2)
+        const H5S_t *space1;         IN: 1st Dataspace pointer to compare
+        const H5S_t *space2;         IN: 2nd Dataspace pointer to compare
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in the dataspaces are the same
+    dimensionality and shape.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Assumes that there is only a single "block" for hyperslab selections.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
+{
+    H5S_hyper_span_t *span1=NULL,*span2=NULL;   /* Hyperslab span node */
+    hsize_t	elmts1,elmts2;                  /* Number of elements in each dimension of selection */
+    unsigned	u;                              /* Index variable */
+    htri_t ret_value=TRUE;  /* return value */
+
+    FUNC_ENTER (H5S_select_shape_same, FAIL);
+
+    /* Check args */
+    assert(space1);
+    assert(space2);
+
+    if (space1->extent.u.simple.rank!=space2->extent.u.simple.rank)
+        HGOTO_DONE(FALSE);
+
+    /* Get information about memory and file */
+    for (u=0; u<space1->extent.u.simple.rank; u++) {
+        switch(space1->select.type) {
+            case H5S_SEL_HYPERSLABS:
+                /* Check size hyperslab selection in this dimension */
+                if(space1->select.sel_info.hslab.diminfo != NULL) {
+                    elmts1=space1->select.sel_info.hslab.diminfo[u].block;
+                } /* end if */
+                else {
+                    /* Check for the first dimension */
+                    if(span1==NULL)
+                        span1=space1->select.sel_info.hslab.span_lst->head;
+
+                    /* Get the number of elements in the span */
+                    elmts1=(span1->high-span1->low)+1;
+
+                    /* Advance to the next dimension */
+                    span1=span1->down->head;
+                } /* end else */
+                break;
+
+            case H5S_SEL_ALL:
+                elmts1=space1->extent.u.simple.size[u];
+                break;
+
+            case H5S_SEL_POINTS:
+                elmts1=1;
+                break;
+
+            default:
+                assert(0 && "Invalid selection type!");
+        } /* end switch */
+
+        switch(space2->select.type) {
+            case H5S_SEL_HYPERSLABS:
+                /* Check size hyperslab selection in this dimension */
+                if(space2->select.sel_info.hslab.diminfo != NULL) {
+                    elmts2=space2->select.sel_info.hslab.diminfo[u].block;
+                } /* end if */
+                else {
+                    /* Check for the first dimension */
+                    if(span2==NULL)
+                        span2=space2->select.sel_info.hslab.span_lst->head;
+
+                    /* Get the number of elements in the span */
+                    elmts2=(span2->high-span2->low)+1;
+
+                    /* Advance to the next dimension */
+                    span2=span2->down->head;
+                } /* end else */
+                break;
+
+            case H5S_SEL_ALL:
+                elmts2=space2->extent.u.simple.size[u];
+                break;
+
+            case H5S_SEL_POINTS:
+                elmts2=1;
+                break;
+
+            default:
+                assert(0 && "Invalid selection type!");
+        } /* end switch */
+
+        /* Make certaint the selections have the same number of elements in this dimension */
+        if (elmts1!=elmts2)
+            HGOTO_DONE(FALSE);
+    } /* end for */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_shape_same() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_regular
+ PURPOSE
+    Check if a selection is "regular"
+ USAGE
+    htri_t H5S_select_regular(space)
+        const H5S_t *space;     IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in a dataspace is the a regular
+    pattern.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_select_regular(const H5S_t *space)
+{
+    htri_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_select_regular, FAIL);
+
+    /* Check args */
+    assert(space);
+
+    /* Check for a "regular" selection */
+    /* [Defer (mostly) to the selection routines] */
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_regular(space);
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_regular(space);
+            break;
+
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=TRUE;
+            break;
+
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=FALSE;
+            break;
+
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
+    } /* end switch */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_regular() */
 

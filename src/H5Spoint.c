@@ -1167,6 +1167,48 @@ H5S_point_select_single(const H5S_t *space)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_point_select_regular
+ PURPOSE
+    Check if a point selection is "regular"
+ USAGE
+    htri_t H5S_point_select_regular(space)
+        const H5S_t *space;     IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in a dataspace is the a regular
+    pattern.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Doesn't check for points selected to be next to one another in a regular
+    pattern yet.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_point_select_regular(const H5S_t *space)
+{
+    htri_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_point_select_regular, FAIL);
+
+    /* Check args */
+    assert(space);
+
+    /* Only simple check for regular points for now... */
+    if(space->select.num_elem==1)
+    	ret_value=TRUE;
+    else
+    	ret_value=FALSE;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_point_select_regular() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_elements
  PURPOSE
     Specify a series of elements in the dataspace to select
