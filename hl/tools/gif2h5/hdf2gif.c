@@ -69,7 +69,7 @@ int main(int argc , char **argv) {
 	BYTE  Blue[256];
 	
 	int   RWidth, RHeight;
-	int   LeftOfs, TopOfs;
+	/*int   LeftOfs, TopOfs;*/
 	int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
 	int   j,nc;
 	int	  w,h,i;
@@ -95,8 +95,8 @@ int main(int argc , char **argv) {
 		return 0;
 	}
 	
-	memset(image_name_arr , NULL , MAX_NUMBER_IMAGES);
-	memset(pal_name_arr , NULL , MAX_NUMBER_IMAGES);
+	memset((void*)&image_name_arr[0] , 0 , MAX_NUMBER_IMAGES);
+	memset((void*)&pal_name_arr[0] , 0 , MAX_NUMBER_IMAGES);
 
 	HDFName = (CHAR*) malloc (strlen(argv[1]) + 1);
 	GIFName = (CHAR*) malloc (strlen(argv[2]) + 1);
@@ -193,11 +193,15 @@ int main(int argc , char **argv) {
                  assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
                 RWidth = (int)dim_sizes[1];
                 RHeight = (int)dim_sizes[0];
+                w = (int)dim_sizes[1];
+                h = (int)dim_sizes[0];
+                
 
 #ifdef UNUSED
-                w = dim_sizes[1];
+              /*  w = dim_sizes[1];
 		h = dim_sizes[0];
 
+              */
 		LeftOfs = TopOfs = 0;
 #endif /*UNUSED */
 
