@@ -47,7 +47,7 @@ const string	DSET_DEFAULT_NAME("default");
 const string	DSET_CHUNKED_NAME("chunked");
 const string	DSET_SIMPLE_IO_NAME("simple_io");
 const string	DSET_TCONV_NAME	("tconv");
-const string	DSET_COMPRESS_NA("compressed");
+const string	DSET_COMPRESS_NAME("compressed");
 const string	DSET_BOGUS_NAME	("bogus");
 
 const int H5Z_FILTER_BOGUS = 305;
