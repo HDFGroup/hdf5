@@ -1225,7 +1225,7 @@ static herr_t
 dump_all(hid_t group, const char *name, void * op_data)
 {
     hid_t                   obj;
-    char                   *buf, *tmp;
+    char                   *buf, *tmp, *tmp2;
     H5G_stat_t              statbuf;
     int                     i;
 
@@ -1254,11 +1254,22 @@ dump_all(hid_t group, const char *name, void * op_data)
 		printf("LINKTARGET \"%s\"\n", buf);
 	    } else {
 		/* XML */
+                tmp2 = (char *) malloc(strlen(prefix) + statbuf.linklen + 2);
+                strcpy(tmp2, prefix);
+		if (buf && buf[0] == '/') {
+			strcat(tmp2, buf);
+		} else {
+			strcat(strcat(tmp2, "/"), buf);
+		}
+		strcat(strcat(tmp, "/"), name);
 		printf
 		    ("<SoftLink LinkName=\"%s\" Target=\"%s\" TargetObj=\"%s\" OBJ-XID=\"%s\" Source=\"%s\"/>\n",
-		     xml_escape_the_name(name), xml_escape_the_name(buf),
-		     xml_escape_the_name(buf), xml_escape_the_name(name),
+		     xml_escape_the_name(name), 
+                     xml_escape_the_name(buf),
+		     xml_escape_the_name(tmp2), 
+                     xml_escape_the_name(tmp),
 		     (strcmp(prefix, "") ? xml_escape_the_name(prefix) : "root"));
+               free(tmp2);
 	    }
 	} else {
             fflush(stdout);
@@ -1323,6 +1334,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 				dump_header_format->datasetblockend);
 		    } else {
 			/* the XML version */
+			strcat(strcat(tmp, "/"), name);
 			printf
 			    ("<Dataset Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\">\n",
 			     xml_escape_the_name(name),
@@ -3835,12 +3847,14 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	   the future.
 	 */
 	printf("<NamedDataType Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\">\n",
-	       name, tmp, name);
+	       name, 
+	       xml_escape_the_name(tmp),
+	       (strcmp(prefix, "") ? xml_escape_the_name(prefix) : "root"));
     } else {
 	printf("<NamedDataType Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\">\n",
 	       xml_escape_the_name(name),
 	       xml_escape_the_name(tmp),
-	       (strcmp(prefix, "") ? xml_escape_the_name(name) : "root"));
+	       (strcmp(prefix, "") ? xml_escape_the_name(prefix) : "root"));
     }
 
     indent += COL;
@@ -3952,7 +3966,8 @@ xml_dump_group(hid_t gid, const char *name)
     } else {
 	printf("<Group Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\" >\n",
 	       xml_escape_the_name(name),
-	       xml_escape_the_name(tmp), xml_escape_the_name(par));
+	       xml_escape_the_name(tmp),
+	       (strcmp(prefix, "") ? xml_escape_the_name(par) : "root"));
     }
     indent += COL;
     H5Gget_objinfo(gid, ".", TRUE, &statbuf);
