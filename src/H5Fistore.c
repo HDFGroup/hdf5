@@ -999,7 +999,7 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			"unable to allocate chunk");
 	}
-	if (H5F_block_write(f, udata.addr, udata.key.nbytes, H5P_DEFAULT,
+	if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5P_DEFAULT,
 			    buf)<0) {
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			"unable to write raw data to file");

@@ -539,7 +539,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 		    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 				  "external data write failed");
 		}
-	    } else if (H5F_block_write(f, addr, elmt_size, dxpl_id, buf)<0) {
+	    } else if (H5F_block_write(f, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
 		HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			      "block write failed");
 	    }
