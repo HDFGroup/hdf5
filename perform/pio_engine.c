@@ -223,12 +223,12 @@ do_pio(parameters param)
         HDfprintf(stderr,
 	    "Transfer block size (%Hd) must be > 0\n", (long_long)blk_size);
 	GOTOERROR(FAIL);
-    } /* end if */
+    }
     if(buf_size<=0) {
         HDfprintf(stderr,
 	    "Transfer buffer size (%Hd) must be > 0\n", (long_long)buf_size);
 	GOTOERROR(FAIL);
-    } /* end if */
+    }
     if ((buf_size % blk_size) != 0){
         HDfprintf(stderr,
             "Transfer buffer size (%Hd) must be a multiple of the "
@@ -236,13 +236,20 @@ do_pio(parameters param)
             (long_long)buf_size, (long_long)blk_size);
         GOTOERROR(FAIL);
     }
-    if((nbytes%buf_size)!=0) {
+    if((nbytes%pio_mpi_nprocs_g)!=0) {
         HDfprintf(stderr,
             "Dataset size (%Hd) must be a multiple of the "
-            "trasfer buffer size (%Hd)\n",
-            (long_long)nbytes, (long_long)buf_size);
+            "number of processes (%d)\n",
+            (long_long)nbytes, pio_mpi_nprocs_g);
 	GOTOERROR(FAIL);
-    } /* end if */
+    }
+    if(((nbytes/pio_mpi_nprocs_g)%buf_size)!=0) {
+        HDfprintf(stderr,
+            "Dataset size/process (%Hd) must be a multiple of the "
+            "trasfer buffer size (%Hd)\n",
+            (long_long)(nbytes/pio_mpi_nprocs_g), (long_long)buf_size);
+	GOTOERROR(FAIL);
+    }
 
     /* Allocate transfer buffer */
     if ((buffer = malloc(buf_size)) == NULL){
@@ -731,7 +738,12 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 /* Contiguous pattern */
                 if (parms->interleaved==0) {
                     /* Compute file offset */
-                    file_offset = posix_file_offset + (off_t)buf_size;
+                    file_offset = posix_file_offset + (off_t)nbytes_xfer;
+
+		    /* bytes to transfer this time */
+		    nbytes_toxfer = bytes_count - nbytes_xfer;
+		    if (nbytes_toxfer > buf_size)
+			nbytes_toxfer = buf_size;
 
                     /* only care if seek returns error */
                     rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
@@ -739,11 +751,11 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 
                     /* check if all bytes are written */
                     rc = ((ssize_t)buf_size ==
-                        POSIXWRITE(fd->posixfd, buffer, buf_size));
+                        POSIXWRITE(fd->posixfd, buffer, nbytes_toxfer));
                     VRFY((rc != 0), "POSIXWRITE");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size;
+                    nbytes_xfer+=nbytes_toxfer;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {
@@ -1181,7 +1193,12 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                 /* Contiguous pattern */
                 if (parms->interleaved==0) {
                     /* Compute file offset */
-                    file_offset = posix_file_offset + (off_t)buf_size;
+                    file_offset = posix_file_offset + (off_t)nbytes_xfer;
+
+		    /* bytes to transfer this time */
+		    nbytes_toxfer = bytes_count - nbytes_xfer;
+		    if (nbytes_toxfer > buf_size)
+			nbytes_toxfer = buf_size;
 
                     /* only care if seek returns error */
                     rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
@@ -1189,11 +1206,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 
                     /* check if all bytes are written */
                     rc = ((ssize_t)buf_size ==
-                        POSIXREAD(fd->posixfd, buffer, buf_size));
+                        POSIXREAD(fd->posixfd, buffer, nbytes_toxfer));
                     VRFY((rc != 0), "POSIXREAD");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size;
+                    nbytes_xfer+=nbytes_toxfer;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {

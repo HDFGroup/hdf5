@@ -1405,6 +1405,10 @@ usage(const char *prog)
         printf("\n");
         printf("      Example: --debug=2,r,t\n");
         printf("\n");
+        printf("  Environment variables:\n");
+        printf("  HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
+        printf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
+        printf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
         fflush(stdout);
     }
 }
