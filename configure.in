@@ -278,6 +278,21 @@ AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 
+dnl Post processing to patch up some deficiencies in libtool
+case $host_os in
+  linux*)
+    # If an Intel compiler is used, it needs to set $wl to use "-Wl,"
+    if $CC -V 2>&1 | grep '^Intel(R)' > /dev/null ; then
+    echo 'fix $wl in' $ofile
+ed - $ofile <<EOF 2> /dev/null
+/^wl=""/s//wl="-Wl,"/
+w
+q
+EOF
+    fi
+    ;;
+esac
+
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
 case "$INSTALL" in
