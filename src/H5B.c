@@ -2271,6 +2271,7 @@ static herr_t
 H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
+    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     int	i, ncell, cmp;
     static int	ncalls = 0;
     herr_t	status;
@@ -2293,6 +2294,8 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
     /* Initialize the queue */
     bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_READ);
     assert(bt);
+    shared=H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(shared);
     cur = H5MM_calloc(sizeof(struct child_t));
     assert (cur);
     cur->addr = addr;
@@ -2346,8 +2349,8 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 		tail = tmp;
 
 		/* Check that the keys are monotonically increasing */
-		cmp = (type->cmp2) (f, dxpl_id, H5B_NKEY(bt,i), udata,
-				    H5B_NKEY(bt,i+1));
+		cmp = (type->cmp2) (f, dxpl_id, H5B_NKEY(bt,shared,i), udata,
+				    H5B_NKEY(bt,shared,i+1));
 		assert(cmp < 0);
 	    }
 	}
