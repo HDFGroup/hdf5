@@ -93,6 +93,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_ALREADYEXISTS, "Object already exists"},
     {H5E_CANTLOCK, 	"Unable to lock object"},
     {H5E_CANTUNLOCK, 	"Unable to unlock object"},
+    {H5E_CANTGC, 	"Unable to garbage collect"},
 
     /* File accessability errors */
     {H5E_FILEEXISTS, 	"File already exists"},

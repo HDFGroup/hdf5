@@ -403,7 +403,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
      * Remove atoms from the global atom cache.
      */
     for (i=0; i<ID_CACHE_SIZE; i++) {
-	if (H5I_cache_g[i] && H5I_GROUP(H5I_cache_g[i]->id) == grp)
+	if (H5I_cache_g[i] && H5I_GRP(H5I_cache_g[i]->id) == grp)
 	    H5I_cache_g[i] = NULL;
     }
 #endif /* IDS_ARE_CACHED */
@@ -740,7 +740,7 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     assert(id_type>=H5I_FILE && id_type<H5I_NGROUPS);
 
     /* Verify that the group of the ID is correct & lookup the ID */
-    if(id_type == H5I_GROUP(id) && NULL!=(id_ptr = H5I_find_id(id))) {
+    if(id_type == H5I_GRP(id) && NULL!=(id_ptr = H5I_find_id(id))) {
         /* Get the object pointer to return */
         ret_value = id_ptr->obj_ptr;
     } /* end if */
@@ -777,7 +777,7 @@ H5I_get_type(hid_t id)
     FUNC_ENTER_NOAPI(H5I_get_type, H5I_BADID);
 
     if (id>0)
-        ret_value = H5I_GROUP(id);
+        ret_value = H5I_GRP(id);
 
     assert(ret_value>=H5I_BADID && ret_value<H5I_NGROUPS);
 
@@ -857,7 +857,7 @@ H5I_remove(hid_t id)
     FUNC_ENTER_NOAPI(H5I_remove, NULL);
 
     /* Check arguments */
-    grp = H5I_GROUP(id);
+    grp = H5I_GRP(id);
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
@@ -950,7 +950,7 @@ done:
 int
 H5I_dec_ref(hid_t id)
 {
-    H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
+    H5I_type_t		grp = H5I_GRP(id);	/*group the object is in*/
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
     int		ret_value=FAIL;	/*return value		*/
@@ -1011,7 +1011,7 @@ done:
 int
 H5I_inc_ref(hid_t id)
 {
-    H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
+    H5I_type_t		grp = H5I_GRP(id);	/*group the object is in*/
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the ID		*/
     int ret_value;                              /* Return value */
@@ -1126,7 +1126,7 @@ H5I_find_id(hid_t id)
     FUNC_ENTER_NOINIT(H5I_find_id);
 
     /* Check arguments */
-    grp = H5I_GROUP(id);
+    grp = H5I_GRP(id);
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
@@ -1283,7 +1283,7 @@ H5I_debug(H5I_type_t grp)
     /* Cache */
     fprintf(stderr, "	 Cache:\n");
     for (is=0; is<ID_CACHE_SIZE; is++) {
-        if (H5I_cache_g[is] && H5I_GROUP(H5I_cache_g[is]->id)==grp) {
+        if (H5I_cache_g[is] && H5I_GRP(H5I_cache_g[is]->id)==grp) {
             fprintf(stderr, "	     Entry-%d, ID=%lu\n",
                     is, (unsigned long)(H5I_cache_g[is]->id));
         }

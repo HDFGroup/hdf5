@@ -38,8 +38,8 @@
 #include "H5Aprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5HGprivate.h"	/* Global heaps				*/
 #include "H5Sprivate.h"		/* Dataspace				*/
+#include "H5Tprivate.h"		/* Datatype functions			*/
 
 struct H5A_t {
     unsigned       initialized;/* Indicate whether the attribute has been modified */
@@ -52,8 +52,6 @@ struct H5A_t {
     size_t      ds_size;    /* Size of dataspace on disk */
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
-    H5HG_t	sh_heap;    /*if defined, attribute is in global heap	     */
-    H5F_t	*sh_file;   /*file pointer if this is a shared attribute    */
 };
 
 /* Function prototypes for H5A package scope */

@@ -16,6 +16,10 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5S_PACKAGE	        /*suppress error about including H5Spkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK      H5O_attr_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -24,8 +28,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Spkg.h"		/* Dataspaces				*/
-
-#define PABLO_MASK      H5O_attr_mask
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
@@ -170,13 +172,6 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     /* Indicate that the fill values aren't to be written out */
     attr->initialized=1;
     
-#ifdef LOTSLATER
-    if (hobj) {
-        attr->sh_heap = *hobj;
-        attr->sh_file = f;
-    }
-#endif 
-
     /* Set return value */
     ret_value=attr;
 

@@ -53,7 +53,7 @@
 #define ID_MASK		((1<<ID_BITS)-1)
 
 /* Map an atom to a Group number */
-#define H5I_GROUP(a)	((H5I_type_t)(((hid_t)(a)>>ID_BITS) & GROUP_MASK))
+#define H5I_GRP(a)	((H5I_type_t)(((hid_t)(a)>>ID_BITS) & GROUP_MASK))
 
 
 /****************************/

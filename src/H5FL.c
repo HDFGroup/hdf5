@@ -1662,18 +1662,24 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
 herr_t
 H5FL_garbage_coll(void)
 {
+    herr_t                  ret_value = SUCCEED;
+
     FUNC_ENTER_NOINIT(H5FL_garbage_coll);
 
     /* Garbage collect the free lists for array objects */
-    H5FL_arr_gc();
+    if(H5FL_arr_gc()<0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect array objects")
 
     /* Garbage collect free lists for blocks */
-    H5FL_blk_gc();
+    if(H5FL_blk_gc()<0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect block objects")
 
     /* Garbage collect the free lists for regular objects */
-    H5FL_reg_gc();
+    if(H5FL_reg_gc()<0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect regular objects")
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_garbage_coll() */
 
 
