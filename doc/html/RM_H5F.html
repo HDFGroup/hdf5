@@ -428,7 +428,9 @@ facilitate moving easily between them.</i>
 <dt><strong>Purpose:</strong>
         <dd>Terminates access to an HDF5 file.  
 <dt><strong>Description:</strong>
-        <dd><code>H5Fclose</code> terminates access to an HDF5 file.  
+        <dd><code>H5Fclose</code> terminates access to an HDF5 file
+            by flushing all data to storage and terminating access
+            to the file through <code>file_id</code>.  
             <p>
             If this is the last file identifier open for the file 
             and no other access identifier is open (e.g., a dataset 
