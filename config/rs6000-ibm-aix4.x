@@ -11,3 +11,4 @@ CFLAGS="$CFLAGS"
 
 # Cross compiling defaults
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
+hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
