@@ -111,7 +111,7 @@ Platforms Tested
     Cray T3E sn6711 2.0.5.49a     Cray Standard C Version 6.5.0.1
     Cray SV1 10.0.0.2             Cray Standard C Version 6.5.0.1  
                                   Cray Fortran Version 3.5.0.1
-    FreeBSD 4.3                   gcc 2.95.3
+    FreeBSD 4.5                   gcc 2.95.3
                                   g++ 2.95.3
     HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
                                   HP F90 v2.3
@@ -139,12 +139,14 @@ Platforms Tested
                                           2.0 Patch 107356-04 
     SunOS 5.8/32                  Sun WorkShop 6 update 1 C 5.2 2000/09/11
      (Solaris 2.8)                Sun WorkShop 6 update 1 Fortran 95 6.1 
-                                          2000/09/11
-                                  Sun WorkShop 6 update 1 C++ 5.2 2000/09/11
+                                          Patch 109503-07 2001/08/11
+                                  Sun WorkShop 6 update 1 C++ 5.2 Patch
+                                        109508-04 2001/07/11
     SunOS 5.8/64                  Sun WorkShop 6 update 1 C 5.2 2000/09/11
      (Solaris 2.8)                Sun WorkShop 6 update 1 Fortran 95 6.1 
-                                          2000/09/11
-                                  Sun WorkShop 6 update 1 C++ 5.2 2000/09/11
+                                          Patch 109503-07 2001/08/11
+                                  Sun WorkShop 6 update 1 C++ 5.2 Patch
+                                        109508-04 2001/07/11
     TFLOPS r1.0.4 v4.0.7 i386     pgcc Rel 3.1-4i with mpich-1.2.1 with
                                           local modifications
     Windows 2000 (NT5.0)          MSVC++ 6.0
