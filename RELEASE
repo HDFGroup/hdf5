@@ -11,7 +11,7 @@ Changes since HDF5-1.2.0
 * Added GLOBUS-GASS file driver, upgraded to Globus 1.1.
 * Incorporated DPSS file driver contributed by the Cactus group.
   DPSS is renamed to storage grid.
-
+* h5dump correctly displays the committed copy of predefined types.
 
 Release information for hdf5-1.2.0beta
 ------------------------------------
