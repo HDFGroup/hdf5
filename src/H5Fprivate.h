@@ -117,9 +117,18 @@
    (p) = (uint8_t*)(p)+8;						      \
 }
 
+/* DECODE converts little endian bytes pointed by p to integer values and store
+ * it in i.  For signed values, need to do sign-extension when converting
+ * the last byte which carries the sign bit.
+ * The macros does not require i be of a certain byte sizes.  It just requires
+ * i be big enough to hold the intended value range.  E.g. INT16DECODE works
+ * correctly even if i is actually a 64bit int like in a Cray.
+ */
+
 #  define INT16DECODE(p, i) {						      \
    (i)	= (int16_t)((*(p) & 0xff));      (p)++;				      \
-   (i) |= (int16_t)((*(p) & 0xff) << 8); (p)++;				      \
+   (i) |= (int16_t)(((*(p) & 0xff) << 8) |                                    \
+                   ((*(p) & 0x80) ? ~0xffff : 0x0)); (p)++;		      \
 }
 
 #  define UINT16DECODE(p, i) {						      \
@@ -131,7 +140,8 @@
    (i)	= (	     *(p) & 0xff);	  (p)++;			      \
    (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;			      \
    (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;			      \
-   (i) |= ((int32_t)(*(p) & 0xff) << 24); (p)++;			      \
+   (i) |= ((int32_t)(((*(p) & 0xff) << 24) |                                  \
+                   ((*(p) & 0x80) ? ~0xffffffff : 0x0))); (p)++;	      \
 }
 
 #  define UINT32DECODE(p, i) {						      \

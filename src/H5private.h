@@ -232,9 +232,6 @@
  * as the number of bits indicated in the type name.  The `int8' types *must*
  * be exactly one byte wide because we use it for pointer calculations to
  * void* memory.
- *
- * For int16_t and uint16_t we use `short' only if it's exactly 2 bytes.
- * Otherwise we use `int' because it's probably faster.
  */
 #if SIZEOF_INT8_T==0
     typedef signed char int8_t;
@@ -255,7 +252,7 @@
 #endif
 
 #if SIZEOF_INT16_T>=2
-#elif SIZEOF_SHORT==2
+#elif SIZEOF_SHORT>=2
     typedef short int16_t;
 #   undef SIZEOF_INT16_T
 #   define SIZEOF_INT16_T SIZEOF_SHORT

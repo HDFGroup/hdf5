@@ -1023,6 +1023,9 @@ H5F_addr_hash(const haddr_t *addr, uintn mod)
  *		Tuesday, October  23, 1998
  *
  * Modifications:
+ *	Albert Cheng, Feb 18, 1999
+ *	Changed objno to unsigned long type to be consistent with
+ *      addr->offset and how it is being called.
  *
  *-------------------------------------------------------------------------
  */

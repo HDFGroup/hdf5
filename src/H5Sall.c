@@ -135,7 +135,7 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
         acc *= size[i];
     nelmts = (max/acc) * acc;
     if (nelmts<=0) {
-        HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
+        HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
 		       "strip mine buffer is too small");
     }
 
