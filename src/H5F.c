@@ -2505,7 +2505,7 @@ H5F_sizeof_size(H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_intent
+ * Function:	H5F_get_driver_id
  *
  * Purpose:	Quick and dirty routine to retrieve the file's 'driver_id' value
  *          (Mainly added to stop non-file routines from poking about in the
@@ -2529,6 +2529,43 @@ H5F_get_driver_id(H5F_t *f)
 
     FUNC_LEAVE(f->shared->lf->driver_id);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_fileno
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'fileno' value
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *		March 27, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
+{
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER(H5F_get_fileno, FAIL);
+
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(filenum);
+
+    /* Retrieve the file's serial number */
+    if(H5FD_get_fileno(f->shared->lf,filenum)<0)
+	HRETURN_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno");
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5F_get_fileno() */
 
 
 /*-------------------------------------------------------------------------

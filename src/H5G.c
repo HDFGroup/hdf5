@@ -2083,6 +2083,10 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    statbuf->type = H5G_get_type(&obj_ent);
 	    H5E_clear(); /*clear errors resulting from checking type*/
 	}
+
+        /* Common code to retrieve the file's fileno */
+        if(H5F_get_fileno(obj_ent.file,statbuf->fileno)<0)
+            HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
     }
 
     FUNC_LEAVE (SUCCEED);

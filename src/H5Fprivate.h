@@ -269,6 +269,7 @@ struct H5S_t;
 __DLL__ herr_t H5F_init(void);
 __DLL__ unsigned H5F_get_intent(H5F_t *f);
 __DLL__ hid_t H5F_get_driver_id(H5F_t *f);
+__DLL__ herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 
 /* Functions that operate on array storage */
 __DLL__ herr_t H5F_arr_create(H5F_t *f,

@@ -151,6 +151,7 @@ typedef struct H5FD_free_t {
 struct H5FD_t {
     hid_t		driver_id;	/*driver ID for this file	*/
     const H5FD_class_t	*cls;		/*constant class info		*/
+    unsigned long       fileno[2];      /* File serial number */
 
     unsigned long feature_flags;  /* VFL Driver feature Flags */
     hsize_t     threshold;      /* Threshold for alignment              */
