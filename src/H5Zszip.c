@@ -129,6 +129,10 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     assert(ndims>0);
     scanline=dims[ndims-1];
 
+    /* Range check the pixels per block against the 'scanline' size */
+    if(scanline<cd_values[H5Z_SZIP_PARM_PPB])
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "pixels per block greater than scanline");
+
     /* Range check the scanline's size */
     if(scanline > SZ_MAX_PIXELS_PER_SCANLINE)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid scanline size")

@@ -93,6 +93,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Detect situation where szip 'pixels per block' is larger than the
+            fastest changing dimension of a dataset's chunk size and disallow
+            this (due to limits in szip library).  QAK - 2003/12/31
         - Fixed bug with flattened hyperslab selections that would generate
             incorrect hyperslab information with certain high-dimensionality
             combinations of start/stride/count/block information.

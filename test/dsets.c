@@ -2562,7 +2562,9 @@ file)
     unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block;
     const hsize_t dims[2] = {500, 4096};        /* Dataspace dimensions */
+    const hsize_t dims2[2] = {4, 2};            /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {250, 2048};  /* Chunk dimensions */
+    const hsize_t chunk_dims2[2] = {2, 1};      /* Chunk dimensions */
     herr_t      ret;            /* Status value */
 #else /* H5_HAVE_FILTER_SZIP */
     const char		*not_supported= "    Szip filter is not enabled.";
@@ -2614,6 +2616,59 @@ file)
 
     /* Set (invalid at dataset creation time) szip parameters */
     szip_pixels_per_block=2;
+    if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set szip filter\n",__LINE__);
+        goto error;
+    }
+
+    /* Create new dataset */
+    /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
+    H5E_BEGIN_TRY {
+        dsid = H5Dcreate(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, dcpl);
+    } H5E_END_TRY;
+    if (dsid >=0) {
+        H5_FAILED();
+        printf("    Line %d: Shouldn't have created dataset!\n",__LINE__);
+        H5Dclose(dsid);
+        goto error;
+    } /* end if */
+
+    /* Close dataspace */
+    if(H5Sclose(sid)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset creation property list */
+    if(H5Pclose(dcpl)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create another data space */
+    if ((sid = H5Screate_simple(2, dims2, NULL))<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create dcpl with special filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims2)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set chunk sizes\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Set (invalid at dataset creation time) szip parameters */
+    szip_pixels_per_block=32;
     if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set szip filter\n",__LINE__);
