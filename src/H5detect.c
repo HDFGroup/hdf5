@@ -536,19 +536,19 @@ H5TN_init_interface(void)\n\
 \n\
     FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL);\n");
 
-    /* The native endianess of this machine */
-    /* (Use the byte-order of a reasonably large type) */
-    for (i = 0; i < nd; i++)
-        if(d[i].size>1) {
-            byte_order=d[i].perm[0];
-            break;
-        } /* end if */
-    printf("\n\
-    /* Set the native order for this machine */\n\
-    H5T_native_order_g = H5T_ORDER_%s;\n",
-	       byte_order ? "BE" : "LE");	/*byte order		*/
-
     for (i = 0; i < nd; i++) {
+        /* The native endianess of this machine */
+        /* The INFO.perm now contains `-1' for bytes that aren't used and
+         * are always zero.  This happens on the Cray for `short' where
+         * sizeof(short) is 8, but only the low-order 4 bytes are ever used.
+         */
+        for(j=0; j<32; j++) {
+            /*Find the 1st containing valid data*/
+            if(d[i].perm[j]>-1) {
+                byte_order=d[i].perm[j];
+                break;
+            }
+        }
 
 	/* Print a comment to describe this section of definitions. */
 	printf("\n   /*\n");
@@ -575,10 +575,10 @@ H5TN_init_interface(void)\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
 	       d[i].msize ? "FLOAT" : "INTEGER",/*class			*/
 	       d[i].size,			/*size			*/
-	       d[i].perm[0] ? "BE" : "LE",	/*byte order		*/
+	       byte_order ? "BE" : "LE",	/*byte order		*/
 	       d[i].offset,			/*offset		*/
 	       d[i].precision);			/*precision		*/
-    assert(d[i].size<2 || (d[i].perm[0]>0)==(byte_order>0));   /* Double-check that byte-order doesn't change */
+    assert((d[i].perm[0]>0)==(byte_order>0));   /* Double-check that byte-order doesn't change */
 
 	if (0 == d[i].msize) {
 	    /* The part unique to fixed point types */
@@ -622,6 +622,11 @@ H5TN_init_interface(void)\n\
                     d[i].varname, (unsigned long)(d[i].comp_align));
         }
     }
+
+    printf("\n\
+    /* Set the native order for this machine */\n\
+    H5T_native_order_g = H5T_ORDER_%s;\n",
+	       byte_order ? "BE" : "LE");	/*byte order		*/
 
     /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
     printf("\n    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */\n");
