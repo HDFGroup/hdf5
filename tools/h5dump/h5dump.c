@@ -2055,6 +2055,7 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
  h5dump_t          *outputformat = &dataformat;
 
  memset(&ctx, 0, sizeof(ctx));
+ ctx.indent_level=2;
 	size = H5Tget_size(type_id);
 	buf = malloc(size);
 
@@ -2333,20 +2334,23 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  }
 
  indentation(indent + COL);
- printf("%s %s ", "VALUE ", BEGIN);
+ printf("%s ", "VALUE ");
 
  H5Pfill_value_defined(dcpl_id, &fvstatus);
  
  if (fvstatus == H5D_FILL_VALUE_UNDEFINED) 
-  printf("%s %s\n" "UNDEFINED ", END);
+ {
+  printf("%s\n", "UNDEFINED");
+ }
  else 
  {
   dump_fill_value(dcpl_id,type_id,obj_id);
-  printf(" %s\n", END);
  }
 
  /* end indent */ 
  indent -= COL;
+ indentation(indent + COL);
+ printf("\n");
  indentation(indent + COL);
  printf("%s\n",END);
 
