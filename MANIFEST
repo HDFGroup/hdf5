@@ -861,6 +861,7 @@
 ./src/H5MPprivate.h
 ./src/H5O.c
 ./src/H5Oattr.c
+./src/H5Obogus.c
 ./src/H5Ocont.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
@@ -975,6 +976,7 @@
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c
+./test/tbogus.h5
 ./test/tconfig.c
 ./test/testhdf5.c
 ./test/testhdf5.h
