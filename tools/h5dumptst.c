@@ -1160,7 +1160,8 @@ size_t mdims[2];
 static void test_str2(void) {
 hid_t fid, group, attr, dataset, space, space2, mem_space, hyper_space;
 hid_t fxdlenstr, fxdlenstr2, memtype;
-hsize_t dims[1], size[1], start[1], stride[1], count[1], block[1];
+hsize_t dims[1], size[1], stride[1], count[1], block[1];
+hssize_t start[1];
 
 
 int i;

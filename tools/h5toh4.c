@@ -11,11 +11,10 @@
 
 *****************************************************************************/
 
-#include <stdio.h>
+#include "h5toh4.h"
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
-#include <h5toh4.h>
 
 extern int PrintOptions_h5toh4(void);
 extern char *BuildFilename(char *h5_filename, char *h4_extension);
