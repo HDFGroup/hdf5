@@ -159,20 +159,35 @@ typedef ssize_t			hssize_t;
  * File addresses have there own types.
  */
 #if H5_SIZEOF_UINT64_T>=8
-    typedef uint64_t		haddr_t;
-#   define HADDR_UNDEF		((haddr_t)(int64_t)(-1))
+    typedef uint64_t                haddr_t;
+#   define HADDR_UNDEF              ((haddr_t)(int64_t)(-1))
+#   ifdef H5_HAVE_PARALLEL
+#       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
+#   endif  /* H5_HAVE_PARALLEL */
 #elif H5_SIZEOF_INT>=8
-    typedef unsigned		haddr_t;
-#   define HADDR_UNDEF		((haddr_t)(-1))
+    typedef unsigned                haddr_t;
+#   define HADDR_UNDEF              ((haddr_t)(-1))
+#   ifdef H5_HAVE_PARALLEL
+#       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED
+#   endif  /* H5_HAVE_PARALLEL */
 #elif H5_SIZEOF_LONG>=8
-    typedef unsigned long	haddr_t;
-#   define HADDR_UNDEF		((haddr_t)(long)(-1))
+    typedef unsigned long           haddr_t;
+#   define HADDR_UNDEF              ((haddr_t)(long)(-1))
+#   ifdef H5_HAVE_PARALLEL
+#       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED_LONG
+#   endif  /* H5_HAVE_PARALLEL */
 #elif H5_SIZEOF_LONG_LONG>=8
-    typedef unsigned long long	haddr_t;
-#   define HADDR_UNDEF		((haddr_t)(long long)(-1))
+    typedef unsigned long long      haddr_t;
+#   define HADDR_UNDEF              ((haddr_t)(long long)(-1))
+#   ifdef H5_HAVE_PARALLEL
+#       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
+#   endif  /* H5_HAVE_PARALLEL */
 #elif H5_SIZEOF___INT64>=8
-    typedef unsigned __int64	haddr_t;
-#   define HADDR_UNDEF		((haddr_t)(__int64)(-1))
+    typedef unsigned __int64        haddr_t;
+#   define HADDR_UNDEF              ((haddr_t)(__int64)(-1))
+#   ifdef H5_HAVE_PARALLEL
+#       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
+#   endif  /* H5_HAVE_PARALLEL */
 #else
 #   error "nothing appropriate for haddr_t"
 #endif
