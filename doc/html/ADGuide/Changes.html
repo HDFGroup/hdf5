@@ -54,7 +54,204 @@ This document is intended to assist application developers who must keep
 an application synchronized with the HDF5 library or related software.
 
 
-<h2>Release 1.6.3 (current release) versus Release 1.6.2</h2> 
+<h2>Release 1.6.4 (current release) versus Release 1.6.3</h2> 
+
+<dir>
+
+This section lists the API-level changes that have been made in the 
+transition from the HDF5 Release 1.6.3 to Release 1.6.4.
+
+<font size="+1" color="red">
+<p>
+<i>Note to developers:</i>   This is primarily an outline of topics.
+Where no formatting template appears, get it from the last prior release section
+in which the topic appears.
+If you need a section that does not appear, feel free to add it.
+Last thing before the release, unused sections should be commented out.
+</font>
+
+    <h3>New Functions and Tools</h3>
+	<dl>
+	  <dt>C functions:
+          <dd>The following C functions are new for Release 1.6.4 and 
+              are documented in the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+	
+              <table border="0">
+              <tr>
+                <td align="left" valign="top"><code>function</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top">syntax<br>
+                    See <a href="../RM_H5__.html#__">entry</a>.</td>
+              </tr>
+
+              </table>    
+	      
+          <dd>&nbsp;
+	  <dt>Fortran subroutines:
+          <dd>The following Fortran90 subroutines are new for Release 1.6.3 
+	      and are documented in the 
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference 
+                    Manual</cite></a>.
+              <table border="0">
+              <tr>
+                <td align="left" valign="top" colspan="2">New Fortran90 
+                    subroutines corresponding to the new C functions 
+                    listed above:<br>
+                </td>
+              </tr><tr>
+                <td align="left" valign="top">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>function</code><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>function</code>
+                </td>
+                <td align="left" valign="top"> 
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>function</code>
+                </td>
+              </tr>
+              </table>    
+
+              <table border="0">
+              <tr>
+                <td align="left" valign="top">New Fortran90 subroutines 
+                    corresponding to C functions from prior releases:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;None<br>
+<!--
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>new_fortran_here</code><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>last_new_fortran_here</code>
+-->
+                    </td>
+                <td align="left" valign="top"> 
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+              </tr>
+              </table>    
+	  
+          <dd>&nbsp;
+	  <dt>C++ wrappers:
+	  <dd>
+	  
+          <dd>&nbsp;
+	  <dt>Tools:
+          <dd>
+        </dl>
+
+
+    <h3>Deleted Functions</h3>
+
+	<!--
+        None.
+	-->
+
+	<!--
+	The following functions are deprecated in HDF5 Release X.X.x.
+        A backward compatibility mode is provided in this release,
+        enabling these functions and other Release 1.4.x compatibility
+        features, but is available only when the HDF5 library is 
+        configured with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>.
+        The backward compatibility mode is not enabled in the 
+        binaries distributed by NCSA.
+
+        <dir>
+        <table border=0>
+        <tr valign="top" align="left"><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>&nbsp;
+
+</pre>
+        </td></tr>
+        </table>
+        </dir>
+        <p>
+	The above functions will eventually be removed from the HDF5 
+        distribution and from the <cite>HDF5 Reference Manual</cite>.
+	-->
+
+
+	The following functions have been removed in this release.
+
+        <dl>
+          <dd>&nbsp;
+	  <dt>Category
+	  <dd><code>function_name</code>
+        </dl>
+
+
+    <h3>Functions with Changed Syntax</h3>
+
+        The following functions have changed as noted.
+	<p>
+        <dl>
+        <dt>C functions:
+        <dt><code>function</code>
+          <dd>The prototype for this function was changed from:
+                <ul>
+                <li>old sytax<br>
+                </ul>
+
+                to:
+
+                <ul>
+                <li>new syntax<br>
+                </ul>
+            <p>
+            
+
+
+
+        <dd>&nbsp;
+        <dt>C++ wrappers:
+        <dt><code>C++_wrapper_name</code>
+          <dd>Change...
+	  
+
+        <dd>&nbsp;
+        <dt>Fortran90 subroutines:
+        <dt><code>h5subroutine_f?</code>
+          <dd>Change...
+	  
+        </dl>
+
+
+    <h3>Constants with Changed Values</h3>
+    
+        The following library structures have changed as noted.
+	<p>
+        <dl>
+        <dt>C API:
+        <dt><code>struct_name</code>
+          <dd>This function pointer typedef's definition has been changed from:
+	
+                <ul>
+                <li>old definition<br>
+                </ul>
+
+                to:
+
+                <ul>
+                <li>new definition<br>
+                </ul>
+            <p>
+
+
+
+    </dir>
+<p>&nbsp;
+
+
+
+<h2>Release 1.6.3 versus Release 1.6.2</h2> 
 
 <dir>
 
@@ -1690,7 +1887,7 @@ Describes HDF5 Release 1.6.4, February 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 21 September 2004 
+Last modified: 10 February 2005 
 <!-- hhmts end -->
 
 </body>
