@@ -72,6 +72,8 @@ static herr_t H5FD_mpio_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/
 
 /* Callbacks */
 static void *H5FD_mpio_fapl_get(H5FD_t *_file);
+static void *H5FD_mpio_fapl_copy(const void *_old_fa);
+static herr_t H5FD_mpio_fapl_free(void *_fa);
 static H5FD_t *H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_mpio_close(H5FD_t *_file);
@@ -85,6 +87,9 @@ static herr_t H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hadd
 static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             size_t size, const void *buf);
 static herr_t H5FD_mpio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_mpio_comm_info_dup(MPI_Comm comm, MPI_Info info,
+				MPI_Comm *comm_new, MPI_Info *info_new);
+static herr_t H5FD_mpio_comm_info_free(MPI_Comm *comm, MPI_Info *info);
 
 /* MPIO-specific file access properties */
 typedef struct H5FD_mpio_fapl_t {
@@ -102,8 +107,8 @@ static const H5FD_class_t H5FD_mpio_g = {
     NULL,					/*sb_decode		*/
     sizeof(H5FD_mpio_fapl_t),			/*fapl_size		*/
     H5FD_mpio_fapl_get,				/*fapl_get		*/
-    NULL,					/*fapl_copy		*/
-    NULL, 					/*fapl_free		*/
+    H5FD_mpio_fapl_copy,			/*fapl_copy		*/
+    H5FD_mpio_fapl_free, 			/*fapl_free		*/
     0,		                		/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
     NULL,					/*dxpl_free		*/
@@ -209,24 +214,25 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_mpio
  *
- * Purpose:	Store the user supplied MPIO communicator COMM and INFO in
+ * Purpose:	Store the user supplied MPIO communicator comm and info in
  *		the file access property list FAPL_ID which can then be used
  *		to create and/or open the file.  This function is available
  *		only in the parallel HDF5 library and is not collective.
  *
- *		COMM is the MPI communicator to be used for file open as
- *		defined in MPI_FILE_OPEN of MPI-2. This function does not
- *		make a duplicated communicator. Any modification to COMM
- *		after this function call returns may have undetermined effect
- *		on the access property list. Users should not modify the
- *		communicator while it is defined in a property list.
+ *		comm is the MPI communicator to be used for file open as
+ *		defined in MPI_FILE_OPEN of MPI-2. This function makes a
+ *		duplicate of comm. Any modification to comm after this function
+ *		call returns has no effect on the access property list.
  *
- *		INFO is the MPI info object to be used for file open as
- *		defined in MPI_FILE_OPEN of MPI-2. This function does not
- *		make a duplicated info. Any modification to info after this
- *		function call returns may have undetermined effect on the
- *		access property list. Users should not modify the info while
- *		it is defined in a property list.
+ *		info is the MPI Info object to be used for file open as
+ *		defined in MPI_FILE_OPEN of MPI-2. This function makes a
+ *		duplicate of info. Any modification to info after this
+ *		function call returns has no effect on the access property
+ *		list.
+ *
+ *              If fapl_id has previously set comm and info values, they
+ *              will be replaced and the old communicator and Info object
+ *              are freed.
  *
  * Return:	Success:	Non-negative
  *
@@ -252,10 +258,15 @@ done:
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
  *
- *		Raymond Lu 
- * 		Tuesday, Oct 23, 2001
+ *		Raymond Lu, 2001-10-23
  *		Changed the file access list to the new generic property 
  *		list.
+ *
+ *		Albert Cheng, 2003-04-17
+ *		Modified the description of the function that it now stores
+ *		a duplicate of the communicator and INFO object.  Free the
+ *		old duplicates if previously set.  (Work is actually done
+ *		by H5P_set_driver.)
  *
  *-------------------------------------------------------------------------
  */
@@ -275,10 +286,8 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
-
-#ifdef LATER
-#warning "We need to verify that COMM and INFO contain sensible information."
-#endif
+    if (MPI_COMM_NULL == comm)
+	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator");
 
     /* Initialize driver specific properties */
     fa.comm = comm;
@@ -295,15 +304,18 @@ done:
  * Function:	H5Pget_fapl_mpio
  *
  * Purpose:	If the file access property list is set to the H5FD_MPIO
- *		driver then this function returns the MPI communicator and
- *		information through the COMM and INFO pointers.
+ *		driver then this function returns duplicates of the MPI
+ *		communicator and Info object stored through the comm and
+ *		info pointers.  It is the responsibility of the application
+ *		to free the returned communicator and Info object.
  *
  * Return:	Success:	Non-negative with the communicator and
- *				information returned through the COMM and
- *				INFO arguments if non-null. Neither piece of
- *				information is copied and they are therefore
- *				valid only until the file access property
- *				list is modified or closed.
+ *				Info object returned through the comm and
+ *				info arguments if non-null. Since they are
+ *				duplicates of the stored objects, future
+ *				modifications to the access property list do
+ *				not affect them and it is the responsibility
+ *				of the application to free them.
  *
  * 		Failure:	Negative
  *
@@ -317,10 +329,12 @@ done:
  *	        to be controlled by data transfer property list during data
  *	        read/write calls.
  *
- *		Raymond Lu 
- * 		Tuesday, Oct 23, 2001
+ *		Raymond Lu, 2001-10-23
  *		Changed the file access list to the new generic property 
  *		list.
+ *
+ *		Albert Cheng, 2003-04-17
+ *		Return duplicates of the stored communicator and Info object.
  *
  *-------------------------------------------------------------------------
  */
@@ -329,7 +343,9 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
 {
     H5FD_mpio_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    MPI_Comm	comm_tmp=MPI_COMM_NULL;
+    int		mpi_code;		/* mpi return code */
+    herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_API(H5Pget_fapl_mpio, FAIL);
     H5TRACE3("e","ixx",fapl_id,comm,info);
@@ -341,12 +357,34 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     if (NULL==(fa=H5P_get_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
+    /* Store the duplicated communicator in a temporary variable for error */
+    /* recovery in case the INFO duplication fails.  We cannot attempt to */
+    /* the value into *comm yet since if MPI_Comm_dup fails, we will end  */
+    /* up freeing whatever *comm holds and that could be invalid. */
+    if (comm){
+	if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, &comm_tmp)))
+	    HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
+    }
+    
+    if (info){
+	if (MPI_INFO_NULL != fa->info){
+	    if (MPI_SUCCESS != (mpi_code=MPI_Info_dup(fa->info, info)))
+		HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code);
+	}else{
+	    /* do not dup it */
+	    *info = MPI_INFO_NULL;
+	}
+    }
+
     if (comm)
-        *comm = fa->comm;
-    if (info)
-        *info = fa->info;
+        *comm = comm_tmp;
 
 done:
+    if (FAIL==ret_value){
+	/* need to free anything created here */
+	if (comm_tmp != MPI_COMM_NULL)
+	    MPI_Comm_free(&comm_tmp);
+    }
     FUNC_LEAVE_API(ret_value);
 }
 
@@ -772,7 +810,9 @@ done:
  *              Friday, August 13, 1999
  *
  * Modifications:
- *
+ * 		Albert Cheng, 2003-04-17
+ * 		Duplicate the communicator and Info object so that the new
+ * 		property list is insulated from the old one.
  *-------------------------------------------------------------------------
  */
 static void *
@@ -800,6 +840,108 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_fapl_copy
+ *
+ * Purpose:	Copies the mpio-specific file access properties.
+ *
+ * Return:	Success:	Ptr to a new property list
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Albert Cheng
+ *              Jan  8, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5FD_mpio_fapl_copy(const void *_old_fa)
+{
+    void		*ret_value = NULL;
+    const H5FD_mpio_fapl_t *old_fa = (const H5FD_mpio_fapl_t*)_old_fa;
+    H5FD_mpio_fapl_t	*new_fa = NULL;
+    
+    FUNC_ENTER_NOAPI(H5FD_mpio_fapl_copy, NULL);
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "enter H5FD_mpio_fapl_copy\n");
+#endif
+
+    if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_mpio_fapl_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* Copy the general information */
+    HDmemcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
+
+    /* Duplicate communicator and Info object. */
+    if (FAIL==H5FD_mpio_comm_info_dup(old_fa->comm, old_fa->info,
+					&new_fa->comm, &new_fa->info))
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL,
+		"Communicator/Info duplicate failed");
+    ret_value = new_fa;
+
+done:
+    if (NULL == ret_value){
+	/* cleanup */
+	if (new_fa)
+	    H5MM_xfree(new_fa);
+    }
+
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "leaving H5FD_mpio_fapl_copy\n");
+#endif
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FD_mpio_fapl_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_fapl_free
+ *
+ * Purpose:	Frees the mpio-specific file access properties.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Albert Cheng
+ *              Jan  8, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_mpio_fapl_free(void *_fa)
+{
+    herr_t		ret_value = SUCCEED;
+    H5FD_mpio_fapl_t	*fa = (H5FD_mpio_fapl_t*)_fa;
+
+    FUNC_ENTER_NOAPI(H5FD_mpio_fapl_free, FAIL);
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "in H5FD_mpio_fapl_free\n");
+#endif
+    assert(fa);
+
+    /* Free the internal communicator and INFO object */
+    assert(MPI_COMM_NULL!=fa->comm);
+    MPI_Comm_free(&fa->comm);
+    if (MPI_INFO_NULL != fa->info)
+	MPI_Info_free(&fa->info);
+    H5MM_xfree(fa);
+
+done:
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "leaving H5FD_mpio_fapl_free\n");
+#endif
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5FD_mpio_fapl_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -859,6 +1001,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_mpio_fapl_t		_fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     H5FD_t			*ret_value;     /* Return value */
+    MPI_Comm                    comm_dup=MPI_COMM_NULL;
+    MPI_Info                    info_dup=MPI_INFO_NULL;
+
 
     FUNC_ENTER_NOAPI(H5FD_mpio_open, NULL);
 
@@ -880,6 +1025,11 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 	fa = H5P_get_driver_info(plist);
 	assert(fa);
     }
+
+    /* Duplicate communicator and Info object for use by this file. */
+    if (FAIL==H5FD_mpio_comm_info_dup(fa->comm, fa->info, &comm_dup, &info_dup))
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL,
+		"Communicator/Info duplicate failed");
 
     /* convert HDF5 flags to MPI-IO flags */
     /* some combinations are illegal; let MPI-IO figure it out */
@@ -924,15 +1074,15 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /*OKAY: CAST DISCARDS CONST*/
-    if (MPI_SUCCESS != (mpi_code=MPI_File_open(fa->comm, (char*)name,
-            mpi_amode, fa->info, &fh)))
+    mpi_code=MPI_File_open(comm_dup, (char*)name, mpi_amode, info_dup, &fh);
+    if (MPI_SUCCESS != mpi_code)
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code);
     file_opened=1;
 
     /* Get the MPI rank of this process and the total number of processes */
-    if (MPI_SUCCESS != (mpi_code=MPI_Comm_rank (fa->comm, &mpi_rank)))
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_rank (comm_dup, &mpi_rank)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_rank failed", mpi_code);
-    if (MPI_SUCCESS != (mpi_code=MPI_Comm_size (fa->comm, &mpi_size)))
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_size (comm_dup, &mpi_size)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_size failed", mpi_code);
 
 /*  Following changes in handling file-truncation made be rkyates and ppweidhaas, sep 99  */
@@ -945,7 +1095,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     }
 
     /* Broadcast file-size */
-    if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, fa->comm)))
+    if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
 
     /* Only if size > 0, truncate the file - if requested */
@@ -954,7 +1104,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
             HMPI_GOTO_ERROR(NULL, "MPI_File_set_size failed", mpi_code);
 
 	/* Don't let any proc return until all have truncated the file. */
-        if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(fa->comm)))
+        if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(comm_dup)))
             HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mpi_code);
         size = 0;
     }
@@ -964,8 +1114,8 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     file->f = fh;
-    file->comm = fa->comm;
-    file->info = fa->info;
+    file->comm = comm_dup;
+    file->info = info_dup;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
     file->eof = H5FD_mpio_MPIOff_to_haddr(size);
@@ -977,6 +1127,12 @@ done:
     if(ret_value==NULL) {
         if(file_opened)
             MPI_File_close(&fh);
+	if (MPI_COMM_NULL != comm_dup)
+	    MPI_Comm_free(&comm_dup);
+	if (MPI_INFO_NULL != info_dup)
+	    MPI_Info_free(&info_dup);
+	if (file)
+	    H5MM_xfree(file);
     } /* end if */
 
 #ifdef H5FDmpio_DEBUG
@@ -1028,6 +1184,7 @@ H5FD_mpio_close(H5FD_t *_file)
         HMPI_GOTO_ERROR(FAIL, "MPI_File_close failed", mpi_code);
 
     /* Clean up other stuff */
+    H5FD_mpio_comm_info_free(&file->comm, &file->info);
     H5MM_xfree(file);
 
 done:
@@ -2010,5 +2167,124 @@ H5FD_mpio_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
         ret_value=SUCCEED;
 
     FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mpio_comm_info_dup
+ *
+ * Purpose:     Make duplicates of communicator and Info object.
+ * 		If the Info object is in fact MPI_INFO_NULL, no duplicate
+ * 		is made but the same value assigned to the new Info object
+ * 		handle.
+ *
+ * Return:      Success:	Non-negative.  The new communicator and Info
+ * 				object handles are returned via comm_new and
+ * 				info_new pointers.
+ *
+ * 		Failure:	Negative.
+ *
+ * Programmer:  Albert Cheng
+ *              Jan  8, 2003
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_mpio_comm_info_dup(MPI_Comm comm, MPI_Info info, MPI_Comm *comm_new, MPI_Info *info_new)
+{
+    herr_t	ret_value=SUCCEED;
+    MPI_Comm	comm_dup=MPI_COMM_NULL;
+    MPI_Info	info_dup=MPI_INFO_NULL;
+    int		mpi_code;
+    
+    FUNC_ENTER_NOAPI(H5FD_mpio_comm_info_dup, FAIL);
+
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "In H5FD_mpio_comm_info_dup: argument comm/info = %d/%ld\n", comm, (long)info);
+#endif
+    /* Check arguments */
+    if (MPI_COMM_NULL == comm)
+	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument");
+    if (!comm_new || !info_new)
+	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "bad pointers");
+
+    /* Dup them.  Using temporary variables for error recovery cleanup. */
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(comm, &comm_dup)))
+	HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
+    if (MPI_INFO_NULL != info){
+	if (MPI_SUCCESS != (mpi_code=MPI_Info_dup(info, &info_dup)))
+	    HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code);
+    }else{
+	/* No dup, just copy it. */
+	info_dup = info;
+    }
+
+    /* copy them to the return arguments */
+    *comm_new = comm_dup;
+    *info_new = info_dup;
+
+done:
+    if (FAIL == ret_value){
+	/* need to free anything created here */
+	if (MPI_COMM_NULL != comm_dup)
+	    MPI_Comm_free(&comm_dup);
+	if (MPI_INFO_NULL != info_dup)
+	    MPI_Info_free(&info_dup);
+    }
+
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "Leaving H5FD_mpio_comm_info_dup\n");
+#endif
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mpio_comm_info_free
+ *
+ * Purpose:     Free the communicator and Info object.
+ * 		If comm or info is in fact MPI_COMM_NULL or MPI_INFO_NULL
+ * 		respectively, no action occurs to it. 
+ *
+ * Return:      Success:	Non-negative.  The values the pointers refer
+ * 				to will be set to the corresponding NULL
+ * 				handles.
+ *
+ * 		Failure:	Negative.
+ *
+ * Programmer:  Albert Cheng
+ *              Jan  8, 2003
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_mpio_comm_info_free(MPI_Comm *comm, MPI_Info *info)
+{
+    herr_t      ret_value=SUCCEED;
+    FUNC_ENTER_NOAPI(H5FD_mpio_comm_info_free, FAIL);
+
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "in H5FD_mpio_comm_info_free\n");
+#endif
+    /* Check arguments */
+    if (!comm || !info)
+	HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "not a valid argument");
+
+    if (MPI_COMM_NULL != *comm)
+	MPI_Comm_free(comm);
+    if (MPI_INFO_NULL != *info)
+	MPI_Info_free(info);
+
+done:
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "Leaving H5FD_mpio_comm_info_free\n");
+#endif
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 #endif /* H5_HAVE_PARALLEL */
