@@ -12,6 +12,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5Fmpioprivate.h>	/*mpi low-level i/o	  */
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 

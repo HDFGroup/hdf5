@@ -21,6 +21,7 @@
 #include <H5private.h>			/*library		  	*/
 #include <H5ACprivate.h>		/*cache				*/
 #include <H5Eprivate.h>			/*error handling	  	*/
+#include <H5Fmpioprivate.h>		/*mpi low-level i/o	  */
 #include <H5HLprivate.h>		/*self				*/
 #include <H5MFprivate.h>		/*file memory management  	*/
 #include <H5MMprivate.h>		/*core memory management  	*/
