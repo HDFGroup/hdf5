@@ -89,6 +89,7 @@
 #define H5D_XFER_BTREE_SPLIT_RATIO_NAME       "btree_split_ratio"
 #define H5D_XFER_BTREE_SPLIT_RATIO_SIZE       sizeof(double[3])
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEF      {0.1, 0.5, 0.9}
+#ifdef H5_WANT_H5_V1_4_COMPAT
 /* Definitions for hyperslab caching property */
 #define H5D_XFER_HYPER_CACHE_NAME       "hyper_cache"
 #define H5D_XFER_HYPER_CACHE_SIZE       sizeof(unsigned)
@@ -101,10 +102,7 @@
 #define H5D_XFER_HYPER_CACHE_LIM_NAME       "hyper_cache_limit"
 #define H5D_XFER_HYPER_CACHE_LIM_SIZE       sizeof(unsigned)
 #define H5D_XFER_HYPER_CACHE_LIM_DEF  0
-/* Definitions for hyperslab cache limit property */
-#define H5D_XFER_HYPER_CACHE_LIM_NAME       "hyper_cache_limit"
-#define H5D_XFER_HYPER_CACHE_LIM_SIZE       sizeof(unsigned)
-#define H5D_XFER_HYPER_CACHE_LIM_DEF  0
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 /* Definitions for vlen allocation function property */
 #define H5D_XFER_VLEN_ALLOC_NAME       "vlen_alloc"
 #define H5D_XFER_VLEN_ALLOC_SIZE       sizeof(H5MM_allocate_t)

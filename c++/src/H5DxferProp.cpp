@@ -93,6 +93,7 @@ bool DSetMemXferPropList::getPreserve() const
    }
 }
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
 // Indicates whether to cache hyperslab blocks during I/O
 void DSetMemXferPropList::setHyperCache( bool cache, unsigned limit ) const
 {
@@ -119,6 +120,7 @@ void DSetMemXferPropList::getHyperCache( bool& cache, unsigned& limit ) const
    else
       cache = false;
 }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 // Sets B-tree split ratios for a dataset transfer property list 
 void DSetMemXferPropList::setBtreeRatios( double left, double middle, double right ) const

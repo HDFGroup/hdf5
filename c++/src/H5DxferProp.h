@@ -36,11 +36,13 @@ class DSetMemXferPropList : public PropList {
 	// Checks status of the dataset transfer property list
 	bool getPreserve() const;
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
 	// Indicates whether to cache hyperslab blocks during I/O
 	void setHyperCache( bool cache, unsigned limit = 0 ) const;
 
 	// Returns information regarding the caching of hyperslab blocks during I/O
 	void getHyperCache( bool& cache, unsigned& limit ) const;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 	// Sets B-tree split ratios for a dataset transfer property list 
 	void setBtreeRatios( double left, double middle, double right ) const;

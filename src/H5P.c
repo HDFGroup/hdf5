@@ -6,7 +6,7 @@
 * 605 E. Springfield, Champaign IL 61820		                    *
 *							                    *
 * For conditions of distribution and use, see the accompanying		    *
-* hdf/COPYING file.							    *
+* COPYING file.                                                             *
 *									    *
 ****************************************************************************/
 
@@ -2596,6 +2596,7 @@ done:
 
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_hyper_cache
@@ -2692,6 +2693,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 done:
     FUNC_LEAVE(ret_value);
 }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------

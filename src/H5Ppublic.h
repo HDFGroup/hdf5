@@ -6,7 +6,7 @@
  * 605 E. Springfield, Champaign IL 61820                                   *
  *                                                                          *
  * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
+ * COPYING file.                                                            *
  *                                                                          *
  ****************************************************************************/
 
@@ -215,10 +215,12 @@ __DLL__ herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts/*out*/,
        size_t *rdcc_nelmts/*out*/,
        size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
 #endif /* H5_WANT_H5_V1_4_COMPAT */
+#ifdef H5_WANT_H5_V1_4_COMPAT
 __DLL__ herr_t H5Pset_hyper_cache(hid_t plist_id, unsigned cache,
       unsigned limit);
 __DLL__ herr_t H5Pget_hyper_cache(hid_t plist_id, unsigned *cache,
       unsigned *limit);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 __DLL__ herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
        double right);
 __DLL__ herr_t H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/,

@@ -143,8 +143,10 @@ H5D_init_interface(void)
     void            *def_bkgr_buf            = H5D_XFER_BKGR_BUF_DEF;   
     H5T_bkg_t       def_bkgr_buf_type        = H5D_XFER_BKGR_BUF_TYPE_DEF;     
     double          def_btree_split_ratio[3] = H5D_XFER_BTREE_SPLIT_RATIO_DEF;
+#ifdef H5_WANT_H5_V1_4_COMPAT
     unsigned        def_hyper_cache          = H5D_XFER_HYPER_CACHE_DEF;     
     unsigned        def_hyper_cache_lim      = H5D_XFER_HYPER_CACHE_LIM_DEF;   
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     H5MM_allocate_t def_vlen_alloc           = H5D_XFER_VLEN_ALLOC_DEF;     
     void            *def_vlen_alloc_info     = H5D_XFER_VLEN_ALLOC_INFO_DEF;
     H5MM_free_t     def_vlen_free            = H5D_XFER_VLEN_FREE_DEF;    
@@ -216,6 +218,7 @@ H5D_init_interface(void)
         if(H5P_register(xfer_pclass,H5D_XFER_BTREE_SPLIT_RATIO_NAME,H5D_XFER_BTREE_SPLIT_RATIO_SIZE,&def_btree_split_ratio,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
         /* Register the hyperslab caching property */
         if(H5P_register(xfer_pclass,H5D_XFER_HYPER_CACHE_NAME,H5D_XFER_HYPER_CACHE_SIZE,&def_hyper_cache,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
@@ -223,6 +226,7 @@ H5D_init_interface(void)
         /* Register the hyperslab cache limit property */
         if(H5P_register(xfer_pclass,H5D_XFER_HYPER_CACHE_LIM_NAME,H5D_XFER_HYPER_CACHE_LIM_SIZE,&def_hyper_cache_lim,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
         /* Register the vlen allocation function property */
         if(H5P_register(xfer_pclass,H5D_XFER_VLEN_ALLOC_NAME,H5D_XFER_VLEN_ALLOC_SIZE,&def_vlen_alloc,NULL,NULL,NULL,NULL,NULL,NULL)<0)

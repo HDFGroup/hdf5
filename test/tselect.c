@@ -2232,8 +2232,10 @@ test_select_hyper_union(void)
     xfer = H5Pcreate (H5P_DATASET_XFER);
     CHECK(xfer, FAIL, "H5Pcreate");
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
     ret = H5Pset_hyper_cache(xfer,0,1);
     CHECK(ret, FAIL, "H5Pset_hyper_cache");
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer,wbuf);

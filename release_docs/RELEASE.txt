@@ -185,6 +185,8 @@ New Features
       writing.
     * Improved performance of non-contiguous hyperslabs (built up with
       several hyperslab selection calls).
+    * Removed H5P(get|set)_hyper_cache API function, since the property is no
+      longer used.
 
 Platforms Tested
 ================
