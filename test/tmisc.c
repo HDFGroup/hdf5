@@ -106,6 +106,11 @@ typedef struct
     misc5_struct2_hndl *st1h_st2hndl;
 } misc5_struct1_hndl;
 
+/* Definitions for misc. test #6 */
+#define MISC6_FILE              "tmisc6.h5"
+#define MISC6_DSETNAME1         "dset1"
+#define MISC6_DSETNAME2         "dset2"
+#define MISC6_NUMATTR           16
 
 /****************************************************************
 **
@@ -799,6 +804,108 @@ test_misc5(void)
 
 /****************************************************************
 **
+**  test_misc6(): Test that object header continuation messages are
+**      created correctly.
+**
+****************************************************************/
+static void
+test_misc6(void)
+{
+    hid_t loc_id, space_id, dataset_id;
+    hid_t attr_id;
+    char attr_name[16];
+    unsigned u;
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing object header continuation code \n"));
+
+    /* Create the file */
+    loc_id=H5Fcreate(MISC6_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(loc_id,FAIL,"H5Fcreate");
+
+    /* Create the dataspace */
+    space_id=H5Screate(H5S_SCALAR);
+    CHECK(space_id,FAIL,"H5Screate");
+
+    /* Create the first dataset */
+    dataset_id=H5Dcreate(loc_id, MISC6_DSETNAME1, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(dataset_id,FAIL,"H5Dcreate");
+
+    /* Close dataset */
+    ret=H5Dclose(dataset_id);
+    CHECK(ret,FAIL,"H5Dclose");
+
+    /* Create the second dataset */
+    dataset_id=H5Dcreate(loc_id, MISC6_DSETNAME2, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+    CHECK(dataset_id,FAIL,"H5Dcreate");
+
+    /* Close dataset */
+    ret=H5Dclose(dataset_id);
+    CHECK(ret,FAIL,"H5Dclose");
+
+    /* Close file */
+    ret=H5Fclose(loc_id);
+    CHECK(ret,FAIL,"H5Fclose");
+
+    /* Loop through adding attributes to each dataset */
+    for(u=0; u<MISC6_NUMATTR; u++) {
+        /* Create name for attribute */
+        sprintf(attr_name,"Attr#%u",u);
+
+        /* Open the file */
+        loc_id=H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+        CHECK(loc_id,FAIL,"H5Fopen");
+
+
+        /* Open first dataset */
+        dataset_id=H5Dopen(loc_id, MISC6_DSETNAME1);
+        CHECK(dataset_id,FAIL,"H5Dopen");
+
+        /* Add attribute to dataset */
+        attr_id=H5Acreate(dataset_id,attr_name,H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+        CHECK(attr_id, FAIL, "H5Acreate");
+
+        /* Close attribute */
+        ret=H5Aclose(attr_id);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Close dataset */
+        ret=H5Dclose(dataset_id);
+        CHECK(ret, FAIL, "H5Dclose");
+
+
+        /* Open second dataset */
+        dataset_id=H5Dopen(loc_id, MISC6_DSETNAME2);
+        CHECK(dataset_id,FAIL,"H5Dopen");
+
+        /* Add attribute to dataset */
+        attr_id=H5Acreate(dataset_id,attr_name,H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+        CHECK(attr_id, FAIL, "H5Acreate");
+
+        /* Close attribute */
+        ret=H5Aclose(attr_id);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Close dataset */
+        ret=H5Dclose(dataset_id);
+        CHECK(ret, FAIL, "H5Dclose");
+
+
+        /* Close file */
+        ret=H5Fclose(loc_id);
+        CHECK(ret,FAIL,"H5Fclose");
+
+    } /* end for */
+
+    /* Close dataspace */
+    ret=H5Sclose(space_id);
+    CHECK(ret,FAIL,"H5Sclose");
+
+} /* end test_misc6() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -808,11 +915,12 @@ test_misc(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Miscellaneous Routines\n"));
 
-    test_misc1();       /* Test unlinking a dataset & immediately re-using name */
-    test_misc2();       /* Test storing a VL-derived datatype in two different files */
-    test_misc3();       /* Test reading from chunked dataset with non-zero fill value */
-    test_misc4();       /* Test retrieving the fileno for various objects with H5Gget_objinfo() */
-    test_misc5();       /* Test several level deep nested compound & VL datatypes */
+    test_misc1();   /* Test unlinking a dataset & immediately re-using name */
+    test_misc2();   /* Test storing a VL-derived datatype in two different files */
+    test_misc3();   /* Test reading from chunked dataset with non-zero fill value */
+    test_misc4();   /* Test retrieving the fileno for various objects with H5Gget_objinfo() */
+    test_misc5();   /* Test several level deep nested compound & VL datatypes */
+    test_misc6();   /* Test object header continuation code */
 
 } /* test_misc() */
 
@@ -841,4 +949,5 @@ cleanup_misc(void)
     remove(MISC4_FILE_1);
     remove(MISC4_FILE_2);
     remove(MISC5_FILE);
+    remove(MISC6_FILE);
 }
