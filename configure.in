@@ -1826,7 +1826,7 @@ PABLO_MAKE=""
 
 AC_SUBST(PARALLEL_PABLO) PARALLEL_PABLO=""
 
-if test -n "$HAVE_PABLO"; then
+if test "$HAVE_PABLO" = "yes"; then
   PABLO_MAKE="pablo/Makefile"
 
   if test -n "$TESTPARALLEL"; then
