@@ -262,10 +262,10 @@
 
 	    $ CC='cc -xarch=v9' ./configure
 
-	To configure AIX 64 bits including fortran API,
+	To configure AIX 64 bits including fortran API and C++,
 	(Remark: need to hardset $AR to 'ar -X 64'.)
 	Serial:
-	    $ CC='xlc -q64' F9X='xlf -q64' AR='ar -X 64'\
+	    $ CC='xlc -q64' F9X='xlf -q64' CXX='xlC -q64' AR='ar -X 64'\
 	    $ ./configure --enable-fortran
 	Parallel:
 	    $ CC='mpcc_r -q64' F9X='mpxlf_r -q64' AR='ar -X 64'\
