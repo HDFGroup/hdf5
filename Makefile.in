@@ -1,0 +1,87 @@
+# Top-level HDF5 Makefile(.in)				       -*- makefile -*-
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+# This makefile mostly just reinvokes make in the various subdirectories
+# but does so in the correct order.  You can alternatively invoke make from
+# each subdirectory manually.
+#
+@COMMENCE@
+
+# Subdirectories in build-order
+SUBDIRS=src test
+
+##############################################################################
+#			    T A R G E T S
+#
+# all:		Build libraries, header files, and programs in the various
+#		subdirectories but do not install them.
+#
+# install:	Installs libraries, header files, programs, and documentation
+#		in the various directories under the prefix directory (lib,
+#		include, bin, man, info).  Use the `--prefix=PATH' option
+#		to `configure' (or `config.status') or say `--help' for
+#		other alternatives.  The default prefix is `/usr/local'.
+#
+# uninstall:	Delete all the installed files that the `install' target
+#		created (but not the noninstalled files such as `make all'
+#		created).
+#
+# clean:	Removes temporary files except those that record the
+#		configuration and those that are part of the distribution.
+#
+# mostlyclean:	Like `clean' except it doesn't delete a few files like
+#		libraries, programs, and/or generated header files because
+#		regenerating them is rarely necessary and takes a lot of time.
+#
+# distclean:	Deletes all files that are created by configuring or building
+#		HDF5.  If you have unpacked the source and built HDF5 without
+#		creating any other files, then `make distclean' will leave
+#		only the files that were in the distrubution.
+#
+# maintainer-clean:
+#		Like `distclean' except it deletes more files.  It deletes
+#		all generated files.  This target is not intended for normal
+#		users; it deletes files that may require special tools to
+#		rebuild.
+#
+# TAGS:		Updates the tags table for this program.
+#
+# dep depend:	Builds dependencies in all subdirectories.  These targets
+#		might not be available on certain combinations of make
+#		programs and C compilers.  At the other extreme, the GNU
+#		make used in combination with gcc will maintain dependency
+#		information automatically.
+#
+all install uninstall TAGS dep depend:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+
+clean mostlyclean:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+
+distclean:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+	$(RM) config/commence config/conclude config/depend
+	$(RM) config.cache config.log config.status src/config.h
+	$(RM) Makefile
+
+maintainer-clean:
+	@echo "This command is intented for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+	$(RM) config.cache config.log config.status src/config.h
+	$(RM) configure src/config.h.in
+
+
+# This file does not end with the `CONCLUDE' statement since it has
+# redefined all the standard targets anyway.

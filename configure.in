@@ -1,0 +1,136 @@
+dnl Process this file with autoconf to produce configure.  -*-indented-text-*-
+dnl
+dnl Copyright (C) 1997 National Center for Supercomputing Applications.
+dnl                    All rights reserved.
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Initialize configure.
+dnl
+AC_REVISION($Id$)
+AC_INIT(src/H5.c)
+AC_CONFIG_HEADER(src/H5config.h)
+AC_CONFIG_AUX_DIR(bin)
+AC_CANONICAL_HOST
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Check that the cache file was build on the same host as what we're
+dnl running on now.
+dnl
+AC_CACHE_CHECK(for cached host,hdf5_cv_host,hdf5_cv_host="none");
+if test $hdf5_cv_host = "none"; then
+   hdf5_cv_host=$host
+elif test $hdf5_cv_host != $host; then
+   echo "The config.cache file was generated on $hdf5_cv_host but"
+   echo "this is $host.  Please remove that file and try again."
+   AC_MSG_ERROR(config.cache file is invalid)
+fi
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Source any special files that we need.  These files normally aren't
+dnl present but can be used by the maintainers to fine tune things like
+dnl turning on debug or profiling flags for the compiler.
+dnl
+AC_MSG_CHECKING(for site config file)
+site_config="none"
+for f in $host $host_vendor-$host_os $host_os; do
+   if test -f config/$f; then
+      site_config=config/$f
+      break
+   fi
+done
+AC_MSG_RESULT($site_config)
+if test $site_config != "none"; then
+   . $site_config
+fi
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Check for programs.
+dnl
+AC_PROG_CC
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+
+AC_MSG_CHECKING(for GNU Make)
+if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
+  sed -n 1p|cut -c1-8`" = "GNU Make"; then
+   AC_MSG_RESULT(yes)
+   GMAKE=yes
+else
+   AC_MSG_RESULT(no)
+fi
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Check for libraries.  (none required yet)
+dnl
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Check for header files.
+dnl
+AC_HEADER_STDC
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Data types.
+dnl
+AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Check sizes of various integral data types.
+dnl
+AC_C_BIGENDIAN
+AC_CHECK_SIZEOF(short, 2)
+AC_CHECK_SIZEOF(int, 4)
+AC_CHECK_SIZEOF(long, 4)
+AC_CHECK_SIZEOF(long long, 8)
+AC_CHECK_SIZEOF(float, 4)
+AC_CHECK_SIZEOF(double, 8)
+
+
+
+dnl ----------------------------------------------------------------------
+dnl AC_FUNC_MEMCMP
+dnl AC_C_CONST
+dnl AC_C_INLINE
+
+
+
+dnl ----------------------------------------------------------------------
+dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
+dnl `@COMMENCE@' and end with the line `@CONCLUDE@'.  These lines insert
+dnl various files from the config directory into the Makefile.
+dnl
+AC_SUBST_FILE(COMMENCE) COMMENCE=config/commence
+AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
+
+if test "X$GCC" = "Xyes" && test "X$GMAKE" = "Xyes"; then
+   AC_SUBST_FILE(DEPEND) DEPEND=config/depend
+else
+   AC_SUBST(DEPEND) DEPEND='# Use GNU make/GCC if you want auto dependencies'
+fi
+
+dnl We don't need to say when we're entering directories if we're using
+dnl GNU make becuase make does it for us.
+if test "X$GMAKE" = "Xyes"; then
+   AC_SUBST(SETX) SETX=":"
+else
+   AC_SUBST(SETX) SETX="set -x"
+fi
+
+AC_OUTPUT(config/depend config/commence config/conclude Makefile src/Makefile test/Makefile)

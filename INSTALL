@@ -1,0 +1,54 @@
+To build/install HDF5 on Unix systems from the root of the
+distribution directory:
+
+   * Build the ./src/H5config.h file and Makefiles by saying:
+
+	./configure
+
+     You can say `./configure --help' to see a list of options.  On
+     common option is to specify the prefix directory where the
+     libraries, header files, and programs are installed.  The default
+     is to install them in /usr/local/lib, /usr/local/include, and
+     /usr/local/bin, but you can specify some other path instead of
+     /usr/local by saying:
+
+	./configure --prefix=/usr
+
+     You can also override detection of certain things with
+     environment variables:
+
+	CC		Name of the C compiler to use.
+	CFLAGS		Alternate C compiler flags.
+	CPPFLAGS	Alternate C preprocessor flags.
+	MAKE		Name of the make(1) program.
+
+     For instance (assuming /bin/sh), it is common to say:
+
+	CPPFLAGS=-DNDEBUG CC=gcc CFLAGS=-O3 ./configure
+
+
+   * Build library targets by saying:
+
+	make
+
+     If you ran configure like (assuming /bin/sh):
+
+	MAKE=gmake ./configure
+
+     then you'll want to be sure to use `gmake' also when you build
+     the library.  If you're re-building the library after changing
+     some files and you're not using GNU make and gcc, then you should
+     say `make clean' from the top directory between each build
+     attempt.
+
+   * Install the library, header files, and programs by saying:
+
+	make install
+
+     This step will fail unless you have permission to write to the
+     installation directories.
+
+To build/install HDF5 on non-Unix systems from the root of the
+distribution directory:
+
+   * To be written later.
