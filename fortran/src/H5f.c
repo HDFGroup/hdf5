@@ -195,8 +195,9 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5e_flags[18] = H5E_ATTR;
       h5e_flags[19] = H5E_PLINE;
       h5e_flags[20] = H5E_EFL;
-      h5e_flags[21] = H5E_RAGGED;
-      h5e_flags[22] = H5E_REFERENCE;
+      h5e_flags[21] = H5E_REFERENCE;
+      h5e_flags[22] = H5E_VFL;
+      h5e_flags[23] = H5E_TBBT;
     
 /*
  *  H5F flags

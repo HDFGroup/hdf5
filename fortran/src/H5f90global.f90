@@ -211,8 +211,9 @@
       INTEGER ::  H5E_ATTR_F 
       INTEGER ::  H5E_PLINE_F 
       INTEGER ::  H5E_EFL_F 
-      INTEGER ::  H5E_RAGGED_F  
       INTEGER ::  H5E_REFERENCE_F
+      INTEGER ::  H5E_VFL_F 
+      INTEGER ::  H5E_TBBT_F 
 
       EQUIVALENCE(H5E_flags(1), H5E_NONE_MAJOR_F)
       EQUIVALENCE(H5E_flags(2), H5E_ARGS_F)
@@ -235,8 +236,9 @@
       EQUIVALENCE(H5E_flags(19), H5E_ATTR_F)
       EQUIVALENCE(H5E_flags(20), H5E_PLINE_F)
       EQUIVALENCE(H5E_flags(21), H5E_EFL_F)
-      EQUIVALENCE(H5E_flags(22), H5E_RAGGED_F)
-      EQUIVALENCE(H5E_flags(23), H5E_REFERENCE_F)
+      EQUIVALENCE(H5E_flags(22), H5E_REFERENCE_F)
+      EQUIVALENCE(H5E_flags(23), H5E_VFL_F)
+      EQUIVALENCE(H5E_flags(24), H5E_TBBT_F)
 
 !
 ! H5E flags declaration
