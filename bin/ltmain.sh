@@ -2172,7 +2172,9 @@ libdir='$install_libdir'\
 
     if test -z "$run"; then
       # Export the shlibpath_var.
-      eval "export $shlibpath_var"
+      if test -n "$shlibpath_var"; then
+        eval "export $shlibpath_var"
+      fi
 
       # Now actually exec the command.
       eval "exec \$cmd$args"
