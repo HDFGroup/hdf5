@@ -74,6 +74,13 @@
 #endif
 
 /*
+ * Longjumps are used to detect alignment constrants
+ */
+#ifdef HAVE_SETJMP_H
+#   include <setjmp.h>
+#endif
+
+/*
  * Resource usage is not Posix.1 but HDF5 uses it anyway for some performance
  * and debugging code if available.
  */

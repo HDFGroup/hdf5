@@ -10,7 +10,6 @@ top_srcdir=@top_srcdir@
 # Add include directory to the C preprocessor flags, add -lh5tools and
 # -lhdf5 to the list of libraries.
 CPPFLAGS=-I../src -I. @CPPFLAGS@
-LIBS=../src/libhdf5.la @LIBS@
 
 # Test programs and scripts.
 TEST_PROGS=
@@ -21,6 +20,7 @@ TEST_SCRIPTS=testh5dump.sh @TESTH5TOH4@
 # shared library and libhdf5 is much bigger than libh5tools.
 LT_LINK_LIB=$(LT) --mode=link $(CC) -static
 LIB=libh5tools.a
+LIBHDF5=../src/libhdf5.la
 PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@
 
 # Source and object files for the library.
@@ -44,21 +44,21 @@ check test _test: $(PROGS)
 $(PROGS): $(LIB) ../src/libhdf5.la
 
 h5debug: h5debug.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5import: h5import.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5import.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5import.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5ls: h5ls.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5ls.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5ls.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5repart: h5repart.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5dump: h5dump.o h5dumputil.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5toh4: h5toh4.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

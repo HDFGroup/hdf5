@@ -60,6 +60,7 @@ static unsigned long find_bias(int, int, int *, void *);
 static void precision (detected_t*);
 static void print_header(void);
 static size_t align_g[] = {1, 2, 4, 8, 16};
+static jmp_buf jbuf_g;
 
 
 /*-------------------------------------------------------------------------
@@ -241,6 +242,31 @@ precision (detected_t *d)
    precision (&(INFO));							      \
 }
 
+#if defined(HAVE_LONGJMP) && defined(HAVE_SIGNAL)
+#define ALIGNMENT(TYPE,ALIGN) {						      \
+    char		*_buf=NULL;					      \
+    volatile TYPE	_val=0;						      \
+    volatile size_t	_ano=0;						      \
+    void		(*_handler)(int) = signal(SIGBUS, sigbus_handler);    \
+									      \
+    _buf = malloc(sizeof(TYPE)+align_g[NELMTS(align_g)-1]);		      \
+    if (setjmp(jbuf_g)) _ano++;						      \
+    if (_ano<NELMTS(align_g)) {						      \
+	*((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS*/	      \
+	_val = *((TYPE*)(_buf+align_g[_ano]));  /*possible SIGBUS*/	      \
+	(ALIGN)=align_g[_ano];						      \
+    } else {								      \
+	(ALIGN)=0;							      \
+	fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);     \
+    }									      \
+    free(_buf);								      \
+    signal(SIGBUS, _handler); /*restore original handler*/		      \
+}
+#else
+#define ALIGNMENT(TYPE,ALIGN) (ALIGN)=0
+#endif
+
+#if 0
 #if defined(HAVE_FORK) && defined(HAVE_WAITPID)
 #define ALIGNMENT(TYPE,ALIGN) {						      \
     char	*_buf;							      \
@@ -285,8 +311,33 @@ precision (detected_t *d)
 #else
 #define ALIGNMENT(TYPE,ALIGN) (ALIGN)=0
 #endif
+#endif
 
-	
+
+/*-------------------------------------------------------------------------
+ * Function:	sigbus_handler
+ *
+ * Purpose:	Handler for SIGBUS. We use signal() instead of sigaction()
+ *		because it's more portable to non-Posix systems. Although
+ *		it's not nearly as nice to work with, it does the job for
+ *		this simple stuff.
+ *
+ * Return:	Returns via longjmp to jbuf_g.
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, March 18, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+sigbus_handler(int __unused__ signo)
+{
+    longjmp(jbuf_g, 1);
+    signal(SIGBUS, sigbus_handler);
+}
+    
 
 /*-------------------------------------------------------------------------
  * Function:    print_results

@@ -27,7 +27,7 @@ case "$cc_vendor-$cc_version" in
         cat <<EOF
     **
     ** This compiler may generate incorrect code when optimizations are
-    ** enabled. Please upgrade to at newer version (we're not sure which
+    ** enabled. Please upgrade to a newer version (we're not sure which
     ** version actually works) before reporting bugs to the HDF5 team.
     **
 EOF

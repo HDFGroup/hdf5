@@ -172,7 +172,7 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 dnl Unix
 AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h)
-AC_CHECK_HEADERS(stddef.h)
+AC_CHECK_HEADERS(stddef.h setjmp.h)
 dnl Windows
 AC_CHECK_HEADERS(io.h winsock.h sys/timeb.h)
 
@@ -386,7 +386,7 @@ dnl ----------------------------------------------------------------------
 dnl How do we figure out the width of a tty in characters?
 dnl
 AC_CHECK_FUNCS(_getvideoconfig gettextinfo GetConsoleScreenBufferInfo)
-AC_CHECK_FUNCS(_scrsize ioctl compress2 setsysinfo)
+AC_CHECK_FUNCS(_scrsize ioctl)
 
 AC_MSG_CHECKING(for struct videoconfig)
 AC_TRY_COMPILE(,[struct videoconfig w; w.numtextcols=0;],
@@ -417,8 +417,8 @@ dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
 AC_CHECK_FUNCS(getpwuid gethostname system getrusage fork waitpid)
-AC_CHECK_FUNCS(gettimeofday BSDgettimeofday difftime sigaction snprintf)
-
+AC_CHECK_FUNCS(gettimeofday BSDgettimeofday difftime snprintf)
+AC_CHECK_FUNCS(compress2 setsysinfo longjmp signal sigaction)
 AC_TRY_COMPILE([#include<sys/types.h>],
 	       [off64_t n = 0;],
 	       AC_CHECK_FUNCS(lseek64 fseek64),
@@ -594,7 +594,7 @@ case "$CC_BASENAME" in
         fi
 	;;
 
-    mpcc)
+    mpcc|mpcc_r)
 	# The IBM compiler
 	PARALLEL=yes
 	;;
@@ -676,11 +676,11 @@ if test "X-" != "X-$PARALLEL"; then
     AC_MSG_RESULT($RUNPARALLEL)
 
     # Check that we can link a simple MPI and MPI-IO application
-    AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
-    AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
-		AC_MSG_RESULT(yes),
-		AC_MSG_RESULT(no)
-	        AC_MSG_ERROR('unable to link a simple MPI-IO application'))
+dnl    AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
+dnl    AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
+dnl		AC_MSG_RESULT(yes),
+dnl		AC_MSG_RESULT(no)
+dnl	        AC_MSG_ERROR('unable to link a simple MPI-IO application'))
 
 
     # There *must* be some way to run in parallel even if it's just the

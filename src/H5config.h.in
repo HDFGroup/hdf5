@@ -173,6 +173,9 @@
 /* Define if you have the ioctl function.  */
 #undef HAVE_IOCTL
 
+/* Define if you have the longjmp function.  */
+#undef HAVE_LONGJMP
+
 /* Define if you have the lseek64 function.  */
 #undef HAVE_LSEEK64
 
@@ -181,6 +184,9 @@
 
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION
+
+/* Define if you have the signal function.  */
+#undef HAVE_SIGNAL
 
 /* Define if you have the snprintf function.  */
 #undef HAVE_SNPRINTF
@@ -196,6 +202,9 @@
 
 /* Define if you have the <mfhdf.h> header file.  */
 #undef HAVE_MFHDF_H
+
+/* Define if you have the <setjmp.h> header file.  */
+#undef HAVE_SETJMP_H
 
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H

@@ -10,7 +10,6 @@ top_srcdir=@top_srcdir@
 # Add include directory to the C preprocessor flags and the h5test and hdf5
 # libraries to the library list.
 CPPFLAGS=-I. -I../src @CPPFLAGS@
-LIBS=../src/libhdf5.la @LIBS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -24,6 +23,7 @@ TIMINGS=iopipe chunk ragged overhead
 # this library statically because some systems can only link executables to
 # a single shared library and libhdf5 is much bigger than libh5test.
 LT_LINK_LIB=$(LT) --mode=link $(CC) -static
+LIBHDF5=../src/libhdf5.la
 LIB=libh5test.a
 LIB_SRC=h5test.c
 LIB_OBJ=$(LIB_SRC:.c=.o)
@@ -70,84 +70,84 @@ timings _timings: $(TIMINGS)
 	done;
 
 # How to build the tests...  They all depend on the test and hdf5 libraries.
-$(TEST_PROGS): $(LIB) ../src/libhdf5.la
+$(TEST_PROGS): $(LIB) $(LIBHDF5)
 TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o tmeta.o trefer.o tselect.o th5s.o
 testhdf5: $(TESTHDF5_OBJ)
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 lheap: lheap.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ lheap.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ lheap.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 ohdr: ohdr.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ ohdr.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ ohdr.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 stab: stab.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ stab.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ stab.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 gheap: gheap.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ gheap.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gheap.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 dsets: dsets.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 bittests: bittests.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ bittests.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ bittests.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 dtypes: dtypes.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ dtypes.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dtypes.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 hyperslab: hyperslab.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ hyperslab.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hyperslab.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 istore: istore.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ istore.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ istore.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 cmpd_dset: cmpd_dset.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ cmpd_dset.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ cmpd_dset.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 extend: extend.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ extend.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ extend.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 external: external.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ external.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ external.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 iopipe: iopipe.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ iopipe.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ iopipe.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 big: big.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ big.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ big.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 links: links.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ links.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ links.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 chunk: chunk.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ chunk.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ chunk.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 mtime: mtime.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ mtime.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mtime.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 ragged: ragged.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ ragged.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ ragged.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 unlink: unlink.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ unlink.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ unlink.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 overhead: overhead.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ overhead.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ overhead.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 fillval: fillval.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ fillval.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ fillval.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 mount: mount.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ mount.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mount.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 flush1: flush1.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ flush1.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ flush1.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 flush2: flush2.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ flush2.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ flush2.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 enum: enum.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ enum.o $(LIB) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ enum.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
