@@ -1035,6 +1035,7 @@ Optional Features:
                           is disabled.
   --enable-parallel       Search for MPI-IO and MPI support files
   --enable-fphdf5         Enable the Flexible Parallel HDF5 interface
+                          [default=no]
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
                           word no. The default is all internal I/O filters.
@@ -3991,7 +3992,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3994 "configure"' > conftest.$ac_ext
+  echo '#line 3995 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4532,7 +4533,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4535: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4536: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6339,7 +6340,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6342 "configure"
+#line 6343 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6437,7 +6438,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6440 "configure"
+#line 6441 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -32984,12 +32985,14 @@ _ACEOF
 
   fi
 
-  echo "$as_me:$LINENO: checking if Flexible Parallel HDF5 interface enabled" >&5
+        echo "$as_me:$LINENO: checking if Flexible Parallel HDF5 interface enabled" >&5
 echo $ECHO_N "checking if Flexible Parallel HDF5 interface enabled... $ECHO_C" >&6
   # Check whether --enable-fphdf5 or --disable-fphdf5 was given.
 if test "${enable_fphdf5+set}" = set; then
   enableval="$enable_fphdf5"
   FPHDF5=$enableval
+else
+  FPHDF5="no"
 fi;
   if test "X$FPHDF5" = "Xyes"; then
 
@@ -34598,6 +34601,8 @@ PRINT "Features:"
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
 
+PRINT_N "          Flexible Parallel HDF"
+IF_YES_NO "$FPHDF5"
 
 PRINT_N "         Function Stack Tracing"
 IF_ENABLED_DISABLED "$FUNCSTACK"
