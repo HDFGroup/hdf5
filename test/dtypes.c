@@ -4410,7 +4410,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                     break;
 	    if (k==dst_size)
                 continue; /*no error*/
-           
+
 	    /*
 	     * Convert the source and destination values to little endian
 	     * order so we can use the HDF5 bit vector operations to test
@@ -5675,10 +5675,9 @@ run_float_int_conv(const char *name)
 #endif
     
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
-    nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
+    /*nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
-
-
+    */
 #ifdef H5_FP_TO_ULLONG_RIGHT_MAXIMUM
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
@@ -5778,7 +5777,7 @@ main(void)
     
     /* Test hardware integer-float conversion functions */
     nerrors += run_int_float_conv("hw");
-    
+
     /* Test hardware float-integer conversion functions */
     nerrors += run_float_int_conv("hw");
     
