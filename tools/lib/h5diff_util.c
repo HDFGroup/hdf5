@@ -22,8 +22,6 @@ unsigned char	 g_Parallel = 0;  /*0 for serial, 1 for parallel */
 char    outBuff[OUTBUFF_SIZE];
 unsigned int     outBuffOffset;
 
-extern int nID;
-
 /*-------------------------------------------------------------------------
  * Function: parallel_print
  *

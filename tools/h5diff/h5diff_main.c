@@ -71,6 +71,7 @@ int main(int argc, const char *argv[])
 
 #ifdef H5_HAVE_PARALLEL
     MPI_Status Status;
+    outBuffOffset = 0;
 #endif
 
     /* See what we were called as to determine whether to run serial or parallel version
@@ -266,7 +267,9 @@ int main(int argc, const char *argv[])
 		if (!options.err_stat)
 		{
 		    print_found(nfound);
+#ifdef H5_HAVE_PARALLEL
 		    print_manager_output();
+#endif
 		}
 	    }
 	}

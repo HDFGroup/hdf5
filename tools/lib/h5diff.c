@@ -55,7 +55,6 @@ void phdiff_dismiss_workers(void)
 	MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
 }
 
-#endif
 
 /*-------------------------------------------------------------------------
  * Function: print_manager_output
@@ -74,14 +73,20 @@ void phdiff_dismiss_workers(void)
 void print_manager_output(void)
 {
       /* If there was something we buffered, let's print it now */
-      if(outBuffOffset>0)
+      if( (outBuffOffset>0) && g_Parallel)
       {
 	  printf("%s", outBuff); 
 	  fflush(stdout);
 	  memset(outBuff, 0, OUTBUFF_SIZE);
 	  outBuffOffset = 0;
       }
+      else if( (outBuffOffset>0) && !g_Parallel)
+      {
+	  printf("h5diff error: outBuffOffset>0, but we're not in parallel\n");
+      }
 }
+
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: h5diff
