@@ -44,36 +44,35 @@ of the some symbols used.
 
 &lt;attr_name&gt; ::=  &lt;identifier&gt;
 
-&lt;datatype&gt; ::= datatype "&lt;datatype_name&gt;" ; |          // shared data type
-               datatype { &lt;scalar_datatype&gt; } ; |         
-               datatype { &lt;dt_definition&gt;+ } ;       
+&lt;datatype&gt; ::= datatype { "&lt;datatype_name&gt;" } |          // shared data type
+               datatype { &lt;scalar_datatype&gt; }  |         
+               datatype { &lt;dt_definition&gt;+ }        
 
 &lt;datatype_name&gt; ::= &lt;identifier&gt;
 
-&lt;scalar_datatype&gt; ::=  int8 | uint8 | ...     // data types supported by HDF5
+&lt;scalar_datatype&gt; ::= H5T_NATIVE_CHAR | H5T_NATIVE_INT | ...     // data types supported by HDF5
 
-&lt;dt_definition&gt; ::= "&lt;datatype_name&gt;" &lt;field_name&gt; ; | &lt;scalar_datatype&gt; &lt;field_name&gt; ;
+&lt;dt_definition&gt; ::= &lt;scalar_datatype&gt; &lt;field_name&gt; ;
 
-&lt;field_name&gt; ::= one or more field names separated by ","
+&lt;field_name&gt; ::= &lt;identifier&gt;
 
-&lt;dataspace&gt; ::= dataspace "&lt;dataspace_name&gt;" ; |
-                dataspace {array &lt;current_dims&gt; &lt;max_dims&gt;} ; | 
-                dataspace {other &lt;ds_definition&gt;+ } ;         
+&lt;dataspace&gt; ::= dataspace { "&lt;dataspace_name&gt;" } |
+                dataspace { array &lt;current_dims&gt; &lt;max_dims&gt;} | 
+                dataspace { other &lt;ds_definition&gt;+ } 
 
 &lt;dataspace_name&gt; ::= &lt;identifier&gt;
 
-&lt;current_dims&gt; ::= a list of integers represented of the form ( , , .. , )
+&lt;current_dims&gt; ::= a list of integers represented as (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ) where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer, <i>k</i> = 1,2,...
 
-&lt;max_dims&gt; ::=  a list of integers or H5S_UNLIMITED represented of the form ( , , .. , )
+&lt;max_dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ) where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer or H5S_UNLIMITED
 
 &lt;ds_definition&gt; ::= TBD
 
-&lt;data&gt; ::= data {TBD} ;
+&lt;data&gt; ::= data {TBD}
 
 &lt;group_member&gt; ::= &lt;named_datatype&gt; | &lt;named_dataspace&gt; | &lt;group&gt; | &lt;dataset&gt; | &lt;link&gt;
 
-&lt;named_datatype&gt; ::= datatype "&lt;datatype_name&gt;" { &lt;scalar_datatype&gt; } |
-                     datatype "&lt;datatype_name&gt;" { &lt;dt_definition&gt;+ }
+&lt;named_datatype&gt; ::= datatype "&lt;datatype_name&gt;" { &lt;dt_definition&gt;+ }
 
 &lt;named_dataspace&gt; ::= dataspace "&lt;dataspace_name&gt;" {array &lt;current_dims&gt; &lt;max_dims&gt; } |
                      dataspace "&lt;dataspace_name&gt;" { other &lt;ds_definition&gt;+ }
@@ -94,18 +93,18 @@ of the some symbols used.
 
 &lt;dataset_name&gt; ::= &lt;identifier&gt;
 
-&lt;storagelayout&gt; :: = storagelayout &lt;contiguous_layout&gt; ; |  
-                     storagelayout &lt;chunked_layout&gt; ; | 
-                     storagelayout &lt;compact_layout&gt; ; | 
-                     storagelayout &lt;external_layout&gt; ;
+&lt;storagelayout&gt; :: = storagelayout &lt;contiguous_layout&gt;  |  
+                     storagelayout &lt;chunked_layout&gt;  | 
+                     storagelayout &lt;compact_layout&gt;  | 
+                     storagelayout &lt;external_layout&gt; 
 
 &lt;contiguous_layout&gt; ::= {contiguous}    // default
 
 &lt;chunked_layout&gt; ::=  {chunked &lt;dims&gt; }
 
-&lt;dims&gt; ::=  a list of integers represented of the form ( , , .. , )
+&lt;dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ), <i>i<FONT SIZE=1.0>k</i></FONT> is an integer, <i>k</i> = 1,2,... 
 
-&lt;compact_layout&gt; ::= TBD            // not implemented yet
+&lt;compact_layout&gt; ::= TBD           
 
 &lt;external_layout&gt; ::= {external &lt;external_file&gt;+ }
 
@@ -115,19 +114,19 @@ of the some symbols used.
 
 &lt;size&gt; ::= an integer
 
-&lt;compression&gt; :: = compression { TBD } ; //algorithm name and properties?
+&lt;compression&gt; :: = compression { TBD }  
 
-&lt;dataset_attribute&gt; ::= &lt;attribute&gt; ;
+&lt;dataset_attribute&gt; ::= &lt;attribute&gt; 
 
 &lt;link&gt; ::= &lt;hardlink&gt; | &lt;softlink&gt;
 
-&lt;hardlink&gt; ::= hardlink "&lt;hardlink_name&gt;" { linktarget "&lt;target&gt;"; }
+&lt;hardlink&gt; ::= hardlink "&lt;hardlink_name&gt;" { linktarget "&lt;target&gt;" }
 
 &lt;hardlink_name&gt; ::= &lt;identifier&gt;
 
 &lt;target&gt; ::= &lt;identifier&gt;
 
-&lt;softlink&gt; ::= softlink "&lt;softlink_name&gt;" { linktarget "&lt;target&gt;"; }
+&lt;softlink&gt; ::= softlink "&lt;softlink_name&gt;" { linktarget "&lt;target&gt;" }
 
 &lt;softlink_name&gt; ::= &lt;identifier&gt;
 
@@ -146,94 +145,61 @@ Consider an HDF5 file, example.h5, with the following structure:
 
                      /       |       \
                  group1     group3  dataset3
-                 /   \       |          ^
-           group2  dataset2  hardlink --|
-             /  \        ^
-      dataset1 softlink  |
-                  |------|
+                 /   \       |       
+           group2  dataset2 softlink
+             /
+      dataset1 
+              
 
 
 hdf5 "example" { 
 
 group "/" {
 
-   datatype "shared_datatype1" {                    // named data type
-            char name[20], address[40];
-            int32 id; 
+   datatype "shared_datatype" {                    // named data type
+            H5T_NATIVE_CHAR c[20];
+            H5T_NATIVE_INT i; 
    }
  
-   datatype "shared_datatype2" {
-            "shared_datatype1" rec[100];
-            float32 total;
-   }
-
-   dataspace "shared_dataspace1" { array (1000) (1000)}         // named data space
-
-
-
-   attribute "group_attribute1" {                   //group attribute
-             datatype {int32};
-             dataspace "shared_dataspace1";
+   attribute "group_attribute" {                   //attribute
+             datatype {H5T_NATIVE_CHAR}
+             dataspace {array (20) (20)}
+             data { "group attribute" }
    } 
-
-   attribute "group_attribute2" {
-             datatype {int32};
-             dataspace {array (3,5) (3,5)} ;
-             data {(0,0,0,0,0) (1,1,1,1,1) (2,2,2,2,2)};
-   } 
-
 
    group "group1" {
 
-         attribute "group1_attribute" {
-                   datatype {char};
-                   dataspace {array (100) (200)};
-                   data {("attribute_of_group_1")};
-         }
-
          group "group2" {
 
-               datatype "shared_datatype3" {
-                         int8 z;
-                         int32 x; 
-               }
-
                dataset "dataset1" {
-                        dataspace "shared_dataspace1";
-                        datatype "shared_datatype3";
+                        dataspace {array (4) (4)}
+                        datatype {"shared_datatype"}
                         attribute "dataset1_attr" {
-                                   datatype {char};
-                                   dataspace {array (10) (10)};
-                                   data {("data1")};
-                        };
+                                   datatype {H5T_NATIVE_CHAR}
+                                   dataspace {array (10) (10)}
+                        }
                }
- 
- 
-               softlink "sl" {
-                        linktarget "/group1/dataset2";
-               } 
          }
 
          dataset "dataset2" {
-               datatype {int8};
-               dataspace {array (2,5) (unlimited, 5)};
-               data {(0,0,0,0,0) (0,0,0,0,0)};
+               datatype {H5T_NATIVE_INT}
+               dataspace {array (2,5) (H5S_UNLIMITED, 5)}
+               data {0,0,0,0,0,0,0,0,0,0}
          }
    }
    
    group "group3" {
-         hardlink "hl" {
-                  linktarget "/dataset3" ;
+         softlink "slink" {
+                  linktarget "/sometarget" 
          }
    }
       
    
    dataset "dataset3" {
-           datatype { float32 };
-           dataspace {array (1000,1000) (1000,1000) };
-           storagelayout {chunked (250,1000)};
+           datatype {H5T_NATIVE_FLOAT}
+           dataspace {array (100,100) (100,100)} 
    }
  
-} // root group
+} 
 
 }
