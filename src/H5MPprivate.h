@@ -389,6 +389,8 @@
 #define color_H5Sset_extent_simple "red"
 #define color_H5Scopy "red"
 #define color_H5Sclose "red"
+#define color_H5Sencode "red"
+#define color_H5Sdecode "red"
 #define color_H5Sget_simple_extent_npoints "red"
 #define color_H5Sget_simple_extent_ndims "red"
 #define color_H5Sget_simple_extent_dims "red"

@@ -44,6 +44,10 @@ New Features
 
     Library:
     --------
+        - 4 new API functions, H5Tencode, H5Tdecode, H5Sencode, H5Sdecode were
+          added to the library.  Given object ID, these functions encode and 
+          decode HDF5 objects(data type and space) information into and from 
+          binary buffer.        SLU - 2004/07/21
         - Modified the way how HDF5 calculates 'pixels_per_scanline' parameter for 
           SZIP compression. Now there is no restriction on the size and shape of the
           chunk except that the total number of elements in the chunk cannot be 

@@ -3444,10 +3444,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_encode(unsigned char *buf, void *obj, size_t *nalloc, unsigned type_id)
+H5O_encode(unsigned char *buf, void *obj, hid_t type_id)
 {
     const H5O_class_t   *type;            /* Actual H5O class type for the ID */
-    size_t              size;             /* size of the message*/
+    size_t              extent_size;      /* size of the message*/
+    H5F_t               f;                /* fake file structure*/
     herr_t 	        ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_encode,FAIL);
@@ -3457,19 +3458,23 @@ H5O_encode(unsigned char *buf, void *obj, size_t *nalloc, unsigned type_id)
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
 
-    /* check buffer size */
-    if ((size=(type->raw_size)(NULL, obj))<=0)
+    if(type_id == H5O_SDSPACE_ID) {
+        /* Fake file structure, needed for space encoding and decoding. */
+        f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
+        f.shared->sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;
+       
+        /* Encode this "size of size" */ 
+        *buf = H5F_CRT_OBJ_BYTE_NUM_DEF;
+        buf++;
+    }
+    
+    /* Encode */    
+    if ((type->encode)(&f, buf, obj)<0)
         HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
 
-    /* Don't encode if buffer size isn't big enough */
-    if(!buf || *nalloc<size)
-        *nalloc = size;
-    else {
-        /* Encode */    
-        if ((type->encode)(NULL, buf, obj)<0)
-            HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
-    } /* end else */
-
+    if(type_id == H5O_SDSPACE_ID)
+        H5MM_free(f.shared);
+        
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -3481,9 +3486,9 @@ done:
  * Purpose:	Decode a binary object(data type and data space only) 
  *              description and return a new object handle.
  *
- * Return:	Success:	Object ID(non-negative)
+ * Return:	Success:        Pointer to object(data type or space)	
  *
- *		Failure:	Negative
+ *		Failure:	NULL
  *
  * Programmer:	Raymond Lu
  *		slu@ncsa.uiuc.edu
@@ -3497,7 +3502,8 @@ void*
 H5O_decode(unsigned char *buf, unsigned type_id)
 {
     const H5O_class_t   *type;            /* Actual H5O class type for the ID */
-    void 	        *ret_value;       /* Return value */
+    H5F_t               f;                /* fake file structure*/
+    void 	        *ret_value=NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_decode,NULL);
 
@@ -3506,8 +3512,22 @@ H5O_decode(unsigned char *buf, unsigned type_id)
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
 
+    if(type_id == H5O_SDSPACE_ID) {
+        /* Fake file structure, needed for space encoding and decoding. */
+        f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
+
+        /* Decode the "size of size", needed for space encoding and decoding */
+        f.shared->sizeof_size = *buf;
+        buf++;
+    }
+
     /* decode */
-    ret_value = (type->decode)(NULL, 0, buf, NULL);
+    if((ret_value = (type->decode)(&f, 0, buf, NULL))==NULL)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message");
+
+    if(type_id == H5O_SDSPACE_ID) {
+        H5MM_free(f.shared);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

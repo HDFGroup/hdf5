@@ -20,6 +20,7 @@
  */
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5T_init_interface
@@ -32,10 +33,12 @@
 #include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5Fprivate.h"	        /* File                 		*/
 #include "H5Gprivate.h"		/*groups				  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Pprivate.h"		/* Property Lists			  */
+#include "H5Fpkg.h"		/*file functions			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
 
 /* Check for header needed for SGI floating-point code */
@@ -2618,7 +2621,7 @@ H5Tdecode(unsigned char* buf)
     FUNC_ENTER_API (H5Tdecode, FAIL);
 
     if (buf==NULL)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer")
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
 
     if((dt = H5T_decode(buf))==NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
@@ -2658,11 +2661,23 @@ done:
 herr_t
 H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 {
+    size_t      buf_size = 0;
+    H5F_t       f;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5T_encode, FAIL);
+    
+    /* Find out the size of buffer needed */
+    if((buf_size=H5O_raw_size(H5O_DTYPE_ID, &f, obj))==0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "can't find datatype size");
 
-    if(H5O_encode(buf, obj, nalloc, H5O_DTYPE_ID)<0)
+    /* Don't encode if buffer size isn't big enough or buffer is empty */
+    if(!buf || *nalloc<buf_size) {
+        *nalloc = buf_size;
+	HGOTO_DONE(ret_value);
+    }
+
+    if(H5O_encode(buf, obj, H5O_DTYPE_ID)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object");
 
 done:

@@ -108,7 +108,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
     FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_decode);
 
     /* check args */
-    assert(f);
+    /*assert(f);*/
     assert(p);
     assert (!sh);
 
@@ -210,7 +210,7 @@ done:
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
+H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
     const H5S_extent_t	*sdim = (const H5S_extent_t *) mesg;
     unsigned		u;  /* Local counting variable */
@@ -219,7 +219,7 @@ H5O_sdspace_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_encode);
 
     /* check args */
-    /*assert(f);*/
+    assert(f);
     assert(p);
     assert(sdim);
 
