@@ -112,7 +112,7 @@ parse_options(int argc, char **argv){
 				return(1);
 			    } else if (**(argv) == '"') {
 				fileprefixlen = strlen(*(argv)+1)-1;
-				fileprefix = (char *)HDmalloc(fileprefixlen+1);
+				fileprefix = (char *)malloc(fileprefixlen+1);
         			if (!fileprefix) {
 				    printf("%s\n","memory allocation failed");
 				    nerrors++;
@@ -121,7 +121,7 @@ parse_options(int argc, char **argv){
 				fileprefix = strncpy(fileprefix,*(argv)+1,fileprefixlen);
 			    } else {
 				fileprefixlen = strlen(*(argv));
-				fileprefix = (char *)HDmalloc(fileprefixlen+1);
+				fileprefix = (char *)malloc(fileprefixlen+1);
         			if (!fileprefix) {
 				    printf("%s\n","memory allocation failed");
 				    nerrors++;
@@ -183,7 +183,7 @@ main(int argc, char **argv)
     if (fileprefix != NULL) {
 	for (i=0;i<3;i++) {
 	    tmpptr = filenames[i];
-            filenames[i] = (char *)HDmalloc ( fileprefixlen + strlen(tmpptr) + 2);
+            filenames[i] = (char *)malloc ( fileprefixlen + strlen(tmpptr) + 2);
             if (!filenames[i]) {
 		printf("%s\n","memory allocation failed");
 		nerrors++;
@@ -197,10 +197,8 @@ main(int argc, char **argv)
     }
 
     if (dowrite){
-#ifndef MPIOTEST
 	MPI_BANNER("testing MPIO independent overlapping writes...");
 	test_mpio_overlap_writes(filenames);
-#endif
 
 	MPI_BANNER("testing dataset using split communicators...");
 	test_split_comm_access(filenames);

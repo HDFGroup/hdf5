@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <hdf5.h>
-#include <H5private.h>
 #include <mpi.h>
 #include <mpio.h>
 
