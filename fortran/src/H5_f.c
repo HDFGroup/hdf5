@@ -405,7 +405,7 @@ int_f
 nh5init1_flags_c(int_f *h5lib_flags)
 {
     int ret_value = -1;
-    unsigned prm_1 = H5_SZIP_ALLOW_K13_OPTION_MASK;
+    unsigned prm_1 = H5_SZIP_AK13_OPTION_MASK;
     unsigned prm_2 = H5_SZIP_CHIP_OPTION_MASK;
     unsigned prm_3 = H5_SZIP_EC_OPTION_MASK;
     unsigned prm_4 = H5_SZIP_NN_OPTION_MASK;
