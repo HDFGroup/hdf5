@@ -17,17 +17,14 @@ static char		RcsId[] = "$Revision$";
 /* $Id$ */
 
 #define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 /* Private header files */
 #include <H5private.h>		/* Generic Functions			*/
 #include <H5Iprivate.h>		/* IDs			  	*/
 #include <H5Bprivate.h>		/* B-tree subclass names	  	*/
-#include <H5Dpkg.h>		    /* Datasets				*/
-#include <H5Gpkg.h>		    /* Groups				*/
-#include <H5Tpkg.h>		    /* Datatypes				*/
+#include <H5Dprivate.h>		    /* Datasets				*/
+#include <H5Gprivate.h>		    /* Groups				*/
+#include <H5Tprivate.h>		    /* Datatypes				*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Pprivate.h>		/* Property lists			*/
@@ -187,9 +184,9 @@ H5Acreate(hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
     if(NULL == (obj = H5I_object(loc_id)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
     if (H5_DATASET == H5I_group(loc_id))
-        ent=&(((H5D_t *)obj)->ent);
+	ent = H5D_entof ((H5D_t*)obj);
     else
-        ent=&(((H5G_t *)obj)->ent);
+	ent = H5G_entof ((H5G_t*)obj);
 
     /* Go do the real work for attaching the attribute to the dataset */
     ret_value=H5A_create(ent,name,type,space);
@@ -384,9 +381,9 @@ H5Aopen_name(hid_t loc_id, const char *name)
 
     /* Copy the object header entry for the object */
     if (H5_DATASET == H5I_group(loc_id))
-        ent=&(((H5D_t *)obj)->ent);
+	ent = H5D_entof ((H5D_t*)obj);
     else
-        ent=&(((H5G_t *)obj)->ent);
+	ent = H5G_entof ((H5G_t*)obj);
 
     /* Look up the attribute for the object */
     if((idx=H5A_get_index(ent,name))<0)
@@ -441,9 +438,9 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 
     /* Copy the object header entry for the object */
     if (H5_DATASET == H5I_group(loc_id))
-        ent=&(((H5D_t *)obj)->ent);
+	ent = H5D_entof ((H5D_t*)obj);
     else
-        ent=&(((H5G_t *)obj)->ent);
+	ent = H5G_entof ((H5G_t*)obj);
 
     /* Go do the real work for opening the attribute */
     ret_value=H5A_open(ent, idx);
@@ -599,6 +596,9 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
     size_t		buf_size;		    /* desired buffer size	*/
     int         idx;                /* index of attribute in object header */
     herr_t		    ret_value = FAIL;
+#ifdef H5T_DEBUG
+    H5_timer_t		timer;
+#endif
 
     FUNC_ENTER(H5A_write, FAIL);
 
@@ -636,12 +636,17 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
     }
 
 	/* Perform data type conversion.  */
+#ifdef H5T_DEBUG
+    H5T_timer_begin (&timer, cdata);
+#endif
 	cdata->command = H5T_CONV_CONV;
-	cdata->stats->ncalls++;
 	if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, NULL)<0) {
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 			"data type conversion failed");
 	}
+#ifdef H5T_DEBUG
+    H5T_timer_end (&timer, cdata, nelmts);
+#endif
 
     /* Free the previous attribute data buffer, if there is one */
     if(attr->data)
@@ -756,6 +761,9 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     size_t		dst_type_size;		/* size of destination type*/
     size_t		buf_size;		    /* desired buffer size	*/
     herr_t		    ret_value = FAIL;
+#ifdef H5T_DEBUG
+    H5_timer_t		timer;
+#endif
 
     FUNC_ENTER(H5A_read, FAIL);
 
@@ -793,12 +801,17 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     }
 
 	/* Perform data type conversion.  */
+#ifdef H5T_DEBUG
+    H5T_timer_begin (&timer, cdata);
+#endif
 	cdata->command = H5T_CONV_CONV;
-	cdata->stats->ncalls++;
 	if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, NULL)<0) {
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 			"data type conversion failed");
 	}
+#ifdef H5T_DEBUG
+    H5T_timer_end (&timer, cdata, nelmts);
+#endif
 
     /* Copy the converted data into the user's buffer */
     HDmemcpy(buf,tconv_buf,dst_type_size*nelmts);
@@ -1011,9 +1024,9 @@ H5Anum_attrs(hid_t loc_id)
 
     /* Copy the object header entry for the object */
     if (H5_DATASET == H5I_group(loc_id))
-        ent=&(((H5D_t *)obj)->ent);
+	ent = H5D_entof ((H5D_t*)obj);
     else
-        ent=&(((H5G_t *)obj)->ent);
+	ent = H5G_entof ((H5G_t*)obj);
 
     /* Look up the attribute for the object */
     ret_value=H5O_count(ent, H5O_ATTR);
@@ -1086,9 +1099,9 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 
     /* Copy the object header entry for the object */
     if (H5_DATASET == H5I_group(loc_id))
-        ent=&(((H5D_t *)obj)->ent);
+	ent = H5D_entof ((H5D_t*)obj);
     else
-        ent=&(((H5G_t *)obj)->ent);
+	ent = H5G_entof ((H5G_t*)obj);
 
     /* Look up the attribute for the object */
     if((int)*attr_num<H5O_count(ent, H5O_ATTR))   /* Make certain the start point is reasonable */
@@ -1149,9 +1162,9 @@ H5Adelete(hid_t loc_id, const char *name)
 
     /* Copy the object header entry for the object */
     if (H5_DATASET == H5I_group(loc_id))
-        ent=&(((H5D_t *)obj)->ent);
+	ent = H5D_entof ((H5D_t*)obj);
     else
-        ent=&(((H5G_t *)obj)->ent);
+	ent = H5G_entof ((H5G_t*)obj);
 
     /* Look up the attribute for the object */
     idx=0;

@@ -102,15 +102,6 @@ typedef struct H5T_soft_t {
     H5T_conv_t	func;			/*the conversion function	     */
 } H5T_soft_t;
 
-/* Statistics about a conversion function */
-typedef struct H5T_stats_t {
-    uintn	ncalls;			/*num calls to conversion function   */
-#ifdef H5T_DEBUG
-    hsize_t	nelmts;			/*total data points converted	     */
-    H5_timer_t	timer;			/*total time for conversion	     */
-#endif
-} H5T_stats_t;
-
 /* Function prototypes for H5T package scope */
 H5T_path_t *H5T_path_find (const char *name, const H5T_t *src,
 			   const H5T_t *dst, hbool_t create, H5T_conv_t func);

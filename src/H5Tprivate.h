@@ -25,9 +25,18 @@
 #define H5T_RESERVED_ATOMS  8
 typedef struct H5T_t H5T_t;
 
-herr_t H5T_init (void);
+/* Statistics about a conversion function */
+typedef struct H5T_stats_t {
+    uintn	ncalls;			/*num calls to conversion function   */
+#ifdef H5T_DEBUG
+    hsize_t	nelmts;			/*total data points converted	     */
+    H5_timer_t	timer;			/*total time for conversion	     */
+#endif
+} H5T_stats_t;
+
 
 /* Private functions */
+herr_t H5T_init (void);
 herr_t H5T_init_interface (void);
 H5T_t *H5T_create (H5T_class_t type, size_t size);
 H5T_t *H5T_copy (const H5T_t *old_dt);

@@ -2,8 +2,8 @@
  * Copyright (C) 1997 NCSA
  *                    All rights reserved.
  *
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Monday, December  8, 1997
+ * Programmer:  Quincey Koziol
+ *              Monday, Apr 20
  *
  * Purpose:     This file contains declarations which are visible only within
  *              the H5A package.  Source files outside the H5A package should

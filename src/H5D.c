@@ -1746,3 +1746,25 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
     FUNC_LEAVE (SUCCEED);
 }
     
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_entof
+ *
+ * Purpose:	Returns a pointer to the entry for a dataset.
+ *
+ * Return:	Success:	Ptr to entry
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April 24, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_entry_t *
+H5D_entof (H5D_t *dataset)
+{
+    return dataset ? &(dataset->ent) : NULL;
+}
