@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /*
  * This file contains macros & information for file access
  */
@@ -362,7 +360,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_MNT_SYM_LOCAL_SIZE		sizeof(hbool_t) 	
 #define H5F_MNT_SYM_LOCAL_DEF	 	FALSE	
 
-/* Forward declarations for prototypes arguments */
+/* Forward declarations for prototype arguments */
 struct H5G_entry_t;
 struct H5O_layout_t;
 struct H5O_efl_t;
@@ -382,6 +380,7 @@ H5_DLL herr_t H5F_get_obj_count(H5F_t *f, unsigned types,
 H5_DLL herr_t H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *obj_id_list);
 H5_DLL herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void** file_handle);
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
+H5_DLL herr_t H5F_sieve_overlap_clear(H5F_t *f, haddr_t addr, hsize_t size);
 
 /* Functions than check file mounting information */
 H5_DLL htri_t H5F_is_mount(const H5F_t *file);
@@ -446,6 +445,8 @@ H5_DLL herr_t H5F_contig_fill(H5F_t *f, hid_t dxpl_id,
         struct H5O_layout_t *layout, struct H5P_genplist_t *dc_plist,
         const struct H5O_efl_t *efl, const struct H5S_t *space,
         const struct H5O_fill_t *fill, size_t elmt_size);
+H5_DLL herr_t H5F_contig_delete(H5F_t *f, hid_t dxpl_id,
+        const struct H5O_layout_t *layout);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5F_istore_create(H5F_t *f, hid_t dxpl_id,
@@ -461,6 +462,8 @@ H5_DLL herr_t H5F_istore_prune_by_extent( H5F_t *f, hid_t dxpl_id,
 H5_DLL herr_t H5F_istore_initialize_by_extent( H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, struct H5P_genplist_t *dc_plist,
         const struct H5S_t *space );
+H5_DLL herr_t H5F_istore_delete(H5F_t *f, hid_t dxpl_id,
+        const struct H5O_layout_t *layout);
 
 /* Address-related functions */
 H5_DLL void H5F_addr_encode(H5F_t *, uint8_t** /*in,out*/, haddr_t);

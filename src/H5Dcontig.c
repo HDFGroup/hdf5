@@ -31,6 +31,7 @@
 #include "H5Fpkg.h"
 #include "H5FDprivate.h"	/*file driver				  */
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MFprivate.h"	/*file memory management		*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
@@ -264,6 +265,51 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_contig_delete
+ *
+ * Purpose:	Delete the file space for a contiguously stored dataset
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		March 20, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_contig_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
+{
+    hsize_t size;               /* Size of contiguous block of data */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_contig_delete, FAIL);
+
+    /* check args */
+    assert(f);
+    assert(layout);
+
+    /* Compute size */
+    size=layout->dim[0];
+    for (u = 1; u < layout->ndims; u++)
+        size *= layout->dim[u];
+
+    /* Check for overlap with the sieve buffer and reset it */
+    if (H5F_sieve_overlap_clear(f, layout->addr, size)<0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to clear sieve buffer");
+
+    /* Free the file space for the chunk */
+    if (H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, layout->addr, size)<0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_contig_delete */
 
 
 /*-------------------------------------------------------------------------

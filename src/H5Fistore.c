@@ -118,6 +118,18 @@ typedef struct H5F_rdcc_ent_t {
 typedef H5F_rdcc_ent_t *H5F_rdcc_ent_ptr_t; /* For free lists */
 
 /* Private prototypes */
+static haddr_t H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+				  const hssize_t offset[]);
+
+/* B-tree iterator callbacks */
+static H5B_iterate_t H5F_istore_iter_allocated(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
+				 void *right_key, void *_udata);
+static H5B_iterate_t H5F_istore_iter_dump(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
+				 void *right_key, void *_udata);
+static H5B_iterate_t H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
+        void *_rt_key, void *_udata);
+
+/* B-tree callbacks */
 static size_t H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5F_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
@@ -133,10 +145,9 @@ static H5B_ins_t H5F_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *
 				   void *_udata, void *_rt_key,
 				   hbool_t *rt_key_changed,
 				   haddr_t *new_node/*out*/);
-static H5B_iterate_t H5F_istore_iter_allocated(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
-				 void *right_key, void *_udata);
-static H5B_iterate_t H5F_istore_iter_dump(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
-				 void *right_key, void *_udata);
+static H5B_ins_t H5F_istore_remove( H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
+                  hbool_t *lt_key_changed, void *_udata, void *_rt_key,
+                  hbool_t *rt_key_changed);
 static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
 static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
@@ -144,13 +155,6 @@ static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 static herr_t H5F_istore_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
                                 int indent, int fwidth, const void *key,
                                     const void *udata);
-static haddr_t H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-				  const hssize_t offset[]);
-static H5B_iterate_t H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
-        void *_rt_key, void *_udata);
-static H5B_ins_t H5F_istore_remove( H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
-                  hbool_t *lt_key_changed, void *_udata, void *_rt_key,
-                  hbool_t *rt_key_changed);
 
 /*
  * B-tree key.	A key contains the minimum logical N-dimensional address and
@@ -2133,144 +2137,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_istore_dump_btree
- *
- * Purpose:	Prints information about the storage B-tree to the specified
- *		stream.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, April 28, 1999
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims, haddr_t addr)
-{
-    H5F_istore_ud1_t	udata;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_istore_dump_btree, FAIL);
-
-    HDmemset(&udata, 0, sizeof udata);
-    udata.mesg.ndims = ndims;
-    udata.stream = stream;
-    if(stream)
-        HDfprintf(stream, "    Address: %a\n",addr);
-    if(H5B_iterate(f, dxpl_id, H5B_ISTORE, H5F_istore_iter_dump, addr, &udata)<0)
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_istore_stats
- *
- * Purpose:	Print raw data cache statistics to the debug stream.  If
- *		HEADERS is non-zero then print table column headers,
- *		otherwise assume that the H5AC layer has already printed them.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_istore_stats (H5F_t *f, hbool_t headers)
-{
-    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
-    double	miss_rate;
-    char	ascii[32];
-    herr_t      ret_value=SUCCEED;       /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5F_istore_stats, FAIL);
-
-    if (!H5DEBUG(AC))
-        HGOTO_DONE(SUCCEED);
-
-    if (headers) {
-        fprintf(H5DEBUG(AC), "H5F: raw data cache statistics for file %s\n",
-            f->name);
-        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n",
-            "Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
-        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n",
-            "-----", "----", "------", "--------", "-----", "-------");
-    }
-
-#ifdef H5AC_DEBUG
-    if (H5DEBUG(AC)) headers = TRUE;
-#endif
-
-    if (headers) {
-        if (rdcc->nhits>0 || rdcc->nmisses>0) {
-            miss_rate = 100.0 * rdcc->nmisses /
-                    (rdcc->nhits + rdcc->nmisses);
-        } else {
-            miss_rate = 0.0;
-        }
-        if (miss_rate > 100) {
-            sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
-        } else {
-            sprintf(ascii, "%7.2f%%", miss_rate);
-        }
-
-        fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n",
-            "raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
-            rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_istore_debug
- *
- * Purpose:	Debugs a B-tree node for indexed raw data storage.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
-		 int fwidth, int ndims)
-{
-    H5F_istore_ud1_t	udata;
-    herr_t ret_value=SUCCEED;   /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5F_istore_debug, FAIL);
-
-    HDmemset (&udata, 0, sizeof udata);
-    udata.mesg.ndims = ndims;
-
-    H5B_debug (f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_istore_get_addr
  *
  * Purpose:	Get the file address of a chunk if file space has been
@@ -2879,12 +2745,19 @@ H5F_istore_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
 	void UNUSED * _rt_key /*in,out */ ,
 	hbool_t *rt_key_changed /*out */ )
 {
-    H5F_istore_key_t       *lt_key = (H5F_istore_key_t *)_lt_key;
-    H5B_ins_t ret_value=H5B_INS_REMOVE;         /* Return value */
+    H5F_istore_key_t    *lt_key = (H5F_istore_key_t *)_lt_key;
+    H5B_ins_t ret_value=H5B_INS_REMOVE; /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_istore_remove,H5B_INS_ERROR);
 
+    /* Check for overlap with the sieve buffer and reset it */
+    if (H5F_sieve_overlap_clear(f, addr, (hsize_t)lt_key->nbytes)<0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to clear sieve buffer");
+
+    /* Remove raw data chunk from file */
     H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes);
+
+    /* Mark keys as unchanged */
     *lt_key_changed = FALSE;
     *rt_key_changed = FALSE;
 
@@ -3062,6 +2935,197 @@ done:
     if(space_chunk)
 	H5S_close(space_chunk);
 
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_delete
+ *
+ * Purpose:	Delete raw data storage for entire dataset (i.e. all chunks)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 20, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
+{
+    H5F_istore_ud1_t	udata;  /* User data for B-tree iterator call */
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);     /* File's raw data chunk cache */
+    H5F_rdcc_ent_t	*ent, *next;    /* Pointers to cache entries */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_istore_delete, FAIL);
+
+    /* Check if the B-tree has been created in the file */
+    if(H5F_addr_defined(layout->addr)) {
+        /* Iterate through the entries in the cache, checking for the chunks to be deleted */
+        for (ent=rdcc->head; ent; ent=next) {
+            /* Get pointer to next node, in case this one is deleted */
+            next=ent->next;
+
+            /* Is the chunk to be deleted this cache entry? */
+            if(layout->addr==ent->layout->addr)
+                /* Remove entry without flushing */
+            if (H5F_istore_preempt(f, dxpl_id, ent, FALSE )<0)
+                    HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks");
+        } /* end for */
+
+        /* Set up user data for B-tree deletion */
+        HDmemset(&udata, 0, sizeof udata);
+        udata.mesg = *layout;
+
+        /* Delete entire B-tree */
+        if(H5B_delete(f, dxpl_id, H5B_ISTORE, layout->addr, &udata)<0)
+            HGOTO_ERROR(H5E_IO, H5E_CANTDELETE, 0, "unable to delete chunk B-tree");
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_istore_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_dump_btree
+ *
+ * Purpose:	Prints information about the storage B-tree to the specified
+ *		stream.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 28, 1999
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims, haddr_t addr)
+{
+    H5F_istore_ud1_t	udata;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_istore_dump_btree, FAIL);
+
+    HDmemset(&udata, 0, sizeof udata);
+    udata.mesg.ndims = ndims;
+    udata.stream = stream;
+    if(stream)
+        HDfprintf(stream, "    Address: %a\n",addr);
+    if(H5B_iterate(f, dxpl_id, H5B_ISTORE, H5F_istore_iter_dump, addr, &udata)<0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_stats
+ *
+ * Purpose:	Print raw data cache statistics to the debug stream.  If
+ *		HEADERS is non-zero then print table column headers,
+ *		otherwise assume that the H5AC layer has already printed them.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_stats (H5F_t *f, hbool_t headers)
+{
+    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
+    double	miss_rate;
+    char	ascii[32];
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5F_istore_stats, FAIL);
+
+    if (!H5DEBUG(AC))
+        HGOTO_DONE(SUCCEED);
+
+    if (headers) {
+        fprintf(H5DEBUG(AC), "H5F: raw data cache statistics for file %s\n",
+            f->name);
+        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n",
+            "Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
+        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n",
+            "-----", "----", "------", "--------", "-----", "-------");
+    }
+
+#ifdef H5AC_DEBUG
+    if (H5DEBUG(AC)) headers = TRUE;
+#endif
+
+    if (headers) {
+        if (rdcc->nhits>0 || rdcc->nmisses>0) {
+            miss_rate = 100.0 * rdcc->nmisses /
+                    (rdcc->nhits + rdcc->nmisses);
+        } else {
+            miss_rate = 0.0;
+        }
+        if (miss_rate > 100) {
+            sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
+        } else {
+            sprintf(ascii, "%7.2f%%", miss_rate);
+        }
+
+        fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n",
+            "raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
+            rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_debug
+ *
+ * Purpose:	Debugs a B-tree node for indexed raw data storage.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 16, 1998
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
+		 int fwidth, int ndims)
+{
+    H5F_istore_ud1_t	udata;
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5F_istore_debug, FAIL);
+
+    HDmemset (&udata, 0, sizeof udata);
+    udata.mesg.ndims = ndims;
+
+    H5B_debug (f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
+
+done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
