@@ -373,10 +373,10 @@ of the <cite>HDF5 User's Guide.</cite>.
             </td><td valign=top>
             Replaces the existing selection with the parameters from this call.  
             Overlapping blocks are not supported with this operator.
-          </td></tr><tr><td valign=top>
+<!--      </td></tr><tr><td valign=top>
             <code>H5S_SELECT_OR</code>
             </td><td valign=top>
-            Adds the new selection to the existing selection.
+-->         Adds the new selection to the existing selection.
           </td></tr><tr><td valign=top>
             <code>H5S_SELECT_APPEND</code>
             </td><td valign=top>
@@ -388,9 +388,10 @@ of the <cite>HDF5 User's Guide.</cite>.
           </td></tr>
         </table>
         </center>
-        When operator <code>H5S_SELECT_OR</code> 
+<!--    When operator <code>H5S_SELECT_OR</code> 
         is used to combine a new selection with an existing selection,
         the selection ordering is reset to C array ordering.
+-->
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
@@ -1435,7 +1436,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem --> 
 
-Last modified: 6 June 2003 
+Last modified: 10 June 2003 
 
 </body>
 </html>
