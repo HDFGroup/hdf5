@@ -807,9 +807,9 @@ H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
     addr += f->file_create_parms.userblock_size;
    
     if (H5F_SEEK (f->file_handle, addr)<0)
-        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL);
+        HRETURN_ERROR(H5F_mask, ID_H5F_block_read, H5E_IO, H5E_SEEKERROR, FAIL);
     if (H5F_READ (f->file_handle, buf, size)<0)
-        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL);
+        HRETURN_ERROR(H5F_mask, ID_H5F_block_read, H5E_IO, H5E_READERROR, FAIL);
     PABLO_TRACE_OFF(H5F_mask, ID_H5F_block_read);
     return SUCCEED;
 }
@@ -844,9 +844,9 @@ H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
     addr += f->file_create_parms.userblock_size;
 
     if (H5F_SEEK (f->file_handle, addr)<0)
-        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL);
+        HRETURN_ERROR(H5F_mask, ID_H5F_block_write, H5E_IO, H5E_SEEKERROR, FAIL);
     if (H5F_WRITE (f->file_handle, buf, size)<0)
-        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
+        HRETURN_ERROR(H5F_mask, ID_H5F_block_write, H5E_IO, H5E_WRITEERROR, FAIL);
     PABLO_TRACE_OFF(H5F_mask, ID_H5F_block_write);
     return SUCCEED;
 }

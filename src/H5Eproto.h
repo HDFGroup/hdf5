@@ -30,7 +30,7 @@
    same assumptions as HERROR.  IN ADDITION, this macro causes
    a return from the calling routine */
 
-#define HRETURN_ERROR(maj, min, ret_val) {HERROR(maj, min); return(ret_val);}
+#define HRETURN_ERROR(pablo_mask, pablo_func_id, maj, min, ret_val) {HERROR(maj, min); PABLO_TRACE_OFF(pablo_mask,pablo_func_id); return(ret_val);}
 
 /* HGOTO_ERROR macro, used to facilitate error reporting.  Makes
    same assumptions as HERROR.  IN ADDITION, this macro causes
@@ -75,7 +75,7 @@ typedef enum
       H5E_UNINITIALIZED,       /* Information is unitialized */
       H5E_UNSUPPORTED,         /* Feature is unsupported */
       H5E_BADTYPE,             /* Incorrect type found */
-      H5E_BADRANGE,            /* Incorrect range of argument */
+      H5E_BADRANGE,            /* Argument out of range */
 
     /* Resource errors */
       H5E_NOSPACE,             /* No space available for allocation */
@@ -89,9 +89,9 @@ typedef enum
       H5E_BADFILE,             /* Bad file ID accessed */
 
     /* Generic low-level file I/O errors */
-      H5E_SEEKERROR,           /* File seek failed */
-      H5E_READERROR,           /* File read failed */
-      H5E_WRITEERROR,          /* File write failed */
+      H5E_SEEKERROR,           /* Seek failed */
+      H5E_READERROR,           /* Read failed */
+      H5E_WRITEERROR,          /* Write failed */
 
     /* Function entry/exit interface errors */
       H5E_CANTINIT,            /* Can't initialize interface */
