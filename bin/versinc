@@ -1,0 +1,28 @@
+#! /usr/local/bin/perl -w
+require 5.003;
+
+$hdr = "./src/H5public.h";
+$bak = "./src/H5public.h~";
+$tmp = "./src/H5public.$$";
+
+# Open files
+open OLD, $hdr or die "cannot read $hdr";
+open NEW, ">$tmp" or die "cannot write to $tmp";
+
+while (<OLD>) {
+    if (/^(\#\s*define\s+H5_VERS_RELEASE\s+)(\d+)(.*)/) {
+	print NEW $1, $2+1, $3, "\n";
+    } elsif (/^(\#\s*define\s+H5_VERS_PATCH\s+)(\d+)(.*)/) {
+	print NEW $1, "0", $3, "\n";
+    } else {
+	print NEW;
+    }
+}
+close OLD;
+close NEW;
+
+# Create a backup
+rename $hdr, $bak or warn "cannot create backup version";
+rename $tmp, $hdr or die "cannot update version number";
+
+exit 0;

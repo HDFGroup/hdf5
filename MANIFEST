@@ -16,6 +16,7 @@
 ./bin/errors
 ./bin/install-sh
 ./bin/release
+./bin/versinc
 ./config/BlankForm
 ./config/alpha-dec
 ./config/commence.in
