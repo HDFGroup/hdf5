@@ -713,7 +713,7 @@ parallel HDF5 library.</i>
         This function is only valid for dataset creation property lists.
         Valid parameters for <code>layout</code> are:
             <ul><dl>
-                <dt>H5D_COMPACT
+                <dt>H5D_COMPACT  &nbsp;&nbsp; <i><b>(Not yet implemented.)</b></i>
                     <dd>Store raw data and object header contiguously in file.
                         This should only be used for very small amounts of raw
                         data (suggested less than 1KB).
@@ -750,7 +750,7 @@ parallel HDF5 library.</i>
         a dataset.  This function is only valid for dataset creation 
         property lists.  Valid types for <code>layout</code> are:
             <ul> <dl>
-                <dt>H5D_COMPACT
+                <dt>H5D_COMPACT  &nbsp;&nbsp; <i><b>(Not yet implemented.)</b></i>
                     <dd>Raw data and object header stored contiguously in file.
                 <dt>H5D_CONTIGUOUS
                     <dd>Raw data stored separately from object header in one
@@ -925,10 +925,16 @@ parallel HDF5 library.</i>
         <p>
         If a dataset is split across multiple files then the files
         should be defined in order. The total size of the dataset is
-        the sum of the SIZE arguments for all the external files.  If
+        the sum of the <code>size</code> arguments for all the external files.  If
         the total size is larger than the size of a dataset then the
         dataset can be extended (provided the data space also allows
         the extending).
+        <p>
+        The <code>size</code> argument specifies number of bytes reserved 
+        for data in the external file.
+        If  <code>size</code> is set to <code>H5F_UNLIMITED</code>, the 
+        external file can be of unlimited size and no more files can be added to
+        the external files list.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -1557,8 +1563,8 @@ parallel HDF5 library.</i>
         <dt><em>size_t</em> <code>meta_ext_size</code>
             <dd>IN: Number of characters of the meta file extension to be  
                 copied to the <code>meta_ext</code> buffer.
-        <dt><em>OUT</em> <code>*meta_ext</code>
-            <dd>IN: Meta file extension.
+        <dt><em>char</em> <code>*meta_ext</code>
+            <dd>OUT: Meta file extension.
         <dt><em>hid_t</em> <code>*meta_properties</code>
             <dd>OUT: Pointer to a copy of the meta file access property list.
         <dt><em>size_t</em> <code>raw_ext_size</code>
@@ -1585,55 +1591,9 @@ parallel HDF5 library.</i>
         <em>hid_t</em> <code>memb_plist</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Sets the file access properties list to the <em>family</em>
-	  driver.
-  <dt><strong>Description:</strong>
-    <dd><i>Original version.  Edited version below.</i>
-    <dd><code>H5Pset_family</code> sets the file access properties 
-        to use the <em>family</em>
-	driver; any previously defined driver properties are erased
-	from the property list.  Each member of the file family will
-	use <em>member_properties</em> as its file access property
-	list. The <em>memb_size</em> argument gives the logical size
-	in bytes of each family member but the actual size could be
-	smaller depending on whether the file contains holes.  The
-	member size is only used when creating a new file or
-	truncating an existing file; otherwise the member size comes
-	from the size of the first member of the family being
-	opened. Note: if the size of the <code>off_t</code> type is
-	four bytes then the maximum family member size is usually
-	2^31-1 because the byte at offset 2,147,483,647 is generally
-	inaccessible.  Additional parameters may be added to this
-	function in the future.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>hsize_t</em> <code>memb_size</code>
-            <dd>IN: Logical size, in bytes, of each family member.
-        <dt><em>hid_t</em> <code>memb_plist</code>
-            <dd>IN: Identifier of the file access property list 
-                for each member of the family.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetFamily">H5Pset_family</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_family</code>(<em>hid_t</em> <code>plist</code>,
-        <em>hsize_t</em> <code>memb_size</code>,
-        <em>hid_t</em> <code>memb_plist</code>
-    )
-  <dt><strong>Purpose:</strong>
     <dd>Sets the file access properties list to the <code>family</code>
 	  driver.
   <dt><strong>Description:</strong>
-    <dd><i>Edited version.  Original version above.</i>
     <dd><code>H5Pset_family</code> sets the file access properties 
         to use the <code>family</code> driver; any previously defined 
         driver properties are erased from the property list.  

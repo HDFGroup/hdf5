@@ -137,7 +137,7 @@ And in this document, the
 
 	<br><br>
 	<dl>
-	  <dt><code>H5D_COMPACT</code>
+	  <dt><code>H5D_COMPACT</code>  &nbsp;&nbsp; <i><b>(Not yet implemented.)</b></i>
 	  <dd>The raw data is presumably small and can be stored
 	    directly in the object header.  Such data is
 	    non-extendible, non-compressible, non-sparse, and cannot
@@ -145,7 +145,7 @@ And in this document, the
 	    arbitrary but are enforced because of the small size of
 	    the raw data. Storing data in this format eliminates the
 	    disk seek/read request normally necessary to read raw
-	    data. <b>This layout is not implemented yet.</b>
+	    data. 
 
 	    <br><br>
 	  <dt><code>H5D_CONTIGUOUS</code>
@@ -299,7 +299,8 @@ H5Pset_chunk (plist, 2, size);
 	continues for <em>size</em> bytes.  The space represented by this
 	segment is adjacent to the space already represented by the external
 	file list.  The last segment in a file list may have the size
-	<code>H5F_UNLIMITED</em>.
+	<code>H5F_UNLIMITED</em>, in which case the external file may be 
+        of unlimited size and no more files can be added to the external files list.
 
 	  <br><br>
       <dt><code>int H5Pget_external_count (hid_t <em>plist</em>)</code>

@@ -129,10 +129,12 @@ to specific objects and data regions in an HDF5 file.
         opens that object and returns an identifier.
         <p>
         The parameter <code>ref_type</code> specifies the reference type
-        of <code>ref</code>.  See 
-        <a href="References.html#Reference-RefTypes">Reference Types</a> in 
-        <a href="References.html"><i>References (H5R)</i></a> 
-        for a list of valid reference types.
+        of <code>ref</code>. 
+        <code>ref_type</code> may contain either of the following values:
+        <ul>
+        <li><code>H5R_OBJECT</code>  (<code>0</code>)
+        <li><code>H5R_DATASET_REGION</code>  (<code>1</code>)
+        </ul>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset</code>
@@ -151,9 +153,8 @@ to specific objects and data regions in an HDF5 file.
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Reference-GetRegion">H5Rget_region</a>
-&nbsp;&nbsp;<i>(Not yet implemented.)</i>
 <dt><strong>Signature:</strong>
-    <dd><em>H5S_t</em> <code>H5Rget_region</code>(<em>H5D_t</em> <code>dataset</code>,
+    <dd><em>hid_t</em> <code>H5Rget_region</code>(<em>hid_t</em> <code>dataset</code>,
     <em>H5R_type_t</em> <code>ref_type</code>,
     <em>void *</em><code>ref</code>
     )
@@ -166,10 +167,11 @@ to specific objects and data regions in an HDF5 file.
         which is the region pointed to.
         <p>
         The parameter <code>ref_type</code> specifies the reference type
-        of <code>ref</code>.  See 
-        <a href="References.html#Reference-RefTypes">Reference Types</a> in 
-        <a href="References.html"><i>References (H5R)</i></a> 
-        for a list of valid reference types.
+        of <code>ref</code>. 
+        <code>ref_type</code> may contain the following value:
+        <ul>
+        <li><code>H5R_DATASET_REGION</code>  (<code>1</code>)
+        </ul>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset</code>,

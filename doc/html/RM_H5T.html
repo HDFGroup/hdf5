@@ -162,9 +162,9 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>A file, group, or datatype identifier.
+            <dd>A file or group identifier.
         <dt><em>const char *</em> <code>name</code>
-            <dd>A datatype name.
+            <dd>A datatype name, defined within the file or group identified by <code>loc_id</code>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a named datatype identifier if successful;
@@ -427,9 +427,16 @@ H5Tget_overflow ()
 <dt><strong>Description:</strong>
     <dd><code>H5Tcreate</code> creates a new dataype of the specified 
         class with the specified number of bytes.  
-        Currently, only the <code>H5T_COMPOUND</code> datatype class is 
-        supported with this function.  Use <code>H5Tcopy</code>
-        to create integer or floating-point datatypes.  
+        <p>
+        The following datatype classes are supported with this function:
+        <ul>
+            <li><code>H5T_COMPOUND</code> 
+            <li><code>H5T_OPAQUE</code> 
+            <li><code>H5T_ENUM</code> 
+        </ul>
+        <p>
+        Use <code>H5Tcopy</code> to create integer or floating-point datatypes. 
+        <p>
         The datatype identifier returned from this function should be 
         released with <code>H5Tclose</code> or resource leaks will result.
 <dt><strong>Parameters:</strong>
@@ -603,6 +610,8 @@ H5Tget_overflow ()
             <li><code>H5T_BITFIELD</code> (<code>4</code>)
             <li><code>H5T_OPAQUE</code> (<code>5</code>)
             <li><code>H5T_COMPOUND</code> (<code>6</code>)
+            <li><code>H5T_ENUM</code> (<code>7</code>)
+            <li><code>H5T_REFERENCE</code> (<code>8</code>)
         </ul>
 <dt><strong>Parameters:</strong>
     <dl>
@@ -1556,7 +1565,7 @@ zero.
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Tinsert</code>(<em>hid_t </em><code>type_id</code>,
         <em>const char *</em> <code>name</code>,
-        <em>off_t</em> <code>offset</code>,
+        <em>size_t</em> <code>offset</code>,
         <em>hid_t</em> <code>field_id</code>
     )
 <dt><strong>Purpose:</strong>
@@ -1578,7 +1587,7 @@ zero.
             <dd>Identifier of compound datatype to modify.
         <dt><em>const char *</em> <code>name</code>
             <dd>Name of the field to insert.
-        <dt><em>off_t</em> <code>offset</code>
+        <dt><em>size_t</em> <code>offset</code>
             <dd>Offset in memory structure of the field to insert.
         <dt><em>hid_t</em> <code>field_id</code>
             <dd>Datatype identifier of the field to insert.
