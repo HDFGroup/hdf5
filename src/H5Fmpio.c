@@ -74,7 +74,12 @@ static hbool_t          interface_initialize_g = FALSE;	/* rky??? */
 
 /* Global var to allow elimination of redundant metadata writes
  * to be controlled by the value of an environment variable. */
+/* Use the elimination by default unless this is the Intel Red machine */
+#ifndef DOS386
+hbool_t	H5_mpi_1_metawrite_g = TRUE;
+#else
 hbool_t	H5_mpi_1_metawrite_g = FALSE;
+#endif
 
 #define H5F_MPIO_DEV    0xfffe  /*pseudo dev for MPI-IO until we fix things */
 				/* Make sure this differs from H5F_CORE_DEV */
