@@ -1,0 +1,48 @@
+Release information for the 10/10/97 prototype release:
+
+    This release is intended primarily as a proof of concept and as a method
+of familiarizing users with the intended functionality.  A list of the
+limitations of the prototype is as follows:
+    o - Multiple datasets may be created/read/written in an HDF5 file, but
+        access must be as an entire dataset, i.e. no slab/slice/subset code is
+        implemented yet.  The datasets must also be homogeneous, orthogonal
+        datasets, similar to the datasets which are able to be created in the
+        HDF4 "SD" interface.  Reducing these restrictions will be a major
+        effort of further development on the library.
+    o - Datasets can be located in a hierarchy of groups in the file, however
+        user-level features for transitioning through the groups are not
+        implemented in this release.  Each dataset must be accessed through
+        its full "pathname" in the file, ie. "/foo/bar/dataset1",
+        "/foo/bar/dataset2", "/foo/data"
+
+    A list of the API functions currently supported follows.  [This list is
+short, mainly as a method of providing feedback before significant direction
+changes must be made]
+    H5 (library) interface
+        o - H5version
+    H5F (file) interface
+        o - H5Fis_hdf5
+        o - H5Fcreate
+        o - H5Fopen
+        o - H5Fclose
+    H5M (meta) interface
+        o - H5Mcreate (for datatype, dataspace & dataset objects)
+        o - H5Mendaccess
+    H5P (dataspace) interface
+        o - H5Pis_simple
+        o - H5Pset_space
+        o - H5Pnelem
+        o - H5Pget_lrank
+        o - H5Pget_ldims
+    H5T (datatype) interface
+        o - H5Tis_atomic
+        o - H5Tset_type
+        o - H5Tget_type
+        o - H5Tsize
+        o - H5Tarch
+    H5D (dataset) interface
+        o - H5Mfind_name (to attach to a dataset)
+        o - H5Dset_info
+        o - H5Dget_info
+        o - H5Dread
+        o - H5Dwrite

@@ -1,0 +1,18 @@
+This is the 10/15/97 prototype release of the HDF5 library.
+
+This release is not fully functional for the entire API defined in the HTML
+documentation, see the RELEASE file for information specific to this release of
+the library.  The INSTALL file contains instructions on compiling and
+installing the library.
+
+Three mailing lists are currently set up for use with the HDF5 library:
+    hdf5 - For general discussion of the HDF5 library with other users.
+    hdf5dev - For discussion of the HDF5 library development with developers
+        and other interested parties.
+    hdf5announce - For announcements of HDF5 related developments, not a
+        discussion list.
+To subscribe to a list, send mail to "<list>-request@ncsa.uiuc.edu", (i.e.
+hdf5-request@ncsa.uiuc.ed) with "subscribe <e-mail address> in the _body_ of
+the message.  Messages to be sent to the list should be sent to
+"<list>@ncsa.uiuc.edu"
+
