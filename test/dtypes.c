@@ -6618,13 +6618,17 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
             /* Make certain that there isn't some weird number of destination bits */
             assert(dst_nbits%8==0);
             
-            /* For Intel machines, the size of "long double" is 12 byte, precision
-             * is 80 bits.  During hardware conversion, the last 2 byte may have 
-             * garbage in them.  Clean them out with 0s before compare the values.
+            /* For Intel machines, the size of "long double" is 12 bytes, precision
+             * is 80 bits; for AMD processors, the size of "long double" is 16 bytes,
+             * precision is 80 bits.  During hardware conversion, the last few unused 
+             * bytes may have garbage in them.  Clean them out with 0s before compare 
+             * the values.
              */ 
-            if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE && dst_size==12) { 
-                buf[j*dst_size+10] = 0x00;
-                buf[j*dst_size+11] = 0x00;
+            if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
+                int q;
+                for(q=10; q<dst_size; q++) {
+                    buf[j*dst_size+q] = 0x00;
+                }
             }
 
             /* Are the two results the same? */
