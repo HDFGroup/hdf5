@@ -37,7 +37,10 @@
 # only apply to that compiler.
 CC="cc -ansi -64"
 
-warn="-fullwarn"
+# -woff 1174	about function declared but not used
+# -woff 1429	about long long type non-standard
+warn="-fullwarn -woff 1174,1429"
+#warn="-woff 1174,1429"
 
 profile="-pg"
 
@@ -52,5 +55,6 @@ RANLIB=:		# SGI needs not ranlib
 # Don't set CFLAGS if the user already did.
 if test -z "$CFLAGS"; then
    CFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
+   CFLAGS="$CFLAGS $PHDFFLAGS"
    export CFLAGS
 fi
