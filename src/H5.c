@@ -24,7 +24,7 @@ static char             RcsId[] = "@(#)$Revision$";
 
    EXPORTED ROUTINES
    H5dont_atexit    -- Indicate that an 'atexit' routine is _not_ to be installed
-   H5version        -- Check the version of the library
+   H5get_libversion        -- Check the version of the library
 
    LIBRARY-SCOPED ROUTINES
    H5_init_library      -- initialize the HDF5 library
@@ -402,7 +402,7 @@ H5_debug_mask(const char *s)
     
 
 /*-------------------------------------------------------------------------
- * Function:	H5version
+ * Function:	H5get_libversion
  *
  * Purpose:	Returns the library version numbers through arguments. MAJNUM
  *		will be the major revision number of the library, MINNUM the
@@ -427,11 +427,11 @@ H5_debug_mask(const char *s)
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5version, FAIL);
+    FUNC_ENTER(H5get_libversion, FAIL);
 
     /* Set the version information */
     if (majnum) *majnum = H5_VERS_MAJOR;
@@ -443,7 +443,7 @@ H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5vers_check
+ * Function:	H5check_version
  *
  * Purpose:	Verifies that the arguments match the version numbers
  *		compiled into the library.  This function is intended to be
@@ -463,7 +463,7 @@ H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5vers_check (unsigned majnum, unsigned minnum, unsigned relnum)
+H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
 {
     /* Don't initialize the library quite yet */
     

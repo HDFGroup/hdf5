@@ -631,7 +631,7 @@ H5Gunlink(hid_t __unused__ loc_id, const char __unused__ *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gstat
+ * Function:	H5Gget_stat
  *
  * Purpose:	Returns information about an object.  If FOLLOW_LINK is
  *		non-zero then all symbolic links are followed; otherwise all
@@ -650,12 +650,12 @@ H5Gunlink(hid_t __unused__ loc_id, const char __unused__ *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gstat(hid_t loc_id, const char *name, hbool_t follow_link,
+H5Gget_stat(hid_t loc_id, const char *name, hbool_t follow_link,
 	 H5G_stat_t *statbuf/*out*/)
 {
     H5G_entry_t	*loc = NULL;
     
-    FUNC_ENTER (H5Gstat, FAIL);
+    FUNC_ENTER (H5Gget_stat, FAIL);
     H5TRACE4("e","isbx",loc_id,name,follow_link,statbuf);
 
     /* Check arguments */

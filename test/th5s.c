@@ -104,37 +104,37 @@ test_h5s_basic(void)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    n = H5Sextent_npoints(sid1);
-    CHECK(n, UFAIL, "H5Sextent_npoints");
-    VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3, "H5Sextent_npoints");
+    n = H5Sget_simple_extent_npoints(sid1);
+    CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3, "H5Sget_simple_extent_npoints");
 
-    rank = H5Sextent_ndims(sid1);
-    CHECK(rank, UFAIL, "H5Sextent_ndims");
-    VERIFY(rank, SPACE1_RANK, "H5Sextent_ndims");
+    rank = H5Sget_simple_extent_ndims(sid1);
+    CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, SPACE1_RANK, "H5Sget_simple_extent_ndims");
 
-    ret = H5Sextent_dims(sid1, tdims, NULL);
-    CHECK(ret, FAIL, "H5Sextent_dims");
+    ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+    CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
-	   "H5Sextent_dims");
+	   "H5Sget_simple_extent_dims");
 
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, max2);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
-    n = H5Sextent_npoints(sid2);
-    CHECK(n, UFAIL, "H5Sextent_npoints");
+    n = H5Sget_simple_extent_npoints(sid2);
+    CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4,
-	   "H5Sextent_npoints");
+	   "H5Sget_simple_extent_npoints");
 
-    rank = H5Sextent_ndims(sid2);
-    CHECK(rank, UFAIL, "H5Sextent_ndims");
-    VERIFY(rank, SPACE2_RANK, "H5Sextent_ndims");
+    rank = H5Sget_simple_extent_ndims(sid2);
+    CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, SPACE2_RANK, "H5Sget_simple_extent_ndims");
 
-    ret = H5Sextent_dims(sid2, tdims, tmax);
-    CHECK(ret, FAIL, "H5Sextent_dims");
+    ret = H5Sget_simple_extent_dims(sid2, tdims, tmax);
+    CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
-	   "H5Sextent_dims");
+	   "H5Sget_simple_extent_dims");
     VERIFY(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0,
-	   "H5Sextent_dims");
+	   "H5Sget_simple_extent_dims");
 
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -175,20 +175,20 @@ test_h5s_scalar_write(void)
     sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    n = H5Sextent_npoints(sid1);
-    CHECK(n, UFAIL, "H5Sextent_npoints");
-    VERIFY(n, 1, "H5Sextent_npoints");
+    n = H5Sget_simple_extent_npoints(sid1);
+    CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
-    rank = H5Sextent_ndims(sid1);
-    CHECK(rank, UFAIL, "H5Sextent_ndims");
-    VERIFY(rank, SPACE3_RANK, "H5Sextent_ndims");
+    rank = H5Sget_simple_extent_ndims(sid1);
+    CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
-    ret = H5Sextent_dims(sid1, tdims, NULL);
-    VERIFY(ret, 0, "H5Sextent_dims");
+    ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+    VERIFY(ret, 0, "H5Sget_simple_extent_dims");
 
     /* Verify extent type */
-    ext_type = H5Sextent_class(sid1);
-    VERIFY(ext_type, H5S_SCALAR, "H5Sextent_class");
+    ext_type = H5Sget_simple_extent_type(sid1);
+    VERIFY(ext_type, H5S_SCALAR, "H5Sget_simple_extent_type");
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UINT,sid1,H5P_DEFAULT);
@@ -241,16 +241,16 @@ test_h5s_scalar_read(void)
     sid1=H5Dget_space(dataset);
     CHECK(sid1, FAIL, "H5Dget_space");
 
-    n = H5Sextent_npoints(sid1);
-    CHECK(n, UFAIL, "H5Sextent_npoints");
-    VERIFY(n, 1, "H5Sextent_npoints");
+    n = H5Sget_simple_extent_npoints(sid1);
+    CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
-    rank = H5Sextent_ndims(sid1);
-    CHECK(rank, UFAIL, "H5Sextent_ndims");
-    VERIFY(rank, SPACE3_RANK, "H5Sextent_ndims");
+    rank = H5Sget_simple_extent_ndims(sid1);
+    CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
-    ret = H5Sextent_dims(sid1, tdims, NULL);
-    VERIFY(ret, 0, "H5Sextent_dims");
+    ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+    VERIFY(ret, 0, "H5Sget_simple_extent_dims");
 
     ret = H5Dread(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
@@ -318,16 +318,16 @@ test_h5s_compound_scalar_write(void)
     sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    n = H5Sextent_npoints(sid1);
-    CHECK(n, UFAIL, "H5Sextent_npoints");
-    VERIFY(n, 1, "H5Sextent_npoints");
+    n = H5Sget_simple_extent_npoints(sid1);
+    CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
-    rank = H5Sextent_ndims(sid1);
-    CHECK(rank, UFAIL, "H5Sextent_ndims");
-    VERIFY(rank, SPACE3_RANK, "H5Sextent_ndims");
+    rank = H5Sget_simple_extent_ndims(sid1);
+    CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
-    ret = H5Sextent_dims(sid1, tdims, NULL);
-    VERIFY(ret, 0, "H5Sextent_dims");
+    ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+    VERIFY(ret, 0, "H5Sget_simple_extent_dims");
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
@@ -382,16 +382,16 @@ test_h5s_compound_scalar_read(void)
     sid1=H5Dget_space(dataset);
     CHECK(sid1, FAIL, "H5Dget_space");
 
-    n = H5Sextent_npoints(sid1);
-    CHECK(n, UFAIL, "H5Sextent_npoints");
-    VERIFY(n, 1, "H5Sextent_npoints");
+    n = H5Sget_simple_extent_npoints(sid1);
+    CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
-    rank = H5Sextent_ndims(sid1);
-    CHECK(rank, UFAIL, "H5Sextent_ndims");
-    VERIFY(rank, SPACE3_RANK, "H5Sextent_ndims");
+    rank = H5Sget_simple_extent_ndims(sid1);
+    CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
-    ret = H5Sextent_dims(sid1, tdims, NULL);
-    VERIFY(ret, 0, "H5Sextent_dims");
+    ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+    VERIFY(ret, 0, "H5Sget_simple_extent_dims");
 
     type=H5Dget_type(dataset);
     CHECK(type, FAIL, "H5Dget_type");

@@ -729,7 +729,7 @@ H5S_extent_npoints(const H5S_t *ds)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Sextent_npoints
+ * Function:	H5Sget_simple_extent_npoints
  *
  * Purpose:	Determines how many data points a dataset extent has.
  *
@@ -746,12 +746,12 @@ H5S_extent_npoints(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5Sextent_npoints(hid_t space_id)
+H5Sget_simple_extent_npoints(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
     hsize_t		    ret_value = 0;
 
-    FUNC_ENTER(H5Sextent_npoints, 0);
+    FUNC_ENTER(H5Sget_simple_extent_npoints, 0);
     H5TRACE1("h","i",space_id);
 
     /* Check args */
@@ -832,7 +832,7 @@ H5S_get_npoints_max(const H5S_t *ds)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Sextent_ndims
+ * Function:	H5Sget_simple_extent_ndims
  *
  * Purpose:	Determines the dimensionality of a data space.
  *
@@ -848,12 +848,12 @@ H5S_get_npoints_max(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sextent_ndims(hid_t space_id)
+H5Sget_simple_extent_ndims(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
 
-    FUNC_ENTER(H5Sextent_ndims, FAIL);
+    FUNC_ENTER(H5Sget_simple_extent_ndims, FAIL);
     H5TRACE1("Is","i",space_id);
 
     /* Check args */
@@ -916,13 +916,13 @@ H5S_extent_ndims(const H5S_t *ds)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Sextent_dims
+ * Function:	H5Sget_simple_extent_dims
  *
  * Purpose:	Returns the size and maximum sizes in each dimension of
  *		a data space DS through	the DIMS and MAXDIMS arguments.
  *
  * Return:	Success:	Number of dimensions, the same value as
- *				returned by H5Sextent_ndims().
+ *				returned by H5Sget_simple_extent_ndims().
  *
  *		Failure:	FAIL
  *
@@ -938,13 +938,13 @@ H5S_extent_ndims(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sextent_dims(hid_t space_id, hsize_t dims[]/*out*/,
+H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
 		hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
 
-    FUNC_ENTER(H5Sextent_dims, FAIL);
+    FUNC_ENTER(H5Sget_simple_extent_dims, FAIL);
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
@@ -1644,7 +1644,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Sextent_class
+ * Function:	H5Sget_simple_extent_type
  *
  * Purpose:	Retrieves the type of extent for a dataspace object
  *
@@ -1662,12 +1662,12 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
  *-------------------------------------------------------------------------
  */
 H5S_class_t
-H5Sextent_class(hid_t sid)
+H5Sget_simple_extent_type(hid_t sid)
 {
     H5S_class_t	ret_value = H5S_NO_CLASS;
     H5S_t	*space = NULL;
 
-    FUNC_ENTER(H5Sextent_class, FAIL);
+    FUNC_ENTER(H5Sget_simple_extent_type, FAIL);
     H5TRACE1("Sc","i",sid);
 
     /* Check arguments */

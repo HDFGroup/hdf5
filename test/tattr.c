@@ -216,8 +216,8 @@ test_attr_basic_read(void)
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 1, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 1, "H5Aget_num_attrs");
 
     /* Open an attribute for the dataset */
     attr=H5Aopen_name(dataset,ATTR1_NAME);
@@ -245,8 +245,8 @@ test_attr_basic_read(void)
     group=H5Gopen(fid1,GROUP1_NAME);
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(group);
-    VERIFY(ret, 1, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(group);
+    VERIFY(ret, 1, "H5Aget_num_attrs");
 
     /* Open an attribute for the dataset */
     attr=H5Aopen_name(group,ATTR2_NAME);
@@ -402,8 +402,8 @@ test_attr_compound_read(void)
     dataset=H5Dopen(fid1,"Dataset1");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 1, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 1, "H5Aget_num_attrs");
 
     /* Open 1st attribute for the dataset */
     attr=H5Aopen_idx(dataset,0);
@@ -412,10 +412,10 @@ test_attr_compound_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sextent_ndims(space);
-    VERIFY(rank, ATTR4_RANK, "H5Sextent_ndims");
-    ret=H5Sextent_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sextent_dims");
+    rank=H5Sget_simple_extent_ndims(space);
+    VERIFY(rank, ATTR4_RANK, "H5Sget_simple_extent_ndims");
+    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR4_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR4_DIM1);
         num_errs++;
@@ -607,8 +607,8 @@ test_attr_scalar_read(void)
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 1, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 1, "H5Aget_num_attrs");
 
     /* Open an attribute for the dataset */
     attr=H5Aopen_name(dataset,ATTR5_NAME);
@@ -787,8 +787,8 @@ test_attr_mult_read(void)
     dataset=H5Dopen(fid1,"Dataset1");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 3, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 3, "H5Aget_num_attrs");
 
     /* Open 1st attribute for the dataset */
     attr=H5Aopen_idx(dataset,0);
@@ -797,10 +797,10 @@ test_attr_mult_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sextent_ndims(space);
-    VERIFY(rank, ATTR1_RANK, "H5Sextent_ndims");
-    ret=H5Sextent_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sextent_dims");
+    rank=H5Sget_simple_extent_ndims(space);
+    VERIFY(rank, ATTR1_RANK, "H5Sget_simple_extent_ndims");
+    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR1_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR1_DIM1);
         num_errs++;
@@ -858,10 +858,10 @@ test_attr_mult_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sextent_ndims(space);
-    VERIFY(rank, ATTR2_RANK, "H5Sextent_ndims");
-    ret=H5Sextent_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sextent_dims");
+    rank=H5Sget_simple_extent_ndims(space);
+    VERIFY(rank, ATTR2_RANK, "H5Sget_simple_extent_ndims");
+    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR2_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR2_DIM1);
         num_errs++;
@@ -924,10 +924,10 @@ test_attr_mult_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sextent_ndims(space);
-    VERIFY(rank, ATTR3_RANK, "H5Sextent_ndims");
-    ret=H5Sextent_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sextent_dims");
+    rank=H5Sget_simple_extent_ndims(space);
+    VERIFY(rank, ATTR3_RANK, "H5Sget_simple_extent_ndims");
+    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR3_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR3_DIM1);
         num_errs++;
@@ -1065,8 +1065,8 @@ test_attr_iterate(void)
     dataset=H5Dopen(file,"Dataset1");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 3, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 3, "H5Aget_num_attrs");
 
     /* Close dataset */
     start=0;
@@ -1109,24 +1109,24 @@ test_attr_delete(void)
     dataset=H5Dopen(fid1,"Dataset1");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 3, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 3, "H5Aget_num_attrs");
 
     /* Try to delete bogus attribute */
     ret=H5Adelete(dataset,"Bogus");
     VERIFY(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 3, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 3, "H5Aget_num_attrs");
 
     /* Delete middle (2nd) attribute */
     ret=H5Adelete(dataset,ATTR2_NAME);
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 2, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 2, "H5Aget_num_attrs");
 
     /* Open 1st attribute for the dataset */
     attr=H5Aopen_idx(dataset,0);
@@ -1165,8 +1165,8 @@ test_attr_delete(void)
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 1, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 1, "H5Aget_num_attrs");
 
     /* Open last (formally 3rd) attribute for the dataset */
     attr=H5Aopen_idx(dataset,0);
@@ -1189,8 +1189,8 @@ test_attr_delete(void)
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret=H5Anum_attrs(dataset);
-    VERIFY(ret, 0, "H5Anum_attrs");
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 0, "H5Aget_num_attrs");
 
     /* Close dataset */
     ret = H5Dclose(dataset);

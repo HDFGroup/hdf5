@@ -157,7 +157,7 @@ list_attr (hid_t obj, const char *attr_name, void __unused__ *op_data)
     if ((attr = H5Aopen_name (obj, attr_name))) {
 	hid_t space = H5Aget_space (attr);
 	hsize_t size[64];
-	int ndims = H5Sextent_dims (space, size, NULL);
+	int ndims = H5Sget_simple_extent_dims (space, size, NULL);
 	H5Sclose (space);
 	printf (" {");
 	for (i=0; i<ndims; i++) {
@@ -205,7 +205,7 @@ dataset_list1(hid_t dset)
      * already been printed.
      */
     space = H5Dget_space(dset);
-    ndims = H5Sextent_dims(space, cur_size, max_size);
+    ndims = H5Sget_simple_extent_dims(space, cur_size, max_size);
     printf (" {");
     for (i=0; i<ndims; i++) {
 	HDfprintf (stdout, "%s%Hu", i?", ":"", cur_size[i]);
@@ -345,7 +345,7 @@ list (hid_t group, const char *name, void __unused__ *cd)
     
     /* Get object information */
     H5E_BEGIN_TRY {
-	status = H5Gstat(group, name, FALSE, &sb);
+	status = H5Gget_stat(group, name, FALSE, &sb);
     } H5E_END_TRY;
     if (status<0) {
 	puts("**NOT FOUND**");

@@ -10,6 +10,7 @@
  *  of the array attribute. 
  */ 
  
+#include <stdlib.h>
 #include <hdf5.h>
 
 #define FILE "Attributes.h5"
@@ -220,8 +221,8 @@ herr_t attr_info(hid_t loc_id, const char *name, void *opdata)
  */
     atype = H5Aget_type(attr);
     aspace = H5Aget_space(attr);
-    rank = H5Sextent_ndims(aspace);
-    ret = H5Sextent_dims(aspace, sdim, NULL);
+    rank = H5Sget_simple_extent_ndims(aspace);
+    ret = H5Sget_simple_extent_dims(aspace, sdim, NULL);
 /*
  *  Display rank and dimension sizes for the array attribute.
  */
@@ -239,11 +240,11 @@ herr_t attr_info(hid_t loc_id, const char *name, void *opdata)
 
     if (H5T_FLOAT == H5Tget_class(atype)) {
     printf("Type : FLOAT \n"); 
-    npoints = H5Sextent_npoints(aspace);
+    npoints = H5Sget_simple_extent_npoints(aspace);
     float_array = (float *)malloc(sizeof(float)*(int)npoints); 
     ret = H5Aread(attr, atype, float_array);
     printf("Values : ");
-    for( i = 0; i < npoints; i++) printf("%f ", float_array[i]); 
+    for( i = 0; i < (int)npoints; i++) printf("%f ", float_array[i]); 
     printf("\n");
     free(float_array);
     }

@@ -107,8 +107,8 @@ test_select_hyper(void)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Verify extent type */
-    ext_type = H5Sextent_class(sid1);
-    VERIFY(ext_type, H5S_SIMPLE, "H5Sextent_class");
+    ext_type = H5Sget_simple_extent_type(sid1);
+    VERIFY(ext_type, H5S_SIMPLE, "H5Sget_simple_extent_type");
 
     /* Select 2x15x13 hyperslab for disk dataset */
     start[0]=1; start[1]=0; start[2]=0;
@@ -378,8 +378,8 @@ test_select_all(void)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Verify extent type */
-    ext_type = H5Sextent_class(sid1);
-    VERIFY(ext_type, H5S_SIMPLE, "H5Sextent_class");
+    ext_type = H5Sget_simple_extent_type(sid1);
+    VERIFY(ext_type, H5S_SIMPLE, "H5Sget_simple_extent_type");
 
     /* Select entire 15x26 extent for disk dataset */
     ret = H5Sselect_all(sid1);
@@ -1137,8 +1137,8 @@ test_select_hyper_offset(void)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Verify extent type */
-    ext_type = H5Sextent_class(sid1);
-    VERIFY(ext_type, H5S_SIMPLE, "H5Sextent_class");
+    ext_type = H5Sget_simple_extent_type(sid1);
+    VERIFY(ext_type, H5S_SIMPLE, "H5Sget_simple_extent_type");
 
     /* Select 2x15x13 hyperslab for disk dataset */
     start[0]=1; start[1]=0; start[2]=0;

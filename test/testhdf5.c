@@ -172,7 +172,7 @@ main(int argc, char *argv[])
     InitTest("select", test_select, cleanup_select,  "Selections");
 
     Verbosity = 4;              /* Default Verbosity is Low */
-    H5version(&major, &minor, &release);
+    H5get_libversion(&major, &minor, &release);
 
     print_func("\nFor help use: testhdf5 -help\n");
     print_func("Linked with hdf5 version %u.%u release %u\n",

@@ -1040,11 +1040,11 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Anum_attrs
+    H5Aget_num_attrs
  PURPOSE
     Determines the number of attributes attached to an object
  USAGE
-    int H5Anum_attrs (loc_id)
+    int H5Aget_num_attrs (loc_id)
         hid_t loc_id;       IN: Object (dataset or group) to be queried
  RETURNS
     Number of attributes on success, negative on failure
@@ -1060,13 +1060,13 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
  *	The LOC_ID can also be a named (committed) data type.
 --------------------------------------------------------------------------*/
 int
-H5Anum_attrs(hid_t loc_id)
+H5Aget_num_attrs(hid_t loc_id)
 {
     H5G_entry_t    	*ent = NULL;	/*symtab ent of object to attribute */
     void           	*obj = NULL;
     int			ret_value = 0;
 
-    FUNC_ENTER(H5Anum_attrs, FAIL);
+    FUNC_ENTER(H5Aget_num_attrs, FAIL);
     H5TRACE1("Is","i",loc_id);
 
     /* check arguments */
@@ -1100,7 +1100,7 @@ H5Anum_attrs(hid_t loc_id)
     ret_value=H5O_count(ent, H5O_ATTR);
 
     FUNC_LEAVE(ret_value);
-} /* H5Anum_attrs() */
+} /* H5Aget_num_attrs() */
 
 
 /*--------------------------------------------------------------------------

@@ -266,12 +266,12 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type, int 
         f_space = H5Aget_space(dset);
 
 
-    ndims = H5Sextent_ndims(f_space);
+    ndims = H5Sget_simple_extent_ndims(f_space);
     if ((size_t)ndims>NELMTS(sm_size)) return -1;
 
     /* Assume entire data space to be printed */
     for (i=0; i<(hsize_t)ndims; i++) p_min_idx[i] = 0;
-    H5Sextent_dims(f_space, p_max_idx, NULL);
+    H5Sget_simple_extent_dims(f_space, p_max_idx, NULL);
     for (i=0, p_nelmts=1; i<(hsize_t)ndims; i++) {
 	p_nelmts *= p_max_idx[i]-p_min_idx[i];
     }

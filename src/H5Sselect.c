@@ -641,11 +641,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Sselect_npoints
+    H5Sget_select_npoints
  PURPOSE
     Get the number of elements in current selection
  USAGE
-    hsize_t H5Sselect_npoints(dsid)
+    hsize_t H5Sget_select_npoints(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to query
  RETURNS
     The number of elements in selection on success, 0 on failure
@@ -657,12 +657,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5Sselect_npoints(hid_t spaceid)
+H5Sget_select_npoints(hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hsize_t ret_value=0;        /* return value */
 
-    FUNC_ENTER (H5Sselect_npoints, 0);
+    FUNC_ENTER (H5Sget_select_npoints, 0);
     H5TRACE1("h","i",spaceid);
 
     /* Check args */
@@ -674,7 +674,7 @@ H5Sselect_npoints(hid_t spaceid)
     ret_value = H5S_select_npoints(space);
 
     FUNC_LEAVE (ret_value);
-}   /* H5Sselect_npoints() */
+}   /* H5Sget_select_npoints() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -725,7 +725,7 @@ H5S_select_npoints (const H5S_t *space)
     }
 
     FUNC_LEAVE (ret_value);
-}   /* H5Sselect_npoints() */
+}   /* H5S_select_npoints() */
 
 /*--------------------------------------------------------------------------
  NAME

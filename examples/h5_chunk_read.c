@@ -47,8 +47,8 @@ main (void)
      */
 
     filespace = H5Dget_space(dataset);    /* Get filespace handle first. */
-    rank      = H5Sextent_ndims(filespace);
-    status_n  = H5Sextent_dims(filespace, dims, NULL);
+    rank      = H5Sget_simple_extent_ndims(filespace);
+    status_n  = H5Sget_simple_extent_dims(filespace, dims, NULL);
     printf("dataset rank %d, dimensions %lu x %lu\n",
 	   rank, (unsigned long)(dims[0]), (unsigned long)(dims[1]));
 

@@ -68,8 +68,8 @@ main (void)
     printf(" Data size is %d \n", size);
 
     dataspace = H5Dget_space(dataset);    /* dataspace handle */
-    rank      = H5Sextent_ndims(dataspace);
-    status_n  = H5Sextent_dims(dataspace, dims_out, NULL);
+    rank      = H5Sget_simple_extent_ndims(dataspace);
+    status_n  = H5Sget_simple_extent_dims(dataspace, dims_out, NULL);
     printf("rank %d, dimensions %lu x %lu \n", rank,
 	   (unsigned long)(dims_out[0]), (unsigned long)(dims_out[1]));
 

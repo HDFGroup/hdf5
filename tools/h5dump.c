@@ -267,11 +267,12 @@ const char *pt;
  *
  *-----------------------------------------------------------------------*/
 static void
-dump_dataspace (hid_t space) {
-hsize_t size[64];
-hsize_t maxsize[64];  /* check max dims size */
-int ndims = H5Sextent_dims(space, size, maxsize);
-int i;
+dump_dataspace (hid_t space)
+{
+    hsize_t size[64];
+    hsize_t maxsize[64];  /* check max dims size */
+    int ndims = H5Sget_simple_extent_dims(space, size, maxsize);
+    int i;
 
     indent += col;
 
@@ -374,18 +375,18 @@ hid_t  attr_id, type, space;
 static herr_t
 dump_all (hid_t group, const char *name, void __unused__ *op_data)
 {
-hid_t obj;
-hid_t (*func)(void*);
-void *edata;
-char *buf;
-H5G_stat_t statbuf;
+    hid_t obj;
+    hid_t (*func)(void*);
+    void *edata;
+    char *buf;
+    H5G_stat_t statbuf;
 
     /* Disable error reporting */
     H5Eget_auto (&func, &edata);
     H5Eset_auto (NULL, NULL);
 
 
-    H5Gstat(group, name, FALSE, &statbuf);
+    H5Gget_stat(group, name, FALSE, &statbuf);
 
     switch (statbuf.type) {
     case H5G_LINK:

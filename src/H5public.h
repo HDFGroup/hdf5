@@ -29,7 +29,7 @@
 #define H5_VERS_MINOR	0       /* For minor interface/format changes  	     */
 #define H5_VERS_RELEASE	75      /* For tweaks, bug-fixes, or development     */
 
-#define H5check()	H5vers_check(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
+#define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				     H5_VERS_RELEASE)
 
 /*
@@ -82,8 +82,8 @@ extern "C" {
 herr_t H5open (void);
 herr_t H5close (void);
 herr_t H5dont_atexit (void);
-herr_t H5version (unsigned *majnum, unsigned *minnum, unsigned *relnum);
-herr_t H5vers_check (unsigned majnum, unsigned minnum, unsigned relnum);
+herr_t H5get_libversion (unsigned *majnum, unsigned *minnum, unsigned *relnum);
+herr_t H5check_version (unsigned majnum, unsigned minnum, unsigned relnum);
 
 #ifdef __cplusplus
 }
