@@ -63,6 +63,8 @@ Bug Fixes since HDF5-1.4.2 Release
       optimally when the dataset had unlimited dimensions.  Dataset is read
       in a single low-level I/O now, instead of being broken into separate
       pieces internally.
+    * Fixed a bug where reading or writing chunked data which needed datatype
+      conversion could result in data values getting corrupted.
 
 
 Documentation
