@@ -79,6 +79,9 @@ case "$host_os" in
    osf4.*)
       host_os_novers=osf4.x
       ;;
+   osf5.*)
+      host_os_novers=osf5.x
+      ;;
    solaris2.*)
       host_os_novers=solaris2.x
       ;;
