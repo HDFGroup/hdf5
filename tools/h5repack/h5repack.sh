@@ -47,56 +47,55 @@ VERIFY() {
  echo "Testing h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
       
-
-# Call h5repack
-#
-TOOLTEST() 
-{
-   # Run test.
-   # Tflops interprets "$@" as "" when no parameter is given (e.g., the
-   # case of missing file name).  Changed it to use $@ till Tflops fixes it.
-   TESTING $H5REPACK $@
-   (
-      cd $srcdir/../testfiles
-      if [ "`uname -s`" = "TFLOPS O/S" ]; then
-        $RUNSERIAL $H5REPACK_BIN $@
-      else
-        $RUNSERIAL $H5REPACK_BIN "$@"
-      fi
-   ) 
-   RET=$?
-   if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-        nerrors="`expr $nerrors + 1`"
-   else
-        echo " PASSED"
-   fi
-		  
-}
-
 # Call the h5diff tool
 #
 DIFFTEST() 
 {
-   VERIFY  $@
-      (
-	cd $srcdir/../testfiles
-	if [ "`uname -s`" = "TFLOPS O/S" ]; then
+    VERIFY  $@
+    if [ "`uname -s`" = "TFLOPS O/S" ]; then
 	$RUNSERIAL $H5DIFF_BIN $@
-	else
+    else
 	$RUNSERIAL $H5DIFF_BIN "$@"
-	fi
-      )
-   RET=$?
-   if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-        nerrors="`expr $nerrors + 1`"
-   else
-        echo " PASSED"
-   fi
+    fi
+    RET=$?
+    if [ $RET != 0 ] ; then
+ 	echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
 				    
 }
 										
+# Call h5repack
+#
+TOOLTEST() 
+{
+    # Run test.
+    # Tflops interprets "$@" as "" when no parameter is given (e.g., the
+    # case of missing file name).  Changed it to use $@ till Tflops fixes it.
+    TESTING $H5REPACK $@
+
+    infile=$srcdir/../testfiles/$1
+    outfile=out.$1
+    shift
+    if [ "`uname -s`" = "TFLOPS O/S" ]; then
+	$RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile $@
+    else
+	$RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile "$@"
+    fi
+
+    RET=$?
+    if [ $RET != 0 ] ; then
+	echo "*FAILED*"
+	nerrors="`expr $nerrors + 1`"
+    else
+	echo " PASSED"
+	DIFFTEST $infile $outfile
+    fi
+    rm -f $outfile
+}
+
 
 #
 # The tests
@@ -106,127 +105,71 @@ DIFFTEST()
 #
 
 # copy files
-TOOLTEST -i test1.h5 -o test1.out.h5
-DIFFTEST test1.h5 test1.out.h5
+TOOLTEST test1.h5
+TOOLTEST test3.h5
+TOOLTEST test4.h5
 
-TOOLTEST -i test3.h5 -o test3.out.h5
-DIFFTEST test3.h5 test3.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5
-DIFFTEST test4.h5 test4.out.h5  
-
-#TOOLTEST -i test5.h5 -o test5.out.h5
-#DIFFTEST test5.h5 test5.out.h5
+#TOOLTEST test5.h5
 
 # remove all  filters
-TOOLTEST -i test4.h5 -o test4.out.h5 -f NONE
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f NONE
 
 # remove one filter
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset_gzip:NONE
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f dset_gzip:NONE
 
 # gzip
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset1:GZIP=9
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -f GZIP=1
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f dset1:GZIP=9
+TOOLTEST test4.h5 -f GZIP=1
 
 # szip
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset1:SZIP=8
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -f SZIP=8
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f dset1:SZIP=8
+TOOLTEST test4.h5 -f SZIP=8
 
 # shuffle
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset1:SHUF
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -f SHUF
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f dset1:SHUF
+TOOLTEST test4.h5 -f SHUF
 
 # fletcher
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset1:FLET
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -f FLET
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f dset1:FLET
+TOOLTEST test4.h5 -f FLET
 
 #layout chunk
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset1:CHUNK=20x10
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l CHUNK=20x10
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -l dset1:CHUNK=20x10
+TOOLTEST test4.h5 -l CHUNK=20x10
 
 #layout compact
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset1:COMPA
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l COMPA
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -l dset1:COMPA
+TOOLTEST test4.h5 -l COMPA
 
 #layout contiguous
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset1:CONTI
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l CONTI
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -l dset1:CONTI
+TOOLTEST test4.h5 -l CONTI
 
 #conversions
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_compact:CONTI
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_compact:CHUNK=2x5
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_compact:COMPA
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_contiguous:COMPA
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_contiguous:CHUNK=3x6
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_contiguous:CONTI
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_chunk:COMPA
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_chunk:CONTI
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset_chunk:CHUNK=18x13
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -l dset_compact:CONTI
+TOOLTEST test4.h5 -l dset_compact:CHUNK=2x5
+TOOLTEST test4.h5 -l dset_compact:COMPA
+TOOLTEST test4.h5 -l dset_contiguous:COMPA
+TOOLTEST test4.h5 -l dset_contiguous:CHUNK=3x6
+TOOLTEST test4.h5 -l dset_contiguous:CONTI
+TOOLTEST test4.h5 -l dset_chunk:COMPA
+TOOLTEST test4.h5 -l dset_chunk:CONTI
+TOOLTEST test4.h5 -l dset_chunk:CHUNK=18x13
 
 #filters
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset1:SHUF -f dset1,dset2:GZIP=6
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -l dset1:CHUNK=20x10 -f dset1,dset2:SZIP=8
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f dset1:SHUF -f dset1,dset2:GZIP=6
+TOOLTEST test4.h5 -l dset1:CHUNK=20x10 -f dset1,dset2:SZIP=8
 
 #filter conversions
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset_gzip:SZIP=8
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset_szip:GZIP=1
-DIFFTEST test4.h5 test4.out.h5
-
-TOOLTEST -i test4.h5 -o test4.out.h5 -f dset_all:GZIP=1
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f dset_gzip:SZIP=8
+TOOLTEST test4.h5 -f dset_szip:GZIP=1
+TOOLTEST test4.h5 -f dset_all:GZIP=1
 
 #limit
-TOOLTEST -i test4.h5 -o test4.out.h5 -f GZIP=1 -m 1024
-DIFFTEST test4.h5 test4.out.h5
+TOOLTEST test4.h5 -f GZIP=1 -m 1024
 
 #file
-#TOOLTEST -i test4.h5 -o test4.out.h5 -e h5repack_info.txt
-#DIFFTEST test4.h5 test4.out.h5
+#TOOLTEST test4.h5 -e h5repack_info.txt
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
