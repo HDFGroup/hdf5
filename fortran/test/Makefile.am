@@ -26,6 +26,9 @@ INCLUDES=-I$(top_srcdir)/src
 # The Fortran test library
 lib_LTLIBRARIES=libh5test_fortran.la
 
+# Fortran library is linked statically to solve a build problem.
+libh5test_fortran_la_LDFLAGS=-static
+
 # Our main targets, the tests themselves
 TEST_PROG=fortranlib_test fflush1 fflush2
 check_PROGRAMS=$(TEST_PROG)
@@ -33,8 +36,6 @@ check_PROGRAMS=$(TEST_PROG)
 libh5test_fortran_la_SOURCES=fortranlib_test.f90 tH5F.f90 tH5D.f90 \
         tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 tH5Sselect.f90 \
         tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tf.f90 t.c
-
-libh5test_fortran_la_LDFLAGS=-static
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
