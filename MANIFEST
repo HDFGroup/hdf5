@@ -560,7 +560,6 @@
 ./fortran/testpar/ptesthdf5_fortran.f90
 ./fortran/testpar/tcheck.f90
 ./fortran/testpar/thdf5.f90
-./fortran/testpar/thdf5.f90
 ./fortran/testpar/thyperslab_wr.f90
 
 #------------------------------------------------------------------------------
