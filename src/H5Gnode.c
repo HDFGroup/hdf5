@@ -25,7 +25,7 @@
 #include <H5Bprivate.h>		/*B-link trees			  */
 #include <H5Eprivate.h>		/*error handling	  */
 #include <H5Gpkg.h>		/*me				  */
-#include <H5Hprivate.h>		/*heap				  */
+#include <H5HLprivate.h>		/*heap				  */
 #include <H5MFprivate.h>	/*file memory management  */
 #include <H5MMprivate.h>	/*core memory management  */
 #include <H5Oprivate.h>		/*header messages	  */
@@ -486,11 +486,11 @@ H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     assert(lt_key);
     assert(rt_key);
 
-    if (NULL == (s1 = H5H_peek(f, &(udata->heap_addr), lt_key->offset))) {
+    if (NULL == (s1 = H5HL_peek(f, &(udata->heap_addr), lt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
-    if (NULL == (s2 = H5H_peek(f, &(udata->heap_addr), rt_key->offset))) {
+    if (NULL == (s2 = H5HL_peek(f, &(udata->heap_addr), rt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
@@ -538,7 +538,7 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     FUNC_ENTER(H5G_node_cmp3, FAIL);
 
     /* left side */
-    if (NULL == (s = H5H_peek(f, &(udata->heap_addr), lt_key->offset))) {
+    if (NULL == (s = H5HL_peek(f, &(udata->heap_addr), lt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
@@ -546,7 +546,7 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 	HRETURN(-1);
 
     /* right side */
-    if (NULL == (s = H5H_peek(f, &(udata->heap_addr), rt_key->offset))) {
+    if (NULL == (s = H5HL_peek(f, &(udata->heap_addr), rt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
@@ -618,7 +618,7 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
     rt = sn->nsyms;
     while (lt < rt && cmp) {
 	idx = (lt + rt) / 2;
-	if (NULL == (s = H5H_peek(f, &(bt_udata->heap_addr),
+	if (NULL == (s = H5HL_peek(f, &(bt_udata->heap_addr),
 				  sn->entry[idx].name_off))) {
 	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 			"unable to read symbol name");
@@ -739,7 +739,7 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
     rt = sn->nsyms;
     while (lt < rt) {
 	idx = (lt + rt) / 2;
-	if (NULL == (s = H5H_peek(f, &(bt_udata->heap_addr),
+	if (NULL == (s = H5HL_peek(f, &(bt_udata->heap_addr),
 				  sn->entry[idx].name_off))) {
 	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR,
 			"unable to read symbol name");
@@ -760,7 +760,7 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
     /*
      * Add the new name to the heap.
      */
-    offset = H5H_insert(f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name)+1,
+    offset = H5HL_insert(f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name)+1,
 			bt_udata->name);
     bt_udata->ent.name_off = offset;
     if (0==offset || (size_t)(-1)==offset) {
@@ -898,7 +898,7 @@ H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
 	if (bt_udata->skip>0) {
 	    --bt_udata->skip;
 	} else {
-	    name = H5H_peek (f, &(bt_udata->group->ent.cache.stab.heap_addr),
+	    name = H5HL_peek (f, &(bt_udata->group->ent.cache.stab.heap_addr),
 			     name_off[i]);
 	    assert (name);
 	    n = strlen (name);
@@ -983,7 +983,7 @@ H5G_node_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
     for (i = 0; i < sn->nsyms; i++) {
 	fprintf(stream, "%*sSymbol %d:\n", indent - 3, "", i);
 	if (H5F_addr_defined(heap) &&
-	    (s = H5H_peek(f, heap, sn->entry[i].name_off))) {
+	    (s = H5HL_peek(f, heap, sn->entry[i].name_off))) {
 	    fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth,
 		    "Name:",
 		    s);

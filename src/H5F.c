@@ -79,7 +79,6 @@ const H5F_create_t	H5F_create_dflt = {
     sizeof(size_t),		   /* Default offset size */
     sizeof(size_t),		   /* Default length size */
     HDF5_BOOTBLOCK_VERSION,	/* Current Boot-Block version # */
-    HDF5_SMALLOBJECT_VERSION,	/* Current Small-Object heap version # */
     HDF5_FREESPACE_VERSION,	/* Current Free-Space info version # */
     HDF5_OBJECTDIR_VERSION,	/* Current Object Directory info version # */
     HDF5_SHAREDHEADER_VERSION,	/* Current Shared-Header format version # */
@@ -497,7 +496,6 @@ H5F_new(H5F_file_t *shared)
 	f->shared = H5MM_xcalloc(1, sizeof(H5F_file_t));
 	H5F_addr_undef(&(f->shared->boot_addr));
 	H5F_addr_undef(&(f->shared->base_addr));
-	H5F_addr_undef(&(f->shared->smallobj_addr));
 	H5F_addr_undef(&(f->shared->freespace_addr));
 	H5F_addr_undef(&(f->shared->hdf5_eof));
 
@@ -859,11 +857,6 @@ H5F_open(const char *name, uintn flags,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"bad boot block version number");
 	}
-	cp->smallobject_ver = *p++;
-	if (cp->smallobject_ver != HDF5_SMALLOBJECT_VERSION) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"bad small object heap version number");
-	}
 	cp->freespace_ver = *p++;
 	if (cp->freespace_ver != HDF5_FREESPACE_VERSION) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
@@ -874,6 +867,7 @@ H5F_open(const char *name, uintn flags,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"bad object dir version number");
 	}
+	p++; /*reserved*/
 	cp->sharedheader_ver = *p++;
 	if (cp->sharedheader_ver != HDF5_SHAREDHEADER_VERSION) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
@@ -919,7 +913,6 @@ H5F_open(const char *name, uintn flags,
 
 	/* Read the variable length part of the boot block... */
 	variable_size = H5F_SIZEOF_ADDR(f) +	/*base address */
-			H5F_SIZEOF_ADDR(f) +	/*global small obj heap */
 			H5F_SIZEOF_ADDR(f) +	/*global free list addr */
 			H5F_SIZEOF_ADDR(f) +	/*logical file size */
 			H5G_SIZEOF_ENTRY(f);
@@ -933,7 +926,6 @@ H5F_open(const char *name, uintn flags,
 	}
 	p = buf;
 	H5F_addr_decode(f, &p, &(f->shared->base_addr));
-	H5F_addr_decode(f, &p, &(f->shared->smallobj_addr));
 	H5F_addr_decode(f, &p, &(f->shared->freespace_addr));
 	H5F_addr_decode(f, &p, &(f->shared->hdf5_eof));
 	if (H5G_ent_decode(f, &p, &root_ent) < 0) {
@@ -1258,9 +1250,9 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     p += H5F_SIGNATURE_LEN;
 
     *p++ = f->shared->create_parms.bootblock_ver;
-    *p++ = f->shared->create_parms.smallobject_ver;
     *p++ = f->shared->create_parms.freespace_ver;
     *p++ = f->shared->create_parms.objectdir_ver;
+    *p++ = 0;			/*reserved*/
     *p++ = f->shared->create_parms.sharedheader_ver;
     assert (H5F_SIZEOF_ADDR(f)<=255);
     *p++ = (uint8)H5F_SIZEOF_ADDR(f);
@@ -1271,7 +1263,6 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     UINT16ENCODE(p, f->shared->create_parms.btree_k[H5B_SNODE_ID]);
     UINT32ENCODE(p, f->shared->consist_flags);
     H5F_addr_encode(f, &p, &(f->shared->base_addr));
-    H5F_addr_encode(f, &p, &(f->shared->smallobj_addr));
     H5F_addr_encode(f, &p, &(f->shared->freespace_addr));
     H5F_addr_encode(f, &p, &(f->shared->hdf5_eof));
     H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp));
@@ -1570,11 +1561,6 @@ H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
     fprintf(stream, " (abs)\n");
 
     fprintf(stream, "%*s%-*s ", indent, "", fwidth,
-	    "Small object heap address:");
-    H5F_addr_print(stream, &(f->shared->smallobj_addr));
-    fprintf(stream, " (rel)\n");
-
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth,
 	    "Free list address:");
     H5F_addr_print(stream, &(f->shared->freespace_addr));
     fprintf(stream, " (rel)\n");
@@ -1602,9 +1588,6 @@ H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Boot block version number:",
 	    (unsigned) (f->shared->create_parms.bootblock_ver));
-    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	    "Small object heap version number:",
-	    (unsigned) (f->shared->create_parms.smallobject_ver));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Free list version number:",
 	    (unsigned) (f->shared->create_parms.freespace_ver));

@@ -7,7 +7,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
-#include <H5Hprivate.h>
+#include <H5HLprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
@@ -76,7 +76,7 @@ H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p)
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
 #ifndef NDEBUG
     assert (H5F_addr_defined (&(mesg->heap_addr)));
-    s = H5H_peek (f, &(mesg->heap_addr), 0);
+    s = H5HL_peek (f, &(mesg->heap_addr), 0);
     assert (s && !*s);
 #endif
     UINT16DECODE(p, mesg->nalloc);
@@ -90,7 +90,7 @@ H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p)
     for (i=0; i<mesg->nused; i++) {
 	/* Name */
 	H5F_decode_length (f, p, mesg->slot[i].name_offset);
-	s = H5H_peek (f, &(mesg->heap_addr), mesg->slot[i].name_offset);
+	s = H5HL_peek (f, &(mesg->heap_addr), mesg->slot[i].name_offset);
 	assert (s && *s);
 	mesg->slot[i].name = H5MM_xstrdup (s);
 	
@@ -155,9 +155,9 @@ H5O_efl_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
 	 * If the name has not been added to the heap yet then do so now.
 	 */
 	if (0==mesg->slot[i].name_offset) {
-	    offset = H5H_insert (f, &(mesg->heap_addr),
-				 strlen (mesg->slot[i].name)+1,
-				 mesg->slot[i].name);
+	    offset = H5HL_insert (f, &(mesg->heap_addr),
+				  strlen (mesg->slot[i].name)+1,
+				  mesg->slot[i].name);
 	    if ((size_t)(-1)==offset) {
 		HRETURN_ERROR (H5E_EFL, H5E_CANTINIT, FAIL,
 			       "unable to insert URL into name heap");

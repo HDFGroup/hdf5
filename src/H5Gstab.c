@@ -12,7 +12,7 @@
 #include <H5ACprivate.h>
 #include <H5Eprivate.h>
 #include <H5Gpkg.h>
-#include <H5Hprivate.h>
+#include <H5HLprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
@@ -59,13 +59,13 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
      */
     assert(f);
     assert(self);
-    init = MAX(init, H5H_SIZEOF_FREE(f) + 2);
+    init = MAX(init, H5HL_SIZEOF_FREE(f) + 2);
 
     /* Create symbol table private heap */
-    if (H5H_create(f, H5H_LOCAL, init, &(stab.heap_addr) /*out */ ) < 0) {
+    if (H5HL_create(f, init, &(stab.heap_addr)/*out*/)<0) {
         HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap");
     }
-    name = H5H_insert(f, &(stab.heap_addr), 1, "");
+    name = H5HL_insert(f, &(stab.heap_addr), 1, "");
     if ((size_t)(-1)==name) {
         HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap");
     }

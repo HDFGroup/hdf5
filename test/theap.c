@@ -21,7 +21,7 @@
 #include <H5ACprivate.h>
 #include <H5Pprivate.h>
 #include <H5Fprivate.h>
-#include <H5Hprivate.h>
+#include <H5HLprivate.h>
 
 #define NOBJS   40
 
@@ -61,8 +61,8 @@ test_heap(void)
     CHECK(f, NULL, "H5I_object");
 
     /* Create a new heap */
-    status = H5H_create(f, H5H_LOCAL, 0, &heap_addr /*out */ );
-    CHECK_I(status, "H5H_new");
+    status = H5HL_create(f, 0, &heap_addr /*out */ );
+    CHECK_I(status, "H5HL_create");
 
     /* Add stuff to the heap */
     for (i = 0; i < NOBJS; i++) {
@@ -72,7 +72,7 @@ test_heap(void)
         if (j > 4)
             buf[j] = '\0';
 
-        obj[i] = H5H_insert(f, &heap_addr, strlen(buf) + 1, buf);
+        obj[i] = H5HL_insert(f, &heap_addr, strlen(buf) + 1, buf);
 	assert ((size_t)(-1)!=obj[i]);
     }
 
@@ -81,7 +81,7 @@ test_heap(void)
 
     /* Read the objects back out */
     for (i = 0; i < NOBJS; i++) {
-        s = H5H_peek(f, &heap_addr, obj[i]);
+        s = H5HL_peek(f, &heap_addr, obj[i]);
         MESSAGE(8, ("object is `%s'\n", s));
     }
 

@@ -25,7 +25,7 @@
 #include <H5Epublic.h>      /* Errors */
 #include <H5Fpublic.h>      /* Files */
 #include <H5Gpublic.h>      /* Groups */
-#include <H5Hpublic.h>
+#include <H5HLpublic.h>
 #include <H5Ipublic.h>      /* IDs */
 #include <H5MFpublic.h>
 #include <H5MMpublic.h>

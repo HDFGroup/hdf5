@@ -46,9 +46,8 @@ hid_t H5Pcreate (H5P_class_t type);
 herr_t H5Pclose (hid_t tid);
 hid_t H5Pcopy (hid_t tid);
 H5P_class_t H5Pget_class (hid_t tid);
-herr_t H5Pget_version (hid_t tid, int *boot/*out*/, int *heap/*out*/,
-                       int *freelist/*out*/, int *stab/*out*/,
-                       int *shhdr/*out*/);
+herr_t H5Pget_version (hid_t tid, int *boot/*out*/, int *freelist/*out*/,
+		       int *stab/*out*/, int *shhdr/*out*/);
 herr_t H5Pset_userblock (hid_t tid, size_t size);
 herr_t H5Pget_userblock (hid_t tid, size_t *size);
 herr_t H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size);

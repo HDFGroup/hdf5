@@ -408,8 +408,8 @@ H5Pget_class(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
-	 int *freelist /*out */ , int *stab /*out */ , int *shhdr /*out */ )
+H5Pget_version(hid_t tid, int *boot/*out*/, int *freelist/*out*/,
+	       int *stab/*out*/, int *shhdr/*out*/)
 {
     H5F_create_t	   *tmpl = NULL;
 
@@ -422,16 +422,10 @@ H5Pget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
 		      "not a file creation template");
     }
     /* Get values */
-    if (boot)
-	*boot = tmpl->bootblock_ver;
-    if (heap)
-	*heap = tmpl->smallobject_ver;
-    if (freelist)
-	*freelist = tmpl->freespace_ver;
-    if (stab)
-	*stab = tmpl->objectdir_ver;
-    if (shhdr)
-	*shhdr = tmpl->sharedheader_ver;
+    if (boot) *boot = tmpl->bootblock_ver;
+    if (freelist) *freelist = tmpl->freespace_ver;
+    if (stab) *stab = tmpl->objectdir_ver;
+    if (shhdr) *shhdr = tmpl->sharedheader_ver;
 
     FUNC_LEAVE(SUCCEED);
 }

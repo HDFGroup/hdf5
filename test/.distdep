@@ -130,7 +130,7 @@ dtypes.o: \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
    ../src/H5Gpublic.h \
-   ../src/H5Hpublic.h \
+   ../src/H5HLpublic.h \
    ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
@@ -183,7 +183,7 @@ dsets.o: \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
    ../src/H5Gpublic.h \
-   ../src/H5Hpublic.h \
+   ../src/H5HLpublic.h \
    ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
@@ -202,7 +202,7 @@ cmpd_dset.o: \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
    ../src/H5Gpublic.h \
-   ../src/H5Hpublic.h \
+   ../src/H5HLpublic.h \
    ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
@@ -220,7 +220,7 @@ extend.o: \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
    ../src/H5Gpublic.h \
-   ../src/H5Hpublic.h \
+   ../src/H5HLpublic.h \
    ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h
@@ -236,7 +236,7 @@ external.o: \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
    ../src/H5Gpublic.h \
-   ../src/H5Hpublic.h \
+   ../src/H5HLpublic.h \
    ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
@@ -255,7 +255,7 @@ iopipe.o: \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
    ../src/H5Gpublic.h \
-   ../src/H5Hpublic.h \
+   ../src/H5HLpublic.h \
    ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \

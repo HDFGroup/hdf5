@@ -59,16 +59,22 @@ print_stats (const char *prefix,
 {
     double	u_time, s_time, e_time, bw;
 
-    u_time = (r_stop->ru_utime.tv_sec+r_stop->ru_utime.tv_usec/1000000.0) -
-	     (r_start->ru_utime.tv_sec+r_start->ru_utime.tv_usec/1000000.0);
+    u_time = ((double)(r_stop->ru_utime.tv_sec)+
+	      (double)(r_stop->ru_utime.tv_usec)/1000000.0) -
+	     ((double)(r_start->ru_utime.tv_sec)+
+	      (double)(r_start->ru_utime.tv_usec)/1000000.0);
 
-    s_time = (r_stop->ru_stime.tv_sec+r_stop->ru_stime.tv_usec/1000000.0) -
-	     (r_start->ru_stime.tv_sec+r_start->ru_stime.tv_usec/1000000.0);
+    s_time = ((double)(r_stop->ru_stime.tv_sec)+
+	      (double)(r_stop->ru_stime.tv_usec)/1000000.0) -
+	     ((double)(r_start->ru_stime.tv_sec)+
+	      (double)(r_start->ru_stime.tv_usec)/1000000.0);
 
-    e_time = (t_stop->tv_sec+t_stop->tv_usec/1000000.0) -
-	     (t_start->tv_sec+t_start->tv_usec/1000000.0);
+    e_time = ((double)(t_stop->tv_sec)+
+	      (double)(t_stop->tv_usec)/1000000.0) -
+	     ((double)(t_start->tv_sec)+
+	      (double)(t_start->tv_usec)/1000000.0);
 
-    bw = nbytes / e_time;
+    bw = (double)nbytes / e_time;
     
     printf (HEADING "%1.2fuser %1.2fsystem %1.2felapsed %1.2fMB/s\n", 
 	    prefix, u_time, s_time, e_time, bw/(1024*1024));
@@ -141,7 +147,8 @@ main (void)
     int			start[2];
     size_t		count[2];
     
-    printf ("I/O request size is %1.1fMB\n", (size[0]*size[1])/(1024.0*1024));
+    printf ("I/O request size is %1.1fMB\n",
+	    ((double)(size[0])*(double)(size[1]))/(1024.0*1024));
 
     
     /* Open the files */

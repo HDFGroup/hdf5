@@ -29,7 +29,6 @@
 
 /* Version #'s of the major components of the file format */
 #define HDF5_BOOTBLOCK_VERSION  0       /* of the boot block format       */
-#define HDF5_SMALLOBJECT_VERSION 0      /* of the Small-Object Heap       */
 #define HDF5_FREESPACE_VERSION  0       /* of the Free-Space Info         */
 #define HDF5_OBJECTDIR_VERSION  0       /* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION 0     /* of the Shared-Header Info      */

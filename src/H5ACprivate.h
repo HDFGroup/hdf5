@@ -50,11 +50,12 @@
  *		by the LOAD method if the DEST argument is non-zero.
  */
 typedef enum H5AC_subid_t {
-    H5AC_BT_ID		 = 0,	/*B-tree nodes				     */
-    H5AC_SNODE_ID	 = 1,	/*symbol table nodes			     */
-    H5AC_HEAP_ID	 = 2,	/*object or name heap			     */
-    H5AC_OHDR_ID	 = 3,	/*object header				     */
-    H5AC_NTYPES		 = 4	/*THIS MUST BE LAST!			     */
+    H5AC_BT_ID		= 0,	/*B-tree nodes				     */
+    H5AC_SNODE_ID	= 1,	/*symbol table nodes			     */
+    H5AC_LHEAP_ID	= 2,	/*local heap				     */
+    H5AC_GHEAP_ID	= 3,	/*global heap				     */
+    H5AC_OHDR_ID	= 4,	/*object header				     */
+    H5AC_NTYPES		= 5	/*THIS MUST BE LAST!			     */
 } H5AC_subid_t;
 
 typedef struct H5AC_class_t {

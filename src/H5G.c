@@ -79,7 +79,7 @@
 #include <H5Bprivate.h>
 #include <H5Eprivate.h>
 #include <H5Gpkg.h>
-#include <H5Hprivate.h>
+#include <H5HLprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 

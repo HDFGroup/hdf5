@@ -84,7 +84,8 @@ sub manifest () {
 	my ($dir) = $fname =~ m%(.*)/CVS/Entries%;
 	open ENTRIES, $fname or die "unable to open $fname";
 	while (<ENTRIES>) {
-	    my ($ename) = m%^/(.*?)/%;
+	    my ($ename);
+	    next unless ($ename) = m%^/([^/]+)/[^-]%;
 	    $ename = "$dir/" . $ename;
 	    if (exists $manifest{$ename}) {
 		delete $manifest{$ename};

@@ -229,7 +229,6 @@ typedef struct H5F_create_t {
     size_t	sizeof_addr;	/* Number of bytes in an address	*/
     size_t	sizeof_size;	/* Number of bytes for obj sizes	*/
     intn	bootblock_ver;	/* Version # of the bootblock		*/
-    intn	smallobject_ver;/* Version # of the small-object heap	*/
     intn	freespace_ver;	/* Version # of the free-space information*/
     intn	objectdir_ver;	/* Version # of the object directory format*/
     intn	sharedheader_ver;/* Version # of the shared header format */
@@ -398,13 +397,14 @@ typedef struct H5F_file_t {
     uint32	consist_flags;	/* File Consistency Flags		*/
     haddr_t	boot_addr;	/* Absolute address of boot block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
-    haddr_t	smallobj_addr;	/* Relative address of small-obj heap	*/
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
     struct H5AC_t *cache;	/* The object cache			*/
     H5F_create_t create_parms;	/* File-creation property list		*/
     H5F_access_t access_parms;  /* File-access property list		*/
     struct H5G_t *root_grp;	/* Open root group			*/
+    intn	ncwfs;		/* Num entries on cwfs list		*/
+    struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
 } H5F_file_t;
 
 /*

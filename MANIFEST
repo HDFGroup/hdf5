@@ -133,9 +133,12 @@
 ./src/H5Gprivate.h
 ./src/H5Gpublic.h
 ./src/H5Gstab.c
-./src/H5H.c
-./src/H5Hprivate.h
-./src/H5Hpublic.h
+./src/H5HG.c
+./src/H5HGprivate.h
+./src/H5HGpublic.h
+./src/H5HL.c
+./src/H5HLprivate.h
+./src/H5HLpublic.h
 ./src/H5I.c
 ./src/H5Iprivate.h
 ./src/H5Ipublic.h
@@ -199,7 +202,6 @@
 ./test/tstab.c
 ./testpar/Makefile.irix64
 ./testpar/README
-./testpar/phdf5sup.c
 ./testpar/testphdf5.c
 ./tgif/APIGrammar.obj
 ./tgif/FileGrammar.obj

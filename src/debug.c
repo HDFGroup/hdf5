@@ -20,7 +20,8 @@
 #include <H5Pprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
-#include <H5Hprivate.h>
+#include <H5HGprivate.h>
+#include <H5HLprivate.h>
 #include <H5Oprivate.h>
 
 #define INDENT  3
@@ -93,11 +94,17 @@ main(int argc, char *argv[])
          */
         status = H5F_debug(f, &addr, stdout, 0, VCOL);
 
-    } else if (!HDmemcmp(sig, H5H_MAGIC, H5H_SIZEOF_MAGIC)) {
+    } else if (!HDmemcmp(sig, H5HL_MAGIC, H5HL_SIZEOF_MAGIC)) {
         /*
-         * Debug a heap.
+         * Debug a local heap.
          */
-        status = H5H_debug(f, &addr, stdout, 0, VCOL);
+        status = H5HL_debug(f, &addr, stdout, 0, VCOL);
+	
+    } else if (!HDmemcmp (sig, H5HG_MAGIC, H5HG_SIZEOF_MAGIC)) {
+	/*
+	 * Debug a global heap collection.
+	 */
+	status = H5HG_debug (f, &addr, stdout, 0, VCOL);
 
     } else if (!HDmemcmp(sig, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {
         /*

@@ -851,9 +851,12 @@ H5AC_debug(H5F_t *f)
         case H5AC_SNODE_ID:
             strcpy(s, "symbol table nodes");
             break;
-        case H5AC_HEAP_ID:
-            strcpy(s, "heaps");
+        case H5AC_LHEAP_ID:
+            strcpy (s, "local heaps");
             break;
+	case H5AC_GHEAP_ID:
+	    strcpy (s, "global heaps");
+	    break;
         case H5AC_OHDR_ID:
             strcpy(s, "object headers");
             break;

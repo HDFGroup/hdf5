@@ -22,7 +22,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Dprivate.h>		/* Dataset functions			*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
 #include <H5Gprivate.h>		/* Group headers		  	*/
-#include <H5Hprivate.h>		/* Name heap				*/
+#include <H5HLprivate.h>		/* Name heap				*/
 #include <H5MFprivate.h>	/* File space allocation header		*/
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Oprivate.h>		/* Object headers		  	*/
@@ -850,12 +850,12 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 
     /* Update external storage message */
     if (efl->nused>0) {
-	size_t heap_size = H5H_ALIGN (1);
+	size_t heap_size = H5HL_ALIGN (1);
 	for (i=0; i<efl->nused; i++) {
-	    heap_size += H5H_ALIGN (strlen (efl->slot[i].name)+1);
+	    heap_size += H5HL_ALIGN (strlen (efl->slot[i].name)+1);
 	}
-	if (H5H_create (f, H5H_LOCAL, heap_size, &(efl->heap_addr))<0 ||
-	    (size_t)(-1)==H5H_insert (f, &(efl->heap_addr), 1, "")) {
+	if (H5HL_create (f, heap_size, &(efl->heap_addr))<0 ||
+	    (size_t)(-1)==H5HL_insert (f, &(efl->heap_addr), 1, "")) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 			 "unable to create external file list name heap");
 	}
