@@ -21,7 +21,7 @@ fi
 case $CC_BASENAME in
     ecc)
 	# CFLAGS must be set else configure set it to -g
-	CFLAGS="${CFLAGS:--DIA64}"
+	CFLAGS="$CFLAGS"
 	DEBUG_CFLAGS="-g"
 	DEBUG_CPPFLAGS=
 	# ecc has -O2 as default
