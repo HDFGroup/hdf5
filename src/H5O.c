@@ -48,10 +48,6 @@
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint,
                        H5G_entry_t *ent/*out*/, haddr_t header);
-static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
-		       void *_udata2);
-static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
-static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 static herr_t H5O_reset_real(const H5O_class_t *type, void *native);
 static void * H5O_free_real(const H5O_class_t *type, void *mesg);
 static void * H5O_copy_real(const H5O_class_t *type, const void *mesg,
@@ -79,6 +75,14 @@ static unsigned H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		      size_t size);
 static unsigned H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
+static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
+
+/* Metadata cache callbacks */
+static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
+		       void *_udata2);
+static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
+static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
+static herr_t H5O_clear(H5O_t *oh);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
@@ -86,6 +90,7 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
     (H5AC_load_func_t)H5O_load,
     (H5AC_flush_func_t)H5O_flush,
     (H5AC_dest_func_t)H5O_dest,
+    (H5AC_clear_func_t)H5O_clear,
 }};
 
 /* Interface initialization */
@@ -503,7 +508,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     UINT32DECODE(p, oh->nlink);
 
     /* decode first chunk info */
-    chunk_addr = addr + (hsize_t)H5O_SIZEOF_HDR(f);
+    chunk_addr = addr + (hsize_t)hdr_size;
     UINT32DECODE(p, chunk_size);
 
     /* build the message array */
@@ -840,7 +845,47 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
     H5FL_FREE(H5O_t,oh);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
-}
+} /* end H5O_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_clear
+ *
+ * Purpose:	Mark a object header in memory as non-dirty.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 20 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_clear(H5O_t *oh)
+{
+    unsigned	u;      /* Local index variable */
+
+    FUNC_ENTER_NOINIT(H5O_clear);
+
+    /* check args */
+    assert(oh);
+
+    /* Mark chunks as clean */
+    for (u = 0; u < oh->nchunks; u++)
+        oh->chunk[u].dirty=FALSE;
+
+    /* Mark messages as clean */
+    for (u = 0; u < oh->nmesgs; u++)
+        oh->mesg[u].dirty=FALSE;
+
+    /* Mark whole header as clean */
+    oh->cache_info.dirty=FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5O_clear() */
 
 
 /*-------------------------------------------------------------------------
@@ -1114,6 +1159,7 @@ int
 H5O_link(H5G_entry_t *ent, int adjust, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
+    hbool_t deleted=FALSE;      /* Whether the object was deleted as a result of this action */
     int	ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(H5O_link, FAIL);
@@ -1136,6 +1182,24 @@ H5O_link(H5G_entry_t *ent, int adjust, hid_t dxpl_id)
 	    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative");
 	oh->nlink += adjust;
 	oh->cache_info.dirty = TRUE;
+
+        /* Check if the object should be deleted */
+        if(oh->nlink==0) {
+            /* Check if the object is still open by the user */
+            if(H5FO_opened(ent->file,ent->header)>=0) {
+                /* Flag the object to be deleted when it's closed */
+                if(H5FO_mark(ent->file,ent->header)<0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion");
+            } /* end if */
+            else {
+                /* Delete object right now */
+                if(H5O_delete_oh(ent->file,dxpl_id,oh)<0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
+
+                /* Mark the object header as deleted */
+                deleted=TRUE;
+            } /* end else */
+        } /* end if */
     } else if (adjust>0) {
 	oh->nlink += adjust;
 	oh->cache_info.dirty = TRUE;
@@ -1145,7 +1209,7 @@ H5O_link(H5G_entry_t *ent, int adjust, hid_t dxpl_id)
     ret_value = oh->nlink;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh) < 0 && ret_value>=0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, deleted) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1505,7 +1569,7 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
     }
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh) < 0 && ret_value!=NULL)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0 && ret_value!=NULL)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1834,7 +1898,7 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     ret_value = sequence;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh) < 0 && ret_value!=FAIL)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0 && ret_value!=FAIL)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
     
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1916,7 +1980,7 @@ H5O_unprotect(H5G_entry_t *ent, H5O_t *oh, hid_t dxpl_id)
     assert(H5F_addr_defined(ent->header));
     assert(oh);
 
-    if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh) < 0)
+    if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:
@@ -2206,7 +2270,7 @@ H5O_touch(H5G_entry_t *ent, hbool_t force, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object modificaton time");
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh)<0 && ret_value>=0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE)<0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2310,7 +2374,7 @@ H5O_bogus(H5G_entry_t *ent, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object 'bogus' message");
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh)<0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE(ret_value);
@@ -2466,7 +2530,7 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to remove constant message(s)");
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh) < 0 && ret_value>=0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3018,6 +3082,138 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_delete
+ *
+ * Purpose:	Delete an object header from a file.  This frees the file
+ *              space used for the object header (and it's continuation blocks)
+ *              and also walks through each header message and asks it to
+ *              remove all the pieces of the file referenced by the header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 19 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
+{
+    H5O_t *oh=NULL;             /* Object header information */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_delete,FAIL);
+
+    /* Check args */
+    assert (f);
+    assert(H5F_addr_defined(addr));
+
+    /* Get the object header information */
+    if (NULL == (oh = H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
+
+    /* Delete object */
+    if(H5O_delete_oh(f,dxpl_id,oh)<0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
+
+done:
+    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, TRUE)<0 && ret_value>=0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_delete_oh
+ *
+ * Purpose:	Internal function to:
+ *              Delete an object header from a file.  This frees the file
+ *              space used for the object header (and it's continuation blocks)
+ *              and also walks through each header message and asks it to
+ *              remove all the pieces of the file referenced by the header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 19 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
+{
+    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
+    H5O_chunk_t *curr_chk;      /* Pointer to current chunk being operated on */
+    unsigned	u;
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOINIT(H5O_delete_oh);
+
+    /* Check args */
+    assert (f);
+    assert (oh);
+
+    /* Walk through the list of object header messages, asking each on to
+     * delete any file space used
+     */
+    for (u = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
+        const H5O_class_t	*type = NULL;
+
+        /* Don't handle shared messages yet */
+        assert(!(curr_msg->flags & H5O_FLAG_SHARED));
+
+        /* Get the message's type */
+	type = curr_msg->type;
+
+        /* Check if there is a file space deletion callback for this type of message */
+        if(type->delete) {
+            /*
+             * Decode the message if necessary.
+             */
+            if (NULL == curr_msg->native) {
+                assert(type->decode);
+                curr_msg->native = (type->decode) (f, dxpl_id, curr_msg->raw, NULL);
+                if (NULL == curr_msg->native)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message");
+            } /* end if */
+
+            if ((type->delete)(f, dxpl_id, curr_msg->native)<0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
+        } /* end if */
+    } /* end for */
+
+    /* Free all the chunks for the object header */
+    for (u = 0, curr_chk=&oh->chunk[0]; u < oh->nchunks; u++,curr_chk++) {
+        haddr_t     chk_addr;   /* Actual address of chunk */
+        hsize_t     chk_size;   /* Actual size of chunk */
+
+        if(u==0) {
+            chk_addr = curr_chk->addr - H5O_SIZEOF_HDR(f);
+            chk_size = curr_chk->size + H5O_SIZEOF_HDR(f);
+        } /* end if */
+        else {
+            chk_addr = curr_chk->addr;
+            chk_size = curr_chk->size;
+        } /* end else */
+
+        /* Free the file space for the chunk */
+	if (H5MF_xfree(f, H5FD_MEM_OHDR, dxpl_id, chk_addr, chk_size)<0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header");
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_delete_oh() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_debug_id
  *
  * Purpose:	Act as a proxy for calling the 'debug' method for a
@@ -3238,7 +3434,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
 
 done:
-    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh) < 0 && ret_value>=0)
+    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, FALSE) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);

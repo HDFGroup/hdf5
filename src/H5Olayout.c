@@ -24,6 +24,7 @@
 #include "H5Dprivate.h"
 #include "H5Eprivate.h"
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MFprivate.h"	/* File space management		*/
 #include "H5MMprivate.h"
 #include "H5Opkg.h"             /* Object header functions                  */
 
@@ -34,6 +35,7 @@ static void *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_layout_reset (void *_mesg);
 static herr_t H5O_layout_free (void *_mesg);
+static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -47,7 +49,8 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_copy,        	/*copy the native value         */
     H5O_layout_size,        	/*size of message on disk       */
     H5O_layout_reset,           /*reset method                  */
-    H5O_layout_free,        	/*free the struct         */
+    H5O_layout_free,        	/*free the struct		*/
+    H5O_layout_delete,	        /* file delete method		*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
     H5O_layout_debug,       	/*debug the message             */
@@ -441,6 +444,59 @@ H5O_layout_free (void *_mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_layout_delete
+ *
+ * Purpose:     Free file space referenced by message
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, March 19, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
+{
+    const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_layout_delete, FAIL);
+
+    /* check args */
+    assert(f);
+    assert(mesg);
+
+    /* Perform different actions, depending on the type of storage */
+    switch(mesg->type) {
+        case H5D_COMPACT:       /* Compact data storage */
+            /* Nothing required */
+            break;
+
+        case H5D_CONTIGUOUS:    /* Contiguous block on disk */
+            /* Free the file space for the raw data */
+            if (H5F_contig_delete(f, dxpl_id, mesg)<0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
+            break;
+
+        case H5D_CHUNKED:       /* Chunked blocks on disk */
+            /* Free the file space for the raw data */
+            if (H5F_istore_delete(f, dxpl_id, mesg)<0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
+            break;
+
+        default:
+            HGOTO_ERROR (H5E_OHDR, H5E_BADTYPE, FAIL, "not valid storage type");
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_layout_delete() */
 
 
 /*-------------------------------------------------------------------------
