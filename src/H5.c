@@ -14,9 +14,6 @@
 
 #define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"		/* B-link trees				*/
 #include "H5Dprivate.h"		/* Datasets				*/

@@ -1135,9 +1135,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
    assert(asrt);				                              \
 									      \
    /* Check function name */               				      \
-   H5_CHECK_FUNCNAME(func_name);					      \
-									      \
-   /* Start tracing */                  				      \
+   H5_CHECK_FUNCNAME(func_name);
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
     static const char FUNC[]=#func_name;                                      \

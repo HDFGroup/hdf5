@@ -89,7 +89,7 @@
         H5Zszip.c
 
     The following files have had their FUNC_ENTER, FUNC_LEAVE & HGOTO*
-    macros cleaned up and the PABLO_MASK adjusted, but have not been linted
+    macros cleaned up, but have not been linted
     due to their dependencies on features that we don't support on Windows:
         H5FDfphdf5.c
         H5FDgass.c

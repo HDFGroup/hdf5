@@ -24,9 +24,6 @@
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/

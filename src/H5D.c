@@ -17,9 +17,6 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5D_init_interface
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
