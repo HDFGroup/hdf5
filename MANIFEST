@@ -7,7 +7,6 @@
 
 ./COPYING
 ./INSTALL
-./INSTALL_MAINT
 ./INSTALL_TFLOPS
 ./INSTALL_parallel
 ./INSTALL_Windows.txt
@@ -64,6 +63,7 @@
 ./config/solaris2.x
 ./config/unicosmk
 
+./doc/Makefile.in
 ./doc/html/Attributes.html
 ./doc/html/Big.html
 ./doc/html/Caching.html
@@ -108,6 +108,8 @@
 ./doc/html/IH_mapFoot.gif
 ./doc/html/IH_mapHead.gif
 ./doc/html/IOPipe.html
+./doc/html/Lib_Maint.html		_DO_NOT_DISTRIBUTE_
+./doc/html/Makefile.in
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
 ./doc/html/NCSAfooterlogo.gif
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
@@ -129,6 +131,7 @@
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
 ./doc/html/Tools.html
+./doc/html/Tutor/Makefile.in
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
@@ -403,6 +406,7 @@
 ./tools/h5toh4.h
 ./tools/h5tools.c
 ./tools/h5tools.h
+./tools/pdb2hdf.c
 ./tools/testh5dump.sh
 ./tools/testh5toh4
 
