@@ -715,7 +715,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
 	p += sizeof(haddr_t);
 	nseen++;
     } END_MEMBERS;
-    if (H5Tconvert(H5T_NATIVE_HADDR, H5T_STD_U64LE, nseen, buf+8, NULL,
+    if (H5Tconvert(H5T_NATIVE_HADDR, H5T_STD_U64LE, nseen*2, buf+8, NULL,
 		   H5P_DEFAULT)<0) {
         H5Epush_ret(func, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1);
     }
