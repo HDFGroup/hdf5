@@ -2459,7 +2459,7 @@ EOF
       *irix[56]*)
         # Add in paths just for the HDF5 library stuff...
         pwd=`pwd`;
-        rpath="$rpath:$pwd/.libs:$pwd/../src/.libs:$pwd/../../src/.libs";
+        rpath="$rpath:$pwd/.libs:$pwd/../src/.libs:$pwd/../../src/.libs:$pwd/../test/.libs";
 
         # Modify the rpaths so that the compiler can handle the number
         # of library paths
