@@ -2322,15 +2322,53 @@ test_remove_level1_noredistrib(hid_t fapl)
     /* Make certain that the # of records is correct */
     if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-1)) TEST_ERROR;
 
-    /* Query the address of the root node in the B-tree */
-    if (H5B2_get_root_addr(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &root_addr)<0) {
+    PASSED();
+
+    /* Attempt to remove a record from left leaf of a level-1 B-tree with noredistribution */
+    TESTING("B-tree remove: record from left leaf of level-1 B-tree");
+    record = 0;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
 	H5_FAILED();
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
 
-    /* Make certain that the root node has not been freed */
-    if(!H5F_addr_defined(root_addr)) TEST_ERROR;
+    /* Make certain that the record value is correct */
+    if(record != 0) TEST_ERROR;
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-2)) TEST_ERROR;
+
+    PASSED();
+
+    /* Attempt to remove a record from middle leaf of a level-1 B-tree with noredistribution */
+    TESTING("B-tree remove: record from middle leaf of level-1 B-tree");
+    record = INSERT_SPLIT_ROOT_NREC;
+    if(H5B2_remove(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the record value is correct */
+    if(record != INSERT_SPLIT_ROOT_NREC) TEST_ERROR;
+
+    /* Query the number of records in the B-tree */
+    if (H5B2_get_nrec(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &nrec)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Make certain that the # of records is correct */
+    if(nrec != ((INSERT_SPLIT_ROOT_NREC*2)-3)) TEST_ERROR;
 
     PASSED();
 
