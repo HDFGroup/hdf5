@@ -4,7 +4,7 @@ CC=cicc
 AR=xar
 RANLIB=true
 LIBS="-L./ -L../ -lnoop_stubs"
-RUNTEST=yod
+RUNTEST="yod -sz 1"
 export CC AR RANLIB LIBS RUNTEST
 
 # Based on the setting of environment variable `HDF5_MODE' we set the
