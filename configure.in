@@ -757,7 +757,6 @@ case $withval in
     AC_CHECK_LIB(z, compress,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
     ;;
 esac
-echo "LIBS == $LIBS"
 
 dnl ----------------------------------------------------------------------
 dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present? It is also needed by 
