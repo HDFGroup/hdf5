@@ -114,3 +114,25 @@ __DLL__ herr_t H5E_clear (void);
 __DLL__ herr_t H5E_walk (H5E_direction_t dir, H5E_walk_t func,
 			 void *client_data);
 #endif
+
+#ifdef H5_HAVE_PARALLEL
+/*
+ * MPI error handling macros.
+ */
+
+extern	char	H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
+extern	int	H5E_mpi_error_str_len;
+
+#define	HMPI_ERROR(mpierr){						      \
+    MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);      \
+    HERROR(H5E_INTERNAL, H5E_MPIERRSTR, H5E_mpi_error_str);                   \
+}
+#define	HMPI_GOTO_ERROR(retcode, str, mpierr){			      \
+    HMPI_ERROR(mpierr);							      \
+    HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                       \
+}
+#define	HMPI_RETURN_ERROR(retcode, str, mpierr){			      \
+    HMPI_ERROR(mpierr);							      \
+    HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                       \
+}
+#endif
