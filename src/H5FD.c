@@ -851,7 +851,10 @@ H5FDclose(H5FD_t *file)
  *              Wednesday, August  4, 1999
  *
  * Modifications:
- *
+ *              Robb Matzke, 2000-11-10
+ *              Removed a call to set *file to all zero because the struct
+ *              has already been freed by the close method. This fixes a write
+ *              to freed memory.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -868,8 +871,9 @@ H5FD_close(H5FD_t *file)
     FUNC_ENTER(H5FD_close, FAIL);
     assert(file && file->cls);
 
-    /* Free all free-lists, leaking any memory thus described */
-    /* Also leaks file space allocated but not used when metadata aggregation is turned on */
+    /* Free all free-lists, leaking any memory thus described. Also leaks
+     * file space allocated but not used when metadata aggregation is
+     * turned on. */
     for (i=H5FD_MEM_DEFAULT; i<H5FD_MEM_NTYPES; i++) {
 	for (cur=file->fl[i]; cur; cur=next) {
 #ifdef H5F_DEBUG
@@ -913,8 +917,6 @@ H5FD_close(H5FD_t *file)
     if ((driver->close)(file)<0) {
 	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed");
     }
-    HDmemset(file, 0, sizeof(H5FD_t));
-
     FUNC_LEAVE(SUCCEED);
 }
 
