@@ -13,12 +13,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "hdf5.h"
+#include "H5private.h"
 #include "h5tools_utils.h"
 
 #define TRUE 1
@@ -233,7 +236,7 @@ main (int argc, const char *argv[])
   H5Pclose (plist);
   H5Fclose (ifile);
 
-  ufid = open (ub_file, O_RDONLY);
+  ufid = HDopen (ub_file, O_RDONLY, 0);
 
   if (ufid < 0)
     {
@@ -252,7 +255,7 @@ main (int argc, const char *argv[])
 
   fsize = sbuf.st_size;
 
-  h5fid = open (input_file, O_RDONLY);
+  h5fid = HDopen (input_file, O_RDONLY, 0);
 
   if (h5fid < 0)
     {
@@ -273,7 +276,7 @@ main (int argc, const char *argv[])
 
   if (output_file == NULL)
     {
-      ofid = open (input_file, O_WRONLY);
+      ofid = HDopen (input_file, O_WRONLY, 0);
 
       if (ofid < 0)
 	{
@@ -284,7 +287,7 @@ main (int argc, const char *argv[])
     }
   else
     {
-      ofid = open (output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      ofid = HDopen (output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
       if (ofid < 0)
 	{
@@ -435,23 +438,24 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
 
   while (howmuch > 0)
     {
-      lseek (outfid, (off_t) to, SEEK_SET);
-      lseek (infid, (off_t) from, SEEK_SET);
+      HDlseek (outfid, (off_t) to, SEEK_SET);
+      HDlseek (infid, (off_t) from, SEEK_SET);
 
       if (howmuch > 512)
 	{
-	  nchars = read (infid, buf, (unsigned) 512);
+	  nchars = HDread (infid, buf, (unsigned) 512);
 	}
       else
 	{
-	  nchars = read (infid, buf, howmuch);
+	  nchars = HDread (infid, buf, howmuch);
 	}
+
       if (nchars <= 0)
 	{
 	  printf ("huh? \n");
 	  exit (1);
 	}
-      /*ncw = */ write (outfid, buf, (unsigned) nchars);
+      /*ncw = */ HDwrite (outfid, buf, (unsigned) nchars);
 
       /* assert (ncw == nchars) */
 
@@ -526,14 +530,14 @@ write_pad (int ofile, hsize_t where)
 
   buf[0] = '\0';
 
-  lseek (ofile, (off_t) where, SEEK_SET);
+  HDlseek (ofile, (off_t) where, SEEK_SET);
 
   psize = compute_user_block_size (where);
   psize -= where;
 
   for (i = 0; i < psize; i++)
     {
-      write (ofile, buf, 1);
+      HDwrite (ofile, buf, 1);
     }
   return (where + psize);	/* the new size of the file. */
 }
