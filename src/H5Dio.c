@@ -1132,8 +1132,8 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
   	/* Sanity check dataset, then read it */
         assert(((dataset->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->layout.u.contig.addr))
                 || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
-            || dataset->efl.nused>0 || 
-             dataset->layout.type==H5D_COMPACT);
+                || dataset->efl.nused>0 || 0 == nelmts
+                || dataset->layout.type==H5D_COMPACT);
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
         status = (sconv->read)(dataset->ent.file, dxpl_cache, dxpl_id,
             dataset, (H5D_storage_t *)&(dataset->efl),
@@ -1622,7 +1622,8 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
   	/* Sanity check dataset, then read it */
         assert(((dataset->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->layout.u.contig.addr))
                 || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
-            || dataset->efl.nused>0 || dataset->layout.type==H5D_COMPACT);
+                || dataset->efl.nused>0 || 0 == nelmts
+                || dataset->layout.type==H5D_COMPACT);
 
         /* Get first node in chunk tree */
         chunk_node=H5TB_first(fm.fsel->root);
