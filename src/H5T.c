@@ -4075,6 +4075,65 @@ H5Tget_member_name(hid_t type_id, int membno)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Tget_member_index
+ *
+ * Purpose:     Returns the index of a member in a compound or enumeration
+ *              data type by given name.Members are stored in no particular 
+ *              order with numbers 0 through N-1 where N is the value 
+ *              returned by H5Tget_nmembers().
+ *      
+ * Return:      Success:        index of the member if exists.
+ *              Failure:        -1.
+ *
+ * Programmer:  Raymond Lu
+ *              Thursday, April 4, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Tget_member_index(hid_t type_id, const char *name)
+{
+    H5T_t       *dt = NULL;
+    int         ret_value = FAIL;
+    int         nmembs, i;
+
+    FUNC_ENTER(H5Tget_member_index, NULL);
+    H5TRACE2("Is","is",type_id,name);
+
+    /* Check arguments */
+    assert(name);
+    if(H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    /* Locate member by name */
+    switch (dt->type) {
+    case H5T_COMPOUND:
+        nmembs = dt->u.compnd.nmembs;
+        for(i=0; i<nmembs; i++) {
+            if(!HDstrcmp(dt->u.compnd.memb[i].name, name))
+                HGOTO_DONE(i);
+        }
+        break;  
+    case H5T_ENUM:
+        nmembs = dt->u.enumer.nmembs;
+        for(i=0; i<nmembs; i++) {
+            if(!HDstrcmp(dt->u.enumer.name[i], name))
+                HGOTO_DONE(i);
+        }
+        break;
+    default:
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                "operation not supported for this type");
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tget_member_offset
  *
  * Purpose:	Returns the byte offset of the beginning of a member with

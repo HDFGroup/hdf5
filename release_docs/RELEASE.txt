@@ -156,6 +156,9 @@ Documentation
 New Features
 ============
 
+    * A new query function H5Tget_member_index has been added for compound
+      and enumeration data types, to retrieve member's index by name.
+      SLU - 2002/04/05
     * Improved performance of "regular" hyperslab I/O when using MPI-IO and the
       datatype conversion is unneccessary.  QAK - 2002/04/02
     * Improved performance of single hyperslab I/O when datatype conversion is
