@@ -239,7 +239,9 @@ H5_term_library(void)
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(P);
-            /*pending += DOWN(E); - Commented out since there is seg fault */
+            /* Don't shut down the error code until other APIs which use it are shut down */
+            if(pending==0)
+                pending += DOWN(E);
             /* Don't shut down the ID code until other APIs which use them are shut down */
             if(pending==0)
                 pending += DOWN(I);
@@ -903,7 +905,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 		if (prec<1) prec = 1;
 	    }
 
-	    /* Type modifier */
+	    /* Extra type modifiers */
 	    if (HDstrchr ("ZHhlqLI", *s)) {
 		switch (*s) {
                 /*lint --e{506} Don't issue warnings about constant value booleans */
@@ -960,15 +962,12 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 	    sprintf (format_templ, "%%%s%s%s%s%s",
 		     leftjust?"-":"", plussign?"+":"",
 		     ldspace?" ":"", prefix?"#":"", zerofill?"0":"");
-	    if (fwidth>0) {
+	    if (fwidth>0)
 		sprintf (format_templ+HDstrlen(format_templ), "%d", fwidth);
-	    }
-	    if (prec>0) {
+	    if (prec>0)
 		sprintf (format_templ+HDstrlen(format_templ), ".%d", prec);
-	    }
-	    if (*modifier) {
+	    if (*modifier)
 		sprintf (format_templ+HDstrlen(format_templ), "%s", modifier);
-	    }
 	    sprintf (format_templ+HDstrlen(format_templ), "%c", conv);
 	    
 
@@ -1044,9 +1043,9 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 				leftjust?"-":"", plussign?"+":"",
 				ldspace?" ":"", prefix?"#":"",
 				zerofill?"0":"");
-			if (fwidth>0) {
+			if (fwidth>0)
 			    sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
-			}
+
                         /*lint --e{506} Don't issue warnings about constant value booleans */
                         /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
 			if (sizeof(x)==H5_SIZEOF_INT) {
@@ -1060,10 +1059,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 			n = fprintf(stream, format_templ, x);
 		    } else {
 			HDstrcpy(format_templ, "%");
-			if (leftjust) HDstrcat(format_templ, "-");
-			if (fwidth) {
+			if (leftjust)
+                            HDstrcat(format_templ, "-");
+			if (fwidth)
 			    sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
-			}
 			HDstrcat(format_templ, "s");
 			fprintf(stream, format_templ, "UNDEF");
 		    }
@@ -1800,48 +1799,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		}
 		break;
 
-	    case 'j':
-		if (ptr) {
-		    if (vp) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    /*H5E_major_t emaj = va_arg(ap, H5E_major_t);*/
-		    hid_t emaj_id = va_arg(ap, hid_t);
-                    H5E_msg_t   *emaj_ptr;
-
-                    /* Get the message and print it */
-                    if(NULL != (emaj_ptr = H5I_object_verify(emaj_id, H5I_ERROR_MSG)))
-		        fprintf (out, emaj_ptr->msg);
-                    else
-		        fprintf(out, "%d", (int)emaj_id);
-		}
-		break;
-
-	    case 'n':
-		if (ptr) {
-		    if (vp) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    /*H5E_minor_t emin = va_arg(ap, H5E_minor_t);*/
-		    hid_t emin_id = va_arg(ap, hid_t);
-                    H5E_msg_t   *emin_ptr;
-
-                    /* Get the message and print it */
-                    if(NULL != (emin_ptr = H5I_object_verify(emin_id, H5I_ERROR_MSG)))
-		        fprintf (out, emin_ptr->msg);
-                    else
-		        fprintf(out, "%d", (int)emin_id);
-
-		    fprintf(out, "%d", (int)emin_id);
-		}
-		break;
-		
 	    default:
 		fprintf (out, "BADTYPE(E%c)", type[1]);
 		goto error;
@@ -2032,16 +1989,10 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             fprintf (out, "%ld (error)", (long)obj);
                             break;
                         case H5I_FILE:
-                            fprintf(out, "%ld", (long)obj);
-                            if (HDstrcmp (argname, "file")) {
-                                fprintf (out, " (file)");
-                            }
+                            fprintf(out, "%ld (file)", (long)obj);
                             break;
                         case H5I_GROUP:
-                            fprintf(out, "%ld", (long)obj);
-                            if (HDstrcmp (argname, "group")) {
-                                fprintf (out, " (group)");
-                            }
+                            fprintf(out, "%ld (group)", (long)obj);
                             break;
                         case H5I_DATATYPE:
                             if (obj==H5T_NATIVE_SCHAR_g) {
@@ -2131,17 +2082,11 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             } else if (obj==H5T_FORTRAN_S1_g) {
                                 fprintf(out, "H5T_FORTRAN_S1");
                             } else {
-                                fprintf(out, "%ld", (long)obj);
-                                if (HDstrcmp (argname, "type")) {
-                                    fprintf (out, " (type)");
-                                }
+                                fprintf(out, "%ld (dtype)", (long)obj);
                             }
                             break;
                         case H5I_DATASPACE:
-                            fprintf(out, "%ld", (long)obj);
-                            if (HDstrcmp (argname, "space")) {
-                                fprintf (out, " (space)");
-                            }
+                            fprintf(out, "%ld (dspace)", (long)obj);
                             /* Save the rank of simple data spaces for arrays */
                             /* This may generate recursive call to the library... -QAK */
                             {
@@ -2152,22 +2097,10 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             }
                             break;
                         case H5I_DATASET:
-                            fprintf(out, "%ld", (long)obj);
-                            if (HDstrcmp (argname, "dset")) {
-                                fprintf (out, " (dset)");
-                            }
+                            fprintf(out, "%ld (dset)", (long)obj);
                             break;
                         case H5I_ATTR:
-                            fprintf(out, "%ld", (long)obj);
-                            if (HDstrcmp (argname, "attr")) {
-                                fprintf (out, " (attr)");
-                            }
-                            break;
-                        case H5I_TEMPBUF:
-                            fprintf(out, "%ld", (long)obj);
-                            if (HDstrcmp(argname, "tbuf")) {
-                                fprintf(out, " (tbuf");
-                            }
+                            fprintf(out, "%ld (attr)", (long)obj);
                             break;
                         case H5I_REFERENCE:
                             fprintf(out, "%ld (reference)", (long)obj);
@@ -2175,9 +2108,23 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         case H5I_VFL:
                             fprintf(out, "%ld (file driver)", (long)obj);
                             break;
+                        case H5I_GENPROP_CLS:
+                            fprintf(out, "%ld (genprop class)", (long)obj);
+                            break;
+                        case H5I_GENPROP_LST:
+                            fprintf(out, "%ld (genprop list)", (long)obj);
+                            break;
+                        case H5I_ERROR_CLASS:
+                            fprintf(out, "%ld (err class)", (long)obj);
+                            break;
+                        case H5I_ERROR_MSG:
+                            fprintf(out, "%ld (err msg)", (long)obj);
+                            break;
+                        case H5I_ERROR_STACK:
+                            fprintf(out, "%ld (err stack)", (long)obj);
+                            break;
                         default:
-                            fprintf(out, "%ld", (long)obj);
-                            fprintf (out, " (unknown class)");
+                            fprintf(out, "%ld (unknown class)", (long)obj);
                             break;
 		    }
 		}
@@ -2261,9 +2208,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    case H5I_ATTR:
 			fprintf (out, "H5I_ATTR");
 			break;
-		    case H5I_TEMPBUF:
-			fprintf (out, "H5I_TEMPBUF");
-			break;
 		    case H5I_REFERENCE:
 			fprintf (out, "H5I_REFERENCE");
 			break;
@@ -2275,6 +2219,15 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			break;
 		    case H5I_GENPROP_LST:
 			fprintf (out, "H5I_GENPROP_LST");
+			break;
+		    case H5I_ERROR_CLASS:
+			fprintf (out, "H5I_ERROR_CLASS");
+			break;
+		    case H5I_ERROR_MSG:
+			fprintf (out, "H5I_ERROR_MSG");
+			break;
+		    case H5I_ERROR_STACK:
+			fprintf (out, "H5I_ERROR_STACK");
 			break;
 		    case H5I_NGROUPS:
 			fprintf (out, "H5I_NGROUPS");
