@@ -1126,14 +1126,6 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 
 	    H5Tclose(memb);
 
-        /* Create a datatype for reclaiming the memory */
-        space=H5Screate(H5S_SCALAR);
-
-        /* Reclaim the VL memory */
-        H5Dvlen_reclaim(type,space,H5P_DEFAULT,cp_vp);
-
-        /* Let the dataspace go */
-        H5Sclose(space);
     } else {
         /* All other types get printed as hexadecimal */
         unsigned int i;
@@ -1483,6 +1475,9 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
     hsize_t		hs_nelmts;		/*elements in request	*/
 
+    /* VL data special information */
+    unsigned vl_data=0;     /* Whether the dataset contains VL datatypes */
+
 #if 0
     hsize_t		dim_n_size;
 #endif
@@ -1518,6 +1513,10 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
         return 0; /*nothing to print*/
 
     ctx.size_last_dim = total_size[ctx.ndims - 1];
+
+    /* Check if we have VL data in the dataset's datatype */
+    if(H5Tdetect_class(p_type,H5T_VLEN)==TRUE)
+        vl_data=TRUE;
 
     /*
      * Determine the strip mine size and allocate a buffer. The strip mine is
@@ -1570,6 +1569,10 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
         flags |= ((elmtno + hs_nelmts) >= p_nelmts) ? END_OF_DATA : 0;
         h5dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
                                p_type, sm_buf);
+
+        /* Reclaim any VL memory, if necessary */
+        if(vl_data)
+            H5Dvlen_reclaim(p_type,sm_space,H5P_DEFAULT,sm_buf);
 
         /* Calculate the next hyperslab offset */
         for (i = ctx.ndims, carry = 1; i > 0 && carry; --i) {
