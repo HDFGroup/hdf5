@@ -12,7 +12,7 @@ Layer to handle file I/O.  We currently have documented SRB and Globus-GASS.
 I. Overview
 -----------
 This part contains instructions for remote-accessing HDF5 through SRB.  The 
-SRB version 1.1.6 on Sun Solaris 2.7 platform has been tested.  If you have 
+SRB version 1.1.7 on Sun Solaris 2.7 platform has been tested.  If you have 
 difficulties installing the software in your system, please send mails to me
 (Raymond Lu) at
 
@@ -59,9 +59,9 @@ The installation steps are similar to the ones in INSTALL file:
 
 4. Run 'make install'
 
-5. Run testing program:
+5. Run testing program(Optional):
    Go to the testing directory(cd test) and run srb_write, srb_read, 
-   srb_append.
+   srb_append.  Actually, these tests have been run in step 3.
 
    srb_write:  Connect to SRB server, write an HDF5 file with an integer 
                dataset to SRB server.
