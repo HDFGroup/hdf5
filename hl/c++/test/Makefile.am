@@ -19,8 +19,8 @@
 
 include $(top_srcdir)/config/commence.am
 
-# Include src and c++/src directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src
+# Include directories
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test
 
 # C++ libraries and tests are built statically
 AM_LDFLAGS=-static

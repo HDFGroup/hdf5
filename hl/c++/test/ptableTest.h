@@ -9,31 +9,31 @@
 #define PTABLETEST
 
 #include "H5PacketTable.h"
-#include <assert.h>
+#include "h5test.h"
 
 static hid_t fileID;
 
 /* Test some basic functionality; adding and getting records */
-void BasicTest(void);
+int BasicTest(void);
 
 /* Test a compound fixed-length datatype */
-void TestCompoundDatatype(void);
+int TestCompoundDatatype(void);
 
 /* Test the GetNext functions and their indexes */
-void TestGetNext(void);
+int TestGetNext(void);
 
 /* Ensure that the functions return the correct errors in
  * response to invalid indexes */
-void TestErrors(void);
+int TestErrors(void);
 
 /* Test getting multiple records at once using GetPacket */
-void TestGetPacket(void);
+int TestGetPacket(void);
 
 /* Create two packet tables at once using compound datatypes.
    Test for unusual interactions between multiple packet tables. */
-void SystemTest(void);
+int SystemTest(void);
 
 /* Test the variable length dataset functionality */
-void VariableLengthTest(void);
+int VariableLengthTest(void);
 
-#endif // PTABLETEST
+#endif /* PTABLETEST */

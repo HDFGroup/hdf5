@@ -1,3 +1,5 @@
+/* ptableTest.cpp */
+
 #include "ptableTest.h"
 
 #define TEST_FILE "packettest.h5"
@@ -6,62 +8,76 @@
 int main(void)
 {
     herr_t err;
+    herr_t num_errors = 0;
 
     /* Create new HDF5 file */
     fileID = H5Fcreate(TEST_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if(fileID <0)
-        fprintf(stderr, "Couldn't open file.\n");
+    {
+        fprintf(stderr, "Couldn't create file.\n");
+        num_errors = 1;
+    }
     else {
 
-            BasicTest();
+            num_errors += BasicTest();
 
-            TestCompoundDatatype();
+            num_errors += TestCompoundDatatype();
 
-            TestGetPacket();
+            num_errors += TestGetPacket();
 
-            TestGetNext();
+            num_errors += TestGetNext();
 
-            TestErrors();
+            num_errors += TestErrors();
 
-            SystemTest();
+            num_errors += SystemTest();
 
-            VariableLengthTest();
+            num_errors += VariableLengthTest();
 
         /* Terminate access to the file. */
         err = H5Fclose(fileID);
         if( err < 0 )
+        {
             fprintf(stderr, "Failed to close file.\n");
+            num_errors++;
+        }
 
         /* Delete the file */
         remove(TEST_FILE);
     }
+
+    if (num_errors == 0)
+      /* ALL TESTS PASSED */
+      return 0;
+    else
+      /* ERRORS */
+      return -1;
 }
 
 
-void BasicTest()
+int BasicTest()
 {
-    printf("Basic Test running...\n");
-
     herr_t err;
     int myRecord;
     int count;
     int error;
 
+    TESTING("basic funtionality")
+
     FL_PacketTable wrapper(fileID, "/basicTest", H5T_NATIVE_INT, 1);
-    assert(wrapper.IsValid());
+    if(! wrapper.IsValid())
+      goto out;
 
     /* Ensure initial count is zero */
     count = wrapper.GetPacketCount(error);
-    assert(count == 0);
-    assert(error == 0);
+    if(count != 0 || error != 0)
+      goto out;
 
     myRecord = 1;
 
     /* add some records test */
     err = wrapper.AppendPacket(&myRecord);
-    if(err == -1)
-        printf("AppendHorizontalRecord failed.\n");
-    else{
+    if(err < 0)
+        goto out;
 
     myRecord = 2;
 
@@ -69,30 +85,38 @@ void BasicTest()
 
     /* get number of records test */
     count = wrapper.GetPacketCount();    
-
-    assert(count == 2);
+    if(count != 2)
+      goto out;
 
     /* get records test */
     err = wrapper.GetPacket(0, &myRecord);
-    if(err == -1)
-        fprintf(stderr, "Error in GetPacket.\n");
+    if(err < 0)
+      goto out;
 
-    assert(myRecord == 1);
+    if(myRecord != 1)
+      goto out;
 
     err = wrapper.GetPacket(1, &myRecord);
-    if(err == -1)
-        fprintf(stderr, "Error in GetPacket.\n");
+    if(err < 0)
+      goto out;
+    if(myRecord != 2)
+      goto out;
 
-    assert(myRecord == 2);
-}
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return 1;
 }
 
-void TestCompoundDatatype()
+int TestCompoundDatatype()
 {
-printf("TestCompoundDatatype running...\n");
-
     hid_t dtypeID;
+    int count;
     int error;
+
+    TESTING("compound datatypes")
 
     /* Create compound datatype */
     typedef struct compoundType
@@ -111,7 +135,8 @@ printf("TestCompoundDatatype running...\n");
     /* Create packet table */
     FL_PacketTable wrapper(fileID, "/compoundTest", dtypeID, 1);
 
-    assert(wrapper.IsValid());
+    if(! wrapper.IsValid())
+      goto out;
 
     compoundType first;
     first.a = 1;
@@ -121,8 +146,9 @@ printf("TestCompoundDatatype running...\n");
     /* Write packet */
     wrapper.AppendPacket(&first);
 
-    int count = wrapper.GetPacketCount(error);
-    assert(count == 1);
+    count = wrapper.GetPacketCount(error);
+    if(count != 1)
+      goto out;
 
     first.a = first.b = first.c = 0;
     first.e = 0;
@@ -130,20 +156,30 @@ printf("TestCompoundDatatype running...\n");
     /* Read packet back */
     wrapper.GetPacket(0, &first);
 
-    assert(first.a == 1);
-    assert(first.e == 5);
+    if(first.a != 1)
+      goto out;
+    if(first.e != 5)
+      goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return 1;
 }
 
-void TestGetNext()
+int TestGetNext()
 {
-printf("TestGetNext running...\n");
-
     int error;
+
+    TESTING("GetNextPacket")
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, "/TestGetNext", H5T_NATIVE_INT, 1);
 
-    assert(wrapper.IsValid());
+    if(! wrapper.IsValid())
+      goto out;
 
     int record;
     int records[2];
@@ -156,7 +192,8 @@ printf("TestGetNext running...\n");
     for(int i = 1; i < 6; i++)
     {
         wrapper.GetNextPacket(&record);
-        assert(record == i);
+        if(record != i)
+          goto out;
     }
 
     wrapper.ResetIndex();
@@ -165,32 +202,41 @@ printf("TestGetNext running...\n");
     for(int i = 1; i < 6; i++)
     {
         error = wrapper.GetNextPacket(&record);
-        assert(record == i);
-        assert(error == 0);
+        if(record != i || error <0)
+          goto out;
     }
 
     wrapper.SetIndex(1);
 
     /* Ensure we can get multiple records with our index pointer */
     wrapper.GetNextPackets(2, records);
-    assert(records[0] == 2);
-    assert(records[1] == 3);
+    if(records[0] != 2 || records[1] != 3)
+      goto out;
 
     /* Ensure our pointer was updated correctly */
     wrapper.GetNextPacket(&record);
-    assert(record == 4);
+    if(record != 4)
+      goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return 1;
 }
 
-void TestGetPacket()
+int TestGetPacket()
 {
-    printf("TestGetPacket running...\n");
+    int record;
+    int theRecs[3];
+    TESTING("GetPacket")
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, "/TestGetPacket", H5T_NATIVE_INT, 1);
 
-    assert(wrapper.IsValid());
-
-    int record;
+    if(! wrapper.IsValid())
+      goto out;
 
     /* Append 5 records to the dataset */
     for(record = 1; record < 6; record++)
@@ -198,23 +244,34 @@ void TestGetPacket()
 
     /* Ensure that the records were written properly */
     wrapper.GetPacket(1, &record);
-    assert(record == 2);
+    if(record != 2)
+      goto out;
 
     /* Ensure that we can retrieve multiple records */
-    int theRecs[3] = {0, 0, 0};
     wrapper.GetPackets(1, 3, theRecs);
     for(int i = 0; i < 3; i++)
-        assert(theRecs[i] == i+2);
+    {
+        if(theRecs[i] != i+2)
+          goto out;
+    }
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return 1;
 }
 
-void TestErrors()
+int TestErrors()
 {
-    printf("TestErrors running...\n");
+    TESTING("error conditions")
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, "/TestErrors", H5T_NATIVE_INT, 1);
 
-    assert(wrapper.IsValid());
+    if(! wrapper.IsValid())
+      goto out;
 
     int record;
     int records[3];
@@ -226,63 +283,95 @@ void TestErrors()
 
     /* Try to confuse functions with bad indexes */
     error = wrapper.GetPacket(-1, &record);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPacket(4, &record);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPacket(-250, &record);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPacket(3000, &record);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPacket(1, &record);
-    assert(error == 0);
+    if(error < 0)
+      goto out;
 
     error = wrapper.GetPackets(-1, 1, records);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPackets(2, 4, records);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPackets(-60, -62, records);
-    assert(error == -1);
+     if(error >= 0)
+      goto out;
     error = wrapper.GetPackets(10, 12, records);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPackets(0, 2, records);
-    assert(error == 0);
+    if(error < 0)
+      goto out;
     error = wrapper.GetPackets(2, 0, records);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetPackets(1, 1, records);
-    assert(error == 0);
+    if(error < 0)
+      goto out;
     error = wrapper.GetPackets(1, 3, records);
-    assert(error == 0);
+    if(error < 0)
+      goto out;
 
     wrapper.ResetIndex();
     error = wrapper.SetIndex(-1);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetNextPacket(&record);
-    assert(error == 0);
-    assert(record == 1);
+    if(error < 0)
+      goto out;
+    if(record != 1)
+      goto out;
     error = wrapper.SetIndex(20);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetNextPacket(&record);
-    assert(error == 0);
-    assert(record == 2);
+    if(error < 0)
+      goto out;
+    if(record != 2)
+      goto out;
     wrapper.SetIndex(3);
     error = wrapper.GetNextPacket(&record);
-    assert(error == 0);
-    assert(record == 4);
+    if(error < 0)
+      goto out;
+    if(record != 4)
+      goto out;
     error = wrapper.GetNextPacket(&record);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
 
     wrapper.ResetIndex();
     error = wrapper.GetNextPackets(10, records);
-    assert(error == -1);
+    if(error >= 0)
+      goto out;
     error = wrapper.GetNextPackets(0, records);
-    assert(error == 0);
+    if(error < 0)
+      goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return 1;
 }
 
-void SystemTest()
+int SystemTest()
 {
-    printf("SystemTest running...\n");
+    TESTING("multiple datatypes")
 
     hid_t dtypeID1, dtypeID2;
+    unsigned int count;
 
     /* Creating two inter-related datatypes.  Create two datasets and put 
      * one datatype in each. */
@@ -321,14 +410,17 @@ void SystemTest()
     FL_PacketTable wrapper1(fileID, "/SystemTest1", dtypeID1, 1);
     FL_PacketTable wrapper2(fileID, "/SystemTest2", dtypeID2, 1);
 
-    assert(wrapper1.IsValid());
-    assert(wrapper2.IsValid());
+    if(! wrapper1.IsValid())
+      goto out;
+    if(! wrapper2.IsValid())
+      goto out;
 
     /* Write and read packets, ensure that nothing is unusual */
     wrapper2.AppendPacket(ct2);
 
-    unsigned int count = wrapper1.GetPacketCount();
-    assert(count == 0);
+    count = wrapper1.GetPacketCount();
+    if(count != 0)
+      goto out;
 
     compoundType ct1[10];
     ct1[0].a = 31;
@@ -346,22 +438,33 @@ void SystemTest()
     wrapper1.GetNextPacket(&ct1[1]);
     wrapper2.GetPacket(1, &ct2[2]);
 
-    assert(ct1[1].b == ct2[2].g.b);
+    if(ct1[1].b != ct2[2].g.b)
+      goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return 1;
 }
 
-void VariableLengthTest(void)
+int VariableLengthTest(void)
 {
     long test_long;
     short test_short;
     hvl_t read_buf;
+    VL_PacketTable* test_VLPT;
+    PacketTable* new_pt;
 
-    printf("VariableLengthTest running...\n");
+    TESTING("variable-length packet tables")
 
     /* Create a variable length table */
-    VL_PacketTable* test_VLPT = new VL_PacketTable(fileID, "/VariableLengthTest", 1);
+    test_VLPT = new VL_PacketTable(fileID, "/VariableLengthTest", 1);
 
     /* Verify that the creation succeeded */
-    assert(test_VLPT->IsValid());
+    if(! test_VLPT->IsValid())
+      goto out;
 
     /* Append some packets */
     test_short = 9;
@@ -372,8 +475,10 @@ void VariableLengthTest(void)
     /* Read them back and make sure they are correct */
     test_VLPT->GetNextPackets(1, &read_buf);
 
-    assert(read_buf.len == sizeof(short));
-    assert(*(short *)(read_buf.p) == test_short);
+    if(read_buf.len != sizeof(short))
+      goto out;
+    if(*(short *)(read_buf.p) != test_short)
+      goto out;
 
     /* Free the memory used by the read */
     test_VLPT->FreeReadbuff(1, &read_buf);
@@ -381,8 +486,10 @@ void VariableLengthTest(void)
     /* Read the second record */
     test_VLPT->GetNextPackets(1, &read_buf);
 
-    assert(read_buf.len == sizeof(long));
-    assert(*(long *)(read_buf.p) == test_long);
+    if(read_buf.len != sizeof(long))
+      goto out;
+    if(*(long *)(read_buf.p) != test_long)
+      goto out;
 
     /* Free the memory used by the read */
     test_VLPT->FreeReadbuff(1, &read_buf);
@@ -391,13 +498,22 @@ void VariableLengthTest(void)
     delete test_VLPT;
 
     /* Reopen the packet table and verify that it is variable length */
-    PacketTable * new_pt = new PacketTable(fileID, "/VariableLengthTest");
+    new_pt = new PacketTable(fileID, "/VariableLengthTest");
 
     /* Verify that the open succeeded */
-    assert(new_pt->IsValid());
+    if(! new_pt->IsValid())
+      goto out;
 
-    assert(new_pt->IsVariableLength() == 1);
+    if(new_pt->IsVariableLength() != 1)
+      goto out;
 
     /* Close the packet table */
     delete new_pt;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return 1;
 }

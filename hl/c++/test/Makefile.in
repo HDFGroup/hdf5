@@ -284,8 +284,8 @@ H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
 
-# Include src and c++/src directories
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src
+# Include directories
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/c++/src -I$(top_srcdir)/test
 
 # C++ libraries and tests are built statically
 AM_LDFLAGS = -static
