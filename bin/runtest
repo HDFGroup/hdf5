@@ -542,20 +542,20 @@ while [ $# -gt 0 ]; do
 	    TESTHOST=-all
 	    ;;
 	-nocvs)
-	    # do not do cvs commands
+	    # do not do cvs commands.
 	    NOCVS=nocvs
 	    ;;
 	-nodiff)
-	    # do not do diff commands
+	    # do not do diff commands.
 	    NODIFF=nodiff
 	    ;;
 	-configname)
-	    # use <name> as hostname in the parsing of the snaptest configure file
+	    # use <name> as hostname in the parsing of the snaptest configure file.
 	    shift
 	    CONFIGNAME=$1
 	    ;;
 	-setup)
-	    # setup the directory structure for snapshot test
+	    # setup the directory structure for snapshot test.
 	    CMD=setup
 	    ;;
 	-*) # Unknow option
@@ -720,7 +720,7 @@ if [ -z "$NODIFF" ]; then
     fi
 fi
 
-# we can use the version of script in SNAPYARD/current now
+# we can use the version of script in SNAPYARD/current now.
 # Don't do the diff any more.
 PROGNAME="$SNAPYARD/current/$PROGNAME -nodiff"
 
