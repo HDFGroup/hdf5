@@ -1866,6 +1866,16 @@ createOutputDataType(struct Input *in)
               new_type = H5Tcopy (H5T_NATIVE_LLONG);
             break;
           }
+              switch(in->outputByteOrder)
+              {
+                case 0:
+                  H5Tset_order (new_type,H5T_ORDER_BE);
+                break;
+
+                case 1:
+                  H5Tset_order (new_type,H5T_ORDER_LE);
+                break;
+              }                  
         break;
           
         case 1: /* STD */
@@ -1942,6 +1952,16 @@ createOutputDataType(struct Input *in)
               new_type = H5Tcopy (H5T_NATIVE_DOUBLE);
             break;
           }
+              switch(in->outputByteOrder)
+              {
+                case 0:
+                  H5Tset_order (new_type,H5T_ORDER_BE);
+                break;
+
+                case 1:
+                  H5Tset_order (new_type,H5T_ORDER_LE);
+                break;
+              }                  
         break;
   
         case 1:
@@ -2004,6 +2024,16 @@ createOutputDataType(struct Input *in)
                 new_type = H5Tcopy (H5T_NATIVE_ULLONG);
               break;
             }
+              switch(in->outputByteOrder)
+              {
+                case 0:
+                  H5Tset_order (new_type,H5T_ORDER_BE);
+                break;
+
+                case 1:
+                  H5Tset_order (new_type,H5T_ORDER_LE);
+                break;
+              }                  
             break;
           
           case 1:
