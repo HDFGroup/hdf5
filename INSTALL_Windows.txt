@@ -28,10 +28,15 @@ To build the HDF5 and tests, it is assumed that you have done the following:
       This creates a directory called 'hdf5' which 
       contains several files and directories.
 
+	4. You do not have a version of the zlib library and you would like to 
+	use it.  If you do not want to use the zlib library or have your own
+	version read the section about the zlib library.
+
 
 STEP II: Building the Libraries and tests.
 
-        1. Unpack all.zip in 'hdf5'. 
+        1. Unpack all.zip in 'hdf5' and move the zlib.dll from 
+	     c:\myHDFstuff\hdf5\src\dll to the Windows system directory.
 
         2. Invoke Microsoft Visual C++, go to "File" and select
            the "Open Workspace" option. 
@@ -176,8 +181,12 @@ STEP IV: BUILDING THE EXAMPLES
 
 
 
-	3. Run the batch file "InstallExamples.bat" which resides in the top 	   level directory.  This file creates 2 new directories, examplesREL and         examplesDEB, in the examples directory and places all the executables in       it.  Both the release and debug versions of the examples should be built before this step is done.  The examples should be tested in these 2 new directories 
-due to some dependencies between the examples.
+	3. Run the batch file "InstallExamples.bat" which resides in the top
+ 	   level directory.  This file creates 2 new directories, examplesREL and
+	   examplesDEB, in the examples directory and places all the executables 
+	   in it.  Both the release and debug versions of the examples should be
+	   built before this step is done.  The examples should be tested in these
+	   2 new directories due to some dependencies between the examples.
 
 			
 
@@ -237,3 +246,38 @@ Settings... details:
 				   These are all set to use 
                                       Single-Threaded
 
+
+
+ZLIB LIBRARY- REMOVING OR CHANGING THE PATH
+============================================
+
+If you would like to remove the zlib library from the hdf5 library or
+use your own version of the zlib library then follow the steps below.
+
+Removing the zlib library completely:
+
+	Open the all.dsw workspace file in Microsoft Visual C++.  Go to the hdf5 
+	project.  Select the zlib.lib file from this project and delete(press the
+	'delete' key) it.  Next open the H5config.h file from the src directory.
+	Remove the the following two lines:
+		#define HAVE_LIBZ 1
+		#define HAVE_COMPRESS2
+	then save the file.
+	
+	Next go to the hdf5dll project. Remove the zlib.lib from this project too.
+	Open the project settings for the hdf5dll project.  Go to the C/C++
+	settings tab and under the preprocessor definitions remove the ZLIB_DLL
+	in both the debug and the release settings. Recompile the all project and
+	then save the workspace.  
+
+
+Replacing the zlib library:
+
+	Open the all.dsw workspace and go to the hdf5 project.  Delete the 
+	zlib.lib file from the file listing.  Then select the hdf5 project and 
+	richt click to get a menu.  Pick the "add files to project..." option
+	and find the version of the zlib that you would like to use.  Then click OK
+	in the file chooser dialog.  Repeat the steps for the hdf5dll project.
+	You may also want to replace the zlib.h and zconf.h files which are in
+	the src directory with your own versions of these files.  Then recompile
+	the all project.
