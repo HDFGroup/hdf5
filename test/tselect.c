@@ -28,7 +28,7 @@ static char		RcsId[] = "$Revision$";
 
 #include <hdf5.h>
 
-#define FILE   "tselect.h5"
+#define FILENAME   "tselect.h5"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -102,7 +102,7 @@ test_select_hyper(void)
             *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -231,7 +231,7 @@ test_select_point(void)
             *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -373,7 +373,7 @@ test_select_all(void)
             *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -512,7 +512,7 @@ test_select_combo(void)
             *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -677,7 +677,7 @@ test_select_hyper_stride(void)
             *tbuf++=(uint16)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -808,7 +808,7 @@ test_select_hyper_copy(void)
             *tbuf++=(uint16)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -959,7 +959,7 @@ test_select_point_copy(void)
             *tbuf++=(uint16)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -1132,7 +1132,7 @@ test_select_hyper_offset(void)
             *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -1291,7 +1291,7 @@ test_select_point_offset(void)
             *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -1469,7 +1469,7 @@ test_select_hyper_union(void)
             *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
 /* Test simple case of one block overlapping another */
@@ -2033,7 +2033,7 @@ test_select_hyper_union_3d(void)
                 *tbuf++=(uint8)((((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
 /* Test case of two blocks which overlap corners and must be split */
@@ -2174,6 +2174,6 @@ test_select(void)
 void
 cleanup_select(void)
 {
-    remove(FILE);
+    remove(FILENAME);
 }
 
