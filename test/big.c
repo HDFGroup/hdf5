@@ -343,6 +343,38 @@ reader (hid_t fapl)
     return 1;
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	usage
+ *
+ * Purpose:	Print command usage
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Chent
+ *              Mar 28, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+usage(void)
+{
+    HDfprintf(stdout,
+	"Usage: big [-h] [-fsize <fsize>}\n"
+	"\t-h\tPrint the help page\n"
+	"\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
+	"\t\ta positive float point number.  Default value is %Hu.\n"
+	"Examples:\n"
+	"\tbig -fsize 2.1e9 \t# test with file size just under 2GB\n"
+	"\tbig -fsize 2.2e9 \t# test with file size just above 2GB\n"
+	"\tBe sure the file system can support the file size requested\n"
+	, (hsize_t)FAMILY_SIZE);
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -357,15 +389,47 @@ reader (hid_t fapl)
  *              Friday, April 10, 1998
  *
  * Modifications:
+ *		Albert Cheng, 2002/03/28
+ *		Added command option -fsize.
  *
  *-------------------------------------------------------------------------
  */
 int
-main (void)
+main (int ac, char **av)
 {
     hid_t	fapl=-1;
     hsize_t	family_size;
+    hsize_t	family_size_def;	/* default family file size */
     
+    /* parameters setup */
+    family_size_def = FAMILY_SIZE;
+
+    while (--ac > 0){
+	av++;
+	if (strcmp("-fsize", *av)==0){
+	    /* specify a different family file size */
+	    ac--; av++;
+	    if (ac > 0){
+		family_size_def = (hsize_t) atof(*av);
+		if (family_size_def <= 0)
+		    family_size_def = (hsize_t)FAMILY_SIZE;
+		ac--; av++;
+	    }
+	    else{
+		printf("***Missing fsize value***\n");
+		usage();
+		return 1;
+	    }
+	}
+	else if (strcmp("-h", *av)==0){
+	    usage();
+	    return 0;
+	}else{
+	    usage();
+	    return 1;
+	}
+    }
+
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
@@ -376,15 +440,17 @@ main (void)
 #else /* H5_WANT_H5_V1_2_COMPAT */
     if (H5FD_FAMILY!=H5Pget_driver(fapl)) {
 #endif /* H5_WANT_H5_V1_2_COMPAT */
-	printf("Changing file drivers to the family driver, %lu bytes each\n",
-	       (unsigned long)FAMILY_SIZE);
-	if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
+	HDfprintf(stdout,
+	   "Changing file drivers to the family driver, %Hu bytes each\n",
+	   family_size_def);
+	if (H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT)<0) goto error;
     } else if (H5Pget_fapl_family(fapl, &family_size, NULL)<0) {
 	goto error;
-    } else if (family_size!=FAMILY_SIZE) {
-	printf("Changing family member size from %lu to %lu\n",
-	       (unsigned long)family_size, (unsigned long)FAMILY_SIZE);
-	if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
+    } else if (family_size!=family_size_def) {
+	HDfprintf(stdout, "Changing family member size from %Hu to %Hu\n",
+	       family_size, family_size_def);
+	if (H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT)<0)
+	    goto error;
     }
 
     /*
