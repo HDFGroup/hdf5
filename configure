@@ -1022,7 +1022,7 @@ Optional Features:
   --enable-threadsafe     Enable thread safe capability
   --enable-hdf5v1_6       Compile the HDF5 v1.6 compatibility interface
                           [default=no]
-  --enable-stream-vfd     Build the Stream Virtual File Driver [default=no]
+  --enable-stream-vfd     Build the Stream Virtual File Driver [default=yes]
   --enable-gpfs           Enable GPFS hints for the MPI/POSIX file driver.
                           [default=no]
   --enable-debug=all      Turn on debugging in all packages. One may also
