@@ -5314,19 +5314,15 @@ done:
 static herr_t
 H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hssize_t start[],
-		      const hsize_t t_stride[],
-		      const hsize_t t_count[],
-		      const hsize_t t_block[])
+		      const hsize_t stride[],
+		      const hsize_t count[],
+		      const hsize_t block[])
 {
-    hsize_t stride[H5O_LAYOUT_NDIMS];   /* Optimized stride information */
-    hsize_t count[H5O_LAYOUT_NDIMS];    /* Optimized count information */
-    hsize_t block[H5O_LAYOUT_NDIMS];    /* Optimized block information */
     H5S_hyper_span_info_t *new_spans=NULL;  /* Span tree for new hyperslab */
     H5S_hyper_span_info_t *a_not_b=NULL;    /* Span tree for hyperslab spans in old span tree and not in new span tree */
     H5S_hyper_span_info_t *a_and_b=NULL;    /* Span tree for hyperslab spans in both old and new span trees */
     H5S_hyper_span_info_t *b_not_a=NULL;    /* Span tree for hyperslab spans in new span tree and not in old span tree */
     hssize_t nelem;             /* Number of elements in hyperslab span tree */
-    unsigned u;                    /* Counters */
     htri_t      status;         /* Status from internal calls */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -5336,30 +5332,10 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(space);
     assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
     assert(start);
-    assert(t_stride);
-    assert(t_count);
-    assert(t_block);
+    assert(stride);
+    assert(count);
+    assert(block);
     
-    /* Optimize hyperslab selection to merge contiguous blocks */
-    for(u=0; u<space->extent.u.simple.rank; u++) {
-        /* contiguous hyperslabs have the block size equal to the stride */
-        if(t_stride[u]==t_block[u]) {
-            count[u]=1;
-            stride[u]=1;
-            block[u]=t_block[u]*t_count[u];
-        }
-        else {
-            if(t_count[u]==1)
-                stride[u]=1;
-            else {
-                assert(t_stride[u]>t_block[u]);
-                stride[u]=t_stride[u];
-            } /* end else */
-            count[u]=t_count[u];
-            block[u]=t_block[u];
-        } /* end if */
-    } /* end for */
-
     /* Generate span tree for new hyperslab information */
     if((new_spans=H5S_hyper_make_spans(space->extent.u.simple.rank,start,stride,count,block))==NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't create hyperslab information");
@@ -5578,8 +5554,10 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[],
 		      const hsize_t *block)
 {
+    hsize_t opt_stride[H5O_LAYOUT_NDIMS];   /* Optimized stride information */
+    hsize_t opt_count[H5O_LAYOUT_NDIMS];    /* Optimized count information */
+    hsize_t opt_block[H5O_LAYOUT_NDIMS];    /* Optimized block information */
     unsigned u;                    /* Counters */
-    H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_hyperslab, FAIL);
@@ -5597,6 +5575,37 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     /* Point to the correct block values */
     if(block==NULL)
         block = _block;
+
+    /*
+     * Check for overlapping hyperslab blocks in new selection.
+     */
+    for(u=0; u<space->extent.u.simple.rank; u++) {
+        if(count[u]>1 && stride[u]<block[u])
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap");
+    } /* end for */
+
+    /* Optimize hyperslab parameters to merge contiguous blocks, etc. */
+    for(u=0; u<space->extent.u.simple.rank; u++) {
+        /* contiguous hyperslabs have the block size equal to the stride */
+        if(stride[u]==block[u]) {
+            opt_count[u]=1;
+            opt_stride[u]=1;
+            if(block[u]==1)
+                opt_block[u]=count[u];
+            else
+                opt_block[u]=block[u]*count[u];
+        }
+        else {
+            if(count[u]==1)
+                opt_stride[u]=1;
+            else {
+                assert(stride[u]>block[u]);
+                opt_stride[u]=stride[u];
+            } /* end else */
+            opt_count[u]=count[u];
+            opt_block[u]=block[u];
+        } /* end if */
+    } /* end for */
 
     /* Fixup operation for non-hyperslab selections */
     switch(space->select.type) {
@@ -5683,55 +5692,28 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     } /* end switch */
 
     if(op==H5S_SELECT_SET) {
-        /*
-         * Check for overlapping hyperslab blocks in new selection.
-         */
-        for(u=0; u<space->extent.u.simple.rank; u++) {
-            if(count[u]>1 && stride[u]<block[u])
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap");
-        } /* end for */
-
         /* If we are setting a new selection, remove current selection first */
         if((*space->select.release)(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
         /* Save the diminfo */
-        diminfo=space->select.sel_info.hslab.opt_diminfo;
         for(u=0; u<space->extent.u.simple.rank; u++) {
             space->select.sel_info.hslab.app_diminfo[u].start = start[u];
             space->select.sel_info.hslab.app_diminfo[u].stride = stride[u];
             space->select.sel_info.hslab.app_diminfo[u].count = count[u];
             space->select.sel_info.hslab.app_diminfo[u].block = block[u];
 
-            /* Optimize the hyperslab selection to detect contiguously selected block/stride information */
-            /* Modify the stride, block & count for contiguous hyperslab selections */
-
-            /* Starting location doesn't get optimized */
-            diminfo[u].start = start[u];
-
-            /* contiguous hyperslabs have the block size equal to the stride */
-            if(stride[u]==block[u]) {
-                diminfo[u].stride=1;
-                diminfo[u].count=1;
-                diminfo[u].block=count[u]*block[u];
-            } /* end if */
-            else {
-                if(count[u]==1)
-                    diminfo[u].stride=1;
-                else {
-                    assert(stride[u]>block[u]);
-                    diminfo[u].stride=stride[u];
-                } /* end else */
-                diminfo[u].count=count[u];
-                diminfo[u].block=block[u];
-            } /* end else */
+            space->select.sel_info.hslab.opt_diminfo[u].start = start[u];
+            space->select.sel_info.hslab.opt_diminfo[u].stride = opt_stride[u];
+            space->select.sel_info.hslab.opt_diminfo[u].count = opt_count[u];
+            space->select.sel_info.hslab.opt_diminfo[u].block = opt_block[u];
         } /* end for */
 
         /* Indicate that the dimension information is valid */
         space->select.sel_info.hslab.diminfo_valid=TRUE;
 
         /* Build the hyperslab information also */
-        if(H5S_generate_hyperslab (space, H5S_SELECT_SET, start, stride, count, block)<0)
+        if(H5S_generate_hyperslab (space, H5S_SELECT_SET, start, opt_stride, opt_count, opt_block)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
     } /* end if */
     else if(op>=H5S_SELECT_OR && op<=H5S_SELECT_NOTA) {
@@ -5742,7 +5724,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         space->select.sel_info.hslab.diminfo_valid=FALSE;
 
         /* Add in the new hyperslab information */
-        if(H5S_generate_hyperslab (space, op, start, stride, count, block)<0)
+        if(H5S_generate_hyperslab (space, op, start, opt_stride, opt_count, opt_block)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
     } /* end if */
     else
@@ -5823,13 +5805,6 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
             if(stride[u]==0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride==0 value");
         } /* end for */
-        if(block!=NULL) {
-            /* Check for strides smaller than blocks */
-            for(u=0; u<space->extent.u.simple.rank; u++) {
-                if(count[u]>1 && stride[u]<block[u])
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride<block value");
-            } /* end for */
-        } /* end if */
     } /* end if */
 
     if (H5S_select_hyperslab(space, op, start, stride, count, block)<0)
@@ -6077,16 +6052,12 @@ done:
 static herr_t
 H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hssize_t start[],
-		      const hsize_t t_stride[],
-		      const hsize_t t_count[],
-		      const hsize_t t_block[])
+		      const hsize_t stride[],
+		      const hsize_t count[],
+		      const hsize_t block[])
 {
-    hsize_t stride[H5O_LAYOUT_NDIMS];   /* Optimized stride information */
-    hsize_t count[H5O_LAYOUT_NDIMS];    /* Optimized count information */
-    hsize_t block[H5O_LAYOUT_NDIMS];    /* Optimized block information */
     H5S_hyper_span_info_t *new_spans=NULL;   /* Span tree for new hyperslab */
     H5S_hyper_span_info_t *tmp_spans=NULL;   /* Temporary copy of selection */
-    unsigned u;                 /* Counters */
     hbool_t span2_owned=FALSE;          /* Flag to indicate that span2 was used in H5S_operate_hyperslab() */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -6096,30 +6067,10 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(space);
     assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
     assert(start);
-    assert(t_stride);
-    assert(t_count);
-    assert(t_block);
+    assert(stride);
+    assert(count);
+    assert(block);
     
-    /* Optimize hyperslab selection to merge contiguous blocks */
-    for(u=0; u<space->extent.u.simple.rank; u++) {
-        /* contiguous hyperslabs have the block size equal to the stride */
-        if(t_stride[u]==t_block[u]) {
-            count[u]=1;
-            stride[u]=1;
-            block[u]=t_block[u]*t_count[u];
-        }
-        else {
-            if(t_count[u]==1)
-                stride[u]=1;
-            else {
-                assert(t_stride[u]>t_block[u]);
-                stride[u]=t_stride[u];
-            } /* end else */
-            count[u]=t_count[u];
-            block[u]=t_block[u];
-        } /* end if */
-    } /* end for */
-
     /* Generate span tree for new hyperslab information */
     if((new_spans=H5S_hyper_make_spans(space->extent.u.simple.rank,start,stride,count,block))==NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't create hyperslab information");
@@ -6174,8 +6125,10 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[],
 		      const hsize_t *block)
 {
+    hsize_t opt_stride[H5O_LAYOUT_NDIMS];   /* Optimized stride information */
+    hsize_t opt_count[H5O_LAYOUT_NDIMS];    /* Optimized count information */
+    hsize_t opt_block[H5O_LAYOUT_NDIMS];    /* Optimized block information */
     unsigned u;                    /* Counters */
-    H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI (H5S_select_hyperslab, FAIL);
@@ -6193,6 +6146,37 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     /* Point to the correct block values */
     if(block==NULL)
         block = _block;
+
+    /*
+     * Check for overlapping hyperslab blocks in new selection.
+     */
+    for(u=0; u<space->extent.u.simple.rank; u++) {
+        if(count[u]>1 && stride[u]<block[u])
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap");
+    } /* end for */
+
+    /* Optimize hyperslab parameters to merge contiguous blocks, etc. */
+    for(u=0; u<space->extent.u.simple.rank; u++) {
+        /* contiguous hyperslabs have the block size equal to the stride */
+        if(stride[u]==block[u]) {
+            opt_count[u]=1;
+            opt_stride[u]=1;
+            if(block[u]==1)
+                opt_block[u]=count[u];
+            else
+                opt_block[u]=block[u]*count[u];
+        }
+        else {
+            if(count[u]==1)
+                opt_stride[u]=1;
+            else {
+                assert(stride[u]>block[u]);
+                opt_stride[u]=stride[u];
+            } /* end else */
+            opt_count[u]=count[u];
+            opt_block[u]=block[u];
+        } /* end if */
+    } /* end for */
 
     /* Fixup operation for non-hyperslab selections */
     switch(space->select.type) {
@@ -6280,52 +6264,25 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
 
     if(op==H5S_SELECT_SET) {
-        /*
-         * Check for overlapping hyperslab blocks in new selection.
-         */
-        for(u=0; u<space->extent.u.simple.rank; u++) {
-            if(count[u]>1 && stride[u]<block[u])
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap");
-        } /* end for */
-
         /* If we are setting a new selection, remove current selection first */
         if((*space->select.release)(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
         /* Build the hyperslab information also */
-        if(H5S_generate_hyperslab (space, H5S_SELECT_SET, start, stride, count, block)<0)
+        if(H5S_generate_hyperslab (space, H5S_SELECT_SET, start, opt_stride, opt_count, opt_block)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
 
         /* Save the diminfo */
-        diminfo=space->select.sel_info.hslab.opt_diminfo;
         for(u=0; u<space->extent.u.simple.rank; u++) {
             space->select.sel_info.hslab.app_diminfo[u].start = start[u];
             space->select.sel_info.hslab.app_diminfo[u].stride = stride[u];
             space->select.sel_info.hslab.app_diminfo[u].count = count[u];
             space->select.sel_info.hslab.app_diminfo[u].block = block[u];
 
-            /* Optimize the hyperslab selection to detect contiguously selected block/stride information */
-            /* Modify the stride, block & count for contiguous hyperslab selections */
-
-            /* Starting location doesn't get optimized */
-            diminfo[u].start = start[u];
-
-            /* contiguous hyperslabs have the block size equal to the stride */
-            if(stride[u]==block[u]) {
-                diminfo[u].stride=1;
-                diminfo[u].count=1;
-                diminfo[u].block=count[u]*block[u];
-            } /* end if */
-            else {
-                if(count[u]==1)
-                    diminfo[u].stride=1;
-                else {
-                    assert(stride[u]>block[u]);
-                    diminfo[u].stride=stride[u];
-                } /* end else */
-                diminfo[u].count=count[u];
-                diminfo[u].block=block[u];
-            } /* end else */
+            space->select.sel_info.hslab.opt_diminfo[u].start = start[u];
+            space->select.sel_info.hslab.opt_diminfo[u].stride = opt_stride[u];
+            space->select.sel_info.hslab.opt_diminfo[u].count = opt_count[u];
+            space->select.sel_info.hslab.opt_diminfo[u].block = opt_block[u];
         } /* end for */
 
         /* Indicate that the dimension information is valid */
@@ -6336,7 +6293,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         assert(space->select.type==H5S_SEL_HYPERSLABS);
 
         /* Add in the new hyperslab information */
-        if(H5S_generate_hyperslab (space, op, start, stride, count, block)<0)
+        if(H5S_generate_hyperslab (space, op, start, opt_stride, opt_count, opt_block)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
 
         /* Indicate that the regular dimensions are no longer valid */
@@ -6405,13 +6362,6 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
             if(stride[u]==0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride==0 value");
         } /* end for */
-        if(block!=NULL) {
-            /* Check for strides smaller than blocks */
-            for(u=0; u<space->extent.u.simple.rank; u++) {
-                if(count[u]>1 && stride[u]<block[u])
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stride<block value");
-            } /* end for */
-        } /* end if */
     } /* end if */
 
     if (H5S_select_hyperslab(space, op, start, stride, count, block)<0)
