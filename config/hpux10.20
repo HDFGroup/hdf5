@@ -15,12 +15,12 @@ CFLAGS="$CFLAGS -Ae"
 #CPPFLAGS="$CPPFLAGS -I."
 
 # What compiler flags should be used for code development?
-DEBUG_CFLAGS=
+DEBUG_CFLAGS=-g
 DEBUG_CPPFLAGS=
 
 # What compiler flags should be used for building a production
 # library?
-PROD_CFLAGS=
+PROD_CFLAGS=-O
 PROD_CPPFLAGS=
 
 # What compiler flags enable code profiling?
