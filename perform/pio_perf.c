@@ -1304,8 +1304,16 @@ parse_command_line(int argc, char *argv[])
 	cl_opts->max_xfer_size = cl_opts->num_bpp;
     if (cl_opts->min_xfer_size > cl_opts->max_xfer_size)
 	cl_opts->min_xfer_size = cl_opts->max_xfer_size;
+    /* check range of number of processes */
+    if (cl_opts->min_num_procs <= 0)
+	cl_opts->min_num_procs = 1;
+    if (cl_opts->max_num_procs <= 0)
+	cl_opts->max_num_procs = 1;
     if (cl_opts->min_num_procs > cl_opts->max_num_procs)
 	cl_opts->min_num_procs = cl_opts->max_num_procs;
+    /* check iteration */
+    if (cl_opts->num_iters <= 0)
+	cl_opts->num_iters = 1;
 
     return cl_opts;
 }
@@ -1395,7 +1403,7 @@ usage(const char *prog)
         printf("     -e S, --num-bytes=S         Number of bytes per process per dataset\n");
         printf("                                 [default: 256K]\n");
         printf("     -F N, --num-files=N         Number of files [default: 1]\n");
-        printf("     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
+        printf("     -i N, --num-iterations=N    Number of iterations to perform [default: 1]\n");
         printf("     -I, --interleaved           Interleaved block I/O (see below for example)\n");
         printf("                                 [default: Contiguous block I/O]\n");
         printf("     -m, --mpi-posix             Use MPI-posix driver for HDF5 I/O\n");
