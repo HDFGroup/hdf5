@@ -4341,7 +4341,8 @@ TABLE.list TD { border:none; }
                     <tr>
                       <td align=center><code>2</code></td>
                       <td>The current version used by the library (version
-                        1.7.3 or later).  In this version, the Size field is
+                        1.7.3 or later).  In this version, the Size and
+                        Fill Value fields are
                         only present if the Fill Value Defined field is set
                         to 1.
                       </td>
@@ -4456,7 +4457,9 @@ TABLE.list TD { border:none; }
 	  <td>Fill Value</td>
 	  <td>
             <P>The fill value.  The bytes of the fill value are interpreted
-                using the same datatype as for the dataset.
+                using the same datatype as for the dataset.  This field is
+                not present if the Version field is >1 and the Fill Value
+                Defined field is set to 0.
             </P>
           </td>
 	</tr>
