@@ -684,6 +684,7 @@
 ./c++/config/BlankForm
 ./c++/config/commence.in
 ./c++/config/conclude.in
+./c++/config/dec-osf5.x
 ./c++/config/depend1.in
 ./c++/config/depend2.in
 ./c++/config/depend3.in
