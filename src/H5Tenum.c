@@ -414,7 +414,10 @@ done:
  *              Monday, January  4, 1999
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              Wednesday, Febuary 9, 2005
+ *              Made a copy of original datatype and do sorting and search
+ *              on that copy, to protect the original order of members.
  *-------------------------------------------------------------------------
  */
 static char *
@@ -541,7 +544,10 @@ done:
  *              Monday, January  4, 1999
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              Wednesday, Febuary 9, 2005
+ *              Made a copy of original datatype and do sorting and search
+ *              on that copy, to protect the original order of members.
  *-------------------------------------------------------------------------
  */
 static herr_t

@@ -2228,7 +2228,10 @@ test_compound_12(void)
  *              Thursday, April 4, 2002
  *  
  * Modifications:
- *
+ *              Raymond Lu
+ *              Wednesday, Febuary 9, 2005
+ *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
+ *              H5Tget_member_value.
  *-------------------------------------------------------------------------
  */
 static int 
