@@ -1,4 +1,4 @@
-## HDF5-C++ test/Makefile(.in)
+## HDF5-C++ examples/Makefile(.in)
 ##
 ## Copyright (C) 2000 National Center for Supercomputing Applications.
 ##                    All rights reserved.
@@ -9,12 +9,13 @@ top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
 
+hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
 
 ## Add include directory to the C++ preprocessor flags and the hdf5
 ## library to the library list.
 LIB=../src/libhdf5_cpp.la
-CPPFLAGS=-I. -I$(srcdir) -I../src -I../../src -I$(top_srcdir)/src -I$(srcdir)/../src @CPPFLAGS@
+CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 
 ## List all source files here. The list of object files will be

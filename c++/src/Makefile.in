@@ -31,4 +31,6 @@ LIB_OBJ=$(LIB_SRC:.C=.lo)
 
 PUB_HDR=H5Cpp.h
 
+ARFLAGS=rs
+
 @CONCLUDE@

@@ -9,20 +9,27 @@ top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
 
+hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.
 LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
 LIB=../src/libhdf5_cpp.la
-CPPFLAGS=-I. -I$(srcdir) -I../src -I../../src -I$(top_srcdir)/src -I$(srcdir)/../src @CPPFLAGS@
+CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 HDF5LIB=$(hdf5_builddir)/libhdf5.la
+
+## These are our main targets. They should be listed in the order to be
+## executed, generally most specific tests to least specific tests.
+RUNTEST=$(LT_RUN)
 
 TEST_PROGS_SRC=
 TEST_PROGS=
 
 TEST_SRC=
 TEST_OBJ=$(TEST_SRC:.C=.lo)
+
+TEST_SCRIPTS=testexamples.sh
 
 DISTCLEAN=$(TEST_PROGS_SRC:.C=.lo) $(TEST_PROGS_SRC:.C=.o) *.h5
 
