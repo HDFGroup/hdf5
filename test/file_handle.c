@@ -54,7 +54,7 @@ const char *FILENAME[] = {
 static herr_t          
 test_sec2(void)
 {
-    hid_t       file=(-1), fapl;
+    hid_t       file=(-1), fapl, access_fapl = -1;
     char        filename[1024];
     int         *fhandle=NULL;
 
@@ -67,6 +67,14 @@ test_sec2(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+        goto error;
+
+    /* Retrieve the access property list... */
+    if ((access_fapl = H5Fget_access_plist(file)) < 0)
+        goto error;
+
+    /* ...and close the property list */
+    if (H5Pclose(access_fapl) < 0)
         goto error;
 
     /* Check file handle API */
@@ -109,7 +117,7 @@ error:
 static herr_t
 test_core(void)
 {
-    hid_t       file=(-1), fapl;
+    hid_t       file=(-1), fapl, access_fapl = -1;
     char        filename[1024];
     void        *fhandle=NULL;
 
@@ -123,7 +131,15 @@ test_core(void)
                                                                 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         goto error;
-                                                                                             
+
+    /* Retrieve the access property list... */
+    if ((access_fapl = H5Fget_access_plist(file)) < 0)
+        goto error;
+
+    /* ...and close the property list */
+    if (H5Pclose(access_fapl) < 0)
+        goto error;
+
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, &fhandle)<0)
         goto error;
     if(fhandle==NULL)
@@ -167,6 +183,7 @@ static herr_t
 test_family(void)
 {
     hid_t       file=(-1), fapl, fapl2=(-1), space=(-1), dset=(-1);
+    hid_t       access_fapl = -1;
     char        filename[1024];
     char        dname[]="dataset";
     int         i, j;
@@ -188,6 +205,15 @@ test_family(void)
     /* Create and write dataset */
     if((space=H5Screate_simple(2, dims, NULL))<0)
         goto error;
+
+    /* Retrieve the access property list... */
+    if ((access_fapl = H5Fget_access_plist(file)) < 0)
+        goto error;
+
+    /* ...and close the property list */
+    if (H5Pclose(access_fapl) < 0)
+        goto error;
+
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)
         goto error;
 
@@ -259,6 +285,7 @@ static herr_t
 test_multi(void)
 {
     hid_t       file=(-1), fapl, fapl2=(-1), dset=(-1), space=(-1);
+    hid_t       access_fapl = -1;
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
@@ -305,6 +332,15 @@ test_multi(void)
     /* Create and write data set */
     if((space=H5Screate_simple(2, dims, NULL))<0)
         goto error;
+
+    /* Retrieve the access property list... */
+    if ((access_fapl = H5Fget_access_plist(file)) < 0)
+        goto error;
+
+    /* ...and close the property list */
+    if (H5Pclose(access_fapl) < 0)
+        goto error;
+
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)
         goto error;
                                 
