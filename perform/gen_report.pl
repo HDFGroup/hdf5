@@ -138,7 +138,7 @@ sub create_excel_output_string {
 	foreach my $procs (sort { $b <=> $a } keys(%results)) {
 		$output_content .= "\n$procs Procs";
 		$output_content .= "\n" . create_excel_output_header;
-		$output_content .= "\n  Raw";
+		$output_content .= "\n  POSIX";
 
 		foreach my $xfer (sort { $a <=> $b } keys(%{$results{$procs}})) {
 			$output_content .= "\t$results{$procs}{$xfer}[0]{$t}";
@@ -230,7 +230,7 @@ sub create_ascii_output_string {
 		$output_content .= "\n$procs Procs";
 		$output_content .= "\n$output_header\n";
 		$output_content .= "-" x length($output_header);
-		$output_content .= "\n     Raw    |";
+		$output_content .= "\n     POSIX  |";
 
 		foreach my $xfer (sort { $a <=> $b } keys(%{$results{$procs}})) {
 			$output_content = sprintf("$output_content   %-6s |",
