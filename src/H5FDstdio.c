@@ -875,9 +875,10 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 #ifdef WIN32
             HFILE filehandle;   /* Windows file handle */
             LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
+            fd = _fileno(file->fp);
 
             /* Map the posix file handle to a Windows file handle */
-            filehandle = _get_osfhandle(file->fd);
+            filehandle = _get_osfhandle(fd);
 
             /* Translate 64-bit integers into form Windows wants */
             /* [This algorithm is from the Windows documentation for SetFilePointer()] */
