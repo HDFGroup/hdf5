@@ -167,50 +167,55 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
  * Purpose:	Simulation of hardware shifting.  Shifts a bit vector
  *              in a way similar to shifting a variable value, like
  *              value <<= 3, or value >>= 16.  SHIFT_DIST is positive for 
- *              left shift, negative for right shift.
+ *              left shift, negative for right shift.  The bit vector starts
+ *              at OFFSET and is SIZE long.
  *
  * Return:	void
  *
  * Programmer:	Raymond Lu
- *              Wednesday, Febuary 4, 2004
+ *              Monday, April 12, 2004
  *
  * Modifications:
- *
- * 		Can generalize it to handle a bit vector of any START 
- * 		position and any SIZE.
  *
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_shift (uint8_t *buf, ssize_t shift_dist, size_t buf_size)
+H5T_bit_shift (uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
 {
     uint8_t *tmp_buf;
-    size_t  buf_size_bit = 8*buf_size;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_shift);
 
     /* Sanity check */
     assert(buf);
-    assert(buf_size);
+    assert(size);
 
     if(!shift_dist)
         goto done;    
-    if(ABS(shift_dist) >= buf_size_bit) {
-        HDmemset(buf,0,buf_size);
+    if(ABS(shift_dist) >= size) {
+        H5T_bit_set(buf, offset, size, 0);
         goto done;
     }
     
-    tmp_buf = (uint8_t*)H5MM_calloc(buf_size);
+    tmp_buf = (uint8_t*)H5MM_calloc(size/8+1);
     assert(tmp_buf);
 
     /* Shift vector by making copies */    
-    if(shift_dist > 0)  /* left shift */ 
-        H5T_bit_copy (tmp_buf, (size_t)shift_dist, buf, 0, (size_t)(buf_size_bit-shift_dist));
-    else  /* right shift */
-        H5T_bit_copy(tmp_buf, 0, buf, (size_t)-shift_dist, (size_t)(buf_size_bit+shift_dist));
-
-    /* Copy back the vector */
-    HDmemcpy(buf,tmp_buf,buf_size);
+    if(shift_dist > 0) { /* left shift */ 
+        /* Copy part to be shifted to a temporary buffer */
+        H5T_bit_copy (tmp_buf, 0, buf, offset, (size_t)(size-shift_dist));
+        
+        /* Copy it back to the original buffer */
+        H5T_bit_copy (buf, offset+shift_dist, tmp_buf, 0, (size_t)(size-shift_dist));
+        
+        /* Zero-set the left part*/
+        H5T_bit_set(buf, offset, shift_dist, 0);
+    } else { /* right shift */
+        shift_dist = - shift_dist;
+        H5T_bit_copy(tmp_buf, 0, buf, offset+shift_dist, (size_t)(size-shift_dist));
+        H5T_bit_copy (buf, offset, tmp_buf, 0, (size_t)(size-shift_dist));
+        H5T_bit_set(buf, offset+size-shift_dist, shift_dist, 0);
+    }
 
     /* Free temporary buffer */
     H5MM_xfree(tmp_buf);

@@ -8600,7 +8600,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  * Shift mantissa part by exponent minus mantissa size(right shift), 
                  * or by mantissa size minus exponent(left shift).
                  */
-                H5T_bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), buf_size);
+                H5T_bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), 0, buf_size*8);
 
                 /* Convert to integer representation if negative. 
                  * equivalent to ~(value - 1).
@@ -8969,7 +8969,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		    } 
 
                     /* Right shift to drop off extra bits */
-                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), buf_size);
+                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), 0, buf_size*8);
 
                     if(do_round) {
                         H5T_bit_inc(int_buf, 0, buf_size*8);
@@ -8989,7 +8989,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 				/* Right shift 1 bit to let the carried 1 fit in the mantissa,
 				 * and increment exponent by 1.
 				 */
-                    		H5T_bit_shift(int_buf, -1, buf_size);
+                                H5T_bit_shift(int_buf, -1, 0, buf_size*8);
 			 	expo++;    
 			    }
 			}
@@ -8997,7 +8997,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 } else {
                     /* The bit sequence can fit mantissa part.  Left shift to fit in from high-order of
 		     * bit position. */
-                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), buf_size);
+                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), 0, buf_size*8);
                 } 
                     
 
