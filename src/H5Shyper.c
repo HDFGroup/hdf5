@@ -5152,6 +5152,8 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8_t *buf)
                     temp_dim--;
                 } /* end while */
             } /* end if */
+            else
+                break;  /* Break out now, for 1-D selections */
 
             /* Re-compute offset array */
             for(i=0; i<ndims; i++) {
