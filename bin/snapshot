@@ -26,7 +26,7 @@ METHODS="gzip bzip2"
 # How to configure? We disable hdf4 because that's almost always the
 # culprit for tests failing -- hawkwind seems to have a version older
 # than what h5toh4 requires.
-CONFIGURE="./configure --without-hdf4"
+CONFIGURE="./configure"
 
 # Create a working directory.  Hopefully one is left over from last
 # time that still has the contents of the previous release.  But if
