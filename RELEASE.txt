@@ -441,3 +441,5 @@ and testing hdf5 applications. We are investigating this now.
   in the top level directory with the Cray-specific files from the 
   ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
   directory.
+
+* The "stream_test" failed on IRIX64 6.5(n32 mode, modi4) with unknown reason.
