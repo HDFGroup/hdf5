@@ -152,14 +152,15 @@ H5S_all_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
     assert (start);
     assert (end);
 
-    /* Get the start of the 'all' block */
-    /* (Always '0' coordinates for now) */
-    HDmemset(start,0,sizeof(hssize_t)*iter->rank);
+    for(u=0; u<iter->rank; u++) {
+        /* Set the start of the 'all' block */
+        /* (Always '0' coordinates for now) */
+        start[u]=0;
 
-    /* Compute the end of the 'all' block */
-    /* (Always size of the extent for now) */
-    for(u=0; u<iter->rank; u++)
+        /* Compute the end of the 'all' block */
+        /* (Always size of the extent for now) */
         end[u]=iter->dims[u]-1;
+    } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_all_iter_coords() */
