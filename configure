@@ -23231,12 +23231,7 @@ esac
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_COMPRESSION 1
-_ACEOF
-
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_FILTER_GZIP 1
+#define HAVE_FILTER_DEFLATE 1
 _ACEOF
 
 fi

@@ -925,6 +925,7 @@
 ./test/bittests.c
 ./test/cmpd_dset.c
 ./test/dsets.c
+./test/deflate.h5
 ./test/dtypes.c
 ./test/enum.c
 ./test/extend.c
@@ -950,6 +951,7 @@
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
+./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_

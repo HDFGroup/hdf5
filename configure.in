@@ -776,10 +776,8 @@ case $withval in
 esac
 
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
-  AC_DEFINE(HAVE_COMPRESSION, 1,
-            [Define if we have zlib compression support])
-  AC_DEFINE(HAVE_FILTER_GZIP, 1,
-            [Define if support for gzip filter is enabled])
+  AC_DEFINE(HAVE_FILTER_DEFLATE, 1,
+            [Define if support for deflate filter is enabled])
 fi
 
 dnl ----------------------------------------------------------------------
