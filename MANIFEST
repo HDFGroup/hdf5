@@ -11,7 +11,6 @@
 ./Makefile.dist
 ./Makefile.in
 ./README.txt
-./acconfig.h
 ./aclocal.m4
 ./configure
 ./configure.in
@@ -31,7 +30,6 @@
 ./bin/install-sh
 ./bin/iostats
 ./bin/locate_hdf4
-./bin/ltconfig
 ./bin/ltmain.sh
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
@@ -489,7 +487,6 @@
 
 ./fortran/Makefile.dist
 ./fortran/Makefile.in
-./fortran/acconfig.h
 ./fortran/aclocal.m4
 ./fortran/acsite.m4
 ./fortran/configure
