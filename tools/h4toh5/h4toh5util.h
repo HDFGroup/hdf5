@@ -151,7 +151,7 @@ public constant for hdf lib, this constant can be released.*/
 
 /*13. define a default first dimension chunking size when the
   current unlimited dimensional size of SDS is set to 0. */
-#define DEF_CHUNKSIZE 20
+#define HDF4_CHUNKSIZE 20
 extern int32 estnum_vg;
 extern int32 estnum_vd;
 extern int32 num_sds;
@@ -241,6 +241,10 @@ char* make_objname_no(char*,char*,const char*);
 char* make_objname_yes(char*,char*);
 char* correct_name(char*);
 
+/* routines for handling memory allocation of huge SDS dataset */
+int get_numslab_perD(int32,int,int);
+int h5ceil(int32,int32);
+int pow(int,int);
 #endif
 
 
