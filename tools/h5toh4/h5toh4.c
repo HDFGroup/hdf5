@@ -627,8 +627,8 @@ convert_dataset (hid_t did, char *name, op_data_t *op_data) {
     char *fieldname=NULL;
     hid_t fieldtype;
     int32 order;
-    off_t offset;
-    off_t offset_array[512];
+    size_t offset;
+    size_t offset_array[512];
     hid_t h4type_array[512], memtype_array[512];
     int32 order_array[512];
 
@@ -936,7 +936,7 @@ convert_dataset (hid_t did, char *name, op_data_t *op_data) {
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
 				break;
 			}
-			if ((offset = H5Tget_offset(memtype_array[idx])) < 0 || offset >= 128 ) {
+			if ((int)(offset = H5Tget_offset(memtype_array[idx])) < 0 || offset >= 128 ) {
 				fprintf(stderr, "Error: H5Tget_offset() is returning a bad value %d\n",(int)offset);
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
        				return FAIL;

@@ -144,6 +144,11 @@ int ReadGifPlainText(GIFPLAINTEXT *, BYTE **);
 int ReadGifApplication(GIFAPPLICATION *, BYTE **);
 int ReadGifComment(GIFCOMMENT *, BYTE **);
 
+/* HDFGIFWR.C */
+int hdfWriteGIF(FILE *fp, BYTE *pic, int ptype, int w, int h, BYTE *rmap,
+                BYTE *gmap, BYTE *bmap, BYTE *pc2ncmap, int numcols,
+                int colorstyle, int BitsPerPixel);
+
 /* WRITEHDF.C */
 int WriteHDF(GIFTOMEM , CHAR * , CHAR *);
 

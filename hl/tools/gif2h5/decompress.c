@@ -235,7 +235,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
             FreeCode = FirstFree;
             CurCode = OldCode = Code = ReadCode();
             FinChar = CurCode & DataMask;
-            AddToPixel(FinChar);
+            AddToPixel((BYTE)FinChar);
         } else {
             /*
              * If not a clear code, then must be data: save same as CurCode
@@ -275,7 +275,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
              * stacked LIFO, so deal with it that way...
              */
             for (i = OutCount - 1; i >= 0; i--)
-                AddToPixel(OutCode[i]);
+                AddToPixel((BYTE)OutCode[i]);
 
             OutCount = 0;
 

@@ -106,8 +106,8 @@ int main(int argc , char **argv)
         return 0;
     }
 
-    memset(image_name_arr , NULL , MAX_NUMBER_IMAGES);
-    memset(pal_name_arr , NULL , MAX_NUMBER_IMAGES);
+    memset(image_name_arr , 0 , MAX_NUMBER_IMAGES);
+    memset(pal_name_arr , 0 , MAX_NUMBER_IMAGES);
 
     HDFName = (CHAR *)malloc (strlen(argv[1]) + 1);
     GIFName = (CHAR *)malloc (strlen(argv[2]) + 1);

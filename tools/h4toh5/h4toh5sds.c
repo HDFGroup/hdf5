@@ -92,10 +92,10 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   hid_t   h5ty_id;
   hid_t   h5_memtype;
   hid_t   create_plist;
-  hid_t   write_plist;
+/*  hid_t   write_plist; */
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
-  hsize_t bufsize;
+/*  hsize_t bufsize; */
   char*   h5csds_name;
   herr_t  ret;
 
@@ -856,7 +856,7 @@ hid_t   h5dim_nameaid;
   hid_t   attribID;
   hid_t   create_plist;
 
-  int     dim_index;
+/*  int     dim_index; */
   hsize_t h5dimscas[1];
   hsize_t max_h5dimscas[1];
   hsize_t h5dim_dims[1];
@@ -1288,7 +1288,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   int32*  sds_stride;
   int32   count_sdsdata;
   int32   sds_ref;
-  int32   istat;
+/*  int32   istat; */
   int     i;
   int32   num_sdsattrs;
   void*   fill_value;
@@ -1300,9 +1300,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   char    sdslabel[MAX_NC_NAME];
   size_t  h4size;
   size_t  h4memsize;
-  HDF_CHUNK_DEF c_def_out;
   hsize_t*  chunk_dims;
-  int32   c_flags;
 
   /* define varibles for hdf5. */
 
@@ -1311,10 +1309,10 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   hid_t   h5ty_id;
   hid_t   h5_memtype;
   hid_t   create_plist;
-  hid_t   write_plist;
+/*  hid_t   write_plist; */
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
-  hsize_t bufsize;
+/*  hsize_t bufsize; */
   char*   h5csds_name;
 
   if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,
@@ -1704,8 +1702,9 @@ uint16 get_SDref(int32 file_id,uint16 tag,int32 sds_ref){
   }
 
   sd_ref = di.ref;
-  if(!found) ;
-    /* printf("cannot find sd_ref\n");*/
+/*  if(!found)
+        printf("cannot find sd_ref\n");
+*/
 
   DFdifree(GroupID);
   return sd_ref;
@@ -1721,15 +1720,10 @@ static int convert_zerosdsunlimit(int32 file_id,
   int32   sds_dtype;
   int32   sds_rank;
   int32   sds_dimsizes[MAX_VAR_DIMS];
-  int32*  sds_start;
-  int32*  sds_edge;
-  int32*  sds_stride;
-  int32   count_sdsdata;
   int32   sds_ref;
   int32   istat;
   int     i;
   int32   num_sdsattrs;
-  void*   fill_value;
 
   int     check_sdsname;
   int     check_gloattr;
@@ -1756,10 +1750,8 @@ static int convert_zerosdsunlimit(int32 file_id,
   hid_t   h5ty_id;
   hid_t   h5_memtype;
   hid_t   create_plist;
-  hid_t   write_plist;
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
-  hsize_t bufsize;
   char*   h5csds_name;
 
   if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,

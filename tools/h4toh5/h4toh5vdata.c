@@ -420,7 +420,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id,int h4_attr) {
     }
   }
   
-  if(h4_transnumattr(h5dset,HDF4_REF_NUM,vdata_ref)==FAIL){
+  if(h4_transnumattr(h5dset,HDF4_REF_NUM,(uint16)vdata_ref)==FAIL){
     printf("error in transfering vdata attributes.\n");
     free(h5memtype);
     free(h5type);
@@ -527,7 +527,7 @@ int  vdata_transattrs(int32 vdata_id,hid_t h5dset,int snum_vdattrs,
 
        strcat(svdattr_name,":");
        strcat(svdattr_name,"HDF4_VDATA_ATTR_");
-       if(conv_int_str(field_index,refstr)==FAIL) {
+       if(conv_int_str((uint16)field_index,refstr)==FAIL) {
 	 printf("error in converting vdata field index to string.\n");
 	 return FAIL;
        }
@@ -570,7 +570,7 @@ int  vdata_transattrs(int32 vdata_id,hid_t h5dset,int snum_vdattrs,
          return FAIL;
       }
 
-      if ((sh5str_memtype = mkstr(count_svdadata*sh4_amemsize,
+      if ((sh5str_memtype = mkstr((int)(count_svdadata*sh4_amemsize),
 				    H5T_STR_SPACEPAD))<0) {
 	  printf("error in making memory string for vdata attribute. \n");
 	  free(svd_adata);
@@ -731,7 +731,7 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
 
    if(sh5type[i] == H5T_STRING) {
 
-    if ((h5str_type = mkstr(sh4size[i]*fieldorder,H5T_STR_SPACEPAD))<0) {
+    if ((h5str_type = mkstr((int)(sh4size[i]*fieldorder),H5T_STR_SPACEPAD))<0) {
        printf("error in making string of hdf5 string. \n");
        return FAIL;
      }
@@ -741,7 +741,7 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
 
    if (sh5memtype[i] == H5T_STRING) {
 
-     if((h5str_type = mkstr(sh4memsize[i]*fieldorder,H5T_STR_SPACEPAD))<0){ 
+     if((h5str_type = mkstr((int)(sh4memsize[i]*fieldorder),H5T_STR_SPACEPAD))<0){ 
        printf("error in making string for VDATA in memory. \n");
        return FAIL;
      }

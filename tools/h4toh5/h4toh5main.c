@@ -744,7 +744,7 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
       }
 
      /* converting integer number into string format. */
-     if(conv_int_str(ref_array[lone_vg_number],refstr) == FAIL) {
+     if(conv_int_str((int)ref_array[lone_vg_number],refstr) == FAIL) {
        printf("ref. is negative, error in converting\n");
        Vdetach(vgroup_id);
        free(ref_array);
@@ -942,7 +942,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
        }
 
        /* convert reference number into string format. */
-       if(conv_int_str(ref_num,refstr) == FAIL) {
+       if(conv_int_str((uint16)ref_num,refstr) == FAIL) {
 	 printf("ref. is negative, error in converting\n");
 	 Vdetach(vgroup_id);
 	 return FAIL;
@@ -1100,7 +1100,7 @@ int h4toh5lonevds(int32 file_id, hid_t h5group,int h4_attr){
 	   }
 
 	   /* converting reference number into string format.*/
-	   if(conv_int_str(ref_vdata_array[lone_vd_number],refstr)==FAIL) {
+	   if(conv_int_str((uint16)ref_vdata_array[lone_vd_number],refstr)==FAIL) {
 	     printf("error in converting int to string.\n");
 	     free(ref_vdata_array);
 	     VSdetach(vdata_id);
@@ -1237,7 +1237,7 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg,int 
      }
 
      /* convert object reference number into string format. */
-     if(conv_int_str(obj_ref,refstr) == FAIL) {
+     if(conv_int_str((uint16)obj_ref,refstr) == FAIL) {
        printf("error in converting integer into string.\n");
        SDendaccess(sds_id);
        return FAIL;
@@ -1360,7 +1360,7 @@ int h4toh5unvisitedimages(int32 file_id,hid_t h5_root,hid_t h5_palg,int h4_attr)
 	return FAIL;
       }
 
-      if(conv_int_str(obj_ref,refstr)== FAIL) {
+      if(conv_int_str((uint16)obj_ref,refstr)== FAIL) {
 	printf("error in converting object reference number");
 	printf(" into string at h4toh5unvisitedimages routine.\n");
 	GRendaccess(ri_id);

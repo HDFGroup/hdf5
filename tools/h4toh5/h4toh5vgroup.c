@@ -171,7 +171,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
        return FAIL;
      }
 
-     if(conv_int_str(obj_ref,refstr)== FAIL) {
+     if(conv_int_str((uint16)obj_ref,refstr)== FAIL) {
        printf("failed to convert object reference number ");
        printf("into string format at vgroup_h4_to_h5 routine.\n");
        H5Gclose(h5_pgroup);
@@ -262,7 +262,7 @@ int convert_vgroup(int32 file_id,int32 sd_id, int32 obj_ref,
   char*   h5lgroup_name;
   int     check_vgroup;
 
-  if(conv_int_str(obj_ref,refstr)== FAIL) {
+  if(conv_int_str((uint16)obj_ref,refstr)== FAIL) {
     printf("converting integer into string format.\n");
     return FAIL;
   }
@@ -408,7 +408,7 @@ int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
     return FAIL;
   }
 
-  if(conv_int_str(obj_ref,refstr)== FAIL) {
+  if(conv_int_str((uint16)obj_ref,refstr)== FAIL) {
     printf("converting integer into string format.\n");
     VSdetach(vdata_id);
     return FAIL;
@@ -558,7 +558,7 @@ int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
     return FAIL;
   }
 
-  if(conv_int_str(obj_ref,refstr)== FAIL) {
+  if(conv_int_str((uint16)obj_ref,refstr)== FAIL) {
     printf("error in converting reference number into string type.\n");
     return FAIL;
   }
@@ -695,12 +695,12 @@ int convert_image(int32 file_id,int32 obj_ref,char * h5pgroup_name,
     return FAIL;
   }
 
-  if(conv_int_str(obj_ref,refstr)== FAIL) {
+  if(conv_int_str((uint16)obj_ref,refstr)== FAIL) {
     printf("converting integer into string format.\n");
     return FAIL;
   }
 
-  gr_index= GRreftoindex(gr_id,obj_ref);
+  gr_index= GRreftoindex(gr_id,(uint16)obj_ref);
   if(gr_index == FAIL) {
     printf("error in getting gr index.\n");
     return FAIL;
