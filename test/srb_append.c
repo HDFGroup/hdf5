@@ -51,10 +51,6 @@
  */
 #include <h5test.h>
 
-const char *FILENAME[] = {
-    NULL
-};
-
 #ifndef H5_HAVE_SRB
 int main(void)
 {

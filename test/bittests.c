@@ -9,10 +9,6 @@
  */
 #include <h5test.h>
 
-const char *FILENAME[] = {
-    NULL
-};
-
 #define H5T_PACKAGE
 #include <H5Tpkg.h>
 
