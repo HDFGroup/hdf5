@@ -474,6 +474,8 @@
 ./tools/testfiles/tnestedcomp.h5
 ./tools/testfiles/tobjref.h5
 ./tools/testfiles/tobjref.ddl
+./tools/testfiles/topaque.h5
+./tools/testfiles/topaque.ddl
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.h5
