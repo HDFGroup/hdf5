@@ -114,6 +114,8 @@ Library
         conversion buffer is attempted to be read.  QAK - 3/26/02
     * Fixed bug in H5Gget_objinfo() which was not setting the 'fileno'
         of the H5G_stat_t struct.  QAK - 3/27/02
+    * Fixed bug where variable-length string type doesn't behave as string.
+
 
 Configuration
 -------------
