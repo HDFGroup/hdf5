@@ -99,7 +99,7 @@ for f in $host_cpu-$host_vendor-$host_os \
 	 $host_vendor \
 	 $host_cpu ; do
    AC_MSG_CHECKING(for config $f)
-   if test -f $srcdir/config/$f; then
+   if test -f "$srcdir/config/$f"; then
       host_config=$srcdir/config/$f
       AC_MSG_RESULT(found)
       break
@@ -111,11 +111,27 @@ if test $host_config != "none"; then
    . $host_config
 fi
 
+dnl Source any special site-specific file
+hname="`hostname`"
+while test -n "$hname"; do
+   file=$srcdir/config/site-specific/host-$hname
+   AC_MSG_CHECKING(for config $file)
+   if test -f "$file"; then
+      . $file
+      AC_MSG_RESULT(found)
+      break
+   fi
+   AC_MSG_RESULT(no)
+   hname_tmp=$hname
+   hname="`echo $hname | cut -d. -f2-99`"
+   test "$hname_tmp" = "$hname" && break
+done
+
 dnl ----------------------------------------------------------------------
 dnl Check for programs.
 dnl
 AC_PROG_CC
-CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+CC_BASENAME="`echo $CC |cut -f1 -d' ' | xargs basename 2>/dev/null`"
 
 config_dirs=""
 
@@ -476,6 +492,32 @@ dnl Checkpoint the cache
 AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
+dnl If the user specified the --with-zlib flag, then we want to place
+dnl the specified `include' and `lib' directories in the CPPFLAGS and
+dnl LDFLAGS respec. This will cause the subsequent checks to check this
+dnl place first for zlib
+dnl
+AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
+            ,withval=yes)
+case "$withval" in
+   yes | no)
+      ;;
+   *)
+      zlib_inc="`echo $withval |cut -f1 -d,`"
+      if test -n "$zlib_inc"; then
+         saved_CPPFLAGS="$CPPFLAGS"
+         CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+      fi
+
+      zlib_lib="`echo $withval |cut -f2 -d, -s`"
+      if test -n "$zlib_lib"; then
+         saved_LDFLAGS="$LDFLAGS"
+         LDFLAGS="$LDFLAGS -L$zlib_lib"
+      fi
+      ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Is HDF4 present?  If so then we can compile the h5toh4 and h5toh4 converters.
 dnl We assume they can be compiled and then prove otherwise when we don't find
 dnl a header file or library.
@@ -485,10 +527,6 @@ AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4'
 
 AC_SUBST(H4TOH5) H4TOH5=h4toh5
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5'
-
-dnl NCSA keeps hdf4 in a funny place, but for most sites we don't want these.
-test -d /usr/ncsa/include && CPPFLAGS="$CPPFLAGS -I/usr/ncsa/include"
-test -d /usr/ncsa/lib && LDFLAGS="$LDFLAGS -L/usr/ncsa/lib"
 
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case "$withval" in
@@ -550,33 +588,14 @@ AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
 if test "X$FOUND_ZLIB" = "Xno"; then
    dnl Only check for zlib if we haven't found it above in the HDF4 stuff.
    case "$withval" in
-      yes)
-         AC_CHECK_HEADERS(zlib.h)
-         AC_CHECK_LIB(z, compress)
-         ;;
       no)
          AC_MSG_CHECKING(for GNU zlib)
          AC_MSG_RESULT(suppressed)
          ;;
       *)
-         zlib_inc="`echo $withval |cut -f1 -d,`"
-         if test -n "$zlib_inc"; then
-            saved_CPPFLAGS="$CPPFLAGS"
-            CPPFLAGS="$CPPFLAGS -I$zlib_inc"
-            AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
-         else
-            AC_CHECK_HEADERS(zlib.h)
-         fi
-   
-         zlib_lib="`echo $withval |cut -f2 -d, -s`"
-         if test -n "$zlib_lib"; then
-            saved_LDFLAGS="$LDFLAGS"
-            LDFLAGS="$LDFLAGS -L$zlib_lib"
-            AC_CHECK_LIB(z,compress,,LDFLAGS="$saved_LDFLAGS")
-         else
-            AC_CHECK_LIB(z,compress)
-         fi
-         ;;
+         dnl The INC,LIB stuff was already parsed above
+         AC_CHECK_HEADERS(zlib.h)
+         AC_CHECK_LIB(z, compress)
    esac
 fi
 
