@@ -540,7 +540,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
     } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
                                H5Tequal(type, H5T_NATIVE_UCHAR))) {
-        h5tools_print_char(str, info, *ucp_vp);
+        h5tools_print_char(str, info, (unsigned char)(*ucp_vp));
     } else if (H5T_STRING == H5Tget_class(type)) {
         unsigned int i;
 
@@ -578,7 +578,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             }
                 
             /* Print the character */
-            h5tools_print_char(str, info, ucp_vp[i]);
+            h5tools_print_char(str, info, (unsigned char)(ucp_vp[i]));
             
             /* Print the repeat count */
             if (info->str_repeat && j > info->str_repeat) {

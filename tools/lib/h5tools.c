@@ -175,18 +175,18 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
     /* This enum should match the entries in the above drivers_list since they
      * are indexes into the drivers_list array. */
     enum {
-        SEC2_IDX = 0,
-        FAMILY_IDX,
-        SPLIT_IDX,
-        MULTI_IDX,
+        SEC2_IDX = 0
+       ,FAMILY_IDX
+       ,SPLIT_IDX
+       ,MULTI_IDX
 #ifdef H5_HAVE_STREAM
-        STREAM_IDX
+       ,STREAM_IDX
 #endif	/* H5_HAVE_STREAM */
     };
 #define NUM_DRIVERS     (sizeof(drivers_list) / sizeof(struct d_list))
 
     static int          initialized = 0;
-    register int        drivernum;
+    register unsigned   drivernum;
     hid_t               fid = FAIL;
 #ifndef VERSION12
     hid_t               fapl = H5P_DEFAULT;
@@ -606,7 +606,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
 {
     herr_t              ret;                    /*the value to return   */
     hid_t		f_space;		/*file data space	*/
-    hsize_t		elmtno, i;		/*counters		*/
+    hsize_t		i;                      /*counters		*/
     hssize_t		zero = 0;               /*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
