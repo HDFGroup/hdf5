@@ -199,6 +199,17 @@ int apply_filters(hid_t dcpl_id,
  }
 
 /*-------------------------------------------------------------------------
+ * check if we have filters in the pipeline
+ * we want to replace them with the input filters
+ *-------------------------------------------------------------------------
+ */
+
+ if (nfilters) {
+  if (H5Pdelete_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
+   return -1;
+ }
+
+/*-------------------------------------------------------------------------
  * the type of filter and additional parameter 
  * type can be one of the filters
  * H5Z_FILTER_NONE       0,  uncompress if compressed

@@ -322,7 +322,24 @@ test_filter_szip(void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
+
+/*-------------------------------------------------------------------------
+ * test all objects option
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("SZIP 8",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
  
  PASSED();  
 #else
