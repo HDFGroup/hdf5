@@ -139,4 +139,13 @@ void                    test_h5s(void);
 void                    test_h5d(void);
 void                    test_attr(void);
 
-#endif /* HDF5TEST_H */
+/* Prototypes for the cleanup routines */
+void                    cleanup_metadata(void);
+void                    cleanup_file(void);
+void                    cleanup_heap(void);
+void                    cleanup_ohdr(void);
+void                    cleanup_stab(void);
+void                    cleanup_h5s(void);
+void                    cleanup_attr(void);
+
+#endif /* HDF5cleanup_H */

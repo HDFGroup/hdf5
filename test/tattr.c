@@ -1231,3 +1231,24 @@ test_attr(void)
     test_attr_delete();         /* Test H5A code for deleting attributes */
 }   /* test_attr() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup_attr
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_attr(void)
+{
+    remove(FILE);
+}
+

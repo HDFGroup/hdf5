@@ -14,6 +14,7 @@
  *
  *-------------------------------------------------------------------------
  */
+
 #include <testhdf5.h>
 
 #include <H5private.h>
@@ -23,6 +24,8 @@
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
 #include <H5Oprivate.h>
+
+#define TEST_FILE	"tohdr.h5"
 
 /*
  * This file needs to access private datatypes from the H5G package.
@@ -59,7 +62,7 @@ test_ohdr(void)
     MESSAGE(5, ("Testing Object Headers\n"));
 
     /* create the file */
-    fid = H5Fcreate("tohdr.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(TEST_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5I_object(fid);
     CHECK(f, NULL, "H5I_object");
@@ -170,3 +173,25 @@ test_ohdr(void)
     H5O_close(&oh_ent);
     H5Fclose(fid);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup_ohdr
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_ohdr(void)
+{
+    remove(TEST_FILE);
+}
+

@@ -24,6 +24,8 @@
 #include <H5Gprivate.h>
 #include <H5Oprivate.h>
 
+#define TEST_FILE "tstab2.h5"
+
 /*
  * This file needs to access private datatypes from the H5G package.
  */
@@ -92,7 +94,7 @@ test_2(void)
 #endif
 
     /* create the file */
-    fid = H5Fcreate("tstab2.h5", H5F_ACC_TRUNC, create_plist, access_plist);
+    fid = H5Fcreate(TEST_FILE, H5F_ACC_TRUNC, create_plist, access_plist);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5I_object(fid);
     CHECK(f, NULL, "H5I_object");
@@ -149,3 +151,25 @@ test_stab(void)
 {
     test_2();
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup_stab
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_stab(void)
+{
+    remove(TEST_FILE);
+}
+

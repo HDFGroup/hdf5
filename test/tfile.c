@@ -301,3 +301,27 @@ test_file(void)
     test_file_create();		/* Test file creation (also creation templates) */
     test_file_open();		/* Test file opening */
 }				/* test_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup_file
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_file(void)
+{
+    remove(FILE1);
+    remove(FILE2);
+    remove(FILE3);
+}
+

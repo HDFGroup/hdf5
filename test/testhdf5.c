@@ -132,6 +132,37 @@ print_func(const char *format,...)
     return (ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    if (!getenv ("HDF5_NOCLEANUP")) {
+        MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
+	/* call individual cleanup routines in each source module */
+	cleanup_metadata();
+	cleanup_file();
+	cleanup_heap();
+	cleanup_ohdr();
+	cleanup_stab();
+	cleanup_h5s();
+	cleanup_attr();
+    }
+}
+
 int 
 main(int argc, char *argv[])
 {
@@ -282,15 +313,8 @@ main(int argc, char *argv[])
         }                       /* end for */
         print_func("\n\n");
     }                           /* end if */
-    if (CleanUp) {
-        MESSAGE(2, ("\nCleaning Up...\n\n"));
-#if !(defined DOS386 | defined WIN386)
-        system("rm -f *.h5 *.tmp");
-#else /* OLD_WAY */
-        remove("*.h5");
-        remove("*.tmp");
-#endif /* OLD_WAY */
-    }                           /* end if */
+    if (CleanUp)
+	cleanup();
     exit(0);
     return (0);
 }                               /* end main() */

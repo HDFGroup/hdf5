@@ -424,3 +424,25 @@ test_h5s(void)
     test_h5s_compound_scalar_write();	/* Test compound datatype scalar H5S writing code */
     test_h5s_compound_scalar_read();	/* Test compound datatype scalar H5S reading code */
 } /* test_h5s() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup_h5s
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_h5s(void)
+{
+    remove(FILE);
+}
+

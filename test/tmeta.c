@@ -122,3 +122,25 @@ test_metadata(void)
         num_errs++;
     }                           /* end if */
 }                               /* test_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup_metadata
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_metadata(void)
+{
+    /* no file to clean */
+}
+

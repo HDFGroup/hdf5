@@ -23,6 +23,7 @@
 #include <H5Fprivate.h>
 #include <H5HLprivate.h>
 
+#define FILE	"theap.h5"
 #define NOBJS   40
 
 /*-------------------------------------------------------------------------
@@ -55,7 +56,7 @@ test_heap(void)
     MESSAGE(5, ("Testing Heaps\n"));
 
     /* Create the file */
-    fid = H5Fcreate("theap.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5I_object(fid);
     CHECK(f, NULL, "H5I_object");
@@ -88,3 +89,25 @@ test_heap(void)
     /* Close the file */
     H5Fclose(fid);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup_heap
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              July 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_heap(void)
+{
+    remove(FILE);
+}
+
