@@ -3074,8 +3074,12 @@ H5F_close(H5F_t *f)
     /* Only flush at this point if the file will be closed */
     if (closing) {
         /* Dump debugging info */
+#ifdef H5AC_DEBUG
         H5AC_debug(f);
+#endif /* H5AC_DEBUG */
+#ifdef H5F_ISTORE_DEBUG
         H5F_istore_stats(f, FALSE);
+#endif /* H5F_ISTORE_DEBUG */
 
         /* Only try to flush the file if it was opened with write access */
         if(f->intent&H5F_ACC_RDWR) {
