@@ -15,6 +15,9 @@ if [ "$1" ]; then
     shift
 fi
 
+# What compression methods to use?
+METHODS="gzip bzip2"
+
 # Create a working directory.  Hopefully one is left over from last
 # time that still has the contents of the previous release.  But if
 # not, just create one and assume that a snapshot is necessary.
@@ -30,7 +33,7 @@ cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
 
 # Compare it with the previous version.
 if [ -d ${COMPARE}/previous ]; then
-    if (diff -r -I H5_VERS_RELEASE -I " release on " \
+    if (diff -r -I H5_VERS_RELEASE -I " released on " \
 	    ${COMPARE}/previous ${COMPARE}/current >/dev/null); then
 	update=yes
     else
@@ -43,7 +46,7 @@ fi
 # Release snapshot, update version, and commit to cvs
 if [ "$update" = "yes" ]; then
    (cd ${COMPARE}/current; \
-	./bin/release -d $ARCHIVES tar compress gzip bzip2; \
+	./bin/release -d $ARCHIVES $METHODS; \
 	./bin/h5vers -i; \
 	cvs -Q commit -m Snapshot )
 fi
