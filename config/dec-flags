@@ -35,6 +35,9 @@ EOF
 	;;
 esac
 
+# CFLAGS must be set else configure set it to -g
+CFLAGS="$CFLAGS"
+
 # Compiler flags
 case "$cc_vendor-$cc_version" in
     DEC-V5.*)
