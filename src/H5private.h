@@ -431,20 +431,13 @@
 #   define SSIZET_MAX	((hsize_t)(ssize_t)((size_t)1<<(8*sizeof(ssize_t)-1)))
 #endif
 #ifdef H5_HAVE_LARGE_HSIZET
-#   if H5_SIZEOF___INT64>0
-#define	HSIZET_MAX	_UI64_MAX	/*Win32*/
-#define	HSSIZET_MAX	I64_MAX
-#   elif H5_SIZEOF_LONG_LONG>0
 #define	HSIZET_MAX	ULLONG_MAX
 #define	HSSIZET_MAX	LLONG_MAX
-#   else /* Can't find matching type for hsize_t */
-#      error "nothing appropriate for hsize_t"
-#   endif /* H5_HAVE_LARGE_HSIZET */
 #else /* H5_HAVE_LARGE_HSIZET */
 #define HSIZET_MAX	SIZET_MAX
 #define HSSIZET_MAX	SSIZET_MAX
 #endif /* H5_HAVE_LARGE_HSIZET */
-#define HSSIZET_MIN	((-HSSIZET_MAX)-1)
+#define HSSIZET_MIN	(~(HSSIZET_MAX))
 
 /*
  * Some compilers have problems declaring auto variables that point
