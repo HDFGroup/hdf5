@@ -54,6 +54,7 @@
 #define FILE3	"tfile3.h5"
 
 #define ATTR_NAME          "attr"
+#define TYPE_NAME          "type"
 #define FILE4	           "tfile4.h5"
 
 #define OBJ_ID_COUNT_0     0
@@ -827,7 +828,7 @@ static void
 test_get_file_id(void)
 {
     hid_t               fid1, fid2;
-    hid_t		dataset_id, dataspace_id, group_id, attr_id;
+    hid_t		datatype_id, dataset_id, dataspace_id, group_id, attr_id;
     hid_t               plist;
     hsize_t             dims[F2_RANK];
     herr_t              ret;
@@ -891,6 +892,22 @@ test_get_file_id(void)
     ret = H5Fclose(fid2);
     CHECK(ret, FAIL, "H5Fclose");
 
+    /* Create a named datatype.  Make a duplicated file ID from
+     * this attribute.  And close it.
+     */
+    datatype_id=H5Tcopy(H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Acreate");
+    
+    ret = H5Tcommit(fid1, TYPE_NAME, datatype_id);
+    CHECK(ret, FAIL, "H5Tcommit");
+
+    fid2 = H5Iget_file_id(datatype_id);
+    CHECK(fid2, FAIL, "H5Iget_file_id");
+    VERIFY(fid2, fid1, "H5Iget_file_id");
+
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
     /* Create a property list and try to get file ID from it.
      * Supposed to fail.
      */
@@ -903,6 +920,9 @@ test_get_file_id(void)
     VERIFY(fid2, FAIL, "H5Iget_file_id");
     
     /* Close objects */ 
+    ret = H5Tclose(datatype_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
     ret = H5Aclose(attr_id);
     CHECK(ret, FAIL, "H5Aclose");
     

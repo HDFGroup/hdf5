@@ -4191,7 +4191,6 @@ H5F_get_id(H5F_t *file)
     assert(file);
     ret_value = file->file_id;
     
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_id() */
 

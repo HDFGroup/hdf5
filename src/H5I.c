@@ -117,6 +117,7 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 /*--------------------- Local function prototypes ---------------------------*/
 static herr_t H5I_init_interface(void);
 static H5I_id_info_t *H5I_find_id(hid_t id);
+static hid_t H5I_get_file_id(hid_t obj_id);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t grp);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -812,12 +813,13 @@ done:
 hid_t
 H5Iget_file_id(hid_t obj_id)
 {
-    hid_t		ret_value = FAIL;
+    hid_t		ret_value;
 
     FUNC_ENTER_API(H5Iget_file_id, FAIL);
     H5TRACE1("i","i",obj_id);
 
-    ret_value = H5I_get_file_id(obj_id);
+    if((ret_value = H5I_get_file_id(obj_id))<0)
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -841,39 +843,41 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+static hid_t
 H5I_get_file_id(hid_t obj_id)
 {
-    hid_t		ret_value = FAIL;
-    H5I_type_t          obj_type  = H5I_BADID;
     H5G_entry_t         *ent;
+    hid_t		ret_value;
 
-    FUNC_ENTER_NOAPI(H5I_get_file_id, FAIL);
+    FUNC_ENTER_NOINIT(H5I_get_file_id);
 
     /* Get object type */
-    obj_type = H5I_GRP(obj_id);
-
-    switch(obj_type) {
+    switch(H5I_GRP(obj_id)) {
         case H5I_FILE:
             ret_value = obj_id;
-            /* Increment reference count on atom. */
-            if (H5I_inc_ref(ret_value)<0)
-	        HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "incrementing file ID failed");
-           
             break;
+
+        case H5I_DATATYPE:
+            if((ent = H5G_loc(obj_id))==NULL)
+                HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "not a named datatype");
+            ret_value = H5F_get_id(ent->file);
+            break;
+
         case H5I_GROUP:
         case H5I_DATASET:
         case H5I_ATTR:
-            ent = H5G_loc(obj_id);
+            if((ent = H5G_loc(obj_id))==NULL)
+                HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't get symbol table info");
             ret_value = H5F_get_id(ent->file);
-            /* Increment reference count on atom. */
-            if (H5I_inc_ref(ret_value)<0)
-	        HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "incrementing file ID failed");
-
             break;
+
         default:
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID");
     } 
+
+    /* Increment reference count on atom. */
+    if (H5I_inc_ref(ret_value)<0)
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed");
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
