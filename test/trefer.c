@@ -357,8 +357,8 @@ test_reference_region(void)
     /* Select 6x6 hyperslab for first reference */
     start[0]=2; start[1]=2;
     stride[0]=1; stride[1]=1;
-    count[0]=6; count[1]=6;
-    block[0]=1; block[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=6; block[1]=6;
     ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
