@@ -6,9 +6,9 @@
 
 #include "testphdf5.h"
 
-#ifndef FILENAME_MAX
-#define FILENAME_MAX 512
-#endif
+#ifndef PATH_MAX
+#define PATH_MAX    512
+#endif  /* !PATH_MAX */
 
 /* global variables */
 int dim0 = DIM0;
@@ -32,10 +32,8 @@ const char *FILENAME[5]={
 	    "ParaEg3",
 	    "ParaMdset",
 	    NULL};
-char	filenames[5][FILENAME_MAX];
+char	filenames[5][PATH_MAX];
 hid_t	fapl;				/* file access property list */
-
-
 
 #ifdef USE_PAUSE
 /* pause the process for a moment to allow debugger to attach if desired. */
