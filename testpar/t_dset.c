@@ -23,6 +23,10 @@
  * Setup the dimensions of the hyperslab.
  * Two modes--by rows or by columns.
  * Assume dimension rank is 2.
+ * BYROW	divide into slabs of rows
+ * BYCOL	divide into blocks of columns
+ * ZROW		same as BYROW except process 0 gets 0 rows
+ * ZCOL		same as BYCOL except process 0 gets 0 columns
  */
 void
 slab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
@@ -51,14 +55,31 @@ if (verbose) printf("slab_set BYROW\n");
 	count[1] = 1;
 	start[0] = 0;
 	start[1] = mpi_rank*block[1];
-#ifdef DISABLED
-	/* change the above macro to #ifndef if you want to test */
-	/* zero elements access. */
-	printf("set to size 0\n");
-	if (!(mpi_rank % 3))
-	    block[1]=0;
-#endif
 if (verbose) printf("slab_set BYCOL\n");
+	break;
+    case ZROW:
+	/* Similar to BYROW except process 0 gets 0 row */
+	block[0] = (mpi_rank ? dim0/mpi_size : 0);
+	block[1] = dim1;
+	stride[0] = block[0];
+	stride[1] = block[1];
+	count[0] = 1;
+	count[1] = 1;
+	start[0] = (mpi_rank? mpi_rank*block[0] : 0);
+	start[1] = 0;
+if (verbose) printf("slab_set ZROW\n");
+	break;
+    case ZCOL:
+	/* Similar to BYCOL except process 0 gets 0 column */
+	block[0] = dim0;
+	block[1] = (mpi_rank ? dim1/mpi_size : 0);
+	stride[0] = block[0];
+	stride[1] = block[1];
+	count[0] = 1;
+	count[1] = 1;
+	start[0] = 0;
+	start[1] = (mpi_rank? mpi_rank*block[1] : 0);
+if (verbose) printf("slab_set ZCOL\n");
 	break;
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
@@ -551,9 +572,28 @@ dataset_writeAll(char *filename)
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
 
     /* write data collectively */
+    MESG("writeAll by Row");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    xfer_plist, data_array1);					    
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
+
+#ifdef NEWSTUFF
+printf("doing ZROW write\n");
+    /* setup dimensions again to writeAll with zero rows for process 0 */
+    slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+    /* need to make mem_dataspace to match for process 0 */
+    if (MAINPROCESS){
+	ret=H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    }
+    MESG("writeAll by Zero Row");
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
+#endif
+
 
     /* release all temporary handles. */
     /* Could have used them for dataset2 but it is cleaner */

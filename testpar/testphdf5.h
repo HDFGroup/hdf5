@@ -27,8 +27,8 @@
         H5Eprint (stdout);                                                    \
 	fflush(stdout);							      \
 	if (!verbose){							      \
-	    MPI_Finalize();						      \
-	    exit(nerrors);						      \
+	    printf("aborting MPI process\n"); \
+	    MPI_Abort(MPI_COMM_WORLD, nerrors);			              \
 	}								      \
     }                                                                         \
     H5Eclear();                                                               \
@@ -56,6 +56,8 @@
 /* hyperslab layout styles */
 #define BYROW		1	/* divide into slabs of rows */
 #define BYCOL		2	/* divide into blocks of columns */
+#define ZROW		3	/* same as BYCOL except process 0 gets 0 rows */
+#define ZCOL		4	/* same as BYCOL except process 0 gets 0 columns */
 
 
 /* dataset data type.  Int's can be easily octo dumped. */

@@ -49,7 +49,11 @@ void multiple_dset_write(char *filename)
     H5Dwrite (dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, outme);
 
     H5Dclose (dataset);
-  }
+    if (! ((i+1) % 10)) {
+	printf("created %d datasets\n", i+1);
+	MPI_Barrier(MPI_COMM_WORLD);
+    }
+}
 
   H5Sclose (filespace);
   H5Sclose (memspace);

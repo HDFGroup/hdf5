@@ -20,6 +20,7 @@ void *old_client_data;			/* previous error handler arg.*/
 /* other option flags */
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
+int domdset=1;				/* multiple dataset test */
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[5]={
 	    "ParaEg1",
@@ -81,6 +82,66 @@ int MPI_Init(int *argc, char ***argv)
 }
 #endif	/* USE_PAUSE */
 
+#if 0		/* temp. disabled */
+int MPI_Type_commit(MPI_Datatype *mpi_type)
+{
+    int ret_code;
+    ret_code=PMPI_Type_commit(mpi_type);
+    printf("PMPI_Type_commit ret_code=%d, mpi_type=%d\n", ret_code, *mpi_type);
+    return (ret_code);
+}
+
+int MPI_Type_free(MPI_Datatype *mpi_type)
+{
+    int ret_code;
+    printf("PMPI_Type_free mpi_type=%d, ", *mpi_type);
+    ret_code=PMPI_Type_free(mpi_type);
+    printf("ret_code=%d\n", ret_code);
+    return (ret_code);
+}
+
+int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype *newtype)
+{
+    int ret_code;
+    ret_code=PMPI_Type_contiguous(count, oldtype, newtype);
+    printf("PMPI_Type_contiguous ret_code=%d, count=%d, old_type=%d, new_type=%d\n",
+	    ret_code, count, oldtype, *newtype);
+    return (ret_code);
+}
+
+int MPI_Type_vector(int count, int blocklength, int stride, MPI_Datatype oldtype, MPI_Datatype *newtype) 
+{
+    int ret_code;
+    ret_code=PMPI_Type_vector(count, blocklength, stride, oldtype, newtype);
+    printf("PMPI_Type_vector ret_code=%d, count=%d, blocklength=%d, stride=%d, "
+	"old_type=%d, new_type=%d\n",
+	    ret_code, count, blocklength, stride, oldtype, *newtype);
+    return (ret_code);
+}
+
+int MPI_Type_struct(int count, int *array_of_blocklengths, MPI_Aint *array_of_displacements, MPI_Datatype *array_of_types, MPI_Datatype *newtype)
+{
+    int ret_code;
+    ret_code=PMPI_Type_struct(count, array_of_blocklengths, array_of_displacements, array_of_types, newtype);
+    printf("PMPI_Type_struct ret_code=%d, new_type=%d\n",
+	    ret_code, *newtype);
+    return (ret_code);
+}
+
+#ifdef HAVE_MPI2
+int MPI_Type_create_resized(MPI_Datatype oldtype, MPI_Aint lb, MPI_Aint extent, MPI_Datatype *newtype)
+{
+    int ret_code;
+    ret_code=PMPI_Type_create_resized(oldtype, lb, extent, newtype);
+    printf("PMPI_Type_create_resized ret_code=%d, lb=%d, extent=%d, old_type=%d, new_type=%d\n",
+	    ret_code, lb, extent, oldtype, *newtype);
+    return (ret_code);
+}
+#endif
+
+#endif
+
+
 
 /*
  * Show command usage
@@ -89,8 +150,9 @@ void
 usage(void)
 {
     printf("Usage: testphdf5 [-r] [-w] [-v] [-f <prefix>] [-d <dim0> <dim1>]\n");
-    printf("\t-r\t\tno read\n");
-    printf("\t-w\t\tno write\n");
+    printf("\t-r\t\tno read test\n");
+    printf("\t-w\t\tno write test\n");
+    printf("\t-m\t\tno multiple dataset test\n");
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-d <dim0> <dim1>\tdataset dimensions\n");
@@ -124,6 +186,8 @@ parse_options(int argc, char **argv)
 		case 'r':   doread = 0;
 			    break;
 		case 'w':   dowrite = 0;
+			    break;
+		case 'm':   domdset = 0;
 			    break;
 		case 'v':   verbose = 1;
 			    break;
@@ -238,35 +302,45 @@ main(int argc, char **argv)
     }
 
     if (dowrite){
-	MPI_BANNER("testing MPIO independent overlapping writes...");
+	MPI_BANNER("MPIO independent overlapping writes...");
 	test_mpio_overlap_writes(filenames[0]);
 
-	MPI_BANNER("testing dataset using split communicators...");
+	MPI_BANNER("dataset using split communicators...");
 	test_split_comm_access(filenames[0]);
 
-	MPI_BANNER("testing dataset independent write...");
+	MPI_BANNER("dataset independent write...");
 	dataset_writeInd(filenames[0]);
 
-	MPI_BANNER("testing dataset collective write...");
+	MPI_BANNER("dataset collective write...");
 	dataset_writeAll(filenames[1]);
 
-	MPI_BANNER("testing extendible dataset independent write...");
+	MPI_BANNER("extendible dataset independent write...");
 	extend_writeInd(filenames[2]);
 
-	MPI_BANNER("testing multiple datasets write ...");
-	multiple_dset_write(filenames[3]);
-
+	if (domdset){
+	    MPI_BANNER("multiple datasets write ...");
+	    multiple_dset_write(filenames[3]);
+	}
+	else{
+	    MPI_BANNER("Multiple datasets test skipped");
+	}
+    }
+    else{
+	MPI_BANNER("write tests skipped");
     }
 
     if (doread){
-	MPI_BANNER("testing dataset independent read...");
+	MPI_BANNER("dataset independent read...");
 	dataset_readInd(filenames[0]);
 
-	MPI_BANNER("testing dataset collective read...");
+	MPI_BANNER("dataset collective read...");
 	dataset_readAll(filenames[1]);
 
-	MPI_BANNER("testing extendible dataset independent read...");
+	MPI_BANNER("extendible dataset independent read...");
 	extend_readInd(filenames[2]);
+    }
+    else{
+	MPI_BANNER("read tests skipped");
     }
 
     if (!(dowrite || doread)){
