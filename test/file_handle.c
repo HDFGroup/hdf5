@@ -62,7 +62,7 @@ test_sec2(void)
     hid_t       file=(-1), fapl, access_fapl = -1;
     char        filename[1024];
     int         *fhandle=NULL;
-    haddr_t    file_size;
+    hsize_t     file_size;
     
     TESTING("SEC2 file driver");
    
@@ -90,7 +90,7 @@ test_sec2(void)
         goto error;
 
     /* Check file size API */
-    if((file_size = H5Fget_filesize(file)) <= 0)
+    if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
     /* There is no garantee the size of metadata in file is constant.  
@@ -140,7 +140,7 @@ test_core(void)
     hid_t       file=(-1), fapl, access_fapl = -1;
     char        filename[1024];
     void        *fhandle=NULL;
-    haddr_t    file_size;
+    hsize_t     file_size;
 
     TESTING("CORE file driver");
 
@@ -170,7 +170,7 @@ test_core(void)
     }
 
     /* Check file size API */
-    if((file_size = H5Fget_filesize(file)) <= 0)
+    if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
     /* There is no garantee the size of metadata in file is constant.  
@@ -225,7 +225,7 @@ test_family(void)
     int         *fhandle=NULL, *fhandle2=NULL;
     int         buf[FAMILY_NUMBER][FAMILY_SIZE];
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
-    haddr_t    file_size;
+    hsize_t     file_size;
 
     TESTING("FAMILY file driver");
 
@@ -239,7 +239,7 @@ test_family(void)
         goto error;
 
     /* Check file size API */
-    if((file_size = H5Fget_filesize(file)) <= 0)
+    if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
     /* The file size is supposed to be 2KB right now. */
@@ -286,7 +286,7 @@ test_family(void)
         goto error;
 
     /* Check file size API */
-    if((file_size = H5Fget_filesize(file)) <= 0)
+    if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
     /* Some data has been written.  The file size should be bigger(4KB) now. */ 
@@ -344,7 +344,7 @@ test_multi(void)
     hid_t       access_fapl = -1;
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
-    haddr_t     file_size;
+    hsize_t     file_size;
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
@@ -399,7 +399,7 @@ test_multi(void)
         goto error;
 
     /* Check file size API */
-    if((file_size = H5Fget_filesize(file)) <= 0)
+    if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
     /* Before any data is written, the raw data file is empty.  So
@@ -435,7 +435,7 @@ test_multi(void)
         goto error;
 
     /* Check file size API */
-    if((file_size = H5Fget_filesize(file)) <= 0)
+    if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
     /* After the data is written, the file size is huge because the 

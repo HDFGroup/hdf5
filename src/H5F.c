@@ -4714,7 +4714,7 @@ done:
  *              is called after an existing file is opened in order
  *		to learn the true size of the underlying file.
  *
- * Return:      Success:        File size
+ * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
  * Programmer:  David Pitt
@@ -4725,22 +4725,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-haddr_t
-H5Fget_filesize(hid_t file_id)
+herr_t
+H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
     H5F_t      *file=NULL;      /* File object for file ID */
-    haddr_t    ret_value;      /* Return value */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    haddr_t    eof;
 
-    FUNC_ENTER_API(H5Fget_filesize, HADDR_UNDEF)
-    H5TRACE1("a","i",file_id);
+    FUNC_ENTER_API(H5Fget_filesize, FAIL)
+    H5TRACE2("e","i*h",file_id,size);
 
     /* Check args */
     if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "not a file ID")
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual file size */
-    if((ret_value = H5FDget_eof(file->shared->lf))==HADDR_UNDEF)
-         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HADDR_UNDEF, "unable to get file size")
+    if((eof = H5FDget_eof(file->shared->lf))==HADDR_UNDEF)
+         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+
+    *size = (hsize_t)eof;
 
 done:
     FUNC_LEAVE_API(ret_value)
