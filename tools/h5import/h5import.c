@@ -454,7 +454,7 @@ readIntegerData(FILE **strm, struct Input *in)
               (void) fprintf(stderr, err1);
               return (-1);
             }   
-            *in64 = (H5DT_INT64) strtoll(buffer, NULL, 10);
+            *in64 = (H5DT_INT64) HDstrtoll(buffer, NULL, 10);
           }
         break;
 
@@ -620,7 +620,7 @@ readUIntegerData(FILE **strm, struct Input *in)
               (void) fprintf(stderr, err1);
               return (-1);
             }   
-            *in64 = (H5DT_UINT64) strtoll(buffer, NULL, 10);
+            *in64 = (H5DT_UINT64) HDstrtoll(buffer, NULL, 10);
           }
         break;
 
