@@ -814,24 +814,12 @@ H5F_open (const char *name, uintn flags,
    }
 
    /* What is the current size of the file? */
-#ifndef LATER
-   /*
-    * Remember the current position so we can reset it.  If not, the seek()
-    * optimization stuff gets confused.  Eventually we should have a
-    * get_filesize() method for the various file types we'll have.
-    */
-   {
-      size_t curpos = H5F_TELL (f->shared->file_handle);
-#endif
       if (H5F_SEEKEND (f->shared->file_handle)<0) {
 	 /* Cannot determine file size */
 	 HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, NULL);
       }
       f->shared->logical_len = H5F_TELL (f->shared->file_handle);
-#ifndef LATER
-      H5F_SEEK (f->shared->file_handle, curpos);
-   }
-#endif
+      f->shared->last_op=OP_SEEK;   /* change the last operation to a seek */
    
 
    /* Success! */
