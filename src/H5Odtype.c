@@ -123,8 +123,8 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
 	dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
 	dt->u.atomic.msb_pad = H5T_PAD_ZERO;
 
-	dt->u.atomic.u.s.pad = flags & 0x0f;
-	dt->u.atomic.u.s.cset = (flags>>4) & 0x0f;
+	dt->u.atomic.u.s.pad = (H5T_str_t)(flags & 0x0f);
+	dt->u.atomic.u.s.cset = (H5T_cset_t)((flags>>4) & 0x0f);
 	break;
 
     case H5T_FLOAT:

@@ -919,7 +919,7 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
 	idx = (lt+rt)/2;
 	if (NULL==(s=H5HL_peek(f, &(bt_udata->heap_addr),
 			       sn->entry[idx].name_off))) {
-	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
+	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR,
 			"unable to read symbol name");
 	}
 	cmp = HDstrcmp(bt_udata->name, s);
@@ -929,7 +929,7 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
 	    lt = idx+1;
 	}
     }
-    if (cmp) HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
+    if (cmp) HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "not found");
 
     if (H5G_CACHED_SLINK==sn->entry[idx].type) {
 	/* Remove the symbolic link value */
@@ -944,7 +944,7 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
 	/* Decrement the reference count */
 	assert(H5F_addr_defined(&(sn->entry[idx].header)));
 	if (H5O_link(sn->entry+idx, -1)<0) {
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR,
 			"unable to decrement object link count");
 	}
     }

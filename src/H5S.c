@@ -1668,12 +1668,12 @@ H5Sget_simple_extent_type(hid_t sid)
     H5S_class_t	ret_value = H5S_NO_CLASS;
     H5S_t	*space = NULL;
 
-    FUNC_ENTER(H5Sget_simple_extent_type, FAIL);
+    FUNC_ENTER(H5Sget_simple_extent_type, H5S_NO_CLASS);
     H5TRACE1("Sc","i",sid);
 
     /* Check arguments */
     if (H5I_DATASPACE != H5I_get_type(sid) || NULL == (space = H5I_object(sid))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
     }
 
     ret_value=space->extent.type;

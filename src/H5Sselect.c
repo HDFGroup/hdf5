@@ -152,7 +152,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
             break;
     }
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }   /* H5S_select_copy() */
 
 /*--------------------------------------------------------------------------
@@ -759,7 +759,7 @@ H5Sget_select_npoints(hid_t spaceid)
 hsize_t
 H5S_get_select_npoints (const H5S_t *space)
 {
-    herr_t ret_value=FAIL;  /* return value */
+    hsize_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5S_get_select_npoints, FAIL);
 

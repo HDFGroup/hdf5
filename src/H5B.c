@@ -1585,9 +1585,9 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
  *		item falls at the left or right end of the current level then
  *		it might be necessary to adjust the left and/or right keys.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	A B-tree operation.
  *
- *		Failure:	FAIL
+ *		Failure:	H5B_INS_ERROR
  *
  * Programmer:	Robb Matzke
  *              Wednesday, September 16, 1998
@@ -1607,7 +1607,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
     intn	idx=-1, lt=0, rt, cmp=1, i;
     size_t	sizeof_rkey, sizeof_node, sizeof_rec;
     
-    FUNC_ENTER(H5B_remove_helper, FAIL);
+    FUNC_ENTER(H5B_remove_helper, H5B_INS_ERROR);
     assert(f);
     assert(addr && H5F_addr_defined(addr));
     assert(type);
@@ -1623,14 +1623,14 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
      * for which we're searching.
      */
     if (NULL==(bt=H5AC_protect(f, H5AC_BT, addr, type, udata))) {
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR,
 		    "unable to load B-tree node");
     }
     rt = bt->nchildren;
     while (lt<rt && cmp) {
 	idx = (lt+rt)/2;
 	if (H5B_decode_keys(f, bt, idx)<0) {
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, FAIL,
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR,
 			"unable to decode B-tree key(s)");
 	}
 	if ((cmp=(type->cmp3)(f, bt->key[idx].nkey, udata,
@@ -1641,7 +1641,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	}
     }
     if (cmp) {
-	HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree key not found");
+	HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR, "B-tree key not found");
     }
 
     /*
@@ -1659,8 +1659,8 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 					 lt_key_changed/*out*/,
 					 udata,
 					 bt->key[idx+1].nkey/*out*/,
-					 rt_key_changed/*out*/))<0) {
-	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
+					 rt_key_changed/*out*/))==H5B_INS_ERROR) {
+	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR,
 			"key not found in subtree");
 	}
     } else if (type->remove) {
@@ -1676,7 +1676,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 				      udata,
 				      bt->key[idx+1].nkey,
 				      rt_key_changed))<0) {
-	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL,
+	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR,
 			"key not found in leaf node");
 	}
     } else {
@@ -1735,7 +1735,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    if (H5F_addr_defined(&(bt->left))) {
 		if (NULL==(sibling=H5AC_find(f, H5AC_BT, &(bt->left), type,
 					     udata))) {
-		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR,
 				"unable to unlink node from tree");
 		}
 		sibling->right = bt->right;
@@ -1744,7 +1744,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    if (H5F_addr_defined(&(bt->right))) {
 		if (NULL==(sibling=H5AC_find(f, H5AC_BT, &(bt->right), type,
 					     udata))) {
-		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR,
 				"unable to unlink node from tree");
 		}
 		sibling->left = bt->left;
@@ -1758,7 +1758,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 		H5AC_flush(f, H5AC_BT, addr, TRUE)<0 ||
 		H5MF_xfree(f, addr, sizeof_node)<0) {
 		bt = NULL;
-		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL,
+		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR,
 			    "unable to free B-tree node");
 	    }
 	    bt = NULL;
@@ -1851,7 +1851,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
     
  done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt)<0) {
-	HRETURN_ERROR(H5E_BTREE, H5E_PROTECT, FAIL,
+	HRETURN_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR,
 		      "unable to release node");
     }
     FUNC_LEAVE(ret_value);
@@ -1901,7 +1901,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 
     /* The actual removal */
     if (H5B_remove_helper(f, addr, type, 0, lt_key, &lt_key_changed,
-			  udata, rt_key, &rt_key_changed)<0) {
+			  udata, rt_key, &rt_key_changed)==H5B_INS_ERROR) {
 	HRETURN_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
 		      "unable to remove entry from B-tree");
     }
