@@ -175,7 +175,7 @@ static herr_t H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr
 			     size_t size, void *buf);
 static herr_t H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_log_flush(H5FD_t *_file, hbool_t closing);
+static herr_t H5FD_log_flush(H5FD_t *_file);
 
 /*
  * The free list map which causes each request type to use no free lists
@@ -581,7 +581,7 @@ H5FD_log_close(H5FD_t *_file)
 
     FUNC_ENTER(H5FD_log_close, FAIL);
 
-    if (H5FD_log_flush(_file,TRUE)<0)
+    if (H5FD_log_flush(_file)<0)
         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to flush file");
 
 #ifdef H5_HAVE_GETTIMEOFDAY
@@ -1212,7 +1212,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_flush(H5FD_t *_file, hbool_t UNUSED closing)
+H5FD_log_flush(H5FD_t *_file)
 {
     H5FD_log_t	*file = (H5FD_log_t*)_file;
 

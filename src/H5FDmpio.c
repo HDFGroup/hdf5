@@ -83,7 +83,7 @@ static herr_t H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 			     size_t size, void *buf);
 static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_mpio_flush(H5FD_t *_file, hbool_t closing);
+static herr_t H5FD_mpio_flush(H5FD_t *_file);
 
 /* MPIO-specific file access properties */
 typedef struct H5FD_mpio_fapl_t {
@@ -1521,7 +1521,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_flush(H5FD_t *_file, hbool_t closing)
+H5FD_mpio_flush(H5FD_t *_file)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int			mpi_code;	/* mpi return code */
@@ -1563,13 +1563,8 @@ H5FD_mpio_flush(H5FD_t *_file, hbool_t closing)
         }
     }
 
-    /* Don't bother calling MPI_File_sync() if we are going to immediately
-     * close the file, MPI_File_close() performs the same sync actions.
-     */
-    if(!closing) {
-        if (MPI_SUCCESS != (mpi_code=MPI_File_sync(file->f)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code);
-    } /* end if */
+    if (MPI_SUCCESS != (mpi_code=MPI_File_sync(file->f)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code);
 
 done:
 #ifdef H5FDmpio_DEBUG

@@ -135,7 +135,7 @@ typedef struct H5FD_class_t {
 		   void *buffer);
     herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size,
 		    const void *buffer);
-    herr_t (*flush)(H5FD_t *file, hbool_t closing);
+    herr_t (*flush)(H5FD_t *file);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 

@@ -78,7 +78,7 @@ typedef struct H5FD_core_fapl_t {
 static void *H5FD_core_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
-static herr_t H5FD_core_flush(H5FD_t *_file, hbool_t closing);
+static herr_t H5FD_core_flush(H5FD_t *_file);
 static herr_t H5FD_core_close(H5FD_t *_file);
 static int H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static haddr_t H5FD_core_get_eoa(H5FD_t *_file);
@@ -365,7 +365,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_flush(H5FD_t *_file, hbool_t UNUSED closing)
+H5FD_core_flush(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
@@ -425,7 +425,7 @@ H5FD_core_close(H5FD_t *_file)
     FUNC_ENTER(H5FD_core_close, FAIL);
 
     /* Flush */
-    if (H5FD_core_flush(_file,TRUE)<0)
+    if (H5FD_core_flush(_file)<0)
         HRETURN_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file");
 
     /* Release resources */
