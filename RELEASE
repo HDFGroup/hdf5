@@ -419,4 +419,9 @@ Known Problems
         some floating-point values.  These are benign differences due to the
         different precision in the values displayed and h5ls appears to be
         dumping floating-point numbers correctly.
-        
+
+* Before building HDF5 F90 Library from source on Crays (T3E and J90) 
+  replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src subdirectory 
+  in the top level directory with the Cray-specific files from the 
+  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
+  directory.
