@@ -235,7 +235,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	    buf[i] = dd;
 	    interval_nelmts += size[i];
 	}
-	if (H5Rwrite(ra, row, i, H_MTYPE, size, buf)<0) goto error;
+	if (H5RAwrite(ra, row, i, H_MTYPE, size, buf)<0) goto error;
 	if (0==row || alarm_g || 0==timeout_g) {
 	    alarm_g = 0;
 	    H5_timer_end(&timer_total, &timer);
@@ -333,7 +333,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	/* Clear data then read */
 	HDmemset(size, 0, rows_at_once*sizeof(*size));
 	HDmemset(buf, 0, rows_at_once*sizeof(*buf));
-	if (H5Rread(ra, row, rows_at_once, H_MTYPE, size,
+	if (H5RAread(ra, row, rows_at_once, H_MTYPE, size,
 		    (void**)buf)<0) {
 	    goto error;
 	}
@@ -470,7 +470,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 
 	/* Read data */
 	for (i=0; i<rows_at_once; i++) size[i] = width;
-	if (H5Rread(ra, row, rows_at_once, H_MTYPE, size,
+	if (H5RAread(ra, row, rows_at_once, H_MTYPE, size,
 		    (void**)buf)<0) {
 	    goto error;
 	}
@@ -612,7 +612,7 @@ main(int argc, char *argv[])
     printf("Chunk size is %lu by %lu\n",
 	   (unsigned long)(ch_size[0]), (unsigned long)(ch_size[1]));
     if (H5Pset_chunk(dcpl, 2, ch_size)<0) goto error;
-    if ((ra=H5Rcreate(file, "ra", H_FTYPE, dcpl))<0) goto error;
+    if ((ra=H5RAcreate(file, "ra", H_FTYPE, dcpl))<0) goto error;
     if (H5Pclose(dcpl)<0) goto error;
 
     /* The tests */
@@ -630,7 +630,7 @@ main(int argc, char *argv[])
     rand_nelmts(1);
     
     /* Cleanup */
-    if (H5Rclose(ra)<0) goto error;
+    if (H5RAclose(ra)<0) goto error;
     if (H5Fclose(file)<0) goto error;
 
     puts("All ragged array tests passed.");

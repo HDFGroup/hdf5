@@ -25,7 +25,7 @@
  *		dataset.  All three datasets are contained in a single group
  *		whose name is the name of the ragged array.
  */
-#include <H5Rprivate.h>
+#include <H5RAprivate.h>
 
 #include <H5private.h>
 #include <H5Eprivate.h>
@@ -33,32 +33,32 @@
 #include <H5MMprivate.h>
 #include <H5Pprivate.h>
 
-typedef struct H5R_meta_t {
+typedef struct H5RA_meta_t {
     hsize_t	nelmts;		/*num elements in row			*/
     hssize_t	offset;		/*offset into overflow array		*/
     hsize_t	nover;		/*allocated size in overflow array	*/
-} H5R_meta_t;
+} H5RA_meta_t;
 
-struct H5R_t {
+struct H5RA_t {
     H5G_t	*group;		/*the group containing everything	*/
     H5D_t	*meta;		/*ragged meta data array		*/
     H5D_t	*raw;		/*fixed-width raw data			*/
     H5D_t	*over;		/*overflow data				*/
 };
 
-#define PABLO_MASK	H5R_mask
+#define PABLO_MASK	H5RA_mask
 static hbool_t interface_initialize_g = FALSE;
-#define INTERFACE_INIT H5R_init_interface
-static herr_t H5R_init_interface(void);
-static void H5R_term_interface(void);
-static H5T_t *H5R_meta_type_g = NULL;
+#define INTERFACE_INIT H5RA_init_interface
+static herr_t H5RA_init_interface(void);
+static void H5RA_term_interface(void);
+static H5T_t *H5RA_meta_type_g = NULL;
 
-static herr_t H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta,
+static herr_t H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta,
 			       hsize_t nelmts, void *buf);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_init_interface
+ * Function:	H5RA_init_interface
  *
  * Purpose:	Initialize the interface.
  *
@@ -74,38 +74,38 @@ static herr_t H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5R_init_interface(void)
+H5RA_init_interface(void)
 {
     herr_t	ret_value = SUCCEED;
     H5T_t	*type = NULL;
     
-    FUNC_ENTER(H5R_init_interface, FAIL);
+    FUNC_ENTER(H5RA_init_interface, FAIL);
 
     /* The atom group */
     if ((ret_value=H5I_init_group(H5I_RAGGED, H5I_RAGGED_HASHSIZE, 0,
-				  (herr_t(*)(void*))H5R_close))>=0) {
-	ret_value = H5_add_exit(H5R_term_interface);
+				  (herr_t(*)(void*))H5RA_close))>=0) {
+	ret_value = H5_add_exit(H5RA_term_interface);
     }
 
     /* The meta dataset type */
-    if (NULL==(type=H5T_create(H5T_COMPOUND, sizeof(H5R_meta_t))) ||
-	H5T_insert(type, "nelmts", HOFFSET(H5R_meta_t, nelmts),
+    if (NULL==(type=H5T_create(H5T_COMPOUND, sizeof(H5RA_meta_t))) ||
+	H5T_insert(type, "nelmts", HOFFSET(H5RA_meta_t, nelmts),
 		   0, NULL, NULL, H5I_object(H5T_NATIVE_HSIZE_g))<0 ||
-	H5T_insert(type, "offset", HOFFSET(H5R_meta_t, offset),
+	H5T_insert(type, "offset", HOFFSET(H5RA_meta_t, offset),
 		   0, NULL, NULL, H5I_object(H5T_NATIVE_HSSIZE_g))<0 ||
-	H5T_insert(type, "nover", HOFFSET(H5R_meta_t, nover),
+	H5T_insert(type, "nover", HOFFSET(H5RA_meta_t, nover),
 		   0, NULL, NULL, H5I_object(H5T_NATIVE_HSIZE_g))) {
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		      "unable to define ragged array meta type");
     }
-    H5R_meta_type_g = type;
+    H5RA_meta_type_g = type;
     
     FUNC_LEAVE(ret_value);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_term_interface
+ * Function:	H5RA_term_interface
  *
  * Purpose:	Terminate the ragged array interface.
  *
@@ -119,16 +119,16 @@ H5R_init_interface(void)
  *-------------------------------------------------------------------------
  */
 static void
-H5R_term_interface(void)
+H5RA_term_interface(void)
 {
     H5I_destroy_group(H5I_RAGGED);
-    H5T_close(H5R_meta_type_g);
-    H5R_meta_type_g = NULL;
+    H5T_close(H5RA_meta_type_g);
+    H5RA_meta_type_g = NULL;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Rcreate
+ * Function:	H5RAcreate
  *
  * Purpose:	Create a new ragged array with the specified name.  A ragged
  *		array is implemented as a group containing three datasets.
@@ -158,15 +158,15 @@ H5R_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
+H5RAcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
 {
-    H5R_t		*ra=NULL;
+    H5RA_t		*ra=NULL;
     H5G_entry_t		*loc=NULL;
     H5T_t		*type=NULL;
     const H5D_create_t	*plist=NULL;
     hid_t		ret_value=FAIL;
     
-    FUNC_ENTER(H5Rcreate, FAIL);
+    FUNC_ENTER(H5RAcreate, FAIL);
     H5TRACE4("i","isii",loc_id,name,type_id,plist_id);
 
     /* Check args */
@@ -197,14 +197,14 @@ H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
     }
     
     /* Do the real work */
-    if (NULL==(ra=H5R_create(loc, name, type, plist))) {
+    if (NULL==(ra=H5RA_create(loc, name, type, plist))) {
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		      "unable to create ragged array");
     }
 
     /* Register the new dataset to get an ID for it */
     if ((ret_value=H5I_register(H5I_RAGGED, ra))<0) {
-	H5R_close(ra);
+	H5RA_close(ra);
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTREGISTER, FAIL,
 		      "unable to register ragged array");
     }
@@ -214,7 +214,7 @@ H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_create
+ * Function:	H5RA_create
  *
  * Purpose:	Create a new ragged array implemented as a group.
  *
@@ -229,18 +229,18 @@ H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
  *
  *-------------------------------------------------------------------------
  */
-H5R_t *
-H5R_create(H5G_entry_t *loc, const char *name, H5T_t *type,
+H5RA_t *
+H5RA_create(H5G_entry_t *loc, const char *name, H5T_t *type,
 	   const H5D_create_t *dcpl)
 {
-    H5R_t		*ra = NULL;
+    H5RA_t		*ra = NULL;
     H5S_t		*space = NULL;
     hsize_t		cur_dims[2];
     hsize_t		max_dims[2];
-    H5R_t		*ret_value=NULL;
+    H5RA_t		*ret_value=NULL;
     H5D_create_t	d1_dcpl;
     
-    FUNC_ENTER(H5R_create, NULL);
+    FUNC_ENTER(H5RA_create, NULL);
 
     /* Check args */
     assert(loc);
@@ -250,7 +250,7 @@ H5R_create(H5G_entry_t *loc, const char *name, H5T_t *type,
     assert(H5D_CHUNKED==dcpl->layout);
 
     /* Create the data struct */
-    if (NULL==(ra=H5MM_calloc(sizeof(H5R_t)))) {
+    if (NULL==(ra=H5MM_calloc(sizeof(H5RA_t)))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 		    "memory allocation failed for ragged array struct");
     }
@@ -316,9 +316,9 @@ H5R_create(H5G_entry_t *loc, const char *name, H5T_t *type,
     d1_dcpl.chunk_size[0] = MAX(1,
 				(dcpl->chunk_size[0]*dcpl->chunk_size[1]*
 				 H5T_get_size(type))/
-				H5T_get_size(H5R_meta_type_g));
+				H5T_get_size(H5RA_meta_type_g));
     if (NULL==(ra->meta=H5D_create(H5G_entof(ra->group), "meta",
-				   H5R_meta_type_g, space, &d1_dcpl))) {
+				   H5RA_meta_type_g, space, &d1_dcpl))) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
 		    "unable to create meta dataset");
     }
@@ -347,7 +347,7 @@ H5R_create(H5G_entry_t *loc, const char *name, H5T_t *type,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ropen
+ * Function:	H5RAopen
  *
  * Purpose:	Opens an existing ragged array.  The name of the array should
  *		be the same that was used when the array was created; that is,
@@ -365,13 +365,13 @@ H5R_create(H5G_entry_t *loc, const char *name, H5T_t *type,
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Ropen(hid_t loc_id, const char *name)
+H5RAopen(hid_t loc_id, const char *name)
 {
     H5G_entry_t	*loc=NULL;
-    H5R_t	*ra=NULL;
+    H5RA_t	*ra=NULL;
     hid_t	ret_value=FAIL;
     
-    FUNC_ENTER(H5Ropen, FAIL);
+    FUNC_ENTER(H5RAopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
@@ -383,14 +383,14 @@ H5Ropen(hid_t loc_id, const char *name)
     }
 
     /* The real work */
-    if (NULL==(ra=H5R_open(loc, name))) {
+    if (NULL==(ra=H5RA_open(loc, name))) {
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTOPENOBJ, FAIL,
 		      "unable to open ragged array");
     }
 
     /* Turn it into an atom */
     if ((ret_value=H5I_register(H5I_RAGGED, ra))<0) {
-	H5R_close(ra);
+	H5RA_close(ra);
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTREGISTER, FAIL,
 		      "unable to register ragged array");
     }
@@ -400,7 +400,7 @@ H5Ropen(hid_t loc_id, const char *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_open
+ * Function:	H5RA_open
  *
  * Purpose:	Open a ragged array.  The name of the array is the same as
  *		the group that implements the array.
@@ -416,20 +416,20 @@ H5Ropen(hid_t loc_id, const char *name)
  *
  *-------------------------------------------------------------------------
  */
-H5R_t *
-H5R_open(H5G_entry_t *loc, const char *name)
+H5RA_t *
+H5RA_open(H5G_entry_t *loc, const char *name)
 {
-    H5R_t	*ra = NULL;
-    H5R_t	*ret_value = NULL;
+    H5RA_t	*ra = NULL;
+    H5RA_t	*ret_value = NULL;
     
-    FUNC_ENTER(H5R_open, NULL);
+    FUNC_ENTER(H5RA_open, NULL);
 
     /* Check arguments */
     assert(loc);
     assert(name && *name);
 
     /* Create the struct */
-    if (NULL==(ra=H5MM_calloc(sizeof(H5R_t)))) {
+    if (NULL==(ra=H5MM_calloc(sizeof(H5RA_t)))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 		    "memory allocation failed for ragged array struct");
     }
@@ -465,7 +465,7 @@ H5R_open(H5G_entry_t *loc, const char *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Rclose
+ * Function:	H5RAclose
  *
  * Purpose:	Close a ragged array.
  *
@@ -481,11 +481,11 @@ H5R_open(H5G_entry_t *loc, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Rclose(hid_t array_id)
+H5RAclose(hid_t array_id)
 {
-    H5R_t	*ra=NULL;
+    H5RA_t	*ra=NULL;
     
-    FUNC_ENTER(H5Rclose, FAIL);
+    FUNC_ENTER(H5RAclose, FAIL);
     H5TRACE1("e","i",array_id);
 
     /* Check args */
@@ -507,7 +507,7 @@ H5Rclose(hid_t array_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_close
+ * Function:	H5RA_close
  *
  * Purpose:	Close a ragged array
  *
@@ -523,9 +523,9 @@ H5Rclose(hid_t array_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R_close(H5R_t *ra)
+H5RA_close(H5RA_t *ra)
 {
-    FUNC_ENTER(H5R_close, FAIL);
+    FUNC_ENTER(H5RA_close, FAIL);
 
     assert(ra);
     if ((ra->group && H5G_close(ra->group)<0) ||
@@ -535,7 +535,7 @@ H5R_close(H5R_t *ra)
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		      "unable to close one or more component datasets");
     }
-    HDmemset(ra, 0, sizeof(H5R_t));
+    HDmemset(ra, 0, sizeof(H5RA_t));
     H5MM_xfree(ra);
 
     FUNC_LEAVE(SUCCEED);
@@ -543,7 +543,7 @@ H5R_close(H5R_t *ra)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Rwrite
+ * Function:	H5RAwrite
  *
  * Purpose:	Write a contiguous set of rows to a ragged array beginning at
  *		row number START_ROW and continuing for NROWS rows.  Each row
@@ -562,14 +562,14 @@ H5R_close(H5R_t *ra)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Rwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
+H5RAwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
 	 hid_t type_id, hsize_t size[/*nrows*/], void *buf[/*nrows*/])
 {
-    H5R_t	*ra=NULL;
+    H5RA_t	*ra=NULL;
     H5T_t	*type=NULL;
     hsize_t	i;
     
-    FUNC_ENTER(H5Rwrite, FAIL);
+    FUNC_ENTER(H5RAwrite, FAIL);
     H5TRACE6("e","iHshi*[a2]h*[a2]x",array_id,start_row,nrows,type_id,size,
              buf);
 
@@ -596,7 +596,7 @@ H5Rwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
     }
     
     /* Do the work */
-    if (H5R_write(ra, start_row, nrows, type, size, buf)<0) {
+    if (H5RA_write(ra, start_row, nrows, type, size, buf)<0) {
 	HRETURN_ERROR(H5E_RAGGED, H5E_WRITEERROR, FAIL,
 		      "unable to write to ragged array");
     }
@@ -606,7 +606,7 @@ H5Rwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_write
+ * Function:	H5RA_write
  *
  * Purpose:	Write a contiguous set of rows to a ragged array beginning at
  *		row number START_ROW and continuing for NROWS rows.  Each row
@@ -625,11 +625,11 @@ H5Rwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
+H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	  hsize_t size[], void *buf[])
 {
     herr_t	ret_value=FAIL;
-    H5R_meta_t	*meta = NULL;
+    H5RA_meta_t	*meta = NULL;
     H5S_t	*mf_space=NULL;		/*meta file data space		*/
     H5S_t	*mm_space=NULL;		/*meta memory data space	*/
     H5S_t	*rf_space=NULL;		/*raw data file space		*/
@@ -643,7 +643,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     size_t	type_size;		/*size of the TYPE argument	*/
     hsize_t	i;
     
-    FUNC_ENTER(H5R_write, FAIL);
+    FUNC_ENTER(H5RA_write, FAIL);
 
     /* Check args */
     assert(ra);
@@ -671,17 +671,17 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to set meta data selection");
     }
-    if (NULL==(meta=H5MM_malloc(nrows*sizeof(H5R_meta_t)))) {
+    if (NULL==(meta=H5MM_malloc(nrows*sizeof(H5RA_meta_t)))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "memory allocation failed for meta data");
     }
-    if (H5D_read(ra->meta, H5R_meta_type_g, mm_space, mf_space,
+    if (H5D_read(ra->meta, H5RA_meta_type_g, mm_space, mf_space,
 		 &H5D_xfer_dflt, meta)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read meta data");
     }
     HDmemset(meta+meta_read_size, 0,
-	     (nrows-meta_read_size)*sizeof(H5R_meta_t));
+	     (nrows-meta_read_size)*sizeof(H5RA_meta_t));
 
     /* Write the part of the data that will fit in the raw dataset */
     if (NULL==(rf_space=H5D_get_space(ra->raw)) ||
@@ -726,7 +726,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     /* Update the meta data */
     for (i=0; i<nrows; i++) {
 	if (size[i]>raw_cur_size[1]) {
-	    H5R_fix_overflow(ra, type, meta+i, size[i]-raw_cur_size[1],
+	    H5RA_fix_overflow(ra, type, meta+i, size[i]-raw_cur_size[1],
 			     (uint8*)(buf[i])+raw_cur_size[1]*type_size);
 	}
 	meta[i].nelmts = size[i];
@@ -746,7 +746,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to set meta data selection");
     }
-    if (H5D_write(ra->meta, H5R_meta_type_g, mm_space, mf_space,
+    if (H5D_write(ra->meta, H5RA_meta_type_g, mm_space, mf_space,
 		  &H5D_xfer_dflt, meta)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_WRITEERROR, FAIL,
 		    "unable to write meta data");
@@ -766,7 +766,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_fix_overflow
+ * Function:	H5RA_fix_overflow
  *
  * Purpose:	Updates the overflow information for a row.  This is where
  *		the heap management comes into play.  The NELMTS is the
@@ -786,7 +786,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta, hsize_t nelmts,
+H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta, hsize_t nelmts,
 		 void *buf)
 {
     H5S_t	*of_space=NULL;		/*overflow file space		*/
@@ -794,7 +794,7 @@ H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta, hsize_t nelmts,
     hsize_t	cur_size;		/*num elmts in overflow dataset	*/
     herr_t	ret_value=FAIL;		/*return value			*/
     
-    FUNC_ENTER(H5R_fix_overflow, FAIL);
+    FUNC_ENTER(H5RA_fix_overflow, FAIL);
     
     assert(ra);
     assert(meta);
@@ -887,7 +887,7 @@ H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta, hsize_t nelmts,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Rread
+ * Function:	H5RAread
  *
  * Purpose:	Reads the contents of one or more rows of a ragged array
  *		pointed to by ARRAY_ID.  The rows to read begin at row
@@ -924,13 +924,13 @@ H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta, hsize_t nelmts,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Rread(hid_t array_id, hssize_t start_row, hsize_t nrows,
+H5RAread(hid_t array_id, hssize_t start_row, hsize_t nrows,
 	hid_t type_id, hsize_t size[/*nrows*/], void *buf[/*nrows*/])
 {
-    H5R_t	*ra=NULL;
+    H5RA_t	*ra=NULL;
     H5T_t	*type=NULL;
     
-    FUNC_ENTER(H5Rread, FAIL);
+    FUNC_ENTER(H5RAread, FAIL);
     H5TRACE6("e","iHshi*[a2]h*[a2]x",array_id,start_row,nrows,type_id,size,
              buf);
 
@@ -951,7 +951,7 @@ H5Rread(hid_t array_id, hssize_t start_row, hsize_t nrows,
     }
     
     /* Do the work */
-    if (H5R_read(ra, start_row, nrows, type, size, buf)<0) {
+    if (H5RA_read(ra, start_row, nrows, type, size, buf)<0) {
 	HRETURN_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		      "unable to read ragged array");
     }
@@ -961,9 +961,9 @@ H5Rread(hid_t array_id, hssize_t start_row, hsize_t nrows,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_read
+ * Function:	H5RA_read
  *
- * Purpose:	Reads (part of) a ragged array.  See H5Rread() for details.
+ * Purpose:	Reads (part of) a ragged array.  See H5RAread() for details.
  *
  * Return:	Success:	SUCCEED
  *
@@ -977,11 +977,11 @@ H5Rread(hid_t array_id, hssize_t start_row, hsize_t nrows,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
+H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	 hsize_t size[], void *buf[])
 {
     herr_t	ret_value=FAIL;
-    H5R_meta_t	*meta = NULL;
+    H5RA_meta_t	*meta = NULL;
     H5S_t	*mf_space=NULL;		/*meta file data space		*/
     H5S_t	*mm_space=NULL;		/*meta memory data space	*/
     H5S_t	*rf_space=NULL;		/*raw data file space		*/
@@ -999,7 +999,7 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     void	**buf_out=NULL;		/*output BUF values		*/
     hsize_t	i;			/*counter			*/
 
-    FUNC_ENTER(H5R_read, FAIL);
+    FUNC_ENTER(H5RA_read, FAIL);
 
     /* Check args */
     assert(ra);
@@ -1054,7 +1054,7 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	     (nrows-raw_read_size[0])*raw_read_size[1]*type_size);
 	
     /* Get the meta data */
-    if (NULL==(meta=H5MM_malloc(nrows*sizeof(H5R_meta_t)))) {
+    if (NULL==(meta=H5MM_malloc(nrows*sizeof(H5RA_meta_t)))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "memory allocation failed for meta data");
     }
@@ -1075,13 +1075,13 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to set meta data selection");
     }
-    if (H5D_read(ra->meta, H5R_meta_type_g, mm_space, mf_space,
+    if (H5D_read(ra->meta, H5RA_meta_type_g, mm_space, mf_space,
 		 &H5D_xfer_dflt, meta)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read meta data");
     }
     HDmemset(meta+meta_read_size, 0,
-	     (nrows-meta_read_size)*sizeof(H5R_meta_t));
+	     (nrows-meta_read_size)*sizeof(H5RA_meta_t));
 
     /* Copy data into output buffers */
     for (i=0; i<nrows; i++) {
@@ -1166,7 +1166,7 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5R_entof
+ * Function:	H5RA_entof
  *
  * Purpose:	Return a pointer to the ragged arrays symbol table entry.
  *
@@ -1182,7 +1182,7 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5R_entof(H5R_t *ra)
+H5RA_entof(H5RA_t *ra)
 {
     assert(ra);
     return H5G_entof(ra->group);

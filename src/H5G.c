@@ -84,7 +84,7 @@
 #include <H5Iprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
-#include <H5Rprivate.h>
+#include <H5RAprivate.h>
 
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
@@ -1863,7 +1863,7 @@ H5G_loc (hid_t loc_id)
     H5T_t	*dt=NULL;
     H5D_t	*dset=NULL;
     H5A_t	*attr=NULL;
-    H5R_t	*ra=NULL;
+    H5RA_t	*ra=NULL;
 
     FUNC_ENTER (H5G_loc, NULL);
 
@@ -1951,7 +1951,7 @@ H5G_loc (hid_t loc_id)
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 			  "invalid ragged array ID");
 	}
-	if (NULL==(ret_value=H5R_entof(ra))) {
+	if (NULL==(ret_value=H5RA_entof(ra))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 			  "unable to get symbol table entry of ragged array");
 	}
