@@ -1,0 +1,138 @@
+#------------------------------------------------------------ -*- makefile -*-
+# The following section of this makefile comes from the
+# `./config/conclude' file which was generated with config.status
+# from `./config/conclude.in'.
+#-----------------------------------------------------------------------------
+
+# Automake needs to be taught how to build lib, progs, and tests targets.
+# These will be filled in automatically for the most part (e.g.,
+# lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
+# EXTRA_TEST variables are supplied to allow the user to force targets to
+# be built at certain times. 
+LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
+      $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
+PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
+        $(EXTRA_PROG)
+TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
+
+
+# lib/progs/tests targets recurse into subdirectories. build-* targets
+# build files in this directory.
+build-lib: $(LIB)
+build-progs: $(LIB) $(PROGS)
+build-tests: $(LIB) $(PROGS) $(TESTS)
+
+lib progs tests ::
+	@$(MAKE) build-$@ || exit 1;                                          \
+	for d in X $(SUBDIRS); do                                             \
+	    if test $$d != X -a $$d != .; then                                \
+	        (set -x; cd $$d && $(MAKE) $@) || exit 1;                     \
+	    fi;                                                               \
+	done
+
+# Tell Automake to build tests when the user types `make all' (this is
+# not its default behavior).  Also build EXTRA_LIB and EXTRA_PROG since
+# Automake won't build them automatically, either.
+all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(TESTS)
+
+# make install-doc doesn't do anything outside of doc directory, but
+# Makefiles should recognize it.
+install-doc uninstall-doc:
+	@echo "Nothing to be done."
+
+# Run each test in order, passing $(TEST_FLAGS) to the program.
+# Since tests are done in a shell loop, "make -i" does apply inside it.
+# Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
+# The timestamps give a rough idea how much time the tests use.
+#
+# Note that targets in TESTS (defined above) will be built when the user
+# types 'make tests' or 'make check', but only programs in TEST_PROG,
+# TEST_PROG_PARA, or TEST_SCRIPT will actually be executed.
+check-TESTS: test
+
+test _test: $(PROGS) $(TESTS)
+	@if test -n "$(TEST_PROG)$(TEST_PROG_PARA)$(TEST_SCRIPT)"; then      \
+	   echo "===Tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
+        fi
+	@for test in $(TEST_PROG) dummy; do                                  \
+	   if test $$test != dummy; then                                      \
+	      echo "============================";                            \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then                        \
+	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";            \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then                          \
+	         echo "C++ API: Testing $$test $(TEST_FLAGS)";                \
+	      else                                                            \
+	         echo "Testing $$test $(TEST_FLAGS)";                         \
+	      fi;                                                             \
+	      echo "============================";                            \
+	      srcdir="$(srcdir)"                                              \
+	         $(RUNTEST) ./$$test $(TEST_FLAGS) ||                         \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+	         break;                                                       \
+	      echo "";                                                        \
+	   fi;                                                                \
+	done;                                                                 \
+	test $$test = dummy || false
+	@if test -n "$(TEST_PROG_PARA)"; then                                \
+	    echo "**** Hint ****";                                            \
+	    echo "Parallel test files reside in the current directory"        \
+	         "by default.";                                               \
+	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
+	    echo "    export HDF5_PARAPREFIX";                                \
+	    echo "    make check";                                            \
+	    echo "**** end of Hint ****";                                     \
+	fi
+	@for test in $(TEST_PROG_PARA) dummy; do                             \
+	   if test $$test != dummy; then                                      \
+	      echo "============================";                            \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then                        \
+	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";            \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then                          \
+	         echo "C++ API: Testing $$test $(TEST_FLAGS)";                \
+	      else                                                            \
+	         echo "Testing $$test $(TEST_FLAGS)";                         \
+	      fi;                                                             \
+	      echo "============================";                            \
+	      srcdir="$(srcdir)"                                              \
+	         $(RUNPARALLEL) ./$$test $(TEST_FLAGS) ||                     \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+	         break;                                                       \
+	      echo "";                                                        \
+	   fi;                                                                \
+	done;                                                                 \
+	test $$test = dummy || false
+	@for test in $(TEST_SCRIPT) dummy; do                                \
+	   if test $$test != dummy; then                                      \
+	      echo "============================";                            \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then                        \
+	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";            \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then                          \
+	         echo "C++ API: Testing $$test $(TEST_FLAGS)";                \
+	      else                                                            \
+	         echo "Testing $$test $(TEST_FLAGS)";                         \
+	      fi;                                                             \
+	      echo "============================";                            \
+	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
+	         srcdir="$(srcdir)"                                           \
+	         /bin/sh $$test $(TEST_FLAGS) ||                              \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+	         break;                                                       \
+	      echo "";                                                        \
+	  fi;                                                                 \
+	done;                                                                 \
+	test $$test = dummy || false
+	@if test -n "$(TEST_PROG)$(TEST_PROG_PARA)$(TEST_SCRIPT)"; then      \
+	    echo "===Tests in `echo ${PWD} | sed -e s:.*/::` ended `date`===";\
+	fi
+
+# Run test with different Virtual File Driver
+check-vfd:
+	@for vfd in $(VFD_LIST) dummy; do                                     \
+	    if test $$vfd != dummy; then                                      \
+	        echo "============================";                          \
+	        echo "Testing Virtual File Driver $$vfd";                     \
+	        echo "============================";                          \
+	        HDF5_DRIVER=$$vfd $(MAKE) check;                              \
+	    fi;                                                               \
+	done

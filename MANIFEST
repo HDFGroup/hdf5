@@ -10,6 +10,7 @@
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
+./Makefile.am
 ./Makefile.in
 ./README.txt
 ./aclocal.m4
@@ -37,7 +38,10 @@
 ./bin/locate_sw
 ./bin/ltmain.sh
 ./bin/make_err
+./bin/missing
 ./bin/mkdirs
+./bin/mkinstalldirs
+./bin/reconfigure.sh			_DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot
@@ -46,16 +50,12 @@
 ./bin/trace
 
 ./config/BlankForm
-./config/commence.in
-./config/conclude.in
+./config/commence.am
+./config/commence-doc.am
+./config/conclude.am
 ./config/dec-flags
 ./config/dec-osf4.x
 ./config/dec-osf5.x
-./config/depend1.in
-./config/depend2.in
-./config/depend3.in
-./config/depend4.in
-./config/dependN.in
 ./config/freebsd
 ./config/gnu-fflags
 ./config/gnu-flags
@@ -74,6 +74,7 @@
 ./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
+./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/powerpc-apple
@@ -91,6 +92,7 @@
 
 ./config/site-specific/BlankForm
 
+./doc/Makefile.am
 ./doc/Makefile.in
 
 ./doc/html/Attributes.html
@@ -113,7 +115,6 @@
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
 ./doc/html/DatatypesEnum.html
-./doc/html/Dependencies
 ./doc/html/ddl.html
 ./doc/html/Debugging.html
 ./doc/html/EnumMap.gif
@@ -141,6 +142,7 @@
 ./doc/html/IH_mapHead.gif
 ./doc/html/IOPipe.html
 ./doc/html/Lib_Maint.html		_DO_NOT_DISTRIBUTE_
+./doc/html/Makefile.am
 ./doc/html/Makefile.in
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
 ./doc/html/MountingFiles.html
@@ -177,28 +179,28 @@
 
 ./doc/html/ADGuide.html
 ./doc/html/ADGuide/Changes.html
-./doc/html/ADGuide/Dependencies
 ./doc/html/ADGuide/H4toH5Mapping.pdf
 ./doc/html/ADGuide/H4toH5Mapping.doc    _DO_NOT_DISTRIBUTE_
 ./doc/html/ADGuide/HISTORY.txt
 ./doc/html/ADGuide/ImageSpec.html
+./doc/html/ADGuide/Makefile.am
 ./doc/html/ADGuide/Makefile.in
 ./doc/html/ADGuide/PaletteExample1.gif
 ./doc/html/ADGuide/Palettes.fm.anc.gif
 ./doc/html/ADGuide/RELEASE.txt
 
 ./doc/html/Graphics/C++.gif
-./doc/html/Graphics/Dependencies
 ./doc/html/Graphics/FORTRAN.gif
 ./doc/html/Graphics/Java.gif
+./doc/html/Graphics/Makefile.am
 ./doc/html/Graphics/Makefile.in
 ./doc/html/Graphics/OtherAPIs.gif
 
-./doc/html/Intro/Dependencies
 ./doc/html/Intro/IntroExamples.html
+./doc/html/Intro/Makefile.am
 ./doc/html/Intro/Makefile.in
 
-./doc/html/PSandPDF/Dependencies
+./doc/html/PSandPDF/Makefile.am
 ./doc/html/PSandPDF/Makefile.in
 ./doc/html/PSandPDF/process.txt         _DO_NOT_DISTRIBUTE_
 
@@ -217,13 +219,13 @@
 ./doc/html/TechNotes/CodeReview.html
 ./doc/html/TechNotes/Daily_Test_Explained.htm
 ./doc/html/TechNotes/DataTransformReport.htm
-./doc/html/TechNotes/Dependencies
 ./doc/html/TechNotes/ExternalFiles.html
 ./doc/html/TechNotes/FreeLists.html
 ./doc/html/TechNotes/H4-H5Compat.html
 ./doc/html/TechNotes/HeapMgmt.html
 ./doc/html/TechNotes/IOPipe.html
 ./doc/html/TechNotes/LibMaint.html
+./doc/html/TechNotes/Makefile.am
 ./doc/html/TechNotes/Makefile.in
 ./doc/html/TechNotes/MemoryMgmt.html
 ./doc/html/TechNotes/MoveDStruct.html
@@ -262,7 +264,7 @@
 ./doc/html/Tutor/ContentsFull.html
 ./doc/html/Tutor/ContentsIntro.html
 ./doc/html/Tutor/Copyright.html
-./doc/html/Tutor/Dependencies
+./doc/html/Tutor/Makefile.am
 ./doc/html/Tutor/Makefile.in
 ./doc/html/Tutor/answers.html
 ./doc/html/Tutor/api.html
@@ -311,7 +313,6 @@
 ./doc/html/Tutor/Graphics/CreateFile.gif
 ./doc/html/Tutor/Graphics/CreateGrp1.gif
 ./doc/html/Tutor/Graphics/CreateGrp2.gif
-./doc/html/Tutor/Graphics/Dependencies
 ./doc/html/Tutor/Graphics/Examples.gif
 ./doc/html/Tutor/Graphics/FileOrg.gif
 ./doc/html/Tutor/Graphics/FullTOC1.gif
@@ -321,6 +322,7 @@
 ./doc/html/Tutor/Graphics/Intro.gif
 ./doc/html/Tutor/Graphics/IntroTopics.gif
 ./doc/html/Tutor/Graphics/Iterate.gif
+./doc/html/Tutor/Graphics/Makefile.am
 ./doc/html/Tutor/Graphics/Makefile.in
 ./doc/html/Tutor/Graphics/MountFile.gif
 ./doc/html/Tutor/Graphics/Quiz.gif
@@ -337,7 +339,7 @@
 ./doc/html/Tutor/Graphics/TitlePg.gif
 ./doc/html/Tutor/Graphics/Utilities.gif
 
-./doc/html/Tutor/examples/Dependencies
+./doc/html/Tutor/examples/Makefile.am
 ./doc/html/Tutor/examples/Makefile.in
 ./doc/html/Tutor/examples/attrexample.f90
 ./doc/html/Tutor/examples/chunk.f90
@@ -416,11 +418,11 @@
 ./doc/html/cpplus/CppInterfaces.html
 ./doc/html/cpplus/CppUserNotes.doc
 ./doc/html/cpplus/CppUserNotes.pdf
-./doc/html/cpplus/Dependencies
+./doc/html/cpplus/Makefile.am
 ./doc/html/cpplus/Makefile.in
 
-./doc/html/ed_libs/Dependencies
 ./doc/html/ed_libs/Footer.lbi
+./doc/html/ed_libs/Makefile.am
 ./doc/html/ed_libs/Makefile.in
 ./doc/html/ed_libs/NavBar_ADevG.lbi
 ./doc/html/ed_libs/NavBar_Common.lbi
@@ -435,7 +437,6 @@
 ./doc/html/ed_libs/styles_RM.lbi
 ./doc/html/ed_libs/styles_UG.lbi
 
-./doc/html/ed_styles/Dependencies
 ./doc/html/ed_styles/FormatElect.css
 ./doc/html/ed_styles/FormatPrint.css
 ./doc/html/ed_styles/GenElect.css
@@ -444,15 +445,16 @@
 ./doc/html/ed_styles/IndexPrint.css
 ./doc/html/ed_styles/IntroElect.css
 ./doc/html/ed_styles/IntroPrint.css
+./doc/html/ed_styles/Makefile.am
 ./doc/html/ed_styles/Makefile.in
 ./doc/html/ed_styles/RMelect.css
 ./doc/html/ed_styles/RMprint.css
 ./doc/html/ed_styles/UGelect.css
 ./doc/html/ed_styles/UGprint.css
 
-./doc/html/fortran/Dependencies
 ./doc/html/fortran/F90Flags.html
 ./doc/html/fortran/F90UserNotes.html
+./doc/html/fortran/Makefile.am
 ./doc/html/fortran/Makefile.in
 
 ./doc/html/group_p1.gif
@@ -508,7 +510,7 @@
 ./doc/tgif/UserView.obj			_DO_NOT_DISTRIBUTE_
 
 ./examples/Attributes.txt
-./examples/Dependencies
+./examples/Makefile.am
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
@@ -531,9 +533,10 @@
 #
 #------------------------------------------------------------------------------
 
+./fortran/Makefile.am
 ./fortran/Makefile.in
 
-./fortran/examples/Dependencies
+./fortran/examples/Makefile.am
 ./fortran/examples/Makefile.in
 ./fortran/examples/attrexample.f90
 ./fortran/examples/compound.f90
@@ -550,7 +553,6 @@
 ./fortran/examples/rwdsetexample.f90
 ./fortran/examples/selectele.f90
 
-./fortran/src/Dependencies
 ./fortran/src/H5_f.c
 ./fortran/src/H5_ff.f90
 ./fortran/src/H5Af.c
@@ -586,12 +588,13 @@
 ./fortran/src/H5fortran_types.f90.in
 ./fortran/src/HDF5.f90
 ./fortran/src/HDF5mpio.f90
+./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
 ./fortran/src/README
 ./fortran/src/h5fc.in
 ./fortran/src/libhdf5_fortran.settings.in
 
-./fortran/test/Dependencies
+./fortran/test/Makefile.am
 ./fortran/test/Makefile.in
 ./fortran/test/fflush1.f90
 ./fortran/test/fflush2.f90
@@ -613,7 +616,7 @@
 ./fortran/test/tH5VL.f90
 ./fortran/test/tH5Z.f90
 
-./fortran/testpar/Dependencies
+./fortran/testpar/Makefile.am
 ./fortran/testpar/Makefile.in
 ./fortran/testpar/ptesthdf5_fortran.f90
 ./fortran/testpar/thdf5.f90
@@ -631,9 +634,9 @@
 #
 #------------------------------------------------------------------------------
 
+./c++/Makefile.am
 ./c++/Makefile.in
 
-./c++/examples/Dependencies
 ./c++/examples/chunks.cpp
 ./c++/examples/compound.cpp
 ./c++/examples/create.cpp
@@ -643,9 +646,9 @@
 ./c++/examples/readdata.cpp
 ./c++/examples/testexamples.sh
 ./c++/examples/writedata.cpp
+./c++/examples/Makefile.am
 ./c++/examples/Makefile.in
 
-./c++/src/Dependencies
 ./c++/src/H5AbstractDs.cpp
 ./c++/src/H5AbstractDs.h
 ./c++/src/H5Alltypes.h
@@ -703,10 +706,11 @@
 ./c++/src/H5StrType.h
 ./c++/src/H5VarLenType.cpp
 ./c++/src/H5VarLenType.h
+./c++/src/Makefile.am
 ./c++/src/Makefile.in
 ./c++/src/h5c++.in
 
-./c++/test/Dependencies
+./c++/test/Makefile.am
 ./c++/test/Makefile.in
 ./c++/test/dsets.cpp
 ./c++/test/h5cpputil.cpp
@@ -722,7 +726,7 @@
 #
 #------------------------------------------------------------------------------
 
-./perform/Dependencies
+./perform/Makefile.am
 ./perform/Makefile.in
 ./perform/benchpar.c
 ./perform/chunk.c
@@ -754,7 +758,6 @@
 ./src/hdf5.lnt				_DO_NOT_DISTRIBUTE_
 ./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
-./src/Dependencies
 ./src/H5.c
 ./src/H5api_adpt.h
 ./src/H5err.txt
@@ -955,11 +958,12 @@
 ./src/H5detect.c
 ./src/H5private.h
 ./src/H5public.h
+./src/Makefile.am
 ./src/Makefile.in
 ./src/hdf5.h
 ./src/libhdf5.settings.in
 
-./test/Dependencies
+./test/Makefile.am
 ./test/Makefile.in
 ./test/big.c
 ./test/bittests.c
@@ -1061,7 +1065,7 @@
 ./test/testfiles/error_test_1
 ./test/testfiles/error_test_2
 
-./testpar/Dependencies
+./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_dset.c
 ./testpar/t_file.c
@@ -1075,10 +1079,10 @@
 ./testpar/testphdf5.h
 ./testpar/testph5.sh.in
 
-./tools/Dependencies
+./tools/Makefile.am
 ./tools/Makefile.in
 
-./tools/gifconv/Dependencies
+./tools/gifconv/Makefile.am
 ./tools/gifconv/Makefile.in
 ./tools/gifconv/decompress.c
 ./tools/gifconv/gif.h
@@ -1090,7 +1094,7 @@
 ./tools/gifconv/readhdf.c
 ./tools/gifconv/writehdf.c
 
-./tools/h5dump/Dependencies
+./tools/h5dump/Makefile.am
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
@@ -1098,7 +1102,7 @@
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumpxml.sh
 
-./tools/h5import/Dependencies
+./tools/h5import/Makefile.am
 ./tools/h5import/Makefile.in
 ./tools/h5import/h5import.h
 ./tools/h5import/h5import.c
@@ -1135,7 +1139,7 @@
 ./tools/h5import/testfiles/test12.h5
 ./tools/h5import/testfiles/test13.h5
 
-./tools/h5diff/Dependencies
+./tools/h5diff/Makefile.am
 ./tools/h5diff/Makefile.in
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/testh5diff_attr.c
@@ -1147,7 +1151,7 @@
 ./tools/h5diff/testh5diff.sh
 
 # h5repack sources
-./tools/h5repack/Dependencies
+./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack.c
@@ -1167,12 +1171,12 @@
 ./tools/h5repack/testh5repack_util.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
-./tools/h5ls/Dependencies
+./tools/h5ls/Makefile.am
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh
 
-./tools/lib/Dependencies
+./tools/lib/Makefile.am
 ./tools/lib/Makefile.in
 ./tools/lib/h5diff.c
 ./tools/lib/h5diff.h
@@ -1196,7 +1200,7 @@
 ./tools/lib/ph5diff.h
 ./tools/lib/talign.c
 
-./tools/misc/Dependencies
+./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
 ./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
@@ -1526,9 +1530,9 @@
 ./tools/testfiles/h5repack_info.txt
 
 # jam utility and tests
-./tools/h5jam/Dependencies
 ./tools/h5jam/h5jam.c
 ./tools/h5jam/h5unjam.c
+./tools/h5jam/Makefile.am
 ./tools/h5jam/Makefile.in
 ./tools/h5jam/h5jamgentest.c
 ./tools/h5jam/testh5jam.sh.in
@@ -1544,8 +1548,9 @@
 ./tools/testfiles/u513.txt
 
 # high level libraries
+./hl/Makefile.am
 ./hl/Makefile.in
-./hl/src/Dependencies
+./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5IM.c
 ./hl/src/H5IM.h
@@ -1555,7 +1560,7 @@
 ./hl/src/H5TB.h
 ./hl/src/H5DS.c
 ./hl/src/H5DS.h
-./hl/test/Dependencies
+./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
@@ -1566,7 +1571,6 @@
 ./hl/test/test_table_cray.hdf5
 
 # hl fortran
-./hl/fortran/src/Dependencies
 ./hl/fortran/src/H5f90i.h
 ./hl/fortran/src/H5IMfc.c
 ./hl/fortran/src/H5IMff.f90
@@ -1575,12 +1579,14 @@
 ./hl/fortran/src/H5LTff.f90
 ./hl/fortran/src/H5TBfc.c
 ./hl/fortran/src/H5TBff.f90
+./hl/fortran/src/Makefile.am
 ./hl/fortran/src/Makefile.in
+./hl/fortran/test/Makefile.am
 ./hl/fortran/test/Makefile.in
 ./hl/fortran/test/tstimage.f90
 ./hl/fortran/test/tstlite.f90
 ./hl/fortran/test/tsttable.f90
-./hl/fortran/test/Dependencies
+./hl/fortran/Makefile.am
 ./hl/fortran/Makefile.in
 
 

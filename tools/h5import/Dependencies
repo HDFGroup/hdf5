@@ -1,8 +1,0 @@
-## This file is machine generated on GNU systems.
-## Only temporary changes may be made here.
-
-h5import.lo: \
-   $(top_srcdir)/tools/h5import/h5import.c \
-   $(top_srcdir)/tools/h5import/h5import.h
-h5importtest.lo: \
-   $(top_srcdir)/tools/h5import/h5importtest.c

@@ -1,0 +1,21 @@
+## This file supplies Makefile.am files in the doc directory (and subdirectories)
+## with the rules they need.
+
+include $(top_srcdir)/config/commence.am
+
+# Ignore most rules
+lib progs check test _test:
+	@echo "Nothing to be done"
+
+tests TAGS tags dep depend:
+	@@SETX@; for d in X $(SUBDIRS); do                                  \
+	  if test $$d != X; then                                              \
+	    (cd $$d && $(MAKE) $@) || exit 1;                                 \
+	  fi;     
+	done
+
+# In docs directory, install-doc is the same as install
+install-doc install-all:
+	$(MAKE) install
+uninstall-doc uninstall-all:
+	$(MAKE) uninstall

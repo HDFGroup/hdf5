@@ -204,7 +204,7 @@ done
 # It's possible that there isn't a modules flag...
   fmodules=""
   if test -n "$F9XMODFLAG"; then
-    fmodules="${F9XMODFLAG}${libdir}"
+    fmodules="${F9XMODFLAG}${includedir}"
   fi
 
 if test "x$do_compile" = "xyes"; then

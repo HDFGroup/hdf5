@@ -1,0 +1,120 @@
+#
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+##
+## Makefile.am
+## Run automake to generate a Makefile.in from this file.
+#
+# HDF5 Fortran Library Makefile(.in)
+#
+
+include $(top_srcdir)/config/commence.am
+
+# Include src directory in both Fortran and C flags (C compiler is used
+# for linking)
+AM_CFLAGS = -I$(top_srcdir)/src
+AM_FFLAGS=-I$(top_srcdir)/src
+
+# This is our main target, the fortran library
+lib_LTLIBRARIES=libhdf5_fortran.la
+
+# DEBUG - will linking statically solve fortran build problem?
+libhdf5_fortran_la_LDFLAGS=-static
+
+# Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
+if BUILD_PARALLEL_CONDITIONAL
+   PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
+else
+   PARALLEL_COND_SRC = HDF5.f90
+endif
+
+# Source files for the library.
+libhdf5_fortran_la_SOURCES=H5fortran_flags.f90 H5f90global.f90          \
+         H5fortran_types.f90 H5_ff.f90 H5Aff.f90 H5Dff.f90 H5Eff.f90    \
+         H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90    \
+         H5Tff.f90 H5Zff.f90                                            \
+         H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
+         H5If.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c                      \
+         $(PARALLEL_COND_SRC)
+
+# h5fc and libhdf5_fortran.settings are generated during configure.
+# Remove them only when distclean.
+DISTCLEANFILES=h5fc H5fortran_types.f90 libhdf5_fortran.settings
+
+# Fortran module files can have different extensions and different names
+# (e.g., different capitalizations) on different platforms.  Write rules
+# for them explicitly rather than trying to teach automake about them.
+# They should be installed as headers and removed during clean.
+maintainer-clean-local: clean-local
+distclean-local: clean-local
+clean-local:
+	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(RM) *.$(F9XMODEXT);                                         \
+	fi
+
+install-data-local:
+	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(includedir)/. ; \
+	fi
+
+uninstall-local:
+	if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
+	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
+	  fi;                                                           \
+	fi;								\
+	$(RM) $(bindir)/$(H5FC_NAME)
+
+# Also install and uninstall (uninstall-local above) h5fc script
+install-exec-local:
+	$(INSTALL) h5fc $(bindir)/$(H5FC_NAME)   
+
+# Install libhdf5_fortran.settings in lib directory
+settingsdir=$(libdir)
+settings_DATA=libhdf5_fortran.settings
+
+# Custom rule for installing h5fc, since it will be named h5pfc if hdf5
+# is configured for parallel mode
+if BUILD_PARALLEL_CONDITIONAL
+  H5FC_NAME = h5pfc
+else
+  H5FC_NAME = h5fc
+endif
+
+# Hardcode the dependencies of these files. There isn't a known way of
+# determining this automagically (like we do with the C files). So, when
+# doing a parallel make, some modules could be made way before the
+# modules they depend upon are actually made. *sigh*
+H5fortran_flags.lo: $(srcdir)/H5fortran_flags.f90
+H5f90global.lo:     $(srcdir)/H5f90global.f90 H5fortran_flags.lo H5fortran_types.lo
+H5fortran_types.lo: H5fortran_types.f90
+H5_ff.lo:           $(srcdir)/H5_ff.f90 H5f90global.lo
+H5Aff.lo:           $(srcdir)/H5Aff.f90 H5f90global.lo
+H5Dff.lo:           $(srcdir)/H5Dff.f90 H5f90global.lo
+H5Eff.lo:           $(srcdir)/H5Eff.f90 H5f90global.lo
+H5Fff.lo:           $(srcdir)/H5Fff.f90 H5f90global.lo
+H5Gff.lo:           $(srcdir)/H5Gff.f90 H5f90global.lo
+H5Iff.lo:           $(srcdir)/H5Iff.f90 H5f90global.lo
+H5Pff.lo:           $(srcdir)/H5Pff.f90 H5f90global.lo
+H5Rff.lo:           $(srcdir)/H5Rff.f90 H5f90global.lo
+H5Sff.lo:           $(srcdir)/H5Sff.f90 H5f90global.lo
+H5Tff.lo:           $(srcdir)/H5Tff.f90 H5f90global.lo
+H5Zff.lo:           $(srcdir)/H5Zff.f90 H5f90global.lo
+HDF5.lo:            $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo      \
+                    H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo    \
+                    H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo
+H5FDmpioff.lo:      $(srcdir)/H5FDmpioff.f90 H5f90global.lo
+HDF5mpio.lo:        $(srcdir)/H5FDmpioff.f90 H5f90global.lo H5Aff.lo  \
+                    H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo    \
+                    H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo H5FDmpioff.lo
+
+include $(top_srcdir)/config/conclude.am

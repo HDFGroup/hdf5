@@ -1,4 +1,0 @@
-##							       -*- makefile -*-
-
-## Automatic dependencies are not being used and we cannot include other
-## files.
