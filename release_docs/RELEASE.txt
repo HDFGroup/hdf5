@@ -319,107 +319,13 @@ Platforms Tested
 Supported Configuration Features Summary
 ========================================
 
-Key:   y = tested and supported
-       n = not supported or not tested in this release
-       x = not working in this release
-       dna = does not apply
-       ( ) = footnote appears below second table
-
-Platform                    C   C        F90    F90      C++  Shared        zlib
-                                parallel        parallel      libraries (4)
-Solaris2.7 64-bit           y   y (1)    y      y (1)    y    y             y
-Solaris2.7 32-bit           y   y (1)    y      y (1)    y    y             y
-Solaris2.8 64-bit           y   y (1)    y      y (1)    y    y             y
-Solaris2.8 32-bit           y   y        y      y (1)    y    y             y
-IRIX64_6.5 64-bit           y   y (2)    y      y        y    y             y
-IRIX64_6.5 32-bit           y   y (2)    n      n        n    y             y
-HPUX11.00                   y   y (1)    y      y        y    y             y
-OSF1 v5.1                   y   y        y      y        y    y             y
-T3E                         y   y (5)    y      y (5)    n    n             n 
-SV1                         y   y (5)    y      y (5)    n    n             y
-TFLOPS                      n   y (1)    n      n        n    n             y
-AIX-5.1 32-bit              y   y        y      y        y    n             y
-AIX-5.1 64-bit              y   y        y      y        y    n             y
-WinXP Visual Studio (7)     y   n        n      n        y    y             y
-WinXP Intel                 y   n        n      n        y    y             y
-WinXP CW                    y   n        n      n        n    n             y
-Win2000 Visual Studio       y   n        y      n        y    y             y
-Win2000 Intel               y   n        y      n        y    y             y
-Mac OS X 10.3               y   n        y      n        y    y             y
-FreeBSD 4.9                 y   y (1)    n      n        y    y             y
-RedHat 7, 8 & 9 ia32        y   y (1)    y(PGI) n        y    y             y
-    W gcc (3)
-RedHat 7.3 ia32 W Intel (3) y   n        y      n        y    n             y
-RedHat 7.3 ia32 W PGI (3)   y   n        y      n        y    n             y
-RedHat 7 ia32 C Intel (3)   y   n        y      n        y    n             y
-RedHat 7.1 ia64 C Intel (3) y   n        y      n        y    n             y
-RedHat 8 & SuSe x86_64      y   n        n      n        y    n             y
-    gcc (3)
-Linux 2.4 SGI Altix ia64    y   n        y      n        y    y             y
-    Intel (3) 
-Xeon Linux 2.4.20-31.9      y   n	 y	n	 y    y		    y
-    smp_perfctr_lustre 
-    C Intel (3)
-IA-64 Linux 2.4.21.         y   y        y      y        y    y             y
-    SuSE_128.bef1 C
-    Intel (3)
-
-Platform                    static-  Thread-  SZIP  GASS  STREAM-  High-  H4/H5 
-                            exec     safe                 VFD      level  tools
-                                                                   APIs   (6)
-Solaris2.7 64-bit           x        y        y     n     y        y      n
-Solaris2.7 32-bit           x        y        y     n     y        y      y
-Solaris2.8 64-bit           x        y        y     n     y        y      n
-Solaris2.8 32-bit           x        y        y     n     y        y      y
-IRIX64_6.5 64-bit           x        y        y     y     y        y      y
-IRIX64_6.5 32-bit           x        y        y     y     y        y      y
-HPUX11.00                   x        n        y     n     y        y      y
-OSF1 v5.1                   y        n        y     n     y        y      y
-T3E                         y        n        n     n     y        y      y
-SV1                         y        n        n     n     y        y      y
-TFLOPS                      y        n        n     n     n        n      n
-AIX-5.1 32-bit              y        n        y     n     y        y      y
-AIX-5.1 64-bit              y        n        y     n     y        y      y
-WinXP Visual Studio         y        n        y     n     n        y      y
-WinXP Intel                 y        n        y     n     n        y      y
-WinXP CW                    y        n        y     n     n        y      y
-Win2000 Visual Studio       y        n        y     n     n        y      y
-Win2000 Intel               y        n        y     n     n        y      y
-Mac OS X 10.3               y        n        y     n     y        y      n
-FreeBSD 4.9                 y        y        y     n     y        y      y
-RedHat 7, 8 & 9 ia32        y        y        y     n     y        y      y
-    W gcc (3)
-RedHat 7.3 ia32 W Intel (3) y        n        y     n     y        n      n
-RedHat 7.3 ia32 W PGI (3)   y        n        y     n     y        n      n
-RedHat 7 ia32 C Intel (3)   y        n        y     n     y        y      y
-RedHat 7.1 ia64 C Intel (3) y        n        y     n     y        y      y
-RedHat 8 & SuSe x86_64      y        n        y     n     y        y      y
-    gcc (3)
-Linux 2.4 SGI Altix ia64    y        n        y     n     y        y      y
-    Intel (3) 
-Xeon Linux 2.4.20-31.9      n        n	      y	    n     y	   n	  n
-    smp_perfctr_lustre 
-    C Intel (3)
-IA-64 Linux 2.4.21.         n        n        y     n     y        n      n 
-    SuSE_128.bef1 C
-    Intel (3)
-
-
-
-Compiler versions for each platform are listed in the "Platforms Tested" 
-table found elsewhere in this file (RELEASE.txt).  Unless otherwise noted, 
-compilers used are the system compilers.
-
-Footnotes:  (1) Using mpich 1.2.4.
-            (2) Using mpt and mpich 1.2.4.
-            (3) Linux 2.4 with GNU, Intel, and PGI compilers, as indicated.  
-                W or C indicates workstation or cluster, respectively.
-            (4) Shared libraries are provided only for the C library, 
-                except on Windows where they are provided for C and C++.
-            (5) Using mpt.
-            (6) Includes the H4toH5 Library and the h4toh5 and h5toh4 
-                utilities.
-
+  *******************************************************************
+  A copy of the current version of the table that belongs in this
+  spot is placed for review in the HDF Lobby or can be obtained from 
+  Frank Baker.  Please review and give any revisions to him.
+  All changes entered into the table in RELEASE.txt on or prior to 
+  15 Sept '04 will be captured and posted for review on 16 Sept.
+  *******************************************************************
 
 Known Problems
 ==============
