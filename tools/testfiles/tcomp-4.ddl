@@ -25,7 +25,7 @@ GROUP "/" {
       }
       DATASPACE  SIMPLE { ( 6 ) / ( 6 ) }
       DATA {
-        (0), {
+        (0): {
             0,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
@@ -38,7 +38,7 @@ GROUP "/" {
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
             109
          },
-        (1), {
+        (1): {
             1,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
@@ -51,7 +51,7 @@ GROUP "/" {
             [ 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96 ],
             109
          },
-        (2), {
+        (2): {
             2,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
@@ -64,7 +64,7 @@ GROUP "/" {
             [ 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93 ],
             109
          },
-        (3), {
+        (3): {
             3,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
@@ -77,7 +77,7 @@ GROUP "/" {
             [ 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89 ],
             109
          },
-        (4), {
+        (4): {
             4,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
@@ -90,7 +90,7 @@ GROUP "/" {
             [ 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85 ],
             109
          },
-        (5), {
+        (5): {
             5,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",

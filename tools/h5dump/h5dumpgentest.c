@@ -4992,11 +4992,21 @@ static void gent_fcontents(void)
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
- * datatype 
+ * datatypes 
  *-------------------------------------------------------------------------
  */
- tid=H5Tcopy(H5T_STD_B8LE);
+ tid=H5Tcopy(H5T_NATIVE_INT);
  ret=H5Tcommit(fid, "mytype", tid);
+ assert(ret>=0);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+ /* no name datatype */
+ tid=H5Tcopy(H5T_NATIVE_INT);
+ ret=H5Tcommit(fid, "mytype2", tid);
+ assert(ret>=0);
+ write_dset(fid,1,dims,"dsetmytype2",tid,buf);
+ ret=H5Gunlink(fid,"mytype2");
  assert(ret>=0);
  ret=H5Tclose(tid);
  assert(ret>=0);

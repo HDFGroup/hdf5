@@ -15,7 +15,7 @@ GROUP "/" {
       }
       DATASPACE  SIMPLE { ( 3, 6 ) / ( 3, 6 ) }
       DATA {
-        (0,0), {
+        (0,0): {
             [ 0, 1, 4, 9, 16, 25, 36, 49, 64, 81,
                 1, 4, 9, 16, 25, 36, 49, 64, 81, 100,
                 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
@@ -28,7 +28,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (0,1), {
+        (0,1): {
             [ 1, 4, 9, 16, 25, 36, 49, 64, 81, 100,
                 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
                 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
@@ -41,7 +41,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (0,2), {
+        (0,2): {
             [ 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
                 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
                 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
@@ -54,7 +54,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (0,3), {
+        (0,3): {
             [ 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
                 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
                 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
@@ -67,7 +67,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (0,4), {
+        (0,4): {
             [ 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
                 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
                 36, 49, 64, 81, 100, 121, 144, 169, 196, 225,
@@ -80,7 +80,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (0,5), {
+        (0,5): {
             [ 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
                 36, 49, 64, 81, 100, 121, 144, 169, 196, 225,
                 49, 64, 81, 100, 121, 144, 169, 196, 225, 256,
@@ -93,7 +93,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (1,0), {
+        (1,0): {
             [ 0, 1, 4, 9, 16, 25, 36, 49, 64, 81,
                 1, 4, 9, 16, 25, 36, 49, 64, 81, 100,
                 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
@@ -106,7 +106,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (1,1), {
+        (1,1): {
             [ 1, 4, 9, 16, 25, 36, 49, 64, 81, 100,
                 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
                 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
@@ -119,7 +119,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (1,2), {
+        (1,2): {
             [ 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
                 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
                 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
@@ -132,7 +132,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (1,3), {
+        (1,3): {
             [ 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
                 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
                 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
@@ -145,7 +145,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (1,4), {
+        (1,4): {
             [ 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
                 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
                 36, 49, 64, 81, 100, 121, 144, 169, 196, 225,
@@ -158,7 +158,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (1,5), {
+        (1,5): {
             [ 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
                 36, 49, 64, 81, 100, 121, 144, 169, 196, 225,
                 49, 64, 81, 100, 121, 144, 169, 196, 225, 256,
@@ -171,7 +171,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (2,0), {
+        (2,0): {
             [ 0, 1, 4, 9, 16, 25, 36, 49, 64, 81,
                 1, 4, 9, 16, 25, 36, 49, 64, 81, 100,
                 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
@@ -184,7 +184,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (2,1), {
+        (2,1): {
             [ 1, 4, 9, 16, 25, 36, 49, 64, 81, 100,
                 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
                 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
@@ -197,7 +197,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (2,2), {
+        (2,2): {
             [ 4, 9, 16, 25, 36, 49, 64, 81, 100, 121,
                 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
                 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
@@ -210,7 +210,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (2,3), {
+        (2,3): {
             [ 9, 16, 25, 36, 49, 64, 81, 100, 121, 144,
                 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
                 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
@@ -223,7 +223,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (2,4), {
+        (2,4): {
             [ 16, 25, 36, 49, 64, 81, 100, 121, 144, 169,
                 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
                 36, 49, 64, 81, 100, 121, 144, 169, 196, 225,
@@ -236,7 +236,7 @@ GROUP "/" {
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678",
                 "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          },
-        (2,5), {
+        (2,5): {
             [ 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
                 36, 49, 64, 81, 100, 121, 144, 169, 196, 225,
                 49, 64, 81, 100, 121, 144, 169, 196, 225, 256,
@@ -260,9 +260,9 @@ GROUP "/" {
          }
       DATASPACE  SIMPLE { ( 3, 4 ) / ( 3, 4 ) }
       DATA {
-        (0,0), "s1", "s2", "s3", "s4",
-        (1,0), "s5", "s6", "s7", "s8",
-        (2,0), "s9", "s0", "s1", "s2"
+        (0,0): "s1", "s2", "s3", "s4",
+        (1,0): "s5", "s6", "s7", "s8",
+        (2,0): "s9", "s0", "s1", "s2"
       }
    }
    DATASET "string2" {
@@ -274,11 +274,11 @@ GROUP "/" {
          }
       DATASPACE  SIMPLE { ( 20 ) / ( 20 ) }
       DATA {
-        (0), "ab cd ef1  ", "ab cd ef2  ", "ab cd ef3  ", "ab cd ef4  ",
-        (4), "ab cd ef5  ", "ab cd ef6  ", "ab cd ef7  ", "ab cd ef8  ",
-        (8), "ab cd ef9  ", "ab cd ef0  ", "ab cd ef1  ", "ab cd ef2  ",
-        (12), "ab cd ef3  ", "ab cd ef4  ", "ab cd ef5  ", "ab cd ef6  ",
-        (16), "ab cd ef7  ", "ab cd ef8  ", "ab cd ef9  ", "ab cd ef0  "
+        (0): "ab cd ef1  ", "ab cd ef2  ", "ab cd ef3  ", "ab cd ef4  ",
+        (4): "ab cd ef5  ", "ab cd ef6  ", "ab cd ef7  ", "ab cd ef8  ",
+        (8): "ab cd ef9  ", "ab cd ef0  ", "ab cd ef1  ", "ab cd ef2  ",
+        (12): "ab cd ef3  ", "ab cd ef4  ", "ab cd ef5  ", "ab cd ef6  ",
+        (16): "ab cd ef7  ", "ab cd ef8  ", "ab cd ef9  ", "ab cd ef0  "
       }
    }
    DATASET "string3" {
@@ -290,15 +290,15 @@ GROUP "/" {
          }
       DATASPACE  SIMPLE { ( 27 ) / ( 27 ) }
       DATA {
-        (0), "abcd0\000\000\000", "abcd1\000\000\000", "abcd2\000\000\000",
-        (3), "abcd3\000\000\000", "abcd4\000\000\000", "abcd5\000\000\000",
-        (6), "abcd6\000\000\000", "abcd7\000\000\000", "abcd8\000\000\000",
-        (9), "abcd9\000\000\000", "abcd0\000\000\000", "abcd1\000\000\000",
-        (12), "abcd2\000\000\000", "abcd3\000\000\000", "abcd4\000\000\000",
-        (15), "abcd5\000\000\000", "abcd6\000\000\000", "abcd7\000\000\000",
-        (18), "abcd8\000\000\000", "abcd9\000\000\000", "abcd0\000\000\000",
-        (21), "abcd1\000\000\000", "abcd2\000\000\000", "abcd3\000\000\000",
-        (24), "abcd4\000\000\000", "abcd5\000\000\000", "abcd6\000\000\000"
+        (0): "abcd0\000\000\000", "abcd1\000\000\000", "abcd2\000\000\000",
+        (3): "abcd3\000\000\000", "abcd4\000\000\000", "abcd5\000\000\000",
+        (6): "abcd6\000\000\000", "abcd7\000\000\000", "abcd8\000\000\000",
+        (9): "abcd9\000\000\000", "abcd0\000\000\000", "abcd1\000\000\000",
+        (12): "abcd2\000\000\000", "abcd3\000\000\000", "abcd4\000\000\000",
+        (15): "abcd5\000\000\000", "abcd6\000\000\000", "abcd7\000\000\000",
+        (18): "abcd8\000\000\000", "abcd9\000\000\000", "abcd0\000\000\000",
+        (21): "abcd1\000\000\000", "abcd2\000\000\000", "abcd3\000\000\000",
+        (24): "abcd4\000\000\000", "abcd5\000\000\000", "abcd6\000\000\000"
       }
    }
    DATASET "string4" {
@@ -310,9 +310,9 @@ GROUP "/" {
          }
       DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
       DATA {
-        (0), "s1234567890123456789                                                                                                                                                    ",
-        (1), "s1234567890123456789                                                                                                                                                    ",
-        (2), "s1234567890123456789                                                                                                                                                    "
+        (0): "s1234567890123456789                                                                                                                                                    ",
+        (1): "s1234567890123456789                                                                                                                                                    ",
+        (2): "s1234567890123456789                                                                                                                                                    "
       }
    }
 }

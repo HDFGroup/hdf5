@@ -469,7 +469,7 @@ static void             dump_data(hid_t, int, struct subset_t *, int);
 static void             dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
 static void             dump_comment(hid_t obj_id);
 static void             dump_fcpl(hid_t fid);
-static void             dump_list(hid_t fid);
+static void             dump_fcontents(hid_t fid);
 
 
 /* XML format:   same interface, alternative output */
@@ -1915,7 +1915,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
  outputformat->pindex=pindex;
  if (outputformat->pindex)
  {
-  outputformat->idx_fmt = "(%s),";
+  outputformat->idx_fmt = "(%s):";
   outputformat->idx_n_fmt = "%lu";
   outputformat->idx_sep = ",";
   outputformat->line_pre  = "        %s ";
@@ -2491,7 +2491,7 @@ dump_fcpl(hid_t fid)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    dump_list
+ * Function:    dump_fcontents
  *
  * Purpose:     prints all objects 
  *
@@ -2504,9 +2504,32 @@ dump_fcpl(hid_t fid)
  *-------------------------------------------------------------------------
  */
 
-static void dump_list(hid_t fid)
+static void dump_fcontents(hid_t fid)
 {
+ hid_t did, tid, gid;
+ char  type_name[1024];
+ int i;
+
  printf("%s %s\n",FILE_CONTENTS, BEGIN);
+
+ /* special case of unamed types in root group */
+ if (unamedtype)
+ {
+	 gid=H5Gopen(fid,"/");
+  for (i = 0; i < type_table->nobjs; i++)
+   if (!type_table->objs[i].recorded) 
+   {
+    did = H5Dopen(gid, type_table->objs[i].objname);
+    tid = H5Dget_type(did);
+    sprintf(type_name, "/#%lu:%lu",
+     type_table->objs[i].objno[0],
+     type_table->objs[i].objno[1]);
+    H5Tclose(tid);
+    H5Dclose(did);
+    printf(" %-10s %s\n", "datatype", type_name  );
+   }
+   H5Gclose(gid);
+ }
 
  /* print objects in the files */
  h5trav_getinfo(fid, NULL, 1);
@@ -3484,7 +3507,7 @@ main(int argc, const char *argv[])
     {
      if (display_fi)
      {
-      dump_list(fid);
+      dump_fcontents(fid);
       end_obj(dump_header_format->fileend,dump_header_format->fileblockend);
       goto done;
      }
