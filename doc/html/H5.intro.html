@@ -159,7 +159,7 @@ The development of HDF5 is motivated by a number of limitations in the current H
 <UL>
 </FONT><LI>A new file format designed to address some of the deficiencies of HDF4.x, particularly the need to store larger files and more objects per file. 
 <LI>A simpler, more comprehensive data model that includes only two basic structures: a multidimensional array of record structures, and a grouping structure. 
-<LI>A simpler, better-engineered library and API, with improved support for parallel i/o, threads, and other requirements imposed by modern systems and applications.</UL>
+<LI>A simpler, better-engineered library and API, with improved support for parallel I/O, threads, and other requirements imposed by modern systems and applications.</UL>
 
 <H3><A NAME="Intro-Limits">Limitations of the Current Release</A></H3>
 <FONT FACE="Times"><P>This release includes the basic functionality that was planned for the HDF5 library. However, the library does not implement all of the features detailed in the format and API specifications. Here is a listing of some of the limitations of the current release: 
@@ -210,7 +210,14 @@ The development of HDF5 is motivated by a number of limitations in the current H
 <P>The header contains information that is needed to interpret the array portion of the dataset, as well as metadata (or pointers to metadata) that describes or annotates the dataset. Header information includes the name of the object, its dimensionality, its number-type, information about how the data itself is stored on disk, and other information used by the library to speed up access to the dataset or maintain the file's integrity.
 <P>There are four essential classes of information in any header: <I>name</I>, <I>datatype</I>, <I>dataspace</I>, and <I>storage layout</I>:
 </FONT><B><DFN><P>Name.</B></DFN><FONT FACE="Times"> A dataset <I>name</I> is a sequence of alphanumeric ASCII characters.
-</FONT><B><DFN><P>Datatype.</B></DFN><FONT FACE="Times"> HDF5 allows one to define many different kinds of datatypes. There are two categories of datatypes: <I>atomic</I> datatypes and <I>compound</I> datatypes. Atomic datatypes are those that are not decomposed at the datatype interface level, such as integers and floats. <I><CODE>NATIVE</CODE></I> datatypes are system-specific instances of atomic datatypes. Compound datatypes are made up of atomic datatypes. And <I>named</I> datatypes are either atomic or compound datatypes that are have been specifically designated to be shared across datasets.
+</FONT><B><DFN><P>Datatype.</B></DFN><FONT FACE="Times"> HDF5 allows one to define many different kinds of datatypes. There are two categories of datatypes: <I>atomic</I> datatypes and <I>compound</I> datatypes. 
+Atomic datatypes can also be system-specific, or <I><CODE>NATIVE</CODE></I>, and all datatypes can be <I>named</I>:
+<ul>
+<li><em>Atomic</em> datatypes are those that are not decomposed at the datatype interface level, such as integers and floats.
+<li><I><CODE>NATIVE</CODE></I> datatypes are system-specific instances of atomic datatypes. 
+<li>Compound datatypes are made up of atomic datatypes.
+<li><em>Named</em> datatypes are either atomic or compound datatypes that have been specifically designated to be shared across datasets.
+</ul>
 <I><P>Atomic datatypes</I> include integers and floating-point numbers. Each atomic type belongs to a particular class and has several properties: size, order, precision, and offset. In this introduction, we consider only a few of these properties.
 <P>Atomic classes include integer, float, date and time, string, bit field, and opaque. <I>(Note: Only integer, float and string  classes are available in the current implementation.)
 </I><P>Properties of integer types include size, order (endian-ness), and signed-ness (signed/unsigned).
