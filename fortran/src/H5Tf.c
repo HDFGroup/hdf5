@@ -1432,7 +1432,7 @@ nh5tinsert_array_c2(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* of
 }
 /*----------------------------------------------------------------------------
  * Name:        h5tarray_create_c
- * Purpose:     Call H5Tcreate_array to create array datatype
+ * Purpose:     Call H5Tarray_create to create array datatype
  * Inputs:      base_id - identifier of array base datatype
  *              rank - array's rank
  *              dims - Size of new member array
@@ -1466,7 +1466,7 @@ nh5tarray_create_c(hid_t_f * base_id, int_f *rank, hsize_t_f* dims, hid_t_f* typ
   
   c_base_id = (hid_t)*base_id;
   c_rank = (int)*rank;
-  c_type_id = H5Tcreate_array(c_base_id, c_rank, c_dims, NULL);
+  c_type_id = H5Tarray_create(c_base_id, c_rank, c_dims, NULL);
 
   if(c_type_id < 0) {
           HDfree(c_dims);
