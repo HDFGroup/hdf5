@@ -47,6 +47,20 @@ if test gcc = "$cc_vendor" -a "$cc_vers_all" -lt 2008001; then
 EOF
     sleep 5
 
+# GCC v2.96 (shipped with RH7.x) has problems with `float'-> `double' conversions.
+elif test gcc = "$cc_vendor" -a "$cc_vers_all" -eq 2096000; then
+   cat <<EOF
+    **
+    ** This compiler may have problems converting 'float' values to
+    ** 'double' values.  There may be other code generation problems
+    ** as well.
+    **
+    ** Please use a different version of gcc before reporting bugs.
+    **
+EOF
+       sleep 5
+    fi
+
 # Current EGCS compilers have problems with `long long' and register
 # allocation when optimizations are turned on for x86 systems.
 elif test egcs = "$cc_vendor" -a "$cc_vers_all" -le 2091066; then
