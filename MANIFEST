@@ -515,8 +515,6 @@
 ./fortran/config/linux-gnu
 ./fortran/config/linux-gnulibc1
 ./fortran/config/linux-gnulibc2
-./fortran/config/powerpc-ibm-aix4.2.1.0
-./fortran/config/powerpc-ibm-aix4.3.2.0
 ./fortran/config/powerpc-ibm-aix4.x
 ./fortran/config/rs6000-ibm-aix4.x
 ./fortran/config/solaris2.x
