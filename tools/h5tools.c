@@ -1781,10 +1781,22 @@ h5dump_fixtype(hid_t f_type)
         H5Tclose(f_memb);
         break;
 
+    case H5T_VLEN:
+        /* Get the VL sequence's base type and convert it to the printable version */
+        f_memb = H5Tget_super(f_type);
+        array_base = h5dump_fixtype(f_memb);
+
+        /* Copy the VL type */
+        m_type = H5Tvlen_create(array_base);
+
+        /* Close the temporary datatypes */
+        H5Tclose(array_base);
+        H5Tclose(f_memb);
+        break;
+
     case H5T_ENUM:
     case H5T_REFERENCE:
     case H5T_OPAQUE:
-    case H5T_VLEN:
 	/* Same as file type */
 	m_type = H5Tcopy(f_type);
 	break;
@@ -1938,13 +1950,12 @@ h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 {
     h5dump_context_t ctx;	/*print context				*/
     hid_t base_type;		/*the base type of the VL data		*/
-    hid_t xfer_pid;		/*dataset transfer property list id	*/
     hid_t f_space;		/*file data space			*/
-    hsize_t dims[H5S_MAX_RANK]; /*size of the dimensions		*/
+    hsize_t dims[H5S_MAX_RANK];	/*size of the dimensions		*/
     int ndims;
     hid_t mem_space;
     const char *bad_type;
-    herr_t ret = FAIL;
+    herr_t ret=0;
     hssize_t start = 0;
     hsize_t count = 1;
     unsigned int i;
@@ -1961,16 +1972,9 @@ h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     }
 
     base_type = H5Tget_super(type);
-    xfer_pid = H5Pcreate(H5P_DATA_XFER);
 
-    if (xfer_pid == FAIL) {
-	ret = FAIL;
-	goto free_xfer;
-    }
-
-    memset(dims, 0, sizeof(dims));
     ndims = H5Sget_simple_extent_dims(f_space, dims, NULL);
-    ctx.size_last_dim = dims[0];
+    ctx.size_last_dim = dims[ctx.ndims - 1];
 
     /* Assume entire data space to be printed */
     for (i = 0; i < (hsize_t)ctx.ndims; i++)
@@ -1990,7 +1994,7 @@ recheck:
             hid_t tmp_type = base_type;
     
             if (been_here) {
-                bad_type = "H5T_VLEN";
+                bad_type = "variable length of";
                 goto bad;
             } else {
                 been_here++;
@@ -2033,74 +2037,49 @@ recheck:
     mem_space = H5Screate_simple(0, NULL, NULL);
 
     for (i = 0; i < dims[0]; i++) {
-        unsigned char *buffer = NULL;
-        hsize_t mem_needed = 0;
-	hvl_t *vldata = NULL;
+        herr_t ret;
+        hvl_t vldata;
         h5dump_context_t tmp;
 
 	if (ndims > 0) {
 	    start = i;
 	    ret = H5Sselect_hyperslab(f_space, H5S_SELECT_SET, &start, NULL,
 			    	      &count, NULL);
-
 	    if (ret == FAIL)
 	        goto free_mem;
 	} else {
 	    ret = H5Sselect_all(f_space);
-
 	    if (ret == FAIL)
 	        goto free_mem;
 	}
 
-	ret = H5Dvlen_get_buf_size(dset, type, f_space, &mem_needed);
-
+	ret = H5Dread(dset, type, mem_space, f_space, H5P_DEFAULT, &vldata);
 	if (ret == FAIL)
 	    goto free_mem;
 
-	mem_needed += sizeof(hvl_t);
-	buffer = calloc(mem_needed, 1);
-
-	if (!buffer) {
-	    indentation(indentlevel);
-	    fprintf(stream,
-		    "Unable to allocate %ld bytes for variable length data.\n",
-		    (long)mem_needed);
-	    continue;
-	}
-
-	ret = H5Dread(dset, type, mem_space, f_space, H5P_DEFAULT, buffer);
-
-	if (ret == FAIL)
-	    goto free_mem;
-
-	vldata = (hvl_t *)buffer;
 	tmp = ctx;
 	h5dump_simple_data(stream, info, dset, &ctx,
 			   START_OF_DATA | END_OF_DATA,
-			   vldata->len, base_type, (void *)vldata->p);
+			   vldata.len, base_type, vldata.p);
 	ctx = tmp;
 	fputs("\n", stream);
 
-	if (ndims == 0) {
-	    H5Dvlen_reclaim(type, f_space, xfer_pid, vldata);
-	    free(buffer);
-	    break;
-	}
+	ret = H5Dvlen_reclaim(type, mem_space, H5P_DEFAULT, &vldata);
+	if (ret == FAIL)
+	    goto free_mem;
 
-	free(vldata->p);
-	free(buffer);
+	if (ndims == 0)
+	    break;
     }
 
 free_mem:
     H5Sclose(mem_space);
-free_xfer:
-    H5Pclose(xfer_pid);
+    H5Tclose(base_type);
 free_space:
     H5Sclose(f_space);
     return ret;
 
 bad:
-    H5Pclose(xfer_pid);
     H5Sclose(f_space);
     indentation(indentlevel);
     fprintf(stream,
@@ -2150,11 +2129,21 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
     return h5dump_simple_mem(stream, info, type, space, mem, indentlevel);
 }
 
-/*************************************************************************
- *
- * from h5dumputil.c
- *
- *************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+
+/*from h5dumputil.c*/
+
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
 
 /*-------------------------------------------------------------------------
  * Function:    indentation
@@ -2200,11 +2189,11 @@ print_version(const char *program_name)
            H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-/*************************************************************************
+/*
  *
- * from h5finshd.c
+ * THE FUNCTIONS BELOW ARE FROM THE H5FINSHD.C FILE
  *
- *************************************************************************/
+ */
 
 /*-------------------------------------------------------------------------
  * Function:    init_table
@@ -2297,8 +2286,7 @@ search_obj(table_t *table, unsigned long *objno)
     int i;
 
     for (i = 0; i < table->nobjs; i++)
-        if (table->objs[i].objno[0] == *objno &&
-			table->objs[i].objno[1] == *(objno + 1))
+        if (table->objs[i].objno[0] == *objno && table->objs[i].objno[1] == *(objno + 1))
 	    return i;
   
     return -1;
@@ -2341,7 +2329,7 @@ add_obj (table_t *table, unsigned long *objno, char *objname)
 }
 
 /*-------------------------------------------------------------------------
- * Function:   find_objs 
+ * Function:   Find_objs 
  *
  * Purpose:    Find objects, committed types and store them in tables
  *
@@ -2476,7 +2464,7 @@ dump_table(char* tablename, table_t *table)
 {
     int i;
 
-    printf("%s: # of entries = %d\n", tablename, table->nobjs);
+    printf("%s: # of entries = %d\n", tablename,table->nobjs);
 
     for ( i = 0; i < table->nobjs; i++)
         printf("%lu %lu %s %d\n", table->objs[i].objno[0],
@@ -2501,6 +2489,7 @@ int
 get_table_idx(table_t *table, unsigned long *objno)
 {
     return search_obj(table, objno);
+
 }
 
 /*-------------------------------------------------------------------------
