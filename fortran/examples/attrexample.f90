@@ -24,8 +24,7 @@
      INTEGER     ::   arank = 1                      ! Attribure rank
      INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string
 
-!     CHARACTER*27, DIMENSION(2) ::  attr_data  ! Attribute data
-     CHARACTER*80, DIMENSION(2) ::  attr_data  ! Attribute data
+     CHARACTER(LEN=80), DIMENSION(2) ::  attr_data  ! Attribute data
 
      INTEGER     ::   error ! Error flag
      INTEGER, DIMENSION(7) :: data_dims
@@ -36,7 +35,6 @@
      !
      attr_data(1) = "Dataset character attribute"
      attr_data(2) = "Some other string here     "
-!     attrlen = 27
      attrlen = 80 
      !
      ! Initialize FORTRAN interface.

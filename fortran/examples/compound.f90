@@ -42,8 +42,8 @@
      INTEGER(SIZE_T)     ::   type_sized  ! Size of the double precision datatype
      INTEGER(SIZE_T)     ::   type_sizer  ! Size of the real datatype
      INTEGER(SIZE_T)     ::   offset     ! Member's offset
-     CHARACTER*2, DIMENSION(dimsize)      :: char_member
-     CHARACTER*2, DIMENSION(dimsize)      :: char_member_out ! Buffer to read data out
+     CHARACTER(LEN=2), DIMENSION(dimsize)      :: char_member
+     CHARACTER(LEN=2), DIMENSION(dimsize)      :: char_member_out ! Buffer to read data out
      INTEGER, DIMENSION(dimsize)          :: int_member
      DOUBLE PRECISION, DIMENSION(dimsize) :: double_member
      REAL, DIMENSION(dimsize)             :: real_member
