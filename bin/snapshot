@@ -272,8 +272,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	    ${srcdir:+${CURRENT}/}${CONFIGURE} --prefix=$INSTALLDIR && \
 	    ${MAKE} && \
 	    ${MAKE} check && \
-	    ${MAKE} install install-doc && \
-	    (cd examples; ${MAKE} check ) && \
+	    ${MAKE} install install-doc check-install && \
 	    ${MAKE} uninstall uninstall-doc); then
 	    :
 	else
