@@ -14,6 +14,10 @@
 
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
+/* Pablo mask */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Z_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -23,9 +27,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Zpkg.h"		/* Data filters				*/
-
-/* Pablo mask */
-#define PABLO_MASK	H5Z_mask
 
 /* Interface initialization */
 #define INTERFACE_INIT H5Z_init_interface
@@ -530,7 +531,8 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
             /* Check if the chunks have filters */
             if(dcpl_pline.nfilters > 0) {
                 unsigned chunk_ndims;   /* # of chunk dimensions */
-                hsize_t chunk_size[H5O_LAYOUT_NDIMS];       /* Size of chunk dimensions */
+                size_t chunk_size[H5O_LAYOUT_NDIMS];       /* Size of chunk dimensions */
+                hsize_t chunk_dims[H5O_LAYOUT_NDIMS];      /* Size of chunk dimensions */
                 H5S_t *space;           /* Dataspace describing chunk */
                 hid_t space_id;         /* ID for dataspace describing chunk */
                 size_t u;               /* Local index variable */
@@ -542,8 +544,10 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve chunk size");
 
                 /* Create a data space for a chunk & set the extent */
-                if(NULL == (space = H5S_create_simple(chunk_ndims,chunk_size,NULL)))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
+                for(u=0; u<chunk_ndims; u++)
+                    chunk_dims[u]=chunk_size[u];
+                if(NULL == (space = H5S_create_simple(chunk_ndims,chunk_dims,NULL)))
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
                 /* Get ID for dataspace to pass to filter routines */
                 if ((space_id=H5I_register (H5I_DATASPACE, space))<0) {

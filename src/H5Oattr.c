@@ -16,6 +16,10 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5S_PACKAGE	        /*suppress error about including H5Spkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK      H5O_attr_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -24,8 +28,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Spkg.h"		/* Dataspaces				*/
-
-#define PABLO_MASK      H5O_attr_mask
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
@@ -201,13 +203,14 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->ds,0)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+
     if(version < H5O_ATTR_VERSION_NEW)
         p += H5O_ALIGN(attr->ds_size);
     else
         p += attr->ds_size;
 
     /* Compute the size of the data */
-    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_get_simple_extent_npoints(attr->ds)*H5T_get_size(attr->dt),hsize_t,size_t);
+    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_GET_SIMPLE_EXTENT_NPOINTS(attr->ds)*H5T_get_size(attr->dt),hsize_t,size_t);
 
     /* Go get the data */
     if (NULL==(attr->data = H5MM_malloc(attr->data_size)))
@@ -262,7 +265,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     size_t      name_len;   /* Attribute name length */
     unsigned    version;        /* Attribute version */
     hbool_t     type_shared;    /* Flag to indicate that a shared datatype is used for this attribute */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_attr_encode, FAIL);
 

@@ -107,7 +107,6 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
     hsize_t	total_bytes;
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
-    unsigned		u;
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_all_type);
@@ -116,7 +115,7 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
     assert (space);
 
     /* Just treat the entire extent as a block of bytes */
-    if((snelmts = H5S_get_simple_extent_npoints(space))<0)
+    if((snelmts = H5S_GET_SIMPLE_EXTENT_NPOINTS(space))<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
 
@@ -678,7 +677,8 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
      * the address to read from.  This should be used as the diplacement for
      * a call to MPI_File_set_view() in the read or write call.
      */
-    addr = f->shared->base_addr + layout->addr + mpi_file_offset;
+    assert(layout->type==H5D_CONTIGUOUS);
+    addr = f->shared->base_addr + layout->u.contig.addr + mpi_file_offset;
 #ifdef H5Smpi_DEBUG
     HDfprintf(stderr, "spaces_xfer: addr=%a\n", addr );
 #endif

@@ -850,6 +850,7 @@
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
 ./src/H5Dpkg.h
+./src/H5Dtest.c
 ./src/H5E.c
 ./src/H5Eprivate.h
 ./src/H5Epublic.h
@@ -1050,6 +1051,7 @@
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
@@ -1075,6 +1077,7 @@
 ./test/th5s.h5
 ./test/theap.c
 ./test/titerate.c
+./test/tlayouto.h5
 ./test/tmeta.c
 ./test/tmisc.c
 ./test/tmtimen.h5

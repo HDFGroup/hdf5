@@ -1976,7 +1976,7 @@ test_missing_filter(hid_t file)
     /* Query the dataset's size on disk */
     if((dset_size=H5Dget_storage_size(dsid))==0) {
         H5_FAILED();
-        printf("    Line %d: Error querying dataset size\n",__LINE__);
+        printf("    Line %d: Error querying dataset size, dset_size=%lu\n",__LINE__,(unsigned long)dset_size);
         goto error;
     } /* end if */
 

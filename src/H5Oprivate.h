@@ -48,17 +48,20 @@
 /* Flags which are part of a message */
 #define H5O_FLAG_CONSTANT	0x01u
 #define H5O_FLAG_SHARED		0x02u
-#define H5O_FLAG_BITS		0x03u
+#define H5O_FLAG_BITS		(H5O_FLAG_CONSTANT|H5O_FLAG_SHARED)
 
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
 #define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.  */
+/* Complex dataspace is/was planned for message 0x0002 */
 #define H5O_DTYPE_ID	0x0003          /* Datatype Message.  */
 #define H5O_FILL_ID     0x0004          /* Fill Value Message. (Old)  */
 #define H5O_FILL_NEW_ID 0x0005          /* Fill Value Message. (New)  */
+/* Compact data storage is/was planned for message 0x0006 */
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
 #define H5O_LAYOUT_ID	0x0008          /* Data Storage Layout Message.  */
 #define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
+/* message 0x000a appears unused... */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */
 #define H5O_ATTR_ID	0x000c          /* Attribute Message.  */
 #define H5O_NAME_ID	0x000d          /* Object name message.  */
@@ -67,7 +70,6 @@
 #define H5O_CONT_ID	0x0010          /* Object header continuation message.  */
 #define H5O_STAB_ID	0x0011          /* Symbol table message.  */
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
-
 
 /*
  * Fill Value Message. (Old)
@@ -102,7 +104,7 @@ typedef struct H5O_fill_new_t {
 #define H5O_EFL_UNLIMITED	H5F_UNLIMITED /*max possible file size	     */
 
 typedef struct H5O_efl_entry_t {
-    size_t	name_offset;	/*offset of name within heap	     */
+    size_t	name_offset;		/*offset of name within heap	     */
     char	*name;			/*malloc'd name			     */
     off_t	offset;			/*offset of data within file	     */
     hsize_t	size;			/*size allocated within file	     */
@@ -121,15 +123,37 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
 
+typedef struct H5O_layout_contig_t {
+    haddr_t	addr;			/* File address of data              */ 
+    hsize_t     size;                   /* Size of data in bytes             */
+} H5O_layout_contig_t;
+
+typedef struct H5O_layout_chunk_t {
+    haddr_t	addr;			/* File address of B-tree            */ 
+    unsigned	ndims;			/* Num dimensions in chunk           */
+    size_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
+    size_t      size;                   /* Size of chunk in bytes            */
+} H5O_layout_chunk_t;
+
+typedef struct H5O_layout_compact_t {
+    hbool_t     dirty;                  /* Dirty flag for compact dataset    */ 
+    size_t      size;                   /* Size of buffer in bytes           */
+    void        *buf;                   /* Buffer for compact dataset        */
+} H5O_layout_compact_t;
+
 typedef struct H5O_layout_t {
-    int		type;			/*type of layout, H5D_layout_t	     */
-    haddr_t	addr;			/*file address of data or B-tree     */ 
-    unsigned	ndims;			/*num dimensions in stored data	     */
-    hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk in bytes     */
-    hsize_t     chunk_size;             /*size of chunk in bytes   */
-    hbool_t     dirty;                  /*dirty flag for compact dataset     */ 
-    size_t      size;                   /*size of compact dataset in bytes   */
-    void        *buf;                   /*buffer for compact dataset         */
+    H5D_layout_t type;			/* Type of layout                    */
+    unsigned version;                   /* Version of message                */
+    /* Structure for "unused" dimension information */
+    struct {
+        unsigned ndims;			/*num dimensions in stored data	     */
+        hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk in bytes     */
+    } unused;
+    union {
+        H5O_layout_contig_t contig;     /* Information for contiguous layout */
+        H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
+        H5O_layout_compact_t compact;   /* Information for compact layout    */
+    } u;
 } H5O_layout_t;
 
 /* Enable reading/writing "bogus" messages */

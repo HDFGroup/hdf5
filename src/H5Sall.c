@@ -380,7 +380,7 @@ H5S_all_copy (H5S_t *dst, const H5S_t *src)
     assert(dst);
 
     /* Set number of elements in selection */
-    dst->select.num_elem=(hsize_t)H5S_get_simple_extent_npoints(dst);
+    dst->select.num_elem=(hsize_t)H5S_GET_SIMPLE_EXTENT_NPOINTS(dst);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -723,7 +723,7 @@ H5S_select_all (H5S_t *space, unsigned rel_prev)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
 
     /* Set number of elements in selection */
-    space->select.num_elem=(hsize_t)H5S_get_simple_extent_npoints(space);
+    space->select.num_elem=(hsize_t)H5S_GET_SIMPLE_EXTENT_NPOINTS(space);
 
     /* Set selection type */
     space->select.type=H5S_SEL_ALL;

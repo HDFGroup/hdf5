@@ -86,4 +86,11 @@ extern H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
 H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
                         hbool_t update_time, hbool_t full_overwrite);
+
+/* Testing functions */
+#ifdef H5D_TESTING
+H5_DLL herr_t H5D_layout_version_test(hid_t did, unsigned *version);
+H5_DLL herr_t H5D_layout_contig_size_test(hid_t did, hsize_t *size);
+#endif /* H5D_TESTING */
+
 #endif /*_H5Dpkg_H*/

@@ -104,6 +104,7 @@ TABLE.list TD { border:none; }
 	      <li><a href="#NILMessage">Name: NIL</a>                                                       <!-- 0x0000 -->
 	      <li><a href="#SimpleDataSpace">Name: Simple Dataspace</a>                                     <!-- 0x0001 -->
 <!--          <li><a href="#DataSpaceMessage">Name: Complex Dataspace</a>  -->                              <!-- 0x0002 -->
+	      <li><a href="#ReservedMessage_0002">Name: Reserved - not assigned yet</a>                     <!-- 0x0002 -->
 	      <li><a href="#DataTypeMessage">Name: Datatype</a>                                             <!-- 0x0003 -->
 	      <li><a href="#OldFillValueMessage">Name: Data Storage - Fill Value (Old)</a>                  <!-- 0x0004 -->
 	      <li><a href="#FillValueMessage">Name: Data Storage - Fill Value</a>                           <!-- 0x0005 -->
@@ -119,18 +120,20 @@ TABLE.list TD { border:none; }
 	<ol type=A>
 	  <li><a href="#ObjectHeader">Disk Format Level 2a - Data Object Headers</a><i>(Continued)</i>
 	    <ol type=1 start=6>
-	      <li><a href="#CompactDataStorageMessage">Name: Data Storage - Compact</a>                     <!-- 0x0006 -->
+<!--          <li><a href="#CompactDataStorageMessage">Name: Data Storage - Compact</a>  -->                <!-- 0x0006 -->
+	      <li><a href="#ReservedMessage_0006">Name: Reserved - not assigned yet</a>                     <!-- 0x0006 -->
 	      <li><a href="#ExternalFileListMessage">Name: Data Storage - External Data Files</a>           <!-- 0x0007 -->
 	      <li><a href="#LayoutMessage">Name: Data Storage - Layout</a>                                  <!-- 0x0008 -->
 	      <li><a href="#ReservedMessage_0009">Name: Reserved - not assigned yet</a>                     <!-- 0x0009 -->
 	      <li><a href="#ReservedMessage_000A">Name: Reserved - not assigned yet</a>                     <!-- 0x000a -->
-	      <li><a href="#FilterMessage">Name: Data Storage - Filter Pipeline</a>                	     <!-- 0x000b -->
+	      <li><a href="#FilterMessage">Name: Data Storage - Filter Pipeline</a>                	    <!-- 0x000b -->
 	      <li><a href="#AttributeMessage">Name: Attribute</a>                                           <!-- 0x000c -->
-	      <li><a href="#NameMessage">Name: Object Name</a>                                              <!-- 0x000d -->
-	      <li><a href="#ModifiedMessage">Name: Object Modification Date and Time</a>                    <!-- 0x000e -->
-	      <li><a href="#SharedMessage">Name: Shared Object Message</a>                                  <!-- 0x000f -->
+	      <li><a href="#CommentMessage">Name: Object Comment</a>                                              <!-- 0x000d -->
+	      <li><a href="#OldModifiedMessage">Name: Object Modification Date and Time (Old)</a>           <!-- 0x000e -->
+              <li><a href="#SharedMessage">Name: Shared Object Message</a>                                  <!-- 0x000f -->
 	      <li><a href="#ContinuationMessage">Name: Object Header Continuation</a>                       <!-- 0x0010 -->
 	      <li><a href="#SymbolTableMessage">Name: Group Message</a>                                     <!-- 0x0011 -->
+	      <li><a href="#ModifiedMessage">Name: Object Modification Date and Time</a>                    <!-- 0x0012 -->
 	    </ol>
 	  <li><a href="#SharedObjectHeader">Disk Format: Level 2b - Shared Data Object Headers</a>
 	  <li><a href="#DataStorage">Disk Format: Level 2c - Data Object Data Storage</a>
@@ -1620,10 +1623,13 @@ TABLE.list TD { border:none; }
             first free block (or the
             <A href="#UndefinedAddress">undefined address</A> if there is no
             free block).  The free block contains "Size of Lengths" bytes that
-            are the offset of the next free chunk (or the
-            <A href="#UndefinedAddress">undefined address</A> if this is the
-            last free chunk) followed by "Size of Lengths" bytes that store
-            the size of this free chunk.
+            are the offset of the next free block (or the
+            value '1' if this is the
+            last free block) followed by "Size of Lengths" bytes that store
+            the size of this free block.  The size of the free block includes
+            the space used to store the offset of the next free block and
+            the of the current block, making the minimum size of a free block
+            2 * "Size of Lengths".
             </P>
           </td>
         </tr>
@@ -2719,6 +2725,17 @@ TABLE.list TD { border:none; }
     </center>
 -->
 
+    <hr>
+    <h4><a name="ReservedMessage_0002">Name: Reserved - Not Assigned Yet</a></h4>
+    <b>Header Message Type:</b> 0x0002<BR>
+    <b>Length:</b> N/A<BR>
+    <b>Status:</b> N/A<BR>
+    <b>Format of Data:</b> N/A<BR>
+
+    <p><b>Purpose and Description:</b> This message type was skipped during
+      the initial specification of the file format and may be used in a
+      future expansion to the format.
+
 
     <hr>
     <h4><a name="DataTypeMessage">Name: Datatype</a></h4>
@@ -3428,7 +3445,12 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td>0-23</td>
+	  <td>0-7</td>
+	  <td>Length of ASCII tag in bytes.</td>
+	</tr>
+
+	<tr>
+	  <td>8-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
       </table>
@@ -3521,7 +3543,7 @@ TABLE.list TD { border:none; }
     <div align=center>
       <table class=format>
 	<caption>
-	  Properties Description for Datatype Version 0
+	  Properties Description for Datatype Version 1
 	</caption>
 
 	<tr>
@@ -3649,7 +3671,7 @@ TABLE.list TD { border:none; }
     <div align=center>
       <table class=format>
 	<caption>
-	  Properties Description for Datatype Version 1
+	  Properties Description for Datatype Version 2
 	</caption>
 
 	<tr>
@@ -4338,7 +4360,8 @@ TABLE.list TD { border:none; }
                     <tr>
                       <td align=center><code>2</code></td>
                       <td>The current version used by the library (version
-                        1.7.3 or later).  In this version, the Size field is
+                        1.7.3 or later).  In this version, the Size and
+                        Fill Value fields are
                         only present if the Fill Value Defined field is set
                         to 1.
                       </td>
@@ -4453,7 +4476,9 @@ TABLE.list TD { border:none; }
 	  <td>Fill Value</td>
 	  <td>
             <P>The fill value.  The bytes of the fill value are interpreted
-                using the same datatype as for the dataset.
+                using the same datatype as for the dataset.  This field is
+                not present if the Version field is >1 and the Fill Value
+                Defined field is set to 0.
             </P>
           </td>
 	</tr>
@@ -4461,6 +4486,7 @@ TABLE.list TD { border:none; }
     </div>
     </P>
 
+<!--
     <hr>
     <h4><a name="CompactDataStorageMessage">Name: Data Storage - Compact</a></h4>
 
@@ -4480,6 +4506,18 @@ TABLE.list TD { border:none; }
     <P><b>Format of Data:</b>  The message data is actually composed
       of dataset data, so the format will be determined by the dataset
       format.
+-->
+
+    <hr>
+    <h4><a name="ReservedMessage_0006">Name: Reserved - Not Assigned Yet</a></h4>
+    <b>Header Message Type:</b> 0x0006<BR>
+    <b>Length:</b> N/A<BR>
+    <b>Status:</b> N/A<BR>
+    <b>Format of Data:</b> N/A<BR>
+
+    <p><b>Purpose and Description:</b> This message type was skipped during
+      the initial specification of the file format and may be used in a
+      future expansion to the format.
 
     <hr>
     <h4><a name="ExternalFileListMessage">Name: Data Storage -
@@ -4668,7 +4706,7 @@ TABLE.list TD { border:none; }
 
     <p><b>Purpose and Description:</b> Data layout describes how the
       elements of a multi-dimensional array are arranged in the linear
-      address space of the file. Two types of data layout are
+      address space of the file. Three types of data layout are
       supported:
 
     <ol>
@@ -4688,13 +4726,19 @@ TABLE.list TD { border:none; }
 	the size of the entire array; the size of the entire array can
 	be calculated by traversing the B-tree that stores the chunk
 	addresses.
+
+      <li>The array can be stored in one contiguous block, as part of
+        this object header message (this is called "compact" storage below).
     </ol>
+    
+    <P>Version 3 of this message re-structured the format into specific
+        properties that are required for each layout class.
 
     <p>
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=top>
-	  <B>Data Layout Message</B>
+	  <B>Data Layout Message, Versions 1 and 2</B>
 	</caption>
 
 	<tr align=center>
@@ -4730,6 +4774,18 @@ TABLE.list TD { border:none; }
 	<tr align=center>
 	  <td colspan=4>...</td>
 	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Compact Data Size (4-bytes)</td>
+	</tr>
+	
+	<tr align=center>
+	  <td colspan=4>Compact Data</td>
+	</tr>
+	
+	<tr align=center>
+	  <td colspan=4>...</td>
+	</tr>
       </table>
     </center>
 
@@ -4743,8 +4799,8 @@ TABLE.list TD { border:none; }
 
 	<tr valign=top>
 	  <td>Version</td>
-	  <td>A version number for the layout message. This
-	    documentation describes version one.</td>
+	  <td>A version number for the layout message. This value can be
+            either 1 or 2.</td>
 	</tr>
 
 	<tr valign=top>
@@ -4758,8 +4814,10 @@ TABLE.list TD { border:none; }
 	  <td>Layout Class</td>
 	  <td>The layout class specifies how the other fields of the
 	    layout message are to be interpreted.  A value of one
-	    indicates contiguous storage while a value of two
-	    indicates chunked storage.  Other values will be defined
+	    indicates contiguous storage, a value of two
+	    indicates chunked storage,
+	    while a value of three
+	    indicates compact storage.  Other values will be defined
 	    in the future.</td>
 	</tr>
 
@@ -4768,7 +4826,10 @@ TABLE.list TD { border:none; }
 	  <td>For contiguous storage, this is the address of the first
 	    byte of storage.  For chunked storage this is the address
 	    of the B-tree that is used to look up the addresses of the
-	    chunks.</td>
+	    chunks.  This field is not present for compact storage.
+            If the version for this message is set to 2, the address
+            may have the "undefined address" value, to indicate that
+            storage has not yet been allocated for this array.</td>
 	</tr>
 
 	<tr valign=top>
@@ -4776,6 +4837,244 @@ TABLE.list TD { border:none; }
 	  <td>For contiguous storage the dimensions define the entire
 	    size of the array while for chunked storage they define
 	    the size of a single chunk.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Compact Data Size</td>
+	  <td>This field is only present for compact data storage.
+            It contains the size of the raw data for the dataset array.</td>
+
+	<tr valign=top>
+	  <td>Compact Data</td>
+	  <td>This field is only present for compact data storage.
+            It contains the raw data for the dataset array.</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <B>Data Layout Message, Version 3</B>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td>Version</td>
+	  <td>Layout Class</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Properties</td>
+	</tr>
+
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Version</td>
+	  <td>A version number for the layout message. This value can be
+            either 1, 2 or 3.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Layout Class</td>
+	  <td>The layout class specifies how the other fields of the
+	    layout message are to be interpreted.  A value of one
+	    indicates contiguous storage, a value of two
+	    indicates chunked storage,
+	    while a value of three
+	    indicates compact storage.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Properties</td>
+	  <td>This variable-sized field encodes information specific to each
+            layout class and is described below.  If there is no property
+            information specified for a layout class, the size of this field
+            is zero bytes.</td>
+	</tr>
+
+      </table>
+    </center>
+
+    <P>Class-specific information for contiguous layout (Class 0):
+
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <B>Property Descriptions</B>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Address<br><br></td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Size<br><br></td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Address</td>
+	  <td>This is the address of the first byte of raw data storage.
+            The address may have the "undefined address" value, to indicate
+            that storage has not yet been allocated for this array.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Size</td>
+	  <td>This field contains the size allocated to store the raw data.</td>
+      </table>
+    </center>
+
+    <P>Class-specific information for chunked layout (Class 1):
+
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <B>Property Descriptions</B>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td>Dimensionality</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Address<br><br></td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Dimension 0 (4-bytes)</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Dimension 1 (4-bytes)</td>
+	</tr>
+	
+	<tr align=center>
+	  <td colspan=4>...</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Dimensionality</td>
+	  <td>A chunk has a fixed dimensionality.  This field
+	    specifies the number of dimension size fields later in the
+	    message.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Address</td>
+	  <td>This is the address
+	    of the B-tree that is used to look up the addresses of the
+	    chunks.
+            The address
+            may have the "undefined address" value, to indicate that
+            storage has not yet been allocated for this array.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Dimensions</td>
+	  <td>The dimension sizes define the size of a single chunk.</td>
+	</tr>
+      </table>
+    </center>
+
+    <P>Class-specific information for compact layout (Class 2):
+
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <B>Property Descriptions</B>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=2>Size</td>
+	</tr>
+	
+	<tr align=center>
+	  <td colspan=4>Raw Data</td>
+	</tr>
+	
+	<tr align=center>
+	  <td colspan=4>...</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Size</td>
+	  <td>This field contains the size of the raw data for the dataset array.</td>
+
+	<tr valign=top>
+	  <td>Raw Data</td>
+	  <td>This field contains the raw data for the dataset array.</td>
 	</tr>
       </table>
     </center>
@@ -5124,14 +5423,14 @@ TABLE.list TD { border:none; }
     </center>
     
     <hr>
-    <h4><a name="NameMessage">Name: Object Name</a></h4>
+    <h4><a name="CommentMessage">Name: Object Comment</a></h4>
 
     <p><b>Header Message Type:</b> 0x000D<br>
       <b>Length:</b> varies<br>
       <b>Status:</b> Optional, may not be repeated.
 
-    <p><b>Purpose and Description:</b> The object name or comment is
-      designed to be a short description of an object.  An object name
+    <p><b>Purpose and Description:</b> The object comment is
+      designed to be a short description of an object.  An object comment
       is a sequence of non-zero (<code>\0</code>) ASCII characters with no other
       formatting included by the library.
 
@@ -5150,7 +5449,7 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4><br>Name<br><br></td>
+	  <td colspan=4><br>Comment<br><br></td>
 	</tr>
       </table>
     </center>
@@ -5171,7 +5470,7 @@ TABLE.list TD { border:none; }
     </center>
     
     <hr>
-    <h4><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h4>
+    <h4><a name="OldModifiedMessage">Name: Object Modification Date &amp; Time (Old)</a></h4>
 
     <p><b>Header Message Type:</b> 0x000E<br>
       <b>Length:</b> fixed<br>
@@ -5182,6 +5481,12 @@ TABLE.list TD { border:none; }
       time format) the last modification of an object.  The time is
       updated when any object header message changes according to the
       system clock where the change was posted.
+
+    <p>This modification time message is deprecated in favor of the "new"
+        modification time message (Message Type 0x0012) and is no longer written
+        to the file in versions of the HDF5 library after the 1.6.0 version.
+    </p>
+
 
     <p>
     <center>
@@ -5460,6 +5765,75 @@ where the group name heap is located.
 </dl>
 </dl>
 
+    <hr>
+    <h4><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h4>
+
+    <P class=item><B>Header Message Type:</B> 0x0012
+    </P>
+    <P class=item><B>Length:</B> Fixed
+    </P>
+    <P class=item><B>Status:</B> Optional, may not be repeated.
+    </P>
+
+    <P class=item><B>Description:</B> The object modification date
+      and time is a timestamp which indicates
+      the last modification of an object.  The time is
+      updated when any object header message changes according to the
+      system clock where the change was posted.
+    </P>
+
+    <p>
+    <center>
+      <table border align=center cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Modification Time Message</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=1>Version</td>
+	  <td colspan=3>Reserved</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Seconds After Epoch</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Version</td>
+	  <td>The version number for the message.  This document
+	    describes version one of the new modification time message.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Reserved</td>
+	  <td>This field is reserved and should always be zero.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Seconds After Epoch</td>
+	  <td>The number of seconds since 0 hours, 0
+               minutes, 0 seconds, January 1, 1970, Coordinated Universal Time.
+	</tr>
+      </table>
+    </center>
+    
 <h3><a name="SharedObjectHeader">Disk Format: Level 2b - Shared Data Object Headers</a></h3>
 <P>In order to share header messages between several dataset objects, object
 header messages may be placed into the global heap.  Since these
@@ -5570,7 +5944,7 @@ value with all bits set, i.e. <code>0xffff...ff</code>.
 <!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
-Describes HDF5 Release 1.6.2, February 2004
+Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><!-- hhmts start -->
 Last modified: 5 July 2002 
 <!-- hhmts end -->

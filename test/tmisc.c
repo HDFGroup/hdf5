@@ -22,8 +22,14 @@
 *
 *************************************************************/
 
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+
+/* Define this macro to indicate that the testing APIs should be available */
+#define H5D_TESTING
+
 #include "hdf5.h"
 #include "testhdf5.h"
+#include "H5Dpkg.h"		/* Datasets 				*/
 
 /* Definitions for misc. test #1 */
 #define MISC1_FILE	"tmisc1.h5"
@@ -216,6 +222,17 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC19_DSET_NAME        "Dataset"
 #define MISC19_ATTR_NAME        "Attribute"
 #define MISC19_GROUP_NAME       "Group"
+
+/* Definitions for misc. test #20 */
+#define MISC20_FILE             "tmisc20.h5"
+#define MISC20_FILE_OLD         "tlayouto.h5"
+#define MISC20_DSET_NAME        "Dataset"
+#define MISC20_DSET2_NAME       "Dataset2"
+#define MISC20_SPACE_RANK       2
+#define MISC20_SPACE_DIM0       (8*1024*1024*1024ULL)
+#define MISC20_SPACE_DIM1       ((4*1024*1024*1024ULL)+1ULL)
+#define MISC20_SPACE2_DIM0      8
+#define MISC20_SPACE2_DIM1      4
 
 /****************************************************************
 **
@@ -3203,6 +3220,176 @@ test_misc19(void)
 
 /****************************************************************
 **
+**  test_misc20(): Test problems with version 2 of storage layout
+**                      message truncating dimensions
+**
+****************************************************************/
+static void
+test_misc20(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t sid;          /* 'Space ID */
+    hid_t did;          /* Dataset ID */
+    hid_t dcpl;         /* Dataset creation property list ID */
+    int rank=MISC20_SPACE_RANK;    /* Rank of dataspace */
+    hsize_t big_dims[MISC20_SPACE_RANK]={MISC20_SPACE_DIM0,MISC20_SPACE_DIM1};      /* Large dimensions */
+    hsize_t small_dims[MISC20_SPACE_RANK]={MISC20_SPACE2_DIM0,MISC20_SPACE2_DIM1};      /* Small dimensions */
+    unsigned version;   /* Version of storage layout info */
+    hsize_t contig_size;        /* Size of contiguous storage size from layout into */
+    char testfile[512]="";          /* Character buffer for corrected test file name */
+    char *srcdir = HDgetenv("srcdir");    /* Pointer to the directory the source code is located within */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing large dimension truncation fix\n"));
+
+    /* Verify that chunks with dimensions that are too large get rejected */
+
+    /* Create a dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate"); 
+
+    /* Use chunked storage for this dataset */
+    ret = H5Pset_chunk(dcpl,rank,big_dims);
+    VERIFY(ret, FAIL, "H5Pset_chunk"); 
+
+    /* Verify that the storage for the dataset is the correct size and hasn't
+     * been truncated.
+     */
+
+    /* Create the file */
+    fid = H5Fcreate(MISC20_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace with _really_ big dimensions */
+    sid = H5Screate_simple(rank,big_dims,NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Make certain that the dataset's storage doesn't get allocated :-) */
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+
+    /* Create dataset with big dataspace */
+    did = H5Dcreate(fid, MISC20_DSET_NAME, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Close datasset */
+    ret=H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close dataspace */
+    ret=H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace with small dimensions */
+    sid = H5Screate_simple(rank,small_dims,NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create dataset with big dataspace */
+    did = H5Dcreate(fid, MISC20_DSET2_NAME, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Close datasset */
+    ret=H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close dataspace */
+    ret=H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close dataset creation property list */
+    ret=H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file */
+    fid = H5Fopen(MISC20_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open dataset with big dimensions */
+    did = H5Dopen(fid, MISC20_DSET_NAME);
+    CHECK(did, FAIL, "H5Dopen");
+
+    /* Get the layout version */
+    ret = H5D_layout_version_test(did,&version);
+    CHECK(ret, FAIL, "H5D_layout_version_test");
+    VERIFY(version,3,"H5D_layout_version_test");
+
+    /* Get the layout contiguous storage size */
+    ret = H5D_layout_contig_size_test(did,&contig_size);
+    CHECK(ret, FAIL, "H5D_layout_contig_size_test");
+    VERIFY(contig_size, MISC20_SPACE_DIM0*MISC20_SPACE_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5D_layout_contig_size_test");
+
+    /* Close datasset */
+    ret=H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Open dataset with small dimensions */
+    did = H5Dopen(fid, MISC20_DSET2_NAME);
+    CHECK(did, FAIL, "H5Dopen");
+
+    /* Get the layout version */
+    ret = H5D_layout_version_test(did,&version);
+    CHECK(ret, FAIL, "H5D_layout_version_test");
+    VERIFY(version,2,"H5D_layout_version_test");
+
+    /* Get the layout contiguous storage size */
+    ret = H5D_layout_contig_size_test(did,&contig_size);
+    CHECK(ret, FAIL, "H5D_layout_contig_size_test");
+    VERIFY(contig_size, MISC20_SPACE2_DIM0*MISC20_SPACE2_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5D_layout_contig_size_test");
+
+    /* Close datasset */
+    ret=H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Verify that the storage size is computed correctly for older versions of layout info */
+
+    /* Generate the correct name for the test file, by prepending the source path */
+    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC20_FILE_OLD) + 1) < sizeof(testfile))) {
+        HDstrcpy(testfile, srcdir);
+        HDstrcat(testfile, "/");
+    }
+    HDstrcat(testfile, MISC20_FILE_OLD);
+
+    /*
+     * Open the old file and the dataset and get old settings.
+     */
+    fid =    H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open dataset with small dimensions */
+    did = H5Dopen(fid, MISC20_DSET_NAME);
+    CHECK(did, FAIL, "H5Dopen");
+
+    /* Get the layout version */
+    ret = H5D_layout_version_test(did,&version);
+    CHECK(ret, FAIL, "H5D_layout_version_test");
+    VERIFY(version,2,"H5D_layout_version_test");
+
+    /* Get the layout contiguous storage size */
+    ret = H5D_layout_contig_size_test(did,&contig_size);
+    CHECK(ret, FAIL, "H5D_layout_contig_size_test");
+    VERIFY(contig_size, MISC20_SPACE_DIM0*MISC20_SPACE_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5D_layout_contig_size_test");
+
+    /* Close datasset */
+    ret=H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_misc20() */
+    
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -3231,6 +3418,7 @@ test_misc(void)
     test_misc17();      /* Test array of ASCII character */
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
+    test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
 
 } /* test_misc() */
 
@@ -3274,4 +3462,5 @@ cleanup_misc(void)
     HDremove(MISC17_FILE);
     HDremove(MISC18_FILE);
     HDremove(MISC19_FILE);
+    HDremove(MISC20_FILE);
 }

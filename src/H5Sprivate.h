@@ -176,6 +176,7 @@ typedef struct H5S_conv_t {
 #ifdef H5S_PACKAGE
 #define H5S_GET_SIMPLE_EXTENT_TYPE(S)   ((S)->extent.type)
 #define H5S_GET_SIMPLE_EXTENT_NDIMS(S)  ((S)->extent.u.simple.rank)
+#define H5S_GET_SIMPLE_EXTENT_NPOINTS(S) ((S)->extent.nelem)
 #define H5S_GET_SELECT_NPOINTS(S)       ((S)->select.num_elem)
 #define H5S_GET_SELECT_TYPE(S)          ((S)->select.type)
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
@@ -197,6 +198,7 @@ typedef struct H5S_conv_t {
 #else /* H5S_PACKAGE */
 #define H5S_GET_SIMPLE_EXTENT_TYPE(S)   (H5S_get_simple_extent_type(S))
 #define H5S_GET_SIMPLE_EXTENT_NDIMS(S)  (H5S_get_simple_extent_ndims(S))
+#define H5S_GET_SIMPLE_EXTENT_NPOINTS(S) (H5S_get_simple_extent_npoints(S))
 #define H5S_GET_SELECT_NPOINTS(S)       (H5S_get_select_npoints(S))
 #define H5S_GET_SELECT_TYPE(S)          (H5S_get_select_type(S))
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)       (H5S_select_get_seq_list(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
