@@ -1,6 +1,6 @@
 /*
  * Small program to illustrate the "misalignment" of members within a compound
- * datatype, in a datatype fixed by h5tools_fixtype().
+ * datatype, in a datatype fixed by H5Tget_native_type().
  */
 #include <string.h>
 #include <stdlib.h>
@@ -72,7 +72,7 @@ int main(void)
 	H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
-	fix = h5tools_fixtype(cmp);
+	fix = H5Tget_native_type(cmp,H5T_DIR_DEFAULT);
 
 	cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
 

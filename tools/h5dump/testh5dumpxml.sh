@@ -100,6 +100,7 @@ TOOLTEST tloop.h5.xml --xml tloop.h5
 TOOLTEST tloop2.h5.xml --xml tloop2.h5
 TOOLTEST tmany.h5.xml --xml tmany.h5
 TOOLTEST tnestedcomp.h5.xml --xml tnestedcomp.h5
+TOOLTEST tcompound_complex.h5.xml --xml tcompound_complex.h5
 TOOLTEST tobjref.h5.xml --xml tobjref.h5
 TOOLTEST topaque.h5.xml --xml topaque.h5
 TOOLTEST tslink.h5.xml --xml tslink.h5

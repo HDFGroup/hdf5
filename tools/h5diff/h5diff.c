@@ -79,7 +79,6 @@ static int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_
 #ifdef NOT_YET
 static void list( const char *filename, int nobjects, info_t *info );
 #endif /* NOT_YET */
-static hid_t fixtype( hid_t f_type );
 static int h5diff_can_diff( hid_t type_id );
 static void print_datatype(hid_t type);
 static int check_n_input( const char* );
@@ -1083,8 +1082,8 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  *-------------------------------------------------------------------------
  */
 
- m_type1 = fixtype( f_type1 );
- m_type2 = fixtype( f_type2 );
+ m_type1 = H5Tget_native_type( f_type1 , H5T_DIR_DEFAULT);
+ m_type2 = H5Tget_native_type( f_type2 , H5T_DIR_DEFAULT);
 
  m_size1 = H5Tget_size( m_type1 );
  m_size2 = H5Tget_size( m_type2 );
@@ -1136,13 +1135,13 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   if ( m_size1 < m_size2 )
   {
    assert( (H5Tclose(m_type1)) >=0);
-   m_type1 = fixtype( f_type2 );
+   m_type1 = H5Tget_native_type( f_type2 , H5T_DIR_DEFAULT);
    m_size1 = H5Tget_size( m_type1 );
   }
   else
   {
    assert( (H5Tclose(m_type2)) >=0);
-   m_type2 = fixtype( f_type1 );
+   m_type2 = H5Tget_native_type( f_type1 , H5T_DIR_DEFAULT);
    m_size2 = H5Tget_size( m_type2 );
   }
 #if defined (H5DIFF_DEBUG)
@@ -2292,119 +2291,6 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
 }
 
 
-
-
-
-
-/*-------------------------------------------------------------------------
- * Function: fixtype
- *
- * Purpose: Given a file data type choose a memory data type which is
- *  appropriate 
- *
- * Return: Memory data type
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments: Adapted from h5tools_fixtype
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static 
-hid_t fixtype(hid_t f_type)
-{
- hid_t   m_type = -1;
- size_t  size;
- 
- size = H5Tget_size(f_type);
- 
- switch (H5Tget_class(f_type)) 
- {
- default:
-  return -1;
- case H5T_INTEGER:
-/*
- * Use the smallest native integer type of the same sign as the file
- * such that the memory type is at least as large as the file type.
- * If there is no memory type large enough then use the largest
- * memory type available.
- */
-  if (size <= sizeof(char)) 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_SCHAR);
-   #if defined (H5DIFF_DEBUG)
-   printf("using memory type H5T_NATIVE_SCHAR\n");
-   #endif
-  } 
-  else if (size <= sizeof(short)) 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_SHORT);
-   #if defined (H5DIFF_DEBUG) 
-    printf("using memory type H5T_NATIVE_SHORT\n");  
-   #endif
-  } 
-  else if (size <= sizeof(int)) 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_INT);
-   #if defined (H5DIFF_DEBUG)  
-    printf("using memory type H5T_NATIVE_INT\n");
-   #endif
-  } 
-  else if (size <= sizeof(long)) 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_LONG);
-   #if defined (H5DIFF_DEBUG) 
-    printf("using memory type H5T_NATIVE_LONG\n");
-   #endif
-  } 
-  else 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_LLONG);
-   #if defined (H5DIFF_DEBUG)
-    printf("using memory type H5T_NATIVE_LLONG\n");
-   #endif
-  }
-  
-  H5Tset_sign(m_type, H5Tget_sign(f_type));
-  break;
-  
- case H5T_FLOAT:
-/*
- * Use the smallest native floating point type available such that
- * its size is at least as large as the file type.  If there is not
- * native type large enough then use the largest native type.
- */
-  if (size <= sizeof(float)) 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_FLOAT);
-   #if defined (H5DIFF_DEBUG)
-    printf("using memory type H5T_NATIVE_FLOAT\n");
-   #endif
-  } 
-  else if (size <= sizeof(double)) 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
-   #if defined (H5DIFF_DEBUG) 
-    printf("using memory type H5T_NATIVE_DOUBLE\n");
-   #endif
-  } 
-  else 
-  {
-   m_type = H5Tcopy(H5T_NATIVE_LDOUBLE);
-   #if defined (H5DIFF_DEBUG)
-    printf("using memory type H5T_NATIVE_LDOUBLE\n");
-   #endif
-  }
-  break;
-  
- }
-  
- return m_type;
-}
 
 
 /*-------------------------------------------------------------------------

@@ -1915,7 +1915,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
     } else {
         /* need to call h5tools_dump_mem for the attribute data */    
         type = H5Aget_type(obj_id);
-        p_type = h5tools_fixtype(type);
+        p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
         space = H5Aget_space(obj_id);
         ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
@@ -4187,7 +4187,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset)
 	    status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
 	} else {
 	    /* all other data */
-	    p_type = h5tools_fixtype(type);
+	    p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
 	    H5Tclose(type);
 
 	    space = H5Aget_space(obj_id);
