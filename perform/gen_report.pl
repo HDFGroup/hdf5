@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl 
 #
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -59,18 +59,33 @@
 #            )
 #        }
 
-if ($#ARGV != 0) {
-	print "gen_report.pl [FILE]\n";
-	exit 1;
+use IO::Handle;
+use Getopt::Long;
+use Switch;
+
+if ($#ARGV == -1) {
+	usage();
 }
 
 my ($ascii_output, $excel_output);
 
+GetOptions("data_type=s"=>\$data_type, 
+            "buffer_size=i"=>\$transfer_buffer_size,
+            "procs=i"=>\$num_procs_graph,
+	    "help!"=>\$help,
+	    "throughput=s"=>\$throughput_type,
+            "3d!"=>\$plot_3d);
+
+usage() if $help or !@ARGV;
+
+$throughput_type = "average" if !$throughput_type;
+
 foreach my $arg (@ARGV) {
+
 	if ($arg !~ /^-/) {
 		$arg =~ /f([0-9]+.)\.i([0-9]+)\.d([0-9]+)\.X([0-9]+.)\.x([0-9]+.)\.(.*)/;
 
-		my $output = "result_f" . $1 . ".X" . $4 . ".x" . $5 . "." . $6;
+		my $output = $arg . $1 . ".X" . $4 . ".x" . $5 . "." . $6;
 
 		$ascii_output = $output . ".ascii";
 		$excel_output = $output . ".excel";
@@ -80,7 +95,9 @@ foreach my $arg (@ARGV) {
 				die "error: cannot open file $ascii_output: $!\n";
 		open(EXCEL_OUTPUT, ">$excel_output") or
 				die "error: cannot open file $excel_output: $!\n";
-	} else {
+	} 
+	else
+	{
 		die "error: unrecognized option: $arg\n";
 	}
 }
@@ -113,12 +130,41 @@ while (<INPUT>) {
 	} elsif (/Read Open/) {
 		$avg_type = "read-close";
 	} elsif (/Read/) {
-		$avg_type = "read-only";
+	    $avg_type = "read-only";
 	}
 
-	if (/Maximum Throughput: ( ?[0-9]+\.[0-9]{2}) MB\/s/) {
+	if($throughput_type eq "max")
+	{
+	    if (/Maximum Throughput: ( {0,2}[0-9]+\.[0-9]{2}) MB\/s/) {
 		$results{$num_procs}{$xfer_size}[$type]{$avg_type} = $1;
+	    }
 	}
+	elsif($throughput_type eq "min")
+	{
+	    if (/Minimum Throughput: ( {0,2}[0-9]+\.[0-9]{2}) MB\/s/) {
+		$results{$num_procs}{$xfer_size}[$type]{$avg_type} = $1;
+	    }
+	}
+	elsif($throughput_type eq "average")
+	{
+	    if (/Average Throughput: ( {0,2}[0-9]+\.[0-9]{2}) MB\/s/) {
+		$results{$num_procs}{$xfer_size}[$type]{$avg_type} = $1;
+	    }
+	}
+}
+
+
+
+sub usage {
+	print "Usage: gen_reporl.pl [options] FILE
+	options are:\n
+	-data_type \"data_type\" plots the results for \"write-only\",\"read-only\", \"write-close\", or \"read-close\" (default is write-only)\n
+	-buffer_size \"buffer_size\" plots data from this buffer size (in kilobytes, default is 128)\n
+	-procs \"num_procs\" plots data from the run with num_procs processors (default is 1).\n
+	-throughput \"throughput_type\" plots either the \"max\", \"min\", or \"average\" throughput (default is average)\n
+	-3d	if present, does a 3d plot in addition to the normal ones\n";
+			
+	exit 1;
 }
 
 sub create_excel_output_header {
@@ -289,5 +335,124 @@ sub write_ascii_file {
 	}
 }
 
+sub plot_default_graph1 {
+	open(GNUPLOT_DATA_OUTPUT, ">gnuplot.data") or
+		die "error: cannot open file gnuplot.data: $!\n";
+	
+	$transfer_buffer_size = 128 if !$transfer_buffer_size;
+	$data_type = "write-only" if !$data_type;
+
+	#set up the plot
+	print GNUPLOT_PIPE  "set term x11 1\n";
+	print GNUPLOT_PIPE  "set xlabel \"Number of Processors\"\n";
+	print GNUPLOT_PIPE  "set title \"" . $data_type . " Performance (Speed vs. Num. Procs)\"\n";
+	print GNUPLOT_PIPE  "set ylabel \"Bandwdith (MB/s)\"\n";
+	print GNUPLOT_PIPE  "set label 1 \"Transfer buffer size: " . $transfer_buffer_size . "K\" at graph 0.7, graph 0.7 left \n";
+
+#the next line attempts to hack gnuplot to get around it's inability to linearly scale, but logarithmically label an axis
+	print GNUPLOT_PIPE  "set xtics (\"1\" 1, \"2\" 2, \"4\" 4, \"8\" 8, \"16\" 16, \"32\" 32, \"64\" 64, \"128\" 128, \"256\" 256, \"512\" 512, \"1024\" 1024)\n";
+
+
+ 	foreach $proc (sort { $a <=> $b }( keys %results )) {
+	    print GNUPLOT_DATA_OUTPUT $proc . "\t" .		
+			$results{$proc}{$transfer_buffer_size*1024}[0]{$data_type} . "\t" .		
+			$results{$proc}{$transfer_buffer_size*1024}[1]{$data_type}. "\t" .		
+			$results{$proc}{$transfer_buffer_size*1024}[2]{$data_type} . "\n";
+
+     	}
+	
+	close(GNUPLOT_DATA_OUTPUT); 
+
+	print GNUPLOT_PIPE "plot \"gnuplot.data\" using 1:2 title 'POSIX' with \\
+	linespoints , \"gnuplot.data\" using 1:3 title 'MPIO' with linespoints, \\
+	\"gnuplot.data\" using 1:4 title 'PHDF5' with linespoints\n";
+	unlink(GNUPLOT_DATA_OUTPUT);
+
+}
+
+sub plot_default_graph2 {
+	open(GNUPLOT_DATA_OUTPUT, ">gnuplot.data") or
+		die "error: cannot open file gnuplot.data: $!\n";
+	
+	$num_procs_graph = 1 if !$num_procs_graph;
+	$data_type = "write-only" if !$data_type;
+
+	#set up the plot
+	print GNUPLOT_PIPE  "set term x11 2\n";
+	print GNUPLOT_PIPE  "set xlabel \"Transfer Buffer Size (in bytes)\"\n";
+	print GNUPLOT_PIPE  "set title \"" . $data_type . " Performance (Speed vs. Transfer Buffer Size)\"\n";
+	print GNUPLOT_PIPE  "set ylabel \"Bandwdith (MB/s)\"\n";
+	print GNUPLOT_PIPE  "set label 1 \"Procs: " . $num_procs_graph . "\" at graph 0.7, graph 0.7 left \n";
+
+#the next line attempts to hack gnuplot to get around it's inability to linearly scale, but logarithmically label an axis
+	print GNUPLOT_PIPE  "set xtics (\"4K\" 4*1024, \"8K\" 8*1024, \"16K\" 16*1024, \"32K\" 32*1024, \"64K\" 64*1024, \"128K\" 128*1024, \"256K\" 256*1024, \"512K\" 512*1024, \"1M\" 1024*1024, \"2M\" 2048*1024, \"4M\" 4096*1024, \"8M\" 8192*1024, \"16M\" 16384*1024)\n";
+
+ 	foreach $xfer (sort {$a <=> $b} ( keys %{$results{1}} )) {
+	    print GNUPLOT_DATA_OUTPUT $xfer . "\t" .		
+			$results{$num_procs_graph}{$xfer}[0]{$data_type} . "\t" .		
+			$results{$num_procs_graph}{$xfer}[1]{$data_type}. "\t" .		
+			$results{$num_procs_graph}{$xfer}[2]{$data_type} . "\n";
+
+     	}
+	
+	close(GNUPLOT_DATA_OUTPUT); 
+
+	print GNUPLOT_PIPE "plot \"gnuplot.data\" using 1:2 title 'POSIX' with \\
+	linespoints , \"gnuplot.data\" using 1:3 title 'MPIO' with linespoints, \\
+	\"gnuplot.data\" using 1:4 title 'PHDF5' with linespoints\n";
+	
+	unlink(GNUPLOT_DATA_OUTPUT);
+}
+
+sub plot_3d_graph3 {
+	open(GNUPLOT_DATA_OUTPUT, ">gnuplot.data") or
+		die "error: cannot open file gnuplot.data: $!\n";
+
+	#set up the plot
+	print GNUPLOT_PIPE  "set term x11 3\n";
+	print GNUPLOT_PIPE  "set xlabel \"Num. Processors\"\n";
+	print GNUPLOT_PIPE  "set title \"Write Speed v. No. Procs v. Buffer Size\"\n";
+	print GNUPLOT_PIPE  "set ylabel \"Buffer Size (bytes)\"\n";
+	print GNUPLOT_PIPE  "set zlabel \"Bandwidth (in MB/s)\"\n";
+	print GNUPLOT_PIPE  "set nolabel\n";
+	print GNUPLOT_PIPE  "set dgrid3d 30,30\n";
+	print GNUPLOT_PIPE  "set hidden3d\n";
+
+#the next lines attempts to hack gnuplot to get around it's inability to linearly scale, but logarithmically label an axis
+	print GNUPLOT_PIPE  "set xtics (\"1\" 1, \"2\" 2, \"4\" 4, \"8\" 8, \"16\" 16, \"32\" 32, \"64\" 64, \"128\" 128, \"256\" 256, \"512\" 512, \"1024\" 1024)\n";
+	print GNUPLOT_PIPE  "set ytics (\"4K\" 4*1024, \"8K\" 8*1024, \"16K\" 16*1024, \"32K\" 32*1024, \"64K\" 64*1024, \"128K\" 128*1024, \"256K\" 256*1024, \"512K\" 512*1024, \"1M\" 1024*1024, \"2M\" 2048*1024, \"4M\" 4096*1024, \"8M\" 8192*1024, \"16M\" 16384*1024)\n";
+
+
+#Read speed on z-axis, processors on x, buffer size on y.
+
+	foreach $proc (sort { $a <=> $b }( keys %results )) {
+		foreach $xfer (sort {$a <=> $b} ( keys %{$results{$proc}} )) {
+			print GNUPLOT_DATA_OUTPUT $proc . "\t" . $xfer . "\t" . 
+			$results{$proc}{$xfer}[0]{"write-only"} . "\t" .		
+			$results{$proc}{$xfer}[1]{"write-only"}. "\t" .		
+			$results{$proc}{$xfer}[2]{"write-only"} . "\n";
+
+     		}
+	}
+	
+	close(GNUPLOT_DATA_OUTPUT); 
+	
+	print GNUPLOT_PIPE "splot \"gnuplot.data\" using 1:2:3 title 'POSIX' with \\
+	linespoints  , \"gnuplot.data\" using 1:2:4 title 'MPIO' with linespoints, \\
+	\"gnuplot.data\" using 1:2:5 title 'PHDF5' with linespoints\n";
+
+	
+#:	unlink(GNUPLOT_DATA_OUTPUT);
+}
+open(GNUPLOT_PIPE, "| gnuplot -persist") || die "Couldn't run gnuplot: $!\n";
+GNUPLOT_PIPE->autoflush(1);
+
 write_excel_file;
 write_ascii_file;
+plot_default_graph1;
+sleep 1;
+plot_default_graph2;
+sleep 1;
+
+plot_3d_graph3 if $plot_3d;
+close(GNUPLOT_PIPE);
