@@ -7,20 +7,7 @@
  *
  * Purpose:	Tests dataset fill values.
  */
-
-/* See H5private.h for how to include headers */
-#undef NDEBUG
-#include <hdf5.h>
-
-#ifdef STDC_HEADERS
-#   include <fcntl.h>
-#   include <stdlib.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif
+#include <h5test.h>
 
 /*
  * Define NO_FILLING if you want to compare how this test works when there is
@@ -28,76 +15,17 @@
  */
 /* #define NO_FILLING */
 
+const char *FILENAME[] = {
+    "fillval_1",
+    "fillval_2",
+    "fillval_3",
+    "fillval_4",
+    "fillval_5",
+    "fillval_6",
+    NULL
+};
 
-#define FILE_NAME_1	"fillval_1.h5"
-#define FILE_NAME_2	"fillval_2.h5"
-#define FILE_NAME_3	"fillval_3.h5"
-#define FILE_NAME_4	"fillval_4.h5"
-#define FILE_NAME_5	"fillval_5.h5"
-#define FILE_NAME_6	"fillval_6.h5"
 #define FILE_NAME_RAW	"fillval.raw"
-
-#ifndef HAVE_ATTRIBUTE
-#   undef __attribute__
-#   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
-#else
-#   define __unused__ __attribute__((unused))
-#endif
-
-
-/*-------------------------------------------------------------------------
- * Function:	cleanup
- *
- * Purpose:	Removes test files
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Thursday, June  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-cleanup(void)
-{
-    if (!getenv("HDF5_NOCLEANUP")) {
-	remove(FILE_NAME_1);
-	remove(FILE_NAME_2);
-	remove(FILE_NAME_3);
-	remove(FILE_NAME_4);
-	remove(FILE_NAME_5);
-	remove(FILE_NAME_6);
-	remove(FILE_NAME_RAW);
-    }
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	display_error_cb
- *
- * Purpose:	Displays the error stack after printing "*FAILED*".
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *		Wednesday, March  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-display_error_cb(void __unused__ *client_data)
-{
-    puts("*FAILED*");
-    H5Eprint(stdout);
-    return 0;
-}
 
 
 /*-------------------------------------------------------------------------
@@ -121,9 +49,9 @@ static int
 test_getset(void)
 {
     herr_t	status;
-    hid_t	dcpl;
+    hid_t	dcpl=-1;
     int		fill_i;
-    hid_t	type_ss, type_si;
+    hid_t	type_ss=-1, type_si=-1;
     struct fill_si {
 	int 	v1, v2;
     }		fill_si;
@@ -131,8 +59,7 @@ test_getset(void)
 	short	v1, v2;
     }		fill_ss, fill_ss_rd;
     
-    printf("%-70s", "Testing property lists");
-    fflush(stdout);
+    TESTING("property lists");
 
     /*
      * Create the dataset creation property list and the data types that will
@@ -162,8 +89,8 @@ test_getset(void)
 	status = H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
     } H5E_END_TRY;
     if (status>=0) {
-	puts("*FAILED*");
-	puts("   H5Pget_fill_value() should have been negative");
+	FAILED();
+	puts("    H5Pget_fill_value() should have been negative");
 	goto error;
     }
 
@@ -179,9 +106,9 @@ test_getset(void)
      */
     if (H5Pget_fill_value(dcpl, type_ss, &fill_ss_rd)<0) goto error;
     if (fill_ss.v1!=fill_ss_rd.v1 || fill_ss.v2!=fill_ss_rd.v2) {
-	puts("*FAILED*");
-	puts("   Failed to get fill value using same data type that was used");
-	puts("   to set the fill value.");
+	FAILED();
+	puts("    Failed to get fill value using same data type that was ");
+	puts("    used to set the fill value.");
 	goto error;
     }
 
@@ -190,9 +117,9 @@ test_getset(void)
      */
     if (H5Pget_fill_value(dcpl, type_si, &fill_si)<0) goto error;
     if (fill_ss.v1!=fill_si.v1 || fill_ss.v2!=fill_si.v2) {
-	puts("*FAILED*");
-	puts("   Failed to get fill value using a data type other than what");
-	puts("   was used to set the fill value.");
+	FAILED();
+	puts("    Failed to get fill value using a data type other than what");
+	puts("    was used to set the fill value.");
 	goto error;
     }
 
@@ -202,18 +129,24 @@ test_getset(void)
     if (H5Pset_fill_value(dcpl, type_si, &fill_si)<0) goto error;
     if (H5Pget_fill_value(dcpl, type_ss, &fill_ss)<0) goto error;
     if (fill_si.v1!=fill_ss.v1 || fill_si.v2!=fill_ss.v2) {
-	puts("*FAILED*");
-	puts("   Resetting the fill value was unsuccessful.");
+	FAILED();
+	puts("    Resetting the fill value was unsuccessful.");
 	goto error;
     }
 
     /* Success */
     if (H5Pclose(dcpl)<0) goto error;
-    puts(" PASSED");
+    if (H5Tclose(type_si)<0) goto error;
+    if (H5Tclose(type_ss)<0) goto error;
+    PASSED();
     return 0;
 
  error:
-    H5Pclose(dcpl);
+    H5E_BEGIN_TRY {
+	H5Pclose(dcpl);
+	H5Tclose(type_si);
+	H5Tclose(type_ss);
+    } H5E_END_TRY;
     return 1;
 }
 
@@ -235,30 +168,29 @@ test_getset(void)
  *-------------------------------------------------------------------------
  */
 static int
-test_create(const char *filename, H5D_layout_t layout)
+test_create(hid_t fapl, const char *basename, H5D_layout_t layout)
 {
     hid_t	file=-1, space=-1, dcpl=-1, dset1=-1, dset2=-1, dset3=-1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
     hsize_t	ch_size[5] = {1, 1, 1, 4, 2};
     short	rd_s, fill_s = 0x1234;
     long	rd_l, fill_l = 0x4321;
-    char	test[256];
+    char	filename[1024];
 
     if (H5D_CHUNKED==layout) {
-	strcpy(test, "Testing chunked dataset creation");
+	TESTING("chunked dataset creation");
     } else {
-	strcpy(test, "Testing contiguous dataset creation");
+	TESTING("contiguous dataset creation");
     }
-    printf("%-70s", test);
-    fflush(stdout);
 
     /*
      * Create a file and three datasets.  The three datasets test three fill
      * conversion paths: small to large, large to small, and no conversion.
      * They depend on `short' being smaller than `long'.
      */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC,
-			H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
+    h5_fixname(basename, fapl, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+	goto error;
     if ((space=H5Screate_simple(5, cur_size, cur_size))<0) goto error;
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5D_CHUNKED==layout) {
@@ -295,7 +227,7 @@ test_create(const char *filename, H5D_layout_t layout)
     if (H5Fclose(file)<0) goto error;
 
     /* Open the file and get the dataset fill value from each dataset */
-    if ((file=H5Fopen(FILE_NAME_1, H5F_ACC_RDONLY, H5P_DEFAULT))<0)
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0)
 	goto error;
 
     /* Large to small conversion */
@@ -305,9 +237,9 @@ test_create(const char *filename, H5D_layout_t layout)
 #ifndef NO_FILLING
     if (H5Pget_fill_value(dcpl, H5T_NATIVE_SHORT, &rd_s)<0) goto error;
     if (rd_s!=fill_s) {
-	puts("*FAILED*");
-	puts("   Got a different fill value than what was set.");
-	printf("   Got %d, set %d\n", rd_s, fill_s);
+	FAILED();
+	puts("    Got a different fill value than what was set.");
+	printf("    Got %d, set %d\n", rd_s, fill_s);
 	goto error;
     }
 #endif
@@ -320,9 +252,9 @@ test_create(const char *filename, H5D_layout_t layout)
 #ifndef NO_FILLING
     if (H5Pget_fill_value(dcpl, H5T_NATIVE_LONG, &rd_l)<0) goto error;
     if (rd_l!=fill_l) {
-	puts("*FAILED*");
-	puts("   Got a different fill value than what was set.");
-	printf("   Got %ld, set %ld\n", rd_l, fill_l);
+	FAILED();
+	puts("    Got a different fill value than what was set.");
+	printf("    Got %ld, set %ld\n", rd_l, fill_l);
 	goto error;
     }
 #endif
@@ -335,9 +267,9 @@ test_create(const char *filename, H5D_layout_t layout)
 #ifndef NO_FILLING
     if (H5Pget_fill_value(dcpl, H5T_NATIVE_LONG, &rd_l)<0) goto error;
     if (rd_l!=fill_l) {
-	puts("*FAILED*");
-	puts("   Got a different fill value than what was set.");
-	printf("   Got %ld, set %ld\n", rd_l, fill_l);
+	FAILED();
+	puts("    Got a different fill value than what was set.");
+	printf("    Got %ld, set %ld\n", rd_l, fill_l);
 	goto error;
     }
 #endif
@@ -346,7 +278,7 @@ test_create(const char *filename, H5D_layout_t layout)
 
     
     if (H5Fclose(file)<0) goto error;
-    puts(" PASSED");
+    PASSED();
     return 0;
 
  error:
@@ -379,7 +311,7 @@ test_create(const char *filename, H5D_layout_t layout)
  *-------------------------------------------------------------------------
  */
 static int
-test_rdwr(const char *filename, H5D_layout_t layout)
+test_rdwr(hid_t fapl, const char *basename, H5D_layout_t layout)
 {
     hid_t	file=-1, fspace=-1, mspace=-1, dcpl=-1, dset=-1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
@@ -394,19 +326,18 @@ test_rdwr(const char *filename, H5D_layout_t layout)
 #endif
     int		val_rd, should_be;
     int		i, j, *buf=NULL, odd;
-    char	test[256];
+    char	filename[1024];
 
     if (H5D_CHUNKED==layout) {
-	strcpy(test, "Testing chunked dataset I/O");
+	TESTING("chunked dataset I/O");
     } else {
-	strcpy(test, "Testing contiguous dataset I/O");
+	TESTING("contiguous dataset I/O");
     }
-    printf("%-70s", test);
-    fflush(stdout);
 
     /* Create a file and dataset */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC,
-			H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
+    h5_fixname(basename, fapl, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+	goto error;
     if ((fspace=H5Screate_simple(5, cur_size, cur_size))<0) goto error;
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5D_CHUNKED==layout) {
@@ -429,9 +360,9 @@ test_rdwr(const char *filename, H5D_layout_t layout)
 	if (H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
 		    &val_rd)<0) goto error;
 	if (val_rd!=fillval) {
-	    puts("*FAILED*");
-	    puts("   Value read was not a fill value.");
-	    printf("   Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    FAILED();
+	    puts("    Value read was not a fill value.");
+	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "Fill value: %u\n",
 		   (long)hs_offset[0], (long)hs_offset[1],
 		   (long)hs_offset[2], (long)hs_offset[3],
@@ -473,9 +404,9 @@ test_rdwr(const char *filename, H5D_layout_t layout)
 		    &val_rd)<0) goto error;
 
 	if (val_rd!=should_be) {
-	    puts("*FAILED*");
-	    puts("   Value read was not correct.");
-	    printf("   Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    FAILED();
+	    puts("    Value read was not correct.");
+	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "should be: %u\n",
 		   (long)hs_offset[0], (long)hs_offset[1],
 		   (long)hs_offset[2], (long)hs_offset[3],
@@ -491,7 +422,7 @@ test_rdwr(const char *filename, H5D_layout_t layout)
     if (H5Sclose(fspace)<0) goto error;
     if (H5Pclose(dcpl)<0) goto error;
     if (H5Fclose(file)<0) goto error;
-    puts(" PASSED");
+    PASSED();
     return 0;
 
  error:
@@ -523,7 +454,7 @@ test_rdwr(const char *filename, H5D_layout_t layout)
  *-------------------------------------------------------------------------
  */
 static int
-test_extend(const char *filename, H5D_layout_t layout)
+test_extend(hid_t fapl, const char *basename, H5D_layout_t layout)
 {
     hid_t	file=-1, fspace=-1, mspace=-1, dcpl=-1, dset=-1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
@@ -539,15 +470,13 @@ test_extend(const char *filename, H5D_layout_t layout)
 #endif
     int		val_rd, should_be;
     int		i, j, *buf=NULL, odd, fd;
-    char	test[256];
+    char	filename[1024];
 
     if (H5D_CHUNKED==layout) {
-	strcpy(test, "Testing chunked dataset extend");
+	TESTING("chunked dataset extend");
     } else {
-	strcpy(test, "Testing contiguous dataset extend");
+	TESTING("contiguous dataset extend");
     }
-    printf("%-70s", test);
-    fflush(stdout);
 
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5D_CHUNKED==layout) {
@@ -603,15 +532,16 @@ test_extend(const char *filename, H5D_layout_t layout)
      * errors described above or `unable to select fill value region'.
      */
     if (H5D_CONTIGUOUS==layout) {
-	puts("   SKIP");
-	puts("   Not implemented yet -- needs H5S_SELECT_DIFF operator");
+	SKIPPED();
+	puts("    Not implemented yet -- needs H5S_SELECT_DIFF operator");
 	return 0;
     }
 #endif
     
     /* Create a file and dataset */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC,
-			H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
+    h5_fixname(basename, fapl, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+	goto error;
     if ((fspace=H5Screate_simple(5, cur_size, max_size))<0) goto error;
     if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_INT, fspace, dcpl))<0)
 	goto error;
@@ -627,9 +557,9 @@ test_extend(const char *filename, H5D_layout_t layout)
 	if (H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
 		    &val_rd)<0) goto error;
 	if (val_rd!=fillval) {
-	    puts("*FAILED*");
-	    puts("   Value read was not a fill value.");
-	    printf("   Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    FAILED();
+	    puts("    Value read was not a fill value.");
+	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "Fill value: %u\n",
 		   (long)hs_offset[0], (long)hs_offset[1],
 		   (long)hs_offset[2], (long)hs_offset[3],
@@ -671,9 +601,9 @@ test_extend(const char *filename, H5D_layout_t layout)
 		    &val_rd)<0) goto error;
 
 	if (val_rd!=should_be) {
-	    puts("*FAILED*");
-	    puts("   Value read was not correct.");
-	    printf("   Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    FAILED();
+	    puts("    Value read was not correct.");
+	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "should be: %u\n",
 		   (long)hs_offset[0], (long)hs_offset[1],
 		   (long)hs_offset[2], (long)hs_offset[3],
@@ -707,9 +637,9 @@ test_extend(const char *filename, H5D_layout_t layout)
 		    &val_rd)<0) goto error;
 
 	if (val_rd!=should_be) {
-	    puts("*FAILED*");
-	    puts("   Value read was not correct.");
-	    printf("   Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    FAILED();
+	    puts("    Value read was not correct.");
+	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "should be: %u\n",
 		   (long)hs_offset[0], (long)hs_offset[1],
 		   (long)hs_offset[2], (long)hs_offset[3],
@@ -723,7 +653,7 @@ test_extend(const char *filename, H5D_layout_t layout)
     if (H5Sclose(fspace)<0) goto error;
     if (H5Pclose(dcpl)<0) goto error;
     if (H5Fclose(file)<0) goto error;
-    puts(" PASSED");
+    PASSED();
     return 0;
 
  error:
@@ -759,6 +689,7 @@ int
 main(int argc, char *argv[])
 {
     int		nerrors=0, argno, test_contig=1, test_chunk=1;
+    hid_t	fapl=-1;
 
     if (argc>=2) {
 	test_contig = test_chunk = 0;
@@ -773,29 +704,30 @@ main(int argc, char *argv[])
 	    }
 	}
     }
-    
-    H5Eset_auto(display_error_cb, NULL);
 
+    h5_reset();
+    fapl = h5_fileaccess();
 
     nerrors += test_getset();
 
     /* Chunked storage layout tests */
     if (test_chunk) {
-	nerrors += test_create(FILE_NAME_1, H5D_CHUNKED);
-	nerrors += test_rdwr(FILE_NAME_3, H5D_CHUNKED);
-	nerrors += test_extend(FILE_NAME_5, H5D_CHUNKED);
+	nerrors += test_create(fapl, FILENAME[0], H5D_CHUNKED);
+	nerrors += test_rdwr  (fapl, FILENAME[2], H5D_CHUNKED);
+	nerrors += test_extend(fapl, FILENAME[4], H5D_CHUNKED);
     }
 
     /* Contiguous storage layout tests */
     if (test_contig) {
-	nerrors += test_create(FILE_NAME_2, H5D_CONTIGUOUS);
-	nerrors += test_rdwr(FILE_NAME_4, H5D_CONTIGUOUS);
-	nerrors += test_extend(FILE_NAME_6, H5D_CONTIGUOUS);
+	nerrors += test_create(fapl, FILENAME[1], H5D_CONTIGUOUS);
+	nerrors += test_rdwr  (fapl, FILENAME[3], H5D_CONTIGUOUS);
+	nerrors += test_extend(fapl, FILENAME[5], H5D_CONTIGUOUS);
     }
     
     if (nerrors) goto error;
     puts("All fill value tests passed.");
-    cleanup();
+    h5_cleanup(fapl);
+    if (!getenv("HDF5_NOCLEANUP")) remove(FILE_NAME_RAW);
     return 0;
 
  error:

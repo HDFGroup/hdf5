@@ -7,76 +7,12 @@
  *
  * Purpose:	Tests hard and soft (symbolic) links.
  */
+#include <h5test.h>
 
-/* See H5private.h for how to include headers */
-#undef NDEBUG
-#include <hdf5.h>
-
-#ifdef STDC_HEADERS
-#   include <stdlib.h>
-#   include <string.h>
-#endif
-
-#ifndef HAVE_ATTRIBUTE
-#   undef __attribute__
-#   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
-#else
-#   define __unused__ __attribute__((unused))
-#endif
-
-#define TEST_FILE_NAME	"links.h5"
-
-#define FALSE		0
-#define TRUE		1
-
-
-/*-------------------------------------------------------------------------
- * Function:	cleanup
- *
- * Purpose:	Cleanup temporary test files
- *
- * Return:	none
- *
- * Programmer:	Albert Cheng
- *              May 28, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-cleanup(void)
-{
-    if (!getenv ("HDF5_NOCLEANUP")) {
-	remove(TEST_FILE_NAME);
-    }
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	display_error_cb
- *
- * Purpose:	Displays the error stack after printing "*FAILED*".
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *		Wednesday, March  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-display_error_cb (void __unused__ *client_data)
-{
-    puts ("*FAILED*");
-    H5Eprint (stdout);
-    return 0;
-}
+const char *FILENAME[] = {
+    "links",
+    NULL
+};
 
 
 /*-------------------------------------------------------------------------
@@ -96,16 +32,17 @@ display_error_cb (void __unused__ *client_data)
  *-------------------------------------------------------------------------
  */
 static int
-mklinks(void)
+mklinks(hid_t fapl)
 {
     hid_t		file, scalar, grp, d1;
     static hsize_t	size[1] = {1};
+    char		filename[1024];
 
-    printf("%-70s", "Testing link creation");
+    TESTING("link creation");
 
     /* Create a file */
-    if ((file=H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC,
-			H5P_DEFAULT, H5P_DEFAULT))<0) {
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
     if ((scalar=H5Screate_simple (1, size, size))<0) goto error;
@@ -139,7 +76,7 @@ mklinks(void)
     if (H5Sclose (scalar)<0) goto error;
     if (H5Fclose (file)<0) goto error;
 
-    puts(" PASSED");
+    PASSED();
     return 0;
 
  error:
@@ -165,18 +102,19 @@ mklinks(void)
  *-------------------------------------------------------------------------
  */
 static int
-cklinks(void)
+cklinks(hid_t fapl)
 {
     hid_t		file;
     H5G_stat_t		sb1, sb2;
     char		linkval[1024];
+    char		filename[1024];
     herr_t		status;
 
-    printf("%-70s", "Testing link queries");
-    fflush(stdout);
+    TESTING("link queries");
 
     /* Open the file */
-    if ((file=H5Fopen(TEST_FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT))<0) {
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) {
 	goto error;
     }
 
@@ -184,36 +122,36 @@ cklinks(void)
     if (H5Gget_objinfo(file, "d1", TRUE, &sb1)<0) goto error;
     if (H5Gget_objinfo(file, "grp1/hard", TRUE, &sb2)<0) goto error;
     if (H5G_DATASET!=sb2.type) {
-	puts("*FAILED*");
-	puts("   Unexpected object type should have been a dataset");
+	FAILED();
+	puts("    Unexpected object type should have been a dataset");
 	goto error;
     }
     if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
-	puts("*FAILED*");
-	puts("   Hard link test failed. Link seems not to point to the ");
-	puts("   expected file location.");
+	FAILED();
+	puts("    Hard link test failed. Link seems not to point to the ");
+	puts("    expected file location.");
 	goto error;
     }
 
     /* Symbolic link */
     if (H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2)<0) goto error;
     if (H5G_DATASET!=sb2.type) {
-	puts("*FAILED*");
-	puts("   Unexpected object type should have been a dataset");
+	FAILED();
+	puts("    Unexpected object type should have been a dataset");
 	goto error;
     }
     if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
-	puts("*FAILED*");
-	puts("   Soft link test failed. Link seems not to point to the ");
-	puts("   expected file location.");
+	FAILED();
+	puts("    Soft link test failed. Link seems not to point to the ");
+	puts("    expected file location.");
 	goto error;
     }
     if (H5Gget_linkval(file, "grp1/soft", sizeof linkval, linkval)<0) {
 	goto error;
     }
     if (strcmp(linkval, "/d1")) {
-	puts("*FAILED*");
-	puts("   Soft link test failed. Wrong link value");
+	FAILED();
+	puts("    Soft link test failed. Wrong link value");
 	goto error;
     }
 
@@ -222,22 +160,22 @@ cklinks(void)
 	status = H5Gget_objinfo(file, "grp1/dangle", TRUE, &sb2);
     } H5E_END_TRY;
     if (status>=0) {
-	puts("*FAILED*");
-	puts("   H5Gget_objinfo() should have failed for a dangling link.");
+	FAILED();
+	puts("    H5Gget_objinfo() should have failed for a dangling link.");
 	goto error;
     }
     if (H5Gget_objinfo(file, "grp1/dangle", FALSE, &sb2)<0) goto error;
     if (H5G_LINK!=sb2.type) {
-	puts("*FAILED*");
-	puts("   Unexpected object type should have been a symbolic link");
+	FAILED();
+	puts("    Unexpected object type should have been a symbolic link");
 	goto error;
     }
     if (H5Gget_linkval(file, "grp1/dangle", sizeof linkval, linkval)<0) {
 	goto error;
     }
     if (strcmp(linkval, "foobar")) {
-	puts("*FAILED*");
-	puts("   Dangling link test failed. Wrong link value");
+	FAILED();
+	puts("    Dangling link test failed. Wrong link value");
 	goto error;
     }
 
@@ -246,28 +184,28 @@ cklinks(void)
 	status = H5Gget_objinfo(file, "grp1/recursive", TRUE, &sb2);
     } H5E_END_TRY;
     if (status>=0) {
-	puts("*FAILED*");
-	puts("   H5Gget_objinfo() should have failed for a recursive link.");
+	FAILED();
+	puts("    H5Gget_objinfo() should have failed for a recursive link.");
 	goto error;
     }
     if (H5Gget_objinfo(file, "grp1/recursive", FALSE, &sb2)<0) goto error;
     if (H5G_LINK!=sb2.type) {
-	puts("*FAILED*");
-	puts("   Unexpected object type should have been a symbolic link");
+	FAILED();
+	puts("    Unexpected object type should have been a symbolic link");
 	goto error;
     }
     if (H5Gget_linkval(file, "grp1/recursive", sizeof linkval, linkval)<0) {
 	goto error;
     }
     if (strcmp(linkval, "/grp1/recursive")) {
-	puts("*FAILED*");
+	FAILED();
 	puts("   Recursive link test failed. Wrong link value");
 	goto error;
     }
 
     /* Cleanup */
     if (H5Fclose(file)<0) goto error;
-    puts(" PASSED");
+    PASSED();
     return 0;
 
  error:
@@ -295,13 +233,14 @@ int
 main(void)
 {
     int		nerrors = 0;
+    hid_t	fapl;
 
-    /* Set error handling to print `*FAILED*' before the error stack */
-    H5Eset_auto(display_error_cb, NULL);
+    h5_reset();
+    fapl = h5_fileaccess();
 
     /* The tests... */
-    nerrors += mklinks() < 0 ? 1 : 0;
-    nerrors += cklinks() < 0 ? 1 : 0;
+    nerrors += mklinks(fapl) < 0 ? 1 : 0;
+    nerrors += cklinks(fapl) < 0 ? 1 : 0;
 
     /* Results */
     if (nerrors) {
@@ -310,6 +249,6 @@ main(void)
 	exit(1);
     }
     printf("All link tests passed.\n");
-    cleanup();
+    h5_cleanup(fapl);
     return 0;
 }

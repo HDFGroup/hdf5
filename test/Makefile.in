@@ -14,8 +14,7 @@ LIBS=libh5test.a ../src/libhdf5.a @LIBS@
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROGS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset   \
-      extend external shtype links unlink big mtime fillval mount flush1     \
-      flush2
+      extend external links unlink big mtime fillval mount flush1 flush2
 TIMINGS=iopipe chunk ragged overhead
 
 # The libh5test.a library provides common support code for the tests.
@@ -29,11 +28,10 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    extern_1.h5 extern_2.h5 extern_3.h5 extern_1.raw extern_1b.raw   \
 	    extern_2.raw extern_2b.raw extern_3.raw extern_3b.raw            \
 	    extern_4.raw extern_4b.raw iopipe.raw iopipe.h5 gheap0.h5        \
-	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 shtype0.h5 shtype1.h5    \
-	    shtype2a.h5 shtype2b.h5 shtype3.h5 links.h5 chunk.h5 big.data    \
-	    big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5 tattr.h5   \
-	    tselect.h5 mtime.h5 ragged.h5 grptime.h5 unlink.h5 overhead.h5   \
-	    fillval_[0-9].h5 mount_[0-9].h5 trefer.h5 flush.h5
+	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 links.h5 chunk.h5        \
+	    big.data big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5   \
+            tattr.h5 tselect.h5 mtime.h5 ragged.h5 grptime.h5 unlink.h5      \
+	    overhead.h5 fillval_[0-9].h5 mount_[0-9].h5 trefer.h5 flush.h5
 CLEAN=$(TIMINGS)
 
 # Source and object files for programs...  The TEST_SRC list contains all the
@@ -42,9 +40,9 @@ CLEAN=$(TIMINGS)
 # overlap with other tests.
 TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c trefer.c         \
     tselect.c tstab.c th5s.c dtypes.c hyperslab.c istore.c dsets.c           \
-    cmpd_dset.c extend.c external.c iopipe.c gheap.c shtype.c big.c links.c  \
-    chunk.c bittests.c mtime.c ragged.c unlink.c overhead.c fillval.c        \
-    mount.c flush1.c flush2.c
+    cmpd_dset.c extend.c external.c iopipe.c gheap.c big.c links.c chunk.c   \
+    bittests.c mtime.c ragged.c unlink.c overhead.c fillval.c mount.c        \
+    flush1.c flush2.c
 TEST_OBJ=$(TEST_SRC:.c=.o)
 
 # Private header files (not to be installed)...
@@ -92,9 +90,6 @@ extend: extend.o
 
 external: external.o
 	$(CC) $(CFLAGS) -o $@ external.o $(LDFLAGS) $(LIBS)
-
-shtype: shtype.o
-	$(CC) $(CFLAGS) -o $@ shtype.o $(LDFLAGS) $(LIBS)
 
 iopipe: iopipe.o
 	$(CC) $(CFLAGS) -o $@ iopipe.o $(LDFLAGS) $(LIBS)
