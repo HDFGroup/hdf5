@@ -123,11 +123,11 @@ static haddr_t H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *
 				  const hssize_t offset[]);
 
 /* B-tree iterator callbacks */
-static H5B_iterate_t H5F_istore_iter_allocated(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
+static int H5F_istore_iter_allocated(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
 				 void *right_key, void *_udata);
-static H5B_iterate_t H5F_istore_iter_dump(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
+static int H5F_istore_iter_dump(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
 				 void *right_key, void *_udata);
-static H5B_iterate_t H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
+static int H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
         void *_rt_key, void *_udata);
 
 /* B-tree callbacks */
@@ -789,7 +789,7 @@ done:
  *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
-static H5B_iterate_t 
+static int 
 H5F_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
@@ -825,7 +825,7 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key,
  *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
-static H5B_iterate_t
+static int
 H5F_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
@@ -2600,7 +2600,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5B_iterate_t
+static int
 H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t UNUSED addr,
         void UNUSED *_rt_key, void *_udata)
 {
@@ -2608,7 +2608,7 @@ H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t UNUSED a
     H5F_istore_key_t       *lt_key = (H5F_istore_key_t *)_lt_key;
     unsigned                u;
     H5F_istore_ud1_t        udata;
-    H5B_iterate_t           ret_value=H5B_ITER_CONT;       /* Return value */
+    int                     ret_value=H5B_ITER_CONT;       /* Return value */
 
     /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of 
      * storage that contains the beginning of the logical address space represented by UDATA.

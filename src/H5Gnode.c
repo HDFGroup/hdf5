@@ -1243,7 +1243,7 @@ done:
  *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
-H5B_iterate_t
+int
 H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata)
 {
@@ -1253,7 +1253,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     size_t		n, *name_off=NULL;
     const char		*name;
     char		buf[1024], *s;
-    H5B_iterate_t	ret_value = H5B_ITER_ERROR;
+    int	                ret_value;
 
     FUNC_ENTER_NOAPI(H5G_node_iterate, H5B_ITER_ERROR);
 
@@ -1280,7 +1280,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     /*
      * Iterate over the symbol table node entries.
      */
-    for (i=0, ret_value=H5B_ITER_CONT; i<nsyms && H5B_ITER_CONT==ret_value; i++) {
+    for (i=0, ret_value=H5B_ITER_CONT; i<nsyms && !ret_value; i++) {
         if (bt_udata->skip>0) {
             --bt_udata->skip;
         } else {
@@ -1305,7 +1305,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
         bt_udata->final_ent++;
     }
     if (ret_value<0)
-        HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
+        HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:
     name_off = H5MM_xfree (name_off);
@@ -1328,13 +1328,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5B_iterate_t
+int
 H5G_node_sumup(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata)
 {
     hsize_t	        *num_objs = (hsize_t *)_udata;
     H5G_node_t		*sn = NULL;
-    H5B_iterate_t	ret_value = H5B_ITER_CONT;
+    int                  ret_value = H5B_ITER_CONT;
 
     FUNC_ENTER_NOAPI(H5G_node_sumup, H5B_ITER_ERROR);
 
@@ -1371,7 +1371,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5B_iterate_t
+int
 H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata)
 {
@@ -1380,7 +1380,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     hsize_t             loc_idx;
     const char		*name;   
     H5G_node_t		*sn = NULL;
-    H5B_iterate_t	ret_value = H5B_ITER_CONT;
+    int                 ret_value = H5B_ITER_CONT;
 
     FUNC_ENTER_NOAPI(H5G_node_name, H5B_ITER_ERROR);
 
@@ -1397,12 +1397,12 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     
     /* Find the node, locate the object symbol table entry and retrieve the name */ 
     if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
-            loc_idx = bt_udata->idx - bt_udata->num_objs; 
-            name_off = sn->entry[loc_idx].name_off;  
-            name = H5HL_peek (f, dxpl_id, bt_udata->group->ent.cache.stab.heap_addr, name_off);
-            assert (name);
-            bt_udata->name = H5MM_strdup (name);
-            HGOTO_DONE(H5B_ITER_STOP);
+        loc_idx = bt_udata->idx - bt_udata->num_objs; 
+        name_off = sn->entry[loc_idx].name_off;  
+        name = H5HL_peek (f, dxpl_id, bt_udata->group->ent.cache.stab.heap_addr, name_off);
+        assert (name);
+        bt_udata->name = H5MM_strdup (name);
+        HGOTO_DONE(H5B_ITER_STOP);
     }
 
     bt_udata->num_objs += sn->nsyms;
@@ -1427,14 +1427,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5B_iterate_t
+int
 H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_ud3_t	*bt_udata = (H5G_bt_ud3_t*)_udata;
     hsize_t             loc_idx;
     H5G_node_t		*sn = NULL;
-    H5B_iterate_t	ret_value = H5B_ITER_CONT;
+    int                 ret_value = H5B_ITER_CONT;
 
     FUNC_ENTER_NOAPI(H5G_node_name, H5B_ITER_ERROR);
 
@@ -1448,9 +1448,9 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
 
     if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
-            loc_idx = bt_udata->idx - bt_udata->num_objs; 
-            bt_udata->type = H5G_get_type(&(sn->entry[loc_idx]), dxpl_id);  
-            HGOTO_DONE(H5B_ITER_STOP);
+        loc_idx = bt_udata->idx - bt_udata->num_objs; 
+        bt_udata->type = H5G_get_type(&(sn->entry[loc_idx]), dxpl_id);  
+        HGOTO_DONE(H5B_ITER_STOP);
     }
 
     bt_udata->num_objs += sn->nsyms;

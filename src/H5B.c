@@ -1517,8 +1517,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
     haddr_t		*child = NULL;
     uint8_t		*key = NULL;
     int		        i, nchildren;
-    herr_t		ret_value = SUCCEED;
-    H5B_iterate_t       ret_flag = H5B_ITER_CONT;
+    herr_t		ret_value;
     
     FUNC_ENTER_NOAPI(H5B_iterate, FAIL);
 
@@ -1535,7 +1534,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node");
     if (bt->level > 0) {
 	/* Keep following the left-most child until we reach a leaf node. */
-	if (H5B_iterate(f, dxpl_id, type, op, bt->child[0], udata)<0)
+	if ((ret_value=H5B_iterate(f, dxpl_id, type, op, bt->child[0], udata))<0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "unable to list B-tree node");
     } else {
 	/*
@@ -1545,7 +1544,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	if (NULL==(child=H5FL_ARR_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
                 NULL==(key=H5MM_malloc((2*H5F_KVALUE(f, type)+1)*type->sizeof_nkey)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-	for (cur_addr=addr, ret_value=0; H5F_addr_defined(cur_addr); cur_addr=next_addr) {
+	for (cur_addr=addr, ret_value=0; H5F_addr_defined(cur_addr) && !ret_value; cur_addr=next_addr) {
 
 	    /*
 	     * Save all the child addresses and native keys since we can't
@@ -1570,16 +1569,11 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	     * Perform the iteration operator, which might invoke an
 	     * application callback.
 	     */
-	    for (i=0; i<nchildren && ret_flag==H5B_ITER_CONT; i++) {
-		ret_flag = (*op)(f, dxpl_id, key+i*type->sizeof_nkey,
+	    for (i=0, ret_value=H5B_ITER_CONT; i<nchildren && !ret_value; i++) {
+		ret_value = (*op)(f, dxpl_id, key+i*type->sizeof_nkey,
                          child[i], key+(i+1)*type->sizeof_nkey, udata);
-		if (ret_flag==H5B_ITER_ERROR) {
+		if (ret_value<0)
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed");
-                } else if(ret_flag==H5B_ITER_STOP) {
-                    HGOTO_DONE(SUCCEED);
-                } else {
-                    ;
-                }
 	    } /* end for */
 	} /* end for */
     } /* end else */

@@ -58,14 +58,15 @@ typedef enum H5B_ins_t {
 } H5B_ins_t;
 
 /* Define return values from operator callback function for H5B_iterate */
-typedef enum H5B_iterate_t {
-    H5B_ITER_ERROR       = -1,  /*error return value                         */
-    H5B_ITER_CONT        = 0,   /*continue the loop                          */
-    H5B_ITER_STOP        = 1    /*stop and break the loop                    */
-} H5B_iterate_t;
+/* (Actually, any postive value will cause the iterator to stop and pass back
+ *      that positive value to the function that called the iterator)
+ */
+#define H5B_ITER_ERROR  (-1)
+#define H5B_ITER_CONT   (0)
+#define H5B_ITER_STOP   (1)
 
 /* Define the operator callback function pointer for H5B_iterate() */
-typedef H5B_iterate_t (*H5B_operator_t)(H5F_t *f, hid_t, void *_lt_key, haddr_t addr,
+typedef int (*H5B_operator_t)(H5F_t *f, hid_t, void *_lt_key, haddr_t addr,
                                         void *_rt_key, void *_udata);
 
 /* Typedef for B-tree in memory (defined in H5Bpkg.h) */
