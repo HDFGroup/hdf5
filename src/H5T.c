@@ -1,4 +1,5 @@
-/****************************************************************************
+/*
+ * 
 * NCSA HDF								   *
 * Software Development Group						   *
 * National Center for Supercomputing Applications			   *
@@ -3238,8 +3239,8 @@ H5T_debug(H5T_t *dt, FILE * stream)
 	break;
     }
 
-    fprintf(stream, "%s%s {nbytes=%d",
-	    s, dt->locked ? "[!]" : "", dt->size);
+    fprintf(stream, "%s%s {nbytes=%ul",
+	    s, dt->locked ? "[!]" : "", (unsigned long)(dt->size));
 
     if (H5T_is_atomic(dt)) {
 	switch (dt->u.atomic.order) {
@@ -3332,8 +3333,8 @@ H5T_debug(H5T_t *dt, FILE * stream)
 	    if (dt->u.compnd.memb[i].ndims) {
 		fprintf(stream, "[");
 		for (j = 0; j < dt->u.compnd.memb[i].ndims; j++) {
-		    fprintf(stream, "%s%d", j ? ", " : "",
-			    dt->u.compnd.memb[i].dim[j]);
+		    fprintf(stream, "%s%lu", j ? ", " : "",
+			    (unsigned long)(dt->u.compnd.memb[i].dim[j]));
 		}
 		fprintf(stream, "]");
 	    }

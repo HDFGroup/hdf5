@@ -11,14 +11,14 @@
 
 SHELL=/bin/sh
 
-all lib progs test install uninstall dep depend clean mostlyclean: config
+all lib progs test _test install uninstall dep depend: _config
 	$(MAKE) $@
 
-distclean maintainer-clean TAGS: config
+clean mostlyclean distclean maintainer-clean TAGS: _config
 	$(MAKE) $@
 
-config:
+_config:
 	sh configure
 
 .PHONY: all lib progs test install uninstall dep depend clean mostlyclean     \
-	distclean maintainer-clean config
+	distclean maintainer-clean _config

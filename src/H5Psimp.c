@@ -89,7 +89,7 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		const H5P_number_t *numbering, intn start, intn nelmts,
 		void *buf/*out*/)
 {
-    int	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
+    size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
