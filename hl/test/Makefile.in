@@ -203,6 +203,11 @@ LDADD = $(LIBH5_HL) $(LIBHDF5)
 TEST_PROG = test_lite test_image test_table test_ds
 check_PROGRAMS = $(TEST_PROG)
 
+# Temporary files.  These files are the ones created by running `make test'.
+MOSTLYCLEANFILES = combine_tables[1-2].h5 test_ds.h5 test_image.h5 \
+        test_lite[1-2].h5 test_table.h5
+
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
@@ -422,6 +427,7 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 

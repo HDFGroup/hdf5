@@ -21,4 +21,8 @@ LDADD=$(LIBH5_HL) $(LIBHDF5)
 TEST_PROG=test_lite test_image test_table test_ds
 check_PROGRAMS=$(TEST_PROG)
 
+# Temporary files.  These files are the ones created by running `make test'.
+MOSTLYCLEANFILES=combine_tables[1-2].h5 test_ds.h5 test_image.h5 \
+        test_lite[1-2].h5 test_table.h5
+
 include $(top_srcdir)/config/conclude.am
