@@ -61,7 +61,7 @@ typedef struct H5HL_free_t {
     struct H5HL_free_t	*next;		/*next entry in free list	*/
 } H5HL_free_t;
 
-typedef struct H5HL_t {
+struct H5HL_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
     haddr_t		    addr;	/*address of data		*/
@@ -69,7 +69,8 @@ typedef struct H5HL_t {
     size_t		    mem_alloc;	/*data bytes allocated in mem	*/
     uint8_t		   *chunk;	/*the chunk, including header	*/
     H5HL_free_t		   *freelist;	/*the free list			*/
-} H5HL_t;
+};
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/

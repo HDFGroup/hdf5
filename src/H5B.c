@@ -145,6 +145,8 @@ static herr_t H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t 
 			const double split_ratios[], void *udata,
 			haddr_t *new_addr/*out*/);
 static H5B_t * H5B_copy(const H5F_t *f, const H5B_t *old_bt);
+static herr_t H5B_serialize(H5F_t *f, H5B_t *bt, uint8_t *buf);
+static size_t H5B_size(H5F_t *f, H5B_t *bt);
 #ifdef H5B_DEBUG
 static herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
 			 void *udata);
@@ -403,6 +405,78 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B_serialize
+ *
+ * Purpose:     Serialize the data structure for writing to disk or
+ *              storing on the SAP (for FPHDF5).
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Bill Wendling
+ *              wendling@ncsa.uiuc.edu
+ *              Sept. 15, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B_serialize(H5F_t *f, H5B_t *bt, uint8_t *buf)
+{
+    unsigned    u;
+    uint8_t    *p = NULL;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B_serialize, FAIL)
+
+    /* check arguments */
+    assert(f);
+    assert(bt);
+    assert(bt->page);
+    assert(bt->type);
+
+    p = buf;
+
+    /* magic number */
+    HDmemcpy(p, H5B_MAGIC, H5B_SIZEOF_MAGIC);
+    p += 4;
+
+    /* node type and level */
+    *p++ = bt->type->id;
+    H5_CHECK_OVERFLOW(bt->level, int, uint8_t);
+    *p++ = (uint8_t)bt->level;
+
+    /* entries used */
+    UINT16ENCODE(p, bt->nchildren);
+
+    /* sibling pointers */
+    H5F_addr_encode(f, &p, bt->left);
+    H5F_addr_encode(f, &p, bt->right);
+
+    /* child keys and pointers */
+    for (u = 0; u <= bt->nchildren; ++u) {
+        /* encode the key */
+        assert(bt->key[u].rkey == p);
+        p += bt->sizeof_rkey;
+
+        /* encode the key */
+        if (bt->key[u].dirty && bt->key[u].nkey)
+            if (bt->type->encode(f, bt, bt->key[u].rkey, bt->key[u].nkey) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
+
+        /* encode the child address */
+        if (u < bt->ndirty)
+            H5F_addr_encode(f, &p, bt->child[u]);
+        else
+            p += H5F_SIZEOF_ADDR(f);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
  * Function:	H5B_flush
  *
  * Purpose:	Flushes a dirty B-tree node to disk.
@@ -414,92 +488,61 @@ done:
  *		Jun 23 1997
  *
  * Modifications:
- *              rky 980828
- *		Only p0 writes metadata to disk.
+ *      rky 980828
+ *      Only p0 writes metadata to disk.
  *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
+ *      Robb Matzke, 1999-07-28
+ *      The ADDR argument is passed by value.
  *
  *	Quincey Koziol, 2002-7-180
  *	Added dxpl parameter to allow more control over I/O from metadata
  *      cache.
+ *
+ *      Bill Wendling, 2003-09-15
+ *      Separated out the bit of code that serializes the B-Tree
+ *      structure.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
 {
-    size_t	size = 0;
-    uint8_t	*p = bt->page;
-    unsigned	u;                      /* Local index variable */
-    herr_t      ret_value=SUCCEED;      /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B_flush, FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* check arguments */
     assert(f);
     assert(H5F_addr_defined(addr));
     assert(bt);
     assert(bt->type);
     assert(bt->type->encode);
 
-    size = H5B_nodesize(f, bt->type, NULL, bt->sizeof_rkey);
-
     if (bt->cache_info.dirty) {
+        unsigned    u;
 
-	/* magic number */
-	HDmemcpy(p, H5B_MAGIC, H5B_SIZEOF_MAGIC);
-	p += 4;
+        if (H5B_serialize(f, bt, bt->page) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSERIALIZE, FAIL, "unable to serialize B-tree")
 
-	/* node type and level */
-	*p++ = bt->type->id;
-        H5_CHECK_OVERFLOW(bt->level,int,uint8_t);
-	*p++ = (uint8_t)bt->level;
-
-	/* entries used */
-	UINT16ENCODE(p, bt->nchildren);
-
-	/* sibling pointers */
-	H5F_addr_encode(f, &p, bt->left);
-	H5F_addr_encode(f, &p, bt->right);
-
-	/* child keys and pointers */
-	for (u=0; u<=bt->nchildren; u++) {
-
-	    /* encode the key */
-	    assert(bt->key[u].rkey == p);
-	    if (bt->key[u].dirty) {
-		if (bt->key[u].nkey) {
-		    if ((bt->type->encode) (f, bt, bt->key[u].rkey, bt->key[u].nkey) < 0)
-			HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
-		}
-		bt->key[u].dirty = FALSE;
-	    }
-	    p += bt->sizeof_rkey;
-
-	    /* encode the child address */
-	    if (u < bt->ndirty) {
-		H5F_addr_encode(f, &p, bt->child[u]);
-	    } else {
-		p += H5F_SIZEOF_ADDR(f);
-	    }
-	}
+        /* child keys and pointers */
+        for (u = 0; u <= bt->nchildren; ++u)
+            bt->key[u].dirty = FALSE;
 
 	/*
-	 * Write the disk page.	 We always write the header, but we don't
-	 * bother writing data for the child entries that don't exist or
-	 * for the final unchanged children.
+         * Write the disk page.	We always write the header, but we don't
+         * bother writing data for the child entries that don't exist or
+         * for the final unchanged children.
 	 */
-	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->page)<0)
+	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, H5B_size(f, bt), dxpl_id, bt->page) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree node to disk")
+
 	bt->cache_info.dirty = FALSE;
 	bt->ndirty = 0;
     }
-    if (destroy) {
-        if(H5B_dest(f,bt)<0)
+
+    if (destroy)
+        if (H5B_dest(f,bt) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -585,6 +628,38 @@ H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5B_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_size
+ *
+ * Purpose:     Get the size of the B-tree node on disk.
+ *
+ * Return:      Doesn't fail.
+ *
+ * Programmer:  Bill Wendling
+ *              wendling@ncsa.uiuc.edu
+ *              Sept. 16, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+H5B_size(H5F_t *f, H5B_t *bt)
+{
+    size_t      ret_value = 0;
+
+    FUNC_ENTER_NOINIT(H5B_size)
+
+    /* check args */
+    assert(f);
+    assert(bt);
+    assert(bt->type);
+
+    ret_value = H5B_nodesize(f, bt->type, NULL, bt->sizeof_rkey);
+    FUNC_LEAVE_NOAPI(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -977,9 +1052,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 
     FUNC_ENTER_NOAPI(H5B_insert, FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments. */
     assert(f);
     assert(type);
     assert(type->sizeof_nkey <= sizeof _lt_key);

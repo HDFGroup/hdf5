@@ -80,11 +80,11 @@ typedef herr_t (*H5AC_dest_func_t)(H5F_t *f, void *thing);
 typedef herr_t (*H5AC_clear_func_t)(H5F_t *f, void *thing, hbool_t dest);
 
 typedef struct H5AC_class_t {
-    H5AC_subid_t	id;
-    H5AC_load_func_t    load;
-    H5AC_flush_func_t   flush;
-    H5AC_dest_func_t    dest;
-    H5AC_clear_func_t   clear;
+    H5AC_subid_t            id;
+    H5AC_load_func_t        load;
+    H5AC_flush_func_t       flush;
+    H5AC_dest_func_t        dest;
+    H5AC_clear_func_t       clear;
 } H5AC_class_t;
 
 /*===----------------------------------------------------------------------===

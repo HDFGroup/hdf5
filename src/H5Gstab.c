@@ -235,6 +235,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hi
     /* initialize data to pass through B-tree */
     if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
+
     udata.operation = H5G_OPER_INSERT;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;

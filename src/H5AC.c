@@ -51,6 +51,11 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 
+#ifdef H5_HAVE_FPHDF5
+#include "H5FDfphdf5.h"         /* FPHDF5 File Driver                   */
+#include "H5FPprivate.h"        /* Flexible PHDF5                       */
+#endif  /* H5_HAVE_FPHDF5 */
+
 /* Interface initialization */
 static int             interface_initialize_g = 0;
 #define INTERFACE_INIT H5AC_init_interface
@@ -453,233 +458,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_find
- *
- * Purpose:     Given an object type and the address at which that object
- *              is located in the file, return a pointer to the object.
- *              The optional UDATA1 and UDATA2 structures are passed down to
- *              the function that is responsible for loading the object into
- *              memory.
- *
- *              The returned pointer is guaranteed to be valid until the next
- *              call to an H5AC function (if you want a pointer which is valid
- *              indefinately then see H5AC_protect()).
- *
- *              If H5AC_DEBUG is defined then this function also
- *              checks that the requested object is not currently
- *              protected since it is illegal to modify a protected object
- *              except through the pointer returned by H5AC_protect().
- *
- * Return:      Success:        Pointer to the object.  The pointer is
- *                              valid until some other cache function
- *                              is called.
- *
- *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              matzke@llnl.gov
- *              Jul  9 1997
- *
- * Modifications:
- *
- *      Robb Matzke, 4 Aug 1997
- *      Fails immediately if the cached object is at the correct address
- *      but is of the wrong type.  This happens if the caller doesn't know
- *      what type of object is at the address and calls this function with
- *      various type identifiers until one succeeds (cf., the debugger).
- *
- *      Robb Matzke, 30 Oct 1997
- *      Keeps track of hits, misses, and flushes per object type so we have
- *      some cache performance diagnostics.
- *
- * 	Robb Matzke, 1999-07-27
- *	The ADDR argument is passed by value.
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-	    const void *udata1, void *udata2)
-{
-    unsigned                idx;
-    void                   *thing;
-    H5AC_flush_func_t       flush;
-    H5AC_info_t           **info;
-#ifdef H5_HAVE_PARALLEL
-    H5AC_info_t           **dinfo = NULL;
-#endif /* H5_HAVE_PARALLEL */
-    H5AC_t                 *cache;
-    void                   *ret_value;          /* Return value */
-
-    FUNC_ENTER_NOAPI(H5AC_find, NULL)
-
-    assert(f);
-    assert(f->shared->cache);
-    assert(type);
-    assert(type->load);
-    assert(type->flush);
-    assert(H5F_addr_defined(addr));
-
-    /* Get local pointers to the file's cache information */
-    idx = H5AC_HASH(f, addr);
-    cache = f->shared->cache;
-    info = cache->slot + idx;
-
-#ifdef H5_HAVE_PARALLEL
-    /* If MPI based VFD is used, do special parallel I/O actions */
-    if(IS_H5FD_MPI(f)) {
-        H5AC_dest_func_t        dest;
-
-        /* Get local pointer to file's dirty cache information */
-        dinfo = cache->dslot + idx;
-
-        /* Check if the cache has 'held' information for this cache slot */
-        if (*dinfo) {
-            /* Sanity check that the 'clean' item is really clean */
-            assert(*info);
-            assert((*info)->dirty==0);
-
-            /* Destroy 'current' information */
-            dest = (*info)->type->dest;
-            if ((dest)(f, (*info))<0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, NULL, "unable to free cached object")
-
-            /* Restore 'held' information back to 'current' information */
-            (*info)=(*dinfo);
-
-            /* Clear 'held' information */
-            (*dinfo)=NULL;
-
-#ifdef H5AC_DEBUG
-            cache->diagnostics[type->id].nrestores++;
-#endif /* H5AC_DEBUG */
-        } /* end if */
-    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-
-    /*
-     * Return right away if the item is in the cache.
-     */
-    if ((*info) && H5F_addr_eq(addr,(*info)->addr)
-#ifdef H5AC_DEBUG
-            && (*info)->type==type
-#endif /* H5AC_DEBUG */
-            ) {
-#ifndef H5AC_DEBUG
-        /* Sanity check that the object in the cache is the correct type */
-        assert((*info)->type==type);
-#endif /* H5AC_DEBUG */
-
-#ifdef H5AC_DEBUG
-        cache->diagnostics[type->id].nhits++;
-#endif /* H5AC_DEBUG */
-        HGOTO_DONE(*info)
-    }
-#ifdef H5AC_DEBUG
-    cache->diagnostics[type->id].nmisses++;
-#endif /* H5AC_DEBUG */
-
-#ifdef H5AC_DEBUG
-    /*
-     * Check that the requested thing isn't protected, for protected things
-     * can only be modified through the pointer already handed out by the
-     * H5AC_protect() function.
-     */
-    {
-        H5AC_prot_t            *prot = NULL;
-        int                    i;
-
-        prot = cache->prot + idx;
-        for (i = 0; i < prot->nprots; i++) {
-            assert(H5F_addr_ne(addr, prot->slot[i]->addr));
-        }
-    }
-#endif /* H5AC_DEBUG */
-
-    /*
-     * Load a new thing.  If it can't be loaded, then return an error
-     * without preempting anything.
-     */
-    if (NULL == (thing = (type->load)(f, dxpl_id, addr, udata1, udata2)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load object")
-
-#ifdef H5_HAVE_PARALLEL
-    /* If MPI based VFD is used, do special parallel I/O actions */
-    if(IS_H5FD_MPI(f)) {
-        H5P_genplist_t *dxpl;           /* Dataset transfer property list */
-        H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
-
-        /* Get the dataset transfer property list */
-        if (NULL == (dxpl = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataset creation property list")
-
-        /* Get the transfer mode property */
-        if(H5P_get(dxpl, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve xfer mode")
-
-        /* Make certain there is no 'held' info for this slot */
-        assert((*dinfo)==NULL);
-
-        /* Must be using collective I/O to flush metadata in parallel */
-        if(xfer_mode==H5FD_MPIO_INDEPENDENT) {
-            /* Check if there is dirty metadata in this slot */
-            if((*info) && (*info)->dirty) {
-                /* 'Hold' the current metadata for later */
-                (*dinfo)=(*info);
-
-                /* Reset the 'current' metadata, so it doesn't get flushed */
-                (*info)=NULL;
-
-#ifdef H5AC_DEBUG
-                cache->diagnostics[(*dinfo)->type->id].nholds++;
-#endif /* H5AC_DEBUG */
-            } /* end if */
-        } /* end else */
-    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-
-    /*
-     * Flush & destroy the previous cache entry if there is one.
-     */
-    if (*info) {
-#ifdef H5AC_DEBUG
-        H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
-#endif /* H5AC_DEBUG */
-
-        flush = (*info)->type->flush;
-        if ( (flush)(f, dxpl_id, TRUE, (*info)->addr, (*info)) < 0) {
-            /*
-             * The old thing could not be removed from the stack.
-             * Release the new thing and fail.
-             */
-            if ((type->dest)(f, thing) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "unable to destroy just-loaded object")
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "unable to flush existing cached object")
-        }
-#ifdef H5AC_DEBUG
-        cache->diagnostics[type_id].nflushes++;
-#endif /* H5AC_DEBUG */
-    } /* end if */
-
-    /*
-     * Make the cache point to the new thing.
-     */
-    (*info)=thing;
-    (*info)->type = type;
-    (*info)->addr = addr;
-    assert((*info)->dirty==0);  /* Should be clean after being loaded */
-
-    /* Set the return value */
-    ret_value=thing;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-#endif  /* 0 */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_compare
@@ -1029,16 +807,20 @@ done:
  * Modifications:
  * 		Robb Matzke, 1999-07-27
  *		The ADDR argument is passed by value.
+ *
+ *		Bill Wendling, 2003-09-16
+ *		Added automatic "flush" if the FPHDF5 driver is being
+ *		used. This'll write the metadata to the SAP where other,
+ *		lesser processes can grab it.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
-    unsigned                idx;
-    H5AC_flush_func_t       flush;
-    H5AC_info_t           **info;
-    H5AC_t                 *cache;
-    herr_t ret_value=SUCCEED;      /* Return value */
+    unsigned        idx;
+    H5AC_info_t   **info;
+    H5AC_t         *cache;
+    herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_set, FAIL)
 
@@ -1066,14 +848,16 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
 #endif
 
 #ifdef H5_HAVE_PARALLEL
-    /* If MPI based VFD is used, do special parallel I/O actions */
+    /*
+     * If MPI based VFD is used, do special parallel I/O actions
+     */
     if(IS_H5FD_MPI(f)) {
         H5AC_info_t       **dinfo;
+        H5P_genplist_t     *dxpl;       /* Dataset transfer property list   */
+        H5FD_mpio_xfer_t    xfer_mode;  /* I/O transfer mode property value */
 #ifdef H5AC_DEBUG
         H5AC_subid_t        type_id;
 #endif /* H5AC_DEBUG */
-        H5P_genplist_t *dxpl;           /* Dataset transfer property list */
-        H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
 
         /* Get the dataset transfer property list */
         if (NULL == (dxpl = H5I_object(dxpl_id)))
@@ -1147,20 +931,40 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
         H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
 #endif /* H5AC_DEBUG */
 
-        flush = (*info)->type->flush;
-        if ((flush)(f, dxpl_id, TRUE, (*info)->addr, (*info)) < 0)
+        if ((*info)->type->flush(f, dxpl_id, TRUE, (*info)->addr, (*info)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
 #ifdef H5AC_DEBUG
         cache->diagnostics[type_id].nflushes++;
 #endif /* H5AC_DEBUG */
     } /* end if */
 
     /* Cache this item */
-    (*info)=thing;
+    (*info) = thing;
     (*info)->type = type;
     (*info)->addr = addr;
+
+#ifdef H5_HAVE_FPHDF5
+    if (H5FD_is_fphdf5_driver(f->shared->lf)) {
 #ifdef H5AC_DEBUG
-    cache->diagnostics[type->id].ninits++;
+        H5AC_subid_t    type_id = (*info)->type->id;    /* Remember this for later */
+#endif  /* H5AC_DEBUG */
+
+        /*
+         * We want to write this metadata to the SAP right now. This will
+         * keep all of the participating processes in sync.
+         */
+        if ((*info)->type->flush(f, dxpl_id, FALSE, (*info)->addr, *info) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+#ifdef H5AC_DEBUG
+        ++cache->diagnostics[type_id].nflushes;
+#endif  /* H5AC_DEBUG */
+    }
+#endif  /* H5_HAVE_FPHDF5 */
+
+#ifdef H5AC_DEBUG
+    ++cache->diagnostics[type->id].ninits;
 #endif /* H5AC_DEBUG */
 
 done:
@@ -1435,6 +1239,13 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     }
 #endif
 
+#ifdef H5_HAVE_FPHDF5
+    /*
+     * XXX: Send a request to the SAP asking to lock this particular
+     * address. -BW
+     */
+#endif  /* H5_HAVE_FPHDF5 */
+
     FUNC_ENTER_NOAPI(H5AC_protect, NULL)
 
     /* check args */
@@ -1479,6 +1290,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
                 /* Sanity check that the object in the cache is the correct type */
                 assert((*dinfo)->type==type);
 #endif /* H5AC_DEBUG */
+
                 /*
                  * The object is already cached; simply remove it from the cache.
                  */
@@ -1560,6 +1372,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
              */
             if (NULL == (thing = (type->load)(f, dxpl_id, addr, udata1, udata2)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load object")
+
 #ifdef H5AC_DEBUG
             cache->diagnostics[type->id].nmisses++;
 #endif /* H5AC_DEBUG */
@@ -1588,7 +1401,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     prot->nprots += 1;
 #endif /* H5AC_DEBUG */
 
-    cache->nprots += 1;
+    ++cache->nprots;
 
     rw = rw;    /* Remove compiler warning if no FPHDF5 used */
 
@@ -1638,6 +1451,13 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
     herr_t                  ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_unprotect, FAIL)
+
+#ifdef H5_HAVE_FPHDF5
+    /*
+     * XXX: Send a request to the SAP asking to release the lock on this
+     * particular address. -BW
+     */
+#endif  /* H5_HAVE_FPHDF5 */
 
     /* check args */
     assert(f);
@@ -1767,16 +1587,34 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
             if ((flush)(f, dxpl_id, TRUE, (*info)->addr, (*info)) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object")
 #ifdef H5AC_DEBUG
-            cache->diagnostics[type_id].nflushes++;
+            ++cache->diagnostics[type_id].nflushes;
 #endif /* H5AC_DEBUG */
         }
 
-        /*
-         * Insert the object back into the cache; it is no longer protected.
-         */
-        (*info)=thing;
+        /* Insert the object back into the cache; it is no longer protected. */
+        (*info) = thing;
         (*info)->type = type;
         (*info)->addr = addr;
+
+#ifdef H5_HAVE_FPHDF5
+        /* If the data in the cache is dirty, we want to flush it to the SAP */
+        if (H5FD_is_fphdf5_driver(f->shared->lf)) {
+            if ((*info) && (*info)->dirty) {
+                /*
+                 * We want to write this metadata to the SAP right now.
+                 * This will keep all of the participating processes in
+                 * sync.
+                 */
+                if ((*info)->type->flush(f, dxpl_id, FALSE, (*info)->addr, *info) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+                (*info)->dirty = FALSE;
+#ifdef H5AC_DEBUG
+                ++cache->diagnostics[type_id].nflushes;
+#endif /* H5AC_DEBUG */
+            }
+        }
+#endif  /* H5_HAVE_FPHDF5 */
     } /* end if */
     else {
         /* Destroy previously cached thing */
@@ -1785,7 +1623,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
     } /* end else */
 
     /* Decrement the number of protected items outstanding */
-    cache->nprots -= 1;
+    --cache->nprots;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -313,7 +313,7 @@ H5FP_object_lock_cmp(H5FP_object_lock *o1,
     FUNC_ENTER_NOINIT(H5FP_object_lock_cmp);
     assert(o1);
     assert(o2);
-    FUNC_LEAVE_NOAPI(o1->oid - o2->oid);
+    FUNC_LEAVE_NOAPI(o2->oid - o1->oid);
 }
 
 /*
@@ -441,7 +441,7 @@ H5FP_file_mod_cmp(H5FP_mdata_mod *k1,
     FUNC_ENTER_NOINIT(H5FP_file_mod_cmp);
     assert(k1);
     assert(k2);
-    FUNC_LEAVE_NOAPI(k1->addr - k2->addr);
+    FUNC_LEAVE_NOAPI(k2->addr - k1->addr);
 }
 
 /*
@@ -1114,6 +1114,7 @@ done:
     if (ret_value != SUCCEED) {
         /* Can't lock the whole group at one time for some reason */
 HDfprintf(stderr, "%s: locking failure (%d)!!\n", FUNC, ret_value);
+assert(0);
     }
 
     HDfree(oids);
@@ -1272,13 +1273,27 @@ H5FP_sap_handle_read_request(H5FP_request_t *req)
 
         mod.addr = req->addr;   /* This is the key field for the TBBT */
 
-        if ((node = H5TB_dfind(info->mod_tree, (void *)&mod, NULL)) != NULL) {
+        if ((node = H5TB_dless(info->mod_tree, (void *)&mod, NULL)) != NULL) {
             H5FP_mdata_mod *fm = (H5FP_mdata_mod *)node->data;
 
-            r.md_size = fm->md_size;
-            r.addr = fm->addr;
-            r.status = H5FP_STATUS_OK;
-            metadata = fm->metadata;    /* Sent out in a separate message */
+            if (H5F_addr_eq(req->addr, fm->addr)) {
+                r.md_size = fm->md_size;
+                r.addr = fm->addr;
+                r.status = H5FP_STATUS_OK;
+                metadata = fm->metadata;    /* Sent out in a separate message */
+            } else if (H5F_addr_gt(req->addr, fm->addr)
+                        && H5F_addr_lt(req->addr, fm->addr + fm->md_size)) {
+                r.md_size = fm->md_size - (req->addr - fm->addr);
+                r.addr = req->addr;
+                r.status = H5FP_STATUS_OK;
+                metadata = fm->metadata + (req->addr - fm->addr);   /* Sent out in a separate message */
+            } else {
+HDfprintf(stderr, "Panic!!!!\n");
+assert(0);
+            }
+        } else {
+HDfprintf(stderr, "%s: Couldn't find metadata at req->addr == %a\n", FUNC, req->addr);
+assert(0);
         }
     }
 
@@ -1402,7 +1417,7 @@ H5FP_sap_handle_flush_request(H5FP_request_t *req)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_flush_request);
 
-    if ((info = H5FP_find_file_info(req->file_id)) != NULL)
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
         if (info->num_mods) {
             /*
              * If there are any modifications not written out yet, dump
@@ -1421,6 +1436,10 @@ H5FP_sap_handle_flush_request(H5FP_request_t *req)
                             "can't dump metadata to client");
             }
         }
+    } else {
+        HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL,
+                    "can't find information for file");
+    }
 
 done:
     H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
@@ -1462,6 +1481,9 @@ H5FP_sap_handle_close_request(H5FP_request_t *req)
                             "cannot remove file ID from list");
             }
         }
+    } else {
+        HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL,
+                    "can't find information for file");
     }
 
 done:

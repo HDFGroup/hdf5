@@ -326,18 +326,31 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
                         H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
-    HDmemset(*buf, '\0', size);
-
     switch (sap_read.status) {
     case H5FP_STATUS_OK:
         /* use the info in the H5FP_read_t structure to update the metadata */
         *status = H5FP_STATUS_OK;
+        HDmemset(*buf, '\0', size);
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-        if ((mrc = MPI_Recv(*buf, (int)size, MPI_BYTE, (int)H5FP_sap_rank,
-                            H5FP_TAG_METADATA, H5FP_SAP_COMM,
-                            &mpi_status)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+        if (size < sap_read.md_size) {
+            char *mdata;
+
+            if (H5FP_read_metadata(&mdata, (int)sap_read.md_size, (int)H5FP_sap_rank) == FAIL) {
+HDfprintf(stderr, "Metadata Read Failed!!!!\n");
+            }
+
+            HDmemcpy(*buf, mdata, size);
+            HDfree(mdata);
+        } else if (size == sap_read.md_size) {
+            if ((mrc = MPI_Recv(*buf, (int)sap_read.md_size, MPI_BYTE,
+                                (int)H5FP_sap_rank, H5FP_TAG_METADATA,
+                                H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+        } else {
+HDfprintf(stderr, "Buffer not big enough to hold metadata!!!!\n");
+assert(0);
+        }
 
         *bytes_read = size;
         break;
@@ -395,7 +408,7 @@ H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
     int mrc, my_rank;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FP_request_change, FAIL);
+    FUNC_ENTER_NOAPI(H5FP_request_write_metadata, FAIL);
 
     /* check args */
     assert(file);

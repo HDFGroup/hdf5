@@ -1331,7 +1331,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
         if (H5P_exist_plist(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) > 0)
             if (H5P_get(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY, &capt_only) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, HADDR_UNDEF, "can't retrieve FPHDF5 property")
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, HADDR_UNDEF, "can't retrieve FPHDF5 property")
 
         HDmemset(&fp_alloc, 0, sizeof(fp_alloc));
 

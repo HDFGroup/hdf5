@@ -580,11 +580,15 @@ H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, int arg, H5TB_NODE **
 	/* didn't find an exact match, search back up the tree until a node */
 	/* is found with a key less than the key searched for */
     if(cmp!=0) {
-        while((ptr=ptr->Parent)!=NULL) {
-              cmp = KEYcmp(key, ptr->key, arg);
-              if(cmp<0) /* found a node which is less than the search for one */
-                  break;
-          } /* end while */
+        /* If we haven't already found the least node, then backtrack to
+         * find it */
+        if(cmp>0) {
+            while((ptr=ptr->Parent)!=NULL) {
+                  cmp = KEYcmp(key, ptr->key, arg);
+                  if(cmp<0) /* found a node which is less than the search for one */
+                      break;
+              } /* end while */
+        } /* end if */
         if(ptr==NULL) /* didn't find a node in the tree which was less */
             cmp=1;
         else /* reset this for cmp test below */

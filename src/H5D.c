@@ -13,9 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#ifdef H5_HAVE_FPHDF5
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#endif  /* H5_HAVE_FPHDF5 */
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
@@ -24,9 +21,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#ifdef H5_HAVE_FPHDF5
-#include "H5Fpkg.h"             /* Files access                         */
-#endif  /* H5_HAVE_FPHDF5 */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
@@ -37,7 +31,9 @@
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
 #ifdef H5_HAVE_FPHDF5
-#include "H5FPprivate.h"        /* Flexible PHDF5                       */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
+#include "H5Fpkg.h"             /* File access                          */
 #endif  /* H5_HAVE_FPHDF5 */
 
 /*#define H5D_DEBUG*/
@@ -1615,10 +1611,6 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     H5P_genplist_t 	*dc_plist=NULL;         /* New Property list */
     hbool_t             has_vl_type=FALSE;      /* Flag to indicate a VL-type for dataset */
     H5D_t		*ret_value;             /* Return value */
-#ifdef H5_HAVE_FPHDF5
-    hbool_t             locked_grp = FALSE;     /* The parent group is locked */
-    hobj_ref_t          grp_oid;
-#endif  /* H5_HAVE_FPHDF5 */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL)
 
@@ -1631,7 +1623,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     assert (H5I_GENPROP_LST==H5I_get_type(dxpl_id));
 
     /* Check if the filters in the DCPL can be applied to this dataset */
-    if(H5Z_can_apply(dcpl_id,type_id)<0)
+    if (H5Z_can_apply(dcpl_id,type_id)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
 
     /* Get the dataset's datatype */
@@ -1639,15 +1631,15 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
 
     /* Check if the datatype is "sensible" for use in a dataset */
-    if(H5T_is_sensible(type)!=TRUE)
+    if (H5T_is_sensible(type)!=TRUE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible")
 
     /* Check if the datatype is/contains a VL-type */
-    if(H5T_detect_class(type, H5T_VLEN))
+    if (H5T_detect_class(type, H5T_VLEN))
         has_vl_type=TRUE;
 
     /* Initialize the dataset object */
-    if(NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
+    if (NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make the "set local" filter callbacks for this dataset */
@@ -1657,72 +1649,6 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     /* What file is the dataset being added to? */
     if (NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point")
-
-#ifdef H5_HAVE_FPHDF5
-#error "This is not the right place for this code, see comment in code - QAK"
-/* This code ought to be somewhere in H5G_insert (or one of the functions that
- * it calls), not here.  All the routines which create objects in the file
- * (H5Dcreate, H5Gcreate, H5Tcommit, H5Glink, etc.) all prepare an object in
- * memory and then call H5G_insert to actually insert the object into the group
- * that contains it.
- *
- * Looking through the H5G_insert code, it calls H5G_namei which calls
- * H5G_stab_insert to actually insert the object into the symbol table, so 
- * H5G_stab_insert would probably be the best place to do this sort of locking.
- * (I think it would be better to do it there than in H5G_insert because the
- * H5Glink code doesn't end up calling H5G_insert for creating soft links, but
- * it does end up calling H5G_stab_insert).
- *
- * Otherwise, you are going to have to duplicate this chunk of code into far
- * too many places in the library...  - QAK
- */
-    if (H5FD_is_fphdf5_driver(file->shared->lf)) {
-        unsigned file_id = H5FD_fphdf5_file_id(file->shared->lf);
-        char *tmp_name = H5MM_xstrdup(name);
-        char *last = HDstrrchr(tmp_name, '/');
-        hid_t gid;
-        H5G_t *grp = NULL;
-        H5G_entry_t *grp_loc = NULL;
-        H5FP_status_t status;
-        unsigned req_id;
-
-        /* Chop off the dataset name (we only want to lock the group) */
-        if (last)
-            last[1] = '\0';
-
-        /* Open the group */
-        if ((grp = H5G_open(loc, tmp_name, dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
-
-        /* Register the group so we can grab information about it */
-        if ((gid = H5I_register(H5I_GROUP, grp)) < 0) {
-            H5G_close(grp);
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register group");
-        }
-
-        /* Grab the location of the group */
-        if ((grp_loc = H5G_loc(gid)) == NULL) {
-            H5I_dec_ref(gid);
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location ID")
-        }
-
-        grp_oid = grp_loc->header;
-
-        if (H5FP_request_lock(file_id, grp_oid, H5FP_LOCK_WRITE,
-                              TRUE, &req_id, &status) != SUCCEED) {
-            /* FIXME: This is bad. We should check the "status" variable */
-            H5I_dec_ref(gid);
-            H5MM_xfree(tmp_name);
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, "unable to lock group");
-        }
-
-        if (H5I_dec_ref(gid) != SUCCEED)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to close group");
-
-        locked_grp = TRUE;
-        H5MM_xfree(tmp_name);
-    }
-#endif  /* H5_HAVE_FPHDF5 */
 
     /* Copy datatype for dataset */
     if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
@@ -1903,11 +1829,17 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
     } /* end switch */
 
-    /*
-     * Update the dataset's entry info.
-     */
+    /* Update the dataset's entry info. */
     if (H5D_update_entry_info(file, dxpl_id, new_dset, dc_plist) != SUCCEED)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
+
+#ifdef H5_HAVE_FPHDF5
+    /* FPHDF5 is all about independent writes */
+    if (H5FD_is_fphdf5_driver(file->shared->lf))
+        if (H5Pset_dxpl_fphdf5(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL,
+                        "unable to set xfer property list to independent write")
+#endif  /* H5_HAVE_FPHDF5 */
 
     /* 
      * Give the dataset a name.  That is, create and add a new
@@ -1945,20 +1877,6 @@ done:
         new_dset->ent.file = NULL;
         H5FL_FREE(H5D_t,new_dset);
     }
-
-#ifdef H5_HAVE_FPHDF5
-    if (locked_grp) {
-        unsigned file_id = H5FD_fphdf5_file_id(file->shared->lf);
-        H5FP_status_t status;
-        unsigned req_id;
-
-        /* Request a release of the lock */
-        if (H5FP_request_release_lock(file_id, grp_oid, TRUE, &req_id, &status)) {
-            /* FIXME: This is bad. We should check the "status" variable */
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, "unable to lock group");
-        }
-    }
-#endif  /* H5_HAVE_FPHDF5 */
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
