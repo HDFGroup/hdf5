@@ -28,14 +28,14 @@
 #include <H5Pprivate.h>		/*property lists			*/
 
 /*
- * The driver identification number, initialized at runtime if HAVE_PARALLEL
+ * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
  * is defined. This allows applications to still have the H5FD_MPIO
  * "constants" in their source code (it also makes this file strictly ANSI
- * compliant when HAVE_PARALLEL isn't defined)
+ * compliant when H5_HAVE_PARALLEL isn't defined)
  */
 static hid_t H5FD_MPIO_g = 0;
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 
 #define FALSE	0
 #define TRUE	1
@@ -1502,4 +1502,4 @@ haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 
     FUNC_LEAVE(ret_value);
 }
-#endif /*HAVE_PARALLEL*/
+#endif /*H5_HAVE_PARALLEL*/

@@ -462,9 +462,9 @@ H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 	 * bother writing data for the child entries that don't exist or
 	 * for the final unchanged children.
 	 */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 	if (H5F_block_write(f, addr, (hsize_t)size, H5P_DEFAULT, bt->page)<0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 			  "unable to save B-tree node to disk");

@@ -121,7 +121,7 @@ static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
 static herr_t H5F_istore_debug_key(FILE *stream, intn indent, intn fwidth,
 				   const void *key, const void *udata);
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 static herr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 				  const hssize_t offset[],
 				  void *_udata/*out*/);
@@ -1669,7 +1669,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	    sub_offset_m[i] = chunk_offset[i] + offset_wrt_chunk[i] +
 			      offset_m[i] - offset_f[i];
 	}
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	/*
 	 * If MPIO is used, must bypass the chunk-cache scheme because other
 	 * MPI processes could be writing to other elements in the same chunk.
@@ -1727,7 +1727,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 			      "unable to unlock raw data chunk");
 	    }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	}
 #endif
 
@@ -1843,7 +1843,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 			      offset_m[i] - offset_f[i];
 	}
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	/*
 	 * If MPIO is used, must bypass the chunk-cache scheme because other
 	 * MPI processes could be writing to other elements in the same chunk.
@@ -1902,7 +1902,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "uanble to unlock raw data chunk");
 	    }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	}
 #endif
 	
@@ -2146,7 +2146,7 @@ H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
  *
  *-------------------------------------------------------------------------
  */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 static herr_t
 H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 		    const hssize_t offset[], void *_udata/*out*/)
@@ -2174,7 +2174,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 
     FUNC_LEAVE (FAIL);
 }
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -2272,7 +2272,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	     * chunk.
 	     */
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	    /* rky 981207 Serialize access to this critical region. */
 	    if (SUCCEED!=
 		H5FD_mpio_wait_for_left_neighbor(f->shared->lf)) {
@@ -2292,7 +2292,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "uanble to unlock raw data chunk");
 	    }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	    if (SUCCEED!=
 		H5FD_mpio_signal_right_neighbor(f->shared->lf)) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
@@ -2320,7 +2320,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	if (carry) break;
     }
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /*
      * rky 980923
      * 

@@ -411,7 +411,7 @@ __DLL__ herr_t H5S_none_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				       H5D_operator_t op, void *operator_data);
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 /* MPI-IO function to read directly from app buffer to file rky980813 */
 __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 				    const struct H5O_layout_t *layout,
@@ -436,6 +436,6 @@ __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
 __DLLVAR__ hbool_t		H5_mpi_opt_types_g;
 #endif /* _H5S_IN_H5S_C */
 
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Sprivate_H */

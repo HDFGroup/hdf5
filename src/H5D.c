@@ -38,7 +38,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDmpio.h>
 
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
 #include <H5Rpublic.h>
 #endif
@@ -902,7 +902,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 		    "unable to locate insertion point");
     }
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
     if (H5FD_MPIO==f->shared->lf->driver_id &&
 	create_parms->pline.nfilters>0) {
@@ -1290,7 +1290,7 @@ H5D_open_oid(H5G_entry_t *ent)
                 sizeof(dataset->create_parms->pline));
     }
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
     if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
 	dataset->create_parms->pline.nfilters>0){
@@ -1522,7 +1522,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (!mem_space) mem_space = file_space;
     nelmts = H5S_get_select_npoints(mem_space);
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     {
 	/* Collective access is not permissible without the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
@@ -1564,7 +1564,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from file to memory data space");
     }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /* rky 980813 This is a temporary KLUGE.
      * The sconv functions should be set by H5S_find,
      * or we should use a different way to call the MPI-IO
@@ -1879,7 +1879,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(buf);
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /* If MPIO is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
@@ -1889,7 +1889,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		     "Parallel IO does not support writing VL datatypes yet");
     }
 #endif
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /* If MPIO is used, no dataset region reference support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
@@ -1932,7 +1932,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (!mem_space) mem_space = file_space;
     nelmts = H5S_get_select_npoints(mem_space);
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     {
 	/* Collective access is not permissible without the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
@@ -1981,7 +1981,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from memory to file data space");
     }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /* rky 980813 This is a temporary KLUGE.
      * The sconv functions should be set by H5S_find,
      * or we should use a different way to call the MPI-IO
@@ -2489,7 +2489,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	break;
 
     case H5D_CHUNKED:
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	/*
 	 * If the dataset is accessed via parallel I/O, allocate file space
 	 * for all chunks now and initialize each chunk with the fill value.
@@ -2514,7 +2514,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 			    "unable to allocate all chunks of dataset");
 	    }
 	}
-#endif /*HAVE_PARALLEL*/
+#endif /*H5_HAVE_PARALLEL*/
 	break;
     }
     ret_value = SUCCEED;

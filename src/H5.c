@@ -1866,7 +1866,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 		    MPI_Comm comm = va_arg (ap, MPI_Comm);
 		    fprintf (out, "%ld", (long)comm);
 #endif
@@ -1880,7 +1880,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 		    MPI_Info info = va_arg (ap, MPI_Info);
 		    fprintf (out, "%ld", (long)info);
 #endif

@@ -1694,5 +1694,4 @@ H5Zdeflate.lo: \
    $(srcdir)/H5Zprivate.h \
    $(srcdir)/H5Zpublic.h \
    $(srcdir)/H5Fprivate.h \
-   $(srcdir)/H5Fpublic.h \
-   $(srcdir)/H5FDpublic.h
+   $(srcdir)/H5Fpublic.h

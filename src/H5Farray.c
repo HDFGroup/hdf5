@@ -140,7 +140,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
    
@@ -158,7 +158,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     /* Make a local copy of size so we can modify it */
     H5V_vector_cpy(layout->ndims, hslab_size, _hslab_size);
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     {
 	/* Get the transfer mode */
 	H5F_xfer_t *dxpl;
@@ -171,7 +171,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     }
 #endif
     
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     /* Collective MPIO access is unsupported for non-contiguous datasets */
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
 	HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
@@ -245,7 +245,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	 * Now begin to walk through the array, copying data from disk to
 	 * memory.
 	 */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	if (H5FD_MPIO_COLLECTIVE==xfer_mode){
 	    /*
 	     * Currently supports same number of collective access. Need to
@@ -380,7 +380,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
    
@@ -398,7 +398,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     /* Make a local copy of _size so we can modify it */
     H5V_vector_cpy(layout->ndims, hslab_size, _hslab_size);
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     {
 	/* Get the transfer mode */
 	H5F_xfer_t *dxpl;
@@ -411,7 +411,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     }
 #endif
     
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
 	HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		       "collective access on non-contiguous datasets not "
@@ -488,7 +488,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	 * Now begin to walk through the array, copying data from memory to
 	 * disk.
 	 */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	if (H5FD_MPIO_COLLECTIVE==xfer_mode){
 	    /*
 	     * Currently supports same number of collective access. Need to

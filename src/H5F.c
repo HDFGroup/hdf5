@@ -83,11 +83,11 @@ H5F_xfer_t	H5F_xfer_dflt = {
     NULL, 			/*Background buffer or NULL		    */
     H5T_BKG_NO,			/*Type of background buffer needed	    */
     {0.1, 0.5, 0.9},		/*B-tree node splitting ratios		    */
-#ifndef HAVE_PARALLEL
+#ifndef H5_HAVE_PARALLEL
     1,				/*Cache the hyperslab blocks		    */
 #else
     0,				/*Don't cache the hyperslab blocks	    */
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     0,              		/*No limit on hyperslab block size to cache */
     NULL,                   	/*Use malloc() for VL data allocations	    */
     NULL,                   	/*No information needed for malloc() calls  */
@@ -175,7 +175,7 @@ H5F_init_interface(void)
     
     FUNC_ENTER(H5F_init_interface, FAIL);
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     {
         /* Allow MPI buf-and-file-type optimizations? */
         const char *s = HDgetenv ("HDF5_MPI_1_METAWRITE");
@@ -206,12 +206,12 @@ H5F_init_interface(void)
 	if ((status=H5FD_SEC2)<0) goto end_registration;
 	if ((status=H5FD_STDIO)<0) goto end_registration;
 	if ((status=H5FD_FAMILY)<0) goto end_registration;
-#ifdef HAVE_GASS
+#ifdef H5_HAVE_GASS
 	if ((status=H5FD_GASS)<0) goto end_registration;
 #endif
 	if ((status=H5FD_CORE)<0) goto end_registration;
 	if ((status=H5FD_MULTI)<0) goto end_registration;
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	if ((status=H5FD_MPIO)<0) goto end_registration;
 #endif
     end_registration: ;
@@ -726,7 +726,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	f->shared->alignment = fapl->alignment;
 	f->shared->gc_ref = fapl->gc_ref;
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	/*
 	 * Disable cache if file is open using MPIO driver.  Parallel
 	 * does not permit caching.  (maybe able to relax it for
@@ -1726,7 +1726,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	
     } else {
 	/* Write superblock */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
         H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
 	if (H5FD_write(f->shared->lf, H5P_DEFAULT, f->shared->boot_addr,
@@ -1737,7 +1737,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 
 	/* Write driver information block */
 	if (HADDR_UNDEF!=f->shared->driver_addr) {
-#ifdef HAVE_PARALLLEL
+#ifdef H5_HAVE_PARALLEL
 	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
 	    if (H5FD_write(f->shared->lf, H5P_DEFAULT,

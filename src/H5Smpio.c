@@ -17,10 +17,10 @@
 
 #include <H5FDmpio.h>		/*the MPIO file driver			*/
 
-#ifndef HAVE_PARALLEL
+#ifndef H5_HAVE_PARALLEL
 /* 
  * The H5S_mpio_xxxx functions are for parallel I/O only and are
- * valid only when HAVE_PARALLEL is #defined.  This empty #ifndef
+ * valid only when H5_HAVE_PARALLEL is #defined.  This empty #ifndef
  * body is used to allow this source file be included in the serial
  * distribution.
  * Some compilers/linkers may complain about "empty" object file.
@@ -28,7 +28,7 @@
  * them.
  */
 /* const hbool_t H5S_mpio_avail = FALSE; */
-#else /* HAVE_PARALLEL */
+#else /* H5_HAVE_PARALLEL */
 /* Interface initialization */
 #define PABLO_MASK      H5Sall_mask
 #define INTERFACE_INIT  NULL
@@ -698,4 +698,4 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
     FUNC_LEAVE (ret_value);
 }
 
-#endif  /* HAVE_PARALLEL */
+#endif  /* H5_HAVE_PARALLEL */

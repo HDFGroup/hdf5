@@ -379,9 +379,9 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	hdr_end_addr = addr + (hsize_t)H5HL_SIZEOF_HDR(f);
 	if (H5F_addr_eq(heap->addr, hdr_end_addr)) {
 	    /* The header and data are contiguous */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	    H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 	    if (H5F_block_write(f, addr,
 				(hsize_t)(H5HL_SIZEOF_HDR(f)+heap->disk_alloc),
 				H5P_DEFAULT, heap->chunk) < 0) {
@@ -389,17 +389,17 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 			    "unable to write heap header and data to file");
 	    }
 	} else {
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	    H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 	    if (H5F_block_write(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
 				H5P_DEFAULT, heap->chunk)<0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			      "unable to write heap header to file");
 	    }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	    H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 	    if (H5F_block_write(f, heap->addr, (hsize_t)(heap->disk_alloc),
 				H5P_DEFAULT,
 				heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {

@@ -414,9 +414,9 @@ __DLLVAR__ H5F_access_t H5F_access_dflt;
 __DLLVAR__ H5F_xfer_t H5F_xfer_dflt;
 __DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 __DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5F_init(void);

@@ -39,7 +39,7 @@ static H5S_conv_t		**H5S_conv_g = NULL;
 static size_t			H5S_aconv_g = 0;	/*entries allocated*/
 static size_t			H5S_nconv_g = 0;	/*entries used*/
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 /* Global var whose value comes from environment variable */
 hbool_t         H5_mpi_opt_types_g = FALSE;
 #endif
@@ -77,7 +77,7 @@ H5S_init_interface(void)
 		      "unable to register one or more conversion functions");
     }
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
     {
         /* Allow MPI buf-and-file-type optimizations? */
         const char *s = HDgetenv ("HDF5_MPI_OPT_TYPES");

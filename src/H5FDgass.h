@@ -15,13 +15,13 @@
 
 #include <string.h>
 
-#ifdef HAVE_GASS 
+#ifdef H5_HAVE_GASS 
 #define H5FD_GASS        (H5FD_gass_init())
 #else
 #define H5FD_GASS        (-1)
 #endif   
 
-#ifdef HAVE_GASS
+#ifdef H5_HAVE_GASS
 /* Define the GASS info object. (Will be added to later as more GASS
    functionality is sought to be exposed. */
 typedef struct GASS_Info {
@@ -37,7 +37,7 @@ typedef struct GASS_Info {
 #endif
 
 /* Function prototypes */
-#ifdef HAVE_GASS
+#ifdef H5_HAVE_GASS
 hid_t H5FD_gass_init(void);
 herr_t H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info);
 herr_t H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/);

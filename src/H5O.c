@@ -556,9 +556,9 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 	HDmemset (p, 0, H5O_SIZEOF_HDR(f)-12);
 
 	/* write the object header header */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 	H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 	if (H5F_block_write(f, addr, (hsize_t)H5O_SIZEOF_HDR(f), 
 			    H5P_DEFAULT, buf) < 0) {
 	    HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
@@ -632,9 +632,9 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 	for (i = 0; i < oh->nchunks; i++) {
 	    if (oh->chunk[i].dirty) {
 		assert(H5F_addr_defined(oh->chunk[i].addr));
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 		H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 write*/
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 		if (H5F_block_write(f, oh->chunk[i].addr,
 				    (hsize_t)(oh->chunk[i].size),
 				    H5P_DEFAULT, oh->chunk[i].image) < 0) {
