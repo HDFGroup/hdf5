@@ -58,7 +58,7 @@ int trav_table_search(unsigned long *objno, trav_table_t *table )
 
 void trav_table_add(unsigned long *objno, 
                     char *name, 
-                    H5G_obj_t type, 
+                    H5G_obj_t1 type, 
                     trav_table_t *table)
 {
  int i;
@@ -108,7 +108,7 @@ void trav_table_add(unsigned long *objno,
 
 void trav_table_addflags(unsigned *flags, 
                          char *name, 
-                         H5G_obj_t type, 
+                         H5G_obj_t1 type, 
                          trav_table_t *table)
 {
  int i;

@@ -41,7 +41,7 @@ void init_packobject(pack_info_t *obj)
  }
  obj->chunk.rank = -1;
  obj->refobj_id = -1;
- obj->layout = -1;
+ obj->layout = H5D_LAYOUT_ERROR;
  obj->nfilters = 0;
  
  
@@ -104,7 +104,7 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
   }
   table->objs[i].chunk.rank = -1;
   table->objs[i].refobj_id = -1;
-  table->objs[i].layout = -1;
+  table->objs[i].layout = H5D_LAYOUT_ERROR;
   table->objs[i].nfilters = 0;
  }
  return 0;
@@ -148,7 +148,7 @@ int options_table_init( pack_opttbl_t **tbl )
   }
   table->objs[i].chunk.rank = -1;
   table->objs[i].refobj_id = -1;
-  table->objs[i].layout = -1;
+  table->objs[i].layout = H5D_LAYOUT_ERROR;
   table->objs[i].nfilters = 0;
  }
  
