@@ -251,6 +251,7 @@ struct flush_cache_test_spec
 static hbool_t write_permitted = TRUE;
 static hbool_t pass = TRUE; /* set to false on error */
 static hbool_t skip_long_tests = TRUE;
+static hbool_t run_full_test = TRUE;
 const char *failure_mssg = NULL;
 
 test_entry_t pico_entries[NUM_PICO_ENTRIES];
@@ -561,6 +562,7 @@ static void row_major_scan_forward(H5C_t * cache_ptr,
                                    int dirty_unprotects);
 
 static void hl_row_major_scan_forward(H5C_t * cache_ptr,
+                                      int32_t max_index,
                                       hbool_t verbose,
                                       hbool_t reset_stats,
                                       hbool_t display_stats,
@@ -583,6 +585,7 @@ static void row_major_scan_backward(H5C_t * cache_ptr,
                                     int dirty_unprotects);
 
 static void hl_row_major_scan_backward(H5C_t * cache_ptr,
+                                       int32_t max_index,
                                        hbool_t verbose,
                                        hbool_t reset_stats,
                                        hbool_t display_stats,
@@ -601,6 +604,7 @@ static void col_major_scan_forward(H5C_t * cache_ptr,
                                    int dirty_unprotects);
 
 static void hl_col_major_scan_forward(H5C_t * cache_ptr,
+                                      int32_t max_index,
                                       hbool_t verbose,
                                       hbool_t reset_stats,
                                       hbool_t display_stats,
@@ -620,6 +624,7 @@ static void col_major_scan_backward(H5C_t * cache_ptr,
                                     int dirty_unprotects);
 
 static void hl_col_major_scan_backward(H5C_t * cache_ptr,
+                                       int32_t max_index,
                                        hbool_t verbose,
                                        hbool_t reset_stats,
                                        hbool_t display_stats,
@@ -2441,11 +2446,17 @@ row_major_scan_forward(H5C_t * cache_ptr,
  *
  * Modifications:
  *
+ *		JRM -- 1/21/05
+ *		Added the max_index parameter to allow the caller to
+ *		throttle the size of the inner loop, and thereby the
+ *		execution time of the function.
+ *
  *-------------------------------------------------------------------------
  */
 
 static void
 hl_row_major_scan_forward(H5C_t * cache_ptr,
+                          int32_t max_index,
                           hbool_t verbose,
                           hbool_t reset_stats,
                           hbool_t display_stats,
@@ -2458,11 +2469,14 @@ hl_row_major_scan_forward(H5C_t * cache_ptr,
     int32_t idx;
     int32_t i;
     int32_t lag = 100;
+    int32_t local_max_index;
 
     if ( verbose )
         HDfprintf(stdout, "%s(): entering.\n", fcn_name);
 
     HDassert( lag > 5 );
+    HDassert( max_index >= 200 );
+    HDassert( max_index <= MAX_ENTRIES );
 
     type = 0;
 
@@ -2475,7 +2489,9 @@ hl_row_major_scan_forward(H5C_t * cache_ptr,
     {
         idx = -lag;
 
-        while ( ( pass ) && ( idx <= (max_indices[type] + lag) ) )
+        local_max_index = MIN(max_index, max_indices[type]);
+
+        while ( ( pass ) && ( idx <= (local_max_index + lag) ) )
         {
             if ( ( pass ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
                  ( (idx + lag) <= max_indices[type] ) &&
@@ -2493,7 +2509,7 @@ hl_row_major_scan_forward(H5C_t * cache_ptr,
 
             while ( ( pass ) && ( i >= idx - lag ) && ( i >= 0 ) )
             {
-                if ( ( pass ) && ( i >= 0 ) && ( i <= max_indices[type] ) ) {
+                if ( ( pass ) && ( i >= 0 ) && ( i <= local_max_index ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
@@ -2770,11 +2786,17 @@ row_major_scan_backward(H5C_t * cache_ptr,
  *
  * Modifications:
  *
+ *		JRM -- 1/21/05
+ *		Added the max_index parameter to allow the caller to
+ *		throttle the size of the inner loop, and thereby the
+ *		execution time of the function.
+ *
  *-------------------------------------------------------------------------
  */
 
 static void
 hl_row_major_scan_backward(H5C_t * cache_ptr,
+                           int32_t max_index,
                            hbool_t verbose,
                            hbool_t reset_stats,
                            hbool_t display_stats,
@@ -2787,11 +2809,14 @@ hl_row_major_scan_backward(H5C_t * cache_ptr,
     int32_t idx;
     int32_t i;
     int32_t lag = 100;
+    int32_t local_max_index;
 
     if ( verbose )
         HDfprintf(stdout, "%s(): entering.\n", fcn_name);
 
     HDassert( lag > 5 );
+    HDassert( max_index >= 200 );
+    HDassert( max_index <= MAX_ENTRIES );
 
     type = NUMBER_OF_ENTRY_TYPES - 1;
 
@@ -2804,10 +2829,12 @@ hl_row_major_scan_backward(H5C_t * cache_ptr,
     {
         idx = max_indices[type] + lag;
 
+        local_max_index = MIN(max_index, max_indices[type]);
+
         while ( ( pass ) && ( idx >= -lag ) )
         {
             if ( ( pass ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
-                 ( (idx + lag) <= max_indices[type] ) &&
+                 ( (idx + lag) <= local_max_index ) &&
                  ( ((idx + lag) % 2) == 0 ) &&
                  ( ! entry_in_cache(cache_ptr, type, (idx + lag)) ) ) {
 
@@ -2822,7 +2849,7 @@ hl_row_major_scan_backward(H5C_t * cache_ptr,
 
             while ( ( pass ) && ( i >= idx - lag ) && ( i >= 0 ) )
             {
-                if ( ( pass ) && ( i >= 0 ) && ( i <= max_indices[type] ) ) {
+                if ( ( pass ) && ( i >= 0 ) && ( i <= local_max_index ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
@@ -2971,11 +2998,17 @@ col_major_scan_forward(H5C_t * cache_ptr,
  *
  * Modifications:
  *
+ *		JRM -- 1/21/05
+ *		Added the max_index parameter to allow the caller to
+ *		throttle the size of the inner loop, and thereby the
+ *		execution time of the function.
+ *
  *-------------------------------------------------------------------------
  */
 
 static void
 hl_col_major_scan_forward(H5C_t * cache_ptr,
+                          int32_t max_index,
                           hbool_t verbose,
                           hbool_t reset_stats,
                           hbool_t display_stats,
@@ -2989,11 +3022,14 @@ hl_col_major_scan_forward(H5C_t * cache_ptr,
     int32_t idx;
     int32_t lag = 200;
     int32_t i;
+    int32_t local_max_index;
 
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
     HDassert( lag > 5 );
+    HDassert( max_index >= 500 );
+    HDassert( max_index <= MAX_ENTRIES );
 
     type = 0;
 
@@ -3004,7 +3040,9 @@ hl_col_major_scan_forward(H5C_t * cache_ptr,
 
     idx = 0;
 
-    while ( ( pass ) && ( idx <= MAX_ENTRIES ) )
+    local_max_index = MIN(max_index, MAX_ENTRIES);
+
+    while ( ( pass ) && ( idx <= local_max_index ) )
     {
 
         i = idx;
@@ -3016,7 +3054,7 @@ hl_col_major_scan_forward(H5C_t * cache_ptr,
             while ( ( pass ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
             {
                 if ( ( pass ) && ( do_inserts ) && ( i == idx ) &&
-                     ( i <= max_indices[type] ) &&
+                     ( i <= local_max_index ) &&
                      ( (i % 3) == 0 ) &&
                      ( ! entry_in_cache(cache_ptr, type, i) ) ) {
 
@@ -3027,7 +3065,7 @@ hl_col_major_scan_forward(H5C_t * cache_ptr,
                                  H5C__NO_FLAGS_SET);
                 }
 
-                if ( ( pass ) && ( i >= 0 ) && ( i <= max_indices[type] ) ) {
+                if ( ( pass ) && ( i >= 0 ) && ( i <= local_max_index ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
@@ -3191,11 +3229,17 @@ col_major_scan_backward(H5C_t * cache_ptr,
  *
  * Modifications:
  *
+ *		JRM -- 1/21/05
+ *		Added the max_index parameter to allow the caller to
+ *		throttle the size of the inner loop, and thereby the
+ *		execution time of the function.
+ *
  *-------------------------------------------------------------------------
  */
 
 static void
 hl_col_major_scan_backward(H5C_t * cache_ptr,
+                           int32_t max_index,
                            hbool_t verbose,
                            hbool_t reset_stats,
                            hbool_t display_stats,
@@ -3209,32 +3253,39 @@ hl_col_major_scan_backward(H5C_t * cache_ptr,
     int32_t idx;
     int32_t lag = 50;
     int32_t i;
+    int32_t local_max_index;
 
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
+    HDassert( lag > 5 );
+    HDassert( max_index >= 500 );
+    HDassert( max_index <= MAX_ENTRIES );
+
     type = 0;
+
+    local_max_index = MIN(max_index, MAX_ENTRIES);
 
     if ( ( pass ) && ( reset_stats ) ) {
 
         H5C_stats__reset(cache_ptr);
     }
 
-    idx = MAX_ENTRIES;
+    idx = local_max_index;
 
     while ( ( pass ) && ( idx >= 0 ) )
     {
 
         i = idx;
 
-        while ( ( pass ) && ( i <= MAX_ENTRIES ) && ( i <= (idx + lag) ) ) {
+        while ( ( pass ) && ( i <= local_max_index ) && ( i <= (idx + lag) ) ) {
 
             type = 0;
 
             while ( ( pass ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
             {
                 if ( ( pass ) && ( do_inserts ) && ( i == idx ) &&
-                     ( i <= max_indices[type] ) &&
+                     ( i <= local_max_index ) &&
                      ( ! entry_in_cache(cache_ptr, type, i) ) ) {
 
                     if ( verbose )
@@ -3244,7 +3295,7 @@ hl_col_major_scan_backward(H5C_t * cache_ptr,
                                  H5C__NO_FLAGS_SET);
                 }
 
-                if ( ( pass ) && ( i >= 0 ) && ( i <= max_indices[type] ) ) {
+                if ( ( pass ) && ( i >= 0 ) && ( i <= local_max_index ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
@@ -3253,7 +3304,7 @@ hl_col_major_scan_backward(H5C_t * cache_ptr,
                 }
 
                 if ( ( pass ) && ( i >= 0 ) &&
-                     ( i <= max_indices[type] ) ) {
+                     ( i <= local_max_index ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, i);
@@ -4067,6 +4118,7 @@ smoke_check_5(void)
     hbool_t dirty_inserts = FALSE;
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
+    int32_t max_index = 1024;
     int mile_stone = 1;
     H5C_t * cache_ptr = NULL;
     H5C_auto_size_ctl_t auto_size_ctl =
@@ -4124,6 +4176,11 @@ smoke_check_5(void)
         return;
     }
 
+    if ( run_full_test ) {
+
+        max_index = (10 * 1024) - 1;
+    }
+
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
@@ -4155,6 +4212,7 @@ smoke_check_5(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4167,6 +4225,7 @@ smoke_check_5(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -4179,6 +4238,7 @@ smoke_check_5(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4202,6 +4262,7 @@ smoke_check_5(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4226,6 +4287,7 @@ smoke_check_5(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -4288,6 +4350,7 @@ smoke_check_6(void)
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
     int mile_stone = 1;
+    int32_t max_index = 1024;
     H5C_t * cache_ptr = NULL;
     H5C_auto_size_ctl_t auto_size_ctl =
     {
@@ -4346,6 +4409,11 @@ smoke_check_6(void)
         return;
     }
 
+    if ( run_full_test ) {
+
+        max_index = (10 * 1024) - 1;
+    }
+
     if ( show_progress ) /* 1 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n", 
                   fcn_name, mile_stone++, (int)pass);
@@ -4375,6 +4443,7 @@ smoke_check_6(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4387,6 +4456,7 @@ smoke_check_6(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -4399,6 +4469,7 @@ smoke_check_6(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4422,6 +4493,7 @@ smoke_check_6(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4446,6 +4518,7 @@ smoke_check_6(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -4508,6 +4581,7 @@ smoke_check_7(void)
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
     int mile_stone = 1;
+    int32_t max_index = 1024;
     H5C_t * cache_ptr = NULL;
     H5C_auto_size_ctl_t auto_size_ctl =
     {
@@ -4565,6 +4639,11 @@ smoke_check_7(void)
         return;
     }
 
+    if ( run_full_test ) {
+
+        max_index = (10 * 1024) - 1;
+    }
+
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
@@ -4596,6 +4675,7 @@ smoke_check_7(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4608,6 +4688,7 @@ smoke_check_7(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -4620,6 +4701,7 @@ smoke_check_7(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4643,6 +4725,7 @@ smoke_check_7(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4667,6 +4750,7 @@ smoke_check_7(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -4729,6 +4813,7 @@ smoke_check_8(void)
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
     int mile_stone = 1;
+    int32_t max_index = 1024;
     H5C_t * cache_ptr = NULL;
     H5C_auto_size_ctl_t auto_size_ctl =
     {
@@ -4786,6 +4871,11 @@ smoke_check_8(void)
         return;
     }
 
+    if ( run_full_test ) {
+
+        max_index = (10 * 1024) - 1;
+    }
+
     pass = TRUE;
 
     if ( show_progress ) /* 1 */
@@ -4817,6 +4907,7 @@ smoke_check_8(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4829,6 +4920,7 @@ smoke_check_8(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -4841,6 +4933,7 @@ smoke_check_8(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4864,6 +4957,7 @@ smoke_check_8(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                              /* max_index              */ max_index,
                               /* verbose                */ FALSE,
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
@@ -4888,6 +4982,7 @@ smoke_check_8(void)
                   fcn_name, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                               /* max_index              */ max_index,
                                /* verbose                */ FALSE,
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
@@ -17389,10 +17484,12 @@ main(void)
 {
     H5open();
 
-#ifdef NDEBUG
     skip_long_tests = FALSE;
+
+#ifdef NDEBUG
+    run_full_test = TRUE;
 #else /* NDEBUG */
-    skip_long_tests = TRUE;
+    run_full_test = FALSE;
 #endif /* NDEBUG */
 
     smoke_check_1();
