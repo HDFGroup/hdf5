@@ -271,8 +271,14 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     /* Check for which information to write */
     if(mesg->version<3) {
         /* number of dimensions */
-        assert(mesg->unused.ndims > 0 && mesg->unused.ndims <= H5O_LAYOUT_NDIMS);
-        *p++ = mesg->unused.ndims;
+        if(mesg->type!=H5D_CHUNKED) {
+            assert(mesg->unused.ndims > 0 && mesg->unused.ndims <= H5O_LAYOUT_NDIMS);
+            *p++ = mesg->unused.ndims;
+        } /* end if */
+        else {
+            assert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+            *p++ = mesg->u.chunk.ndims;
+        } /* end else */
 
         /* layout class */
         *p++ = mesg->type;
