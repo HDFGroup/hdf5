@@ -41,46 +41,7 @@ SNAPCMD="$SRCDIR test clean"
 STANDARD_OPT=""
 ENABLE_PARALLEL="--enable-parallel"
 
-#***************
-# Various hosts
-#***************
-# DEC
-# Gondolin: DEC
-#DECHOST="skydive"	# skydive is dead.
-			# gondolin rsh/ssh don't work. run as alone-host.
-# HP
-# sangamon: HPUX 10
-# kelgia: HPUX 11
-HPHOST="kelgia sangamon"	# HPUX 10 & 11 
-
-# Linux
-# Dangermouse, eirene: Linux
-# Dangermouse used to die if gmake -j is used.
-LINUXHOST=eirene
-
-# SGI O2K
-# modi4:	R10K,  IRIX64 6.5, default to -64,-mips4
-#		Testing {parallel,serial}x{-64,-n32}x
-O2KHOST=modi4
-# regular, unleaded, premium:
-#		R10K,  IRIX64 6.5, default to -n32,-mips4
-# impact7:	R4400, IRIX 6.5,   default to -n32,-mips3
-# o2-N:		R10K,  IRIX 6.5,   default to -n32,-mips4
-# paz:		R4400, IRIX 6.5,   default to -n32,-mips3
-SGIHOST="regular impact7 o2-3"	
-
-# Sun
-SUNHOST="arabica baldric"	# solaris 2.6 and 2.7
-
-# FreeBSD
-# AFS does not work well in hawkwind.  Use NFS/local space for its
-# test directory.  ssh does not work for it either.
-FREEBSDHOST="hawkwind"
-
-# set up default all hosts to test
-ALLHOSTS="$O2KHOST $SUNHOST $SGIHOST $HPHOST $LINUXHOST $DECHOST $FREEBSDHOST"
-
-# test hosts
+# test host default as local host.
 TESTHOST=""
 
 #################################
@@ -515,7 +476,7 @@ while [ $# -gt 0 ]; do
 	    PROGNAME="$PROGNAME $H5VER"
 	    ;;
 	-all)
-	    # cannot assign ALLHOSTS yet.
+	    # Test all hosts.
 	    TESTHOST=-all
 	    ;;
 	-nocvs)
@@ -554,11 +515,14 @@ SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
 # Setup test host(s)
 #################################
 ALLHOSTSFILE=${SNAPYARD}/allhostfile
-if [ -f $ALLHOSTSFILE ]; then
-    ALLHOSTS=`grep -v '#' $ALLHOSTSFILE`
-fi
 if [ "$TESTHOST" = -all ]; then
-    TESTHOST=$ALLHOSTS
+    if [ -f $ALLHOSTSFILE ]; then
+	TESTHOST=`sed -e s/#.*// $ALLHOSTSFILE`
+    else
+	PRINT "could not access the all-hosts-file ($ALLHOSTSFILE)"
+	USAGE
+	exit 1
+    fi
 fi
 
 
