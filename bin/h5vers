@@ -1,4 +1,8 @@
-#!/usr/bin/perl -w
+#! /bin/sh
+perl -x -S $0 "$@"
+exit
+
+#! perl
 require 5.003;
 
 ### Copyright © 1998 NCSA.
