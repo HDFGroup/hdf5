@@ -1,4 +1,4 @@
-#!rbin/sh 
+#!/bin/sh
 #
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -26,11 +26,11 @@ TESTING() {
 TOOLTEST()
 {
 err=0
-./h5import $*
-../h5dump/h5dump $5 >log2
+$RUNSERIAL ./h5import $*
+$RUNSERIAL ../h5dump/h5dump $5 >log2
 
 cd tmp_testfiles
-../../h5dump/h5dump $5 >log1
+$RUNSERIAL ../../h5dump/h5dump $5 >log1
 cd ..
 
 cmp -s tmp_testfiles/log1 log2 || err=1
@@ -56,7 +56,7 @@ rm -f  output.h5 log1 tx* b* *.dat
 mkdir tmp_testfiles
 cp $srcdir/testfiles/*.h5 tmp_testfiles/
 
-./h5importtest
+$RUNSERIAL ./h5importtest
 
 TESTING "ASCII I32 rank 3 - Output BE " ;
 TOOLTEST txtin32 -c $srcdir/testfiles/textin32 -o test1.h5
