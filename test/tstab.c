@@ -118,6 +118,12 @@ test_2(void)
         CHECK_I(status, "H5Gclose");
     }
 
+    /* close the property lists */
+    status = H5Pclose(create_plist);
+    CHECK_I(status, "H5Pclose");
+    status = H5Pclose(access_plist);
+    CHECK_I(status, "H5Pclose");
+
     /* close the file */
     status = H5Fclose(fid);
     CHECK_I(status, "H5Fclose");

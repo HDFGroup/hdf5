@@ -95,23 +95,23 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
     p+=name_len;    /* advance the memory pointer */
 
     /* decode the attribute datatype */
-    if((attr->dt=(H5O_DTYPE[0].decode)(f,p,NULL))==NULL) {
+    if((attr->dt=(H5O_DTYPE->decode)(f,p,NULL))==NULL) {
         HRETURN_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL,
                       "can't decode attribute datatype");
     }
-    attr->dt_size=(H5O_DTYPE[0].raw_size)(f,attr->dt);
+    attr->dt_size=(H5O_DTYPE->raw_size)(f,attr->dt);
     p+=attr->dt_size;
 
     /* decode the attribute dataspace */
     attr->ds = H5MM_xcalloc(1, sizeof(H5S_t));
-    if((simple=(H5O_SDSPACE[0].decode)(f,p,NULL))!=NULL) {
+    if((simple=(H5O_SDSPACE->decode)(f,p,NULL))!=NULL) {
         attr->ds->type = H5S_SIMPLE;
         HDmemcpy(&(attr->ds->u.simple),simple, sizeof(H5S_simple_t));
         H5MM_xfree(simple);
     } else {
         attr->ds->type = H5S_SCALAR;
     } /* end else */
-    attr->ds_size=(H5O_SDSPACE[0].raw_size)(f,&(attr->ds->u.simple));
+    attr->ds_size=(H5O_SDSPACE->raw_size)(f,&(attr->ds->u.simple));
     p+=attr->ds_size;
 
     /* Compute the size of the data */
@@ -170,14 +170,14 @@ H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
     p+=name_len;
 
     /* encode the attribute datatype */
-    if((H5O_DTYPE[0].encode)(f,p,attr->dt)<0) {
+    if((H5O_DTYPE->encode)(f,p,attr->dt)<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
                       "can't encode attribute datatype");
     }
     p+=attr->dt_size;
 
     /* encode the attribute dataspace */
-    if((H5O_SDSPACE[0].encode)(f,p,&(attr->ds->u.simple))<0) {
+    if((H5O_SDSPACE->encode)(f,p,&(attr->ds->u.simple))<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
                       "can't encode attribute dataspace");
     }
@@ -297,7 +297,7 @@ H5O_attr_reset(void *_mesg)
 
     if (attr) {
         tmp = H5MM_xmalloc(sizeof(H5A_t));
-        *tmp = *attr;
+        HDmemcpy(tmp,attr,sizeof(H5A_t));
         H5A_close(tmp);
         HDmemset(attr, 0, sizeof(H5A_t));
     }

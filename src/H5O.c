@@ -1448,9 +1448,13 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      * that could be generated below.
      */
     if (oh->nmesgs + 3 > oh->alloc_nmesgs) {
-	oh->alloc_nmesgs += MAX(H5O_NMESGS, 3);
-	oh->mesg = H5MM_xrealloc(oh->mesg,
+        int old_alloc=oh->alloc_nmesgs;
+
+        oh->alloc_nmesgs += MAX(H5O_NMESGS, 3);
+        oh->mesg = H5MM_xrealloc(oh->mesg,
 				 oh->alloc_nmesgs * sizeof(H5O_mesg_t));
+        /* Set new object header info to zeros */
+        HDmemset(&oh->mesg[old_alloc],0,(oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
     }
 
     /*
@@ -1592,9 +1596,13 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	assert(oh->mesg[idx].raw_size - size >= H5O_SIZEOF_MSGHDR(f));
 
 	if (oh->nmesgs >= oh->alloc_nmesgs) {
+        int old_alloc=oh->alloc_nmesgs;
+
 	    oh->alloc_nmesgs += H5O_NMESGS;
 	    oh->mesg = H5MM_xrealloc(oh->mesg,
 				     oh->alloc_nmesgs * sizeof(H5O_mesg_t));
+        /* Set new object header info to zeros */
+        HDmemset(&oh->mesg[old_alloc],0,(oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
 	}
 	null_idx = oh->nmesgs++;
 	oh->mesg[null_idx].type = H5O_NULL;

@@ -117,6 +117,10 @@ test_attr_basic_write(void)
     sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
+    /* Try to create an attribute on the file (should fail) */
+    ret=H5Acreate(fid1,ATTR1_NAME,H5T_NATIVE_INT32,sid2,H5P_DEFAULT);
+    VERIFY(ret, FAIL, "H5Acreate");
+
     /* Create an attribute for the dataset */
     attr=H5Acreate(dataset,ATTR1_NAME,H5T_NATIVE_INT32,sid2,H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate");
@@ -326,7 +330,7 @@ test_attr_complex_write(void)
     CHECK(attr, FAIL, "H5Acreate");
 
     /* Try to create the same attribute again (should fail) */
-    ret=H5Acreate(dataset,ATTR4_NAME,H5T_NATIVE_INT32,sid2,H5P_DEFAULT);
+    ret=H5Acreate(dataset,ATTR4_NAME,tid1,sid2,H5P_DEFAULT);
     VERIFY(ret, FAIL, "H5Acreate");
 
     /* Write complex attribute data */
@@ -992,7 +996,7 @@ test_attr_delete(void)
 
     /* Try to delete bogus attribute */
     ret=H5Adelete(dataset,"Bogus");
-    CHECK(ret, FAIL, "H5Adelete");
+    VERIFY(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
     ret=H5Anum_attrs(dataset);

@@ -2765,6 +2765,7 @@ H5T_close(H5T_t *dt)
 
     assert(dt);
 
+    /* Don't free locked datatypes unless we are shutting the interface down */
     if (!dt->locked) {
 	if (dt && H5T_COMPOUND == dt->type) {
 	    for (i = 0; i < dt->u.compnd.nmembs; i++) {

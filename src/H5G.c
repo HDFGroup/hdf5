@@ -1290,6 +1290,8 @@ H5G_close(H5G_t *grp)
 	}
     }
     --grp->nref;
+    if(grp->nref==0)
+        H5MM_xfree(grp);
 
     FUNC_LEAVE(SUCCEED);
 }
