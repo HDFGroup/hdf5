@@ -768,7 +768,7 @@ test_conv_buffer(hid_t fid)
     hsize_t     dimsb[1];
     hsize_t     dimsc[1];
     hid_t       xfer_list;
-    hsize_t      size;
+    size_t      size;
 
     TESTING("data type conversion buffer size");
     

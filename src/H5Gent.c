@@ -31,7 +31,9 @@ static int          	interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /* Private prototypes */
+#ifdef NOT_YET
 static herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -91,6 +93,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef NOT_YET
 static herr_t
 H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
@@ -107,6 +110,7 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------

@@ -2294,7 +2294,6 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
-    hsize_t offset[H5O_LAYOUT_NDIMS];   /* Offset of selection for chunk */
     hsize_t nchunks, last_nchunks;      /* Number of chunks in dataset */
     H5TB_NODE *curr_node;       /* Current node in TBBT */
     char bogus;                         /* "bogus" buffer to pass to selection iterator */
@@ -2646,8 +2645,8 @@ H5D_create_chunk_file_map(fm_map *fm)
 {
     H5S_t       *tmp_fspace=NULL;           /* Temporary file dataspace */
     hssize_t    sel_points;                 /* Number of elements in file selection */
-    hsize_t     sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
-    hsize_t     sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hssize_t    sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hssize_t    sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     hssize_t    start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
     hssize_t    coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
     hsize_t     count[H5O_LAYOUT_NDIMS];    /* Hyperslab count information */
@@ -2837,11 +2836,11 @@ H5D_create_chunk_mem_map(fm_map *fm)
 #endif /* QAK */
 
     /* Get offset of first block in file selection */
-    if(H5S_get_select_hyper_blocklist(fm->file_space, 0, 1, file_off)<0)
+    if(H5S_get_select_hyper_blocklist(fm->file_space, (hsize_t)0, (hsize_t)1, file_off)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info");
 
     /* Get offset of first block in memory selection */
-    if(H5S_get_select_hyper_blocklist(fm->mem_space, 0, 1, mem_off)<0)
+    if(H5S_get_select_hyper_blocklist(fm->mem_space, (hsize_t)0, (hsize_t)1, mem_off)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info");
 
     /* Calculate the adjustment for memory selection from file selection */
@@ -2979,7 +2978,6 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
     H5S_t       *mspace;                        /* Memory chunk's dataspace */
     hssize_t    coords_in_mem[H5O_LAYOUT_NDIMS];        /* Coordinates of element in memory */
     hsize_t     chunk_index;                    /* Chunk index */
-    hsize_t     u;                              /* Local index variables */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
     
     FUNC_ENTER_NOINIT(H5D_chunk_mem_cb);

@@ -71,9 +71,9 @@ typedef struct H5HL_t {
 } H5HL_t;
 
 /* PRIVATE PROTOTYPES */
+#ifdef NOT_YET
 static void *H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size,
 			void *buf);
-#ifdef NOT_YET
 static herr_t H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size,
 			  const void *buf);
 #endif /* NOT_YET */
@@ -621,6 +621,7 @@ H5HL_clear(H5HL_t *heap)
  *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
+#ifdef NOT_YET
 static void *
 H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, void *buf)
 {
@@ -648,6 +649,7 @@ H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, voi
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
