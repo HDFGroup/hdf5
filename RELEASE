@@ -64,6 +64,8 @@ Library
      non-zero values.
    * Changed return type of H5Aiterate and H5A_operator_t typedef to be
      herr_t, to align them with the dataset and group iterator functions.
+   * Changed H5Screate_simple and H5Sset_extent_simple to not allow dimensions
+     of size 0 with out the same dimension being unlimited.
 
 Configuration
 -------------
