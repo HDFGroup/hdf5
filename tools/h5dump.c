@@ -490,14 +490,9 @@ static herr_t
 dump_all (hid_t group, const char *name, void __unused__ *op_data)
 {
     hid_t obj;
-    hid_t (*func)(void*);
-    void *edata;
     char *buf;
     H5G_stat_t statbuf;
 
-    /* Disable error reporting */
-    H5Eget_auto (&func, &edata);
-    H5Eset_auto (NULL, NULL);
 
 
     H5Gget_objinfo(group, name, FALSE, &statbuf);
@@ -554,15 +549,12 @@ dump_all (hid_t group, const char *name, void __unused__ *op_data)
     default:
          printf ("Unknown Object %s\n", name);
          status = 1; 
-         H5Eset_auto (func, edata);
          return FAIL;
          break;
 
     }
 
 
-    /* Restore error reporting */
-    H5Eset_auto (func, edata);
 
     return SUCCEED;
 
@@ -819,6 +811,11 @@ int nopts=0, *opts;
 char *buf;
 H5G_stat_t statbuf;
 void __unused__ *op_data;
+    hid_t (*func)(void*);
+    void *edata;
+    /* Disable error reporting */
+    H5Eget_auto (&func, &edata);
+    H5Eset_auto (NULL, NULL);
 
     if (argc < 2 ) {
         usage();
@@ -1012,6 +1009,8 @@ void __unused__ *op_data;
 
     free(opts);
 
+    /* Restore error reporting */
+    H5Eset_auto (func, edata);
     if (H5Fclose (fid) < 0) exit(1);
 
     return status;
