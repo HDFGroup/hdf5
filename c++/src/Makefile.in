@@ -92,12 +92,12 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 includedir = $(exec_prefix)/include
 
 
-# Prevent automake from trying to run autotools during build
-# Temporary fix (I hope!) - JAMES
-ACLOCAL = 
-AUTOCONF = 
-AUTOMAKE = 
-AUTOHEADER = 
+# Set the paths for autotools to be correct on heping.
+# Ideally, these tools should never be needed during the build.
+ACLOCAL = /usr/bin/aclocal
+AUTOCONF = /usr/local/autoconf-2.59/bin/autoconf
+AUTOMAKE = /usr/bin/automake
+AUTOHEADER = /usr/local/autoconf-2.59/bin/autoheader
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMTAR = @AMTAR@
 AR = @AR@
