@@ -161,6 +161,11 @@ Platforms Tested
                                   xlf 8.1.1.7
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
+    AIX 5.2 (32/64 bit, LLNL frost)    xlc 6.0.0.8
+                                  xlC 6.0.0.8
+                                  xlf 8.1.1.7
+                                  mpcc_r 6.0.0.8
+                                  mpxlf_r 8.1.1.7
     Cray T90 sn7001 10.0.0md      Cray Standard C Version 6.4.0.3
                                   Cray Fortran Version 3.4.0.0
     Cray T3E sn6606 2.0.6.08      Cray Standard C Version 6.6.0.3
@@ -219,7 +224,7 @@ Platforms Tested
     SunOS 5.9 32,64               Sun C 5.6 2004/07/15
      (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
                                   Sun C++ 5.6 2004/07/15
-    TFLOPS r1.0.4 v4.4.4 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
+    TFLOPS r1.0.4 v4.5.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
     IA-32 Linux 2.4.18            gcc 2.96
                                   Intel(R) C++ Version 7.0
