@@ -20,6 +20,7 @@
 #include "H5FDprivate.h"    /* File driver                                  */
 #include "H5FDfphdf5.h"     /* Flexible PHDF5 I/O file driver               */
 #include "H5FDmpio.h"       /* MPI I/O file driver                          */
+#include "H5FDprivate.h"    /* File drivers                                 */
 #include "H5Iprivate.h"     /* Object IDs                                   */
 #include "H5MMprivate.h"    /* Memory allocation                            */
 #include "H5Pprivate.h"     /* Property lists                               */

@@ -16,7 +16,6 @@
 #define H5FDFPHDF5_H__
 
 #include "H5FDmpio.h"
-#include "H5FDprivate.h"
 
 #ifdef H5_HAVE_PARALLEL
 #   define H5FD_FPHDF5      (H5FD_fphdf5_init())
