@@ -2863,3 +2863,61 @@ H5S_hyper_select_deserialize (H5S_t *space, const uint8_t *buf)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_select_deserialize() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_bounds
+ PURPOSE
+    Gets the bounding box containing the selection.
+ USAGE
+    herr_t H5S_hyper_bounds(space, hsize_t *start, hsize_t *end)
+        H5S_t *space;           IN: Dataspace pointer of selection to query
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the bounding box containing the current selection and places
+    it into the user's buffers.  The start and end buffers must be large
+    enough to hold the dataspace rank number of coordinates.  The bounding box
+    exactly contains the selection, ie. if a 2-D element selection is currently
+    defined with the following points: (4,5), (6,8) (10,7), the bounding box
+    with be (4, 5), (10, 8).
+        The bounding box calculations _does_ include the current offset of the
+    selection within the dataspace extent.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
+{
+    H5S_hyper_node_t *node;     /* Hyperslab node */
+    intn rank;                  /* Dataspace rank */
+    intn i;                     /* index variable */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5S_hyper_bounds, FAIL);
+
+    assert(space);
+    assert(start);
+    assert(end);
+
+    /* Get the dataspace extent rank */
+    rank=space->extent.u.simple.rank;
+
+    /* Iterate through the node, copying each hyperslab's information */
+    node=space->select.sel_info.hslab.hyper_lst->head;
+    while(node!=NULL) {
+        for(i=0; i<rank; i++) {
+            if(start[i]>(hsize_t)(node->start[i]+space->select.offset[i]))
+                start[i]=node->start[i]+space->select.offset[i];
+            if(end[i]<(hsize_t)(node->end[i]+space->select.offset[i]))
+                end[i]=node->end[i]+space->select.offset[i];
+        } /* end for */
+        node=node->next;
+      } /* end while */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_hyper_bounds() */

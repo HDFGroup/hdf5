@@ -333,6 +333,7 @@ __DLL__ herr_t H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
 __DLL__ hssize_t H5S_select_serial_size(const H5S_t *space);
 __DLL__ herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
+__DLL__ herr_t H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 
 /* Point select functions */
 __DLL__ herr_t H5S_point_add(H5S_t *space, size_t num_elemn,
@@ -344,12 +345,14 @@ __DLL__ htri_t H5S_point_select_valid(const H5S_t *space);
 __DLL__ hssize_t H5S_point_select_serial_size(const H5S_t *space);
 __DLL__ herr_t H5S_point_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_point_select_deserialize(H5S_t *space, const uint8_t *buf);
+__DLL__ herr_t H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 
 /* "All" select functions */
 __DLL__ herr_t H5S_all_release(H5S_t *space);
 __DLL__ hsize_t H5S_all_npoints(const H5S_t *space);
 __DLL__ herr_t H5S_all_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_all_select_deserialize(H5S_t *space, const uint8_t *buf);
+__DLL__ herr_t H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 
 /* Hyperslab selection functions */
 __DLL__ herr_t H5S_hyper_add(H5S_t *space, const hssize_t *start,
@@ -370,6 +373,7 @@ __DLL__ herr_t H5S_hyper_clip(H5S_t *space, H5S_hyper_node_t *nodes,
 __DLL__ hssize_t H5S_hyper_select_serial_size(const H5S_t *space);
 __DLL__ herr_t H5S_hyper_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_hyper_select_deserialize(H5S_t *space, const uint8_t *buf);
+__DLL__ herr_t H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 
 /* "None" selection functions */
 __DLL__ herr_t H5S_none_select_serialize(const H5S_t *space, uint8_t *buf);
@@ -401,5 +405,7 @@ __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
 /* Global var whose value comes from environment variable */
 __DLLVAR__ hbool_t		H5_mpi_opt_types_g;
 #endif /* _H5S_IN_H5S_C */
+
 #endif /* HAVE_PARALLEL */
+
 #endif /* _H5Sprivate_H */

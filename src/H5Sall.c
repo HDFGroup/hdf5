@@ -640,3 +640,53 @@ H5S_all_select_deserialize (H5S_t *space, const uint8_t __unused__ *buf)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_select_deserialize() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_all_bounds
+ PURPOSE
+    Gets the bounding box containing the selection.
+ USAGE
+    herr_t H5S_all_bounds(space, hsize_t *start, hsize_t *end)
+        H5S_t *space;           IN: Dataspace pointer of selection to query
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the bounding box containing the current selection and places
+    it into the user's buffers.  The start and end buffers must be large
+    enough to hold the dataspace rank number of coordinates.  The bounding box
+    exactly contains the selection, ie. if a 2-D element selection is currently
+    defined with the following points: (4,5), (6,8) (10,7), the bounding box
+    with be (4, 5), (10, 8).  Calling this function on a "none" selection
+    returns fail.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
+{
+    intn rank;                  /* Dataspace rank */
+    intn i;                     /* index variable */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5S_all_bounds, FAIL);
+
+    assert(space);
+    assert(start);
+    assert(end);
+
+    /* Get the dataspace extent rank */
+    rank=space->extent.u.simple.rank;
+
+    /* Just copy over the complete extent */
+    for(i=0; i<rank; i++) {
+        start[i]=0;
+        end[i]=space->extent.u.simple.size[i]-1;
+    } /* end for */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_all_bounds() */

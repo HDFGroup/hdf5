@@ -21,6 +21,11 @@
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = 0;
 
+static hssize_t H5S_get_select_hyper_nblocks(H5S_t *space);
+static hssize_t H5S_get_select_elem_npoints(H5S_t *space);
+static herr_t H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t *buf);
+static herr_t H5S_get_select_elem_pointlist(H5S_t *space, hsize_t *buf);
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -158,68 +163,6 @@ H5S_select_release (H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_release() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Sselect_hyperslab
- PURPOSE
-    Specify a hyperslab to combine with the current hyperslab selection
- USAGE
-    herr_t H5Sselect_hyperslab(dsid, op, start, stride, count, block)
-        hid_t dsid;             IN: Dataspace ID of selection to modify
-        H5S_seloper_t op;       IN: Operation to perform on current selection
-        const hssize_t *start;        IN: Offset of start of hyperslab
-        const hssize_t *stride;       IN: Hyperslab stride
-        const hssize_t *count;        IN: Number of blocks included in hyperslab
-        const hssize_t *block;        IN: Size of block in hyperslab
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Combines a hyperslab selection with the current selection for a dataspace.
-    If the current selection is not a hyperslab, it is freed and the hyperslab
-    parameters passed in are combined with the H5S_SEL_ALL hyperslab (ie. a
-    selection composing the entire current extent).  Currently, only the
-    H5S_SELECT_SET & H5S_SELECT_OR operations are supported.  If STRIDE or
-    BLOCK is NULL, they are assumed to be set to all '1'.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-herr_t
-H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
-		     const hssize_t start[/*space_id*/],
-		     const hsize_t _stride[/*space_id*/],
-		     const hsize_t count[/*space_id*/],
-		     const hsize_t _block[/*space_id*/])
-{
-    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-
-    FUNC_ENTER (H5Sselect_hyperslab, FAIL);
-    H5TRACE6("e","iSs*[a0]Hs*[a0]h*[a0]h*[a0]h",space_id,op,start,_stride,
-             count,_block);
-
-    /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) ||
-            NULL == (space=H5I_object(space_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    }
-    if(start==NULL || count==NULL) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
-    } /* end if */
-
-    if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID)) {
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
-    } /* end if */
-
-    if (H5S_select_hyperslab(space, op, start, _stride, count, _block)<0) {
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		      "unable to set hyperslab selection");
-    }
-
-    FUNC_LEAVE (SUCCEED);
-}
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_select_hyperslab
@@ -431,6 +374,67 @@ done:
     if(_stride!=NULL) H5TB_release_buf(stride_id);
     if(_block!=NULL) H5TB_release_buf(block_id);
     FUNC_LEAVE (ret_value);
+}
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_hyperslab
+ PURPOSE
+    Specify a hyperslab to combine with the current hyperslab selection
+ USAGE
+    herr_t H5Sselect_hyperslab(dsid, op, start, stride, count, block)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+        H5S_seloper_t op;       IN: Operation to perform on current selection
+        const hssize_t *start;        IN: Offset of start of hyperslab
+        const hssize_t *stride;       IN: Hyperslab stride
+        const hssize_t *count;        IN: Number of blocks included in hyperslab
+        const hssize_t *block;        IN: Size of block in hyperslab
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Combines a hyperslab selection with the current selection for a dataspace.
+    If the current selection is not a hyperslab, it is freed and the hyperslab
+    parameters passed in are combined with the H5S_SEL_ALL hyperslab (ie. a
+    selection composing the entire current extent).  Currently, only the
+    H5S_SELECT_SET & H5S_SELECT_OR operations are supported.  If STRIDE or
+    BLOCK is NULL, they are assumed to be set to all '1'.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
+		     const hssize_t start[/*space_id*/],
+		     const hsize_t _stride[/*space_id*/],
+		     const hsize_t count[/*space_id*/],
+		     const hsize_t _block[/*space_id*/])
+{
+    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+
+    FUNC_ENTER (H5Sselect_hyperslab, FAIL);
+    H5TRACE6("e","iSs*[a0]Hs*[a0]h*[a0]h*[a0]h",space_id,op,start,_stride,
+             count,_block);
+
+    /* Check args */
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
+            NULL == (space=H5I_object(space_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+    if(start==NULL || count==NULL) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
+    } /* end if */
+
+    if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+    } /* end if */
+
+    if (H5S_select_hyperslab(space, op, start, _stride, count, _block)<0) {
+        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		      "unable to set hyperslab selection");
+    }
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 /*--------------------------------------------------------------------------
@@ -1127,3 +1131,452 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_deserialize() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_hyper_nblocks
+ PURPOSE
+    Get the number of hyperslab blocks in current hyperslab selection
+ USAGE
+    hssize_t H5S_get_select_hyper_nblocks(space)
+        H5S_t *space;             IN: Dataspace ptr of selection to query
+ RETURNS
+    The number of hyperslab blocks in selection on success, negative on failure
+ DESCRIPTION
+    Returns the number of hyperslab blocks in current selection for dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static hssize_t
+H5S_get_select_hyper_nblocks(H5S_t *space)
+{
+    hssize_t ret_value=FAIL;        /* return value */
+
+    FUNC_ENTER (H5S_get_select_hyper_nblocks, FAIL);
+
+    assert(space);
+
+    ret_value = space->select.sel_info.hslab.hyper_lst->count;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_hyper_nblocks() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_hyper_nblocks
+ PURPOSE
+    Get the number of hyperslab blocks in current hyperslab selection
+ USAGE
+    hssize_t H5Sget_select_hyper_nblocks(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+ RETURNS
+    The number of hyperslab blocks in selection on success, negative on failure
+ DESCRIPTION
+    Returns the number of hyperslab blocks in current selection for dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hssize_t
+H5Sget_select_hyper_nblocks(hid_t spaceid)
+{
+    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
+    hssize_t ret_value=FAIL;        /* return value */
+
+    FUNC_ENTER (H5Sget_select_hyper_nblocks, FAIL);
+
+    /* Check args */
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+    if(space->select.type!=H5S_SEL_HYPERSLABS)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
+
+    ret_value = H5S_get_select_hyper_nblocks(space);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_hyper_nblocks() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_elem_npoints
+ PURPOSE
+    Get the number of points in current element selection
+ USAGE
+    hssize_t H5S_get_select_elem_npoints(space)
+        H5S_t *space;             IN: Dataspace ptr of selection to query
+ RETURNS
+    The number of element points in selection on success, negative on failure
+ DESCRIPTION
+    Returns the number of element points in current selection for dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static hssize_t
+H5S_get_select_elem_npoints(H5S_t *space)
+{
+    hssize_t ret_value=FAIL;        /* return value */
+
+    FUNC_ENTER (H5S_get_select_elem_npoints, FAIL);
+
+    assert(space);
+
+    ret_value = space->select.num_elem;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_elem_npoints() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_elem_npoints
+ PURPOSE
+    Get the number of points in current element selection
+ USAGE
+    hssize_t H5Sget_select_elem_npoints(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+ RETURNS
+    The number of element points in selection on success, negative on failure
+ DESCRIPTION
+    Returns the number of element points in current selection for dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hssize_t
+H5Sget_select_elem_npoints(hid_t spaceid)
+{
+    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
+    hssize_t ret_value=FAIL;        /* return value */
+
+    FUNC_ENTER (H5Sget_select_elem_npoints, FAIL);
+
+    /* Check args */
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+    if(space->select.type!=H5S_SEL_POINTS)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an element selection");
+
+    ret_value = H5S_get_select_elem_npoints(space);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_elem_npoints() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_hyper_blocklist
+ PURPOSE
+    Get the list of hyperslab blocks currently selected
+ USAGE
+    herr_t H5S_get_select_hyper_blocklist(space, hsize_t *buf)
+        H5S_t *space;           IN: Dataspace pointer of selection to query
+        hsize_t *buf;           OUT: List of hyperslab blocks selected
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Puts a list of the hyperslab blocks into the user's buffer.  The block
+    coordinates have the same dimensionality (rank) as the dataspace they
+    are located within.  The list of blocks is formatted as follows:
+    <"start" coordinate> immediately followed by <"opposite" corner coordinate>,
+    followed by the next "start" coordinate, etc. until all the block
+    information in the selection have been put into the user's buffer.  No
+    guarantee of any order of the blocks is implied.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t *buf)
+{
+    H5S_hyper_node_t *node;     /* Hyperslab node */
+    intn rank;                  /* Dataspace rank */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5S_get_select_hyper_blocklist, FAIL);
+
+    assert(space);
+    assert(buf);
+
+    /* Get the dataspace extent rank */
+    rank=space->extent.u.simple.rank;
+
+    /* Iterate through the node, copying each hyperslab's information */
+    node=space->select.sel_info.hslab.hyper_lst->head;
+    while(node!=NULL) {
+        HDmemcpy(buf,node->start,sizeof(hsize_t)*rank);
+        buf+=rank;
+        HDmemcpy(buf,node->end,sizeof(hsize_t)*rank);
+        buf+=rank;
+        node=node->next;
+      } /* end while */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_hyper_blocklist() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_hyper_blocklist
+ PURPOSE
+    Get the list of hyperslab blocks currently selected
+ USAGE
+    herr_t H5Sget_select_hyper_blocklist(dsid, hsize_t *buf)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t *buf;           OUT: List of hyperslab blocks selected
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Puts a list of the hyperslab blocks into the user's buffer.  The block
+    coordinates have the same dimensionality (rank) as the dataspace they
+    are located within.  The list of blocks is formatted as follows:
+    <"start" coordinate> immediately followed by <"opposite" corner coordinate>,
+    followed by the next "start" coordinate, etc. until all the block
+    information in the selection have been put into the user's buffer.  No
+    guarantee of any order of the blocks is implied.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t *buf)
+{
+    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
+    herr_t ret_value=FAIL;        /* return value */
+
+    FUNC_ENTER (H5Sget_select_hyper_blocklist, FAIL);
+
+    /* Check args */
+    if(buf==NULL)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+    if(space->select.type!=H5S_SEL_HYPERSLABS)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
+
+    ret_value = H5S_get_select_hyper_blocklist(space,buf);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_hyper_blocklist() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_elem_pointlist
+ PURPOSE
+    Get the list of element points currently selected
+ USAGE
+    herr_t H5S_get_select_elem_pointlist(space, hsize_t *buf)
+        H5S_t *space;           IN: Dataspace pointer of selection to query
+        hsize_t *buf;           OUT: List of element points selected
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Puts a list of the element points into the user's buffer.  The point
+    coordinates have the same dimensionality (rank) as the dataspace they
+    are located within.  The list of points is formatted as follows:
+    <coordinate> followed by the next coordinate, etc. until all the point
+    information in the selection have been put into the user's buffer.  No
+    guarantee of any order of the elements is implied.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_get_select_elem_pointlist(H5S_t *space, hsize_t *buf)
+{
+    H5S_pnt_node_t *node;       /* Point node */
+    intn rank;                  /* Dataspace rank */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5S_get_select_elem_pointlist, FAIL);
+
+    assert(space);
+    assert(buf);
+
+    /* Get the dataspace extent rank */
+    rank=space->extent.u.simple.rank;
+
+    /* Iterate through the node, copying each hyperslab's information */
+    node=space->select.sel_info.pnt_lst->head;
+    while(node!=NULL) {
+        HDmemcpy(buf,node->pnt,sizeof(hsize_t)*rank);
+        buf+=rank;
+        node=node->next;
+      } /* end while */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_elem_pointlist() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_elem_pointlist
+ PURPOSE
+    Get the list of element points currently selected
+ USAGE
+    herr_t H5Sget_select_elem_pointlist(dsid, hsize_t *buf)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t *buf;           OUT: List of element points selected
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Puts a list of the element points into the user's buffer.  The point
+    coordinates have the same dimensionality (rank) as the dataspace they
+    are located within.  The list of points is formatted as follows:
+    <coordinate> followed by the next coordinate, etc. until all the point
+    information in the selection have been put into the user's buffer.  No
+    guarantee of any order of the elements is implied.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t *buf)
+{
+    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
+    herr_t ret_value=FAIL;        /* return value */
+
+    FUNC_ENTER (H5Sget_select_elem_pointlist, FAIL);
+
+    /* Check args */
+    if(buf==NULL)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+    if(space->select.type!=H5S_SEL_POINTS)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection");
+
+    ret_value = H5S_get_select_elem_pointlist(space,buf);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_elem_pointlist() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_bounds
+ PURPOSE
+    Gets the bounding box containing the selection.
+ USAGE
+    herr_t H5S_get_select_bounds(space, hsize_t *start, hsize_t *end)
+        H5S_t *space;           IN: Dataspace pointer of selection to query
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the bounding box containing the current selection and places
+    it into the user's buffers.  The start and end buffers must be large
+    enough to hold the dataspace rank number of coordinates.  The bounding box
+    exactly contains the selection, ie. if a 2-D element selection is currently
+    defined with the following points: (4,5), (6,8) (10,7), the bounding box
+    with be (4, 5), (10, 8).  Calling this function on a "none" selection
+    returns fail.
+        The bounding box calculations _does_ include the current offset of the
+    selection within the dataspace extent.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
+{
+    intn rank;                  /* Dataspace rank */
+    intn i;                     /* index variable */
+    herr_t ret_value=FAIL;   /* return value */
+
+    FUNC_ENTER (H5S_get_select_bounds, FAIL);
+
+    assert(space);
+    assert(start);
+    assert(end);
+
+    /* Set all the start and end arrays up */
+    rank=space->extent.u.simple.rank;
+    for(i=0; i<rank; i++) {
+        start[i]=UINT_MAX;
+        end[i]=0;
+    } /* end for */
+
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_bounds(space,start,end);
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_bounds(space,start,end);
+            break;
+
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=H5S_all_bounds(space,start,end);
+            break;
+
+        case H5S_SEL_NONE:           /* Nothing selected */
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
+    }
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_bounds() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_bounds
+ PURPOSE
+    Gets the bounding box containing the selection.
+ USAGE
+    herr_t H5S_get_select_bounds(space, start, end)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the bounding box containing the current selection and places
+    it into the user's buffers.  The start and end buffers must be large
+    enough to hold the dataspace rank number of coordinates.  The bounding box
+    exactly contains the selection, ie. if a 2-D element selection is currently
+    defined with the following points: (4,5), (6,8) (10,7), the bounding box
+    with be (4, 5), (10, 8).  Calling this function on a "none" selection
+    returns fail.
+        The bounding box calculations _does_ include the current offset of the
+    selection within the dataspace extent.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
+{
+    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
+    herr_t ret_value=FAIL;        /* return value */
+
+    FUNC_ENTER (H5Sget_select_bounds, FAIL);
+
+    /* Check args */
+    if(start==NULL || end==NULL)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+
+    ret_value = H5S_get_select_bounds(space,start,end);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sget_select_bounds() */

@@ -370,9 +370,6 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
             INT32DECODE(p,hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-	    printf("%s: hobjid.addr=",FUNC);
-	    H5F_addr_print(stdout,&hobjid.addr);
-	    printf(", hobjid.idx=%d\n", hobjid.idx);
             if((buf=H5HG_read(ent.file,&hobjid,NULL))==NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL,
                   "Unable to read dataset region information");
@@ -528,13 +525,18 @@ H5R_get_region(H5D_t *dset, H5R_type_t __unused__ ref_type, void *_ref)
         HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, NULL, "not found");
     }
 
-/* Unserialize the selection */
+    /* Unserialize the selection */
+    if (H5S_select_deserialize(ret_value,p) < 0) {
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, NULL, "can't deserialize selection");
+    }
 
     /* Free the buffer allocated in H5HG_read() */
     H5MM_xfree(buf);
 
-/* Close the dataset we opened */
-
+    /* Close the dataset we opened */
+    if (H5D_close(dataset) < 0) {
+        HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "not found");
+    }
 
 done:
     FUNC_LEAVE(ret_value);
