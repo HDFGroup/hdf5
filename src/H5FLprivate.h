@@ -55,24 +55,28 @@ typedef struct H5FL_reg_head_t {
 /*
  * Macros for defining & using free lists for a type
  */
+#define H5FL_REG_NAME(t)        H5_##t##_reg_free_list
 #ifndef H5_NO_REG_FREE_LISTS
+/* Common macros for H5FL_DEFINE & H5FL_DEFINE_STATIC */
+#define H5FL_DEFINE_COMMON(t) H5FL_reg_head_t H5FL_REG_NAME(t)={0,0,0,0,#t,sizeof(t),NULL}
+
 /* Declare a free list to manage objects of type 't' */
-#define H5FL_DEFINE(t)  H5FL_reg_head_t t##_free_list={0,0,0,0,#t,sizeof(t),NULL}
+#define H5FL_DEFINE(t)  H5_DLL H5FL_DEFINE_COMMON(t)
 
 /* Reference a free list for type 't' defined in another file */
-#define H5FL_EXTERN(t)  extern H5FL_reg_head_t t##_free_list
+#define H5FL_EXTERN(t)  extern H5_DLL H5FL_reg_head_t H5FL_REG_NAME(t)
 
 /* Declare a static free list to manage objects of type 't' */
-#define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE(t)
+#define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE_COMMON(t)
 
 /* Allocate an object of type 't' */
-#define H5FL_MALLOC(t) H5FL_reg_malloc(&(t##_free_list))
+#define H5FL_MALLOC(t) H5FL_reg_malloc(&(H5FL_REG_NAME(t)))
 
 /* Allocate an object of type 't' and clear it to all zeros */
-#define H5FL_CALLOC(t) H5FL_reg_calloc(&(t##_free_list))
+#define H5FL_CALLOC(t) H5FL_reg_calloc(&(H5FL_REG_NAME(t)))
 
 /* Free an object of type 't' */
-#define H5FL_FREE(t,obj) H5FL_reg_free(&(t##_free_list),obj)
+#define H5FL_FREE(t,obj) H5FL_reg_free(&(H5FL_REG_NAME(t)),obj)
 
 /* Re-allocating an object of type 't' is not defined, because these free-lists
  * only support fixed sized types, like structs, etc..
@@ -80,9 +84,12 @@ typedef struct H5FL_reg_head_t {
 
 #else /* H5_NO_REG_FREE_LISTS */
 #include "H5MMprivate.h"
-#define H5FL_DEFINE(t)  int t##_reg_free_list_placeholder
-#define H5FL_EXTERN(t)  extern int t##_reg_free_list_placeholder
-#define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE(t)
+/* Common macro for H5FL_DEFINE & H5FL_DEFINE_STATIC */
+#define H5FL_DEFINE_COMMON(t) int H5FL_REG_NAME(t)
+
+#define H5FL_DEFINE(t)  H5_DLL H5FL_DEFINE_COMMON(t)
+#define H5FL_EXTERN(t)  extern H5_DLL int H5FL_REG_NAME(t)
+#define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE_COMMON(t)
 #define H5FL_MALLOC(t) H5MM_malloc(sizeof(t))
 #define H5FL_CALLOC(t) H5MM_calloc(sizeof(t))
 #define H5FL_FREE(t,obj) H5MM_xfree(obj)
@@ -117,35 +124,42 @@ typedef struct H5FL_blk_head_t {
 /*
  * Macros for defining & using priority queues 
  */
+#define H5FL_BLK_NAME(t)        H5_##t##_blk_free_list
 #ifndef H5_NO_BLK_FREE_LISTS
+/* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
+#define H5FL_BLK_DEFINE_COMMON(t) H5FL_blk_head_t H5FL_BLK_NAME(t)={0,0,0,0,#t,NULL}
+
 /* Declare a free list to manage objects of type 't' */
-#define H5FL_BLK_DEFINE(t)  H5FL_blk_head_t t##_pq={0,0,0,0,#t,NULL}
+#define H5FL_BLK_DEFINE(t)  H5_DLL H5FL_BLK_DEFINE_COMMON(t)
 
 /* Reference a free list for type 't' defined in another file */
-#define H5FL_BLK_EXTERN(t)  extern H5FL_blk_head_t t##_pq
+#define H5FL_BLK_EXTERN(t)  extern H5_DLL H5FL_blk_head_t H5FL_BLK_NAME(t)
 
 /* Declare a static free list to manage objects of type 't' */
-#define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE(t)
+#define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE_COMMON(t)
 
 /* Allocate an block of type 't' */
-#define H5FL_BLK_MALLOC(t,size) H5FL_blk_malloc(&(t##_pq),size)
+#define H5FL_BLK_MALLOC(t,size) H5FL_blk_malloc(&(H5FL_BLK_NAME(t)),size)
 
 /* Allocate an block of type 't' and clear it to zeros */
-#define H5FL_BLK_CALLOC(t,size) H5FL_blk_calloc(&(t##_pq),size)
+#define H5FL_BLK_CALLOC(t,size) H5FL_blk_calloc(&(H5FL_BLK_NAME(t)),size)
 
 /* Free a block of type 't' */
-#define H5FL_BLK_FREE(t,blk) H5FL_blk_free(&(t##_pq),blk)
+#define H5FL_BLK_FREE(t,blk) H5FL_blk_free(&(H5FL_BLK_NAME(t)),blk)
 
 /* Re-allocate a block of type 't' */
-#define H5FL_BLK_REALLOC(t,blk,new_size) H5FL_blk_realloc(&(t##_pq),blk,new_size)
+#define H5FL_BLK_REALLOC(t,blk,new_size) H5FL_blk_realloc(&(H5FL_BLK_NAME(t)),blk,new_size)
 
 /* Check if there is a free block available to re-use */
-#define H5FL_BLK_AVAIL(t,size)  H5FL_blk_free_block_avail(&(t##_pq),size)
+#define H5FL_BLK_AVAIL(t,size)  H5FL_blk_free_block_avail(&(H5FL_BLK_NAME(t)),size)
 
 #else /* H5_NO_BLK_FREE_LISTS */
-#define H5FL_BLK_DEFINE(t)      int t##_blk_free_list_placeholder
-#define H5FL_BLK_EXTERN(t)      extern int t##_blk_free_list_placeholder
-#define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE(t)
+/* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
+#define H5FL_BLK_DEFINE_COMMON(t) int H5FL_BLK_NAME(t)
+
+#define H5FL_BLK_DEFINE(t)      H5_DLL H5FL_BLK_DEFINE_COMMON(t)
+#define H5FL_BLK_EXTERN(t)      extern H5_DLL int H5FL_BLK_NAME(t)
+#define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE_COMMON(t)
 #define H5FL_BLK_MALLOC(t,size) H5MM_malloc(size)
 #define H5FL_BLK_CALLOC(t,size) H5MM_calloc(size)
 #define H5FL_BLK_FREE(t,blk) H5MM_xfree(blk)
@@ -179,32 +193,39 @@ typedef struct H5FL_arr_head_t {
 /*
  * Macros for defining & using free lists for an array of a type
  */
+#define H5FL_ARR_NAME(t)        H5_##t##_arr_free_list
 #ifndef H5_NO_ARR_FREE_LISTS
+/* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
+#define H5FL_ARR_DEFINE_COMMON(t,m) H5FL_arr_head_t H5FL_ARR_NAME(t)={0,0,NULL,0,#t"_arr",m+1,sizeof(t),{NULL}}
+
 /* Declare a free list to manage arrays of type 't' */
-#define H5FL_ARR_DEFINE(t,m)  H5FL_arr_head_t t##_arr_free_list={0,0,NULL,0,#t"_arr",m+1,sizeof(t),{NULL}}
+#define H5FL_ARR_DEFINE(t,m)  H5_DLL H5FL_ARR_DEFINE_COMMON(t,m)
 
 /* Reference a free list for arrays of type 't' defined in another file */
-#define H5FL_ARR_EXTERN(t)  extern H5FL_arr_head_t t##_arr_free_list
+#define H5FL_ARR_EXTERN(t)  extern H5_DLL H5FL_arr_head_t H5FL_ARR_NAME(t)
 
 /* Declare a static free list to manage arrays of type 't' */
-#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE(t,m)
+#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(t,m)
 
 /* Allocate an array of type 't' */
-#define H5FL_ARR_MALLOC(t,elem) H5FL_arr_malloc(&(t##_arr_free_list),elem)
+#define H5FL_ARR_MALLOC(t,elem) H5FL_arr_malloc(&(H5FL_ARR_NAME(t)),elem)
 
 /* Allocate an array of type 't' and clear it to all zeros */
-#define H5FL_ARR_CALLOC(t,elem) H5FL_arr_calloc(&(t##_arr_free_list),elem)
+#define H5FL_ARR_CALLOC(t,elem) H5FL_arr_calloc(&(H5FL_ARR_NAME(t)),elem)
 
 /* Free an array of type 't' */
-#define H5FL_ARR_FREE(t,obj) H5FL_arr_free(&(t##_arr_free_list),obj)
+#define H5FL_ARR_FREE(t,obj) H5FL_arr_free(&(H5FL_ARR_NAME(t)),obj)
 
 /* Re-allocate an array of type 't' */
-#define H5FL_ARR_REALLOC(t,obj,new_elem) H5FL_arr_realloc(&(t##_arr_free_list),obj,new_elem)
+#define H5FL_ARR_REALLOC(t,obj,new_elem) H5FL_arr_realloc(&(H5FL_ARR_NAME(t)),obj,new_elem)
 
 #else /* H5_NO_ARR_FREE_LISTS */
-#define H5FL_ARR_DEFINE(t,m)    int t##_arr_free_list_placeholder
-#define H5FL_ARR_EXTERN(t)      extern int t##_arr_free_list_placeholder
-#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE(t,m)
+/* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
+#define H5FL_ARR_DEFINE_COMMON(t,m) int H5FL_ARR_NAME(t)
+
+#define H5FL_ARR_DEFINE(t,m)    H5_DLL H5FL_ARR_DEFINE_COMMON(t,m)
+#define H5FL_ARR_EXTERN(t)      extern H5_DLL int H5FL_ARR_NAME(t)
+#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE_COMMON(t,m)
 #define H5FL_ARR_MALLOC(t,elem) H5MM_malloc(elem*sizeof(t))
 #define H5FL_ARR_CALLOC(t,elem) H5MM_calloc(elem*sizeof(t))
 #define H5FL_ARR_FREE(t,obj) H5MM_xfree(obj)
