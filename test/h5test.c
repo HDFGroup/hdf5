@@ -796,3 +796,23 @@ h5_get_file_size(const char *filename)
     return(0);
 } /* end get_file_size() */
 
+
+/*
+ * Setup a test function.  It must have no parameters and returns void.
+ */
+void 
+InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr)
+{
+    if (Index >= MAXNUMOFTESTS) {
+        printf("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
+        exit(-1);
+    }                           /* end if */
+    HDstrcpy(Test[Index].Description, TheDescr);
+    HDstrcpy(Test[Index].Name, TheName);
+    Test[Index].Call = TheCall;
+    Test[Index].Cleanup = Cleanup;
+    Test[Index].NumErrors = -1;
+    Test[Index].SkipFlag = 0;
+    Index++;
+}
+

@@ -42,6 +42,7 @@
 
 #include <stdarg.h>
 
+#include "h5test.h"
 #include "ttsafe.h"
 
 #ifndef H5_HAVE_THREADSAFE
@@ -52,49 +53,20 @@ int main(void)
 }
 #else
 
-#define MAXNUMOFTESTS 50
 #define HDF5_TEST_MASTER
 
 #define MAX_NUM_NAME 1000
 #define NAME_OFFSET 6         /* offset for "name<num>" */
-
-/* Internal Variables */
-static int Index = 0;
 
 /* Global variables */
 int num_errs = 0;
 int Verbosity;
 
 /* ANY new test needs to have a prototype in tproto.h */
-struct TestStruct {
-	int    NumErrors;
-	char   Description[64];
-	int    SkipFlag;
-	char   Name[16];
-	void (*Call)(void);
-	void (*Cleanup)(void);
-} Test[MAXNUMOFTESTS];
+TestStruct Test[MAXNUMOFTESTS];
+int Index = 0;
 
-static void InitTest(const char *TheName, void (*TheCall) (void),
-		     void (*Cleanup) (void), const char *TheDescr);
 static void usage(void);
-
-static void InitTest(const char *TheName, void (*TheCall) (void),
-		     void (*Cleanup) (void), const char *TheDescr)
-{
-	if (Index >= MAXNUMOFTESTS) {
-		print_func("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
-		exit(-1);
-	}
-
-	HDstrcpy(Test[Index].Description, TheDescr);
-	HDstrcpy(Test[Index].Name, TheName);
-	Test[Index].Call = TheCall;
-	Test[Index].Cleanup = Cleanup;
-	Test[Index].NumErrors = -1;
-	Test[Index].SkipFlag = 0;
-	Index++;
-}
 
 static void usage(void)
 {
