@@ -1141,8 +1141,7 @@ done:
  *		be the same type as the dataset but the library must be able
  *		to convert VALUE to the dataset type when the dataset is
  *		created.  If VALUE is NULL, it will be interpreted as 
- *		undefining fill value.  The fill value property will be 
- *		removed from property list. 
+ *		undefining fill value.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1337,17 +1336,14 @@ H5P_is_fill_value_defined(const struct H5O_fill_t *fill, H5D_fill_value_t *statu
     assert(status);
 
     /* Check if the fill value was never set */
-    if(fill->size == (size_t)-1 && !fill->buf) {
+    if(fill->size == (size_t)-1 && !fill->buf)
 	*status = H5D_FILL_VALUE_UNDEFINED;
-    }
     /* Check if the fill value was set to the default fill value by the library */
-    else if(fill->size == 0 && !fill->buf) {
+    else if(fill->size == 0 && !fill->buf)
 	*status = H5D_FILL_VALUE_DEFAULT;
-    }
     /* Check if the fill value was set by the application */
-    else if(fill->size > 0 && fill->buf) {
+    else if(fill->size > 0 && fill->buf)
 	*status = H5D_FILL_VALUE_USER_DEFINED;
-    }
     else {
 	*status = H5D_FILL_VALUE_ERROR;
         HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid combination of fill-value info"); 

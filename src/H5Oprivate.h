@@ -48,17 +48,20 @@
 /* Flags which are part of a message */
 #define H5O_FLAG_CONSTANT	0x01u
 #define H5O_FLAG_SHARED		0x02u
-#define H5O_FLAG_BITS		0x03u
+#define H5O_FLAG_BITS		(H5O_FLAG_CONSTANT|H5O_FLAG_SHARED)
 
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
 #define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.  */
+/* Complex dataspace is/was planned for message 0x0002 */
 #define H5O_DTYPE_ID	0x0003          /* Datatype Message.  */
 #define H5O_FILL_ID     0x0004          /* Fill Value Message. (Old)  */
 #define H5O_FILL_NEW_ID 0x0005          /* Fill Value Message. (New)  */
+/* Compact data storage is/was planned for message 0x0006 */
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
 #define H5O_LAYOUT_ID	0x0008          /* Data Storage Layout Message.  */
 #define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
+/* message 0x000a appears unused... */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */
 #define H5O_ATTR_ID	0x000c          /* Attribute Message.  */
 #define H5O_NAME_ID	0x000d          /* Object name message.  */
@@ -91,7 +94,7 @@ typedef struct H5O_fill_new_t {
     void		*buf;		/*the fill value		     */
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */	
-    htri_t		fill_defined;   /* whether fill value is defined     */	
+    hbool_t		fill_defined;   /* whether fill value is defined     */	
 } H5O_fill_new_t;
 
 /*

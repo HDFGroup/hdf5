@@ -1385,8 +1385,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     if(dset->dcpl_id!=H5P_DATASET_CREATE_DEFAULT) {
         /*
          * Retrieve properties of fill value and others. Copy them into new fill
-         * value struct. Convert the fill value to the dataset type and write 
-         * the message
+         * value struct.
          */
         if (H5P_get(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time")
@@ -1429,9 +1428,8 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 	fill.size = -1;
  	fill.type = fill.buf = NULL;
  	fill.fill_defined = FALSE;
-    } else {
+    } else
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to determine if fill value is defined")
-    }
 
     fill.alloc_time = alloc_time;
     fill.fill_time = fill_time;
