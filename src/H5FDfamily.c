@@ -319,10 +319,17 @@ H5FD_family_fapl_copy(const void *_old_fa)
     if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_family_fapl_t))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
+    /* Copy the fields of the structure */
     memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
-    if(NULL == (plist = H5I_object(old_fa->memb_fapl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    new_fa->memb_fapl_id = H5P_copy_plist(plist);
+
+    /* Deep copy the property list objects in the structure */
+    if(old_fa->memb_fapl_id==H5P_DEFAULT)
+        new_fa->memb_fapl_id = H5P_DEFAULT;
+    else {
+        if(NULL == (plist = H5I_object(old_fa->memb_fapl_id)))
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        new_fa->memb_fapl_id = H5P_copy_plist(plist);
+    } /* end else */
 
     FUNC_LEAVE(new_fa);
 }
@@ -474,9 +481,13 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
         fa = H5P_get_driver_info(plist);
-        if(NULL == (plist = H5I_object(fa->memb_fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-        file->memb_fapl_id = H5P_copy_plist(plist);
+        if(fa->memb_fapl_id==H5P_DEFAULT)
+            file->memb_fapl_id = H5P_DEFAULT;
+        else {
+            if(NULL == (plist = H5I_object(fa->memb_fapl_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+            file->memb_fapl_id = H5P_copy_plist(plist);
+        } /* end else */
         file->memb_size = fa->memb_size;
     }
     file->name = H5MM_strdup(name);
