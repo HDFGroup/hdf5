@@ -807,6 +807,8 @@
 ./src/H5FDlog.h
 ./src/H5FDmpio.c
 ./src/H5FDmpio.h
+./src/H5FDmpiposix.c
+./src/H5FDmpiposix.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
 ./src/H5FDprivate.h
@@ -974,6 +976,7 @@
 ./testpar/t_mpi.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
+./testpar/testph5.sh.in
 
 ./tools/Dependencies
 ./tools/Makefile.in
