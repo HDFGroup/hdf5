@@ -87,6 +87,9 @@ Bug Fixes since HDF5-1.6.3 release
 
     Tools
     -----
+        - Fixed space utilization reported in h5ls to correct error in formula
+            used.  QAK - 2004/10/22
+
     Documentation 
     ------------- 
 

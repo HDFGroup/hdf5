@@ -1522,24 +1522,19 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  }
 
  /* Print total raw storage size */
- used = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
- total = H5Dget_storage_size(dset);
+ total = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
+ used = H5Dget_storage_size(dset);
  printf("    %-10s ", "Storage:");
  printf("%lu logical byte%s, %lu allocated byte%s",
-        (unsigned long)used, 1==used?"":"s",
-        (unsigned long)total, 1==total?"":"s");
- if (total>0) {
+        (unsigned long)total, 1==total?"":"s",
+        (unsigned long)used, 1==used?"":"s");
+ if (used>0) {
 #ifdef WIN32
-     hsize_t mask = (hsize_t)1 << (8*sizeof(hsize_t)-1);
-     if ((used & mask) || (total & mask)) {
-  total = 0; /*prevent utilization printing*/
-     } else {
-  utilization = (hssize_t)used*100.0 /(hssize_t)total;
-     }
+    utilization = (hssize_t)used*100.0 /(hssize_t)total;
 #else
-     utilization = (used*100.0)/total;
+    utilization = (used*100.0)/total;
 #endif
-     printf(", %1.2f%% utilization", utilization/*(used*100.0)/total*/);
+     printf(", %1.2f%% utilization", utilization);
  }
  putchar('\n');
  
