@@ -117,7 +117,7 @@ typedef struct H5F_file_t {
     size_t	sizeof_addr;	/* Size of addresses in file            */
     size_t	sizeof_size;	/* Size of offsets in file              */
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
-    int btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
+    unsigned    btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
 
     haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
@@ -189,6 +189,7 @@ struct H5F_t {
 /* Forward declarations for prototype arguments */
 struct H5D_dxpl_cache_t;
 struct H5D_dcpl_cache_t;
+union H5D_storage_t;
 
 /* Private functions, not part of the publicly documented API */
 #ifdef NOT_YET
@@ -197,7 +198,7 @@ H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 H5_DLL herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 			 int indent, int fwidth);
-H5_DLL herr_t H5F_sieve_overlap_clear(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size);
+H5_DLL herr_t H5F_sieve_overlap_clear(const H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5F_istore_init (H5F_t *f);
@@ -206,14 +207,14 @@ H5_DLL herr_t H5F_istore_dest (H5F_t *f, hid_t dxpl_id);
 H5_DLL ssize_t H5F_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id,
     const struct H5O_layout_t *layout, const struct H5D_dcpl_cache_t *dcpl_cache,
-    hssize_t chunk_coords[],
+    const union H5D_storage_t *store,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf);
 H5_DLL ssize_t H5F_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id,
     const struct H5O_layout_t *layout, const struct H5D_dcpl_cache_t *dcpl_cache,
-    hssize_t chunk_coords[],
+    const union H5D_storage_t *store,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);

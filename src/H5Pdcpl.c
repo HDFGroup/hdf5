@@ -294,7 +294,7 @@ done:
 herr_t
 H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
 {
-    int			idx;
+    size_t		idx;
     hsize_t		total, tmp;
     H5O_efl_t           efl;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -331,7 +331,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
 
     /* Add to the list */
     if (efl.nused >= efl.nalloc) {
-        int na = efl.nalloc + H5O_EFL_ALLOC;
+        size_t na = efl.nalloc + H5O_EFL_ALLOC;
         H5O_efl_entry_t *x = H5MM_realloc (efl.slot, na*sizeof(H5O_efl_entry_t));
 
         if (!x)
@@ -394,7 +394,7 @@ H5Pget_external_count(hid_t plist_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
     /* Set return value */
-    ret_value=efl.nused;
+    ret_value=(int)efl.nused;
     
 done:
     FUNC_LEAVE_API(ret_value);
@@ -451,7 +451,7 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
-    if (idx<0 || idx>=efl.nused)
+    if (idx<0 || (size_t)idx>=efl.nused)
         HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "external file index is out of range");
 
     /* Return values */
@@ -667,7 +667,7 @@ H5Pget_nfilters(hid_t plist_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Set return value */
-    ret_value=(int)(pline.nfilters);
+    ret_value=(int)(pline.nused);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -749,7 +749,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
 
     /* Check more args */
-    if (idx<0 || (size_t)idx>=pline.nfilters)
+    if (idx<0 || (size_t)idx>=pline.nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
 
     /* Set pointer to particular filter to query */
@@ -1342,17 +1342,14 @@ H5P_is_fill_value_defined(const struct H5O_fill_t *fill, H5D_fill_value_t *statu
     assert(status);
 
     /* Check if the fill value was never set */
-    if(fill->size == (size_t)-1 && !fill->buf) {
+    if(fill->size == (size_t)-1 && !fill->buf)
 	*status = H5D_FILL_VALUE_UNDEFINED;
-    }
     /* Check if the fill value was set to the default fill value by the library */
-    else if(fill->size == 0 && !fill->buf) {
+    else if(fill->size == 0 && !fill->buf)
 	*status = H5D_FILL_VALUE_DEFAULT;
-    }
     /* Check if the fill value was set by the application */
-    else if(fill->size > 0 && fill->buf) {
+    else if(fill->size > 0 && fill->buf)
 	*status = H5D_FILL_VALUE_USER_DEFINED;
-    }
     else {
 	*status = H5D_FILL_VALUE_ERROR;
         HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid combination of fill-value info"); 
@@ -1645,6 +1642,3 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
 done:
     FUNC_LEAVE_API(ret_value);
 }
-
-
-

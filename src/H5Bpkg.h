@@ -54,11 +54,11 @@ struct H5B_t {
                             /* first field in structure */
     const H5B_class_t	*type;		/*type of tree			     */
     size_t		sizeof_rkey;	/*size of raw (disk) key	     */
-    int			ndirty;		/*num child ptrs to emit	     */
+    unsigned		ndirty;		/*num child ptrs to emit	     */
     int			level;		/*node level			     */
     haddr_t		left;		/*address of left sibling	     */
     haddr_t		right;		/*address of right sibling	     */
-    int			nchildren;	/*number of child pointers	     */
+    unsigned		nchildren;	/*number of child pointers	     */
     uint8_t		*page;		/*disk page			     */
     uint8_t		*native;	/*array of keys in native format     */
     H5B_key_t		*key;		/*2k+1 key entries		     */

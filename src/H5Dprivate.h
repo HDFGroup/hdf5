@@ -167,7 +167,10 @@ typedef struct H5D_t H5D_t;
 /* Typedef for dataset storage information */
 typedef union H5D_storage_t {
     H5O_efl_t   efl;            /* External file list information for dataset */
-    hssize_t    *chunk_coords;  /* chunk's coordinates in file chunks */
+    struct {
+        hsize_t index;          /* "Index" of chunk in dataset (must be first for TBBT routines) */
+        hssize_t *offset;       /* Chunk's coordinates in elements */
+    } chunk;
 } H5D_storage_t;
 
 /* Typedef for cached dataset transfer property list information */
@@ -197,7 +200,7 @@ H5_DLL herr_t H5D_init(void);
 H5_DLL hid_t H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL htri_t H5D_isa(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL H5G_entry_t *H5D_entof(H5D_t *dataset);
-H5_DLL H5T_t *H5D_typeof(H5D_t *dset);
+H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
 H5_DLL herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t, 
                             void *copy_data);
 H5_DLL herr_t H5D_crt_close(hid_t dxpl_id, void *close_data);
@@ -205,7 +208,7 @@ H5_DLL herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
 H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
-H5_DLL herr_t H5D_flush(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
 H5_DLL herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
 
