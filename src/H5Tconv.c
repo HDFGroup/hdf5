@@ -2263,6 +2263,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	      size_t buf_stride, size_t bkg_stride, void *_buf,
               void *_bkg, hid_t dxpl_id)
 {
+    H5T_vlen_alloc_info_t vl_alloc_info;/* VL allocation information         */
     H5T_path_t	*tpath;			/* Type conversion path		     */
     hid_t   	tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
     H5T_t	*src = NULL;		/*source data type		     */
@@ -2400,6 +2401,10 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
             } /* end if */
     
+            /* Get the allocation info */
+            if(H5T_vlen_get_alloc_info(dxpl_id,&vl_alloc_info)<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info");
+
             /* Set the flag for nested VL case */
             if(dst->u.vlen.f!=NULL && H5T_detect_class(dst->parent,H5T_VLEN) && bg_ptr!=NULL)
                 nested=1;
@@ -2477,7 +2482,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
                     /* Write sequence to destination location */
-                    if((*(dst->u.vlen.write))(dst->u.vlen.f,dxpl_id,d,conv_buf, bg_ptr, (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
+                    if((*(dst->u.vlen.write))(dst->u.vlen.f,dxpl_id,&vl_alloc_info,d,conv_buf, bg_ptr, (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
 
                     /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorted than the old data elements.*/
