@@ -74,14 +74,25 @@ if test -z "$CXX"; then
   CXX_BASENAME=aCC
 fi
 
-if test -z "$cxx_flags_set"; then
-  # +Z for PIC, +A for using archived libraries
-  CXXFLAGS="$CXXFLAGS +Z +A"
-  CFLAGS="$CFLAGS -g +O2"
-  DEBUG_CXXFLAGS=-g
-  DEBUG_CPPFLAGS=
-  PROD_CXXFLAGS="-O -s"
-  PROD_CPPFLAGS=
-  PROFILE_CPPFLAGS=
-  cxx_flags_set=yes
-fi
+case "X-$CXX" in
+  X-aCC)
+    # +Z for PIC, +A for using archived libraries
+    CXXFLAGS="$CXXFLAGS +Z +A"
+    CFLAGS="$CFLAGS -g +O2"
+    DEBUG_CXXFLAGS=-g
+    DEBUG_CPPFLAGS=
+    PROD_CXXFLAGS="-O -s"
+    PROD_CPPFLAGS=
+    PROFILE_CPPFLAGS=
+    ;;
+
+  *)
+    CXXFLAGS="$CXXFLAGS"
+    CFLAGS="$CFLAGS"
+    DEBUG_CXXFLAGS=
+    DEBUG_CPPFLAGS=
+    PROD_CXXFLAGS=
+    PROD_CPPFLAGS=
+    PROFILE_CPPFLAGS=
+    ;;
+esac
