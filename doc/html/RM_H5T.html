@@ -115,6 +115,7 @@ of a dataset.
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
+    <li><a href="#Datatype-GetMemberClass">H5Tget_member_class</a>
     <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
     <li><a href="#Datatype-GetMemberOffset">H5Tget_member_offset</a>
     <li><a href="#Datatype-GetMemberType">H5Tget_member_type</a>
@@ -213,6 +214,7 @@ facilitate moving easily between them.</i>
     </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top width=32%>
     <i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>
+<!--<li><a href="#Datatype-GetMemberClass">H5Tget_member_class_f</a>        -->
     <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
     <li><a href="#Datatype-GetMemberOffset">h5tget_member_offset_f</a>
     <li><a href="#Datatype-GetMemberDims">h5tget_member_dims_f</a>
@@ -1917,6 +1919,42 @@ zero.
 
 <hr>
 <dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberClass">H5Tget_member_class</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_class_t</em> <code>H5Tget_member_class</code>(
+                       <em>hid_t</em> <code>cdtype_id</code>,
+                       <em>int </em><code>member_no</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns datatype class of compound datatype member.
+<dt><strong>Description:</strong>
+    <dd>Given a compound datatype, <code>cdtype_id</code>, the function 
+        <code>H5Tget_member_class</code> returns the datatype class of 
+        the compound datatype member specified by <code>member_no</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>cdtype_id</code>
+            <dd>IN: Datatype identifier of compound object.
+        <dt><em>int</em> <code>member_no</code>
+            <dd>IN: Compound object member number.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype class, a non-negative value, if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5txxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberName">H5Tget_member_name</a>
 <dt><strong>Signature:</strong>
     <dd><em>char *</em> <code>H5Tget_member_name</code>(<em>hid_t </em><code>type_id</code>,
@@ -2678,7 +2716,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  13 November 2000
+Last modified:  7 February 2001
 <br>
 Describes HDF5 Release 1.4 Beta, December 2000
 
