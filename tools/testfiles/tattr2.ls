@@ -7,7 +7,7 @@ dset                     Dataset {2/2}
         Type:      17-byte null-terminated ASCII string
         Data:  "string attribute"
     Attribute: bitfield  {2}
-        Type:      8-bit bitfield little-endian
+        Type:      8-bit bitfield
         Data:  0x01, 0x02
     Attribute: opaque    {2}
         Type:      1-byte opaque type
@@ -43,6 +43,6 @@ dset                     Dataset {2/2}
         Data:  0, 0
     Location:  0:1:0:976
     Links:     1
-    Modified:  2003-05-19 21:08:18 CDT
+    Modified:  XXXX-XX-XX XX:XX:XX XXX
     Storage:   8 logical bytes, 0 allocated bytes
     Type:      32-bit little-endian integer
