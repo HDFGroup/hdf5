@@ -3753,18 +3753,19 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
       *-------------------------------------------------------------------------
       */
         if(shrink && H5D_CHUNKED == dset->layout.type) {
-            H5D_dxpl_cache_t    dxpl_cache;     /* Cached data transfer properties */
+            H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+            H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     
             /* Fill the DXPL cache values for later use */
             if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
             /* Remove excess chunks */
-            if(H5D_istore_prune_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, dset) < 0)
+            if(H5D_istore_prune_by_extent(dset->ent.file, dxpl_cache, dxpl_id, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
 
             /* Reset the elements outsize the new dimensions, but in existing chunks */
-            if(H5D_istore_initialize_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, dset) < 0)
+            if(H5D_istore_initialize_by_extent(dset->ent.file, dxpl_cache, dxpl_id, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ")
         } /* end if */
     } /* end if */

@@ -372,11 +372,14 @@ done:
     within the library.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
+    The CACHE pointer should point at already allocated memory to place
+    non-default property list info.  If a default property list is used, the
+    CACHE pointer will be changed to point at the default information.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
+H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -387,9 +390,9 @@ H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
 
     /* Check for the default DXPL */
     if(dxpl_id==H5P_DATASET_XFER_DEFAULT)
-        HDmemcpy(cache,&H5D_def_dxpl_cache,sizeof(H5D_dxpl_cache_t));
+        *cache=&H5D_def_dxpl_cache;
     else
-        if(H5D_get_dxpl_cache_real(dxpl_id,cache)<0)
+        if(H5D_get_dxpl_cache_real(dxpl_id,*cache)<0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTGET, FAIL, "Can't retrieve DXPL values")
 
 done:
@@ -644,7 +647,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5_HAVE_PARALLEL
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
 #endif /*H5_HAVE_PARALLEL*/
-    H5D_dxpl_cache_t dxpl_cache;        /* Data transfer property cache */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
@@ -669,12 +673,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
 #ifdef H5_HAVE_PARALLEL
     /* Collective access is not permissible without a MPI based VFD */
-    if (dxpl_cache.xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
+    if (dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
 
     /* Set the "parallel I/O possible" flag, for H5S_find(), if we are doing collective I/O */
     /* (Don't set the parallel I/O possible flag for the MPI-posix driver, since it doesn't do real collective I/O) */
-    if (H5S_mpi_opt_types_g && dxpl_cache.xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPIPOSIX(dataset->ent.file))
+    if (H5S_mpi_opt_types_g && dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPIPOSIX(dataset->ent.file))
         sconv_flags |= H5S_CONV_PAR_IO_POSSIBLE;
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -757,18 +761,18 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5_HAVE_PARALLEL
     /* Don't reset the transfer mode if we can't or won't use it */
     if(!use_par_opt_io || !H5T_path_noop(tpath))
-        H5D_io_assist_mpio(dxpl_id, &dxpl_cache, &xfer_mode_changed);
+        H5D_io_assist_mpio(dxpl_id, dxpl_cache, &xfer_mode_changed);
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
     else {
         if(H5D_chunk_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end else */
 
@@ -848,7 +852,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5_HAVE_PARALLEL
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
 #endif /*H5_HAVE_PARALLEL*/
-    H5D_dxpl_cache_t dxpl_cache;        /* Data transfer property cache */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
@@ -893,12 +898,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
 #ifdef H5_HAVE_PARALLEL
     /* Collective access is not permissible without a MPI based VFD */
-    if (dxpl_cache.xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
+    if (dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based driver only")
 
     /* Set the "parallel I/O possible" flag, for H5S_find(), if we are doing collective I/O */
     /* (Don't set the parallel I/O possible flag for the MPI-posix driver, since it doesn't do real collective I/O) */
-    if (H5S_mpi_opt_types_g && dxpl_cache.xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPIPOSIX(dataset->ent.file))
+    if (H5S_mpi_opt_types_g && dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPIPOSIX(dataset->ent.file))
         sconv_flags |= H5S_CONV_PAR_IO_POSSIBLE;
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -972,18 +977,18 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5_HAVE_PARALLEL
     /* Don't reset the transfer mode if we can't or won't use it */
     if(!use_par_opt_io || !H5T_path_noop(tpath))
-        H5D_io_assist_mpio(dxpl_id, &dxpl_cache, &xfer_mode_changed);
+        H5D_io_assist_mpio(dxpl_id, dxpl_cache, &xfer_mode_changed);
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
     else {
         if(H5D_chunk_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end else */
 
