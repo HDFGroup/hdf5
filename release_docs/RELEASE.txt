@@ -64,6 +64,11 @@ New Features
 
     Parallel Library:
     -----------------
+        - Add options of using atomicity and file-sync to test_mpio_1wMr.
+          AKC - 2003/11/13
+        - Added parallel test, test_mpio_1wMr, which tests if the
+          underlaying parallel I/O system is conforming to the POSIX
+          write/read requirement.  AKC - 2003/11/12
 
     Tools:
     ------
