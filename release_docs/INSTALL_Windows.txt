@@ -2,7 +2,7 @@ HDF5 Build and Install Instructions for Windows 2000/XP.
 ----------------------------------------------------------
 
 The instructions which follow assume that you will be using the 
-source code release 'zip' file (hdf5-161.zip).
+source code release 'zip' file (hdf5-162.zip).
 
 ***************************WARNINGS****************************
 Please read CAREFULLY about Preconditions first
@@ -22,16 +22,16 @@ Preconditions
       directory called 'hdf5???' under MyHDFstuff which contains
       several files and directories. Rename "hdf5???" to "hdf5".  
 
-   4. HDF5 uses zlib for compression and zlib is NOT distributed 
-      with hdf5 lib in 1.6.1 release. You have to install your own
+   4. HDF5 uses zlib version 1.1.4 for compression and zlib is NOT distributed 
+      with hdf5 lib in 1.6.2 release. You have to install your own
       zlib library or you may go to HDF web site
 	(ftp://ftp.ncsa.uiuc.edu/HDF/gzip/) 
       to download the correponding zlib library. If you want to build
 	 HDF5 library without using zlib, please read section V.
 
    5. HDF5 uses szlib(szip) for compression and szlib is distributed 
-	with hdf5 lib in 1.6.1 release. You can also download szlib source 
-	codes and binaries from ftp://ftp.ncsa.uiuc.edu/HDF/szip/windows/
+	with hdf5 lib in 1.6.2 release. You can also download szlib source 
+	codes and binaries from ftp://ftp.ncsa.uiuc.edu/HDF/szip/
       If you want to build HDF5 library without using szlib, please read
       section V.
 
@@ -108,13 +108,10 @@ Section II:
 STEP 1: Building hdf5 libraries and non-hdf4 related tools
 
 
-    1. Unpack all.zip in 'hdf5' and move the zlib.dll from
-       c:\myHDFstuff\hdf5\src\zlib\dll to the Windows system 
-       directory.
+    1. Unpack all.zip in 'hdf5'. Files in the all.zip archive
+       has path hdf5\.... Make sure that you extract files into the 
+       C:\myHDFstuff directory 
 
-	 The system directory can usually be found under the path 
-		C:\WINNT\system or C:\WINDOWS\system
-      
     2. Invoke Microsoft Visual C++, go to "File" and select 
        the "Open Workspace" option. 
 
@@ -527,7 +524,7 @@ using the Visual C++ Development Environment.
 Project name and location issues: 
        
     The files in all.zip must end up in the hdf5\ directory installed by
-    hdf5-1.6.1.zip
+    hdf5-1.6.2.zip
 
     If you must install all.dsw and all.dsp in another directory,
     relative to hdf5\ , you will be asked to locate the sub-project
@@ -648,7 +645,8 @@ Extra steps:
 	c:\myHDFstuff\hdf5\misc\typegen\typegen.dsw.
 2) Build the project file.
 3) Invoke command prompt and go to c:\myHDFstuff\hdf5\src.
-4) type H5Tinit.exe >H5Tinit.c
+4) type 
+        H5Tinit.exe >H5Tinit.c
 5) Go back to section II, continue with step 1(2).
 
 Section VIII:
