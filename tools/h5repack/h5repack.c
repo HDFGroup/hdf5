@@ -338,7 +338,11 @@ static int check_options(pack_opt_t *options)
     szip_pixels_per_block=pack.filter[j].cd_values[0];
     
     /* check szip parameters */
-    if (check_szip(0, /* do not test size */
+    if ( pack.chunk.rank!=-1 /* 
+                             it means a layout was not input, so there is no 
+                             case to try to check it
+                             */
+     && check_szip(0, /* do not test size */
      pack.chunk.rank,
      pack.chunk.chunk_lengths,
      szip_options_mask,

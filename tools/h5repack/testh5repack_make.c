@@ -84,9 +84,7 @@ int make_testfiles(void)
  return 0;                                                 
  
 out:
- H5E_BEGIN_TRY {
   H5Fclose(loc_id);
- } H5E_END_TRY;
  return -1;
 }
 

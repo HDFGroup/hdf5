@@ -702,7 +702,7 @@ int main (void)
   PASSED();  
 
 
- TESTING("    filter queue");
+ TESTING("    filter queue fletcher, shuffle, deflate, szip");
 
 /*-------------------------------------------------------------------------
  * add some filters
@@ -733,6 +733,65 @@ int main (void)
   TEST_ERROR;
 
  PASSED();  
+
+ TESTING("    filter conversion from deflate to szip");
+/*-------------------------------------------------------------------------
+ * filter conversion from deflate to szip
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_gzip:SZIP=8",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();  
+
+ TESTING("    filter conversion from szip to deflate");
+/*-------------------------------------------------------------------------
+ * filter conversion from szip to deflate
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();  
+
+ TESTING("    filter conversion from 2 filters to 1 filter");
+/*-------------------------------------------------------------------------
+ * filter conversion from szip to deflate
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_all:GZIP=1",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();  
+
+
 
  puts("All h5repack tests passed.");
  
