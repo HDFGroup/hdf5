@@ -5590,8 +5590,12 @@ H5S_hyper_select_contiguous(const H5S_t *space)
         small_contiguous=FALSE;	/* assume false initially */
 
         /* Check for a "large contigous" block */
-        for(u=1; u<space->extent.u.simple.rank; u++) {
-            if(space->select.sel_info.hslab.diminfo[u].count>1 || space->select.sel_info.hslab.diminfo[u].block!=space->extent.u.simple.size[u]) {
+        for(u=0; u<space->extent.u.simple.rank; u++) {
+            if(space->select.sel_info.hslab.diminfo[u].count>1) {
+                large_contiguous=FALSE;
+                break;
+            } /* end if */
+            if(u>0 && space->select.sel_info.hslab.diminfo[u].block!=space->extent.u.simple.size[u]) {
                 large_contiguous=FALSE;
                 break;
             } /* end if */
