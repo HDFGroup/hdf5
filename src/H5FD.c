@@ -1812,7 +1812,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
 	 void *buf/*out*/)
 {
     FUNC_ENTER(H5FDread, FAIL);
-    H5TRACE5("e","xiahx",file,dxpl_id,addr,size,buf);
+    H5TRACE6("e","xMtiahx",file,type,dxpl_id,addr,size,buf);
 
     /* Check args */
     if (!file || !file->cls) {
