@@ -88,7 +88,7 @@ H5Tinit.c: H5detect
 ## a long time to compile it with any optimization on.  H5detect is used
 ## to generate H5Tinit.c once. So, optimization is not critical.
 H5detect: $(srcdir)/H5detect.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -g $(srcdir)/H5detect.c \
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(srcdir)/H5detect.c \
 	    $(LDFLAGS) $(LIBS) -o $@
 
 
