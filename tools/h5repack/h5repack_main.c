@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 static 
 void usage(void)
 {
- printf("h5repack -i input -o output [-h] [-v] [-f 'comp_info'] [-l 'chunk_info'][-m number][-e file] \n");
+ printf("h5repack -i input -o output [-h] [-v] [-f 'filter'] [-l 'layout'][-m number][-e file] \n");
  printf("\n");
  printf("-i input          Input HDF5 File\n");
  printf("-o output         Output HDF5 File\n");
@@ -185,5 +185,6 @@ void usage(void)
  printf("   Applies chunked layout to objects 'dset1' and 'dset2'\n");
  printf("\n");
 }
+
 
 

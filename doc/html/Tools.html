@@ -93,8 +93,9 @@ installed with HDF5.
         <li><a href="#Tools-Ls">h5ls</a> -- 
             Lists specified features of HDF5 file contents
         <li><a href="#Tools-Diff">h5diff</a> -- 
-            Compares two HDF5 files and reports the differences  
-            <em>(Beta version)</em>
+            Compares two HDF5 files and reports the differences.
+        <li><a href="#Tools-Repack">h5repack</a> -- Copies an HDF5 file to a new
+          file with or without compression/chunking.
         <li><a href="#Tools-Perf">h5perf</a> -- 
             Measures HDF5 performance
         <li><a href="#Tools-Repart">h5repart</a> -- 
@@ -669,7 +670,7 @@ installed with HDF5.
 <!-- HEADER RIGHT "h5diff" -->
 <hr>
 <dl>
-<dt><strong>Tool Name:</strong> <a name="Tools-Diff">h5diff</a>  &nbsp;&nbsp; <em>(Beta version)</em>
+<dt><strong>Tool Name:</strong> <a name="Tools-Diff">h5diff</a>  &nbsp;&nbsp;&nbsp;
 <dt><strong>Syntax:</strong>
     <dd><code>h5diff </code> <em>file1</em> <em>file2</em> 
                     [<em>OPTIONS</em>]
@@ -692,9 +693,19 @@ installed with HDF5.
 	<em>object1</em> in <em>file1</em>
 	with <em>object2</em> in <em>file2</em>.
 	These objects must be HDF5 datasets.
+    <dd>
 	<p>
 	<em>object1</em> and <em>object2</em> must be expressed
 	as absolute paths from the respective file's root group.
+    <dd>
+	<p>
+ <code>h5diff</code>  has the following four modes of output:<br>
+    Normal mode: print the number of differences found and where they occurred<br>
+    Report mode (-r): print the above plus the differences<br>
+    Verbose mode (-v): print the above plus a list of objects and warnings<br>
+    Quiet mode (-q): do not print output (h5diff always returns an exit code of
+    1 when differences are found).
+    <dd>
 	<p>
 	Additional information, with several sample cases, 
 	can be found in the document 
@@ -710,12 +721,18 @@ installed with HDF5.
             <td valign="top">The HDF5 files to be compared.</td></tr>
         <tr>
 		    <td valign="top"><code>-h</code></td>
-            <td valign="top">Print all differences.</td></tr>
+            <td valign="top">help message.</td></tr>
         <tr>
 		    <td valign="top"><code>-r</code></td>
-            <td valign="top">Print only the names of objects that differ; 
-	            do not print the differences. These objects may be HDF5 
-				datasets, groups, or named datatypes.</td></tr>
+            <td valign="top">Report mode. Print the differences.</td></tr>
+        <tr>
+		    <td valign="top"><code>-v</code></td>
+            <td valign="top">Verbose mode. Print the differences, list of objects, warnings.</td>
+        </tr>
+        <tr>
+		    <td valign="top"><code>-q</code></td>
+            <td valign="top">Quiet mode. Do not print output.</td>
+        </tr>
         <tr>
 		    <td valign="top"><code>-n</code> <em>count</em></td>
             <td valign="top">Print difference up to <em>count</em> 
@@ -769,6 +786,90 @@ installed with HDF5.
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "h5repart" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong>  <a name="Tools-Repack">h5repack</a>  &nbsp;&nbsp;&nbsp;
+<dt><strong>Syntax:</strong>
+    <dd><code>h5repack </code> -i <em>file1</em>-o <em>file2</em> [-h] [-v] [-f
+      '<i>filter</i>'] [-l '<i>layout</i>'][-m number][-e file]       
+<dt><strong>Purpose:</strong>
+    <dd>Copies an HDF5 file to a new file with or without compression/chunking.
+<dt><strong>Description:</strong>
+    <dd><code>h5repack</code> is a command line tool that applies HDF5 filters
+      to a input file <em>file1</em>, saving the output in a new file, <em>file2</em>.<p>'<i>filter</i>'
+      is a string with the format&nbsp;<br>
+      &lt;list of objects&gt; : &lt;name of filter&gt; = &lt;filter
+      parameters&gt;.<br>
+      <br>
+      &nbsp;&lt;list of objects&gt; is a comma separated list of object names
+      meaning apply compression only to those objects. If no object names are
+      specified, the filter is applied to all objects<br>
+      &nbsp;&lt;name of filter&gt; can be:&nbsp;<br>
+      GZIP, to apply the HDF5 GZIP filter (GZIP compression)<br>
+      SZIP, to apply the HDF5 SZIP filter (SZIP compression)<br>
+      SHUF, to apply the HDF5 shuffle filter<br>
+      FLET, to apply the HDF5 checksum filter<br>
+      NONE, to remove the filter&nbsp;<br>
+      &lt;filter parameters&gt; is optional compression info&nbsp;<br>
+      SHUF (no parameter)&nbsp;<br>
+      FLET (no parameter)&nbsp;<br>
+      GZIP=&lt;deflation level&gt; from 1-9&nbsp;<br>
+      SZIP=&lt;pixels per block,coding&gt; (pixels per block is a even number in
+      2-32 and coding method is 'EC' or 'NN')
+<dt>&nbsp;</dt>
+<dd>'<i>layout'</i> is a string with the format<br>
+  &nbsp;&lt;list of objects&gt; : &lt;layout type&gt;&nbsp;<br>
+  <br>
+  &lt;list of objects&gt; is a comma separated list of object names, meaning
+  that layout information is supplied for those objects. If no object names are
+  specified, the layout is applied to all objects&nbsp;<br>
+  &lt;layout type&gt; can be:&nbsp;<br>
+  CHUNK, to apply chunking layout&nbsp;<br>
+  COMPA, to apply compact layout&nbsp;<br>
+  CONTI, to apply continuous layout&nbsp;<br>
+  &lt;layout parameters&gt; is present for the chunk case only it is the chunk
+  size of each dimension: &lt;dim_1 x dim_2 x ... dim_n&gt;</dd>
+<dt>&nbsp;</dt>
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><em>file1</em>
+        <dt><em>file2</em>
+            <dd>The input and output HDF5 files
+        <dt><code>-h</code>
+            <dd>help message.<dt><code>-f</code> <em>filter</em>
+            <dd>Filter type<dt><code>-l</code> <em>layout</em>
+            <dd>Layout type<dt><code>-v</code>
+            <dd>Verbose mode. Print output (list of objects in the file, filters
+              and layout applied).<dt><code>-e</code> <em>file</em>
+            <dd>File with the -f and -l options (only filter and layout flags)
+        <dt><code>-d</code> <em>delta</em>
+            <dd>Print only differences that are greater than the 
+	        limit <em>delta</em>.
+                <em>delta</em> must be a positive number.
+                The comparison criterion is whether the 
+		absolute value of the difference of 
+		two corresponding values is greater than 
+		<em>delta</em> 
+		<br>(e.g., <code> |a&ndash;b|&nbsp;&gt;&nbsp;<em>delta</em></code>,
+		where <code>a</code> is a value in <em>file1</em> and
+		<code>b</code> is a value in <em>file2</em>).<dt><code>-m</code> <em>number</em>
+            <dd>Do not apply the filter to objects which size in bytes is
+              smaller than number. If no size is specified a minimum of 1024
+              bytes is assumed.
+    </dl>
+<dt><strong>Examples:</strong>
+    <dd>1) h5repack -i file1 -o file2 -f GZIP=1 -v<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Applies GZIP compression to all
+      objects in file1 and saves the output in file2
+      <p>2) h5repack -i file1 -o file2 -f dset1:SZIP=8,NN -v<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Applies SZIP compression only
+      to object 'dset1'</p>
+      <p>3) h5repack -i file1 -o file2 -l dset1,dset2:CHUNK=20x10 -v<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Applies chunked layout to
+      objects 'dset1' and 'dset2'<br>
+</dl>
+
+<p>&nbsp;</p>
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Repart">h5repart</a>
@@ -2309,7 +2410,7 @@ installed with HDF5.
 		<pre>
         # h5cc -c prog1.c
         # h5cc -c prog2.c
-        # h5cc -shlib -o hdf_prog prog1.o prog2.o</pre></dt>	
+        # h5cc -shlib -o hdf_prog prog1.o prog2.o</pre>	
 
 <dt><strong>Options and Parameters:</strong>
     <ul><table>
@@ -2401,7 +2502,7 @@ installed with HDF5.
         <pre>
         # h5fc -c prog1.f90
         # h5fc -c prog2.f90
-        # h5fc -o hdf_prog prog1.o prog2.o</pre></dt>
+        # h5fc -o hdf_prog prog1.o prog2.o</pre>
         
 <dt><strong>Options and Parameters:</strong>
     <ul><table>
@@ -2614,7 +2715,9 @@ And in this document, the
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
-</address><!-- #EndLibraryItem --><dt><dt><SCRIPT LANGUAGE="JAVASCRIPT">
+</address><!-- #EndLibraryItem -->
+<dl>
+  <dt><dt><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
 document.writeln("Last modified: 11 March 2004");
 -->
