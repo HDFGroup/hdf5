@@ -33,11 +33,21 @@
 
 /* Local macros */
 
-/* v2 B-tree info */
+/* v2 B-tree settings */
 #define H5BT_BT2_NODE_SIZE      512
 #define H5BT_BT2_RREC_SIZE(f)   (H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f))    /* Offset & length of block tracked */
 #define H5BT_BT2_SPLIT_PERC     100
 #define H5BT_BT2_MERGE_PERC     40
+
+/* Bit flags for block tracker size status */
+#define H5BT_STATUS_MAX_VALID   0x01    /* Maximum block size valid over all blocks tracked */
+    /* If this flag is not set, then only part of the blocks have been */
+    /* searched to determine the current maximum block size.  This can happen */
+    /* during block shrinks or removals */
+#define H5BT_STATUS_MIN_VALID   0x01    /* Minimum block size valid over all blocks tracked */
+    /* If this flag is not set, then only part of the blocks have been */
+    /* searched to determine the current minimum block size.  This can happen */
+    /* during block expansions or removals */
 
 /* Local typedefs */
 
@@ -86,6 +96,8 @@ H5BT_create(H5F_t *f, hid_t dxpl_id, haddr_t *addr_p)
 
     /* Assign internal information */
     bt->cache_info.is_dirty = TRUE;
+    bt->max_block_size = 0;             /* Indicate that the value is invalid */
+    bt->min_block_size = HSIZET_MAX;    /* Indicate that the value is invalid */
 
     /* Allocate space for the header on disk */
     if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BLKTRK, dxpl_id, (hsize_t)H5BT_SIZE(f))))
@@ -160,6 +172,7 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
     H5BT_blk_info_t lower, upper;       /* Info for blocks less than & greater than new block */
     hbool_t lower_valid = FALSE, upper_valid = FALSE;   /* Lower & upper blocks valid? */
     H5BT_blk_info_t new_block;          /* Info for new block */
+    hsize_t nblks;                      /* Number of blocks tracked */
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5BT_insert, FAIL)
@@ -202,17 +215,55 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
     /* Clear any errors from H5B2_neighbor() */
     H5E_clear_stack(NULL);
 
+#ifdef QAK
     /* Check for merged blocks */
     if(lower_valid || upper_valid) {
 HDfprintf(stderr,"%s: Lower & upper block merging not supported yet!\n",FUNC);
 HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "lower or upper block found!")
     } /* end if */
+#endif /* QAK */
 
     /* Insert new block into B-tree */
     new_block.addr = offset;
     new_block.len = length;
     if(H5B2_insert(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &new_block) < 0)
         HDONE_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to insert block")
+
+/* Update block tracker metadata */
+
+    /* Determine the number of blocks being tracked */
+    if(H5B2_get_nrec(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &nblks) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to determine # of blocks")
+
+    /* This is the only block tracked so far */
+    if(nblks == 1) {
+        bt->max_block_size = length;
+        bt->max_block_cnt = 1;
+        bt->status |= H5BT_STATUS_MAX_VALID;
+        bt->min_block_size = length;
+        bt->min_block_cnt = 1;
+        bt->status |= H5BT_STATUS_MAX_VALID;
+    } /* end if */
+    else {
+        /* Update maximum block size */
+        if (length > bt->max_block_size) {
+            bt->max_block_size = length;
+            bt->max_block_cnt = 1;
+        } /* end if */
+        else if (length == bt->max_block_size)
+            bt->max_block_cnt++;
+
+        /* Update minimum block size */
+        if (length < bt->min_block_size) {
+            bt->min_block_size = length;
+            bt->min_block_cnt = 1;
+        } /* end if */
+        else if (length == bt->min_block_size)
+            bt->min_block_cnt++;
+    } /* end if */
+
+    /* Increment total number of bytes tracked in all blocks */
+    bt->tot_block_size += length;
 
 done:
     /* Release the block tracker info */
