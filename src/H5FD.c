@@ -3202,7 +3202,7 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
 
     /* Do the real work */
-    if (H5FD_flush(file,dxpl_id,closing)<0)
+    if (H5FD_flush(file, dxpl_id, closing ? H5_FLUSH_CLOSING : H5_FLUSH_NONE) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file flush request failed");
 
 done:
@@ -3226,10 +3226,14 @@ done:
  *              Quincey Koziol, May 20, 2002
  *              Added 'closing' parameter
  *
+ *              Bill Wendling, March 18, 2003
+ *              Changed closing flag to FLAGS so that more than just one
+ *              can be supported.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing)
+H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned flags)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -3248,8 +3252,11 @@ H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing)
         file->accum_dirty=FALSE;
     } /* end if */
 
-    if (file->cls->flush && (file->cls->flush)(file,dxpl_id,closing)<0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
+    if ((flags & H5_FLUSH_CLEAR_ONLY) == 0)
+        /* Flush only if we're not clearing the dirty bits in the caches */
+        if (file->cls->flush &&
+                (file->cls->flush)(file, dxpl_id, flags & H5_FLUSH_CLOSING)<0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

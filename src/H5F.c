@@ -1,12 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /****************************************************************************
-* NCSA HDF								    *
-* Software Development Group						    *
-* National Center for Supercomputing Applications			    *
-* University of Illinois at Urbana-Champaign				    *
-* 605 E. Springfield, Champaign IL 61820				    *
-*									    *
-* For conditions of distribution and use, see the accompanying		    *
-* hdf/COPYING file.   							    *
 *                                                                           *
 * MODIFICATIONS                                                             *
 *	Robb Matzke, 30 Aug 1997                                            *
@@ -67,14 +73,15 @@ static H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
 			hid_t fapl_id, hid_t dxpl_id);
 static herr_t H5F_close(H5F_t *f);
 static herr_t H5F_close_all(void);
+
 #ifdef NOT_YET
 static herr_t H5F_flush_all(hbool_t invalidate);
 static int H5F_flush_all_cb(H5F_t *f, hid_t fid, const void *_invalidate);
 #endif /* NOT_YET */
+
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
-static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
-			hbool_t alloc_only, hbool_t closing);
+static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 static herr_t H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list, 
 				unsigned *obj_id_count);
@@ -654,17 +661,20 @@ done:
  *              Friday, February 19, 1999
  *
  * Modifications:
+ *          Bill Wendling, 2003-03-18
+ *          Changed H5F_flush to accept H5F_flush_t flags instead of a
+ *          series of h5bool_t's.
  *
  *-------------------------------------------------------------------------
  */
 static int
 H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 {
-    hbool_t	invalidate = *((const hbool_t*)_invalidate);
+    unsigned    invalidate = (*((const hbool_t*)_invalidate);
 
     FUNC_ENTER_NOINIT(H5F_flush_all_cb);
 
-    H5F_flush(f, H5F_SCOPE_LOCAL, invalidate, FALSE, FALSE);
+    H5F_flush(f, H5F_SCOPE_LOCAL, (invalidate ? H5_FLUSH_INVALIDATE : H5_FLUSH_NONE));
 
     FUNC_LEAVE_NOAPI(0);
 }
@@ -1711,6 +1721,10 @@ done:
  *		Changed the file creation and access property lists to the 
  *		new generic property list.
  *
+ *		Bill Wendling, 2003-03-18
+ *		Modified H5F_flush call to take one flag instead of
+ *		multiple Boolean flags.
+ *
  *-------------------------------------------------------------------------
  */
 static H5F_t *
@@ -1879,7 +1893,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         shared->boot_addr = userblock_size;
 	shared->base_addr = shared->boot_addr;
 	shared->consist_flags = 0x03;
-	if (H5F_flush(file, dxpl_id, H5F_SCOPE_LOCAL, FALSE, TRUE,FALSE)<0)
+
+	if (H5F_flush(file, dxpl_id, H5F_SCOPE_LOCAL, H5_FLUSH_ALLOC_ONLY) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock");
 
 	/* Create and open the root group */
@@ -2298,9 +2313,12 @@ done:
  *              Thursday, August  6, 1998
  *
  * Modifications:
- *
  * 		Robb Matzke, 1998-10-16
  *		Added the `scope' argument.
+ *
+ *		Bill Wendling, 2003-03-18
+ *		Modified H5F_flush call to take one flag instead of
+ *		several Boolean flags.
  *
  *-------------------------------------------------------------------------
  */
@@ -2361,7 +2379,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file");
 
     /* Flush the file */
-    if (H5F_flush(f, H5AC_dxpl_id, scope, FALSE, FALSE, FALSE)<0)
+    if (H5F_flush(f, H5AC_dxpl_id, scope, H5_FLUSH_NONE) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed");
 
 done:
@@ -2416,12 +2434,15 @@ done:
  *		Quincey Koziol, 2002-06-06
  *              Return the remainders of the metadata & "small data" blocks to
  *              the free list of blocks for the file.
+ *              
+ *              Bill Wendling, 2003-03-18
+ *              Modified the flags being passed in to be one flag instead
+ *              of several.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
-	  hbool_t alloc_only, hbool_t closing)
+H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 {
     uint8_t		sbuf[1024];     /* Superblock encoding buffer */
     uint8_t		dbuf[1024];     /* Driver info block encoding buffer */
@@ -2438,9 +2459,9 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
     int                 share_head_vers;/* Shared header info version */
     H5P_genplist_t *plist;              /* Property list */
     herr_t              ret_value;      /* Return value */
-    
+
     FUNC_ENTER_NOINIT(H5F_flush);
-	
+
     /*
      * Nothing to do if the file is read only.	This determination is made at
      * the shared open(2) flags level, implying that opening a file twice,
@@ -2451,44 +2472,55 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
 	HGOTO_DONE(SUCCEED);
 
     /* Flush other stuff depending on scope */
-    if (H5F_SCOPE_GLOBAL==scope) {
+    if (H5F_SCOPE_GLOBAL == scope) {
 	while (f->mtab.parent)
             f = f->mtab.parent;
+
 	scope = H5F_SCOPE_DOWN;
     }
-    if (H5F_SCOPE_DOWN==scope) {
-	for (i=0; i<f->mtab.nmounts; i++) {
-	    if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope, invalidate, FALSE, closing)<0)
-		nerrors++;
-	}
-    }
+
+    if (H5F_SCOPE_DOWN == scope)
+        for (i = 0; i < f->mtab.nmounts; i++)
+            /* Flush but don't pass down the ALLOC_ONLY flag if there */
+            if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope,
+                          flags & ~H5_FLUSH_ALLOC_ONLY) < 0)
+                nerrors++;
 
     /* Avoid flushing buffers & caches when alloc_only set */
-    if(!alloc_only) {
+    if ((flags & H5_FLUSH_ALLOC_ONLY) == 0) {
         /* flush any cached compact storage raw data */
-        if (H5D_flush(f, dxpl_id)<0)
+        if (H5D_flush(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache");
 
-        /* If we are invalidating everything (which only happens just before
-         * the file closes), release the unused portion of the metadata and
-         * "small data" blocks back to the free lists in the file.
+        /*
+         * If we are invalidating everything (which only happens just
+         * before the file closes), release the unused portion of the
+         * metadata and "small data" blocks back to the free lists in the
+         * file.
          */
-        if(invalidate) {
-            if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_METADATA) {
+        if (flags & H5_FLUSH_INVALIDATE) {
+            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
                 /* Return the unused portion of the metadata block to a free list */
-                if(f->shared->lf->eoma!=0)
-                    if(H5FD_free(f->shared->lf,H5FD_MEM_DEFAULT,dxpl_id,f->shared->lf->eoma,f->shared->lf->cur_meta_block_size)<0)
-                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block");
+                if (f->shared->lf->eoma != 0)
+                    if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
+                                  f->shared->lf->eoma,
+                                  f->shared->lf->cur_meta_block_size) < 0)
+                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                    "can't free metadata block");
 
                 /* Reset metadata block information, just in case */
                 f->shared->lf->eoma=0;
                 f->shared->lf->cur_meta_block_size=0;
             } /* end if */
-            if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_SMALLDATA) {
+
+            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
                 /* Return the unused portion of the "small data" block to a free list */
-                if(f->shared->lf->eosda!=0)
-                    if(H5FD_free(f->shared->lf,H5FD_MEM_DRAW,dxpl_id,f->shared->lf->eosda,f->shared->lf->cur_sdata_block_size)<0)
-                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block");
+                if (f->shared->lf->eosda != 0)
+                    if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
+                                  f->shared->lf->eosda,
+                                  f->shared->lf->cur_sdata_block_size) < 0)
+                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                    "can't free 'small data' block");
 
                 /* Reset "small data" block information, just in case */
                 f->shared->lf->eosda=0;
@@ -2497,9 +2529,11 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
         } /* end if */
 
         /* flush the data sieve buffer, if we have a dirty one */
-        if(f->shared->sieve_buf && f->shared->sieve_dirty) {
+        if (f->shared->sieve_buf && f->shared->sieve_dirty) {
             /* Write dirty data sieve buffer to file */
-            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0)
+            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc,
+                                f->shared->sieve_size, dxpl_id,
+                                f->shared->sieve_buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
 
             /* Reset sieve buffer dirty flag */
@@ -2507,11 +2541,11 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
         } /* end if */
 
         /* flush the entire raw data cache */
-        if (H5F_istore_flush (f, dxpl_id, invalidate)<0)
+        if (H5F_istore_flush(f, dxpl_id, flags & H5_FLUSH_INVALIDATE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache");
         
         /* flush (and invalidate) the entire meta data cache */
-        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, invalidate)<0)
+        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & H5_FLUSH_INVALIDATE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
     } /* end if */
 
@@ -2559,7 +2593,8 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
      * Encode the driver information block.
      */
     H5_ASSIGN_OVERFLOW(driver_size,H5FD_sb_size(f->shared->lf),hsize_t,size_t);
-    if (driver_size>0) {
+
+    if (driver_size > 0) {
 	driver_size += 16; /*driver block header */
 	assert(driver_size<=sizeof(dbuf));
 	p = dbuf;
@@ -2584,40 +2619,46 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
         assert(driver_size<=sizeof(dbuf));
     } /* end if */
 
-    if (alloc_only) {
+    if (flags & H5_FLUSH_ALLOC_ONLY) {
 	haddr_t addr;
+
 	/*
-	 * Allocate space for the userblock, superblock, and driver info
-	 * block. We do it with one allocation request because the userblock
-	 * and superblock need to be at the beginning of the file and only
-	 * the first allocation request is required to return memory at
-	 * format address zero.
+         * Allocate space for the userblock, superblock, and driver info
+         * block. We do it with one allocation request because the
+         * userblock and superblock need to be at the beginning of the
+         * file and only the first allocation request is required to
+         * return memory at format address zero.
 	 */
         H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
 	addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-              ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
-	if (HADDR_UNDEF==addr)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate file space for userblock and/or superblock");
-	if (0!=addr)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file driver failed to allocate userblock and/or superblock at address zero");
-	
+                          ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
+
+	if (HADDR_UNDEF == addr)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                        "unable to allocate file space for userblock and/or superblock");
+
+	if (0 != addr)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                        "file driver failed to allocate userblock and/or superblock at address zero");
+
 	/*
 	 * The file driver information block begins immediately after the
 	 * superblock.
 	 */
-	if (driver_size>0)
+	if (driver_size > 0)
 	    f->shared->driver_addr = superblock_size;
-	
     } else {
         /* Compute boot block checksum */
         assert(sizeof(chksum)==sizeof(f->shared->boot_chksum));
-        for(p=(uint8_t *)&chksum, chksum=0, i=0; i<superblock_size; i++)
+
+        for (p=(uint8_t *)&chksum, chksum=0, i=0; i<superblock_size; i++)
             p[i%sizeof(f->shared->boot_chksum)] ^= sbuf[i];
 
         /* Compare with current checksums */
-        if(chksum!=f->shared->boot_chksum) {
+        if (chksum!=f->shared->boot_chksum) {
             /* Write superblock */
-            if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id, f->shared->boot_addr, superblock_size, sbuf)<0)
+            if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                           f->shared->boot_addr, superblock_size, sbuf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock");
 
             /* Update checksum information if different */
@@ -2628,14 +2669,18 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
 	if (HADDR_UNDEF!=f->shared->driver_addr) {
             /* Compute driver info block checksum */
             assert(sizeof(chksum)==sizeof(f->shared->drvr_chksum));
+
             for(p=(uint8_t *)&chksum, chksum=0, i=0; i<driver_size; i++)
                 p[i%sizeof(f->shared->drvr_chksum)] ^= dbuf[i];
 
             /* Compare with current checksums */
             if(chksum!=f->shared->boot_chksum) {
                 /* Write driver information block */
-                if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id, f->shared->base_addr+superblock_size, driver_size, dbuf)<0)
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write driver information block");
+                if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                               f->shared->base_addr + superblock_size,
+                               driver_size, dbuf) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+                                "unable to write driver information block");
 
                 /* Update checksum information if different */
                 f->shared->drvr_chksum=chksum;
@@ -2643,12 +2688,14 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
 	} /* end if */
     } /* end else */
 
-    /* Flush file buffers to disk */
-    if (!alloc_only && H5FD_flush(f->shared->lf,dxpl_id,closing)<0)
-	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
+    /* If we're not just allocating... */
+    if ((flags & H5_FLUSH_ALLOC_ONLY) == 0)
+        /* ...flush file buffers to disk. */
+        if (H5FD_flush(f->shared->lf, dxpl_id, flags) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
 
     /* Check flush errors for children - errors are already on the stack */
-    ret_value= (nerrors ? FAIL : SUCCEED);
+    ret_value = (nerrors ? FAIL : SUCCEED);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2685,6 +2732,11 @@ done:
  *
  * 		Robb Matzke, 1999-08-02
  *		Modified to use the virtual file layer.
+ *
+ *		Bill Wendling, 2003-03-18
+ *		Modified H5F_flush call to take one flag instead of
+ *		several Boolean flags.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2841,7 +2893,8 @@ H5F_close(H5F_t *f)
 	H5F_istore_stats(f, FALSE);
 
 	/* Flush and destroy all caches */
-	if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, TRUE, FALSE, TRUE)<0)
+	if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
+                      H5_FLUSH_INVALIDATE | H5_FLUSH_CLOSING) < 0)
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
     } /* end if */
 
