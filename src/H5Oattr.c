@@ -51,6 +51,8 @@ const H5O_class_t H5O_ATTR[1] = {{
     H5O_attr_debug,		/* debug the message            */
 }};
 
+#define H5O_ATTR_VERSION	1
+
 /* Interface initialization */
 static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
@@ -76,6 +78,9 @@ static hbool_t          interface_initialize_g = FALSE;
  * Modifications:
  * 	Robb Matzke, 17 Jul 1998
  *	Added padding for alignment.
+ *
+ * 	Robb Matzke, 20 Jul 1998
+ *	Added a version number at the beginning.
 --------------------------------------------------------------------------*/
 static void *
 H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
@@ -83,6 +88,7 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     H5A_t		*attr = NULL;
     H5S_simple_t	*simple;	/*simple dimensionality information  */
     size_t		name_len;   	/*attribute name length */
+    intn		version;	/*message version number*/
 
     FUNC_ENTER(H5O_attr_decode, NULL);
 
@@ -95,6 +101,16 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 		       "memory allocation failed");
     }
 
+    /* Version number */
+    version = *p++;
+    if (version!=H5O_ATTR_VERSION) {
+	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+		      "bad version number for attribute message");
+    }
+
+    /* Reserved */
+    p++;
+
     /*
      * Decode the sizes of the parts of the attribute.  The sizes stored in
      * the file are exact but the parts are aligned on 8-byte boundaries.
@@ -102,7 +118,6 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     UINT16DECODE(p, name_len); /*including null*/
     UINT16DECODE(p, attr->dt_size);
     UINT16DECODE(p, attr->ds_size);
-    p += 2; /*reserved*/
     
     /* Decode and store the name */
     if (NULL==(attr->name=H5MM_malloc(name_len))) {
@@ -175,6 +190,9 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  * Modifications:
  * 	Robb Matzke, 17 Jul 1998
  *	Added padding for alignment.
+ *
+ * 	Robb Matzke, 20 Jul 1998
+ *	Added a version number at the beginning.
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
@@ -189,6 +207,12 @@ H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
     assert(p);
     assert(attr);
 
+    /* Version */
+    *p++ = H5O_ATTR_VERSION;
+
+    /* Reserved */
+    *p++ = 0;
+
     /*
      * Encode the lengths of the various parts of the attribute message. The
      * encoded lengths are exact but we pad each part except the data to be a
@@ -198,7 +222,6 @@ H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
     UINT16ENCODE(p, name_len);
     UINT16ENCODE(p, attr->dt_size);
     UINT16ENCODE(p, attr->ds_size);
-    UINT16ENCODE(p, 0); /*reserved*/
 
     /*
      * Write the name including null terminator padded to the correct number

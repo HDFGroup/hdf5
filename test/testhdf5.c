@@ -142,7 +142,7 @@ main(int argc, char *argv[])
     int                     Summary = 0;
     int                     CleanUp = 1;
     int                     Cache = 1;
-    uintn                   major, minor, release, patch;
+    uintn                   major, minor, release;
 
 #if defined __MWERKS__
     argc = ccommand(&argv);
@@ -172,7 +172,7 @@ main(int argc, char *argv[])
     InitTest("select", test_select, cleanup_select,  "Selections");
 
     Verbosity = 4;              /* Default Verbosity is Low */
-    H5version(&major, &minor, &release, &patch);
+    H5version(&major, &minor, &release);
 
     print_func("\nFor help use: testhdf5 -help\n");
     print_func("Linked with hdf5 version %u.%u release %u\n",

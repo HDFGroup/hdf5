@@ -1502,11 +1502,19 @@
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
+	</tr>
 
 	<tr align=center>
-	  <td colspan=4>Dimensionality</td>
+	  <td>Version</td>
+	  <td>Dimensionality</td>
+	  <td>Flags</td>
+	  <td>Reserved</td>
+	</tr>
+
 	<tr align=center>
-	  <td colspan=4>Dimension Flags</td>
+	  <td colspan=4>Reserved</td>
+	</tr>
+
 	<tr align=center>
 	  <td colspan=4>Dimension Size #1 (&lt;size&gt; bytes)</td>
 	<tr align=center>
@@ -1543,12 +1551,12 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Dimension Flags</td>
+	  <td>Flags</td>
 	  <td>This field is used to store flags to indicate the
-	    presence of parts of this message.  Bit 0 (counting from
-	    the right) is used to indicate that maximum dimensions are
-	    present.  Bit 1 is used to indicate that permutation
-	    indices are present for each dimension.</td>
+	    presence of parts of this message.  Bit 0 (the least
+	    significant bit) is used to indicate that maximum
+	    dimensions are present.  Bit 1 is used to indicate that
+	    permutation indices are present for each dimension.</td>
 	</tr>
 
 	<tr valign=top>
@@ -1935,7 +1943,7 @@
 	</tr>
 
 	<tr align=center>
-	  <td>Type Class</td>
+	  <td>Type Class and Version</td>
 	  <td colspan=3>Class Bit Field</td>
 	</tr>
 
@@ -1950,11 +1958,13 @@
     </center>
 
     <p>The Class Bit Field and Properties fields vary depending
-      on the Type Class.  The type class is one of: 0 (fixed-point
-      number), 1 (floating-point number), 2 (date and time), 3 (text
-      string), 4 (bit field), 5 (opaque), 6 (compound).  The Class Bit
-      Field is zero and the size of the Properties field is zero
-      except for the cases noted here.
+      on the Type Class, which is the low-order four bits of the Type
+      Class and Version field (the high-order four byte are the
+      version which should be set to the value one).  The type class
+      is one of: 0 (fixed-point number), 1 (floating-point number), 2
+      (date and time), 3 (text string), 4 (bit field), 5 (opaque), 6
+      (compound).  The Class Bit Field is zero and the size of the
+      Properties field is zero except for the cases noted here.
 
     <p>
     <center>
@@ -2269,7 +2279,8 @@
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4><br>Heap Address<br><br></td>
+	  <td>Version</td>
+	  <td colspan=3>Reserved</td>
 	</tr>
 
 	<tr align=center>
@@ -2278,7 +2289,7 @@
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4>Reserved</td>
+	  <td colspan=4><br>Heap Address<br><br></td>
 	</tr>
 
 	<tr align=center>
@@ -2451,17 +2462,18 @@
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4><br>Address<br><br></td>
-	</tr>
-
-	<tr align=center>
+	  <td>Version</td>
 	  <td>Dimensionality</td>
 	  <td>Layout Class</td>
-	  <td colspan=2>Reserved</td>
+	  <td>Reserved</td>
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4>Reserved (4-bytes)</td>
+	  <td colspan=4>Reserved</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Address<br><br></td>
 	</tr>
 
 	<tr align=center>
@@ -2487,11 +2499,9 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Address</td>
-	  <td>For contiguous storage, this is the address of the first
-	    byte of storage.  For chunked storage this is the address
-	    of the B-tree that is used to look up the addresses of the
-	    chunks.</td>
+	  <td>Version</td>
+	  <td>A version number for the layout message. This
+	    documentation describes version one.</td>
 	</tr>
 
 	<tr valign=top>
@@ -2508,6 +2518,14 @@
 	    indicates contiguous storage while a value of two
 	    indicates chunked storage.  Other values will be defined
 	    in the future.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Address</td>
+	  <td>For contiguous storage, this is the address of the first
+	    byte of storage.  For chunked storage this is the address
+	    of the B-tree that is used to look up the addresses of the
+	    chunks.</td>
 	</tr>
 
 	<tr valign=top>
@@ -2715,13 +2733,14 @@
 	</tr>
 
 	<tr align=center>
+	  <td>Version</td>
+	  <td>Reserved</td>
 	  <td colspan=2>Name Size</td>
-	  <td colspan=2>Type Size</td>
 	</tr>
 
 	<tr align=center>
+	  <td colspan=2>Type Size</td>
 	  <td colspan=2>Space Size</td>
-	  <td colspan=2>Reserved</td>
 	</tr>
 
 	<tr align=center>
@@ -2748,6 +2767,12 @@
 	<tr>
 	  <th width="30%">Field Name</th>
 	  <th width="70%">Description</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Version</td>
+	  <td>Version number for the message.  This document describes 
+	    version 1 of attribute messages.</td>
 	</tr>
 
 	<tr valign=top>
@@ -2881,8 +2906,9 @@
 	</tr>
 
 	<tr align=center>
+	  <td>Version</td>
 	  <td>Flags</td>
-	  <td colspan=3>Reserved</td>
+	  <td colspan=2>Reserved</td>
 	</tr>
 
 	<tr align=center>
@@ -2901,6 +2927,12 @@
 	<tr>
 	  <th width="30%">Field Name</th>
 	  <th width="70%">Description</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Version</td>
+	  <td>The version number for the message.  This document
+	    describes version one of shared messages.</td>
 	</tr>
 
 	<tr valign=top>
@@ -3108,7 +3140,7 @@ data-type.
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- hhmts start -->
-Last modified: Mon Jul 20 10:17:03 EDT 1998
+Last modified: Mon Jul 20 13:49:08 EDT 1998
 <!-- hhmts end -->
 </body>
 </html>

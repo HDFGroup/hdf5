@@ -36,6 +36,8 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_debug,       	/*debug the message             */
 }};
 
+#define H5O_LAYOUT_VERSION	1
+
 /* Interface initialization */
 #define PABLO_MASK      H5O_layout_mask
 static hbool_t interface_initialize_g = FALSE;
@@ -56,6 +58,8 @@ static hbool_t interface_initialize_g = FALSE;
  *              Wednesday, October  8, 1997
  *
  * Modifications:
+ * 	Robb Matzke, 1998-07-20
+ *	Rearranged the message to add a version number at the beginning.
  *
  *-------------------------------------------------------------------------
  */
@@ -63,7 +67,7 @@ static void *
 H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5O_layout_t           *mesg = NULL;
-    intn                    i;
+    intn                    i, version;
 
     FUNC_ENTER(H5O_layout_decode, NULL);
 
@@ -77,7 +81,15 @@ H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
-    H5F_addr_decode(f, &p, &(mesg->addr));
+
+    /* Version */
+    version = *p++;
+    if (version!=H5O_LAYOUT_VERSION) {
+	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+		      "bad version number for layout message");
+    }
+
+    /* Dimensionality */
     mesg->ndims = *p++;
 
     /* Layout class */
@@ -85,7 +97,10 @@ H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     assert(H5D_CONTIGUOUS == mesg->type || H5D_CHUNKED == mesg->type);
 
     /* Reserved bytes */
-    p += 6;
+    p += 5;
+
+    /* Address */
+    H5F_addr_decode(f, &p, &(mesg->addr));
 
     /* Read the size */
     for (i = 0; i < mesg->ndims; i++) {
@@ -108,6 +123,8 @@ H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *              Wednesday, October  8, 1997
  *
  * Modifications:
+ * 	Robb Matzke, 1998-07-20
+ *	Rearranged the message to add a version number at the beginning.
  *
  *-------------------------------------------------------------------------
  */
@@ -125,8 +142,8 @@ H5O_layout_encode(H5F_t *f, uint8 *p, const void *_mesg)
     assert(mesg->ndims > 0 && mesg->ndims <= H5O_LAYOUT_NDIMS);
     assert(p);
 
-    /* data or B-tree address */
-    H5F_addr_encode(f, &p, &(mesg->addr));
+    /* Version */
+    *p++ = H5O_LAYOUT_VERSION;
 
     /* number of dimensions */
     *p++ = mesg->ndims;
@@ -135,8 +152,10 @@ H5O_layout_encode(H5F_t *f, uint8 *p, const void *_mesg)
     *p++ = mesg->type;
 
     /* reserved bytes should be zero */
-    for (i = 0; i < 6; i++)
-        *p++ = 0;
+    for (i=0; i<5; i++) *p++ = 0;
+
+    /* data or B-tree address */
+    H5F_addr_encode(f, &p, &(mesg->addr));
 
     /* dimension size */
     for (i = 0; i < mesg->ndims; i++) {

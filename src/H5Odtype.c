@@ -55,6 +55,8 @@ const H5O_class_t H5O_DTYPE[1] = {{
     H5O_dtype_debug,		/* debug the message            */
 }};
 
+#define H5O_DTYPE_VERSION	1
+
 /* Interface initialization */
 static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
@@ -78,7 +80,7 @@ static hbool_t          interface_initialize_g = FALSE;
 static herr_t
 H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
 {
-    uintn                   flags, perm_word;
+    uintn                   flags, perm_word, version;
     intn                    i, j;
 
     FUNC_ENTER(H5O_dtype_decode_helper, FAIL);
@@ -89,7 +91,12 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
 
     /* decode */
     UINT32DECODE(*pp, flags);
-    dt->type = (H5T_class_t)(flags & 0xff);
+    version = (flags>>4) & 0x0f;
+    if (version!=H5O_DTYPE_VERSION) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL,
+		      "bad version number for data type message");
+    }
+    dt->type = (H5T_class_t)(flags & 0x0f);
     flags >>= 8;
     UINT32DECODE(*pp, dt->size);
 
@@ -455,7 +462,7 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
         break;
     }
 
-    *hdr++ = dt->type;
+    *hdr++ = ((uintn)(dt->type) & 0x0f) | (H5O_DTYPE_VERSION<<4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
     *hdr++ = (flags >> 16) & 0xff;

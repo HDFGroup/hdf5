@@ -37,6 +37,8 @@ const H5O_class_t H5O_EFL[1] = {{
     H5O_efl_debug,	    	/*debug the message		*/
 }};
 
+#define H5O_EFL_VERSION		1
+
 /* Interface initialization */
 static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT	NULL
@@ -56,14 +58,16 @@ static hbool_t interface_initialize_g = FALSE;
  *		Tuesday, November 25, 1997
  *
  * Modifications:
- *
+ *	Robb Matzke, 1998-07-20
+ *	Rearranged the message to add a version number near the beginning.
+ *	
  *-------------------------------------------------------------------------
  */
 static void *
 H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5O_efl_t		*mesg = NULL;
-    int			i;
+    intn		i, version;
     const char		*s = NULL;
 
     FUNC_ENTER(H5O_efl_decode, NULL);
@@ -73,22 +77,34 @@ H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     assert(p);
     assert (!sh);
 
-    /* Decode the header */
     if (NULL==(mesg = H5MM_calloc(sizeof(H5O_efl_t)))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
+
+    /* Version */
+    version = *p++;
+    if (version!=H5O_EFL_VERSION) {
+	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+		      "bad version number for external file list message");
+    }
+
+    /* Reserved */
+    p += 3;
+
+    /* Number of slots */
+    UINT16DECODE(p, mesg->nalloc);
+    assert(mesg->nalloc>0);
+    UINT16DECODE(p, mesg->nused);
+    assert(mesg->nused <= mesg->nalloc);
+
+    /* Heap address */
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
 #ifndef NDEBUG
     assert (H5F_addr_defined (&(mesg->heap_addr)));
     s = H5HL_peek (f, &(mesg->heap_addr), 0);
     assert (s && !*s);
 #endif
-    UINT16DECODE(p, mesg->nalloc);
-    assert(mesg->nalloc>0);
-    UINT16DECODE(p, mesg->nused);
-    assert(mesg->nused <= mesg->nalloc);
-    p += 4; /*reserved*/
 
     /* Decode the file list */
     mesg->slot = H5MM_calloc(mesg->nalloc*sizeof(H5O_efl_entry_t));
@@ -128,7 +144,9 @@ H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  *		Tuesday, November 25, 1997
  *
  * Modifications:
- *
+ *	Robb Matzke, 1998-07-20
+ *	Rearranged the message to add a version number near the beginning.
+ *	
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -146,17 +164,23 @@ H5O_efl_encode(H5F_t *f, uint8 *p, const void *_mesg)
     assert(mesg);
     assert(p);
 
-    /* Encode header */
-    assert (H5F_addr_defined (&(mesg->heap_addr)));
-    H5F_addr_encode(f, &p, &(mesg->heap_addr));
+    /* Version */
+    *p++ = H5O_EFL_VERSION;
+
+    /* Reserved */
+    *p++ = 0;
+    *p++ = 0;
+    *p++ = 0;
+
+    /* Number of slots */
     assert (mesg->nalloc>0);
     UINT16ENCODE(p, mesg->nused); /*yes, twice*/
     assert (mesg->nused>0 && mesg->nused<=mesg->nalloc);
     UINT16ENCODE(p, mesg->nused);
-    *p++ = 0;
-    *p++ = 0;
-    *p++ = 0;
-    *p++ = 0;
+
+    /* Heap address */
+    assert (H5F_addr_defined (&(mesg->heap_addr)));
+    H5F_addr_encode(f, &p, &(mesg->heap_addr));
 
     /* Encode file list */
     for (i=0; i<mesg->nused; i++) {

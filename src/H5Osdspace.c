@@ -48,6 +48,8 @@ const H5O_class_t H5O_SDSPACE[1] = {{
     H5O_sdspace_debug,	        /* debug the message		    	*/
 }};
 
+#define H5O_SDSPACE_VERSION	1
+
 /* Is the interface initialized? */
 static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
@@ -74,13 +76,16 @@ static hbool_t interface_initialize_g = FALSE;
 	Robb Matzke, 1998-04-09
 	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
 	instead of just four bytes.
+ 
+  	Robb Matzke, 1998-07-20
+        Added a version number and reformatted the message for aligment.
 --------------------------------------------------------------------------*/
 static void *
 H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     intn		u;		/* local counting variable */
-    uintn		flags;
+    uintn		flags, version;
     
     FUNC_ENTER(H5O_sdspace_decode, NULL);
 
@@ -91,8 +96,15 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 
     /* decode */
     if ((sdim = H5MM_calloc(sizeof(H5S_simple_t))) != NULL) {
-	UINT32DECODE(p, sdim->rank);
-	UINT32DECODE(p, flags);
+	version = *p++;
+	if (version!=H5O_SDSPACE_VERSION) {
+	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
+			  "wrong version number in data space message");
+	}
+	sdim->rank = *p++;
+	flags = *p++;
+	p += 5; /*reserved*/
+
 	if (sdim->rank > 0) {
 	    if (NULL==(sdim->size=H5MM_malloc(sizeof(sdim->size[0])*
 					      sdim->rank))) {
@@ -157,6 +169,9 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 	Robb Matzke, 1998-04-09
 	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
 	instead of just four bytes.
+ 
+  	Robb Matzke, 1998-07-20
+        Added a version number and reformatted the message for aligment.
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *mesg)
@@ -179,8 +194,15 @@ H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *mesg)
 #endif
 
     /* encode */
-    UINT32ENCODE(p, sdim->rank);
-    UINT32ENCODE(p, flags);
+    *p++ = H5O_SDSPACE_VERSION;
+    *p++ = sdim->rank;
+    *p++ = flags;
+    *p++ = 0; /*reserved*/
+    *p++ = 0; /*reserved*/
+    *p++ = 0; /*reserved*/
+    *p++ = 0; /*reserved*/
+    *p++ = 0; /*reserved*/
+
     if (sdim->rank > 0) {
 	for (u = 0; u < sdim->rank; u++) {
 	    H5F_encode_length (f, p, sdim->size[u]);
@@ -317,9 +339,9 @@ static size_t
 H5O_sdspace_size(H5F_t *f, const void *mesg)
 {
     const H5S_simple_t	   *sdim = (const H5S_simple_t *) mesg;
+    
     /*
-     * all dimensionality messages are at least 8 bytes long (four bytes for
-     * rank and four bytes for flags)
+     * All dimensionality messages are at least 8 bytes long.
      */
     size_t		    ret_value = 8;
 

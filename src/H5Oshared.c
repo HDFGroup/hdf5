@@ -38,6 +38,8 @@ const H5O_class_t H5O_SHARED[1] = {{
     H5O_shared_debug,	    	/*debug method				*/
 }};
 
+#define H5O_SHARED_VERSION	1
+
 /* Interface initialization */
 #define PABLO_MASK	H5O_shared_mask
 static hbool_t interface_initialize_g = FALSE;
@@ -57,14 +59,15 @@ static hbool_t interface_initialize_g = FALSE;
  *              Thursday, April  2, 1998
  *
  * Modifications:
- *
+ *	Robb Matzke, 1998-07-20
+ *	Added a version number to the beginning of the message.
  *-------------------------------------------------------------------------
  */
 static void *
 H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
 {
     H5O_shared_t	*mesg;
-    uintn		flags;
+    uintn		flags, version;
     
     FUNC_ENTER (H5O_shared_decode, NULL);
 
@@ -79,10 +82,21 @@ H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
 		       "memory allocation failed");
     }
 
+    /* Version */
+    version = *buf++;
+    if (version!=H5O_SHARED_VERSION) {
+	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+		      "bad version number for shared object message");
+    }
+
+    /* Flags */
     flags = *buf++;
     mesg->in_gh = (flags & 0x01);
-    buf += 7; /*reserved*/
 
+    /* Reserved */
+    buf += 6;
+
+    /* Body */
     if (mesg->in_gh) {
 	H5F_addr_decode (f, &buf, &(mesg->u.gh.addr));
 	INT32DECODE (buf, mesg->u.gh.idx);
@@ -107,6 +121,8 @@ H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
  *              Thursday, April  2, 1998
  *
  * Modifications:
+ *	Robb Matzke, 1998-07-20
+ *	Added a version number to the beginning of the message.
  *
  *-------------------------------------------------------------------------
  */
@@ -124,6 +140,7 @@ H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
     assert (mesg);
 
     /* Encode */
+    *buf++ = H5O_SHARED_VERSION;
     flags = mesg->in_gh ? 0x01 : 0x00;
     *buf++ = flags;
     *buf++ = 0; /*reserved 1*/
@@ -132,7 +149,6 @@ H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
     *buf++ = 0; /*reserved 4*/
     *buf++ = 0; /*reserved 5*/
     *buf++ = 0; /*reserved 6*/
-    *buf++ = 0; /*reserved 7*/
 
     if (mesg->in_gh) {
 	H5F_addr_encode (f, &buf, &(mesg->u.gh.addr));
