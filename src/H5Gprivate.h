@@ -95,8 +95,9 @@ typedef struct H5G_entry_t {
     H5G_type_t  type;                   /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
     H5F_t       *file;                  /*file to which this obj hdr belongs */
-				char        *name;                  /*name associated with atom          */
-				char        *old_name;              /*old name hidden by a file mount    */
+    char        *user_path;             /* Path to object, as opened by user */
+    char        *canon_path;            /* Path to object, as found in file  */
+    unsigned    user_path_hidden;       /* Whether the user's path is valid  */
 } H5G_entry_t;
 
 typedef struct H5G_t H5G_t;
@@ -113,12 +114,19 @@ typedef struct H5G_typeinfo_t {
 } H5G_typeinfo_t;
 
 /* Type of operation being performed for call to H5G_replace_name() */
-typedef enum H5G_names_op_t {
+typedef enum {
     OP_MOVE = 0,        /* H5*move call    */
     OP_UNLINK,          /* H5Gunlink call  */
     OP_MOUNT,           /* H5Fmount call   */
     OP_UNMOUNT          /* H5Funmount call */
 } H5G_names_op_t;
+
+/* Depth of group entry copy */
+typedef enum {
+    H5G_COPY_LIMITED,   /* Limited copy from source to destination, omitting name & old name fields */
+    H5G_COPY_SHALLOW,   /* Copy from source to destination, including name & old name fields */
+    H5G_COPY_DEEP       /* Deep copy from source to destination, including duplicating name & old name fields */
+} H5G_ent_copy_depth_t;
 
 /*
  * Library prototypes...  These are the ones that other packages routinely
@@ -159,16 +167,14 @@ H5_DLL herr_t H5G_unlink(H5G_entry_t *loc, const char *name);
 H5_DLL herr_t H5G_find(H5G_entry_t *loc, const char *name,
 			H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/);
 H5_DLL H5F_t *H5G_insertion_file(H5G_entry_t *loc, const char *name);
-H5_DLL herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
-				  H5G_entry_t *obj_ent/*in,out*/,
-				  int *nlinks/*in,out*/);
 H5_DLL herr_t H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
 H5_DLL herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
 			      H5G_entry_t *ent/*out*/);
-H5_DLL  herr_t H5G_replace_name(int type, H5G_entry_t *loc, const char *src_name,
-            const char *dst_name, H5G_names_op_t op);
-H5_DLL  herr_t H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name);
-H5_DLL  herr_t H5G_ent_copy(const H5G_entry_t *src, H5G_entry_t *dst );
+H5_DLL  herr_t H5G_replace_name(int type, H5G_entry_t *loc,
+        const char *src_name, H5G_entry_t *src_loc,
+        const char *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op);
+H5_DLL  herr_t H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
+            H5G_ent_copy_depth_t depth);
 H5_DLL  herr_t H5G_free_grp_name(H5G_t *grp);
 H5_DLL  herr_t H5G_free_ent_name(H5G_entry_t *ent);
 

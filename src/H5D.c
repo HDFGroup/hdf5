@@ -1992,7 +1992,7 @@ H5D_open_oid(H5G_entry_t *ent)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Shallow copy (take ownership) of the group entry object */
-    HDmemcpy(&(dataset->ent),ent,sizeof(H5G_entry_t));
+    H5G_ent_copy(&(dataset->ent),ent,H5G_COPY_SHALLOW);
 
     /* Find the dataset object */
     if (H5O_open(&(dataset->ent)) < 0)
@@ -2191,7 +2191,7 @@ H5D_close(H5D_t *dataset)
     /* Update header message of layout for compact dataset. */
     if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty) {
         if(H5O_modify(&(dataset->ent), H5O_LAYOUT, 0, 0, &(dataset->layout))<0)
-            HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
         dataset->layout.dirty = FALSE;
     } /* end if */
 

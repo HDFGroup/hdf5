@@ -352,12 +352,28 @@ done:
  * Comments: 
  *
  * Modifications:
+ *      Quincey Koziol, Sept. 25, 2002:
+ *          - Changed source & destination parameters to match the rest
+ *              of the functions in the library.
+ *          - Added 'depth' parameter to determine how much of the group
+ *              entry structure we want to copy.  The new depths are:
+ *                  H5G_COPY_LIMITED - Copy all the fields from the
+ *                      source to the destination, except for the user path
+ *                      field, keeping it the same as its
+ *                      previous value in the destination.
+ *                  H5G_COPY_SHALLOW - Copy all the fields from the source
+ *                      to the destination, including the user path and
+ *                      canonical path.
+ *                  H5G_COPY_DEEP - Copy all the fields from the source to
+ *                      the destination, deep copying the user and canonical
+ *                      paths.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_copy( const H5G_entry_t *src, H5G_entry_t *dst )
+H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t depth)
 {
+    char *tmp_user_path=NULL;   /* Temporary string pointers for entry's user path */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_copy, FAIL);
@@ -366,12 +382,23 @@ H5G_ent_copy( const H5G_entry_t *src, H5G_entry_t *dst )
     assert( src );
     assert( dst );
 
+    /* If the depth is "very shallow", keep the old entry's user path */
+    if(depth==H5G_COPY_LIMITED) {
+        tmp_user_path=dst->user_path;
+        H5MM_xfree(dst->canon_path);
+    } /* end if */
+
     /* Copy the top level information */
     HDmemcpy(dst,src,sizeof(H5G_entry_t));
 
     /* Deep copy the names */
-    dst->name=H5MM_xstrdup(src->name);
-    dst->old_name=H5MM_xstrdup(src->old_name);
+    if(depth==H5G_COPY_DEEP) {
+        dst->user_path=H5MM_xstrdup(src->user_path);
+        dst->canon_path=H5MM_xstrdup(src->canon_path);
+    } else if(depth==H5G_COPY_LIMITED) {
+        dst->user_path=tmp_user_path;
+        dst->canon_path=H5MM_xstrdup(src->canon_path);
+    } /* end if */
 
 done:
     FUNC_LEAVE(ret_value);

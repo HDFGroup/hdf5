@@ -1195,7 +1195,7 @@ herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle)
     H5F_t               *file=NULL;
     herr_t              ret_value;
     
-    FUNC_ENTER_API(H5Fget_vfd_handle, NULL);
+    FUNC_ENTER_API(H5Fget_vfd_handle, FAIL);
 
     /* Check args */
     assert(file_handle);
@@ -2975,7 +2975,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
 
     /* Search the open IDs and replace names for mount operation */
     /* We pass H5G_UNKNOWN as object type; search all IDs */
-    if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, OP_MOUNT )<0)
+    if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, NULL, NULL, OP_MOUNT )<0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name");
 
 done:
@@ -3050,7 +3050,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
 	for (i=0; i<parent->mtab.nmounts; i++) {
 	    if (parent->mtab.child[i].file==child) {
                 /* Search the open IDs replace names to reflect unmount operation */
-                if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, OP_UNMOUNT )<0)
+                if (H5G_replace_name( H5G_UNKNOWN, mnt_ent, mnt_ent->user_path, NULL, NULL, NULL, OP_UNMOUNT )<0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ");
 
 		/* Unmount the child */
@@ -3164,17 +3164,11 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
 
 	/* Copy root info over to ENT */
 	if (0==cmp) {
-            char *tmp_name, *tmp_old_name;     /* Temporary string pointers for entry's name and "old name"*/
-
             /* Get the entry for the root group in the child's file */
 	    ent = H5G_entof(parent->mtab.child[md].file->shared->root_grp);
 
-            /* Don't lose the name of the group when we copy the root group's entry */
-            tmp_name = find->name;
-            tmp_old_name = find->old_name;
-	    *find = *ent;
-            find->name = tmp_name;
-            find->old_name = tmp_old_name;
+            /* Don't lose the user path of the group when we copy the root group's entry */
+            H5G_ent_copy(find,ent,H5G_COPY_LIMITED);
 
             /* Switch to child's file */
 	    parent = ent->file;

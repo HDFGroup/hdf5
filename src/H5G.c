@@ -110,9 +110,11 @@ static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
 
 /* Struct only used by change name callback function */
 typedef struct H5G_names_t {
-    const char *src_name;
-    const char *dst_name;
     H5G_entry_t	*loc;
+    const char *src_name;
+    H5G_entry_t	*src_loc;
+    const char *dst_name;
+    H5G_entry_t	*dst_loc;
     H5G_names_op_t op;
 } H5G_names_t;  
 
@@ -121,6 +123,8 @@ H5FL_DEFINE(H5G_t);
 
 /* Private prototypes */
 static herr_t H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key);
+static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
+                  H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/);
 
 
 /*-------------------------------------------------------------------------
@@ -1050,7 +1054,7 @@ H5G_basename(const char *name, size_t *size_p)
 static herr_t
 H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
-	  unsigned target, int *nlinks)
+	  unsigned target, int *nlinks/*out*/)
 {
     H5G_entry_t		  _grp_ent;     /*entry for current group	*/
     H5G_entry_t		  _obj_ent;     /*entry found			*/
@@ -1064,10 +1068,19 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     
     FUNC_ENTER_NOINIT(H5G_namei);
 
-    if (rest) *rest = name;
-    if (!grp_ent) grp_ent = &_grp_ent;
-    if (!obj_ent) obj_ent = &_obj_ent;
-    if (!nlinks) nlinks = &_nlinks;
+    /* Set up "out" parameters */
+    if (rest)
+        *rest = name;
+    if (!grp_ent) {
+        HDmemset(&_grp_ent,0,sizeof(H5G_entry_t));
+        grp_ent = &_grp_ent;
+    } /* end if */
+    if (!obj_ent) {
+        HDmemset(&_obj_ent,0,sizeof(H5G_entry_t));
+        obj_ent = &_obj_ent;
+    } /* end if */
+    if (!nlinks)
+        nlinks = &_nlinks;
     
     /* Check args */
     if (!name || !*name)
@@ -1091,7 +1104,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     } /* end if */
 
     /* Deep copy of the symbol table entry */
-    if (H5G_ent_copy( loc_ent, obj_ent )<0)
+    if (H5G_ent_copy(obj_ent, loc_ent,H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
     
     HDmemset(grp_ent, 0, sizeof(H5G_entry_t));
@@ -1136,7 +1149,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
             H5G_free_ent_name(grp_ent);
 
         /* Transfer "ownership" of the entry's information to the group entry */
-	*grp_ent = *obj_ent;
+        H5G_ent_copy(grp_ent,obj_ent,H5G_COPY_SHALLOW);
 	HDmemset(obj_ent, 0, sizeof(H5G_entry_t));
 	obj_ent->header = HADDR_UNDEF;
 
@@ -1156,9 +1169,8 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	 * is the last component of the name and the H5G_TARGET_SLINK bit of
 	 * TARGET is set then we don't follow it.
 	 */
-	if (H5G_CACHED_SLINK==obj_ent->type &&
-	    (0==(target & H5G_TARGET_SLINK) ||
-	     ((s=H5G_component(name+nchars, NULL)) && *s))) {
+	if(H5G_CACHED_SLINK==obj_ent->type && (0==(target & H5G_TARGET_SLINK) ||
+                ((s=H5G_component(name+nchars, NULL)) && *s))) {
 	    if ((*nlinks)-- <= 0)
 		HGOTO_ERROR (H5E_SYM, H5E_SLINK, FAIL, "too many symbolic links");
 	    if (H5G_traverse_slink (grp_ent, obj_ent, nlinks)<0)
@@ -1171,14 +1183,12 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	 * component of the name.
 	 */
 	if (0==(target & H5G_TARGET_MOUNT) ||
-	    ((s=H5G_component(name+nchars, NULL)) && *s)) {
+                ((s=H5G_component(name+nchars, NULL)) && *s)) {
 	    H5F_mountpoint(obj_ent/*in,out*/);
 	}
 	
 	/* next component */
 	name += nchars;
-
-    
     } /* end while */
     
     /* Update the "rest of name" pointer */
@@ -1220,7 +1230,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 		    H5G_entry_t *obj_ent/*in,out*/,
 		    int *nlinks/*in,out*/)
@@ -1229,10 +1239,13 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     const char		*clv = NULL;		/*cached link value	*/
     char		*linkval = NULL;	/*the copied link value	*/
     H5G_entry_t         tmp_grp_ent;            /* Temporary copy of group entry */
-    char                *tmp_name, *tmp_old_name;       /* Temporary pointer to object's name & "old name" */
+    char                *tmp_user_path=NULL, *tmp_canon_path=NULL; /* Temporary pointer to object's user path & canonical path */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
+
+    /* Portably initialize the temporary group entry */
+    HDmemset(&tmp_grp_ent,0,sizeof(H5G_entry_t));
 
     /* Get the link value */
     if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab_mesg))
@@ -1242,14 +1255,17 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbolic link value");
     linkval = H5MM_xstrdup (clv);
 		
-    /* Copy the entry's name (& old_name) to restore later, then free the names for the entries */
-    tmp_name= H5MM_xstrdup(obj_ent->name);
-    tmp_old_name= H5MM_xstrdup(obj_ent->old_name);
-    H5G_free_ent_name(obj_ent);
+    /* Hold the entry's name (& old_name) to restore later */
+    tmp_user_path=obj_ent->user_path;
+    obj_ent->user_path=NULL;
+    tmp_canon_path=obj_ent->canon_path;
+    obj_ent->canon_path=NULL;
+
+    /* Free the names for the group entry */
     H5G_free_ent_name(grp_ent);
 
     /* Clone the group entry, so we can track the names properly */
-    H5G_ent_copy(grp_ent,&tmp_grp_ent);
+    H5G_ent_copy(&tmp_grp_ent,grp_ent,H5G_COPY_DEEP);
 
     /* Traverse the link */
     if (H5G_namei (&tmp_grp_ent, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, nlinks))
@@ -1259,15 +1275,17 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     H5G_free_ent_name(obj_ent);
 
     /* Restore previous name for object */
-    obj_ent->name = tmp_name;
-    obj_ent->old_name = tmp_old_name;
+    obj_ent->user_path = tmp_user_path;
+    tmp_user_path=NULL;
+    obj_ent->canon_path = tmp_canon_path;
+    tmp_canon_path=NULL;
 	
 done:
     /* Error cleanup */
-    if (ret_value == FAIL ) {
-        H5MM_xfree(tmp_name);
-        H5MM_xfree(tmp_old_name);
-    } /* end if */
+    if(tmp_user_path)
+        H5MM_xfree(tmp_user_path);
+    if(tmp_canon_path)
+        H5MM_xfree(tmp_canon_path);
 
     /* Release cloned copy of group entry */
     H5G_free_ent_name(&tmp_grp_ent);
@@ -1337,10 +1355,12 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
 	H5O_reset (H5O_STAB, &stab);
     }
 
-    /* Create the name for the root group's entry */
-    ent->name = HDstrdup("/");
-    assert(ent->name);
-    ent->old_name = NULL;
+    /* Create the path names for the root group's entry */
+    ent->user_path=HDstrdup("/");
+    assert(ent->user_path);
+    ent->canon_path=HDstrdup("/");
+    assert(ent->canon_path);
+    ent->user_path_hidden=0;
 
     /*
      * Create the group pointer.  Also decrement the open object count so we
@@ -1580,7 +1600,7 @@ H5G_open_oid(H5G_entry_t *ent)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy over (take ownership) of the group entry object */
-    HDmemcpy(&(grp->ent),ent,sizeof(H5G_entry_t));
+    H5G_ent_copy(&(grp->ent),ent,H5G_COPY_SHALLOW);
 
     /* Grab the object header */
     if (H5O_open(&(grp->ent)) < 0)
@@ -2460,7 +2480,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink name from symbol table");
 
     /* Search the open IDs and replace names for unlinked object */
-    if (H5G_replace_name(statbuf.type, loc, name, NULL, OP_UNLINK )<0)
+    if (H5G_replace_name(statbuf.type, &obj_ent, name, NULL, NULL, NULL, OP_UNLINK )<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name");
 
 done:
@@ -2499,7 +2519,8 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
     H5G_stat_t		sb;
     char		*linkval=NULL;
     size_t		lv_size=32;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5G_entry_t         obj_ent;        /* Object entry for object being moved */
+    herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_move, FAIL);
     assert(src_loc);
@@ -2539,8 +2560,11 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
      * This has to be done here because H5G_link and H5G_unlink have 
      * internal object entries, and do not modify the entries list
     */
-   if (H5G_replace_name(sb.type, src_loc, src_name, dst_name, OP_MOVE )<0)
+    if (H5G_namei (src_loc, src_name, NULL, NULL, &obj_ent, H5G_TARGET_NORMAL|H5G_TARGET_SLINK, NULL))
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link");
+    if (H5G_replace_name(sb.type, &obj_ent, src_name, src_loc, dst_name, dst_loc, OP_MOVE )<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ");
+    H5G_free_ent_name(&obj_ent);
 
     /* Remove the old name */
     if (H5G_unlink(src_loc, src_name)<0)
@@ -2678,68 +2702,11 @@ H5G_free_ent_name(H5G_entry_t *ent)
     /* Check args */
     assert(ent);
 
-    if ( ent->name )
-        ent->name = H5MM_xfree(ent->name);
-    if ( ent->old_name )
-        ent->old_name = H5MM_xfree(ent->old_name);
+    if(ent->user_path)
+        ent->user_path = H5MM_xfree(ent->user_path);
+    if(ent->canon_path)
+        ent->canon_path = H5MM_xfree(ent->canon_path);
  
-done:
-    FUNC_LEAVE(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5G_insert_name
- *
- * Purpose: Insert a name into the symbol entry OBJ, located at LOC
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: August 22, 2002
- *
- * Comments: The allocated memory (H5MM_malloc) is freed in H5O_close
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
-{
-    size_t  loc_name_len, name_len;     /* Length of location's name and name to append */
-    herr_t  ret_value = SUCCEED;       
- 
-    FUNC_ENTER_NOAPI(H5G_insert_name, FAIL);
- 
-    /* Only attempt to build a new name if the location's name exists */
-    if(loc->name) {
-        loc_name_len = HDstrlen(loc->name);
-        name_len = HDstrlen(name);
-        assert(name_len>0 && loc_name_len>0);
-
-        /* Free the object's name, if it exists */
-        if(obj->name)
-            obj->name=H5MM_xfree(obj->name);
-
-        /* The location's name already has a '/' separator */
-        if ('/'==loc->name[loc_name_len-1]) {
-            if (NULL==(obj->name = H5MM_malloc (loc_name_len+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            HDstrcpy(obj->name, loc->name);
-            HDstrcat(obj->name, name);
-        } /* end if */
-        /* The location's name needs a separator */
-        else {
-            if (NULL==(obj->name = H5MM_malloc (loc_name_len+1+name_len+1)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            HDstrcpy(obj->name, loc->name);
-            HDstrcat(obj->name, "/");
-            HDstrcat(obj->name, name);
-        } /* end else */
-    } /* end if */
-
 done:
     FUNC_LEAVE(ret_value);
 }
@@ -2751,7 +2718,9 @@ done:
  * Purpose: Search the list of open IDs and replace names according to a
  *              particular operation.  The operation occured on the LOC
  *              entry, which had SRC_NAME previously.  The new name (if there
- *              is one) is DST_NAME.
+ *              is one) is DST_NAME.  Additional entry location information
+ *              (currently only needed for the 'move' operation) is passed
+ *              in SRC_LOC and DST_LOC.
  *
  * Return: Success: 0, Failure: -1
  *
@@ -2766,8 +2735,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_replace_name( int type, H5G_entry_t *loc, const char *src_name, 
-                        const char *dst_name, H5G_names_op_t op )
+H5G_replace_name( int type, H5G_entry_t *loc,
+    const char *src_name, H5G_entry_t *src_loc,
+    const char *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op )
 {
     H5G_names_t names;          /* Structure to hold operation information for callback */
     unsigned search_group=0;    /* Flag to indicate that groups are to be searched */
@@ -2781,6 +2751,8 @@ H5G_replace_name( int type, H5G_entry_t *loc, const char *src_name,
     names.src_name=src_name;
     names.dst_name=dst_name;
     names.loc=loc;
+    names.src_loc=src_loc;
+    names.dst_loc=dst_loc;
     names.op=op;
 
     /* Determine which types of IDs need to be operated on */
@@ -2836,47 +2808,6 @@ H5G_replace_name( int type, H5G_entry_t *loc, const char *src_name,
 
 done: 
     FUNC_LEAVE(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5G_rest
- *
- * Purpose: Get the last component of the name
- *
- * Return: Pointer to the last component of a name, if found, otherwise NULL
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: July 5, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static const char *
-H5G_rest(const char *name)
-{
-    size_t  nchars;             /* Number of characters in component */
-    const char *rest=NULL;      /* Pointer to last component, if found */
-  
-    FUNC_ENTER_NOINIT(H5G_rest);
-  
-    /* traverse the name to find the last component */
-    while ((name = H5G_component(name, &nchars)) && *name) {
-        /* Get pointer to current component of name */
-        rest = name;
-   
-        /* Advance to next component */
-        name = rest+nchars;
-    } /* end while */
-  
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE(rest);
 }
 
 
@@ -2966,8 +2897,8 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
 {
     const H5G_names_t *names = (const H5G_names_t *)key;        /* Get operation's information */
     H5G_entry_t *ent = NULL;    /* Group entry for object that the ID refers to */
-    const char  *rest;          /* The base name of an object */
-    unsigned    i;              /* Local index variable */
+    H5F_t *top_ent_file;        /* Top file in entry's mounted file chain */
+    H5F_t *top_loc_file;        /* Top file in location's mounted file chain */
     herr_t      ret_value = SUCCEED;       /* Return value */
   
     FUNC_ENTER_NOINIT(H5G_replace_ent);
@@ -2997,68 +2928,30 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
     } /* end switch */
     assert(ent);
   
-    /* Check if ID's entry is in a mounted file */
-    if(ent->file->mtab.parent) {
-        /* If the ID's entry's parent file is not in the file we operated on, skip it */
-        if(ent->file->mtab.parent->shared != names->loc->file->shared )
-            HGOTO_DONE(SUCCEED); /* Do not exit search over IDs */
-
-        /* We need to recurse into the child's file for unlink and move operations */
-        if(names->op==OP_UNLINK || names->op==OP_MOVE) {
-            H5F_t *parent_file=ent->file->mtab.parent;  /* Pointer to the parent's file info */
-
-            /* Search through mounted files for the one which contains the ID's entry */
-            for(i=0; i<parent_file->mtab.nmounts; i++) {
-                H5F_mount_t *child_mnt = &parent_file->mtab.child[i];   /* Mount information for child file */
-                H5F_t       *child_file = child_mnt->file;      /* Child's file info */
-
-                /* we found the right file */
-                if(ent->file->shared == child_file->shared ) {
-                    H5G_entry_t *child_grp_ent = &child_mnt->group->ent;    /* Mount point's group entry */
-                    size_t child_len;           /* Length of mount point's name */
-                    size_t dst_offset=0;        /* Offset into destination name */
-
-                    /* Get the length of the child group's name (i.e. the mount point's name in parent group) */
-                    child_len = HDstrlen(child_grp_ent->name);
-
-                    /* Find the prefix of the name */
-                    if(HDstrncmp( child_grp_ent->name, names->src_name, child_len) == 0) {
-                        /* Advance the offset in the destination also for moves in mounted files */
-                        if (names->op==OP_MOVE)
-                            dst_offset=child_len;
-
-                        /* Search the open ID list and replace names */
-                        if (H5G_replace_name( H5G_UNKNOWN, child_grp_ent,
-                                names->src_name+child_len, names->dst_name+dst_offset, 
-                                names->op )<0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name");
-                    } /* end if */
-                } /* end if */
-            } /* end for */
-        } /* end if */
-    } /* end if */
-    /* Verify if file IDs refer to the same file */
-    else {
-        /* If the ID's entry is not in the file we operated on, skip it */
-        if( ent->file->shared != names->loc->file->shared ) 
-            HGOTO_DONE(SUCCEED); /* Do not exit search over IDs */
-    } /* end else */
-  
-    /* Get the type of call we are doing */
     switch(names->op) {
         /*-------------------------------------------------------------------------
         * OP_MOUNT
         *-------------------------------------------------------------------------
         */
         case OP_MOUNT:
-            /* Find entries that might contain part of this name */
-            if(ent->name) {
-                if(HDstrstr(ent->name, names->src_name)) {
-                    /* Keep the old name for when file is unmounted */
-                    ent->old_name = ent->name; 
+            if(ent->file->mtab.parent && HDstrcmp(ent->user_path,ent->canon_path)) {
+                /* Find the "top" file in the chain of mounted files */
+                top_ent_file=ent->file->mtab.parent;
+                while(top_ent_file->mtab.parent!=NULL) {
+                    top_ent_file=top_ent_file->mtab.parent;
+                } /* end while */
+            } /* end if */
+            else
+                top_ent_file=ent->file;
 
-                    /* Set the new name for the object */
-                    ent->name=H5MM_xstrdup(names->dst_name);
+            /* Check for entry being in correct file (or mounted file) */
+            if(top_ent_file->shared == names->loc->file->shared) {
+                /* Check if the source is along the entry's path */
+                /* (But not actually the entry itself) */
+                if(H5G_common_path(ent->user_path,names->src_name) &&
+                    HDstrcmp(ent->user_path,names->src_name)!=0) {
+                    /* Hide the user path */
+                    ent->user_path_hidden++;
                 } /* end if */
             } /* end if */
             break;
@@ -3068,28 +2961,44 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
         *-------------------------------------------------------------------------
         */
         case OP_UNMOUNT:
-            /* Find entries that might contain part of current name */
-            if(ent->name) {
-                if(HDstrstr(ent->name, names->src_name)) {
-                    /* Delete the old name  */
-                    H5MM_xfree(ent->name);
+            if(ent->file->mtab.parent) {
+                /* Find the "top" file in the chain of mounted files for the entry */
+                top_ent_file=ent->file->mtab.parent;
+                while(top_ent_file->mtab.parent!=NULL) {
+                    top_ent_file=top_ent_file->mtab.parent;
+                } /* end while */
+            } /* end if */
+            else
+                top_ent_file=ent->file;
 
-                    /* Copy the new name */
-                    ent->name=H5MM_xstrdup(names->dst_name);
-                } /* end if */
-            } /* end if*/
+            if(names->loc->file->mtab.parent) {
+                /* Find the "top" file in the chain of mounted files for the location */
+                top_loc_file=names->loc->file->mtab.parent;
+                while(top_loc_file->mtab.parent!=NULL) {
+                    top_loc_file=top_loc_file->mtab.parent;
+                } /* end while */
+            } /* end if */
+            else
+                top_loc_file=names->loc->file;
 
-            /* See if the entry old name matches  */
-            if(ent->old_name) {
-                if(HDstrstr(ent->old_name, names->src_name)) {
-                    /* Delete the old name  */
-                    H5MM_xfree(ent->name);
-
-                    /* Copy the old name to the entry */
-                    ent->name = ent->old_name;
-                    ent->old_name = NULL;
+            if(ent->user_path_hidden) {
+                /* If the ID's entry is not in the file we operated on, skip it */
+                if(top_ent_file->shared == top_loc_file->shared) {
+                    if(H5G_common_path(ent->user_path,names->src_name)) {
+                        /* Un-hide the user path */
+                        ent->user_path_hidden--;
+                    } /* end if */
                 } /* end if */
             } /* end if */
+            else {
+                /* If the ID's entry is not in the file we operated on, skip it */
+                if(top_ent_file->shared == top_loc_file->shared) {
+                    if(ent->user_path && H5G_common_path(ent->user_path,names->src_name)) {
+                        /* Free user path */
+                        ent->user_path=H5MM_xfree(ent->user_path);
+                    } /* end if */
+                } /* end if */
+            } /* end else */
             break;
 
         /*-------------------------------------------------------------------------
@@ -3097,21 +3006,24 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
         *-------------------------------------------------------------------------
         */
         case OP_UNLINK:
-            if(ent->name) {
-                /* Found the correct entry, just replace the name */
-                if(HDstrcmp(ent->name, names->src_name)==0) {
-                    /* Delete the old name */
-                    H5MM_xfree(ent->name);
-
-                    /* Copy destination name */
-                    ent->name=H5MM_xstrdup(names->dst_name);
+            /* If the ID's entry is not in the file we operated on, skip it */
+            if(ent->file->shared == names->loc->file->shared) {
+                /* Check if we are referring to the same object */
+                if(H5F_addr_eq(ent->header, names->loc->header)) {
+                    /* Check if the object was opened with the same canonical path as the one being moved */
+                    if(HDstrcmp(ent->canon_path,names->loc->canon_path)==0) {
+                        /* Free user path */
+                        ent->user_path=H5MM_xfree(ent->user_path);
+                    } /* end if */
                 } /* end if */
-                /* Find other entries that might contain part of this name */
                 else {
-                    if(H5G_common_path(ent->name, names->src_name))
-                        ent->name=H5MM_xfree(ent->name); /* Delete the old name and clear the entry */
+                    /* Check if the location being unlinked is in the canonical path for the current object */
+                    if(H5G_common_path(ent->canon_path,names->loc->canon_path)) {
+                        /* Free user path */
+                        ent->user_path=H5MM_xfree(ent->user_path);
+                    } /* end if */
                 } /* end else */
-            } /* end if*/
+            } /* end if */
             break;
 
         /*-------------------------------------------------------------------------
@@ -3119,32 +3031,172 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
         *-------------------------------------------------------------------------
         */
         case OP_MOVE: /* H5Gmove case, check for relative names case */
-            if(ent->name) {
-                /* Verify if we have the wanted entry */
-                if(HDstrcmp(ent->name, names->src_name)==0) {
-                    /* Delete the old name  */
-                    H5MM_xfree(ent->name);
+            /* If the ID's entry is not in the file we operated on, skip it */
+            if(ent->file->shared == names->loc->file->shared) {
+                char *src_path;         /* Full user path of source name */
+                char *dst_path;         /* Full user path of destination name */
+                char *canon_src_path;   /* Pointer to canonical part of source path */
+                char *canon_dst_path;   /* Pointer to canonical part of destination path */
 
-                    /* Set the new name */
-                    ent->name=H5MM_xstrdup(names->dst_name);
+                /* Make certain that the source and destination names are full (not relative) paths */
+                if(*(names->src_name)!='/') {
+                    size_t src_path_len;    /* Length of the source path */
+                    unsigned need_sep;      /* Flag to indicate if separator is needed */
+
+                    /* Get the length of the name for the source group's user path */
+                    src_path_len=HDstrlen(names->src_loc->user_path);
+
+                    /* Determine if there is a trailing separator in the name */
+                    if(names->src_loc->user_path[src_path_len-1]=='/')
+                        need_sep=0;
+                    else
+                        need_sep=1;
+
+                    /* Add in the length needed for the '/' separator and the relative path */
+                    src_path_len+=HDstrlen(names->src_name)+need_sep;
+
+                    /* Allocate space for the path */
+                    if(NULL==(src_path = H5MM_malloc(src_path_len+1)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                    HDstrcpy(src_path,names->src_loc->user_path);
+                    if(need_sep)
+                        HDstrcat(src_path,"/");
+                    HDstrcat(src_path,names->src_name);
+                } /* end if */
+                else
+                    src_path=HDstrdup(names->src_name);
+                if(*(names->dst_name)!='/') {
+                    size_t dst_path_len;        /* Length of the destination path */
+                    unsigned need_sep;      /* Flag to indicate if separator is needed */
+
+                    /* Get the length of the name for the destination group's user path */
+                    dst_path_len=HDstrlen(names->dst_loc->user_path);
+
+                    /* Determine if there is a trailing separator in the name */
+                    if(names->dst_loc->user_path[dst_path_len-1]=='/')
+                        need_sep=0;
+                    else
+                        need_sep=1;
+
+                    /* Add in the length needed for the '/' separator and the relative path */
+                    dst_path_len+=HDstrlen(names->dst_name)+need_sep;
+
+                    /* Allocate space for the path */
+                    if(NULL==(dst_path = H5MM_malloc(dst_path_len+1)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                    HDstrcpy(dst_path,names->dst_loc->user_path);
+                    if(need_sep)
+                        HDstrcat(dst_path,"/");
+                    HDstrcat(dst_path,names->dst_name);
+                } /* end if */
+                else
+                    dst_path=HDstrdup(names->dst_name);
+
+                /* Get the canonical parts of the source and destination names */
+
+                /* Check if the object being moved was accessed through a mounted file */
+                if(HDstrcmp(names->loc->user_path,names->loc->canon_path)!=0) {
+                    size_t non_canon_name_len;   /* Length of non-canonical part of name */
+
+                    /* Get current string lengths */
+                    non_canon_name_len=HDstrlen(names->loc->user_path)-HDstrlen(names->loc->canon_path);
+
+                    canon_src_path=src_path+non_canon_name_len;
+                    canon_dst_path=dst_path+non_canon_name_len;
                 } /* end if */
                 else {
-                    /* Get the last component of the name */
-                    rest=H5G_rest(ent->name);
+                    canon_src_path=src_path;
+                    canon_dst_path=dst_path;
+                } /* end else */
 
-                    /* Relative names case, build the full pathname */
-                    if(rest && HDstrcmp(rest, names->src_name)==0) {
-                        size_t ent_name_len = HDstrlen(ent->name);  /* Length of entry's full pathname */
-                        size_t rest_len = HDstrlen(rest);           /* Length of entry's last component of pathname */
+                /* Check if the link being changed in the file is along the canonical path for this object */
+                if(H5G_common_path(ent->canon_path,canon_src_path)) {
+                    size_t user_dst_len;    /* Length of destination user path */
+                    size_t canon_dst_len;   /* Length of destination canonical path */
+                    char *old_user_path;    /* Pointer to previous user path */
+                    char *tail_path;    /* Pointer to "tail" of path */
+                    size_t tail_len;    /* Pointer to "tail" of path */
+                    char *src_canon_prefix;     /* Pointer to source canonical path prefix of component which is moving */
+                    size_t src_canon_prefix_len;/* Length of the source canonical path prefix */
+                    char *dst_canon_prefix;     /* Pointer to destination canonical path prefix of component which is moving */
+                    size_t dst_canon_prefix_len;/* Length of the destination canonical path prefix */
+                    char *user_prefix;      /* Pointer to user path prefix of component which is moving */
+                    size_t user_prefix_len; /* Length of the user path prefix */
+                    char *src_comp;     /* The source name of the component which is actually changing */
+                    char *dst_comp;     /* The destination name of the component which is actually changing */
 
-                        /* Reallocate buffer for entry's name */
-                        ent->name=H5MM_realloc(ent->name,
-                                ent_name_len+(HDstrlen(names->dst_name)-rest_len)+1);
+                    /* Get the source & destination components */
+                    src_comp=HDstrrchr(canon_src_path,'/');
+                    assert(src_comp);
+                    dst_comp=HDstrrchr(canon_dst_path,'/');
+                    assert(dst_comp);
 
-                        /* Overwrite last component of name */
-                        HDstrcpy(ent->name+(ent_name_len-rest_len),names->dst_name);
-                    } /* Relative names case */
-                } /* wanted entry */
+                    /* Find the canonical prefixes for the entry */
+                    src_canon_prefix_len=HDstrlen(canon_src_path)-HDstrlen(src_comp);
+                    if(NULL==(src_canon_prefix = H5MM_malloc(src_canon_prefix_len+1)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    HDstrncpy(src_canon_prefix,canon_src_path,src_canon_prefix_len);
+                    src_canon_prefix[src_canon_prefix_len]='\0';
+
+                    dst_canon_prefix_len=HDstrlen(canon_dst_path)-HDstrlen(dst_comp);
+                    if(NULL==(dst_canon_prefix = H5MM_malloc(dst_canon_prefix_len+1)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    HDstrncpy(dst_canon_prefix,canon_dst_path,dst_canon_prefix_len);
+                    dst_canon_prefix[dst_canon_prefix_len]='\0';
+
+                    /* Find the user prefix for the entry */
+                    user_prefix_len=HDstrlen(ent->user_path)-HDstrlen(ent->canon_path);
+                    if(NULL==(user_prefix = H5MM_malloc(user_prefix_len+1)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    HDstrncpy(user_prefix,ent->user_path,user_prefix_len);
+                    user_prefix[user_prefix_len]='\0';
+
+                    /* Hold this for later use */
+                    old_user_path=ent->user_path;
+
+                    /* Set the tail path info */
+                    tail_path=old_user_path+user_prefix_len+src_canon_prefix_len+HDstrlen(src_comp);
+                    tail_len=HDstrlen(tail_path);
+
+                    /* Free the old canonical path */
+                    H5MM_xfree(ent->canon_path);
+
+                    /* Get the length of the destination paths */
+                    user_dst_len=user_prefix_len+dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
+                    canon_dst_len=dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
+
+                    /* Allocate space for the new user path */
+                    if(NULL==(ent->user_path = H5MM_malloc(user_dst_len+1)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    
+                    /* Allocate space for the new canonical path */
+                    if(NULL==(ent->canon_path = H5MM_malloc(canon_dst_len+1)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    
+                    /* Create the new names */
+                    HDstrcpy(ent->user_path,user_prefix);
+                    HDstrcat(ent->user_path,dst_canon_prefix);
+                    HDstrcat(ent->user_path,dst_comp);
+                    HDstrcat(ent->user_path,tail_path);
+                    HDstrcpy(ent->canon_path,dst_canon_prefix);
+                    HDstrcat(ent->canon_path,dst_comp);
+                    HDstrcat(ent->canon_path,tail_path);
+
+                    /* Free the old user path */
+                    H5MM_xfree(old_user_path);
+
+                    /* Free the extra paths allocated */
+                    H5MM_xfree(src_canon_prefix);
+                    H5MM_xfree(dst_canon_prefix);
+                    H5MM_xfree(user_prefix);
+                } /* end if */
+
+
+                /* Free the extra paths allocated */
+                H5MM_xfree(src_path);
+                H5MM_xfree(dst_path);
             } /* end if */
             break;
 

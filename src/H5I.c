@@ -1156,11 +1156,11 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 
     /* get symbol table entry */
     if(NULL!=(ent = H5G_loc(id))) {
-        if (ent->name != NULL) {
-            len = HDstrlen(ent->name);
+        if (ent->user_path != NULL && ent->user_path_hidden==0) {
+            len = HDstrlen(ent->user_path);
 
             if(name) {
-                HDstrncpy(name, ent->name, MIN(len+1,size));
+                HDstrncpy(name, ent->user_path, MIN(len+1,size));
                 if(len >= size)
                     name[size-1]='\0';
             } /* end if */

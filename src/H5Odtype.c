@@ -1127,11 +1127,11 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     assert (!sh->in_gh);
 
     /* Shallow copy the symbol table entry */
-    dt->ent = sh->u.ent;
+    H5G_ent_copy(&(dt->ent),&(sh->u.ent),H5G_COPY_SHALLOW);
 
     /* Reset the names of the copied symbol table entry */
-    dt->ent.name = NULL;
-    dt->ent.old_name = NULL;
+    dt->ent.user_path = NULL;
+    dt->ent.canon_path = NULL;
 
     /* Note that the datatype is a named datatype */
     dt->state = H5T_STATE_NAMED;

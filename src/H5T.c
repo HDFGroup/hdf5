@@ -5360,7 +5360,8 @@ H5T_open_oid (H5G_entry_t *ent)
 
     /* Mark the type as named and open */
     dt->state = H5T_STATE_OPEN;
-    dt->ent = *ent; 
+    /* Shallow copy (take ownership) of the group entry object */
+    H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW);
 		
     /* Set return value */
     ret_value=dt;
@@ -5577,7 +5578,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     } /* end switch */
 
     /* Deep copy of the symbol table entry */
-    if (H5G_ent_copy(&(old_dt->ent),&(new_dt->ent))<0)
+    if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
 					
     /* Set return value */
@@ -5782,7 +5783,7 @@ H5T_close(H5T_t *dt)
             break;
     }
 
-    /*Free the ID to name buffer */
+    /* Free the ID to name info */
     H5G_free_ent_name(&(dt->ent));
 
     /* Free the datatype struct */

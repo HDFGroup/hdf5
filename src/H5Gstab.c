@@ -21,6 +21,10 @@
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
+/* Private prototypes */
+static herr_t H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj,
+        const char *name);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_create
@@ -157,7 +161,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     else {
         if (obj_ent) {
             /* do a deep copy */
-            if (H5G_ent_copy( &(udata.ent), obj_ent )<0)
+            if (H5G_ent_copy(obj_ent, &(udata.ent),H5G_COPY_DEEP)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
             /* insert the name into the symbol entry OBJ_ENT */
@@ -210,13 +214,17 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     if (grp_ent->file->shared != obj_ent->file->shared)
 	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "interfile hard links are not allowed");
 
+    /* insert the name into the symbol entry OBJ_ENT */
+    if(H5G_insert_name(grp_ent, obj_ent, name) < 0)
+       HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
+
     /* initialize data to pass through B-tree */
     if (NULL == H5O_read(grp_ent, H5O_STAB, 0, &stab))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
     udata.operation = H5G_OPER_INSERT;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;
-    udata.ent = *obj_ent;   /* Shallow copy here, deep copy happens in H5G_node_insert() callback() */
+    H5G_ent_copy(&(udata.ent),obj_ent,H5G_COPY_SHALLOW); /* Shallow copy here, deep copy happens in H5G_node_insert() callback() */
 
     /* insert */
     if (H5B_insert(grp_ent->file, H5B_SNODE, stab.btree_addr, split_ratios, &udata) < 0)
@@ -224,10 +232,6 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     
     /* update the name offset in the entry */
     obj_ent->name_off = udata.ent.name_off;
-
-    /* insert the name into the symbol entry OBJ_ENT */
-    if(H5G_insert_name(grp_ent, obj_ent, name) < 0)
-       HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
 
 done:
     FUNC_LEAVE(ret_value);
@@ -272,7 +276,95 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name)
     if (H5B_remove(grp_ent->file, H5B_SNODE, stab.btree_addr, &udata)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry");
 
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_insert_name
+ *
+ * Purpose: Insert a name into the symbol entry OBJ, located at LOC
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: August 22, 2002
+ *
+ * Comments: The allocated memory (H5MM_malloc) is freed in H5O_close
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
+{
+    size_t  name_len;           /* Length of name to append */
+    size_t  user_path_len;      /* Length of location's user path name */
+    size_t  canon_path_len;     /* Length of location's canonical path name */
+    herr_t  ret_value = SUCCEED;       
+ 
+    FUNC_ENTER_NOAPI(H5G_insert_name, FAIL);
+
+    assert(loc);
+    assert(obj);
+    assert(name);
+ 
+    /* Only attempt to build a new name if the location's name exists */
+    if(loc->canon_path) {
+
+        /* Reset the object's previous names, if they exist */
+        H5MM_xfree(obj->user_path);
+        H5MM_xfree(obj->canon_path);
+        obj->user_path_hidden=0;
+
+        /* Get the length of the strings involved */
+        user_path_len = HDstrlen(loc->user_path);
+        canon_path_len = HDstrlen(loc->canon_path);
+        name_len = HDstrlen(name);
+
+        /* Modify the object's user path */
+
+        /* The location's user path already ends in a '/' separator */
+        if ('/'==loc->user_path[user_path_len-1]) {
+            if (NULL==(obj->user_path = H5MM_malloc (user_path_len+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            HDstrcpy(obj->user_path, loc->user_path);
+        } /* end if */
+        /* The location's user path needs a separator */
+        else {
+            if (NULL==(obj->user_path = H5MM_malloc (user_path_len+1+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            HDstrcpy(obj->user_path, loc->user_path);
+            HDstrcat(obj->user_path, "/");
+        } /* end else */
+
+        /* Append the component's name */
+        HDstrcat(obj->user_path, name);
+
+        /* Modify the object's canonical path */
+
+        /* The location's canonical path already ends in a '/' separator */
+        if ('/'==loc->canon_path[canon_path_len-1]) {
+            if (NULL==(obj->canon_path = H5MM_malloc (canon_path_len+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            HDstrcpy(obj->canon_path, loc->canon_path);
+        } /* end if */
+        /* The location's canonical path needs a separator */
+        else {
+            if (NULL==(obj->canon_path = H5MM_malloc (canon_path_len+1+name_len+1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            HDstrcpy(obj->canon_path, loc->canon_path);
+            HDstrcat(obj->canon_path, "/");
+        } /* end else */
+
+        /* Append the component's name */
+        HDstrcat(obj->canon_path, name);
+    } /* end if */
 
 done:
     FUNC_LEAVE(ret_value);
 }
+

@@ -856,7 +856,7 @@ H5G_node_insert(H5F_t *f, haddr_t addr, void UNUSED *_lt_key,
     HDmemmove(insert_into->entry + idx + 1,
 	      insert_into->entry + idx,
 	      (insert_into->nsyms - idx) * sizeof(H5G_entry_t));
-    H5G_ent_copy(&(bt_udata->ent), &(insert_into->entry[idx])); /* Deep copy the entry */
+    H5G_ent_copy(&(insert_into->entry[idx]), &(bt_udata->ent),H5G_COPY_DEEP);
     insert_into->entry[idx].dirty = TRUE;
     insert_into->nsyms += 1;
 

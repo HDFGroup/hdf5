@@ -245,7 +245,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     attr->initialized = TRUE; /*for now, set to false later*/
 
     /* Deep copy of the symbol table entry */
-    if (H5G_ent_copy(ent,&(attr->ent))<0)
+    if (H5G_ent_copy(&(attr->ent),ent,H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
     /* Compute the internal sizes */
@@ -500,7 +500,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
     attr->initialized=1;
    
     /* Deep copy of the symbol table entry */
-    if (H5G_ent_copy(ent,&(attr->ent))<0)
+    if (H5G_ent_copy(&(attr->ent),ent,H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
     /* Hold the symbol table entry (and file) open */
