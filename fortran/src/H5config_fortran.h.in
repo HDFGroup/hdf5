@@ -15,6 +15,12 @@
 /* Define if support for szip filter is enabled */
 #undef HAVE_FILTER_SZIP
 
+/* Define if we have GPFS support */
+#undef HAVE_GPFS
+
+/* Define to 1 if you have the <gpfs.h> header file. */
+#undef HAVE_GPFS_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
