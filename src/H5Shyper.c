@@ -54,7 +54,6 @@ typedef struct {
     H5S_sel_iter_t *iter;
     void *src;
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];
-    hssize_t mem_offset[H5O_LAYOUT_NDIMS];
     H5D_operator_t op;
     void * op_data;
 } H5S_hyper_iter_info_t;
@@ -5121,6 +5120,7 @@ H5S_hyper_select_iterate_mem (int dim, H5S_hyper_iter_info_t *iter_info)
     hsize_t offset;             /* offset of region in buffer */
     void *tmp_buf;              /* temporary location of the element in the buffer */
     H5S_hyper_region_t *regions;  /* Pointer to array of hyperslab nodes overlapped */
+    hssize_t mem_offset[H5O_LAYOUT_NDIMS];      /* Offset array */
     size_t num_regions;         /* number of regions overlapped */
     herr_t user_ret=0;          /* User's return value */
     size_t i;                   /* Counters */
@@ -5142,28 +5142,29 @@ H5S_hyper_select_iterate_mem (int dim, H5S_hyper_iter_info_t *iter_info)
         /*  (Which means that we've got a list of the regions in the fastest */
         /*   changing dimension and should input those regions) */
         if((unsigned)(dim+2)==iter_info->space->extent.u.simple.rank) {
-            HDmemcpy(iter_info->mem_offset, iter_info->iter->hyp.pos,(iter_info->space->extent.u.simple.rank*sizeof(hssize_t)));
-            iter_info->mem_offset[iter_info->space->extent.u.simple.rank]=0;
+            /* Get the current coordinate position */
+            HDmemcpy(mem_offset, iter_info->iter->hyp.pos,(iter_info->space->extent.u.simple.rank*sizeof(hssize_t)));
+            mem_offset[iter_info->space->extent.u.simple.rank]=0;
 
             /* Iterate over data from regions */
             for(i=0; i<num_regions && user_ret==0; i++) {
                 /* Set the location of the current hyperslab */
-                iter_info->mem_offset[iter_info->space->extent.u.simple.rank-1]=regions[i].start;
+                mem_offset[iter_info->space->extent.u.simple.rank-1]=regions[i].start;
 
                 /* Get the offset in the memory buffer */
                 offset=H5V_array_offset(iter_info->space->extent.u.simple.rank+1,
-                    iter_info->mem_size,iter_info->mem_offset);
+                    iter_info->mem_size,mem_offset);
                 tmp_buf=((char *)iter_info->src+offset);
 
                 /* Iterate over each element in the current region */
                 for(j=regions[i].start; j<=regions[i].end && user_ret==0; j++) {
                     /* Call the user's function */
-                    user_ret=(*(iter_info->op))(tmp_buf,iter_info->dt,(hsize_t)iter_info->space->extent.u.simple.rank,iter_info->mem_offset,iter_info->op_data);
+                    user_ret=(*(iter_info->op))(tmp_buf,iter_info->dt,(hsize_t)iter_info->space->extent.u.simple.rank,mem_offset,iter_info->op_data);
 
                     /* Subtract the element from the selected region (not implemented yet) */
 
                     /* Increment the coordinate offset */
-                    iter_info->mem_offset[iter_info->space->extent.u.simple.rank-1]=j;
+                    mem_offset[iter_info->space->extent.u.simple.rank-1]++;
 
                     /* Advance the pointer in the buffer */
                     tmp_buf=((char *)tmp_buf+iter_info->elem_size);
