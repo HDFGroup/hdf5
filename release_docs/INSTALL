@@ -124,20 +124,31 @@
 
 
 4. HDF5 dependencies
-4.1. Zlib
+4.1. Zlib 
 	The HDF5 library has a predefined compression filter that uses
 	the "deflate" method for chunked datatsets. If zlib-1.1.2 or
 	later is found then HDF5 will use it, otherwise HDF5's predefined
 	compression method will degenerate to a no-op (the compression
 	filter will succeed but the data will not be compressed).
 
-4.2. Szip
+4.2. Szip (optional)
 	The HDF5 library has a predefined compression filter that uses
 	the extended-Rice lossless compression algorithm for chunked 
         datatsets. For more information about Szip compression and license terms
         see http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/index.html.
         Precompiled szip binaries for each supported platform and source tar ball
         file can be found at ftp://ftp.ncsa.uiuc.edu/HDF/szip/
+        
+        To configure HDF5 library with Szip compression filter, use 
+        --enable-szlib=/PATH_TO_SZIP flag. For more information see 5.3.6.
+
+        Starting with the release 1.6.3 Szip library binaries are distributed 
+        with encoder enabled (license may be required to use this binary) 
+        and with encoder disabled (license free). Depending on which Szip 
+        binary is used, Szip compression is available or is not available 
+        for an HDF5 application. Szip decoding is always available, i.e.
+        an HDF5 application can always read Szip compressed data if Szip filter
+        is present.
 
 4.3. MPI and MPI-IO
 	The parallel version of the library is built upon the foundation
