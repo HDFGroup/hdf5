@@ -915,17 +915,13 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 void 
 test_file(void)
 {
-#ifndef H5_NO_SHARED_WRITING 
-
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
     test_file_create();		/* Test file creation(also creation templates)*/
     test_file_open();		/* Test file opening */
     test_file_close();          /* Test file close behavior */
-#endif /* H5_NO_SHARED_WRITING */        
 }				/* test_file() */
-
 
 
 /*-------------------------------------------------------------------------

@@ -834,8 +834,6 @@ int main( void )
 
  PASSED();
 
-#ifndef H5_NO_SHARED_WRITING 
-
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Fmount; long name
  *-------------------------------------------------------------------------
@@ -1142,9 +1140,6 @@ int main( void )
  PASSED();
 
 
-#endif /* H5_NO_SHARED_WRITING */    
-
-
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with a defined type dataset
  *-------------------------------------------------------------------------
@@ -1407,8 +1402,6 @@ int main( void )
 
  PASSED();
 
-
-#ifndef H5_NO_SHARED_WRITING 
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with added names with mounting
@@ -1721,9 +1714,6 @@ int main( void )
  PASSED();
 
 
-#endif /* H5_NO_SHARED_WRITING */  
-
- 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Glink hard
  *-------------------------------------------------------------------------
@@ -2087,7 +2077,6 @@ int main( void )
  
  PASSED();
 
-#ifndef H5_NO_SHARED_WRITING 
  
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with several nested mounted files
@@ -2867,8 +2856,6 @@ int main( void )
  H5Fclose( file3_id );
  
  PASSED();
-
-#endif /* H5_NO_SHARED_WRITING */  
 
 
 /*-------------------------------------------------------------------------
