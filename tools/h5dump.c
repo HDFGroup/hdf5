@@ -1033,21 +1033,116 @@ int i;
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-----------------------------------------------------------------------
+ */
 static void
 dump_data (hid_t obj_id, int obj_data) {
+	h5dump_t info;
+	int status = -1;
+	void *buf;
+	char *attr_name = malloc(sizeof(char)*80);
+	hid_t attr, space, type, p_type;
+	int ndims, i;
+	hsize_t size[64], nelmts = 1;
+	int depth;
+	int stdindent = COL; /* should be 3*/
 
+	info.elmt_fmt = "%s";
+	info.elmt_suf1 = ",";
+	info.elmt_suf2 = " ";	
+	
+	info.idx_fmt = "";
+	info.idx_n_fmt = "";
+	info.idx_sep = "";
+
+	info.line_ncols = nCols;
+	info.line_multi_new = 1;
+	info.line_1st = "        %s ";
+	info.line_pre  = "         ";
+	info.line_cont = "        %s";
+	info.line_sep = "";
+	info.line_suf = "";
+	info.line_per_line = 0;
+	info.line_indent = "   ";
+
+	info.cmpd_name = "";
+	info.cmpd_pre = "{\n";
+	info.cmpd_sep = ",\n";
+	info.cmpd_suf = "}";
+	info.cmpd_end = "\n";
+
+	info.fmt_double = "%g";
+	info.fmt_float = "%g";
+	info.fmt_schar = "%d";
+	info.fmt_int = "%d";
+	
+	info.str_repeat = 0;
+    info.raw = 0;
+
+	info.ascii = 0;
+
+	info.arr_pre = "[ ";
+	info.arr_suf = " ]";
+	info.arr_sep = ", ";
+	info.arr_linebreak = 1;
+
+	info.skip_first = 1;
     indent += COL;
+	/*the depth will tell us how far we need to indent extra.  we use to just
+	use indent but with the merging of the tools lib we have to do something different
+	for the lib funtions... the normal indentation is 6 so when we dont need any extra
+	indentation, depth will be 0.*/
+	depth = indent/stdindent - 2;
+
     indentation (indent);
     printf("%s %s\n", DATA, BEGIN);
 
+
     /* Print all the values. */
-    if (print_data(obj_id, -1, obj_data) < 0) {
+	if (obj_data == DATASET_DATA){
+		status = h5dump_dset(stdout, &info, obj_id, -1,depth);
+	}
+	else { /* need to call h5dump_mem for the attribute data */	
+
+		type = H5Aget_type(obj_id);
+	/*	if (type < 0) {
+			return (status);
+		}*/
+		p_type = h5dump_fixtype(type);
+		H5Tclose(type);
+
+	/*	if (p_type < 0) return status;*/
+
+		space = H5Aget_space(obj_id);
+
+/*		if (space < 0) return status;
+*/
+
+
+		ndims = H5Sget_simple_extent_dims(space, size, NULL);
+	    for (i=0; i<ndims; i++) {
+			nelmts *= size[i];
+	    }
+
+
+		buf = malloc(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type)));
+	   	assert(buf);
+	    if (H5Aread(obj_id, p_type, buf)>=0) {
+			status = h5dump_mem(stdout, &info, p_type, space, buf, depth);
+	    }
+	    free(buf);
+	    H5Tclose(p_type); 
+		H5Sclose(space);
+		H5Tclose(type);
+		H5Aclose(attr);
+	}
+
+	
+    if (status < 0) {
         indentation(indent+COL);
         printf("Unable to print data.\n");
         status = 1;
     }
-
     indentation(indent);
     printf("%s\n", END);
     indent -= COL;
@@ -1091,9 +1186,6 @@ main(int argc, char *argv[])
         usage();
         exit(1);
     }
-
-/*init the programtype var fromt he tools lib*/
-	programtype = H5DUMP;
 
     opts = malloc((argc/2) * sizeof (int));
     opts[0] = -1;

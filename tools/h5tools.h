@@ -108,7 +108,6 @@ typedef struct h5dump_t {
     int		ascii;
     int		str_locale;
     int		str_repeat;
-
     /*
      * Fields associated with compound array members.
      *
@@ -121,10 +120,14 @@ typedef struct h5dump_t {
      *
      *	 suf:	    A string to print at the end of each array.  The default
      *		    value is a right square bracket `]'.
-     */
+     *
+	 *	 linebreaks: a boolean value to determine if we want to break the line
+	 *               after each row of an array
+	 */
     const char	*arr_pre;
     const char	*arr_sep;
     const char	*arr_suf;
+	int   arr_linebreak;
     
     /*
      * Fields associated with compound data types.
@@ -143,12 +146,16 @@ typedef struct h5dump_t {
      *		    The default is a left curly brace.
      *
      *	 suf:       A string to print at the end of each compound type.  The
-     *		    default is a right curly brace.
+     *		    default is  right curly brace.
+	 *   
+	 *	 end:       a string to print after we reach the last element of 
+	 *          each compound type. prints out before the suf.
      */
     const char	*cmpd_name;
     const char	*cmpd_sep;
     const char	*cmpd_pre;
     const char	*cmpd_suf;
+	const char  *cmpd_end;
 
     /*
      * Fields associated with the individual elements.
@@ -239,6 +246,9 @@ typedef struct h5dump_t {
      *		    should the following element begin on the next line? The
      *		    default is to start the next element on the same line
      *		    unless it wouldn't fit.
+	 *
+	 *   indentlevel: a string that shows how far to indent if extra spacing
+	 *          is needed. dumper uses it.
      */
     int		line_ncols;		/*columns of output		*/
     size_t	line_per_line;		/*max elements per line		*/
@@ -248,13 +258,17 @@ typedef struct h5dump_t {
     const char	*line_suf;		/*string to append to each line	*/
     const char	*line_sep;		/*separates lines		*/
     int		line_multi_new;		/*split multi-line outputs?	*/
+	const char *line_indent;    /*for extra identation if we need it*/
+
+	int skip_first;				/*used to skip the first set of checks for line length*/
+
 } h5dump_t;
 
 
 hid_t h5dump_fixtype(hid_t f_type);
-int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type);
+int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_typ,int indentlevel);
 int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
-	       void *mem);
+	       void *mem, int indentlevel);
 int copy_atomic_char(char* output, char* input, int numchar, int freespace);
 
 /*if we get a new program that needs to use the library add its name here*/
@@ -315,13 +329,6 @@ void init_prefix(char **temp, int);
 extern int indent;
 extern void indentation(int);
 extern int nCols;
-/* 
-	used to determine what action to take in certain cases
-	this variable should be set at the beginning of all programs
-	that use the lib
- */
-extern ProgType programtype; 
-
 
 
 /* taken from h5dump.h*/
