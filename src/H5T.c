@@ -953,7 +953,7 @@ H5T_init_interface(void)
     status |= H5Tregister(H5T_PERS_SOFT, "fbo",
 			  floatpt, floatpt,
 			  H5T_conv_order);
-    status |= H5Tregister(H5T_PERS_SOFT, "struct",
+    status |= H5Tregister(H5T_PERS_SOFT, "struct(no-opt)",
 			  compound, compound,
 			  H5T_conv_struct);
     status |= H5Tregister(H5T_PERS_SOFT, "struct(opt)",
@@ -6186,19 +6186,21 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	}
 	
     } else if (H5T_VLEN==dt1->type) {
-        /* Sort memory VL datatypes before disk datatypes, somewhat arbitrarily */
-        if(dt1->u.vlen.type==H5T_VLEN_MEMORY && dt1->u.vlen.type==H5T_VLEN_DISK) {
+        /* Arbitrarily sort memory VL datatypes before disk datatypes */
+        if (dt1->u.vlen.type==H5T_VLEN_MEMORY &&
+	    dt2->u.vlen.type==H5T_VLEN_DISK) {
             HGOTO_DONE(-1);
-        }
-        else if(dt1->u.vlen.type==H5T_VLEN_DISK && dt1->u.vlen.type==H5T_VLEN_MEMORY) {
+        } else if (dt1->u.vlen.type==H5T_VLEN_DISK &&
+		   dt2->u.vlen.type==H5T_VLEN_MEMORY) {
             HGOTO_DONE(1);
         }
+	
     } else if (H5T_OPAQUE==dt1->type) {
 	HGOTO_DONE(HDstrcmp(dt1->u.opaque.tag,dt2->u.opaque.tag));
 
     } else {
 	/*
-	 * Atomic data types...
+	 * Atomic datatypes...
 	 */
 	if (dt1->u.atomic.order < dt2->u.atomic.order) HGOTO_DONE(-1);
 	if (dt1->u.atomic.order > dt2->u.atomic.order) HGOTO_DONE(1);
@@ -6300,10 +6302,6 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    break;
 
 	case H5T_BITFIELD:
-	    /*void */
-	    break;
-
-	case H5T_OPAQUE:
 	    /*void */
 	    break;
 

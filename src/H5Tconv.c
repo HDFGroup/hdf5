@@ -1145,12 +1145,14 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  * 		For each member of the struct
  *		  If sizeof detination type <= sizeof source type then
  *		    Convert member to destination type for all elements
- *		  Move member as far left as possible for all elements
+ *		    Move memb to BKG buffer for all elements
+ *		  Else
+ *		    Move member as far left as possible for all elements
  *		  
  *		For each member of the struct (in reverse order)
  *		  If not destination type then
  *		    Convert member to destination type for all elements
- *		  Move member to correct position in BKG for all elements
+ *		    Move member to correct position in BKG for all elements
  *
  *		Copy BKG to BUF for all elements
  *
@@ -1194,7 +1196,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     size_t	offset;			/*byte offset wrt struct	*/
     uintn	elmtno;			/*element counter		*/
     intn	i, j;			/*counters			*/
-    H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
+    H5T_conv_struct_t *priv = NULL;	/*private data			*/
 
     FUNC_ENTER (H5T_conv_struct_opt, FAIL);
 
@@ -1215,19 +1217,55 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	assert (H5T_COMPOUND==src->type);
 	assert (H5T_COMPOUND==dst->type);
 
-	/*
-	 * This optimized version only works when the source and destination
-	 * datatypes are the same size.
-	 */
-	if (src->size < dst->size) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-			  "conversion is unsupported by this function");
-	}
-	
 	/* Initialize data which is relatively constant */
 	if (H5T_conv_struct_init (src, dst, cdata)<0) {
 	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			   "unable to initialize conversion data");
+	}
+	priv = (H5T_conv_struct_t *)(cdata->priv);
+	src2dst = priv->src2dst;
+	
+	/*
+	 * If the destination type is not larger than the source type then
+	 * this conversion function is guaranteed to work (provided all
+	 * members can be converted also). Otherwise the determination is
+	 * quite a bit more complicated. Essentially we have to make sure
+	 * that there is always room in the source buffer to do the
+	 * conversion of a member in place. This is basically the same pair
+	 * of loops as in the actual conversion except it checks that there
+	 * is room for each conversion instead of actually doing anything.
+	 */
+	if (dst->size > src->size) {
+	    for (i=0, offset=0; i<src->u.compnd.nmembs; i++) {
+		if (src2dst[i]<0) continue;
+		src_memb = src->u.compnd.memb + i;
+		dst_memb = dst->u.compnd.memb + src2dst[i];
+		src_memb_size = src_memb->size / priv->memb_nelmts[i];
+		dst_memb_size = dst_memb->size / priv->memb_nelmts[i];
+		for (j=0; j<(intn)(priv->memb_nelmts[i]); j++) {
+		    if (dst_memb_size > src_memb_size) {
+			offset += src_memb_size;
+		    }
+		}
+	    }
+	    for (i=src->u.compnd.nmembs-1; i>=0; --i) {
+		if (src2dst[i]<0) continue;
+		src_memb = src->u.compnd.memb + i;
+		dst_memb = dst->u.compnd.memb + src2dst[i];
+		src_memb_size = src_memb->size / priv->memb_nelmts[i];
+		dst_memb_size = dst_memb->size / priv->memb_nelmts[i];
+
+		for (j=priv->memb_nelmts[i]-1; j>=0; --j) {
+		    if (dst_memb_size > src_memb_size) {
+			offset -= src_memb_size;
+			if (dst_memb_size > src->size-offset) {
+			    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+					  "convertion is unsupported by this "
+					  "function");
+			}
+		    }
+		}
+	    }
 	}
 	break;
 
@@ -1235,6 +1273,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	/*
 	 * Free the private conversion data.
 	 */
+	priv = (H5T_conv_struct_t *)(cdata->priv);
 	H5MM_xfree(priv->src2dst);
 	H5MM_xfree(priv->src_memb_id);
 	H5MM_xfree(priv->dst_memb_id);
@@ -1253,30 +1292,30 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    NULL == (dst = H5I_object(dst_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
-	assert(src->size>=dst->size);
-	assert(priv);
-	assert(bkg && cdata->need_bkg>=H5T_BKG_TEMP);
 
+	/* Update cached data if necessary */
 	if (cdata->recalc &&
 	    H5T_conv_struct_init (src, dst, cdata)<0) {
 	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			   "unable to initialize conversion data");
 	}
+	priv = (H5T_conv_struct_t *)(cdata->priv);
+	src2dst = priv->src2dst;
+	assert(priv);
+	assert(bkg && cdata->need_bkg>=H5T_BKG_TEMP);
 
 	/*
 	 * Insure that members are sorted.
 	 */
 	H5T_sort_value(src, NULL);
 	H5T_sort_value(dst, NULL);
-	src2dst = priv->src2dst;
 
 	/*
 	 * For each member where the destination is not larger than the
-	 * source, stride through all the elements converting only that
-	 * member in each element.
-	 * 
-	 * Shift struct member (converted or not) as far left as possible
-	 * within each element.
+	 * source, stride through all the elements converting only that member
+	 * in each element and then copying the element to its final
+	 * destination in the bkg buffer. Otherwise move the element as far
+	 * left as possible in the buffer.
 	 */
 	for (i=0, offset=0; i<src->u.compnd.nmembs; i++) {
 	    if (src2dst[i]<0) continue;
@@ -1299,13 +1338,11 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 				      "unable to convert compound data "
 				      "type member");
 		    }
-		    for (xbuf=buf, elmtno=0; elmtno<nelmts; elmtno++) {
-			HDmemmove(xbuf+offset,
-				  xbuf+src_memb->offset+j*src_memb_size,
-				  dst_memb_size);
+		    for (elmtno=0; elmtno<nelmts; elmtno++) {
+			HDmemmove(xbkg, xbuf, dst_memb_size);
 			xbuf += stride ? stride : src->size;
+			xbkg += stride ? stride : dst->size;
 		    }
-		    offset += dst_memb_size;
 		} else {
 		    for (xbuf=buf, elmtno=0; elmtno<nelmts; elmtno++) {
 			HDmemmove(xbuf+offset,
@@ -1320,11 +1357,9 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 	/*
 	 * Work from right to left, converting those members that weren't
-	 * converted in the previous loop -- those members where the
-	 * destination is larger than the source.
-	 *
-	 * Move the member (converted in this loop or not) to the final
-	 * position in the bkg buffer.
+	 * converted in the previous loop (those members where the destination
+	 * is larger than the source) and them to their final position in the
+	 * bkg buffer.
 	 */
 	for (i=src->u.compnd.nmembs-1; i>=0; --i) {
 	    if (src2dst[i]<0) continue;
@@ -1347,16 +1382,11 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 				      "unable to convert compound data "
 				      "type member");
 		    }
-		} else {
-		    offset -= dst_memb_size;
-		    xbuf = buf + offset;
-		    xbkg = bkg + dst_memb->offset + j*dst_memb_size;
-		}
-
-		for (elmtno=0; elmtno<nelmts; elmtno++) {
-		    HDmemmove(xbkg, xbuf, dst_memb_size);
-		    xbuf += stride ? stride : src->size;
-		    xbkg += stride ? stride : dst->size;
+		    for (elmtno=0; elmtno<nelmts; elmtno++) {
+			HDmemmove(xbkg, xbuf, dst_memb_size);
+			xbuf += stride ? stride : src->size;
+			xbkg += stride ? stride : dst->size;
+		    }
 		}
 	    }
 	}

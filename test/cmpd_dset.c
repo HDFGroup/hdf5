@@ -80,11 +80,13 @@ typedef struct s5_t {
  *              Friday, January 23, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-06-23
+ *		If the command line switch `--noopt' is present then the fast
+ *		compound datatype conversion is turned off.
  *-------------------------------------------------------------------------
  */
 int
-main (void)
+main (int argc, char *argv[])
 {
     /* First dataset */
     static s1_t		s1[NX*NY];
@@ -134,6 +136,15 @@ main (void)
 
     h5_reset();
 
+    /* Turn off optimized compound converter? */
+    if (argc>1) {
+	if (argc>2 || strcmp("--noopt", argv[1])) {
+	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
+	    exit(1);
+	}
+	H5Tunregister(H5T_PERS_DONTCARE, NULL, -1, -1, H5T_conv_struct_opt);
+    }
+	
     /* Create the file */
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
