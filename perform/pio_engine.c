@@ -633,8 +633,6 @@ fprintf(stderr, "proc %d: writes %ld bytes at mpi-offset %ld\n",
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
                 }
 
-                MPI_Barrier(pio_comm_g);
-
                 /* set write time here */
                 hrc = H5Dwrite(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
                                h5dset_space_id, H5P_DEFAULT, buffer);
@@ -845,8 +843,6 @@ fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
                                               start, stride, count, block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
                 }
-
-                MPI_Barrier(pio_comm_g);
 
                 /* set read time here */
                 hrc = H5Dread(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
