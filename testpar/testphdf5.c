@@ -172,7 +172,7 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE
 
     /* print the slab read */
     for (i=0; i < count[0]; i++){
-	printf("Row %ld: ", (long)i*stride[0]+start[0]);
+	printf("Row %d: ", (int)(i*stride[0]+start[0]));
 	for (j=0; j < count[1]; j++){
 	    printf("%03d ", *dataptr++);
 	}
@@ -204,7 +204,7 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
 		if (nerrors <= MAX_ERR_REPORT){
 		    printf("Dataset Verify failed at [%d][%d](row %d, col %d): expect %d, got %d\n",
 			i, j,
-			(int) i*stride[0]+start[0], (int) j*stride[1]+start[1],
+			(int)(i*stride[0]+start[0]), (int)(j*stride[1]+start[1]),
 			*(dataset-1), *(original-1));
 		}
 	    }
@@ -268,8 +268,8 @@ phdf5writeInd(char *filename)
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
-    /* set Independent Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl1, comm, info);     
     assert(ret != FAIL);
     MESG("H5Pset_mpi succeed");
 
@@ -315,7 +315,7 @@ phdf5writeInd(char *filename)
     stride[0] = 1;
     stride[1] =1;
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%lu,%lu), total datapoints=%lu\n",
+    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
 	start[0], start[1], count[0], count[1], count[0]*count[1]);
 
     /* put some trivial data in the data_array */
@@ -400,8 +400,8 @@ phdf5readInd(char *filename)
     /* setup file access template */
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
-    /* set Independent Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl1, comm, info);     
     assert(ret != FAIL);
 
 
@@ -430,7 +430,7 @@ phdf5readInd(char *filename)
     stride[0] = 1;
     stride[1] =1;
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%lu,%lu), total datapoints=%lu\n",
+    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
     start[0], start[1], count[0], count[1], count[0]*count[1]);
 
     /* create a file dataspace independently */
@@ -525,8 +525,8 @@ phdf5writeAll(char *filename)
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
-    /* set Independent Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl1, comm, info);     
     assert(ret != FAIL);
     MESG("H5Pset_mpi succeed");
 
@@ -567,7 +567,7 @@ phdf5writeAll(char *filename)
     /* Dataset1: each process takes a block of rows. */
     slab_set(start, count, stride, BYROW);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%lu,%lu), total datapoints=%lu\n",
+    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
 	start[0], start[1], count[0], count[1], count[0]*count[1]);
 
     /* create a file dataspace independently */
@@ -613,7 +613,7 @@ if (verbose)
     /* Dataset2: each process takes a block of columns. */
     slab_set(start, count, stride, BYCOL);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%lu,%lu), total datapoints=%lu\n",
+    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
 	start[0], start[1], count[0], count[1], count[0]*count[1]);
 
     /* put some trivial data in the data_array */
@@ -727,8 +727,8 @@ phdf5readAll(char *filename)
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
-    /* set Independent Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl1, comm, info);     
     assert(ret != FAIL);
     MESG("H5Pset_mpi succeed");
 
@@ -762,7 +762,7 @@ phdf5readAll(char *filename)
     /* Dataset1: each process takes a block of columns. */
     slab_set(start, count, stride, BYCOL);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%lu,%lu), total datapoints=%lu\n",
+    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
 	start[0], start[1], count[0], count[1], count[0]*count[1]);
 
     /* create a file dataspace independently */
@@ -812,7 +812,7 @@ if (verbose)
     /* Dataset2: each process takes a block of rows. */
     slab_set(start, count, stride, BYROW);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%lu,%lu), total datapoints=%lu\n",
+    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
 	start[0], start[1], count[0], count[1], count[0]*count[1]);
 
     /* create a file dataspace independently */
@@ -918,8 +918,8 @@ test_split_comm_access(char *filenames[])
 	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
 	assert(acc_tpl != FAIL);
 	
-	/* set Independent Parallel access with communicator */
-	ret = H5Pset_mpi(acc_tpl, comm, info, H5ACC_INDEPENDENT);     
+	/* set Parallel access with communicator */
+	ret = H5Pset_mpi(acc_tpl, comm, info);     
 	assert(ret != FAIL);
 
 	/* create the file collectively */

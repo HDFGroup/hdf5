@@ -13,7 +13,8 @@ MPI_LIBS=$(HOME)/ROMIO/lib/IRIX64/libmpio.a -lmpi
 
 CC=cc -ansi -64
 # 1429 -- long long non-standard
-WARNING=-woff 1429
+# 1178 -- print format not compatible
+WARNING=-woff 1429,1178
 CFLAGS=-g $(WARNING)
 CPPFLAGS=-I. -I../src $(MPI_INC)
 RM=rm -f
