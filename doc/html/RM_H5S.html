@@ -55,22 +55,28 @@ elements of a dataset.
 <tr><td valign=top>
 <ul>
     <li><a href="#Dataspace-Create">H5Screate</a>
+    <li><a href="#Dataspace-Copy">H5Scopy</a>
+    <li><a href="#Dataspace-Close">H5Sclose</a>
     <li><a href="#Dataspace-CreateSimple">H5Screate_simple</a>
     <li><a href="#Dataspace-IsSimple">H5Sis_simple</a>
     <li><a href="#Dataspace-OffsetSimple">H5Soffset_simple</a>
-    <li><a href="#Dataspace-Copy">H5Scopy</a>
-    <li><a href="#Dataspace-ExtentClass">H5Sextent_class</a>
-    <li><a href="#Dataspace-ExtentCopy">H5Sextent_copy</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Dataspace-SetExtentSimple">H5Sset_extent_simple</a>
-    <li><a href="#Dataspace-SetExtentNone">H5Sset_extent_none</a>
-    <li><a href="#Dataspace-SelectNpoints">H5Sget_select_npoints</a>
     <li><a href="#Dataspace-ExtentDims">H5Sget_simple_extent_dims</a>
     <li><a href="#Dataspace-ExtentNdims">H5Sget_simple_extent_ndims</a>
     <li><a href="#Dataspace-ExtentNpoints">H5Sget_simple_extent_npoints</a>
     <li><a href="#Dataspace-ExtentType">H5Sget_simple_extent_type</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Dataspace-ExtentClass">H5Sextent_class</a>
+    <li><a href="#Dataspace-ExtentCopy">H5Sextent_copy</a>
+    <li><a href="#Dataspace-SetExtentSimple">H5Sset_extent_simple</a>
+    <li><a href="#Dataspace-SetExtentNone">H5Sset_extent_none</a>
+    <li><a href="#Dataspace-SelectNpoints">H5Sget_select_npoints</a>
+    <li><a href="#Dataspace-SelectHyperNBlocks">H5Sget_select_hyper_nblocks</a>
+    <li><a href="#Dataspace-SelectHyperBlockList">H5Sget_select_hyper_blocklist</a>
+    <li><a href="#Dataspace-SelectElemNPoints">H5Sget_select_elem_npoints</a>
+    <li><a href="#Dataspace-SelectElemPointList">H5Sget_select_elem_pointlist</a>
+    <li><a href="#Dataspace-SelectBounds">H5Sget_select_bounds</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
@@ -79,7 +85,6 @@ elements of a dataset.
     <li><a href="#Dataspace-SelectNone">H5Sselect_none</a>
     <li><a href="#Dataspace-SelectValid">H5Sselect_valid</a>
     <li><a href="#Dataspace-SelectHyperslab">H5Sselect_hyperslab</a>
-    <li><a href="#Dataspace-Close">H5Sclose</a>
 </ul>
 </td></tr>
 </table>
@@ -732,6 +737,200 @@ I/O is performed.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectHyperNBlocks">H5Sget_select_hyper_nblocks</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hssize_t </em><code>H5Sget_select_hyper_nblocks</code>(<em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Get number of hyperslab blocks.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_hyper_nblocks</code> returns the 
+        number of hyperslab blocks in the current dataspace selection.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>Identifier of dataspace to query.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of hyperslab blocks in 
+        the current dataspace selection if successful.
+        Otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectHyperBlockList">H5Sget_select_hyper_blocklist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sget_select_hyper_blocklist</code>(<em>hid_t </em><code>space_id</code>,
+        <em>hsize_t </em><code>startblock</code>,
+        <em>hsize_t </em><code>numblocks</code>,
+        <em>hsize_t *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the list of hyperslab blocks currently selected.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_hyper_blocklist</code> returns a list of 
+        the hyperslab blocks currently selected.  Starting with the 
+        <code>startblock</code>-th block in the list of blocks,
+        <code>numblocks</code> blocks are put into the user's buffer.
+        If the user's buffer fills up before <code>numblocks</code>
+        blocks are inserted, the buffer will contain only as many 
+        blocks as fit.
+        <p>
+        The block coordinates have the same dimensionality (rank) 
+        as the dataspace they are located within.  The list of blocks 
+        is formatted as follows: 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            &lt;"start" coordinate&gt;, immediately followed by 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            &lt;"opposite" corner coordinate&gt;, followed by 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            the next "start" and "opposite" coordinates, 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            etc. 
+            <br>
+        until all of the selected blocks have been listed.
+        <p>
+        No guarantee is implied as the order in which blocks are listed.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>IN: Dataspace identifier of selection to query.
+        <dt><em>hsize_t </em><code>startblock</code>
+            <dd>IN: Hyperslab block to start with.
+        <dt><em>hsize_t </em><code>numblocks</code>
+            <dd>IN: Number of hyperslab blocks to get.
+        <dt><em>hsize_t *</em><code>buf</code>
+            <dd>OUT: List of hyperslab blocks selected.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectElemNPoints">H5Sget_select_elem_npoints</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hssize_t </em><code>H5Sget_select_elem_npoints</code>(<em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the number of element points in the current selection.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_elem_npoints</code> returns
+    the number of element points in the current dataspace selection.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>Identifier of dataspace to query.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of element points in the current dataspace selection if successful.
+        Otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectElemPointList">H5Sget_select_elem_pointlist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sget_select_elem_pointlist</code>(<em>hid_t </em><code>space_id</code>
+        <em>hsize_t </em><code>startpoint</code>,
+        <em>hsize_t </em><code>numpoints</code>,
+        <em>hsize_t *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the list of element points currently selected.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_elem_pointlist</code> returns the list of 
+        element points in the current dataspace selection.  Starting with 
+        the <code>startpoint</code>-th point in the list of points,
+        <code>numpoints</code> points are put into the user's buffer.
+        If the user's buffer fills up before <code>numpoints</code>
+        points are inserted, the buffer will contain only as many 
+        points as fit.
+        <p>
+        The element point coordinates have the same dimensionality (rank) 
+        as the dataspace they are located within.  The list of element points 
+        is formatted as follows: 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            &lt;coordinate&gt;, followed by 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            the next coordinate, 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            etc. 
+            <br>
+        until all of the selected element points have been listed.
+        <p>
+        The points are returned in the order they will be iterated through
+        when the selection is read/written from/to disk.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>IN: Dataspace identifier of selection to query.
+        <dt><em>hsize_t </em><code>startpoint</code>
+            <dd>IN: Element point to start with.
+        <dt><em>hsize_t </em><code>numpoints</code>
+            <dd>IN: Number of element points to get.
+        <dt><em>hsize_t *</em><code>buf</code>
+            <dd>OUT: List of element points selected.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectBounds">H5Sget_select_bounds</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sget_select_bounds</code>(<em>hid_t </em><code>space_id</code>
+        <em>hsize_t *</em><code>start</code>,
+        <em>hsize_t *</em><code>end</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the bounding box containing the selection.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_bounds</code> retrieves the coordinates of 
+        bounding box containing the current selection and places
+        them into user-supplied buffers.  
+        <p>
+        The <code>start</code> and <code>end</code> buffers must be large
+        enough to hold the dataspace rank number of coordinates.  
+        <p>
+        The bounding box exactly contains the selection.  
+        I.e., if a 2-dimensional element selection is currently
+        defined with the points (4,5), (6,8), and (10,7), then the 
+        bounding box will be (4, 5), (10, 8).  
+        <p>
+        Calling this function on a <code>none</code> selection returns 
+        <code>FAIL</code>.
+        <p>
+        The bounding box calculation includes the current offset of the
+        selection within the dataspace extent.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>Identifier of dataspace to query.
+        <em>hsize_t *</em><code>start</code>
+            <dd>OUT: Starting coordinates of the bounding box.
+        <em>hsize_t *</em><code>end</code>
+            <dd>OUT: Ending coordinates of the bounding box, 
+                i.e., the coordinates of the diagonally opposite corner.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a negative value if successful;
         otherwise returns a negative value.
 </dl>
 

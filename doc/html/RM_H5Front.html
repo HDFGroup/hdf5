@@ -117,12 +117,6 @@ Manual that accompanies this Beta release; they will be documented in
 the final Release 1.2.  Brief descriptions, as extracted from comments 
 in the source code, are appended below.
 
-	H5Sget_select_hyper_nblocks
-	H5Sget_select_elem_npoints
-	H5Sget_select_hyper_blocklist
-	H5Sget_select_elem_pointlist
-	H5Sget_select_bounds
-
 	H5Tenum_create
 	H5Tenum_insert
 	H5Tenum_nameof
@@ -133,112 +127,6 @@ in the source code, are appended below.
 	H5Tget_member_value
 	H5Tregister
 
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Sget_select_hyper_nblocks
- PURPOSE
-    Get the number of hyperslab blocks in current hyperslab selection
- USAGE
-    hssize_t H5Sget_select_hyper_nblocks(dsid)
-        hid_t dsid;             IN: Dataspace ID of selection to query
- RETURNS
-    The number of hyperslab blocks in selection on success, negative on failure
- DESCRIPTION
-    Returns the number of hyperslab blocks in current selection for dataspace.
---------------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Sget_select_elem_npoints
- PURPOSE
-    Get the number of points in current element selection
- USAGE
-    hssize_t H5Sget_select_elem_npoints(dsid)
-        hid_t dsid;             IN: Dataspace ID of selection to query
- RETURNS
-    The number of element points in selection on success, negative on failure
- DESCRIPTION
-    Returns the number of element points in current selection for dataspace.
---------------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Sget_select_hyper_blocklist
- PURPOSE
-    Get the list of hyperslab blocks currently selected
- USAGE
-    herr_t H5Sget_select_hyper_blocklist(dsid, hsize_t *buf)
-        hid_t dsid;             IN: Dataspace ID of selection to query
-        hsize_t startblock;     IN: Hyperslab block to start with
-        hsize_t numblocks;      IN: Number of hyperslab blocks to get
-        hsize_t *buf;           OUT: List of hyperslab blocks selected
- RETURNS
-    Non-negative on success, negative on failure
- DESCRIPTION
-        Puts a list of the hyperslab blocks into the user's buffer.  The blocks
-    start with the 'startblock'th block in the list of blocks and put
-    'numblocks' number of blocks into the user's buffer (or until the end of
-    the list of blocks, whichever happen first)
-        The block coordinates have the same dimensionality (rank) as the
-    dataspace they are located within.  The list of blocks is formatted as
-    follows: <"start" coordinate> immediately followed by <"opposite" corner
-    coordinate>, followed by the next "start" and "opposite" coordinate, etc.
-    until all the block information requested has been put into the user's
-    buffer.
-        No guarantee of any order of the blocks is implied.
---------------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Sget_select_elem_pointlist
- PURPOSE
-    Get the list of element points currently selected
- USAGE
-    herr_t H5Sget_select_elem_pointlist(dsid, hsize_t *buf)
-        hid_t dsid;             IN: Dataspace ID of selection to query
-        hsize_t startpoint;     IN: Element point to start with
-        hsize_t numpoints;      IN: Number of element points to get
-        hsize_t *buf;           OUT: List of element points selected
- RETURNS
-    Non-negative on success, negative on failure
- DESCRIPTION
-        Puts a list of the element points into the user's buffer.  The points
-    start with the 'startpoint'th block in the list of points and put
-    'numpoints' number of points into the user's buffer (or until the end of
-    the list of points, whichever happen first)
-        The point coordinates have the same dimensionality (rank) as the
-    dataspace they are located within.  The list of points is formatted as
-    follows: <coordinate> followed by the next coordinate, etc. until all the
-    point information in the selection have been put into the user's buffer.
-        The points are returned in the order they will be iterated through
-    when a selection is read/written from/to disk.
---------------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Sget_select_bounds
- PURPOSE
-    Gets the bounding box containing the selection.
- USAGE
-    herr_t H5S_get_select_bounds(space, start, end)
-        hid_t dsid;             IN: Dataspace ID of selection to query
-        hsize_t *start;         OUT: Starting coordinate of bounding box
-        hsize_t *end;           OUT: Opposite coordinate of bounding box
- RETURNS
-    Non-negative on success, negative on failure
- DESCRIPTION
-    Retrieves the bounding box containing the current selection and places
-    it into the user's buffers.  The start and end buffers must be large
-    enough to hold the dataspace rank number of coordinates.  The bounding box
-    exactly contains the selection, ie. if a 2-D element selection is currently
-    defined with the following points: (4,5), (6,8) (10,7), the bounding box
-    with be (4, 5), (10, 8).  Calling this function on a "none" selection
-    returns fail.
-        The bounding box calculations _does_ include the current offset of the
-    selection within the dataspace extent.
---------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tenum_create
