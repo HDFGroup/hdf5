@@ -1398,23 +1398,22 @@ fi
 dnl Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
 
-dnl Compiler with version information
+dnl Compiler with version information. This consists of the full path
+dnl name of the compiler and the reported version number.
 AC_SUBST(CC_VERSION)
-if test -n "$cc_vendor" && test -n "$cc_version"; then
-   CC_VERSION="$CC ($cc_vendor-$cc_version)"
+if `echo $CC | grep / 2>&1 /dev/null`; then
+   CC_VERSION="$CC"	
 else
-   dnl If $CC contains directory component, take it as is;
-   dnl else search it among PATH components.
-   if `echo $CC | grep / 2>&1 /dev/null`; then
-      CC_VERSION="$CC"	
-   else
-      for x in `echo $PATH | sed -e 's/:/ /g'`; do
-         if test -x $x/$CC; then
-            CC_VERSION="$x/$CC"
-            break
-         fi
-      done
-   fi
+   CC_VERSION="$CC";
+   for x in `echo $PATH | sed -e 's/:/ /g'`; do
+      if test -x $x/$CC; then
+	 CC_VERSION="$x/$CC"
+	 break
+      fi
+   done
+fi
+if test -n "$cc_vendor" && test -n "$cc_version"; then
+   CC_VERSION="$CC_VERSION ($cc_vendor-$cc_version)"
 fi
 
 dnl ----------------------------------------------------------------------
