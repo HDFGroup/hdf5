@@ -165,8 +165,8 @@ Please check your Makefile.
 #include <sys/stat.h>
 #define DF_MT             DFMT_SUN
 typedef char              *_fcd;
-typedef int               hsize_t_f;
-typedef int               hssize_t_f;
+typedef long long         hssize_t_f;
+typedef long long         hsize_t_f;
 typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
