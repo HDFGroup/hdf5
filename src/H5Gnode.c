@@ -800,6 +800,10 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
 	} else {
 	    idx -= H5G_NODE_K(f);
 	    insert_into = snrt;
+	    if (idx == H5G_NODE_K (f)) {
+		rt_key->offset = offset;
+		*rt_key_changed = TRUE;
+	    }
 	}
 
     } else {

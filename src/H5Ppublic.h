@@ -24,6 +24,7 @@
 #include <H5public.h>
 #include <H5Apublic.h>
 #include <H5Dpublic.h>
+#include <H5Fpublic.h>
 
 /* Template classes */
 typedef enum H5P_class_t {
@@ -61,14 +62,25 @@ herr_t H5Pset_layout (hid_t tid, H5D_layout_t layout);
 H5D_layout_t H5Pget_layout (hid_t tid);
 herr_t H5Pset_chunk (hid_t tid, int ndims, const size_t dim[]);
 int H5Pget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
+H5F_driver_t H5Pget_driver (hid_t tid);
 herr_t H5Pset_stdio (hid_t tid);
+herr_t H5Pget_stdio (hid_t tid);
 herr_t H5Pset_sec2 (hid_t tid);
+herr_t H5Pget_sec2 (hid_t tid);
 herr_t H5Pset_core (hid_t tid, size_t increment);
-herr_t H5Pset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid);
+herr_t H5Pget_core (hid_t tid, size_t *increment/*out*/);
+herr_t H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
+		     const char *raw_ext, hid_t raw_tid);
+herr_t H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
+		     hid_t *meta_properties/*out*/, size_t raw_ext_size,
+		     char *raw_ext/*out*/, hid_t *raw_properties/*out*/);
+
 herr_t H5Pset_family (hid_t tid, hid_t memb_tid);
+herr_t H5Pget_family (hid_t tid, hid_t *memb_tid/*out*/);
 #ifdef HAVE_PARALLEL
 herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode);
-/* herr_t H5Pget_mpi (hid_t tid, int *ik); */  /* not defined yet */
+herr_t H5Pget_mpi (hid_t tid, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/,
+		   uintn *access_mode/*out*/);
 #endif
 
 #ifdef __cplusplus

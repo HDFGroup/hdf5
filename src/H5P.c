@@ -282,17 +282,44 @@ H5Pclose(hid_t tid)
 herr_t
 H5P_close (H5P_class_t type, void *tmpl)
 {
+    H5F_access_t	*fa_list = (H5F_access_t*)tmpl;
+    
     FUNC_ENTER (H5P_close, FAIL);
 
     /* Check args */
-    assert (tmpl);
+    if (!tmpl) HRETURN (SUCCEED);
 
     /* Some templates may need to do special things */
     switch (type) {
     case H5P_FILE_ACCESS:
+	switch (fa_list->driver) {
+	case H5F_LOW_ERROR:
+	case H5F_LOW_SEC2:
+	case H5F_LOW_STDIO:
+	case H5F_LOW_CORE:
+	    /* Nothing to do */
+	    break;
+
+	case H5F_LOW_MPI:
 #ifdef LATER
-	/* Need to free the COMM and INFO objects too. */
+	    /* Need to free the COMM and INFO objects too. */
 #endif
+	    break;
+
+	case H5F_LOW_SPLIT:
+	    /* Free member info */
+	    fa_list->driver = H5F_LOW_ERROR; /*prevent cycles*/
+	    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.meta_access);
+	    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.raw_access);
+	    H5MM_xfree (fa_list->u.split.meta_ext);
+	    H5MM_xfree (fa_list->u.split.raw_ext);
+	    break;
+
+	case H5F_LOW_FAMILY:
+	    /* Free member info */
+	    H5P_close (H5P_FILE_ACCESS, fa_list->u.fam.memb_access);
+	    break;
+	}
 	break;
 	
     case H5P_FILE_CREATE:
@@ -930,6 +957,41 @@ H5Pget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pget_driver
+ *
+ * Purpose:	Return the ID of the low-level file driver.  TID should be a
+ *		file access property list.
+ *
+ * Return:	Success:	A low-level driver ID
+ *
+ *		Failure:	H5F_LOW_ERROR (a negative value)
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_driver_t
+H5Pget_driver (hid_t tid)
+{
+    H5F_access_t	*tmpl = NULL;
+
+    FUNC_ENTER (H5Pget_driver, H5F_LOW_ERROR);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
+	NULL == (tmpl = H5A_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+
+    FUNC_LEAVE (tmpl->driver);
+}
+    
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_stdio
  *
  * Purpose:	Set the low level file driver to use the functions declared
@@ -969,6 +1031,47 @@ H5Pset_stdio (hid_t tid)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pget_stdio
+ *
+ * Purpose:	If the file access property list is set to the stdio driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.  In the future, additional arguments may be
+ *		added to this function to match those added to H5Pset_stdio().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_stdio (hid_t tid)
+{
+    H5F_access_t	*tmpl = NULL;
+
+    FUNC_ENTER (H5Pget_stdio, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
+	NULL == (tmpl = H5A_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5F_LOW_STDIO != tmpl->driver) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the stdio driver is not set");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_sec2
  *
  * Purpose:	Set the low-level file driver to use the functions declared
@@ -1002,6 +1105,47 @@ H5Pset_sec2 (hid_t tid)
 
     /* Set driver */
     tmpl->driver = H5F_LOW_SEC2;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_sec2
+ *
+ * Purpose:	If the file access property list is set to the sec2 driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.  In the future, additional arguments may be
+ *		added to this function to match those added to H5Pset_sec2().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_sec2 (hid_t tid)
+{
+    H5F_access_t	*tmpl = NULL;
+
+    FUNC_ENTER (H5Pget_sec2, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
+	NULL == (tmpl = H5A_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5F_LOW_SEC2 != tmpl->driver) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the sec2 driver is not set");
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1056,6 +1200,54 @@ H5Pset_core (hid_t tid, size_t increment)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pget_core
+ *
+ * Purpose:	If the file access property list is set to the core driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.  On success, the block size is returned
+ *		through the INCREMENT argument if it isn't the null pointer.
+ *		In the future, additional arguments may be added to this
+ *		function to match those added to H5Pset_core().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_core (hid_t tid, size_t *increment/*out*/)
+{
+    H5F_access_t	*tmpl = NULL;
+
+    FUNC_ENTER (H5Pget_core, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
+	NULL == (tmpl = H5A_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5F_LOW_CORE != tmpl->driver) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the core driver is not set");
+    }
+
+    /* Return values */
+    if (increment) {
+	*increment = tmpl->u.core.increment;
+    }
+    
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_split
  *
  * Purpose:	Set the low-level driver to split meta data from raw data,
@@ -1073,7 +1265,8 @@ H5Pset_core (hid_t tid, size_t increment)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid)
+H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
+	      const char *raw_ext, hid_t raw_tid)
 {
     H5F_access_t	*tmpl = NULL;
     H5F_access_t	*meta_tmpl = NULL;
@@ -1104,6 +1297,96 @@ H5Pset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid)
     tmpl->driver = H5F_LOW_SPLIT;
     tmpl->u.split.meta_access = H5P_copy (H5P_FILE_ACCESS, meta_tmpl);
     tmpl->u.split.raw_access = H5P_copy (H5P_FILE_ACCESS, raw_tmpl);
+    tmpl->u.split.meta_ext = H5MM_xstrdup (meta_ext);
+    tmpl->u.split.raw_ext = H5MM_xstrdup (raw_ext);
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_split
+ *
+ * Purpose:	If the file access property list is set to the sec2 driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.  On success, at most META_EXT_SIZE characters
+ *		are copied to the META_EXT buffer if non-null and at most
+ *		RAW_EXT_SIZE characters are copied to the RAW_EXT buffer if
+ *		non-null.  If the actual extension is larger than the number
+ *		of characters requested then the buffer will not be null
+ *		terminated (that is, behavior like strncpy()).  In addition,
+ *		if META_PROPERTIES and/or RAW_PROPERTIES are non-null then
+ *		the file access property list of the meta file and/or raw
+ *		file is copied and its OID returned through these arguments.
+ *		If the meta file or raw file has no property list then an OID
+ *		of FAIL (-1) is returned but the H5Pget_split() function
+ *		still returns SUCCEED. In the future, additional arguments
+ *		may be added to this function to match those added to
+ *		H5Pset_sec2().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
+	      hid_t *meta_properties/*out*/, size_t raw_ext_size,
+	      char *raw_ext/*out*/, hid_t *raw_properties/*out*/)
+{
+    H5F_access_t	*tmpl = NULL;
+
+    FUNC_ENTER (H5Pget_split, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
+	NULL == (tmpl = H5A_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5F_LOW_SPLIT != tmpl->driver) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the split driver is not set");
+    }
+
+    /* Reset output args for error handling */
+    if (meta_ext && meta_ext_size>0) *meta_ext = '\0';
+    if (raw_ext && raw_ext_size>0) *raw_ext = '\0';
+    if (meta_properties) *meta_properties = FAIL;
+    if (raw_properties) *raw_properties = FAIL;
+
+    /* Output arguments */
+    if (meta_ext && meta_ext_size>0) {
+	if (tmpl->u.split.meta_ext) {
+	    strncpy (meta_ext, tmpl->u.split.meta_ext, meta_ext_size);
+	} else {
+	    strncpy (meta_ext, ".meta", meta_ext_size);
+	}
+    }
+    if (raw_ext && raw_ext_size>0) {
+	if (tmpl->u.split.raw_ext) {
+	    strncpy (raw_ext, tmpl->u.split.raw_ext, raw_ext_size);
+	} else {
+	    strncpy (raw_ext, ".raw", raw_ext_size);
+	}
+    }
+    if (meta_properties && tmpl->u.split.meta_access) {
+	*meta_properties = H5P_create (H5P_FILE_ACCESS,
+				       H5P_copy (H5P_FILE_ACCESS,
+						 tmpl->u.split.meta_access));
+    }
+    if (raw_properties && tmpl->u.split.raw_access) {
+	*raw_properties = H5P_create (H5P_FILE_ACCESS,
+				      H5P_copy (H5P_FILE_ACCESS,
+						tmpl->u.split.raw_access));
+    }
+    
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1155,9 +1438,63 @@ H5Pset_family (hid_t tid, hid_t memb_tid)
     FUNC_LEAVE (SUCCEED);
 }
     
-    
 
-#ifdef HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_family
+ *
+ * Purpose:	If the file access property list is set to the family driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.  On success, if MEMB_TID is a non-null
+ *		pointer it will be initialized with the OID of a copy of the
+ *		file access template used for the family members.  If the
+ *		family members have no file access template (that is, they
+ *		are using the default values) then FAIL (-1) is returned for
+ *		the member property list OID but the function still returns
+ *		SUCCEED.  In the future, additional arguments may be added to
+ *		this function to match those added to H5Pset_family().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_family (hid_t tid, hid_t *memb_tid)
+{
+    H5F_access_t	*tmpl = NULL;
+
+    FUNC_ENTER (H5Pget_family, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
+	NULL == (tmpl = H5A_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5F_LOW_FAMILY != tmpl->driver) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the family driver is not set");
+    }
+
+    /* Output args */
+    if (memb_tid && tmpl->u.fam.memb_access) {
+	*memb_tid = H5P_create (H5P_FILE_ACCESS,
+				H5P_copy (H5P_FILE_ACCESS,
+					  tmpl->u.fam.memb_access));
+    } else if (memb_tid) {
+	*memb_tid = FAIL;
+    }
+	
+    FUNC_LEAVE (SUCCEED);
+}
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mpi
  *
@@ -1211,6 +1548,7 @@ H5Pset_family (hid_t tid, hid_t memb_tid)
  *
  *-------------------------------------------------------------------------
  */
+#ifdef HAVE_PARALLEL
 herr_t
 H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
 {
@@ -1268,9 +1606,57 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
 
     FUNC_LEAVE(SUCCEED);
 }
-
 #endif /*HAVE_PARALLEL*/
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mpi
+ *
+ * Purpose:	If the file access property list is set to the mpi driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.  In the future, additional arguments may be
+ *		added to this function to match those added to H5Pset_mpi().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef HAVE_PARALLEL
+herr_t
+H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, uintn *access_mode)
+{
+    H5F_access_t	*tmpl = NULL;
+
+    FUNC_ENTER (H5Pget_mpi, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
+	NULL == (tmpl = H5A_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5F_LOW_MPI != tmpl->driver) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the mpi driver is not set");
+    }
+
+#ifndef LATER
+    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
+		   "not implemented yet");
+#endif
+
+    FUNC_LEAVE (SUCCEED);
+}
+#endif /*HAVE_PARALLEL*/
+
+
 /*--------------------------------------------------------------------------
  NAME
     H5Pcopy

@@ -834,11 +834,12 @@ H5G_create(H5F_t *f, const char *name, size_t size_hint)
  *
  *-------------------------------------------------------------------------
  */
-H5G_t		       *
+H5G_t *
 H5G_open(H5F_t *f, const char *name)
 {
-    H5G_t		   *grp = NULL;
-    H5G_t		   *ret_value = NULL;
+    H5G_t		*grp = NULL;
+    H5G_t		*ret_value = NULL;
+    H5O_stab_t		mesg;
 
     FUNC_ENTER(H5G_open, NULL);
 
@@ -846,13 +847,17 @@ H5G_open(H5F_t *f, const char *name)
     assert(f);
     assert(name && *name);
 
-    /* Open the group */
+    /* Open the object, making sure it's a group */
     grp = H5MM_xcalloc(1, sizeof(H5G_t));
     if (H5G_find(f, name, NULL, &(grp->ent)) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found");
     }
     if (H5O_open(f, &(grp->ent)) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
+    }
+    if (NULL==H5O_read (&(grp->ent), H5O_STAB, 0, &mesg)) {
+	H5O_close (&(grp->ent));
+	HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group");
     }
     grp->nref = 1;
     ret_value = grp;

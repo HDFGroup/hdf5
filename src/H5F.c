@@ -130,11 +130,12 @@ H5F_init_interface(void)
 {
     herr_t	ret_value = SUCCEED;
     
+    interface_initialize_g = TRUE;
     FUNC_ENTER(H5F_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
     if (H5A_init_group(H5_FILE, H5A_FILEID_HASHSIZE, 0,
-		       (herr_t (*)(void*))H5Fclose)<0 ||
+		       (herr_t (*)(void*))H5F_close)<0 ||
 	H5_add_exit(H5F_term_interface)<0) {	
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
@@ -151,7 +152,7 @@ H5F_init_interface(void)
 	/* nothing more to init */
 	break;
 
-    case H5F_LOW_MPIO:
+    case H5F_LOW_MPI:
 #ifdef HAVE_PARALLEL
 	H5F_access_dflt.u.mpio.access_mode = 0;
 	H5F_access_dflt.u.mpio.comm = MPI_COMM_NULL;
@@ -1064,7 +1065,7 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_id,
     if (!filename || !*filename) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name");
     }
-    if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC)) {
+    if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG)) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
     }
     if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_EXCL)) {
@@ -1400,13 +1401,11 @@ H5Fclose(hid_t fid)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
     }
 
-    /* Close the file */
-    ret_value = H5F_close(file);
-
-    /* Remove the file atom */
-    if (NULL == H5A_remove(fid)) {
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't remove atom");
-    }
+    /*
+     * Decrement reference count on atom.  When it reaches zero the file will
+     * be closed.
+     */
+    H5A_dec_ref (fid);
 
  done:
     FUNC_LEAVE(ret_value < 0 ? FAIL : SUCCEED);
