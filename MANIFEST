@@ -295,7 +295,6 @@
 ./fortran/acconfig.h
 ./fortran/aclocal.m4
 ./fortran/acsite.m4
-./fortran/config.h.in
 ./fortran/configure
 ./fortran/configure.in
 
@@ -379,6 +378,7 @@
 ./fortran/src/H5Sff.f90
 ./fortran/src/H5Tf.c
 ./fortran/src/H5Tff.f90
+./fortran/src/H5config.h.in
 ./fortran/src/H5f90.h
 ./fortran/src/H5f90global.f90
 ./fortran/src/H5f90i.h
@@ -454,6 +454,7 @@
 ./c++/config/linux-gnulibc2
 ./c++/config/solaris2.x
 
+./c++/examples/Dependencies
 ./c++/examples/Attributes.h5
 ./c++/examples/Group.h5
 ./c++/examples/SDS.h5
@@ -469,6 +470,7 @@
 ./c++/examples/writedata.C
 ./c++/examples/Makefile.in
 
+./c++/src/Dependencies
 ./c++/src/H5AbstractDs.C
 ./c++/src/H5AbstractDs.h
 ./c++/src/H5Alltypes.h
@@ -524,8 +526,10 @@
 ./c++/src/H5RefCounter.h
 ./c++/src/H5StrType.C
 ./c++/src/H5StrType.h
+./c++/src/H5config.h.in
 ./c++/src/Makefile.in
 
+./c++/test/Dependencies
 ./c++/test/Makefile.in
 
 #------------------------------------------------------------------------------
