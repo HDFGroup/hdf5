@@ -2526,7 +2526,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 				    "unable to write fill value to dataset");
 		    }
 		} else {
-		    if (H5F_block_write(dset->ent.file, addr, size,
+		    if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, addr, size,
 					H5P_DEFAULT, buf)<0) {
 			HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 				    "unable to write fill value to dataset");

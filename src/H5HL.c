@@ -395,7 +395,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	    if (IS_H5FD_MPIO(f))
 		H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* H5_HAVE_PARALLEL */
-	    if (H5F_block_write(f, addr,
+	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr,
 				(hsize_t)(H5HL_SIZEOF_HDR(f)+heap->disk_alloc),
 				H5P_DEFAULT, heap->chunk) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
@@ -406,7 +406,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	    if (IS_H5FD_MPIO(f))
 		H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* H5_HAVE_PARALLEL */
-	    if (H5F_block_write(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
+	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
 				H5P_DEFAULT, heap->chunk)<0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			      "unable to write heap header to file");
@@ -415,7 +415,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	    if (IS_H5FD_MPIO(f))
 		H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* H5_HAVE_PARALLEL */
-	    if (H5F_block_write(f, heap->addr, (hsize_t)(heap->disk_alloc),
+	    if (H5F_block_write(f, H5FD_MEM_LHEAP, heap->addr, (hsize_t)(heap->disk_alloc),
 				H5P_DEFAULT,
 				heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,

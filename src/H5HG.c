@@ -408,7 +408,7 @@ H5HG_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap)
     assert (heap);
 
     if (heap->dirty) {
-	if (H5F_block_write (f, addr, (hsize_t)(heap->size),
+	if (H5F_block_write (f, H5FD_MEM_GHEAP, addr, (hsize_t)(heap->size),
 			     H5P_DEFAULT, heap->chunk)<0) {
 	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
 			   "unable to write global heap collection to file");

@@ -583,7 +583,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
         if (IS_H5FD_MPIO(f))
             H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif /* H5_HAVE_PARALLEL */
-        if (H5F_block_write(f, addr, (hsize_t)H5O_SIZEOF_HDR(f), 
+        if (H5F_block_write(f, H5FD_MEM_OHDR, addr, (hsize_t)H5O_SIZEOF_HDR(f), 
                     H5P_DEFAULT, buf) < 0) {
             HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
                   "unable to write object header hdr to disk");
@@ -673,7 +673,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
                 if (IS_H5FD_MPIO(f))
                     H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 write*/
 #endif /* H5_HAVE_PARALLEL */
-                if (H5F_block_write(f, addr,
+                if (H5F_block_write(f, H5FD_MEM_OHDR, addr,
                             (hsize_t)(H5O_SIZEOF_HDR(f)+oh->chunk[i].size),
                             H5P_DEFAULT, p) < 0) {
                     HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
@@ -688,7 +688,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
                 if (IS_H5FD_MPIO(f))
                 H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 write*/
 #endif /* H5_HAVE_PARALLEL */
-                if (H5F_block_write(f, oh->chunk[i].addr,
+                if (H5F_block_write(f, H5FD_MEM_OHDR, oh->chunk[i].addr,
                             (hsize_t)(oh->chunk[i].size),
                             H5P_DEFAULT, oh->chunk[i].image) < 0) {
                     HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
