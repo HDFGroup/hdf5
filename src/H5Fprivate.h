@@ -251,7 +251,7 @@ typedef struct H5F_access_t {
     intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
     intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
-    float	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
+    double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     uintn	gc_ref;		/* Garbage-collect references?		*/
@@ -265,7 +265,7 @@ typedef struct H5F_xfer_t {
     void		*tconv_buf;	/*type conversion buffer or null     */
     void		*bkg_buf;	/*background buffer or null	     */
     H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
-    float		split_ratios[3];/*B-tree node splitting ratios	     */
+    double		split_ratios[3];/*B-tree node splitting ratios	     */
     uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
     uintn       	block_limit;    /*largest hyperslab block to cache   */
     H5MM_allocate_t 	vlen_alloc; 	/*VL datatype allocation function    */
@@ -320,7 +320,7 @@ typedef struct H5F_file_t {
     intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
     intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
-    float	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
+    double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     uintn	gc_ref;		/* Garbage-collect references?		*/

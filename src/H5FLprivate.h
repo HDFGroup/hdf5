@@ -34,7 +34,10 @@ typedef struct H5FL_node_t {
 #ifdef H5FL_DEBUG
     uintn inuse;                /* Indicate when object is in use */
 #endif /* H5FL_DEBUG */
-    unsigned char block;        /* Actual storage for the data */
+    union {
+        double unused1;         /* Unused normally, just here for aligment */
+        haddr_t unused2;        /* Unused normally, just here for aligment */
+    }align;             /* Bogus union, just here to align following block */
 } H5FL_node_t;
 
 /* Data structure for free list of blocks */
@@ -73,7 +76,10 @@ typedef struct H5FL_head_t {
 typedef struct H5FL_blk_list_t {
     size_t size;                /* Size of the page */
     struct H5FL_blk_list_t *next;   /* Pointer to next block in free list */
-    unsigned char block;        /* Actual storage for the data */
+    union {
+        double unused1;         /* Unused normally, just here for aligment */
+        haddr_t unused2;        /* Unused normally, just here for aligment */
+    }align;             /* Bogus union, just here to align following block */
 } H5FL_blk_list_t;
 
 /* Data structure for priority queue node of block free lists */
@@ -118,7 +124,10 @@ typedef struct H5FL_blk_head_t {
 typedef struct H5FL_arr_node_t {
     struct H5FL_arr_node_t *next;   /* Pointer to next block in free list */
     size_t nelem;               /* Number of elements in this array */
-    unsigned char arr;          /* Actual storage for the array data */
+    union {
+        double unused1;         /* Unused normally, just here for aligment */
+        haddr_t unused2;        /* Unused normally, just here for aligment */
+    }align;             /* Bogus union, just here to align following block */
 } H5FL_arr_node_t;
 
 /* Data structure for free list of array blocks */

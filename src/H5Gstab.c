@@ -177,7 +177,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
 {
     H5O_stab_t		stab;		/*symbol table message		*/
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
-    static float	split_ratios[3] = {0.1, 0.5, 0.9};
+    static double	split_ratios[3] = {0.1, 0.5, 0.9};
 
     FUNC_ENTER(H5G_stab_insert, FAIL);
 
