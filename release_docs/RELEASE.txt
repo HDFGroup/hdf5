@@ -38,12 +38,13 @@ New Features
 
     * File sizes greater than 2GB are now supported on Linux systems with
       version 2.4.x or higher kernels.
+    * Parallel HDF5 now runs on Linux systems using MPIch.
     * Added a global string variable H5_lib_vers_info_g which holds the
       HDF5 library version information.  This can be used to identify
       an hdf5 library or hdf5 application binary.
       Also added a verification of the consistency between H5_lib_vers_info_g
       and other version information in the source code.
-    * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
+    * HDF5 now runs on the HP V2500 and HP N4000 machines.
     * F90 API:
         - Added aditional parameter "dims" to the h5dread_f/h5dwrite_f and
           h5aread_f/h5awrite_f subroutines.  This parameter is a 1-D array 
@@ -68,10 +69,10 @@ New Features
     * Added support for the Metrowerks Code Warrior compiler for Windows.  
     * For H4->H5 converter utility, added a new option to choose not to convert
       HDF4 specified attributes(reference number, class) into HDF5 attributes.
-    * Added support chunking and compression in SDS and image in H4->H5 converter. 
-      Currently HDF5 only supports gzip compression, so by default an HDF4 file 
-      with any other compression method will be converted into an HDF5 file in 
-      gzip compression. 
+    * Added support chunking and compression in SDS and image in H4->H5
+      converter. Currently HDF5 only supports gzip compression, so by
+      default an HDF4 file with any other compression method will be
+      converted into an HDF5 file in gzip compression. 
     * correct the order or reading HDF4 image array in H4->H5 conversion.  
     * Added new parallel hdf5 tests in t_mpi.  The new test checks if the
       filesystem or the MPI-IO can really handle greater than 2GB files.
