@@ -27,6 +27,7 @@ CONTENTS
 
 - New Features
 - Bug Fixes since HDF5-1.4.3
+- Performance Improvements
 - Documentation
 - Platforms Tested
 - Supported Configuration Features
@@ -42,14 +43,6 @@ New Features
   =========
     o General
     --------- 
-      * Added internal "small data" aggregation, which can reduce the number of
-        actual I/O calls made, improving performance.  QAK - 2002/06/05
-      * Improved internal metadata aggregation, which can reduce the number of
-        actual I/O calls made, improving performance.  Additionally, this can
-        reduce the size of files produced.  QAK - 2002/06/04
-      * Improved internal metadata caching, which can reduce the number of
-        actual I/O calls made by a substantial amount, improving
-        performance.  QAK - 2002/06/03
       * Fill-value's forward-compatibility with 1.5 was added.  SLU -
 	2002/04/11
       * A new query function H5Tget_member_index has been added for compound
@@ -68,6 +61,14 @@ New Features
  
     o Performance
     -------------
+      * Added internal "small data" aggregation, which can reduce the number of
+        actual I/O calls made, improving performance.  QAK - 2002/06/05
+      * Improved internal metadata aggregation, which can reduce the number of
+        actual I/O calls made, improving performance.  Additionally, this can
+        reduce the size of files produced.  QAK - 2002/06/04
+      * Improved internal metadata caching, which can reduce the number of
+        actual I/O calls made by a substantial amount, improving
+        performance.  QAK - 2002/06/03
 
   o Parallel Library
   ==================
@@ -134,7 +135,7 @@ Bug Fixes since HDF5-1.4.3 Release
     * Clear symbol table node "dirty" flag when flushing symbol tables to
         disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
     * Fixed bug where an object's header could get corrupted in certain
-        obscure situations where many objects were created in the
+        obscure situations when many objects were created in the
         file.  QAK - 2002/05/31
         was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where read/write intent in file IDs created with H5Freopen
@@ -157,6 +158,27 @@ Bug Fixes since HDF5-1.4.3 Release
     * Fixed data corruption bug in hyperslab routines when contiguous
         hyperslab that spans entire dimension and is larger than type
         conversion buffer is attempted to be read.  QAK - 2002/03/26
+
+
+Performance Improvements
+========================
+    This release of the HDF5 library has been extensively tuned to improve
+performance, especially to improve parallel I/O performance.
+    Most of the specific information for particular performance improvements
+is mentioned in the "New Features" and "Bug Fixes Since HDF5-1.4.3" sections
+of this document, but in general, the library should make fewer and larger
+I/O requests when accessing a file.  Additionally, improvements to the parallel
+I/O portions of the library should have reduced the communications and barriers
+used in various internal algorithms, improving the performance of the library.
+    However, with the extensive changes to some portions of the library that
+were required for these improvements, some errors or unanticipated results may
+have been introduced also.  Please report any problems encountered to our
+support team at hdfhelp@ncsa.uiuc.edu.
+    Hopefully these improvements will benefit all HDF5 applications, but if
+there are particular I/O patterns that appear to be slower than necessary,
+please send e-mail to hdfhelp@ncsa.uiuc.edu with a sample program showing the
+problem behavior and we will look into the issue to see if it is possible to
+address it.
 
 
 Documentation
