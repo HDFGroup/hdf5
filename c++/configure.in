@@ -9,7 +9,7 @@ dnl ----------------------------------------------------------------------
 dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
-AC_INIT(src/H5library.C)
+AC_INIT(src/H5Library.C)
 dnl AC_CONFIG_HEADER(config.h)
 AC_CONFIG_AUX_DIR(bin)
 AC_CANONICAL_HOST
