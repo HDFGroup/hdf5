@@ -41,6 +41,17 @@
 #   include <Winsock.h>
 #endif
 
+
+#if defined (__MWERKS__)
+#ifdef H5_HAVE_SYS_TIMEB 
+#undef H5_HAVE_SYS_TIMEB
+#endif
+#ifdef H5_HAVE_SYSTEM 
+#undef H5_HAVE_SYSTEM
+#endif
+#endif 
+
+
 #ifdef H5_HAVE_SYS_TIMEB 
 #   include <sys/timeb.h>
 #endif

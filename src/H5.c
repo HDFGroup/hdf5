@@ -36,7 +36,9 @@
 #endif
 
 /* We need this on Irix64 even though we've included stdio.h as documented */
+#if !defined __MWERKS__  
 FILE *fdopen(int fd, const char *mode);
+#endif
 
 #define PABLO_MASK      H5_mask
 

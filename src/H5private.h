@@ -9,6 +9,10 @@
  *		define common things which are not defined in the HDF5 API.
  *		The configuration constants like H5_HAVE_UNISTD_H etc. are
  *		defined in H5config.h which is included by H5public.h.
+ * 
+ * Modifications: Pedro Vicente <pvn@ncsa.uiuc.edu>, June 2001
+ *  WIN32 modifications
+ *
  */
 #ifndef _H5private_H
 #define _H5private_H
@@ -130,26 +134,92 @@
 #   include <sys/proc.h>
 #endif
 
-/*
- * Win32 is severely broken when it comes to ANSI-C and Posix.1 compliance.
- */
-#ifdef H5_HAVE_IO_H
-#   include <io.h>
-#endif
-#ifdef H5_HAVE_WINDOWS_H
-#   include <windows.h>
-#endif
 
 #ifdef WIN32
-#   include <io.h>
-#   include <process.h>
-#   include <windows.h>
+
+/*
+ * we need this from <windows.h> 
+ * HDF5 is currently supported on _X86_ 
+ * including <windows.h> has the side effect of introducing thousands of Windows GUI
+ * macros and type declarations to the compilation environment, so we don't include it
+ */
+
+#if !defined(_68K_) && !defined(_MPPC_) && !defined(_PPC_) && !defined(_ALPHA_) && !defined(_MIPS_) && !defined(_X86_) && defined(_M_IX86)
+#define _X86_
 #endif
+
+#include <windef.h>
+#include <winbase.h>
+#include <io.h>
+
+/* H5_inline */
+
+/* remove any previous defs made by configure in unix */
+#ifdef H5_inline 
+# undef H5_inline
+#endif
+
+/*
+The inline keywords allows the compiler to insert a copy of 
+the function body into each place the function is called
+inline is now in C but in the C99 standard and not the old C89 version so
+MS doesn't recognize it yet (as of April 2001)
+*/
+#if defined(__MWERKS__) || defined(__cplusplus)
+# define H5_inline   inline
+# else
+# define H5_inline 
+#endif
+
+/* Metroworks <sys/types.h> doesn't define off_t. */
+#ifdef __MWERKS__
+typedef long off_t;
+/* Metroworks does not define EINTR in <errno.h> */
+# define EINTR 4
+#endif
+/*__MWERKS__*/
+
+#endif
+/*WIN32*/
+
+/*
+ * This driver supports systems that have the lseek64() function by defining
+ * some macros here so we don't have to have conditional compilations later
+ * throughout the code.
+ *
+ * file_offset_t:	The datatype for file offsets, the second argument of
+ *			the lseek() or lseek64() call.
+ *
+ * file_seek:		The function which adjusts the current file position,
+ *			either lseek() or lseek64().
+ */
+/* adding for windows NT file system support. */
+/* pvn: added __MWERKS__ support. */
+
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_seek		lseek64
+#elif defined (WIN32)
+# ifdef __MWERKS__
+# define file_offset_t off_t
+# define file_seek lseek
+# else /*MSVC*/
+# define file_offset_t __int64
+# define file_seek _lseeki64
+# endif
+#else
+#   define file_offset_t	off_t
+#   define file_seek		lseek
+#endif
+
 #ifndef F_OK
 #   define F_OK	00
 #   define W_OK 02
 #   define R_OK 04
 #endif
+
+
+
 
 /*
  * Pablo support files.
@@ -719,7 +789,7 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#ifdef WIN32
+#if defined (__MWERKS__)
 #define HDstrdup(S)    _strdup(S)
 #else
 
@@ -1059,5 +1129,6 @@ __DLL__ intn H5TN_term_interface(void);
 __DLL__ intn H5T_term_interface(void);
 __DLL__ intn H5Z_term_interface(void);
 
-
 #endif
+
+

@@ -20,6 +20,7 @@
 /* Default Template for creation, access, etc. templates */
 #define H5P_DEFAULT     0
 
+#include <H5private.h>
 /* Public headers needed by this file */
 #include "H5public.h"
 #include "H5Ipublic.h"
@@ -226,3 +227,5 @@ __DLL__ herr_t H5Pget_sieve_buf_size(hid_t fapl_id, hsize_t *size/*out*/);
 }
 #endif
 #endif
+
+

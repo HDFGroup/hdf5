@@ -612,7 +612,7 @@ set_tableflag(table_t *table, int idx)
 char *
 get_objectname(table_t *table, int idx)
 {
-    return strdup(table->objs[idx].objname);
+    return HDstrdup(table->objs[idx].objname);
 }
 
 

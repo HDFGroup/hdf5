@@ -18,6 +18,9 @@
 #include "hdf5.h"
 #include "H5private.h"
 
+
+
+
 /*
  * The output functions need a temporary buffer to hold a piece of the
  * dataset while it's being printed. This constant sets the limit on the
@@ -564,8 +567,11 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     for (; count > 0; sset->start[ctx.ndims - 1] += sset->stride[ctx.ndims - 1],
                       count--) {
         /* calculate the potential number of elements we're going to print */
-        H5Sselect_hyperslab(f_space, H5S_SELECT_SET, sset->start, sset->stride,
-                            sset->count, sset->block);
+        H5Sselect_hyperslab(f_space, H5S_SELECT_SET, 
+        (hssize_t*)sset->start, 
+        (hsize_t*)sset->stride,
+        (hsize_t*)sset->count, 
+        (hsize_t*)sset->block);
         sm_nelmts = H5Sget_select_npoints(f_space);
 
         /*
