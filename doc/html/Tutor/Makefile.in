@@ -15,13 +15,14 @@ DOCDIR=$(docdir)/hdf5/Tutor
 
 # Public doc files (to be installed)...
 PUB_DOCS=Contents.html ContentsAdd.html ContentsAdv.html                   \
-         ContentsFull.html ContentsIntro.html Copyright.html answers.html  \
-         api.html bighdf2sp.JPG compound.html crtatt.html crtdat.html      \
-         crtfile.html crtgrp.html crtgrpar.html crtgrpd.html extend.html   \
-         fileorg.html glossary.html img001.gif img002.gif img003.gif       \
-         img004.gif img005.gif index.html intro.html iterate.html          \
-         mount.html questions.html rdwt.html references.html reftoobj.html \
-         reftoreg.html select.html selectc.html title.html util.html
+	 ContentsFull.html ContentsIntro.html Copyright.html answers.html  \
+	 api.html bighdf2sp.JPG compound.html crtatt.html crtdat.html      \
+	 crtfile.html crtgrp.html crtgrpar.html crtgrpd.html extend.html   \
+	 fileorg.html glossary.html img001.gif img002.gif img003.gif       \
+	 img004.gif img005.gif index.html intro.html iterate.html          \
+	 mount.html property.html questions.html rdwt.html references.html \
+	 reftoobj.html reftoreg.html select.html selectc.html              \
+	 software.html title.html util.html
 
 # Other doc files (not to be installed)...
 PRIVATE_DOCS=
