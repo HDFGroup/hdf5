@@ -67,14 +67,14 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 extern "C" {
 #endif
 
-H5_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
-herr_t h5_errors(void *client_data);
-H5_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
+H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
+H5TEST_DLL herr_t h5_errors(void *client_data);
+H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);
-hid_t h5_fileaccess(void);
-void h5_no_hwconv(void);
-void h5_reset(void);
-void h5_show_hostname(void);
+H5TEST_DLL hid_t h5_fileaccess(void);
+H5TEST_DLL void h5_no_hwconv(void);
+H5TEST_DLL void h5_reset(void);
+H5TEST_DLL void h5_show_hostname(void);
 #ifdef H5_HAVE_PARALLEL
 int h5_set_info_object(void);
 void h5_dump_info_object(MPI_Info info);
