@@ -1,6 +1,6 @@
 /*
- * Copyright © 1998 NCSA
- *                  All rights reserved.
+ * Copyright (c) 1998-2001 National Center for Supercomputing Applications
+ *                         All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, November 19, 1998
@@ -14,7 +14,7 @@
 
 #ifdef WIN32
 #include <process.h>
-#endif
+#endif  /* WIN32 */
 
 /*
  * Define these environment variables or constants to influence functions in
@@ -271,18 +271,17 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
     const char     *prefix = NULL;
     const char     *suffix = ".h5"; /* suffix has default */
-    char           *ptr, last;
+    char           *ptr, last = '\0';
     size_t          i, j;
 #ifdef H5_WANT_H5_V1_2_COMPAT
     H5F_driver_t    driver;
-#else /* H5_WANT_H5_V1_2_COMPAT */
+#else
     hid_t           driver;
 #endif /* H5_WANT_H5_V1_2_COMPAT */
     
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    /* If we have a prefix, then prepend that to fullname */
     memset(fullname, 0, size);
 
 #ifdef H5_WANT_H5_V1_2_COMPAT
@@ -457,7 +456,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
         last = *ptr;
     }
-    
+
     return fullname;
 }
 
