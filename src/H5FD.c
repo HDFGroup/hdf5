@@ -983,17 +983,17 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
     FUNC_ENTER(H5FD_cmp, -1); /*return value is arbitrary*/
 
-    if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) return 0;
-    if (!f1 || !f1->cls) return -1;
-    if (!f2 || !f2->cls) return 1;
-    if (f1->cls < f2->cls) return -1;
-    if (f1->cls > f2->cls) return 1;
+    if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HRETURN(0);
+    if (!f1 || !f1->cls) HRETURN(-1);
+    if (!f2 || !f2->cls) HRETURN(1);
+    if (f1->cls < f2->cls) HRETURN(-1);
+    if (f1->cls > f2->cls) HRETURN(1);
 
     /* Files are same driver; no cmp callback */
     if (!f1->cls->cmp) {
-	if (f1<f2) return -1;
-	if (f1>f2) return 1;
-	return 0;
+	if (f1<f2) HRETURN(-1);
+	if (f1>f2) HRETURN(1);
+	HRETURN(0);
     }
 
     ret_value = (f1->cls->cmp)(f1, f2);

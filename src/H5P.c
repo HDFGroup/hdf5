@@ -631,7 +631,7 @@ H5Pcopy(hid_t plist_id)
     H5TRACE1("i","i",plist_id);
 
     if (H5P_DEFAULT==plist_id)
-        return H5P_DEFAULT;
+        HRETURN(H5P_DEFAULT);
 
     /* Check args */
     if (NULL == (plist = H5I_object(plist_id)) ||
