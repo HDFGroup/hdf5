@@ -45,11 +45,11 @@ H5_DLL H5Z_class_t *H5Z_find(H5Z_filter_t id);
 
 
 /* Filter routines */
-size_t H5Z_filter_deflate(unsigned flags, size_t cd_nelmts,
+H5_DLL size_t H5Z_filter_deflate(unsigned flags, size_t cd_nelmts,
 			  const unsigned cd_values[], size_t nbytes,
 			  size_t *buf_size, void **buf);
 
-size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
+H5_DLL size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
 			  const unsigned cd_values[], size_t nbytes,
 			  size_t *buf_size, void **buf);
 #endif
