@@ -1267,6 +1267,9 @@ H5D_close(H5D_t *dataset)
  * 	Robb Matzke, 11 Aug 1998
  *	Added timing calls around all the data space I/O functions.
  *
+ * 	rky 980918
+ *	Added must_convert to do non-optimized read when necessary.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1294,6 +1297,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
+    hbool_t             must_convert;           /*have to xfer the slow way */
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
@@ -1390,13 +1394,19 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 			       &(dataset->create_parms->efl),
 			       H5T_get_size (dataset->type), file_space,
 			       mem_space, xfer_parms->xfer_mode,
-			       buf/*out*/);
-        if (status>=0) goto succeed;
-#ifdef HAVE_PARALLEL
-	/* Supports only no conversion, type or space, for now. */
-	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
-		    "optimized parallel read failed");
-#endif
+			       buf/*out*/, &must_convert );
+        if (status<0) {
+	    /* Supports only no conversion, type or space, for now. */
+	    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+		        "optimized read failed");
+	}
+	if (must_convert) {
+	    /* sconv->read cannot do a direct transfer;
+	     * fall through and xfer the data in the more roundabout way */
+	} else {
+	    /* direct xfer accomplished successfully */
+	    goto succeed;
+	}
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
 	    fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
@@ -1613,6 +1623,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  * 	Robb Matzke, 9 Jun 1998
  *	The data space is no longer cached in the dataset struct.
  *
+ * 	rky 980918
+ *	Added must_convert to do non-optimized read when necessary.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1639,6 +1652,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
+    hbool_t             must_convert;           /*have to xfer the slow way */
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
@@ -1742,13 +1756,20 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				&(dataset->create_parms->pline),
 				&(dataset->create_parms->efl),
 				H5T_get_size (dataset->type), file_space,
-				mem_space, xfer_parms->xfer_mode, buf);
-	if (status>=0) goto succeed;
-#ifdef HAVE_PARALLEL
-	/* Supports only no conversion, type or space, for now. */
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
-		    "optimized parallel write failed");
-#endif
+				mem_space, xfer_parms->xfer_mode, buf,
+				&must_convert /*out*/ );
+        if (status<0) {
+	    /* Supports only no conversion, type or space, for now. */
+	    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+		        "optimized write failed");
+	}
+	if (must_convert) {
+	    /* sconv->write cannot do a direct transfer;
+	     * fall through and xfer the data in the more roundabout way */
+	} else {
+	    /* direct xfer accomplished successfully */
+	    goto succeed;
+	}
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
 	    fprintf (H5DEBUG(D), "H5D: data space conversion could not be "

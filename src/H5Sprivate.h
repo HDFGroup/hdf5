@@ -223,6 +223,17 @@ typedef struct H5S_conv_t {
      * If there is no data type conversion then it might be possible to
      * transfer data points between application memory and the file in one
      * step without going through the data type conversion buffer.
+     *
+     * rky 980918
+     * If the direct read or write function determines that the transfer
+     * must be done indirectly, i.e., through the conversion buffer or
+     * (in the case of parallel MPI-IO) in block-by-block transfers
+     * then the function returns with the value of must_convert!=0,
+     * the function's return value is SUCCEED,
+     * and no transfer of data is attempted.
+     * Otherwise the direct read or write function returns must_convert 0,
+     * with the function's return value being SUCCEED or FAIL
+     * depending on whether or not the transfer of data was successful.
      */
     
     /* Read from file to application w/o intermediate scratch buffer */
@@ -230,14 +241,17 @@ typedef struct H5S_conv_t {
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, const H5S_t *mem_space,
-		   const H5D_transfer_t xfer_mode, void *buf/*out*/);
+		   const H5D_transfer_t xfer_mode, void *buf/*out*/,
+		   hbool_t *must_convert/*out*/ );
+
 
     /* Write directly from app buffer to file */
     herr_t (*write)(H5F_t *f, const struct H5O_layout_t *layout,
 		    const struct H5O_pline_t *pline,
 		    const struct H5O_efl_t *efl, size_t elmt_size,
 		    const H5S_t *file_space, const H5S_t *mem_space,
-		    const H5D_transfer_t xfer_mode, const void *buf);
+		    const H5D_transfer_t xfer_mode, const void *buf,
+		    hbool_t *must_convert/*out*/ );
     
 #ifdef H5S_DEBUG
     struct {
@@ -332,14 +346,16 @@ hbool_t H5S_hyper_select_valid (const H5S_t *space);
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, const H5S_t *mem_space,
-		   const H5D_transfer_t xfer_mode, void *buf/*out*/);
+		   const H5D_transfer_t xfer_mode, void *buf/*out*/,
+                   hbool_t *must_convert /*out*/ );
 
     /* MPI-IO function to write directly from app buffer to file rky980813 */
     herr_t H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
 		    const struct H5O_pline_t *pline,
 		    const struct H5O_efl_t *efl, size_t elmt_size,
 		    const H5S_t *file_space, const H5S_t *mem_space,
-		    const H5D_transfer_t xfer_mode, const void *buf);
+		    const H5D_transfer_t xfer_mode, const void *buf,
+                    hbool_t *must_convert /*out*/ );
 
 #ifndef _H5S_IN_H5S_C
     /* Global var whose value comes from environment variable */

@@ -55,6 +55,7 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_efl_t __unused__ *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      const H5D_transfer_t xfer_mode, void *buf /*out*/,
+		     hbool_t *must_convert /*out*/,
 		     const hbool_t do_write );
 
 /*-------------------------------------------------------------------------
@@ -434,6 +435,9 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *
  * Modifications:
  *
+ * rky 980918
+ * Added must_convert parameter to let caller know we can't optimize the xfer.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -442,6 +446,7 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_efl_t __unused__ *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      const H5D_transfer_t xfer_mode, void *buf /*out*/,
+		     hbool_t *must_convert /*out*/,
 		     const hbool_t do_write )
 {
     herr_t	 ret_value = SUCCEED;
@@ -453,6 +458,8 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     hbool_t	 mbt_is_derived, mft_is_derived;
 
     FUNC_ENTER (H5S_mpio_spaces_xfer, FAIL);
+
+    *must_convert = 0;	/* means we at least tried to do optimized xfer */
 
     /* Check args */
     assert (f);
@@ -466,9 +473,11 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     /* Currently can only handle H5D_CONTIGUOUS layout */
     if (layout->type != H5D_CONTIGUOUS) {
 #ifdef H5S_DEBUG
-        fprintf (stderr, "H5S: can only create MPI datatype for hyperslab selection when layout is contiguous.\n" );
+	if (H5DEBUG(S)) {
+            fprintf (H5DEBUG(S), "H5S: can only create MPI datatype for hyperslab when layout is contiguous.\n" );
+	}
 #endif
-	ret_value = FAIL;
+	*must_convert = 1;      /* can't do optimized xfer; do the old way */
 	goto done;
     }
 
@@ -555,6 +564,9 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
  *
  * Modifications:
  *
+ * rky 980918
+ * Added must_convert parameter to let caller know we can't optimize the xfer.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -562,7 +574,8 @@ H5S_mpio_spaces_read (H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_pline_t *pline,
                      const struct H5O_efl_t *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     const H5D_transfer_t xfer_mode, void *buf /*out*/ )
+                     const H5D_transfer_t xfer_mode, void *buf /*out*/,
+		     hbool_t *must_convert /*out*/ )
 {
     herr_t ret_value = FAIL;
 
@@ -570,7 +583,7 @@ H5S_mpio_spaces_read (H5F_t *f, const struct H5O_layout_t *layout,
 
     ret_value = H5S_mpio_spaces_xfer( f, layout, pline, efl, elmt_size,
 			file_space, mem_space, xfer_mode, (void*)buf,
-			0 /*read*/ );
+			must_convert /*out*/, 0 /*read*/ );
 
     FUNC_LEAVE (ret_value);
 } /* H5S_mpio_spaces_read() */
@@ -586,6 +599,9 @@ H5S_mpio_spaces_read (H5F_t *f, const struct H5O_layout_t *layout,
  *
  * Modifications:
  *
+ * rky 980918
+ * Added must_convert parameter to let caller know we can't optimize the xfer.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -593,7 +609,8 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_pline_t *pline,
                      const struct H5O_efl_t *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     const H5D_transfer_t xfer_mode, const void *buf )
+                     const H5D_transfer_t xfer_mode, const void *buf,
+		     hbool_t *must_convert /*out*/ )
 {
     herr_t ret_value = FAIL;
 
@@ -601,7 +618,7 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
 
     ret_value = H5S_mpio_spaces_xfer( f, layout, pline, efl, elmt_size,
 			file_space, mem_space, xfer_mode, (void*)buf,
-			1 /*write*/ );
+			must_convert /*out*/, 1 /*write*/ );
 
     FUNC_LEAVE (ret_value);
 } /* H5S_mpio_spaces_write() */
