@@ -52,6 +52,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
  int          have_szip=0;
  int          have_shuffle=0; 
  int          have_fletcher=0;
+ int          have_nbit=0;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
  have_deflate=1;
@@ -65,6 +66,10 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
 #ifdef H5_HAVE_FILTER_FLETCHER32
  have_fletcher=1;
 #endif
+#ifdef H5_HAVE_FILTER_NBIT
+ have_nbit=1;
+#endif
+
 
  /* get information about filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
@@ -143,6 +148,18 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
     return 0;
    }
    break;
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_NBIT
+ *-------------------------------------------------------------------------
+ */
+  case H5Z_FILTER_NBIT:
+   if (!have_nbit)
+   {
+    if (name)
+     print_warning(name,"nbit");
+    return 0;
+   }
+   break;
   }/*switch*/
  }/*for*/
 
@@ -172,6 +189,7 @@ int h5tools_can_encode( H5Z_filter_t filtn)
  int          have_szip=0;
  int          have_shuffle=0; 
  int          have_fletcher=0;
+ int          have_nbit=0;
  unsigned int filter_config_flags;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -185,6 +203,9 @@ int h5tools_can_encode( H5Z_filter_t filtn)
 #endif
 #ifdef H5_HAVE_FILTER_FLETCHER32
  have_fletcher=1;
+#endif
+#ifdef H5_HAVE_FILTER_NBIT
+ have_nbit=1;
 #endif
 
   switch (filtn)
@@ -234,6 +255,12 @@ int h5tools_can_encode( H5Z_filter_t filtn)
    break;
   case H5Z_FILTER_FLETCHER32:
    if (!have_fletcher)
+   {
+    return 0;
+   }
+   break;
+  case H5Z_FILTER_NBIT:
+   if (!have_nbit)
    {
     return 0;
    }
