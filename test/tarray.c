@@ -1517,6 +1517,297 @@ test_array_vlen_array(void)
 
 } /* end test_array_vlen_array() */
 
+#define FIELDNAME  "ArrayofStructures"
+#define LENGTH     5 
+#define ALEN       10
+#define RANK       1
+#define NMAX       100
+
+typedef struct
+{
+  int      nsubfields;
+  char     *name[NMAX];
+  off_t    offset[NMAX];
+  hid_t    datatype[NMAX];
+
+} CmpDTSinfo;
+
+/****************************************************************
+**
+**  test_array_bkg(): Test basic array datatype code.
+**      Tests reading compound datatype with array fields and
+**          writing partial fields.
+** 
+****************************************************************/
+static void 
+test_array_bkg(void)
+{
+    herr_t       status = -1;
+    
+    hid_t        fid, array_dt;
+    hid_t        space;
+    hid_t        type;
+    hid_t        dataset;
+    
+    hsize_t      dim[] = {LENGTH};
+    hsize_t      dima[] = {ALEN};
+
+    int          i, j;    
+    int          ndims[3] = {1,1,1};
+    
+    typedef struct
+    {
+	  int      a[ALEN];
+	  float    b[ALEN];
+	  double   c[ALEN];
+    } CmpField;
+    
+    CmpField     cf[LENGTH];
+    CmpField     cfr[LENGTH];
+    CmpDTSinfo   dtsinfo;
+    
+    typedef struct
+    {
+      float   b[ALEN];
+    } fld_t;
+  
+    fld_t   fld[LENGTH]; 
+    fld_t   fldr[LENGTH]; 
+     
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Partial I/O of Array Fields in Compound Datatype Functionality\n"));
+
+    /* Initialize the data */    
+    /* ------------------- */
+    for (i = 0; i < LENGTH; i++)
+	  {        
+		for (j = 0; j < ALEN; j++)
+		  {
+			cf[i].a[j] = 100*(i+1) + j;
+			cf[i].b[j] = 100.*(i+1) + 0.01*j;
+			cf[i].c[j] = 100.*(i+1) + 0.02*j;
+		  }
+	  }
+
+	    
+    /* Set the number of data members */
+    /* ------------------------------ */
+    dtsinfo.nsubfields = 3;
+
+    /* Initialize the offsets  */
+    /* ----------------------- */
+    dtsinfo.offset[0]   = HOFFSET(CmpField, a);
+    dtsinfo.offset[1]   = HOFFSET(CmpField, b);
+    dtsinfo.offset[2]   = HOFFSET(CmpField, c);
+
+    /* Initialize the data type IDs */
+    /* ---------------------------- */    
+    dtsinfo.datatype[0] = H5T_NATIVE_INT;
+    dtsinfo.datatype[1] = H5T_NATIVE_FLOAT;
+    dtsinfo.datatype[2] = H5T_NATIVE_DOUBLE;
+       
+
+    /* Initialize the names of data members */
+    /* ------------------------------------ */    
+    for (i = 0; i < dtsinfo.nsubfields; i++)
+      dtsinfo.name[i] = (char *)calloc(20, sizeof(char));	  
+	
+	strcpy(dtsinfo.name[0], "One");
+	strcpy(dtsinfo.name[1], "Two");
+	strcpy(dtsinfo.name[2], "Three");
+    
+
+    /* Create file */
+    /* ----------- */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create data space */
+    /* ----------------- */
+    space  = H5Screate_simple(RANK, dim, NULL);
+    CHECK(space, FAIL, "H5Screate_simple");
+
+    /* Create the memory data type */
+    /* --------------------------- */
+    type   = H5Tcreate(H5T_COMPOUND, sizeof(CmpField));
+    CHECK(type, FAIL, "H5Tcreate");
+
+    
+    /* Add  members to the compound data type */
+    /* -------------------------------------- */
+    for ( i = 0; i < dtsinfo.nsubfields; i++)
+    {  
+        array_dt = H5Tarray_create (dtsinfo.datatype[i], ndims[i], dima, NULL);
+        CHECK(array_dt, FAIL, "H5Tarray_create");
+
+        status = H5Tinsert (type, dtsinfo.name[i], dtsinfo.offset[i], array_dt);
+        CHECK(status, FAIL, "H5Tinsert");
+
+        status = H5Tclose(array_dt);
+        CHECK(status, FAIL, "H5Tclose");
+    }
+	
+    /* Create the dataset */
+    /* ------------------ */
+    dataset = H5Dcreate(fid, FIELDNAME, type, space, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write data to the dataset */
+    /* ------------------------- */
+    status = H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cf);
+    CHECK(status, FAIL, "H5Dwrite");
+    
+    status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
+    CHECK(status, FAIL, "H5Dread");
+
+    /* Verify correct data */    
+    /* ------------------- */
+    for (i = 0; i < LENGTH; i++) {        
+	    for (j = 0; j < ALEN; j++) {
+            if(cf[i].a[j]!=cfr[i].a[j]) {
+                num_errs++;
+                printf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
+                continue;
+            }
+            if(cf[i].b[j]!=cfr[i].b[j]) {
+                num_errs++;
+                printf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                continue;
+            }
+            if(cf[i].c[j]!=cfr[i].c[j]) {
+                num_errs++;
+                printf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                continue;
+            }
+        }
+    }
+
+
+    /* Release memory resources */
+    /* ------------------------ */
+    for (i = 0; i < dtsinfo.nsubfields; i++)
+	    free(dtsinfo.name[i]);
+
+
+    /* Release IDs */
+    /* ----------- */
+    status = H5Tclose(type);
+    CHECK(status, FAIL, "H5Tclose");
+   
+    status = H5Sclose(space);
+    CHECK(status, FAIL, "H5Sclose");
+
+    status = H5Dclose(dataset);
+    CHECK(status, FAIL, "H5Dclose");
+
+    status = H5Fclose(fid);
+    CHECK(status, FAIL, "H5Fclose");
+    
+
+/******************************/
+/* Reopen the file and update */
+/******************************/
+
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    dataset = H5Dopen(fid, FIELDNAME );
+    CHECK(dataset, FAIL, "H5Dopen");
+    
+    type = H5Tcreate(H5T_COMPOUND, sizeof(fld_t));
+    CHECK(type, FAIL, "H5Tcreate");
+
+    array_dt = H5Tarray_create (H5T_NATIVE_FLOAT, 1, dima, NULL);
+    CHECK(array_dt, FAIL, "H5Tarray_create");
+
+    status = H5Tinsert (type, "Two", HOFFSET(fld_t, b), array_dt);
+    CHECK(status, FAIL, "H5Tinsert");
+
+    /* Initialize the data to overwrite */    
+    /* -------------------------------- */
+    for (i=0; i< LENGTH; i++)
+        for (j = 0; j < ALEN; j++)
+            cf[i].b[j]=fld[i].b[j] = 1.313;
+
+    status = H5Dwrite (dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, fld);
+    CHECK(status, FAIL, "H5Dwrite");
+
+    status = H5Dread (dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, fldr);
+    CHECK(status, FAIL, "H5Dread");
+   
+    for (i=0; i< LENGTH; i++) 
+        for (j = 0; j < ALEN; j++)
+            if(fld[i].b[j]!=fldr[i].b[j]) {
+                num_errs++;
+                printf("Field data doesn't match, fld[%d].b[%d]=%f, fldr[%d].b[%d]=%f\n",(int)i,(int)j,(float)fld[i].b[j],(int)i,(int)j,(float)fldr[i].b[j]);
+                continue;
+            }
+    
+    status = H5Dclose(dataset);
+    CHECK(status, FAIL, "H5Dclose");
+
+    status = H5Tclose (type);
+    CHECK(status, FAIL, "H5Tclose");
+  
+    status = H5Tclose (array_dt);
+    CHECK(status, FAIL, "H5Tclose");
+
+    status = H5Fclose(fid);
+    CHECK(status, FAIL, "H5Fclose");
+
+/****************************************************/
+/* Reopen the file and print out all the data again */
+/****************************************************/
+
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    dataset = H5Dopen(fid, FIELDNAME );
+    CHECK(dataset, FAIL, "H5Dopen");
+    
+    type = H5Dget_type(dataset);
+    CHECK(type, FAIL, "H5Dget_type");
+
+
+    /* Reset the data to read in */    
+    /* ------------------------- */
+    memset(cfr, 0, sizeof(CmpField)*LENGTH);
+
+    status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
+    CHECK(status, FAIL, "H5Dread");
+
+    /* Verify correct data */    
+    /* ------------------- */
+    for (i = 0; i < LENGTH; i++) {        
+	    for (j = 0; j < ALEN; j++) {
+            if(cf[i].a[j]!=cfr[i].a[j]) {
+                num_errs++;
+                printf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
+                continue;
+            }
+            if(cf[i].b[j]!=cfr[i].b[j]) {
+                num_errs++;
+                printf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                continue;
+            }
+            if(cf[i].c[j]!=cfr[i].c[j]) {
+                num_errs++;
+                printf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                continue;
+            }
+        }
+    }
+
+    status = H5Dclose(dataset);
+    CHECK(status, FAIL, "H5Dclose");
+
+    status = H5Tclose (type);
+    CHECK(status, FAIL, "H5Tclose");
+  
+    status = H5Fclose(fid);
+    CHECK(status, FAIL, "H5Fclose");
+} /* end test_array_bkg() */
+
 /****************************************************************
 **
 **  test_compat(): Test array datatype compatibility code.
@@ -1873,6 +2164,8 @@ test_array(void)
     test_array_compound_array();    /* Test 1-D array of compound datatypes (with array fields) */
     test_array_vlen_atomic();   /* Test 1-D array of atomic VL datatypes */
     test_array_vlen_array();    /* Test 1-D array of 1-D array VL datatypes */
+
+    test_array_bkg();           /* Read compound datatype with array fields and background fields read */
 
     /* This test uses a custom file */
     test_compat();              /* Test compatibility changes for compound datatype fields */
