@@ -160,7 +160,17 @@ case "$cc_vendor-$cc_version" in
 	cc_flags_set=yes
 	;;
 
-    gcc-2.95*)
+    gcc-2.95.[3456789])
+        # Start using the C99 Standard's extensions (long long, etc.)
+        # (Not quite yet... -QAK)
+        # General
+        #CFLAGS="$CFLAGS -std=c9x"
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-2.95.[12])
         # No changes from default GCC flags...
 
 	# Flags are set
