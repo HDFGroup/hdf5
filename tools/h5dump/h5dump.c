@@ -594,60 +594,59 @@ static void
 usage(const char *prog)
 {
     fflush(stdout);
-    fprintf(stdout, "\
-usage: %s [OPTIONS] file\n\
-  OPTIONS\n\
-     -h, --help           Print a usage message and exit\n\
-     -B, --bootblock      Print the content of the boot block\n\
-     -H, --header         Print the header only; no data is displayed\n\
-     -i, --object-ids     Print the object ids\n\
-     -V, --version        Print version number and exit\n\
-     -a P, --attribute=P  Print the specified attribute\n\
-     -d P, --dataset=P    Print the specified dataset\n\
-     -f D, --filedriver=D Specify which driver to open the file with\n\
-     -g P, --group=P      Print the specified group and all members\n\
-     -l P, --soft-link=P  Print the value(s) of the specified soft link\n\
-     -o F, --output=F     Output raw data into file F\n\
-     -t P, --datatype=P   Print the specified named data type\n\
-     -w N, --width=N      Set the number of columns of output\n\
-     -x, --xml            Output in XML\n\
-     -D U, --xml-dtd=U    Use the DTD at U\n\
-\n\
- Subsetting is available by using the following options with a dataset\n\
- attribute. Subsetting is done by selecting a hyperslab from the data.\n\
- Thus, the options mirror those for performing a hyperslab selection.\n\
- The START and COUNT parameters are mandatory if you do subsetting.\n\
- The STRIDE and BLOCK parameters are optional and will default to 1 in\n\
- each dimension.\n\
-\n\
-      -s L, --start=L     Offset of start of subsetting selection\n\
-      -S L, --stride=L    Hyperslab stride\n\
-      -c L, --count=L     Number of blocks to include in selection\n\
-      -k L, --block=L     Size of block in hyperslab\n\
-\n\
-  D - is the file driver to use in opening the file. Acceptable values\n\
-        are \"sec2\", \"family\", \"split\", \"multi\", and \"stream\". Without\n\
-        the file driver flag, the file will be opened with each driver in\n\
-        turn and in the order specified above until one driver succeeds\n\
-        in opening the file.\n\
-  F - is a filename.\n\
-  P - is the full path from the root group to the object.\n\
-  N - is an integer greater than 1.\n\
-  L - is a list of integers the number of which are equal to the\n\
-        number of dimensions in the dataspace being queried\n\
-  U - is a URI reference (as defined in [IETF RFC 2396],\n\
-        updated by [IETF RFC 2732])\n\
-\n\
-  Examples:\n\
-\n\
-  1) Attribute foo of the group /bar_none in file quux.h5\n\
-\n\
-     	h5dump -a /bar_none/foo quux.h5\n\
-\n\
-  2) Selecting a subset from dataset /foo in file quux.h5\n\
-\n\
-      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n\
-\n", prog);
+    fprintf(stdout, " usage: %s [OPTIONS] file\n", prog);
+    fprintf(stdout, "  OPTIONS\n");
+    fprintf(stdout, "     -h, --help           Print a usage message and exit\n");
+    fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
+    fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
+    fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
+    fprintf(stdout, "     -V, --version        Print version number and exit\n");
+    fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
+    fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
+    fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
+    fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
+    fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
+    fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
+    fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
+    fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
+    fprintf(stdout, "     -x, --xml            Output in XML\n");
+    fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD at U\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
+    fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
+    fprintf(stdout, " Thus, the options mirror those for performing a hyperslab selection.\n");
+    fprintf(stdout, " The START and COUNT parameters are mandatory if you do subsetting.\n");
+    fprintf(stdout, " The STRIDE and BLOCK parameters are optional and will default to 1 in\n");
+    fprintf(stdout, " each dimension.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "      -s L, --start=L     Offset of start of subsetting selection\n");
+    fprintf(stdout, "      -S L, --stride=L    Hyperslab stride\n");
+    fprintf(stdout, "      -c L, --count=L     Number of blocks to include in selection\n");
+    fprintf(stdout, "      -k L, --block=L     Size of block in hyperslab\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "  D - is the file driver to use in opening the file. Acceptable values\n");
+    fprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", and \"stream\". Without\n");
+    fprintf(stdout, "        the file driver flag, the file will be opened with each driver in\n");
+    fprintf(stdout, "        turn and in the order specified above until one driver succeeds\n");
+    fprintf(stdout, "        in opening the file.\n");
+    fprintf(stdout, "  F - is a filename.\n");
+    fprintf(stdout, "  P - is the full path from the root group to the object.\n");
+    fprintf(stdout, "  N - is an integer greater than 1.\n");
+    fprintf(stdout, "  L - is a list of integers the number of which are equal to the\n");
+    fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
+    fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
+    fprintf(stdout, "        updated by [IETF RFC 2732])\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "  Examples:\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "  1) Attribute foo of the group /bar_none in file quux.h5\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "     	h5dump -a /bar_none/foo quux.h5\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "  2) Selecting a subset from dataset /foo in file quux.h5\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
+    fprintf(stdout, "\n");
 }
 
 /*-------------------------------------------------------------------------
