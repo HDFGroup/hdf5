@@ -39,7 +39,7 @@ int  h5diff(const char *fname1,
             const char *fname2, 
             const char *objname1, 
             const char *objname2, 
-            diff_opt_t options)
+            diff_opt_t *options)
 {
  int          nobjects1, nobjects2;
  trav_info_t  *info1=NULL;
@@ -148,7 +148,7 @@ int diff_match( hid_t file1_id,
                 hid_t file2_id, 
                 int nobjects2, 
                 trav_info_t *info2, 
-                diff_opt_t options )
+                diff_opt_t *options )
 {
  int           more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
  trav_table_t  *table=NULL;
@@ -223,7 +223,7 @@ int diff_match( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
- if (options.verbose)
+ if (options->verbose)
  {
   printf("\n");
   printf("file1     file2\n");
@@ -281,7 +281,7 @@ int diff_compare( hid_t file1_id,
                   const char *obj2_name, 
                   int nobjects2, 
                   trav_info_t *info2,
-                  diff_opt_t options )
+                  diff_opt_t *options )
 {
 
  int f1=0, f2=0;
@@ -308,7 +308,7 @@ int diff_compare( hid_t file1_id,
  obj2_name=info2[j].name;
 
  /* objects are not the same type */
- if ( info1[i].type != info2[j].type )
+ if ( info1[i].type != info2[j].type && options->verbose)
  {
   printf("Comparison not supported\n");
   printf("<%s> is of type %s and <%s> is of type %s\n", 
@@ -345,7 +345,7 @@ int diff( hid_t file1_id,
           const char *obj1_name, 
           hid_t file2_id, 
           const char *obj2_name, 
-          diff_opt_t options, 
+          diff_opt_t *options, 
           int type )
 {
  int nfound=0;
@@ -357,14 +357,16 @@ int diff( hid_t file1_id,
   break;
   
  default:
-  printf("Comparison not supported\n");
-  printf("<%s> is of type %s and <%s> is of type %s\n", 
-   obj1_name, get_type(type), 
-   obj2_name, get_type(type) );
+  if (options->verbose) {
+   printf("Comparison not supported\n");
+   printf("<%s> is of type %s and <%s> is of type %s\n", 
+    obj1_name, get_type(type), 
+    obj2_name, get_type(type) );
+  }
   break;
  } 
  
- if (options.verbose) 
+ if (options->verbose) 
   printf("\n");
  return nfound;
 }
@@ -398,19 +400,19 @@ void diff_list( const char *filename, int nobjects, trav_info_t *info )
   switch ( info[i].type )
   {
   case H5G_GROUP:
-   printf("%s %20s\n", info[i].name, "group" );
+   printf(" %-10s %s\n", "group", info[i].name  );
    break;
   case H5G_DATASET:
-   printf("%s %20s\n", info[i].name, "dataset" );
+   printf(" %-10s %s\n", "dataset", info[i].name );
    break;
   case H5G_TYPE:
-   printf("%s %20s\n", info[i].name, "datatype" );
+   printf(" %-10s %s\n", "datatype", info[i].name );
    break;
   case H5G_LINK:
-   printf("%s %20s\n", info[i].name, "link" );
+   printf(" %-10s %s\n", "link", info[i].name );
    break;
   default:
-   printf("%s %20s\n", info[i].name, "User defined object" );
+   printf(" %-10s %s\n", "User defined object", info[i].name );
    break;
   }
  }

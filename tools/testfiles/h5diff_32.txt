@@ -1,8 +1,49 @@
 #############################
-Expected output for 'h5diff file4.h5 file4.h5 opaque'
+Expected output for 'h5diff file4.h5 file4.h5 -v opaque'
 #############################
-$h5diff file4.h5 file4.h5 opaque
+$h5diff file4.h5 file4.h5 -v opaque
+
+file1     file2
+---------------------------------------
+    x      x    /array         
+    x      x    /bitfield      
+    x      x    /compound      
+    x      x    /enum          
+    x      x    /float         
+    x      x    /integer       
+    x      x    /opaque        
+    x      x    /ref           
+    x      x    /string        
+    x      x    /vlen          
+
+Comparison not supported
+</array> is of class H5T_ARRAY and </array> is of class H5T_ARRAY
+
+Comparison not supported
+</bitfield> is of class H5T_BITFIELD and </bitfield> is of class H5T_BITFIELD
+
+Comparison not supported
+</compound> is of class H5T_COMPOUND and </compound> is of class H5T_COMPOUND
+
+Comparison not supported
+</enum> is of class H5T_ENUM and </enum> is of class H5T_ENUM
+
+Comparing </float> with </float>
+0 differences found
+
+Comparing </integer> with </integer>
+0 differences found
+
 Comparison not supported
 </opaque> is of class H5T_OPAQUE and </opaque> is of class H5T_OPAQUE
+
+Comparison not supported
+</ref> is of class H5T_REFERENCE and </ref> is of class H5T_REFERENCE
+
+Comparison not supported
+</string> is of class H5T_STRING and </string> is of class H5T_STRING
+
+Comparison not supported
+</vlen> is of class H5T_VLEN and </vlen> is of class H5T_VLEN
 
 

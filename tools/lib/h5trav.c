@@ -360,7 +360,9 @@ int traverse( hid_t loc_id,
     }
     else
     {
+#if defined (H5_TRAV_DEBUG)
      printf("%s %s\n", "HARDLINK", table->objs[j].objname);
+#endif
     }
 
    }
@@ -397,7 +399,9 @@ int traverse( hid_t loc_id,
     }
     else
     {
+#if defined (H5_TRAV_DEBUG)
      printf("%s %s\n", "HARDLINK", table->objs[j].objname);
+#endif
     }
 
    }

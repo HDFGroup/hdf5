@@ -193,15 +193,14 @@ int copy_file(char* fnamein,
   return -1;
  }
 
+
+
 /*-------------------------------------------------------------------------
  * do the copy
  *-------------------------------------------------------------------------
  */
  
   do_copy_file(fidin,fidout,nobjects,info,options);
-  
-
-
 
 /*-------------------------------------------------------------------------
  * free
@@ -241,19 +240,19 @@ void print_objlist(char *filename,
   switch ( info[i].type )
   {
   case H5G_GROUP:
-   printf("%s %20s\n", info[i].name, "group" );
+   printf(" %-10s %s\n", "group", info[i].name  );
    break;
   case H5G_DATASET:
-   printf("%s %20s\n", info[i].name, "dataset" );
+   printf(" %-10s %s\n", "dataset", info[i].name );
    break;
   case H5G_TYPE:
-   printf("%s %20s\n", info[i].name, "datatype" );
+   printf(" %-10s %s\n", "datatype", info[i].name );
    break;
   case H5G_LINK:
-   printf("%s %20s\n", info[i].name, "link" );
+   printf(" %-10s %s\n", "link", info[i].name );
    break;
   default:
-   printf("%s %20s\n", info[i].name, "User defined object" );
+   printf(" %-10s %s\n", "User defined object", info[i].name );
    break;
   }
  }
@@ -281,18 +280,21 @@ int do_copy_file(hid_t fidin,
                  trav_info_t *info,
                  pack_opt_t *options)
 {
- hid_t     grp_id;       /* group ID */ 
+ hid_t     grp_in;       /* group ID */ 
+ hid_t     grp_out;      /* group ID */ 
  hid_t     dset_in;      /* read dataset ID */ 
  hid_t     dset_out;     /* write dataset ID */ 
+ hid_t     type_in;      /* named type ID */ 
+ hid_t     type_out;     /* named type ID */ 
  hid_t     dcpl_id;      /* dataset creation property list ID */ 
  hid_t     space_id;     /* space ID */ 
  hid_t     ftype_id;     /* file data type ID */ 
  hid_t     mtype_id;     /* memory data type ID */
  size_t    msize;        /* memory size of memory type */
  void      *buf=NULL;    /* data buffer */
- hsize_t   nelmts;       /* number of elements in dataaset */
+ hsize_t   nelmts;       /* number of elements in dataset */
  int       rank;         /* rank of dataset */
- hsize_t   dims[32];     /* dimansions of dataset */
+ hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
  int       i, j;
 
  for ( i = 0; i < nobjects; i++)
@@ -305,11 +307,26 @@ int do_copy_file(hid_t fidin,
  */
   case H5G_GROUP:
    if (options->verbose)
-    printf("%s %20s\n", info[i].name, "group" );
+    printf(" %-10s %s\n", "group",info[i].name );
 
-   if ((grp_id=H5Gcreate(fidout, info[i].name, 0))<0) 
+   if ((grp_out=H5Gcreate(fidout, info[i].name, 0))<0) 
     goto error;
-   if (H5Gclose(grp_id)<0) 
+
+   if((grp_in = H5Gopen (fidin, info[i].name))<0) 
+    goto error;
+
+/*-------------------------------------------------------------------------
+ * copy attrs
+ *-------------------------------------------------------------------------
+ */
+
+   copy_attr(grp_in, 
+             grp_out, 
+             options);
+   
+   if (H5Gclose(grp_out)<0) 
+    goto error;
+   if (H5Gclose(grp_in)<0) 
     goto error;
 
    break;
@@ -320,7 +337,7 @@ int do_copy_file(hid_t fidin,
  */
   case H5G_DATASET:
    if (options->verbose)
-    printf("%s %20s\n", info[i].name, "dataset" );
+    printf(" %-10s %s\n", "dataset",info[i].name );
 
    if ((dset_in=H5Dopen(fidin,info[i].name))<0) 
     goto error;
@@ -363,6 +380,22 @@ int do_copy_file(hid_t fidin,
    if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
     goto error;
 
+   
+/*-------------------------------------------------------------------------
+ * copy attrs
+ *-------------------------------------------------------------------------
+ */
+
+  copy_attr(dset_in, 
+            dset_out, 
+            options);
+
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+
    if (H5Tclose(ftype_id)<0) 
     goto error;
    if (H5Tclose(mtype_id)<0) 
@@ -375,7 +408,9 @@ int do_copy_file(hid_t fidin,
     goto error;
    if (H5Dclose(dset_out)<0) 
     goto error;
-   
+
+   if (buf)
+    free(buf);
    
    break;
 
@@ -384,18 +419,68 @@ int do_copy_file(hid_t fidin,
  *-------------------------------------------------------------------------
  */
   case H5G_TYPE:
+
+   if ((type_in = H5Topen (fidin, info[i].name))<0) 
+    goto error;
+
+   if ((type_out = H5Tcopy(type_in))<0) 
+    goto error;
+
+   if ((H5Tcommit(fidout, info[i].name, type_out))<0) 
+    goto error;
+
+/*-------------------------------------------------------------------------
+ * copy attrs
+ *-------------------------------------------------------------------------
+ */
+
+   copy_attr(type_in, 
+             type_out, 
+             options);
+   
+   if (H5Tclose(type_in)<0) 
+    goto error;
+   if (H5Tclose(type_out)<0) 
+    goto error;
+
    if (options->verbose)
-    printf("%s %20s\n", info[i].name, "datatype" );
+    printf(" %-10s %s\n", "datatype",info[i].name );
+
    break;
 
   case H5G_LINK:
-   if (options->verbose)
-    printf("%s %20s\n", info[i].name, "link" );
+
+   {
+
+    H5G_stat_t  statbuf;
+    char        *targbuf=NULL;
+    
+    if (H5Gget_objinfo(fidin,info[i].name,FALSE,&statbuf)<0)
+     goto error;
+    
+   	targbuf = malloc(statbuf.linklen);
+    
+    if (H5Gget_linkval(fidin,info[i].name,statbuf.linklen,targbuf)<0)
+     goto error;
+
+    if (H5Glink(fidout,
+     H5G_LINK_SOFT,
+     targbuf,       /* current name of object */
+     info[i].name   /* new name of object */
+     )<0) 
+     goto error;
+    
+    free(targbuf);
+      
+    if (options->verbose)
+     printf(" %-10s %s\n", "link",info[i].name );
+
+   }
    break;
 
   default:
    if (options->verbose)
-    printf("%s %20s\n", info[i].name, "User defined object" );
+    printf(" %-10s %s\n", "User defined object", info[i].name);
    break;
   }
  }
@@ -404,16 +489,146 @@ int do_copy_file(hid_t fidin,
  
 error:
  H5E_BEGIN_TRY {
-  H5Gclose(grp_id);
+  H5Gclose(grp_in);
+  H5Gclose(grp_out);
   H5Pclose(dcpl_id);
   H5Sclose(space_id);
   H5Dclose(dset_in);
   H5Dclose(dset_out);
   H5Tclose(ftype_id);
   H5Tclose(mtype_id);
+  H5Tclose(type_in);
+  H5Tclose(type_out);
+  if (buf)
+   free(buf);
  } H5E_END_TRY;
  return -1;
 
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: copy_attr
+ *
+ * Purpose: copy attributes located in LOC_IN, which is obtained either from 
+ * loc_id = H5Gopen( fid, name);
+ * loc_id = H5Dopen( fid, name);
+ * loc_id = H5Topen( fid, name);
+ *
+ * Return: 0, ok, -1 no
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: October, 28, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int copy_attr(hid_t loc_in, 
+              hid_t loc_out, 
+              pack_opt_t *options
+              )
+{
+ hid_t      attr_id;      /* attr ID */ 
+ hid_t      attr_out;     /* attr ID */ 
+ hid_t      space_id;     /* space ID */ 
+ hid_t      ftype_id;     /* file data type ID */ 
+ hid_t      mtype_id;     /* memory data type ID */
+	size_t     msize;        /* memory size of memory type */
+ void       *buf=NULL;    /* data buffer */
+ hsize_t    nelmts;       /* number of elements in dataset */
+ int        rank;         /* rank of dataset */
+ hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
+	char       name[255];
+	int        n, i, j;
+
+ if ((n = H5Aget_num_attrs(loc_in))<0) 
+  goto error;
+ 
+ for ( i = 0; i < n; i++)
+ {
+/*-------------------------------------------------------------------------
+ * open
+ *-------------------------------------------------------------------------
+ */
+  /* open attribute */
+  if ((attr_id = H5Aopen_idx(loc_in, i))<0) 
+   goto error;
+  
+  /* get name */
+  if (H5Aget_name( attr_id, 255, name )<0) 
+   goto error;
+
+		/* get the file datatype  */
+		if ((ftype_id = H5Aget_type( attr_id )) < 0 )
+			goto error;
+		
+		/* get the dataspace handle  */
+		if ((space_id = H5Aget_space( attr_id )) < 0 )
+			goto error;
+		
+		/* get dimensions  */
+		if ( (rank = H5Sget_simple_extent_dims(space_id, dims, NULL)) < 0 )
+			goto error;
+	
+/*-------------------------------------------------------------------------
+ * read to memory
+ *-------------------------------------------------------------------------
+ */
+   nelmts=1;
+   for (j=0; j<rank; j++) 
+    nelmts*=dims[j];
+   if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+    goto error;
+   if ((msize=H5Tget_size(mtype_id))<0)
+    goto error;
+   buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+   if ( buf==NULL){
+    printf( "cannot read into memory\n" );
+    goto error;
+   }
+   if (H5Aread(attr_id,mtype_id,buf)<0)
+    goto error;
+
+   
+/*-------------------------------------------------------------------------
+ * copy 
+ *-------------------------------------------------------------------------
+ */
+
+  if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
+   goto error;
+  if(H5Awrite(attr_out,mtype_id,buf)<0)
+   goto error;
+      
+  if (options->verbose)
+   printf("   %-13s %s\n", "attr", name);
+		
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+
+		if (H5Tclose(ftype_id)<0) goto error;
+		if (H5Tclose(mtype_id)<0) goto error;
+		if (H5Sclose(space_id)<0) goto error;
+		if (H5Aclose(attr_id)<0) goto error;
+  if (H5Aclose(attr_out)<0) goto error;
+  if (buf)
+   free(buf);
+ } /* i */
+	
+ 	return 0;
+
+error:
+ H5E_BEGIN_TRY {
+  H5Tclose(ftype_id);
+		H5Tclose(mtype_id);
+		H5Sclose(space_id);
+		H5Aclose(attr_id);
+  H5Aclose(attr_out);
+  if (buf)
+    free(buf);
+ } H5E_END_TRY;
+ return -1;
+}

@@ -10,6 +10,7 @@ file2             File name of the second HDF5 file
 [obj2]            Name of an HDF5 object, in absolute path
 [OPTIONS] are:
 [-h]              Print out this information
+[-v]              Verbose mode
 [-r]              Print only what objects differ, not the differences
 [-n count]        Print difference up to count number
 [-d delta]        Print difference when it is greater than limit delta

@@ -39,7 +39,7 @@ int diff_array( void *buf1,
                 hsize_t tot_cnt, 
                 int rank, 
                 hsize_t *dims, 
-                diff_opt_t options, 
+                diff_opt_t *options, 
                 const char *obj1, 
                 const char *obj2,
                 hid_t m_type )
@@ -91,13 +91,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_char, _buf1, sizeof(char));
     memcpy(&temp2_char, _buf2, sizeof(char));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (abs(temp1_char-temp2_char) > options.delta)
+     if (abs(temp1_char-temp2_char) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -107,13 +107,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options.percent )
+     if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -124,14 +124,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options.percent && 
-      abs(temp1_char-temp2_char) > options.delta )
+     if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent && 
+      abs(temp1_char-temp2_char) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -143,9 +143,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_char != temp2_char)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -175,13 +175,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_uchar, _buf1, sizeof(unsigned char));
     memcpy(&temp2_uchar, _buf2, sizeof(unsigned char));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (abs(temp1_uchar-temp2_uchar) > options.delta)
+     if (abs(temp1_uchar-temp2_uchar) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -191,13 +191,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options.percent )
+     if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -208,14 +208,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options.percent && 
-      abs(temp1_uchar-temp2_uchar) > options.delta )
+     if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent && 
+      abs(temp1_uchar-temp2_uchar) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -227,9 +227,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_uchar != temp2_uchar)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -260,13 +260,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_short, _buf1, sizeof(short));
     memcpy(&temp2_short, _buf2, sizeof(short));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (abs(temp1_short-temp2_short) > options.delta)
+     if (abs(temp1_short-temp2_short) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -276,13 +276,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options.percent )
+     if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -293,14 +293,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options.percent && 
-      abs(temp1_short-temp2_short) > options.delta )
+     if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent && 
+      abs(temp1_short-temp2_short) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -312,9 +312,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_short != temp2_short)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -344,13 +344,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_ushort, _buf1, sizeof(unsigned short));
     memcpy(&temp2_ushort, _buf2, sizeof(unsigned short));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (abs(temp1_ushort-temp2_ushort) > options.delta)
+     if (abs(temp1_ushort-temp2_ushort) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -360,13 +360,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options.percent )
+     if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -377,14 +377,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options.percent && 
-      abs(temp1_ushort-temp2_ushort) > options.delta )
+     if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options->percent && 
+      abs(temp1_ushort-temp2_ushort) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -396,9 +396,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_ushort != temp2_ushort)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -429,13 +429,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_int, _buf1, sizeof(int));
     memcpy(&temp2_int, _buf2, sizeof(int));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (abs(temp1_int-temp2_int) > options.delta)
+     if (abs(temp1_int-temp2_int) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -445,13 +445,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options.percent )
+     if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -462,14 +462,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options.percent && 
-      abs(temp1_int-temp2_int) > options.delta )
+     if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options->percent && 
+      abs(temp1_int-temp2_int) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -481,9 +481,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_int != temp2_int)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -514,13 +514,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_uint, _buf1, sizeof(unsigned int));
     memcpy(&temp2_uint, _buf2, sizeof(unsigned int));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (abs((int)(temp1_uint-temp2_uint)) > options.delta)
+     if (abs((int)(temp1_uint-temp2_uint)) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -530,13 +530,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_uint!=0 && abs((int)(1-temp2_uint/temp1_uint)) > options.percent )
+     if ( temp1_uint!=0 && abs((int)(1-temp2_uint/temp1_uint)) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -547,14 +547,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_uint!=0 && abs((int)(1-temp2_uint/temp1_uint)) > options.percent && 
-      abs((int)(temp1_uint-temp2_uint)) > options.delta )
+     if ( temp1_uint!=0 && abs((int)(1-temp2_uint/temp1_uint)) > options->percent && 
+      abs((int)(temp1_uint-temp2_uint)) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -566,9 +566,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_uint != temp2_uint)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -599,13 +599,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_long, _buf1, sizeof(long));
     memcpy(&temp2_long, _buf2, sizeof(long));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (labs(temp1_long-temp2_long) > (long)options.delta)
+     if (labs(temp1_long-temp2_long) > (long)options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -615,13 +615,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > (long)options.percent )
+     if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > (long)options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -632,14 +632,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > (long)options.percent && 
-      labs(temp1_long-temp2_long) > (long)options.delta )
+     if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > (long)options->percent && 
+      labs(temp1_long-temp2_long) > (long)options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -651,9 +651,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_long != temp2_long)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -683,13 +683,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_ulong, _buf1, sizeof(unsigned long));
     memcpy(&temp2_ulong, _buf2, sizeof(unsigned long));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (labs((long)(temp1_ulong-temp2_ulong)) > (long)options.delta)
+     if (labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -699,13 +699,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_ulong!=0 && labs((long)(1-temp2_ulong/temp1_ulong)) > (long)options.percent )
+     if ( temp1_ulong!=0 && labs((long)(1-temp2_ulong/temp1_ulong)) > (long)options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -716,14 +716,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_ulong!=0 && labs((long)(1-temp2_ulong/temp1_ulong)) > (long)options.percent && 
-      labs((long)(temp1_ulong-temp2_ulong)) > (long)options.delta )
+     if ( temp1_ulong!=0 && labs((long)(1-temp2_ulong/temp1_ulong)) > (long)options->percent && 
+      labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -735,9 +735,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_ulong != temp2_ulong)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -767,13 +767,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_llong, _buf1, sizeof(long_long));
     memcpy(&temp2_llong, _buf2, sizeof(long_long));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (labs((long)(temp1_llong-temp2_llong)) > (long)options.delta)
+     if (labs((long)(temp1_llong-temp2_llong)) > (long)options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -783,13 +783,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > (long)options.percent )
+     if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > (long)options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -800,14 +800,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > (long)options.percent && 
-      labs((long)(temp1_llong-temp2_llong)) > (long)options.delta )
+     if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > (long)options->percent && 
+      labs((long)(temp1_llong-temp2_llong)) > (long)options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -819,9 +819,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_llong != temp2_llong)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -851,13 +851,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_ullong, _buf1, sizeof(unsigned long_long));
     memcpy(&temp2_ullong, _buf2, sizeof(unsigned long_long));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (labs((long)(temp1_ullong-temp2_ullong)) > (long)options.delta)
+     if (labs((long)(temp1_ullong-temp2_ullong)) > (long)options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -868,13 +868,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > (long)options.percent )
+     if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > (long)options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -886,14 +886,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > (long)options.percent && 
-      labs((long)(temp1_ullong-temp2_ullong)) > (long)options.delta )
+     if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > (long)options->percent && 
+      labs((long)(temp1_ullong-temp2_ullong)) > (long)options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -906,9 +906,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_ullong != temp2_ullong)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -939,13 +939,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_float, _buf1, sizeof(float));
     memcpy(&temp2_float, _buf2, sizeof(float));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (fabs(temp1_float-temp2_float) > options.delta)
+     if (fabs(temp1_float-temp2_float) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -955,13 +955,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options.percent )
+     if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -972,14 +972,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options.percent && 
-      fabs(temp1_float-temp2_float) > options.delta )
+     if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options->percent && 
+      fabs(temp1_float-temp2_float) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -991,9 +991,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_float != temp2_float)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1023,13 +1023,13 @@ int diff_array( void *buf1,
     memcpy(&temp1_double, _buf1, sizeof(double));
     memcpy(&temp2_double, _buf2, sizeof(double));
     /* -d and !-p */
-    if (options.d && !options.p)
+    if (options->d && !options->p)
     {
-     if (fabs(temp1_double-temp2_double) > options.delta)
+     if (fabs(temp1_double-temp2_double) > options->delta)
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1039,13 +1039,13 @@ int diff_array( void *buf1,
      }
     }
     /* !-d and -p */
-    else if (!options.d && options.p)
+    else if (!options->d && options->p)
     {
-     if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options.percent )
+     if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options->percent )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1056,14 +1056,14 @@ int diff_array( void *buf1,
      }
     }
     /* -d and -p */
-    else if ( options.d && options.p)
+    else if ( options->d && options->p)
     {
-     if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options.percent && 
-      fabs(temp1_double-temp2_double) > options.delta )
+     if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options->percent && 
+      fabs(temp1_double-temp2_double) > options->delta )
      {
-      if (options.n && nfound>=options.count)
+      if (options->n && nfound>=options->count)
        return nfound;
-      if ( options.r==0 ) 
+      if ( options->r==0 ) 
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1075,9 +1075,9 @@ int diff_array( void *buf1,
     }
     else if (temp1_double != temp2_double)
     {
-     if (options.n && nfound>=options.count)
+     if (options->n && nfound>=options->count)
       return nfound;
-     if ( options.r==0 ) 
+     if ( options->r==0 ) 
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);

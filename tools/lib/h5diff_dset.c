@@ -40,7 +40,7 @@ int diff_dataset( hid_t file1_id,
                   hid_t file2_id, 
                   const char *obj1_name, 
                   const char *obj2_name, 
-                  diff_opt_t options )
+                  diff_opt_t *options )
 {
  hid_t        dset1_id  =-1;
  hid_t        dset2_id  =-1;
@@ -139,10 +139,12 @@ int diff_dataset( hid_t file1_id,
 
  if ( tclass1 != tclass2 )
  {
-  printf("Comparison not supported\n");
-  printf("<%s> is of class %s and <%s> is of class %s\n", 
-   obj1_name, get_class(tclass1), 
-   obj2_name, get_class(tclass2) );
+  if (options->verbose) {
+   printf("Comparison not supported\n");
+   printf("<%s> is of class %s and <%s> is of class %s\n", 
+    obj1_name, get_class(tclass1), 
+    obj2_name, get_class(tclass2) );
+  }
   goto out;
  }
 
@@ -163,10 +165,12 @@ int diff_dataset( hid_t file1_id,
  case H5T_ENUM:
  case H5T_VLEN:
  case H5T_ARRAY:
-  printf("Comparison not supported\n");
-  printf("<%s> is of class %s and <%s> is of class %s\n", 
-   obj1_name, get_class(tclass1), 
-   obj2_name, get_class(tclass2) );
+  if (options->verbose ) {
+   printf("Comparison not supported\n");
+   printf("<%s> is of class %s and <%s> is of class %s\n", 
+    obj1_name, get_class(tclass1), 
+    obj2_name, get_class(tclass2) );
+  }
   goto out;
  default:
   break;
@@ -179,16 +183,18 @@ int diff_dataset( hid_t file1_id,
  
  if ( rank1 != rank2 )
  {
-  printf("Comparison not supported\n");
-  printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
-  print_dims(rank1,dims1);
-  printf(", max dimensions ");
-  print_dims(rank1,maxdim1);
-  printf("\n" );
-  printf("<%s> has rank %d, dimensions ", obj2_name, rank2);
-  print_dims(rank2,dims2);
-  printf(", max dimensions ");
-  print_dims(rank2,maxdim2);
+  if (options->verbose) {
+   printf("Comparison not supported\n");
+   printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
+   print_dims(rank1,dims1);
+   printf(", max dimensions ");
+   print_dims(rank1,maxdim1);
+   printf("\n" );
+   printf("<%s> has rank %d, dimensions ", obj2_name, rank2);
+   print_dims(rank2,dims2);
+   printf(", max dimensions ");
+   print_dims(rank2,maxdim2);
+  }
   goto out;
  }
 
@@ -213,16 +219,18 @@ int diff_dataset( hid_t file1_id,
 
  if (dim_diff==1)
  {
-  printf("Comparison not supported\n");
-  printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
-  print_dims(rank1,dims1);
-  printf(", max dimensions ");
-  print_dims(rank1,maxdim1);
-  printf("\n" );
-  printf("<%s> has rank %d, dimensions ", obj2_name, rank2);
-  print_dims(rank2,dims2);
-  printf(", max dimensions ");
-  print_dims(rank2,maxdim2);
+  if (options->verbose) {
+   printf("Comparison not supported\n");
+   printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
+   print_dims(rank1,dims1);
+   printf(", max dimensions ");
+   print_dims(rank1,maxdim1);
+   printf("\n" );
+   printf("<%s> has rank %d, dimensions ", obj2_name, rank2);
+   print_dims(rank2,dims2);
+   printf(", max dimensions ");
+   print_dims(rank2,maxdim2);
+  }
   goto out;
  }
 
@@ -232,13 +240,15 @@ int diff_dataset( hid_t file1_id,
  */
  if (maxdim_diff==1)
  {
-  printf( "Warning: Different maximum dimensions\n");
-  printf("<%s> has max dimensions ", obj1_name);
-  print_dims(rank1,maxdim1);
-  printf("\n");
-  printf("<%s> has max dimensions ", obj2_name);
-  print_dims(rank2,maxdim2);
-  printf("\n");
+  if (options->verbose) {
+   printf( "Warning: Different maximum dimensions\n");
+   printf("<%s> has max dimensions ", obj1_name);
+   print_dims(rank1,maxdim1);
+   printf("\n");
+   printf("<%s> has max dimensions ", obj2_name);
+   print_dims(rank2,maxdim2);
+   printf("\n");
+  }
  }
   
 /*-------------------------------------------------------------------------
@@ -265,7 +275,7 @@ int diff_dataset( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
- if ( (H5Tequal(f_type1, f_type2)==0) ) 
+ if ( (H5Tequal(f_type1, f_type2)==0) && options->verbose) 
  {
   printf("Warning: Different storage datatype\n");
   printf("<%s> has file datatype ", obj1_name);
@@ -298,13 +308,15 @@ int diff_dataset( hid_t file1_id,
 
  can1=diff_can(m_type1);
  can2=diff_can(m_type2);
- if ( can1==0 || can2==0 )
+ if ( (can1==0 || can2==0))
  {
-  printf("Comparison not supported\n");
-  if ( can1==0 )
-   printf("<%s> type is not supported\n", obj1_name);
-  if ( can2==0 )
-   printf("<%s> type is not supported\n", obj2_name);
+  if (options->verbose) {
+   printf("Comparison not supported\n");
+   if ( can1==0 )
+    printf("<%s> type is not supported\n", obj1_name);
+   if ( can2==0 )
+    printf("<%s> type is not supported\n", obj2_name);
+  }
   goto out;
  }
 
@@ -317,9 +329,11 @@ int diff_dataset( hid_t file1_id,
  sign2=H5Tget_sign(m_type2);
  if ( sign1 != sign2 )
  {
-  printf("Comparison not supported\n");
-  printf("<%s> has sign %s\n", obj1_name, get_sign(sign1));
-  printf("<%s> has sign %s", obj2_name, get_sign(sign2));
+  if (options->verbose) {
+   printf("Comparison not supported\n");
+   printf("<%s> has sign %s\n", obj1_name, get_sign(sign1));
+   printf("<%s> has sign %s", obj2_name, get_sign(sign2));
+  }
   goto out;
  }
 
@@ -374,12 +388,12 @@ int diff_dataset( hid_t file1_id,
  * array compare
  *-------------------------------------------------------------------------
  */
- if (options.verbose)
+ if (options->verbose)
   printf( "Comparing <%s> with <%s>\n", obj1_name, obj2_name );
  name1=diff_basename(obj1_name);
  name2=diff_basename(obj2_name);
  nfound = diff_array(buf1,buf2,tot_cnt1,rank1,dims1,options,name1,name2,m_type1);
- if (options.verbose)
+ if (options->verbose)
   printf("%d differences found\n", nfound );
 
 /*-------------------------------------------------------------------------

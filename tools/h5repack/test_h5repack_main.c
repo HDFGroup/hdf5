@@ -60,7 +60,7 @@ test()
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- if (h5diff(FILENAME,FILENAME,NULL,NULL,diff_options) == 1)
+ if (h5diff(FILENAME,FILENAME,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  
  PASSED();                                                 

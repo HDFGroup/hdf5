@@ -1,7 +1,8 @@
 #############################
-Expected output for 'h5diff file3.h5 file3.h5 dset type'
+Expected output for 'h5diff file3.h5 file3.h5 -v dset type'
 #############################
-$h5diff file3.h5 file3.h5 dset type
+$h5diff file3.h5 file3.h5 -v dset type
 Comparison not supported
-</dset> is of type H5G_DATASET and </type> is of type H5G_TYPE
+</type> is of type H5G_TYPE and </type> is of type H5G_TYPE
+
 

@@ -19,7 +19,7 @@
 /* Due to alignment issue in Alpha clusters, options must be declared here
  * not as a local variable in main().
  */
-diff_opt_t  options = {0,0,0,0,0,0,0,1};
+diff_opt_t  options = {0,0,0,0,0,0,0,0};
 
 static void usage(void);
 static int check_n_input( const char* );
@@ -112,6 +112,10 @@ int main(int argc, const char *argv[])
     break;
     case 'h': 
      usage();
+     break;
+    case 'v': 
+     options.verbose = 1;
+     break;
     case 'r': 
      options.r = 1;
      break;
@@ -185,7 +189,7 @@ int main(int argc, const char *argv[])
  }/*for*/
  
 
- nfound = h5diff(fname1,fname2,objname1,objname2,options);
+ nfound = h5diff(fname1,fname2,objname1,objname2,&options);
  printf("\n");
  ret= (nfound==0 ? 0 : 1 );
  return ret;
@@ -295,6 +299,7 @@ void usage(void)
  printf("[obj2]            Name of an HDF5 object, in absolute path\n");
  printf("[OPTIONS] are:\n");
  printf("[-h]              Print out this information\n");
+ printf("[-v]              Verbose mode\n");
  printf("[-r]              Print only what objects differ, not the differences\n");
  printf("[-n count]        Print difference up to count number\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");

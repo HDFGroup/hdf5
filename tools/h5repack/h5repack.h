@@ -24,7 +24,9 @@
 #define MAX_NC_NAME 256 /* max length of a name */
 #define MAX_VAR_DIMS 32 /* max per variable dimensions */
 
-
+#if 1
+#define H5_REPACK_DEBUG
+#endif
 
 
 /*-------------------------------------------------------------------------

@@ -1,7 +1,8 @@
 #############################
-Expected output for 'h5diff file3.h5 file3.h5 dset link'
+Expected output for 'h5diff file3.h5 file3.h5 -v dset link'
 #############################
-$h5diff file3.h5 file3.h5 dset link
+$h5diff file3.h5 file3.h5 -v dset link
 Comparison not supported
-</dset> is of type H5G_DATASET and </link> is of type H5G_LINK
+</link> is of type H5G_LINK and </link> is of type H5G_LINK
+
 

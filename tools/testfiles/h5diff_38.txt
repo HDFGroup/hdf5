@@ -1,8 +1,8 @@
 #############################
-Expected output for 'h5diff file4.h5 file4.h5 integer float'
+Expected output for 'h5diff file4.h5 file4.h5 -v integer float'
 #############################
-$h5diff file4.h5 file4.h5 integer float
-Comparison not supported
-</integer> is of class H5T_INTEGER and </float> is of class H5T_FLOAT
+$h5diff file4.h5 file4.h5 -v integer float
+Comparing </float> with </float>
+0 differences found
 
 

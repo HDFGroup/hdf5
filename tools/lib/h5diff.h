@@ -74,7 +74,7 @@ int  h5diff(const char *fname1,
             const char *fname2, 
             const char *objname1, 
             const char *objname2, 
-            diff_opt_t options);
+            diff_opt_t *options);
 
 
 #ifdef __cplusplus
@@ -93,13 +93,13 @@ int diff_dataset( hid_t file1_id,
                   hid_t file2_id, 
                   const char *obj1_name, 
                   const char *obj2_name,
-                  diff_opt_t options );
+                  diff_opt_t *options );
 
 int diff( hid_t file1_id, 
           const char *obj1_name, 
           hid_t file2_id, 
           const char *obj2_name, 
-          diff_opt_t options, 
+          diff_opt_t *options, 
           int type );
 
 int diff_compare( hid_t file1_id, 
@@ -112,7 +112,7 @@ int diff_compare( hid_t file1_id,
                   const char *obj2_name, 
                   int nobjects2, 
                   trav_info_t *info2,
-                  diff_opt_t options );
+                  diff_opt_t *options );
 
 int diff_match( hid_t file1_id, 
                 int nobjects1, 
@@ -120,14 +120,14 @@ int diff_match( hid_t file1_id,
                 hid_t file2_id, 
                 int nobjects2, 
                 trav_info_t *info2, 
-                diff_opt_t options );
+                diff_opt_t *options );
 
 int diff_array( void *buf1, 
                 void *buf2, 
                 hsize_t tot_cnt, 
                 int rank, 
                 hsize_t *dims, 
-                diff_opt_t options, 
+                diff_opt_t *options, 
                 const char *obj1, 
                 const char *obj2,
                 hid_t m_type );

@@ -1,14 +1,8 @@
 #############################
-Expected output for 'h5diff file6.h5 file6.h5 dset5a dset5b'
+Expected output for 'h5diff file6.h5 file6.h5 -v dset5a dset5b'
 #############################
-$h5diff file6.h5 file6.h5 dset5a dset5b
-Comparing </dset5a> with </dset5b>
-position        dset5a          dset5b          difference          
-------------------------------------------------------------
-[ 1 0 ]          1               3               2              
-[ 1 1 ]          1               4               3              
-[ 2 0 ]          1               5               4              
-[ 2 1 ]          1               6               5              
-4 differences found
+$h5diff file6.h5 file6.h5 -v dset5a dset5b
+Comparing </dset5b> with </dset5b>
+0 differences found
 
 

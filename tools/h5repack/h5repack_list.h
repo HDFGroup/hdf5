@@ -44,6 +44,11 @@ int do_copy_file(hid_t fidin,
                  trav_info_t *info,
                  pack_opt_t *options);
 
+int copy_attr(hid_t loc_in, 
+              hid_t loc_out, 
+              pack_opt_t *options
+              );
+
 
 
 
