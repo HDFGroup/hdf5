@@ -164,6 +164,26 @@ typedef struct
 #define MISC12_CHUNK_SIZE       2
 #define MISC12_APPEND_SIZE      5
 
+/* Definitions for misc. test #13 */
+#define MISC13_FILE_1          "tmisc13a.h5"
+#define MISC13_FILE_2          "tmisc13b.h5"
+#define MISC13_DSET1_NAME      "Dataset1"
+#define MISC13_DSET2_NAME      "Dataset2"
+#define MISC13_DSET3_NAME      "Dataset3"
+#define MISC13_GROUP1_NAME     "Group1"
+#define MISC13_GROUP2_NAME     "Group2"
+#define MISC13_DTYPE_NAME      "Datatype"
+#define MISC13_RANK            2
+#define MISC13_DIM1            20
+#define MISC13_DIM2            30
+#define MISC13_CHUNK_DIM1      10
+#define MISC13_CHUNK_DIM2      15
+#define MISC13_USERBLOCK_SIZE  512
+#define MISC13_COPY_BUF_SIZE   4096
+
+unsigned m13_data[MISC13_DIM1][MISC13_DIM2];           /* Data to write to dataset */
+unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset */
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -1949,6 +1969,365 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc12() */
 
+/* Various routines for misc. 13 test */
+static void
+init_data(void)
+{
+    unsigned u,v;       /* Local index variables */
+
+    for(u=0; u<MISC13_DIM1; u++)
+        for(v=0; v<MISC13_DIM2; v++)
+            m13_data[u][v]=(u*MISC13_DIM2)+v;
+}
+
+static int
+verify_data(void)
+{
+    unsigned u,v;       /* Local index variables */
+
+    for(u=0; u<MISC13_DIM1; u++)
+        for(v=0; v<MISC13_DIM2; v++)
+            if(m13_data[u][v]!=m13_rdata[u][v])
+                return(-1);
+    return(0);
+}
+
+static void
+create_dataset(hid_t loc_id, const char *name, hid_t dcpl)
+{
+    hid_t dsid;         /* Dataset ID */
+    hid_t sid;          /* Dataspace ID */
+    hsize_t dims[MISC13_RANK]; /* Dataset dimensions */
+    herr_t ret;         /* Generic return value */
+
+    /* Create dataspace for use with dataset */
+    dims[0]=MISC13_DIM1;
+    dims[1]=MISC13_DIM2;
+    sid=H5Screate_simple(MISC13_RANK, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create contiguous dataset in root group */
+    dsid = H5Dcreate(loc_id, name, H5T_NATIVE_UINT, sid, dcpl);
+    CHECK(dsid, FAIL, "H5Dcreate");
+
+    /* Write some data to dataset */
+    ret = H5Dwrite(dsid, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, m13_data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close the contiguous dataset */
+    ret = H5Dclose(dsid);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}
+
+static void
+verify_dataset(hid_t loc_id, const char *name)
+{
+    hid_t dsid;         /* Dataset ID */
+    herr_t ret;         /* Generic return value */
+
+    /* Open the contiguous dataset in the root group */
+    dsid = H5Dopen(loc_id, name);
+    CHECK(dsid, FAIL, "H5Dopen");
+
+    /* Read the data */
+    ret = H5Dread(dsid, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, m13_rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Verify that the data is correct */
+    ret=verify_data();
+    CHECK(ret, FAIL, "verify_data");
+
+    /* Close the contiguous dataset */
+    ret = H5Dclose(dsid);
+    CHECK(ret, FAIL, "H5Dclose");
+}
+
+static void
+create_hdf_file(const char *name)
+{
+    hid_t fid;          /* File ID */
+    hid_t gid,gid2;     /* Group IDs */
+    hid_t tid;          /* Datatype ID */
+    hid_t dcpl;         /* Dataset creation property list ID */
+    hsize_t chunk_dims[MISC13_RANK]; /* Chunk dimensions */
+    herr_t ret;         /* Generic return value */
+
+    /* Create file */
+    fid=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create DCPL for use with datasets */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Set the DCPL to be chunked */
+    ret = H5Pset_layout(dcpl, H5D_CHUNKED);
+    CHECK(ret, FAIL, "H5Pset_layout");
+
+    /* Use chunked storage for this DCPL */
+    chunk_dims[0]=MISC13_CHUNK_DIM1;
+    chunk_dims[1]=MISC13_CHUNK_DIM2;
+    ret = H5Pset_chunk(dcpl,MISC13_RANK,chunk_dims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    /* Create contiguous dataset in root group */
+    create_dataset(fid,MISC13_DSET1_NAME,H5P_DEFAULT);
+
+    /* Create chunked dataset in root group */
+    create_dataset(fid,MISC13_DSET2_NAME,dcpl);
+
+    /* Create a datatype to commit to the file */
+    tid=H5Tcopy(H5T_NATIVE_INT);
+    CHECK(tid, FAIL, "H5Tcopy");
+
+    /* Create a named datatype in the root group */
+    ret=H5Tcommit(fid,MISC13_DTYPE_NAME,tid);
+    CHECK(ret, FAIL, "H5Tcommit");
+
+    /* Close named datatype */
+    ret=H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Create a group in the root group */
+    gid = H5Gcreate(fid, MISC13_GROUP1_NAME, 0);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Create another group in the new group */
+    gid2 = H5Gcreate(gid, MISC13_GROUP2_NAME, 0);
+    CHECK(gid2, FAIL, "H5Gcreate");
+
+    /* Close the second group */
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Create contiguous dataset in new group */
+    create_dataset(gid,MISC13_DSET1_NAME,H5P_DEFAULT);
+
+    /* Create chunked dataset in new group */
+    create_dataset(gid,MISC13_DSET2_NAME,dcpl);
+
+    /* Create a datatype to commit to the new group */
+    tid=H5Tcopy(H5T_NATIVE_INT);
+    CHECK(tid, FAIL, "H5Tcopy");
+
+    /* Create a named datatype in the new group */
+    ret=H5Tcommit(gid,MISC13_DTYPE_NAME,tid);
+    CHECK(ret, FAIL, "H5Tcommit");
+
+    /* Close named datatype */
+    ret=H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close the first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the DCPL */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    assert(ret>=0);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+
+static void
+insert_user_block(const char *old_name, const char *new_name,const char *str,size_t size)
+{
+    FILE *new_fp, *old_fp;      /* Pointers to new & old files */
+    void *user_block;           /* Pointer to user block to write to file */
+    void *copy_buf;             /* Pointer to buffer for copying data */
+    size_t written;             /* Amount of data written to new file */
+    size_t read_in;             /* Amount of data read in from old file */
+    int ret;                    /* Generic status value */
+
+    /* Allocate space for the user block */
+    user_block=HDcalloc(size,1);
+    CHECK(user_block, NULL, "HDcalloc");
+
+    /* Copy in the user block data */
+    HDmemcpy(user_block,str,strlen(str));
+
+    /* Open the new file */
+    new_fp=HDfopen(new_name,"wb");
+    CHECK(new_fp, NULL, "HDfopen");
+
+    /* Write the user block to the new file */
+    written=HDfwrite(user_block,1,size,new_fp);
+    VERIFY(written, size, "HDfwrite");
+
+    /* Open the old file */
+    old_fp=fopen(old_name,"rb");
+    CHECK(old_fp, NULL, "HDfopen");
+
+    /* Allocate space for the copy buffer */
+    copy_buf=malloc(MISC13_COPY_BUF_SIZE);
+    CHECK(copy_buf, NULL, "HDmalloc");
+
+    /* Copy data from the old file to the new file */
+    while((read_in=fread(copy_buf,1,MISC13_COPY_BUF_SIZE,old_fp))>0) {
+        /* Write the data to the new file */
+        written=fwrite(copy_buf,1,read_in,new_fp);
+        VERIFY(written, read_in, "HDfwrite");
+    } /* end while */
+
+    /* Close the old file */
+    ret=HDfclose(old_fp);
+    VERIFY(ret, 0, "HDfclose");
+
+    /* Close the new file */
+    ret=fclose(new_fp);
+    VERIFY(ret, 0, "HDfclose");
+
+    /* Free the copy buffer */
+    free(copy_buf);
+
+    /* Free the user block */
+    free(user_block);
+}
+
+static void
+verify_file(const char *name, hsize_t blk_size, unsigned check_new_data)
+{
+    hid_t fid;          /* File ID */
+    hid_t gid,gid2;     /* Group IDs */
+    hid_t tid;          /* Datatype ID */
+    hid_t fcpl;         /* File creation property list ID */
+    hsize_t userblock;  /* Userblock size retrieved from FCPL */
+    herr_t ret;         /* Generic return value */
+
+    /* Open the file */
+    fid=H5Fopen(name, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Get the file's FCPL */
+    fcpl=H5Fget_create_plist(fid);
+    CHECK(fcpl, FAIL, "H5Fget_create_plist");
+
+    /* Get the user block size for the file */
+    ret=H5Pget_userblock(fcpl,&userblock);
+    CHECK(ret, FAIL, "H5Pget_userblock");
+
+    /* Check the userblock size */
+    VERIFY(userblock, blk_size, "H5Pget_userblock");
+
+    /* Close the FCPL */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Verify the contiguous dataset in the root group */
+    verify_dataset(fid,MISC13_DSET1_NAME);
+
+    /* Verify the chunked dataset in the root group */
+    verify_dataset(fid,MISC13_DSET2_NAME);
+
+    /* Verify the "new" contiguous dataset in the root group, if asked */
+    if(check_new_data)
+        verify_dataset(fid,MISC13_DSET3_NAME);
+
+    /* Open the named datatype in the root group */
+    tid = H5Topen(fid, MISC13_DTYPE_NAME);
+    CHECK(tid, FAIL, "H5Topen");
+
+    /* Verify the type is correct */
+    VERIFY(H5Tequal(tid,H5T_NATIVE_INT), TRUE, "H5Tequal");
+
+    /* Close named datatype */
+    ret=H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Open the first group */
+    gid = H5Gopen(fid, MISC13_GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Verify the contiguous dataset in the first group */
+    verify_dataset(gid,MISC13_DSET1_NAME);
+
+    /* Verify the chunked dataset in the first group */
+    verify_dataset(gid,MISC13_DSET2_NAME);
+
+    /* Open the named datatype in the first group */
+    tid = H5Topen(gid,MISC13_DTYPE_NAME);
+    CHECK(tid, FAIL, "H5Topen");
+
+    /* Verify the type is correct */
+    VERIFY(H5Tequal(tid,H5T_NATIVE_INT), TRUE, "H5Tequal");
+
+    /* Close named datatype */
+    ret=H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Open the second group */
+    gid2 = H5Gopen(gid, MISC13_GROUP2_NAME);
+    CHECK(gid2, FAIL, "H5Gopen");
+
+    /* Close the second group */
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the first group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+
+static void
+add_to_new_file(const char *name)
+{
+    hid_t fid;          /* File ID */
+    herr_t ret;         /* Generic return value */
+
+    /* Open the file */
+    fid=H5Fopen(name, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Create new contiguous dataset in root group */
+    create_dataset(fid, MISC13_DSET3_NAME, H5P_DEFAULT);
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+
+/****************************************************************
+**
+**  test_misc13(): Test that file contents can be "slid down" by
+**      inserting a user block in front of an existing file.
+**
+****************************************************************/
+static void
+test_misc13(void)
+{
+    /* Initialize data to write */
+    init_data();
+
+    /* Create first file, with no user block */
+    create_hdf_file(MISC13_FILE_1);
+
+    /* Verify file contents are correct */
+    verify_file(MISC13_FILE_1,(hsize_t)0,0);
+
+    /* Create a new file by inserting a user block in front of the first file */
+    insert_user_block(MISC13_FILE_1,MISC13_FILE_2,"Test String",MISC13_USERBLOCK_SIZE);
+
+    /* Verify file contents are still correct */
+    verify_file(MISC13_FILE_2,(hsize_t)MISC13_USERBLOCK_SIZE,0);
+
+    /* Make certain we can modify the new file */
+    add_to_new_file(MISC13_FILE_2);
+
+    /* Verify file contents are still correct */
+    verify_file(MISC13_FILE_2,(hsize_t)MISC13_USERBLOCK_SIZE,1);
+}
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -1972,6 +2351,7 @@ test_misc(void)
     test_misc10();      /* Test for using dataset creation property lists from old files */
     test_misc11();      /* Test for all properties of a file creation property list being stored */
     test_misc12();      /* Test VL-strings in chunked datasets operating correctly */
+    test_misc13();      /* Test that a user block can be insert in front of file contents */
 
 } /* test_misc() */
 
@@ -2007,4 +2387,6 @@ cleanup_misc(void)
     HDremove(MISC10_FILE_NEW);
     HDremove(MISC11_FILE);
     HDremove(MISC12_FILE);
+    HDremove(MISC13_FILE_1);
+    HDremove(MISC13_FILE_2);
 }

@@ -2666,7 +2666,7 @@ H5F_istore_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, H5B_INS_ERROR, "unable to clear sieve buffer");
 
     /* Remove raw data chunk from file */
-    H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes);
+    H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes);
 
     /* Mark keys as unchanged */
     *lt_key_changed = FALSE;

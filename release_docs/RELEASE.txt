@@ -73,6 +73,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+      - Corrected bug with user blocks that didn't allow a user block to
+        be inserted in front of a file after the file was created.
+        QAK - 2003/08/13
       - Corrected errors with using point selections to access data in
         chunked datasets.  QAK - 2003/07/23
       - Corrected error with variable-length datatypes and chunked datasets
