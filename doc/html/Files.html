@@ -53,10 +53,10 @@
 
     <h2>1. Introduction</h2>
 
-    <p>HDF5 files are composed of a "boot block" describing information
+    <p>HDF5 files are composed of a <em>super block</em> describing information
         required to portably access files on multiple platforms, followed
         by information about the groups in a file and the datasets in the
-        file.  The boot block contains information about the size of offsets
+        file.  The super block contains information about the size of offsets
         and lengths of objects, the number of entries in symbol tables
         (used to store groups) and additional version information for the
         file.
@@ -145,11 +145,11 @@
 
     <P>File creation property lists apply to <code>H5Fcreate()</code> only
       and are used to control the file meta-data which is maintained
-      in the boot block of the file.  The parameters which can be
+      in the super block of the file.  The parameters which can be
       modified are:
 
     <dl>
-      <dt>User-Block Size <dd>The "user-block" is a fixed length block of
+      <dt>User-Block Size <dd>The <em>user-block</em> is a fixed length block of
 	data located at the beginning of the file which is ignored by the
 	HDF5 library and may be used to store any data information found
 	to be useful to applications.  This value may be set to any power
@@ -295,7 +295,7 @@
       correspond to a single file on a Unix file system, multiple files on a
       Unix file system, multiple files on a parallel file system, or a block
       of memory within the application. Generally, an HDF5 address space is
-      referred to as an "HDF5 file" regardless of how the space is organized
+      referred to as an <em>HDF5 file</em> regardless of how the space is organized
       at the storage level.
 
     <h3>6.1. Unbuffered Permanent Files</h3>
@@ -519,8 +519,9 @@
       data. The <em>split</em> driver does this by creating two files: one for
       meta data and another for raw data.  The application provides a base
       file name to <code>H5Fcreate()</code> or <code>H5Fopen()</code> and this
-      driver appends a file extension which defaults to ".meta" for the meta
-      data file and ".raw" for the raw data file.  Each file can have its own
+      driver appends a file extension which defaults to <code>.meta</code> for 
+      the meta data file and <code>.raw</code> for the raw data file.  
+      Each file can have its own
       file access property list which allows, for instance, a split file with
       meta data stored with the <em>core</em> driver and raw data stored with
       the <em>sec2</em> driver.
@@ -540,10 +541,10 @@
       <dd>The file access properties are set to use the <em>split</em>
 	driver and any previously defined driver properties are erased from
 	the property list.  The meta file will have a name which is formed by
-	adding <em>meta_extension</em> (or ".meta") to the end of the base
-	name and will be accessed according to the
+	adding <em>meta_extension</em> (or <code>.meta</code>) to the end of 
+        the base name and will be accessed according to the
 	<em>meta_properties</em>. The raw file will have a name which is
-	formed by appending <em>raw_extension</em> (or ".raw") to the base
+	formed by appending <em>raw_extension</em> (or <code>.raw</code>) to the base
 	name and will be accessed according to the <em>raw_properties</em>.
 	Additional parameters may be added to this function in the future.
 
