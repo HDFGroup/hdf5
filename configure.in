@@ -1403,7 +1403,7 @@ dnl libraries.
 dnl 
 DYNAMIC_DIRS=""
 if test -n "$LDFLAGS"; then
-   for d in X $LDFLAGS ; do
+   for d in $LDFLAGS ; do
       case "$d" in
          -L*)
             d=`echo $d | sed -e 's/-L//g'`
@@ -1423,7 +1423,7 @@ AC_SUBST(DYNAMIC_DIRS)
 
 if test -n "$CPPFLAGS"; then
    TEMP_CPPFLAGS=""
-   for d in X $CPPFLAGS ; do
+   for d in $CPPFLAGS ; do
       case "$d" in
         -I.*)
            dnl If the path isn't absolute, make it so by prepending

@@ -9372,7 +9372,7 @@ fi
 
 DYNAMIC_DIRS=""
 if test -n "$LDFLAGS"; then
-   for d in X $LDFLAGS ; do
+   for d in $LDFLAGS ; do
       case "$d" in
          -L*)
             d=`echo $d | sed -e 's/-L//g'`
@@ -9390,7 +9390,7 @@ fi
 
 if test -n "$CPPFLAGS"; then
    TEMP_CPPFLAGS=""
-   for d in X $CPPFLAGS ; do
+   for d in $CPPFLAGS ; do
       case "$d" in
         -I.*)
                       	   d=`echo $d | sed -e 's/-I//g'`
