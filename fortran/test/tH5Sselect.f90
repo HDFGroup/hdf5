@@ -741,13 +741,12 @@
      !
      !start block for getting the selected hyperslab 
      !
-     INTEGER(HSIZE_T), DIMENSION(2) :: startblock = (/0,0/)
+     INTEGER(HSIZE_T) :: startblock = 0
 
      !
      !start point for getting the selected elements 
      !
-     INTEGER(HSIZE_T), DIMENSION(2) :: startpoint = (/0,0/)
-!     INTEGER(HSIZE_T), DIMENSION(2) :: startpoint = (/1,1/)
+     INTEGER(HSIZE_T)  :: startpoint = 0
 
      !
      !Stride of the hyperslab in the file 

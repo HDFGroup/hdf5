@@ -11,4 +11,5 @@
        USE H5T
        USE H5P
        USE H5R
+       USE H5LIB
     END MODULE HDF5

@@ -343,6 +343,51 @@ FORTRAN Dataset API -- h5d
 </pre>
 
 
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dget_storage_size_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dget_storage_size_f</strong>
+<pre>
+          SUBROUTINE h5dget_storage_size_f(dset_id, size, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataset identifier  
+            INTEGER(HSIZE_T), INTENT(OUT)  :: size ! Amount of storage required for dataset
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code  
+                                                   ! 0 on success and -1 on failure
+          END SUBROUTINE h5dget_storage_size_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dvlen_get_max_len_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dvlen_get_max_len_f</strong>
+<pre>
+          SUBROUTINE h5dvlen_get_max_len_f(dset_id, size, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataset identifier  
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier  
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier  
+            
+            INTEGER(SIZE_T), INTENT(OUT)  :: elem_len ! Maximum length of the element
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code  
+                                                   ! 0 on success and -1 on failure
+          END SUBROUTINE h5dvlen_get_max_len_f
+</pre>
+
 </dl>
 
 <p>&nbsp;
@@ -355,7 +400,7 @@ FORTRAN Dataset API -- h5d
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  7 May 2002
+Last modified:  11 November 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 

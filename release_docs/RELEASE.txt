@@ -246,6 +246,13 @@ Documentation
  
     o APIs
     ------
+      o Fortran APIs
+      --------------
+          * Added support for generic properties.
+          * Added support for time allocation properties.
+          * Added support for variable length datatypes (only datatypes based
+            on INTEGER, REAL and CHARACTER Fortran types are supported).
+          EIP, March 5, 2003
  
     o Performance
     -------------

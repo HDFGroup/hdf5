@@ -3055,4 +3055,53 @@
             hdferr = h5tget_tag_c(type_id, tag, taglen)
           END SUBROUTINE h5tget_tag_f
 
+!----------------------------------------------------------------------
+! Name:		h5tvlen_create_f 
+!
+! Purpose: 	Creates a new variable-lenght datatype. 
+!
+! Inputs:  
+!		type_id		- identifier iof base datatype
+! Outputs:  
+!		vltype_id	- identifier for VL datatype
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		Wednesday, October 23, 2002
+!
+! Modifications: 	
+!
+! Comment: Only basic Fortran base datatypes are supported		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5tvlen_create_f(type_id, vltype_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tvlen_create_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN)  :: type_id    ! Datatype identifier 
+            INTEGER(HID_T), INTENT(OUT) :: vltype_id  ! VL datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr            ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5tvlen_create_c(type_id, vltype_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5TVLEN_CREATE_C'::h5tvlen_create_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN)  :: type_id
+              INTEGER(HID_T), INTENT(OUT) :: vltype_id
+              END FUNCTION h5tvlen_create_c
+            END INTERFACE
+
+            hdferr = h5tvlen_create_c(type_id, vltype_id)
+          END SUBROUTINE h5tvlen_create_f
+
       END MODULE H5T

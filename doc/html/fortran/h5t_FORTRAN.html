@@ -1234,90 +1234,25 @@ FORTRAN Datatype API -- h5t
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5tarray_create_f">
+<a name="h5tvlen_create_f">
 <p>&nbsp;
 </a>
 
 
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tarray_create_f</strong>
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tvlen_create_f</strong>
 <pre>
- 
-           SUBROUTINE h5tarray_create_f(base_type_id, rank, dims, type_id, hdferr) 
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: base_type_id  ! Datatype identifier 
-                                                        ! of base type
-            INTEGER, INTENT(IN) :: rank                 ! Array rank
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims 
-                                                        ! Array dimensions
-            INTEGER(HID_T), INTENT(OUT) :: type_id      ! Array datatype identifier
-            INTEGER, INTENT(OUT) :: hdferr              ! Error code
 
-          END SUBROUTINE h5tarray_create_f
+          SUBROUTINE h5tvlen_create_f(type_id, vltype_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier of the base type. 
+                                                    ! Base type can only be atomic 
+            INTEGER(HID_T), INTENT(OUT) :: vltype_id ! VL datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr           ! Error code
+
+          END SUBROUTINE h5tvlen_create_f
 </pre>
 
 
-<p>&nbsp;
-<p>&nbsp;
-<hr>
-<p>&nbsp;
-<a name="h5tget_array_ndims_f">
-<p>&nbsp;
-</a>
-
-
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_array_ndims_f</strong>
-<pre>
- 
-           SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr) 
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Array datatype identifier 
-            INTEGER, INTENT(OUT) :: ndims         ! Number of array idimensions
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
-          END SUBROUTINE h5tget_array_ndims_f
-</pre>
-
-
-<p>&nbsp;
-<p>&nbsp;
-<hr>
-<p>&nbsp;
-<a name="h5tget_array_dims_f">
-<p>&nbsp;
-</a>
-
-
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_array_dims_f</strong>
-<pre>
- 
-           SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr) 
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Array datatype identifier 
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: dims 
-                                                  ! Sizes of array dimesions
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
-          END SUBROUTINE h5tget_array_dims_f
-</pre>
-
-
-<p>&nbsp;
-<p>&nbsp;
-<hr>
-<p>&nbsp;
-<a name="h5tget_super_f">
-<p>&nbsp;
-</a>
-
-
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_super_f</strong>
-<pre>
- 
-           SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr) 
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
-            INTEGER(HID_T), INTENT(OUT) :: type_id ! Base datatype identifier 
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
-          END SUBROUTINE h5tget_super_f
-</pre>
 
 
 
@@ -1338,7 +1273,7 @@ FORTRAN Datatype API -- h5t
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  19 December 2002
+Last modified:  23 October, 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 

@@ -1,4 +1,5 @@
 #include "H5f90.h"
+#define MAX(a,b)            (((a)>(b)) ? (a) : (b))
 
 /*----------------------------------------------------------------------------
  * Name:        h5dcreate_c
@@ -1014,6 +1015,495 @@ nh5dextend_c ( hid_t_f *dset_id , hsize_t_f *dims)
 
   if ( status >= 0  ) ret_value = 0;
   HDfree(c_dims);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        nh5dget_storage_size_c
+ * Purpose:     Call H5Dget_storage_size to return the amount of storage 
+ *              required for a dataset
+ * Inputs:      dset_id - identifier of the dataset 
+ * Outputs:     size    - the amount of storage required for a dataset
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, October 22, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dget_storage_size_c ( hid_t_f *dset_id , hsize_t_f *size)
+{
+  int ret_value = -1;
+  hsize_t c_size;
+  hid_t c_dset_id;
+
+  c_dset_id = (hid_t)*dset_id;
+  c_size = H5Dget_storage_size(c_dset_id);
+  if (c_size == 0) return ret_value;
+  *size = (hsize_t_f)c_size;
+  ret_value = 0;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        nh5dvlen_get_max_len_c
+ * Purpose:     Get the maximum size of the VL dataset element
+ * Inputs:      dset_id - identifier of the dataset 
+ *              type_id - datatype identifier
+ *              space_id - dataspace identifier 
+ * Outputs:     len      - maximum length of the VL dataset element
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, October 22, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dvlen_get_max_len_c ( hid_t_f *dset_id ,  hid_t_f *type_id, hid_t_f *space_id, size_t_f *len)
+{
+  int ret_value = -1;
+  size_t c_len;
+  hid_t c_dset_id;
+  hid_t c_type_id;
+  hid_t c_space_id;
+  hvl_t *c_buf;
+  int i,j;
+  hssize_t num_elem;
+
+  c_dset_id = (hid_t)*dset_id;
+  c_type_id = (hid_t)*type_id;
+  c_space_id = (hid_t)*space_id;
+
+  num_elem = H5Sget_select_npoints(c_space_id);  
+  if( num_elem < 0) return ret_value;
+
+  c_buf = (hvl_t *)malloc(sizeof(hvl_t)*num_elem); 
+  if (c_buf == NULL) return ret_value;
+  if(H5Dread(c_dset_id, c_type_id, H5S_ALL, c_space_id, H5P_DEFAULT, c_buf)) goto DONE;
+  
+  c_len = 0;
+  for (i=0; i < num_elem; i++) c_len = MAX(c_len, c_buf[i].len);  
+  *len = (size_t_f)c_len;
+  ret_value = 0;
+  
+DONE:
+
+  H5Dvlen_reclaim(c_type_id, c_space_id, H5P_DEFAULT, c_buf);
+  free(c_buf);
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        nh5dwrite_vl_integer_c
+ * Purpose:     Write variable length dataset 
+ * Inputs:      dset_id - identifier of the dataset 
+ *              mem_type_id - datatype identifier
+ *              mem_space_id - dataspace identifier 
+ *              file_space_id - file dataspace identifier 
+ *              xfer          - file transfer property
+ *              buf           - data buffer
+ *              dims          - one-demnsional array of size 2
+ *                              dims[0] = MAXLENGTH
+ *                              dims[1] = number of elements of VL type
+ *              len           - array element lenghts
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, October 23, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims, size_t_f *len)
+{
+  int ret_value = -1;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+  herr_t status;
+  int *tmp;
+  size_t max_len;
+
+  hvl_t *c_buf;
+  int i, j;
+  hsize_t num_elem;
+  
+  max_len = (size_t)dims[0];
+  num_elem = dims[1];
+
+  c_dset_id       = (hid_t)*dset_id;
+  c_mem_type_id   = (hid_t)*mem_type_id;
+  c_mem_space_id  = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  c_xfer_prp      = (hid_t)*xfer_prp;
+
+  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  if (c_buf == NULL) return ret_value;
+  tmp = buf; 
+  for (i=0; i < num_elem; i++) {
+       c_buf[i].len = (size_t)len[i];  
+       c_buf[i].p   = tmp;
+       tmp = tmp + max_len;
+ } 
+  /*
+   * Call H5Dwrite function.
+   */
+   status = H5Dwrite(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
+
+  if( status < 0) goto DONE;
+  ret_value = 0;
+DONE:
+  free(c_buf);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        nh5dread_vl_integer_c
+ * Purpose:     Read variable length dataset 
+ * Inputs:      dset_id - identifier of the dataset 
+ *              mem_type_id - datatype identifier
+ *              mem_space_id - dataspace identifier 
+ *              file_space_id - file dataspace identifier 
+ *              xfer          - file transfer property
+ *              dims          - one-demnsional array of size 2
+ *                              dims[0] = MAXLENGTH
+ *                              dims[1] = number of elements of VL type
+ * Outputs:     buf           - data buffer
+ *              len           - array element lenghts
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, October 24, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims, size_t_f *len)
+{
+  int ret_value = -1;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+  herr_t status;
+  size_t max_len;
+
+  hvl_t *c_buf;
+  size_t i;
+  hssize_t num_elem;
+  
+  c_dset_id       = (hid_t)*dset_id;
+  c_mem_type_id   = (hid_t)*mem_type_id;
+  c_mem_space_id  = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  c_xfer_prp      = (hid_t)*xfer_prp;
+
+  max_len = (size_t)dims[0];
+  num_elem = H5Sget_select_npoints(c_mem_space_id);  
+  if(num_elem != dims[1]) return ret_value;
+
+  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  if (c_buf == NULL) return ret_value;
+  /*
+   * Call H5Dread function.
+   */
+   status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
+ if ( status >=0 ) {
+  for (i=0; i < num_elem; i++) {
+       len[i] = (size_t_f)c_buf[i].len;  
+       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int));
+  }
+ } 
+  ret_value = num_elem;
+DONE:
+  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  free(c_buf);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        nh5dwrite_vl_string_c
+ * Purpose:     Write variable length strings from Fortran program
+ * Inputs:      dset_id - identifier of the dataset 
+ *              mem_type_id - datatype identifier
+ *              mem_space_id - dataspace identifier 
+ *              file_space_id - file dataspace identifier 
+ *              xfer          - file transfer property
+ *              buf           - data buffer
+ *              dims          - one-demnsional array of size 2 
+ *                              dims[0] = number of strings of size max_len
+ *              len           - array of strings lengths
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, October 28, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims, size_t_f *len)
+{
+  int ret_value = -1;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+  herr_t status;
+  char *tmp, *tmp_p;
+  size_t max_len;
+  size_t buf_len;
+
+  char **c_buf;
+  int i, j;
+  hsize_t num_elem;
+  
+  max_len = (size_t)dims[0];
+  num_elem = dims[1];
+
+  c_dset_id       = (hid_t)*dset_id;
+  c_mem_type_id   = (hid_t)*mem_type_id;
+  c_mem_space_id  = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  c_xfer_prp      = (hid_t)*xfer_prp;
+
+  /*
+   * Allocate arra of character pointers
+   */
+  c_buf = (char **)malloc(num_elem * sizeof(char *)); 
+  if (c_buf == NULL) return ret_value;
+
+  /* Copy data to long C string */
+  tmp = (char *)HD5f2cstring(buf, max_len*num_elem);
+  if (tmp == NULL) { free(c_buf);
+                     return ret_value;
+                   }
+  /*
+   * Move data from temorary buffer
+   */
+   tmp_p = tmp;
+   for (i=0; i < num_elem; i++) {
+        c_buf[i] = (char *) malloc(len[i]+1);
+        memcpy(c_buf[i], tmp_p, len[i]);
+        c_buf[i][len[i]] = '\0'; 
+        tmp_p = tmp_p + max_len;
+   }
+
+  /*
+   * Call H5Dwrite function.
+   */
+   status = H5Dwrite(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
+
+  if( status < 0) goto DONE;
+  ret_value = 0;
+DONE:
+  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  free(c_buf);
+  free(tmp);
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        nh5dread_vl_string_c
+ * Purpose:     Read variable length strings from Fortran program
+ * Inputs:      dset_id - identifier of the dataset 
+ *              mem_type_id - datatype identifier
+ *              mem_space_id - dataspace identifier 
+ *              file_space_id - file dataspace identifier 
+ *              xfer          - file transfer property
+ *              dims          - one-demnsional array of size 2 
+ *                              dims[0] = number of strings of size max_len
+ * Output:      buf           - data buffer
+ *              len           - array of strings lengths
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Friday, November 1, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims, size_t_f *len)
+{
+  int ret_value = -1;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+  herr_t status;
+  char *tmp, *tmp_p;
+  size_t max_len;
+  size_t buf_len;
+
+  char **c_buf;
+  int i, j;
+  hsize_t num_elem;
+  
+  max_len = (size_t)dims[0];
+  num_elem = dims[1];
+
+  c_dset_id       = (hid_t)*dset_id;
+  c_mem_type_id   = (hid_t)*mem_type_id;
+  c_mem_space_id  = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  c_xfer_prp      = (hid_t)*xfer_prp;
+
+  /*
+   * Allocate array of character pointers
+   */
+  c_buf = (char **)malloc(num_elem * sizeof(char *)); 
+  if (c_buf == NULL) return ret_value;
+
+  /*
+   * Call H5Dread function.
+   */
+   status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
+   if (status < 0) { free(c_buf);
+                     return ret_value;
+                   }
+  /* Copy data to long C string */
+  tmp = (char *)malloc(max_len*num_elem +1);
+  tmp_p = tmp;
+  for (i=0; i<max_len*num_elem; i++) tmp[i] = ' ';
+  tmp[max_len*num_elem] = '\0';
+  for (i=0; i < num_elem; i++) {
+        memcpy(tmp_p, c_buf[i], strlen(c_buf[i]));
+        len[i] = (size_t_f)strlen(c_buf[i]);
+        tmp_p = tmp_p + max_len;
+  }
+  HD5packFstring(tmp, _fcdtocp(buf), max_len*num_elem);  
+  ret_value = 0;
+DONE:
+  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  free(c_buf);
+  free(tmp);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        nh5dwrite_vl_real_c
+ * Purpose:     Write variable length dataset 
+ * Inputs:      dset_id - identifier of the dataset 
+ *              mem_type_id - datatype identifier
+ *              mem_space_id - dataspace identifier 
+ *              file_space_id - file dataspace identifier 
+ *              xfer          - file transfer property
+ *              buf           - data buffer
+ *              dims          - one-demnsional array of size 2
+ *                              dims[0] = MAXLENGTH
+ *                              dims[1] = number of elements of VL type
+ *              len           - array element lenghts
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, November 11, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, real_f *buf, hsize_t_f *dims, size_t_f *len)
+{
+  int ret_value = -1;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+  herr_t status;
+  float *tmp;
+  size_t max_len;
+
+  hvl_t *c_buf;
+  int i, j;
+  hsize_t num_elem;
+  
+  max_len = (size_t)dims[0];
+  num_elem = dims[1];
+
+  c_dset_id       = (hid_t)*dset_id;
+  c_mem_type_id   = (hid_t)*mem_type_id;
+  c_mem_space_id  = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  c_xfer_prp      = (hid_t)*xfer_prp;
+
+  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  if (c_buf == NULL) return ret_value;
+  tmp = buf; 
+  for (i=0; i < num_elem; i++) {
+       c_buf[i].len = (size_t)len[i];  
+       c_buf[i].p   = tmp;
+       tmp = tmp + max_len;
+ } 
+  /*
+   * Call H5Dwrite function.
+   */
+   status = H5Dwrite(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
+
+  if( status < 0) goto DONE;
+  ret_value = 0;
+DONE:
+  free(c_buf);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        nh5dread_vl_real_c
+ * Purpose:     Read variable length dataset 
+ * Inputs:      dset_id - identifier of the dataset 
+ *              mem_type_id - datatype identifier
+ *              mem_space_id - dataspace identifier 
+ *              file_space_id - file dataspace identifier 
+ *              xfer          - file transfer property
+ *              dims          - one-demnsional array of size 2
+ *                              dims[0] = MAXLENGTH
+ *                              dims[1] = number of elements of VL type
+ * Outputs:     buf           - data buffer
+ *              len           - array element lenghts
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, November 11, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, real_f *buf, hsize_t_f *dims, size_t_f *len)
+{
+  int ret_value = -1;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+  herr_t status;
+  size_t max_len;
+
+  hvl_t *c_buf;
+  size_t i;
+  hssize_t num_elem;
+  
+  c_dset_id       = (hid_t)*dset_id;
+  c_mem_type_id   = (hid_t)*mem_type_id;
+  c_mem_space_id  = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  c_xfer_prp      = (hid_t)*xfer_prp;
+
+  max_len = (size_t)dims[0];
+  num_elem = H5Sget_select_npoints(c_mem_space_id);  
+  if(num_elem != dims[1]) return ret_value;
+
+  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  if (c_buf == NULL) return ret_value;
+  /*
+   * Call H5Dread function.
+   */
+   status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
+ if ( status >=0 ) {
+  for (i=0; i < num_elem; i++) {
+       len[i] = (size_t_f)c_buf[i].len;  
+       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(float));
+  }
+ } 
+  ret_value = num_elem;
+DONE:
+  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  free(c_buf);
   return ret_value;
 }
 

@@ -23,6 +23,42 @@
          MODULE PROCEDURE h5pget_fill_value_char
        END INTERFACE
 
+       INTERFACE h5pset_f
+         MODULE PROCEDURE h5pset_integer
+         MODULE PROCEDURE h5pset_real
+! Comment if on T3E
+         MODULE PROCEDURE h5pset_double
+! End comment if on T3E
+         MODULE PROCEDURE h5pset_char
+       END INTERFACE
+     
+       INTERFACE h5pget_f
+         MODULE PROCEDURE h5pget_integer
+         MODULE PROCEDURE h5pget_real
+! Comment if on T3E
+         MODULE PROCEDURE h5pget_double
+! End comment if on T3E
+         MODULE PROCEDURE h5pget_char
+       END INTERFACE
+
+       INTERFACE h5pregister_f
+         MODULE PROCEDURE h5pregister_integer
+         MODULE PROCEDURE h5pregister_real
+! Comment if on T3E
+         MODULE PROCEDURE h5pregister_double
+! End comment if on T3E
+         MODULE PROCEDURE h5pregister_char
+       END INTERFACE
+     
+       INTERFACE h5pinsert_f
+         MODULE PROCEDURE h5pinsert_integer
+         MODULE PROCEDURE h5pinsert_real
+! Comment if on T3E
+         MODULE PROCEDURE h5pinsert_double
+! End comment if on T3E
+         MODULE PROCEDURE h5pinsert_char
+       END INTERFACE
+     
      CONTAINS
 
 !----------------------------------------------------------------------
@@ -32,7 +68,7 @@
 !		list class.
 !
 ! Inputs:  
-!		classtype	- type of the property list to be created.
+!		class		- type of the property class to be created.
 !				  Possible values are:
 !				  H5P_FILE_CREATE_F
 !				  H5P_FILE_ACCESS_F
@@ -56,7 +92,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5pcreate_f(classtype, prp_id, hdferr) 
+          SUBROUTINE h5pcreate_f(class, prp_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -64,7 +100,7 @@
 !DEC$endif
 !
             IMPLICIT NONE
-            INTEGER, INTENT(IN) :: classtype  ! The type of the property list 
+            INTEGER(HID_T), INTENT(IN) :: class      ! The type of the property list 
                                               ! to be created. Possible values
                                               ! are: 
                                               !  H5P_FILE_CREATE_F
@@ -79,17 +115,17 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pcreate_c(classtype, prp_id)
+              INTEGER FUNCTION h5pcreate_c(class, prp_id)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PCREATE_C'::h5pcreate_c
               !DEC$ ENDIF
-              INTEGER, INTENT(IN) :: classtype
+              INTEGER(HID_T), INTENT(IN) :: class
               INTEGER(HID_T), INTENT(OUT) :: prp_id
               END FUNCTION h5pcreate_c
             END INTERFACE
 
-            hdferr = h5pcreate_c(classtype, prp_id) 
+            hdferr = h5pcreate_c(class, prp_id) 
           END SUBROUTINE h5pcreate_f
 
 !----------------------------------------------------------------------
@@ -3429,5 +3465,2219 @@
             hdferr = h5pget_buffer_c(plist_id, size) 
           END SUBROUTINE h5pget_buffer_f
 
+!----------------------------------------------------------------------
+! Name:		h5pfill_value_defined_f
+!
+! Purpose: 	Check if fill value is defined.
+!
+! Inputs:  
+!		plist_id	- dataset creation property list identifier
+! Outputs:  
+!               flag            - fill value status flag
+!                                 Possible values are:
+!				    H5D_FILL_VALUE_ERROR_F
+!				    H5D_FILL_VALUE_UNDEFINED_F
+!				    H5D_FILL_VALUE_DEFAULT_F
+!				    H5D_FILL_VALUE_USER_DEFINED_F
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 4, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pfill_value_defined_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id 
+            INTEGER, INTENT(OUT) :: flag
+            INTEGER, INTENT(OUT)       :: hdferr    
+
+            INTERFACE
+              INTEGER FUNCTION h5pfill_value_defined_c(plist_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PFILL_VALUE_DEFINED_C'::h5pfill_value_defined_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER, INTENT(OUT) :: flag
+              END FUNCTION h5pfill_value_defined_c
+            END INTERFACE
+
+            hdferr = h5pfill_value_defined_c(plist_id, flag) 
+          END SUBROUTINE h5pfill_value_defined_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_alloc_time_f
+!
+! Purpose: 	Set space allocation time for dataset during creation.
+!
+! Inputs:  
+!		plist_id	- dataset creation property list identifier
+!               flag            - allocation time flag
+!                                 Possible values are:
+!				    H5D_ALLOC_TIME_ERROR_F
+!				    H5D_ALLOC_TIME_DEFAULT_F
+!				    H5D_ALLOC_TIME_EARLY_F
+!				    H5D_ALLOC_TIME_LATE_F
+!				    H5D_ALLOC_TIME_INCR_F
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 4, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_alloc_time_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id 
+            INTEGER, INTENT(IN) :: flag
+            INTEGER, INTENT(OUT)       :: hdferr    
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_alloc_time_c(plist_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_ALLOC_TIME_C'::h5pset_alloc_time_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER, INTENT(IN) :: flag
+              END FUNCTION h5pset_alloc_time_c
+            END INTERFACE
+
+            hdferr = h5pset_alloc_time_c(plist_id, flag) 
+          END SUBROUTINE h5pset_alloc_time_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_alloc_time_f
+!
+! Purpose: 	Get space allocation time for dataset during creation.
+!
+! Inputs:  
+!		plist_id	- dataset creation property list identifier
+! Outputs:  
+!               flag            - allocation time flag
+!                                 Possible values are:
+!				    H5D_ALLOC_TIME_ERROR_F
+!				    H5D_ALLOC_TIME_DEFAULT_F
+!				    H5D_ALLOC_TIME_EARLY_F
+!				    H5D_ALLOC_TIME_LATE_F
+!				    H5D_ALLOC_TIME_INCR_F
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 4, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_alloc_time_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id 
+            INTEGER, INTENT(OUT) :: flag
+            INTEGER, INTENT(OUT)       :: hdferr    
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_alloc_time_c(plist_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PGET_ALLOC_TIME_C'::h5pget_alloc_time_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER, INTENT(OUT) :: flag
+              END FUNCTION h5pget_alloc_time_c
+            END INTERFACE
+
+            hdferr = h5pget_alloc_time_c(plist_id, flag) 
+          END SUBROUTINE h5pget_alloc_time_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_fill_time_f
+!
+! Purpose: 	Set fill value writing time for dataset
+!
+! Inputs:  
+!		plist_id	- dataset creation property list identifier
+!               flag            - fill time flag
+!                                 Possible values are:
+!				    H5D_FILL_TIME_ERROR_F
+!				    H5D_FILL_TIME_ALLOC_F
+!				    H5D_FILL_TIME_NEVER_F
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 4, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_fill_time_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id 
+            INTEGER, INTENT(IN) :: flag
+            INTEGER, INTENT(OUT)       :: hdferr    
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_fill_time_c(plist_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_TIME_C'::h5pset_fill_time_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER, INTENT(IN) :: flag
+              END FUNCTION h5pset_fill_time_c
+            END INTERFACE
+
+            hdferr = h5pset_fill_time_c(plist_id, flag) 
+          END SUBROUTINE h5pset_fill_time_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_fill_time_f
+!
+! Purpose: 	Get fill value writing time for dataset
+!
+! Inputs:  
+!		plist_id	- dataset creation property list identifier
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!               flag            - fill time flag
+!                                 Possible values are:
+!				    H5D_FILL_TIME_ERROR_F
+!				    H5D_FILL_TIME_ALLOC_F
+!				    H5D_FILL_TIME_NEVER_F
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 4, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_fill_time_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id 
+            INTEGER, INTENT(OUT) :: flag
+            INTEGER, INTENT(OUT)       :: hdferr    
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_fill_time_c(plist_id, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_TIME_C'::h5pget_fill_time_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER, INTENT(OUT) :: flag
+              END FUNCTION h5pget_fill_time_c
+            END INTERFACE
+
+            hdferr = h5pget_fill_time_c(plist_id, flag) 
+          END SUBROUTINE h5pget_fill_time_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_meta_block_size_f 
+!
+! Purpose: 	Sets the minimum size of metadata block allocations 
+!
+! Inputs:  
+!		plist_id	- file access property list identifier
+!               size		- metatdata block size
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_meta_block_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
+            INTEGER(HSIZE_T), INTENT(IN) :: size  ! Block size in bytes; 
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_meta_block_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_META_BLOCK_SIZE_C'::h5pset_meta_block_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(HSIZE_T), INTENT(IN) :: size
+              END FUNCTION h5pset_meta_block_size_c
+            END INTERFACE
+
+            hdferr = h5pset_meta_block_size_c(plist_id, size) 
+          END SUBROUTINE h5pset_meta_block_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_meta_block_size_f 
+!
+! Purpose: 	Gets the minimum size of metadata block allocations 
+!
+! Inputs:  
+!		plist_id	- file access property list identifier
+! Outputs:  
+!               size		- metatdata block size
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_meta_block_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
+            INTEGER(HSIZE_T), INTENT(OUT) :: size  ! Block size in bytes; 
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_meta_block_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_META_BLOCK_SIZE_C'::h5pset_meta_block_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(HSIZE_T), INTENT(OUT) :: size
+              END FUNCTION h5pget_meta_block_size_c
+            END INTERFACE
+
+            hdferr = h5pget_meta_block_size_c(plist_id, size) 
+          END SUBROUTINE h5pget_meta_block_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_sieve_buf_size_f 
+!
+! Purpose: 	Sets the maximum size of the data sieve buffer
+!
+! Inputs:  
+!		plist_id	- file access property list identifier
+!               size		- sieve buffer size
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_sieve_buf_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
+            INTEGER(SIZE_T), INTENT(IN) :: size  ! Buffer size in bytes; 
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_sieve_buf_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_SIEVE_BUF_SIZE_C'::h5pset_sieve_buf_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(SIZE_T), INTENT(IN) :: size
+              END FUNCTION h5pset_sieve_buf_size_c
+            END INTERFACE
+
+            hdferr = h5pset_sieve_buf_size_c(plist_id, size) 
+          END SUBROUTINE h5pset_sieve_buf_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_sieve_buf_size_f 
+!
+! Purpose: 	Gets the maximum size of the data sieve buffer
+!
+! Inputs:  
+!		plist_id	- file access property list identifier
+! Outputs:  
+!               size		- sieve buffer size
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_sieve_buf_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
+            INTEGER(SIZE_T), INTENT(OUT) :: size   ! Buffer size in bytes 
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_sieve_buf_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PGET_SIEVE_BUF_SIZE_C'::h5pget_sieve_buf_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(SIZE_T), INTENT(OUT) :: size
+              END FUNCTION h5pget_sieve_buf_size_c
+            END INTERFACE
+
+            hdferr = h5pget_sieve_buf_size_c(plist_id, size) 
+          END SUBROUTINE h5pget_sieve_buf_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_small_data_block_size_f 
+!
+! Purpose: 	Sets the minimum size of "small" raw data block
+!
+! Inputs:  
+!		plist_id	- file access property list identifier
+!               size		- small raw data block size
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_small_data_block_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
+            INTEGER(HSIZE_T), INTENT(IN) :: size    ! Small raw data block size
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_small_data_block_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_SMALL_DATA_BLOCK_SIZE_C'::h5pset_small_data_block_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(HSIZE_T), INTENT(IN) :: size
+              END FUNCTION h5pset_small_data_block_size_c
+            END INTERFACE
+
+            hdferr = h5pset_small_data_block_size_c(plist_id, size) 
+          END SUBROUTINE h5pset_small_data_block_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_small_data_block_size_f 
+!
+! Purpose: 	Gets the minimum size of "small" raw data block
+!
+! Inputs:  
+!		plist_id	- file access property list identifier
+! Outputs:  
+!               size		- small raw data block size
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_small_data_block_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
+            INTEGER(HSIZE_T), INTENT(OUT) :: size    ! Small raw data block size
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_small_data_block_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PGET_SMALL_DATA_BLOCK_SIZE_C'::h5pget_small_data_block_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(HSIZE_T), INTENT(IN) :: size
+              END FUNCTION h5pget_small_data_block_size_c
+            END INTERFACE
+
+            hdferr = h5pget_small_data_block_size_c(plist_id, size) 
+          END SUBROUTINE h5pget_small_data_block_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_hyper_vector_size_f 
+!
+! Purpose: 	Set the number of "I/O" vectors (vector size)
+!
+! Inputs:  
+!		plist_id	- dataset transfer property list identifier
+!               size		- vector size
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_hyper_vector_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
+            INTEGER(SIZE_T), INTENT(IN) :: size     ! Vector size
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_hyper_vector_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_HYPER_VECTOR_SIZE_C'::h5pset_hyper_vector_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(SIZE_T), INTENT(IN) :: size
+              END FUNCTION h5pset_hyper_vector_size_c
+            END INTERFACE
+
+            hdferr = h5pset_hyper_vector_size_c(plist_id, size) 
+          END SUBROUTINE h5pset_hyper_vector_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_hyper_vector_size_f 
+!
+! Purpose: 	Get the number of "I/O" vectors (vector size)
+!
+! Inputs:  
+!		plist_id	- dataset transfer property list identifier
+! Outputs:  
+!               size		- vector size
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 7, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_hyper_vector_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
+            INTEGER(SIZE_T), INTENT(OUT) :: size     ! Vector size
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_hyper_vector_size_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PGET_HYPER_VECTOR_SIZE_C'::h5pget_hyper_vector_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(SIZE_T), INTENT(OUT) :: size
+              END FUNCTION h5pget_hyper_vector_size_c
+            END INTERFACE
+
+            hdferr = h5pget_hyper_vector_size_c(plist_id, size) 
+          END SUBROUTINE h5pget_hyper_vector_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_integer 
+!
+! Purpose: 	Sets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+!		value		- value to set property to
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_integer(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_integer
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            INTEGER,   INTENT(IN) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_c(prp_id, name, name_len, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_C'::h5pset_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER, INTENT(IN) :: value
+              END FUNCTION h5pset_c
+            END INTERFACE
+
+            name_len = LEN(name)
+        hdferr = h5pset_c(prp_id, name , name_len, value)
+          END SUBROUTINE h5pset_integer
+
+!----------------------------------------------------------------------
+! Name:		h5pset_real
+!
+! Purpose: 	Sets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+!		value		- value to set property to
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_real(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_real
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            REAL,   INTENT(IN) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_c(prp_id, name, name_len, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_C'::h5pset_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              REAL, INTENT(IN) :: value
+              END FUNCTION h5pset_c
+            END INTERFACE
+
+            name_len = LEN(name)
+        hdferr = h5pset_c(prp_id, name , name_len, value)
+          END SUBROUTINE h5pset_real
+
+!----------------------------------------------------------------------
+! Name:		h5pset_double
+!
+! Purpose: 	Sets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+!		value		- value to set property to
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_double(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_double
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            DOUBLE PRECISION,   INTENT(IN) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_c(prp_id, name, name_len, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_C'::h5pset_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              DOUBLE PRECISION, INTENT(IN) :: value
+              END FUNCTION h5pset_c
+            END INTERFACE
+
+            name_len = LEN(name)
+        hdferr = h5pset_c(prp_id, name , name_len, value)
+          END SUBROUTINE h5pset_double
+
+!----------------------------------------------------------------------
+! Name:		h5pset_char
+!
+! Purpose: 	Sets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+!		value		- value to set property to
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_char(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_char
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            CHARACTER(LEN=*),   INTENT(IN) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+            INTEGER :: value_len
+
+            INTERFACE
+              INTEGER FUNCTION h5psetc_c(prp_id, name, name_len, value, value_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSETC_C'::h5psetc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              !DEC$ATTRIBUTES reference :: value
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              CHARACTER(LEN=*), INTENT(IN) :: value
+              INTEGER, INTENT(IN)         :: value_len
+              END FUNCTION h5psetc_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            value_len = LEN(value)
+            hdferr = h5psetc_c(prp_id, name , name_len, value, value_len)
+          END SUBROUTINE h5pset_char
+
+!----------------------------------------------------------------------
+! Name:		h5pget_integer 
+!
+! Purpose: 	Gets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+! Outputs:  
+!		value		- value of property
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_integer(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_integer
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            INTEGER,   INTENT(OUT) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_c(prp_id, name, name_len, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_C'::h5pget_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER, INTENT(OUT) :: value
+              END FUNCTION h5pget_c
+            END INTERFACE
+
+            name_len = LEN(name)
+        hdferr = h5pget_c(prp_id, name , name_len, value)
+          END SUBROUTINE h5pget_integer
+
+!----------------------------------------------------------------------
+! Name:		h5pget_real
+!
+! Purpose: 	Gets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+! Outputs:  
+!		value		- value of property
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_real(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_real
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            REAL,   INTENT(OUT) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_c(prp_id, name, name_len, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_C'::h5pget_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              REAL, INTENT(OUT) :: value
+              END FUNCTION h5pget_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pget_c(prp_id, name , name_len, value)
+          END SUBROUTINE h5pget_real
+
+!----------------------------------------------------------------------
+! Name:		h5pget_double
+!
+! Purpose: 	Gets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+! Outputs:  
+!		value		- value of property
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_double(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_double
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            DOUBLE PRECISION,   INTENT(OUT) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_c(prp_id, name, name_len, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_C'::h5pget_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              DOUBLE PRECISION, INTENT(OUT) :: value
+              END FUNCTION h5pget_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pget_c(prp_id, name , name_len, value)
+          END SUBROUTINE h5pget_double
+
+!----------------------------------------------------------------------
+! Name:		h5pget_char
+!
+! Purpose: 	Gets a property list value
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to modify
+!		name 		- name of property to modify
+! Outputs:  
+!		value		- value of property
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_char(prp_id, name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_char
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            CHARACTER(LEN=*),   INTENT(OUT) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+            INTEGER :: value_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pgetc_c(prp_id, name, name_len, value, value_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSETC_C'::h5psetc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              !DEC$ATTRIBUTES reference :: value
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              CHARACTER(LEN=*), INTENT(OUT) :: value
+              INTEGER, INTENT(IN)         :: value_len
+              END FUNCTION h5pgetc_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            value_len = LEN(value)
+            hdferr = h5pgetc_c(prp_id, name , name_len, value, value_len)
+          END SUBROUTINE h5pget_char
+
+!----------------------------------------------------------------------
+! Name:		h5pexist_f 
+!
+! Purpose: 	Queries whether a property name exists in a property list or class. 
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to query
+!		name 		- name of property to check for
+! Outputs:  
+!               flag            - logical flag
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pexist_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+            LOGICAL, INTENT(OUT) :: flag          ! .TRUE. if exists, .FALSE.
+                                                  ! otherwise
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pexist_c(prp_id, name, name_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PEXIST_C'::h5pexist_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              END FUNCTION h5pexist_c
+            END INTERFACE
+            flag = .FALSE.
+            name_len = LEN(name)
+            hdferr = h5pexist_c(prp_id, name , name_len)
+            if (hdferr > 0) then
+                flag = .TRUE.
+                hdferr = 0
+            endif
+          END SUBROUTINE h5pexist_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_size_f 
+!
+! Purpose: 	Queries the size of a property value in bytes.
+!
+! Inputs:  
+!		prp_id		- property list identifier to query
+!		name 		- name of property to query
+! Outputs:  
+!               size            - size of property in bytes
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_size_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to query
+            INTEGER(SIZE_T), INTENT(OUT) :: size  ! Size in bytes
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_size_c(prp_id, name, name_len, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_SIZE_C'::h5pget_size_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(OUT) :: size
+              END FUNCTION h5pget_size_c
+            END INTERFACE
+            name_len = LEN(name)
+            hdferr = h5pget_size_c(prp_id, name , name_len, size)
+          END SUBROUTINE h5pget_size_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_npros_f 
+!
+! Purpose: 	Queries number of properties in property list or class
+!
+! Inputs:  
+!		prp_id		- iproperty list identifier to query
+! Outputs:  
+!               nprops          - number of properties in property object
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_nprops_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier 
+            INTEGER(SIZE_T), INTENT(OUT) :: nprops  ! iNumber of properties
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_nprops_c(prp_id, nprops)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_NPROPS_C'::h5pget_nprops_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              INTEGER(SIZE_T), INTENT(OUT) :: nprops
+              END FUNCTION h5pget_nprops_c
+            END INTERFACE
+            hdferr = h5pget_nprops_c(prp_id, nprops)
+          END SUBROUTINE h5pget_nprops_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_class_name_f 
+!
+! Purpose: 	Queries the ithe name of a class.
+!
+! Inputs:  
+!		prp_id		- property list identifier to query
+! Outputs:  
+!		name 		- name of a class
+!		hdferr:		- error code		
+!                                       
+!				 	Success:  Actual lenght of the class name
+!                                                 If provided buffer "name" is 
+!                                                 smaller, than name will be 
+!                                                 truncated to fit into
+!                                                 provided user buffer
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_class_name_f(prp_id, name, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_class_name_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(INOUT) :: name  ! Buffer to retireve class name
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_class_name_c(prp_id, name, name_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_CLASS_NAME_C'::h5pget_class_name_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              CHARACTER(LEN=*), INTENT(INOUT) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              END FUNCTION h5pget_class_name_c
+            END INTERFACE
+            name_len = LEN(name)
+            hdferr = h5pget_class_name_c(prp_id, name , name_len)
+          END SUBROUTINE h5pget_class_name_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_class_parent_f 
+!
+! Purpose: 	Retrieves the parent class of a genric property class. 
+!
+! Inputs:  
+!		prp_id		- property list identifier to query
+! Outputs:  
+!		parent_id 	- identifier of the parent class
+!		hdferr:		- error code		
+!                                       
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_class_parent_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
+            INTEGER(HID_T), INTENT(OUT) :: parent_id ! Parent class property list 
+                                                     ! identifier 
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_class_parent_c(prp_id, parent_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_CLASS_PARENT_C'::h5pget_class_parent_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              INTEGER(HID_T), INTENT(OUT) :: parent_id
+              END FUNCTION h5pget_class_parent_c
+            END INTERFACE
+            hdferr = h5pget_class_parent_c(prp_id, parent_id)
+          END SUBROUTINE h5pget_class_parent_f
+
+!----------------------------------------------------------------------
+! Name:		h5pisa_class_f 
+!
+! Purpose: 	Determines whether a property list is a member of a class. 
+!
+! Inputs:  
+!		plist		- property list identifier 
+!		pclass		- identifier of the property class
+! Outputs:  
+!               flag            - .TRUE. if a member, .FALSE. otherwise
+!		hdferr:		- error code		
+!                                       
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pisa_class_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist     ! Property list identifier 
+            INTEGER(HID_T), INTENT(IN) :: pclass    ! Class identifier
+            LOGICAL, INTENT(OUT) :: flag            ! logical flag
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pisa_class_c(plist, pclass)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PISA_CLASS_C'::h5pisa_class_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist
+              INTEGER(HID_T), INTENT(IN) :: pclass
+              END FUNCTION h5pisa_class_c
+            END INTERFACE
+            flag = .FALSE.
+            hdferr = h5pisa_class_c(plist, pclass)
+            if (hdferr .gt. 0) then
+                flag = .TRUE.
+                hdferr = 0
+            endif
+          END SUBROUTINE h5pisa_class_f
+
+!----------------------------------------------------------------------
+! Name:		h5pcopy_prop_f 
+!
+! Purpose: 	Copies a property from one list or class to another.
+!
+! Inputs:  
+!		dst_id		- Identifier of the destination property list
+!		src_id		- Identifier of the source property list 
+!		name 		- name of the property to copy
+! Outputs:  
+!		hdferr:		- error code		
+!                                       
+!				 	Success: 0 
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pcopy_prop_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dst_id  ! Destination property list 
+                                                  ! identifier 
+            INTEGER(HID_T), INTENT(IN) :: src_id  ! Source property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name ! Property name
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pcopy_prop_c(dst_id, src_id, name, name_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PCOPY_PROP_C'::h5pcopy_prop_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: dst_id
+              INTEGER(HID_T), INTENT(IN) :: src_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              END FUNCTION h5pcopy_prop_c
+            END INTERFACE
+            name_len = LEN(name)
+            hdferr = h5pcopy_prop_c(dst_id, src_id, name , name_len)
+          END SUBROUTINE h5pcopy_prop_f
+
+!----------------------------------------------------------------------
+! Name:		h5premove_f 
+!
+! Purpose: 	Removes a property from a property list. 
+
+!
+! Inputs:  
+!		plid		- Property list identofoer
+!		name 		- name of the property to remove
+! Outputs:  
+!		hdferr:		- error code		
+!                                       
+!				 	Success: 0 
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5premove_f(plid, name, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5premove_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plid   ! property list identifier
+            CHARACTER(LEN=*), INTENT(IN) :: name ! name of property to remove
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5premove_c(plid, name, name_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREMOVE_C'::h5premove_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: plid 
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              END FUNCTION h5premove_c
+            END INTERFACE
+            name_len = LEN(name)
+            hdferr = h5premove_c(plid, name , name_len)
+          END SUBROUTINE h5premove_f
+
+!----------------------------------------------------------------------
+! Name:		h5punregister_f 
+!
+! Purpose: 	Removes a property from a property list class. 
+
+!
+! Inputs:  
+!		class		- Property list class identifier
+!		name 		- name of the property to remove
+! Outputs:  
+!		hdferr:		- error code		
+!                                       
+!				 	Success: 0 
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5punregister_f(class, name, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5punregister_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: class  ! property list class identifier
+            CHARACTER(LEN=*), INTENT(IN) :: name ! name of property to remove
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5punregister_c(class, name, name_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PUNREGISTER_C'::h5punregister_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: class
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              END FUNCTION h5punregister_c
+            END INTERFACE
+            name_len = LEN(name)
+            hdferr = h5punregister_c(class, name , name_len)
+          END SUBROUTINE h5punregister_f
+
+!----------------------------------------------------------------------
+! Name:		h5pclose_class_f 
+!
+! Purpose: 	Closes an existing property list class. 
+
+!
+! Inputs:  
+!		class		- Property list class identifier
+! Outputs:  
+!		hdferr:		- error code		
+!                                       
+!				 	Success: 0 
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pclose_class_f(class, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pclose_class_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: class  ! property list class identifier
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pclose_class_c(class)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PCLOSE_CLASS_C'::h5pclose_class_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: class
+              END FUNCTION h5pclose_class_c
+            END INTERFACE
+            hdferr = h5pclose_class_c(class)
+          END SUBROUTINE h5pclose_class_f
+
+!----------------------------------------------------------------------
+! Name:		h5pcreate_class_f 
+!
+! Purpose: 	Create a new property list class
+
+!
+! Inputs:  
+!		parent		- Property list identifier of the parent class
+!                                 Possible values include:
+!                                 H5P_NO_CLASS_F
+!                                 H5P_FILE_CREATE_F
+!                                 H5P_FILE_ACCESS_F
+!                                 H5P_DATASET_CREATE_F
+!                                 H5P_DATASET_XFER_F
+!                                 H5P_MOUNT_F
+!		name 		- name of the class we are creating
+! Outputs:  
+!               class           - porperty list class identifier
+!		hdferr:		- error code		
+!                                       
+!				 	Success: 0 
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 9, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pcreate_class_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: parent  ! parent property list class 
+                                                  ! identifier
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! name of property tocreate 
+            INTEGER(HID_T), INTENT(OUT) :: class  ! property list class identifier
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pcreate_class_c(parent, name, name_len,&
+                                                 class) 
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PCREATE_CLASS_C'::h5pcreate_class_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: parent
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(HID_T), INTENT(OUT) :: class
+              END FUNCTION h5pcreate_class_c
+            END INTERFACE
+            name_len = LEN(name)
+            hdferr = h5pcreate_class_c(parent, name , name_len, &
+                                       class)
+          END SUBROUTINE h5pcreate_class_f
+
+!----------------------------------------------------------------------
+! Name:		h5pregister_integer
+!
+! Purpose: 	Registers a permanent property with a property list class.
+!
+! Inputs:  
+!		class		- property list class to register 
+!                                 permanent property within
+!		name 		- name of property to register
+!               size            - size of property in bytes
+!		value		- default value for property in newly 
+!                                 created property lists
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pregister_integer(class, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pregister_integer
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
+            INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
+            INTEGER,   INTENT(IN) :: value        ! Property value
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pregister_c(class, name, name_len, size, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_C'::h5pregister_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: class
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              INTEGER, INTENT(IN) :: value
+              END FUNCTION h5pregister_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pregister_c(class, name , name_len, size, value)
+          END SUBROUTINE h5pregister_integer
+
+!----------------------------------------------------------------------
+! Name:		h5pregister_real
+!
+! Purpose: 	Registers a permanent property with a property list class.
+!
+! Inputs:  
+!		class		- property list class to register 
+!                                 permanent property within
+!		name 		- name of property to register
+!               size            - size of property in bytes
+!		value		- default value for property in newly 
+!                                 created property lists
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pregister_real(class, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pregister_real
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
+            INTEGER(SIZE_T), INTENT(IN) :: size   ! size of the property value	
+            REAL,   INTENT(IN) :: value           ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pregister_c(class, name, name_len, size, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_C'::h5pregister_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: class
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              REAL, INTENT(IN) :: value
+              END FUNCTION h5pregister_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pregister_c(class, name , name_len, size, value)
+          END SUBROUTINE h5pregister_real
+
+!----------------------------------------------------------------------
+! Name:		h5pregister_double
+!
+! Purpose: 	Registers a permanent property with a property list class.
+!
+! Inputs:  
+!		class		- property list class to register 
+!                                 permanent property within
+!		name 		- name of property to register
+!               size            - size of property in bytes
+!		value		- default value for property in newly 
+!                                 created property lists
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pregister_double(class, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pregister_double
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
+            INTEGER(SIZE_T), INTENT(IN) :: size  ! size of the property value	
+            DOUBLE PRECISION,   INTENT(IN) :: value        ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pregister_c(class, name, name_len, size, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTER_C'::h5pregister_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: class
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              DOUBLE PRECISION, INTENT(IN) :: value
+              END FUNCTION h5pregister_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pregister_c(class, name , name_len, size, value)
+          END SUBROUTINE h5pregister_double
+
+!----------------------------------------------------------------------
+! Name:		h5pregister_char
+!
+! Purpose: 	Registers a permanent property with a property list class.
+!
+! Inputs:  
+!		class		- property list class to register 
+!                                 permanent property within
+!		name 		- name of property to register
+!               size            - size of property in bytes
+!		value		- default value for property in newly 
+!                                 created property lists
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pregister_char(class, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pregister_char
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
+            INTEGER(SIZE_T), INTENT(IN) :: size  ! size of the property value	
+            CHARACTER(LEN=*),   INTENT(IN) :: value        ! Property value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: name_len
+            INTEGER :: value_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pregisterc_c(class, name, name_len, size, value, &
+                                              value_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREGISTERC_C'::h5pregisterc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              !DEC$ATTRIBUTES reference :: value
+              INTEGER(HID_T), INTENT(IN) :: class
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              CHARACTER(LEN=*), INTENT(IN) :: value
+              INTEGER, INTENT(IN)          :: value_len
+              END FUNCTION h5pregisterc_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            value_len = LEN(value)
+            hdferr = h5pregisterc_c(class, name , name_len, size, value, value_len)
+          END SUBROUTINE h5pregister_char
+
+!----------------------------------------------------------------------
+! Name:		h5pinsert_integer
+!
+! Purpose: 	Registers a temporary property with a property list class.
+!
+! Inputs:  
+!		plist		- property list identifier
+!		name 		- name of property to insert
+!               size            - size of property in bytes
+!		value		- initial value for the property 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pinsert_integer
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
+            INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
+            INTEGER,   INTENT(IN) :: value        ! Property value
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pinsert_c(plist, name, name_len, size, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_C'::h5pinsert_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: plist
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              INTEGER, INTENT(IN) :: value
+              END FUNCTION h5pinsert_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pinsert_c(plist, name , name_len, size, value)
+          END SUBROUTINE h5pinsert_integer
+
+!----------------------------------------------------------------------
+! Name:		h5pinsert_real
+!
+! Purpose: 	Registers a temporary property with a property list class.
+!
+! Inputs:  
+!		plist		- property list identifier
+!                                 permanent property within
+!		name 		- name of property to insert
+!               size            - size of property in bytes
+!		value		- initial value for the property 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pinsert_real(plist, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pinsert_real
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
+            INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
+            REAL,   INTENT(IN) :: value           ! Property value
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pinsert_c(plist, name, name_len, size, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_C'::h5pinsert_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: plist
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              REAL, INTENT(IN) :: value
+              END FUNCTION h5pinsert_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pinsert_c(plist, name , name_len, size, value)
+          END SUBROUTINE h5pinsert_real
+
+!----------------------------------------------------------------------
+! Name:		h5pinsert_double
+!
+! Purpose: 	Registers a temporary property with a property list class.
+!
+! Inputs:  
+!		plist		- property list identifier
+!                                 permanent property within
+!		name 		- name of property to insert
+!               size            - size of property in bytes
+!		value		- initial value for the property 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pinsert_double(plist, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pinsert_double
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
+            INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
+            DOUBLE PRECISION, INTENT(IN) :: value ! Property value
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+            INTEGER :: name_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pinsert_c(plist, name, name_len, size, value)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERT_C'::h5pinsert_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: plist
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              DOUBLE PRECISION, INTENT(IN) :: value
+              END FUNCTION h5pinsert_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            hdferr = h5pinsert_c(plist, name , name_len, size, value)
+          END SUBROUTINE h5pinsert_double
+
+!----------------------------------------------------------------------
+! Name:		h5pinsert_char
+!
+! Purpose: 	Registers a temporary property with a property list class.
+!
+! Inputs:  
+!		plist		- property list identifier
+!                                 permanent property within
+!		name 		- name of property to insert
+!               size            - size of property in bytes
+!		value		- initial value for the property 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 10, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pinsert_char
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist      ! Property list identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of property to insert 
+            INTEGER(SIZE_T), INTENT(IN) :: size      ! Size of property value	
+            CHARACTER(LEN=*),   INTENT(IN) :: value  ! Property value
+            INTEGER, INTENT(OUT) :: hdferr           ! Error code
+            INTEGER :: name_len
+            INTEGER :: value_len
+
+            INTERFACE
+              INTEGER FUNCTION h5pinsertc_c(plist, name, name_len, size, value, value_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PINSERTC_C'::h5pinsertc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              !DEC$ATTRIBUTES reference :: value
+              INTEGER(HID_T), INTENT(IN) :: plist
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)         :: name_len
+              INTEGER(SIZE_T), INTENT(IN) :: size 
+              CHARACTER(LEN=*), INTENT(IN) :: value
+              INTEGER, INTENT(IN)         :: value_len
+              END FUNCTION h5pinsertc_c
+            END INTERFACE
+
+            name_len = LEN(name)
+            value_len = LEN(value)
+            hdferr = h5pinsertc_c(plist, name , name_len, size, value, value_len)
+          END SUBROUTINE h5pinsert_char
 
      END MODULE H5P

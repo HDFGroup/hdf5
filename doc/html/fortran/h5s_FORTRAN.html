@@ -515,6 +515,289 @@ FORTRAN Dataspace API -- h5s
 
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5scombine_hyperslab_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5scombine_hyperslab_f</strong>
+<pre>
+
+          SUBROUTINE h5scombine_hyperslab_f(space_id, operator, start, count, &
+                                            new_space_id, hdferr, stride, block) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+            INTEGER, INTENT(IN) :: operator     ! Operator, valid values are:
+						!  H5S_SELECT_NOOP_F 
+						!  H5S_SELECT_SET_F 
+						!  H5S_SELECT_OR_F 
+						!  H5S_SELECT_AND_F 
+						!  H5S_SELECT_XOR_F 
+						!  H5S_SELECT_NOTB_F 
+						!  H5S_SELECT_NOTA_F 
+						!  H5S_SELECT_APPEND_F 
+						!  H5S_SELECT_PREPEND_F 
+                                                !  
+            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+                                          ! Starting coordinates of the hyperslab 
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count 
+                                          ! Number of blocks to select 
+                                          ! from dataspace 
+            INTEGER(HID_T), INTENT(OUT) :: new_space_id ! New dataspace identifier 
+                                                        ! with the generated selection
+            INTEGER, INTENT(OUT) :: hdferr     ! Error code
+            INTEGER(HSIZE_T), DIMENSION(:), OPTIONAL, INTENT(IN) :: stride
+                                          ! Array of how many elements to move
+                                          ! in each direction
+            INTEGER(HSIZE_T), DIMENSION(:), OPTIONAL, INTENT(IN) :: block 
+                                          ! Sizes of element block
+          END SUBROUTINE h5scombine_hyperslab_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5scombine_select_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5scombine_select_f</strong>
+<pre>
+
+          SUBROUTINE h5scombine_select_f(space1_id, operator, space2_id, &
+                                            new_space_id, hdferr) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN) :: space1_id ! Dataspace identifier
+            INTEGER, INTENT(IN) :: operator     ! Operator to apply to two dataspaces;
+                                                !  valid values are:
+						!  H5S_SELECT_NOOP_F 
+						!  H5S_SELECT_SET_F 
+						!  H5S_SELECT_OR_F 
+						!  H5S_SELECT_AND_F 
+						!  H5S_SELECT_XOR_F 
+						!  H5S_SELECT_NOTB_F 
+						!  H5S_SELECT_NOTA_F 
+						!  H5S_SELECT_APPEND_F 
+						!  H5S_SELECT_PREPEND_F 
+                                                !  
+            INTEGER(HID_T), INTENT(IN) :: space2_id ! Dataspace identifier
+            INTEGER(HID_T), INTENT(OUT) :: new_space_id ! New dataspace identifier 
+                                                        ! with the generated selection
+            INTEGER, INTENT(OUT) :: hdferr     ! Error code
+          END SUBROUTINE h5scombine_select_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sselect_select_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sselect_select_f</strong>
+<pre>
+
+          SUBROUTINE h5sselect_select_f(space1_id, operator, space2_id,  hdferr) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN) :: space1_id ! Dataspace identifier
+            INTEGER, INTENT(IN) :: operator     ! Operator to apply to two dataspaces;
+                                                !  valid values are:
+						!  H5S_SELECT_NOOP_F 
+						!  H5S_SELECT_SET_F 
+						!  H5S_SELECT_OR_F 
+						!  H5S_SELECT_AND_F 
+						!  H5S_SELECT_XOR_F 
+						!  H5S_SELECT_NOTB_F 
+						!  H5S_SELECT_NOTA_F 
+						!  H5S_SELECT_APPEND_F 
+						!  H5S_SELECT_PREPEND_F 
+                                                !  
+            INTEGER(HID_T), INTENT(IN) :: space2_id ! Dataspace identifier
+            INTEGER, INTENT(OUT) :: hdferr     ! Error code
+          END SUBROUTINE h5sselect_select_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_select_type_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_select_type_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_select_type_f(space_id, type, hdferr) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+            INTEGER, INTENT(OUT) :: type           ! Selection type
+                                                   !  valid values are:
+						   !  H5S_SEL_ERROR_F 
+						   !  H5S_SEL_NONE_F 
+						   !  H5S_SEL_POINTS_F 
+						   !  H5S_SEL_HYPERSLABS_F 
+						   !  H5S_SEL_ALL_F 
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code
+          END SUBROUTINE h5sget_select_type_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_select_hyper_nblocks_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_select_hyper_nblocks_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+            INTEGER, INTENT(OUT) :: num_blocks     ! number of hyperslab blocks in 
+                                                   ! the current hyperslab selection
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code
+          END SUBROUTINE h5sget_select_hyper_nblocks_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_select_hyper_blocklist_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_select_hyper_blocklist_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, num_blocks, &
+                                                     buf, hdferr) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN)   :: space_id ! Dataspace identifier
+            INTEGER(HSIZE_T), INTENT(IN) :: startblock
+                                                   !Hyperslab block to start with
+            INTEGER, INTENT(OUT) :: num_blocks     ! number of hyperslab blocks to get in 
+                                                   ! the current hyperslab selection
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf
+                                                   ! List of hyperslab blocks selected 
+
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code
+          END SUBROUTINE h5sget_select_hyper_blocklist_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_select_elem_npoints_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_select_elem_npoints_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+            INTEGER, INTENT(OUT) :: num_points     ! number of points in 
+                                                   ! the current elements selection
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code
+          END SUBROUTINE h5sget_select_elem_npoints_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_select_elem_pointlist_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_select_elem_pointlist_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, num_points, &
+                                                     buf, hdferr) 
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN)   :: space_id ! Dataspace identifier
+            INTEGER(HSIZE_T), INTENT(IN) :: startpoint ! Element point to start with
+            INTEGER, INTENT(OUT) :: num_points     ! number of points to get in 
+                                                   ! the current element selection
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf
+                                                   ! List of points selected 
+
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code
+          END SUBROUTINE h5sget_select_elem_pointlist_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_select_bounds_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_select_bounds_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_select_bounds_f(space_id, start, end, hdferr)
+
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN)   :: space_id ! Dataspace identifier
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+                                            ! Starting coordinate of the bounding box
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) ::end 
+                                            ! Ending coordinate (opposite corner)
+                                            ! of the bounding box
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code
+          END SUBROUTINE h5sget_select_bounds_f
+</pre>
+
+
+
 </dl>
 
 <p>&nbsp;
@@ -527,7 +810,7 @@ FORTRAN Dataspace API -- h5s
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  20 October 1999
+Last modified:  8 October, 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 

@@ -77,6 +77,12 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     if ((integertypes[13] = (hid_t_f)H5Tcopy(H5T_STD_U32LE)) < 0) return ret_value;
     if ((integertypes[14] = (hid_t_f)H5Tcopy(H5T_STD_U64BE)) < 0) return ret_value;
     if ((integertypes[15] = (hid_t_f)H5Tcopy(H5T_STD_U64LE)) < 0) return ret_value;
+/* 
+ *  Define Fortran H5T_STRING type to store non-fixed size strings 
+ */
+    if ((c_type_id = H5Tcopy(H5T_C_S1)) < 0) return ret_value;
+    if(H5Tset_size(c_type_id, H5T_VARIABLE) < 0) return ret_value; 
+    integertypes[16] = c_type_id;
 
     ret_value = 0; 
     return ret_value;
@@ -169,6 +175,22 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
     h5d_flags[0] = H5D_COMPACT;
     h5d_flags[1] = H5D_CONTIGUOUS;
     h5d_flags[2] = H5D_CHUNKED;
+    h5d_flags[3] = H5D_ALLOC_TIME_ERROR;
+    h5d_flags[4] = H5D_ALLOC_TIME_DEFAULT;
+    h5d_flags[5] = H5D_ALLOC_TIME_EARLY;
+    h5d_flags[6] = H5D_ALLOC_TIME_LATE;
+    h5d_flags[7] = H5D_ALLOC_TIME_INCR;
+    h5d_flags[8] = H5D_SPACE_STATUS_ERROR;
+    h5d_flags[9] = H5D_SPACE_STATUS_NOT_ALLOCATED;
+    h5d_flags[10] = H5D_SPACE_STATUS_PART_ALLOCATED;
+    h5d_flags[11] = H5D_SPACE_STATUS_ALLOCATED;
+    h5d_flags[12] = H5D_FILL_TIME_ERROR;
+    h5d_flags[13] = H5D_FILL_TIME_ALLOC;
+    h5d_flags[14] = H5D_FILL_TIME_NEVER;
+    h5d_flags[15] = H5D_FILL_VALUE_ERROR;
+    h5d_flags[16] = H5D_FILL_VALUE_UNDEFINED;
+    h5d_flags[17] = H5D_FILL_VALUE_DEFAULT;
+    h5d_flags[18] = H5D_FILL_VALUE_USER_DEFINED;
 
 /*
  *  H5E flags
@@ -260,6 +282,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5p_flags[3] = H5P_DATASET_XFER;
       h5p_flags[4] = H5P_MOUNT;
       h5p_flags[5] = H5P_DEFAULT;
+      h5p_flags[6] = H5P_NO_CLASS;
 
 /*
  *  H5R flags
@@ -279,6 +302,22 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5s_flags[3] = H5S_SELECT_OR;
       h5s_flags[4] = (int_f)H5S_UNLIMITED;
       h5s_flags[5] = H5S_ALL;
+
+      h5s_flags[6] = H5S_SELECT_NOOP;
+      h5s_flags[7] = H5S_SELECT_AND;
+      h5s_flags[8] = H5S_SELECT_XOR;
+      h5s_flags[9] = H5S_SELECT_NOTB;
+      h5s_flags[10] = H5S_SELECT_NOTA;
+      h5s_flags[11] = H5S_SELECT_APPEND;
+      h5s_flags[12] = H5S_SELECT_PREPEND;
+      h5s_flags[13] = H5S_SELECT_INVALID;
+
+
+      h5s_flags[14] = H5S_SEL_ERROR;
+      h5s_flags[15] = H5S_SEL_NONE;
+      h5s_flags[16] = H5S_SEL_POINTS;
+      h5s_flags[17] = H5S_SEL_HYPERSLABS;
+      h5s_flags[18] = H5S_SEL_ALL;
 
 /*
  *  H5T flags
@@ -313,6 +352,8 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5t_flags[25] = H5T_STR_NULLPAD;
       h5t_flags[26] = H5T_STR_SPACEPAD;
       h5t_flags[27] = H5T_STR_ERROR;
+      h5t_flags[28] = H5T_VLEN;
+      h5t_flags[29] = H5T_ARRAY;
 
     ret_value = 0; 
     return ret_value;

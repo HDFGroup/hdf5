@@ -226,32 +226,25 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
   hsize_t c_num_blocks;
 
   int i, rank;
-  hsize_t* c_startblock,* c_buf;
+  hsize_t c_startblock, *c_buf;
 
   c_space_id = *space_id;
   c_num_blocks = * num_blocks;
 
   rank = H5Sget_simple_extent_ndims(c_space_id);
   if (rank < 0 ) return ret_value;
-
-  c_startblock = (hsize_t*)malloc(sizeof(hsize_t)*rank);
-  if (!c_startblock) return ret_value;
-  for (i = 0; i < rank; i++)
-  {
-    c_startblock[i] = (hsize_t)startblock[i];
-  }
+  c_startblock = (hsize_t)*startblock;
 
   c_buf = (hsize_t*)malloc(sizeof(hsize_t)*c_num_blocks*2*rank);
   if (!c_buf) return ret_value;
 
-  ret_value = H5Sget_select_hyper_blocklist(c_space_id, *c_startblock, 
+  ret_value = H5Sget_select_hyper_blocklist(c_space_id, c_startblock, 
                                             c_num_blocks, c_buf);
   for(i = 0; i < c_num_blocks*2*rank; i++)
   {
       buf[i] = (hsize_t_f)c_buf[i] +1;
   }
   HDfree(c_buf);
-  HDfree(c_startblock);
   if (ret_value  >= 0  ) ret_value = 0;
   return ret_value;
 }
@@ -330,7 +323,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   int ret_value = -1;
   hid_t c_space_id;
   hsize_t c_num_points;
-  hsize_t* c_startpoint,* c_buf;
+  hsize_t c_startpoint,* c_buf;
   int i,j, rank;
 
   c_space_id = *space_id;
@@ -339,14 +332,10 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   rank = H5Sget_simple_extent_ndims(c_space_id);
   if (rank < 0 ) return ret_value;
 
-  c_startpoint = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (!c_startpoint) return ret_value;
-  for (i =0; i < rank; i++)
-    c_startpoint[i] = (hsize_t)startpoint[i];
-
+  c_startpoint = (hsize_t)*startpoint; 
   c_buf = (hsize_t*)malloc(sizeof(hsize_t)*c_num_points*rank);
   if (!c_buf) return ret_value;
-  ret_value = H5Sget_select_elem_pointlist(c_space_id, *startpoint, 
+  ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint, 
                                             c_num_points, c_buf);
   for (i = c_num_points*rank-1; i >= 0; i--) {
       buf[i] = (hsize_t_f)(c_buf[i]+1);
@@ -354,7 +343,6 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
 
   if (ret_value  >= 0  ) ret_value = 0;
  
-  HDfree(c_startpoint);
   HDfree(c_buf);
 
   return ret_value;
@@ -764,7 +752,6 @@ nh5sset_extent_none_c ( hid_t_f *space_id )
  *              count - number of blocks included in the hyperslab
  *              stride - hyperslab stride (interval between blocks)
  *              block - size of block in the hyperslab
- *              maximum_size - aray with maximum sizes of dimensions
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, August 11, 1999
@@ -789,16 +776,16 @@ nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize
   rank = H5Sget_simple_extent_ndims(*space_id);
   if (rank < 0 ) return ret_value;
   c_start = (hssize_t *)HDmalloc(sizeof(hssize_t)*rank);
-  if (!c_start) return ret_value;
+  if (!c_start) goto DONE;
 
   c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (!c_count) return ret_value;
+  if (!c_count) goto DONE;
 
   c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (!c_stride) return ret_value;
+  if (!c_stride) goto DONE;
 
   c_block = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (!c_block) return ret_value;
+  if (!c_block) goto DONE;
 
 
   /*
@@ -822,10 +809,171 @@ nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize
   c_space_id = *space_id;
   status = H5Sselect_hyperslab(c_space_id, c_op, c_start, c_stride, c_count, c_block);
   if ( status >= 0  ) ret_value = 0;
-  HDfree(c_start);
-  HDfree(c_count);
-  HDfree(c_stride);
-  HDfree(c_block);
+DONE:
+  if(!c_start ) HDfree(c_start);
+  if(!c_count ) HDfree(c_count);
+  if(!c_stride) HDfree(c_stride);
+  if(!c_block ) HDfree(c_block);
+  return ret_value;
+}
+#ifdef NEW_HYPERSLAB_API
+/*----------------------------------------------------------------------------
+ * Name:        h5scombine_hyperslab_c
+ * Purpose:     Call H5Scombine_hyperslab 
+ * Inputs:      space_id - identifier of the dataspace 
+ *              operator - defines how the new selection is combined
+ *              start - offset of start of hyperslab 
+ *              count - number of blocks included in the hyperslab
+ *              stride - hyperslab stride (interval between blocks)
+ *              block - size of block in the hyperslab
+ * Outputs:     hyper_id - identifier for the new dataspace
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, October 7, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  hid_t c_hyper_id;
+  hssize_t *c_start;
+  hsize_t *c_count;
+  hsize_t *c_stride;
+  hsize_t *c_block; 
+
+  H5S_seloper_t c_op;
+  herr_t  status;
+  int rank;
+  int i;
+
+  rank = H5Sget_simple_extent_ndims(*space_id);
+  if (rank < 0 ) return ret_value;
+  c_start = (hssize_t *)HDmalloc(sizeof(hssize_t)*rank);
+  if (!c_start) goto DONE;
+
+  c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (!c_count) goto DONE;
+
+  c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (!c_stride) goto DONE;
+
+  c_block = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (!c_block) goto DONE;
+
+
+  /*
+   * Reverse dimensions due to C-FORTRAN storage order.
+   */
+
+  for (i=0; i < rank; i++) {
+      int t= (rank - i) - 1;
+      c_start[i] = (hssize_t)start[t];
+      c_count[i] = (hsize_t)count[t];
+      c_stride[i] = (hsize_t)stride[t];
+      c_block[i] = (hsize_t)block[t];
+  }
+
+   c_op = (H5S_seloper_t)*op;
+
+  c_space_id = (hid_t)*space_id;
+  c_hyper_id = H5Scombine_hyperslab(c_space_id, c_op, c_start, c_stride, c_count, c_block);
+  if ( c_hyper_id < 0  ) goto DONE;
+  *hyper_id = (hid_t_f)c_hyper_id;
+  ret_value = 0;
+DONE:
+  if(!c_start ) HDfree(c_start);
+  if(!c_count ) HDfree(c_count);
+  if(!c_stride) HDfree(c_stride);
+  if(!c_block ) HDfree(c_block);
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5scombine_select_c
+ * Purpose:     Call H5Scombine_ select
+ * Inputs:      space1_id - identifier of the first dataspace 
+ *              operator - defines how the new selection is combined
+ *              space2_id - identifier of the second dataspace 
+ * Outputs:     ds_id   - identifier for the new dataspace
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, October 7, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id)
+{
+  int ret_value = -1;
+  hid_t c_space1_id;
+  hid_t c_space2_id;
+  hid_t c_ds_id;
+  H5S_seloper_t c_op;
+
+  c_op = (H5S_seloper_t)*op;
+
+  c_space1_id = (hid_t)*space1_id;
+  c_space2_id = (hid_t)*space2_id;
+  c_ds_id = H5Scombine_select(c_space1_id, c_op, c_space2_id);
+  if ( c_ds_id < 0  ) return ret_value;
+  *ds_id = (hid_t_f)c_ds_id;
+  ret_value = 0;
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5sselect_select_c
+ * Purpose:     Call H5Sselect_ select
+ * Inputs:      space1_id - identifier of the first dataspace  to modify
+ *              operator - defines how the new selection is combined
+ *              space2_id - identifier of the second dataspace 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, October 7, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
+{
+  int ret_value = -1;
+  hid_t c_space1_id;
+  hid_t c_space2_id;
+  H5S_seloper_t c_op;
+
+  c_op = (H5S_seloper_t)*op;
+
+  c_space1_id = (hid_t)*space1_id;
+  c_space2_id = (hid_t)*space2_id;
+  if( H5Sselect_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
+  ret_value = 0;
+  return ret_value;
+}
+#endif /*NEW_HYPERSLAB_API*/
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_select_type_c
+ * Purpose:     Call H5Sget_select_type
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     type - type of selection
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, October 7, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_select_type_c ( hid_t_f *space_id , int_f *type)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  H5S_sel_type c_type;
+
+  c_space_id = (hid_t)*space_id;
+  c_type = H5Sget_select_type(c_space_id);
+  if(c_type < 0) return ret_value;
+  *type = (int_f)c_type;
+  ret_value = 0;
   return ret_value;
 }
 

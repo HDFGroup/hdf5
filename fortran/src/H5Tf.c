@@ -1545,9 +1545,8 @@ nh5tset_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen)
 
 /*----------------------------------------------------------------------------
  * Name:        h5tget_tag_c
- * Inputs:      type_id - identifier of the dataspace 
  * Purpose:     Call H5Tset_tag to set an opaque datatype tag
- * Inputs:      type_id - identifier of the dataspace 
+ * Inputs:      type_id - identifier of the datatype
  * Outputs:     tag -  Unique ASCII string with which the opaque 
  *                     datatype is to be tagged
  *              taglen - length of tag
@@ -1570,6 +1569,30 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, int_f* taglen)
   HD5packFstring(c_tag, _fcdtocp(tag), strlen(c_tag));  
   *taglen = strlen(c_tag);
   HDfree(c_tag);
+  ret_value = 0; 
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5tvlen_create_c
+ * Purpose:     Call H5Tvlen_create to create VL dtatype
+ * Inputs:      type_id - identifier of the base datatype
+ * Outputs:     vltype_id - identifier of the VL datatype
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, October 23, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5tvlen_create_c(hid_t_f* type_id, hid_t_f *vltype_id)
+{
+  int ret_value = -1;
+  hid_t c_type_id;
+  hid_t c_vltype_id;
+
+  c_type_id = (hid_t)*type_id;
+  c_vltype_id = H5Tvlen_create(c_type_id);
+  if (c_vltype_id < 0 ) return ret_value;
+  *vltype_id = (hid_t_f)c_vltype_id;
   ret_value = 0; 
   return ret_value;
 }

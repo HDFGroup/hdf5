@@ -36,7 +36,7 @@ LIB_OBJ=$(LIB_FSRC:.f90=.lo) $(LIB_CSRC:.c=.lo)
 TEST_PROGS_SRC=fortranlib_test.f90 fflush1.f90 fflush2.f90
 TEST_PROGS=$(TEST_PROGS_SRC:.f90=)
 
-TEST_FSRC= tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90	\
+TEST_FSRC= tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90	tH5VL.f90\
 	 tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tf.f90
 TEST_CSRC = t.c
 TEST_OBJ=$(TEST_FSRC:.f90=.lo) $(TEST_CSRC:.c=.lo)

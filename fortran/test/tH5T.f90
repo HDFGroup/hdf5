@@ -719,7 +719,7 @@
 
     LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(OUT) :: total_error 
-    CHARACTER(LEN=7), PARAMETER :: filename="enum.h5"
+    CHARACTER(LEN=4), PARAMETER :: filename="enum"
     CHARACTER(LEN=80) :: fix_filename
     CHARACTER(LEN=8), PARAMETER :: dsetname="enumdset"
     CHARACTER(LEN=4)            :: true ="TRUE"

@@ -188,6 +188,18 @@
 
           END INTERFACE 
 
+          INTERFACE h5dwrite_vl_f
+            MODULE PROCEDURE h5dwrite_vl_integer
+            MODULE PROCEDURE h5dwrite_vl_real
+            MODULE PROCEDURE h5dwrite_vl_string
+          END INTERFACE
+
+          INTERFACE h5dread_vl_f
+            MODULE PROCEDURE h5dread_vl_integer
+            MODULE PROCEDURE h5dread_vl_real
+            MODULE PROCEDURE h5dread_vl_string
+          END INTERFACE
+
         CONTAINS
           
 !----------------------------------------------------------------------
@@ -9237,4 +9249,527 @@
             hdferr = h5dget_create_plist_c(dataset_id, plist_id)
           END SUBROUTINE h5dget_create_plist_f  
 
+!----------------------------------------------------------------------
+! Name:		h5dget_storage_size_f 
+!
+! Purpose:	Returns the amount of storage requires by a dataset	
+!
+! Inputs:  
+!		dataset_id	- dataset identifier
+! Outputs:  
+!		size		- datastorage size
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Elena Pourmal
+!		October 15, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr) 
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dget_storage_size_f
+!DEC$endif
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
+            INTEGER(HSIZE_T),  INTENT(OUT)  :: size
+                                                          ! Amount of storage 
+                                                          ! allocated for dataset
+            INTEGER, INTENT(OUT) :: hdferr                ! Error code 
+
+            INTERFACE
+              INTEGER FUNCTION h5dget_storage_size_c(dataset_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DGET_STORAGE_SIZE_C'::h5dget_storage_size_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: dataset_id
+              INTEGER(HSIZE_T), INTENT(OUT)  :: size
+              END FUNCTION h5dget_storage_size_c
+            END INTERFACE
+
+            hdferr = h5dget_storage_size_c(dataset_id, size)
+          END SUBROUTINE h5dget_storage_size_f  
+
+!----------------------------------------------------------------------
+! Name:		h5dvlen_get_max_len_f 
+!
+! Purpose:	Returns maximum lenght of the VL array elements
+!
+! Inputs:  
+!		dataset_id	- dataset identifier
+!		type_id		- datatype identifier
+!		space_id	- dataspace identifier
+! Outputs:  
+!		size		- buffer size
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Elena Pourmal
+!		October 15, 2002	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr) 
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dvlen_get_max_len_f
+!DEC$endif
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: type_id         ! Datatype identifier
+            INTEGER(HID_T), INTENT(IN) :: space_id        ! Dataspace identifier
+            INTEGER(SIZE_T),  INTENT(OUT)  :: len         ! Maximum length of the element
+            INTEGER, INTENT(OUT) :: hdferr                ! Error code 
+
+            INTERFACE
+              INTEGER FUNCTION h5dvlen_get_max_len_c(dataset_id, type_id, space_id, len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DVLEN_GET_MAX_LEN_C'::h5dvlen_get_max_len_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: dataset_id
+              INTEGER(HID_T), INTENT(IN) :: type_id 
+              INTEGER(HID_T), INTENT(IN) :: space_id     
+              INTEGER(SIZE_T), INTENT(OUT)  :: len 
+              END FUNCTION h5dvlen_get_max_len_c
+            END INTERFACE
+
+            hdferr = h5dvlen_get_max_len_c(dataset_id, type_id,  space_id, len)
+          END SUBROUTINE h5dvlen_get_max_len_f  
+
+          SUBROUTINE h5dwrite_vl_integer(dset_id, mem_type_id, buf, dims, len, &
+                                         hdferr, &
+                                         mem_space_id, file_space_id, xfer_prp)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_vl_integer
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims ! MAX len x num_elem
+            INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: len ! Array to store 
+                                                              ! the lenght of each
+                                                              ! element
+            INTEGER, INTENT(IN), &
+            DIMENSION(dims(1),dims(2)) :: buf   ! Data buffer
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                                ! Memory dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+            
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T)  :: mem_space_id_default
+            INTEGER(HID_T) :: file_space_id_default 
+
+            INTERFACE
+              INTEGER FUNCTION h5dwrite_vl_integer_c(dset_id, mem_type_id, &
+                                          mem_space_id_default, & 
+                                          file_space_id_default, &
+                                          xfer_prp_default, buf, dims, len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_VL_INTEGER_C'::h5dwrite_vl_integer_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: dset_id
+              INTEGER(HID_T), INTENT(IN) :: mem_type_id
+              INTEGER(HID_T)  :: mem_space_id_default
+              INTEGER(HID_T) :: file_space_id_default
+              INTEGER(HID_T) :: xfer_prp_default
+              INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+              INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: len 
+              INTEGER, INTENT(IN), &
+              DIMENSION(dims(1),dims(2)) :: buf
+              END FUNCTION h5dwrite_vl_integer_c
+            END INTERFACE
+
+
+            xfer_prp_default = H5P_DEFAULT_F
+            mem_space_id_default = H5S_ALL_F
+            file_space_id_default = H5S_ALL_F
+
+            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
+            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
+            if (present(file_space_id)) file_space_id_default = file_space_id 
+
+            hdferr = h5dwrite_vl_integer_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, &
+                                buf, dims, len)
+           
+          END SUBROUTINE h5dwrite_vl_integer
+
+          SUBROUTINE h5dread_vl_integer(dset_id, mem_type_id, buf, dims, len, &
+                                         hdferr, &
+                                         mem_space_id, file_space_id, xfer_prp)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_vl_integer
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims ! MAX len x num_elem
+            INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*) :: len ! Array to store 
+                                                              ! the lenght of each
+                                                              ! element
+            INTEGER, INTENT(INOUT), &
+            DIMENSION(dims(1),dims(2)) :: buf   ! Data buffer
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+                                                ! -1 if failed, 0 otherwise
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                                ! Memory dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+            
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T)  :: mem_space_id_default
+            INTEGER(HID_T) :: file_space_id_default 
+            INTEGER(HID_T) :: tmp
+            INTEGER :: error
+
+            INTERFACE
+              INTEGER FUNCTION h5dread_vl_integer_c(dset_id, mem_type_id, &
+                                          mem_space_id_default, & 
+                                          file_space_id_default, &
+                                          xfer_prp_default, buf, dims, len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_VL_INTEGER_C'::h5dread_vl_integer_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: dset_id
+              INTEGER(HID_T), INTENT(IN) :: mem_type_id
+              INTEGER(HID_T)  :: mem_space_id_default
+              INTEGER(HID_T) :: file_space_id_default
+              INTEGER(HID_T) :: xfer_prp_default
+              INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+              INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*) :: len 
+              INTEGER, INTENT(INOUT), &
+              DIMENSION(dims(1),dims(2)) :: buf
+              END FUNCTION h5dread_vl_integer_c
+            END INTERFACE
+
+            CALL h5dget_space_f(dset_id, tmp, error) 
+            xfer_prp_default = H5P_DEFAULT_F
+            mem_space_id_default = tmp
+            file_space_id_default = tmp
+
+            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
+            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
+            if (present(file_space_id)) file_space_id_default = file_space_id 
+
+            hdferr = h5dread_vl_integer_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, &
+                                buf, dims, len)
+           
+          END SUBROUTINE h5dread_vl_integer
+
+          SUBROUTINE h5dwrite_vl_real(dset_id, mem_type_id, buf, dims, len, &
+                                         hdferr, &
+                                         mem_space_id, file_space_id, xfer_prp)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_vl_real
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims ! MAX len x num_elem
+            INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: len ! Array to store 
+                                                              ! the lenght of each
+                                                              ! element
+            REAL, INTENT(IN), &
+            DIMENSION(dims(1),dims(2)) :: buf   ! Data buffer
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                                ! Memory dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+            
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T)  :: mem_space_id_default
+            INTEGER(HID_T) :: file_space_id_default 
+
+            INTERFACE
+              INTEGER FUNCTION h5dwrite_vl_real_c(dset_id, mem_type_id, &
+                                          mem_space_id_default, & 
+                                          file_space_id_default, &
+                                          xfer_prp_default, buf, dims, len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_VL_REAL_C'::h5dwrite_vl_real_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: dset_id
+              INTEGER(HID_T), INTENT(IN) :: mem_type_id
+              INTEGER(HID_T)  :: mem_space_id_default
+              INTEGER(HID_T) :: file_space_id_default
+              INTEGER(HID_T) :: xfer_prp_default
+              INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+              INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: len 
+              REAL, INTENT(IN), &
+              DIMENSION(dims(1),dims(2)) :: buf
+              END FUNCTION h5dwrite_vl_real_c
+            END INTERFACE
+
+
+            xfer_prp_default = H5P_DEFAULT_F
+            mem_space_id_default = H5S_ALL_F
+            file_space_id_default = H5S_ALL_F
+
+            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
+            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
+            if (present(file_space_id)) file_space_id_default = file_space_id 
+
+            hdferr = h5dwrite_vl_real_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, &
+                                buf, dims, len)
+           
+          END SUBROUTINE h5dwrite_vl_real
+
+          SUBROUTINE h5dread_vl_real(dset_id, mem_type_id, buf, dims, len, &
+                                         hdferr, &
+                                         mem_space_id, file_space_id, xfer_prp)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_vl_real
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims ! MAX len x num_elem
+            INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*) :: len ! Array to store 
+                                                              ! the lenght of each
+                                                              ! element
+            REAL, INTENT(INOUT), &
+            DIMENSION(dims(1),dims(2)) :: buf   ! Data buffer
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+                                                ! -1 if failed, 0 otherwise
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                                ! Memory dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+            
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T)  :: mem_space_id_default
+            INTEGER(HID_T) :: file_space_id_default 
+            INTEGER(HID_T) :: tmp
+            INTEGER :: error
+
+            INTERFACE
+              INTEGER FUNCTION h5dread_vl_real_c(dset_id, mem_type_id, &
+                                          mem_space_id_default, & 
+                                          file_space_id_default, &
+                                          xfer_prp_default, buf, dims, len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_VL_REAL_C'::h5dread_vl_real_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: dset_id
+              INTEGER(HID_T), INTENT(IN) :: mem_type_id
+              INTEGER(HID_T)  :: mem_space_id_default
+              INTEGER(HID_T) :: file_space_id_default
+              INTEGER(HID_T) :: xfer_prp_default
+              INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+              INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*) :: len 
+              REAL, INTENT(INOUT), &
+              DIMENSION(dims(1),dims(2)) :: buf
+              END FUNCTION h5dread_vl_real_c
+            END INTERFACE
+
+            CALL h5dget_space_f(dset_id, tmp, error) 
+            xfer_prp_default = H5P_DEFAULT_F
+            mem_space_id_default = tmp
+            file_space_id_default = tmp
+
+            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
+            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
+            if (present(file_space_id)) file_space_id_default = file_space_id 
+
+            hdferr = h5dread_vl_real_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, &
+                                buf, dims, len)
+           
+          END SUBROUTINE h5dread_vl_real
+
+          SUBROUTINE h5dwrite_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
+                                         hdferr, &
+                                         mem_space_id, file_space_id, xfer_prp)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_vl_string
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims ! number of strings
+            INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: str_len ! Array to store 
+                                                              ! the lenght of each
+                                                              ! element
+            CHARACTER(LEN=*), INTENT(IN), &
+            DIMENSION(dims(2)) :: buf           ! Data buffer
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                                ! Memory dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+            
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T)  :: mem_space_id_default
+            INTEGER(HID_T) :: file_space_id_default 
+!            CHARACTER, DIMENSION(dims(1)*dims(2)) :: tmp_buf
+            integer i, j
+
+            INTERFACE
+              INTEGER FUNCTION h5dwrite_vl_string_c(dset_id, mem_type_id, &
+                                          mem_space_id_default, & 
+                                          file_space_id_default, &
+!                                          xfer_prp_default, tmp_buf, dims, str_len)
+                                          xfer_prp_default, buf, dims, str_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_VL_STRING_C'::h5dwrite_vl_string_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf
+              INTEGER(HID_T), INTENT(IN) :: dset_id
+              INTEGER(HID_T), INTENT(IN) :: mem_type_id
+              INTEGER(HID_T)  :: mem_space_id_default
+              INTEGER(HID_T) :: file_space_id_default
+              INTEGER(HID_T) :: xfer_prp_default
+              INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims
+              INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: str_len 
+!              CHARACTER, INTENT(IN), &
+!              DIMENSION(dims(1)*dims(2)) :: tmp_buf
+              CHARACTER(LEN=*), DIMENSION(dims(2)) :: buf
+              END FUNCTION h5dwrite_vl_string_c
+            END INTERFACE
+
+
+            xfer_prp_default = H5P_DEFAULT_F
+            mem_space_id_default = H5S_ALL_F
+            file_space_id_default = H5S_ALL_F
+
+            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
+            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
+            if (present(file_space_id)) file_space_id_default = file_space_id 
+!            do i = 1, dims(2)
+!               do j = 1, dims(1)
+!               tmp_buf((i-1)*dims(1) +j) = buf(i)(j:j)
+!               enddo
+!            enddo 
+!              write(*,*) (tmp_buf(j:j), j=1,dims(1)*dims(2))
+!              write(*,*) str_len(1), str_len(2), str_len(3), str_len(4)
+
+            hdferr = h5dwrite_vl_string_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, &
+                                buf, dims, str_len)
+           
+          END SUBROUTINE h5dwrite_vl_string
+
+          SUBROUTINE h5dread_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
+                                         hdferr, &
+                                         mem_space_id, file_space_id, xfer_prp)
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_vl_string
+!DEC$endif
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims ! number of strings
+            INTEGER(SIZE_T), INTENT(OUT), DIMENSION(*) :: str_len ! Array to store 
+                                                              ! the lenght of each
+                                                              ! element
+            CHARACTER(LEN=*), INTENT(OUT), &
+            DIMENSION(dims(2)) :: buf           ! Data buffer
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                               ! Memory dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+            
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T)  :: mem_space_id_default
+            INTEGER(HID_T) :: file_space_id_default 
+!            CHARACTER, DIMENSION(dims(1)*dims(2)) :: tmp_buf
+!            integer i, j
+
+            INTERFACE
+              INTEGER FUNCTION h5dread_vl_string_c(dset_id, mem_type_id, &
+                                          mem_space_id_default, & 
+                                          file_space_id_default, &
+!                                          xfer_prp_default, tmp_buf, dims, str_len)
+                                          xfer_prp_default, buf, dims, str_len)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_VL_STRING_C'::h5dread_vl_string_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf
+              INTEGER(HID_T), INTENT(IN) :: dset_id
+              INTEGER(HID_T), INTENT(IN) :: mem_type_id
+              INTEGER(HID_T)  :: mem_space_id_default
+              INTEGER(HID_T) :: file_space_id_default
+              INTEGER(HID_T) :: xfer_prp_default
+              INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims
+              INTEGER(SIZE_T), INTENT(OUT), DIMENSION(*) :: str_len 
+!              CHARACTER, INTENT(IN), &
+!              DIMENSION(dims(1)*dims(2)) :: tmp_buf
+              CHARACTER(LEN=*), DIMENSION(dims(2)) :: buf
+              END FUNCTION h5dread_vl_string_c
+            END INTERFACE
+
+
+            xfer_prp_default = H5P_DEFAULT_F
+            mem_space_id_default = H5S_ALL_F
+            file_space_id_default = H5S_ALL_F
+
+            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
+            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
+            if (present(file_space_id)) file_space_id_default = file_space_id 
+!            do i = 1, dims(2)
+!               do j = 1, dims(1)
+!               tmp_buf((i-1)*dims(1) +j) = buf(i)(j:j)
+!               enddo
+!            enddo 
+!              write(*,*) (tmp_buf(j:j), j=1,dims(1)*dims(2))
+!              write(*,*) str_len(1), str_len(2), str_len(3), str_len(4)
+
+            hdferr = h5dread_vl_string_c(dset_id, mem_type_id, mem_space_id_default, &
+                                file_space_id_default, xfer_prp_default, &
+                                buf, dims, str_len)
+          RETURN 
+          END SUBROUTINE h5dread_vl_string
       END MODULE H5D

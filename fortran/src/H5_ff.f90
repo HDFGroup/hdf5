@@ -1,4 +1,6 @@
 
+   MODULE H5LIB
+     CONTAINS
 !----------------------------------------------------------------------
 ! Name:		h5open_f 
 !
@@ -347,3 +349,4 @@
         error = h5dont_atexit_c()
 
       END SUBROUTINE h5dont_atexit_f
+   END MODULE H5LIB

@@ -43,6 +43,7 @@
      INTEGER :: identifier_total_error = 0
      INTEGER :: group_total_error = 0
      INTEGER :: error_total_error = 0
+     INTEGER :: vl_total_error = 0
      INTEGER :: majnum, minnum, relnum
      CHARACTER(LEN=8) error_string
      CHARACTER(LEN=8) :: success = ' PASSED '
@@ -275,6 +276,16 @@
      write(*, fmt = '(59x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + error_total_error 
+
+     error_string = failure
+     CALL vl_test_integer(cleanup, vl_total_error)
+     CALL vl_test_real(cleanup, vl_total_error)
+     CALL vl_test_string(cleanup, vl_total_error)
+     IF (vl_total_error == 0) error_string = success
+     write(*, fmt = '(11a)', advance = 'no') ' VL test'     
+     write(*, fmt = '(62x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + vl_total_error 
 
      write(*,*)
 
