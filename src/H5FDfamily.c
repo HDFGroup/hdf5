@@ -172,7 +172,7 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     herr_t ret_value=FAIL;
     H5FD_family_fapl_t	fa;
     
-    FUNC_ENTER(H5FD_set_fapl_family, FAIL);
+    FUNC_ENTER(H5Pset_fapl_family, FAIL);
     H5TRACE3("e","ihi",fapl_id,memb_size,memb_fapl_id);
     
     /* Check arguments */

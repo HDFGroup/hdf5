@@ -235,7 +235,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     herr_t ret_value=FAIL;
     H5FD_mpio_fapl_t	fa;
     
-    FUNC_ENTER(H5FD_set_fapl_mpio, FAIL);
+    FUNC_ENTER(H5Pset_fapl_mpio, FAIL);
     H5TRACE3("e","iMcMi",fapl_id,comm,info);
 
     /* Check arguments */

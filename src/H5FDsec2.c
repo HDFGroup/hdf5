@@ -220,7 +220,7 @@ H5Pset_fapl_sec2(hid_t fapl_id)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5FD_set_fapl_sec2, FAIL);
+    FUNC_ENTER(H5Pset_fapl_sec2, FAIL);
     H5TRACE1("e","i",fapl_id);
     
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))

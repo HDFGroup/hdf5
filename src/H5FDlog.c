@@ -263,7 +263,7 @@ H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity)
     H5FD_log_fapl_t	fa;     /* File access property list information */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5FD_set_fapl_log, FAIL);
+    FUNC_ENTER(H5Pset_fapl_log, FAIL);
     H5TRACE3("e","isIs",fapl_id,logfile,verbosity);
     
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
