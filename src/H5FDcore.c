@@ -573,8 +573,7 @@ static herr_t
 H5FD_core_read(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
 	       hsize_t size, void *buf/*out*/)
 {
-    H5FD_core_t		*file = (H5FD_core_t*)_file;
-    ssize_t		nbytes;
+    H5FD_core_t	*file = (H5FD_core_t*)_file;
     
     FUNC_ENTER(H5FD_core_read, FAIL);
 
@@ -582,24 +581,25 @@ H5FD_core_read(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
     assert(buf);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr)
+    if (HADDR_UNDEF == addr)
         HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
     if (REGION_OVERFLOW(addr, size))
         HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
-    if (addr+size>file->eoa)
+    if (addr + size > file->eoa)
         HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
     /* Read the part which is before the EOF marker */
-    if (addr<file->eof) {
-        nbytes = MIN(size, file->eof-addr);
-        memcpy(buf, file->mem+addr, nbytes);
+    if (addr < file->eof) {
+		hsize_t nbytes = MIN(size, file->eof-addr);
+
+        memcpy(buf, file->mem + addr, nbytes);
         size -= nbytes;
         addr += nbytes;
-        buf = (char*)buf + nbytes;
+        buf = (char *)buf + nbytes;
     }
 
     /* Read zeros for the part which is after the EOF markers */
-    if (size>0)
+    if (size > 0)
         memset(buf, 0, size);
 
     FUNC_LEAVE(SUCCEED);
