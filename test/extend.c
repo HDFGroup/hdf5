@@ -54,13 +54,13 @@ main (void)
     assert (mem_space>=0);
 
     /* Create the file */
-    file = H5Fcreate ("extend.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+    file = H5Fcreate ("extend.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 
     /* Create the dataset which is originally NX by NY */
-    cparms = H5Ccreate (H5C_DATASET_CREATE);
+    cparms = H5Pcreate (H5P_DATASET_CREATE);
     assert (cparms>=0);
-    status = H5Cset_chunk (cparms, 2, chunk_dims);
+    status = H5Pset_chunk (cparms, 2, chunk_dims);
     assert (status>=0);
     dataset = H5Dcreate (file, "dataset", H5T_NATIVE_INT, mem_space, cparms);
     assert (dataset>=0);
@@ -85,7 +85,7 @@ main (void)
 
 	    /* Write to the hyperslab */
 	    status = H5Dwrite (dataset, H5T_NATIVE_INT, mem_space, file_space,
-			       H5C_DEFAULT, buf1);
+			       H5P_DEFAULT, buf1);
 	    assert (status>=0);
 	    H5Sclose (file_space);
 	}
@@ -108,7 +108,7 @@ main (void)
 	    
 	    /* Read */
 	    status = H5Dread (dataset, H5T_NATIVE_INT, mem_space, file_space,
-			      H5C_DEFAULT, buf2);
+			      H5P_DEFAULT, buf2);
 	    assert (status>=0);
 
 	    /* Compare */

@@ -40,7 +40,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5private.h>		/*library functions			  */
 #include <H5Aprivate.h>		/*atoms					  */
 #include <H5ACprivate.h>	/*cache					  */
-#include <H5Cprivate.h>		/*templates				  */
+#include <H5Pprivate.h>		/*templates				  */
 #include <H5Eprivate.h>		/*error handling		  */
 #include <H5Gprivate.h>		/*symbol tables				  */
 #include <H5Mprivate.h>		/*meta data				  */
@@ -239,7 +239,7 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
  * Modifications:
  *
  * 	Robb Matzke, 18 Feb 1998
- *	Calls H5C_copy() to copy the template and H5C_close() to free that
+ *	Calls H5P_copy() to copy the template and H5P_close() to free that
  *	template if an error occurs.
  *
  *-------------------------------------------------------------------------
@@ -259,15 +259,15 @@ H5Fget_create_template(hid_t fid)
     }
     
     /* Create the template object to return */
-    if (NULL==(tmpl=H5C_copy (H5C_FILE_CREATE,
+    if (NULL==(tmpl=H5P_copy (H5P_FILE_CREATE,
 			      &(file->shared->create_parms)))) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		       "unable to copy file creation properties");
     }
 
     /* Create an atom */
-    if ((ret_value = H5C_create(H5C_FILE_CREATE, tmpl)) < 0) {
-	H5C_close (H5C_FILE_CREATE, tmpl);
+    if ((ret_value = H5P_create(H5P_FILE_CREATE, tmpl)) < 0) {
+	H5P_close (H5P_FILE_CREATE, tmpl);
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register property list");
     }
@@ -309,15 +309,15 @@ H5Fget_access_template (hid_t file_id)
     }
 
     /* Create the template object to return */
-    if (NULL==(tmpl=H5C_copy (H5C_FILE_ACCESS,
+    if (NULL==(tmpl=H5P_copy (H5P_FILE_ACCESS,
 			      &(f->shared->access_parms)))) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		       "unable to copy file access properties");
     }
 
     /* Create an atom */
-    if ((ret_value = H5C_create (H5C_FILE_ACCESS, tmpl))<0) {
-	H5C_close (H5C_FILE_ACCESS, tmpl);
+    if ((ret_value = H5P_create (H5P_FILE_ACCESS, tmpl))<0) {
+	H5P_close (H5P_FILE_ACCESS, tmpl);
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register property list");
     }
@@ -1009,11 +1009,11 @@ H5F_open(const char *name, uintn flags,
  *
  *		The more complex behaviors of a file's creation and access
  *		are controlled through the file-creation and file-access
- *		property lists.  The value of H5C_DEFAULT for a template
+ *		property lists.  The value of H5P_DEFAULT for a template
  *		value indicates that the library should use the default
  *		values for the appropriate template.
  *
- * See also:	H5Fpublic.h for the list of supported flags. H5Cpublic.h for
+ * See also:	H5Fpublic.h for the list of supported flags. H5Ppublic.h for
  * 		the list of file creation and file access properties.
  *
  * Return:	Success:	A file ID
@@ -1039,7 +1039,7 @@ H5F_open(const char *name, uintn flags,
  *	Better error checking for the creation and access property lists. It
  *	used to be possible to swap the two and core the library.  Also, zero
  *	is no longer valid as a default property list; one must use
- *	H5C_DEFAULT instead.
+ *	H5P_DEFAULT instead.
  *
  *-------------------------------------------------------------------------
  */
@@ -1071,16 +1071,16 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_id,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "mutually exclusive flags for file creation");
     }
-    if (H5C_DEFAULT==create_id) {
+    if (H5P_DEFAULT==create_id) {
 	create_parms = &H5F_create_dflt;
-    } else if (H5C_FILE_CREATE!=H5Cget_class (create_id) ||
+    } else if (H5P_FILE_CREATE!=H5Pget_class (create_id) ||
 	       NULL == (create_parms = H5A_object(create_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file creation property list");
     }
-    if (H5C_DEFAULT==access_id) {
+    if (H5P_DEFAULT==access_id) {
 	access_parms = &H5F_access_dflt;
-    } else if (H5C_FILE_ACCESS!=H5Cget_class (access_id) ||
+    } else if (H5P_FILE_ACCESS!=H5Pget_class (access_id) ||
 	       NULL == (access_parms = H5A_object(access_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file access property list");
@@ -1176,9 +1176,9 @@ H5Fopen(const char *filename, uintn flags, hid_t access_id)
 	(flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags");
     }
-    if (H5C_DEFAULT==access_id) {
+    if (H5P_DEFAULT==access_id) {
 	access_parms = &H5F_access_dflt;
-    } else if (H5C_FILE_ACCESS!=H5Cget_class (access_id) ||
+    } else if (H5P_FILE_ACCESS!=H5Pget_class (access_id) ||
 	       NULL == (access_parms = H5A_object(access_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file access property list");

@@ -39,7 +39,7 @@ for (j = 0; j < NX; j++) {
  * default file creation properties, and default file
  * access properties.
  */
-file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
 /*
  * Describe the size of the array and create the data space for fixed
@@ -60,13 +60,13 @@ status = H5Tset_order(datatype, H5T_ORDER_LE);
  * datatype and default dataset creation properties.
  */
 dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
-                    H5C_DEFAULT);
+                    H5P_DEFAULT);
 
 /*
  * Write the data to the dataset using default transfer properties.
  */
 status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL,
-                  H5C_DEFAULT, data);
+                  H5P_DEFAULT, data);
 
 /*
  * Close/release resources.

@@ -18,7 +18,7 @@
 
 /* Public headers needed by this file */
 #include <H5public.h>
-#include <H5Cpublic.h>          /*for hobjtype_t defn                        */
+#include <H5Ppublic.h>          /*for hobjtype_t defn                        */
 
 #ifdef __cplusplus
 extern "C" {

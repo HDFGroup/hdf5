@@ -44,8 +44,8 @@
 #endif
 
 /*
- * Low-level file drivers.  These values are returned by H5Cget_file_driver()
- * and are set by the various H5Cset_...() functions that set file driver
+ * Low-level file drivers.  These values are returned by H5Pget_file_driver()
+ * and are set by the various H5Pset_...() functions that set file driver
  * properties.
  */
 typedef enum H5F_driver_t {
@@ -59,7 +59,7 @@ typedef enum H5F_driver_t {
 } H5F_driver_t;
 
 
-/* Parallel styles passed to H5Cset_mpi() */
+/* Parallel styles passed to H5Pset_mpi() */
 #ifdef HAVE_PARALLEL
 #  define H5ACC_INDEPENDENT 0x0010	/*MPI independent access	*/
 #  define H5ACC_COLLECTIVE  0x0011	/*MPI collective access		*/

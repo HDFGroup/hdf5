@@ -45,13 +45,13 @@ static char             RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>          /* Generic functions */
 #include <H5Aprivate.h>		/* Atom interface */
-#include <H5Cprivate.h>         /* Template interface */
+#include <H5Pprivate.h>         /* Template interface */
 #include <H5Dprivate.h>         /* Dataset interface */
 #include <H5Eprivate.h>         /*error handling */
 #include <H5Sprivate.h>         /* Dataspace functions */
 #include <H5Tprivate.h>         /* Datatype interface */
 #include <H5Mprivate.h>         /* Meta-object interface */
-#include <H5Cprivate.h>         /* Template interface */
+#include <H5Pprivate.h>         /* Template interface */
 
 #define PABLO_MASK      H5M_mask
 
@@ -59,11 +59,11 @@ static char             RcsId[] = "@(#)$Revision$";
 
 static meta_func_t      meta_func_arr[] =
 {
-    {                           /* Template object meta-functions (defined in H5C.c) */
+    {                           /* Template object meta-functions (defined in H5P.c) */
         H5_TEMPLATE_0,          /* File-Creation Template Type ID */
         NULL,                   /* File-Creation Template Create */
         NULL,                   /* File-Creation Template Access */
-        H5Ccopy,                /* File-Creation Template Copy */
+        H5Pcopy,                /* File-Creation Template Copy */
         NULL,                   /* File-Creation Template FindName */
         NULL,                   /* File-Creation Template NameLen */
         NULL,                   /* File-Creation Template GetName */
@@ -74,13 +74,13 @@ static meta_func_t      meta_func_arr[] =
         NULL,                   /* File-Creation Template Delete */
         NULL,                   /* File-Creation Template GetParent */
         NULL,                   /* File-Creation Template GetFile */
-        H5Cclose                /* File-Creation Template Release */
+        H5Pclose                /* File-Creation Template Release */
     },
-    {                           /* Template object meta-functions (defined in H5C.c) */
+    {                           /* Template object meta-functions (defined in H5P.c) */
         H5_TEMPLATE_1,          /* File-Access Template Type ID */
         NULL,                   /* File-Access Template Create */
         NULL,                   /* File-Access Template Access */
-        H5Ccopy,                /* File-Access Template Copy */
+        H5Pcopy,                /* File-Access Template Copy */
         NULL,                   /* File-Access Template FindName */
         NULL,                   /* File-Access Template NameLen */
         NULL,                   /* File-Access Template GetName */
@@ -91,7 +91,7 @@ static meta_func_t      meta_func_arr[] =
         NULL,                   /* File-Access Template Delete */
         NULL,                   /* File-Access Template GetParent */
         NULL,                   /* File-Access Template GetFile */
-        H5Cclose                /* File-Access Template Release */
+        H5Pclose                /* File-Access Template Release */
     },
     {                           /* Datatype object meta-functions (defined in H5T.c) */
         H5_DATATYPE,            /* Datatype Type ID */

@@ -40,7 +40,7 @@ main ()
 /*
  * Open the file and the dataset.
  */
-file = H5Fopen(FILE, H5F_ACC_RDONLY, H5C_DEFAULT);
+file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
 dataset = H5Dopen(file, DATASETNAME);
  
 /*
@@ -60,12 +60,12 @@ cparms = H5Dget_create_parms(dataset); /* Get properties handle first. */
 /* 
  * Check if dataset is chunked.
  */
- if (H5D_CHUNKED == H5Cget_layout(cparms))  {
+ if (H5D_CHUNKED == H5Pget_layout(cparms))  {
 
 /*
  * Get chunking information: rank and dimensions
  */
-rank_chunk = H5Cget_chunk(cparms, 2, chunk_dims);
+rank_chunk = H5Pget_chunk(cparms, 2, chunk_dims);
 printf("chunk rank %d, dimensions %d x %d \n", rank_chunk,
         chunk_dims[0], chunk_dims[1]);
 } 
@@ -79,7 +79,7 @@ memspace = H5Screate_simple(RANK,dims,NULL);
  * Read dataset back and display.
  */
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-                 H5C_DEFAULT, data_out);
+                 H5P_DEFAULT, data_out);
     printf("\n");
     printf("Dataset: \n");
 for (j = 0; j < dims[0]; j++) {
@@ -121,7 +121,7 @@ count[0]  = 10;
 count[1]  = 1;
 status = H5Sset_hyperslab(filespace, offset, count, NULL);
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-                 H5C_DEFAULT, column);
+                 H5P_DEFAULT, column);
 printf("\n");
 printf("Third column: \n");
 for (i = 0; i < 10; i++) {
@@ -161,7 +161,7 @@ status = H5Sset_hyperslab(filespace, offset, count, NULL);
  * Read chunk back and display.
  */
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-                 H5C_DEFAULT, chunk_out);
+                 H5P_DEFAULT, chunk_out);
     printf("\n");
     printf("Chunk: \n");
 for (j = 0; j < chunk_dims[0]; j++) {
@@ -177,7 +177,7 @@ for (j = 0; j < chunk_dims[0]; j++) {
 /*
  * Close/release resources.
  */
-H5Cclose(cparms);
+H5Pclose(cparms);
 H5Dclose(dataset);
 H5Sclose(filespace);
 H5Sclose(memspace);

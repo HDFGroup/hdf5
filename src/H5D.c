@@ -19,7 +19,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5private.h>		/* Generic Functions			  */
 #include <H5Aprivate.h>		/* Atoms			  */
 #include <H5ACprivate.h>	/* Cache			  */
-#include <H5Cprivate.h>		/* Templates				  */
+#include <H5Pprivate.h>		/* Templates				  */
 #include <H5Dprivate.h>		/* Dataset functions			  */
 #include <H5Eprivate.h>		/* Error handling		  */
 #include <H5Gprivate.h>		/* Group headers		  */
@@ -187,7 +187,7 @@ H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if (create_parms_id >= 0) {
-	if (H5C_DATASET_CREATE != H5Cget_class(create_parms_id) ||
+	if (H5P_DATASET_CREATE != H5Pget_class(create_parms_id) ||
 	    NULL == (create_parms = H5A_object(create_parms_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "not a dataset creation template");
@@ -415,7 +415,7 @@ H5Dget_type (hid_t dataset_id)
  *
  * Return:	Success:	ID for a copy of the dataset creation
  *				template.  The template should be released by
- *				calling H5Cclose().
+ *				calling H5Pclose().
  *
  *		Failure:	FAIL
  *
@@ -442,14 +442,14 @@ H5Dget_create_parms (hid_t dataset_id)
     }
 
     /* Copy the creation template */
-    if (NULL==(copied_parms=H5C_copy (H5C_DATASET_CREATE,
+    if (NULL==(copied_parms=H5P_copy (H5P_DATASET_CREATE,
 				      &(dataset->create_parms)))) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		       "unable to copy the creation template");
     }
 
     /* Create an atom */
-    if ((ret_value=H5A_register ((group_t)(H5_TEMPLATE_0+H5C_DATASET_CREATE),
+    if ((ret_value=H5A_register ((group_t)(H5_TEMPLATE_0+H5P_DATASET_CREATE),
 				 copied_parms))<0) {
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register creation template");
@@ -478,7 +478,7 @@ H5Dget_create_parms (hid_t dataset_id)
  *		The number of elements in the memory data space must match
  *		the number of elements in the file data space.
  *
- *		The XFER_PARMS_ID can be the constant H5C_DEFAULT in which
+ *		The XFER_PARMS_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
  *
  * Return:	Success:	SUCCEED
@@ -534,9 +534,9 @@ H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
     }
-    if (H5C_DEFAULT == xfer_parms_id) {
+    if (H5P_DEFAULT == xfer_parms_id) {
 	xfer_parms = &H5D_xfer_dflt;
-    } else if (H5C_DATASET_XFER != H5Cget_class(xfer_parms_id) ||
+    } else if (H5P_DATASET_XFER != H5Pget_class(xfer_parms_id) ||
 	       NULL == (xfer_parms = H5A_object(xfer_parms_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
@@ -573,7 +573,7 @@ H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
  *		The number of elements in the memory data space must match
  *		the number of elements in the file data space.
  *
- *		The XFER_PARMS_ID can be the constant H5C_DEFAULT in which
+ *		The XFER_PARMS_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
  *
  * Return:	Success:	SUCCEED
@@ -623,9 +623,9 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
     }
-    if (H5C_DEFAULT == xfer_parms_id) {
+    if (H5P_DEFAULT == xfer_parms_id) {
 	xfer_parms = &H5D_xfer_dflt;
-    } else if (H5C_DATASET_XFER != H5Cget_class(xfer_parms_id) ||
+    } else if (H5P_DATASET_XFER != H5Pget_class(xfer_parms_id) ||
 	       NULL == (xfer_parms = H5A_object(xfer_parms_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }

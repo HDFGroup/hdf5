@@ -1,0 +1,77 @@
+/****************************************************************************
+ * NCSA HDF                                                                 *
+ * Software Development Group                                               *
+ * National Center for Supercomputing Applications                          *
+ * University of Illinois at Urbana-Champaign                               *
+ * 605 E. Springfield, Champaign IL 61820                                   *
+ *                                                                          *
+ * For conditions of distribution and use, see the accompanying             *
+ * hdf/COPYING file.                                                        *
+ *                                                                          *
+ ****************************************************************************/
+
+/*
+ * This file contains function prototypes for each exported function in the
+ * H5P module.
+ */
+#ifndef _H5Ppublic_H
+#define _H5Ppublic_H
+
+/* Default Template for creation, access, etc. templates */
+#define H5P_DEFAULT     (-2)
+
+/* Public headers needed by this file */
+#include <H5public.h>
+#include <H5Apublic.h>
+#include <H5Dpublic.h>
+
+/* Template classes */
+typedef enum H5P_class_t {
+    H5P_NO_CLASS         = -1,  /*error return value                         */
+    H5P_FILE_CREATE      = 0,   /*file creation template                     */
+    H5P_FILE_ACCESS      = 1,   /*file access template                       */
+    H5P_DATASET_CREATE   = 2,   /*dataset creation template                  */
+    H5P_DATASET_XFER     = 3,   /*dataset transfer template                  */
+
+    H5P_NCLASSES         = 4    /*this must be last!                         */
+} H5P_class_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Public functions */
+hid_t H5Pcreate (H5P_class_t type);
+herr_t H5Pclose (hid_t tid);
+hid_t H5Pcopy (hid_t tid);
+H5P_class_t H5Pget_class (hid_t tid);
+herr_t H5Pget_version (hid_t tid, int *boot/*out*/, int *heap/*out*/,
+                       int *freelist/*out*/, int *stab/*out*/,
+                       int *shhdr/*out*/);
+herr_t H5Pset_userblock (hid_t tid, size_t size);
+herr_t H5Pget_userblock (hid_t tid, size_t *size);
+herr_t H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size);
+herr_t H5Pget_sizes (hid_t tid, size_t *sizeof_addr/*out*/,
+                     size_t *sizeof_size/*out*/);
+herr_t H5Pset_sym_k (hid_t tid, int ik, int lk);
+herr_t H5Pget_sym_k (hid_t tid, int *ik/*out*/, int *lk/*out*/);
+herr_t H5Pset_istore_k (hid_t tid, int ik);
+herr_t H5Pget_istore_k (hid_t tid, int *ik/*out*/);
+herr_t H5Pset_layout (hid_t tid, H5D_layout_t layout);
+H5D_layout_t H5Pget_layout (hid_t tid);
+herr_t H5Pset_chunk (hid_t tid, int ndims, const size_t dim[]);
+int H5Pget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
+herr_t H5Pset_stdio (hid_t tid);
+herr_t H5Pset_sec2 (hid_t tid);
+herr_t H5Pset_core (hid_t tid, size_t increment);
+herr_t H5Pset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid);
+herr_t H5Pset_family (hid_t tid, hid_t memb_tid);
+#ifdef HAVE_PARALLEL
+herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode);
+/* herr_t H5Pget_mpi (hid_t tid, int *ik); */  /* not defined yet */
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+#endif

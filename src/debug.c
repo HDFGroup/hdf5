@@ -17,7 +17,7 @@
 #include <H5private.h>
 #include <H5Aprivate.h>
 #include <H5Bprivate.h>
-#include <H5Cprivate.h>
+#include <H5Pprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
 #include <H5Hprivate.h>
@@ -57,7 +57,7 @@ main(int argc, char *argv[])
     /*
      * Open the file and get the file descriptor.
      */
-    if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, H5C_DEFAULT)) < 0) {
+    if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
         fprintf(stderr, "cannot open file\n");
         HDexit(1);
     }

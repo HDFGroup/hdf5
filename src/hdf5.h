@@ -19,19 +19,19 @@
 #define _HDF5_H
 
 #include <H5public.h>
-#include <H5Apublic.h>
-#include <H5ACpublic.h>
-#include <H5Bpublic.h>
-#include <H5Cpublic.h>
-#include <H5Dpublic.h>
-#include <H5Epublic.h>
-#include <H5Fpublic.h>
-#include <H5Gpublic.h>
+#include <H5Apublic.h>      /* Atoms */
+#include <H5ACpublic.h>     /* Metadata cache */
+#include <H5Bpublic.h>      /* B-trees */
+#include <H5Dpublic.h>      /* Datasets */
+#include <H5Epublic.h>      /* Errors */
+#include <H5Fpublic.h>      /* Files */
+#include <H5Gpublic.h>      /* Groups */
 #include <H5Hpublic.h>
-#include <H5Mpublic.h>
+#include <H5Mpublic.h>      /* "Meta" */
 #include <H5MFpublic.h>
 #include <H5MMpublic.h>
-#include <H5Opublic.h>
-#include <H5Spublic.h>
-#include <H5Tpublic.h>
+#include <H5Opublic.h>      /* Object headers */
+#include <H5Ppublic.h>      /* Property lists */
+#include <H5Spublic.h>      /* Dataspaces */
+#include <H5Tpublic.h>      /* Datatypes */
 #endif

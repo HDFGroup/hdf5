@@ -49,13 +49,13 @@ dataspace = H5Screate_simple(RANK, dims, maxdims);
 /*
  * Create a new file. If file exists its contents will be overwritten.
  */
-file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
 /* 
  * Modify dataset creation properties, i.e. enable chunking.
  */
-cparms = H5Ccreate (H5C_DATASET_CREATE);
-status = H5Cset_chunk( cparms, RANK, chunk_dims);
+cparms = H5Pcreate (H5P_DATASET_CREATE);
+status = H5Pset_chunk( cparms, RANK, chunk_dims);
 
 /*
  * Create a new dataset within the file using cparms
@@ -83,7 +83,7 @@ status = H5Sset_hyperslab(filespace, offset, dims1, NULL);
  * Write the data to the hyperslab.
  */
 status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
-                  H5C_DEFAULT, data1);
+                  H5P_DEFAULT, data1);
 
 /*
  * Extend the dataset. Dataset becomes 10 x 3.
@@ -110,7 +110,7 @@ dataspace = H5Screate_simple(RANK, dims2, NULL);
  * Write the data to the hyperslab.
  */
 status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
-                  H5C_DEFAULT, data2);
+                  H5P_DEFAULT, data2);
 
 /*
  * Extend the dataset. Dataset becomes 10 x 5.
@@ -137,7 +137,7 @@ dataspace = H5Screate_simple(RANK, dims3, NULL);
  * Write the data to the hyperslab.
  */
 status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
-                  H5C_DEFAULT, data3);
+                  H5P_DEFAULT, data3);
 
 /*
  * Resulting dataset

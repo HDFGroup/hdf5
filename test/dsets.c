@@ -65,7 +65,7 @@ test_create(hid_t file)
      * not sure what they are, so we won't check.
      */
     dataset = H5Dcreate(file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space,
-                        H5C_DEFAULT);
+                        H5P_DEFAULT);
     if (dataset < 0) {
         puts("*FAILED*");
         if (!isatty(1)) {
@@ -88,7 +88,7 @@ test_create(hid_t file)
      * dataset can only be created once.
      */
     dataset = H5Dcreate(file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space,
-                        H5C_DEFAULT);
+                        H5P_DEFAULT);
     if (dataset >= 0) {
         puts("*FAILED*");
         if (!isatty(1)) {
@@ -135,11 +135,11 @@ test_create(hid_t file)
      * Create a new dataset that uses chunked storage instead of the default
      * layout.
      */
-    create_parms = H5Ccreate(H5C_DATASET_CREATE);
+    create_parms = H5Pcreate(H5P_DATASET_CREATE);
     assert(create_parms >= 0);
     csize[0] = 5;
     csize[1] = 100;
-    status = H5Cset_chunk(create_parms, 2, csize);
+    status = H5Pset_chunk(create_parms, 2, csize);
     assert(status >= 0);
 
     dataset = H5Dcreate(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space,
@@ -214,12 +214,12 @@ test_simple_io(hid_t file)
 
     /* Create the dataset */
     dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
-                        H5C_DEFAULT);
+                        H5P_DEFAULT);
     assert(dataset >= 0);
 
     /* Write the data to the dataset */
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                      H5C_DEFAULT, points);
+                      H5P_DEFAULT, points);
     if (status < 0) {
         puts("*FAILED*");
         if (!isatty(1)) {
@@ -230,7 +230,7 @@ test_simple_io(hid_t file)
     }
     /* Read the dataset back */
     status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                     H5C_DEFAULT, check);
+                     H5P_DEFAULT, check);
     if (status < 0) {
         puts("*FAILED*");
         if (!isatty(1)) {
@@ -306,12 +306,12 @@ test_tconv(hid_t file)
 
     /* Create the data set */
     dataset = H5Dcreate(file, DSET_TCONV_NAME, H5T_NATIVE_INT32, space,
-                        H5C_DEFAULT);
+                        H5P_DEFAULT);
     assert(dataset >= 0);
 
     /* Write the data to the dataset */
     status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL,
-                      H5C_DEFAULT, out);
+                      H5P_DEFAULT, out);
     if (status<0) H5Eprint (H5E_thrdid_g, stdout);
     assert(status >= 0);
 
@@ -330,7 +330,7 @@ test_tconv(hid_t file)
     }
 
     /* Read data with byte order conversion */
-    status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5C_DEFAULT, in);
+    status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, in);
     assert(status >= 0);
 
     /* Check */
@@ -375,7 +375,7 @@ main(void)
     assert (status>=0);
 
     unlink("dataset.h5");
-    file = H5Fcreate("dataset.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+    file = H5Fcreate("dataset.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(file >= 0);
 
     status = test_create(file);

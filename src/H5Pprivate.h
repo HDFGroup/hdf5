@@ -11,19 +11,19 @@
  ****************************************************************************/
 
 /*
- * This file contains private information about the H5C module
+ * This file contains private information about the H5P module
  */
-#ifndef _H5Cprivate_H
-#define _H5Cprivate_H
+#ifndef _H5Pprivate_H
+#define _H5Pprivate_H
 
-#include <H5Cpublic.h>
+#include <H5Ppublic.h>
 
 /* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Fprivate.h>
 
-hid_t H5C_create (H5C_class_t type, void *tmpl);
-void *H5C_copy (H5C_class_t type, const void *src);
-herr_t H5C_close (H5C_class_t type, void *tmpl);
+hid_t H5P_create (H5P_class_t type, void *tmpl);
+void *H5P_copy (H5P_class_t type, const void *src);
+herr_t H5P_close (H5P_class_t type, void *tmpl);
 
 #endif

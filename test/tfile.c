@@ -28,7 +28,7 @@ static char             RcsId[] = "$Revision$";
 
 #include <H5private.h>
 #include <H5Bprivate.h>
-#include <H5Cprivate.h>
+#include <H5Pprivate.h>
 #include <H5Mprivate.h>
 
 #define F1_USERBLOCK_SIZE  0
@@ -71,11 +71,11 @@ test_file_create(void)
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
     /* Create first file */
-    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Try to create first file again (should fail) */
-    fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+    fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
 
     /* Get the file-creation template */
@@ -83,19 +83,19 @@ test_file_create(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Cget_userblock(tmpl1, &parm);
-    CHECK(ret, FAIL, "H5Cget_userblock");
-    VERIFY(parm, F1_USERBLOCK_SIZE, "H5Cget_userblock");
+    ret = H5Pget_userblock(tmpl1, &parm);
+    CHECK(ret, FAIL, "H5Pget_userblock");
+    VERIFY(parm, F1_USERBLOCK_SIZE, "H5Pget_userblock");
 
-    ret = H5Cget_sizes(tmpl1, &parm, &parm2);
-    CHECK(ret, FAIL, "H5Cget_sizes");
-    VERIFY(parm, F1_OFFSET_SIZE, "H5Cget_sizes");
-    VERIFY(parm2, F1_LENGTH_SIZE, "H5Cget_sizes");
+    ret = H5Pget_sizes(tmpl1, &parm, &parm2);
+    CHECK(ret, FAIL, "H5Pget_sizes");
+    VERIFY(parm, F1_OFFSET_SIZE, "H5Pget_sizes");
+    VERIFY(parm2, F1_LENGTH_SIZE, "H5Pget_sizes");
 
-    ret = H5Cget_sym_k(tmpl1, &iparm, &iparm2);
-    CHECK(ret, FAIL, "H5Cget_sym_k");
-    VERIFY(iparm, F1_SYM_INTERN_K, "H5Cget_sym_k");
-    VERIFY(iparm2, F1_SYM_LEAF_K, "H5Cget_sym_k");
+    ret = H5Pget_sym_k(tmpl1, &iparm, &iparm2);
+    CHECK(ret, FAIL, "H5Pget_sym_k");
+    VERIFY(iparm, F1_SYM_INTERN_K, "H5Pget_sym_k");
+    VERIFY(iparm2, F1_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Release file-creation template */
     ret = H5Mclose(tmpl1);
@@ -108,24 +108,24 @@ test_file_create(void)
 #endif
 
     /* Create a new file with a non-standard file-creation template */
-    tmpl1 = H5Ccreate(H5C_FILE_CREATE);
-    CHECK(tmpl1, FAIL, "H5Cnew");
+    tmpl1 = H5Pcreate(H5P_FILE_CREATE);
+    CHECK(tmpl1, FAIL, "H5Pnew");
 
     /* Set the new file-creation parameters */
-    ret = H5Cset_userblock(tmpl1, F2_USERBLOCK_SIZE);
-    CHECK(ret, FAIL, "H5Cset_userblock");
+    ret = H5Pset_userblock(tmpl1, F2_USERBLOCK_SIZE);
+    CHECK(ret, FAIL, "H5Pset_userblock");
 
-    ret = H5Cset_sizes(tmpl1, F2_OFFSET_SIZE, F2_LENGTH_SIZE);
-    CHECK(ret, FAIL, "H5Cset_sizes");
+    ret = H5Pset_sizes(tmpl1, F2_OFFSET_SIZE, F2_LENGTH_SIZE);
+    CHECK(ret, FAIL, "H5Pset_sizes");
 
-    ret = H5Cset_sym_k(tmpl1, F2_SYM_INTERN_K, F2_SYM_LEAF_K);
-    CHECK(ret, FAIL, "H5Cset_sym_k");
+    ret = H5Pset_sym_k(tmpl1, F2_SYM_INTERN_K, F2_SYM_LEAF_K);
+    CHECK(ret, FAIL, "H5Pset_sym_k");
 
     /*
      * Try to create second file, with non-standard file-creation template
      * params.
      */
-    fid2 = H5Fcreate(FILE2, H5F_ACC_TRUNC, tmpl1, H5C_DEFAULT);
+    fid2 = H5Fcreate(FILE2, H5F_ACC_TRUNC, tmpl1, H5P_DEFAULT);
     CHECK(fid2, FAIL, "H5Fcreate");
 
     /* Release file-creation template */
@@ -137,19 +137,19 @@ test_file_create(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Cget_userblock(tmpl1, &parm);
-    CHECK(ret, FAIL, "H5Cget_userblock");
-    VERIFY(parm, F2_USERBLOCK_SIZE, "H5Cget_userblock");
+    ret = H5Pget_userblock(tmpl1, &parm);
+    CHECK(ret, FAIL, "H5Pget_userblock");
+    VERIFY(parm, F2_USERBLOCK_SIZE, "H5Pget_userblock");
 
-    ret = H5Cget_sizes(tmpl1, &parm, &parm2);
-    CHECK(ret, FAIL, "H5Cget_sizes");
-    VERIFY(parm, F2_OFFSET_SIZE, "H5Cget_sizes");
-    VERIFY(parm2, F2_LENGTH_SIZE, "H5Cget_sizes");
+    ret = H5Pget_sizes(tmpl1, &parm, &parm2);
+    CHECK(ret, FAIL, "H5Pget_sizes");
+    VERIFY(parm, F2_OFFSET_SIZE, "H5Pget_sizes");
+    VERIFY(parm2, F2_LENGTH_SIZE, "H5Pget_sizes");
 
-    ret = H5Cget_sym_k(tmpl1, &iparm, &iparm2);
-    CHECK(ret, FAIL, "H5Cget_sym_k");
-    VERIFY(iparm, F2_SYM_INTERN_K, "H5Cget_sym_k");
-    VERIFY(iparm2, F2_SYM_LEAF_K, "H5Cget_sym_k");
+    ret = H5Pget_sym_k(tmpl1, &iparm, &iparm2);
+    CHECK(ret, FAIL, "H5Pget_sym_k");
+    VERIFY(iparm, F2_SYM_INTERN_K, "H5Pget_sym_k");
+    VERIFY(iparm2, F2_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Clone the file-creation template */
     tmpl2 = H5Mcopy(tmpl1);
@@ -160,14 +160,14 @@ test_file_create(void)
     CHECK(ret, FAIL, "H5Mrelease");
 
     /* Set the new file-creation parameter */
-    ret = H5Cset_userblock(tmpl2, F3_USERBLOCK_SIZE);
-    CHECK(ret, FAIL, "H5Cset_userblock");
+    ret = H5Pset_userblock(tmpl2, F3_USERBLOCK_SIZE);
+    CHECK(ret, FAIL, "H5Pset_userblock");
 
     /*
      * Try to create second file, with non-standard file-creation template
      * params
      */
-    fid3 = H5Fcreate(FILE3, H5F_ACC_TRUNC, tmpl2, H5C_DEFAULT);
+    fid3 = H5Fcreate(FILE3, H5F_ACC_TRUNC, tmpl2, H5P_DEFAULT);
     CHECK(fid3, FAIL, "H5Fcreate");
 
     /* Release file-creation template */
@@ -179,19 +179,19 @@ test_file_create(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Cget_userblock(tmpl1, &parm);
-    CHECK(ret, FAIL, "H5Cget_userblock");
-    VERIFY(parm, F3_USERBLOCK_SIZE, "H5Cget_userblock");
+    ret = H5Pget_userblock(tmpl1, &parm);
+    CHECK(ret, FAIL, "H5Pget_userblock");
+    VERIFY(parm, F3_USERBLOCK_SIZE, "H5Pget_userblock");
 
-    ret = H5Cget_sizes(tmpl1, &parm, &parm2);
-    CHECK(ret, FAIL, "H5Cget_sizes");
-    VERIFY(parm, F3_OFFSET_SIZE, "H5Cget_sizes");
-    VERIFY(parm2, F3_LENGTH_SIZE, "H5Cget_sizes");
+    ret = H5Pget_sizes(tmpl1, &parm, &parm2);
+    CHECK(ret, FAIL, "H5Pget_sizes");
+    VERIFY(parm, F3_OFFSET_SIZE, "H5Pget_sizes");
+    VERIFY(parm2, F3_LENGTH_SIZE, "H5Pget_sizes");
 
-    ret = H5Cget_sym_k(tmpl1, &iparm, &iparm2);
-    CHECK(ret, FAIL, "H5Cget_sym_k");
-    VERIFY(iparm, F3_SYM_INTERN_K, "H5Cget_sym_k");
-    VERIFY(iparm2, F3_SYM_LEAF_K, "H5Cget_sym_k");
+    ret = H5Pget_sym_k(tmpl1, &iparm, &iparm2);
+    CHECK(ret, FAIL, "H5Pget_sym_k");
+    VERIFY(iparm, F3_SYM_INTERN_K, "H5Pget_sym_k");
+    VERIFY(iparm2, F3_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Release file-creation template */
     ret = H5Mclose(tmpl1);
@@ -229,7 +229,7 @@ test_file_open(void)
     MESSAGE(5, ("Testing Low-Level File Opening I/O\n"));
 
     /* Open first file */
-    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5C_DEFAULT);
+    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Get the file-creation template */
@@ -237,19 +237,19 @@ test_file_open(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Cget_userblock(tmpl1, &parm);
-    CHECK(ret, FAIL, "H5Cget_userblock");
-    VERIFY(parm, F2_USERBLOCK_SIZE, "H5Cget_userblock");
+    ret = H5Pget_userblock(tmpl1, &parm);
+    CHECK(ret, FAIL, "H5Pget_userblock");
+    VERIFY(parm, F2_USERBLOCK_SIZE, "H5Pget_userblock");
 
-    ret = H5Cget_sizes(tmpl1, &parm, &parm2);
-    CHECK(ret, FAIL, "H5Cget_sizes");
-    VERIFY(parm, F2_OFFSET_SIZE, "H5Cget_sizes");
-    VERIFY(parm2, F2_LENGTH_SIZE, "H5Cget_sizes");
+    ret = H5Pget_sizes(tmpl1, &parm, &parm2);
+    CHECK(ret, FAIL, "H5Pget_sizes");
+    VERIFY(parm, F2_OFFSET_SIZE, "H5Pget_sizes");
+    VERIFY(parm2, F2_LENGTH_SIZE, "H5Pget_sizes");
 
-    ret = H5Cget_sym_k(tmpl1, &iparm, &iparm2);
-    CHECK(ret, FAIL, "H5Cget_sym_k");
-    VERIFY(iparm, F2_SYM_INTERN_K, "H5Cget_sym_k");
-    VERIFY(iparm2, F2_SYM_LEAF_K, "H5Cget_sym_k");
+    ret = H5Pget_sym_k(tmpl1, &iparm, &iparm2);
+    CHECK(ret, FAIL, "H5Pget_sym_k");
+    VERIFY(iparm, F2_SYM_INTERN_K, "H5Pget_sym_k");
+    VERIFY(iparm2, F2_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Release file-creation template */
     ret = H5Mclose(tmpl1);

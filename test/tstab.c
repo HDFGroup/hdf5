@@ -19,7 +19,7 @@
 #include <H5private.h>
 #include <H5Aprivate.h>
 #include <H5ACprivate.h>
-#include <H5Cprivate.h>
+#include <H5Pprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
 #include <H5Oprivate.h>
@@ -67,7 +67,7 @@ test_1(void)
      */
 
     /* create the file */
-    fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+    fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");
@@ -130,7 +130,7 @@ test_1(void)
      */
 
     /* create the file */
-    fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
+    fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");
@@ -233,17 +233,17 @@ test_2(void)
      * Use larger symbol table data structures to be more efficient, use
      * defaults to bang harder on the library for testing.
      */
-    create_plist = H5Ccreate(H5C_FILE_CREATE);
-    H5Cset_sym_k(create_plist, 16, 16);
+    create_plist = H5Pcreate(H5P_FILE_CREATE);
+    H5Pset_sym_k(create_plist, 16, 16);
 
     /*
      * File access property list.
      */
 #if 0
-    access_plist = H5Ccreate (H5C_FILE_ACCESS);
-    H5Cset_core (access_plist, 3000000);
+    access_plist = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_core (access_plist, 3000000);
 #else
-    access_plist = H5C_DEFAULT;
+    access_plist = H5P_DEFAULT;
 #endif
 
     /* create the file */

@@ -48,7 +48,7 @@ for (j = 0; j < NX; j++) {
 /*
  * Open the file and the dataset.
  */
-file = H5Fopen(FILE, H5F_ACC_RDONLY, H5C_DEFAULT);
+file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
 dataset = H5Dopen(file, DATASETNAME);
 
 /*
@@ -103,7 +103,7 @@ status = H5Sset_hyperslab(memspace, offset_out, count_out, NULL);
  * memory and display.
  */
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace,
-                 H5C_DEFAULT, data_out);
+                 H5P_DEFAULT, data_out);
 for (j = 0; j < NX; j++) {
     for (i = 0; i < NY; i++) printf("%d ", data_out[j][i][0]);
     printf("\n");

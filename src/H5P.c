@@ -22,26 +22,26 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5private.h>          /* Generic Functions                      */
 #include <H5Aprivate.h>         /* Atoms                          */
 #include <H5Bprivate.h>         /* B-tree subclass names          */
-#include <H5Cprivate.h>         /* Template information           */
+#include <H5Pprivate.h>         /* Template information           */
 #include <H5Dprivate.h>         /* Datasets                               */
 #include <H5Eprivate.h>         /* Error handling                 */
 #include <H5MMprivate.h>        /* Memory management                      */
 
-#define PABLO_MASK      H5C_mask
+#define PABLO_MASK      H5P_mask
 
 /* Is the interface initialized? */
 static hbool_t          interface_initialize_g = FALSE;
-#define INTERFACE_INIT H5C_init_interface
-static herr_t           H5C_init_interface(void);
+#define INTERFACE_INIT H5P_init_interface
+static herr_t           H5P_init_interface(void);
 
 /* PRIVATE PROTOTYPES */
-static void             H5C_term_interface(void);
+static void             H5P_term_interface(void);
 
 /*--------------------------------------------------------------------------
 NAME
-   H5C_init_interface -- Initialize interface-specific information
+   H5P_init_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5C_init_interface()
+    herr_t H5P_init_interface()
    
 RETURNS
    SUCCEED/FAIL
@@ -50,13 +50,13 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5C_init_interface(void)
+H5P_init_interface(void)
 {
     herr_t                  ret_value = SUCCEED;
     intn                    i;
     herr_t                  status;
 
-    FUNC_ENTER(H5C_init_interface, FAIL);
+    FUNC_ENTER(H5P_init_interface, FAIL);
 
     /*
      * Make sure the file creation and file access default templates are
@@ -65,17 +65,17 @@ H5C_init_interface(void)
      */
     if (H5F_init_interface ()<0) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		       "unable to initialize H5F and H5C interfaces");
+		       "unable to initialize H5F and H5P interfaces");
     }
 
-    assert(H5C_NCLASSES <= H5_TEMPLATE_MAX - H5_TEMPLATE_0);
+    assert(H5P_NCLASSES <= H5_TEMPLATE_MAX - H5_TEMPLATE_0);
 
     /*
      * Initialize the mappings between template classes and atom groups. We
      * keep the two separate because template classes are publicly visible but
      * atom groups aren't.
      */
-    for (i = 0; i < H5C_NCLASSES; i++) {
+    for (i = 0; i < H5P_NCLASSES; i++) {
         status = H5A_init_group((group_t)(H5_TEMPLATE_0 +i),
 				H5A_TEMPID_HASHSIZE, 0, NULL);
         if (status < 0) ret_value = FAIL;
@@ -88,7 +88,7 @@ H5C_init_interface(void)
     /*
      * Register cleanup function.
      */
-    if (H5_add_exit(H5C_term_interface) < 0) {
+    if (H5_add_exit(H5P_term_interface) < 0) {
         HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
                       "unable to install atexit function");
     }
@@ -98,11 +98,11 @@ H5C_init_interface(void)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5C_term_interface
+    H5P_term_interface
  PURPOSE
-    Terminate various H5C objects
+    Terminate various H5P objects
  USAGE
-    void H5C_term_interface()
+    void H5P_term_interface()
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -114,23 +114,23 @@ H5C_init_interface(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static void
-H5C_term_interface(void)
+H5P_term_interface(void)
 {
     intn                    i;
 
-    for (i = 0; i < H5C_NCLASSES; i++) {
+    for (i = 0; i < H5P_NCLASSES; i++) {
         H5A_destroy_group((group_t)(H5_TEMPLATE_0 + i));
     }
 }
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Ccreate
+    H5Pcreate
  PURPOSE
     Returns a copy of the default template for some class of templates.
  USAGE
-    herr_t H5Ccreate (type)
-        H5C_class_t type;       IN: Template class whose default is desired.
+    herr_t H5Pcreate (type)
+        H5P_class_t type;       IN: Template class whose default is desired.
  RETURNS
     Template ID or FAIL
  
@@ -143,31 +143,31 @@ H5C_term_interface(void)
     Returns a copy of the default template for some class of templates.
 --------------------------------------------------------------------------*/
 hid_t
-H5Ccreate(H5C_class_t type)
+H5Pcreate(H5P_class_t type)
 {
     hid_t                   ret_value = FAIL;
     void                   *tmpl = NULL;
 
-    FUNC_ENTER(H5Ccreate, FAIL);
+    FUNC_ENTER(H5Pcreate, FAIL);
 
     /* Allocate a new template and initialize it with default values */
     switch (type) {
-    case H5C_FILE_CREATE:
+    case H5P_FILE_CREATE:
 	tmpl = H5MM_xmalloc(sizeof(H5F_create_t));
         memcpy(tmpl, &H5F_create_dflt, sizeof(H5F_create_t));
         break;
 
-    case H5C_FILE_ACCESS:
+    case H5P_FILE_ACCESS:
         tmpl = H5MM_xmalloc(sizeof(H5F_access_t));
         memcpy(tmpl, &H5F_access_dflt, sizeof(H5F_access_t));
         break;
 
-    case H5C_DATASET_CREATE:
+    case H5P_DATASET_CREATE:
         tmpl = H5MM_xmalloc(sizeof(H5D_create_t));
         memcpy(tmpl, &H5D_create_dflt, sizeof(H5D_create_t));
         break;
 
-    case H5C_DATASET_XFER:
+    case H5P_DATASET_XFER:
         tmpl = H5MM_xmalloc(sizeof(H5D_xfer_t));
         memcpy(tmpl, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
         break;
@@ -178,7 +178,7 @@ H5Ccreate(H5C_class_t type)
     }
 
     /* Atomize the new template */
-    if ((ret_value = H5C_create(type, tmpl)) < 0) {
+    if ((ret_value = H5P_create(type, tmpl)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
                       "can't register template");
     }
@@ -186,11 +186,11 @@ H5Ccreate(H5C_class_t type)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_create
+ * Function:    H5P_create
  *
  * Purpose:     Given a pointer to some template struct, atomize the template
  *              and return its ID. The template memory is not copied, so the
- *              caller should not free it; it will be freed by H5C_release().
+ *              caller should not free it; it will be freed by H5P_release().
  *
  * Return:      Success:        A new template ID.
  *
@@ -204,14 +204,14 @@ H5Ccreate(H5C_class_t type)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5C_create(H5C_class_t type, void *tmpl)
+H5P_create(H5P_class_t type, void *tmpl)
 {
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5C_create, FAIL);
+    FUNC_ENTER(H5P_create, FAIL);
 
     /* check args */
-    assert(type >= 0 && type < H5C_NCLASSES);
+    assert(type >= 0 && type < H5P_NCLASSES);
     assert(tmpl);
 
     /* Atomize the new template */
@@ -225,11 +225,11 @@ H5C_create(H5C_class_t type, void *tmpl)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Cclose
+    H5Pclose
  PURPOSE
     Release access to a template object.
  USAGE
-    herr_t H5Cclose(oid)
+    herr_t H5Pclose(oid)
         hid_t oid;       IN: Template object to release access to
  RETURNS
     SUCCEED/FAIL
@@ -237,15 +237,15 @@ H5C_create(H5C_class_t type, void *tmpl)
         This function releases access to a template object
 --------------------------------------------------------------------------*/
 herr_t
-H5Cclose(hid_t tid)
+H5Pclose(hid_t tid)
 {
-    H5C_class_t		type;
+    H5P_class_t		type;
     void                *tmpl = NULL;
 
-    FUNC_ENTER(H5Cclose, FAIL);
+    FUNC_ENTER(H5Pclose, FAIL);
 
     /* Check arguments */
-    if ((type=H5Cget_class (tid))<0 ||
+    if ((type=H5Pget_class (tid))<0 ||
 	NULL==(tmpl=H5A_object (tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     }
@@ -256,14 +256,14 @@ H5Cclose(hid_t tid)
      * free function is not registered as part of the group because it takes
      * an extra argument.
      */
-    if (0==H5A_dec_ref(tid)) H5C_close (type, tmpl);
+    if (0==H5A_dec_ref(tid)) H5P_close (type, tmpl);
 
     FUNC_LEAVE (SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5C_close
+ * Function:	H5P_close
  *
  * Purpose:	Closes a template and frees the memory associated with the
  *		template.
@@ -280,24 +280,24 @@ H5Cclose(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_close (H5C_class_t type, void *tmpl)
+H5P_close (H5P_class_t type, void *tmpl)
 {
-    FUNC_ENTER (H5C_close, FAIL);
+    FUNC_ENTER (H5P_close, FAIL);
 
     /* Check args */
     assert (tmpl);
 
     /* Some templates may need to do special things */
     switch (type) {
-    case H5C_FILE_ACCESS:
+    case H5P_FILE_ACCESS:
 #ifdef LATER
 	/* Need to free the COMM and INFO objects too. */
 #endif
 	break;
 	
-    case H5C_FILE_CREATE:
-    case H5C_DATASET_CREATE:
-    case H5C_DATASET_XFER:
+    case H5P_FILE_CREATE:
+    case H5P_DATASET_CREATE:
+    case H5P_DATASET_XFER:
 	/*nothing to do*/
 	break;
 
@@ -313,13 +313,13 @@ H5C_close (H5C_class_t type, void *tmpl)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_class
+ * Function:    H5Pget_class
  *
  * Purpose:     Returns the class identifier for a template.
  *
  * Return:      Success:        A template class
  *
- *              Failure:        H5C_NO_CLASS (-1)
+ *              Failure:        H5P_NO_CLASS (-1)
  *
  * Programmer:  Robb Matzke
  *              Wednesday, December  3, 1997
@@ -328,27 +328,27 @@ H5C_close (H5C_class_t type, void *tmpl)
  *
  *-------------------------------------------------------------------------
  */
-H5C_class_t
-H5Cget_class(hid_t tid)
+H5P_class_t
+H5Pget_class(hid_t tid)
 {
     group_t                 group;
-    H5C_class_t             ret_value = H5C_NO_CLASS;
+    H5P_class_t             ret_value = H5P_NO_CLASS;
 
-    FUNC_ENTER(H5Cget_class, H5C_NO_CLASS);
+    FUNC_ENTER(H5Pget_class, H5P_NO_CLASS);
 
     if ((group = H5A_group(tid)) < 0 ||
 #ifndef NDEBUG
         group >= H5_TEMPLATE_MAX ||
 #endif
         group < H5_TEMPLATE_0) {
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5C_NO_CLASS, "not a template");
+        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS, "not a template");
     }
-    ret_value = (H5C_class_t)(group - H5_TEMPLATE_0);
+    ret_value = (H5P_class_t)(group - H5_TEMPLATE_0);
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_version
+ * Function:    H5Pget_version
  *
  * Purpose:     Retrieves version information for various parts of a file.
  *
@@ -374,15 +374,15 @@ H5Cget_class(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
+H5Pget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
          int *freelist /*out */ , int *stab /*out */ , int *shhdr /*out */ )
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cget_version, FAIL);
+    FUNC_ENTER(H5Pget_version, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -403,7 +403,7 @@ H5Cget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cset_userblock
+ * Function:    H5Pset_userblock
  *
  * Purpose:     Sets the userblock size field of a file creation template.
  *
@@ -419,15 +419,15 @@ H5Cget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_userblock(hid_t tid, size_t size)
+H5Pset_userblock(hid_t tid, size_t size)
 {
     intn                    i;
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cset_userblock, FAIL);
+    FUNC_ENTER(H5Pset_userblock, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -448,7 +448,7 @@ H5Cset_userblock(hid_t tid, size_t size)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_userblock
+ * Function:    H5Pget_userblock
  *
  * Purpose:     Queries the size of a user block in a file creation template.
  *
@@ -464,14 +464,14 @@ H5Cset_userblock(hid_t tid, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cget_userblock(hid_t tid, size_t *size)
+H5Pget_userblock(hid_t tid, size_t *size)
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cget_userblock, FAIL);
+    FUNC_ENTER(H5Pget_userblock, FAIL);
 
     /* Check args */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -484,7 +484,7 @@ H5Cget_userblock(hid_t tid, size_t *size)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cset_sizes
+ * Function:    H5Pset_sizes
  *
  * Purpose:     Sets file size-of addresses and sizes.  TEMPLATE
  *              should be a file creation template.  A value of zero causes
@@ -502,14 +502,14 @@ H5Cget_userblock(hid_t tid, size_t *size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
+H5Pset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cset_sizeof_addr, FAIL);
+    FUNC_ENTER(H5Pset_sizeof_addr, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -538,7 +538,7 @@ H5Cset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_sizes
+ * Function:    H5Pget_sizes
  *
  * Purpose:     Returns the size of address and size quantities stored in a
  *              file according to a file creation template.  Either (or even
@@ -556,15 +556,15 @@ H5Cset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cget_sizes(hid_t tid,
+H5Pget_sizes(hid_t tid,
              size_t *sizeof_addr /*out */ , size_t *sizeof_size /*out */ )
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cget_sizes, FAIL);
+    FUNC_ENTER(H5Pget_sizes, FAIL);
 
     /* Check args */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -579,7 +579,7 @@ H5Cget_sizes(hid_t tid,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cset_sym_k
+ * Function:    H5Pset_sym_k
  *
  * Purpose:     IK is one half the rank of a tree that stores a symbol
  *              table for a group.  Internal nodes of the symbol table are on
@@ -608,14 +608,14 @@ H5Cget_sizes(hid_t tid,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_sym_k(hid_t tid, int ik, int lk)
+H5Pset_sym_k(hid_t tid, int ik, int lk)
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cset_sym_k, FAIL);
+    FUNC_ENTER(H5Pset_sym_k, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -631,10 +631,10 @@ H5Cset_sym_k(hid_t tid, int ik, int lk)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_sym_k
+ * Function:    H5Pget_sym_k
  *
  * Purpose:     Retrieves the symbol table B-tree 1/2 rank (IK) and the
- *              symbol table leaf node 1/2 size (LK).  See H5Cset_sym_k() for
+ *              symbol table leaf node 1/2 size (LK).  See H5Pset_sym_k() for
  *              details. Either (or even both) IK and LK may be null
  *              pointers.
  *
@@ -650,14 +650,14 @@ H5Cset_sym_k(hid_t tid, int ik, int lk)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
+H5Pget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cget_sym_k, FAIL);
+    FUNC_ENTER(H5Pget_sym_k, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -672,7 +672,7 @@ H5Cget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cset_istore_k
+ * Function:    H5Pset_istore_k
  *
  * Purpose:     IK is one half the rank of a tree that stores chunked raw
  *              data.  On average, such a tree will be 75% full, or have an
@@ -690,14 +690,14 @@ H5Cget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_istore_k(hid_t tid, int ik)
+H5Pset_istore_k(hid_t tid, int ik)
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cset_istore_k, FAIL);
+    FUNC_ENTER(H5Pset_istore_k, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -713,10 +713,10 @@ H5Cset_istore_k(hid_t tid, int ik)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_istore_k
+ * Function:    H5Pget_istore_k
  *
  * Purpose:     Queries the 1/2 rank of an indexed storage B-tree.  See
- *              H5Cset_istore_k() for details.  The argument IK may be the
+ *              H5Pset_istore_k() for details.  The argument IK may be the
  *              null pointer.
  *
  * Return:      Success:        SUCCEED, size returned through IK
@@ -731,14 +731,14 @@ H5Cset_istore_k(hid_t tid, int ik)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cget_istore_k(hid_t tid, int *ik /*out */ )
+H5Pget_istore_k(hid_t tid, int *ik /*out */ )
 {
     H5F_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cget_istore_k, FAIL);
+    FUNC_ENTER(H5Pget_istore_k, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_CREATE != H5Cget_class(tid) ||
+    if (H5P_FILE_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
@@ -751,7 +751,7 @@ H5Cget_istore_k(hid_t tid, int *ik /*out */ )
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cset_layout
+ * Function:    H5Pset_layout
  *
  * Purpose:     Sets the layout of raw data in the file.
  *
@@ -767,14 +767,14 @@ H5Cget_istore_k(hid_t tid, int *ik /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_layout(hid_t tid, H5D_layout_t layout)
+H5Pset_layout(hid_t tid, H5D_layout_t layout)
 {
     H5D_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cset_layout, FAIL);
+    FUNC_ENTER(H5Pset_layout, FAIL);
 
     /* Check arguments */
-    if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
+    if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a dataset creation template");
@@ -790,7 +790,7 @@ H5Cset_layout(hid_t tid, H5D_layout_t layout)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_layout
+ * Function:    H5Pget_layout
  *
  * Purpose:     Retrieves layout type of a dataset creation template.
  *
@@ -806,14 +806,14 @@ H5Cset_layout(hid_t tid, H5D_layout_t layout)
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
-H5Cget_layout(hid_t tid)
+H5Pget_layout(hid_t tid)
 {
     H5D_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cget_layout, H5D_LAYOUT_ERROR);
+    FUNC_ENTER(H5Pget_layout, H5D_LAYOUT_ERROR);
 
     /* Check arguments */
-    if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
+    if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
                       "not a dataset creation template");
@@ -822,7 +822,7 @@ H5Cget_layout(hid_t tid)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cset_chunk
+ * Function:    H5Pset_chunk
  *
  * Purpose:     Sets the number of dimensions and the size of each chunk to
  *              the values specified.  The dimensionality of the chunk should
@@ -843,15 +843,15 @@ H5Cget_layout(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_chunk(hid_t tid, int ndims, const size_t dim[])
+H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
 {
     int                     i;
     H5D_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cset_chunk, FAIL);
+    FUNC_ENTER(H5Pset_chunk, FAIL);
 
     /* Check arguments */
-    if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
+    if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a dataset creation template");
@@ -885,7 +885,7 @@ H5Cset_chunk(hid_t tid, int ndims, const size_t dim[])
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Cget_chunk
+ * Function:    H5Pget_chunk
  *
  * Purpose:     Retrieves the chunk size of chunked layout.  The chunk
  *              dimensionality is returned and the chunk size in each
@@ -904,15 +904,15 @@ H5Cset_chunk(hid_t tid, int ndims, const size_t dim[])
  *-------------------------------------------------------------------------
  */
 int
-H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
+H5Pget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 {
     int                     i;
     H5D_create_t           *tmpl = NULL;
 
-    FUNC_ENTER(H5Cget_chunk, FAIL);
+    FUNC_ENTER(H5Pget_chunk, FAIL);
 
     /* Check arguments */
-    if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
+    if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a dataset creation template");
@@ -930,7 +930,7 @@ H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Cset_stdio
+ * Function:	H5Pset_stdio
  *
  * Purpose:	Set the low level file driver to use the functions declared
  *		in the stdio.h file: fopen(), fseek() or fseek64(), fread(),
@@ -948,14 +948,14 @@ H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_stdio (hid_t tid)
+H5Pset_stdio (hid_t tid)
 {
     H5F_access_t	*tmpl = NULL;
     
-    FUNC_ENTER (H5Cset_stdio, FAIL);
+    FUNC_ENTER (H5Pset_stdio, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+    if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
@@ -969,7 +969,7 @@ H5Cset_stdio (hid_t tid)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Cset_sec2
+ * Function:	H5Pset_sec2
  *
  * Purpose:	Set the low-level file driver to use the functions declared
  *		in the unistd.h file: open(), lseek() or lseek64(), read(),
@@ -987,14 +987,14 @@ H5Cset_stdio (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_sec2 (hid_t tid)
+H5Pset_sec2 (hid_t tid)
 {
     H5F_access_t	*tmpl = NULL;
     
-    FUNC_ENTER (H5Cset_sec2, FAIL);
+    FUNC_ENTER (H5Pset_sec2, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+    if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
@@ -1008,7 +1008,7 @@ H5Cset_sec2 (hid_t tid)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Cset_core
+ * Function:	H5Pset_core
  *
  * Purpose:	Set the low-level file driver to use malloc() and free().
  *		This driver is restricted to temporary files which are not
@@ -1030,14 +1030,14 @@ H5Cset_sec2 (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_core (hid_t tid, size_t increment)
+H5Pset_core (hid_t tid, size_t increment)
 {
     H5F_access_t	*tmpl = NULL;
     
-    FUNC_ENTER (H5Cset_core, FAIL);
+    FUNC_ENTER (H5Pset_core, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+    if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
@@ -1056,7 +1056,7 @@ H5Cset_core (hid_t tid, size_t increment)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Cset_split
+ * Function:	H5Pset_split
  *
  * Purpose:	Set the low-level driver to split meta data from raw data,
  *		storing meta data in one file and raw data in another file.
@@ -1073,28 +1073,28 @@ H5Cset_core (hid_t tid, size_t increment)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid)
+H5Pset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid)
 {
     H5F_access_t	*tmpl = NULL;
     H5F_access_t	*meta_tmpl = NULL;
     H5F_access_t	*raw_tmpl = NULL;
     
-    FUNC_ENTER (H5Cset_split, FAIL);
+    FUNC_ENTER (H5Pset_split, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+    if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
-    if (H5C_DEFAULT!=meta_tid &&
-	(H5C_FILE_ACCESS != H5Cget_class(meta_tid) ||
+    if (H5P_DEFAULT!=meta_tid &&
+	(H5P_FILE_ACCESS != H5Pget_class(meta_tid) ||
 	 NULL == (tmpl = H5A_object(meta_tid)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
-    if (H5C_DEFAULT!=raw_tid &&
-	(H5C_FILE_ACCESS != H5Cget_class(raw_tid) ||
+    if (H5P_DEFAULT!=raw_tid &&
+	(H5P_FILE_ACCESS != H5Pget_class(raw_tid) ||
 	 NULL == (tmpl = H5A_object(raw_tid)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
@@ -1102,15 +1102,15 @@ H5Cset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid)
 
     /* Set driver */
     tmpl->driver = H5F_LOW_SPLIT;
-    tmpl->u.split.meta_access = H5C_copy (H5C_FILE_ACCESS, meta_tmpl);
-    tmpl->u.split.raw_access = H5C_copy (H5C_FILE_ACCESS, raw_tmpl);
+    tmpl->u.split.meta_access = H5P_copy (H5P_FILE_ACCESS, meta_tmpl);
+    tmpl->u.split.raw_access = H5P_copy (H5P_FILE_ACCESS, raw_tmpl);
 
     FUNC_LEAVE (SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Cset_family
+ * Function:	H5Pset_family
  *
  * Purpose:	Sets the low-level driver to stripe the hdf5 address space
  *		across a family of files.
@@ -1127,22 +1127,22 @@ H5Cset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_family (hid_t tid, hid_t memb_tid)
+H5Pset_family (hid_t tid, hid_t memb_tid)
 {
     
     H5F_access_t	*tmpl = NULL;
     H5F_access_t	*memb_tmpl = NULL;
     
-    FUNC_ENTER (H5Cset_family, FAIL);
+    FUNC_ENTER (H5Pset_family, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+    if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
-    if (H5C_DEFAULT!=memb_tid &&
-	(H5C_FILE_ACCESS != H5Cget_class(memb_tid) ||
+    if (H5P_DEFAULT!=memb_tid &&
+	(H5P_FILE_ACCESS != H5Pget_class(memb_tid) ||
 	 NULL == (tmpl = H5A_object(memb_tid)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
@@ -1150,7 +1150,7 @@ H5Cset_family (hid_t tid, hid_t memb_tid)
 
     /* Set driver */
     tmpl->driver = H5F_LOW_FAMILY;
-    tmpl->u.fam.memb_access = H5C_copy (H5C_FILE_ACCESS, memb_tmpl);
+    tmpl->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS, memb_tmpl);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1159,9 +1159,9 @@ H5Cset_family (hid_t tid, hid_t memb_tid)
 
 #ifdef HAVE_PARALLEL
 /*-------------------------------------------------------------------------
- * Function:    H5Cset_mpi
+ * Function:    H5Pset_mpi
  *
- * Signature:   herr_t H5Cset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info,
+ * Signature:   herr_t H5Pset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info,
  *                  uintn access_mode) 
  *
  * Purpose:     Store the access mode for MPIO call and the user supplied
@@ -1212,16 +1212,16 @@ H5Cset_family (hid_t tid, hid_t memb_tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
+H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
 {
     H5F_access_t           *tmpl = NULL;
     MPI_Comm		    lcomm;
     int			    mrc;		/* MPI return code */
 
-    FUNC_ENTER(H5Cset_mpi, FAIL);
+    FUNC_ENTER(H5Pset_mpi, FAIL);
 
     /* Check arguments */
-    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+    if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
@@ -1273,11 +1273,11 @@ H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Ccopy
+    H5Pcopy
  PURPOSE
     Copy a template
  USAGE
-    hid_t H5C_copy(tid)
+    hid_t H5P_copy(tid)
         hid_t tid;        IN: Template object to copy
  RETURNS
     Returns template ID (atom) on success, FAIL on failure
@@ -1295,26 +1295,26 @@ H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
     settings.
 --------------------------------------------------------------------------*/
 hid_t
-H5Ccopy(hid_t tid)
+H5Pcopy(hid_t tid)
 {
     const void             *tmpl = NULL;
     void                   *new_tmpl = NULL;
-    H5C_class_t             type;
+    H5P_class_t             type;
     hid_t                   ret_value = FAIL;
     group_t                 group;
 
-    FUNC_ENTER(H5Ccopy, FAIL);
+    FUNC_ENTER(H5Pcopy, FAIL);
 
     /* Check args */
     if (NULL == (tmpl = H5A_object(tid)) ||
-        (type = H5Cget_class(tid)) < 0 ||
+        (type = H5Pget_class(tid)) < 0 ||
         (group = H5A_group(tid)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
                       "can't unatomize template");
     }
 
     /* Copy it */
-    if (NULL==(new_tmpl=H5C_copy (type, tmpl))) {
+    if (NULL==(new_tmpl=H5P_copy (type, tmpl))) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		       "unable to copy template");
     }
@@ -1328,7 +1328,7 @@ H5Ccopy(hid_t tid)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5C_copy
+ * Function:	H5P_copy
  *
  * Purpose:	Creates a new template and initializes it with some other
  *		template.
@@ -1345,28 +1345,28 @@ H5Ccopy(hid_t tid)
  *-------------------------------------------------------------------------
  */
 void *
-H5C_copy (H5C_class_t type, const void *src)
+H5P_copy (H5P_class_t type, const void *src)
 {
     size_t	size;
     void	*dst = NULL;
     
-    FUNC_ENTER (H5C_copy, NULL);
+    FUNC_ENTER (H5P_copy, NULL);
     
     /* How big is the template */
     switch (type) {
-    case H5C_FILE_CREATE:
+    case H5P_FILE_CREATE:
         size = sizeof(H5F_create_t);
         break;
 
-    case H5C_FILE_ACCESS:
+    case H5P_FILE_ACCESS:
 	size = sizeof(H5F_access_t);
 	break;
 
-    case H5C_DATASET_CREATE:
+    case H5P_DATASET_CREATE:
         size = sizeof(H5D_create_t);
         break;
 
-    case H5C_DATASET_XFER:
+    case H5P_DATASET_XFER:
         size = sizeof(H5D_xfer_t);
         break;
 

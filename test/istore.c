@@ -9,7 +9,7 @@
  */
 #include <H5private.h>
 #include <H5Aprivate.h>
-#include <H5Cprivate.h>
+#include <H5Pprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
 #include <H5MMprivate.h>
@@ -573,8 +573,8 @@ main(int argc, char *argv[])
     /*
      * Use larger file addresses...
      */
-    template_id = H5Ccreate(H5C_FILE_CREATE);
-    H5Cset_sizes(template_id, 8, 0);
+    template_id = H5Pcreate(H5P_FILE_CREATE);
+    H5Pset_sizes(template_id, 8, 0);
     creation_template = H5A_object(template_id);
 
     /* Create the test file */
