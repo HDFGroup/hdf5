@@ -87,6 +87,7 @@ H5FS_get_stack(void)
         /* no associated value with current thread - create one */
         fstack = (H5FS_t *)HDmalloc(sizeof(H5FS_t));  /* Don't use H5MM_malloc() here, it causes infinite recursion */
         pthread_setspecific(H5TS_funcstk_key_g, (void *)fstack);
+	fstack->nused=0;
     }
 
     FUNC_LEAVE_NOAPI_NOFS(fstack);
