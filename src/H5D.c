@@ -365,9 +365,9 @@ H5D_term_interface(void)
 herr_t
 H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
 {
-    H5O_fill_t     src_fill={0}, dst_fill={0};
-    H5O_efl_t      src_efl={0}, dst_efl={0};
-    H5O_pline_t    src_pline={0}, dst_pline={0};
+    H5O_fill_t     src_fill, dst_fill;
+    H5O_efl_t      src_efl, dst_efl;
+    H5O_pline_t    src_pline, dst_pline;
     herr_t         ret_value=SUCCEED;
 
     FUNC_ENTER(H5D_crt_copy, FAIL);
@@ -379,20 +379,26 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
 
     /* Get the fill value, external file list, and data pipeline properties
      * from the old property list */
+    HDmemset(&src_fill,0,sizeof(H5O_fill_t));
     if(H5P_get(old_plist_id, H5D_CRT_FILL_VALUE_NAME, &src_fill) < 0) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
+    HDmemset(&src_efl,0,sizeof(H5O_efl_t));
     if(H5P_get(old_plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &src_efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
                     "can't get external file list");
+    HDmemset(&src_pline,0,sizeof(H5O_pline_t));
     if(H5P_get(old_plist_id, H5D_CRT_DATA_PIPELINE_NAME, &src_pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Make copies of fill value, external file list, and data pipeline */
+    HDmemset(&dst_fill,0,sizeof(H5O_fill_t));
     if(NULL==H5O_copy(H5O_FILL, &src_fill, &dst_fill)) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy fill value");
+    HDmemset(&dst_efl,0,sizeof(H5O_efl_t));
     if(NULL==H5O_copy(H5O_EFL, &src_efl, &dst_efl)) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, 
                     "can't copy external file list");
+    HDmemset(&dst_pline,0,sizeof(H5O_pline_t));
     if(NULL==H5O_copy(H5O_PLINE, &src_pline, &dst_pline)) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy data pipeline");
 
@@ -432,20 +438,23 @@ done:
 herr_t
 H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
 {
-    H5O_fill_t     fill={0};
-    H5O_efl_t      efl={0};
-    H5O_pline_t    pline={0};
+    H5O_fill_t     fill;
+    H5O_efl_t      efl;
+    H5O_pline_t    pline;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER(H5D_crt_close, FAIL);
 
     /* Get the fill value, external file list, and data pipeline properties
      * from the old property list */
+    HDmemset(&fill,0,sizeof(H5O_fill_t));
     if(H5P_get(dcpl_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
+    HDmemset(&efl,0,sizeof(H5O_efl_t));
     if(H5P_get(dcpl_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
                     "can't get external file list");
+    HDmemset(&pline,0,sizeof(H5O_pline_t));
     if(H5P_get(dcpl_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
@@ -962,7 +971,6 @@ H5Dget_create_plist(hid_t dset_id)
 {
     H5D_t		*dset = NULL;
     H5O_fill_t          copied_fill={NULL,0,NULL};
-    H5O_efl_t           efl1, efl2;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_create_plist, FAIL);
@@ -1766,12 +1774,11 @@ H5D_open_oid(H5G_entry_t *ent)
     H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
     H5D_t 	*ret_value = NULL;	/*return value			*/
     H5S_t	*space = NULL;		/*data space			*/
-    H5O_fill_t  fill={0};
-    H5O_pline_t pline={0};   
-    H5O_efl_t   efl={0};
+    H5O_fill_t  fill;
+    H5O_pline_t pline;   
+    H5O_efl_t   efl;
     H5D_layout_t layout;
     int         chunk_ndims;
-    unsigned	u;
     
     FUNC_ENTER(H5D_open_oid, NULL);
 
@@ -1803,6 +1810,7 @@ H5D_open_oid(H5G_entry_t *ent)
     }
 
     /* Get the optional fill value message */
+    HDmemset(&fill,0,sizeof(H5O_fill_t));
     if(NULL == H5O_read(&(dataset->ent), H5O_FILL, 0, &fill)) {
         H5E_clear();
         HDmemset(&fill, 0, sizeof(fill));
@@ -1811,6 +1819,7 @@ H5D_open_oid(H5G_entry_t *ent)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't set fill value");
 
     /* Get the optional filters message */
+    HDmemset(&pline,0,sizeof(H5O_pline_t));
     if(NULL == H5O_read(&(dataset->ent), H5O_PLINE, 0, &pline)) {
         H5E_clear();
         HDmemset(&pline, 0, sizeof(pline));
@@ -1872,6 +1881,7 @@ H5D_open_oid(H5G_entry_t *ent)
 
     /* Get the external file list message, which might not exist */
     if( !H5F_addr_defined(dataset->layout.addr) ) {
+        HDmemset(&efl,0,sizeof(H5O_efl_t));
         if(NULL == H5O_read(&(dataset->ent), H5O_EFL, 0, &efl))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, 
                   "storage address is undefined and no external file list");

@@ -111,7 +111,7 @@ __DLL__ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t siz
             H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
             H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close);
 __DLL__ herr_t H5P_get(hid_t plist_id, const char *name, void *value);
-__DLL__ herr_t H5P_set(hid_t plist_id, const char *name, void *value);
+__DLL__ herr_t H5P_set(hid_t plist_id, const char *name, const void *value);
 __DLL__ H5P_class_t_old H5P_get_class(hid_t tid);
 __DLL__ hid_t H5P_get_driver(hid_t plist_id);
 

@@ -1652,7 +1652,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     if(H5P_set(plist_id, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, 
                       "can't set chunk dimensionanlity");
-    if(H5P_set(plist_id, H5D_CRT_CHUNK_SIZE_NAME, (void*)dim) < 0)
+    if(H5P_set(plist_id, H5D_CRT_CHUNK_SIZE_NAME, dim) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk size");
 
     FUNC_LEAVE(SUCCEED);
@@ -5068,7 +5068,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_set(hid_t plist_id, const char *name, void *value)
+herr_t H5P_set(hid_t plist_id, const char *name, const void *value)
 {
     H5P_genplist_t *plist;      /* Property list to modify */
     H5P_genprop_t *prop;        /* Temporary property pointer */
