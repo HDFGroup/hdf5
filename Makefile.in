@@ -14,7 +14,7 @@ srcdir=@srcdir@
 VPATH=.:@srcdir@
 @COMMENCE@
 
-# Subdirectories in build-order
+# Subdirectories in build-order (not including `examples')
 SUBDIRS=src test tools @TESTPARALLEL@
 
 ##############################################################################
@@ -66,8 +66,13 @@ SUBDIRS=src test tools @TESTPARALLEL@
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-lib progs tests check test _test uninstall TAGS dep depend:
+lib progs check test _test uninstall:
 	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+
+tests TAGS dep depend:
+	@@SETX@; for d in $(SUBDIRS) examples; do			      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
@@ -88,13 +93,13 @@ H5Tinit.c:
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) examples; do			      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) conftest conftest.c
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) examples; do			      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config/commence config/conclude config/depend
@@ -105,7 +110,7 @@ distclean:
 maintainer-clean:
 	@echo "This command is intented for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) examples; do			      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config.cache config.log config.status src/H5config.h
