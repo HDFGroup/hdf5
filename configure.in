@@ -837,23 +837,23 @@ AC_SUBST(DEBUG_PKG)
 all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case X-$DEBUG_PKG in
     X-|X-yes)
-   DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
-   CPPFLAGS="$CPPFLAGS -UNDEBUG"
-   AC_MSG_RESULT(default ($DEBUG_PKG))
-   ;;
+	DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
+	CPPFLAGS="$CPPFLAGS -UNDEBUG"
+	AC_MSG_RESULT(default ($DEBUG_PKG))
+	;;
     X-all)
-   DEBUG_PKG=$all_packages
-   CPPFLAGS="$CPPFLAGS -UNDEBUG"
-   AC_MSG_RESULT(all ($DEBUG_PKG))
-   ;;
+	DEBUG_PKG=$all_packages
+	CPPFLAGS="$CPPFLAGS -UNDEBUG"
+	AC_MSG_RESULT(all ($DEBUG_PKG))
+	;;
     X-no|X-none)
-   AC_MSG_RESULT(none)
-   DEBUG_PKG=
-   CPPFLAGS="$CPPFLAGS -DNDEBUG"
-   ;;
+	AC_MSG_RESULT(none)
+	DEBUG_PKG=
+	CPPFLAGS="$CPPFLAGS -DNDEBUG"
+	;;
     *)
-   AC_MSG_RESULT($DEBUG_PKG)
-   ;;
+	AC_MSG_RESULT($DEBUG_PKG)
+	;;
 esac
 
 if test "X" != "X$DEBUG_PKG"; then
