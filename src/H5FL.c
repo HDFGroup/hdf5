@@ -58,7 +58,7 @@ static H5FL_gc_list_t *H5FL_gc_head=NULL;
 static H5FL_gc_arr_list_t *H5FL_gc_arr_head=NULL;
 
 /* Macros for turning off free lists in the library */
-/* #define NO_FREE_LISTS */
+#define NO_FREE_LISTS
 #ifdef NO_FREE_LISTS
 #define NO_REG_FREE_LISTS
 #define NO_ARR_FREE_LISTS
