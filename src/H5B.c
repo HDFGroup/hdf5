@@ -126,6 +126,7 @@ static herr_t H5B_split(H5F_t *f, const H5B_class_t *type,
 			H5B_t *old_bt, const haddr_t *old_addr, intn idx,
 			const float split_ratios[], void *udata,
 			haddr_t *new_addr/*out*/);
+static H5B_t * H5B_copy(H5F_t *f, const H5B_t *old_bt);
 #ifdef H5B_DEBUG
 static herr_t H5B_assert(H5F_t *f, const haddr_t *addr,
 			 const H5B_class_t *type, void *udata);
@@ -868,7 +869,6 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     intn	level;
     H5B_t	*bt;
     size_t	size;
-    uint8_t	*buf = NULL;
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     herr_t	ret_value = FAIL;
 
@@ -926,55 +926,57 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
      * from "moving".
      */
     size = H5B_nodesize(f, type, NULL, bt->sizeof_rkey);
-    if (NULL==(buf = H5MM_malloc(size))) {
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		     "memory allocation failed");
-    }
     if (H5MF_alloc(f, H5MF_META, (hsize_t)size, &old_root/*out*/) < 0) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "unable to allocate file space to move root");
     }
-    if (H5AC_flush(f, H5AC_BT, addr, FALSE) < 0) {
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
-		    "unable to flush B-tree root node");
-    }
-    if (H5F_block_read(f, addr, (hsize_t)size, &H5F_xfer_dflt, buf) < 0) {
-	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, FAIL,
-		    "unable to read B-tree root node");
-    }
-    if (H5F_block_write(f, &old_root, (hsize_t)size, &H5F_xfer_dflt, buf)<0) {
-	HGOTO_ERROR(H5E_BTREE, H5E_WRITEERROR, FAIL,
-		    "unable to move B-tree root node");
-    }
-    if (H5AC_rename(f, H5AC_BT, addr, &old_root) < 0) {
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL,
-		    "unable to move B-tree root node");
-    }
 
     /* update the new child's left pointer */
     if (NULL == (bt = H5AC_find(f, H5AC_BT, &child, type, udata))) {
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
 		    "unable to load new child");
     }
     bt->dirty = TRUE;
     bt->left = old_root;
 
-    /* clear the old root at the old address (we already copied it) */
+    /*
+     * Move the node to the new location by checking it out & checking it in
+     * at the new location -QAK
+     */
+    /* Bring the old root into the cache if it's not already */
     if (NULL == (bt = H5AC_find(f, H5AC_BT, addr, type, udata))) {
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
-		    "unable to clear old root location");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+		    "unable to load new child");
     }
+
+    /* Make certain the old root info is marked as dirty before moving it, */
+    /* so it is certain to be written out at the new location */
     bt->dirty = TRUE;
-    bt->ndirty = 0;
+
+    /* Make a copy of the old root information */
+    if (NULL == (bt = H5B_copy(f, bt))) {
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+		    "unable to copy old root");
+    }
+
+    /* Move the location on the disk */
+    if (H5AC_rename(f, H5AC_BT, addr, &old_root) < 0) {
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL,
+		    "unable to move B-tree root node");
+    }
+
+    /* Insert the copy of the old root into the file again */
+    if (H5AC_set(f, H5AC_BT, addr, bt) < 0) {
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
+		    "unable to flush old B-tree root node");
+    }
+
+    /* clear the old root info at the old address (we already copied it) */
+    bt->dirty = TRUE;
     H5F_addr_undef(&(bt->left));
     H5F_addr_undef(&(bt->right));
-    bt->nchildren = 0;
 
-    /* the new root */
-    if (NULL == (bt = H5AC_find(f, H5AC_BT, addr, type, udata))) {
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load new root");
-    }
-    bt->dirty = TRUE;
+    /* Set the new information for the copy */
     bt->ndirty = 2;
     bt->level = level + 1;
     bt->nchildren = 2;
@@ -999,7 +1001,6 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     ret_value = SUCCEED;
     
  done:
-    buf = H5MM_xfree(buf);
     FUNC_LEAVE(ret_value);
 }
     
@@ -2007,6 +2008,83 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 
     FUNC_LEAVE(size);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B_copy
+ *
+ * Purpose:	Deep copies an existing H5B_t node.
+ *
+ * Return:	Success:	Pointer to H5B_t object.
+ *
+ * 		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Apr 18 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5B_t *
+H5B_copy(H5F_t *f, const H5B_t *old_bt)
+{
+    H5B_t		*ret_value = NULL;
+    size_t		size, total_native_keysize;
+    uintn       nkeys;
+    uintn		u;
+
+    FUNC_ENTER(H5B_copy, NULL);
+
+    /*
+     * Check arguments.
+     */
+    assert(f);
+    assert(old_bt);
+
+    /*
+     * Get correct sizes 
+     */
+    size = H5B_nodesize(f, old_bt->type, &total_native_keysize, old_bt->sizeof_rkey);
+
+    /* Allocate memory for the new H5B_t object */
+    if (NULL==(ret_value = H5FL_ALLOC(H5B_t,0))) {
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed for B-tree root node");
+    }
+
+    /* Copy the main structure */
+    HDmemcpy(ret_value,old_bt,sizeof(H5B_t));
+
+    /* Compute the number of keys in this node */
+    nkeys=2*H5B_K(f,old_bt->type);
+
+    if (NULL==(ret_value->page=H5FL_BLK_ALLOC(page,size,0)) ||
+            NULL==(ret_value->native=H5FL_BLK_ALLOC(native_block,total_native_keysize,0)) ||
+            NULL==(ret_value->child=H5FL_ARR_ALLOC(haddr_t,nkeys,0)) ||
+            NULL==(ret_value->key=H5FL_ARR_ALLOC(H5B_key_t,(nkeys+1),0))) {
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed for B-tree root node");
+    }
+
+    /* Copy the other structures */
+    HDmemcpy(ret_value->page,old_bt->page,size);
+    HDmemcpy(ret_value->native,old_bt->native,total_native_keysize);
+    HDmemcpy(ret_value->child,old_bt->child,sizeof(haddr_t)*nkeys);
+    HDmemcpy(ret_value->key,old_bt->key,sizeof(H5B_key_t)*(nkeys+1));
+
+    /*
+     * Translate the keys from pointers into the old 'page' buffer into
+     *  pointers into the new 'page' buffer.
+     */
+    for (u = 0; u < nkeys; u++)
+        ret_value->key[u].rkey = (old_bt->key[u].rkey - old_bt->page) + ret_value->page;
+
+done:
+    FUNC_LEAVE(ret_value);
+}   /* H5B_copy */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_debug

@@ -997,6 +997,8 @@ H5F_addr_add(haddr_t *a1 /*in,out */ , const haddr_t *a2)
  *		Friday, November  7, 1997
  *
  * Modifications:
+ *  Divided the offset by 8, to spread out the hash numbers better
+ *      Quincey Koziol, Wednesday, April 19, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1006,7 +1008,7 @@ H5F_addr_hash(const haddr_t *addr, uintn mod)
     assert(addr && addr_defined(addr));
     assert(mod > 0);
 
-    return (unsigned)(addr->offset % mod);  /*ignore file number */
+    return (unsigned)((addr->offset/8) % mod);  /*ignore file number */
 }
 
 /*-------------------------------------------------------------------------
