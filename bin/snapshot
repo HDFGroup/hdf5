@@ -1,6 +1,7 @@
 #!/bin/sh
 set -x
 date
+uname -a
 #
 # This script should be run nightly from cron.  It checks out hdf5
 # from the CVS source tree and compares it against the previous
@@ -113,10 +114,6 @@ CONFIGURE="./configure $HDF4LIB"
 # Execute the requests
 snapshot=yes
 
-# Show all settings right before execution.
-# set
-# exit 0
-
 COMPARE=${HOME}/hdf5-snapshots
 
 #=============================
@@ -159,7 +156,9 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	    make _test); then
 	    :
 	else
+	    errcode=$?
 	    snapshot=no
+	    exit $errcode
 	fi
     fi
 fi # Test the HDF5 library
@@ -176,16 +175,12 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    # cvs commit if errors encounter here.
 	    set -e
 	    cd ${COMPARE}/current
-# "perl -w ..." doesn't appear to be working on baldric..
-#    cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
-#	    cvs -Q tag hdf5-`perl bin/h5vers |tr . _`
 	    bin/release -d $ARCHIVES $METHODS
-#    RELEASE_VERSION="`perl -w bin/h5vers -v`"
 	    RELEASE_VERSION="`perl bin/h5vers -v`"
-#    perl -w bin/h5vers -i
 	    perl bin/h5vers -i
 	    cvs -Q commit -m "Snapshot $RELEASE_VERSION"
 	)
+	errcode=$?
     fi
 
     # Replace the previous version with the current version.
@@ -193,4 +188,4 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     mv ${COMPARE}/current ${COMPARE}/previous
 fi #Release snapshot
 
-exit 0
+exit $errcode
