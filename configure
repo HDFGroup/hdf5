@@ -1010,7 +1010,7 @@ Optional Features:
   --enable-threadsafe     Enable thread safe capability
   --enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface
                           [default=no]
-  --enable-stream-vfd     Build the Stream Virtual File Driver [default=no]
+  --enable-stream-vfd     Build the Stream Virtual File Driver [default=yes]
   --enable-gpfs           Enable GPFS hints for the MPI/POSIX file driver.
                           [default=no]
   --enable-debug=all      Turn on debugging in all packages. One may also
@@ -28270,6 +28270,8 @@ echo $ECHO_N "checking for Stream Virtual File Driver support... $ECHO_C" >&6
 if test "${enable_stream_vfd+set}" = set; then
   enableval="$enable_stream_vfd"
   STREAM_VFD=$enableval
+else
+  STREAM_VFD=yes
 fi;
 
 if test "$STREAM_VFD" = "yes"; then
