@@ -137,7 +137,7 @@ distclean:
 	done
 	-$(RM) config/commence config/conclude
 	-$(RM) config/stamp1 config/stamp2 config/depend?
-	-$(RM) config.cache config.log config.status
+	-$(RM) config.cache config.log config.status configure.lineno
 	-$(RM) src/H5config.h src/H5pubconf.h
 	-$(RM) libtool Makefile
 
