@@ -1,7 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
- * Copyright (c) 1999-2002 NCSA
- *                       All rights reserved.
- *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 29, 1999
  *
@@ -670,7 +681,8 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
     char msgbuf[1];
     MPI_Status rcvstat;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    int		mpi_code;		/* mpi return code */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_wait_for_left_neighbor, FAIL);
 
@@ -682,8 +694,9 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 
     /* p0 has no left neighbor; all other procs wait for msg */
     if (file->mpi_rank != 0) {
-        if (MPI_SUCCESS!= MPI_Recv( &msgbuf, 1, MPI_CHAR, file->mpi_rank-1, MPI_ANY_TAG, file->comm, &rcvstat ))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Recv failed");
+        if (MPI_SUCCESS != (mpi_code=MPI_Recv( &msgbuf, 1, MPI_CHAR,
+			file->mpi_rank-1, MPI_ANY_TAG, file->comm, &rcvstat )))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mpi_code);
     }
     
 done:
@@ -722,6 +735,7 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
     char msgbuf[1];
+    int		mpi_code;		/* mpi return code */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_signal_right_neighbor, FAIL);
@@ -730,8 +744,9 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
     assert(H5FD_MPIO==file->pub.driver_id);
 
     if (file->mpi_rank != (file->mpi_size-1)) {
-        if (MPI_SUCCESS!= MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR, file->mpi_rank+1, 0, file->comm))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Send failed");
+        if (MPI_SUCCESS != (mpi_code=MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR,
+			file->mpi_rank+1, 0, file->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
     }
 
 done:
