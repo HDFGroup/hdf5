@@ -409,6 +409,7 @@
 ./fortran/test/tH5Sselect.f90
 ./fortran/test/tH5T.f90
 
+./fortran/testpar/Makefile.in
 ./fortran/testpar/ptesthdf5_fortran.f90
 ./fortran/testpar/tcheck.f90
 ./fortran/testpar/thdf5.f90
