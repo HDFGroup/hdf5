@@ -1363,6 +1363,11 @@
 ./tools/testfiles/h5diff_test1.h5
 ./tools/testfiles/h5diff_test2.h5
 ./tools/testfiles/h5diff_1.txt
+./tools/testfiles/h5diff_2.txt
+./tools/testfiles/h5diff_3.txt
+./tools/testfiles/h5diff_4.txt
+./tools/testfiles/h5diff_5.txt
+
 
 ./windows/all.zip
 ./windows/all_withf90.zip
