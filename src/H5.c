@@ -2197,8 +2197,8 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             /* This may generate recursive call to the library... -QAK */
                             {
                                 H5S_t *space = H5I_object(obj);
-                                if (H5S_SIMPLE==H5S_GET_SIMPLE_EXTENT_TYPE(space)) {
-                                    asize[argno] = H5S_GET_SIMPLE_EXTENT_NDIMS(space);
+                                if (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space)) {
+                                    asize[argno] = H5S_GET_EXTENT_NDIMS(space);
                                 }
                             }
                             break;

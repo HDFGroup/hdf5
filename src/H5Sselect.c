@@ -120,7 +120,7 @@ done:
 herr_t
 H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 {
-    herr_t ret_value=SUCCEED;     /* return value */
+    herr_t ret_value;     /* return value */
 
     FUNC_ENTER_NOAPI(H5S_select_copy, FAIL);
 
@@ -129,50 +129,11 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     assert(src);
 
     /* Copy regular fields */
-    HDmemcpy(&dst->select,&src->select,sizeof(H5S_select_t));
-
-/* Need to copy permutation order information still */
+    dst->select=src->select;
 
     /* Perform correct type of copy based on the type of selection */
-    switch (src->extent.type) {
-        case H5S_NULL:
-        case H5S_SCALAR:
-            /*nothing needed */
-            break;
-
-        case H5S_SIMPLE:
-            /* Deep copy extra stuff */
-            switch(src->select.type) {
-                case H5S_SEL_NONE:
-                    ret_value=H5S_none_copy(dst,src);
-                    break;
-
-                case H5S_SEL_ALL:
-                    ret_value=H5S_all_copy(dst,src);
-                    break;
-
-                case H5S_SEL_POINTS:
-                    ret_value=H5S_point_copy(dst,src);
-                    break;
-
-                case H5S_SEL_HYPERSLABS:
-                    ret_value=H5S_hyper_copy(dst,src,share_selection);
-                    break;
-
-                default:
-                    assert("unknown selection type" && 0);
-                    break;
-            } /* end switch */
-            break;
-
-        case H5S_COMPLEX:
-            /*void */
-            break;
-
-        default:
-            assert("unknown dataspace type" && 0);
-            break;
-    } /* end switch */
+    if((ret_value=(*src->select.type->copy)(dst,src,share_selection))<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection specific information");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -200,14 +161,14 @@ done:
 herr_t
 H5S_select_release(H5S_t *ds)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_release, FAIL);
 
     assert(ds);
 
     /* Call the selection type's release function */
-    (*ds->select.release)(ds);
+    ret_value=(*ds->select.type->release)(ds);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -238,14 +199,14 @@ H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_get_seq_list, FAIL);
 
     assert(space);
 
     /* Call the selection type's get_seq_list function */
-    (*space->select.get_seq_list)(space,flags,iter,maxseq,maxbytes,nseq,nbytes,off,len);
+    ret_value=(*space->select.type->get_seq_list)(space,flags,iter,maxseq,maxbytes,nseq,nbytes,off,len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -281,7 +242,7 @@ H5S_select_serial_size(const H5S_t *space)
     assert(space);
 
     /* Call the selection type's serial_size function */
-    ret_value=(*space->select.serial_size)(space);
+    ret_value=(*space->select.type->serial_size)(space);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -321,7 +282,7 @@ H5S_select_serialize(const H5S_t *space, uint8_t *buf)
     assert(buf);
 
     /* Call the selection type's serialize function */
-    ret_value=(*space->select.serialize)(space,buf);
+    ret_value=(*space->select.type->serialize)(space,buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -475,7 +436,7 @@ H5S_select_valid(const H5S_t *space)
 
     assert(space);
 
-    ret_value = (*space->select.is_valid)(space);
+    ret_value = (*space->select.type->is_valid)(space);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -519,24 +480,26 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
     UINT32DECODE(tbuf, sel_type);
     switch(sel_type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value=H5S_point_deserialize(space,buf);
+            ret_value=(*H5S_sel_point->deserialize)(space,buf);
             break;
 
         case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value=H5S_hyper_deserialize(space,buf);
+            ret_value=(*H5S_sel_hyper->deserialize)(space,buf);
             break;
 
         case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value=H5S_all_deserialize(space,buf);
+            ret_value=(*H5S_sel_all->deserialize)(space,buf);
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
-            ret_value=H5S_none_deserialize(space,buf);
+            ret_value=(*H5S_sel_none->deserialize)(space,buf);
             break;
 
         default:
             break;
     }
+    if(ret_value<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "can't deserialize selection");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -634,7 +597,7 @@ H5S_get_select_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
     assert(start);
     assert(end);
 
-    ret_value = (*space->select.bounds)(space,start,end);
+    ret_value = (*space->select.type->bounds)(space,start,end);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -672,7 +635,7 @@ H5S_select_is_contiguous(const H5S_t *space)
     /* Check args */
     assert(space);
 
-    ret_value = (*space->select.is_contiguous)(space);
+    ret_value = (*space->select.type->is_contiguous)(space);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -710,7 +673,7 @@ H5S_select_is_single(const H5S_t *space)
     /* Check args */
     assert(space);
 
-    ret_value = (*space->select.is_single)(space);
+    ret_value = (*space->select.type->is_single)(space);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -748,7 +711,7 @@ H5S_select_is_regular(const H5S_t *space)
     /* Check args */
     assert(space);
 
-    ret_value = (*space->select.is_regular)(space);
+    ret_value = (*space->select.type->is_regular)(space);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -775,7 +738,7 @@ done:
 herr_t
 H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_size)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_iter_init, FAIL);
 
@@ -799,7 +762,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
     sel_iter->elmt_size=elmt_size;
 
     /* Call initialization routine for selection type */
-    ret_value= (*space->select.iter_init)(sel_iter, space);
+    ret_value= (*space->select.type->iter_init)(sel_iter, space);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -840,7 +803,7 @@ H5S_select_iter_coords (const H5S_sel_iter_t *sel_iter, hssize_t *coords)
     assert(coords);
 
     /* Call iter_coords routine for selection type */
-    ret_value = (*sel_iter->iter_coords)(sel_iter,coords);
+    ret_value = (*sel_iter->type->iter_coords)(sel_iter,coords);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -883,7 +846,7 @@ H5S_select_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *en
     assert(end);
 
     /* Call iter_block routine for selection type */
-    ret_value = (*iter->iter_block)(iter,start,end);
+    ret_value = (*iter->type->iter_block)(iter,start,end);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_block() */
@@ -920,7 +883,7 @@ H5S_select_iter_nelmts (const H5S_sel_iter_t *sel_iter)
     assert(sel_iter);
 
     /* Call iter_nelmts routine for selection type */
-    ret_value = (*sel_iter->iter_nelmts)(sel_iter);
+    ret_value = (*sel_iter->type->iter_nelmts)(sel_iter);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -959,7 +922,7 @@ H5S_select_iter_has_next_block (const H5S_sel_iter_t *iter)
     assert(iter);
 
     /* Call iter_has_next_block routine for selection type */
-    ret_value = (*iter->iter_has_next_block)(iter);
+    ret_value = (*iter->type->iter_has_next_block)(iter);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_has_next_block() */
@@ -999,7 +962,7 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     assert(nelem>0);
 
     /* Call iter_next routine for selection type */
-    ret_value = (*iter->iter_next)(iter,nelem);
+    ret_value = (*iter->type->iter_next)(iter,nelem);
 
     /* Decrement the number of elements left in selection */
     iter->elmt_left-=nelem;
@@ -1043,7 +1006,7 @@ H5S_select_iter_next_block(H5S_sel_iter_t *iter)
     assert(iter);
 
     /* Call iter_next_block routine for selection type */
-    ret_value = (*iter->iter_next_block)(iter);
+    ret_value = (*iter->type->iter_next_block)(iter);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_next_block() */
@@ -1080,7 +1043,7 @@ H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
     assert(sel_iter);
 
     /* Call selection type-specific release routine */
-    ret_value = (*sel_iter->iter_release)(sel_iter);
+    ret_value = (*sel_iter->type->iter_release)(sel_iter);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1297,7 +1260,7 @@ H5S_get_select_type(const H5S_t *space)
     assert(space);
 
     /* Set return value */
-    ret_value=space->select.type;
+    ret_value=H5S_GET_SELECT_TYPE(space);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1350,9 +1313,9 @@ HDfprintf(stderr,"%s: Entering\n",FUNC);
 
 #ifdef QAK
 HDfprintf(stderr,"%s: Check 0.5\n",FUNC);
-HDfprintf(stderr,"%s: space1 selection type=%d\n",FUNC,(int)space1->select.type);
+HDfprintf(stderr,"%s: space1 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space1));
 HDfprintf(stderr,"%s: space1->select.num_elem=%Hd\n",FUNC,space1->select.num_elem);
-HDfprintf(stderr,"%s: space2 selection type=%d\n",FUNC,(int)space2->select.type);
+HDfprintf(stderr,"%s: space2 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space2));
 HDfprintf(stderr,"%s: space2->select.num_elem=%Hd\n",FUNC,space2->select.num_elem);
 #endif /* QAK */
     /* Check for different number of elements selected */
@@ -1363,7 +1326,7 @@ HDfprintf(stderr,"%s: space2->select.num_elem=%Hd\n",FUNC,space2->select.num_ele
 HDfprintf(stderr,"%s: Check 1.0\n",FUNC);
 #endif /* QAK */
     /* Check for "easy" cases before getting into generalized block iteration code */
-    if(space1->select.type==H5S_SEL_ALL && space2->select.type==H5S_SEL_ALL) {
+    if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_ALL && H5S_GET_SELECT_TYPE(space2)==H5S_SEL_ALL) {
         hsize_t dims1[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #1 */
         hsize_t dims2[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #2 */
 
@@ -1380,25 +1343,25 @@ HDfprintf(stderr,"%s: Check 2.0\n",FUNC);
             if(dims1[u]!=dims2[u])
                 HGOTO_DONE(FALSE);
     } /* end if */
-    else if(space1->select.type==H5S_SEL_NONE || space2->select.type==H5S_SEL_NONE) {
+    else if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_NONE || H5S_GET_SELECT_TYPE(space2)==H5S_SEL_NONE) {
 #ifdef QAK
 HDfprintf(stderr,"%s: Check 3.0\n",FUNC);
 #endif /* QAK */
         HGOTO_DONE(TRUE);
     } /* end if */
-    else if((space1->select.type==H5S_SEL_HYPERSLABS && space1->select.sel_info.hslab.diminfo_valid)
-            && (space2->select.type==H5S_SEL_HYPERSLABS && space2->select.sel_info.hslab.diminfo_valid)) {
+    else if((H5S_GET_SELECT_TYPE(space1)==H5S_SEL_HYPERSLABS && space1->select.sel_info.hslab->diminfo_valid)
+            && (H5S_GET_SELECT_TYPE(space2)==H5S_SEL_HYPERSLABS && space2->select.sel_info.hslab->diminfo_valid)) {
 
 #ifdef QAK
 HDfprintf(stderr,"%s: Check 4.0\n",FUNC);
 #endif /* QAK */
         /* Check that the shapes are the same */
         for (u=0; u<space1->extent.u.simple.rank; u++) {
-            if(space1->select.sel_info.hslab.opt_diminfo[u].stride!=space2->select.sel_info.hslab.opt_diminfo[u].stride)
+            if(space1->select.sel_info.hslab->opt_diminfo[u].stride!=space2->select.sel_info.hslab->opt_diminfo[u].stride)
                 HGOTO_DONE(FALSE);
-            if(space1->select.sel_info.hslab.opt_diminfo[u].count!=space2->select.sel_info.hslab.opt_diminfo[u].count)
+            if(space1->select.sel_info.hslab->opt_diminfo[u].count!=space2->select.sel_info.hslab->opt_diminfo[u].count)
                 HGOTO_DONE(FALSE);
-            if(space1->select.sel_info.hslab.opt_diminfo[u].block!=space2->select.sel_info.hslab.opt_diminfo[u].block)
+            if(space1->select.sel_info.hslab->opt_diminfo[u].block!=space2->select.sel_info.hslab->opt_diminfo[u].block)
                 HGOTO_DONE(FALSE);
         } /* end for */
     } /* end if */
@@ -1414,7 +1377,7 @@ HDfprintf(stderr,"%s: Check 4.0\n",FUNC);
         unsigned first_block=1;         /* Flag to indicate the first block */
 #ifdef QAK
 HDfprintf(stderr,"%s: Check 10.0\n",FUNC);
-HDfprintf(stderr,"%s: space1 selection type=%d\n",FUNC,(int)space1->select.type);
+HDfprintf(stderr,"%s: space1 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space1));
 if(space1->select.sel_info.hslab.span_lst) {
     HDfprintf(stderr,"%s: Dumping space1 span list\n",FUNC);
     H5S_hyper_print_spans(stderr,space1->select.sel_info.hslab.span_lst);
@@ -1423,7 +1386,7 @@ else {
     HDfprintf(stderr,"%s: Dumping space1 diminfo\n",FUNC);
     H5S_hyper_print_diminfo(stderr,space1);
 } /* end else */
-HDfprintf(stderr,"%s: space2 selection type=%d\n",FUNC,(int)space2->select.type);
+HDfprintf(stderr,"%s: space2 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space2));
 if(space2->select.sel_info.hslab.span_lst) {
     HDfprintf(stderr,"%s: Dumping space2 span list\n",FUNC);
     H5S_hyper_print_spans(stderr,space2->select.sel_info.hslab.span_lst);

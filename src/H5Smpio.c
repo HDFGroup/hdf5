@@ -114,7 +114,7 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
     assert (space);
 
     /* Just treat the entire extent as a block of bytes */
-    if((snelmts = H5S_GET_SIMPLE_EXTENT_NPOINTS(space))<0)
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(space))<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
 
@@ -535,11 +535,11 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
     assert (space);
 
     /* Creat MPI type based on the kind of selection */
-    switch (space->extent.type) {
+    switch (H5S_GET_EXTENT_TYPE(space)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            switch(space->select.type) {
+            switch(H5S_GET_SELECT_TYPE(space)) {
                 case H5S_SEL_NONE:
                     if ( H5S_mpio_none_type( space, elmt_size,
                         /* out: */ new_type, count, extra_offset, is_derived_type ) <0)
@@ -827,8 +827,8 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
     assert(file_space);
 
     /* Check whether these are both simple or scalar dataspaces */
-    if (!((H5S_SIMPLE==mem_space->extent.type || H5S_SCALAR==mem_space->extent.type)
-         && (H5S_SIMPLE==file_space->extent.type || H5S_SCALAR==file_space->extent.type)))
+    if (!((H5S_SIMPLE==H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space))
+         && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space))))
         HGOTO_DONE(FALSE);
 
     /* Check whether both selections are "regular" */
@@ -840,7 +840,7 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
         HGOTO_DONE(FALSE);
 
     /* Can't currently handle point selections */
-    if (H5S_SEL_POINTS==mem_space->select.type || H5S_SEL_POINTS==file_space->select.type)
+    if (H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(mem_space) || H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(file_space))
         HGOTO_DONE(FALSE);
 
     /* Dataset storage must be contiguous currently */

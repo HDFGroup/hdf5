@@ -161,7 +161,7 @@ H5D_contig_fill(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
     assert(elmt_size>0);
 
     /* Get the number of elements in the dataset's dataspace */
-    snpoints = H5S_GET_SIMPLE_EXTENT_NPOINTS(dset->space);
+    snpoints = H5S_GET_EXTENT_NPOINTS(dset->space);
     assert(snpoints>=0);
     H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
 

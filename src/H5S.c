@@ -809,7 +809,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-    ret_value = H5S_GET_SIMPLE_EXTENT_NPOINTS(ds);
+    ret_value = H5S_GET_EXTENT_NPOINTS(ds);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -848,7 +848,7 @@ H5S_get_npoints_max(const H5S_t *ds)
     /* check args */
     assert(ds);
 
-    switch (ds->extent.type) {
+    switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
             ret_value = 0;
             break;
@@ -856,7 +856,7 @@ H5S_get_npoints_max(const H5S_t *ds)
         case H5S_SCALAR:
             ret_value = 1;
             break;
-            
+
         case H5S_SIMPLE:
             if (ds->extent.u.simple.max) {
                 for (ret_value=1, u=0; u<ds->extent.u.simple.rank; u++) {
@@ -916,7 +916,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-    ret_value = H5S_GET_SIMPLE_EXTENT_NDIMS(ds);
+    ret_value = H5S_GET_EXTENT_NDIMS(ds);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -954,7 +954,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
     /* check args */
     assert(ds);
 
-    switch (ds->extent.type) {
+    switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
@@ -1045,7 +1045,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
     /* check args */
     assert(ds);
 
-    switch (ds->extent.type) {
+    switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
             ret_value = 0;
@@ -1103,7 +1103,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id
     assert(ent);
     assert(ds);
 
-    switch (ds->extent.type) {
+    switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
@@ -1150,7 +1150,7 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds)
     assert(oh);
     assert(ds);
 
-    switch (ds->extent.type) {
+    switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
@@ -1247,8 +1247,8 @@ H5S_is_simple(const H5S_t *sdim)
     /* Check args and all the boring stuff. */
     assert(sdim);
     /* H5S_NULL shouldn't be simple dataspace */
-    ret_value = (sdim->extent.type == H5S_SIMPLE ||
-	  sdim->extent.type == H5S_SCALAR) ? TRUE : FALSE;
+    ret_value = (H5S_GET_EXTENT_TYPE(sdim) == H5S_SIMPLE ||
+	  H5S_GET_EXTENT_TYPE(sdim) == H5S_SCALAR) ? TRUE : FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1485,20 +1485,20 @@ UNUSED
     FUNC_ENTER_NOAPI(H5S_find, NULL);
 
     /* Check args */
-    assert (mem_space && (H5S_SIMPLE==mem_space->extent.type ||
-                          H5S_NULL==mem_space->extent.type ||
-			  H5S_SCALAR==mem_space->extent.type));
-    assert (file_space && (H5S_SIMPLE==file_space->extent.type ||
-                           H5S_NULL==file_space->extent.type ||
-			   H5S_SCALAR==file_space->extent.type));
+    assert (mem_space && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(mem_space) ||
+                          H5S_NULL==H5S_GET_EXTENT_TYPE(mem_space) ||
+			  H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space)));
+    assert (file_space && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) ||
+                           H5S_NULL==H5S_GET_EXTENT_TYPE(file_space) ||
+			   H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space)));
 
     /*
      * Is this path already present in the data space conversion path table?
      * If so then return a pointer to that entry.
      */
     for (i=0; i<H5S_nconv_g; i++) {
-        if (H5S_conv_g[i]->ftype==file_space->select.type &&
-                H5S_conv_g[i]->mtype==mem_space->select.type) {
+        if (H5S_conv_g[i]->ftype==H5S_GET_SELECT_TYPE(file_space) &&
+                H5S_conv_g[i]->mtype==H5S_GET_SELECT_TYPE(mem_space)) {
 
 #ifdef H5_HAVE_PARALLEL
             /*
@@ -1539,8 +1539,8 @@ UNUSED
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path");
 
     /* Initialize file & memory conversion functions */
-    path->ftype = file_space->select.type;
-    path->mtype = mem_space->select.type;
+    path->ftype = H5S_GET_SELECT_TYPE(file_space);
+    path->mtype = H5S_GET_SELECT_TYPE(mem_space);
 
 #ifdef H5_HAVE_PARALLEL
     /*
@@ -1622,7 +1622,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
     FUNC_ENTER_NOAPI(H5S_extend, FAIL);
 
     /* Check args */
-    assert (space && H5S_SIMPLE==space->extent.type);
+    assert (space && H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space));
     assert (size);
 
     /* Check through all the dimensions to see if modifying the dataspace is allowed */
@@ -1807,7 +1807,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
 
     assert(space);
 
-    ret_value=space->extent.type;
+    ret_value=H5S_GET_EXTENT_TYPE(space);
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1845,7 +1845,7 @@ H5Sget_simple_extent_type(hid_t sid)
     if (NULL == (space = H5I_object_verify(sid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
 
-    ret_value=H5S_GET_SIMPLE_EXTENT_TYPE(space);
+    ret_value=H5S_GET_EXTENT_TYPE(space);
     
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1918,8 +1918,8 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
-    if (space->extent.u.simple.rank==0 || (space->extent.type==H5S_SCALAR
-            || space->extent.type==H5S_NULL))
+    if (space->extent.u.simple.rank==0 || (H5S_GET_EXTENT_TYPE(space)==H5S_SCALAR
+            || H5S_GET_EXTENT_TYPE(space)==H5S_NULL))
         HGOTO_ERROR(H5E_ATOM, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
     if (offset == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
@@ -1957,7 +1957,7 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
     FUNC_ENTER_NOAPI( H5S_set_extent, FAIL );
 
     /* Check args */
-    assert( space && H5S_SIMPLE==space->extent.type );
+    assert( space && H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space) );
     assert( size);
 
     /* Verify that the dimensions being changed are allowed to change */
@@ -2003,7 +2003,7 @@ H5S_set_extent_real( H5S_t *space, const hsize_t *size )
     FUNC_ENTER_NOAPI(H5S_set_extent_real, FAIL );
 
     /* Check args */
-    assert(space && H5S_SIMPLE==space->extent.type );
+    assert(space && H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space));
     assert(size);
 
     /* Change the dataspace size & re-compute the number of elements in the extent */
@@ -2045,7 +2045,7 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, 
     
     FUNC_ENTER_NOAPI(H5S_debug, FAIL);
     
-    switch (mesg->extent.type) {
+    switch (H5S_GET_EXTENT_TYPE(mesg)) {
         case H5S_NULL:
             fprintf(stream, "%*s%-*s H5S_NULL\n", indent, "", fwidth,
                     "Space class:");
@@ -2065,7 +2065,7 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, 
             
         default:
             fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
-                    "Space class:", (long)(mesg->extent.type));
+                    "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));
             break;
     }
 

@@ -112,6 +112,7 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hsize_t _stride[],
 				   const hsize_t count[],
 				   const hsize_t _block[]);
+/* #define NEW_HYPERSLAB_API */
 #ifdef NEW_HYPERSLAB_API
 H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hssize_t start[],

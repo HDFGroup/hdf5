@@ -1442,7 +1442,7 @@ H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id)
     assert(space);
 
     /* Get the total number of elements in dataset's dataspace */
-    if((total_elem=H5S_GET_SIMPLE_EXTENT_NPOINTS(space))<0)
+    if((total_elem=H5S_GET_EXTENT_NPOINTS(space))<0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get # of dataspace elements")
 
     /* Get the size of the dataset's datatype */
@@ -2194,7 +2194,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                 }
 
                 /* Compute the total size of a chunk */
-                tmp_size = H5S_GET_SIMPLE_EXTENT_NPOINTS(new_dset->space) *
+                tmp_size = H5S_GET_EXTENT_NPOINTS(new_dset->space) *
                                         H5T_get_size(new_dset->type);
                 H5_ASSIGN_OVERFLOW(new_dset->layout.u.contig.size,tmp_size,hssize_t,hsize_t);
             } /* end case */
@@ -2205,7 +2205,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                 hsize_t	max_dim[H5O_LAYOUT_NDIMS];      /* Maximum size of data in elements */
 
                 /* Set up layout information */
-                if((ndims=H5S_GET_SIMPLE_EXTENT_NDIMS(new_dset->space))<0)
+                if((ndims=H5S_GET_EXTENT_NDIMS(new_dset->space))<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get rank")
                 new_dset->layout.u.chunk.ndims = (unsigned)ndims + 1;
                 assert((unsigned)(new_dset->layout.u.chunk.ndims) <= NELMTS(new_dset->layout.u.chunk.dim));
@@ -2257,7 +2257,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                  * Compact dataset is stored in dataset object header message of 
                  * layout.
                  */
-                tmp_size = H5S_GET_SIMPLE_EXTENT_NPOINTS(space) *
+                tmp_size = H5S_GET_EXTENT_NPOINTS(space) *
                                         H5T_get_size(new_dset->type);
                 H5_ASSIGN_OVERFLOW(new_dset->layout.u.compact.size,tmp_size,hssize_t,size_t);
 
@@ -2542,7 +2542,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             if(dataset->layout.version<3) {
                 hssize_t tmp_size;                      /* Temporary holder for raw data size */
 
-                tmp_size = H5S_GET_SIMPLE_EXTENT_NPOINTS(dataset->space) *
+                tmp_size = H5S_GET_EXTENT_NPOINTS(dataset->space) *
                                         H5T_get_size(dataset->type);
                 H5_ASSIGN_OVERFLOW(dataset->layout.u.contig.size,tmp_size,hssize_t,hsize_t);
             } /* end if */
@@ -2986,7 +2986,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
      * We assume that external storage is already
      * allocated by the caller, or at least will be before I/O is performed.
      */
-    if(!(H5S_NULL == H5S_GET_SIMPLE_EXTENT_TYPE(dset->space) || dset->efl.nused>0)) {
+    if(!(H5S_NULL == H5S_GET_EXTENT_TYPE(dset->space) || dset->efl.nused>0)) {
         /* Get a pointer to the dataset's layout information */
         layout=&(dset->layout);
 
@@ -3135,7 +3135,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
                 size_t              npoints;        /* Number of points in space */
 
                 /* Get the number of elements in the dataset's dataspace */
-                snpoints = H5S_GET_SIMPLE_EXTENT_NPOINTS(dset->space);
+                snpoints = H5S_GET_EXTENT_NPOINTS(dset->space);
                 assert(snpoints>=0);
                 H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
 
