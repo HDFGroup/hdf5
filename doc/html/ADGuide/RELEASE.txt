@@ -1,12 +1,12 @@
-HDF5 version 1.6.0-post8 released on Sun Sep 21 20:46:46 CDT 2003
+HDF5 version 1.6.1 released on Thu Oct 16 21:42:02 CDT 2003
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.0 and
-HDF5-1.6.*, and contains information on the platforms tested and
-known problems in HDF5-1.6.*. For more details check the HISTORY.txt
+HDF5-1.6.1, and contains information on the platforms tested and
+known problems in HDF5-1.6.1. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -27,6 +27,7 @@ CONTENTS
 - New Features
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.6.0
+- Documentation
 - Platforms Tested
 - Known Problems
 
@@ -39,6 +40,10 @@ New Features
 
     Library:
     --------
+        - Added new fields to the H5G_stat_t for more information about an
+            object's object header.  QAK 2003/10/06
+        - Added new H5Fget_freespace() routine to query the free space in a
+            given file.  QAK 2003/10/06
 
     Parallel Library:
     -----------------
@@ -46,16 +51,64 @@ New Features
     Tools:
     ------
 
+    C++ API:
+    --------
+        - Added overloaded functions read and write to H5::Attribute.
+          BMR - 2003/04/21
+        - Added an overloaded constructor H5::StrType so the need to separately
+          set the length of the string type can be eliminated. BMR - 2003/04/21
+        - Added overloaded functions read and write to H5::DataSet.
+          BMR - 2003/04/27
+
+        The following items were added but not documented in previous releases:
+
+        - On windows, any application, that uses the C++ API dll, must
+          include the name HDF5CPP_USEDLL in its project setting. (Feb 17, 2002)
+          BMR - 2003/10/10
+        - Added missing default constructor H5::H5File. (Apr 26, 2002)
+          BMR - 2003/10/10
+        - Added new member function H5::DataSet::fillMemBuf per the new C
+          API H5Dfill, which fills the elements in a selection for a memory
+          buffer with a fill value. (May 16, 2002) BMR - 2003/10/10
+        - Added the new member function getMemberIndex to H5::EnumType
+          and H5::CompType to match the new C API H5Tget_member_index.  Given
+          the name of a member of an enumeration or compound datatype, this
+          new function queries the index of the member. (May 16, 2002)
+          BMR - 2003/10/10
+        - Added these member functions to H5::Group per the new C functions
+          H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx:
+          + getNumObjs: Returns the number of objects in the group.
+          + getObjnameByIdx: Retrieves the name of an object in a group,
+                             given an index
+          + getObjTypeByIdx: Returns the type of an object in a group,
+                             given an index
+          (Jan 20, 2003) BMR - 2003/10/10
+
 
 Support for new platforms, languages and compilers.
 =======================================
-
+         - gcc 3.3.1 is supported on Linux.
+  
 
 Bug Fixes since HDF5-1.6.0 release
 ==================================
 
     Library
     -------
+        - Fixed incorrect datatype of the third parameter to the Fortran90
+          h5pset(get)_cache_f functions (INTEGER to INTEGER(SIZE_T)) EIP - 2003/10/13
+        - Fixed problems with accessing variable-length data datatypes on
+            Crays.  QAK - 2003/10/10
+        - Fixed potential file corruption bug when too many object header
+            messages (probably attributes, from a user perspective) were
+            inserted into an object header and certain other conditions were
+            met.  QAK - 2003/10/08
+        - Changed implementation of internal ID searching algorithm to avoid
+            O(n) behavior for many common cases.  QAK - 2003/10/06
+        - Allow partial parallel writing to compact datasets.  QAK - 2003/10/06
+        - Correctly create reference to shared datatype in attribute, instead
+            of making a copy of the shared datatype in the attribute.
+            QAK - 2003/10/01
         - Revert changes which caused files >2GB to fail when created with
             MPI-I/O file driver on certain platforms.  QAK - 2003/09/16
         - Allow compound datatypes to grow in size.  SLU - 2003/09/10
@@ -96,7 +149,7 @@ Bug Fixes since HDF5-1.6.0 release
             and H5Gunlink.  QAK - 2003/08/16
         - Corrected bug with user blocks that didn't allow a user block to
             be inserted in front of a file after the file was created.
-            AK - 2003/08/13
+            QAK - 2003/08/13
         - Corrected errors with using point selections to access data in
             chunked datasets.  QAK - 2003/07/23
         - Corrected error with variable-length datatypes and chunked datasets
@@ -124,6 +177,24 @@ Bug Fixes since HDF5-1.6.0 release
 
     Documentation 
     ------------- 
+        - Added two missing Fortran APIs (h5pget_fapl_mpiposix_f and 
+            h5pset_fapl_mpiposix_f) to the reference manual.
+            FMB - 2003/10/15
+        - Corrected the reference manual descriptions of H5open/h5open_f and 
+            H5close/h5close_f to indicate that these calls are required in 
+            Fortran90 applications.   FMB - 2003/10/15
+
+
+Documentation
+=============
+
+    Fortran90 APIs are being integrated into the main body of the 
+    HDF5 Reference Manual (RM).  This process is complete in all RM sections
+    except H5P.
+
+    A PDF version of the RM will be posted on the HDF5 website
+    (at http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/) approximately one week
+    after the release.
 
 
 Platforms Tested
@@ -139,47 +210,42 @@ Platforms Tested
 				  mpxlf_r 7.1.1.2
                                   poe 3.2.0.10
     Cray T3E sn6606 2.0.6.08      Cray Standard C Version 6.6.0.2
-                                  Cray Fortran Version 3.6.0.0.2
-                                  mpt 2.2.0.0
+                                  Cray Fortran Version 3.6.0.2
     Cray SV1 sn9617 10.0.1.2      Cray Standard C Version 6.6.0.2
-                                  mpt 2.2.0.0
-                                  Cray Fortran Version 3.6.0.0.2
+                                  Cray Fortran Version 3.6.0.2
     Cray T90IEEE 10.0.1.01y       Cray Standard C Version 6.4.0.2.3
                                   Cray Fortran Version 3.4.0.3
-                                  mpt 2.1.0.0
-    FreeBSD 4.7                   gcc 2.95.4
-                                  g++ 2.95.5
+    FreeBSD 4.9                   gcc 2.95.4
+                                  g++ 2.95.4
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
                                   HP F90 v2.4
                                   HP ANSI C++ B3910B A.03.13
-                                  MPIch 1.2.4
-    IRIX 6.5                      MIPSpro cc 7.30
+                                  HP MPI 01.07.00.00
+    IRIX 6.5                      MIPSpro cc 7.3.1.2m
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
                                   F90 MIPSpro 7.3.1.3m (64 only)
                                   MPIch 1.2.4
-    Linux 2.4.18                  gcc 2.96, 3.2.2, 3.2.3
+    Linux 2.4.18                  gcc 2.96, 3.2.2, 3.3.1
                                   g++ 3.2.2, 3.2.3
                                   Intel(R) C++ Version 7.1
                                   Intel(R) Fortran Compiler Version 7.1
                                   PGI compilers (pgcc, pgf90, pgCC) version 4.0-2
                                   MPIch 1.2.4
+    Linux 2.4.20-8                gcc 3.2.2
     OSF1 V5.1                     Compaq C V6.4-014
                                   Compaq C V6.3-027
-				  Compaq Fortran V5.5-1877
-				  Compaq C++ V6.5-014
+				  Compaq Fortran V5.5-2602
+				  Compaq C++ V6.5-030
 				  MPI_64bit_R5
                                   g++ version 3.0 for C++
-    SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
+    SunOS 5.7(32 and 64 bit)      WorkShop Compilers 5.0 98/12/15 C 5.0
      (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
                                   WorkShop Compilers 5.0 98/10/25 
                                   FORTRAN 90 2.0 Patch 107356-04 
-    SunOS 5.8/32                  Sun WorkShop 6 update 2 C 5.3
+    SunOS 5.8(32 and 64 bit)      Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.8/64                  Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
-                                  Sun WorkShop 6 update 2 C++ 5.3
-    TFLOPS r1.0.4 v4.3.3 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
+    TFLOPS r1.0.4 v4.4.0 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
     IA-32 Linux 2.4.9             gcc 2.96
                                   Intel(R) C++ Version 7.0
@@ -193,9 +259,9 @@ Platforms Tested
                                   Intel C and F90 compilers version 7.1
 				  Code Warrior 8.0
     Windows XP                    MSVC++.NET
-    MAC OS X                      Darwin 6.5
+    MAC OS X                      Darwin 6.8
                                   gcc and g++ Apple Computer, Inc. GCC 
-                                  version 1161, based on gcc version 3.1
+                                  version 1175, based on gcc version 3.1
                                   
 
 
@@ -289,10 +355,11 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
-
-* PGI C++ compiler fails when compiling the C++ library's tests.
-  Therefore, we cannot verify that the C++ library built with the PGI C++
-  compiler is correct.
+* Fortran subroutine h5pget_driver_f doesn't return a correct driver information.
+  The fix willl be available in the 1.6.2 release. 
+* There are two h5dump xml tests(h5dump --xml thlink.h5 and h5dump --xml tmany.h5)
+  failed on windows xp with .NET for debug and debug dll. Release and Release
+  dll work fine. 
 
 * The h5dump tests may fail to match the expected output on some platforms
   (e.g. parallel jobs, Windows) where the error messages directed to
