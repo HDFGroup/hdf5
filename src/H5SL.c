@@ -122,6 +122,7 @@ struct H5SL_t {
     /* Static values for each list */
     H5SL_type_t type;   /* Type of skip list */
     double p;           /* Probability of using a higher level [0..1) */
+    int p1;             /* Probability converted into appropriate value for random # generator on this machine */
     size_t max_level;   /* Maximum number of levels */
 
     /* Dynamic values for each list */
@@ -131,7 +132,7 @@ struct H5SL_t {
 };
 
 /* Static functions */
-static size_t H5SL_random_level(double p, size_t max_level);
+static size_t H5SL_random_level(int p1, size_t max_level);
 static H5SL_node_t * H5SL_new_node(size_t lvl, void *item, void *key);
 
 /* Declare a free list to manage the H5SL_t struct */
@@ -164,7 +165,7 @@ H5SL_init_interface(void)
 
     /* Create randomized set of numbers */
     curr_time=HDtime(NULL);
-    HDsrandom((unsigned long)curr_time);
+    HDsrand((unsigned)curr_time);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SL_init_interface() */
@@ -177,7 +178,7 @@ H5SL_init_interface(void)
     Generate a random level
  USAGE
     size_t H5SL_random_level(p,max_level)
-        double p;               IN: probability distribution
+        int p1;                 IN: probability distribution
         size_t max_level;       IN: Maximum level for node height
 
  RETURNS
@@ -194,14 +195,17 @@ H5SL_init_interface(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static size_t
-H5SL_random_level(double p, size_t max_level)
+H5SL_random_level(int p1, size_t max_level)
 {
     size_t lvl;         /* Level generated */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_random_level);
 
+    /* Account for starting at zero offset */
+    max_level--;
+
     lvl=0;
-    while((((double)HDrandom())/((double)LONG_MAX))<p && lvl < max_level)
+    while(HDrand()<p1 && lvl < max_level)
         lvl++;
 
     FUNC_LEAVE_NOAPI(lvl);
@@ -293,6 +297,7 @@ H5SL_create(H5SL_type_t type, double p, size_t max_level)
     /* Set the static internal fields */
     new_slist->type=type;
     new_slist->p=p;
+    new_slist->p1=p*RAND_MAX;
     new_slist->max_level=max_level;
 
     /* Set the dynamic internal fields */
@@ -418,7 +423,7 @@ H5SL_insert(H5SL_t *slist, void *item, void *key)
     /* 'key' must not have been found in existing list, if we get here */
 
     /* Generate level for new node */
-    lvl=H5SL_random_level(slist->p,slist->max_level);
+    lvl=H5SL_random_level(slist->p1,slist->max_level);
     if((int)lvl>slist->curr_level) {
         /* Cap the increase in the current level to just one greater */
         lvl=slist->curr_level+1;
@@ -427,12 +432,12 @@ H5SL_insert(H5SL_t *slist, void *item, void *key)
         update[lvl]=&slist->header->forward[lvl];
 
         /* Increase the maximum level of the list */
-        slist->curr_level=lvl;
+        slist->curr_level=(int)lvl;
     } /* end if */
 
     /* Create new node of proper level */
     if((x=H5SL_new_node(lvl,item,key))==NULL)
-        HGOTO_ERROR(H5E_SLIST,H5E_NOSPACE,NULL,"can't create new skip list node");
+        HGOTO_ERROR(H5E_SLIST,H5E_NOSPACE,FAIL,"can't create new skip list node");
 
     /* Link the new node into the existing list */
     for(i=0; i<=(int)lvl; i++) {
