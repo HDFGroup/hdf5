@@ -411,7 +411,7 @@ H5Fget_create_plist(hid_t file_id)
 {
     H5F_t		*file = NULL;
     hid_t		ret_value = FAIL;
-    H5F_create_t	*plist = NULL;
+    H5P_t	    *plist = NULL;
 
     FUNC_ENTER(H5Fget_create_plist, FAIL);
     H5TRACE1("i","i",file_id);
@@ -429,8 +429,8 @@ H5Fget_create_plist(hid_t file_id)
 
     /* Create an atom */
     if ((ret_value = H5P_create(H5P_FILE_CREATE, plist)) < 0) {
-	H5P_close(H5P_FILE_CREATE, plist);
-	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+        H5P_close(plist);
+        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register property list");
     }
     
@@ -460,7 +460,7 @@ hid_t
 H5Fget_access_plist(hid_t file_id)
 {
     H5F_t		*f = NULL;
-    H5F_access_t	*plist = NULL;
+    H5P_t	    *plist = NULL;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER(H5Fget_access_plist, FAIL);
@@ -479,8 +479,8 @@ H5Fget_access_plist(hid_t file_id)
 
     /* Create an atom */
     if ((ret_value = H5P_create(H5P_FILE_ACCESS, plist))<0) {
-	H5P_close(H5P_FILE_ACCESS, plist);
-	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+        H5P_close(plist);
+        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register property list");
     }
 
@@ -783,8 +783,8 @@ H5F_dest(H5F_t *f)
 		ret_value = FAIL; /*but keep going*/
 	    }
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
-	    H5P_close (H5P_FILE_CREATE, f->shared->create_parms);
-	    H5P_close (H5P_FILE_ACCESS, f->shared->access_parms);
+	    H5P_close (f->shared->create_parms);
+	    H5P_close (f->shared->access_parms);
 	    f->shared = H5MM_xfree(f->shared);
 	} else if (f->shared->nrefs>0) {
 	    /*

@@ -33,20 +33,8 @@ static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT H5P_init_interface
 static herr_t		H5P_init_interface(void);
 
-/* Declare a free list to manage the H5F_create_t struct */
-H5FL_DEFINE_STATIC(H5F_create_t);
-
-/* Declare a free list to manage the H5F_access_t struct */
-H5FL_DEFINE_STATIC(H5F_access_t);
-
-/* Declare a free list to manage the H5D_create_t struct */
-H5FL_DEFINE_STATIC(H5D_create_t);
-
-/* Declare a free list to manage the H5F_xfer_t struct */
-H5FL_DEFINE_STATIC(H5F_xfer_t);
-
-/* Declare a free list to manage the H5F_mprop_t struct */
-H5FL_DEFINE_STATIC(H5F_mprop_t);
+/* Declare a free list to manage the H5P_t struct */
+H5FL_DEFINE_STATIC(H5P_t);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -88,7 +76,7 @@ H5P_init_interface(void)
      */
     for (i = 0; i < H5P_NCLASSES; i++) {
 	status = H5I_init_group((H5I_type_t)(H5I_TEMPLATE_0 +i),
-				H5I_TEMPID_HASHSIZE, 0, NULL);
+				H5I_TEMPID_HASHSIZE, 0, (H5I_free_t)H5P_close);
 	if (status < 0) ret_value = FAIL;
     }
     if (ret_value < 0) {
@@ -166,50 +154,36 @@ hid_t
 H5Pcreate(H5P_class_t type)
 {
     hid_t		    ret_value = FAIL;
-    void		   *plist = NULL;
+    H5P_t		    *plist = NULL;
 
     FUNC_ENTER(H5Pcreate, FAIL);
     H5TRACE1("i","p",type);
 
-    /* Allocate a new property list and initialize it with default values */
+    /* Allocate a new property list */
+    if (NULL==(plist = H5FL_ALLOC(H5P_t,0))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+               "memory allocation failed");
+    }
+
+    /* Initialize it with default values */
     switch (type) {
         case H5P_FILE_CREATE:
-            if (NULL==(plist = H5FL_ALLOC(H5F_create_t,0))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                       "memory allocation failed");
-            }
             HDmemcpy(plist, &H5F_create_dflt, sizeof(H5F_create_t));
             break;
 
         case H5P_FILE_ACCESS:
-            if (NULL==(plist = H5FL_ALLOC(H5F_access_t,0))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                       "memory allocation failed");
-            }
             HDmemcpy(plist, &H5F_access_dflt, sizeof(H5F_access_t));
             break;
 
         case H5P_DATASET_CREATE:
-            if (NULL==(plist = H5FL_ALLOC(H5D_create_t,0))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                       "memory allocation failed");
-            }
             HDmemcpy(plist, &H5D_create_dflt, sizeof(H5D_create_t));
             break;
 
         case H5P_DATASET_XFER:
-            if (NULL==(plist = H5FL_ALLOC(H5F_xfer_t,0))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                       "memory allocation failed");
-            }
             HDmemcpy(plist, &H5F_xfer_dflt, sizeof(H5F_xfer_t));
             break;
 
         case H5P_MOUNT:
-            if (NULL==(plist = H5FL_ALLOC(H5F_mprop_t,0))) {
-                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                      "memory allocation failed");
-            }
             HDmemcpy(plist, &H5F_mount_dflt, sizeof(H5F_mprop_t));
             break;
 
@@ -217,6 +191,9 @@ H5Pcreate(H5P_class_t type)
             HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                   "unknown property list class");
     }
+
+    /* Set the type of the property list */
+    plist->class=type;
 
     /* Atomize the new property list */
     if ((ret_value = H5P_create(type, plist)) < 0) {
@@ -246,7 +223,7 @@ H5Pcreate(H5P_class_t type)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5P_create(H5P_class_t type, void *plist)
+H5P_create(H5P_class_t type, H5P_t *plist)
 {
     hid_t	ret_value = FAIL;
 
@@ -295,13 +272,9 @@ H5Pclose(hid_t plist_id)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     }
 	
-    /*
-     * Chuck the object!  When the reference count reaches zero then
-     * H5I_dec_ref() removes it from the group and we should free it.  The
-     * free function is not registered as part of the group because it takes
-     * an extra argument.
-     */
-    if (0==H5I_dec_ref(plist_id)) H5P_close (type, plist);
+    /* When the reference count reaches zero the resources are freed */
+    if (H5I_dec_ref(plist_id) < 0)
+        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing property list");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -323,10 +296,11 @@ H5Pclose(hid_t plist_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_close(H5P_class_t type, void *plist)
+H5P_close(void *_plist)
 {
-    H5F_access_t	*fa_list = (H5F_access_t*)plist;
-    H5D_create_t	*dc_list = (H5D_create_t*)plist;
+    H5P_t           *plist=(H5P_t *)_plist;
+    H5F_access_t	*fa_list = &(plist->u.faccess);
+    H5D_create_t	*dc_list = &(plist->u.dcreate);
     
     FUNC_ENTER (H5P_close, FAIL);
 
@@ -334,7 +308,7 @@ H5P_close(H5P_class_t type, void *plist)
     if (!plist) HRETURN (SUCCEED);
 
     /* Some property lists may need to do special things */
-    switch (type) {
+    switch (plist->class) {
         case H5P_FILE_ACCESS:
             switch (fa_list->driver) {
                 case H5F_LOW_ERROR:
@@ -353,43 +327,41 @@ H5P_close(H5P_class_t type, void *plist)
                 case H5F_LOW_SPLIT:
                     /* Free member info */
                     fa_list->driver = H5F_LOW_ERROR; /*prevent cycles*/
-                    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.meta_access);
-                    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.raw_access);
+                    H5P_close (fa_list->u.split.meta_access);
+                    H5P_close (fa_list->u.split.raw_access);
                     H5MM_xfree (fa_list->u.split.meta_ext);
                     H5MM_xfree (fa_list->u.split.raw_ext);
                     break;
 
                 case H5F_LOW_FAMILY:
                     /* Free member info */
-                    H5P_close (H5P_FILE_ACCESS, fa_list->u.fam.memb_access);
+                    H5P_close (fa_list->u.fam.memb_access);
                     break;
             }
-            H5FL_FREE(H5F_access_t,plist);
             break;
         
         case H5P_FILE_CREATE:
-            H5FL_FREE(H5F_create_t,plist);
             break;
         
         case H5P_DATASET_CREATE:
             H5O_reset(H5O_FILL, &(dc_list->fill));
             H5O_reset(H5O_EFL, &(dc_list->efl));
             H5O_reset(H5O_PLINE, &(dc_list->pline));
-            H5FL_FREE(H5D_create_t,plist);
             break;
 
         case H5P_DATASET_XFER:
-            H5FL_FREE(H5F_xfer_t,plist);
             break;
 
         case H5P_MOUNT:
-            H5FL_FREE(H5F_mprop_t,plist);
             break;
 
         default:
             HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
                        "unknown property list class");
     }
+
+    /* Free the property list */
+    H5FL_FREE(H5P_t,plist);
 
     /* Free the property list struct and return */
     FUNC_LEAVE(SUCCEED);
@@ -468,6 +440,205 @@ H5P_get_class(hid_t plist_id)
     }
     ret_value = (H5P_class_t)(group - H5I_TEMPLATE_0);
     FUNC_LEAVE(ret_value);
+}
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pcopy
+ PURPOSE
+    Copy a property list
+ USAGE
+    hid_t H5P_copy(plist_id)
+	hid_t plist_id;	  IN: property list object to copy
+ RETURNS
+    Returns property list ID (atom) on success, Negative on failure
+
+ ERRORS
+    ARGS      BADRANGE	    Unknown property list class. 
+    ATOM      BADATOM	    Can't unatomize property list. 
+    ATOM      CANTREGISTER  Register the atom for the new property list. 
+    INTERNAL  UNSUPPORTED   Dataset transfer properties are not implemented
+			    yet. 
+    INTERNAL  UNSUPPORTED   File access properties are not implemented yet. 
+
+ DESCRIPTION
+ * This function creates a new copy of a property list with all the same
+ * parameter settings.
+--------------------------------------------------------------------------*/
+hid_t
+H5Pcopy(hid_t plist_id)
+{
+    const void		   *plist = NULL;
+    void		   *new_plist = NULL;
+    H5P_class_t		    type;
+    hid_t		    ret_value = FAIL;
+    H5I_type_t		    group;
+
+    FUNC_ENTER(H5Pcopy, FAIL);
+    H5TRACE1("i","i",plist_id);
+
+    /* Check args */
+    if (NULL == (plist = H5I_object(plist_id)) ||
+	(type = H5P_get_class(plist_id)) < 0 ||
+	(group = H5I_get_type(plist_id)) < 0) {
+	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
+		      "unable to unatomize property list");
+    }
+
+    /* Copy it */
+    if (NULL==(new_plist=H5P_copy (type, plist))) {
+	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		       "unable to copy property list");
+    }
+
+    /* Register the atom for the new property list */
+    if ((ret_value = H5I_register(group, new_plist)) < 0) {
+	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		      "unable to atomize property list pointer");
+    }
+    FUNC_LEAVE(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_copy
+ *
+ * Purpose:	Creates a new property list and initializes it with some
+ *		other property list.
+ *
+ * Return:	Success:	Ptr to new property list
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *		Tuesday, February  3, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5P_copy (H5P_class_t type, const void *src)
+{
+    size_t		size;
+    H5P_t		*dst = NULL;
+    const H5D_create_t	*dc_src = NULL;
+    H5D_create_t	*dc_dst = NULL;
+    const H5F_access_t	*fa_src = NULL;
+    H5F_access_t	*fa_dst = NULL;
+    
+    FUNC_ENTER (H5P_copy, NULL);
+    
+    /* How big is the property list */
+    switch (type) {
+        case H5P_FILE_CREATE:
+            size = sizeof(H5F_create_t);
+            break;
+
+        case H5P_FILE_ACCESS:
+            size = sizeof(H5F_access_t);
+            break;
+
+        case H5P_DATASET_CREATE:
+            size = sizeof(H5D_create_t);
+            break;
+
+        case H5P_DATASET_XFER:
+            size = sizeof(H5F_xfer_t);
+            break;
+
+        case H5P_MOUNT:
+            size = sizeof(H5F_mprop_t);
+            break;
+
+        default:
+            HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
+                  "unknown property list class");
+    }
+
+    /* Create the new property list */
+    if (NULL==(dst = H5FL_ALLOC(H5P_t,0))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
+
+    /* Copy into new object */
+    HDmemcpy(dst, src, size);
+
+    /* Set the type of the property list */
+    dst->class=type;
+
+    /* Deep-copy pointers */
+    switch (type) {
+    case H5P_FILE_CREATE:
+	break;
+	
+    case H5P_FILE_ACCESS:
+	fa_src = (const H5F_access_t*)src;
+	fa_dst = (H5F_access_t*)dst;
+	switch (fa_src->driver) {
+	case H5F_LOW_ERROR:
+	case H5F_LOW_SEC2:
+	case H5F_LOW_STDIO:
+	case H5F_LOW_CORE:
+	case H5F_LOW_MPIO:
+	    /* Nothing to do */
+	    break;
+	    
+	case H5F_LOW_FAMILY:
+	    fa_dst->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS,
+						  fa_src->u.fam.memb_access);
+	    break;
+
+	case H5F_LOW_SPLIT:
+	    fa_dst->u.split.meta_access=H5P_copy (H5P_FILE_ACCESS,
+						  fa_src->u.split.meta_access);
+	    fa_dst->u.split.raw_access = H5P_copy (H5P_FILE_ACCESS,
+						   fa_src->u.split.raw_access);
+	    break;
+	}
+	break;
+	
+    case H5P_DATASET_CREATE:
+	dc_src = (const H5D_create_t*)src;
+	dc_dst = (H5D_create_t*)dst;
+
+	/* Copy the fill value */
+	if (NULL==H5O_copy(H5O_FILL, &(dc_src->fill), &(dc_dst->fill))) {
+	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
+			  "unabe to copy fill value message");
+	}
+	
+	/* Copy the external file list */
+	HDmemset(&(dc_dst->efl), 0, sizeof(dc_dst->efl));
+	if (NULL==H5O_copy(H5O_EFL, &(dc_src->efl), &(dc_dst->efl))) {
+	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
+			  "unable to copy external file list message");
+	}
+
+	/* Copy the filter pipeline */
+	if (NULL==H5O_copy(H5O_PLINE, &(dc_src->pline), &(dc_dst->pline))) {
+	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
+			  "unable to copy filter pipeline message");
+	}
+	
+
+	break;
+	
+    case H5P_DATASET_XFER:
+	/* Nothing to do */
+	break;
+
+    case H5P_MOUNT:
+	/* Nothing to do */
+	break;
+
+    default:
+	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
+		      "unknown property list class");
+    }
+
+    FUNC_LEAVE (dst);
 }
     
 
@@ -3157,218 +3328,3 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func,
     FUNC_LEAVE (SUCCEED);
 }
 
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Pcopy
- PURPOSE
-    Copy a property list
- USAGE
-    hid_t H5P_copy(plist_id)
-	hid_t plist_id;	  IN: property list object to copy
- RETURNS
-    Returns property list ID (atom) on success, Negative on failure
-
- ERRORS
-    ARGS      BADRANGE	    Unknown property list class. 
-    ATOM      BADATOM	    Can't unatomize property list. 
-    ATOM      CANTREGISTER  Register the atom for the new property list. 
-    INTERNAL  UNSUPPORTED   Dataset transfer properties are not implemented
-			    yet. 
-    INTERNAL  UNSUPPORTED   File access properties are not implemented yet. 
-
- DESCRIPTION
- * This function creates a new copy of a property list with all the same
- * parameter settings.
---------------------------------------------------------------------------*/
-hid_t
-H5Pcopy(hid_t plist_id)
-{
-    const void		   *plist = NULL;
-    void		   *new_plist = NULL;
-    H5P_class_t		    type;
-    hid_t		    ret_value = FAIL;
-    H5I_type_t		    group;
-
-    FUNC_ENTER(H5Pcopy, FAIL);
-    H5TRACE1("i","i",plist_id);
-
-    /* Check args */
-    if (NULL == (plist = H5I_object(plist_id)) ||
-	(type = H5P_get_class(plist_id)) < 0 ||
-	(group = H5I_get_type(plist_id)) < 0) {
-	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
-		      "unable to unatomize property list");
-    }
-
-    /* Copy it */
-    if (NULL==(new_plist=H5P_copy (type, plist))) {
-	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		       "unable to copy property list");
-    }
-
-    /* Register the atom for the new property list */
-    if ((ret_value = H5I_register(group, new_plist)) < 0) {
-	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		      "unable to atomize property list pointer");
-    }
-    FUNC_LEAVE(ret_value);
-}
-
-/*-------------------------------------------------------------------------
- * Function:	H5P_copy
- *
- * Purpose:	Creates a new property list and initializes it with some
- *		other property list.
- *
- * Return:	Success:	Ptr to new property list
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Tuesday, February  3, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5P_copy (H5P_class_t type, const void *src)
-{
-    size_t		size;
-    void		*dst = NULL;
-    const H5D_create_t	*dc_src = NULL;
-    H5D_create_t	*dc_dst = NULL;
-    const H5F_access_t	*fa_src = NULL;
-    H5F_access_t	*fa_dst = NULL;
-    
-    FUNC_ENTER (H5P_copy, NULL);
-    
-    /* How big is the property list */
-    switch (type) {
-    case H5P_FILE_CREATE:
-    /* Create the new property list */
-    if (NULL==(dst = H5FL_ALLOC(H5F_create_t,0))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-	size = sizeof(H5F_create_t);
-	break;
-
-    case H5P_FILE_ACCESS:
-    /* Create the new property list */
-    if (NULL==(dst = H5FL_ALLOC(H5F_access_t,0))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-	size = sizeof(H5F_access_t);
-	break;
-
-    case H5P_DATASET_CREATE:
-    /* Create the new property list */
-    if (NULL==(dst = H5FL_ALLOC(H5D_create_t,0))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-	size = sizeof(H5D_create_t);
-	break;
-
-    case H5P_DATASET_XFER:
-    /* Create the new property list */
-    if (NULL==(dst = H5FL_ALLOC(H5F_xfer_t,0))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-	size = sizeof(H5F_xfer_t);
-	break;
-
-    case H5P_MOUNT:
-    /* Create the new property list */
-    if (NULL==(dst = H5FL_ALLOC(H5F_mprop_t,0))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-	size = sizeof(H5F_mprop_t);
-	break;
-
-    default:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
-		      "unknown property list class");
-    }
-
-    /* Copy into new object */
-    HDmemcpy(dst, src, size);
-
-    /* Deep-copy pointers */
-    switch (type) {
-    case H5P_FILE_CREATE:
-	break;
-	
-    case H5P_FILE_ACCESS:
-	fa_src = (const H5F_access_t*)src;
-	fa_dst = (H5F_access_t*)dst;
-	switch (fa_src->driver) {
-	case H5F_LOW_ERROR:
-	case H5F_LOW_SEC2:
-	case H5F_LOW_STDIO:
-	case H5F_LOW_CORE:
-	case H5F_LOW_MPIO:
-	    /* Nothing to do */
-	    break;
-	    
-	case H5F_LOW_FAMILY:
-	    fa_dst->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS,
-						  fa_src->u.fam.memb_access);
-	    break;
-
-	case H5F_LOW_SPLIT:
-	    fa_dst->u.split.meta_access=H5P_copy (H5P_FILE_ACCESS,
-						  fa_src->u.split.meta_access);
-	    fa_dst->u.split.raw_access = H5P_copy (H5P_FILE_ACCESS,
-						   fa_src->u.split.raw_access);
-	    break;
-	}
-	break;
-	
-    case H5P_DATASET_CREATE:
-	dc_src = (const H5D_create_t*)src;
-	dc_dst = (H5D_create_t*)dst;
-
-	/* Copy the fill value */
-	if (NULL==H5O_copy(H5O_FILL, &(dc_src->fill), &(dc_dst->fill))) {
-	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
-			  "unabe to copy fill value message");
-	}
-	
-	/* Copy the external file list */
-	HDmemset(&(dc_dst->efl), 0, sizeof(dc_dst->efl));
-	if (NULL==H5O_copy(H5O_EFL, &(dc_src->efl), &(dc_dst->efl))) {
-	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
-			  "unable to copy external file list message");
-	}
-
-	/* Copy the filter pipeline */
-	if (NULL==H5O_copy(H5O_PLINE, &(dc_src->pline), &(dc_dst->pline))) {
-	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
-			  "unable to copy filter pipeline message");
-	}
-	
-
-	break;
-	
-    case H5P_DATASET_XFER:
-	/* Nothing to do */
-	break;
-
-    case H5P_MOUNT:
-	/* Nothing to do */
-	break;
-
-    default:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
-		      "unknown property list class");
-    }
-
-    FUNC_LEAVE (dst);
-}

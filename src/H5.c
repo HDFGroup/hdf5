@@ -134,9 +134,13 @@ H5_term_library(void)
     intn	pending, ntries=0, n;
     uintn	at=0;
     char	loop[1024];
+    H5E_auto_t func;
     
     /* Don't do anything if the library is already closed */
     if (!H5_libinit_g) return;
+
+    /* Check if we should display error output */
+    H5Eget_auto(&func,NULL);
 
     /*
      * Terminate each interface. The termination functions return a positive
@@ -167,8 +171,11 @@ H5_term_library(void)
 	pending += DOWN(I);
     } while (pending && ntries++<100);
     if (pending) {
-	fprintf(stderr, "HDF5: infinite loop closing library\n");
-	fprintf(stderr, "      %s...\n", loop);
+        /* Only display the error message if the user is interested in them. */
+        if (func) {
+            fprintf(stderr, "HDF5: infinite loop closing library\n");
+            fprintf(stderr, "      %s...\n", loop);
+        }
     }
     
     /* Mark library as closed */

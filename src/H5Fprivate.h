@@ -494,7 +494,17 @@ typedef struct H5F_file_t {
     haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
     struct H5AC_t *cache;	/* The object cache			*/
     H5F_create_t *create_parms;	/* File-creation property list		*/
+                            /* This actually ends up being a pointer to a */
+                            /* H5P_t type, which is returned from H5P_copy */
+                            /* But that's ok because we only access it like */
+                            /* a H5F_create_t until we pass it back to */
+                            /* H5P_close to release it - QAK */
     H5F_access_t *access_parms;	/* File-access property list		*/
+                            /* This actually ends up being a pointer to a */
+                            /* H5P_t type, which is returned from H5P_copy */
+                            /* But that's ok because we only access it like */
+                            /* a H5F_create_t until we pass it back to */
+                            /* H5P_close to release it - QAK */
     struct H5G_t *root_grp;	/* Open root group			*/
     intn	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
