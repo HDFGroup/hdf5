@@ -182,6 +182,11 @@ int main(int argc, const char *argv[])
    for (s=argv[argno]+1; *s; s++) 
    {
     switch (*s) {
+				default:
+				printf("-%s is an invalid option\n", s );
+    usage(progname);
+    exit(EXIT_SUCCESS);
+				break;
     case 'h': 
      usage(progname);
      exit(EXIT_SUCCESS);
@@ -771,41 +776,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
 
  type_mem = fixtype( type1_id );
 
-#if 0
-
- switch(tclass1)
- {
- case H5T_INTEGER:
-  switch(type1_size)
-  {
-  case 1:
-   type_native = H5T_NATIVE_CHAR;
-   break;
-  case 2:
-   type_native = H5T_NATIVE_SHORT;
-   break;
-  case 4:
-   type_native = H5T_NATIVE_INT;
-   break;
-  } 
-  break; /*switch*/
-  case H5T_FLOAT:
-   switch(type1_size)
-   {
-   case 4:
-    type_native = H5T_NATIVE_FLOAT;
-    break;
-   case 8:
-    type_native = H5T_NATIVE_DOUBLE;
-    break;
-  } /*switch*/
-   break; 
- } /*switch*/
- 
-
-#endif
-
-
 /*-------------------------------------------------------------------------
  * read
  *-------------------------------------------------------------------------
@@ -877,6 +847,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  char   *i1ptr1, *i1ptr2;
  short  *i2ptr1, *i2ptr2;
  int    *i4ptr1, *i4ptr2;
+	long   *i8ptr1, *i8ptr2;
  float  *fptr1, *fptr2;
  double *dptr1, *dptr2;
  int    nfound = 0; /* number of differences found */
@@ -903,7 +874,6 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
 
  printf("%-15s %-15s %-15s %-20s\n", "position", obj1_name, obj2_name, "difference");
  printf("------------------------------------------------------------\n");
-
 
  switch(type_class)
  {
@@ -1068,7 +1038,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
       {
        print_pos( i, acc, pos, rank );
        printf(SPACES);
-       printf(IFORMAT, *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
+       printf(IFORMAT, *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
       }
       nfound++;
      }                                               
@@ -1085,9 +1055,10 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 4:
     i4ptr1 = (int *) buf1;
     i4ptr2 = (int *) buf2;
-  
+
     for ( i = 0; i < tot_cnt; i++)
     {
+
      /* delta but not percentage */
      if ( options.d_ && !options.p_ )
      {
@@ -1153,12 +1124,108 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
        printf(IFORMAT, *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
       }
       nfound++;
-      
-     }                                               
+     } 
      i4ptr1++;  i4ptr2++;
-    }
+    } /*for */
 
     break;
+
+
+  /*-------------------------------------------------------------------------
+   * H5T_INTEGER 8
+   *-------------------------------------------------------------------------
+   */
+
+			case 8:
+    i8ptr1 = (long *) buf1;
+    i8ptr2 = (long *) buf2;
+ 
+    for ( i = 0; i < tot_cnt; i++)
+    {
+
+#if 0
+				print_pos( i, acc, pos, rank );
+    printf(SPACES);
+    printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+#else
+
+     /* delta but not percentage */
+     if ( options.d_ && !options.p_ )
+     {
+      if ( options.n_ && nfound>=options.n_number_count)
+       return nfound;
+      if ( abs(*i8ptr1 - *i8ptr2) > options.d_delta )
+      {
+       if ( options.r_==0 ) 
+       {
+        print_pos( i, acc, pos, rank );
+        printf(SPACES);
+        printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+       }
+       nfound++;
+      }
+     }
+      
+     /* percentage but not delta */
+     else if ( !options.d_ && options.p_ )
+     {
+      if ( abs(1 - *i8ptr1 / *i8ptr2) > options.p_relative  )
+      {
+       if ( options.n_ && nfound>=options.n_number_count)
+        return nfound;
+       if ( options.r_==0 ) 
+       {
+        print_pos( i, acc, pos, rank );
+        printf(SPACES);
+        printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+       }
+       nfound++;
+      }
+     }
+   
+     /* percentage and delta */
+     else if ( options.d_ && options.p_ )
+     {
+      if ( abs(1 - *i8ptr1 / *i8ptr2) > options.p_relative &&
+           abs(*i8ptr1 - *i8ptr2) > options.d_delta )
+      {
+       if ( options.n_ && nfound>=options.n_number_count)
+        return nfound;
+       if ( options.r_==0 ) 
+       {
+        print_pos( i, acc, pos, rank );
+        printf(SPACES);
+        printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+       }
+       nfound++;
+      }
+     }
+     
+     else
+          
+     if (*i8ptr1 != *i8ptr2)
+     {
+      if ( options.n_ && nfound>=options.n_number_count)
+       return nfound;
+      if ( options.r_==0 ) 
+      {
+       print_pos( i, acc, pos, rank );
+       printf(SPACES);
+       printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+      }
+      nfound++;
+      
+     } 
+#endif					
+     i8ptr1++;  i8ptr2++;
+    } /*for */
+
+    break;
+				
+
+			default:
+    printf("no valid H5T_INTEGER size found" );
+				break;
     
        
    } /*switch*/
@@ -1346,6 +1413,10 @@ position   dset5      dset6     difference
 
 
     break;
+
+				default:
+    printf("no valid H5T_FLOAT size found" );
+				break;
       
    } /*switch*/
 
@@ -1501,14 +1572,19 @@ hid_t fixtype(hid_t f_type)
  */
   if (size <= sizeof(char)) {
    m_type = H5Tcopy(H5T_NATIVE_SCHAR);
+			printf("using memory type H5T_NATIVE_SCHAR\n");
   } else if (size <= sizeof(short)) {
    m_type = H5Tcopy(H5T_NATIVE_SHORT);
+			printf("using memory type H5T_NATIVE_SHORT\n");
   } else if (size <= sizeof(int)) {
    m_type = H5Tcopy(H5T_NATIVE_INT);
+			printf("using memory type H5T_NATIVE_INT\n");
   } else if (size <= sizeof(long)) {
    m_type = H5Tcopy(H5T_NATIVE_LONG);
+			printf("using memory type H5T_NATIVE_LONG\n");
   } else {
    m_type = H5Tcopy(H5T_NATIVE_LLONG);
+			printf("using memory type H5T_NATIVE_LLONG\n");
   }
   
   H5Tset_sign(m_type, H5Tget_sign(f_type));
@@ -1522,10 +1598,13 @@ hid_t fixtype(hid_t f_type)
  */
   if (size <= sizeof(float)) {
    m_type = H5Tcopy(H5T_NATIVE_FLOAT);
+			printf("using memory type H5T_NATIVE_FLOAT\n");
   } else if (size <= sizeof(double)) {
    m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
+			printf("using memory type H5T_NATIVE_DOUBLE\n");
   } else {
    m_type = H5Tcopy(H5T_NATIVE_LDOUBLE);
+			printf("using memory type H5T_NATIVE_LDOUBLE\n");
   }
   break;
   
@@ -1563,11 +1642,6 @@ int do_test_files()
  char    data10[] = {"A string"};
  long    data11[7] = {1,1,1,1,1,1,1};
  long    data12[7] = {1,1,1,4,5,6,7};
-
- /* attribute */
- size_t  size_attr = 5;
- float   attr_data1[5] = {1,2,3,4,5};
- float   attr_data2[5] = {1,2.1f,3.01f,4.001f,5.00001f};
  herr_t  status;
 
 /*-------------------------------------------------------------------------
