@@ -529,6 +529,18 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
 			   "unable to copy file access property list");
 	}
 
+#ifdef HAVE_PARALLEL
+	/*
+	 * Disable cache if file is open using MPIO driver.  Parallel
+	 * does not permit caching.  (maybe able to relax it for
+	 * read only open.)
+	 */
+	if (f->shared->access_parms->driver==H5F_LOW_MPIO){
+	    f->shared->access_parms->rdcc_nbytes = 0;
+	    f->shared->access_parms->mdc_nelmts = 0;
+	}
+#endif
+
 	/*
 	 * Create a meta data cache with the specified number of elements.
 	 * The cache might be created with a different number of elements and

@@ -746,6 +746,7 @@ H5Dextend (hid_t dataset_id, const hsize_t *size)
  * Errors:
  *		DATASET	  CANTINIT	Can't update dataset header. 
  *		DATASET	  CANTINIT	Problem with the dataset name. 
+ *		DATASET	  CANTINIT	Fail in file space allocation for chunks");
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
@@ -776,6 +777,14 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     assert (type);
     assert (space);
     assert (create_parms);
+#ifdef HAVE_PARALLEL
+    /* If MPIO is used, no compression support yet. */
+    if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
+	H5Z_NONE!=create_parms->compress.method){
+	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+		     "Parallel IO does not support compression yet");
+    }
+#endif
     if (H5Z_NONE!=create_parms->compress.method &&
 	H5D_CHUNKED!=create_parms->layout) {
 	HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
@@ -926,6 +935,22 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
     }
 
+#ifdef HAVE_PARALLEL
+    /*
+     * If the dataset uses chunk storage and is accessed via
+     * parallel I/O, allocate file space for all chunks now.
+     */
+    if (/*new_dset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&*/
+	new_dset->layout.type == H5D_CHUNKED){
+	if (H5F_istore_allocate(new_dset, new_dset->ent.file,
+		&(new_dset->layout), space,
+		&(new_dset->create_parms->compress))==FAIL){
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		"fail in file space allocation for chunks");
+	}
+    }
+#endif /* HAVE_PARALLEL */
+
     /* Success */
     ret_value = new_dset;
 
@@ -972,6 +997,10 @@ H5D_open(H5G_t *loc, const char *name)
     H5D_t	*dataset = NULL;	/*the dataset which was found	*/
     H5D_t	*ret_value = NULL;	/*return value			*/
     intn	i;
+    H5S_t	*space = NULL;
+#ifdef HAVE_PARALLEL
+    H5F_t	*f = NULL;
+#endif
     
     FUNC_ENTER(H5D_open, NULL);
 
@@ -999,6 +1028,10 @@ H5D_open(H5G_t *loc, const char *name)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to load type info from dataset header");
     }
+    if (NULL==(space=H5S_read (&(dataset->ent)))) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		     "unable to read data space info from dataset header");
+    }
 
     /* Get the optional compression message */
     if (NULL==H5O_read (&(dataset->ent), H5O_COMPRESS, 0,
@@ -1007,6 +1040,16 @@ H5D_open(H5G_t *loc, const char *name)
 	HDmemset (&(dataset->create_parms->compress), 0,
 		  sizeof(dataset->create_parms->compress));
     }
+
+#ifdef HAVE_PARALLEL
+    f = H5G_fileof (loc);
+    /* If MPIO is used, no compression support yet. */
+    if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
+	H5Z_NONE!=dataset->create_parms->compress.method){
+	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+		     "Parallel IO does not support compression yet");
+    }
+#endif
     
     /*
      * Get the raw data layout info.  It's actually stored in two locations:
@@ -1048,10 +1091,28 @@ H5D_open(H5G_t *loc, const char *name)
 		     "storage address is undefined an no external file list");
     }
 
+#ifdef HAVE_PARALLEL
+    /*
+     * If the dataset uses chunk storage and is accessed via
+     * parallel I/O, allocate file space for all chunks now.
+     */
+    if (/*dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&*/
+	dataset->layout.type == H5D_CHUNKED){
+	if (H5F_istore_allocate(dataset, dataset->ent.file,
+		&(dataset->layout), space,
+		&(dataset->create_parms->compress))==FAIL){
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		"fail in file space allocation for chunks");
+	}
+    }
+#endif /* HAVE_PARALLEL */
+
     /* Success */
     ret_value = dataset;
 
   done:
+    if (space)
+	H5S_close (space);
     if (!ret_value && dataset) {
 	if (H5F_addr_defined(&(dataset->ent.header))) {
 	    H5O_close(&(dataset->ent));
@@ -1773,6 +1834,23 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
 	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		       "unable to update file with new dataspace");
     }
+
+#ifdef HAVE_PARALLEL
+    /*
+     * If the dataset uses chunk storage and is accessed via
+     * parallel I/O, need to allocate file space for all chunks now.
+     */
+    if (/*dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&*/
+	dataset->layout.type == H5D_CHUNKED){
+	if (H5F_istore_allocate(dataset, dataset->ent.file,
+		&(dataset->layout), space,
+		&(dataset->create_parms->compress))==FAIL){
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		"fail in file space allocation for chunks");
+	}
+    }
+#endif /* HAVE_PARALLEL */
+
     ret_value = SUCCEED;
 
  done:

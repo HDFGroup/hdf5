@@ -398,7 +398,9 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     intn		i;
 
     FUNC_ENTER(H5F_istore_new_node, FAIL);
-
+#ifdef AKC
+printf("%s: Called\n", FUNC);
+#endif
     /* check args */
     assert(f);
     assert(lt_key);
@@ -409,6 +411,9 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
 
     /* Allocate new storage */
     assert (udata->key.nbytes > 0);
+#ifdef AKC
+printf("calling H5MF_alloc for new chunk\n");
+#endif
     if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, addr /*out */ ) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
 		      "couldn't allocate new file storage");
@@ -539,6 +544,9 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
     FUNC_ENTER(H5F_istore_insert, H5B_INS_ERROR);
+#ifdef AKC
+printf("%s: Called\n", FUNC);
+#endif
 
     /* check args */
     assert(f);
@@ -568,6 +576,9 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 	 * then we should reallocate storage.
 	 */
 	if (lt_key->nbytes != udata->key.nbytes) {
+#ifdef AKC
+printf("calling H5MF_realloc for new chunk\n");
+#endif
 	    if (H5MF_realloc (f, H5MF_RAW, lt_key->nbytes, addr,
 			      udata->key.nbytes, new_node/*out*/)<0) {
 		HRETURN_ERROR (H5E_STORAGE, H5E_WRITEERROR, H5B_INS_ERROR,
@@ -601,6 +612,9 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 	/*
 	 * Allocate storage for the new chunk
 	 */
+#ifdef AKC
+printf("calling H5MF_alloc for new chunk\n");
+#endif
 	if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, new_node/*out*/)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR,
 			  "file allocation failed");
@@ -1329,6 +1343,49 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 	    sub_offset_m[i] = chunk_offset[i] + offset_wrt_chunk[i] +
 			      offset_m[i] - offset_f[i];
 	}
+#ifdef HAVE_PARALLEL
+	/*
+	 * If MPIO is used, must bypass the chunk-cache scheme
+	 * because other MPI processes could be writing to other
+	 * elements in the same chunk.
+	 * Do a direct write-through of only the elements requested.
+	 */
+	 if (f->shared->access_parms->driver==H5F_LOW_MPIO){
+	    H5F_istore_ud1_t	udata;
+	    H5O_layout_t	l;	/* temporary layout */
+	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)==FAIL){
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+				"unable to locate raw data chunk");
+	    };
+	    /*
+	     * use default transfer mode as we do not support collective
+	     * transfer mode since each data write could decompose into
+	     * multiple chunk writes and we are not doing the calculation
+	     * yet.
+	     */
+	    l.type = H5D_CONTIGUOUS;
+	    l.ndims = layout->ndims;
+	    for (i=l.ndims; i-- > 0;)
+		l.dim[i] = layout->dim[i];
+	    l.addr = udata.addr;
+	    if (H5F_arr_read(f, &l,
+			    comp, NULL /* no efl */,
+			    sub_size, size_m,
+			    sub_offset_m, offset_wrt_chunk,
+			    H5D_XFER_DFLT, buf)==FAIL){
+		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+			     "unable to read raw data from file");
+	    };
+	}else{
+#endif
+
+#ifdef AKC
+printf("Locking chunk( ");
+for (i=0; i<layout->ndims; i++){
+printf("%ld ", chunk_offset[i]);
+}
+printf(")\n");
+#endif
 
 	/*
 	 * Lock the chunk, transfer data to the application, then unlock the
@@ -1346,6 +1403,9 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			   "unable to unlock raw data chunk");
 	}
+#ifdef HAVE_PARALLEL
+	}
+#endif
 
 	/* Increment indices */
 	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
@@ -1458,6 +1518,49 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 			      offset_m[i] - offset_f[i];
 	}
 
+#ifdef HAVE_PARALLEL
+	/*
+	 * If MPIO is used, must bypass the chunk-cache scheme
+	 * because other MPI processes could be writing to other
+	 * elements in the same chunk.
+	 * Do a direct write-through of only the elements requested.
+	 */
+	 if (f->shared->access_parms->driver==H5F_LOW_MPIO){
+	    H5F_istore_ud1_t	udata;
+	    H5O_layout_t	l;	/* temporary layout */
+	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)==FAIL){
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+				"unable to locate raw data chunk");
+	    };
+	    /*
+	     * use default transfer mode as we do not support collective
+	     * transfer mode since each data write could decompose into
+	     * multiple chunk writes and we are not doing the calculation
+	     * yet.
+	     */
+	    l.type = H5D_CONTIGUOUS;
+	    l.ndims = layout->ndims;
+	    for (i=l.ndims; i-- > 0;)
+		l.dim[i] = layout->dim[i];
+	    l.addr = udata.addr;
+	    if (H5F_arr_write(f, &l,
+			    comp, NULL /* no efl */,
+			    sub_size, size_m,
+			    sub_offset_m, offset_wrt_chunk,
+			    H5D_XFER_DFLT, buf)==FAIL){
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			     "unable to write raw data to file");
+	    };
+	}else{
+#endif
+
+#ifdef AKC
+printf("Locking chunk( ");
+for (i=0; i<layout->ndims; i++){
+printf("%ld ", chunk_offset[i]);
+}
+printf(")\n");
+#endif
 	/*
 	 * Lock the chunk, copy from application to chunk, then unlock the
 	 * chunk.
@@ -1475,6 +1578,9 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 	    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			   "uanble to unlock raw data chunk");
 	}
+#ifdef HAVE_PARALLEL
+	}
+#endif
 	
 	/* Increment indices */
 	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
@@ -1625,3 +1731,184 @@ H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 
     FUNC_LEAVE (SUCCEED);
 }
+
+
+#ifdef HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_get_addr
+ *
+ * Purpose:	Get the file address of a chunk if file space has been
+ *		assigned.  Save the retrieved information in the udata
+ *		supplied.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Albert Cheng
+ *              June 27, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
+		 const hssize_t offset[], H5F_istore_ud1_t *udata/*out*/)
+{
+    intn		i;
+    herr_t		status;			/*func return status	*/
+    herr_t		ret_value=FAIL;		/*return value		*/
+    
+    FUNC_ENTER (H5F_istore_get_addr, NULL);
+
+    assert(f);
+    assert(layout && (layout->ndims > 0));
+    assert(offset);
+    assert(udata);
+
+
+    for (i=0; i<layout->ndims; i++) {
+	udata->key.offset[i] = offset[i];
+    }
+    udata->mesg = *layout;
+    H5F_addr_undef (&(udata->addr));
+    status = H5B_find (f, H5B_ISTORE, &(layout->addr), udata);
+    H5E_clear ();
+    if (status>=0 && H5F_addr_defined (&(udata->addr)))
+	HRETURN(SUCCEED);
+
+    FUNC_LEAVE (FAIL);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_allocate
+ *
+ * Purpose:	Allocate file space for all chunks that are not allocated yet.
+ *		Return SUCCEED if all needed allocation succeed, otherwise
+ *		FAIL.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Note:	Current implementation relies on cache_size being 0,
+ *		thus no chunk is cashed and written to disk immediately
+ *		when a chunk is unlocked (via H5F_istore_unlock)
+ *		This should be changed to do a direct flush independent
+ *		of the cache value.
+ *
+ * Programmer:	Albert Cheng
+ *		June 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_allocate (H5D_t *dataset, H5F_t *f, const H5O_layout_t *layout,
+		const H5S_t *space, const H5O_compress_t *comp)
+{
+    hsize_t		space_dim[H5O_LAYOUT_NDIMS];
+    intn		space_ndims;
+
+    intn		i, carry;
+    hssize_t		chunk_offset[H5O_LAYOUT_NDIMS];
+    uint8		*chunk=NULL;
+    intn		idx_hint=0;
+    size_t		chunk_size;
+    H5F_istore_ud1_t	udata;
+    
+    FUNC_ENTER(H5F_istore_allocate, FAIL);
+#ifdef AKC
+printf("Enter %s:\n", FUNC);
+#endif
+
+    /* Check args */
+    assert(dataset);
+    assert(layout);
+    assert(f);
+    assert(space);
+
+    if (layout->type != H5D_CHUNKED)
+	HRETURN(SUCCEED);		/*nothing to do or should we FAIL? */
+
+    assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+    assert(H5F_addr_defined(&(layout->addr)));
+
+    /* get current dims of dataset */
+    if ((space_ndims=H5S_get_dims(space, space_dim, NULL)) <= 0 ||
+	space_ndims+1 != layout->ndims){
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		    "unable to allocate chunk storage");
+    }
+    /* copy the element size over */
+    space_dim[space_ndims] = layout->dim[space_ndims];
+
+    /*
+     * Setup indice to go through all chunks. (Future improvement
+     * should allocate only chunks that have no file space assigned yet.
+     */
+    for (i=0, chunk_size=1; i<layout->ndims; i++) {
+	chunk_offset[i]=0;
+	chunk_size *= layout->dim[i];
+    }
+
+    /* Loop over all chunks */
+    while (1) {
+	
+#ifdef AKC
+printf("Checking allocation for chunk( ");
+for (i=0; i<layout->ndims; i++){
+printf("%ld ", chunk_offset[i]);
+}
+printf(")\n");
+#endif
+#ifdef NO
+	if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)==FAIL){
+#endif
+	    /* No file space assigned yet.  Allocate it. */
+	    /* The following needs improvement like calling the */
+	    /* allocation directly rather than indirectly using the */
+	    /* allocation effect in the unlock process. */
+
+#ifdef AKC
+printf("need allocation\n");
+#endif
+	    /*
+	     * Lock the chunk, copy from application to chunk, then unlock the
+	     * chunk.
+	     */
+	    if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
+					      FALSE, &idx_hint))) {
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			       "unable to read raw data chunk");
+	    }
+	    if (H5F_istore_unlock (f, layout, comp, TRUE, chunk_offset, &idx_hint,
+				   chunk, chunk_size)<0) {
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			       "uanble to unlock raw data chunk");
+	    }
+#ifdef NO
+	}
+	else{
+#ifdef AKC
+printf("NO need for allocation\n");
+printf("udata.addr.offset=%d\n", udata.addr.offset);
+#endif
+	}
+#endif
+	
+	/* Increment indices */
+	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
+	    chunk_offset[i] += layout->dim[i];
+	    if (chunk_offset[i] >= space_dim[i]) chunk_offset[i] = 0;
+	    else carry = 0;
+	}
+	if (carry) break;
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+#endif
