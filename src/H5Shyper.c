@@ -2408,7 +2408,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblocks, hsize_t *buf)
+H5S_get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startblock, hsize_t numblocks, hsize_t *buf)
 {
     H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
@@ -2433,11 +2433,20 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
         /* Set some convienence values */
         ndims=space->extent.u.simple.rank;
         fast_dim=ndims-1;
-        /*
-         * Use the "application dimension information" to pass back to the user
-         * the blocks they set, not the optimized, internal information.
-         */
-        diminfo=space->select.sel_info.hslab.app_diminfo;
+
+        /* Check which set of dimension information to use */
+        if(internal)
+            /*
+             * Use the "optimized dimension information" to pass back information
+             * on the blocks set, not the "application information".
+             */
+            diminfo=space->select.sel_info.hslab.diminfo;
+        else
+            /*
+             * Use the "application dimension information" to pass back to the user
+             * the blocks they set, not the optimized, internal information.
+             */
+            diminfo=space->select.sel_info.hslab.app_diminfo;
 
         /* Build the tables of count sizes as well as the initial offset */
         for(i=0; i<ndims; i++) {
@@ -2568,7 +2577,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
 
     /* Go get the correct number of blocks */
     if(numblocks>0)
-        ret_value = H5S_get_select_hyper_blocklist(space,startblock,numblocks,buf);
+        ret_value = H5S_get_select_hyper_blocklist(space,0,startblock,numblocks,buf);
     else
         ret_value=SUCCEED;      /* Successfully got 0 blocks... */
 
@@ -3913,6 +3922,55 @@ H5S_hyper_move(H5S_t *space, const hssize_t *offset)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_move() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_normalize_offset
+ PURPOSE
+    "Normalize" a hyperslab selection by adjusting it's coordinates by the
+    amount of the selection offset.
+ USAGE
+    herr_t H5S_hyper_normalize_offset(space)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to move
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves the hyperslab selection by the selection offset and then resets
+    the selection offset to zeros.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_normalize_offset(H5S_t *space)
+{
+    unsigned u;                         /* Local index variable */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_normalize_offset);
+
+    assert(space);
+
+    /* Check if there is an offset currently */
+    if(space->select.offset) {
+        /* Invert the selection offset */
+        for(u=0; u<space->extent.u.simple.rank; u++)
+            space->select.offset[u] =- space->select.offset[u];
+
+        /* Call the existing 'adjust' routine */
+        if(H5S_hyper_adjust(space, space->select.offset)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
+
+        /* Zero out the selection offset */
+        for(u=0; u<space->extent.u.simple.rank; u++)
+            space->select.offset[u] = 0;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_hyper_normalize_offset() */
 
 
 /*--------------------------------------------------------------------------
