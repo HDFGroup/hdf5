@@ -47,6 +47,9 @@
 /* Define the operator callback function pointer for H5B2_iterate() */
 typedef int (*H5B2_operator_t)(const void *record, void *op_data);
 
+/* Define the 'found' callback function pointer for H5B2_find() */
+typedef herr_t (*H5B2_found_t)(const void *record, void *op_data);
+
      
 /****************************/
 /* Library Private Typedefs */
@@ -67,15 +70,15 @@ typedef struct H5B2_class_t {
     H5B2_subid_t id;				/*id as found in file*/
     size_t	nrec_size;			/*size of native (memory) record*/
 
-    /* Store & retrieve records */
-    herr_t (*store)(const H5F_t *f, hid_t dxpl_id, const void *udata, void *nrecord);  /*  Store record in native record table */
+    /* Store record from application to B-tree 'native' form */
+    herr_t (*store)(const void *udata, void *nrecord);                  /*  Store record in native record table */
 
     /* Compare records, according to a key */
-    herr_t (*compare)(const H5F_t *f, hid_t dxpl_id, const void *rec1, const void *rec2);  /*  Compare two native records */
+    herr_t (*compare)(const void *rec1, const void *rec2);              /*  Compare two native records */
 
     /* Encode & decode record values */
-    herr_t (*encode)(const H5F_t *f, uint8_t *raw, const void *record);  /*  Encode record from native form to disk storage form */
-    herr_t (*decode)(const H5F_t *f, const uint8_t *raw, void *record);  /*  Decode record from disk storage form to native form */
+    herr_t (*encode)(const H5F_t *f, uint8_t *raw, const void *record); /*  Encode record from native form to disk storage form */
+    herr_t (*decode)(const H5F_t *f, const uint8_t *raw, void *record); /*  Decode record from disk storage form to native form */
 
     /* Debug record values */
     herr_t (*debug) (FILE *stream, const H5F_t *f, hid_t dxpl_id,       /* Print a record for debugging */
@@ -94,6 +97,8 @@ H5_DLL herr_t H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, H5B2_operator_t op, void *op_data);
+H5_DLL herr_t H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, void *udata, H5B2_found_t op, void *op_data);
 
 #endif /* _H5B2private_H */
 

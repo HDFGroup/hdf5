@@ -26,10 +26,8 @@
 #include "H5B2pkg.h"		/* B-trees				*/
 
 /* Static Prototypes */
-static herr_t H5B2_test_store(const H5F_t *f, hid_t dxpl_id, const void *udata,
-    void *nrecord);
-static herr_t H5B2_test_compare(const H5F_t *f, hid_t dxpl_id, const void *rec1,
-    const void *rec2);
+static herr_t H5B2_test_store(const void *udata, void *nrecord);
+static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
 static herr_t H5B2_test_encode(const H5F_t *f, uint8_t *raw,
     const void *nrecord);
 static herr_t H5B2_test_decode(const H5F_t *f, const uint8_t *raw,
@@ -66,7 +64,7 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_store(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *udata, void *nrecord)
+H5B2_test_store(const void *udata, void *nrecord)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_store)
 
@@ -93,7 +91,7 @@ H5B2_test_store(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *udata, 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_compare(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *rec1, const void *rec2)
+H5B2_test_compare(const void *rec1, const void *rec2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_compare)
 
