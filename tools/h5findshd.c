@@ -3,22 +3,20 @@
 #include <H5private.h>
 #include <h5tools.h>
 
-int prefix_len = 1024;
-char *prefix;
-table_t group_table, dset_table, type_table;
+
 
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
 
-extern void init_prefix(char **temp);
+extern void init_prefix(char **temp, int length);
 extern void init_table(table_t **table);
 extern void free_table(table_t **table);
 extern void dump_table(char *name, table_t* table);
 extern herr_t find_objs(hid_t group, const char *name, void *op_data);
 extern int search_obj (table_t *temp, unsigned long *);
-extern int get_table_idx(int, unsigned long *);
-extern int get_tableflag(int, int);
-extern int set_tableflag(int, int);
-extern char* get_objectname(int, int);
+extern int get_table_idx(table_t *table, unsigned long *);
+extern int get_tableflag(table_t*, int);
+extern int set_tableflag(table_t*, int);
+extern char* get_objectname(table_t*, int);
 
 
 /*-------------------------------------------------------------------------
@@ -66,7 +64,7 @@ void init_table (table_t** temp){
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-void init_prefix(char **prefix){
+void init_prefix(char **prefix, int prefix_len){
 	char *temp;
     temp = (char *) malloc(prefix_len * sizeof (char));
     *temp = '\0';
@@ -310,10 +308,10 @@ int i;
  *
  *-----------------------------------------------------------------------*/
 int
-get_table_idx(int type, unsigned long *objno)
+get_table_idx(table_t *table, unsigned long *objno)
 {
-int idx;
-
+int idx = -1;
+/*
     switch (type) {
 
     case H5G_GROUP:
@@ -336,7 +334,8 @@ int idx;
 	idx = -1;
 
     }
-
+*/
+   idx = search_obj(table, objno);
     return idx;
 
 }
@@ -355,9 +354,9 @@ int idx;
  *
  *-----------------------------------------------------------------------*/
 int
-get_tableflag(int type, int idx)
+get_tableflag(table_t *table, int idx)
 {
-
+  /*
     switch (type) {
 
     case H5G_GROUP:
@@ -375,8 +374,10 @@ get_tableflag(int type, int idx)
     default:
 
 	return -1;
-
-    }
+}
+  */
+  return(table->objs[idx].objflag);
+  
 
 }
 /*-------------------------------------------------------------------------
@@ -394,9 +395,9 @@ get_tableflag(int type, int idx)
  *
  *-----------------------------------------------------------------------*/
 int
-set_tableflag(int type, int idx)
+set_tableflag(table_t *table, int idx)
 {
-
+/*
     switch (type) {
 
     case H5G_GROUP:
@@ -417,8 +418,11 @@ set_tableflag(int type, int idx)
     default:
 
 	return FAIL;
-
-    }
+}
+*/
+    table->objs[idx].objflag = TRUE;
+    return(SUCCEED);
+    
 
 }
 /*-------------------------------------------------------------------------
@@ -434,9 +438,9 @@ set_tableflag(int type, int idx)
  *
  *-----------------------------------------------------------------------*/
 char *
-get_objectname(int type, int idx)
+get_objectname(table_t* table, int idx)
 {
-
+  /*
     switch (type) {
 
     case H5G_GROUP:
@@ -456,5 +460,21 @@ get_objectname(int type, int idx)
 	return NULL;
 
     }
+  */
 
+  return(strdup(table->objs[idx].objname));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

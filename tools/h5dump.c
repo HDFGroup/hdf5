@@ -1196,7 +1196,7 @@ main(int argc, char *argv[])
     init_table(&group_table);
     init_table(&type_table);
     init_table(&dset_table);
-	init_prefix(&prefix);
+	init_prefix(&prefix, prefix_len);
 
 	/*init the find_objs_t*/
 	info->threshold = 0;
