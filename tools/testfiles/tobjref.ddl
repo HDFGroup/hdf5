@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tobjref.h5'
-#############################
 HDF5 "tobjref.h5" {
 GROUP "/" {
    DATASET "Dataset3" {
@@ -12,14 +9,14 @@ GROUP "/" {
    }
    GROUP "Group1" {
       DATASET "Dataset1" {
-         DATATYPE { H5T_STD_U32LE }
+         DATATYPE { H5T_STD_U32BE }
          DATASPACE { SIMPLE ( 4 ) / ( 4 ) }
          DATA {
-            0, 50331648, 100663296, 150994944
+            0, 3, 6, 9
          }
       }
       DATASET "Dataset2" {
-         DATATYPE { H5T_STD_U8LE }
+         DATATYPE { H5T_STD_U8BE }
          DATASPACE { SIMPLE ( 4 ) / ( 4 ) }
          DATA {
             0, 0, 0, 0
@@ -27,7 +24,7 @@ GROUP "/" {
       }
       DATATYPE "Datatype1" {
          H5T_STD_I32BE "a";
-         H5T_STD_I32BE "b";
+         H5T_IEEE_F32BE "b";
          H5T_IEEE_F32BE "c";
       }
    }
