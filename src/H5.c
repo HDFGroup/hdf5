@@ -237,7 +237,9 @@ H5_term_library(void)
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(P);
-            pending += DOWN(I);
+            /* Don't shut down the ID code until other APIs which use them are shut down */
+            if(pending==0)
+                pending += DOWN(I);
             /* Don't shut down the free list code until _everything_ else is down */
             if(pending==0)
                 pending += DOWN(FL);
