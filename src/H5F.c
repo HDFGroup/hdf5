@@ -65,7 +65,7 @@ typedef struct H5F_olist_t {
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F_dest(H5F_t *f);
 static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
-			hbool_t alloc_only);
+			hbool_t alloc_only, hbool_t closing);
 static haddr_t H5F_locate_signature(H5FD_t *file);
 static int H5F_flush_all_cb(H5F_t *f, hid_t fid, const void *_invalidate);
 static herr_t H5F_get_obj_count(H5F_t *f, unsigned types, 
@@ -631,7 +631,7 @@ static int
 H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 {
     hbool_t	invalidate = *((const hbool_t*)_invalidate);
-    H5F_flush(f, H5F_SCOPE_LOCAL, invalidate, FALSE);
+    H5F_flush(f, H5F_SCOPE_LOCAL, invalidate, FALSE, FALSE);
     return 0;
 }
 
@@ -1747,7 +1747,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         shared->boot_addr = userblock_size;
 	shared->base_addr = shared->boot_addr;
 	shared->consist_flags = 0x03;
-	if (H5F_flush(file, H5F_SCOPE_LOCAL, FALSE, TRUE)<0)
+	if (H5F_flush(file, H5F_SCOPE_LOCAL, FALSE, TRUE,FALSE)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock");
 
 	/* Create and open the root group */
@@ -2222,7 +2222,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     }
 
     /* Flush the file */
-    if (H5F_flush(f, scope, FALSE, FALSE)<0) {
+    if (H5F_flush(f, scope, FALSE, FALSE, FALSE)<0) {
 	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
 		      "flush failed");
     }
@@ -2267,12 +2267,15 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
  *   
  *		Raymond Lu, 2001-10-14
  *              Changed to new generic property list.
+ *   
+ *		Quincey Koziol, 2002-05-20
+ *              Added 'closing' parameter
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
-	  hbool_t alloc_only)
+	  hbool_t alloc_only, hbool_t closing)
 {
     uint8_t		sbuf[2048], dbuf[2048], *p=NULL;
     unsigned		nerrors=0, i;
@@ -2303,7 +2306,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     }
     if (H5F_SCOPE_DOWN==scope) {
 	for (i=0; i<f->mtab.nmounts; i++) {
-	    if (H5F_flush(f->mtab.child[i].file, scope, invalidate, FALSE)<0)
+	    if (H5F_flush(f->mtab.child[i].file, scope, invalidate, FALSE, closing)<0)
 		nerrors++;
 	}
     }
@@ -2431,7 +2434,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     } /* end else */
 
     /* Flush file buffers to disk */
-    if (!alloc_only && H5FD_flush(f->shared->lf)<0)
+    if (!alloc_only && H5FD_flush(f->shared->lf,closing)<0)
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
 
     /* Check flush errors for children - errors are already on the stack */
@@ -2489,7 +2492,7 @@ H5F_close(H5F_t *f)
 
     /*
      * If this file is referenced more than once then just decrement the
-     * count, flush the file, and return.
+     * count and return.
      */
     if (f->nrefs>1) {
 	/* Decrement reference counts */
@@ -2622,14 +2625,8 @@ H5F_close(H5F_t *f)
 	H5AC_debug(f);
 	H5F_istore_stats(f, FALSE);
 
-#ifdef H5_HAVE_PARALLEL
-        if(IS_H5FD_MPIO(f)) {
-            if (SUCCEED!= H5FD_mpio_closing(f->shared->lf))
-                HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to set 'closing' flag");
-        } /* end if */
-#endif /* H5_HAVE_PARALLEL */
 	/* Flush and destroy all caches */
-	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE)<0)
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE, TRUE)<0)
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
     } /* end if */
 

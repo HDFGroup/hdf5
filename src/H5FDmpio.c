@@ -53,7 +53,6 @@ typedef struct H5FD_mpio_t {
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
     int         mpi_round;      /* Current round robin process (for metadata I/O) */
-    unsigned    closing;        /* Indicate that the file is closing immediately after call to flush */
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
@@ -83,7 +82,7 @@ static herr_t H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 			     size_t size, void *buf);
 static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_mpio_flush(H5FD_t *_file);
+static herr_t H5FD_mpio_flush(H5FD_t *_file, unsigned closing);
 
 /* MPIO-specific file access properties */
 typedef struct H5FD_mpio_fapl_t {
@@ -630,37 +629,6 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
         if (MPI_SUCCESS!= MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR, file->mpi_rank+1, 0, file->comm))
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Send failed");
     }
-    FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_mpio_closing
- *
- * Purpose:	Indicate that next flush call is immediately prior to a
- *              close on the file.
- *
- * Return:	Success: non-negative
- *		Failure: negative
- *
- * Programmer:	Quincey Koziol, May 13, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_mpio_closing(H5FD_t *_file)
-{
-    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-
-    FUNC_ENTER(H5FD_mpio_closing, FAIL);
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
-
-    /* Set the 'closing' flag for this file */
-    file->closing=TRUE;
-    
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -1638,7 +1606,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_flush(H5FD_t *_file)
+H5FD_mpio_flush(H5FD_t *_file, unsigned closing)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int			mpi_code;	/* mpi return code */
@@ -1693,13 +1661,10 @@ H5FD_mpio_flush(H5FD_t *_file)
     } /* end if */
 
     /* Only sync the file if we are not going to immediately close it */
-    if(!file->closing) {
+    if(!closing) {
         if (MPI_SUCCESS != (mpi_code=MPI_File_sync(file->f)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code);
     } /* end if */
-
-    /* Reset 'closing' flag now */
-    file->closing=FALSE;
 
 done:
 #ifdef H5FDmpio_DEBUG

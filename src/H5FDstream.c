@@ -153,7 +153,7 @@ static const H5FD_stream_fapl_t default_fapl =
 static void   *H5FD_stream_fapl_get (H5FD_t *_stream);
 static H5FD_t *H5FD_stream_open (const char *name, unsigned flags,
                                  hid_t fapl_id, haddr_t maxaddr);
-static herr_t  H5FD_stream_flush (H5FD_t *_stream);
+static herr_t  H5FD_stream_flush (H5FD_t *_stream, unsigned closing);
 static herr_t  H5FD_stream_close (H5FD_t *_stream);
 static herr_t H5FD_stream_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_stream_get_eoa (H5FD_t *_stream);
@@ -813,7 +813,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_flush (H5FD_t *_stream)
+static herr_t H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
   size_t size;
@@ -898,7 +898,7 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
   FUNC_ENTER (H5FD_stream_close, FAIL);
 
   /* Flush */
-  if (H5FD_stream_flush (_stream) != SUCCEED)
+  if (H5FD_stream_flush (_stream,TRUE) != SUCCEED)
   {
     HRETURN_ERROR (H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file");
   }

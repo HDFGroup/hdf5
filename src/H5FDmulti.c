@@ -129,7 +129,7 @@ static herr_t H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, had
 			      size_t size, void *_buf/*out*/);
 static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, const void *_buf);
-static herr_t H5FD_multi_flush(H5FD_t *_file);
+static herr_t H5FD_multi_flush(H5FD_t *_file, unsigned closing);
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
@@ -1254,7 +1254,7 @@ H5FD_multi_close(H5FD_t *_file)
     H5Eclear();
 
     /* Flush our own data */
-    if (H5FD_multi_flush(_file)<0)
+    if (H5FD_multi_flush(_file,TRUE)<0)
         nerrors++;
 
     /* Close as many members as possible */
@@ -1712,7 +1712,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_flush(H5FD_t *_file)
+H5FD_multi_flush(H5FD_t *_file, unsigned closing)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
     H5FD_mem_t		mt;
@@ -1758,7 +1758,7 @@ H5FD_multi_flush(H5FD_t *_file)
     for (mt=H5FD_MEM_SUPER; mt<H5FD_MEM_NTYPES; mt=mt+1) {
 	if (file->memb[mt]) {
 	    H5E_BEGIN_TRY {
-		if (H5FDflush(file->memb[mt])<0) nerrors++;
+		if (H5FDflush(file->memb[mt],closing)<0) nerrors++;
 	    } H5E_END_TRY;
 	}
     }

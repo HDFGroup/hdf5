@@ -81,7 +81,7 @@ static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, ha
 			       size_t size, void *_buf/*out*/);
 static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 				size_t size, const void *_buf);
-static herr_t H5FD_family_flush(H5FD_t *_file);
+static herr_t H5FD_family_flush(H5FD_t *_file,unsigned closing);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
@@ -1009,7 +1009,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_flush(H5FD_t *_file)
+H5FD_family_flush(H5FD_t *_file, unsigned closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     int			i, nerrors=0;
@@ -1017,7 +1017,7 @@ H5FD_family_flush(H5FD_t *_file)
     FUNC_ENTER(H5FD_family_flush, FAIL);
 
     for (i=0; i<file->nmembs; i++)
-        if (file->memb[i] && H5FDflush(file->memb[i])<0)
+        if (file->memb[i] && H5FDflush(file->memb[i],closing)<0)
             nerrors++;
 
     if (nerrors)

@@ -2472,11 +2472,13 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
  *              Thursday, July 29, 1999
  *
  * Modifications:
+ *              Quincey Koziol, May 20, 2002
+ *              Added 'closing' parameter
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDflush(H5FD_t *file)
+H5FDflush(H5FD_t *file, unsigned closing)
 {
     FUNC_ENTER(H5FDflush, FAIL);
     H5TRACE1("e","x",file);
@@ -2487,7 +2489,7 @@ H5FDflush(H5FD_t *file)
     }
 
     /* Do the real work */
-    if (H5FD_flush(file)<0) {
+    if (H5FD_flush(file,closing)<0) {
 	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
 		      "file flush request failed");
     }
@@ -2509,11 +2511,13 @@ H5FDflush(H5FD_t *file)
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Quincey Koziol, May 20, 2002
+ *              Added 'closing' parameter
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_flush(H5FD_t *file)
+H5FD_flush(H5FD_t *file, unsigned closing)
 {
     FUNC_ENTER(H5FD_flush, FAIL);
     assert(file && file->cls);
@@ -2529,7 +2533,7 @@ H5FD_flush(H5FD_t *file)
         file->accum_dirty=FALSE;
     } /* end if */
 
-    if (file->cls->flush && (file->cls->flush)(file)<0)
+    if (file->cls->flush && (file->cls->flush)(file,closing)<0)
         HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
 
     FUNC_LEAVE(SUCCEED);
