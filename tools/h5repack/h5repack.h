@@ -64,6 +64,7 @@ typedef struct {
  char         path[MAX_NC_NAME];            /* name of object */
  comp_info_t  comp;                         /* compression information */
  chunk_info_t chunk;                        /* chunk information */
+ hid_t        refobj_id;                    /* object ID */
 } pack_info_t;
 
 /* store a table of all objects */
@@ -129,7 +130,7 @@ int copy_file(const char* fnamein,
 
 void print_objlist(const char *filename, 
                    int nobjects, 
-                   trav_info_t *info );
+                   trav_info_t *travi );
 
 int do_copy_file(hid_t fidin, 
                  hid_t fidout, 
@@ -139,12 +140,38 @@ int do_copy_file(hid_t fidin,
 
 int copy_attr(hid_t loc_in, 
               hid_t loc_out, 
-              pack_opt_t *options
+              pack_opt_t *options,
+              int nobjects,        /* number of objects */
+              trav_info_t *travi,  /* array of object names */
+              hid_t fidout         /*for saving references */
               );
 
 
 void read_info(const char *filename,pack_opt_t *options);
 
+
+void close_obj(H5G_obj_t obj_type, hid_t obj_id);
+
+const char* MapIdToName(hid_t refobj_id, 
+                        int nobjects,         /* number of objects */
+                        trav_info_t *travi,   /* array of object names */
+                        pack_opt_t  *options) /* repack options */;
+
+
+
+int do_copy_refobjs(hid_t fidin, 
+                    hid_t fidout, 
+                    int nobjects,        /* number of objects */
+                    trav_info_t *travi,  /* array of object names */
+                    pack_opt_t *options); /* repack options */
+
+int do_copy_refobjs_inattr(hid_t loc_in, 
+              hid_t loc_out, 
+              pack_opt_t *options,
+              int nobjects,        /* number of objects */
+              trav_info_t *travi,  /* array of object names */
+              hid_t fidout         /* for saving references */
+              );
 
 
 /*-------------------------------------------------------------------------
@@ -224,6 +251,16 @@ int write_attr(hid_t loc_id,
                hid_t type_id, 
                void *buf);
 
+ 
+void write_attr_in(hid_t loc_id, 
+                   const char* dset_name, /* for saving reference to dataset*/
+                   hid_t fid, /* for reference create */
+                   int make_diffs /* flag to modify data buffers */);
+
+void write_dset_in(hid_t loc_id, 
+                   const char* dset_name, /* for saving reference to dataset*/
+                   hid_t file_id,
+                   int make_diffs /* flag to modify data buffers */);
 
 
 
