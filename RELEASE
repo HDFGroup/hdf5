@@ -50,6 +50,9 @@ New features
      HDF5 files via socket connections.
    * Increased maximum number of dimensions for a dataset (H5S_MAX_RANK) from
      31 to 32 to align with HDF4 & netCDF.
+   * Added 'query' function to VFL drivers.  Also added 'type' parameter to
+     VFL 'read' & 'write' calls, so they are aware of the type of data being
+     accessed in the file.  Updated the VFL document also.
 
 Bug fixes since HDF5-1.2.0
 ==========================
