@@ -8,6 +8,7 @@
  */
 
 #include "hdf5.h"
+#include "H5private.h"
 #ifdef H5_HAVE_PARALLEL
 #include <stdio.h>
 #include <stdlib.h>
