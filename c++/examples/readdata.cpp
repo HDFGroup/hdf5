@@ -19,9 +19,6 @@
 //
 
 #include <string>
-#if !defined(H5_NO_NAMESPACE) && !defined(H5_NO_STD)
-using namespace std;
-#endif
 
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
