@@ -6,7 +6,7 @@
  *  Then four elements  of the matrix are overwritten with the new values and 
  *  file is closed. Program reopens the file and selects the union of two 
  *  hyperslabs in the dataset in the file. Then it reads the selection into the
- *  memory dataset preserving the shape of the selectin.
+ *  memory dataset preserving the shape of the selection.
  */ 
  
 #include <hdf5.h>
@@ -38,6 +38,8 @@ int main (void)
 
    hid_t   file, dataset;           /* File and dataset identifiers */
    hid_t   mid1, mid2, mid, fid;    /* Dataspace identifiers */
+   hid_t   plist;                   /* Dataset property list identifier */
+
    hsize_t dim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset 
                                        (in memory) */ 
    hsize_t dim2[] = {MSPACE2_DIM};  /* Dimension size of the second dataset
@@ -58,7 +60,8 @@ int main (void)
                                             from the file dataspace */ 
    herr_t ret;
    unsigned i,j;
-   int    matrix[FSPACE_DIM1][FSPACE_DIM2]; /* Buffer to write to the dataset */
+   int fillvalue = 0;   /* Fill value for the dataset */
+
    int    matrix_out[MSPACE_DIM1][MSPACE_DIM2]; /* Buffer to read from the 
                                                    dataset */
    int    vector[MSPACE1_DIM];
@@ -70,15 +73,16 @@ int main (void)
    vector[0] = vector[MSPACE1_DIM - 1] = -1;
    for (i = 1; i < MSPACE1_DIM - 1; i++) vector[i] = i;
 
-   for (i = 0; i < FSPACE_DIM1; i++) {
-       for (j = 0; j < FSPACE_DIM2; j++)
-       matrix[i][j] = 0;
-    }
+   /*
+    * Create a file.
+    */
+   file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    /*
-     * Create a file.
-     */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+   /*
+    * Create property list for a dataset and set up fill values.
+    */
+   plist = H5Pcreate(H5P_DATASET_CREATE);
+   ret   = H5Pset_fill_value(plist, H5T_NATIVE_INT, &fillvalue); 
 
     /* 
      * Create dataspace for the dataset in the file.
@@ -86,10 +90,10 @@ int main (void)
     fid = H5Screate_simple(FSPACE_RANK, fdim, NULL);
 
     /*
-     * Create dataset and write it into the file.
+     * Create dataset in the file. Notice that creation
+     * property list plist is used.
      */
-    dataset = H5Dcreate(file, "Matrix in file", H5T_NATIVE_INT, fid, H5P_DEFAULT);
-    ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, matrix);
+    dataset = H5Dcreate(file, "Matrix in file", H5T_NATIVE_INT, fid, plist);
 
     /*
      * Select hyperslab for the dataset in the file, using 3x2 blocks, 
