@@ -3082,7 +3082,7 @@ H5S_hyper_add_span_element(H5S_t *space, unsigned rank, hssize_t *coords)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span");
 
         /* Set the reference count */
-        head->count=0;
+        head->count=1;
 
         /* Reset the scratch pad space */
         head->scratch=0;
