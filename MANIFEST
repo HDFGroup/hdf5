@@ -763,6 +763,7 @@
 ./release_docs/INSTALL_VFL
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_Windows.txt
+./release_docs/INSTALL_Windows_withcpp.txt
 ./release_docs/INSTALL_codewarrior.txt
 ./release_docs/HISTORY.txt
 ./release_docs/RELEASE.txt
