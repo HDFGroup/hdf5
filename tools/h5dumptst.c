@@ -1574,38 +1574,63 @@ void test_datareg(void){
 
 }
 void test_nestcomp(void){
+/*taken from Elena's compound test file*/
 
-	hid_t file,space,type,type2,dataset;
-	int i, maxdim = 5;
-	hsize_t dim = 5;
-	int y = 1;
+   /* Compound memeber of the compound datatype*/
+    typedef struct cmp_t {
+	char   a;
+	float  b[2];
+    } cmp_t;
+    /* First structure  and dataset*/
+    typedef struct s1_t {
+	int    a;
+	float  b;
+	double c; 
+        cmp_t  d; 
+    } s1_t;
+  hid_t      cmp_tid;    /* Handle for the compound datatype */
+  hid_t      char_id;    /* Handle for the string datatype */
+  size_t     array_dims[] = {2};    /* Dataspace dimensions */
+  int        ndims = 1;    /* Number of dimensions in the array field */
 
-	typedef struct {
-		double re;   /*real part*/
-	    double im;   /*imaginary part*/
-	} complex_t;
 
-	typedef struct {
-		complex_t x;
-	    complex_t y;
-	} surf_t;
-	surf_t surft[5];
+    s1_t       s1[10];
+    hid_t      s1_tid;     /* File datatype identifier */
+
+    /* Second structure (subset of s1_t)  and dataset*/
+    typedef struct s2_t {
+	double c;
+	int    a;
+    } s2_t;
+    s2_t       s2[10];
+    hid_t      s2_tid;    /* Memory datatype handle */
+
+    /* Third "structure" ( will be used to read float field of s1) */
+    hid_t      s3_tid;   /* Memory datatype handle */
+    float      s3[10];
+
+    int        i;
+    hid_t      file, dataset, space; /* Handles */
+    herr_t     status;
+    hsize_t    dim[] = {10};   /* Dataspace dimensions */
+
+	char datasetname[] = "ArrayOfStructures";
     /*
      * Initialize the data
      */
-	
-    for (i = 0; i< dim; i++) {
-		surft[i].x.re = i;
-		surft[i].x.im = i+y;
-		y++;
-		surft[i].y.re = i+y;
-		surft[i].y.im = i+2*y;
+    for (i = 0; i< 10; i++) {
+        s1[i].a = i;
+        s1[i].b = i*i;
+        s1[i].c = 1./(i+1);
+        s1[i].d.a = 65 + i;
+        s1[i].d.b[0] = -100.;
+        s1[i].d.b[1] =  100.;
     }
 
     /*
      * Create the data space.
      */
-    space = H5Screate_simple(1, &dim, NULL);
+    space = H5Screate_simple(1, dim, NULL);
 
     /*
      * Create the file.
@@ -1613,36 +1638,47 @@ void test_nestcomp(void){
     file = H5Fcreate(FILE18, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
-     * Create the memory datatype. 
+     * Create the memory data type. 
      */
-    type = H5Tcreate (H5T_COMPOUND, sizeof(complex_t));
+    /* 
+     * Create a datatype for compound field first.
+     */
+    cmp_tid = H5Tcreate (H5T_COMPOUND, sizeof(cmp_t));
+    /* We are using C string of length one to represent "real" character */
+    char_id = H5Tcopy(H5T_C_S1);
+    H5Tset_strpad(char_id, H5T_STR_NULLTERM);       
+    H5Tinsert(cmp_tid, "char_name", HOFFSET(cmp_t, a), char_id);
+    H5Tinsert_array(cmp_tid, "array_name", HOFFSET(cmp_t, b), ndims, 
+                    array_dims, NULL, H5T_NATIVE_FLOAT);
 
-    H5Tinsert(type, "re", HOFFSET(complex_t, re), H5T_NATIVE_DOUBLE);
-    H5Tinsert(type, "im", HOFFSET(complex_t, im), H5T_NATIVE_DOUBLE);
-
-    type2 = H5Tcreate (H5T_COMPOUND, sizeof(surf_t));
-
-    H5Tinsert(type2, "x", HOFFSET(surf_t, x), type);
-    H5Tinsert(type2, "y", HOFFSET(surf_t, y), type);
+    s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
+    H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
+    H5Tinsert(s1_tid, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
+    /* Insert compound memeber created above */
+    H5Tinsert(s1_tid, "d_name", HOFFSET(s1_t, d), cmp_tid);
 
     /* 
      * Create the dataset.
      */
-    dataset = H5Dcreate(file, "/nested compound", type2, space, H5P_DEFAULT);
+    dataset = H5Dcreate(file, datasetname, s1_tid, space, H5P_DEFAULT);
 
     /*
      * Wtite data to the dataset; 
      */
-    H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, surft);
+    status = H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
 
     /*
      * Release resources
      */
-    H5Tclose(type2);
-	H5Tclose(type);
+    H5Tclose(s1_tid);
+    H5Tclose(cmp_tid);
+    H5Tclose(char_id);
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(file);
+
+
 
 }
 
