@@ -244,11 +244,12 @@ do_pio(parameters param)
 		(long_long)buf_size, (long_long)blk_size);
 	    GOTOERROR(FAIL);
 	}
-	if ((nelmts % (buf_size/ELMT_SIZE)) != 0){
+
+	if ((nelmts % (buf_size / ELMT_SIZE)) != 0){
 	    HDfprintf(stderr,
 		"Dataset size (%Hd) must be a multiple of the "
-		"trasfer buffer size (%Hd)\n",
-		(long_long)nelmts, (long_long)buf_size);
+		"transfer buffer size (%Hd)\n",
+		(long_long)nelmts, (long_long)(buf_size / ELMT_SIZE));
 	    GOTOERROR(FAIL);
 	}
     }
