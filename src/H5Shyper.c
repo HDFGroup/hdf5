@@ -2834,7 +2834,11 @@ for(i=0; i<ndims; i++)
                 } /* end while */
 #else /* NO_DUFFS_DEVICE */
                 duffs_index = (fast_dim_count + 7) / 8;
-                switch (fast_dim_count % 8) {
+                /* The following size_t cast is required on HPUX 10.20 in
+                 * order to make the system compuiler happy.  It can be
+                 * removed when we are no longer supporting that platform. -QAK
+                 */
+                switch (((size_t)fast_dim_count) % 8) {
                     case 0:
                         do
                           {
@@ -3503,7 +3507,11 @@ for(i=0; i<ndims; i++)
                 } /* end while */
 #else /* NO_DUFFS_DEVICE */
                 duffs_index = (fast_dim_count + 7) / 8;
-                switch (fast_dim_count % 8) {
+                /* The following size_t cast is required on HPUX 10.20 in
+                 * order to make the system compuiler happy.  It can be
+                 * removed when we are no longer supporting that platform. -QAK
+                 */
+                switch (((size_t)fast_dim_count) % 8) {
                     case 0:
                         do
                           {
