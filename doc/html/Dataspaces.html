@@ -252,12 +252,12 @@ dataspace identifier after this call is undefined.
 </DD>
 
 <DT>
-<TT>H5S_class_t H5Sget_class (hid_t <I>space</I>)</TT></DT>
+<TT>H5S_class_t H5Sextent_class (hid_t <I>space</I>)</TT></DT>
 
 <DD>
 Query a dataspace to determine the current class of a dataspace.  The value
-which is returned is one of: H5S_SCALAR, H5S_SIMPLE, or H5S_NONE on success or
-FAIL on failure.
+which is returned is one of: H5S_SCALAR, H5S_SIMPLE on success or
+H5S_NO_CLASS on failure.
 </DD>
 </DL>
 
