@@ -17,8 +17,8 @@
 #include "H5Bprivate.h"         /*B-link trees                    	*/
 #include "H5Dprivate.h"         /*datasets                              */
 #include "H5Eprivate.h"         /*error handling          		*/
-#include "H5FDprivate.h"	/*file driver				*/
-#include "H5FLprivate.h"	/*Free Lists                            */
+#include "H5FDprivate.h"        /*file driver				*/
+#include "H5FLprivate.h"        /*free lists                            */
 #include "H5Iprivate.h"		/*atoms					*/
 #include "H5MMprivate.h"        /*memory management               	*/
 #include "H5Pprivate.h"		/*property lists			*/
@@ -728,7 +728,7 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
 int
 HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
-    return vsprintf(buf, fmt, ap);
+    return HDvsprintf(buf, fmt, ap);
 }
 #endif /* H5_HAVE_VSNPRINTF */
 
@@ -794,7 +794,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    fmt += 2;
 	    nout++;
 	} else if ('%'==fmt[0]) {
-	    s = fmt+1;
+	    s = fmt + 1;
 
 	    /* Flags */
 	    while (HDstrchr ("-+ #", *s)) {
@@ -843,7 +843,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    }
 
 	    /* Type modifier */
-	    if (HDstrchr ("ZHhlq", *s)) {
+	    if (HDstrchr ("ZHhlqL", *s)) {
 		switch (*s) {
 		case 'H':
 		    if (sizeof(hsize_t)<sizeof(long)) {
@@ -863,11 +863,20 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 			HDstrcpy (modifier, PRINTF_LL_WIDTH);
 		    }
 		    break;
-		    
 		default:
-		    modifier[0] = *s;
-		    modifier[1] = '\0';
-		    break;
+                    /* Handle 'll' for long long types */
+                   if(*s=='l' && *(s+1)=='l') {
+                        modifier[0] = *s;
+                        modifier[1] = *s;
+                        modifier[2] = '\0';
+                        s++; /* Increment over first 'l', second is taken care
+                              * of below */
+                    } /* end if */
+                    else {
+                        modifier[0] = *s;
+                        modifier[1] = '\0';
+                    } /* end else */
+ 		    break;
 		}
 		s++;
 	    }
