@@ -67,6 +67,12 @@ dnl set by the code which follows...
 dnl
 DEFAULT_LIBS=""
 
+dnl Support F9X variable to define Fortran compiler if FC variable is
+dnl not used.  This should be depreciated in the future.
+if test "x" = "x$FC"; then
+  FC=${F9X}
+fi
+
 dnl ----------------------------------------------------------------------
 dnl Set prefix default (install directory) to a directory in the build area.
 dnl This allows multiple src-dir builds within one host.
@@ -273,7 +279,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl General Fortran flags
   dnl
   FCFLAGS="${FCFLAGS} ${FFLAGS}"
-  FC=${F9X}
+
   AC_SUBST([F9XSUFFIXFLAG])
   AC_SUBST([FSEARCH_DIRS])
 
