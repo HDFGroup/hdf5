@@ -41,6 +41,8 @@ New Features
 
     Library:
     --------
+        - Data type conversion between integers and floats was added.
+            SLU 2003/11/21
         - New function H5Iget_file_id() was added.  It returns file ID given
             an object(dataset, group, or attribute) ID.  SLU 2003/10/29
         - Added new fields to the H5G_stat_t for more information about an
