@@ -1805,7 +1805,8 @@ H5G_node_close(const H5F_t *f)
     assert(f);
 
     /* Free the raw B-tree node buffer */
-    H5RC_DEC(H5F_GRP_BTREE_SHARED(f));
+    if (H5F_GRP_BTREE_SHARED(f))
+       H5RC_DEC(H5F_GRP_BTREE_SHARED(f));
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_node_close */
