@@ -27,7 +27,7 @@ TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
-PROGS=$(TEST_SRC:.cpp=)
+TEST_PROGS=$(TEST_SRC:.cpp=)
 
 TEST_SCRIPTS=$(srcdir)/testexamples.sh
 
@@ -36,7 +36,7 @@ TEST_SCRIPTS=$(srcdir)/testexamples.sh
 CLEAN=
 
 ## How to build the programs... they all depend on the Fortran & C hdf5 libraries
-$(PROGS): $(LIB) $(LIBHDF5)
+$(TEST_PROGS): $(LIB) $(LIBHDF5)
 
 compound: compound.lo 
 	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ compound.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
