@@ -229,6 +229,8 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC20_DSET_NAME        "Dataset"
 #define MISC20_DSET2_NAME       "Dataset2"
 #define MISC20_SPACE_RANK       2
+/* Make sure the product of the following 2 does not get too close to */
+/* 64 bits, risking an overflow. */
 #define MISC20_SPACE_DIM0       (8*1024*1024*(uint64_t)1024)
 #define MISC20_SPACE_DIM1       ((256*1024*(uint64_t)1024)+1)
 #define MISC20_SPACE2_DIM0      8
