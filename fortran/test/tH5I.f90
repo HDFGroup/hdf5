@@ -54,6 +54,7 @@
      CHARACTER(LEN=80) name_buf
      INTEGER(SIZE_T)   buf_size
      INTEGER(SIZE_T)   name_size
+     INTEGER    ::    ref_count ! Reference count for IDs
 
 
      !
@@ -88,16 +89,15 @@
      buf_size = 80
      CALL h5iget_name_f(dset_id, name_buf, buf_size, name_size, error)
      CALL check("h5iget_name_f",error,total_error)
-          if (name_size .ne. len(dsetname)) then
-              write(*,*) "h5iget_name returned wrong name size"
-              total_error = total_error + 1
-              goto 100
-          endif
+      if (name_size .ne. len(dsetname)) then
+          write(*,*) "h5iget_name returned wrong name size"
+          total_error = total_error + 1
+      else
           if (name_buf(1:name_size) .ne. dsetname) then
               write(*,*) "h5iget_name returned wrong name"
               total_error = total_error + 1
           endif
-100       continue
+      endif
 
      !
      ! Write data_in to the dataset
@@ -121,8 +121,7 @@
      !
      ! Create dataset INTEGER attribute.
      !
-     CALL h5acreate_f(dset_id, aname, atype_id, aspace_id, &
-                      attr_id, error)
+     CALL h5acreate_f(dset_id, aname, atype_id, aspace_id, attr_id, error)
      CALL check("h5acreate_f",error,total_error)
 
      !
@@ -136,55 +135,42 @@
      !
      CALL h5iget_type_f(file_id, type, error)
      CALL check("h5iget_type_f",error,total_error)
-     if (type .ne. H5I_FILE_F) then
-         write(*,*) "get file identifier wrong"
-         total_error = total_error + 1
-     end if
+     CALL verify("get file identifier wrong",type,H5I_FILE_F,total_error)
+
      !
      !Get the group identifier
      !
      CALL h5iget_type_f(group_id, type, error)
      CALL check("h5iget_type_f",error,total_error)
-     if (type .ne. H5I_GROUP_F) then
-         write(*,*) "get group identifier wrong",type 
-         total_error = total_error + 1
-     end if
+     CALL verify("get group identifier wrong",type,H5I_GROUP_F,total_error)
+
      !
      !Get the datatype identifier
      !
      CALL h5iget_type_f(atype_id, type, error)
      CALL check("h5iget_type_f",error,total_error)
-     if (type .ne. H5I_DATATYPE_F) then
-         write(*,*) "get datatype identifier wrong",type 
-         total_error = total_error + 1
-     end if
+     CALL verify("get datatype identifier wrong",type,H5I_DATATYPE_F,total_error)
+
      !
      !Get the dataspace identifier
      !
      CALL h5iget_type_f(aspace_id, type, error)
      CALL check("h5iget_type_f",error,total_error)
-     if (type .ne. H5I_DATASPACE_F) then
-         write(*,*) "get dataspace identifier wrong",type 
-         total_error = total_error + 1
-     end if
+     CALL verify("get dataspace identifier wrong",type,H5I_DATASPACE_F,total_error)
+
      !
      !Get the dataset identifier
      !
      CALL h5iget_type_f(dset_id, type, error)
      CALL check("h5iget_type_f",error,total_error)
-     if (type .ne. H5I_DATASET_F) then
-         write(*,*) "get dataset identifier wrong",type 
-         total_error = total_error + 1
-     end if
+     CALL verify("get dataset identifier wrong",type,H5I_DATASET_F,total_error)
+
      !
      !Get the attribute identifier
      !
      CALL h5iget_type_f(attr_id, type, error)
      CALL check("h5iget_type_f",error,total_error)
-     if (type .ne. H5I_ATTR_F) then
-         write(*,*) "get attribute identifier wrong",type 
-         total_error = total_error + 1
-     end if
+     CALL verify("get attribute identifier wrong",type,H5I_ATTR_F,total_error)
 
      !   
      ! Close the attribute.
@@ -209,14 +195,59 @@
      ! 
      CALL h5dclose_f(dset_id, error)
      CALL check("h5dclose_f",error,total_error)
+
+     !   
+     ! Close the group.
+     ! 
+     CALL h5gclose_f(group_id, error)
+     CALL check("h5gclose_f",error,total_error)
+
      ! 
      ! Close the file.
      !
      CALL h5fclose_f(file_id, error)
      CALL check("h5fclose_f",error,total_error)
 
-          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
-              CALL check("h5_cleanup_f", error, total_error)
+     !
+     ! Basic Test of increment/decrement ID functions
+     !
+
+     ! Create a file
+     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
+     CALL check("h5fcreate_f",error,total_error)
+    
+     ! Get the reference count for the file ID
+     CALL h5iget_ref_f(file_id, ref_count, error)
+     CALL check("h5iget_ref_f",error,total_error)
+     CALL verify("get file ref count wrong",ref_count,1,total_error)
+
+     ! Increment the reference count for the file ID
+     CALL h5iinc_ref_f(file_id, ref_count, error)
+     CALL check("h5iinc_ref_f",error,total_error)
+     CALL verify("get file ref count wrong",ref_count,2,total_error)
+
+     ! Close the file normally.
+     CALL h5fclose_f(file_id, error)
+     CALL check("h5fclose_f",error,total_error)
+
+     ! Get the reference count for the file ID
+     CALL h5iget_ref_f(file_id, ref_count, error)
+     CALL check("h5iget_ref_f",error,total_error)
+     CALL verify("get file ref count wrong",ref_count,1,total_error)
+
+     ! Close the file by decrementing the reference count
+     CALL h5idec_ref_f(file_id, ref_count, error)
+     CALL check("h5iinc_ref_f",error,total_error)
+     CALL verify("get file ref count wrong",ref_count,0,total_error)
+
+     ! Try closing the file again (should fail)
+     CALL h5fclose_f(file_id, error)
+     CALL verify("file close should fail",error,-1,total_error)
+     ! Clear the error stack from the file close failure
+     CALL h5eclear_f(error)
+
+      if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
 
      RETURN
      END SUBROUTINE identifier_test
