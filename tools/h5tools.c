@@ -1497,13 +1497,17 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
         return -1;
 
     /* Assume entire data space to be printed */
-    for (i = 0; i < (hsize_t)ctx.ndims; i++)
-        ctx.p_min_idx[i] = 0;
+    if(ctx.ndims>0)
+        for (i = 0; i < (hsize_t)ctx.ndims; i++)
+            ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
 
-    for (i = 0, p_nelmts = 1; i < (hsize_t)ctx.ndims; i++)
-        p_nelmts *= total_size[i];
+    if(ctx.ndims>0)
+        for (i = 0, p_nelmts = 1; i < (hsize_t)ctx.ndims; i++)
+            p_nelmts *= total_size[i];
+    else
+        p_nelmts = 1;
  
     if (p_nelmts == 0)
         return 0; /*nothing to print*/
@@ -1516,11 +1520,14 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
      */
     p_type_nbytes = H5Tget_size(p_type);
 
-    for (i = ctx.ndims, sm_nbytes = p_type_nbytes; i > 0; --i) {
-        sm_size[i - 1] = MIN(total_size[i - 1], H5DUMP_BUFSIZE / sm_nbytes);
-        sm_nbytes *= sm_size[i - 1];
-        assert(sm_nbytes > 0);
-    }
+    if(ctx.ndims>0)
+        for (i = ctx.ndims, sm_nbytes = p_type_nbytes; i > 0; --i) {
+            sm_size[i - 1] = MIN(total_size[i - 1], H5DUMP_BUFSIZE / sm_nbytes);
+            sm_nbytes *= sm_size[i - 1];
+            assert(sm_nbytes > 0);
+        }
+    else
+        sm_nbytes = p_type_nbytes;
 
     sm_buf = malloc(sm_nbytes);
     sm_nelmts = sm_nbytes / p_type_nbytes;
