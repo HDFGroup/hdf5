@@ -648,69 +648,92 @@ case "$withval" in
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
+dnl Is the GNU zlib present? It has a header file `zlib.h' and a library
 dnl `-lz' and their locations might be specified with the `--with-zlib'
-dnl command-line switch.  The value is an include path and/or a library path.
+dnl command-line switch. The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
+AC_ARG_WITH(zlib,
+  [  --with-zlib=INC,LIB     Use the GNU zlib compression],,
+  withval=yes)
 
-AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
-            ,withval=yes)
 case $withval in
-    yes)
-	AC_CHECK_HEADERS(zlib.h)
-	AC_CHECK_LIB(z, compress)
-	;;
-    no)
-	AC_MSG_CHECKING(for GNU zlib)
-	AC_MSG_RESULT(suppressed)
-	;;
-    *)
-	zlib_inc="`echo $withval |cut -f1 -d,`"
-	if test -n "$zlib_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$zlib_inc"
-	    AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
-        else
-	    AC_CHECK_HEADERS(zlib.h)
-	fi
+  yes)
+    AC_CHECK_HEADERS(zlib.h)
+    AC_CHECK_LIB(z, compress)
+    ;;
+  no)
+    AC_MSG_CHECKING(for GNU zlib)
+    AC_MSG_RESULT(suppressed)
+    ;;
+  *)
+    zlib_inc="`echo $withval |cut -f1 -d,`"
+    if test -n "$zlib_inc"; then
+      saved_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+      AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
+    else
+      AC_CHECK_HEADERS(zlib.h)
+    fi
 
-	zlib_lib="`echo $withval |cut -f2 -d, -s`"
-	if test -n "$zlib_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$zlib_lib"
-	    AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
-	else
-	    AC_CHECK_LIB(z, compress)
-	fi
-	;;
+    zlib_lib="`echo $withval |cut -f2 -d, -s`"
+
+    if test -n "$zlib_lib"; then
+      saved_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$zlib_lib"
+      AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
+    else
+      AC_CHECK_LIB(z, compress)
+    fi
+    ;;
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage 
-dnl driver.
-dnl
-AC_SUBST(SSL) SSL=yes
-AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB ],,)
-if test -n "$with_ssl"; then
-   LDFLAGS="$LDFLAGS -L$with_ssl"
-fi
-
-AC_CHECK_LIB(crypto,main,,unset SSL)
-AC_CHECK_LIB(ssl,SSL_get_version,,unset SSL)
-
-dnl ----------------------------------------------------------------------
-dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present?  It is also needed by 
+dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present? It is also needed by 
 dnl the Grid Storage driver.
 dnl
 AC_SUBST(GASS) GASS=yes
 AC_SUBST(TESTGASS) TESTGASS='$(srcdir)/testgass'
-AC_ARG_WITH(gass,[  --with-gass=INC,LIB     Use the GASS Library [default=no]],
-	    ,withval=no)
+AC_ARG_WITH(gass,
+  [  --with-gass=INC,LIB     Use the GASS Library [default=no]],,
+  withval=no)
 
 case "$withval" in
-   yes)
-      AC_CHECK_HEADERS(globus_common.h,,unset GASS TESTGASS)
+  yes)
+    AC_CHECK_HEADERS(globus_common.h,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+    ;;
+  no)
+    AC_MSG_CHECKING(for GASS)
+    AC_MSG_RESULT(suppressed)
+    unset GASS TESTGASS
+    ;;
+  *)
+    gass_inc="`echo $withval |cut -f1 -d,`"
+
+    if test -n "$gass_inc"; then
+      saved_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$gass_inc"
+      AC_CHECK_HEADERS(globus_common.h,,
+                       CPPFLAGS="$saved_CPPFLAGS"
+                       unset GASS TESTGASS)
+    else
+      AC_CHECK_HEADERS(globus_common.h)
+    fi
+
+    gass_lib="`echo $withval |cut -f2 -d, -s`"
+
+    if test -n "$gass_lib"; then
+      saved_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$gass_lib"
       AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
@@ -720,103 +743,22 @@ case "$withval" in
       AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-      ;;
-   no)
-      AC_MSG_CHECKING(for GASS)
-      AC_MSG_RESULT(suppressed)
-      unset GASS TESTGASS
-      ;;
-   *)
-      gass_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$gass_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
-         CPPFLAGS="$CPPFLAGS -I$gass_inc"
-         AC_CHECK_HEADERS(globus_common.h,,
-                          CPPFLAGS="$saved_CPPFLAGS"
-                          unset GASS TESTGASS)
-      else
-         AC_CHECK_HEADERS(globus_common.h)
-      fi
-	
-      gass_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$gass_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
-         LDFLAGS="$LDFLAGS -L$gass_lib"
-         AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-      else
-         AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-      fi
-      ;;
+    else
+      AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+    fi
+    ;;
 esac
 
 if test -n "$GASS"; then
-   AC_DEFINE(HAVE_GASS)
-fi
-
-dnl ----------------------------------------------------------------------
-dnl Are SRB Client and other system libraries(socket, elf) present?  
-dnl
-AC_SUBST(SRB) SRB=yes
-AC_SUBST(TESTSRB) TESTSRB='$(srcdir)/testsrb'
-AC_ARG_WITH(srb,[  --with-srb=INC,LIB      Use the SRB Library [default=no]],
-	    ,withval=no)
-
-case "$withval" in
-   yes)
-      AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
-      AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-      AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-      AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-      ;;
-   no)
-      AC_MSG_CHECKING(for SRB)
-      AC_MSG_RESULT(suppressed)
-      unset SRB TESTSRB
-      ;;
-   *)
-      srb_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$srb_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
-         CPPFLAGS="$CPPFLAGS -I$srb_inc"
-         AC_CHECK_HEADERS(srbClient.h,,
-                          CPPFLAGS="$saved_CPPFLAGS"
-                          unset SRB TESTSRB)
-      else
-         AC_CHECK_HEADERS(srbClient.h)
-      fi
-
-      srb_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$srb_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
-         LDFLAGS="$LDFLAGS -L$srb_lib"
-         AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-      else
-         AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-      fi
-      ;;
-esac
-if test -n "$SRB"; then
-    AC_DEFINE(HAVE_SRB)
+  AC_DEFINE(HAVE_GASS)
 fi
 
 dnl ----------------------------------------------------------------------
@@ -826,52 +768,121 @@ dnl
 AC_SUBST(GRIDSTORAGE) GRIDSTORAGE=yes
 AC_SUBST(TESTGRIDSTORAGE) TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
 AC_ARG_WITH(gridstorage,
-   [  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]],
-   ,withval=no)
+  [  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]],,
+  withval=no)
 
 case "$withval" in
-   yes)
-      AC_CHECK_HEADERS(grid_storage_file.h,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-      AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+  yes)
+    AC_CHECK_HEADERS(grid_storage_file.h,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+    AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+    AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
+                 unset GRIDSTORAGE TESTGRIDSTORAGE)
+    ;;
+  no)
+    AC_MSG_CHECKING(for GRIDSTORAGE)
+    AC_MSG_RESULT(suppressed)
+    unset GRIDSTORAGE TESTGRIDSTORAGE
+    ;;
+  *)
+    gridstorage_inc="`echo $withval |cut -f1 -d,`"
+
+    if test -n "$gridstorage_inc"; then
+      saved_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
+      AC_CHECK_HEADERS(grid_storage_file.h,,
+                       CPPFLAGS="$saved_CPPFLAGS"
+                       unset GRIDSTORAGE TESTGRIDSTORAGE)
+    else
+      AC_CHECK_HEADERS(grid_storage_file.h)
+    fi
+
+    gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
+
+    if test -n "$gridstorage_lib"; then
+      saved_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$gridstorage_lib"
+      AC_CHECK_LIB(grid_storage_client,main,,
+                   unset GRIDSTORAGE TESTGRIDSTORAGE)
       AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
                    unset GRIDSTORAGE TESTGRIDSTORAGE)
-      ;;
-   no)
-      AC_MSG_CHECKING(for GRIDSTORAGE)
-      AC_MSG_RESULT(suppressed)
-      unset GRIDSTORAGE TESTGRIDSTORAGE
-      ;;
-   *)
-      gridstorage_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$gridstorage_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
-         CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
-         AC_CHECK_HEADERS(grid_storage_file.h,,
-                          CPPFLAGS="$saved_CPPFLAGS"
-                          unset GRIDSTORAGE TESTGRIDSTORAGE)
-      else
-         AC_CHECK_HEADERS(grid_storage_file.h)
-      fi
-	
-      gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$gridstorage_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
-         LDFLAGS="$LDFLAGS -L$gridstorage_lib"
-         AC_CHECK_LIB(grid_storage_client,main,,
-	              unset GRIDSTORAGE TESTGRIDSTORAGE)
-         AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
-	              unset GRIDSTORAGE TESTGRIDSTORAGE)
-      else
-         AC_CHECK_LIB(grid_storage_client,main,,
-	              unset GRIDSTORAGE TESTGRIDSTORAGE)
-         AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
-	              unset GRIDSTORAGE TESTGRIDSTORAGE)
-      fi
-      ;;
+    else
+      AC_CHECK_LIB(grid_storage_client,main,,
+                   unset GRIDSTORAGE TESTGRIDSTORAGE)
+      AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
+                   unset GRIDSTORAGE TESTGRIDSTORAGE)
+    fi
+    ;;
 esac
 
 if test -n "$GRIDSTORAGE"; then
-   AC_DEFINE(HAVE_GRIDSTORAGE)
+  AC_DEFINE(HAVE_GRIDSTORAGE)
+fi
+
+if test -n "$GRIDSTORAGE" -o -n "$GASS"; then
+  dnl Is SSL library present? It is needed by GLOBUS-GASS and Grid
+  dnl Storage driver.
+  dnl
+  AC_SUBST(SSL) SSL=yes
+  AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB ],,)
+
+  if test -n "$with_ssl"; then
+    LDFLAGS="$LDFLAGS -L$with_ssl"
+  fi
+
+  AC_CHECK_LIB(crypto,main,,unset SSL)
+  AC_CHECK_LIB(ssl,SSL_get_version,,unset SSL)
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Are SRB Client and other system libraries(socket, elf) present?  
+dnl
+AC_SUBST(SRB) SRB=yes
+AC_SUBST(TESTSRB) TESTSRB='$(srcdir)/testsrb'
+AC_ARG_WITH(srb,[  --with-srb=INC,LIB      Use the SRB Library [default=no]],,
+            withval=no)
+
+case "$withval" in
+  yes)
+    AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
+    AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+    AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+    AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+    ;;
+  no)
+    AC_MSG_CHECKING(for SRB)
+    AC_MSG_RESULT(suppressed)
+    unset SRB TESTSRB
+    ;;
+  *)
+    srb_inc="`echo $withval |cut -f1 -d,`"
+    if test -n "$srb_inc"; then
+      saved_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$srb_inc"
+      AC_CHECK_HEADERS(srbClient.h,,
+                       CPPFLAGS="$saved_CPPFLAGS"
+                       unset SRB TESTSRB)
+    else
+      AC_CHECK_HEADERS(srbClient.h)
+    fi
+
+    srb_lib="`echo $withval |cut -f2 -d, -s`"
+
+    if test -n "$srb_lib"; then
+      saved_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$srb_lib"
+      AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+    else
+      AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+    fi
+    ;;
+esac
+
+if test -n "$SRB"; then
+  AC_DEFINE(HAVE_SRB)
 fi
 
 dnl ----------------------------------------------------------------------
