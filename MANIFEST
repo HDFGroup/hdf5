@@ -501,6 +501,7 @@
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
+./tools/.distdep
 ./tools/Makefile.in
 ./tools/h5debug.c
 ./tools/h5dump.c
