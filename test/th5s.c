@@ -28,8 +28,8 @@ static char             RcsId[] = "$Revision$";
 
 #include <H5private.h>
 #include <H5Bprivate.h>
-#include <H5Mprivate.h>
 #include <H5Sprivate.h>
+#include <H5Pprivate.h>
 
 #define FILE   "th5p1.h5"
 
@@ -103,11 +103,11 @@ test_h5p_basic(void)
     CHECK(ret, FAIL, "H5Sget_ldims");
     VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(uint32)), 0, "H5Sget_ldims");
 
-    ret = H5Mclose(sid1);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
 
-    ret = H5Mclose(sid2);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
 
     /* Close first file */
     ret = H5Fclose(fid1);

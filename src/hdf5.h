@@ -27,7 +27,6 @@
 #include <H5Fpublic.h>      /* Files */
 #include <H5Gpublic.h>      /* Groups */
 #include <H5Hpublic.h>
-#include <H5Mpublic.h>      /* "Meta" */
 #include <H5MFpublic.h>
 #include <H5MMpublic.h>
 #include <H5Opublic.h>      /* Object headers */

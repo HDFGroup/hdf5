@@ -23,10 +23,8 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Eprivate.h>		/* Error handling		  	*/
 #include <H5Gprivate.h>		/* Group headers		  	*/
 #include <H5Hprivate.h>		/* Name heap				*/
-#include <H5Mprivate.h>		/* Meta data				*/
 #include <H5MFprivate.h>	/* File space allocation header		*/
 #include <H5MMprivate.h>	/* Memory management			*/
-#include <H5Mprivate.h>		/* Meta-Object API			*/
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
 
@@ -688,32 +686,6 @@ H5Dextend (hid_t dataset_id, const size_t *size)
     FUNC_LEAVE (SUCCEED);
 }
 
-/*-------------------------------------------------------------------------
- * Function:	H5D_find_name
- *
- * Purpose:	This is a callback for H5Mfind_name().	It does the same
- *		thing as H5Dopen() except it takes an extra argument which
- *		isn't used.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Errors:
- *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5D_find_name(hid_t file_id, group_t UNUSED, const char *name)
-{
-    return H5Dopen(file_id, name);
-}
-
 /*-------------------------------------------------------------------------
  * Function:	H5D_create
  *

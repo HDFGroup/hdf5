@@ -29,7 +29,6 @@ static char             RcsId[] = "$Revision$";
 #include <H5private.h>
 #include <H5Bprivate.h>
 #include <H5Pprivate.h>
-#include <H5Mprivate.h>
 
 #define F1_USERBLOCK_SIZE  0
 #define F1_OFFSET_SIZE     sizeof(size_t)
@@ -98,13 +97,13 @@ test_file_create(void)
     VERIFY(iparm2, F1_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Release file-creation template */
-    ret = H5Mclose(tmpl1);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Pclose(tmpl1);
+    CHECK(ret, FAIL, "H5Pclose");
 
 #ifdef LATER
     /* Double-check that the atom has been vaporized */
-    ret = H5Mclose(tmpl1);
-    VERIFY(ret, FAIL, "H5Mrelease");
+    ret = H5Pclose(tmpl1);
+    VERIFY(ret, FAIL, "H5Pclose");
 #endif
 
     /* Create a new file with a non-standard file-creation template */
@@ -129,8 +128,8 @@ test_file_create(void)
     CHECK(fid2, FAIL, "H5Fcreate");
 
     /* Release file-creation template */
-    ret = H5Mclose(tmpl1);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Pclose(tmpl1);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get the file-creation template */
     tmpl1 = H5Fget_create_template(fid2);
@@ -152,12 +151,12 @@ test_file_create(void)
     VERIFY(iparm2, F2_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Clone the file-creation template */
-    tmpl2 = H5Mcopy(tmpl1);
-    CHECK(tmpl2, FAIL, "H5Mcopy");
+    tmpl2 = H5Pcopy(tmpl1);
+    CHECK(tmpl2, FAIL, "H5Pcopy");
 
     /* Release file-creation template */
-    ret = H5Mclose(tmpl1);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Pclose(tmpl1);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Set the new file-creation parameter */
     ret = H5Pset_userblock(tmpl2, F3_USERBLOCK_SIZE);
@@ -171,8 +170,8 @@ test_file_create(void)
     CHECK(fid3, FAIL, "H5Fcreate");
 
     /* Release file-creation template */
-    ret = H5Mclose(tmpl2);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Pclose(tmpl2);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Get the file-creation template */
     tmpl1 = H5Fget_create_template(fid3);
@@ -194,8 +193,8 @@ test_file_create(void)
     VERIFY(iparm2, F3_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Release file-creation template */
-    ret = H5Mclose(tmpl1);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Pclose(tmpl1);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Close first file */
     ret = H5Fclose(fid1);
@@ -252,8 +251,8 @@ test_file_open(void)
     VERIFY(iparm2, F2_SYM_LEAF_K, "H5Pget_sym_k");
 
     /* Release file-creation template */
-    ret = H5Mclose(tmpl1);
-    CHECK(ret, FAIL, "H5Mrelease");
+    ret = H5Pclose(tmpl1);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Close first file */
     ret = H5Fclose(fid1);

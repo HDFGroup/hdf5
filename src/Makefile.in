@@ -16,11 +16,11 @@ PROGS=debug
 # Source and object files for the library (lexicographically)...
 PARALLEL_SRC=H5Fmpio.c
 
-LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c        \
-	H5Ffamily.c H5Fistore.c H5Flow.c H5Fsec2.c H5Fsplit.c H5Fstdio.c      \
-        H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5H.c H5M.c H5MF.c H5MM.c H5O.c    \
-        H5Ocont.c H5Odtype.c H5Oefl.c H5Olayout.c H5Oname.c H5Onull.c         \
-        H5Osdspace.c H5Ostab.c H5P.c H5S.c H5Ssimp.c H5T.c H5Tconv.c          \
+LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c  \
+	H5Ffamily.c H5Fistore.c H5Flow.c H5Fsec2.c H5Fsplit.c H5Fstdio.c    \
+    H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5H.c H5MF.c H5MM.c H5O.c        \
+    H5Ocont.c H5Odtype.c H5Oefl.c H5Olayout.c H5Oname.c H5Onull.c       \
+    H5Osdspace.c H5Ostab.c H5P.c H5S.c H5Ssimp.c H5T.c H5Tconv.c        \
 	H5Tinit.c H5V.c @PARALLEL_SRC@
 
 LIB_OBJ=$(LIB_SRC:.c=.o)
@@ -35,13 +35,13 @@ PROG_OBJ=$(PROG_SRC:.c=.o)
 # Public header files (to be installed)...
 PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Ppublic.h	      \
         H5Dpublic.h H5Epublic.h H5Fpublic.h H5Gpublic.h H5Hpublic.h	      \
-        H5Mpublic.h H5MFpublic.h H5MMpublic.h H5Opublic.h H5Spublic.h	      \
+        H5MFpublic.h H5MMpublic.h H5Opublic.h H5Spublic.h	      \
 	H5Tpublic.h H5config.h hdf5.h
 
 # Other header files (not to be installed)...
 PRIVATE_HDR=H5private.h H5Aprivate.h H5ACprivate.h H5Bprivate.h		      \
 	H5Pprivate.h H5Dprivate.h H5Eprivate.h H5Fprivate.h H5Gprivate.h      \
-	H5Gpkg.h H5Hprivate.h H5Mprivate.h H5MFprivate.h H5MMprivate.h	      \
+	H5Gpkg.h H5Hprivate.h H5MFprivate.h H5MMprivate.h	      \
 	H5Oprivate.h H5Sprivate.h H5Tprivate.h H5Tpkg.h H5Vprivate.h
 
 # Number format detection
