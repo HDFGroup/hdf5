@@ -46,6 +46,7 @@
 #include <H5FDsec2.h>		/* POSIX unbuffered file I/O		*/
 #include <H5FDstdio.h>		/* Standard C buffered I/O		*/
 #include <H5FDgass.h>		/* Remote files using GASS I/O		*/
+#include <H5FDdpss.h>           /* Remote access using Storage Client API */
 #include <H5FDmulti.h>		/* Usage-partitioned file family	*/
 
 #endif
