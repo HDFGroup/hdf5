@@ -552,7 +552,7 @@ if test -n "$PARALLEL"; then
   AC_TRY_LINK([
 #include <mpi.h>
   ],
-    [MPI_Comm_c2f()],
+    [MPI_Comm c_comm; MPI_Comm_c2f(c_comm)],
     AC_DEFINE(HAVE_MPI_MULTI_LANG_Comm, 1,
               [Define if \`MPI_Comm_c2f' and \`MPI_Comm_f2c' exists])
     AC_MSG_RESULT(yes),
@@ -563,7 +563,7 @@ if test -n "$PARALLEL"; then
   AC_TRY_LINK([
 #include <mpi.h>
   ],
-    [MPI_Info_c2f()],
+    [MPI_Info c_info; MPI_Info_c2f(c_info)],
     AC_DEFINE(HAVE_MPI_MULTI_LANG_Info, 1,
               [Define if \`MPI_Info_c2f' and \`MPI_Info_f2c' exists])
     AC_MSG_RESULT(yes),
