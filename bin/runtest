@@ -262,7 +262,7 @@ WAITTILL()
 RUNSNAPTEST()
 {
     SNAPCMD_OPT="$STANDARD_OPT"		# snapshot test option
-    SRCDIRNAME=""
+    SRCDIRNAME=${HOSTNAME}
     # restore CC, PATH in case they were changed in the last test.
     CC="$CC_SAVED"
     PATH=$PATH_SAVED
@@ -333,6 +333,8 @@ RUNSNAPTEST()
 		skiptest=yes
 		;;
 	    srcdirname)
+		# Use this before using parallel and -n32 since this overrides
+		# the others.
 		shift
 		SRCDIRNAME=$1
 		;;
@@ -367,7 +369,7 @@ RUNSNAPTEST()
 
     # Setup log file name to save test output
     THIS_MINUTE=`date +%H%M`
-    LOGFILE=${LOGBASENAME}${SRCDIRNAME}_${TODAY}_${THIS_MINUTE}
+    LOGFILE=${LOGBASENAME}/${SRCDIRNAME}_${TODAY}_${THIS_MINUTE}
     PRINT "Running snapshot with output saved in"
     PRINT "   $LOGFILE"
     (date; PRINT Hostname=$HOSTNAME) >> $LOGFILE
@@ -606,7 +608,7 @@ fi
 SNAPYARD=`cd $BASEDIR && /bin/pwd`
 # Log file basename
 LOGDIR=${SNAPYARD}/log
-LOGBASENAME=${LOGDIR}/${HOSTNAME}
+LOGBASENAME=${LOGDIR}
 PASSEDLOG=${LOGDIR}/PASSED_LOG_${TODAY}
 FAILEDLOG=${LOGDIR}/FAILED_LOG_${TODAY}
 SKIPPEDLOG=${LOGDIR}/SKIPPED_LOG_${TODAY}
