@@ -491,7 +491,6 @@ test_select_combo(void)
                *tbuf2;      /* temporary buffer pointer */
     intn        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
-hbool_t	    valid;		/* Generic boolean return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Combination of Hyperslab & Element Selection Functions\n"));

@@ -91,7 +91,7 @@ usage (const char *progname)
 static off_t
 get_size (const char *progname, int *argno, int argc, char *argv[])
 {
-    off_t	retval;
+    off_t	retval=-1;
     char	*suffix;
     
     if (isdigit (argv[*argno][2])) {

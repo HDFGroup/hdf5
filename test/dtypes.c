@@ -1391,11 +1391,22 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    for (j=0; j<nelmts*src_size; j++) buf[j] = saved[j] = rand();
 	} else {
 	    for (j=0; j<nelmts; j++) {
+#if 0
 		unsigned char temp[32];
+#else
+		/* Do it this way for alignment reasons */
+#ifdef USE_LDOUBLE
+		long double temp[1];
+#else
+		double temp[1];
+#endif
+#endif
 		if (src_size<=dst_size) {
 		    for (k=0; k<dst_size; k++) buf[j*src_size+k] = rand();
 		} else {
-		    for (k=0; k<dst_size; k++) temp[k] = rand();
+		    for (k=0; k<dst_size; k++) {
+			((unsigned char*)temp)[k] = rand();
+		    }
 		    if (FLT_DOUBLE==src_type && FLT_FLOAT==dst_type) {
 			hw_d = *((float*)temp);
 			memcpy(buf+j*src_size, &hw_d, src_size);
