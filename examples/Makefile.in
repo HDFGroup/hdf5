@@ -17,12 +17,12 @@ LIBHDF5=../src/libhdf5.la
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS_PARA=ph5example
 TEST_PROGS=h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
-	h5_group h5_select h5_attribute h5_mount h5_reference \
+	h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
 	$(TEST_PROGS_PARA)
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
-CLEAN=*.h5
+CLEAN=*.h5 *.raw *.meta
 
 ## List all source files here.  The list of object files will be
 ## created by replacing the `.c' with a `.o'.  This list is necessary
@@ -30,7 +30,7 @@ CLEAN=*.h5
 TEST_SRC_PARA=ph5example.c
 TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
 	 h5_read.c h5_write.c h5_select.c h5_attribute.c h5_mount.c \
-	 h5_reference.c \
+	 h5_reference.c h5_drivers.c \
 	 $(TEST_SRC_PARA)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
@@ -65,6 +65,9 @@ h5_mount: h5_mount.lo
 
 h5_reference: h5_reference.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_reference.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+h5_drivers: h5_drivers.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_drivers.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 ph5example: ph5example.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $@.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
