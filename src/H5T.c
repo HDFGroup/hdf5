@@ -7098,6 +7098,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                     dt2->u.vlen.loc==H5T_VLEN_MEMORY) {
                 HGOTO_DONE(1);
             }
+            /* Don't allow VL types in different files to compare as equal */
+            if (dt1->u.vlen.f < dt2->u.vlen.f)
+                HGOTO_DONE(-1);
+            if (dt1->u.vlen.f > dt2->u.vlen.f)
+                HGOTO_DONE(1);
             break;
 
         case H5T_OPAQUE:
@@ -7308,6 +7313,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     int	lt, rt;			/*left and right edges		*/
     int	md;			/*middle			*/
     int	cmp;			/*comparison result		*/
+    int old_npaths;             /* Previous number of paths in table */
     H5T_path_t	*table=NULL;		/*path existing in the table	*/
     H5T_path_t	*path=NULL;		/*new path			*/
     H5T_path_t	*ret_value=NULL;	/*return value			*/
@@ -7380,6 +7386,12 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    }
 	}
     }
+
+    /* Keep a record of the number of paths in the table, in case one of the
+     * initialization calls below (hard or soft) causes more entries to be
+     * added to the table - QAK, 1/26/02
+     */
+    old_npaths=H5T_g.npaths;
     
     /*
      * If we didn't find the path or if the caller is specifying a new hard
@@ -7477,6 +7489,29 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 		    "no appropriate function for conversion path");
     }
 
+    /* Check if paths were inserted into the table through a recursive call
+     * and re-compute the correct location for this path if so. - QAK, 1/26/02
+     */
+    if(old_npaths!=H5T_g.npaths) {
+        lt = md = 1;
+        rt = H5T_g.npaths;
+        cmp = -1;
+        
+        while (cmp && lt<rt) {
+            md = (lt+rt) / 2;
+            assert(H5T_g.path[md]);
+            cmp = H5T_cmp(src, H5T_g.path[md]->src);
+            if (0==cmp) cmp = H5T_cmp(dst, H5T_g.path[md]->dst);
+            if (cmp<0) {
+                rt = md;
+            } else if (cmp>0) {
+                lt = md+1;
+            } else {
+                table = H5T_g.path[md];
+            }
+        }
+    } /* end if */
+
     /* Replace an existing table entry or add a new entry */
     if (table && path!=table) {
 	assert(table==H5T_g.path[md]);
@@ -7495,7 +7530,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	}
 	if (table->src) H5T_close(table->src);
 	if (table->dst) H5T_close(table->dst);
-    H5FL_FREE(H5T_path_t,table);
+        H5FL_FREE(H5T_path_t,table);
 	table = path;
 	H5T_g.path[md] = path;
     } else if (path!=table) {
@@ -7524,7 +7559,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     if (!ret_value && path && path!=table) {
 	if (path->src) H5T_close(path->src);
 	if (path->dst) H5T_close(path->dst);
-    H5FL_FREE(H5T_path_t,path);
+        H5FL_FREE(H5T_path_t,path);
     }
     if (src_id>=0) H5I_dec_ref(src_id);
     if (dst_id>=0) H5I_dec_ref(dst_id);
