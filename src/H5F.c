@@ -1457,8 +1457,8 @@ done:
  *      H5FL_FREE() aborts if called with a null pointer (unlike the
  *      original H5MM_free()).
  *
-	*	  Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
- *	  Added `id to name' support.
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *      Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -1476,10 +1476,10 @@ H5F_dest(H5F_t *f)
 	     * the memory associated with it.
 	     */
 	    if (f->shared->root_grp) {
-
-                /*Free the ID to name buffer */
+                /* Free the ID to name buffer */
                 H5G_free_grp_name(f->shared->root_grp);
 
+                /* Free the memory for the root group */
                 H5FL_FREE(H5G_t,f->shared->root_grp);
                 f->shared->root_grp=NULL;
             }
@@ -2813,6 +2813,9 @@ done:
  * 	Robb Matzke, 1998-10-14
  *	The reference count for the mounted H5F_t is incremented.
  *
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2894,6 +2897,11 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     child->mtab.parent = parent;
     child->nrefs++;
 
+    /* Search the open IDs and replace names for mount operation */
+    /* We pass H5G_UNKNOWN as object type; search all IDs */
+    if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, OP_MOUNT )<0)
+	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name");
+
 done:
     if (ret_value<0 && mount_point)
 	H5G_close(mount_point);
@@ -2920,12 +2928,12 @@ done:
  *
  * Modifications:
  *
- * Robb Matzke, 1998-10-14
- *	The ref count for the child is decremented by calling H5F_close().
+ *      Robb Matzke, 1998-10-14
+ *      The ref count for the child is decremented by calling H5F_close().
  *
-	*	Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added `id to name' support.
-	* 
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
+ * 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2965,10 +2973,9 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
 	parent = child->mtab.parent;
 	for (i=0; i<parent->mtab.nmounts; i++) {
 	    if (parent->mtab.child[i].file==child) {
-
-  /* Search the symbol table entry list and replace names through group IDs */
-		if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, OP_UNMOUNT )<0)
-  	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ");
+                /* Search the open IDs replace names to reflect unmount operation */
+                if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, OP_UNMOUNT )<0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ");
 
 		/* Unmount the child */
 		parent->mtab.nmounts -= 1;
@@ -3038,9 +3045,9 @@ done:
  *              Tuesday, October  6, 1998
  *
  * Modifications:
-	*
-	* Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added `id to name' support.
+ *
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -3051,7 +3058,6 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
     int	lt, rt, md=(-1), cmp;
     H5G_entry_t	*ent = NULL;
     herr_t ret_value=SUCCEED;   /* Return value */
-				char *tmp;
     
     FUNC_ENTER_NOAPI(H5F_mountpoint, FAIL);
 
@@ -3082,10 +3088,19 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
 
 	/* Copy root info over to ENT */
 	if (0==cmp) {
+            char *tmp_name, *tmp_old_name;     /* Temporary string pointers for entry's name and "old name"*/
+
+            /* Get the entry for the root group in the child's file */
 	    ent = H5G_entof(parent->mtab.child[md].file->shared->root_grp);
-					tmp = find->name;
+
+            /* Don't lose the name of the group when we copy the root group's entry */
+            tmp_name = find->name;
+            tmp_old_name = find->old_name;
 	    *find = *ent;
-					find->name = tmp;
+            find->name = tmp_name;
+            find->old_name = tmp_old_name;
+
+            /* Switch to child's file */
 	    parent = ent->file;
 	}
     } while (!cmp);
@@ -3107,9 +3122,6 @@ done:
  *              Tuesday, October  6, 1998
  *
  * Modifications:
- *
-	* Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -3138,11 +3150,6 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     /* Do the mount */
     if (H5F_mount(loc, name, child, plist_id)<0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file");
-
-  /* Search the symbol table entry list and replace names through group IDs */
-		/* We pass H5G_UNKNOWN as object type; search all IDs */
-				if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, OP_MOUNT )<0)
-	HRETURN_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name ");
 
 done:
     FUNC_LEAVE(ret_value);

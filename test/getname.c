@@ -22,7 +22,7 @@ typedef struct s1_t {
 #define NY 5
 
 
-int check_name( char *name, const char* check )
+static int check_name( char *name, const char* check )
 {
 
  int ret = HDstrcmp( name, check );
@@ -1428,8 +1428,6 @@ int main( void )
  
  PASSED();
 
-#if 1
-
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Glink symbolic and move target
@@ -1622,7 +1620,6 @@ int main( void )
  *-------------------------------------------------------------------------
  */
 
-#endif
  
  /* Close file */
  H5Fclose( file_id );

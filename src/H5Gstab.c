@@ -121,9 +121,9 @@ done:
  *
  * Modifications:
  *
-	*	Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added `id to name' support.
- *	Added a deep copy of the symbol table entry
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
+ *      Added a deep copy of the symbol table entry
  *
  *-------------------------------------------------------------------------
  */
@@ -134,8 +134,6 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
     H5O_stab_t		stab;		/*symbol table message		*/
     herr_t      ret_value=SUCCEED;       /* Return value */
-
-				obj_ent->name=NULL;
 
     FUNC_ENTER_NOAPI(H5G_stab_find, FAIL);
 
@@ -153,27 +151,20 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
 
     /* search the B-tree */
     if (H5B_find(grp_ent->file, H5B_SNODE, stab.btree_addr, &udata) < 0) {
-     HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
-    }
-     
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
+    } /* end if */
     /* change OBJ_ENT only if found */
-    else
-    {
-     if (obj_ent) {
-      
-						/* do a deep copy */
-					 if (H5G_ent_copy( &(udata.ent), obj_ent )<0)
-					  HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
-      
-						/* insert the name into the symbol entry OBJ_ENT */
-      if (H5G_insert_name( grp_ent, obj_ent, name ) < 0) {
-       HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, 
-        "cannot insert name");
-      }
-      
-     } 
-    }
+    else {
+        if (obj_ent) {
+            /* do a deep copy */
+            if (H5G_ent_copy( &(udata.ent), obj_ent )<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
+            /* insert the name into the symbol entry OBJ_ENT */
+            if (H5G_insert_name( grp_ent, obj_ent, name ) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
+        } /* end if */
+    } /* end else */
 
 done:
     FUNC_LEAVE(ret_value);
@@ -197,8 +188,8 @@ done:
  *
  * Modifications:
  *
-	*	Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added `id to name' support.
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -225,10 +216,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     udata.operation = H5G_OPER_INSERT;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;
-   
-				/* Deep copy */
-				H5G_ent_copy(obj_ent, &udata.ent);
-
+    udata.ent = *obj_ent;   /* Shallow copy here, deep copy happens in H5G_node_insert() callback() */
 
     /* insert */
     if (H5B_insert(grp_ent->file, H5B_SNODE, stab.btree_addr, split_ratios, &udata) < 0)
@@ -237,11 +225,9 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     /* update the name offset in the entry */
     obj_ent->name_off = udata.ent.name_off;
 
-				/* insert the name into the symbol entry OBJ_ENT */
-    if (H5G_insert_name( grp_ent, obj_ent, name ) < 0) {
-       HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, 
-        "cannot insert name");
-				}
+    /* insert the name into the symbol entry OBJ_ENT */
+    if(H5G_insert_name(grp_ent, obj_ent, name) < 0)
+       HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot insert name");
 
 done:
     FUNC_LEAVE(ret_value);

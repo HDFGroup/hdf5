@@ -5360,7 +5360,7 @@ H5T_open_oid (H5G_entry_t *ent)
 
     /* Mark the type as named and open */
     dt->state = H5T_STATE_OPEN;
-				dt->ent = *ent; 
+    dt->ent = *ent; 
 		
     /* Set return value */
     ret_value=dt;
@@ -5406,9 +5406,9 @@ done:
  *      Robb Matzke, 20 May 1999
  *	Now able to copy opaque types.
  *
-	*	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 21 Sep 2002
- *	 Added a deep copy of the symbol table entry
-	*
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 21 Sep 2002
+ *      Added a deep copy of the symbol table entry
+ *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -5428,8 +5428,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     if (NULL==(new_dt = H5FL_ALLOC(H5T_t,0)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-				/* Copy actual information */
-     *new_dt = *old_dt; 
+    /* Copy actual information */
+    *new_dt = *old_dt; 
 					
     /* Copy parent information */
     if (new_dt->parent)
@@ -5576,10 +5576,9 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             break;
     } /* end switch */
 
-
-				/*deep copy of the symbol table entry*/
-				if (H5G_ent_copy(&(old_dt->ent),&(new_dt->ent))<0)
-					HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
+    /* Deep copy of the symbol table entry */
+    if (H5G_ent_copy(&(old_dt->ent),&(new_dt->ent))<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
 					
     /* Set return value */
     ret_value=new_dt;
@@ -5720,15 +5719,15 @@ done:
  *		Monday, December  8, 1997
  *
  * Modifications:
- * 		Robb Matzke, 1999-04-27
- *		This function fails if the datatype state is IMMUTABLE.
+ *      Robb Matzke, 1999-04-27
+ *      This function fails if the datatype state is IMMUTABLE.
  *
- *		Robb Matzke, 1999-05-20
- *		Closes opaque types also.
+ *      Robb Matzke, 1999-05-20
+ *      Closes opaque types also.
  *
- *	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	 Added "ID to name" support
-	*
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added "ID to name" support
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5783,7 +5782,7 @@ H5T_close(H5T_t *dt)
             break;
     }
 
-				/*Free the ID to name buffer */
+    /*Free the ID to name buffer */
     H5G_free_ent_name(&(dt->ent));
 
     /* Free the datatype struct */
@@ -7529,9 +7528,6 @@ done:
  *              Friday, Dec 7, 2001 
  *
  * Modifications:
-	*              Pedro Vicente 
- *              Tuesday, Sep 3, 2002
-	*              Added 'else'
  *
  *-------------------------------------------------------------------------
  */
@@ -7545,14 +7541,13 @@ H5T_is_immutable(H5T_t *dt)
     assert(dt);
 
     if(dt->state == H5T_STATE_IMMUTABLE)
-	     ret_value = TRUE;
-				else
-					ret_value = FALSE;
+        ret_value = TRUE;
 
 done:
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_is_named
  *
@@ -7569,7 +7564,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 htri_t
 H5T_is_named(H5T_t *dt)
 {
@@ -7579,16 +7573,12 @@ H5T_is_named(H5T_t *dt)
 
     assert(dt);
 
-    if( dt->state == H5T_STATE_OPEN || dt->state == H5T_STATE_NAMED )
-	     ret_value = TRUE;
-				else
-					ret_value = FALSE;
+    if(dt->state == H5T_STATE_OPEN || dt->state == H5T_STATE_NAMED)
+        ret_value = TRUE;
 
 done:
     FUNC_LEAVE(ret_value);
 }
-
-
 
 
 /*--------------------------------------------------------------------------

@@ -269,8 +269,8 @@ done:
  *
  * Modifications:
  *
-	*	Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added `id to name' support.
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -311,10 +311,7 @@ H5O_close(H5G_entry_t *obj_ent)
 
 				
     /* Free the ID to name buffers */
-				if ( obj_ent->name )
-			 	obj_ent->name = H5MM_xfree(obj_ent->name);
-				if ( obj_ent->old_name )
-			 	obj_ent->old_name = H5MM_xfree(obj_ent->old_name);
+    H5G_free_ent_name(obj_ent);
 
 done:
     FUNC_LEAVE(ret_value);

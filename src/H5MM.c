@@ -98,18 +98,20 @@ done:
 char *
 H5MM_xstrdup(const char *s)
 {
-    char	*ret_value;
+    char	*ret_value=NULL;
 
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5MM_xstrdup);
 
-    if (!s)
-        HGOTO_DONE(NULL);
-    ret_value = H5MM_malloc(HDstrlen(s) + 1);
-    assert (ret_value);
-    HDstrcpy(ret_value, s);
+    if (s) {
+        ret_value = H5MM_malloc(HDstrlen(s) + 1);
+        assert (ret_value);
+        HDstrcpy(ret_value, s);
+    } /* end if */
 
+#ifdef LATER
 done:
+#endif /* LATER */
     FUNC_LEAVE(ret_value);
 }
 

@@ -1905,8 +1905,8 @@ done:
  *  	Quincey Koziol, 12 Oct 1998
  *  	Moved guts of function into H5D_open_oid
  *
-	*	  Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
- *	  Added `id to name' support.
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
+ *      Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -1935,10 +1935,6 @@ H5D_open(H5G_entry_t *loc, const char *name)
     ret_value = dataset;
 
 done:
-
-				/*Free the ID to name buffer */
-    H5G_free_ent_name(&ent);
-
     FUNC_LEAVE(ret_value);
 }
 
@@ -1965,8 +1961,8 @@ done:
  *		Feb 26, 2002
  *		A new fill value message and two new properties are added.
  *
- *	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	 Added a deep copy of the symbol table entry
+ *              Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *              Added a deep copy of the symbol table entry
  *
  *-------------------------------------------------------------------------
  */
@@ -1992,10 +1988,8 @@ H5D_open_oid(H5G_entry_t *ent)
     if(NULL==(dataset = H5D_new(H5P_DEFAULT)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-				/* Deep copy of the symbol table entry */
-				if (H5G_ent_copy(ent,&(dataset->ent))<0)
-					HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
-
+    /* Shallow copy (take ownership) of the group entry object */
+    HDmemcpy(&(dataset->ent),ent,sizeof(H5G_entry_t));
 
     /* Find the dataset object */
     if (H5O_open(&(dataset->ent)) < 0)

@@ -11,9 +11,9 @@
  * Purpose:             Library-visible declarations.
  *
  * Modifications:       Aug 22, 2002
-	*                      Pedro Vicente <pvn@ncsa.uiuc.edu>
-	*                      Added 'names' field to H5G_entry_t
-	*                      Added H5G_replace_name
+ *                      Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *                      Added 'names' field to H5G_entry_t
+ *                      Added H5G_replace_name
  *
  *-------------------------------------------------------------------------
  */
@@ -112,24 +112,13 @@ typedef struct H5G_typeinfo_t {
     char	*desc;			/*description of object type	     */
 } H5G_typeinfo_t;
 
-
-	typedef enum H5G_names_op_t {
-    OP_MOVE   = 0,  /* H5*move call    */
-				OP_LINK   = 1,  /* H5Glink call  */
-    OP_UNLINK = 2,  /* H5Gunlink call  */
-    OP_MOUNT  = 3,  /* H5Fmount call   */
-				OP_UNMOUNT= 4   /* H5Funmount call */
-	}H5G_names_op_t;
-
-/* Struct only used by change name callback function */
-typedef struct H5G_names_t {
-	H5I_type_t obj_type;
-	const char *src_name;
-	const char *dst_name;
-	H5G_entry_t	*loc;
-	H5G_names_op_t op;
-} H5G_names_t;  
-
+/* Type of operation being performed for call to H5G_replace_name() */
+typedef enum H5G_names_op_t {
+    OP_MOVE = 0,        /* H5*move call    */
+    OP_UNLINK,          /* H5Gunlink call  */
+    OP_MOUNT,           /* H5Fmount call   */
+    OP_UNMOUNT          /* H5Funmount call */
+} H5G_names_op_t;
 
 /*
  * Library prototypes...  These are the ones that other packages routinely
@@ -176,6 +165,12 @@ H5_DLL herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
 H5_DLL herr_t H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
 H5_DLL herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
 			      H5G_entry_t *ent/*out*/);
+H5_DLL  herr_t H5G_replace_name(int type, H5G_entry_t *loc, const char *src_name,
+            const char *dst_name, H5G_names_op_t op);
+H5_DLL  herr_t H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name);
+H5_DLL  herr_t H5G_ent_copy(const H5G_entry_t *src, H5G_entry_t *dst );
+H5_DLL  herr_t H5G_free_grp_name(H5G_t *grp);
+H5_DLL  herr_t H5G_free_ent_name(H5G_entry_t *ent);
 
 /*
  * These functions operate on symbol table nodes.
@@ -192,11 +187,4 @@ H5_DLL H5G_cache_t *H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type);
 H5_DLL herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
 H5_DLL herr_t H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent, FILE * stream,
 			     int indent, int fwidth, haddr_t heap);
-H5_DLL  herr_t H5G_replace_name( int type, H5G_entry_t	*loc, const char *src_name, 
-																								 const char *dst_name, int op );
-H5_DLL  herr_t H5G_insert_name( H5G_entry_t	*loc, H5G_entry_t	*obj, const char *name);
-H5_DLL  herr_t H5G_ent_copy( const H5G_entry_t *src, H5G_entry_t *dst );
-/*Free the ID to name buffer */
-H5_DLL  herr_t H5G_free_grp_name(H5G_t *grp);
-H5_DLL  herr_t H5G_free_ent_name(H5G_entry_t *ent);
 #endif

@@ -1108,8 +1108,8 @@ done:
  *
  * Modifications:
  *
- *	Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	Added `id to name' support.
+ *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *      Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -1126,13 +1126,15 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     assert (sh);
     assert (!sh->in_gh);
 
-				dt->ent = sh->u.ent;
+    /* Shallow copy the symbol table entry */
+    dt->ent = sh->u.ent;
 
-				dt->ent.name = NULL;
-				dt->ent.old_name = NULL;
+    /* Reset the names of the copied symbol table entry */
+    dt->ent.name = NULL;
+    dt->ent.old_name = NULL;
 
-				dt->state = H5T_STATE_NAMED;
-
+    /* Note that the datatype is a named datatype */
+    dt->state = H5T_STATE_NAMED;
 
 done:
     FUNC_LEAVE (ret_value);

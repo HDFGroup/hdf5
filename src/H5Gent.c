@@ -337,8 +337,7 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function: H5G_ent_copy
  *
@@ -356,32 +355,27 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5G_ent_copy( const H5G_entry_t *src, H5G_entry_t *dst )
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
 
-	herr_t ret_value=SUCCEED;   /* Return value */
+    FUNC_ENTER_NOAPI(H5G_ent_copy, FAIL);
 
-	FUNC_ENTER_NOAPI(H5G_ent_copy, FAIL);
+    /* check arguments */
+    assert( src );
+    assert( dst );
 
-	assert( src );
-	assert( dst );
+    /* Copy the top level information */
+    HDmemcpy(dst,src,sizeof(H5G_entry_t));
 
-	HDmemcpy(dst,src,sizeof(H5G_entry_t));
+    /* Deep copy the names */
+    dst->name=H5MM_xstrdup(src->name);
+    dst->old_name=H5MM_xstrdup(src->old_name);
 
-	if (src->name){
-		dst->name=H5MM_strdup(src->name);
-	}
-	if (src->old_name){
-		dst->old_name=H5MM_strdup(src->old_name);
-	}
-	
-	
 done:
-	FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
-
 
 
 /*-------------------------------------------------------------------------
