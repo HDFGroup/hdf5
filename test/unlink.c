@@ -36,7 +36,7 @@ const char *FILENAME[] = {
 /* Macros for test_create_unlink() & test_filespace */
 #define GROUPNAME       "group"
 #define GROUP2NAME      "group2"
-#define NGROUPS         1000
+#define UNLINK_NGROUPS         1000
 #define DATASETNAME     "dataset"
 #define DATASET2NAME    "dataset2"
 #define ATTRNAME        "attribute"
@@ -937,14 +937,14 @@ test_filespace(void)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
 
     /* Create a many groups to remove */
-    for(u=0; u<NGROUPS; u++) {
+    for(u=0; u<UNLINK_NGROUPS; u++) {
         sprintf(objname,"%s %u",GROUPNAME,u);
         if((group = H5Gcreate (file, objname, 0))<0) TEST_ERROR;
         if(H5Gclose (group)<0) TEST_ERROR;
     } /* end for */
 
     /* Remove the all the groups */
-    for(u=0; u<NGROUPS; u++) {
+    for(u=0; u<UNLINK_NGROUPS; u++) {
         sprintf(objname,"%s %u",GROUPNAME,u);
         if(H5Gunlink (file, objname)<0) TEST_ERROR;
     } /* end for */
@@ -1129,7 +1129,7 @@ static int test_create_unlink(const char *msg, hid_t fapl)
     }
 
     /* Create a many groups to remove */
-    for(u=0; u<NGROUPS; u++) {
+    for(u=0; u<UNLINK_NGROUPS; u++) {
         sprintf(groupname,"%s %u",GROUPNAME,u);
         if((group = H5Gcreate (file, groupname, 0))<0)
         {
@@ -1146,7 +1146,7 @@ static int test_create_unlink(const char *msg, hid_t fapl)
     } /* end for */
 
     /* Remove the all the groups */
-    for(u=0; u<NGROUPS; u++) {
+    for(u=0; u<UNLINK_NGROUPS; u++) {
         sprintf(groupname,"%s %u",GROUPNAME,u);
         if(H5Gunlink (file, groupname)<0)
         {
