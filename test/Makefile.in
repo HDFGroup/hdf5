@@ -16,8 +16,6 @@ CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.
-RUNTEST=$(LT_RUN)
-
 TEST_PROGS=testhdf5 lheap ohdr stab gheap hyperslab istore bittests dtypes      \
            dsets cmpd_dset extend external links unlink big mtime fillval mount \
            flush1 flush2 enum gass_write gass_read gass_append set_extent       \
