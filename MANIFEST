@@ -473,6 +473,7 @@
 ./test/tfile.c
 ./test/th5s.c
 ./test/th5s.h5
+./test/titerate.c
 ./test/tmeta.c
 ./test/trefer.c
 ./test/tselect.c

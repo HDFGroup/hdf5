@@ -47,6 +47,8 @@ Bug fixes since HDF5-1.2.1
      correctly.
    * h5dump correctly displays the committed copy of predefined types
      correctly.
+   * Fixed error in H5Giterate which was not updating the "index" parameter
+     correctly.
 
 
 Known Problems:
