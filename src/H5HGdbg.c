@@ -79,7 +79,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	    "Dirty:",
-	    (int)(h->cache_info.dirty));
+	    (int)(h->cache_info.is_dirty));
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Total collection size in file:",
 	    (unsigned long)(h->size));

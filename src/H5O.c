@@ -281,7 +281,7 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     if (NULL == (oh = H5FL_MALLOC(H5O_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-    oh->cache_info.dirty = TRUE;
+    oh->cache_info.is_dirty = TRUE;
     oh->version = H5O_VERSION;
     oh->nlink = 0;
 
@@ -658,7 +658,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
     assert(oh);
 
     /* flush */
-    if (oh->cache_info.dirty) {
+    if (oh->cache_info.is_dirty) {
 	p = buf;
 
 	/* encode version */
@@ -782,7 +782,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
                 oh->chunk[u].dirty = FALSE;
 	    } /* end if */
 	} /* end for */
-	oh->cache_info.dirty = FALSE;
+	oh->cache_info.is_dirty = FALSE;
     }
 
     if (destroy) {
@@ -821,7 +821,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
     assert(oh);
 
     /* Verify that node is clean */
-    assert (oh->cache_info.dirty==FALSE);
+    assert (oh->cache_info.is_dirty==FALSE);
 
     /* destroy chunks */
     for (i = 0; i < oh->nchunks; i++) {
@@ -885,7 +885,7 @@ H5O_clear(H5O_t *oh)
         oh->mesg[u].dirty=FALSE;
 
     /* Mark whole header as clean */
-    oh->cache_info.dirty=FALSE;
+    oh->cache_info.is_dirty=FALSE;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5O_clear() */
@@ -1183,7 +1183,7 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
 	if (oh->nlink + adjust < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative");
 	oh->nlink += adjust;
-	oh->cache_info.dirty = TRUE;
+	oh->cache_info.is_dirty = TRUE;
 
         /* Check if the object should be deleted */
         if(oh->nlink==0) {
@@ -1214,7 +1214,7 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
         } /* end if */
 
 	oh->nlink += adjust;
-	oh->cache_info.dirty = TRUE;
+	oh->cache_info.is_dirty = TRUE;
     }
 
     /* Set return value */
@@ -2154,7 +2154,7 @@ H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
 
     idx_msg->flags = flags;
     idx_msg->dirty = TRUE;
-    oh->cache_info.dirty = TRUE;
+    oh->cache_info.is_dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2221,7 +2221,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     }
     *((time_t*)(oh->mesg[idx].native)) = now;
     oh->mesg[idx].dirty = TRUE;
-    oh->cache_info.dirty = TRUE;
+    oh->cache_info.is_dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2511,7 +2511,7 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
             else
                 curr_msg->native = H5O_free_real(type, curr_msg->native);
 	    curr_msg->dirty = TRUE;
-	    oh->cache_info.dirty = TRUE;
+	    oh->cache_info.is_dirty = TRUE;
 	    H5O_touch_oh(ent->file, oh, FALSE);
 	}
     }
@@ -2991,7 +2991,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
     msg->dirty = TRUE;
     msg->native = NULL;
 
-    oh->cache_info.dirty = TRUE;
+    oh->cache_info.is_dirty = TRUE;
 
     /* Set return value */
     ret_value=idx;
@@ -3458,7 +3458,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	      "Dirty:",
-	      (int) (oh->cache_info.dirty));
+	      (int) (oh->cache_info.is_dirty));
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	      "Version:",
 	      (int) (oh->version));

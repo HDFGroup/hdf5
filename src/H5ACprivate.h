@@ -97,7 +97,7 @@ typedef struct H5AC_class_t {
 typedef struct H5AC_info_t {
     const H5AC_class_t	*type;		/*type of object stored here	     */
     haddr_t		addr;		/*file address for object	     */
-    hbool_t             dirty;          /* 'Dirty' flag for cached object */
+    hbool_t             is_dirty;       /* 'Dirty' flag for cached object */
 } H5AC_info_t;
 typedef H5AC_info_t *H5AC_info_ptr_t;   /* Typedef for free lists */
 

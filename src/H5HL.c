@@ -173,7 +173,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
     }
 
     /* add to cache */
-    heap->cache_info.dirty = 1;
+    heap->cache_info.is_dirty = TRUE;
     if (H5AC_set(f, dxpl_id, H5AC_LHEAP, *addr_p, heap) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to cache heap");
 
@@ -560,7 +560,7 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
     assert(H5F_addr_defined(addr));
     assert(heap);
 
-    if (heap->cache_info.dirty) {
+    if (heap->cache_info.is_dirty) {
         haddr_t hdr_end_addr;
         size_t  sizeof_hdr = H5HL_SIZEOF_HDR(f);    /* cache H5HL header size for file */
 
@@ -589,7 +589,7 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 		HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write heap data to file")
 	}
 
-	heap->cache_info.dirty = FALSE;
+	heap->cache_info.is_dirty = FALSE;
     }
 
     /* Should we destroy the memory version? */
@@ -629,7 +629,7 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
     assert(heap);
 
     /* Verify that node is clean */
-    assert (heap->cache_info.dirty==FALSE);
+    assert (heap->cache_info.is_dirty==FALSE);
 
     if(heap->chunk)
         heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
@@ -668,7 +668,7 @@ H5HL_clear(H5HL_t *heap)
     assert(heap);
 
     /* Mark heap as clean */
-    heap->cache_info.dirty = FALSE;
+    heap->cache_info.is_dirty = FALSE;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5HL_clear() */
@@ -930,7 +930,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to load heap");
 
-    heap->cache_info.dirty=TRUE;
+    heap->cache_info.is_dirty=TRUE;
 
     /* Cache this for later */
     sizeof_hdr= H5HL_SIZEOF_HDR(f);
@@ -1116,7 +1116,7 @@ H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, co
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
 
-    heap->cache_info.dirty=TRUE;
+    heap->cache_info.is_dirty=TRUE;
     HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
 
 done:
@@ -1182,7 +1182,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     assert(offset + size <= heap->mem_alloc);
 
     fl = heap->freelist;
-    heap->cache_info.dirty=TRUE;
+    heap->cache_info.is_dirty=TRUE;
 
     /*
      * Check if this chunk can be prepended or appended to an already

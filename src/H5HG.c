@@ -216,7 +216,7 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
                      "memory allocation failed");
     heap->addr = addr;
     heap->size = size;
-    heap->cache_info.dirty = TRUE;
+    heap->cache_info.is_dirty = TRUE;
     if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, \
                      "memory allocation failed");
@@ -519,10 +519,10 @@ H5HG_flush (H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t 
     assert (H5F_addr_eq (addr, heap->addr));
     assert (heap);
 
-    if (heap->cache_info.dirty) {
+    if (heap->cache_info.is_dirty) {
 	if (H5F_block_write (f, H5FD_MEM_GHEAP, addr, heap->size, dxpl_id, heap->chunk)<0)
 	    HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write global heap collection to file");
-	heap->cache_info.dirty = 0;
+	heap->cache_info.is_dirty = FALSE;
     }
 
     if (destroy) {
@@ -560,7 +560,7 @@ H5HG_dest (H5F_t *f, H5HG_heap_t *heap)
     assert (heap);
 
     /* Verify that node is clean */
-    assert (heap->cache_info.dirty==0);
+    assert (heap->cache_info.is_dirty==FALSE);
 
     for (i=0; i<f->shared->ncwfs; i++) {
         if (f->shared->cwfs[i]==heap) {
@@ -600,7 +600,7 @@ H5HG_clear(H5HG_heap_t *heap)
     assert (heap);
 
     /* Mark heap as clean */
-    heap->cache_info.dirty = 0;
+    heap->cache_info.is_dirty = FALSE;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5HG_clear() */
@@ -714,7 +714,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
     }
 
     /* Mark the heap as dirty */
-    heap->cache_info.dirty = 1;
+    heap->cache_info.is_dirty = TRUE;
 
     /* Set the return value */
     ret_value=idx;
@@ -808,7 +808,7 @@ HDmemset(new_chunk+heap->size,0,need);
     assert(H5HG_ISALIGNED(heap->obj[0].size));
 
     /* Mark the heap as dirty */
-    heap->cache_info.dirty = 1;
+    heap->cache_info.is_dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -979,7 +979,7 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
                  need-(H5HG_SIZEOF_OBJHDR(f)+size));
 #endif /* OLD_WAY */
     } /* end if */
-    heap->cache_info.dirty = TRUE;
+    heap->cache_info.is_dirty = TRUE;
 
     /* Return value */
     hobj->addr = heap->addr;
@@ -1113,7 +1113,7 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
         if (heap->obj[hobj->idx].nrefs+adjust>H5HG_MAXLINK)
             HGOTO_ERROR (H5E_HEAP, H5E_BADVALUE, FAIL, "new link count would be out of range");
         heap->obj[hobj->idx].nrefs += adjust;
-        heap->cache_info.dirty = TRUE;
+        heap->cache_info.is_dirty = TRUE;
     } /* end if */
 
     /* Set return value */
@@ -1192,14 +1192,14 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
     }
     HDmemset (heap->obj+hobj->idx, 0, sizeof(H5HG_obj_t));
-    heap->cache_info.dirty = 1;
+    heap->cache_info.is_dirty = TRUE;
 
     if (heap->obj[0].size+H5HG_SIZEOF_HDR(f)==heap->size) {
         /*
          * The collection is empty. Remove it from the CWFS list and return it
          * to the file free list.
          */
-        heap->cache_info.dirty = FALSE;
+        heap->cache_info.is_dirty = FALSE;
         H5_CHECK_OVERFLOW(heap->size,size_t,hsize_t);
         H5MF_xfree(f, H5FD_MEM_GHEAP, dxpl_id, heap->addr, (hsize_t)heap->size);
         deleted=TRUE;   /* Indicate that the object was deleted, for the unprotect call */

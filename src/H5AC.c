@@ -606,9 +606,9 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                     H5AC_dest_func_t        dest;
 
                     /* Various sanity checks */
-                    assert((*dinfo)->dirty);
+                    assert((*dinfo)->is_dirty);
                     assert((*info)!=NULL);
-                    assert((*info)->dirty==0);
+                    assert((*info)->is_dirty==0);
 
 #ifdef H5AC_DEBUG
                     type_id=(*info)->type->id;  /* Remember this for later */
@@ -672,7 +672,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                     flush = (*info)->type->flush;
 
                     /* Only block for all the processes on the first piece of metadata */
-                    if(first_flush && (*info)->dirty) {
+                    if(first_flush && (*info)->is_dirty) {
                         status = (flush)(f, dxpl_id, destroy, (*info)->addr, (*info));
                         first_flush=0;
                     } /* end if */
@@ -730,9 +730,9 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                 H5AC_dest_func_t        dest;
 
                 /* Various sanity checks */
-                assert((*dinfo)->dirty);
+                assert((*dinfo)->is_dirty);
                 assert((*info)!=NULL);
-                assert((*info)->dirty==0);
+                assert((*info)->is_dirty==0);
 
 #ifdef H5AC_DEBUG
                 type_id=(*info)->type->id;  /* Remember this for later */
@@ -877,9 +877,9 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
                 H5AC_dest_func_t        dest;
 
                 /* Various sanity checks */
-                assert((*dinfo)->dirty);
+                assert((*dinfo)->is_dirty);
                 assert((*info)!=NULL);
-                assert((*info)->dirty==0);
+                assert((*info)->is_dirty==0);
 
 #ifdef H5AC_DEBUG
                 type_id=(*info)->type->id;  /* Remember this for later */
@@ -907,9 +907,9 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
             assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
 
             /* Make certain there will be no write of dirty metadata */
-            if((*info) && (*info)->dirty) {
+            if((*info) && (*info)->is_dirty) {
                 /* Sanity check new item */
-                assert(((H5AC_info_t*)thing)->dirty==0);
+                assert(((H5AC_info_t*)thing)->is_dirty==0);
 
                 /* 'Hold' the current metadata for later */
                 (*dinfo)=(*info);
@@ -1050,9 +1050,9 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
                 H5AC_dest_func_t        dest;
 
                 /* Various sanity checks */
-                assert((*new_dinfo)->dirty);
+                assert((*new_dinfo)->is_dirty);
                 assert((*new_info)!=NULL);
-                assert((*new_info)->dirty==0);
+                assert((*new_info)->is_dirty==0);
 
 #ifdef H5AC_DEBUG
                 type_id=(*new_info)->type->id;  /* Remember this for later */
@@ -1080,9 +1080,9 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
             assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
 
             /* Make certain there will be no write of dirty metadata */
-            if((*new_info) && (*new_info)->dirty) {
+            if((*new_info) && (*new_info)->is_dirty) {
                 /* Sanity check that we won't put two pieces of dirty metadata in same cache location */
-                assert((*old_info)->dirty==0);
+                assert((*old_info)->is_dirty==0);
 
                 /* 'Hold' the current metadata for later */
                 (*new_dinfo)=(*new_info);
@@ -1134,7 +1134,7 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
         /* Check for 'held' metadata in old location & restore it, if so */
         if(*old_dinfo) {
             /* Sanity check */
-            assert((*old_dinfo)->dirty);
+            assert((*old_dinfo)->is_dirty);
 
 #ifdef H5AC_DEBUG
             type_id=(*old_info)->type->id;  /* Remember this for later */
@@ -1250,9 +1250,9 @@ H5AC_protect(H5F_t *f,
         /* Check for 'held' metadata in location & handle it */
         if(*dinfo) {
             /* Sanity checks */
-            assert((*dinfo)->dirty);
+            assert((*dinfo)->is_dirty);
             assert((*info));
-            assert((*info)->dirty==0);
+            assert((*info)->is_dirty==0);
             assert((*dinfo)->addr!=(*info)->addr);
 
             /* Is 'held' metadata the metadata we are looking for? */
@@ -1489,9 +1489,9 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
                     H5AC_dest_func_t        dest;
 
                     /* Various sanity checks */
-                    assert((*dinfo)->dirty);
+                    assert((*dinfo)->is_dirty);
                     assert((*info)!=NULL);
-                    assert((*info)->dirty==0);
+                    assert((*info)->is_dirty==0);
 
 #ifdef H5AC_DEBUG
                     type_id=(*info)->type->id;  /* Remember this for later */
@@ -1519,9 +1519,9 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
                 assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
 
                 /* Make certain there will be no write of dirty metadata */
-                if((*info) && (*info)->dirty) {
+                if((*info) && (*info)->is_dirty) {
                     /* Sanity check new item */
-                    assert(((H5AC_info_t*)thing)->dirty==0);
+                    assert(((H5AC_info_t*)thing)->is_dirty==0);
 
                     /* 'Hold' the current metadata for later */
                     (*dinfo)=(*info);
