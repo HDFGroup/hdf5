@@ -1421,7 +1421,6 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
         udata.mesg = *layout;
         udata.addr = HADDR_UNDEF;
         status = H5B_find (f, dxpl_id, H5B_ISTORE, layout->addr, &udata);
-        H5E_clear(NULL);
 
         if (status>=0 && H5F_addr_defined(udata.addr)) {
             size_t		chunk_alloc=0;		/*allocated chunk size	*/
@@ -1443,6 +1442,9 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
             rdcc->nmisses++;
         } else {
             H5D_fill_value_t	fill_status;
+
+            /* Clear the error stack from not finding the chunk on disk */
+            H5E_clear(NULL);
 
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
