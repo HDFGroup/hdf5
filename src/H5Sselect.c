@@ -530,6 +530,50 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Sselect_none
+ PURPOSE
+    Specify that nothing is selected in the extent
+ USAGE
+    herr_t H5Sselect_elements(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    This function de-selects the entire extent for a dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t H5Sselect_none (hid_t spaceid)
+{
+    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5Sselect_none, FAIL);
+
+    /* Check args */
+    if (H5_DATASPACE != H5I_group(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+
+    /* Remove current selection first */
+    if(H5S_select_release(space)<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL,
+            "can't release hyperslab");
+    } /* end if */
+
+    /* Set selection type */
+    space->select.type=H5S_SEL_NONE;
+    ret_value=SUCCEED;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Sselect_none() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Sselect_npoints
  PURPOSE
     Get the number of elements in current selection
