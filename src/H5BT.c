@@ -44,7 +44,7 @@
     /* If this flag is not set, then only part of the blocks have been */
     /* searched to determine the current maximum block size.  This can happen */
     /* during block shrinks or removals */
-#define H5BT_STATUS_MIN_VALID   0x01    /* Minimum block size valid over all blocks tracked */
+#define H5BT_STATUS_MIN_VALID   0x02    /* Minimum block size valid over all blocks tracked */
     /* If this flag is not set, then only part of the blocks have been */
     /* searched to determine the current minimum block size.  This can happen */
     /* during block expansions or removals */
@@ -242,7 +242,7 @@ HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "lower or upper block found!")
         bt->status |= H5BT_STATUS_MAX_VALID;
         bt->min_block_size = length;
         bt->min_block_cnt = 1;
-        bt->status |= H5BT_STATUS_MAX_VALID;
+        bt->status |= H5BT_STATUS_MIN_VALID;
     } /* end if */
     else {
         /* Update maximum block size */
@@ -272,4 +272,48 @@ done:
     
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_insert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_get_total_size
+ *
+ * Purpose:	Query the total amount of bytes tracked
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 10 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *tot_size)
+{
+    H5BT_t *bt = NULL;                  /* The new B-tree header information */
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5BT_get_total_size, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(tot_size);
+
+    /* Look up the block tracker header */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
+
+    /* Save total number of bytes tracked in all blocks */
+    *tot_size = bt->tot_block_size;
+
+done:
+    /* Release the block tracker info */
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5BT_get_total_size() */
 

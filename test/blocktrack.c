@@ -57,6 +57,7 @@ test_create(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     haddr_t     bt_addr;                /* Address of block tracker created */
+    hsize_t     tot_size;               /* Total size of blocks tracked */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -78,6 +79,16 @@ test_create(hid_t fapl)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 0) TEST_ERROR;
+
+
     PASSED();
 
     if (H5Fclose(file)<0) TEST_ERROR;
@@ -115,6 +126,7 @@ test_insert_one(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     haddr_t     bt_addr;                /* Address of block tracker created */
+    hsize_t     tot_size;               /* Total size of blocks tracked */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -142,6 +154,14 @@ test_insert_one(hid_t fapl)
 	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 20) TEST_ERROR;
 
     PASSED();
 
@@ -181,6 +201,7 @@ test_insert_many(hid_t fapl)
     H5F_t	*f=NULL;
     haddr_t     bt_addr;                /* Address of block tracker created */
     unsigned    u;                      /* Local index variable */
+    hsize_t     tot_size;               /* Total size of blocks tracked */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -209,6 +230,15 @@ test_insert_many(hid_t fapl)
             H5Eprint_stack(H5E_DEFAULT, stdout);
             goto error;
         } /* end if */
+
+        if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        } /* end if */
+        /* Make certain that the size is correct */
+        if(tot_size != ((u+1)*20)) TEST_ERROR;
+
     } /* end for */
 
     PASSED();
