@@ -1478,7 +1478,11 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned
 #ifndef H5_HAVE_PARALLEL
 UNUSED
 #endif /* H5_HAVE_PARALLEL */
-flags)
+flags, hbool_t
+#ifndef H5_HAVE_PARALLEL
+UNUSED
+#endif /* H5_HAVE_PARALLEL */
+*use_par_opt_io)
 {
     H5S_conv_t	*path=NULL;  /* Space conversion path */
 #ifdef H5_HAVE_PARALLEL
@@ -1521,10 +1525,17 @@ flags)
 
             /* Check if we can use the optimized parallel I/O routines */
             if(opt==TRUE) {
+                /* Set the pointers to the MPI-specific routines */
                 H5S_conv_g[i]->read = H5S_mpio_spaces_read;
                 H5S_conv_g[i]->write = H5S_mpio_spaces_write;
+
+                /* Indicate that the I/O will be parallel */
+                *use_par_opt_io=TRUE;
             } /* end if */
             else {
+                /* Indicate that the I/O will _NOT_ be parallel */
+                *use_par_opt_io=FALSE;
+
 #endif /* H5_HAVE_PARALLEL */
                 H5S_conv_g[i]->read = H5S_select_read;
                 H5S_conv_g[i]->write = H5S_select_write;
@@ -1556,10 +1567,17 @@ flags)
 
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {
+        /* Set the pointers to the MPI-specific routines */
         path->read = H5S_mpio_spaces_read;
         path->write = H5S_mpio_spaces_write;
+
+        /* Indicate that the I/O will be parallel */
+        *use_par_opt_io=TRUE;
     } /* end if */
     else {
+        /* Indicate that the I/O will _NOT_ be parallel */
+        *use_par_opt_io=FALSE;
+
 #endif /* H5_HAVE_PARALLEL */
         path->read = H5S_select_read;
         path->write = H5S_select_write;

@@ -515,6 +515,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5S_conv_t	*sconv=NULL;	        /*space conversion funcs*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode;         /*xfer_mode for this request */
+    hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
 #endif /*H5_HAVE_PARALLEL*/
     H5P_genplist_t *dx_plist=NULL;      /* Data transfer property list */
@@ -637,11 +638,13 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
+    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags, &use_par_opt_io)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space")
 
 #ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
+    /* Don't reset the transfer mode if we can't or won't use it */
+    if(!use_par_opt_io || !H5T_path_noop(tpath))
+        H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Determine correct I/O routine to invoke */
@@ -737,6 +740,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5S_conv_t	*sconv=NULL;		/*space conversion funcs*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode;         /*xfer_mode for this request */
+    hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
 #endif /*H5_HAVE_PARALLEL*/
     H5P_genplist_t *dx_plist=NULL;      /* Data transfer property list */
@@ -857,11 +861,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
+    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags, &use_par_opt_io)))
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space")
         
 #ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
+    /* Don't reset the transfer mode if we can't or won't use it */
+    if(!use_par_opt_io || !H5T_path_noop(tpath))
+        H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Determine correct I/O routine to invoke */
