@@ -141,7 +141,10 @@ typedef enum H5E_minor_t {
     H5E_COMPLEN,                /*name component is too long                 */
     H5E_CWG,                    /*problem with current working group         */
     H5E_LINK,                   /*link count failure                         */
-    H5E_SLINK			/*symbolic link error			     */
+    H5E_SLINK,			/*symbolic link error			     */
+
+    /* Parallel errors */
+    H5E_MPI			/*some MPI function failed		     */
 } H5E_minor_t;
 
 /* Information about an error */
