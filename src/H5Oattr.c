@@ -195,9 +195,9 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
             nelem*=attr->ds->extent.u.simple.size[u];
         attr->ds->extent.nelem = nelem;
     } else {
-        attr->ds->extent.type = H5S_SCALAR;
-        attr->ds->extent.nelem = 1;
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace");
     }
+
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->ds,0)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
