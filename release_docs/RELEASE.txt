@@ -35,11 +35,6 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
-    * The first version of szip compression support were implemented. 
-      User should have static szlib library installed. Using function
-	H5Pset_szip to pass the szip parameters to the HDF5 library.
-        More detailed decription of the process will be followed.
-	KY-2003/04/01
     * -O caused errors in AIX 5.x platforms.  Removed it from
       --enable-production mode.  AKC - 2003/03/31
     * Corrected metadata caching bug in parallel I/O which could cause hangs
@@ -274,6 +269,15 @@ Documentation
 New Features
 ============
 
+    * Added new dataset creation property list functions for working with
+      I/O filters: H5Pmodify_filter, H5Pget_filter_by_id and
+      H5Pall_filters_avail.  Also changed H5Zregister to use new method
+      of registering filters with library.  QAK - 2003/04/08
+    * The first version of szip compression support were implemented. 
+      User should have static szlib library installed. Using function
+      H5Pset_szip to pass the szip parameters to the HDF5 library.
+      More detailed decription of the process will be followed.
+      KY-2003/04/01
     * Added Fletcher32 checksum as a filter in pipeline.  It only works in 
       chunked dataset.  SLU - 2003/2/11
     * MPICH/MPE instrumentation feature added.  Use --enable-mpe to configure
