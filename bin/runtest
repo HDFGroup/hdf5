@@ -745,6 +745,11 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     PRINT_BLANK
     TEST_TYPE="launching"
     cd ${SNAPYARD}/log
+    # Fork off timekeeper if concurrent tests will be used.
+    if [ -n "$SRCDIR" ]; then
+	($SNAPYARD/current/bin/timekeeper 300 &)
+	PRINT "    Fork off timekeeper 300"
+    fi
     n_test=0
     runtest_type="hosts"
     for h in $TESTHOST; do
@@ -764,13 +769,11 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	    rsh|ssh)
 		CMD="$RSH $h -n $PROGNAME -configname $CONFIGNAME"
 		PRINT $CMD
-		# kludge: some how eirene and houdin can not have
-                # rsh connections too close.  wait a few seconds
-		test $h = houdin && echo "wait 10 sec for houdin" && sleep 10
 
 		# launch concurrent tests only if srcdir is used
 		if [ -n "$SRCDIR" ]; then
 		    $CMD &
+		    echo $! > PID.$h
 		else
 		    $CMD
 		fi
@@ -796,7 +799,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	(tail -2 $TMP_OUTPUT | grep -s 'Grand total' > /dev/null 2>&1) ||
 	    (REPORT_ERR "****FAILED ${h}: snaptest did not complete****" &&
 		PRINT_BLANK)
-	rm $TMP_OUTPUT
+	rm -f $TMP_OUTPUT PID.$h
     done
     exit 0
 fi
