@@ -221,6 +221,7 @@
 ./doc/html/TechNotes/NamingScheme.html
 ./doc/html/TechNotes/ObjectHeader.html
 ./doc/html/TechNotes/RawDStorage.html
+./doc/html/TechNotes/ReservedFileSpace.html
 ./doc/html/TechNotes/SWControls.html
 ./doc/html/TechNotes/SymbolTables.html
 ./doc/html/TechNotes/TestReview.html
@@ -1044,6 +1045,7 @@
 ./test/ntypes.c
 ./test/noencoder.h5
 ./test/ohdr.c
+./test/reserved.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_

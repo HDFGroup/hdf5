@@ -129,8 +129,9 @@ main(void)
     if (H5Fclose(file)<0) goto error;
     PASSED();
 
-    puts("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
+
+    puts("All local heap tests passed.");
     return 0;
 
  error:

@@ -72,7 +72,7 @@ static herr_t H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type,
     int sequence, hid_t dxpl_id);
 static unsigned H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		      size_t size);
-static unsigned H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size);
+static unsigned H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 static herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg);
@@ -715,6 +715,10 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
                         assert(cont->chunkno < oh->nchunks);
                         assert(!H5F_addr_defined(oh->chunk[cont->chunkno].addr));
                         cont->size = oh->chunk[cont->chunkno].size;
+
+                        /* Free the space we'd previously reserved to hold this chunk */
+                        H5MF_free_reserved(f, cont->size);
+
                         if (HADDR_UNDEF==(cont->addr=H5MF_alloc(f,
                                             H5FD_MEM_OHDR, dxpl_id, (hsize_t)cont->size)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for object header data");
@@ -2536,6 +2540,10 @@ done:
  *		that message will be extended with the chunk.  Otherwise a
  *		new null message is created.
  *
+ *              F is the file into which the new chunk will be written.  It is
+ *              included to ensure that there is enough space to extend this
+ *              chunk.
+ *
  * Return:	Success:	Message index for null message which
  *				is large enough to hold SIZE bytes.
  *
@@ -2554,7 +2562,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static unsigned
-H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
+H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size)
 {
     unsigned	u;
     unsigned	idx;
@@ -2582,6 +2590,11 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
 
                 delta = MAX (H5O_MIN_SIZE, aligned_size - oh->mesg[idx].raw_size);
                 assert (delta=H5O_ALIGN (delta));
+
+                /* Reserve space in the file to hold the increased chunk size */
+                if( H5MF_reserve(f, delta) < 0 )
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space for chunk");
+
                 oh->mesg[idx].dirty = TRUE;
                 oh->mesg[idx].raw_size += delta;
 
@@ -2609,6 +2622,13 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
         } /* end if */
     }
 
+    /* Reserve space in the file */
+    delta = MAX(H5O_MIN_SIZE, aligned_size+H5O_SIZEOF_MSGHDR(f));
+    delta = H5O_ALIGN(delta);
+
+    if( H5MF_reserve(f, delta) < 0 )
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space in file");
+
     /* create a new null message */
     if (oh->nmesgs >= oh->alloc_nmesgs) {
         unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
@@ -2619,8 +2639,6 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
         oh->alloc_nmesgs = na;
         oh->mesg = x;
     }
-    delta = MAX(H5O_MIN_SIZE, aligned_size+H5O_SIZEOF_MSGHDR(f));
-    delta = H5O_ALIGN(delta);
     idx = oh->nmesgs++;
     oh->mesg[idx].type = H5O_NULL;
     oh->mesg[idx].dirty = TRUE;
@@ -2748,6 +2766,10 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      */
     size = MAX(H5O_MIN_SIZE, size + H5O_SIZEOF_MSGHDR(f));
     assert (size == H5O_ALIGN (size));
+
+    /* Reserve space in the file to hold the new chunk */
+    if( H5MF_reserve(f, size) < 0 )
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space in file for new chunk");
 
     /*
      * Create the new chunk without giving it a file address.
@@ -2913,7 +2935,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	 * since we can just increase the size of that chunk.
 	 */
 	for (chunkno = 0; chunkno < oh->nchunks; chunkno++) {
-	    if ((idx = H5O_alloc_extend_chunk(oh, chunkno, size)) != UFAIL) {
+	    if ((idx = H5O_alloc_extend_chunk(f, oh, chunkno, size)) != UFAIL) {
 		break;
 	    }
 	    H5E_clear();

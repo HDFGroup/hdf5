@@ -2487,10 +2487,6 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 nelmts-=safe;
             } /* end while */
 
-            /* Reset the conversion buffer pointer, so it doesn't get freed */
-            if(write_to_file && noop_conv)
-                conv_buf=NULL;
-
             /* Release the temporary datatype IDs used */
             if (tsrc_id >= 0)
                 H5I_dec_ref(tsrc_id);
@@ -2503,6 +2499,10 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }   /* end switch */
     
 done:
+    /* If the conversion buffer doesn't need to be freed, reset its pointer */
+    if(write_to_file && noop_conv)
+        conv_buf = NULL;
+
     /* Release the conversion buffer (always allocated, except on errors) */
     if(conv_buf!=NULL)
         H5FL_BLK_FREE(vlen_seq,conv_buf);

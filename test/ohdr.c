@@ -309,8 +309,9 @@ main(void)
     }
     PASSED();
 
-    puts("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
+
+    puts("All object header tests passed.");
     return 0;
 
  error:

@@ -231,7 +231,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     bt->right = HADDR_UNDEF;
     bt->nchildren = 0;
     if((bt->rc_shared=(type->get_shared)(f, udata))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "can't retrieve B-tree node buffer")
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't retrieve B-tree node buffer")
     shared=H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     if (NULL==(bt->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
@@ -537,9 +537,6 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
      * Check arguments.
      */
     assert(bt);
-
-    /* Verify that node is clean */
-    assert(bt->cache_info.dirty==0);
 
     H5FL_SEQ_FREE(haddr_t,bt->child);
     H5FL_BLK_FREE(native_block,bt->native);
