@@ -1509,7 +1509,7 @@ else
         hname="`hostname`"
 
         case "$hname" in
-          *pacific.llnl.gov* | *s0*)
+          *pacific.llnl.gov | snow*.llnl.gov | *s0*)
             hardcode_libdir_flag_spec=' '
             ;;
           *)
