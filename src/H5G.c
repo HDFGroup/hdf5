@@ -6,11 +6,14 @@
  *
  * Created:		H5G.c
  * 			Jul 18 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		
  *
- * Modifications:	
+ * Modifications:
+ *
+ *	Robb Matzke, 5 Aug 1997
+ *	Added calls to H5E.
  *
  *-------------------------------------------------------------------------
  */
@@ -21,12 +24,19 @@
 #define H5G_INIT_HEAP		8192
 
 /* Packages needed by this file... */
+#include "H5private.h"
 #include "H5Bprivate.h"
 #include "H5Gprivate.h"
 #include "H5Hprivate.h"
 #include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
-/* PRIVATE PROTOTYPES */
+#define PABLO_MASK	H5G_mask
+
+
+/* Is the interface initialized? */
+static intn interface_initialize_g = FALSE;
+
 
 
 /*-------------------------------------------------------------------------
@@ -46,10 +56,10 @@
  *
  * Return:	Success:	Address of new symbol table.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  1 1997
  *
  * Modifications:
@@ -59,27 +69,48 @@
 haddr_t
 H5G_new (hdf5_file_t *f, size_t init)
 {
-   haddr_t	addr;				/*symtab object header	*/
-   haddr_t	heap;				/*private heap		*/
    off_t	name;				/*offset of "" name	*/
+   haddr_t	addr;				/*object header address	*/
+   H5O_stab_t	stab;				/*symbol table message	*/
+
+   FUNC_ENTER (H5G_new, NULL, FAIL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
 
    /* Create symbol table private heap */
    if (init>0) {
-      if ((heap = H5H_new (f, init))<0) return -1;
-      if ((name = H5H_insert (f, heap, 1, "")<0)) return -1;
-      assert (0==name); /*or B-tree's won't work*/
+      if ((stab.heap = H5H_new (f, H5H_LOCAL, init))<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      }
+      if ((name = H5H_insert (f, stab.heap, 1, "")<0)) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      }
+      if (0!=name) {
+	 /*
+	  * B-tree's won't work if the first name isn't at the beginning
+	  * of the heap.
+	  */
+	 HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
+      }
    } else {
-      heap = 0; /*we'll create it later*/
+      stab.heap = 0; /*we'll create it later*/
    }
 
+   /* The B-tree is created on demand later */
+   stab.btree = 0;
+
    /* Create symbol table object header */
-   addr = not_implemented_yet__create_object_header();
-   if (addr<0) return -1;
+   if ((addr = H5O_new (f, 0, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
+   if (H5O_modify(f, addr, NULL, NULL, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
 
-   /* Insert the heap and B-tree addresses */
-   not_implemented_yet__insert_symtab_message (f, addr, heap, 0);
-
-   return addr;
+   FUNC_LEAVE (addr);
 }
 
 
@@ -92,10 +123,10 @@ H5G_new (hdf5_file_t *f, size_t init)
  *
  * Return:	Success:	Address corresponding to the name.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  1 1997
  *
  * Modifications:
@@ -106,20 +137,35 @@ haddr_t
 H5G_find (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
 {
    H5G_node_ud1_t       udata;		/*data to pass through B-tree	*/
-   haddr_t		btree;		/*address of B-tree		*/
+   H5O_stab_t		stab;		/*symbol table message		*/
+
+   FUNC_ENTER (H5G_find, NULL, FAIL);
+
+   /* Check arguments */
+   assert (f);
+   assert (addr>=0);
+   assert (name && *name);
+   assert (entry);
 
    /* set up the udata */
-   not_implemented_yet__get_symtab_message (f, addr, &(udata.heap), &btree);
-   if (btree<=0 || udata.heap<=0) return -1; /*empty symbol table*/
+   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+   }
+   if (stab.btree<=0 || stab.heap<=0) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*empty symbol table*/
+   }
    udata.operation = H5G_OPER_FIND;
    udata.name = name;
+   udata.heap = stab.heap;
 
    /* search the B-tree */
-   if (H5B_find (f, H5B_SNODE, btree, &udata)<0) return -1;
+   if (H5B_find (f, H5B_SNODE, stab.btree, &udata)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+   }
 
    /* return the result */
    if (entry) *entry = udata.entry;
-   return udata.entry.header;
+   FUNC_LEAVE (udata.entry.header);
 }
 
 
@@ -131,12 +177,12 @@ H5G_find (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
  *		file F.  ENTRY is the new symbol table entry to use for the
  *		symbol.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  1 1997
  *
  * Modifications:
@@ -147,18 +193,34 @@ herr_t
 H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
 {
    H5G_node_ud1_t	udata;		/*data to pass through B-tree	*/
-   haddr_t		btree;		/*address of B-tree		*/
+   H5O_stab_t		stab;		/*symbol table message		*/
+
+   FUNC_ENTER (H5G_modify, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   assert (addr>=0);
+   assert (name && *name);
+   assert (entry);
 
    /* set up the udata */
-   not_implemented_yet__get_symtab_message (f, addr, &(udata.heap), &btree);
-   if (btree<=0 || udata.heap<=0) return -1; /*empty symbol table*/
+   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+   }
+   if (stab.btree<=0 || stab.heap<=0) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*empty symbol table*/
+   }
    udata.operation = H5G_OPER_MODIFY;
    udata.name = name;
+   udata.heap = stab.heap;
    udata.entry = *entry;
 
    /* search and modify the B-tree */
-   if (H5B_find (f, H5B_SNODE, btree, &udata)<0) return -1;
-   return 0;
+   if (H5B_find (f, H5B_SNODE, stab.btree, &udata)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+   }
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -169,12 +231,12 @@ H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
  *		file F.  The name of the new symbol is NAME and its symbol
  *		table entry is ENTRY.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  1 1997
  *
  * Modifications:
@@ -184,31 +246,51 @@ H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
 herr_t
 H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
 {
-   haddr_t		btree;		/*file address of B-tree	*/
+   H5O_stab_t		stab;		/*symbol table message		*/
    H5G_node_ud1_t	udata;		/*data to pass through B-tree	*/
    off_t		offset;		/*offset of name within heap	*/
 
+   FUNC_ENTER (H5G_insert, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   assert (addr>=0);
+   assert (name && *name);
+   assert (entry);
+   
    /* make sure we have a B-tree and a heap */
-   not_implemented_yet__get_symtab_message (f, addr, &btree, &(udata.heap));
-   if (btree<=0 || udata.heap<=0) {
-      if (btree<=0 &&
-	  (btree = H5B_new (f, H5B_SNODE, sizeof(H5G_node_key_t)))<0) {
-	 return -1;
+   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+   }
+   if (stab.btree<=0 || stab.heap<=0) {
+      if (stab.btree<=0 &&
+	  (stab.btree = H5B_new (f, H5B_SNODE, sizeof(H5G_node_key_t)))<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       }
-      if (udata.heap<=0) {
-	 udata.heap = H5H_new (f, MAX(strlen(name)+1, H5G_INIT_HEAP));
-	 if (udata.heap<0) return -1;
-	 if (0!=(offset = H5H_insert (f, udata.heap, 1, ""))) return -1;
+      if (stab.heap<=0) {
+	 stab.heap = H5H_new (f, H5H_LOCAL,
+			      MAX(strlen(name)+1, H5G_INIT_HEAP));
+	 if (stab.heap<0) {
+	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+	 }
+	 if (0!=(offset = H5H_insert (f, stab.heap, 1, ""))) {
+	    HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
+	 }
       }
-      not_implemented_yet__update_symtab_message (f, addr, udata.heap, btree);
+      if (H5O_modify (f, addr, NULL, NULL, H5O_STAB, 0, &stab)<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      }
    }
 
    /* initialize data to pass through B-tree */
    udata.name = name;
+   udata.heap = stab.heap;
    udata.entry = *entry;
-   if (H5B_insert (f, H5B_SNODE, btree, &udata)<0) return -1;
+   if (H5B_insert (f, H5B_SNODE, stab.btree, &udata)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
+   }
 
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -227,12 +309,12 @@ H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
  *				but at most MAXENTRIES values are copied
  *				into the NAMES and ENTRIES arrays.
  *
- *		Failure:	-1, the pointers in NAMES are undefined but
+ *		Failure:	FAIL, the pointers in NAMES are undefined but
  *			 	no memory is allocated.  The values in
  *				ENTRIES are undefined.
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  1 1997
  *
  * Modifications:
@@ -244,26 +326,31 @@ H5G_list (hdf5_file_t *f, haddr_t addr, int maxentries,
 	  char *names[], H5G_entry_t entries[])
 {
    H5G_node_list_t	udata;
-   haddr_t		btree;
+   H5O_stab_t		stab;
    intn			i;
-   
-   not_implemented_yet__get_symtab_message (f, addr, &btree, &(udata.heap));
-   if (btree<=0 || udata.heap<=0) return 0; /*empty directory*/
+
+   FUNC_ENTER (H5G_list, NULL, FAIL);
+
+   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+   }
+   if (stab.btree<=0 || stab.heap<=0) HRETURN (0); /*empty directory*/
 
    udata.entry = entries;
    udata.name = names;
+   udata.heap = stab.heap;
    udata.maxentries = maxentries;
    udata.nsyms = 0;
 
    if (names) HDmemset (names, 0, maxentries);
-   if (H5B_list (f, H5B_SNODE, btree, &udata)<0) {
+   if (H5B_list (f, H5B_SNODE, stab.btree, &udata)<0) {
       if (names) {
 	 for (i=0; i<maxentries; i++) H5MM_xfree (names[i]);
       }
-      return -1;
+      HRETURN_ERROR (H5E_SYM, H5E_CANTLIST, FAIL);
    }
 
-   return udata.nsyms;
+   FUNC_LEAVE (udata.nsyms);
 }
    
 
@@ -273,13 +360,13 @@ H5G_list (hdf5_file_t *f, haddr_t addr, int maxentries,
  * Purpose:	Same as H5G_decode() except it does it for an array of
  *		symbol table entries.
  *
- * Return:	Success:	0, with *pp pointing to the first byte
+ * Return:	Success:	SUCCEED, with *pp pointing to the first byte
  *				after the last symbol.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 18 1997
  *
  * Modifications:
@@ -291,10 +378,22 @@ H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
 {
    intn		i;
 
+   FUNC_ENTER (H5G_decode_vec, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   assert (pp);
+   assert (ent);
+   assert (n>=0);
+
+   /* decode entries */
    for (i=0; i<n; i++) {
-      if (H5G_decode (f, pp, ent+i)<0) return -1;
+      if (H5G_decode (f, pp, ent+i)<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTDECODE, FAIL);
+      }
    }
-   return 0;
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -303,13 +402,13 @@ H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  *
  * Purpose:	Decodes a symbol table entry pointed to by `*pp'.
  *
- * Return:	Success:	0 with *pp pointing to the first byte
+ * Return:	Success:	SUCCEED with *pp pointing to the first byte
  *				following the symbol table entry.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 18 1997
  *
  * Modifications:
@@ -320,11 +419,20 @@ herr_t
 H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
 {
    uint8	*p_ret = *pp;
-   
+
+   FUNC_ENTER (H5G_decode, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   assert (pp);
+   assert (ent);
+
+   /* decode header */
    H5F_decode_offset (f, *pp, ent->name_off);
    H5F_decode_offset (f, *pp, ent->header);
    UINT32DECODE (*pp, ent->type);
 
+   /* decode scratch-pad */
    switch (ent->type) {
    case H5G_NOTHING_CACHED:
       break;
@@ -338,9 +446,9 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       UINT32DECODE (*pp, ent->cache.sdata.dim[3]);
       break;
 
-   case H5G_CACHED_SYMTAB:
-      UINT32DECODE (*pp, ent->cache.symtab.btree);
-      UINT32DECODE (*pp, ent->cache.symtab.heap);
+   case H5G_CACHED_STAB:
+      UINT32DECODE (*pp, ent->cache.stab.btree);
+      UINT32DECODE (*pp, ent->cache.stab.heap);
       break;
 
    default:
@@ -348,7 +456,7 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
    }
 
    *pp = p_ret + H5G_SIZEOF_ENTRY(f);
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -358,13 +466,13 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
  * Purpose:	Same as H5G_encode() except it does it for an array of
  *		symbol table entries.
  *
- * Return:	Success:	0, with *pp pointing to the first byte
+ * Return:	Success:	SUCCEED, with *pp pointing to the first byte
  *				after the last symbol.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 18 1997
  *
  * Modifications:
@@ -376,10 +484,22 @@ H5G_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
 {
    intn		i;
 
+   FUNC_ENTER (H5G_encode_vec, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   assert (pp);
+   assert (ent);
+   assert (n>=0);
+
+   /* encode entries */
    for (i=0; i<n; i++) {
-      if (H5G_encode (f, pp, ent+i)<0) return -1;
+      if (H5G_encode (f, pp, ent+i)<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTENCODE, FAIL);
+      }
    }
-   return 0;
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -389,13 +509,13 @@ H5G_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  * Purpose:	Encodes the specified symbol table entry into the buffer
  *		pointed to by *pp.
  *
- * Return:	Success:	0, with *pp pointing to the first byte
+ * Return:	Success:	SUCCEED, with *pp pointing to the first byte
  *				after the symbol table entry.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 18 1997
  *
  * Modifications:
@@ -407,10 +527,19 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
 {
    uint8	*p_ret = *pp;
 
+   FUNC_ENTER (H5G_encode, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   assert (pp);
+   assert (ent);
+
+   /* encode header */
    H5F_encode_offset (f, *pp, ent->name_off);
    H5F_encode_offset (f, *pp, ent->header);
    UINT32ENCODE (*pp, ent->type);
 
+   /* encode scratch-pad */
    switch (ent->type) {
    case H5G_NOTHING_CACHED:
       break;
@@ -424,9 +553,9 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       UINT32ENCODE (*pp, ent->cache.sdata.dim[3]);
       break;
 
-   case H5G_CACHED_SYMTAB:
-      UINT32ENCODE (*pp, ent->cache.symtab.btree);
-      UINT32ENCODE (*pp, ent->cache.symtab.heap);
+   case H5G_CACHED_STAB:
+      UINT32ENCODE (*pp, ent->cache.stab.btree);
+      UINT32ENCODE (*pp, ent->cache.stab.heap);
       break;
 
    default:
@@ -434,11 +563,7 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
    }
 
    *pp = p_ret + H5G_SIZEOF_ENTRY(f);
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
-herr_t not_implemented_yet__create_object_header (void) {return FAIL;}
-herr_t not_implemented_yet__insert_symtab_message (hdf5_file_t* f, haddr_t addr, haddr_t heap, haddr_t btree) {return FAIL;}
-herr_t not_implemented_yet__get_symtab_message (hdf5_file_t *f, haddr_t addr, haddr_t *heap, haddr_t *btree) {return FAIL;}
-herr_t not_implemented_yet__update_symtab_message (hdf5_file_t *f, haddr_t addr, haddr_t heap, haddr_t btree) {return FAIL;}

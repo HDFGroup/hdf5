@@ -6,7 +6,7 @@
  *
  * Created:		H5MM.c
  * 			Jul 10 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		Memory management functions.
  *
@@ -30,7 +30,7 @@
  *		Failure:	abort()
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 10 1997
  *
  * Modifications:
@@ -56,7 +56,7 @@ H5MM_xmalloc (size_t size)
  *		Failure:	abort()
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 10 1997
  *
  * Modifications:
@@ -89,7 +89,7 @@ H5MM_xcalloc (size_t n, size_t size)
  *		Failure:	abort()
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 10 1997
  *
  * Modifications:
@@ -127,7 +127,7 @@ H5MM_xrealloc (void *mem, size_t size)
  *		Failure:	abort()
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 10 1997
  *
  * Modifications:
@@ -160,7 +160,7 @@ H5MM_xstrdup (const char *s)
  *		Failure:	never fails
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 10 1997
  *
  * Modifications:

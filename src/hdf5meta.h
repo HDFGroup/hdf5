@@ -123,13 +123,13 @@
 #else /* HDF5_HAVE_NATIVE_INT64 */
 #error  "Define int64 on platforms which don't support it"
 #endif /* HDF5_HAVE_NATIVE_INT64 */
-#   define INT16DECODE(p, i) { (i) = (int16)(*(int16 *)(p)); (p)+=2; }
-#   define UINT16DECODE(p, i) { (i) = (uint16)(*(uint16 *)(p)); (p)+=2; }
-#   define INT32DECODE(p, i) { (i) = (int32)(*(int32 *)(p)); (p)+=4; }
-#   define UINT32DECODE(p, i) { (i) = (uint32)(*(uint32 *)(p)); (p)+=4; }
+#   define INT16DECODE(p, i) { (i) = (int16)(*(const int16 *)(p)); (p)+=2; }
+#   define UINT16DECODE(p, i) { (i) = (uint16)(*(const uint16 *)(p)); (p)+=2; }
+#   define INT32DECODE(p, i) { (i) = (int32)(*(const int32 *)(p)); (p)+=4; }
+#   define UINT32DECODE(p, i) { (i) = (uint32)(*(const uint32 *)(p)); (p)+=4; }
 #ifdef HDF5_HAVE_NATIVE_INT64
-#   define INT64DECODE(p, i) { (i) = (int64)(*(int64 *)(p)); (p)+=8; }
-#   define UINT64DECODE(p, i) { (i) = (uint64)(*(uint64 *)(p)); (p)+=8; }
+#   define INT64DECODE(p, i) { (i) = (int64)(*(const int64 *)(p)); (p)+=8; }
+#   define UINT64DECODE(p, i) { (i) = (uint64)(*(const uint64 *)(p)); (p)+=8; }
 #else /* HDF5_HAVE_NATIVE_INT64 */
 #error  "Define int64 on platforms which don't support it"
 #endif /* HDF5_HAVE_NATIVE_INT64 */

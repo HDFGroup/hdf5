@@ -43,7 +43,7 @@ static int	interface_initialize_g = FALSE;		/*initialized?*/
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  9 1997
  *
  * Modifications:
@@ -74,7 +74,7 @@ H5AC_new (hdf5_file_t *f)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  9 1997
  *
  * Modifications:
@@ -113,7 +113,7 @@ H5AC_dest (hdf5_file_t *f)
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  9 1997
  *
  * Modifications:
@@ -147,7 +147,7 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
     * Return right away if the item is in the cache.
     */
    if (f->cache[idx].type==type && f->cache[idx].addr==addr) {
-      return f->cache[idx].thing;
+      HRETURN (f->cache[idx].thing);
    }
 
    /*
@@ -209,7 +209,7 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  9 1997
  *
  * Modifications:
@@ -276,7 +276,7 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  9 1997
  *
  * Modifications:
@@ -326,7 +326,7 @@ H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  9 1997
  *
  * Modifications:

@@ -13,7 +13,10 @@
  *			table entries.  A B-tree usually points to the
  *			symbol table nodes for any given symbol table.
  *
- * Modifications:	
+ * Modifications:
+ *
+ * 	Robb Matzke, 5 Aug 1997
+ *	Added calls to H5E.
  *
  *-------------------------------------------------------------------------
  */
@@ -24,6 +27,7 @@
 #include "hdf5.h"
 
 /* Packages needed by this file... */
+#include "H5private.h"			/*library			*/
 #include "H5ACprivate.h"		/*cache				*/
 #include "H5Bprivate.h"			/*B-link trees			*/
 #include "H5Gprivate.h"			/*me				*/
@@ -31,9 +35,12 @@
 #include "H5MFprivate.h"		/*file memory management	*/
 #include "H5MMprivate.h"		/*core memory management	*/
 
+#define PABLO_MASK	H5G_node_mask
+
+
 /* PRIVATE PROTOTYPES */
-static void H5G_node_decode_key (hdf5_file_t *f, uint8 *raw, void *_key);
-static void H5G_node_encode_key (hdf5_file_t *f, uint8 *raw, void *_key);
+static herr_t H5G_node_decode_key (hdf5_file_t *f, uint8 *raw, void *_key);
+static herr_t H5G_node_encode_key (hdf5_file_t *f, uint8 *raw, void *_key);
 static size_t H5G_node_size (hdf5_file_t *f);
 static haddr_t H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata,
 			     void *_rt_key);
@@ -73,6 +80,9 @@ const H5B_class_t H5B_SNODE[1] = {{
    H5G_node_encode_key,				/*encode		*/
 }};
 
+/* Has the interface been initialized? */
+static intn interface_initialize_g = FALSE;
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_sizeof_rkey
@@ -85,7 +95,7 @@ const H5B_class_t H5B_SNODE[1] = {{
  *		Failure:	never fails
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 14 1997
  *
  * Modifications:
@@ -104,22 +114,32 @@ H5G_node_sizeof_rkey (hdf5_file_t *f)
  *
  * Purpose:	Decodes a raw key into a native key.
  *
- * Return:	void
+ * Return:	Success:	SUCCEED
+ *
+ * 		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  8 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 H5G_node_decode_key (hdf5_file_t *f, uint8 *raw, void *_key)
 {
    H5G_node_key_t	*key = (H5G_node_key_t *)_key;
 
+   FUNC_ENTER (H5G_node_decode_key, NULL, FAIL);
+
+   assert (f);
+   assert (raw);
+   assert (key);
+
    H5F_decode_offset (f, raw, key->offset);
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -128,22 +148,32 @@ H5G_node_decode_key (hdf5_file_t *f, uint8 *raw, void *_key)
  *
  * Purpose:	Encodes a native key into a raw key.
  *
- * Return:	void
+ * Return:	Success:	SUCCEED
+ *
+ * 		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul  8 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 H5G_node_encode_key (hdf5_file_t *f, uint8 *raw, void *_key)
 {
    H5G_node_key_t	*key = (H5G_node_key_t *)_key;
 
+   FUNC_ENTER (H5G_node_encode_key, NULL, FAIL);
+
+   assert (f);
+   assert (raw);
+   assert (key);
+
    H5F_encode_offset (f, raw, key->offset);
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -157,7 +187,7 @@ H5G_node_encode_key (hdf5_file_t *f, uint8 *raw, void *_key)
  *		Failure:	Never fails.
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 23 1997
  *
  * Modifications:
@@ -182,10 +212,10 @@ H5G_node_size (hdf5_file_t *f)
  *
  * Return:	Success:	Address of symbol table node.
  *
- *		Failure:	0
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 23 1997
  *
  * Modifications:
@@ -197,23 +227,44 @@ H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
 {
    H5G_node_key_t	*lt_key = (H5G_node_key_t*)_lt_key;
    H5G_node_key_t	*rt_key = (H5G_node_key_t*)_rt_key;
-   H5G_node_t		*sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
-   size_t		size = H5G_node_size (f);
-   haddr_t		addr = H5MF_alloc (f, size);
+   H5G_node_t		*sym = NULL;
+   size_t		size = 0;
+   haddr_t		addr;
+
+   FUNC_ENTER (H5G_node_new, NULL, FAIL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
+   assert (lt_key);
+   assert (rt_key);
+
+   sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
+   size = H5G_node_size (f);
+   if ((addr = H5MF_alloc (f, size))<0) {
+      H5MM_xfree (sym);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
 
    sym->dirty = 1;
    sym->entry = H5MM_xcalloc (2 * H5G_NODE_K, sizeof(H5G_entry_t));
-   H5AC_set (f, H5AC_SNODE, addr, sym);
+   if (H5AC_set (f, H5AC_SNODE, addr, sym)<0) {
+      H5MM_xfree (sym->entry);
+      H5MM_xfree (sym);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
 
    /*
     * The left and right symbols in an empty tree are both the
-    * empty string stored at offset zero by the symtab.c functions. This
+    * empty string stored at offset zero by the H5G functions. This
     * allows the comparison functions to work correctly without knowing
     * that there are no symbols.
     */
    if (lt_key) lt_key->offset = 0;
    if (rt_key) rt_key->offset = 0;
-   return addr;
+
+   FUNC_LEAVE (addr);
 }
 
 
@@ -222,12 +273,12 @@ H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *
  * Purpose:	Flush a symbol table node to disk.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 23 1997
  *
  * Modifications:
@@ -239,6 +290,16 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 {
    uint8	*buf=NULL, *p=NULL;
    size_t	size;
+   herr_t	status;
+
+   FUNC_ENTER (H5G_node_flush, NULL, FAIL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
+   assert (addr>=0);
+   assert (sym);
 
    if (sym->dirty) {
       size = H5G_node_size (f);
@@ -261,8 +322,9 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
       H5G_encode_vec (f, &p, sym->entry, sym->nsyms);
 
       
-      H5F_block_write (f, addr, p-buf, buf);
+      status = H5F_block_write (f, addr, p-buf, buf);
       buf = H5MM_xfree (buf);
+      if (status<0) HRETURN_ERROR (H5E_SYM, H5E_WRITEERROR, FAIL);
    }
 
    if (destroy) {
@@ -270,7 +332,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
       H5MM_xfree (sym);
    }
 
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -284,7 +346,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 23 1997
  *
  * Modifications:
@@ -294,14 +356,32 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 static H5G_node_t *
 H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
 {
-   H5G_node_t	*sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
-   size_t	size = H5G_node_size (f);
-   uint8	*buf = H5MM_xmalloc (size);
-   uint8	*p = buf;
-   
+   H5G_node_t	*sym = NULL;
+   size_t	size = 0;
+   uint8	*buf = NULL, *p = NULL;
 
+   FUNC_ENTER (H5G_node_load, NULL, NULL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
+   assert (addr>=0);
+   assert (NULL==_udata);
+
+   /*
+    * Initialize variables.
+    */
+   size = H5G_node_size (f);
+   buf = p = H5MM_xmalloc (size);
+   sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
    sym->entry = H5MM_xcalloc (2*H5G_NODE_K, sizeof(H5G_entry_t));
-   H5F_block_read (f, addr, size, buf);
+   
+   if (H5F_block_read (f, addr, size, buf)<0) {
+      H5MM_xfree (sym->entry);
+      H5MM_xfree (sym);
+      HRETURN_ERROR (H5E_SYM, H5E_READERROR, NULL);
+   }
 
    /* magic */
    if (HDmemcmp (p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) goto error;
@@ -317,15 +397,15 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
    UINT16DECODE (p, sym->nsyms);
 
    /* entries */
-   H5G_decode_vec (f, &p, sym->entry, sym->nsyms);
+   if (H5G_decode_vec (f, &p, sym->entry, sym->nsyms)<0) goto error;
 
    H5MM_xfree (buf);
-   return sym;
+   FUNC_LEAVE (sym);
 
 error:
    H5MM_xfree (buf);
    H5MM_xfree (sym);
-   return NULL;
+   HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
 }
 
 
@@ -346,10 +426,10 @@ error:
  *				the LEFT key (exclusive) and the
  *				RIGHT key (inclusive).
  *
- *		Failure:	Never fails
+ *		Failure:	FAIL (same as LT < RT)
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 23 1997
  *
  * Modifications:
@@ -364,15 +444,21 @@ H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
    H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
    const char		*s;
 
+   FUNC_ENTER (H5G_node_cmp, NULL, FAIL);
+
    /* left side */
-   s = H5H_peek (f, udata->heap, lt_key->offset);
-   if (HDstrcmp (udata->name, s)<=0) return -1;
+   if (NULL==(s=H5H_peek (f, udata->heap, lt_key->offset))) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+   }
+   if (HDstrcmp (udata->name, s)<=0) HRETURN (-1);
 
    /* right side */
-   s = H5H_peek (f, udata->heap, rt_key->offset);
-   if (HDstrcmp (udata->name, s)>0) return 1;
+   if (NULL==(s=H5H_peek (f, udata->heap, rt_key->offset))) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+   }
+   if (HDstrcmp (udata->name, s)>0) HRETURN(-1);
 
-   return 0;
+   FUNC_LEAVE (0);
 }
 
 
@@ -391,13 +477,13 @@ H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *		entry field.  Otherwise the entry is copied from the
  *		UDATA entry field to the symbol table.
  *
- * Return:	Success:	0 if found and data returned through the
+ * Return:	Success:	SUCCEED if found and data returned through the
  *				UDATA pointer.
  *
- *		Failure:	-1 if not found.
+ *		Failure:	FAIL if not found.
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 23 1997
  *
  * Modifications:
@@ -413,8 +499,18 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key, void *_udata,
    intn			lt=0, idx=0, rt, cmp=1;
    const char		*s;
 
-   sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
-   if (!sn) return -1;
+   FUNC_ENTER (H5G_node_found, NULL, FAIL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
+   assert (addr>=0);
+   assert (udata);
+
+   if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+   }
    rt = sn->nsyms;
 
    /*
@@ -422,8 +518,12 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key, void *_udata,
     */
    while (lt<rt && cmp) {
       idx = (lt + rt) / 2;
-      sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
-      s = H5H_peek (f, udata->heap, sn->entry[idx].name_off);
+      if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      }
+      if (NULL==(s=H5H_peek (f, udata->heap, sn->entry[idx].name_off))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      }
       cmp = HDstrcmp (udata->name, s);
       
       if (cmp<0) {
@@ -432,7 +532,7 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key, void *_udata,
 	 lt = idx+1;
       }
    }
-   if (cmp) return -1;
+   if (cmp) HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
 
    switch (udata->operation) {
    case H5G_OPER_FIND:
@@ -451,7 +551,7 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key, void *_udata,
       break;
    }
 
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -484,7 +584,7 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key, void *_udata,
  *		Failure:	-1
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 24 1997
  *
  * Modifications:
@@ -508,6 +608,18 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    intn			idx=-1, nsyms, cmp=1;
    intn			lt=0, rt;		/*binary search cntrs	*/
 
+   FUNC_ENTER (H5G_node_insert, NULL, FAIL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
+   assert (addr>=0);
+   assert (anchor);
+   assert (md_key);
+   assert (rt_key);
+   assert (udata);
+
    /*
     * Symbol tables are always split so the new symbol table node is
     * to the right of the old one.
@@ -520,8 +632,9 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
     * Load the symbol node and buffer the entries so we don't have to
     * worry about the cached value disappearing.
     */
-   sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
-   if (!sn) return -1;
+   if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+   }
    HDmemcpy (ent, sn->entry, sn->nsyms * sizeof(H5G_entry_t));
    rt = nsyms = sn->nsyms;
    sn = NULL;
@@ -531,8 +644,12 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
     */
    while (lt<rt) {
       idx = (lt + rt) / 2;
-      s = H5H_peek (f, udata->heap, ent[idx].name_off);
-      if (0==(cmp=HDstrcmp (udata->name, s))) return -1; /*already present*/
+      if (NULL==(s=H5H_peek (f, udata->heap, ent[idx].name_off))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      }
+      if (0==(cmp=HDstrcmp (udata->name, s))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL); /*already present*/
+      }
       if (cmp<0) {
 	 rt = idx;
       } else {
@@ -547,6 +664,7 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
     * with the new heap address.
     */
    offset = H5H_insert (f, udata->heap, strlen(udata->name)+1, udata->name);
+   if (offset<0) HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
 
    if (nsyms>=2*H5G_NODE_K) {
       /*
@@ -556,7 +674,9 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
        */
       
       /* The left node */
-      sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
+      if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      }
       HDmemset (sn->entry+H5G_NODE_K, 0, H5G_NODE_K*sizeof(H5G_entry_t));
       sn->nsyms = H5G_NODE_K;
       sn->dirty += 1;
@@ -573,8 +693,12 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       md_key->offset = sn->entry[sn->nsyms-1].name_off;
 
       /* The right node */
-      new_node = H5G_node_new (f, NULL, NULL, NULL);
-      sn = H5AC_find (f, H5AC_SNODE, new_node, NULL);
+      if ((new_node = H5G_node_new (f, NULL, NULL, NULL))<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      }
+      if (NULL==(sn=H5AC_find (f, H5AC_SNODE, new_node, NULL))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      }
       HDmemcpy (sn->entry, ent+H5G_NODE_K,
 		H5G_NODE_K*sizeof(H5G_entry_t));
       sn->nsyms = H5G_NODE_K;
@@ -598,7 +722,9 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       /*
        * Add the new symbol to the node.
        */
-      sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
+      if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      }
       sn->dirty += 1;
       HDmemmove (sn->entry+idx+1, sn->entry+idx,
 		 (sn->nsyms-idx) * sizeof (H5G_entry_t));
@@ -612,7 +738,7 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       }
    }
 
-   return new_node;
+   FUNC_LEAVE (new_node);
 }
 
 
@@ -622,12 +748,12 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
  * Purpose:	This function gets called during a directory list operation.
  *		It should fill in data in the UDATA struct.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jun 24 1997
  *
  * Modifications:
@@ -638,12 +764,23 @@ static herr_t
 H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
 {
    H5G_node_list_t	*udata = (H5G_node_list_t *)_udata;
-   H5G_node_t		*sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
+   H5G_node_t		*sn = NULL;
    off_t		*offsets = NULL;
    intn			nsyms, i;
    const char		*s;
 
-   if (!sn) return -1;
+   FUNC_ENTER (H5G_node_list, NULL, FAIL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
+   assert (addr>=0);
+   assert (udata);
+
+   if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+   }
    nsyms = sn->nsyms;
 
    /*
@@ -653,7 +790,7 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
     */
    if (udata->nsyms >= udata->maxentries) {
       udata->nsyms += nsyms;
-      return 0;
+      HRETURN (SUCCEED);
    }
 
    /*
@@ -677,11 +814,14 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
    if (udata->name && udata->entry) {
       for (i=0; i<nsyms && udata->nsyms+i<udata->maxentries; i++) {
 	 s = H5H_peek (f, udata->heap, udata->entry[udata->nsyms+i].name_off);
+	 if (!s) HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
 	 udata->name[udata->nsyms+i] = H5MM_xstrdup (s);
       }
    } else if (udata->name) {
       for (i=0; i<nsyms && udata->nsyms+i<udata->maxentries; i++) {
-	 s = H5H_peek (f, udata->heap, offsets[i]);
+	 if (NULL==(s=H5H_peek (f, udata->heap, offsets[i]))) {
+	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+	 }
 	 udata->name[udata->nsyms+i] = H5MM_xstrdup (s);
       }
       offsets = H5MM_xfree (offsets);
@@ -691,7 +831,7 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
     * Update the number of symbols.
     */
    udata->nsyms += nsyms;
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -701,12 +841,12 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
  * Purpose:	Prints debugging information about a symbol table node
  *		or a B-tree node for a symbol table B-tree.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  4 1997
  *
  * Modifications:
@@ -719,18 +859,32 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 {
    int		i, j;
    char		buf[64];
-   H5G_node_t	*sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
+   H5G_node_t	*sn = NULL;
+   herr_t	status;
+
+   FUNC_ENTER (H5G_node_debug, NULL, FAIL);
+
+   /*
+    * Check arguments.
+    */
+   assert (f);
+   assert (addr>=0);
+   assert (stream);
+   assert (indent>=0);
+   assert (fwidth>=0);
 
    /*
     * If we couldn't load the symbol table node, then try loading the
     * B-tree node.
     */
-   if (!sn) {
-      return H5B_debug (f, addr, stream, indent, fwidth, H5B_SNODE);
+   if (NULL==(sn=H5AC_find(f, H5AC_SNODE, addr, NULL))) {
+      H5ECLEAR; /*discard that error*/
+      status = H5B_debug (f, addr, stream, indent, fwidth, H5B_SNODE);
+      if (status<0) HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      HRETURN (SUCCEED);
    }
 
 
-   if (!sn) return -1;
    fprintf (stream, "%*sSymbol Table Node...\n", indent, "");
    fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
 	    "Dirty:",
@@ -773,14 +927,14 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	 }
 	 break;
 	 
-      case H5G_CACHED_SYMTAB:
+      case H5G_CACHED_STAB:
 	 fprintf (stream, "Symbol Table\n");
 	 fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 		  "B-tree address:",
-		  (unsigned long)(sn->entry[i].cache.symtab.btree));
+		  (unsigned long)(sn->entry[i].cache.stab.btree));
 	 fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 		  "Heap address:",
-		  (unsigned long)(sn->entry[i].cache.symtab.heap));
+		  (unsigned long)(sn->entry[i].cache.stab.heap));
 	 break;
 
       default:
@@ -788,6 +942,7 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	 break;
       }
    }
-   return 0;
+
+   FUNC_LEAVE (SUCCEED);
 }
    

@@ -4,18 +4,18 @@
  *
  *-------------------------------------------------------------------------
  *
- * Created:		H5ACproto.h
- * 			Jul 10 1997
+ * Created:		H5Oproto.h
+ * 			Aug  5 1997
  * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Function prototypes for the H5AC package.
+ * Purpose:		Object header public prototypes
  *
  * Modifications:	
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5ACproto_H
-#define _H5ACproto_H
+#ifndef _H5Oproto_H
+#define _H5Oproto_H
 
 #if defined c_plusplus || defined __cplusplus
 extern      "C"
@@ -25,5 +25,6 @@ extern      "C"
 #if defined c_plusplus || defined __cplusplus
 }
 #endif
+
 
 #endif

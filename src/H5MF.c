@@ -6,19 +6,28 @@
  *
  * Created:		H5MF.c
  * 			Jul 11 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		File memory management functions.
  *
- * Modifications:	
+ * Modifications:
+ *
+ * 	Robb Matzke, 5 Aug 1997
+ *	Added calls to H5E.
  *
  *-------------------------------------------------------------------------
  */
 #include <assert.h>
 #include "hdf5.h"
 
+#include "H5private.h"
 #include "H5Fprivate.h"
 #include "H5MFprivate.h"
+
+#define PABLO_MASK	H5MF_mask
+
+/* Is the interface initialized? */
+static intn interface_initialize_g = FALSE;
 
 
 /*-------------------------------------------------------------------------
@@ -30,10 +39,10 @@
  *
  * Return:	Success:	File address of new chunk.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 11 1997
  *
  * Modifications:
@@ -44,14 +53,19 @@ haddr_t
 H5MF_alloc (hdf5_file_t *f, size_t size)
 {
    haddr_t	addr;
-   
+
+   FUNC_ENTER (H5MF_alloc, NULL, FAIL);
+
+   /* check arguments */
    assert (f);
    assert (f->logical_len>0);
    assert (size>0);
 
+   /* reserve space from the end of the file */
    addr = f->logical_len;
    f->logical_len += size;
-   return addr;
+
+   FUNC_LEAVE (addr);
 }
 
 
@@ -68,7 +82,7 @@ H5MF_alloc (hdf5_file_t *f, size_t size)
  *		Failure:	-1
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 17 1997
  *
  * Modifications:
@@ -78,11 +92,17 @@ H5MF_alloc (hdf5_file_t *f, size_t size)
 herr_t
 H5MF_free (hdf5_file_t *f, haddr_t addr, size_t size)
 {
-   if (addr<=0 || 0==size) return 0;
+   FUNC_ENTER (H5MF_free, NULL, FAIL);
 
+   /* check arguments */
+   assert (f);
+   if (addr<=0 || 0==size) HRETURN (SUCCEED);
+
+#ifndef NDEBUG
    fprintf (stderr, "H5MF_free: lost %lu bytes of file storage\n",
 	    (unsigned long)size);
-   
-   return 0;
+#endif
+
+   FUNC_LEAVE (SUCCEED);
 }
 

@@ -15,6 +15,7 @@
 /*
  * This file contains general macros used throughout HDF5 library & interfaces
  */
+#include "hdf5pabl.h"
 
 #ifndef HDF5GEN_H
 #define HDF5GEN_H
@@ -34,6 +35,11 @@
 #endif
 #ifndef TRUE
 #   define TRUE (!FALSE)
+#endif
+
+/* number of members in an array */
+#ifndef NELMTS
+#   define NELMTS(X)	(sizeof(X)/sizeof(X[0]))
 #endif
 
 /*-------------------------------------------------------------------------
@@ -77,9 +83,9 @@
  */
 #define FUNC_ENTER(func_name,interface_init_func,err)			      \
    CONSTR (FUNC, #func_name);						      \
-   /* int pablo_func_id = ID_ ## func_name; */				      \
+   PABLO_SAVE (ID_ ## func_name);					      \
 									      \
-   PABLO_TRACE_ON (PABLO_MASK, ID_ ## func_name);			      \
+   PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
 									      \
    if (!library_initialize_g) {						      \
       library_initialize_g = TRUE;					      \
@@ -120,10 +126,7 @@
  *
  *-------------------------------------------------------------------------
  */
-#define FUNC_LEAVE(return_value) {					      \
-   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
-   return (return_value);						      \
-}
+#define FUNC_LEAVE(return_value) HRETURN(return_value)
 
 #endif /* HDF5GEN_H */
 

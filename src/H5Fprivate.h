@@ -51,12 +51,6 @@ typedef struct {
     struct H5G_entry_t *root_sym; /* Extra for the root symbol in the file */
   } hdf5_file_t;
 
-/* Define a macro to ease calculation of the symbol-table entry size */
-#define H5F_symbol_table_size(f) (4+    /* "Symbol-type" bytes */	      \
-    H5F_SIZEOF_OFFSET(f)+               /* Offset bytes */		      \
-    H5F_SIZEOF_SIZE(f)+                 /* Length bytes */		      \
-    4+                                  /* Name offset in local heap */	      \
-    24)                                 /* "Scratch" space */
 
 #ifdef NOT_YET
 #define H5F_encode_offset(f,p,o) (H5F_SIZEOF_OFFSET(f)==4 ? UINT32ENCODE(p,o) \
@@ -68,9 +62,19 @@ typedef struct {
     case 8: UINT64ENCODE(p,o); break;\
     case 2: UINT16ENCODE(p,o); break;}
 #endif /* NOT_YET */
-#define H5F_decode_offset(f,p,o) switch(H5F_SIZEOF_OFFSET(f)) { case 4: UINT32DECODE(p,o); break;\
-    case 8: UINT64DECODE(p,o); break;\
-    case 2: UINT16DECODE(p,o); break;}
+
+#define H5F_decode_offset(f,p,o)					      \
+   switch (H5F_SIZEOF_OFFSET (f)) {					      \
+   case 4:								      \
+      UINT32DECODE (p, o);						      \
+      break;								      \
+   case 8:								      \
+      UINT64DECODE (p, o);						      \
+      break;								      \
+   case 2:								      \
+      UINT16DECODE (p, o);						      \
+      break;								      \
+   }
 
 #ifdef NOT_YET
 #define H5F_encode_length(f,p,l) (H5F_SIZEOF_SIZE(f)==4 ? UINT32ENCODE(p,l) \

@@ -6,7 +6,7 @@
  *
  * Created:		H5Hprivate.h
  * 			Jul 16 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		
  *
@@ -23,10 +23,15 @@
 #define H5H_MAGIC	"HEAP"		/*heap magic number		*/
 #define H5H_SIZEOF_MAGIC 4
 
+typedef enum H5H_type_t {
+   H5H_LOCAL	=0,			/*local symtab name heap	*/
+   H5H_GLOBAL	=1			/*global small object heap	*/
+} H5H_type_t;
+
 /*
  * Library prototypes...
  */
-haddr_t H5H_new (hdf5_file_t *f, size_t size_hint);
+haddr_t H5H_new (hdf5_file_t *f, H5H_type_t type, size_t size_hint);
 void *H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
 		void *buf);
 const void *H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset);

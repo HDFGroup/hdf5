@@ -6,7 +6,7 @@
  *
  * Created:		H5Hproto.h
  * 			Jul 16 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		
  *

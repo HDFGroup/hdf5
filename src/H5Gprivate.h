@@ -6,7 +6,7 @@
  *
  * Created:		H5Gprivate.h
  * 			Jul 11 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		Private stuff for the H5G package (symbol tables).
  *
@@ -45,7 +45,7 @@
 typedef enum H5G_type_t {
    H5G_NOTHING_CACHED		=0,	/*nothing is cached		*/
    H5G_CACHED_SDATA		=1,	/*simple dataset, `sdata'	*/
-   H5G_CACHED_SYMTAB		=2 	/*symbol table, `symtab'	*/
+   H5G_CACHED_STAB		=2 	/*symbol table, `stab'		*/
 } H5G_type_t;
 
 /*
@@ -68,8 +68,8 @@ typedef struct H5G_entry_t {
 
       struct {
 	 haddr_t btree;		/*file address of symbol table B-tree	*/
-	 haddr_t heap;		/*file address of symtab name heap	*/
-      } symtab;
+	 haddr_t heap;		/*file address of stab name heap	*/
+      } stab;
    } cache;			/*cached data from object header	*/
 } H5G_entry_t;
 

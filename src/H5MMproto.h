@@ -6,7 +6,7 @@
  *
  * Created:		H5MMproto.h
  * 			Jul 10 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		Function prototypes for memory management.
  *

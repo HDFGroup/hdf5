@@ -6,7 +6,7 @@
  *
  * Created:		H5Gproto.h
  * 			Jul 11 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		Prototypes for the H5G package (symbol tables).
  *

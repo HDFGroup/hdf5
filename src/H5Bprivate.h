@@ -52,8 +52,8 @@ typedef struct H5B_class_t {
    haddr_t	(*insert)(hdf5_file_t*,haddr_t,int*,void*,int*,void*,void*,
 			  void*,int*);
    herr_t	(*list)(hdf5_file_t*,haddr_t,void*);
-   void		(*decode)(hdf5_file_t*,uint8*,void*);
-   void		(*encode)(hdf5_file_t*,uint8*,void*);
+   herr_t	(*decode)(hdf5_file_t*,uint8*,void*);
+   herr_t	(*encode)(hdf5_file_t*,uint8*,void*);
 } H5B_class_t;
 
 /*

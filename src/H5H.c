@@ -6,23 +6,29 @@
  *
  * Created:		H5H.c
  * 			Jul 16 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Heap functions.
+ * Purpose:		Heap functions for the global small object heap
+ *			and for local symbol table name heaps.
  *
- * Modifications:	
+ * Modifications:
+ *
+ * 	Robb Matzke, 5 Aug 1997
+ *	Added calls to H5E.
  *
  *-------------------------------------------------------------------------
  */
 #include <assert.h>
 #include "hdf5.h"
 
+#include "H5private.h"			/*library			*/
 #include "H5ACprivate.h"		/*cache				*/
 #include "H5Hprivate.h"			/*self				*/
 #include "H5MFprivate.h"		/*file memory management	*/
 #include "H5MMprivate.h"		/*core memory management	*/
 
 #define H5H_FREE_NULL	1		/*end of free list on disk	*/
+#define PABLO_MASK	H5H_mask
 
 #define H5H_SIZEOF_HDR(F)						      \
    (H5H_SIZEOF_MAGIC +			/*heap signature		*/    \
@@ -50,6 +56,7 @@ typedef struct H5H_t {
    H5H_free_t	*freelist;		/*the free list			*/
 } H5H_t;
 
+/* PRIVATE PROTOTYPES */
 static H5H_t *H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata);
 static herr_t H5H_flush (hdf5_file_t *f, hbool_t dest, haddr_t addr,
 			 H5H_t *heap);
@@ -61,6 +68,9 @@ static const H5AC_class_t H5AC_HEAP[1] = {{
    (void*(*)(hdf5_file_t*,haddr_t,const void*))H5H_load,
    (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5H_flush,
 }};
+
+/* Is the interface initialized? */
+static intn interface_initialize_g = FALSE;
 
 
 /*-------------------------------------------------------------------------
@@ -75,24 +85,37 @@ static const H5AC_class_t H5AC_HEAP[1] = {{
  *
  * Return:	Success:	File address of new heap.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 16 1997
  *
  * Modifications:
  *
+ * 	Robb Matzke, 5 Aug 1997
+ *	Takes a flag that determines the type of heap that is
+ *	created.
+ *
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5H_new (hdf5_file_t *f, size_t size_hint)
+H5H_new (hdf5_file_t *f, H5H_type_t heap_type, size_t size_hint)
 {
    H5H_t	*heap = NULL;
    size_t	total_size;		/*total heap size on disk	*/
    haddr_t	addr;			/*heap file address		*/
-   
+
+   FUNC_ENTER (H5H_new, NULL, FAIL);
+
+   /* check arguments */
    assert (f);
+   if (H5H_GLOBAL==heap_type) {
+#ifndef NDEBUG
+      fprintf (stderr, "H5H_new: a local heap is used as the global heap\n");
+#endif
+   }
+   
    size_hint = MAX (0, size_hint);
    if (size_hint && size_hint<H5H_SIZEOF_FREE(f)) {
       size_hint = H5H_SIZEOF_FREE(f);
@@ -100,7 +123,9 @@ H5H_new (hdf5_file_t *f, size_t size_hint)
 
    /* allocate file version */
    total_size = H5H_SIZEOF_HDR(f) + size_hint;
-   if ((addr = H5MF_alloc (f, total_size))<0) return -1;
+   if ((addr = H5MF_alloc (f, total_size))<0) {
+      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+   }
 
    /* allocate memory version */
    heap = H5MM_xcalloc (1, sizeof(H5H_t));
@@ -121,9 +146,13 @@ H5H_new (hdf5_file_t *f, size_t size_hint)
    
    /* add to cache */
    heap->dirty = 1;
-   H5AC_set (f, H5AC_HEAP, addr, heap);
-   
-   return addr;
+   if (H5AC_set (f, H5AC_HEAP, addr, heap)<0) {
+      heap->chunk = H5MM_xfree (heap->chunk);
+      heap->freelist = H5MM_xfree (heap->freelist);
+      HRETURN_ERROR (H5E_HEAP, H5E_CANTINIT, FAIL);
+   }
+
+   FUNC_LEAVE (addr);
 }
 
 
@@ -137,7 +166,7 @@ H5H_new (hdf5_file_t *f, size_t size_hint)
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 17 1997
  *
  * Modifications:
@@ -148,16 +177,23 @@ static H5H_t *
 H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
 {
    uint8	hdr[20], *p;
-   H5H_t	*heap = H5MM_xcalloc (1, sizeof(H5H_t));
+   H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *tail=NULL;
    haddr_t	free_block;
 
+   FUNC_ENTER (H5H_load, NULL, NULL);
+
+   /* check arguments */
+   assert (f);
    assert (addr>0);
    assert (H5H_SIZEOF_HDR(f) <= sizeof hdr);
    assert (!udata);
 
-   if (H5F_block_read (f, addr, H5H_SIZEOF_HDR(f), hdr)<0) goto error;
+   if (H5F_block_read (f, addr, H5H_SIZEOF_HDR(f), hdr)<0) {
+      HRETURN_ERROR (H5E_HEAP, H5E_READERROR, NULL);
+   }
    p = hdr;
+   heap = H5MM_xcalloc (1, sizeof(H5H_t));
 
    /* magic number */
    if (HDmemcmp (hdr, H5H_MAGIC, H5H_SIZEOF_MAGIC)) goto error;
@@ -169,7 +205,9 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
 
    /* free list head */
    H5F_decode_offset (f, p, free_block);
-   assert (-1==free_block || (free_block>=0 && free_block<heap->disk_alloc));
+   if (-1!=free_block && (free_block<0 || free_block>=heap->disk_alloc)) {
+      goto error;
+   }
 
    /* data */
    H5F_decode_offset (f, p, heap->addr);
@@ -182,7 +220,7 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
 
    /* free list */
    while (H5H_FREE_NULL!=free_block) {
-      assert (free_block>=0 && free_block<heap->disk_alloc);
+      if (free_block<0 || free_block>=heap->disk_alloc) goto error;
       fl = H5MM_xmalloc (sizeof (H5H_free_t));
       fl->offset = free_block;
       fl->prev = tail;
@@ -195,16 +233,22 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
       H5F_decode_offset (f, p, free_block);
       H5F_decode_length (f, p, fl->size);
 
-      assert (fl->offset + fl->size <= heap->disk_alloc);
+      if (fl->offset + fl->size > heap->disk_alloc) goto error;
    }
-   return heap;
+
+   FUNC_LEAVE (heap);
+
 
 error:
    if (heap) {
       heap->chunk = H5MM_xfree (heap->chunk);
       H5MM_xfree (heap);
+      for (fl=heap->freelist; fl; fl=tail) {
+	 tail = fl->next;
+	 H5MM_xfree (fl);
+      }
    }
-   return NULL;
+   HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
 }
 
 
@@ -214,12 +258,12 @@ error:
  * Purpose:	Flushes a heap from memory to disk if it's dirty.  Optionally
  *		deletes the heap from memory.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 17 1997
  *
  * Modifications:
@@ -231,6 +275,13 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
 {
    uint8	*p = heap->chunk;
    H5H_free_t	*fl = heap->freelist;
+
+   FUNC_ENTER (H5H_flush, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   assert (addr>0);
+   assert (heap);
    
    if (heap->dirty) {
 
@@ -240,8 +291,11 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
        * disk storage.
        */
       if (heap->mem_alloc > heap->disk_alloc) {
-	 H5MF_free (f, heap->addr, heap->disk_alloc);
-	 heap->addr = H5MF_alloc (f, heap->mem_alloc);
+	 haddr_t old_addr = heap->addr;
+	 if ((heap->addr = H5MF_alloc (f, heap->mem_alloc))<0) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+	 }
+	 H5MF_free (f, old_addr, heap->disk_alloc); /*don't care if fail*/
 	 heap->disk_alloc = heap->mem_alloc;
       }
 
@@ -273,15 +327,15 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
       if (heap->addr == addr + H5H_SIZEOF_HDR(f)) {
 	 if (H5F_block_write (f, addr, H5H_SIZEOF_HDR(f)+heap->disk_alloc,
 			      heap->chunk)<0) {
-	    return -1;
+	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL);
 	 }
       } else {
 	 if (H5F_block_write (f, addr, H5H_SIZEOF_HDR(f), heap->chunk)<0) {
-	    return -1;
+	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL);
 	 }
 	 if (H5F_block_write (f, heap->addr, heap->disk_alloc,
 			      heap->chunk + H5H_SIZEOF_HDR(f))<0) {
-	    return -1;
+	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL);
 	 }
       }
 
@@ -301,7 +355,7 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
       H5MM_xfree (heap);
    }
 
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
       
 
@@ -319,12 +373,15 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
  * 	       	Attempting to read past the end of an object may cause this
  *		function to fail.
  *
+ *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *		the address comes from the hdf5_file_t global heap field.
+ *
  * Return:	Success:	BUF (or the allocated buffer)
  *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 16 1997
  *
  * Modifications:
@@ -334,14 +391,26 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
 void *
 H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
 {
-   H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
+   H5H_t	*heap = NULL;
 
-   assert (offset>=0 && offset<heap->mem_alloc);
+   FUNC_ENTER (H5H_read, NULL, NULL);
+
+   /* check arguments */
+   assert (f);
+   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   assert (addr>0);
+   assert (offset>=0);
+
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+      HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
+   }
+   assert (offset<heap->mem_alloc);
    assert (offset+size<=heap->mem_alloc);
 
    if (!buf) buf = H5MM_xmalloc (size);
    HDmemcpy (buf, heap->chunk+H5H_SIZEOF_HDR(f)+offset, size);
-   return buf;
+
+   FUNC_LEAVE (buf);
 }
 
 
@@ -358,6 +427,9 @@ H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
  *		byte offset of the object from the beginning of the heap and
  *		may include an offset into the interior of the object.
  *
+ *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *		the address comes from the hdf5_file_t global heap field.
+ *
  * Return:	Success:	Ptr to the object.  The pointer points to
  *				a chunk of memory large enough to hold the
  *				object from the specified offset (usually
@@ -368,7 +440,7 @@ H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 16 1997
  *
  * Modifications:
@@ -378,10 +450,24 @@ H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
 const void *
 H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
 {
-   H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
+   H5H_t	*heap = NULL;
+   const void	*retval = NULL;
 
-   assert (offset>=0 && offset<heap->mem_alloc);
-   return heap->chunk+H5H_SIZEOF_HDR(f)+offset;
+   FUNC_ENTER (H5H_peek, NULL, NULL);
+
+   /* check arguments */
+   assert (f);
+   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   assert (addr>0);
+   assert (offset>=0);
+
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+      HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
+   }
+   assert (offset<heap->mem_alloc);
+   
+   retval = heap->chunk+H5H_SIZEOF_HDR(f)+offset;
+   FUNC_LEAVE (retval);
 }
 
 
@@ -393,7 +479,7 @@ H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
  * Return:	void
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 17 1997
  *
  * Modifications:
@@ -415,12 +501,15 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
  *
  * Purpose:	Inserts a new item into the heap.
  *
+ *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *		the address comes from the hdf5_file_t global heap field.
+ *
  * Return:	Success:	Offset of new item within heap.
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 17 1997
  *
  * Modifications:
@@ -430,11 +519,26 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
 off_t
 H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
 {
-   H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
+   H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *max_fl=NULL;
    off_t	offset = -1;
    size_t	need_more;
+#ifndef NDEBUG
+   static	nmessages = 0;
+#endif
 
+   FUNC_ENTER (H5H_insert, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   assert (addr>0);
+   assert (size>0);
+   assert (buf);
+
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+      HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
+   }
    heap->dirty += 1;
 
    /*
@@ -477,10 +581,16 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
 	 max_fl->size += need_more - size;
 
 	 if (max_fl->size < H5H_SIZEOF_FREE(f)) {
+#ifndef NDEBUG
 	    if (max_fl->size) {
 	       fprintf (stderr, "H5H_insert: lost %d bytes at line %d\n",
 			max_fl->size, __LINE__);
+	       if (0==nmessages++) {
+		  fprintf (stderr, "Messages from H5H_insert() will go away "
+			   "when assertions are turned off.\n");
+	       }
 	    }
+#endif
 	    H5H_remove_free (heap, max_fl);
 	 }
 	 
@@ -498,15 +608,27 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
 	    fl->next = heap->freelist;
 	    if (heap->freelist) heap->freelist->prev = fl;
 	    heap->freelist = fl;
+#ifndef NDEBUG
 	 } else if (need_more>size) {
 	    fprintf (stderr, "H5H_insert: lost %d bytes at line %d\n",
 		     need_more-size, __LINE__);
+	    if (0==nmessages++) {
+	       fprintf (stderr, "Messages from H5H_insert() will go away "
+			"when assertions are turned off.\n");
+	    }
+#endif
 	 }
       }
 
+#ifndef NDEBUG
       fprintf (stderr, "H5H_insert: resize mem buf from %lu to %lu bytes\n",
 	       (unsigned long)(heap->mem_alloc),
 	       (unsigned long)(heap->mem_alloc + need_more));
+      if (0==nmessages++) {
+	 fprintf (stderr, "Messages from H5H_insert() will go away "
+		  "when assertions are turned off.\n");
+      }
+#endif
       heap->mem_alloc += need_more;
       heap->chunk = H5MM_xrealloc (heap->chunk,
 				   H5H_SIZEOF_HDR(f)+heap->mem_alloc);
@@ -516,7 +638,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
     * Copy the data into the heap
     */
    HDmemcpy (heap->chunk + H5H_SIZEOF_HDR(f) + offset, buf, size);
-   return offset;
+   FUNC_LEAVE (offset);
 }
    
 
@@ -531,12 +653,15 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
  * 		Do not partially write an object to create it;  the first
  *		write for an object must be for the entire object.
  *
- * Return:	Success:	0
+ *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *		the address comes from the hdf5_file_t global heap field.
  *
- *		Failure:	-1
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 16 1997
  *
  * Modifications:
@@ -547,15 +672,27 @@ herr_t
 H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
 	   const void *buf)
 {
-   H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
+   H5H_t	*heap = NULL;
 
-   assert (offset>=0 && offset<heap->mem_alloc);
-   assert (offset+size<=heap->mem_alloc);
+   FUNC_ENTER (H5H_write, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   assert (addr>0);
+   assert (offset>=0);
    assert (buf);
+
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+      HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
+   }
+   assert (offset<heap->mem_alloc);
+   assert (offset+size<=heap->mem_alloc);
 
    heap->dirty += 1;
    HDmemcpy (heap->chunk+H5H_SIZEOF_HDR(f)+offset, buf, size);
-   return 0;
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -575,12 +712,15 @@ H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
  *		in two separate objects, one at the original offset and
  *		one at the first offset past the removed portion.
  *
- * Return:	Success:	0
+ *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *		the address comes from the hdf5_file_t global heap field.
  *
- *		Failure:	-1
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 16 1997
  *
  * Modifications:
@@ -590,10 +730,25 @@ H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
 herr_t
 H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
 {
-   H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
+   H5H_t	*heap = NULL;
    H5H_free_t	*fl = heap->freelist, *fl2 = NULL;
+#ifndef NDEBUG
+   static int	nmessages = 0;
+#endif
 
-   assert (offset>=0 && offset<heap->mem_alloc);
+   FUNC_ENTER (H5H_remove, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   assert (addr>0);
+   assert (offset>=0);
+   assert (size>0);
+
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+      HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
+   }
+   assert (offset<heap->mem_alloc);
    assert (offset+size<=heap->mem_alloc);
 
    heap->dirty += 1;
@@ -613,10 +768,10 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
 	       fl->offset = fl2->offset;
 	       fl->size += fl2->size;
 	       H5H_remove_free (heap, fl2);
-	       return 0;
+	       HRETURN (SUCCEED);
 	    }
 	 }
-	 return 0;
+	 HRETURN (SUCCEED);
 	 
       } else if (fl->offset + fl->size == offset) {
 	 fl->size += size;
@@ -625,10 +780,10 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
 	    if (fl->offset + fl->size == fl2->offset) {
 	       fl->size += fl2->size;
 	       H5H_remove_free (heap, fl2);
-	       return 0;
+	       HRETURN (SUCCEED);
 	    }
 	 }
-	 return 0;
+	 HRETURN (SUCCEED);
       }
 
       fl = fl->next;
@@ -641,8 +796,14 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
     * lost.
     */
    if (size < H5H_SIZEOF_FREE(f)) {
+#ifndef NDEUBG
       fprintf (stderr, "H5H_remove: lost %d bytes\n", size);
-      return 0;
+      if (0==nmessages++) {
+	 fprintf (stderr, "Messages from H5H_remove() will go away "
+		  "when assertions are turned off.\n");
+      }
+#endif
+      HRETURN (SUCCEED);
    }
 
    /*
@@ -656,7 +817,7 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
    if (heap->freelist) heap->freelist->prev = fl;
    heap->freelist = fl;
 
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -665,12 +826,15 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
  *
  * Purpose:	Prints debugging information about a heap.
  *
- * Return:	Success:	0
+ *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *		the address comes from the hdf5_file_t global heap field.
  *
- *		Failure:	-1
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  1 1997
  *
  * Modifications:
@@ -681,14 +845,26 @@ herr_t
 H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	   intn fwidth)
 {
-   H5H_t	*h = H5AC_find (f, H5AC_HEAP, addr, NULL);
+   H5H_t	*h = NULL;
    int		i, j, overlap;
    uint8	c;
    H5H_free_t	*freelist=NULL;
    uint8	*marker = NULL;
    size_t	amount_free = 0;
 
-   if (!h) return -1;
+   FUNC_ENTER (H5H_debug, NULL, FAIL);
+
+   /* check arguments */
+   assert (f);
+   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   assert (addr>0);
+   assert (stream);
+   assert (indent>=0);
+   assert (fwidth>=0);
+
+   if (NULL==(h=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+      HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
+   }
 
    fprintf (stream, "%*sHeap...\n", indent, "");
    fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
@@ -771,5 +947,5 @@ H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
    }
       
    H5MM_xfree (marker);
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }

@@ -32,6 +32,8 @@ static char RcsId[] = "@(#)$Revision$";
        H5F_init_interface    -- initialize the H5F interface
  */
 
+#include <assert.h>
+
 #define HDF5_FILE_MASTER
 #include "hdf5.h"
 #undef HDF5_FILE_MASTER
@@ -318,7 +320,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 18 1997
  *
  * Modifications:
@@ -353,7 +355,7 @@ H5F_new (void)
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 18 1997
  *
  * Modifications:
@@ -495,7 +497,9 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     H5F_encode_offset(new_file,p,new_file->smallobj_off);  /* Encode offset of global small-object heap */
     H5F_encode_offset(new_file,p,new_file->freespace_off);  /* Encode offset of global free-space heap */
     /* Predict the header length and encode it: */
-    H5F_encode_length(new_file,p,(p-temp_buf)+f_create_parms->length_size+H5F_symbol_table_size(new_file)); /* Encode length of boot-block */
+    H5F_encode_length(new_file,p,((p-temp_buf) +
+				  H5F_SIZEOF_SIZE(new_file) +
+				  H5G_SIZEOF_ENTRY(new_file)));
     
     /* Encode the (bogus) symbol-table entry */
     if (H5G_encode (new_file, &p, new_file->root_sym)<0) {
@@ -779,7 +783,7 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 10 1997
  *
  * Modifications:
@@ -789,7 +793,7 @@ done:
 herr_t
 H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 {
-   FUNC_ENTER (H5F_block_read, NULL, FAIL);
+   FUNC_ENTER (H5F_block_read, H5F_init_interface, FAIL);
 
    if (0==size) return 0;
    addr += f->file_create_parms.userblock_size;
@@ -816,7 +820,7 @@ H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Jul 10 1997
  *
  * Modifications:
@@ -826,7 +830,7 @@ H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 herr_t
 H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 {
-   FUNC_ENTER (H5F_block_write, NULL, FAIL);
+   FUNC_ENTER (H5F_block_write, H5F_init_interface, FAIL);
 
    if (0==size) return 0;
    addr += f->file_create_parms.userblock_size;
@@ -849,12 +853,12 @@ H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
  *		is indented and the field name occupies the specified width
  *		number of characters.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug  1 1997
  *
  * Modifications:
@@ -865,6 +869,16 @@ herr_t
 H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	   intn fwidth)
 {
+   FUNC_ENTER (H5F_debug, H5F_init_interface, FAIL);
+
+   /* check args */
+   assert (f);
+   assert (addr>=0);
+   assert (stream);
+   assert (indent>=0);
+   assert (fwidth>=0);
+
+   /* debug */
    fprintf (stream, "%*sFile Boot Block...\n", indent, "");
    
    fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
@@ -919,6 +933,5 @@ H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	    "Shared header version number:",
 	    (unsigned)(f->file_create_parms.sharedheader_ver));
 	    
-
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
