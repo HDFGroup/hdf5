@@ -851,5 +851,6 @@ int h5_szip_can_encode(void )
           (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) { 
     return 1;
    }
+   return(-1);
 }
 #endif /* H5_HAVE_FILTER_SZIP */
