@@ -21,33 +21,31 @@
 ## tilde to the file name.
 ##
 $(srcdir)/Dependencies: .depend
-	@if test "$(srcdir)" != "."; then				      \
-	    echo '## This file is machine generated on GNU systems.' >$@;     \
-	    echo '## Only temporary changes may be made here.' >>$@;	      \
-	    echo >>$@;					      		      \
-	    perl -p $(top_srcdir)/bin/distdep .depend >>$@;		      \
-	else								      \
-	    echo 'Dependencies cannot be built when $$srcdir == $$builddir';  \
-	fi
+	@if test "$(srcdir)" != "."; then                                     \
+      echo '## This file is machine generated on GNU systems.' >$@;       \
+      echo '## Only temporary changes may be made here.' >>$@;            \
+      echo >>$@;                                                          \
+      $(PERL) -p $(top_srcdir)/bin/distdep .depend >>$@;                  \
+    else                                                                  \
+      echo 'Dependencies cannot be built when $$srcdir == $$builddir';    \
+    fi
 
 .depend: $(LIB_SRC) $(TEST_SRC) $(PROG_SRC)
 	@touch .depend
-	@for dep in $? dummy; do					      \
-	   if [ $$dep != "dummy" ]; then				      \
-	      case "$$dep" in						      \
-	         *.c)							      \
-	            echo Building dependencies for $$dep;		      \
-	            obj=`basename $$dep .c`.lo;				      \
-	            sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;   \
-	            $(TRACE) $$dep;					      \
-	            $(CC) -MM -MG $(CPPFLAGS) $$dep 2>/dev/null |	      \
-                        sed 's% $(srcdir)/% $$(srcdir)/%g' |		      \
-                        sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |	      \
-                        sed 's% $(top_builddir)/% $$(top_builddir)/%g' |      \
-	                sed 's/\.o/.lo/' >>$@;				      \
-	            ;;							      \
-	      esac;							      \
-	   fi;								      \
-	done;
+	@for dep in $? dummy; do                                              \
+      if test $$dep != "dummy" -a -n "$(PERL)"; then                      \
+        case "$$dep" in                                                   \
+          *.c)                                                            \
+            echo Building dependencies for $$dep;                         \
+            obj=`basename $$dep .c`.lo;                                   \
+            sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;       \
+            $(TRACE) $$dep;                                               \
+            $(CC) -MM -MG $(CPPFLAGS) $$dep 2>/dev/null >>$@;             \
+            $(PERL) -w $(top_srcdir)/bin/dependencies --srcdir=$(srcdir) --top_srcdir=$(top_srcdir) --top_builddir=$(top_builddir) $@; \
+            ;;                                                            \
+        esac;                                                             \
+      fi;                                                                 \
+    done
 
 -include .depend
+

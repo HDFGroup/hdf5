@@ -1689,13 +1689,51 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 exec 5>>./config.log
 
 
-if test -z "$AR"; then
-   for ac_prog in ar xar
+ PERL=""
+if test "X$GCC" = "Xyes"; then
+  for ac_prog in perl
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1699: checking for $ac_word" >&5
+echo "configure:1700: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_prog_PERL'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test -n "$PERL"; then
+  ac_cv_prog_PERL="$PERL" # Let the user override the test.
+else
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+  ac_dummy="$PATH"
+  for ac_dir in $ac_dummy; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_prog_PERL="$ac_prog"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+fi
+fi
+PERL="$ac_cv_prog_PERL"
+if test -n "$PERL"; then
+  echo "$ac_t""$PERL" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+test -n "$PERL" && break
+done
+
+fi
+
+if test -z "$AR"; then
+  for ac_prog in ar xar
+do
+# Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:1737: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_AR'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1730,7 +1768,7 @@ fi
 
 if test -z "$SEARCH"; then
    echo $ac_n "checking how make searches directories""... $ac_c" 1>&6
-echo "configure:1734: checking how make searches directories" >&5
+echo "configure:1772: checking how make searches directories" >&5
    while true; do #for break
             cat >maketest <<EOF
 VPATH=$srcdir/config $srcdir/src $srcdir/bin
@@ -1794,7 +1832,7 @@ EOF
 fi
 
 echo $ac_n "checking for production mode""... $ac_c" 1>&6
-echo "configure:1798: checking for production mode" >&5
+echo "configure:1836: checking for production mode" >&5
 # Check whether --enable-production or --disable-production was given.
 if test "${enable_production+set}" = set; then
   enableval="$enable_production"
@@ -1828,7 +1866,7 @@ case "X-$enable_production" in
 esac
 
 echo $ac_n "checking if should build only statically linked executables""... $ac_c" 1>&6
-echo "configure:1832: checking if should build only statically linked executables" >&5
+echo "configure:1870: checking if should build only statically linked executables" >&5
 # Check whether --enable-static_exec or --disable-static_exec was given.
 if test "${enable_static_exec+set}" = set; then
   enableval="$enable_static_exec"
@@ -1854,12 +1892,12 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 
 echo $ac_n "checking if $CXX can handle namespaces""... $ac_c" 1>&6
-echo "configure:1858: checking if $CXX can handle namespaces" >&5
+echo "configure:1896: checking if $CXX can handle namespaces" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1863 "configure"
+#line 1901 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
 extern "C" void exit(int);
@@ -1878,7 +1916,7 @@ int main(void) {
 } 
 
 EOF
-if { (eval echo configure:1882: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1920: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
    echo yes
@@ -1897,12 +1935,12 @@ fi
 
 
 echo $ac_n "checking if $CXX needs old style header files in includes""... $ac_c" 1>&6
-echo "configure:1901: checking if $CXX needs old style header files in includes" >&5
+echo "configure:1939: checking if $CXX needs old style header files in includes" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1906 "configure"
+#line 1944 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
 extern "C" void exit(int);
@@ -1913,7 +1951,7 @@ extern "C" void exit(int);
 int main(void) { return 0; }
 
 EOF
-if { (eval echo configure:1917: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1955: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
    echo no
@@ -1932,12 +1970,12 @@ fi
 
 
 echo $ac_n "checking if $CXX supports bool types""... $ac_c" 1>&6
-echo "configure:1936: checking if $CXX supports bool types" >&5
+echo "configure:1974: checking if $CXX supports bool types" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1941 "configure"
+#line 1979 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
 extern "C" void exit(int);
@@ -1949,7 +1987,7 @@ int main(void) {
 }
 
 EOF
-if { (eval echo configure:1953: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1991: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
    echo yes
@@ -1968,12 +2006,12 @@ fi
 
 
 echo $ac_n "checking if $CXX can handle static cast""... $ac_c" 1>&6
-echo "configure:1972: checking if $CXX can handle static cast" >&5
+echo "configure:2010: checking if $CXX can handle static cast" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1977 "configure"
+#line 2015 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
 extern "C" void exit(int);
@@ -1988,7 +2026,7 @@ int main(void) {
 }
 
 EOF
-if { (eval echo configure:1992: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2030: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
    echo yes
@@ -2056,7 +2094,7 @@ rm -f confcache
 
 
 echo $ac_n "checking make""... $ac_c" 1>&6
-echo "configure:2060: checking make" >&5
+echo "configure:2098: checking make" >&5
 
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
 	sed -n 1p|cut -c1-8`" = "GNU Make"; then
@@ -2073,7 +2111,7 @@ fi
 
 if test -z "$DEPEND"; then
    echo $ac_n "checking how to include a makefile""... $ac_c" 1>&6
-echo "configure:2077: checking how to include a makefile" >&5
+echo "configure:2115: checking how to include a makefile" >&5
 
       cat >makeinc <<EOF
 foo:
@@ -2309,6 +2347,7 @@ s%@RANLIB@%$RANLIB%g
 s%@CC@%$CC%g
 s%@LN_S@%$LN_S%g
 s%@LIBTOOL@%$LIBTOOL%g
+s%@PERL@%$PERL%g
 s%@AR@%$AR%g
 s%@LT_STATIC_EXEC@%$LT_STATIC_EXEC%g
 /@DEPEND@/r $DEPEND
