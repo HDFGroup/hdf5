@@ -85,6 +85,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id,int h4_attr) {
 
   hid_t     h5_ctype;
   hid_t     h5_cmemtype;
+  hid_t     create_plist;
 
   hid_t*     h5memtype = NULL;
   hid_t*     h5type = NULL;
@@ -92,6 +93,8 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id,int h4_attr) {
   size_t*    h4memsize = NULL;
   size_t*    h4size = NULL;
   hsize_t   h5_vddims[1];
+  hsize_t   h5_maxvddims[1];
+  hsize_t   h5_chunkdims[1];
   char*     h5cvdata_name;
 
   int       check_vdname;
@@ -230,7 +233,6 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id,int h4_attr) {
   for (i=0;i<nfields;i++) {
     /* obtain field order.*/
      fieldorder = VFfieldorder(vdata_id,i);  
-
      if(fieldorder == FAIL){
        printf("error in obtaining field order. \n");
        free(h5memtype);
@@ -256,9 +258,10 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id,int h4_attr) {
     return FAIL;
   }
 
-  h5_vddims[0] = n_records;
-  h5d_sid = H5Screate_simple(1,h5_vddims,NULL);
+  h5_vddims[0]    = n_records;
+  h5_maxvddims[0] = H5S_UNLIMITED;
 
+  h5d_sid = H5Screate_simple(1,h5_vddims,h5_maxvddims);
   if(h5d_sid <0){
     printf("error in obtaining space id.\n");
     free(h5memtype);
@@ -290,7 +293,21 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id,int h4_attr) {
     return FAIL;
   }
 
-  h5dset = H5Dcreate(group_id,h5cvdata_name,h5_ctype,h5d_sid,H5P_DEFAULT);
+  h5_chunkdims[0] = h5_vddims[0];
+  create_plist = H5Pcreate(H5P_DATASET_CREATE);
+  if (H5Pset_chunk(create_plist,1,h5_chunkdims)<0){
+     printf("failed to set up chunking information for ");
+     printf("property list.\n");
+     free(h5memtype);
+     free(h5type);
+     free(h4memsize);
+     free(h4size);
+     free(vd_data);       
+     free(h5cvdata_name);
+     H5Pclose(create_plist);
+     return FAIL;	
+  }
+  h5dset = H5Dcreate(group_id,h5cvdata_name,h5_ctype,h5d_sid,create_plist);
   if(h5dset <0) {
     printf("error in obtaining dataset.\n");
     free(h5memtype);
