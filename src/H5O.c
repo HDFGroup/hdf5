@@ -641,9 +641,15 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 
     if (destroy) {
 	/* destroy chunks */
+    /*the conditional below is because of the microsoft c run time library
+	  it calls its own version of malloc and free and does checks on the mem.
+	  causes problems with this code so i am taking it out for the win32 debug 
+	  version until i can figure out a way around it*/
+#if !defined(WIN32) && !defined(_DEBUG)
 	for (i = 0; i < oh->nchunks; i++) {
 	    oh->chunk[i].image = H5MM_xfree(oh->chunk[i].image);
 	}
+#endif
 	oh->chunk = H5MM_xfree(oh->chunk);
 
 	/* destroy messages */
