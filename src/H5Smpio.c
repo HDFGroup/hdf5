@@ -559,7 +559,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     herr_t	 ret_value = SUCCEED;
     int		 err;
     haddr_t	 disp, addr;
-    hsize_t	 mpi_count;
+    size_t	 mpi_count;
     hsize_t	 mpi_buf_count, mpi_unused_count;
     MPI_Datatype mpi_buf_type, mpi_file_type;
     hbool_t	 mbt_is_derived=0,
@@ -652,6 +652,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     H5FD_mpio_setup(f->shared->lf, mpi_buf_type, mpi_file_type, disp, 1);
 
     /* transfer the data */
+    H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
     mpi_count = (size_t)mpi_buf_count;
     if (mpi_count != mpi_buf_count) {
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
