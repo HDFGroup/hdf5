@@ -575,7 +575,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                                     /* Check return value */
                                     if(status<=0) {
                                         /* We're leaving, so close dataspace */
-                                        if(H5Sclose(space_id)<0)
+                                        if(H5I_dec_ref(space_id)<0)
                                             HGOTO_ERROR (H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace");
 
                                         /* Indicate filter can't apply to this combination of parameters */
@@ -596,7 +596,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                                     /* Make callback to filter's "set local" function */
                                     if((fclass->set_local)(dcpl_id, type_id, space_id)<0) {
                                         /* We're leaving, so close dataspace */
-                                        if(H5Sclose(space_id)<0)
+                                        if(H5I_dec_ref(space_id)<0)
                                             HGOTO_ERROR (H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace");
 
                                         /* Indicate error during filter callback */
@@ -612,7 +612,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                 } /* end for */
 
                 /* Close dataspace */
-                if(H5Sclose(space_id)<0)
+                if(H5I_dec_ref(space_id)<0)
                     HGOTO_ERROR (H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace");
             } /* end if */
         } /* end if */
