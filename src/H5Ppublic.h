@@ -115,9 +115,6 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
             H5P_cls_copy_func_t cls_copy, void *copy_data,
             H5P_cls_close_func_t cls_close, void *close_data);
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
-#ifdef H5P_TESTING
-H5_DLL char *H5Pget_class_path_test(hid_t pclass_id);
-#endif /* H5P_TESTING */
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
 H5_DLL herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create,

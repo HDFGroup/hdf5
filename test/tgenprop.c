@@ -26,6 +26,7 @@
 #include "testhdf5.h"
 #include "hdf5.h"
 #include "H5Dprivate.h"         /* For Dataset creation property list names */
+#include "H5Pprivate.h"         /* For H5P testing functions */
 
 #define FILENAME   "tgenprop.h5"
 
@@ -523,10 +524,6 @@ test_genprop_basic_list(void)
     /* Create a new generic class, derived from the root of the class hierarchy */
     cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
-
-    /* Create a the generic class again, should fail */
-    cid2 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
-    VERIFY(cid2, FAIL, "H5Pcreate_class");
 
     /* Add several properties (w/default values) */
 
@@ -1433,6 +1430,7 @@ test_genprop_path(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
     hid_t		cid2;		/* Generic Property class ID */
+    hid_t		cid3;		/* Generic Property class ID */
     char               *path;           /* Class path */
     herr_t		ret;		/* Generic return value	*/
 
@@ -1448,8 +1446,8 @@ test_genprop_path(void)
     CHECK_I(ret, "H5Pregister");
 
     /* Get full path for first class */
-    path=H5Pget_class_path_test(cid1);
-    CHECK_PTR(path, "H5Pget_class_path_test");
+    path=H5P_get_class_path_test(cid1);
+    CHECK_PTR(path, "H5P_get_class_path_test");
     if(HDstrcmp(path,CLASS1_PATH)!=0) {
         num_errs++;
         printf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
@@ -1465,13 +1463,27 @@ test_genprop_path(void)
     CHECK_I(ret, "H5Pregister");
 
     /* Get full path for second class */
-    path=H5Pget_class_path_test(cid2);
-    CHECK_PTR(path, "H5Pget_class_path_test");
+    path=H5P_get_class_path_test(cid2);
+    CHECK_PTR(path, "H5P_get_class_path_test");
     if(HDstrcmp(path,CLASS2_PATH)!=0) {
         num_errs++;
         printf("Class names don't match!, path=%s, CLASS2_PATH=%s\n",path,CLASS2_PATH);
     } /* end if */
+
+    /* Open a copy of the class with the path name */
+    cid3 = H5P_open_class_path_test(path);
+    CHECK_I(cid3, "H5Popen_class_path");
+
+    /* Check that the classes are equal */
+    ret = H5Pequal(cid2,cid3);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Release the path string */
     free(path);
+
+    /* Close class */
+    ret = H5Pclose_class(cid3);
+    CHECK_I(ret, "H5Pclose_class");
 
     /* Close class */
     ret = H5Pclose_class(cid1);

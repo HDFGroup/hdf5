@@ -13,6 +13,7 @@
 /* $Id$ */
 
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+#define H5P_TESTING		/*suppress warning about H5P testing funcs*/
 
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/
@@ -355,14 +356,14 @@ H5P_term_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static hid_t
+static H5P_genclass_t *
 H5P_copy_pclass(H5P_genclass_t *pclass)
 {
     H5P_genclass_t *new_pclass = NULL;      /* Property list class copied */
     H5P_genprop_t *tmp;         /* Temporary pointer to parent class properties */
     H5P_genprop_t *pcopy;       /* Copy of property to insert into class */
-    unsigned u;                    /* Local index variable */
-    hid_t ret_value=FAIL;       /* return value */
+    unsigned u;                 /* Local index variable */
+    H5P_genclass_t *ret_value=NULL;     /* return value */
 
     FUNC_ENTER_NOINIT(H5P_copy_pclass);
 
@@ -374,7 +375,7 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
 
     /* Create the new property list class */
     if (NULL==(new_pclass=H5P_create_class(pclass->parent, pclass->name, pclass->hashsize, 0, pclass->create_func, pclass->create_data, pclass->copy_func, pclass->copy_data, pclass->close_func, pclass->close_data)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list class");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, NULL, "unable to create property list class");
 
     /* Copy the properties registered for this class */
     if(pclass->nprops>0) {
@@ -386,11 +387,11 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
             while(tmp!=NULL) {
                 /* Make a copy of the class's property */
                 if((pcopy=H5P_dup_prop(tmp))==NULL)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
 
                 /* Insert the initialized property into the property list */
                 if(H5P_add_prop(new_pclass->props,new_pclass->hashsize,pcopy)<0)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class");
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
 
                 /* Increment property count for class */
                 new_pclass->nprops++;
@@ -404,14 +405,13 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
     /* Increment parent class's derived class value */
     if(new_pclass->parent!=NULL)
         if(H5P_access_class(new_pclass->parent,H5P_MOD_INC_CLS)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment parent class ref count");
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment parent class ref count");
 
-    /* Get an atom for the class */
-    if ((ret_value = H5I_register(H5I_GENPROP_CLS, new_pclass))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
+    /* Set the return value */
+    ret_value=new_pclass;
 
 done:
-    if (ret_value<0 && new_pclass)
+    if (ret_value==NULL && new_pclass)
         H5P_close_class(new_pclass);
 
     FUNC_LEAVE (ret_value);
@@ -573,8 +573,17 @@ hid_t H5Pcopy(hid_t id)
     } /* end if */
     /* Must be property classes */
     else {
-        if((ret_value=H5P_copy_pclass(obj))<0)
+        H5P_genclass_t *copy_class;      /* Copy of class */
+
+        /* Copy the class */
+        if((copy_class=H5P_copy_pclass(obj))==NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property class");
+
+        /* Get an atom for the copied class */
+        if ((ret_value = H5I_register(H5I_GENPROP_CLS, copy_class))<0) {
+            H5P_close_class(copy_class);
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
+        } /* end if */
     } /* end else */
 
 done:
@@ -1063,7 +1072,7 @@ H5P_check_class(void *_obj, hid_t id, const void *_key)
     assert(key);
 
     /* Check if the class object has the same parent as the new class */
-    if(obj->parent!=NULL && obj->parent==key->parent) {
+    if(obj->parent==key->parent) {
         /* Check if they have the same name */
         if(HDstrcmp(obj->name,key->name)==0)
             ret_value=1;        /* Indicate a match */
@@ -1126,19 +1135,6 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
         assert(par_class);
         assert(hashsize>0);
     }
-
-    /* Check that the class name is unique in the parent class */
-    if(par_class!=NULL) {
-        H5P_check_class_t check_info;   /* Structure to hold the information for checking duplicate names */
-
-        /* Set up the search structure */
-        check_info.parent=par_class;
-        check_info.name=name;
-
-        /* Iterate over the open class IDs and fail if any have the same parent and name */
-        if(H5I_search(H5I_GENPROP_CLS,H5P_check_class,&check_info)!=NULL)
-            HGOTO_ERROR (H5E_PLIST, H5E_DUPCLASS, NULL, "duplicated class name in parent class");
-    } /* end if */
 
     /* Allocate room for the class & it's hash table of properties */
     if (NULL==(pclass = H5MM_calloc (sizeof(H5P_genclass_t)+((hashsize-1)*sizeof(H5P_genprop_t *)))))
@@ -4702,14 +4698,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-char *H5P_get_class_path(H5P_genclass_t *pclass)
+static char *
+H5P_get_class_path(H5P_genclass_t *pclass)
 {
     char *par_path;     /* Parent class's full path */
     size_t par_path_len;/* Parent class's full path's length */
     size_t my_path_len; /* This class's name's length */
     char *ret_value;    /* return value */
 
-    FUNC_ENTER_NOAPI(H5P_get_class_path, NULL);
+    FUNC_ENTER_NOINIT(H5P_get_class_path);
 
     assert(pclass);
 
@@ -4726,7 +4723,7 @@ char *H5P_get_class_path(H5P_genclass_t *pclass)
              * separator, this class's name and the string terminator
              */
             if(NULL==(ret_value=H5MM_malloc(par_path_len+1+my_path_len+1)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for class name");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for class name");
 
             /* Build the full path for this class */
             HDstrcpy(ret_value,par_path);
@@ -4769,12 +4766,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-char *H5Pget_class_path_test(hid_t pclass_id)
+char *
+H5P_get_class_path_test(hid_t pclass_id)
 {
     H5P_genclass_t	*pclass;    /* Property class to query */
     char *ret_value;       /* return value */
 
-    FUNC_ENTER_API(H5Pget_class_path_test, NULL);
+    FUNC_ENTER_NOAPI(H5P_get_class_path_test, NULL);
 
     /* Check arguments. */
     if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
@@ -4786,7 +4784,132 @@ char *H5Pget_class_path_test(hid_t pclass_id)
 
 done:
     FUNC_LEAVE (ret_value);
-}   /* H5Pget_class_path_test() */
+}   /* H5P_get_class_path_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_open_class_path
+ PURPOSE
+    Internal routine to open [a copy of] a class with its full path name
+ USAGE
+    H5P_genclass_t *H5P_open_class_path(path)
+        const char *path;       IN: Full path name of class to open [copy of]
+ RETURNS
+    Success: Pointer to a generic property class object
+    Failure: NULL
+ DESCRIPTION
+    This routine opens [a copy] of the class indicated by the full path.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static H5P_genclass_t *
+H5P_open_class_path(const char *path)
+{
+    char *tmp_path=NULL;        /* Temporary copy of the path */
+    char *curr_name;            /* Pointer to current component of path name */
+    char *delimit;              /* Pointer to path delimiter during traversal */
+    H5P_genclass_t *curr_class; /* Pointer to class during path traversal */
+    H5P_genclass_t *ret_value;  /* Return value */
+    H5P_check_class_t check_info;   /* Structure to hold the information for checking duplicate names */
+
+    FUNC_ENTER_NOINIT(H5P_open_class_path);
+
+    assert(path);
+
+    /* Duplicate the path to use */
+    tmp_path=HDstrdup(path);
+    assert(tmp_path);
+
+    /* Find the generic property class with this full path */
+    curr_name=tmp_path;
+    curr_class=NULL;
+    while((delimit=HDstrchr(curr_name,'/'))!=NULL) {
+        /* Change the delimiter to terminate the string */
+        *delimit='\0';
+
+        /* Set up the search structure */
+        check_info.parent=curr_class;
+        check_info.name=curr_name;
+
+        /* Find the class with this name & parent by iterating over the open classes */
+        if((curr_class=H5I_search(H5I_GENPROP_CLS,H5P_check_class,&check_info))==NULL)
+            HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class");
+
+        /* Advance the pointer in the path to the start of the next component */
+        curr_name=delimit+1;
+    } /* end while */
+
+    /* Should be pointing to the last component in the path name now... */
+
+    /* Set up the search structure */
+    check_info.parent=curr_class;
+    check_info.name=curr_name;
+
+    /* Find the class with this name & parent by iterating over the open classes */
+    if((curr_class=H5I_search(H5I_GENPROP_CLS,H5P_check_class,&check_info))==NULL)
+        HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class");
+
+    /* Copy it */
+    if((ret_value=H5P_copy_pclass(curr_class))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL, "can't copy property class");
+
+done:
+    /* Free the duplicated path */
+    H5MM_xfree(tmp_path);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_open_class_path() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Popen_class_path
+ PURPOSE
+    Routine to open a [copy of] a class with its full path name
+ USAGE
+    hid_t H5Popen_class_name(path)
+        const char *path;       IN: Full path name of class to open [copy of]
+ RETURNS
+    Success: ID of generic property class
+    Failure: NULL
+ DESCRIPTION
+    This routine opens [a copy] of the class indicated by the full path.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING H5P_open_class_path()
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t H5P_open_class_path_test(const char *path)
+{
+    H5P_genclass_t *pclass=NULL;/* Property class to query */
+    hid_t ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI(H5P_open_class_path_test, FAIL);
+
+    /* Check arguments. */
+    if (NULL == path || *path=='\0')
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid class path");
+
+    /* Open the property list class */
+    if ((pclass=H5P_open_class_path(path))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to find class with full path");
+
+    /* Get an atom for the class */
+    if ((ret_value=H5I_register(H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
+
+done:
+    if(ret_value<0 && pclass)
+        H5P_close_class(pclass);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_open_class_path_test() */
 
 
 /*--------------------------------------------------------------------------
