@@ -438,23 +438,38 @@ dnl result could effect the outcome of the sizeof macros below.
 dnl
 case "$host_cpu-$host_vendor-$host_os" in
    *linux*)
-      AC_CHECK_FUNCS(getdents64,
-        dnl Add the large file support flags to the CPPFLAGS macro if
-        dnl we're on a Linux system which austensibly supports LFS. (We
-        dnl think it does if it has the ``getdents64'' syscall).
-        CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
-        if test $cc_vers_all -gt 2095000 -a $cc_vers_all -lt 2096000; then
-           dnl For GCC compilers 2.95.x, the -malign-double flag plays
-           dnl havoc with the LFS stuff. Remove it. It apparently works
-           dnl for 2.96, though, so...
-           CFLAGS_saved=$CFLAGS
-           CFLAGS=""
-           for flag in X $CFLAGS_saved; do
-              if test "$flag" != "X" -a "$flag" != "-malign-double"; then
-                 CFLAGS="$CFLAGS $flag"
-              fi
-           done
-        fi)
+        dnl ----------------------------------------------------------------------
+        dnl Enable large file support on linux? Store the result in the LINUX_LFS
+        dnl variable for posterity
+        AC_ARG_ENABLE(linux-lfs,
+          [  --enable-linux-lfs      Enable support for large (64-bit) files on linux. [default=check]])
+
+        case "X-$enable_linux_lfs" in
+           X-yes)
+              LINUX_LFS=yes
+              ;;
+           X-no)
+              LINUX_LFS=no
+              ;;
+           X-|*)
+              LINUX_LFS=no
+              AC_CHECK_FUNCS(getdents64,
+                dnl Add the large file support flags to the CPPFLAGS macro if
+                dnl we're on a Linux system which austensibly supports LFS. (We
+                dnl think it does if it has the ``getdents64'' syscall).
+                LINUX_LFS=yes
+                )
+              ;;
+        esac
+
+        AC_MSG_CHECKING(for large file support on linux mode)
+        if test "X$LINUX_LFS" = "Xyes"; then
+           AC_MSG_RESULT(enabled)
+
+           CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
+        else
+           AC_MSG_RESULT(disabled)
+        fi
       ;;
 esac
 

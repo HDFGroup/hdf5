@@ -82,6 +82,8 @@ Bug Fixes since HDF5-1.4.1 Release
       correctly now.
     * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
       when --enable-hdf5v1_2 configure flag is enabled.
+    * Added --enable-linux-lfs flag to allow more control over whether to enable
+      or disable large file support on Linux.
 
 Documentation
 =============
