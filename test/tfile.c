@@ -406,6 +406,31 @@ test_file_close(void)
     CHECK(ret, FAIL, "H5Fclose");
 
 
+    /* Test behavior while opening file multiple times with different file 
+     * close degree
+     */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_WEAK);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    ret = H5Pget_fclose_degree(fapl_id, &fc_degree);
+    VERIFY(fc_degree, H5F_CLOSE_WEAK, "H5Pget_fclose_degree");
+
+    /* should succeed */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Close first open */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close second open */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
     /* Test behavior while opening file multiple times with file close 
      * degree STRONG */
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG);

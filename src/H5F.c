@@ -2042,19 +2042,16 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     if(shared->nrefs == 1) {
         if(fc_degree == H5F_CLOSE_DEFAULT)
-            shared->fc_degree = H5F_CLOSE_DEFAULT;
+            shared->fc_degree = shared->lf->cls->fc_degree;
         else
             shared->fc_degree = fc_degree;
     } else if(shared->nrefs > 1) {
-        if(fc_degree==H5F_CLOSE_DEFAULT) { 
-            if(shared->fc_degree != H5F_CLOSE_DEFAULT && shared->fc_degree!=shared->lf->cls->fc_degree)
+        if(fc_degree==H5F_CLOSE_DEFAULT && shared->fc_degree!=shared->lf->cls->fc_degree)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match");
-        } else {
-            if(fc_degree != shared->fc_degree)
+        if(fc_degree!=H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match");
-        }
     }
-
+        
     /* Success */
     ret_value = file;
 
@@ -2687,10 +2684,7 @@ H5F_close(H5F_t *f)
     assert(1==f->nrefs);
     
     /* Get the close degree from the file */
-    if(f->shared->fc_degree == H5F_CLOSE_DEFAULT)
-        fc_degree = f->shared->lf->cls->fc_degree;
-    else
-        fc_degree = f->shared->fc_degree;
+    fc_degree = f->shared->fc_degree;
 
     /* if close degree if "semi" and there are objects left open and we are
      * holding open the file with this file ID, fail now */
