@@ -133,67 +133,6 @@ H5Pcreate_simple(int rank, size_t dims[])
     FUNC_LEAVE(ret_value);
 }
 
-#ifdef OLD_WAY
-/*-------------------------------------------------------------------------
- * Function:    H5Pcreate
- *
- * Purpose:     Creates a new data space object and opens it for access.
- *
- * Return:      Success:        The ID for the new data space object.
- *
- *              Failure:        FAIL
- *
- * Errors:
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Pcreate(H5P_class_t type)
-{
-    H5P_t                  *ds = NULL;
-    hid_t                   ret_value = FAIL;
-
-    FUNC_ENTER(H5Pcreate, FAIL);
-
-    ds = H5MM_xcalloc(1, sizeof(H5P_t));
-    ds->type = type;
-
-    switch (type) {
-    case H5P_SCALAR:
-        /*void */
-        break;
-
-    case H5P_SIMPLE:
-        ds->u.simple.rank = 0;
-        break;
-
-    case H5P_COMPLEX:
-        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                    "complex types are not supported yet");
-
-    default:
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                    "unknown data space type");
-    }
-
-    /* Register the new data space and get an ID for it */
-    if ((ret_value = H5A_register(H5_DATASPACE, ds)) < 0) {
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-                    "unable to register data space for ID");
-    }
-  done:
-    if (ret_value < 0) {
-        H5MM_xfree(ds);
-    }
-    FUNC_LEAVE(ret_value);
-}
-#endif /* OLD_WAY */
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pclose
  *
@@ -1026,11 +965,13 @@ H5Pset_hyperslab(hid_t sid, const intn *start, const intn *count, const intn *st
     if (H5_DATASPACE != H5A_group(sid) || (space = H5A_object(sid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (start == NULL || count==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid hyperslab selected");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		    "invalid hyperslab selected");
 
     /* We can't modify other types of dataspaces currently, so error out */
     if (space->type!=H5P_SIMPLE)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,"unknown dataspace type");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+		    "unknown dataspace type");
 
     /* Set up stride values for later use */
     tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(intn));
@@ -1039,13 +980,16 @@ H5Pset_hyperslab(hid_t sid, const intn *start, const intn *count, const intn *st
     }
 
     /* Range check arguments */
-    for(u=0; u<space->u.simple.rank; u++)
-      {
-        if(start[u]<0 || start[u]>=space->u.simple.size[u])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,"hyperslab bounds out of range");
-        if(start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])<0 || start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])>=space->u.simple.size[u])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,"hyperslab bounds out of range");
-      } /* end for */
+    for (u=0; u<space->u.simple.rank; u++) {
+        if (start[u]<0 || start[u]>=space->u.simple.size[u])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
+			"hyperslab bounds out of range");
+        if (start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])<0 ||
+	    (start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])>=
+	     space->u.simple.size[u]))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
+			"hyperslab bounds out of range");
+    } /* end for */
 
     /* Allocate space for the hyperslab information */
     if (NULL==space->h.start) {

@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <H5Eprivate.h>
+
+
 #ifndef HAVE_FUNCTION
 #define __FUNCTION__ ""
 #endif
@@ -304,6 +307,7 @@ test_tconv(hid_t file)
     /* Write the data to the dataset */
     status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5P_ALL, H5P_ALL,
                       H5C_DEFAULT, out);
+    if (status<0) H5Eprint (H5E_thrdid_g, stdout);
     assert(status >= 0);
 
     /* Create a new type with the opposite byte order */

@@ -36,9 +36,6 @@ extern "C" {
 #endif
 
 /* Functions in H5P.c */
-#ifdef OLD_WAY
-hid_t H5Pcreate (H5P_class_t type);
-#endif /* OLD_WAY */
 hid_t H5Pcreate_simple (int rank, size_t dims[]);
 herr_t H5Pclose (hid_t space_id);
 size_t H5Pget_npoints (hid_t space_id);
@@ -49,7 +46,7 @@ herr_t H5Pset_space (hid_t space_id, int rank, const size_t *dims);
 herr_t H5Pset_hyperslab(hid_t sid, const int *start, const int *count,
 			const int *stride);
 int H5Pget_hyperslab (hid_t sid, int offset[]/*out*/,
-			 int size[]/*out*/, int stride[]/*out*/);
+		      int size[]/*out*/, int stride[]/*out*/);
 
 #ifdef __cplusplus
 }
