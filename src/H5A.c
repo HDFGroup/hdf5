@@ -986,7 +986,7 @@ H5Aget_type(hid_t attr_id)
  PURPOSE
     Gets a copy of the name for an attribute
  USAGE
-    size_t H5Aget_name (attr_id, buf_size, buf)
+    hssize_t H5Aget_name (attr_id, buf_size, buf)
         hid_t attr_id;      IN: Attribute to get name of
         size_t buf_size;    IN: The size of the buffer to store the string in.
         char *buf;          IN: Buffer to store name in
@@ -1003,7 +1003,7 @@ H5Aget_type(hid_t attr_id)
     the string terminator is stored in the last position of the buffer to
     properly terminate the string.
 --------------------------------------------------------------------------*/
-size_t
+hssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 {
     H5A_t		*attr = NULL;
