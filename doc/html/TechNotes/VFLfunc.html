@@ -47,16 +47,16 @@ herr_t <font color=red>H5FDset_eoa</font>(H5FD_t *file, haddr_t eof);
 
 haddr_t <font color=red>H5FDget_eof</font>(H5FD_t *file);
 
-herr_t <font color=red>H5FDread</font>(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size, 
-		void *buf/*out*/);
+herr_t <font color=red>H5FDread</font>(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
+		size_t size, void *buf/*out*/);
 
 herr_t <font color=red>H5FDwrite</font>(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, 
-		haddr_t addr, hsize_t size, const void *buf);
+		haddr_t addr, size_t size, const void *buf);
 
-herr_t <font color=red>H5FDflush</font></font>(H5FD_t *file);
+herr_t <font color=red>H5FDflush</font></font>(H5FD_t *file, unsigned closing);
 
 ===========================================
-Last Modified:  30 October 2000
+Last modified:  25 June 2002
 HDF Help Desk:  hdfhelp@ncsa.uiuc.edu
 
 </pre>
