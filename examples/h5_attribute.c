@@ -118,6 +118,7 @@ main (void)
    aid3  = H5Screate(H5S_SCALAR);
    atype = H5Tcopy(H5T_C_S1);
            H5Tset_size(atype, 4);
+           H5Tset_strpad(atype, H5T_STR_NULLTERM);
    attr3 = H5Acreate(dataset, ANAMES, atype, aid3, H5P_DEFAULT);
 
    /*
