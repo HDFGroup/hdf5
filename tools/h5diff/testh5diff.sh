@@ -80,11 +80,16 @@ TOOLTEST() {
     actual="../testfiles/`basename $1 .txt`.out"
     actual_err="../testfiles/`basename $1 .txt`.err"
     shift
+#echo $pmode
     if test -n "$pmode"; then
 	RUNCMD=$RUNPARALLEL
+	sleep 2
     else
 	RUNCMD=$RUNSERIAL
     fi
+# set -x
+#    echo RUNCMD=$RUNCMD
+#    $RUNCMD /bin/true
 
     # Run test.
     # Tflops interprets "$@" as "" when no parameter is given (e.g., the

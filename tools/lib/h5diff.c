@@ -33,6 +33,55 @@ print_objname (diff_opt_t * options, hsize_t nfound)
   return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
 }
 
+#ifdef H5_HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function: phdiff_dismiss_workers
+ *
+ * Purpose: tell all workers to end.
+ *
+ * Return: none
+ *
+ * Programmer: Albert Cheng
+ *
+ * Date: Feb 6, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+void phdiff_dismiss_workers(void)
+{
+    int i;
+
+    for(i=1; i<g_nTasks; i++)
+	MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: print_manager_output
+ *
+ * Purpose: special function that prints any output accumulated by the
+ * 	    manager task.
+ *
+ * Return: none
+ *
+ * Programmer: Leon Arber
+ *
+ * Date: Feb 7, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+void print_manager_output(void)
+{
+      /* If there was something we buffered, let's print it now */
+      if(outBuffOffset>0)
+      {
+	  printf("%s", outBuff); 
+	  fflush(stdout);
+	  memset(outBuff, 0, OUTBUFF_SIZE);
+	  outBuffOffset = 0;
+      }
+}
+
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: h5diff
@@ -93,8 +142,7 @@ h5diff (const char *fname1,
 	if(g_Parallel)
 	{
 	    /* Let tasks know that they won't be needed */
-	    for(i=1; i<g_nTasks; i++)
-		MPI_Send(filenames, 1024*2, MPI_CHAR, i, MPI_TAG_END, MPI_COMM_WORLD);
+	    phdiff_dismiss_workers();
 	}
 #endif
 
@@ -109,8 +157,7 @@ h5diff (const char *fname1,
 	if(g_Parallel)
 	{
 	    /* Let tasks know that they won't be needed */
-	    for(i=1; i<g_nTasks; i++)
-		MPI_Send(filenames, 1024*2, MPI_CHAR, i, MPI_TAG_END, MPI_COMM_WORLD);
+	    phdiff_dismiss_workers();
 	}
 #endif
 
@@ -132,6 +179,13 @@ h5diff (const char *fname1,
     {
       printf ("Error: Could not get get file contents\n");
       options->err_stat = 1;
+#ifdef H5_HAVE_PARALLEL
+	if(g_Parallel)
+	{
+	    /* Let tasks know that they won't be needed */
+	    phdiff_dismiss_workers();
+	}
+#endif
       goto out;
     }
 
@@ -153,6 +207,13 @@ h5diff (const char *fname1,
 	h5trav_freeinfo (info1, nobjects1);
       if (info2)
 	h5trav_freeinfo (info2, nobjects1);
+#ifdef H5_HAVE_PARALLEL
+	if(g_Parallel)
+	{
+	    /* Let tasks know that they won't be needed */
+	    phdiff_dismiss_workers();
+	}
+#endif
       goto out;
     }
 
@@ -180,6 +241,10 @@ h5diff (const char *fname1,
       nfound = diff_compare (file1_id, fname1, objname1, nobjects1, info1,
 			     file2_id, fname2, objname2, nobjects2, info2,
 			     options);
+#ifdef H5_HAVE_PARALLEL
+      /* If there was something we buffered, let's print it now */
+      print_manager_output();
+#endif
     }
 
 /*-------------------------------------------------------------------------
@@ -593,6 +658,10 @@ diff_match (hid_t file1_id,
 
     /* the manager can do this. */
     nfound += diff (file1_id, "/", file2_id, "/", options, H5G_GROUP);
+#ifdef H5_HAVE_PARALLEL
+    /* If there was something we buffered, let's print it now */
+    print_manager_output();
+#endif
 
     return nfound;
 }
@@ -694,225 +763,201 @@ diff (hid_t file1_id,
       const char *path1,
       hid_t file2_id, const char *path2, diff_opt_t * options, H5G_obj_t type)
 {
-  hid_t       type1_id=(-1);
-  hid_t       type2_id=(-1);
-  hid_t       grp1_id=(-1);
-  hid_t       grp2_id=(-1);
-  int ret;
-  H5G_stat_t sb1;
-  H5G_stat_t sb2;
-  char *buf1 = NULL;
-  char *buf2 = NULL;
-  hsize_t nfound = 0;
+    hid_t       type1_id=(-1);
+    hid_t       type2_id=(-1);
+    hid_t       grp1_id=(-1);
+    hid_t       grp2_id=(-1);
+    int ret;
+    H5G_stat_t sb1;
+    H5G_stat_t sb2;
+    char *buf1 = NULL;
+    char *buf2 = NULL;
+    hsize_t nfound = 0;
 
-  switch (type)
+    switch (type)
     {
-/*-------------------------------------------------------------------------
- * H5G_DATASET
- *-------------------------------------------------------------------------
- */
-    case H5G_DATASET:
+	/*-------------------------------------------------------------------------
+	 * H5G_DATASET
+	 *-------------------------------------------------------------------------
+	 */
+	case H5G_DATASET:
 
-      /* always print name */
-      if (options->m_verbose)
-      {
-	  if (print_objname (options, (hsize_t)1))
-	    parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
-	  nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+	    /* always print name */
+	    if (options->m_verbose)
+	    {
+		if (print_objname (options, (hsize_t)1))
+		    parallel_print("Dataset:     <%s> and <%s>\n", path1, path2); 
+		nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
 
-	}
-      /* check first if we have differences */
-      else
-	{
-	  if (options->m_quiet == 0)
-	    {
-	      /* shut up temporarily */
-	      options->m_quiet = 1;
-	      nfound =
-		diff_dataset (file1_id, file2_id, path1, path2, options);
-	      /* print again */
-	      options->m_quiet = 0;
-	      if (nfound)
-		{
-		  if (print_objname (options, nfound))
-		    parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
-		  nfound =
-		    diff_dataset (file1_id, file2_id, path1, path2, options);
-		}		/*if */
-	    }			/*if */
-	  /* in quiet mode, just count differences */
-	  else
-	    {
-	      nfound =
-		diff_dataset (file1_id, file2_id, path1, path2, options);
 	    }
-	}			/*else */
+	    /* check first if we have differences */
+	    else
+	    {
+		if (options->m_quiet == 0)
+		{
+		    /* shut up temporarily */
+		    options->m_quiet = 1;
+		    nfound =
+			diff_dataset (file1_id, file2_id, path1, path2, options);
+		    /* print again */
+		    options->m_quiet = 0;
+		    if (nfound)
+		    {
+			if (print_objname (options, nfound))
+			    parallel_print("Dataset:     <%s> and <%s>\n", path1, path2);
+			nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+		    }		/*if */
+		}			/*if */
+		/* in quiet mode, just count differences */
+		else
+		{
+		    nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
+		}
+	    }			/*else */
 
-      break;
+	    break;
 
-/*-------------------------------------------------------------------------
- * H5G_TYPE
- *-------------------------------------------------------------------------
- */
-    case H5G_TYPE:
-      if ((type1_id = H5Topen (file1_id, path1)) < 0)
-	goto out;
-      if ((type2_id = H5Topen (file2_id, path2)) < 0)
-	goto out;
+	    /*-------------------------------------------------------------------------
+	     * H5G_TYPE
+	     *-------------------------------------------------------------------------
+	     */
+	case H5G_TYPE:
+	    if ((type1_id = H5Topen (file1_id, path1)) < 0)
+		goto out;
+	    if ((type2_id = H5Topen (file2_id, path2)) < 0)
+		goto out;
 
-      if ((ret = H5Tequal (type1_id, type2_id)) < 0)
-	goto out;
+	    if ((ret = H5Tequal (type1_id, type2_id)) < 0)
+		goto out;
 
-      /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
-      nfound = (ret > 0) ? 0 : 1;
+	    /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
+	    nfound = (ret > 0) ? 0 : 1;
 
-      if (print_objname (options, nfound))
-	  parallel_print("Datatype:    <%s> and <%s>\n", path1, path2);
-	
-/*-------------------------------------------------------------------------
- * compare attributes
- * the if condition refers to cases when the dataset is a referenced object
- *-------------------------------------------------------------------------
- */
-      if (path1)
-	diff_attr (type1_id, type2_id, path1, path2, options);
+	    if (print_objname (options, nfound))
+		parallel_print("Datatype:    <%s> and <%s>\n", path1, path2);
 
-      if (H5Tclose (type1_id) < 0)
-	goto out;
-      if (H5Tclose (type2_id) < 0)
-	goto out;
+	    /*-------------------------------------------------------------------------
+	     * compare attributes
+	     * the if condition refers to cases when the dataset is a referenced object
+	     *-------------------------------------------------------------------------
+	     */
+	        if (path1)
+		  diff_attr (type1_id, type2_id, path1, path2, options); 
 
-      break;
+	    if (H5Tclose (type1_id) < 0)
+		goto out;
+	    if (H5Tclose (type2_id) < 0)
+		goto out;
 
-/*-------------------------------------------------------------------------
- * H5G_GROUP
- *-------------------------------------------------------------------------
- */
-    case H5G_GROUP:
-      if ((grp1_id = H5Gopen (file1_id, path1)) < 0)
-	goto out;
-      if ((grp2_id = H5Gopen (file2_id, path2)) < 0)
-	goto out;
+	    break;
 
-      ret = HDstrcmp (path1, path2);
+	    /*-------------------------------------------------------------------------
+	     * H5G_GROUP
+	     *-------------------------------------------------------------------------
+	     */
+	case H5G_GROUP:
+	    if ((grp1_id = H5Gopen (file1_id, path1)) < 0)
+		goto out;
+	    if ((grp2_id = H5Gopen (file2_id, path2)) < 0)
+		goto out;
 
-      /* if "path1" != "path2" then the groups are "different" */
-      nfound = (ret != 0) ? 1 : 0;
+	    ret = HDstrcmp (path1, path2);
 
-      if (print_objname (options, nfound))
-	parallel_print("Group:       <%s> and <%s>\n", path1, path2);
-	
- /*-------------------------------------------------------------------------
-  * compare attributes
-  * the if condition refers to cases when the dataset is a referenced object
-  *-------------------------------------------------------------------------
-  */
-      if (path1)
-	diff_attr (grp1_id, grp2_id, path1, path2, options);
+	    /* if "path1" != "path2" then the groups are "different" */
+	    nfound = (ret != 0) ? 1 : 0;
 
-      if (H5Gclose (grp1_id) < 0)
-	goto out;
-      if (H5Gclose (grp2_id) < 0)
-	goto out;
+	    if (print_objname (options, nfound))
+		parallel_print("Group:       <%s> and <%s>\n", path1, path2);
 
-      break;
+	    /*-------------------------------------------------------------------------
+	     * compare attributes
+	     * the if condition refers to cases when the dataset is a referenced object
+	     *-------------------------------------------------------------------------
+	     */
+	    if (path1)
+		diff_attr (grp1_id, grp2_id, path1, path2, options);
 
+	    if (H5Gclose (grp1_id) < 0)
+		goto out;
+	    if (H5Gclose (grp2_id) < 0)
+		goto out;
 
-/*-------------------------------------------------------------------------
- * H5G_LINK
- *-------------------------------------------------------------------------
- */
-    case H5G_LINK:
-      if (H5Gget_objinfo (file1_id, path1, FALSE, &sb1) < 0)
-	goto out;
-      if (H5Gget_objinfo (file1_id, path1, FALSE, &sb2) < 0)
-	goto out;
-
-      buf1 = malloc (sb1.linklen);
-      buf2 = malloc (sb2.linklen);
-
-      if (H5Gget_linkval (file1_id, path1, sb1.linklen, buf1) < 0)
-	goto out;
-      if (H5Gget_linkval (file2_id, path2, sb1.linklen, buf2) < 0)
-	goto out;
-
-      ret = HDstrcmp (buf1, buf2);
-
-      /* if "buf1" != "buf2" then the links are "different" */
-      nfound = (ret != 0) ? 1 : 0;
-
-      if (print_objname (options, nfound))
-	parallel_print("Link:        <%s> and <%s>\n", path1, path2);
-	
-      if (buf1)
-	{
-	  free (buf1);
-	  buf1 = NULL;
-	}
-
-      if (buf2)
-	{
-	  free (buf2);
-	  buf2 = NULL;
-	}
-
-      break;
+	    break;
 
 
-    default:
-      nfound = 0;
-      if (options->m_verbose)
-	{
-	  parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
-		  path1, path2, get_type (type));
-	}	
-	
-      break;
+	    /*-------------------------------------------------------------------------
+	     * H5G_LINK
+	     *-------------------------------------------------------------------------
+	     */
+	case H5G_LINK:
+	    if (H5Gget_objinfo (file1_id, path1, FALSE, &sb1) < 0)
+		goto out;
+	    if (H5Gget_objinfo (file1_id, path1, FALSE, &sb2) < 0)
+		goto out;
+
+	    buf1 = malloc (sb1.linklen);
+	    buf2 = malloc (sb2.linklen);
+
+	    if (H5Gget_linkval (file1_id, path1, sb1.linklen, buf1) < 0)
+		goto out;
+	    if (H5Gget_linkval (file2_id, path2, sb1.linklen, buf2) < 0)
+		goto out;
+
+	    ret = HDstrcmp (buf1, buf2);
+
+	    /* if "buf1" != "buf2" then the links are "different" */
+	    nfound = (ret != 0) ? 1 : 0;
+
+	    if (print_objname (options, nfound))
+		parallel_print("Link:        <%s> and <%s>\n", path1, path2);
+
+	    if (buf1)
+	    {
+		free (buf1);
+		buf1 = NULL;
+	    }
+
+	    if (buf2)
+	    {
+		free (buf2);
+		buf2 = NULL;
+	    }
+
+	    break;
+
+
+	default:
+	    nfound = 0;
+	    if (options->m_verbose)
+	    {
+		parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
+			path1, path2, get_type (type));
+	    }	
+
+	    break;
     }
 
 
 out:
 
-  /* close */
-  /* disable error reporting */
-  H5E_BEGIN_TRY
-  {
-    H5Tclose (type1_id);
-    H5Tclose (type2_id);
-    H5Gclose (grp1_id);
-    H5Tclose (grp2_id);
-    /* enable error reporting */
-  }
-  H5E_END_TRY;
+    /* close */
+    /* disable error reporting */
+    H5E_BEGIN_TRY
+    {
+	H5Tclose (type1_id);
+	H5Tclose (type2_id);
+	H5Gclose (grp1_id);
+	H5Tclose (grp2_id);
+	/* enable error reporting */
+    }
+    H5E_END_TRY;
 
-  if (buf1)
-    free (buf1);
-  if (buf2)
-    free (buf2);
+    if (buf1)
+	free (buf1);
+    if (buf2)
+	free (buf2);
 
-  return nfound;
+    return nfound;
 }
 
 
-#ifdef H5_HAVE_PARALLEL
-/*-------------------------------------------------------------------------
- * Function: phdiff_dismiss_workers
- *
- * Purpose: tell all workers to end.
- *
- * Return: none
- *
- * Programmer: Albert Cheng
- *
- * Date: Feb 6, 2005
- *
- *-------------------------------------------------------------------------
- */
-void phdiff_dismiss_workers(void)
-{
-    int i;
-
-    for(i=1; i<g_nTasks; i++)
-	MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
-}
-#endif

@@ -13,7 +13,6 @@
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
 
-
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
    srcdir=.

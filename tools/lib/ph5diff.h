@@ -16,7 +16,7 @@
 #define _PH5DIFF_H__
 
 
-#define OUTBUFF_SIZE 10000
+#define OUTBUFF_SIZE 50000
 /* Send from manager to workers */
 #define MPI_TAG_ARGS		1	
 #define MPI_TAG_PRINT_TOK	2

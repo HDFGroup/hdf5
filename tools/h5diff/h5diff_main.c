@@ -55,6 +55,8 @@ static void ph5diff_worker( void );
  *-------------------------------------------------------------------------
  */
 
+    int	       nID = 0;
+
 int main(int argc, const char *argv[])
 {
     int        i;
@@ -64,7 +66,6 @@ int main(int argc, const char *argv[])
     const char *objname1  = NULL;
     const char *objname2  = NULL;
     hsize_t    nfound=0;
-    int	       nID = 0;
     int        ret;
     diff_opt_t options;
 
@@ -91,7 +92,7 @@ int main(int argc, const char *argv[])
 	MPI_Comm_rank(MPI_COMM_WORLD, &nID);
 	MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 #else
-	printf("You cannot run ph5diff unless you compiles a parallel build of HDF5\n");
+	printf("You cannot run ph5diff unless you compile a parallel build of HDF5\n");
 	h5diff_exit(2);
 #endif
     }
@@ -263,7 +264,10 @@ int main(int argc, const char *argv[])
 	    else
 	    {
 		if (!options.err_stat)
+		{
 		    print_found(nfound);
+		    print_manager_output();
+		}
 	    }
 	}
 
@@ -365,6 +369,7 @@ ph5diff_worker(void)
 
 		    /*When get token, print stuff out and return token */
 		    printf("%s", outBuff);
+		    fflush(stdout);
 		    memset(outBuff, 0, OUTBUFF_SIZE);
 		    outBuffOffset = 0;
 
@@ -377,7 +382,7 @@ ph5diff_worker(void)
 	    else if(Status.MPI_TAG == MPI_TAG_END)
 	    {
 		MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_END, MPI_COMM_WORLD, &Status);
-		/*printf("exiting..., task: %d\n", nID);*/
+	/*	printf("exiting..., task: %d\n", nID); */
 		break;
 	    }
 	    else
@@ -388,6 +393,7 @@ ph5diff_worker(void)
 
 	}
     }
+
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();	
 }
@@ -546,6 +552,7 @@ void usage(void)
  */
 void h5diff_exit(int status)
 {
+
 #ifdef H5_HAVE_PARALLEL
     /* if in parallel mode, dismiss workers, close down MPI, then exit */
     if(g_nTasks > 1){

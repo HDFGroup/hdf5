@@ -22,6 +22,7 @@ unsigned char	 g_Parallel = 0;  /*0 for serial, 1 for parallel */
 char    outBuff[OUTBUFF_SIZE];
 unsigned int     outBuffOffset;
 
+extern int nID;
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
@@ -43,8 +44,10 @@ void parallel_print(const char* format, ...)
     if(!g_Parallel)
 	vprintf(format, ap);
     else
-	outBuffOffset += HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
-
+    {
+	if((OUTBUFF_SIZE-outBuffOffset) > 0)
+	    outBuffOffset += HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+    }
     va_end(ap);
 }
 
@@ -375,7 +378,10 @@ get_class(H5T_class_t tclass)
  */
 void print_found(hsize_t nfound)
 {
- HDfprintf(stdout,"%Hu differences found\n",nfound);
+    if(g_Parallel)
+	outBuffOffset += HDsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, "%lld differences found\n", nfound);
+    else
+	HDfprintf(stdout,"%Hu differences found\n",nfound);
 }
 
 
