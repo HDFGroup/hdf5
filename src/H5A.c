@@ -146,7 +146,7 @@ intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
         grp_ptr->reserved=reserved;
         grp_ptr->wrapped=0;
         grp_ptr->atoms=0;
-        grp_ptr->nextid=0;
+        grp_ptr->nextid=reserved;
         if((grp_ptr->atom_list=(atom_info_t **)HDcalloc(hash_size,sizeof(atom_info_t *)))==NULL)
             HGOTO_DONE(FAIL);
       } /* end if */
