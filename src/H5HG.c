@@ -142,7 +142,7 @@ H5HG_create (H5F_t *f, size_t size)
     UINT16ENCODE(p, 0);	/*reference count*/
     UINT32ENCODE(p, 0); /*reserved*/
     H5F_encode_length (f, p, heap->obj[0].size);
-    HDmemset (p, 0, (size_t)((heap->chunk+heap->nalloc) - p));
+    HDmemset (p, 0, (size_t)((heap->chunk+heap->size) - p));
 
     /* Add the heap to the cache */
     if (H5AC_set (f, H5AC_GHEAP, &addr, heap)<0) {

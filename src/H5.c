@@ -695,7 +695,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 
 	    case 'c':
 		if (1) {
-		    char x = va_arg (ap, char);
+		    char x = (char)va_arg (ap, int);
 		    n = fprintf (stream, template, x);
 		}
 		break;

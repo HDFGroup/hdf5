@@ -814,8 +814,6 @@ main(void)
     H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted");
     H5Gclose (grp);
 
-    
-
     status = test_create(file);
     nerrors += status < 0 ? 1 : 0;
 
@@ -824,7 +822,7 @@ main(void)
 
     status = test_tconv(file);
     nerrors += status < 0 ? 1 : 0;
-    
+
     status = test_compression(file);
     nerrors += status < 0 ? 1 : 0;
 

@@ -342,6 +342,10 @@ extern hid_t H5T_FORTRAN_S1_g;
 #define H5T_NATIVE_B32		(H5open(), H5T_NATIVE_B32_g)
 #define H5T_NATIVE_B64		(H5open(), H5T_NATIVE_B64_g)
 #define H5T_NATIVE_OPAQUE       (H5open(), H5T_NATIVE_OPAQUE_g)
+#define H5T_NATIVE_HSIZE	(H5open(), H5T_NATIVE_HSIZE_g)
+#define H5T_NATIVE_HSSIZE	(H5open(), H5T_NATIVE_HSSIZE_g)
+#define H5T_NATIVE_HERR		(H5open(), H5T_NATIVE_HERR_g)
+#define H5T_NATIVE_HBOOL	(H5open(), H5T_NATIVE_HBOOL_g)
 extern hid_t H5T_NATIVE_CHAR_g;
 extern hid_t H5T_NATIVE_UCHAR_g;
 extern hid_t H5T_NATIVE_SHORT_g;
@@ -360,8 +364,11 @@ extern hid_t H5T_NATIVE_B16_g;
 extern hid_t H5T_NATIVE_B32_g;
 extern hid_t H5T_NATIVE_B64_g;
 extern hid_t H5T_NATIVE_OPAQUE_g;
-
-
+extern hid_t H5T_NATIVE_HSIZE_g;
+extern hid_t H5T_NATIVE_HSSIZE_g;
+extern hid_t H5T_NATIVE_HERR_g;
+extern hid_t H5T_NATIVE_HBOOL_g;
+   
 /* Operations defined on all data types */
 hid_t H5Topen (hid_t loc_id, const char *name);
 hid_t H5Tcreate (H5T_class_t type, size_t size);

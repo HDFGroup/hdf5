@@ -877,7 +877,7 @@ H5F_istore_preempt (H5F_t *f, intn idx)
 
     H5F_istore_flush_entry (f, ent, TRUE);
     HDmemmove (rdcc->slot+idx, rdcc->slot+idx+1,
-               (rdcc->nused-idx) * sizeof(H5F_rdcc_ent_t));
+               (rdcc->nused-(idx+1)) * sizeof(H5F_rdcc_ent_t));
     rdcc->nused -= 1;
     rdcc->nbytes -= ent->chunk_size;
     
@@ -911,9 +911,6 @@ H5F_istore_dest (H5F_t *f)
     FUNC_ENTER (H5F_istore_dest, FAIL);
 
     for (i=rdcc->nused-1; i>=0; --i) {
-	if (H5F_istore_flush_entry (f, rdcc->slot+i, TRUE)<0) {
-	    nerrors++;
-	}
 	if (H5F_istore_preempt(f, i)<0) {
 	    nerrors++;
 	}

@@ -87,7 +87,10 @@ hid_t H5T_NATIVE_B16_g = FAIL;
 hid_t H5T_NATIVE_B32_g = FAIL;
 hid_t H5T_NATIVE_B64_g = FAIL;
 hid_t H5T_NATIVE_OPAQUE_g = FAIL;
-
+hid_t H5T_NATIVE_HSIZE_g = FAIL;
+hid_t H5T_NATIVE_HSSIZE_g = FAIL;
+hid_t H5T_NATIVE_HERR_g = FAIL;
+hid_t H5T_NATIVE_HBOOL_g = FAIL;
 
 /* The path database */
 static intn H5T_npath_g = 0;			/*num paths defined	*/
@@ -187,7 +190,35 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to initialize H5T layer");
     }
+
+    /* hsize_t */
+    dt = H5I_object (H5T_NATIVE_HSIZE_g = H5Tcopy (H5T_NATIVE_UINT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = sizeof(hsize_t);
+    dt->u.atomic.prec = 8*dt->size;
+    dt->u.atomic.offset = 0;
     
+    /* hssize_t */
+    dt = H5I_object (H5T_NATIVE_HSSIZE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = sizeof(hssize_t);
+    dt->u.atomic.prec = 8*dt->size;
+    dt->u.atomic.offset = 0;
+    
+    /* herr_t */
+    dt = H5I_object (H5T_NATIVE_HERR_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = sizeof(herr_t);
+    dt->u.atomic.prec = 8*dt->size;
+    dt->u.atomic.offset = 0;
+
+    /* hbool_t */
+    dt = H5I_object (H5T_NATIVE_HBOOL_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = sizeof(hbool_t);
+    dt->u.atomic.prec = 8*dt->size;
+    dt->u.atomic.offset = 0;
+
     /*------------------------------------------------------------
      * IEEE Types
      *------------------------------------------------------------ 
