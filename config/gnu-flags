@@ -151,7 +151,7 @@ case "$cc_vendor-$cc_version" in
 
     gcc-2.8*)
         # General
-        CFLAGS="$CFLAGS $ARCH -Wsign-compare"
+        # No changes from default GCC flags...
 
 	# Production
 	PROD_CFLAGS="$PROD_CFLAGS -fschedule-insns2"
@@ -161,7 +161,7 @@ case "$cc_vendor-$cc_version" in
 	;;
 
     gcc-2.95*)
-        # Append some extra warning flags that only gcc3+ know about
+        # Append some extra warning flags that only gcc2.95+ know about
 	CFLAGS="$CFLAGS -Wno-long-long"
 
 	# Flags are set
