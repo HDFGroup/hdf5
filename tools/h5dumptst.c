@@ -19,9 +19,9 @@
 #define FILE12 "tmany.h5"
 #define FILE13 "tstr.h5"
 #define FILE14 "tstr2.h5"
-#define FILE15 "enum.h5"
-#define FILE16 "objref.h5"
-#define FILE17 "datareg.h5"
+#define FILE15 "tenum.h5"
+#define FILE16 "tobjref.h5"
+#define FILE17 "tdatareg.h5"
 #define LENSTR 50
 #define LENSTR2 11
 
