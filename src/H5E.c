@@ -111,7 +111,8 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 
 /* Interface initialization? */
 static intn interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
+#define INTERFACE_INIT H5E_init_interface
+static herr_t H5E_init_interface (void);
 const hbool_t H5E_clearable_g = TRUE;	/* DO NOT CHANGE */
 
 /*
@@ -128,7 +129,34 @@ H5E_t		H5E_stack_g[1];
  * probably be part of the error stack so they're local to a thread.
  */
 herr_t (*H5E_auto_g)(void*) = (herr_t(*)(void*))H5Eprint;
-void *H5E_auto_data_g = stderr;
+void *H5E_auto_data_g = NULL;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_init_interface
+ *
+ * Purpose:	Initialize the H5E interface. `stderr' is an extern or
+ *		function on some systems so we can't initialize
+ *		H5E_auto_data_g statically.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, June 11, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5E_init_interface (void)
+{
+  FUNC_ENTER(H5E_init_interface, FAIL);
+  H5E_auto_data_g = stderr;
+  FUNC_LEAVE(SUCCEED);
+}
 
 
 /*-------------------------------------------------------------------------

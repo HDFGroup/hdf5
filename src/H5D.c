@@ -2596,6 +2596,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Dvlen_reclaim, FAIL);
+    H5TRACE4("e","iiix",type_id,space_id,plist_id,buf);
 
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(type_id) ||

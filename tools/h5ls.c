@@ -15,6 +15,12 @@
 #include <H5private.h>
 #include <h5tools.h>
 
+/*
+ * If defined then include the file name as part of the object name when
+ * printing full object names. Otherwise leave the file name off.
+ */
+#define H5LS_PREPEND_FILENAME
+
 /* Command-line switches */
 static int verbose_g = 0;		/*lots of extra output		     */
 static int width_g = 80;		/*output width in characters	     */
@@ -271,6 +277,9 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
  *              Thursday, November  5, 1998
  *
  * Modifications:
+ * 		Robb Matzke, 1999-06-11
+ *		Added the C9x types, but we still prefer to display the types
+ *		from the C language itself (like `int' vs. `int32_t').
  *
  *-------------------------------------------------------------------------
  */
@@ -303,6 +312,54 @@ display_native_type(hid_t type, int UNUSED indent)
 	printf("native double");
     } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
 	printf("native long double");
+    } else if (H5Tequal(type, H5T_NATIVE_INT8)) {
+	printf("native int8_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT8)) {
+	printf("native uint8_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT16)) {
+	printf("native int16_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT16)) {
+	printf("native uint16_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT32)) {
+	printf("native int32_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT32)) {
+	printf("native uint32_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT64)) {
+	printf("native int64_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT64)) {
+	printf("native uint64_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST8)) {
+	printf("native int_least8_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST8)) {
+	printf("native uint_least8_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST16)) {
+	printf("native int_least16_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST16)) {
+	printf("native uint_least16_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST32)) {
+	printf("native int_least32_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST32)) {
+	printf("native uint_least32_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST64)) {
+	printf("native int_least64_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST64)) {
+	printf("native uint_least64_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST8)) {
+	printf("native int_fast8_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST8)) {
+	printf("native uint_fast8_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST16)) {
+	printf("native int_fast16_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST16)) {
+	printf("native uint_fast16_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST32)) {
+	printf("native int_fast32_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST32)) {
+	printf("native uint_fast32_t");
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST64)) {
+	printf("native int_fast64_t");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST64)) {
+	printf("native uint_fast64_t");
     } else if (H5Tequal(type, H5T_NATIVE_B8)) {
 	printf("native 8-bit field");
     } else if (H5Tequal(type, H5T_NATIVE_B16)) {
@@ -973,6 +1030,8 @@ display_opaque_type(hid_t type, int indent)
  *              Thursday, November  5, 1998
  *
  * Modifications:
+ * 		Robb Matzke, 1999-06-11
+ *		Prints the OID of shared data types.
  *
  *-------------------------------------------------------------------------
  */
@@ -980,6 +1039,7 @@ static void
 display_type(hid_t type, int indent)
 {
     H5T_class_t		data_class = H5Tget_class(type);
+    H5G_stat_t		sb;
     
     /* Bad data type */
     if (type<0) {
@@ -987,9 +1047,17 @@ display_type(hid_t type, int indent)
 	return;
     }
 
-    /* Shared? */
-    if (H5Tcommitted(type)) printf("shared ");
-
+    /* Shared? If so then print the type's OID */
+    if (H5Tcommitted(type)) {
+	if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
+	    printf("shared-%lu:%lu:%lu:%lu ",
+		   sb.fileno[1], sb.fileno[0],
+		   sb.objno[1], sb.objno[0]);
+	} else {
+	    printf("shared ");
+	}
+    }
+    
     /* Print the type */
     if (display_native_type(type, indent) ||
 	display_ieee_type(type, indent) ||
@@ -1480,7 +1548,8 @@ ragged_list2(hid_t UNUSED ra, const char UNUSED *name)
  *		links don't correspond to actual objects we simply print the
  *		link information and return failure.
  *
- * Return:	Success:	never succeeds
+ * Return:	Success:	0 - an invalid object but successful return
+ *				of this function.
  *
  *		Failure:	-1
  *
@@ -1500,9 +1569,9 @@ link_open(hid_t location, const char *name)
     if (NULL==HDmemchr(buf, 0, sizeof(buf))) {
 	strcpy(buf+sizeof(buf)-4, "...");
     }
-    puts(buf);
+    fputs(buf, stdout);
 
-    return -1;
+    return 0;
 }
 
 
@@ -1594,7 +1663,7 @@ list (hid_t group, const char *name, void *_iter)
      * Show detailed information about the object, beginning with information
      * which is common to all objects.
      */
-    if (verbose_g>0) {
+    if (verbose_g>0 && H5G_LINK!=sb.type) {
 	if (sb.type>=0) H5Aiterate(obj, NULL, list_attr, NULL);
 	printf("    %-10s %lu:%lu:%lu:%lu\n", "Location:",
 	       sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
@@ -1612,7 +1681,7 @@ list (hid_t group, const char *name, void *_iter)
 	    puts("\"");
 	}
     }
-    if (sb.type>0 && dispatch_g[sb.type].list2) {
+    if (sb.type>=0 && dispatch_g[sb.type].list2) {
 	(dispatch_g[sb.type].list2)(obj, fullname);
     }
     
@@ -1620,7 +1689,9 @@ list (hid_t group, const char *name, void *_iter)
      * Close the object.
      */
  done:
-    if (sb.type>0 && obj>=0) (dispatch_g[sb.type].close)(obj);
+    if (sb.type>=0 && obj>=0 && dispatch_g[sb.type].close) {
+	(dispatch_g[sb.type].close)(obj);
+    }
     if (fullname) free(fullname);
     return 0;
 }
@@ -1631,8 +1702,7 @@ list (hid_t group, const char *name, void *_iter)
  *
  * Purpose:	Returns a malloc'd buffer that contains the PATH and BASE
  *		names separated by a single slash. It also removes duplicate
- *		and trailing slashes and insures that the name begins with a
- *		slash.
+ *		and trailing slashes.
  *
  * Return:	Success:	Ptr to fixed name from malloc()
  *
@@ -1653,8 +1723,10 @@ fix_name(const char *path, const char *base)
     int		len=0;
 
     if (path) {
-	/* Slash, followed by path, followed by slash */
-	if ('/'!=*path) prev = s[len++] = '/';
+	/* Path, followed by slash */
+#ifdef H5LS_PREPEND_FILENAME
+	if ('/'!=*path) s[len++] = '/';
+#endif
 	for (/*void*/; *path; path++) {
 	    if ('/'!=*path || '/'!=prev) prev = s[len++] = *path;
 	}
@@ -1779,15 +1851,20 @@ get_width(void)
 int
 main (int argc, char *argv[])
 {
-    hid_t	file, plist=H5P_DEFAULT, root;
-    const char	*fname = NULL;
+    hid_t	file=-1, plist=-1, root=-1;
+    char	*fname=NULL, *oname=NULL, *x;
     const char	*progname;
     const char	*s = NULL;
     char	*rest, *container=NULL;
     int		argno;
     H5G_stat_t	sb;
     iter_t	iter;
+    static char	root_name[] = "/";
 
+    /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
+    H5Eset_auto(NULL, NULL);
+
+    /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
 	     dataset_list1, dataset_list2);
     DISPATCH(H5G_GROUP, "Group", H5Gopen, H5Gclose,
@@ -1799,8 +1876,8 @@ main (int argc, char *argv[])
     DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
 	     NULL, ragged_list2);
 
-	/*init the programtype var fromthe tools lib*/
-	programtype = H5LS;
+    /* Init the program type for the tools lib*/
+    programtype = H5LS; /*global*/
 
     /* Name of this program without the path */
     if ((progname=strrchr(argv[0], '/'))) progname++;
@@ -1835,6 +1912,18 @@ main (int argc, char *argv[])
 	    string_g = TRUE;
 	} else if (!strncmp(argv[argno], "--width=", 8)) {
 	    width_g = (int)strtol(argv[argno]+8, &rest, 0);
+	    if (width_g<=0 || *rest) {
+		usage(progname);
+		exit(1);
+	    }
+	} else if (!strcmp(argv[argno], "--width")) {
+	    if (argno+1>=argc) {
+		usage(progname);
+		exit(1);
+	    } else {
+		s = argv[++argno];
+	    }
+	    width_g = (int)strtol(s, &rest, 0);
 	    if (width_g<=0 || *rest) {
 		usage(progname);
 		exit(1);
@@ -1914,66 +2003,94 @@ main (int argc, char *argv[])
     }
 
     /*
-     * The first non-switch argument is a file name.  If the file name
-     * contains a `%' then assume that a file family is being opened.
+     * If no arguments remain then print a usage message (instead of doing
+     * absolutely nothing ;-)
      */
-    if (argno<argc) {
-	fname = argv[argno++];
-    } else {
+    if (argno>=argc) {
 	usage(progname);
 	exit(1);
     }
-    if (strchr(fname, '%')) {
-	plist = H5Pcreate(H5P_FILE_ACCESS);
-	H5Pset_family(plist, 0, H5P_DEFAULT);
-    }
-    if ((file = H5Fopen(fname, H5F_ACC_RDONLY, plist))<0) exit (1);
-
+    
     /*
-     * The remaining optional arguments are the names of the objects to list.
-     * If there are no arguments then list `/'.
+     * Each remaining argument is an hdf5 file followed by an optional slash
+     * and object name.
+     *
+     * Example:	../dir1/foo/bar/baz
+     *          \_________/\______/
+     *             file       obj
+     *
+     * The dichotomy is determined by calling H5Fopen() repeatedly until it
+     * succeeds. The first call uses the entire name and each subsequent call
+     * chops off the last component. If we reach the beginning of the name
+     * then there must have been something wrong with the file (perhaps it
+     * doesn't exist).
      */
-    if (argno>=argc) {
-	if (grp_literal_g) {
-	    root = H5Gopen(file, "/");
-	    iter.container = "/";
-	    list(root, "/", &iter);
-	    H5Gclose(root);
-	} else {
-	    H5Gget_objinfo(file, "/", TRUE, &sb);
-	    sym_insert(&sb, "/");
-	    iter.container = "/";
-	    H5Giterate(file, "/", NULL, list, &iter);
-	}
-    } else {
-	for (/*void*/; argno<argc; argno++) {
-	    if (H5Gget_objinfo(file, argv[argno], TRUE, &sb)>=0 &&
-		H5G_GROUP==sb.type && !grp_literal_g) {
-		/*
-		 * Specified name is a group. List the complete contents of
-		 * the group.
-		 */
-		sym_insert(&sb, argv[argno]);
-		iter.container = container = fix_name("", argv[argno]);
-		H5Giterate(file, argv[argno], NULL, list, &iter);
-		free(container);
+    while (argno<argc) {
+	fname = argv[argno++];
+	oname = NULL;
+	file = -1;
 
-	    } else if ((root=H5Gopen(file, "/"))<0) {
-		exit(1); /*major problem!*/
-		
-	    } else {
-		/*
-		 * Specified name is a non-group object -- list that object.
-		 * The container for the object is everything up to the base
-		 * name.
-		 */
-		iter.container = "/";
-		list(root, argv[argno], &iter);
-		if (H5Gclose(root)<0) exit(1);
+	while (fname && *fname) {
+	    /* Choose a file driver*/
+	    plist = H5Pcreate(H5P_FILE_ACCESS);
+	    if (strchr(fname, '%')) {
+		H5Pset_family(plist, 0, H5P_DEFAULT);
 	    }
-	}
-    }
 
-    if (H5Fclose(file)<0) exit(1);
+	    /* Try to open the file */
+	    H5E_BEGIN_TRY {
+		file = H5Fopen(fname, H5F_ACC_RDONLY, plist);
+	    } H5E_END_TRY;
+	    H5Pclose(plist);
+	    if (file>=0) break; /*success*/
+
+	    /* Shorten the file name; lengthen the object name */
+	    x = oname;
+	    oname = strrchr(fname, '/');
+	    if (x) *x = '/';
+	    if (!oname) break;
+	    *oname = '\0';
+	}
+	if (file<0) {
+	    fprintf(stderr, "%s: unable to open file\n", fname);
+	}
+	if (oname) oname++;
+	if (!oname || !*oname) oname = root_name;
+
+	/* Open the object and display it's information */
+	if (H5Gget_objinfo(file, oname, TRUE, &sb)>=0 &&
+	    H5G_GROUP==sb.type && !grp_literal_g) {
+	    /*
+	     * Specified name is a group. List the complete contents of the
+	     * group.
+	     */
+	    sym_insert(&sb, oname);
+#ifdef H5LS_PREPEND_FILENAME
+	    iter.container = container = fix_name(fname, oname);
+#else
+	    iter.container = container = fix_name("", oname);
+#endif
+	    H5Giterate(file, oname, NULL, list, &iter);
+	    free(container);
+
+	} else if ((root=H5Gopen(file, "/"))<0) {
+	    exit(1); /*major problem!*/
+		
+	} else {
+	    /*
+	     * Specified name is a non-group object -- list that object.  The
+	     * container for the object is everything up to the base name.
+	     */
+#ifdef H5LS_PREPEND_FILENAME
+	    iter.container = fname;
+#else
+	    iter.container = "/";
+#endif
+	    list(root, oname, &iter);
+	    if (H5Gclose(root)<0) exit(1);
+	}
+	H5Fclose(file);
+    }
+    
     return 0;
 }

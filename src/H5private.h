@@ -545,18 +545,18 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgets(S)		gets(S)
 #define HDgetuid()		getuid()
 #define HDgmtime(T)		gmtime(T)
-#define HDisalnum(C)		isalnum(C)
-#define HDisalpha(C)		isalpha(C)
+#define HDisalnum(C)		isalnum((int)(C)) /*cast for solaris warning*/
+#define HDisalpha(C)		isalpha((int)(C)) /*cast for solaris warning*/
 #define HDisatty(F)		isatty(F)
-#define HDiscntrl(C)		iscntrl(C)
-#define HDisdigit(C)		isdigit(C)
-#define HDisgraph(C)		isgraph(C)
-#define HDislower(C)		islower(C)
-#define HDisprint(C)		isprint(C)
-#define HDispunct(C)		ispunct(C)
-#define HDisspace(C)		isspace(C)
-#define HDisupper(C)		isupper(C)
-#define HDisxdigit(C)		isxdigit(C)
+#define HDiscntrl(C)		iscntrl((int)(C)) /*cast for solaris warning*/
+#define HDisdigit(C)		isdigit((int)(C)) /*cast for solaris warning*/
+#define HDisgraph(C)		isgraph((int)(C)) /*cast for solaris warning*/
+#define HDislower(C)		islower((int)(C)) /*cast for solaris warning*/
+#define HDisprint(C)		isprint((int)(C)) /*cast for solaris warning*/
+#define HDispunct(C)		ispunct((int)(C)) /*cast for solaris warning*/
+#define HDisspace(C)		isspace((int)(C)) /*cast for solaris warning*/
+#define HDisupper(C)		isupper((int)(C)) /*cast for solaris warning*/
+#define HDisxdigit(C)		isxdigit((int)(C)) /*cast for solaris warning*/
 #define HDkill(P,S)		kill(P,S)
 #define HDlabs(X)		labs(X)
 #define HDldexp(X,N)		ldexp(X,N)
