@@ -15,7 +15,7 @@ SUBDIRS=
 DOCDIR=$(docdir)/hdf5/cpplus
 
 # Public doc files (to be installed)...
-PUB_DOCS=CppInterfaces.html CppUserNotes.doc CppUserNotes.pdf
+PUB_DOCS=
 
 # Other doc files (not to be installed)...
 PRIVATE_DOCS=
