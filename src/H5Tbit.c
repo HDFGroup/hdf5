@@ -629,39 +629,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_bit_neg2
- *
- * Purpose:	Bit-negate buffer.
- *              At this moment, START is always 0 and SIZE is always a
- *              multiply of 8 (in bit). 
- *
- * Return:	void
- *
- * Programmer:	Raymond Lu
- *              Wednesday, Jan 28, 2004
- *
- * Modifications:
- *
- * 		Need to generalize it to handle rand START and SIZE like
- * 		H5T_bit_inc.
- *
- *-------------------------------------------------------------------------
- */
-void
-H5T_bit_neg2(uint8_t *buf, size_t start, size_t size)
-{
-    size_t i;
-
-    assert(buf);
-    assert(size);
-    assert(start==0);
-
-    for(i=0; i<size/8; i++)
-        buf[i] = ~(buf[i]);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_bit_neg
  *
  * Purpose:	negate part of a bit sequence.  The bit 
