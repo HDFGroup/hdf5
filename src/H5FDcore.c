@@ -34,12 +34,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
-#undef MAX
-#define MAX(X,Y)	((X)>(Y)?(X):(Y))
-
-#undef MIN
-#define MIN(X,Y)	((X)<(Y)?(X):(Y))
-
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_CORE_g = 0;
 
@@ -82,7 +76,7 @@ typedef struct H5FD_core_fapl_t {
  * REGION_OVERFLOW:	Checks whether an address and size pair describe data
  *			which can be addressed entirely in memory.
  */
-#define MAXADDR 		((haddr_t)((~(size_t)0)-1))
+#define MAXADDR 		((haddr_t)(~(size_t)0))
 #define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) ||			      \
 				 ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
