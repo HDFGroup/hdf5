@@ -37,10 +37,19 @@
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
+#   include <time.h>
+
+#if defined(WIN32)
+#	include<sys\types.h>
+#	include<io.h>
+#define F_OK 00
+#define R_OK 04
+#define W_OK 02
+#else
 #   include <sys/time.h>
 #   include <sys/types.h>
-#   include <time.h>
 #   include <unistd.h>
+#endif//if defined(WIN32)
 #endif
 
 /*
@@ -59,6 +68,11 @@
 #   define __unused__		/*void*/
 #else
 #   define __unused__		__attribute__((unused))
+#endif
+
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
 #endif
 
 /* Does the compiler expand __FUNCTION__? */
@@ -149,8 +163,13 @@ typedef unsigned        uint64;
 typedef long            int64;
 typedef unsigned long   uint64;
 #elif SIZEOF_LONG_LONG==8
+#if defined(WIN32)
+typedef __int64       int64;
+typedef unsigned __int64 uint64;
+#else
 typedef long long       int64;
 typedef unsigned long long uint64;
+#endif
 #else
 #  error "no 64-bit integer type"
 #endif

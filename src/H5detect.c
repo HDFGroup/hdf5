@@ -32,13 +32,15 @@ static const char *FileHeader = "\n\
 #undef NDEBUG
 #include <assert.h>
 #include <math.h>
-#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 #include <time.h>
+#if !defined(WIN32)
 #include <unistd.h>
+#include <sys/time.h>
+#include <pwd.h>
+#endif
 
 #include <H5config.h>
 
@@ -893,7 +895,9 @@ bit.\n";
     if (pwd || real_name[0] || host_name[0]) {
         printf(" *\t\t\t");
         if (real_name[0]) printf("%s <", real_name);
+#if !defined(WIN32)
         if (pwd) fputs(pwd->pw_name, stdout);
+#endif
         if (host_name[0]) printf("@%s", host_name);
         if (real_name[0]) printf(">");
         putchar('\n');
@@ -958,10 +962,14 @@ main(void)
     DETECT_I(long,                LLONG,   d[nd]); nd++;
     DETECT_I(unsigned long,       ULLONG,  d[nd]); nd++;
 #else
+#if defined(WIN32)
+	DETECT_I(__int64,	  	  LLONG,   d[nd]); nd++;
+    DETECT_I(unsigned __int64,  ULLONG,  d[nd]); nd++;
+#else
     DETECT_I(long long,	  	  LLONG,   d[nd]); nd++;
     DETECT_I(unsigned long long,  ULLONG,  d[nd]); nd++;
 #endif
-    
+#endif
     DETECT_F(float,		  FLOAT,   d[nd]); nd++;
     DETECT_F(double,		  DOUBLE,  d[nd]); nd++;
 

@@ -39,9 +39,12 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
+#if defined(WIN32)
+#include <time.h>
+#else
 #include <sys/time.h>
 #include <sys/resource.h>
-
+#endif
 /* We need this on Irix64 even though we've included stdio.h as documented */
 FILE *fdopen(int fd, const char *mode);
 
@@ -658,14 +661,22 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		case 'H':
 		    if (sizeof(hsize_t)==sizeof(long)) {
 			HDstrcpy (modifier, "l");
+#if defined(WIN32)
+			} else if (sizeof(hsize_t)==sizeof(__int64)) {
+#else
 		    } else if (sizeof(hsize_t)==sizeof(long long)) {
+#endif
 			HDstrcpy (modifier, PRINTF_LL_WIDTH);
 		    }
 		    break;
 		case 'Z':
 		    if (sizeof(size_t)==sizeof(long)) {
 			HDstrcpy (modifier, "l");
+#if defined(WIN32)
+			} else if (sizeof(size_t)==sizeof(__int64)) {
+#else
 		    } else if (sizeof(size_t)==sizeof(long long)) {
+#endif
 			HDstrcpy (modifier, PRINTF_LL_WIDTH);
 		    } else if (sizeof(size_t)==sizeof(int)) {
 			modifier[0] = '\0';
@@ -713,7 +724,11 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    long x = va_arg (ap, long);
 		    n = fprintf (stream, template, x);
 		} else {
+#if defined(WIN32)
+			__int64 x = va_arg(ap, __int64);
+#else
 		    long long x = va_arg (ap, long long);
+#endif
 		    n = fprintf (stream, template, x);
 		}
 		break;
@@ -732,8 +747,12 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    unsigned long x = va_arg (ap, unsigned long);
 		    n = fprintf (stream, template, x);
 		} else {
+#if defined(WIN32)
+			unsigned __int64 x = va_arg (ap, unsigned __int64);
+#else
 		    unsigned long long x = va_arg (ap, unsigned long long);
-		    n = fprintf (stream, template, x);
+#endif
+			n = fprintf (stream, template, x);
 		}
 		break;
 
@@ -990,6 +1009,7 @@ H5_timer_reset (H5_timer_t *timer)
 void
 H5_timer_begin (H5_timer_t *timer)
 {
+#if !defined(WIN32)
 #ifdef HAVE_GETRUSAGE
     struct rusage	rusage;
 #endif
@@ -1010,6 +1030,7 @@ H5_timer_begin (H5_timer_t *timer)
 
     gettimeofday (&etime, NULL);
     timer->etime = (double)etime.tv_sec + (double)etime.tv_usec/1e6;
+#endif
 }
 
 

@@ -82,8 +82,14 @@ typedef int hbool_t;
  * with small address spaces these are defined to be larger.
  */
 #if defined(HAVE_LARGE_HSIZET) && SIZEOF_SIZE_T<SIZEOF_LONG_LONG
+#if defined(WIN32)
+typedef unsigned __int64 hsize_t;
+typedef signed __int64 hssize_t;
+typedef signed int ssize_t;
+#else
 typedef unsigned long long hsize_t;
 typedef signed long long hssize_t;
+#endif
 #else
 typedef size_t hsize_t;
 typedef ssize_t hssize_t;
