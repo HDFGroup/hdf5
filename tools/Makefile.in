@@ -15,7 +15,8 @@ CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
 ## Test programs and scripts.
 TEST_PROGS=talign
-TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@ @TESTH4TOH5@
+TEST_SCRIPTS=$(srcdir)/testh5dump.sh $(srcdir)/testh5ls.sh \
+	@TESTH5TOH4@ @TESTH4TOH5@
 
 ## These are our main targets: library and tools. We link this library
 ## statically because some systems can only link executables to a single
