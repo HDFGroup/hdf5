@@ -1828,7 +1828,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	    file = NULL; /*to prevent destruction of wrong file*/
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only");
 	}
-	file = H5F_new(file->shared, fcpl_id, fapl_id);
+
+        if ((file = H5F_new(file->shared, fcpl_id, fapl_id)) == NULL)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object");
+
 	lf = file->shared->lf;
     } else if (flags!=tent_flags) {
 	/*
@@ -2672,42 +2675,23 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     if (flags & H5F_FLUSH_ALLOC_ONLY) {
 	haddr_t addr;
 
-#ifdef H5_HAVE_FPHDF5
         /*
-         * If this is an FPHDF5 file driver, then we only want the
-         * captain process allocating the space. The rest of the
-         * processes should just get the broadcast message sent from the
-         * captain.
+         * Allocate space for the userblock, superblock, and driver info
+         * block. We do it with one allocation request because the
+         * userblock and superblock need to be at the beginning of the
+         * file and only the first allocation request is required to
+         * return memory at format address zero.
+         *
+         * Note: This is safe for FPHDF5. We only set H5F_FLUSH_ALLOC_ONLY
+         * from the H5F_open function. That function sets it so that only
+         * the captain process will actually perform any allocations,
+         * which is what we want here. In the H5FD_alloc function, the
+         * allocated address is broadcast to the other processes.
          */
-        if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
-                H5FD_fphdf5_is_captain(f->shared->lf)) {
-#endif  /* H5_HAVE_FPHDF5 */
+        H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
 
-            /*
-             * Allocate space for the userblock, superblock, and driver
-             * info block. We do it with one allocation request because
-             * the userblock and superblock need to be at the beginning
-             * of the file and only the first allocation request is
-             * required to return memory at format address zero.
-             */
-            H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
-
-            addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-                              ((hsize_t)f->shared->base_addr +
-                                            superblock_size + driver_size));
-
-#ifdef H5_HAVE_FPHDF5
-        }
-
-        if (H5FD_is_fphdf5_driver(f->shared->lf)) {
-            int mrc;
-
-            if ((mrc = MPI_Bcast(&addr, 1, HADDR_AS_MPI_TYPE,
-                                 (int)H5FP_capt_barrier_rank,
-                                 H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
-                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mrc);
-        }
-#endif  /* H5_HAVE_FPHDF5 */
+        addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                          ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
 
         if (HADDR_UNDEF == addr)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
@@ -2763,25 +2747,12 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 	} /* end if */
     } /* end else */
 
-#ifdef H5_HAVE_FPHDF5
-    /*
-     * We only want the captain to perform the flush of the metadata to
-     * the file.
-     */
-    if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
-            H5FD_fphdf5_is_captain(f->shared->lf)) {
-#endif  /* H5_HAVE_FPHDF5 */
-
-        /* If we're not just allocating... */
-        if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0)
-            /* ...flush file buffers to disk. */
-            if (H5FD_flush(f->shared->lf, dxpl_id,
-                           (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
-
-#ifdef H5_HAVE_FPHDF5
-    }
-#endif  /* H5_HAVE_FPHDF5 */
+    /* If we're not just allocating... */
+    if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0)
+        /* ...flush file buffers to disk. */
+        if (H5FD_flush(f->shared->lf, dxpl_id,
+                       (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
 
     /* Check flush errors for children - errors are already on the stack */
     ret_value = (nerrors ? FAIL : SUCCEED);

@@ -1319,6 +1319,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
         unsigned        capt_only = 0;
         H5FP_status_t   status;
         H5P_genplist_t *plist;
+        H5FP_alloc_t    fp_alloc;
 
         /* Get the data xfer property list */
         if ((plist = H5I_object(dxpl_id)) == NULL)
@@ -1333,25 +1334,30 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
          * If the captain is the only one who should allocate resources,
          * then do just that...
          */
-        if (!capt_only || H5FD_fphdf5_is_captain(file))
+        if (!capt_only || H5FD_fphdf5_is_captain(file)) {
             /* Send the request to the SAP */
-            if (H5FP_request_allocate(file, type, size, &ret_value, &req_id,
-                                      &status) != SUCCEED)
+            if (H5FP_request_allocate(file, type, size, &fp_alloc.addr,
+                                      &fp_alloc.eoa, &req_id, &status) != SUCCEED)
                 /* FIXME: Should we check the "status" variable here? */
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF,
                             "server couldn't allocate from file");
+        }
 
         if (capt_only) {
             int mrc;
 
-            if ((mrc = MPI_Bcast(&ret_value, 1, HADDR_AS_MPI_TYPE,
+            if ((mrc = MPI_Bcast(&fp_alloc, 1, H5FP_alloc,
                                  (int)H5FP_capt_barrier_rank,
                                  H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(HADDR_UNDEF, "MPI_Bcast failed", mrc);
         }
 
+
+        /* Set the EOA for all processes. This doesn't fail. */
+        file->cls->set_eoa(file, fp_alloc.eoa);
+
         /* We've succeeded -- return the value */
-        HGOTO_DONE(ret_value);
+        HGOTO_DONE(fp_alloc.addr);
     }
 #endif  /* H5_HAVE_FPHDF5 */
 

@@ -231,6 +231,7 @@ typedef struct {
     H5FP_status_t   status;     /* Status of the request                    */
     H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     haddr_t         addr;       /* Address of the metadata                  */
+    haddr_t         eoa;        /* End of address space                     */
 } H5FP_alloc_t;
 
 extern MPI_Datatype H5FP_alloc; /* MPI datatype for the H5FP_alloc obj      */
@@ -285,7 +286,8 @@ extern herr_t H5FP_request_close(H5FD_t *file, unsigned sap_file_id,
 
 extern herr_t H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type,
                                     hsize_t size, haddr_t *addr,
-                                    unsigned *req_id, H5FP_status_t *status);
+                                    haddr_t *eoa, unsigned *req_id,
+                                    H5FP_status_t *status);
 extern herr_t H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type,
                                 haddr_t addr, hsize_t size,
                                 unsigned *req_id, H5FP_status_t *status);

@@ -613,7 +613,8 @@ done:
  */
 herr_t
 H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type, hsize_t size,
-                      haddr_t *addr, unsigned *req_id, H5FP_status_t *status)
+                      haddr_t *addr, haddr_t *eoa, unsigned *req_id,
+                      H5FP_status_t *status)
 {
     H5FP_alloc_t    sap_alloc;
     H5FP_request_t  req;
@@ -652,6 +653,7 @@ H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type, hsize_t size,
 
     *status = H5FP_STATUS_OK;
     *addr = sap_alloc.addr;
+    *eoa = sap_alloc.eoa;
 
 done:
     *req_id = req.req_id;

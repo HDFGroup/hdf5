@@ -1497,9 +1497,12 @@ H5FP_sap_handle_alloc_request(H5FP_request_t *req)
          * Whatta pain.
          */
         if ((sap_alloc.addr = H5FD_alloc((H5FD_t*)&info->file, req->mem_type, H5P_DEFAULT,
-                                     req->meta_block_size)) == HADDR_UNDEF)
+                                         req->meta_block_size)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                         "SAP unable to allocate file memory");
+
+        /* Get the EOA from the file. This call doesn't fail. */
+        sap_alloc.eoa = ((H5FD_t*)&info->file)->cls->get_eoa((H5FD_t*)&info->file);
 
         if ((mrc = MPI_Send(&sap_alloc, 1, H5FP_alloc, (int)req->proc_rank,
                             H5FP_TAG_ALLOC, H5FP_SAP_COMM)) != MPI_SUCCESS)

@@ -399,7 +399,7 @@ H5FP_commit_sap_datatypes(void)
 
     /* Commit the H5FP_alloc datatype */
     block_length[0] = 4;
-    block_length[1] = 1;
+    block_length[1] = 2;
     old_types[0] = MPI_UNSIGNED;
     old_types[1] = HADDR_AS_MPI_TYPE;
     MPI_Address(&sap_alloc.req_id, &displs[0]);

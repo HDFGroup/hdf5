@@ -1402,9 +1402,6 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write, FAIL);
 
-HDfprintf(stderr, "%s: Entering: rank==%d, addr==%a, size==%Zu\n",
-          FUNC, file->mpi_rank, addr, size);
-
     /* check args */
     assert(file);
     assert(file->pub.driver_id == H5FD_FPHDF5);
@@ -1447,9 +1444,6 @@ HDfprintf(stderr, "%s: Entering: rank==%d, addr==%a, size==%Zu\n",
                         &block_before_meta_write) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get H5AC property");
 
-HDfprintf(stderr, "%s: %d: block_before_meta_write == %d\n", FUNC,
-          H5FD_fphdf5_mpi_rank(_file), block_before_meta_write);
-
         if (block_before_meta_write)
             if ((mrc = MPI_Barrier(file->barrier_comm)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mrc);
@@ -1478,8 +1472,6 @@ HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
 
         switch (sap_status) {
         case H5FP_STATUS_OK:
-HDfprintf(stderr, "%s: %d: Wrote the data to the SAP\n", FUNC,
-          H5FD_fphdf5_mpi_rank(_file));
             /* WAH-HOO! We've written it! We can leave now */
             /* Forget the EOF value (see H5FD_fphdf5_get_eof()) */
             file->eof = HADDR_UNDEF;
@@ -1501,7 +1493,6 @@ HDfprintf(stderr, "%s: Couldn't write metadata to SAP (%d)\n",
     ret_value = H5FD_fphdf5_write_real(_file, dxpl_id, mpi_off, size_i, buf);
 
 done:
-HDfprintf(stderr, "%s: Leaving\n", FUNC);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1535,9 +1526,6 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write_real, FAIL);
-
-HDfprintf(stderr, "%s: %d: Entering: addr=%a, size=%Zu\n", FUNC,
-          H5FD_fphdf5_mpi_rank(_file), (haddr_t)mpi_off, size);
 
     /* check args */
     assert(file);
@@ -1602,22 +1590,6 @@ HDfprintf(stderr, "%s: %d: Entering: addr=%a, size=%Zu\n", FUNC,
  
     /* Write the data. */
     assert(xfer_mode == H5FD_MPIO_INDEPENDENT || xfer_mode == H5FD_MPIO_COLLECTIVE);
-
-    {
-        int i;
-
-        sleep(3);
-        HDfprintf(stderr, "%s: writing at %a\n", FUNC, (haddr_t)mpi_off);
-
-        for (i = 0; i < size; ++i) {
-            if (i % 7 == 0)
-                HDfprintf(stderr, "\n");
-
-            HDfprintf(stderr, "\t0x%02x", 0xff & ((char*)buf)[i]);
-        }
-
-        HDfprintf(stderr, "\n");
-    }
 
     if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
@@ -1688,7 +1660,6 @@ HDfprintf(stderr, "%s: %d: Entering: addr=%a, size=%Zu\n", FUNC,
     file->eof = HADDR_UNDEF;
 
 done:
-HDfprintf(stderr, "%s: %d: Leaving (%d)\n", FUNC, H5FD_fphdf5_mpi_rank(_file), ret_value);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1714,9 +1685,6 @@ H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_flush, FAIL);
-
-HDfprintf(stderr, "%s: %d: Entering\n",
-          FUNC, H5FD_fphdf5_mpi_rank(_file));
 
     /* check args */
     assert(file);
@@ -1745,29 +1713,28 @@ HDfprintf(stderr, "%s: %d: Entering\n",
          * finished making it the shorter length, potentially truncating
          * the file and dropping the new data written)
          */
-HDfprintf(stderr, "%s: %d: MPI_Barrier==%d\n", FUNC, file->mpi_rank, file->barrier_comm);
-        if ((mrc = MPI_Barrier(file->barrier_comm)) != MPI_SUCCESS)
+        if ((mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mrc);
 
         /* Update the 'last' eoa value */
         file->last_eoa = file->eoa;
     }
 
-    if (H5FP_request_flush_metadata(_file, file->file_id, dxpl_id,
-                                    &req_id, &status) != SUCCEED) {
-        /* FIXME: This failed */
+    /* Only the captain process needs to flush the metadata. */
+    if (H5FD_fphdf5_is_captain(_file)) {
+        if (H5FP_request_flush_metadata(_file, file->file_id, dxpl_id,
+                                        &req_id, &status) != SUCCEED) {
+            /* FIXME: This failed */
 HDfprintf(stderr, "%s:%d: Flush failed (%d)\n", FUNC, __LINE__, status);
+        }
+
+        /* Only sync the file if we are not going to immediately close it */
+        if (!closing)
+            if ((mrc = MPI_File_sync(file->f)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mrc);
     }
 
-    /* Only sync the file if we are not going to immediately close it */
-    if (!closing)
-        if ((mrc = MPI_File_sync(file->f)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mrc);
-
 done:
-HDfprintf(stderr, "%s: %d: Leaving\n",
-          FUNC, H5FD_fphdf5_mpi_rank(_file));
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
