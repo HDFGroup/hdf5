@@ -134,8 +134,8 @@ typedef struct
 #define MISC8_DSETNAME9         "Dataset9"
 #define MISC8_DSETNAME10        "Dataset10"
 #define MISC8_RANK              2
-#define MISC8_DIM0              100
-#define MISC8_DIM1              100
+#define MISC8_DIM0              50
+#define MISC8_DIM1              50 
 #define MISC8_CHUNK_DIM0        10
 #define MISC8_CHUNK_DIM1        10
 
