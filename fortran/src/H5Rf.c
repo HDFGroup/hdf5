@@ -221,7 +221,7 @@ nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type)
       * Call H5Rget_object_type function.
       */
      c_dset_id = *dset_id;
-     c_obj_type = H5Rget_object_type(c_dset_id, &ref_c);
+     c_obj_type = H5Rget_obj_type(c_dset_id, H5R_OBJECT, &ref_c);
      if(c_obj_type < 0) return ret_value;
      *obj_type = (int_f)c_obj_type;
      ret_value = 0;     
