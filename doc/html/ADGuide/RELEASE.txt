@@ -1,6 +1,5 @@
-
- 
-                       HDF5 Release 1.4.2 under construction
+HDF5 version 1.4.1-post2 released on Sat May 12 23:46:31 CDT 2001
+================================================================================
 
 
 INTRODUCTION
@@ -37,9 +36,18 @@ CONTENTS
 New Features
 ============
 
+    * File sizes greater than 2GB are now supported on Linux systems with
+      version 2.4.x or higher kernels.
+    * Added a global string variable H5_lib_vers_info_g which holds the
+      HDF5 library version information.  This can be used to identify
+      an hdf5 library or hdf5 application binary.
+      Also added a verification of the consistency between H5_lib_vers_info_g
+      and other version information in the source code.
+
 
 Bug Fixes since HDF5-1.4.1 Release
 ==================================
+
     * Fixed bug with non-zero userblock sizes causing raw data to not
       write correctly.
     * Fixed problems with Pablo build and linking with non-standard MPI I/O.
@@ -47,7 +55,13 @@ Bug Fixes since HDF5-1.4.1 Release
       works correctly.
     * IMPORTANT: Fixed file metadata corruption bug which could cause metadata
       data loss in certain situations.
-
+    * The allocation by alignment (H5Pset_alignment) feature code somehow
+      got dropped in some 1.3.x version. Re-implemented it with "new and
+      improved" algorithm.  It keeps track of "wasted" file-fragment in
+      the free-list too.
+    * H5 <-> GIF convertor has been added. This is available under
+      tools/gifconv. The convertor supports the ability to create animated
+      gifs as well.
 
 Documentation
 =============
@@ -86,6 +100,7 @@ Supported Configuration Features Summary
 
     * See "Supported Configuration Features Summary" section for the HDF5
       1.4.0 release in the HISTORY.txt file.
+
 
 Known Problems
 ==============

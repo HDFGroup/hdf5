@@ -1,4 +1,4 @@
-HDF5 library version 1.4.1-post2 currently under development
+HDF5 library version 1.4.1-post3 currently under development
 ================================================================================
 
 
