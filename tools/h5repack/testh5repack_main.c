@@ -96,6 +96,82 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: test_filter_none
+ *
+ * Purpose: 
+ *
+ * 1) delete filters form the filter pipeline
+ * 2) use the h5diff utility to compare the input and output file; 
+ *     it returns RET==0 if the objects have the same data
+ * 3) use API functions to verify the compression/chunking input on the output file
+ *
+ * Return: Success: zero
+ *  Failure: 1
+ *
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *             September, 19, 2003
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_filter_none(void)
+{
+ pack_opt_t  pack_options;
+ diff_opt_t  diff_options;
+ memset(&diff_options, 0, sizeof (diff_opt_t));
+ memset(&pack_options, 0, sizeof (pack_opt_t));
+
+ TESTING("    delete filters");
+
+/*-------------------------------------------------------------------------
+ * test the NONE global option
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_gzip:NONE",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+/*-------------------------------------------------------------------------
+ * test the NONE specific option; uncompress a dataset
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_gzip:NONE",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:NONE",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ 
+ PASSED();  
+ return 0; 
+ 
+error:                                                       
+ return 1;
+
+
+}
+
+/*-------------------------------------------------------------------------
  * Function: test_filter_deflate
  *
  * Purpose: 
@@ -182,7 +258,8 @@ test_filter_deflate(void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- 
+
+
  PASSED();  
 #else
  SKIPPED();
@@ -193,10 +270,7 @@ test_filter_deflate(void)
 error:                                                       
  return 1;
 #endif
-
-
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: test_filter_szip
@@ -347,9 +421,7 @@ error:
  return 1;
 #endif
 
-
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: test_filter_checksum 
@@ -742,6 +814,9 @@ int main (void)
 
  /* test a copy with no filters */
  nerrors += test_copy();
+
+ /* test a copy with the delete filters option */
+ nerrors += test_filter_none();
 
  /* test a copy with the deflate filter */
  nerrors += test_filter_deflate();

@@ -155,7 +155,8 @@ int print_filters(hid_t dcpl_id)
  * Function: apply_filters
  *
  * Purpose: apply the filters in the object to the property list; 
- *  do extra checking in the case of SZIP
+ *  do extra checking in the case of SZIP; delete all filters in the case
+ *  of H5Z_FILTER_NONE present in the PACK_INFO_T filter array
  *
  * Return: 0, ok, -1 no
  *
@@ -171,55 +172,55 @@ int apply_filters(hid_t dcpl_id,
                   pack_opt_t *options, /* repack options */
                   pack_info_t *obj)    /* info about object to filter */
 {
- int          nfilters;       /* number of filters */
- unsigned     filt_flags;     /* filter flags */
- H5Z_filter_t filtn;          /* filter identification number */
- unsigned     cd_values[20];  /* filter client data values */
- size_t       cd_nelmts;      /* filter client number of values */
- char         f_name[256];    /* filter/file name */
- int          i, j;
+ int          nfilters;       /* number of filters in DCPL */
  unsigned     aggression;     /* the deflate level */
  unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
  unsigned     szip_pixels_per_block;
- 
+ int          i;
+
  /* get information about input filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
   return -1;
  
- for (i=0; i<nfilters; i++) 
- {
-  cd_nelmts = NELMTS(cd_values);
-  filtn = H5Pget_filter(dcpl_id, 
-   (unsigned)i, 
-   &filt_flags, 
-   &cd_nelmts,
-   cd_values, 
-   sizeof(f_name), 
-   f_name);
- } 
+/*-------------------------------------------------------------------------
+ * check if we have the H5Z_FILTER_NONE filter
+ * if so, just delete all filters from the DCPL and exit
+ *-------------------------------------------------------------------------
+ */
 
-/* 
- the type of filter and additional parameter 
- type can be one of the filters
- H5Z_FILTER_NONE       0,  uncompress if compressed
- H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
- H5Z_FILTER_SHUFFLE    2 , shuffle the data
- H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
- H5Z_FILTER_SZIP       4 , szip compression 
-*/
- for ( j=0; j<obj->nfilters; j++)
+ for ( i=0; i<obj->nfilters; i++)
  {
-  switch (obj->filter[j].filtn)
+  if (obj->filter[i].filtn==H5Z_FILTER_NONE)
   {
-  case H5Z_FILTER_NONE:
-   
+   if (nfilters && H5Pdelete_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
+    return -1;
+
+   return 1;
+  }
+ }
+
+
+/*-------------------------------------------------------------------------
+ * the type of filter and additional parameter 
+ * type can be one of the filters
+ * H5Z_FILTER_NONE       0,  uncompress if compressed
+ * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
+ * H5Z_FILTER_SHUFFLE    2 , shuffle the data
+ * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
+ * H5Z_FILTER_SZIP       4 , szip compression 
+ *-------------------------------------------------------------------------
+ */
+
+ for ( i=0; i<obj->nfilters; i++)
+ {
+  switch (obj->filter[i].filtn)
+  {
+  default:
    break;
-   
    
   case H5Z_FILTER_DEFLATE:
    
-   
-   aggression=obj->filter[j].cd_values[0];
+   aggression=obj->filter[i].cd_values[0];
    
    /* set up for deflated data */
    if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
@@ -232,7 +233,7 @@ int apply_filters(hid_t dcpl_id,
    
   case H5Z_FILTER_SZIP:
    
-   szip_pixels_per_block=obj->filter[j].cd_values[0];
+   szip_pixels_per_block=obj->filter[i].cd_values[0];
    
    /* check szip parameters */
    if (check_szip(obj->chunk.rank,
@@ -273,13 +274,10 @@ int apply_filters(hid_t dcpl_id,
     return -1;
    
    break;
-   
-   
-  default:
-   break;
+
    
   } /* switch */
- }/*j*/
+ }/*i*/
 
  return 0;
 }

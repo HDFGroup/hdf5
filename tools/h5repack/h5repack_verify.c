@@ -47,11 +47,15 @@ int has_filter(hid_t dcpl_id,
  
  /* if no information about the input filter is requested return exit */
  if (filtnin==-1)
-  return 1;
+  return 1; 
  
  /* get information about filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
   return -1;
+
+ /* if we do not have filters and the requested filter is NONE, return 1 */
+ if (!nfilters && filtnin==H5Z_FILTER_NONE)
+  return 1;
  
  for (i=0; i<nfilters; i++) 
  {
@@ -190,11 +194,14 @@ int h5repack_verify(const char *fname,
   }
 
 /*-------------------------------------------------------------------------
- * layout check
+ * layout check; check only if a filter exists
  *-------------------------------------------------------------------------
  */
-  if (has_layout(dcpl_id,obj)==0)
-   ret=0;
+  if (obj->filter[j].filtn>H5Z_FILTER_NONE )
+  {
+   if (has_layout(dcpl_id,obj)==0)
+    ret=0;
+  }
 
 /*-------------------------------------------------------------------------
  * close
@@ -248,7 +255,7 @@ int h5repack_verify(const char *fname,
   * filter check
   *-------------------------------------------------------------------------
   */
-    if (options->all_filter==1){
+    if (options->all_filter==1 ){
      if (has_filter(dcpl_id,options->filter_g.filtn)==0)
       ret=0;
     }

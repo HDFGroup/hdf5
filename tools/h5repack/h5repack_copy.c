@@ -168,6 +168,7 @@ int do_copy_objects(hid_t fidin,
  for ( i = 0; i < travt->nobjs; i++)
  {
 
+  buf=NULL;
   switch ( travt->objs[i].type )
   {
 /*-------------------------------------------------------------------------
@@ -283,7 +284,7 @@ int do_copy_objects(hid_t fidin,
      if (rank)
      {
       /* filters require CHUNK layout; if we do not have one define a default */
-      if (obj.chunk.rank==0)
+      if (obj.chunk.rank<=0)
       {
        obj.chunk.rank=rank;
        for (j=0; j<rank; j++) 

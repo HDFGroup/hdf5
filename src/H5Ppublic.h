@@ -299,6 +299,8 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
+H5_DLL herr_t H5Pdelete_filter(hid_t plist_id, H5Z_filter_t filter);
+
 
 #ifdef __cplusplus
 }

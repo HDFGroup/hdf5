@@ -624,7 +624,7 @@ int h5trav_getindext(const char *name, trav_table_t *table)
   result = (int)(pdest - table->objs[i].name);
 
   /* found at position 1, meaning without '/' */
-  if( pdest != NULL && result==1 )
+  if( pdest != NULL && result==1 && strlen(table->objs[i].name)-1==strlen(name))
    return i;
 
   /* search also in the list of links */

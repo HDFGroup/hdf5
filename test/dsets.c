@@ -3074,6 +3074,126 @@ error:
     return -1;
 } /* end test_compare_dcpl() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_filter_delete
+ *
+ * Purpose: Tests deletion of filters from a dataset creation property list
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: Pedro Vicente
+ *              Monday, January 26, 2004
+ *
+ * Modifications:
+ *             
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filter_delete(hid_t file)
+{
+ H5Z_filter_t filtn;     /* filter identification number */
+ hid_t        dsid;      /* dataset ID */
+ hid_t        sid;       /* dataspace ID */ 
+ hid_t        dcpl;      /* dataset creation property list ID */
+ hid_t        dcpl1;     /* dataset creation property list ID */
+ hsize_t      dims[2] = {20,20}; /* dataspace dimensions */
+ hsize_t      chunk_dims[2] = {10,10};  /* chunk dimensions */
+ size_t       nfilters;   /* number of filters in DCPL */
+ size_t       i;
+
+ TESTING("filter deletion");
+
+ /* Create the data space */
+ if ((sid = H5Screate_simple(2, dims, NULL))<0) goto error;
+  
+ /* Create dcpl  */
+ if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+ if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) goto error;
+
+#if defined H5_HAVE_FILTER_FLETCHER32 
+ if (H5Pset_fletcher32 (dcpl)<0) goto error;
+#endif
+
+#if defined H5_HAVE_FILTER_DEFLATE
+ if (H5Pset_deflate (dcpl, 6)<0) goto error;
+#endif
+
+#if defined H5_HAVE_FILTER_SHUFFLE 
+ if (H5Pset_shuffle (dcpl)<0) goto error;
+#endif
+
+ /* Create a dataset */
+ if ((dsid = H5Dcreate(file,"dsetdel", H5T_NATIVE_INT, sid, dcpl)) <0) goto error;
+
+ /* Get copy of dataset's dataset creation property list */
+ if ((dcpl1=H5Dget_create_plist(dsid))<0) goto error;
+
+/*----------------------------------------------------------------------
+ * delete the deflate filter
+ *---------------------------------------------------------------------- 
+ */
+
+#if defined H5_HAVE_FILTER_DEFLATE
+ 
+ /* delete the deflate filter */
+ if (H5Pdelete_filter(dcpl1,H5Z_FILTER_DEFLATE)<0) goto error;
+ 
+ /* get information about filters */
+ if ((nfilters = H5Pget_nfilters(dcpl1))<0) goto error; 
+
+ /* check if filter was deleted */
+ for (i=0; i<nfilters; i++) 
+ {
+  filtn = H5Pget_filter(dcpl1,i,0,0,0,0,0);
+  if (H5Z_FILTER_DEFLATE==filtn)
+   goto error; 
+ } 
+
+#endif /*H5_HAVE_FILTER_DEFLATE*/
+ 
+/*----------------------------------------------------------------------
+ * delete all filters
+ *---------------------------------------------------------------------- 
+ */
+ /* delete all filters */
+ if (H5Pdelete_filter(dcpl1,H5Z_FILTER_NONE)<0) goto error; 
+
+ /* get information about filters */
+ if ((nfilters = H5Pget_nfilters(dcpl1))<0) goto error; 
+
+ /* check if filters were deleted */
+ if (nfilters)goto error; 
+ 
+/*----------------------------------------------------------------------
+ * close
+ *---------------------------------------------------------------------- 
+ */
+ 
+ /* clean up objects used for this test */
+ if (H5Pclose (dcpl)<0) goto error;
+ if (H5Pclose (dcpl1)<0) goto error;
+ if (H5Dclose (dsid)<0) goto error;
+ if (H5Sclose (sid)<0) goto error;
+
+ PASSED();
+ return 0;
+  
+error:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Pclose(dcpl1);
+  H5Dclose(dsid);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -3140,6 +3260,7 @@ main(void)
     nerrors += test_set_local(fapl)<0	?1:0;
     nerrors += test_can_apply_szip(file)<0	?1:0; 
     nerrors += test_compare_dcpl(file)<0	?1:0; 
+    nerrors += test_filter_delete(file)<0	?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
