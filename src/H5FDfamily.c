@@ -546,8 +546,10 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
         fa = H5P_get_driver_info(plist);
-        if(fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT)
-            H5I_inc_ref(file->memb_fapl_id);
+        if(fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT) {
+            H5I_inc_ref(fa->memb_fapl_id);
+            file->memb_fapl_id = fa->memb_fapl_id;
+        } /* end if */
         else {
             if(NULL == (plist = H5I_object(fa->memb_fapl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
