@@ -12,7 +12,7 @@ class IdComponent {
    public:
 	// Parent classes must reset the current IdComponent copy
 	// before setting new id to control reference count
-	void setId( const hid_t new_id );
+	void setId( hid_t new_id );
 
 	// Pure virtual function so appropriate close function can
 	// be called by subclasses' for the corresponding object

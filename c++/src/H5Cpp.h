@@ -23,6 +23,7 @@
 #include "H5StrType.h"
 #include "H5CompType.h"
 #include "H5DataSet.h"
+#include "H5CommonFG.h"
 #include "H5Group.h"
 #include "H5File.h"
 #include "H5Library.h"
