@@ -1,5 +1,10 @@
-Release information for hdf5-1.0.0
+Release information for hdf5-1.1.x
 ------------------------------------
+
+		    CHANGES SINCE THE Version 1.0.0 RELEASE
+
+* [Bug-Fix]: Configure failed for all IRIX versions other than 6.3.
+  It now configures correctly for all IRIX 6.x version.
 
 		    CHANGES SINCE THE BETA RELEASE
 
