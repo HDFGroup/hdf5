@@ -189,7 +189,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     /* create the chunk list and initialize the first chunk */
     oh->nchunks = 1;
     oh->alloc_nchunks = H5O_NCHUNKS;
-    if (NULL==(oh->chunk=H5FL_ARR_ALLOC(H5O_chunk_t,(hsize_t)oh->alloc_nchunks,0))) {
+    if (NULL==(oh->chunk=H5FL_ARR_ALLOC(H5O_chunk_t,oh->alloc_nchunks,0))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -197,7 +197,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     oh->chunk[0].dirty = TRUE;
     oh->chunk[0].addr = tmp_addr;
     oh->chunk[0].size = size_hint;
-    if (NULL==(oh->chunk[0].image = H5FL_BLK_ALLOC(chunk_image,(hsize_t)size_hint,1))) {
+    if (NULL==(oh->chunk[0].image = H5FL_BLK_ALLOC(chunk_image,size_hint,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -205,7 +205,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     /* create the message list and initialize the first message */
     oh->nmesgs = 1;
     oh->alloc_nmesgs = H5O_NMESGS;
-    if (NULL==(oh->mesg=H5FL_ARR_ALLOC(H5O_mesg_t,(hsize_t)oh->alloc_nmesgs,1))) {
+    if (NULL==(oh->mesg=H5FL_ARR_ALLOC(H5O_mesg_t,oh->alloc_nmesgs,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -405,7 +405,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 
     /* build the message array */
     oh->alloc_nmesgs = MAX(H5O_NMESGS, nmesgs);
-    if (NULL==(oh->mesg=H5FL_ARR_ALLOC(H5O_mesg_t,(hsize_t)oh->alloc_nmesgs,1))) {
+    if (NULL==(oh->mesg=H5FL_ARR_ALLOC(H5O_mesg_t,oh->alloc_nmesgs,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -430,7 +430,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	oh->chunk[chunkno].dirty = FALSE;
 	oh->chunk[chunkno].addr = chunk_addr;
 	oh->chunk[chunkno].size = chunk_size;
-	if (NULL==(oh->chunk[chunkno].image = H5FL_BLK_ALLOC(chunk_image,(hsize_t)chunk_size,0))) {
+	if (NULL==(oh->chunk[chunkno].image = H5FL_BLK_ALLOC(chunk_image,chunk_size,0))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
@@ -659,7 +659,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
             assert(H5F_addr_defined(oh->chunk[i].addr));
             if(i==0 && combine) {
                 /* Allocate space for the combined prefix and first chunk */
-                if((p=H5FL_BLK_ALLOC(chunk_image,(hsize_t)(H5O_SIZEOF_HDR(f)+oh->chunk[i].size),0))==NULL)
+                if((p=H5FL_BLK_ALLOC(chunk_image,(H5O_SIZEOF_HDR(f)+oh->chunk[i].size),0))==NULL)
                     HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* Copy in the prefix */
@@ -1856,7 +1856,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     oh->chunk[chunkno].dirty = TRUE;
     oh->chunk[chunkno].addr = HADDR_UNDEF;
     oh->chunk[chunkno].size = size;
-    if (NULL==(oh->chunk[chunkno].image = p = H5FL_BLK_ALLOC(chunk_image,(hsize_t)size,1))) {
+    if (NULL==(oh->chunk[chunkno].image = p = H5FL_BLK_ALLOC(chunk_image,size,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }

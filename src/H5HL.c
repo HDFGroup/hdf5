@@ -141,7 +141,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
     heap->addr = *addr_p + (hsize_t)H5HL_SIZEOF_HDR(f);
     heap->disk_alloc = size_hint;
     heap->mem_alloc = size_hint;
-    if (NULL==(heap->chunk = H5FL_BLK_ALLOC(heap_chunk,(hsize_t)(H5HL_SIZEOF_HDR(f) + size_hint),1))) {
+    if (NULL==(heap->chunk = H5FL_BLK_ALLOC(heap_chunk,(H5HL_SIZEOF_HDR(f) + size_hint),1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
@@ -253,7 +253,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
-    heap->chunk = H5FL_BLK_ALLOC(heap_chunk,(hsize_t)(H5HL_SIZEOF_HDR(f) + heap->mem_alloc),1);
+    heap->chunk = H5FL_BLK_ALLOC(heap_chunk,(H5HL_SIZEOF_HDR(f) + heap->mem_alloc),1);
     if (NULL==heap->chunk) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");

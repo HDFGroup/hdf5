@@ -220,7 +220,7 @@ H5F_istore_chunk_alloc(size_t chunk_size)
 
     FUNC_ENTER(H5F_istore_chunk_alloc, NULL);
 
-    ret_value=H5FL_BLK_ALLOC(istore_chunk,(hsize_t)chunk_size,0);
+    ret_value=H5FL_BLK_ALLOC(istore_chunk,chunk_size,0);
 
     FUNC_LEAVE(ret_value);
 } /* end H5F_istore_chunk_alloc() */
@@ -280,7 +280,7 @@ H5F_istore_chunk_realloc(void *chunk, size_t new_size)
 
     FUNC_ENTER(H5F_istore_chunk_realloc, NULL);
 
-    ret_value=H5FL_BLK_REALLOC(istore_chunk,chunk,(hsize_t)new_size);
+    ret_value=H5FL_BLK_REALLOC(istore_chunk,chunk,new_size);
 
     FUNC_LEAVE(ret_value);
 } /* end H5F_istore_chunk_realloc() */
@@ -907,7 +907,7 @@ H5F_istore_init (H5F_t *f)
     if (f->shared->rdcc_nbytes>0 && f->shared->rdcc_nelmts>0) {
 	rdcc->nslots = f->shared->rdcc_nelmts;
     assert(rdcc->nslots>=0);
-	rdcc->slot = H5FL_ARR_ALLOC (H5F_rdcc_ent_ptr_t,(hsize_t)rdcc->nslots,1);
+	rdcc->slot = H5FL_ARR_ALLOC (H5F_rdcc_ent_ptr_t,rdcc->nslots,1);
 	if (NULL==rdcc->slot) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");

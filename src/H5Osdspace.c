@@ -119,7 +119,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
         p += 5; /*reserved*/
 
         if (sdim->rank > 0) {
-            if (NULL==(sdim->size=H5FL_ARR_ALLOC(hsize_t,(hsize_t)sdim->rank,0))) {
+            if (NULL==(sdim->size=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                      "memory allocation failed");
             }
@@ -127,7 +127,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
                 H5F_DECODE_LENGTH (f, p, sdim->size[u]);
             }
             if (flags & H5S_VALID_MAX) {
-                if (NULL==(sdim->max=H5FL_ARR_ALLOC(hsize_t,(hsize_t)sdim->rank,0))) {
+                if (NULL==(sdim->max=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                          "memory allocation failed");
                 }
@@ -262,14 +262,14 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     HDmemcpy(dst, src, sizeof(H5S_simple_t));
     
     if (src->size) {
-	if (NULL==(dst->size = H5FL_ARR_ALLOC(hsize_t,(hsize_t)src->rank,0))) {
+	if (NULL==(dst->size = H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}
 	HDmemcpy (dst->size, src->size, src->rank*sizeof(src->size[0]));
     }
     if (src->max) {
-	if (NULL==(dst->max=H5FL_ARR_ALLOC(hsize_t,(hsize_t)src->rank,0))) {
+	if (NULL==(dst->max=H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}

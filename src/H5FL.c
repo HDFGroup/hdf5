@@ -123,20 +123,19 @@ H5FL_DEFINE(H5FL_blk_node_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5FL_malloc(hsize_t mem_size)
+H5FL_malloc(size_t mem_size)
 {
     void *ret_value=NULL;   /* return value*/
 
     FUNC_ENTER (H5FL_malloc, NULL);
 
     /* Attempt to allocate the memory requested */
-    assert(mem_size==(hsize_t)((size_t)mem_size)); /*check for overflow*/
-    if(NULL==(ret_value=H5MM_malloc((size_t)mem_size))) {
+    if(NULL==(ret_value=H5MM_malloc(mem_size))) {
         /* If we can't allocate the memory now, try garbage collecting first */
         H5FL_garbage_coll();
 
         /* Now try allocating the memory again */
-        if(NULL==(ret_value=H5MM_malloc((size_t)mem_size)))
+        if(NULL==(ret_value=H5MM_malloc(mem_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk");
     } /* end if */
 
@@ -333,8 +332,7 @@ H5FL_reg_alloc(H5FL_reg_head_t *head, uintn clear)
 
     /* Clear to zeros, if asked */
     if(clear) {
-        assert(head->size==(hsize_t)((size_t)head->size)); /*check for overflow*/
-        HDmemset(ret_value,0,(size_t)head->size);
+        HDmemset(ret_value,0,head->size);
     } /* end if */
 #endif /* NO_REG_FREE_LISTS */
 
@@ -534,7 +532,7 @@ H5FL_reg_term(void)
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
-H5FL_blk_find_list(H5FL_blk_node_t **head, hsize_t size)
+H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
 {
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the native list */
     H5FL_blk_node_t *ret_value=NULL;
@@ -588,7 +586,7 @@ H5FL_blk_find_list(H5FL_blk_node_t **head, hsize_t size)
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
-H5FL_blk_create_list(H5FL_blk_node_t **head, hsize_t size)
+H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
 {
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the list */
     H5FL_blk_node_t *ret_value=NULL;
@@ -683,7 +681,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, uintn clear)
+H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear)
 {
     H5FL_blk_node_t *free_list;  /* The free list of nodes of correct size */
     H5FL_blk_list_t *temp;  /* Temp. ptr to the new native list allocated */
@@ -722,8 +720,8 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, uintn clear)
     /* No free list available, or there are no nodes on the list, allocate a new node to give to the user */
     else { 
         /* Allocate new node, with room for the page info header and the actual page data */
-		if(NULL==(temp=H5FL_malloc(sizeof(H5FL_blk_list_t)+size)))
-		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk");
+        if(NULL==(temp=H5FL_malloc(sizeof(H5FL_blk_list_t)+size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk");
 
         /* Increment the number of blocks allocated */
         head->allocated++;
@@ -738,8 +736,7 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, uintn clear)
 
     /* Clear the block to zeros, if requested */
     if(clear) {
-        assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-        HDmemset(ret_value,0,(size_t)size);
+        HDmemset(ret_value,0,size);
     } /* end if */
 #endif /* NO_BLK_FREE_LISTS */
 
@@ -844,9 +841,9 @@ printf("%s: head->name=%s, garbage collecting all block lists\n",FUNC,head->name
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, hsize_t new_size)
+H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
 {
-    hsize_t blk_size;           /* Temporary block size */
+    size_t blk_size;           /* Temporary block size */
     H5FL_blk_list_t *temp;      /* Temp. ptr to the new block node allocated */
     void *ret_value=NULL;       /* Return value */
 
@@ -868,8 +865,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, hsize_t new_size)
             if((ret_value=H5FL_blk_alloc(head,new_size,0))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block");
             blk_size=MIN(new_size,temp->size);
-            assert(blk_size==(hsize_t)((size_t)blk_size)); /*check for overflow*/
-            HDmemcpy(ret_value,block,(size_t)blk_size);
+            HDmemcpy(ret_value,block,blk_size);
             H5FL_blk_free(head,block);
         } /* end if */
         else
@@ -1201,11 +1197,11 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_alloc(H5FL_arr_head_t *head, hsize_t elem, uintn clear)
+H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, uintn clear)
 {
     H5FL_arr_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
-    hsize_t mem_size;        /* Size of memory block being recycled */
+    size_t mem_size;        /* Size of memory block being recycled */
 
     FUNC_ENTER (H5FL_arr_alloc, NULL);
 
@@ -1261,8 +1257,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, hsize_t elem, uintn clear)
 
         /* Clear to zeros, if asked */
         if(clear) {
-            assert(mem_size==(hsize_t)((size_t)mem_size)); /*check for overflow*/
-            HDmemset(ret_value,0,(size_t)mem_size);
+            HDmemset(ret_value,0,mem_size);
         } /* end if */
     } /* end if */
     /* No fixed number of elements, use PQ routine */
@@ -1291,9 +1286,9 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, hsize_t elem, uintn clear)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, hsize_t new_elem)
+H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
 {
-    hsize_t blk_size;       /* Size of block */
+    size_t blk_size;       /* Size of block */
     H5FL_arr_node_t *temp;  /* Temp. ptr to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
 
@@ -1322,8 +1317,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, hsize_t new_elem)
 
                 /* Copy the appropriate amount of elements */
                 blk_size=head->size*MIN(temp->nelem,new_elem);
-                assert(blk_size==(hsize_t)((size_t)blk_size)); /*check for overflow*/
-                HDmemcpy(ret_value,obj,(size_t)blk_size);
+                HDmemcpy(ret_value,obj,blk_size);
 
                 /* Free the old block */
                 H5FL_arr_free(head,obj);

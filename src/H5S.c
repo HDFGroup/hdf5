@@ -664,13 +664,13 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 
         case H5S_SIMPLE:
             if (src->u.simple.size) {
-                dst->u.simple.size = H5FL_ARR_ALLOC(hsize_t,(hsize_t)src->u.simple.rank,0);
+                dst->u.simple.size = H5FL_ARR_ALLOC(hsize_t,src->u.simple.rank,0);
                 for (u = 0; u < src->u.simple.rank; u++) {
                     dst->u.simple.size[u] = src->u.simple.size[u];
                 }
             }
             if (src->u.simple.max) {
-                dst->u.simple.max = H5FL_ARR_ALLOC(hsize_t,(hsize_t)src->u.simple.rank,0);
+                dst->u.simple.max = H5FL_ARR_ALLOC(hsize_t,src->u.simple.rank,0);
                 for (u = 0; u < src->u.simple.rank; u++) {
                     dst->u.simple.max[u] = src->u.simple.max[u];
                 }
@@ -1160,7 +1160,7 @@ H5S_read(H5G_entry_t *ent)
     ds->select.type=H5S_SEL_ALL;
 
     /* Allocate space for the offset and set it to zeros */
-    if (NULL==(ds->select.offset = H5FL_ARR_ALLOC(hssize_t,(hsize_t)ds->extent.u.simple.rank,1))) {
+    if (NULL==(ds->select.offset = H5FL_ARR_ALLOC(hssize_t,ds->extent.u.simple.rank,1))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
 
@@ -1411,7 +1411,7 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
         space->select.offset=H5FL_ARR_FREE(hssize_t,space->select.offset);
 
     /* Allocate space for the offset and set it to zeros */
-    if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,(hsize_t)rank,1))) {
+    if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,rank,1))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -1446,12 +1446,12 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 
         /* Set the rank and copy the dims */
         space->extent.u.simple.rank = rank;
-        space->extent.u.simple.size = H5FL_ARR_ALLOC(hsize_t,(hsize_t)rank,0);
+        space->extent.u.simple.size = H5FL_ARR_ALLOC(hsize_t,rank,0);
         HDmemcpy(space->extent.u.simple.size, dims, sizeof(hsize_t) * rank);
 
         /* Copy the maximum dimensions if specified */
         if(max!=NULL) {
-            space->extent.u.simple.max = H5FL_ARR_ALLOC(hsize_t,(hsize_t)rank,0);
+            space->extent.u.simple.max = H5FL_ARR_ALLOC(hsize_t,rank,0);
             HDmemcpy(space->extent.u.simple.max, max, sizeof(hsize_t) * rank);
         } /* end if */
     }
@@ -1883,7 +1883,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 
     /* Allocate space for new offset */
     if(space->select.offset==NULL) {
-        if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,(hsize_t)space->extent.u.simple.rank,0))) {
+        if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,space->extent.u.simple.rank,0))) {
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
         }
