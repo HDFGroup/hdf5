@@ -2484,6 +2484,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
 
+
         for ac_prog in f90 pgf90 xlf90 f95 g95 xlf95 efc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -5239,7 +5240,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5242 "configure"' > conftest.$ac_ext
+  echo '#line 5243 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5780,7 +5781,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:5783: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:5784: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -7587,7 +7588,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7590 "configure"
+#line 7591 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7685,7 +7686,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7688 "configure"
+#line 7689 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -34723,6 +34724,7 @@ s,@OBJEXT@,$OBJEXT,;t t
 s,@HDF5_INTERFACES@,$HDF5_INTERFACES,;t t
 s,@R_LARGE@,$R_LARGE,;t t
 s,@R_INTEGER@,$R_INTEGER,;t t
+s,@HADDR_T@,$HADDR_T,;t t
 s,@HSIZE_T@,$HSIZE_T,;t t
 s,@HSSIZE_T@,$HSSIZE_T,;t t
 s,@HID_T@,$HID_T,;t t

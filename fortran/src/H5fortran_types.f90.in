@@ -30,6 +30,7 @@
          !   
          INTEGER, PARAMETER :: R_LARGE = @R_LARGE@
          INTEGER, PARAMETER :: R_INTEGER = @R_INTEGER@
+         INTEGER, PARAMETER :: HADDR_T  = @HADDR_T@
          INTEGER, PARAMETER :: HSIZE_T  = @HSIZE_T@
          INTEGER, PARAMETER :: HSSIZE_T = @HSSIZE_T@
          INTEGER, PARAMETER :: HID_T    = @HID_T@

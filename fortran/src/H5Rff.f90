@@ -102,7 +102,7 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
 
             INTEGER :: namelen                     ! Name length
-            INTEGER :: ref_f(REF_OBJ_BUF_LEN)          ! Local buffer to pass reference
+            INTEGER(HADDR_T) :: ref_f              ! Local buffer to pass reference
 
 !            INTEGER, EXTERNAL :: h5fcreate_object_c
 !  Interface is needed for MS FORTRAN
@@ -114,8 +114,7 @@
               !MS$ATTRIBUTES C,reference,alias:'_H5RCREATE_OBJECT_C':: h5rcreate_object_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name 
-!              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
-              INTEGER :: ref_f(REF_OBJ_BUF_LEN)
+              INTEGER(HADDR_T) :: ref_f
               INTEGER(HID_T), INTENT(IN) :: loc_id  
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -244,7 +243,7 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
 
             INTEGER :: ref_type     ! Reference type 
-            INTEGER :: ref_f(REF_OBJ_BUF_LEN)          ! Local buffer to pass reference
+            INTEGER(HADDR_T) :: ref_f          ! Local buffer to pass reference
 
 !            INTEGER, EXTERNAL :: h5h5rdereference_object_c
 !  Interface is needed for MS FORTRAN
@@ -257,7 +256,7 @@
               !DEC$ ENDIF
 !              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER(HID_T), INTENT(IN) :: dset_id  
-              INTEGER :: ref_f(REF_OBJ_BUF_LEN)
+              INTEGER(HADDR_T) :: ref_f
               INTEGER(HID_T), INTENT(OUT) :: obj_id 
               END FUNCTION h5rdereference_object_c
             END INTERFACE
@@ -452,7 +451,7 @@
                                                !  H5G_TYPE_F         3
 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code 
-            INTEGER :: ref_f(REF_OBJ_BUF_LEN)          ! Local buffer to pass reference
+            INTEGER(HADDR_T) :: ref_f          ! Local buffer to pass reference
 
 !            INTEGER, EXTERNAL :: h5rget_object_type_obj_c
 !  Interface is needed for MS FORTRAN
@@ -465,7 +464,7 @@
               !DEC$ ENDIF
 !              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER(HID_T), INTENT(IN) :: dset_id  
-              INTEGER :: ref_f(REF_OBJ_BUF_LEN)
+              INTEGER(HADDR_T) :: ref_f
               INTEGER, INTENT(OUT) :: obj_type 
               END FUNCTION h5rget_object_type_obj_c
             END INTERFACE

@@ -330,7 +330,7 @@
             INTEGER(HID_T) :: xfer_prp_default
             INTEGER(HID_T)  :: mem_space_id_default
             INTEGER(HID_T) :: file_space_id_default
-            INTEGER, ALLOCATABLE, DIMENSION(:) :: ref_buf
+            INTEGER(HADDR_T), ALLOCATABLE, DIMENSION(:) :: ref_buf
             INTEGER :: i,j
 
 !            INTEGER, EXTERNAL :: h5dwrite_ref_obj_c
@@ -349,7 +349,7 @@
               INTEGER(HID_T) :: xfer_prp_default
               INTEGER(HID_T)  :: mem_space_id_default
               INTEGER(HID_T) :: file_space_id_default
-              INTEGER, DIMENSION(*) :: ref_buf
+              INTEGER(HADDR_T), DIMENSION(*) :: ref_buf
               INTEGER(HSIZE_T), DIMENSION(*) :: dims
               END FUNCTION h5dwrite_ref_obj_c
             END INTERFACE 
@@ -362,15 +362,13 @@
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
             
-            allocate(ref_buf(REF_OBJ_BUF_LEN*dims(1)), stat=hdferr)
+            allocate(ref_buf(dims(1)), stat=hdferr)
             if (hdferr .NE. 0 ) then
                 hdferr = -1
                 return
             else
                 do j = 1, dims(1)
-                  do i = 1, REF_OBJ_BUF_LEN  
-                   ref_buf(REF_OBJ_BUF_LEN*(j-1) + i ) = buf(j)%ref(i)
-                 enddo  
+                   ref_buf(j) = buf(j)%ref
                 enddo  
             endif
             hdferr = h5dwrite_ref_obj_c(dset_id, mem_type_id, mem_space_id_default, &
@@ -2500,7 +2498,7 @@
             INTEGER(HID_T) :: xfer_prp_default 
             INTEGER(HID_T)  :: mem_space_id_default 
             INTEGER(HID_T) :: file_space_id_default 
-            INTEGER, ALLOCATABLE, DIMENSION(:) :: ref_buf
+            INTEGER(HADDR_T), ALLOCATABLE, DIMENSION(:) :: ref_buf
             INTEGER :: i,j  
 
 !            INTEGER, EXTERNAL :: h5dread_ref_obj_c
@@ -2519,12 +2517,12 @@
               INTEGER(HID_T) :: xfer_prp_default
               INTEGER(HID_T)  :: mem_space_id_default
               INTEGER(HID_T) :: file_space_id_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              INTEGER, DIMENSION(*) :: ref_buf
+              INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+              INTEGER(HADDR_T), DIMENSION(*) :: ref_buf
               END FUNCTION h5dread_ref_obj_c
             END INTERFACE 
 
-            allocate(ref_buf(REF_OBJ_BUF_LEN*dims(1)), stat=hdferr)
+            allocate(ref_buf(dims(1)), stat=hdferr)
             if (hdferr .NE. 0) then
                 hdferr = -1
                 return
@@ -2541,9 +2539,7 @@
             hdferr = h5dread_ref_obj_c(dset_id, mem_type_id, mem_space_id_default, &
                                 file_space_id_default, xfer_prp_default, ref_buf, dims)
              do j = 1, dims(1)
-              do i = 1, REF_OBJ_BUF_LEN  
-                    buf(j)%ref(i) = ref_buf(REF_OBJ_BUF_LEN*(j-1) + i)
-              enddo
+                buf(j)%ref = ref_buf(j)
              enddo  
              deallocate(ref_buf) 
           END SUBROUTINE h5dread_reference_obj

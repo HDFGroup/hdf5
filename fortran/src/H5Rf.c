@@ -29,7 +29,7 @@
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rcreate_object_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
+nh5rcreate_object_c (haddr_t_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
 {
      int ret_value = -1;
      hid_t c_loc_id;
@@ -53,11 +53,10 @@ nh5rcreate_object_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
 
      HDfree(c_name);
      if (ret_value_c >= 0)  {
-         *ref=(int_f)ref_c;
+         *ref=(haddr_t_f)ref_c;
          ret_value = 0;
      }
        
-     ret_value = 0;
      return ret_value;
 }      
 
@@ -153,7 +152,7 @@ nh5rdereference_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rdereference_object_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
+nh5rdereference_object_c (hid_t_f *dset_id, haddr_t_f *ref, hid_t_f *obj_id)
 {
      int ret_value = -1;
      hid_t c_dset_id;
@@ -218,7 +217,7 @@ nh5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type)
+nh5rget_object_type_obj_c (hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
 {
      int ret_value = -1;
      hid_t c_dset_id;

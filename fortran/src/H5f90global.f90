@@ -18,11 +18,10 @@
 ! Definitions for reference datatypes.
 ! If you change the value of these parameters, do not forget to change corresponding
 ! values in the H5f90.h file. 
-        INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2 
         INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
 
         TYPE hobj_ref_t_f
-             INTEGER ref(REF_OBJ_BUF_LEN)  
+             INTEGER(HADDR_T) ref
         END TYPE 
 
         TYPE hdset_reg_ref_t_f

@@ -60,6 +60,7 @@ case $F9X in
     # -Vaxlib is for non-standard fortran calls like exit().
     MORE_FFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
     FFLAGS="$FFLAGS $MORE_FFLAGS"
+    HADDR_T='SELECTED_INT_KIND(R_LARGE)'
     HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
     HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
     HID_T='SELECTED_INT_KIND(R_INTEGER)'
@@ -69,6 +70,7 @@ case $F9X in
     ;;
 
   *)
+    HADDR_T='SELECTED_INT_KIND(R_LARGE)'
     HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
     HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
     HID_T='SELECTED_INT_KIND(R_INTEGER)'
