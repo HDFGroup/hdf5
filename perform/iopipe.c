@@ -148,14 +148,10 @@ synchronize (void)
 {
 #ifdef H5_HAVE_SYSTEM
 #ifdef WIN32
-#ifdef __WATCOMC__
-	flushall();
-#else /* __WATCOMC__ */
 	_flushall();
-#endif /* __WATCOMC__ */
 #else
-    system ("sync");
-    system ("df >/dev/null");
+    HDsystem ("sync");
+    HDsystem ("df >/dev/null");
 #endif
 #if 0
     /*
