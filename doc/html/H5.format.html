@@ -315,9 +315,9 @@
     <p>
     <center>
       <table width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -614,9 +614,9 @@
     <p>
     <center>
       <table align=center width="80%">
-       <tr>
-         <th width="30%">Field Name</th>
-         <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -758,9 +758,9 @@
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -877,11 +877,13 @@
             <tr valign=top align=left>
               <td width=40%>Bytes 1-4</td>
               <td>Size of chunk in bytes.</td>
-            <tr valign=top align=left></tr>
+            </tr>
+            <tr valign=top align=left>
               <td>Bytes 4-8</td>
               <td>Filter mask, a 32-bit bitfield indicating which 
                 filters have been applied to that chunk.</td>
-            </tr><tr valign=top align=left>
+            </tr>
+            <tr valign=top align=left>
               <td><em>N</em> 64-bit fields</td>
               <td>A 64-bit index indicating the offset of the 
                 chunk within the dataset where <i>N</i> is the number 
@@ -1017,9 +1019,9 @@
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -1067,7 +1069,7 @@
     <p>Each group entry in a group node is designed 
       to allow for very fast browsing of stored objects.
       Toward that design goal, the group entries
-      include space for caching certain constant meta data from the
+      include space for caching certain constant metadata from the
       object header.
 
     <p>
@@ -1085,11 +1087,11 @@
         </tr>
 
         <tr align=center>
-          <td colspan=4>Name Offset (&lt;size&gt; bytes)</td>
+          <td colspan=4>Name Offset<sup><font size=-2>O</font></sup></td>
         </tr>
 
         <tr align=center>
-          <td colspan=4>Object Header Address</td>
+          <td colspan=4>Object Header Address<sup><font size=-2>O</font></sup></td>
         </tr>
 
         <tr align=center>
@@ -1104,14 +1106,24 @@
           <td colspan=4><br><br>Scratch-pad Space (16 bytes)<br><br><br></td>
         </tr>
       </table>
+
+      <table width="80%" border=0>
+        <tr><td>
+          <div align=right>
+            (Items marked with an 'O' the above table are
+            <br>
+            of the size specified in "Size of Offsets.")
+          </div>
+        </td></tr>
+      </table>
     </center>
 
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -1124,38 +1136,47 @@
         <tr valign=top>
           <td>Object Header Address</td>
           <td>Every object has an object header which serves as a
-            permanent location for the object's meta data.  In addition
-            to appearing in the object header, some meta data can be
+            permanent location for the object's metadata.  In addition
+            to appearing in the object header, some metadata can be
             cached in the scratch-pad space.</td>
         </tr>
 
         <tr valign=top>
           <td>Cache Type</td>
           <td>The cache type is determined from the object header.
-            It also determines the format for the scratch-pad space.
+            It also determines the format for the scratch-pad space:
             <br>
-            <dl compact>
-              <dt>0
-              <dd>No data is cached by the group entry.  This
-                is guaranteed to be the case when an object header
-                has a link count greater than one.
-
-              <dt>1
-              <dd>Object header meta data is cached in the group
-                entry.  This implies that the group
-                entry refers to another group.
-
-              <dt>2
-              <dd>The entry is a symbolic link.  The first four bytes
-                of the scratch-pad space are the offset into the local
-                heap for the link value.  The object header address
-                will be undefined.
-
-              <dt><em>N</em>
-              <dd>Other cache values can be defined later and
-              libraries that do not understand the new values will
-              still work properly.
-            </dl>
+            <table>
+                <tr valign=top align=left>
+                    <td width="10%">0</td>
+                    <td>No data is cached by the group entry.  This
+                        is guaranteed to be the case when an object header
+                        has a link count greater than one.
+                    </td>
+                </tr>
+                <tr valign=top align=left>
+                    <td>1</td>
+                    <td>Object header metadata is cached in the group
+                        entry.  This implies that the group
+                        entry refers to another group.
+                    </td>
+                </tr>
+                <tr valign=top align=left>
+                    <td>2</td>
+                    <td>The entry is a symbolic link.  The first four bytes
+                        of the scratch-pad space are the offset into the local
+                        heap for the link value.  The object header address
+                        will be undefined.
+                    </td>
+                </tr>
+                <tr valign=top align=left>
+                    <td><em>N</em></td>
+                    <td>Other cache values can be defined later and
+                        libraries that do not understand the new values will
+                        still work properly.
+                    </td>
+                </tr>
+            </table>
           </td>
         </tr>
 
@@ -1169,10 +1190,10 @@
         <tr valign=top>
           <td>Scratch-pad Space</td>
           <td>This space is used for different purposes, depending
-            on the value of the Cache Type field. Any meta-data
+            on the value of the Cache Type field. Any metadata
             about a dataset object represented in the scratch-pad
             space is duplicated in the object header for that
-            dataset.  This meta data can include the datatype
+            dataset.  This metadata can include the datatype
             and the size of the dataspace for a dataset whose datatype 
             is atomic and whose dataspace is fixed and less than 
             four dimensions.
@@ -1190,12 +1211,12 @@
       according to the value in the Cache Type field.  
 
     <p>If the Cache Type field contains the value zero 
-      (<code>0</code>) then no information is
+      <code>(0)</code> then no information is
       stored in the scratch-pad space.
 
     <p>If the Cache Type field contains the value one
-      (<code>1</code>), then the scratch-pad space
-      contains cached meta data for another object header 
+      <code>(1)</code>, then the scratch-pad space
+      contains cached metadata for another object header 
       in the following format:
 
     <p>
@@ -1212,19 +1233,29 @@
           <th width="25%">byte</th>
 
         <tr align=center>
-          <td colspan=4>Address of B-tree</td>
+          <td colspan=4>Address of B-tree<sup><font size=-2>O</font></sup></td>
 
         <tr align=center>
-          <td colspan=4>Address of Name Heap</td>
+          <td colspan=4>Address of Name Heap<sup><font size=-2>O</font></sup></td>
+      </table>
+
+      <table width="80%" border=0>
+        <tr><td>
+          <div align=right>
+            (Items marked with an 'O' the above table are
+            <br>
+            of the size specified in "Size of Offsets.")
+          </div>
+        </td></tr>
       </table>
     </center>
 
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -1236,15 +1267,15 @@
         <tr valign=top>
           <td>Address of Name Heap</td>
           <td>This is the file address for the group's local
-            heap, in which are stored the symbol names.</td>
+            heap, in which are stored the group's symbol names.</td>
         </tr>
       </table>
     </center>
 
 
     <p>If the Cache Type field contains the value two
-      (<code>2</code>), then the scratch-pad space
-      contains cached meta data for another symbolic link
+      <code>(2)</code>, then the scratch-pad space
+      contains cached metadata for another symbolic link
       in the following format:
 
     <p>
@@ -1270,9 +1301,9 @@
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -1312,29 +1343,46 @@
         </tr>
 
         <tr align=center>
-          <td colspan=4>Reserved (zero)</td>
+          <td colspan=4>Reserved</td>
         </tr>
 
         <tr align=center>
-          <td colspan=4>Data Segment Size</td>
+          <td colspan=4>Data Segment Size<sup><font size="-2">L</font></sup></td>
         </tr>
 
         <tr align=center>
-          <td colspan=4>Offset to Head of Free-list (&lt;size&gt; bytes)</td>
+          <td colspan=4>Offset to Head of Free-list<sup><font size="-2">L</font></sup></td>
         </tr>
 
         <tr align=center>
-          <td colspan=4>Address of Data Segment</td>
+          <td colspan=4>Address of Data Segment<sup><font size="-2">O</font></sup></td>
         </tr>
+      </table>
+
+      <table width="80%" border=0>
+        <tr><td>
+          <div align=right>
+            (Items marked with an 'L' the above table are
+            <br>
+            of the size specified in "Size of Lengths.")
+          </div>
+        </td></tr>
+        <tr><td>
+          <div align=right>
+            (Items marked with an 'O' the above table are
+            <br>
+            of the size specified in "Size of Offsets.")
+          </div>
+        </td></tr>
       </table>
     </center>
 
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -1347,20 +1395,29 @@
         </tr>
 
         <tr valign=top>
+          <td>Reserved</td>
+          <td>These four bytes are present so that the data segment
+            size is aligned on an eight-byte boundary.  They are
+            always set to zero.</td>
+        </tr>
+
+        <tr valign=top>
           <td>Data Segment Size</td>
           <td>The total amount of disk memory allocated for the heap
             data.  This may be larger than the amount of space
-            required by the object stored in the heap.  The extra
-            unused space holds a linked list of free blocks.</td>
+            required by the objects stored in the heap.  The extra
+            unused space in the heap holds a linked list of free blocks.</td>
         </tr>
 
         <tr valign=top>
           <td>Offset to Head of Free-list</td>
           <td>This is the offset within the heap data segment of the
-            first free block (or all 0xff bytes if there is no free
-            block).  The free block contains &lt;size&gt; bytes that
-            are the offset of the next free chunk (or all 0xff bytes
-            if this is the last free chunk) followed by &lt;size&gt;
+            first free block (or the
+            <A href="#UndefinedAddress">undefined address</A> if there is no
+            free block).  The free block contains &lt;Size of Lengths&gt; bytes that
+            are the offset of the next free chunk (or the
+            <A href="#UndefinedAddress">undefined address</A>
+            if this is the last free chunk) followed by &lt;Size of Lengths&gt;
             bytes that store the size of this free chunk.</td>
         </tr>
 
@@ -1466,9 +1523,9 @@
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -1546,9 +1603,9 @@
     <p>
     <center>
       <table align=center width="80%">
-        <tr>
-          <th width="30%">Field Name</th>
-          <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
         </tr>
 
         <tr valign=top>
@@ -1704,8 +1761,8 @@
     <p>A data object is composed of header information and data
       information.  The header information contains the information
       needed to interpret the data information for the data object as
-      well as additional "meta-data" or pointers to additional
-      "meta-data" used to describe or annotate each data object.
+      well as additional "metadata" or pointers to additional
+      "metadata" used to describe or annotate each data object.
 
     <h3><a name="ObjectHeader">
 	Disk Format: Level 2a - Data Object Headers</a></h3>
@@ -1777,9 +1834,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -1870,7 +1927,7 @@
     </center>
 
     <p>The header message types and the message data associated with
-      them compose the critical "meta-data" about each object.  Some
+      them compose the critical "metadata" about each object.  Some
       header messages are required for each object while others are
       optional.  Some optional header messages may also be repeated
       several times in the header itself, the requirements and number
@@ -1965,9 +2022,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3032,9 +3089,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3135,9 +3192,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3215,9 +3272,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3338,9 +3395,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3412,7 +3469,7 @@
 
     <p>
     <center>
-      <table border align=center cellpadding=4 witdh="80%">
+      <table border align=center cellpadding=4 width="80%">
 	<caption align=top>
 	  <b>Filter Pipeline Message</b>
 	</caption>
@@ -3443,9 +3500,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3471,7 +3528,7 @@
 
     <p>
     <center>
-      <table border align=center cellpadding=4 witdh="80%">
+      <table border align=center cellpadding=4 width="80%">
 	<caption align=top>
 	  <b>Filter Pipeline Message</b>
 	</caption>
@@ -3510,9 +3567,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3589,7 +3646,7 @@
     
     <p><b>Purpose and Description:</b>  The <em>Attribute</em>
       message is used to list objects in the HDF file which are used
-      as attributes, or "meta-data" about the current object.  An
+      as attributes, or "metadata" about the current object.  An
       attribute is a small dataset; it has a name, a datatype, a data
       space, and raw data.  Since attributes are stored in the object
       header they must be relatively small (<64kb) and can be
@@ -3642,9 +3699,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3749,9 +3806,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3812,9 +3869,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
@@ -3918,9 +3975,9 @@
     <p>
     <center>
       <table align=center width="80%">
-	<tr>
-	  <th width="30%">Field Name</th>
-	  <th width="70%">Description</th>
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
 	</tr>
 
 	<tr valign=top>
