@@ -7,7 +7,8 @@ GROUP "/" {
       DATATYPE { H5T_STD_I8LE }
       DATASPACE { SIMPLE ( 24 ) / ( 24 ) }
       DATA {
-         "attribute of root group\000"
+         97, 116, 116, 114, 105, 98, 117, 116, 101, 32, 111, 102, 32, 114, 111, 
+         111, 116, 32, 103, 114, 111, 117, 112, 0
       }
    }
    ATTRIBUTE "attr2" {
@@ -41,7 +42,7 @@ GROUP "/" {
       }
       DATASPACE { SCALAR }
       DATA {
-         "string attribute\000"
+         "string attribute"
       }
    }
 }

@@ -16,6 +16,7 @@
 #define FILE10 "tloop.h5"
 #define FILE11 "tloop2.h5"
 #define FILE12 "tmany.h5"
+#define FILE13 "tstr.h5"
 
 static void test_group(void) {
 hid_t fid, group;
@@ -148,24 +149,11 @@ char buf[60];
 int i, data[20];
 double d[10];
 char string[]= "string attribute";
-char str[10][8];
 int point = 100;
-int tmp[2];
 
   fid = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   root = H5Gopen (fid, "/");
-
-  /* attribute 0 */
-/*
-  dims[0] = 2;
-  space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (root, "attr0", H5T_STD_I32LE, space, H5P_DEFAULT);
-  tmp[0] = 64; tmp[1] = 65;
-  H5Awrite(attr, H5T_STD_I32LE, tmp);
-  H5Sclose(space);
-  H5Aclose(attr);
-*/
 
   /* attribute 1 */
   dims[0] = 24;
@@ -211,21 +199,6 @@ int tmp[2];
   H5Tclose(type);
   H5Sclose(space);
   H5Aclose(attr);
-
-  /* attribute 6 */
-/*
-  dims[0] = 10;
-  space = H5Screate_simple(1, dims, NULL);
-  type = H5Tcopy(H5T_C_S1);
-  H5Tset_size(type, 8);
-  attr = H5Acreate (root, "attr6", type, space, H5P_DEFAULT);
-  for (i = 0; i < 10; i++)
-     sprintf(str[i], "string%d", i);
-  H5Awrite(attr, type, str);
-  H5Tclose(type);
-  H5Sclose(space);
-  H5Aclose(attr);
-*/
 
   H5Gclose(root);
 
@@ -400,8 +373,8 @@ hsize_t dset3_dim[2];
   dset3_dim[0] = 3;  dset3_dim[1] = 6;
   space3 = H5Screate_simple(2, dset3_dim, NULL);
   dataset = H5Dcreate(group, "dset3", type, space3, H5P_DEFAULT);
-  for (i = 0; i < dset3_dim[0]; i++) {
-       for (j = 0; j < dset3_dim[1]; j++) {
+  for (i = 0; i < (int)dset3_dim[0]; i++) {
+       for (j = 0; j < (int)dset3_dim[1]; j++) {
             for (k = 0; k < 4; k++)
                  dset3[i][j].a[k] = k;
             for (k = 0; k < 5; k++)
@@ -777,7 +750,7 @@ hid_t fid, group;
   H5Gclose(group);
 
   /* create path from object at /g1 to object at /g2 and name it g1.1 */
-  H5Glink (fid, H5G_LINK_HARD, "/g2", "/g1/g1.1"); /* 
+  H5Glink (fid, H5G_LINK_HARD, "/g2", "/g1/g1.1"); 
 
   /* create path from object at /g2 to object at /g1 and name it g2.1 */
   H5Glink (fid, H5G_LINK_SOFT, "/g1", "/g2/g2.1");
@@ -806,9 +779,6 @@ double d[10];
 char buf[60];
 int i, j;
 int i0, i1, i2, i3;
-int a[2][2][2][2];
-double b[2][2][2][2];
-double c[2][2][2][2];
 hsize_t sdim, maxdim;
 
 typedef struct {	/* compound type has members with rank > 1	*/
@@ -876,7 +846,7 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
   H5Sclose(space2);
   H5Aclose(attr);
 
-  for (j=0; j<sdim; j++) {
+  for (j=0; j<(int)sdim; j++) {
 	for (i3 = 0; i3 < 2; i3++) {
 		index[perm[3]] = i3;
 	for (i2 = 0; i2 < 2; i2++) {
@@ -961,6 +931,129 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
   H5Fclose(fid);
 
 }
+static hid_t mkstr(int size, int pad) {
+hid_t type;
+
+  if ((type=H5Tcopy(H5T_C_S1))<0) return -1;
+  if (H5Tset_size(type, size)<0) return -1;
+  if (H5Tset_strpad(type, pad)<0) return -1;
+
+  return type;
+}
+
+static void test_str(void) {
+hid_t fid, dataset, space, f_type, m_type, str_type;
+
+hsize_t dims1[] = { 3, 4};
+char string1[12][2] = {"s1","s2","s3","s4","s5","s6","s7","s8","s9",
+                       "s0","s1","s2"};
+
+hsize_t dims2[]={20};
+char string2[20][9] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
+                    "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8", 
+                    "ab cd ef9", "ab cd ef0", "ab cd ef1", "ab cd ef2", 
+                    "ab cd ef3", "ab cd ef4", "ab cd ef5", "ab cd ef6", 
+                    "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+
+hsize_t dims3[] = { 27};
+char string3[27][5] = {"abcd0", "abcd1", "abcd2", "abcd3", 
+                   "abcd4", "abcd5", "abcd6", "abcd7", 
+                   "abcd8", "abcd9", "abcd0", "abcd1", 
+                   "abcd2", "abcd3", "abcd4", "abcd5", 
+                   "abcd6", "abcd7", "abcd8", "abcd9", 
+                   "abcd0", "abcd1", "abcd2", "abcd3", 
+                   "abcd4", "abcd5", "abcd6"};
+
+int i, j, k, l;
+
+hsize_t dims4[] = { 3 };
+char string4[3][20] = { "s1234567890123456789", "s1234567890123456789",
+                        "s1234567890123456789"};
+
+hsize_t dims5[] = { 3, 6};
+typedef struct {
+  char s[12][32];
+  int a[8][10];
+} compound_t;
+compound_t comp1[3][6];
+size_t mdims[2];
+
+  fid = H5Fcreate(FILE13, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  /* string 1 : nullterm string */
+  space = H5Screate_simple(2, dims1, NULL);
+  f_type = mkstr(5, H5T_STR_NULLTERM);
+  m_type = mkstr(2, H5T_STR_NULLTERM);
+  dataset = H5Dcreate(fid, "/string1", f_type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string1);
+  H5Tclose(m_type);
+  H5Tclose(f_type);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  /* string 2 : space pad string */
+  space = H5Screate_simple(1, dims2, NULL);
+  f_type = mkstr(11, H5T_STR_SPACEPAD);
+  m_type = mkstr(9, H5T_STR_NULLTERM);
+  dataset = H5Dcreate(fid, "/string2", f_type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string2);
+  H5Tclose(m_type);
+  H5Tclose(f_type);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  /* string 3 : null pad string */
+  space = H5Screate_simple(1, dims3, NULL);
+  f_type = mkstr(8, H5T_STR_NULLPAD);
+  m_type = mkstr(5, H5T_STR_NULLTERM);
+  dataset = H5Dcreate(fid, "/string3", f_type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string3);
+  H5Tclose(m_type);
+  H5Tclose(f_type);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  /* string 4 : space pad long string */
+  space = H5Screate_simple(1, dims4, NULL);
+  f_type = mkstr(168, H5T_STR_SPACEPAD);
+  m_type = mkstr(20, H5T_STR_NULLTERM);
+  dataset = H5Dcreate(fid, "/string4", f_type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4);
+  H5Tclose(m_type);
+  H5Tclose(f_type);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  /* compound data */
+  space = H5Screate_simple(2, dims5, NULL);
+  f_type = H5Tcreate (H5T_COMPOUND, sizeof(compound_t));
+  mdims[0] = 8; mdims[1] = 10;
+  H5Tinsert_array(f_type, "int_array", HOFFSET(compound_t, a), 2, mdims,
+                  NULL, H5T_STD_I32BE);
+  str_type = mkstr(32, H5T_STR_SPACEPAD);
+  mdims[0] = 3; mdims[1] = 4;
+  H5Tinsert_array(f_type, "string", HOFFSET(compound_t, s), 2, mdims, 
+                  NULL, str_type);
+
+  for (i = 0; i < 3; i++)
+      for (j = 0; j < 6; j++) {
+           for (k = 0 ; k < 8; k++)
+                for (l = 0; l < 10; l++)
+                   comp1[i][j].a[k][l] = l;
+           for (k = 0 ; k < 12; k++)
+               sprintf(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
+      }
+           
+  dataset = H5Dcreate(fid, "/comp1", f_type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, f_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1);
+
+  H5Tclose(str_type);
+  H5Tclose(f_type);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  H5Fclose(fid);
+}
 
 int main(void){
 
@@ -974,9 +1067,13 @@ test_all();
 test_loop();
 
 test_dataset2();
+/*
 test_compound_dt2();
+*/
 test_loop2();
 test_many();
+
+test_str();
 
 return 0;
 
