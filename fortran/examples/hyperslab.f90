@@ -52,7 +52,7 @@
      INTEGER :: i, j, k 
 
      INTEGER :: error, error_n  ! Error flags
-     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
 
    !
