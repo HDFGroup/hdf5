@@ -41,10 +41,11 @@ docdir=@exec_prefix@/doc
 PUB_LIB=$(LIB)
 
 ## Shared libraries
+LT_STATIC_EXEC=@LT_STATIC_EXEC@
 LT=$(top_builddir)/libtool
 LT_COMPILE=$(LT) --mode=compile $(CC)
 LT_LINK_LIB=$(LT) --mode=link $(CC) -rpath $(libdir)
-LT_LINK_EXE=$(LT) --mode=link $(CC) -rpath $(bindir)
+LT_LINK_EXE=$(LT) --mode=link $(CC) $(LT_STATIC_EXEC) -rpath $(bindir)
 LT_RUN=$(LT) --mode=execute
 LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
 LT_INSTALL_LIB=$(LT) --mode=install $(INSTALL_DATA)
