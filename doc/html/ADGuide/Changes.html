@@ -93,6 +93,12 @@ H5function6
         The following functions have changed slightly.
         <dir>
         <dl>
+        <dt><code>H5FDflush and VFL "flush" callbacks</code>
+          <dd>An extra parameter 'closing' has been added to these functions,
+                to allow the library to indicate that the file will be closed
+                following the call to "flush".  Actions in the "flush" call
+                that are duplicated in the VFL "close" call may be omitted by
+                the VFL driver.
         <dt><code>H5function</code>
           <dd>Description of change
         </dl>
