@@ -70,7 +70,7 @@ test_select_hyper(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -339,7 +339,7 @@ test_select_combo(void)
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
     hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hssize_t    start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -480,7 +480,7 @@ test_select_hyper_stride(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
