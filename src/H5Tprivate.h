@@ -130,7 +130,7 @@ __DLL__ char *H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/,
 			      size_t size);
 __DLL__ herr_t H5T_enum_valueof(H5T_t *dt, const char *name,
 				void *value/*out*/);
-__DLL__ herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void UNUSED *_op_data);
+__DLL__ herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t ndim, hssize_t *point, void *_op_data);
 __DLL__ htri_t H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 
 /* Reference specific functions */

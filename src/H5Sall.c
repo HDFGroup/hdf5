@@ -284,7 +284,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
  */
 static hsize_t
 H5S_all_mgath (const void *_buf, size_t elmt_size,
-	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
+	       const H5S_t UNUSED *mem_space, H5S_sel_iter_t *mem_iter,
 	       hsize_t nelmts, void *tconv_buf/*out*/)
 {
     const uint8_t *buf=(const uint8_t*)_buf;   /* Get local copies for address arithmetic */
@@ -334,7 +334,7 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
  */
 static herr_t
 H5S_all_mscat (const void *tconv_buf, size_t elmt_size,
-	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
+	       const H5S_t UNUSED *mem_space, H5S_sel_iter_t *mem_iter,
 	       hsize_t nelmts, void *_buf/*out*/)
 {
     uint8_t *buf=(uint8_t *)_buf;

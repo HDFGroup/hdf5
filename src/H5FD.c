@@ -1296,7 +1296,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 #endif
 		assert(tmp);		/* bark in debug mode */
 		if (tmp){
-		    if (tmp->size = best->size - head - size){
+		    if ((tmp->size = best->size - head - size)){
 			tmp->addr = best->addr + head + size;
 			tmp->next = best->next;
 			best->next = tmp;
@@ -1406,8 +1406,8 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                   "driver allocation request failed");
         }
     } else {
-	hsize_t	wasted, tmpsize;
-        haddr_t oldeoa;
+	hsize_t	wasted;
+        haddr_t oldeoa=0;
 	haddr_t eoa = (file->cls->get_eoa)(file);
 
 #ifdef H5F_DEBUG
