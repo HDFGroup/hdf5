@@ -1,7 +1,7 @@
 #############################
  output for 'h5ls -w80 -r -d tnestedcomp.h5'
 #############################
-/tnestedcomp.h5/ArrayOfStructures Dataset {10}
+/ArrayOfStructures       Dataset {10}
     Data:
         (0) {0, 0, 1, {"A", [-100,100]}}, {1, 1, 0.5, {"B", [-100,100]}},
         (2) {2, 4, 0.333333333333333, {"C", [-100,100]}},
