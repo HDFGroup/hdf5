@@ -956,6 +956,9 @@ H5T_init_interface(void)
     status |= H5Tregister(H5T_PERS_SOFT, "struct",
 			  compound, compound,
 			  H5T_conv_struct);
+    status |= H5Tregister(H5T_PERS_SOFT, "struct(opt)",
+			  compound, compound,
+			  H5T_conv_struct_opt);
     status |= H5Tregister(H5T_PERS_SOFT, "enum",
 			  enum_type, enum_type,
 			  H5T_conv_enum);
@@ -1355,7 +1358,7 @@ H5T_term_interface(void)
 		H5T_print_stats(path, &nprint/*in,out*/);
 		path->cdata.command = H5T_CONV_FREE;
 		if ((path->func)(FAIL, FAIL, &(path->cdata),
-				 0, NULL, NULL)<0) {
+				 0, 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
 		    if (H5DEBUG(T)) {
 			fprintf (H5DEBUG(T), "H5T: conversion function "
@@ -4136,7 +4139,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	    }
 	    HDmemset(&cdata, 0, sizeof cdata);
 	    cdata.command = H5T_CONV_INIT;
-	    if ((func)(tmp_sid, tmp_did, &cdata, 0, NULL, NULL)<0) {
+	    if ((func)(tmp_sid, tmp_did, &cdata, 0, 0, NULL, NULL)<0) {
 		H5I_dec_ref(tmp_sid);
 		H5I_dec_ref(tmp_did);
 		tmp_sid = tmp_did = -1;
@@ -4168,7 +4171,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	    H5T_print_stats(old_path, &nprint);
 	    old_path->cdata.command = H5T_CONV_FREE;
 	    if ((old_path->func)(tmp_sid, tmp_did, &(old_path->cdata),
-				 0, NULL, NULL)<0) {
+				 0, 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
 		if (H5DEBUG(T)) {
 		    fprintf (H5DEBUG(T), "H5T: conversion function 0x%08lx "
@@ -4284,7 +4287,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	/* Shut down path */
 	H5T_print_stats(path, &nprint);
 	path->cdata.command = H5T_CONV_FREE;
-	if ((path->func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
+	if ((path->func)(FAIL, FAIL, &(path->cdata), 0, 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
 		fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx failed "
@@ -4402,7 +4405,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 		       "unable to convert between src and dst data types");
     }
 
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, buf, background)<0) {
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, buf, background)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "data type conversion failed");
     }
@@ -6399,7 +6402,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	HDstrcpy(H5T_g.path[0]->name, "no-op");
 	H5T_g.path[0]->func = H5T_conv_noop;
 	H5T_g.path[0]->cdata.command = H5T_CONV_INIT;
-	if (H5T_conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), 0,
+	if (H5T_conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), 0, 0,
 			  NULL, NULL)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
@@ -6487,7 +6490,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 			"query");
 	}
 	path->cdata.command = H5T_CONV_INIT;
-	if ((func)(src_id, dst_id, &(path->cdata), 0, NULL, NULL)<0) {
+	if ((func)(src_id, dst_id, &(path->cdata), 0, 0, NULL, NULL)<0) {
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 			"unable to initialize conversion function");
 	}
@@ -6519,7 +6522,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	}
 	path->cdata.command = H5T_CONV_INIT;
 	if ((H5T_g.soft[i].func) (src_id, dst_id, &(path->cdata),
-				       0, NULL, NULL)<0) {
+				       0, 0, NULL, NULL)<0) {
 	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 	    H5E_clear(); /*ignore the error*/
 	} else {
@@ -6541,7 +6544,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	assert(table==H5T_g.path[md]);
 	H5T_print_stats(table, &nprint/*in,out*/);
 	table->cdata.command = H5T_CONV_FREE;
-	if ((table->func)(FAIL, FAIL, &(table->cdata), 0, NULL, NULL)<0) {
+	if ((table->func)(FAIL, FAIL, &(table->cdata), 0, 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
 		fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free "
@@ -6605,12 +6608,20 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
  *              Tuesday, December 15, 1998
  *
  * Modifications:
+ * 		Robb Matzke, 1999-06-16
+ *		The timers are updated only if H5T debugging is enabled at
+ *		runtime in addition to compile time.
  *
+ *		Robb Matzke, 1999-06-16
+ *		Added support for non-zero strides. If STRIDE is non-zero
+ *		then convert one value at each memory location advancing
+ *		STRIDE bytes each time; otherwise assume both source and
+ *		destination values are packed.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
-	    void *buf, void *bkg)
+	    size_t stride, void *buf, void *bkg)
 {
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
@@ -6619,17 +6630,20 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
     FUNC_ENTER(H5T_convert, FAIL);
 
 #ifdef H5T_DEBUG
-    H5_timer_begin(&timer);
+    if (H5DEBUG(T)) H5_timer_begin(&timer);
 #endif
     tpath->cdata.command = H5T_CONV_CONV;
-    if ((tpath->func)(src_id, dst_id, &(tpath->cdata), nelmts, buf, bkg)<0) {
+    if ((tpath->func)(src_id, dst_id, &(tpath->cdata), nelmts, stride, buf,
+		      bkg)<0) {
 	HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		      "data type conversion failed");
     }
 #ifdef H5T_DEBUG
-    H5_timer_end(&(tpath->stats.timer), &timer);
-    tpath->stats.ncalls++;
-    tpath->stats.nelmts += nelmts;
+    if (H5DEBUG(T)) {
+	H5_timer_end(&(tpath->stats.timer), &timer);
+	tpath->stats.ncalls++;
+	tpath->stats.nelmts += nelmts;
+    }
 #endif
 
     FUNC_LEAVE(SUCCEED);

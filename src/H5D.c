@@ -1751,7 +1751,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         /*
          * Perform data type conversion.
          */
-	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, tconv_buf,
+	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, tconv_buf,
 			bkg_buf)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");
@@ -2151,7 +2151,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         /*
          * Perform data type conversion.
          */
-	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, tconv_buf,
+	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, tconv_buf,
 			bkg_buf)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");

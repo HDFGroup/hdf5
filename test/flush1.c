@@ -69,7 +69,7 @@ main(void)
 	 * 1998-11-06 ptl
 	 */
 	for (j=0; j<ds_size[1]; j++) {
-	    the_data[i][j] = (double)(hssize_t)i/((hssize_t)(j+1));
+	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
 	}
     }
     if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,

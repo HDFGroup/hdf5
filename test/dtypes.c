@@ -285,7 +285,7 @@ reset_hdf5(void)
  *
  * Return:      Success:        0
  *
- *              Failure:        -1
+ *              Failure:        number of errors
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -294,7 +294,7 @@ reset_hdf5(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_classes(void)
 {
     H5T_class_t		tcls;
@@ -317,7 +317,7 @@ test_classes(void)
     return 0;
 
   error:
-    return -1;
+    return 1;
 }
 
 
@@ -328,7 +328,7 @@ test_classes(void)
  *
  * Return:      Success:        0
  *
- *              Failure:        -1
+ *              Failure:        number of errors
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -337,7 +337,7 @@ test_classes(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_copy(void)
 {
     hid_t               a_copy;
@@ -362,18 +362,18 @@ test_copy(void)
     return 0;
 
   error:
-    return -1;
+    return 1;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_compound
+ * Function:    test_compound_1
  *
  * Purpose:     Tests various things about compound data types.
  *
  * Return:      Success:        0
  *
- *              Failure:        -1
+ *              Failure:        number of errors
  *
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
@@ -382,8 +382,8 @@ test_copy(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_compound(void)
+static int
+test_compound_1(void)
 {
     complex_t               tmp;
     hid_t                   complex_id;
@@ -404,8 +404,351 @@ test_compound(void)
     return 0;
 
   error:
-    return -1;
+    return 1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_2
+ *
+ * Purpose:	Tests a compound type conversion where the source and
+ *		destination are the same except for the order of the
+ *		elements.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June 17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_2(void)
+{
+    struct st {
+	int a, b, c[4], d, e;
+    } *s_ptr;
+    struct dt {
+	int e, d, c[4], b, a;
+    } *d_ptr;
+
+    const int		nelmts = 200000;
+    const size_t	four = 4;
+    unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
+    hid_t		st=-1, dt=-1;
+    int			i;
+
+    TESTING("compound element reordering");
+
+    /* Sizes should be the same, but be careful just in case */
+    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = malloc(nelmts * sizeof(struct dt));
+    orig = malloc(nelmts * sizeof(struct st));
+    for (i=0; i<nelmts; i++) {
+	s_ptr = ((struct st*)orig) + i;
+	s_ptr->a    = i*8+0;
+	s_ptr->b    = i*8+1;
+	s_ptr->c[0] = i*8+2;
+	s_ptr->c[1] = i*8+3;
+	s_ptr->c[2] = i*8+4;
+	s_ptr->c[3] = i*8+5;
+	s_ptr->d    = i*8+6;
+	s_ptr->e    = i*8+7;
+    }
+    memcpy(buf, orig, nelmts*sizeof(struct st));
+
+    /* Build hdf5 datatypes */
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+	H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array(st, "c", HOFFSET(struct st, c), 1, &four, NULL,
+			H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+	goto error;
+    
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+	H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array(dt, "c", HOFFSET(struct dt, c), 1, &four, NULL,
+			H5T_NATIVE_INT)<0 ||
+	H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+	goto error;
+    
+    /* Perform the conversion */
+    if (H5Tconvert(st, dt, nelmts, buf, bkg)<0) goto error;
+
+    /* Compare results */
+    for (i=0; i<nelmts; i++) {
+	s_ptr = ((struct st*)orig) + i;
+	d_ptr = ((struct dt*)buf)  + i;
+	if (s_ptr->a    != d_ptr->a    ||
+	    s_ptr->b    != d_ptr->b    ||
+	    s_ptr->c[0] != d_ptr->c[0] ||
+	    s_ptr->c[1] != d_ptr->c[1] ||
+	    s_ptr->c[2] != d_ptr->c[2] ||
+	    s_ptr->c[3] != d_ptr->c[3] ||
+	    s_ptr->d    != d_ptr->d    ||
+	    s_ptr->e    != d_ptr->e) {
+	    FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
+		   s_ptr->c[3], s_ptr->d, s_ptr->e);
+	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+		   d_ptr->c[3], d_ptr->d, d_ptr->e);
+	    goto error;
+	}
+    }
+    
+    /* Release resources */
+    free(buf);
+    free(bkg);
+    free(orig);
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+
+    PASSED();
+    reset_hdf5();
+    return 0;
+
+ error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_3
+ *
+ * Purpose:	Tests compound conversions where the source and destination
+ *		are the same except the destination is missing a couple
+ *		members which appear in the source.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June 17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_3(void)
+{
+    struct st {
+	int a, b, c[4], d, e;
+    } *s_ptr;
+    struct dt {
+	int a,    c[4],    e;
+    } *d_ptr;
+
+    const int		nelmts = 200000;
+    const size_t	four = 4;
+    unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
+    hid_t		st=-1, dt=-1;
+    int			i;
+
+    TESTING("compound subset conversions");
+
+    /* Initialize */
+    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = malloc(nelmts * sizeof(struct dt));
+    orig = malloc(nelmts * sizeof(struct st));
+    for (i=0; i<nelmts; i++) {
+	s_ptr = ((struct st*)orig) + i;
+	s_ptr->a    = i*8+0;
+	s_ptr->b    = i*8+1;
+	s_ptr->c[0] = i*8+2;
+	s_ptr->c[1] = i*8+3;
+	s_ptr->c[2] = i*8+4;
+	s_ptr->c[3] = i*8+5;
+	s_ptr->d    = i*8+6;
+	s_ptr->e    = i*8+7;
+    }
+    memcpy(buf, orig, nelmts*sizeof(struct st));
+
+    /* Build hdf5 datatypes */
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+	H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array(st, "c", HOFFSET(struct st, c), 1, &four, NULL,
+			H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+	goto error;
+    
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+	H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array(dt, "c", HOFFSET(struct dt, c), 1, &four, NULL,
+			H5T_NATIVE_INT)<0 ||
+	H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+	goto error;
+    
+    /* Perform the conversion */
+    if (H5Tconvert(st, dt, nelmts, buf, bkg)<0) goto error;
+
+    /* Compare results */
+    for (i=0; i<nelmts; i++) {
+	s_ptr = ((struct st*)orig) + i;
+	d_ptr = ((struct dt*)buf)  + i;
+	if (s_ptr->a    != d_ptr->a    ||
+	    s_ptr->c[0] != d_ptr->c[0] ||
+	    s_ptr->c[1] != d_ptr->c[1] ||
+	    s_ptr->c[2] != d_ptr->c[2] ||
+	    s_ptr->c[3] != d_ptr->c[3] ||
+	    s_ptr->e    != d_ptr->e) {
+	    FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
+		   s_ptr->c[3], s_ptr->d, s_ptr->e);
+	    printf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n",
+		   d_ptr->a, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+		   d_ptr->c[3], d_ptr->e);
+	    goto error;
+	}
+    }
+    
+    /* Release resources */
+    free(buf);
+    free(bkg);
+    free(orig);
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+
+    PASSED();
+    reset_hdf5();
+    return 0;
+
+ error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_4
+ *
+ * Purpose:	Tests compound conversions when the destination has the same
+ *		fields as the source but one or more of the fields are
+ *		smaller.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June 17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_4(void)
+{
+    
+    struct st {
+	int a, b, c[4], d, e;
+    } *s_ptr;
+    struct dt {
+	short b;
+	int a, c[4];
+	short d;
+	int e;
+    } *d_ptr;
+
+    const int		nelmts = 200000;
+    const size_t	four = 4;
+    unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
+    hid_t		st=-1, dt=-1;
+    int			i;
+
+    TESTING("compound element shrinking & reordering");
+
+    /* Sizes should be the same, but be careful just in case */
+    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = malloc(nelmts * sizeof(struct dt));
+    orig = malloc(nelmts * sizeof(struct st));
+    for (i=0; i<nelmts; i++) {
+	s_ptr = ((struct st*)orig) + i;
+	s_ptr->a    = i*8+0;
+	s_ptr->b    = (i*8+1) & 0x7fff;
+	s_ptr->c[0] = i*8+2;
+	s_ptr->c[1] = i*8+3;
+	s_ptr->c[2] = i*8+4;
+	s_ptr->c[3] = i*8+5;
+	s_ptr->d    = (i*8+6) & 0x7fff;
+	s_ptr->e    = i*8+7;
+    }
+    memcpy(buf, orig, nelmts*sizeof(struct st));
+
+    /* Build hdf5 datatypes */
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+	H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array(st, "c", HOFFSET(struct st, c), 1, &four, NULL,
+			H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+	goto error;
+    
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+	H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
+	H5Tinsert_array(dt, "c", HOFFSET(struct dt, c), 1, &four, NULL,
+			H5T_NATIVE_INT)<0 ||
+	H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
+	H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+	goto error;
+    
+    /* Perform the conversion */
+    if (H5Tconvert(st, dt, nelmts, buf, bkg)<0) goto error;
+
+    /* Compare results */
+    for (i=0; i<nelmts; i++) {
+	s_ptr = ((struct st*)orig) + i;
+	d_ptr = ((struct dt*)buf)  + i;
+	if (s_ptr->a    != d_ptr->a    ||
+	    s_ptr->b    != d_ptr->b    ||
+	    s_ptr->c[0] != d_ptr->c[0] ||
+	    s_ptr->c[1] != d_ptr->c[1] ||
+	    s_ptr->c[2] != d_ptr->c[2] ||
+	    s_ptr->c[3] != d_ptr->c[3] ||
+	    s_ptr->d    != d_ptr->d    ||
+	    s_ptr->e    != d_ptr->e) {
+	    FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
+		   s_ptr->c[3], s_ptr->d, s_ptr->e);
+	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+		   d_ptr->c[3], d_ptr->d, d_ptr->e);
+	    goto error;
+	}
+    }
+    
+    /* Release resources */
+    free(buf);
+    free(bkg);
+    free(orig);
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+
+    PASSED();
+    reset_hdf5();
+    return 0;
+
+ error:
+    return 1;
+}
+    
 
 
 /*-------------------------------------------------------------------------
@@ -415,7 +758,7 @@ test_compound(void)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
@@ -424,7 +767,7 @@ test_compound(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_transient (hid_t fapl)
 {
     static hsize_t	ds_size[2] = {10, 20};
@@ -530,7 +873,7 @@ test_transient (hid_t fapl)
 	H5Dclose (dset);
 	H5Fclose (file);
     } H5E_END_TRY;
-    return -1;
+    return 1;
 }
 
 
@@ -541,7 +884,7 @@ test_transient (hid_t fapl)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
@@ -550,7 +893,7 @@ test_transient (hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_named (hid_t fapl)
 {
     hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, attr1=-1;
@@ -715,7 +1058,7 @@ test_named (hid_t fapl)
 	H5Dclose (dset);
 	H5Fclose (file);
     } H5E_END_TRY;
-    return -1;
+    return 1;
 }
 
 
@@ -754,7 +1097,7 @@ mkstr(size_t len, H5T_str_t strpad)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Monday, August 10, 1998
@@ -763,7 +1106,7 @@ mkstr(size_t len, H5T_str_t strpad)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_conv_str_1(void)
 {
     char	*buf=NULL;
@@ -993,7 +1336,7 @@ test_conv_str_1(void)
 
  error:
     reset_hdf5();
-    return -1;
+    return 1;
 }
 
 
@@ -1004,7 +1347,7 @@ test_conv_str_1(void)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Monday, August 10, 1998
@@ -1013,14 +1356,14 @@ test_conv_str_1(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_conv_str_2(void)
 {
     char		*buf=NULL, s[80];
     hid_t		c_type, f_type;
     const size_t	nelmts = 200000, ntests=NTESTS;
     size_t		i, j, nchars;
-    herr_t		ret_value = -1;
+    int			ret_value = 1;
 
     /*
      * Initialize types and buffer.
@@ -1066,7 +1409,7 @@ test_conv_str_2(void)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Tuesday, January  5, 1999
@@ -1075,14 +1418,14 @@ test_conv_str_2(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_conv_enum_1(void)
 {
     const int	nelmts=200000, ntests=NTESTS;
     int		i, val, *buf=NULL;
     hid_t	t1, t2;
     char	s[80];
-    herr_t	ret_value=FAIL;
+    int		ret_value = 1;
 
     /* Build the data types */
     t1 = H5Tcreate(H5T_ENUM, sizeof(int));
@@ -1142,7 +1485,7 @@ test_conv_enum_1(void)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 20, 1999
@@ -1219,7 +1562,7 @@ test_conv_bitfield(void)
     H5Tclose(st);
     H5Tclose(dt);
     reset_hdf5();
-    return -1;
+    return 1;
 }
 
 
@@ -1241,7 +1584,8 @@ test_conv_bitfield(void)
  */
 static herr_t
 convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
-	       size_t UNUSED nelmts, void UNUSED *_buf, void UNUSED *bkg)
+	       size_t UNUSED nelmts, size_t UNUSED stride, void UNUSED *_buf,
+	       void UNUSED *bkg)
 {
     if (H5T_CONV_CONV==cdata->command) num_opaque_conversions_g++;
     return 0;
@@ -1255,7 +1599,7 @@ convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 20, 1999
@@ -1312,7 +1656,7 @@ test_opaque(void)
     if (st>0) H5Tclose(st);
     if (dt>0) H5Tclose(dt);
     FAILED();
-    return -1;
+    return 1;
 }
 
 
@@ -1321,9 +1665,9 @@ test_opaque(void)
  *
  * Purpose:	Test atomic number conversions.
  *
- * Return:	Success:	
+ * Return:	Success:	0
  *
- *		Failure:	
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Wednesday, June 10, 1998
@@ -1332,7 +1676,7 @@ test_opaque(void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 test_conv_int (void)
 {
     unsigned char	byte[4];
@@ -1431,7 +1775,7 @@ test_conv_int (void)
 
  error:
     reset_hdf5();
-    return -1;
+    return 1;
 }
 
 
@@ -1449,7 +1793,7 @@ test_conv_int (void)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Monday, November 16, 1998
@@ -2581,7 +2925,7 @@ my_isnan(flt_t type, void *val)
  *
  * Return:	Success:	0
  *
- *		Failure:	-1
+ *		Failure:	number of errors
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 23, 1998
@@ -3188,20 +3532,23 @@ main(void)
     }
     
     /* Do the tests */
-    nerrors += test_classes()<0 ? 1 : 0;
-    nerrors += test_copy()<0 ? 1 : 0;
-    nerrors += test_compound()<0 ? 1 : 0;
-    nerrors += test_transient (fapl)<0 ? 1 : 0;
-    nerrors += test_named (fapl)<0 ? 1 : 0;
+    nerrors += test_classes();
+    nerrors += test_copy();
+    nerrors += test_compound_1();
+    nerrors += test_transient (fapl);
+    nerrors += test_named (fapl);
     h5_cleanup (fapl); /*must happen before first reset*/
     reset_hdf5();
 
-    nerrors += test_conv_str_1()<0 ? 1 : 0;
-    nerrors += test_conv_str_2()<0 ? 1 : 0;
-    nerrors += test_conv_int ()<0 ? 1 : 0;
-    nerrors += test_conv_enum_1()<0 ? 1 : 0;
-    nerrors += test_conv_bitfield()<0 ? 1 : 0;
-    nerrors += test_opaque()<0 ? 1 : 0;
+    nerrors += test_conv_str_1();
+    nerrors += test_conv_str_2();
+    nerrors += test_compound_2();
+    nerrors += test_compound_3();
+    nerrors += test_compound_4();
+    nerrors += test_conv_int ();
+    nerrors += test_conv_enum_1();
+    nerrors += test_conv_bitfield();
+    nerrors += test_opaque();
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();

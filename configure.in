@@ -541,6 +541,7 @@ if test X = "X$TRACE" -o Xyes = "X$TRACE"; then
    CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
 else
    AC_MSG_RESULT(no)
+   TRACE_API=no
    CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
 fi
 

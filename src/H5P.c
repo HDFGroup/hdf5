@@ -2722,7 +2722,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     HDmemcpy(buf, plist->fill.buf, H5T_get_size(plist->fill.type));
     
     /* Do the conversion */
-    if (H5T_convert(tpath, src_id, type_id, 1, buf, bkg)<0) {
+    if (H5T_convert(tpath, src_id, type_id, 1, 0, buf, bkg)<0) {
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }

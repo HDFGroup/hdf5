@@ -68,7 +68,14 @@ main(void)
 	     * 1998-11-06 ptl
 	     */
 	    error = fabs(the_data[i][j]-(double)(hssize_t)i/((hssize_t)j+1));
-	    assert(error<0.0001);
+	    if (error>0.0001) {
+		FAILED();
+		printf("    dset[%lu][%lu] = %g\n",
+		       (unsigned long)i, (unsigned long)j, the_data[i][j]);
+		printf("    should be %g\n",
+		       (double)(hssize_t)i/(hssize_t)(j+1));
+		goto error;
+	    }
 	}
     }
 
