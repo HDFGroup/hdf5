@@ -27,8 +27,6 @@
  *		  same file.
  *
  *	H5F_mpio_open
- *		- should take MPI communicator and MPI info as parameters
- *		  (currently uses MPI_COMM_WORLD and MPI_INFO_NULL)
  *		- "unique" key treated same as in H5F_mpio_access
  *
  *	H5F_mpio_read
@@ -258,7 +256,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     if (flags&H5F_ACC_CREAT)	mpi_amode |= MPI_MODE_CREATE;
     if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
 
-    mpierr = MPI_File_open(MPI_COMM_WORLD, (char*)name, mpi_amode, MPI_INFO_NULL, &fh);
+    mpierr = MPI_File_open(access_parms->u.mpio.comm, (char*)name, mpi_amode, access_parms->u.mpio.info, &fh);
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, mpierrmsg );
