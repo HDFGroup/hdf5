@@ -143,8 +143,8 @@
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE(hobj_ref_t_f), DIMENSION(N), INTENT(IN) :: buf ! Data buffer
             INTEGER, INTENT(IN) :: n ! size of the bufffer buf
+            TYPE(hobj_ref_t_f), DIMENSION(n), INTENT(IN) :: buf ! Data buffer
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                                 ! Memory dataspace identfier 
@@ -1301,8 +1301,8 @@
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE(hobj_ref_t_f), DIMENSION(N), INTENT(INOUT) :: buf ! Data buffer
             INTEGER, INTENT(IN) :: n      ! Size of the budffer buf
+            TYPE(hobj_ref_t_f), DIMENSION(N), INTENT(INOUT) :: buf ! Data buffer
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                                 ! Memory dataspace identfier 
