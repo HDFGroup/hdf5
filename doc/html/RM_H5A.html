@@ -341,8 +341,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Name:</strong> <a name="Annot-GetName">H5Aget_name</a>
 <dt><strong>Signature:</strong>
     <dd><em>hssize_t</em> <code>H5Aget_name</code>(<em>hid_t</em> <code>attr_id</code>,
-        <em>char *</em><code>buf</code>,
-        <em>size_t</em> <code>buf_size</code>
+        <em>size_t</em> <code>buf_size</code>,
+        <em>char *</em><code>buf</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Gets an attribute name.
@@ -358,10 +358,10 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
     <dl>
         <dt><em>hid_t</em> <code>attr_id</code>
             <dd>IN: Identifier of the attribute.
-        <dt><em>char *</em><code>buf</code>
-            <dd>IN: Buffer to store name in.
         <dt><em>size_t</em> <code>buf_size</code>
             <dd>IN: The size of the buffer to store the name in.
+        <dt><em>char *</em><code>buf</code>
+            <dd>IN: Buffer to store name in.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns the length of the attribute's name, which may be

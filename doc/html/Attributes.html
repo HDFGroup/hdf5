@@ -218,7 +218,7 @@ And in this document, the
     This function returns a datatype ID for success or negative for failure.
 	<br><br>
       <dt><code>size_t H5Aget_name (hid_t <em>attr_id</em>,
-          char *<em>buf</em>, size_t <em>buf_size</em>)</code>
+          size_t <em>buf_size</em>, char *<em>buf</em>)</code>
       <dd>This function retrieves the name of an attribute for an attribute ID.
     Up to <em>buf_size</em> characters are stored in <em>buf</em> followed by a
     '\0' string terminator.  If the name of the attribute is longer than
