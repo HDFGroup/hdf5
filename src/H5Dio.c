@@ -96,7 +96,7 @@ H5D_io_assist_mpio(H5P_genplist_t *dx_plist, hbool_t doing_mpio, H5FD_mpio_xfer_
 #endif /*H5_HAVE_PARALLEL*/
 static herr_t
 H5D_chunk_mem_file_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_space, 
-            const H5S_t *mem_space, fm_map *fm_struct);
+            const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_chunk_coords_assist(hssize_t *coords, size_t ndims,
     hsize_t chunks[], hsize_t chunk_ptr);
 static herr_t H5D_chunk_cb(void *elem, hid_t type_id, hsize_t ndims,
@@ -231,7 +231,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     /* Set up type conversion function */
     if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id))) {
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
-    } else if (!H5T_IS_NOOP(tpath)) {
+    } else if (!H5T_path_noop(tpath)) {
         if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL)))<0 ||
                 (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL)))<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
@@ -604,7 +604,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      */
     if (NULL==(tpath=H5T_path_find(dataset->type, mem_type, NULL, NULL, dxpl_id))) {
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
-    } else if (!H5T_IS_NOOP(tpath)) {
+    } else if (!H5T_path_noop(tpath)) {
         if ((src_id=H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
                 (dst_id=H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
@@ -830,7 +830,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      */
     if (NULL==(tpath=H5T_path_find(mem_type, dataset->type, NULL, NULL, dxpl_id))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
-    } else if (!H5T_IS_NOOP(tpath)) {
+    } else if (!H5T_path_noop(tpath)) {
 	if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
                 (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
@@ -958,7 +958,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
      * If there is no type conversion then read directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if (H5T_IS_NOOP(tpath)) {
+    if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -1018,11 +1018,11 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (tpath->cdata.need_bkg) {
+    if (H5T_path_bkg(tpath)) {
         /* Retrieve the bkgr buffer property */
         if(H5P_get(dx_plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type");
-        need_bkg = MAX(tpath->cdata.need_bkg, need_bkg);
+        need_bkg = MAX(H5T_path_bkg(tpath), need_bkg);
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     } /* end else */
@@ -1197,7 +1197,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
      * If there is no type conversion then write directly from the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if (H5T_IS_NOOP(tpath)) {
+    if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -1254,11 +1254,11 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (tpath->cdata.need_bkg) {
+    if (H5T_path_bkg(tpath)) {
         /* Retrieve the bkgr buffer property */
         if(H5P_get(dx_plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type");
-        need_bkg = MAX (tpath->cdata.need_bkg, need_bkg);
+        need_bkg = MAX (H5T_path_bkg(tpath), need_bkg);
     } else if(H5T_detect_class(dataset->type, H5T_VLEN)) {
 	/* Old data is retrieved into background buffer for VL datatype.  The 
 	 * data is used later for freeing heap objects. */
@@ -1404,7 +1404,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
 #endif /*H5_HAVE_PARALLEL*/
     xfer_mode, hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
-    fm_map      fm_struct;
+    fm_map      fm;                     /* File<->memory mapping */
     herr_t      status;                 /*function return status*/     
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
@@ -1434,17 +1434,17 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
     FUNC_ENTER_NOINIT(H5D_chunk_read);
     
     /* Initialize fm_map*/
-    HDmemset(&fm_struct, 0, sizeof(fm_map));
-    fm_struct.layout = &(dataset->layout);
+    HDmemset(&fm, 0, sizeof(fm_map));
+    fm.layout = &(dataset->layout);
      
     /* Map elements between file and memory for each chunk*/
-    H5D_chunk_mem_file_map(dataset, mem_type, file_space, mem_space, &fm_struct);
+    H5D_chunk_mem_file_map(dataset, mem_type, file_space, mem_space, &fm);
 
     /*
      * If there is no type conversion then read directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if (H5T_IS_NOOP(tpath)) {
+    if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -1453,15 +1453,15 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
              dataset->layout.type==H5D_COMPACT);
 
         /*loop through each chunk, read data*/
-        for(h=0; h<fm_struct.nchunks; h++) {
-            if(H5S_get_select_npoints(fm_struct.fspace[h]) > 0) {
+        for(h=0; h<fm.nchunks; h++) {
+            if(H5S_get_select_npoints(fm.fspace[h]) > 0) {
                 /*pass in chunk's coordinates in a union.  LAYOUT puts datatype size as an extra dimension,
                  * have to take it out.*/
-                store.chunk_coords = fm_struct.chunk_coords + h*dataset->layout.ndims;
+                store.chunk_coords = fm.chunk_coords + h*dataset->layout.ndims;
 
                 status = (sconv->read)(dataset->ent.file, &(dataset->layout), 
                         dc_plist, &store, H5T_get_size(dataset->type), 
-                        fm_struct.fspace[h], fm_struct.mspace[h], dxpl_id, buf/*out*/);
+                        fm.fspace[h], fm.mspace[h], dxpl_id, buf/*out*/);
 
                 /* Check return value from optimized read */
                 if (status<0)
@@ -1504,11 +1504,11 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (tpath->cdata.need_bkg) {
+    if (H5T_path_bkg(tpath)) {
         /* Retrieve the bkgr buffer property */
         if(H5P_get(dx_plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type");
-        need_bkg = MAX(tpath->cdata.need_bkg, need_bkg);
+        need_bkg = MAX(H5T_path_bkg(tpath), need_bkg);
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     } /* end else */
@@ -1525,26 +1525,26 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
     } /* end if */
     
     /* Loop over all the chunks, performing I/O on each */
-    for(h=0; h<fm_struct.nchunks; h++) {
+    for(h=0; h<fm.nchunks; h++) {
         hsize_t chunk_nelmts;   /* Number of elements selected in current chunk */
 
         /* Get the number of elements selected in this chunk */
-        chunk_nelmts=H5S_get_select_npoints(fm_struct.fspace[h]);
+        chunk_nelmts=H5S_get_select_npoints(fm.fspace[h]);
         assert(chunk_nelmts<=nelmts);
         if(chunk_nelmts > 0) {
             /* initialize selection iterator */
-            if (H5S_select_iter_init(&file_iter, fm_struct.fspace[h], src_type_size)<0)
+            if (H5S_select_iter_init(&file_iter, fm.fspace[h], src_type_size)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
             file_iter_init=1;	/*file selection iteration info has been initialized */
-            if (H5S_select_iter_init(&mem_iter, fm_struct.mspace[h], dst_type_size)<0)
+            if (H5S_select_iter_init(&mem_iter, fm.mspace[h], dst_type_size)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
             mem_iter_init=1;	/*file selection iteration info has been initialized */
-            if (H5S_select_iter_init(&bkg_iter, fm_struct.mspace[h], dst_type_size)<0)
+            if (H5S_select_iter_init(&bkg_iter, fm.mspace[h], dst_type_size)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
             bkg_iter_init=1;	/*file selection iteration info has been initialized */
             
             /*pass in chunk's coordinates in a union*/
-            store.chunk_coords = fm_struct.chunk_coords + h*dataset->layout.ndims;
+            store.chunk_coords = fm.chunk_coords + h*dataset->layout.ndims;
                
             for (smine_start=0; smine_start<chunk_nelmts; smine_start+=smine_nelmts) {
                 /* Go figure out how many elements to read from the file */
@@ -1563,7 +1563,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
                 assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
                      dataset->layout.type==H5D_COMPACT);
                 n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                        dc_plist, &store, src_type_size, fm_struct.fspace[h], 
+                        dc_plist, &store, src_type_size, fm.fspace[h], 
                         &file_iter, smine_nelmts, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
@@ -1578,7 +1578,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
 #ifdef H5S_DEBUG
                     H5_timer_begin(&timer);
 #endif
-                    n = H5S_select_mgath(buf, dst_type_size, fm_struct.mspace[h], &bkg_iter,
+                    n = H5S_select_mgath(buf, dst_type_size, fm.mspace[h], &bkg_iter,
                                      smine_nelmts, dxpl_id, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
                     H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
@@ -1602,7 +1602,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                status = H5S_select_mscat(tconv_buf, dst_type_size, fm_struct.mspace[h],
+                status = H5S_select_mscat(tconv_buf, dst_type_size, fm.mspace[h],
                             &mem_iter, smine_nelmts, dxpl_id, buf/*out*/);
 #ifdef H5S_DEBUG
                 H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
@@ -1658,16 +1658,18 @@ done:
         H5S_select_iter_release(&bkg_iter);
 
     /* Close file space and memory space for each chunk*/
-    for(h=0; h<fm_struct.nchunks; h++) {
-        if(fm_struct.mspace[h])
-            H5S_close(fm_struct.mspace[h]);
-        if(fm_struct.fspace[h])
-            H5S_close(fm_struct.fspace[h]);
+    for(h=0; h<fm.nchunks; h++) {
+        if(fm.mspace[h])
+            H5S_close(fm.mspace[h]);
+        if(fm.fspace[h])
+            H5S_close(fm.fspace[h]);
     }       
-    if(fm_struct.fspace)
-        H5MM_free(fm_struct.fspace);
-    if(fm_struct.mspace)
-        H5MM_free(fm_struct.mspace);   
+    if(fm.chunk_coords)
+        H5MM_free(fm.chunk_coords);
+    if(fm.fspace)
+        H5MM_free(fm.fspace);
+    if(fm.mspace)
+        H5MM_free(fm.mspace);   
       
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5D_chunk_read() */
@@ -1702,7 +1704,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
 #endif /*H5_HAVE_PARALLEL*/
     xfer_mode, hid_t src_id, hid_t dst_id, const void *buf)
 {
-    fm_map fm_struct;
+    fm_map      fm;                     /* File<->memory mapping */
     herr_t      status;                 /*function return status*/     
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
@@ -1732,30 +1734,30 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     FUNC_ENTER_NOINIT(H5D_chunk_write);
     
     /* Initialize fm_map*/
-    HDmemset(&fm_struct, 0, sizeof(fm_map));
-    fm_struct.layout = &(dataset->layout);
+    HDmemset(&fm, 0, sizeof(fm_map));
+    fm.layout = &(dataset->layout);
 
     /* Map elements between file and memory for each chunk*/
-    H5D_chunk_mem_file_map(dataset, mem_type, file_space, mem_space, &fm_struct);
+    H5D_chunk_mem_file_map(dataset, mem_type, file_space, mem_space, &fm);
    
     /*
      * If there is no type conversion then write directly from the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if (H5T_IS_NOOP(tpath)) {
+    if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
         /*loop through each chunk, write data*/
-        for(h=0; h<fm_struct.nchunks; h++) {
-            if(H5S_get_select_npoints(fm_struct.fspace[h]) > 0) {
+        for(h=0; h<fm.nchunks; h++) {
+            if(H5S_get_select_npoints(fm.fspace[h]) > 0) {
                 /*pass in chunk's coordinates in a union.  LAYOUT puts datatype size as an extra dimension,
                  * have to take it out.*/
-                store.chunk_coords = fm_struct.chunk_coords + h*dataset->layout.ndims;
+                store.chunk_coords = fm.chunk_coords + h*dataset->layout.ndims;
 
                 status = (sconv->write)(dataset->ent.file, &(dataset->layout),
                         dc_plist, &store, H5T_get_size(dataset->type),
-                        fm_struct.fspace[h], fm_struct.mspace[h], dxpl_id, buf);
+                        fm.fspace[h], fm.mspace[h], dxpl_id, buf);
             
                 /* Check return value from optimized write */
                 if (status<0)
@@ -1798,11 +1800,11 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (tpath->cdata.need_bkg) {
+    if (H5T_path_bkg(tpath)) {
         /* Retrieve the bkgr buffer property */
         if(H5P_get(dx_plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type");
-        need_bkg = MAX (tpath->cdata.need_bkg, need_bkg);
+        need_bkg = MAX (H5T_path_bkg(tpath), need_bkg);
     } else if(H5T_detect_class(dataset->type, H5T_VLEN)) {
 	/* Old data is retrieved into background buffer for VL datatype.  The 
 	 * data is used later for freeing heap objects. */
@@ -1823,27 +1825,27 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     } /* end if */
 
     /* Loop over all the chunks, performing I/O on each */
-    for(h=0; h<fm_struct.nchunks; h++) {
+    for(h=0; h<fm.nchunks; h++) {
         hsize_t chunk_nelmts;   /* Number of elements selected in current chunk */
 
         /* Get the number of elements selected in this chunk */
-        chunk_nelmts=H5S_get_select_npoints(fm_struct.fspace[h]);
+        chunk_nelmts=H5S_get_select_npoints(fm.fspace[h]);
         assert(chunk_nelmts<=nelmts);
         if(chunk_nelmts > 0) {
             
             /* initialize selection iterator */
-            if (H5S_select_iter_init(&file_iter, fm_struct.fspace[h], dst_type_size)<0)
+            if (H5S_select_iter_init(&file_iter, fm.fspace[h], dst_type_size)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
             file_iter_init=1;	/*file selection iteration info has been initialized */
-            if (H5S_select_iter_init(&mem_iter, fm_struct.mspace[h], src_type_size)<0)
+            if (H5S_select_iter_init(&mem_iter, fm.mspace[h], src_type_size)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
             mem_iter_init=1;	/*file selection iteration info has been initialized */
-            if (H5S_select_iter_init(&bkg_iter, fm_struct.fspace[h], dst_type_size)<0)
+            if (H5S_select_iter_init(&bkg_iter, fm.fspace[h], dst_type_size)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
             bkg_iter_init=1;	/*file selection iteration info has been initialized */
             
             /*pass in chunk's coordinates in a union*/
-            store.chunk_coords = fm_struct.chunk_coords + h*dataset->layout.ndims;
+            store.chunk_coords = fm.chunk_coords + h*dataset->layout.ndims;
            
             for (smine_start=0; smine_start<chunk_nelmts; smine_start+=smine_nelmts) {
                 /* Go figure out how many elements to read from the file */
@@ -1858,7 +1860,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5S_select_mgath(buf, src_type_size, fm_struct.mspace[h], &mem_iter,
+                n = H5S_select_mgath(buf, src_type_size, fm.mspace[h], &mem_iter,
                                      smine_nelmts, dxpl_id, tconv_buf/*out*/);
         
 #ifdef H5S_DEBUG
@@ -1874,7 +1876,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
                     H5_timer_begin(&timer);
 #endif
                     n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                            dc_plist, &store, dst_type_size, fm_struct.fspace[h], 
+                            dc_plist, &store, dst_type_size, fm.fspace[h], 
                             &bkg_iter, smine_nelmts, dxpl_id, bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
@@ -1900,7 +1902,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
                 H5_timer_begin(&timer);
 #endif
                 status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-                            dc_plist, &store, dst_type_size, fm_struct.fspace[h], 
+                            dc_plist, &store, dst_type_size, fm.fspace[h], 
                             &file_iter, smine_nelmts, dxpl_id, tconv_buf);
 
 #ifdef H5S_DEBUG
@@ -1957,16 +1959,18 @@ done:
         H5S_select_iter_release(&bkg_iter);
  
     /* Close file space and memory space for each chunk*/
-    for(h=0; h<fm_struct.nchunks; h++) {
-        if(fm_struct.mspace[h])
-            H5S_close(fm_struct.mspace[h]);
-        if(fm_struct.fspace[h])    
-            H5S_close(fm_struct.fspace[h]);
+    for(h=0; h<fm.nchunks; h++) {
+        if(fm.mspace[h])
+            H5S_close(fm.mspace[h]);
+        if(fm.fspace[h])    
+            H5S_close(fm.fspace[h]);
     }
-    if(fm_struct.fspace)
-        H5MM_free(fm_struct.fspace);
-    if(fm_struct.mspace)
-        H5MM_free(fm_struct.mspace);
+    if(fm.chunk_coords)
+        H5MM_free(fm.chunk_coords);
+    if(fm.fspace)
+        H5MM_free(fm.fspace);
+    if(fm.mspace)
+        H5MM_free(fm.mspace);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5D_chunk_write() */    
