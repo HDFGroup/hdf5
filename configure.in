@@ -91,7 +91,7 @@ AC_ARG_ENABLE(hsizet,
   [  --disable-hsizet        Datasets can normally be larger than memory
                           and/or files but some compilers are unable to
                           handle this (including versions of GCC before
-                          2.8.0).  Disabling the feature causes dataset
+                          2.8.0). Disabling the feature causes dataset
                           sizes to be restricted to the size of core memory,
                           or 'size_t'.],
   HSIZET=$enableval)
@@ -132,7 +132,7 @@ for f in $host_cpu-$host_vendor-$host_os \
   AC_MSG_RESULT(no)
 done
 if test $host_config != "none"; then
-  CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+  CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
   . $host_config
 fi
 
@@ -455,7 +455,8 @@ case "$host_cpu-$host_vendor-$host_os" in
     dnl Enable large file support on linux? Store the result in the LINUX_LFS
     dnl variable for posterity
     AC_ARG_ENABLE(linux-lfs,
-      [  --enable-linux-lfs      Enable support for large (64-bit) files on linux. [default=check]])
+      [  --enable-linux-lfs      Enable support for large (64-bit) files on Linux.
+                          [default=check]])
 
     LINUX_LFS="no"
     case "X-$enable_linux_lfs" in
@@ -466,16 +467,18 @@ case "$host_cpu-$host_vendor-$host_os" in
         ;;
       X-|*)
         AC_CHECK_FUNCS(getdents64,
-             dnl Add the large file support flags to the CPPFLAGS macro if
-             dnl we're on a Linux system which austensibly supports LFS. (We
-             dnl think it does if it has the ``getdents64'' syscall).
-             LINUX_LFS=yes)
+                       dnl Add the large file support flags to the
+                       dnl CPPFLAGS macro if we're on a Linux system
+                       dnl which austensibly supports LFS. (We think it
+                       dnl does if it has the ``getdents64'' syscall).
+                       LINUX_LFS=yes)
         ;;
     esac
 
     AC_MSG_CHECKING(for large file support on linux mode)
     if test "X$LINUX_LFS" = "Xyes"; then
       AC_MSG_RESULT(enabled)
+
       CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
     else
       AC_MSG_RESULT(disabled)
@@ -600,11 +603,16 @@ AC_SUBST(H4TOH5) H4TOH5=h4toh5
 AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 
-AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=no)
+AC_ARG_WITH(hdf4,
+  [  --with-hdf4[=DIR]       Use the HDF4 library where DIR is the directory
+                          containing the include/ and lib/ subdirectories which
+                          have the HDF4 header files and libraries [default=no]],,
+  withval=no)
+
 case "$withval" in
   yes)
     failed="no"
-    AC_CHECK_LIB(z, compress,, failed="yes")
+    AC_CHECK_LIB(z, compress2,, failed="yes")
     if test "$failed" = "no"; then
       HAVE_ZLIB="yes"
       AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
@@ -630,8 +638,8 @@ case "$withval" in
   *)
     case "$withval" in
       *,*)
-        hdf4_inc="`echo $withval |cut -f1 -d,`"
-        hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+        hdf4_inc="`echo $withval | cut -f1 -d,`"
+        hdf4_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
@@ -655,7 +663,7 @@ case "$withval" in
     fi
 
     if test "$failed" = "no"; then
-      AC_CHECK_LIB(z, compress,, failed="yes")
+      AC_CHECK_LIB(z, compress2,, failed="yes")
     fi
     if test "$failed" = "no"; then
       AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
@@ -679,19 +687,20 @@ case "$withval" in
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
+dnl Is the GNU zlib present? It has a header file `zlib.h' and a library
 dnl `-lz' and their locations might be specified with the `--with-zlib'
-dnl command-line switch.  The value is an include path and/or a library path.
+dnl command-line switch. The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
+AC_ARG_WITH(zlib,
+  [  --with-zlib[=DIR]       Use GNU zlib compression [default=yes]],,
+  withval=yes)
 
-AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],,
-            withval=yes)
 case $withval in
   yes)
     HAVE_ZLIB="yes"
     AC_CHECK_HEADERS(zlib.h)
-    AC_CHECK_LIB(z, compress,, unset HAVE_ZLIB)
+    AC_CHECK_LIB(z, compress2,, unset HAVE_ZLIB)
     ;;
   no)
     HAVE_ZLIB="no"
@@ -702,8 +711,8 @@ case $withval in
     HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
-        zlib_inc="`echo $withval |cut -f1 -d,`"
-        zlib_lib="`echo $withval |cut -f2 -d, -s`"
+        zlib_inc="`echo $withval | cut -f1 -d,`"
+        zlib_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
@@ -726,15 +735,19 @@ case $withval in
       LDFLAGS="$LDFLAGS -L$zlib_lib"
     fi
 
-    AC_CHECK_LIB(z, compress,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
+    AC_CHECK_LIB(z, compress2,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
     ;;
 esac
 
-dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage
-dnl driver.  SSL must be tested before them.
-AC_SUBST(SSL) SSL=yes
-AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB [default=no]],
-	    ,withval=no)
+dnl ----------------------------------------------------------------------
+dnl Is SSL library present? It is needed by GLOBUS-GASS and Grid Storage
+dnl driver. SSL must be tested before them.
+dnl
+AC_SUBST(SSL) SSL="yes"
+AC_ARG_WITH(ssl,
+  [  --with-ssl[=LIB]        Use the SSL library [default=no]],,
+  withval=no)
+
 case "$withval" in
    yes)
       AC_CHECK_LIB(crypto,main,,unset SSL)
@@ -754,17 +767,62 @@ case "$withval" in
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present?  It is also needed by 
+dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present? It is also needed by 
 dnl the Grid Storage driver.
 dnl
-AC_SUBST(GASS) GASS=yes
+AC_SUBST(GASS) GASS="yes"
 AC_SUBST(TESTGASS) TESTGASS='$(srcdir)/testgass'
-AC_ARG_WITH(gass,[  --with-gass=INC,LIB     Use the GASS Library [default=no]],
-	    ,withval=no)
+AC_ARG_WITH(gass,
+  [  --with-gass[=DIR]       Use the GASS library [default=no]],,
+  withval=no)
 
 case "$withval" in
-   yes)
-      AC_CHECK_HEADERS(globus_common.h,,unset GASS TESTGASS)
+  yes)
+    AC_CHECK_HEADERS(globus_common.h,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
+    AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+    ;;
+
+  no)
+    AC_MSG_CHECKING(for GASS)
+    AC_MSG_RESULT(suppressed)
+    unset GASS TESTGASS
+    ;;
+
+  *)
+    case "$withval" in
+      *,*)
+        gass_inc="`echo $withval | cut -f1 -d,`"
+        gass_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          gass_inc="$withval/include"
+          gass_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    if test -n "$gass_inc"; then
+      saved_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$gass_inc"
+      AC_CHECK_HEADERS(globus_common.h,,
+                       CPPFLAGS="$saved_CPPFLAGS"
+                       unset GASS TESTGASS)
+    else
+      AC_CHECK_HEADERS(globus_common.h)
+    fi
+
+    if test -n "$gass_lib"; then
+      saved_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$gass_lib"
       AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
@@ -774,113 +832,93 @@ case "$withval" in
       AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
       AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-      ;;
-   no)
-      AC_MSG_CHECKING(for GASS)
-      AC_MSG_RESULT(suppressed)
-      unset GASS TESTGASS
-      ;;
-   *)
-      gass_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$gass_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
-         CPPFLAGS="$CPPFLAGS -I$gass_inc"
-         AC_CHECK_HEADERS(globus_common.h,,
-                          CPPFLAGS="$saved_CPPFLAGS"
-                          unset GASS TESTGASS)
-      else
-         AC_CHECK_HEADERS(globus_common.h)
-      fi
-	
-      gass_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$gass_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
-         LDFLAGS="$LDFLAGS -L$gass_lib"
-         AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-      else
-         AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
-         AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
-      fi
-      ;;
+    else
+      AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gaa,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gss,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gss_assist,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_io,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_transfer_assist,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
+      AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+    fi
+    ;;
 esac
 
 if test -n "$GASS"; then
-   AC_DEFINE(HAVE_GASS)
+  AC_DEFINE(HAVE_GASS)
 fi
 
 dnl ----------------------------------------------------------------------
 dnl Are SRB Client and other system libraries(socket, elf) present?  
 dnl
-AC_SUBST(SRB) SRB=yes
+AC_SUBST(SRB) SRB="yes"
 AC_SUBST(TESTSRB) TESTSRB='$(srcdir)/testsrb'
-AC_ARG_WITH(srb,[  --with-srb=INC,LIB      Use the SRB Library [default=no]],
+AC_ARG_WITH(srb,[  --with-srb[=DIR]        Use the SRB Library [default=no]],
 	    ,withval=no)
 
 case "$withval" in
-   yes)
-      AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
+  yes)
+    AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
+    AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+    AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+    AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+    ;;
+  no)
+    AC_MSG_CHECKING(for SRB)
+    AC_MSG_RESULT(suppressed)
+    unset SRB TESTSRB
+    ;;
+  *)
+    case "$withval" in
+      *,*)
+        srb_inc="`echo $withval | cut -f1 -d,`"
+        srb_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          srb_inc="$withval/include"
+          srb_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    if test -n "$srb_inc"; then
+      saved_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS -I$srb_inc"
+      AC_CHECK_HEADERS(srbClient.h,,
+                       CPPFLAGS="$saved_CPPFLAGS"
+                       unset SRB TESTSRB)
+    else
+      AC_CHECK_HEADERS(srbClient.h)
+    fi
+
+    if test -n "$srb_lib"; then
+      saved_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$srb_lib"
       AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
       AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
       AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-      ;;
-   no)
-      AC_MSG_CHECKING(for SRB)
-      AC_MSG_RESULT(suppressed)
-      unset SRB TESTSRB
-      ;;
-   *)
-      srb_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$srb_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
-         CPPFLAGS="$CPPFLAGS -I$srb_inc"
-         AC_CHECK_HEADERS(srbClient.h,,
-                          CPPFLAGS="$saved_CPPFLAGS"
-                          unset SRB TESTSRB)
-      else
-         AC_CHECK_HEADERS(srbClient.h)
-      fi
-
-      srb_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$srb_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
-         LDFLAGS="$LDFLAGS -L$srb_lib"
-         AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-      else
-         AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-         AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
-      fi
-      ;;
+    else
+      AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+      AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+    fi
+    ;;
 esac
 if test -n "$SRB"; then
-    AC_DEFINE(HAVE_SRB)
+  AC_DEFINE(HAVE_SRB)
 fi
 
 dnl ----------------------------------------------------------------------
 dnl Is Grid Storage present? If so then we can compile in the Grid
 dnl Storage driver.
 dnl
-AC_SUBST(GRIDSTORAGE) GRIDSTORAGE=yes
+AC_SUBST(GRIDSTORAGE) GRIDSTORAGE="yes"
 AC_SUBST(TESTGRIDSTORAGE) TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
 AC_ARG_WITH(gridstorage,
-  [  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]],,
+  [  --with-gridstorage[=DIR] Use the Globus Grid Storage driver [default=no]],,
   withval=no)
 
 case "$withval" in
@@ -896,7 +934,19 @@ case "$withval" in
     unset GRIDSTORAGE TESTGRIDSTORAGE
     ;;
   *)
-    gridstorage_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        gridstorage_inc="`echo $withval | cut -f1 -d,`"
+        gridstorage_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          gridstorage_inc="$withval/include"
+          gridstorage_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
     if test -n "$gridstorage_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
@@ -907,7 +957,6 @@ case "$withval" in
       AC_CHECK_HEADERS(grid_storage_file.h)
     fi
 
-    gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
     if test -n "$gridstorage_lib"; then
       saved_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS -L$gridstorage_lib"
@@ -933,9 +982,9 @@ dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
 dnl translator.
 dnl
 AC_SUBST(PDB2HDF)
-AC_CHECK_LIB(pdb,PD_open)
-AC_CHECK_LIB(silo,lite_PD_open)
-AC_CHECK_HEADERS(pdb.h,PDB2HDF=pdb2hdf)
+AC_CHECK_LIB(pdb, PD_open)
+AC_CHECK_LIB(silo, lite_PD_open)
+AC_CHECK_HEADERS(pdb.h, PDB2HDF=pdb2hdf)
 
 dnl Checkpoint the cache
 AC_CACHE_SAVE
@@ -950,7 +999,7 @@ dnl
 AC_SUBST(PTHREAD) PTHREAD=yes
 
 AC_ARG_WITH(pthread,
-  [  --with-pthread=INC,LIB  Use the Pthreads library],,
+  [  --with-pthread[=DIR]    Use the Pthreads library [default=no]],,
   withval=no)
 
 case "$withval" in
@@ -970,7 +1019,19 @@ case "$withval" in
     unset PTHREAD
     ;;
   *)
-    pthread_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        pthread_inc="`echo $withval | cut -f1 -d,`"
+        pthread_lib="`echo $withval | cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          pthread_inc="$withval/include"
+          pthread_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
     if test -n "$pthread_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$pthread_inc"
@@ -979,7 +1040,6 @@ case "$withval" in
       AC_CHECK_HEADERS(pthread.h,,unset PTHREAD)
     fi
 
-    pthread_lib="`echo $withval |cut -f2 -d, -s`"
     if test -n "$pthread_lib"; then
       saved_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS -L$pthread_lib"
@@ -1028,7 +1088,8 @@ dnl compiled in
 dnl
 AC_MSG_CHECKING(whether HDF5 v1.2 compatibility functions enabled)
 AC_ARG_ENABLE(hdf5v1_2,
-  [  --enable-hdf5v1_2       Compile the HDF5 v1.2 compatibility interface [default=no]],
+  [  --enable-hdf5v1_2       Compile the HDF5 v1.2 compatibility interface
+                          [default=no]],
   HDF5_V1_2_COMPAT=$enableval)
 
 if test "X$HDF5_V1_2_COMPAT" = "Xyes"; then
@@ -1043,10 +1104,10 @@ dnl Should the Stream Virtual File Driver be compiled in ?
 dnl
 AC_MSG_CHECKING(for Stream Virtual File Driver support)
 AC_ARG_ENABLE(stream-vfd,
-  [  --enable-stream-vfd     Build the Stream Virtual File Driver. [default=no]],
+  [  --enable-stream-vfd     Build the Stream Virtual File Driver [default=no]],
   STREAM_VFD=$enableval)
 
-if test "X$STREAM_VFD" = "Xyes"; then
+if test "$STREAM_VFD" = "yes"; then
   AC_MSG_RESULT(yes)
   AC_CHECK_HEADERS(netinet/tcp.h sys/filio.h)
   AC_DEFINE(HAVE_STREAM)
@@ -1065,11 +1126,11 @@ if test "X$STREAM_VFD" = "Xyes"; then
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-      ],
-      [socklen_t foo; return 0;],
-      AC_DEFINE(HAVE_SOCKLEN_T) AC_MSG_RESULT(yes),
-      AC_MSG_RESULT(no)
-   )
+  ],
+    [socklen_t foo; return 0;],
+    AC_DEFINE(HAVE_SOCKLEN_T) AC_MSG_RESULT(yes),
+    AC_MSG_RESULT(no)
+  )
 else
   AC_MSG_RESULT(not configured)
 fi
@@ -1173,15 +1234,15 @@ AC_C_INLINE
 
 AC_MSG_CHECKING(for __attribute__ extension)
 AC_TRY_COMPILE(,[int __attribute__((unused)) x],
-	       AC_DEFINE(HAVE_ATTRIBUTE)
-	       AC_MSG_RESULT(yes),
-	       AC_MSG_RESULT(no))
+               AC_DEFINE(HAVE_ATTRIBUTE)
+               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(for __FUNCTION__ extension)
 AC_TRY_COMPILE(,[(void)__FUNCTION__],
-	       AC_DEFINE(HAVE_FUNCTION)
-	       AC_MSG_RESULT(yes),
-	       AC_MSG_RESULT(no))
+               AC_DEFINE(HAVE_FUNCTION)
+               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(no))
 
 dnl ----------------------------------------------------------------------
 dnl Try to figure out how to print `long long'.  Some machines use `%lld'
@@ -1204,12 +1265,12 @@ for hdf5_cv_printf_ll in l L q ll unknown; do
 
 int main(void)
 {
-	char *s=malloc(128);
+	char *s = malloc(128);
 	long long x = (long long)1048576 * (long long)1048576;
 	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
 	exit(strcmp(s,"1099511627776"));
 }
-   ], break)
+   ], break,,continue)
 done)
 
 AC_MSG_RESULT(%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u)
@@ -1334,11 +1395,11 @@ case "$CC_BASENAME" in
     AC_MSG_CHECKING(for mpirun)
 
     dnl Find the path where mpicc is located.
-    cmd=`echo $CC |cut -f1 -d' '`
-    if (echo $cmd |grep / >/dev/null); then
-      path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+    cmd=`echo $CC | cut -f1 -d' '`
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH |tr : ' '`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -1364,11 +1425,11 @@ case "$CC_BASENAME" in
     AC_MSG_CHECKING(for mpirun_lam or mpirun)
 
     dnl Find the path where hcc is located
-    cmd=`echo $CC |cut -f1 -d' '`
-    if (echo $cmd |grep / >/dev/null); then
-      path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+    cmd=`echo $CC | cut -f1 -d' '`
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH |tr : ' '`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -1384,6 +1445,7 @@ case "$CC_BASENAME" in
       fi
       AC_MSG_RESULT($path/$cmd);
       RUNSERIAL="${RUNSERIAL:-none}"
+
       if test -z "$RUNPARALLEL"; then
         RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
       fi
@@ -1504,10 +1566,10 @@ if test -n "$PARALLEL"; then
   dnl If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
   dnl the empty string.
   if test "X$RUNSERIAL" = "Xnone"; then
-    RUNSERIAL=
+    RUNSERIAL=""
   fi
   if test "X$RUNPARALLEL" = "Xnone"; then
-    RUNPARALLEL=
+    RUNPARALLEL=""
   fi
 fi
 
@@ -1581,7 +1643,7 @@ else
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
     if test -x $x/$CC; then
       CC_VERSION="$x/$CC"
-       break
+      break
     fi
   done
 fi
@@ -1590,9 +1652,9 @@ if test -n "$cc_vendor" && test -n "$cc_version"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Where is the root of the source tree.  Give an absolute address so
+dnl Where is the root of the source tree. Give an absolute address so
 dnl we can find it no matter which directory of the distribution is our
-dnl current directory.  The built-in pwd fails on some systems, but the
+dnl current directory. The built-in pwd fails on some systems, but the
 dnl /bin/pwd version works OK.
 dnl
 if test -x /bin/pwd; then
@@ -1634,8 +1696,8 @@ if test -n "$CPPFLAGS"; then
       -I.*)
         dnl If the path isn't absolute, make it so by prepending
         dnl the ROOT directory to it.
-        d=`echo $d | sed -e 's/-I//g'`
-        d=-I${ROOT}/${d}
+        d="`echo $d | sed -e 's/-I//g'`"
+        d="-I${ROOT}/${d}"
         ;;
     esac
     TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
@@ -1681,13 +1743,13 @@ touch ./config/stamp1
 saved_no_create=$no_create
 no_create=yes
 
-PARALLEL_MAKE=
+PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
   PARALLEL_MAKE="$TESTPARALLEL/Makefile"
 fi
 
-EXTRA_H4_MAKEFILES=
+EXTRA_H4_MAKEFILES=""
 
 if test -n "$H4TOH5"; then
   EXTRA_H4_MAKEFILES="$EXTRA_H4_MAKEFILES tools/h4toh5/Makefile"
@@ -1797,7 +1859,7 @@ IF_ENABLED_DISABLED() {
   fi
 }
 
-PRINT ""
+PRINT "Configure Summary"
 PRINT "Compiling Options:"
 
 PRINT_N "               Compilation Mode"
@@ -1832,7 +1894,6 @@ else
   PRINT "No"
 fi
 
-PRINT ""
 PRINT "Features:"
 
 PRINT_N "                            C++"
