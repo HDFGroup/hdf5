@@ -880,8 +880,8 @@ H5Tget_overflow ()
             <li><code>H5T_BITFIELD</code> (<code>4</code>)
             <li><code>H5T_OPAQUE</code> (<code>5</code>)
             <li><code>H5T_COMPOUND</code> (<code>6</code>)
-            <li><code>H5T_ENUM</code> (<code>7</code>)
-            <li><code>H5T_REFERENCE</code> (<code>8</code>)
+            <li><code>H5T_REFERENCE</code> (<code>7</code>)
+            <li><code>H5T_ENUM</code> (<code>8</code>)
         </ul>
 <dt><strong>Parameters:</strong>
     <dl>
@@ -1918,17 +1918,36 @@ zero.
 <dt><strong>Purpose:</strong>
     <dd>Defines the storage mechanism for character strings.
 <dt><strong>Description:</strong>
-    <dd>The method used to store character strings differs with the 
-        programming language: C usually null terminates strings while 
-        Fortran left-justifies and space-pads strings.  
-        <code>H5Tset_strpad</code> defines the storage mechanism for the string.
-        Valid string padding values are:
+    <dd><code>H5Tset_strpad</code> defines the storage mechanism for the string.
+        <p>
+        The method used to store character strings differs with the 
+        programming language: 
+        <ul>
+            <li>C usually null terminates strings while 
+            <li>Fortran left-justifies and space-pads strings.
+        </ul>
+        Valid string padding values, as passed in the parameter 
+        <code>strpad</code>, are as follows:
         <ul> <dl>
-            <dt>H5T_STR_NULL (<code>0</code>)
-               <dd>Pad with zeros (as C does)
-            <dt>H5T_STR_SPACE (<code>1</code>)
+            <dt>H5T_STR_NULLTERM (<code>0</code>)
+               <dd>Null terminate (as C does)
+            <dt>H5T_STR_NULLPAD (<code>1</code>)
+               <dd>Pad with zeros 
+            <dt>H5T_STR_SPACEPAD (<code>2</code>)
                <dd>Pad with spaces (as FORTRAN does)
         </dl> </ul>
+        <p>
+        When converting from a longer string to a shorter string,
+        the behavior is as follows.
+        If the short string is <code>H5T_STR_NULLPAD</code> or 
+        <code>H5T_STR_SPACEPAD</code>, then the string is simply truncated. 
+        If the short string is <code>H5T_STR_NULLTERM</code>, it is
+        truncated and a null terminator is appended.  
+        <p>
+        When converting from a shorter string to a longer string,
+        the long string is padded on the end by appending nulls or spaces.
+
+
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
