@@ -190,6 +190,7 @@ as the corresponding C function.
 </table>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Dclose" -->
 <hr>
@@ -309,6 +310,29 @@ END SUBROUTINE h5dclose_f
 	&ldquo;HDF5 Datasets&rdquo; chapter of 
 	the new <cite>HDF5 User's Guide</cite>, 
 	which is being prepared for release.
+<dt><strong>Note:</strong>
+    <dd><code>H5Dcreate</code> can fail if there has been an error
+        in setting up an element of the dataset creation property list.
+        In such cases, each item in the property list must be examined
+        to ensure that the setup satisfies to all required conditions.
+        This problem is most likely to occur with the use of filters.
+        <p>
+        For example, <code>H5Dcreate</code> will fail without a meaningful
+        explanation if 
+        <ul>
+          <li>SZIP compression is being used on the dataset and 
+          <li>the SZIP parameter <code>pixels_per_block</code> 
+              is set to an inappropriate value.
+        </ul>
+        <p>
+        In such a case, one would refer to the description of 
+        <a href="RM_H5P.html#Property-SetSzip"><code>H5Pset_szip</code></a>,
+        looking for any conditions or requirements that might affect the
+        local computing environment.
+        <!--
+        <p>
+        Other known similar problems can occur with . . .
+        --> 
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>

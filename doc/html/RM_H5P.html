@@ -2067,7 +2067,7 @@ END SUBROUTINE h5pget_buffer_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_cache_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &
+SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes,
                           rdcc_w0, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
@@ -2572,7 +2572,7 @@ END SUBROUTINE h5pget_edc_check_f
   <dt><strong>Name:</strong> <a name="Property-GetExternal">H5Pget_external</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_external</code>(<em>hid_t</em> <code>plist</code>,
-        <em>int</em> <code>idx</code>,
+        <em>unsigned</em> <code>idx</code>,
         <em>size_t</em> <code>name_size</code>,
         <em>char</em> <code>*name</code>,
         <em>off_t</em> <code>*offset</code>,
@@ -2600,7 +2600,7 @@ END SUBROUTINE h5pget_edc_check_f
 		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
             <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>idx</code></td>
+		    <td valign="top"><em>unsigned</em> <code>idx</code></td>
             <td valign="top">IN: External file index.</td></tr>
         <tr>
 		    <td valign="top"><em>size_t</em>&nbsp;<code>name_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
@@ -3072,7 +3072,7 @@ END SUBROUTINE h5pget_fapl_mpiposix_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_multi_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &
+SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name,
                                memb_addr, relax, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T),INTENT(IN)   :: prp_id    ! Property list identifier
@@ -3512,8 +3512,8 @@ END SUBROUTINE h5pget_fill_value_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_filter_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, 
-                           namelen, name, filter_id, hdferr)
+SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, 
+                           cd_values, namelen, name, filter_id, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
   INTEGER, INTENT(IN) :: filter_number    ! Sequence number within the filter
@@ -3618,16 +3618,15 @@ END SUBROUTINE h5pget_filter_f
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!-- NEW PAGE -->
   <dt><strong>Fortran90 Interface:</strong> h5pget_filter_by_id_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, &
+SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts,
                                  cd_values, namelen, name, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
-  INTEGER, INTENT(IN)        :: filter_id   ! Filter identifier</pre>
-<!-- NEW PAGE -->
-<pre>
+  INTEGER, INTENT(IN)        :: filter_id   ! Filter identifier
   INTEGER(SIZE_T), INTENT(INOUT)     :: cd_nelmts  
                                             ! Number of elements in cd_values
   INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  
@@ -3703,7 +3702,6 @@ END SUBROUTINE h5pget_gc_references_f
         -->
 </dl>
 
-
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pget_hyper_vector_size" -->
 <hr>
@@ -3766,7 +3764,7 @@ END SUBROUTINE h5pget_hyper_vector_size_f
   <dt><strong>Name:</strong> <a name="Property-GetIstoreK">H5Pget_istore_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_istore_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int *</em> <code>ik</code>
+            <em>unsigned *</em> <code>ik</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Queries the 1/2 rank of an indexed storage B-tree.  
@@ -3783,7 +3781,7 @@ END SUBROUTINE h5pget_hyper_vector_size_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier of property list to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int *</em> <code>ik</code></td>
+		    <td valign="top"><em>unsigned *</em> <code>ik</code></td>
             <td valign="top">OUT: Pointer to location to return the chunked storage B-tree 1/2 rank.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -4374,8 +4372,8 @@ END SUBROUTINE h5pget_small_data_block_size_f
   <dt><strong>Name:</strong> <a name="Property-GetSymK">H5Pget_sym_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_sym_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int *</em> <code>ik</code>,
-            <em>int *</em> <code>lk</code>
+            <em>unsigned *</em> <code>ik</code>,
+            <em>unsigned *</em> <code>lk</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Retrieves the size of the symbol table B-tree 1/2 rank 
@@ -4394,10 +4392,10 @@ END SUBROUTINE h5pget_small_data_block_size_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Property list to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int *</em> <code>ik</code></td>
+		    <td valign="top"><em>unsigned *</em> <code>ik</code></td>
             <td valign="top">OUT: Pointer to location to return the symbol table's B-tree 1/2 rank.</td></tr>
         <tr>
-		    <td valign="top"><em>int *</em> <code>size</code></td>
+		    <td valign="top"><em>unsigned *</em> <code>size</code></td>
             <td valign="top">OUT: Pointer to location to return the symbol table's leaf node 1/2 size.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -4478,10 +4476,10 @@ END SUBROUTINE h5pget_userblock_f
   <dt><strong>Name:</strong> <a name="Property-GetVersion">H5Pget_version</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_version</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int *</em> <code>super</code>,
-            <em>int *</em> <code>freelist</code>,
-            <em>int *</em> <code>stab</code>,
-            <em>int *</em> <code>shhdr</code>
+            <em>unsigned *</em> <code>super</code>,
+            <em>unsigned *</em> <code>freelist</code>,
+            <em>unsigned *</em> <code>stab</code>,
+            <em>unsigned *</em> <code>shhdr</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Retrieves the version information of various objects for 
@@ -4496,16 +4494,16 @@ END SUBROUTINE h5pget_userblock_f
 		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
             <td valign="top">IN: Identifier of the file creation property list.</td></tr>
         <tr>
-		    <td valign="top"><em>int *</em> <code>super</code></td>
+		    <td valign="top"><em>unsigned *</em> <code>super</code></td>
             <td valign="top">OUT: Pointer to location to return super block version number.</td></tr>
         <tr>
-		    <td valign="top"><em>int&nbsp;*</em>&nbsp;<code>freelist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		    <td valign="top"><em>unsigned&nbsp;*</em>&nbsp;<code>freelist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">OUT: Pointer to location to return global freelist version number.</td></tr>
         <tr>
-		    <td valign="top"><em>int *</em> <code>stab</code></td>
+		    <td valign="top"><em>unsigned *</em> <code>stab</code></td>
             <td valign="top">OUT: Pointer to location to return symbol table version number.</td></tr>
         <tr>
-		    <td valign="top"><em>int *</em> <code>shhdr</code></td>
+		    <td valign="top"><em>unsigned *</em> <code>shhdr</code></td>
             <td valign="top">OUT: Pointer to location to return shared object header version number.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -4888,6 +4886,10 @@ SUBROUTINE
         <td><em>H5P_prp_copy_func_t</em> <code>copy</code></td>
         <td>IN: Callback routine called when a property is copied from
                 an existing property list</td></tr>
+    <tr>
+        <td><em>H5P_prp_compare_func_t</em> <code>compare</code></td>
+        <td>IN: Callback routine called when a property is compared with
+                another property list</td></tr>
     <tr>
         <td><em>H5P_prp_close_func_t</em> <code>close</code></td>
         <td>IN: Callback routine called when a property list is being closed 
@@ -5295,7 +5297,9 @@ END SUBROUTINE h5pmodify_filter_f
     to range check the value being set for the property 
     or may perform some transformation or translation of the
     value set.  The <code>get</code> callback would then 
-    reverse the <!-- NEW PAGE -->transformation or translation.  
+    reverse the 
+    <!-- NEW PAGE --> 
+    transformation or translation.  
     A single <code>get</code> or <code>set</code> callback 
     could handle multiple properties by 
     performing different actions based on the
@@ -5497,6 +5501,10 @@ END SUBROUTINE h5pmodify_filter_f
         <td valign="top">IN: Callback routine called when a property is copied from
             a property list</td></tr>
       <tr>
+	    <td valign="top"><code>H5P_prp_compare_func_t</code> <em>compare</em></td>
+        <td valign="top">IN: Callback routine called when a property is compared with
+            another property list</td></tr>
+      <tr>
 	    <td valign="top"><code>H5P_prp_close_func_t</code> <em>close</em></td>
         <td valign="top">IN: Callback routine called when a property list is being 
             closed and the property value will be disposed of</td></tr>
@@ -5597,6 +5605,7 @@ END SUBROUTINE h5premove_f
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset" -->
@@ -5716,14 +5725,12 @@ END SUBROUTINE h5pset_f
         <tr>
 		    <td valign="top"><em>hsize_t</em>&nbsp;<code>threshold&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Threshold value.  
-                Must be non-negative.
                 Note that setting the threshold value to 0 (zero) has 
                 the effect of a special case, forcing everything 
                 to be aligned.</td></tr>
         <tr>
 		    <td valign="top"><em>hsize_t</em> <code>alignment</code></td>
-            <td valign="top">IN: Alignment value.  
-                Must be a positive value.</td></tr>
+            <td valign="top">IN: Alignment value.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -6437,18 +6444,18 @@ END SUBROUTINE h5pset_edc_check_f
     <dd>Adds an external file to the list of external files.
   <dt><strong>Description:</strong>
     <dd>The first call to <code>H5Pset_external</code> sets the 
-	<i>external storage</i> property in the property list,
-	thus designating that the dataset will be stored in 
-	one or more non-HDF5 file(s) external to the HDF5 file.
-	This call also adds the file <code>name</code> as the 
-	first file in the list of external files.
-	Subsequent calls to the function add the named file as
-	the next file in the list.
+        <i>external storage</i> property in the property list,
+        thus designating that the dataset will be stored in 
+        one or more non-HDF5 file(s) external to the HDF5 file.
+        This call also adds the file <code>name</code> as the 
+        first file in the list of external files.
+        Subsequent calls to the function add the named file as
+        the next file in the list.
         <p>
         If a dataset is split across multiple files, then the files
         should be defined in order. The total size of the dataset is
-        the sum of the <code>size</code> arguments for all the external files.  If
-        the total size is larger than the size of a dataset then the
+        the sum of the <code>size</code> arguments for all the external files.
+        If the total size is larger than the size of a dataset then the
         dataset can be extended (provided the data space also allows
         the extending).
         <p>
@@ -6458,12 +6465,12 @@ END SUBROUTINE h5pset_edc_check_f
         external file can be of unlimited size and no more files can be added 
         to the external files list.
         <p>
-	All of the external files for a given dataset must be 
-	specified with <code>H5Pset_external</code> 
-	<i>before</i> <code>H5Dcreate</code> is called to create 
-	the dataset. 
-	If one these files does not exist on the system when 
-	<code>H5Dwrite</code> is called to write data to it, 
+        All of the external files for a given dataset must be 
+        specified with <code>H5Pset_external</code> 
+        <i>before</i> <code>H5Dcreate</code> is called to create 
+        the dataset. 
+        If one these files does not exist on the system when 
+        <code>H5Dwrite</code> is called to write data to it, 
         the library will create the file.
   <dt><strong>Parameters:</strong>
     <ul><table>
@@ -7336,16 +7343,14 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
   <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_multi_f
     <dd>
 	<pre>
-SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &
+SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name,
                                memb_addr, relax, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T),INTENT(IN)  :: prp_id     ! Property list identifier
 
   INTEGER,DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN)          :: memb_map
   INTEGER(HID_T),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN)   :: memb_fapl
-  CHARACTER(LEN=*),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN) :: memb_name</pre>
-<!-- NEW PAGE -->
-<pre>
+  CHARACTER(LEN=*),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN) :: memb_name
   REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN)           :: memb_addr
               ! Numbers in the interval [0,1) (e.g. 0.0 0.1 0.5 0.2 0.3 0.4)
               ! real address in the file will be calculated as X*HADDR_MAX 
@@ -8357,7 +8362,7 @@ END SUBROUTINE h5pset_hyper_vector_size_f
   <dt><strong>Name:</strong> <a name="Property-SetIstoreK">H5Pset_istore_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pset_istore_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int</em> <code>ik</code>
+            <em>unsigned</em> <code>ik</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Sets the size of the parameter used to control the
@@ -8377,7 +8382,7 @@ END SUBROUTINE h5pset_hyper_vector_size_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier of property list to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>ik</code></td>
+		    <td valign="top"><em>unsigned</em> <code>ik</code></td>
             <td valign="top">IN: 1/2 rank of chunked storage B-tree.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -8717,9 +8722,9 @@ END SUBROUTINE h5pset_preserve_f
 	closely related to each other and putting them together 
         can increase the compression ratio.
 	<p>
-	As  implied above, the primary value of the shuffle filter 
+        As implied above, the primary value of the shuffle filter 
         lies in its coordinated use with a compression filter; 
-	it does not provide data compression when used alone. 
+        it does not provide data compression when used alone. 
         When the shuffle filter is applied to a dataset 
         immediately prior to the use of a compression filter, 
         the compression ratio achieved is often superior to that
@@ -8952,8 +8957,8 @@ END SUBROUTINE h5pset_small_data_block_size_f
   <dt><strong>Name:</strong> <a name="Property-SetSymK">H5Pset_sym_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pset_sym_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int</em> <code>ik</code>,
-            <em>int</em> <code>lk</code>
+            <em>unsigned</em> <code>ik</code>,
+            <em>unsigned</em> <code>lk</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Sets the size of parameters used to control the symbol table nodes.
@@ -8981,10 +8986,10 @@ END SUBROUTINE h5pset_small_data_block_size_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Identifier for property list to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>ik</code></td>
+		    <td valign="top"><em>unsigned</em> <code>ik</code></td>
             <td valign="top">IN: Symbol table tree rank.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>lk</code></td>
+		    <td valign="top"><em>unsigned</em> <code>lk</code></td>
             <td valign="top">IN: Symbol table node size.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -9023,9 +9028,53 @@ END SUBROUTINE h5pset_sym_k_f
   <dt><strong>Purpose:</strong>
     <dd>Sets up use of the SZIP compression filter.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_szip</code> sets a filter for the dataset 
-        to SZIP compression, <code>H5Z_FILTER_SZIP</code>,
-	a compression method designed for use with scientific data.
+    <dd><code>H5Pset_szip</code> sets an SZIP compression filter, 
+        <code>H5Z_FILTER_SZIP</code>, for a dataset. 
+        SZIP is a compression method designed for use with scientific data.
+	<p>
+        Before proceeding, be aware that there are factors that affect
+        your rights and ability to use SZIP compression.
+        See the documents at
+	<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html" 
+        target="External">SZIP Compression in HDF5</a>
+	for <em>important information regarding terms of use and 
+	the SZIP copyright notice</em>,
+	for further discussion of SZIP compression in HDF5, 
+	and for a list of SZIP-related references.
+
+	<p>
+        In the text below, the term <em>pixel</em> refers to
+        an HDF5 data element. 
+        This terminology derives from SZIP compression's use with image data, 
+        where pixel referred to an image pixel.
+	<p>
+	The SZIP <code>bits_per_pixel</code> value (see <b>Notes</b>, below) 
+	is automatically set, based on the HDF5 datatype.
+	SZIP can be used with atomic datatypes that may have size 
+        of 8, 16, 32, or 64 bits.
+        Specifically, a dataset with a datatype that is 
+            8-, 16-, 32-, or 64-bit 
+	    signed or unsigned integer; 
+            char; or
+            32- or 64-bit float
+        can be compressed with SZIP.  
+	See <b>Notes</b>, below, for further discussion of the
+	the SZIP <code>bits_per_pixel</code> setting.
+	
+	<p>
+        SZIP compression cannot be applied to 
+            compound datatypes, 
+            array datatypes, 
+            variable-length datatypes, 
+	    enumerations, or 
+            any other user-defined datatypes.
+        If an SZIP filter is set up for a dataset containing a non-allowed 
+        datatype, <code>H5Pset_szip</code> will succeed but the subsequent call
+        to <a href="RM_H5D.html#Dataset-Create"><code>H5Dcreate</code></a>
+        will fail; 
+        the conflict is detected only when the property list is used.
+        
+
 	<p>
 	SZIP options are passed in an options mask, <code>options_mask</code>,
 	as follows.
@@ -9038,62 +9087,20 @@ END SUBROUTINE h5pset_sym_k_f
             <hr>
             <b>Description</b>
             <br>
-            <font size=-1>(Paired options are mutually exclusive.)</font>
-        </td></tr>
-	
-        <tr valign=top align=left><td>
-            <hr>
-            <code>H5_SZIP_CHIP_OPTION_MASK&nbsp;&nbsp;</code> 
-            </td><td>
-            <hr>
-            Compresses exactly as in hardware. 
+            <font size=-1>(Mutually exclusive; select one.)</font>
         </td></tr>
         <tr valign=top align=left><td>
-	    <code>H5_SZIP_ALLOW_K13_OPTION_MASK&nbsp;&nbsp;</code>
-            </td><td>
-            Allows k split = 13 compression mode.  (Default)
-        </td></tr>
-	
-        <tr valign=top align=left><td>
             <hr>
-	    <code>H5_SZIP_EC_OPTION_MASK</code> 
+	    <code>H5_SZIP_EC_OPTION_MASK&nbsp;&nbsp;</code> 
             </td><td>
             <hr>
-            Selects entropy coding method.  (Default)
+            Selects entropy coding method. 
         </td></tr>
         <tr valign=top align=left><td>
             <code>H5_SZIP_NN_OPTION_MASK</code> 
             </td><td>
             Selects nearest neighbor coding method. 
         </td></tr>
-	
-<!--  THESE OPTIONS ARE SET DIRECTLY BY THE LIBRARY AND 
-      ARE NOT AVAILABLE FOR USER CONTROL
-
-        <tr valign=top align=left><td>
-            <hr>
-	    <code>LSB_OPTION_MASK</code> 
-            </td><td>
-            <hr>
-            Data format is least significant byte first.  (Default)
-        </td></tr>
-        <tr valign=top align=left><td>
-	    <code>MSB_OPTION_MASK</code> 
-            </td><td>
-            Data format is most significant byte first.
-        </td></tr>
-	
-        <tr valign=top align=left><td>
-            <hr>
-            <code>RAW_OPTION_MASK</code> 
-            </td><td>
-            <hr>
-            Do not output SZIP header.<br>
-            Not a default setting, but should always be set in HDF5.
-        </td></tr>
-
-END LIBRARY-SET OPTION TAGS -->
-
         <tr valign=top align=left><td>
             <hr>
             </td><td>
@@ -9101,50 +9108,50 @@ END LIBRARY-SET OPTION TAGS -->
         </td></tr>
 	</table>
 	</center>
-	Some typical usages are as follows:
+	The following guidelines can be used in determining 
+        which option to select:
 	<ul>
-	  <li>One of the compression methods, 
-	      <code>H5_SZIP_EC_OPTION_MASK</code> or
-	      <code>H5_SZIP_NN_OPTION_MASK</code>, is specified.
-	  <li>The <code>H5_SZIP_ALLOW_K13_OPTION_MASK</code> is used.
+	  <li>The entropy coding method, the EC option specified by
+	      <code>H5_SZIP_EC_OPTION_MASK</code>, is best suited for 
+              data that has been processed.
+	      The EC method works best for small numbers.
+	  <li>The nearest neighbor coding method, the NN option 
+              specified by <code>H5_SZIP_NN_OPTION_MASK</code>,
+              preprocesses the data then the applies EC method as above.
 	</ul>
-	<p>
-	Options are combined to create the options mask by means of
-	a logical <code>OR</code> operation.  For example, the 
-        option mask can be set as follows:
-	<br><br><code>&nbsp;&nbsp;&nbsp;&nbsp;
-    options_mask = H5_SZIP_NN_OPTION_MASK | H5_SZIP_ALLOW_K13_OPTION_MASK;
-	</code>
+        Other factors may affect results, but the above criteria 
+        provides a good starting point for optimizing data compression.
+
 	<p>
         SZIP compresses data block by block, with a user-tunable block size.  
 	This block size is passed in the parameter 
-        <code>pixels_per_block</code> and must be even, 
+        <code>pixels_per_block</code> and must be even and not greater than 32, 
         with typical values being <code>8</code>, <code>10</code>, 
-        <code>16</code>, and <code>32</code>.
-	The more pixel values vary, the smaller this number should be.
-        For optimal performance, the number of pixels per scan line 
-        (i.e., the size of the fastest-changing dimension in the chunk)
-        should be an even multiple of the number of pixels per block.
+        <code>16</code>, or <code>32</code>.
+        This parameter affects compression ratio;
+	the more pixel values vary, the smaller this number should be to
+        achieve better performance.
 	<p>
-  <dt><strong>Notes:</strong>
-    <dd>SZIP works only with datasets with 1 through 24 bits/pixel, 
-	32 pits/pixel, or 64 bits/pixel.
+        In HDF5, compression can be applied only to chunked datasets.
+        If <code>pixels_per_block</code> is bigger than the total 
+        number of elements in a dataset chunk, 
+        <code>H5Pset_szip</code> will succeed but the subsequent call to 
+        <a href="RM_H5D.html#Dataset-Create"><code>H5Dcreate</code></a>
+        will fail; the conflict is detected only when the property list 
+        is used.
 	<p>
-	SZIP typically requires that the user application also supply 
-        the number of pixels in the object to be compressed, 
-        the number of bits per pixel, and the number of pixels per scan line.  
-        These values need not be independently supplied in the HDF5 
-        environment as they are derived from the datatype and dataspace, 
-        which are already known.
-	<p>
-        Also see 
-	<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html" 
-        target="External">SZIP Compression in HDF5</a>
-	for further discussion of SZIP compression in HDF5, 
-	for <em>important information regarding terms of use and 
-	the SZIP copyright notice</em>,
-	and for a list of SZIP-related references.
-
+        To achieve optimal performance for SZIP compression, 
+        it is recommended that a chunk's fastest-changing dimension 
+        be equal to <em>N</em> times <code>pixels_per_block</code>
+        where <em>N</em> is the maximum number of blocks per scan line
+        allowed by the SZIP library.
+        In the current version of SZIP, <em>N</em> is set to 128.
+        <p>
+		<code>H5Pset_szip</code> will fail if SZIP encoding is 
+		disabled in the available copy of the SZIP library.
+		<a href="RM_H5Z.html#Compression-GetFilterInfo">
+		<code>H5Zget_filter_info</code></a> can be employed 
+		to avoid such a failure.
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -9153,7 +9160,9 @@ END LIBRARY-SET OPTION TAGS -->
                 identifier.</td></tr>
         <tr>
 		    <td valign="top"><em>unsigned int</em> <code>options_mask</code></td>
-            <td valign="top">IN: A bit-mask conveying the desired SZIP options.</td></tr>
+            <td valign="top">IN: A bit-mask conveying the desired SZIP options.
+                Valid values are <code>H5_SZIP_EC_OPTION_MASK</code>
+                and <code>H5_SZIP_NN_OPTION_MASK</code>.</td></tr>
         <tr>
 		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>pixels_per_block&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: The number of pixels or data elements in each data block.</td></tr>
@@ -9161,6 +9170,81 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Notes:</strong>
+    <dd>The following notes are of interest primarily to those who have 
+        used SZIP compression outside of the HDF5 context.
+	<p>
+	In non-HDF5 applications, SZIP typically requires that the 
+        user application supply additional parameters:
+        <ul>
+          <li><code>pixels_in_object</code>, 
+              the number of pixels in the object to be compressed 
+          <li><code>bits_per_pixel</code>, 
+              the number of bits per pixel
+          <li><code>pixels_per_scanline</code>, 
+              the number of pixels per scan line  
+        </ul>
+        <p>
+        These values need not be independently supplied in the HDF5 
+        environment as they are derived from the datatype and dataspace, 
+        which are already known.
+        In particular, HDF5 sets 
+        <code>pixels_in_object</code> to the number of elements in a chunk 
+        and <code>bits_per_pixel</code> to the size of the element or 
+        pixel datatype.  
+        The following algorithm is used to set 
+        <code>pixels_per_scanline</code>:
+        <ul>
+          <li>If the size of a chunk's fastest-changing dimension, 
+              <em>size</em>, is greater than 4K, 
+              set <code>pixels_per_scanline</code> to 
+              128 times <code>pixels_per_block</code>.
+          <li>If <em>size</em> is less than 4K 
+              but greater than <code>pixels_per_block</code>, 
+              set <code>pixels_per_scanline</code> to the minimum of
+              <em>size</em> and 128 times <code>pixels_per_block</code>.
+          <li>If <em>size</em> is less than <code>pixels_per_block</code> 
+              but greater than the number elements in the chunk, 
+              set <code>pixels_per_scanline</code> to the minimum of 
+              the number elements in the chunk and 
+              128 times <code>pixels_per_block</code>.
+        </ul>
+	
+	<p>
+	The HDF5 datatype may have precision that is less than the 
+	full size of the data element, e.g., an 11-bit integer can be
+	defined using 
+	<a href="RM_H5T.html#Datatype-SetPrecision"><code>H5Tset_precision</code></a>.
+	To a certain extent, SZIP can take advantage of the 
+	precision of the datatype to improve compression:
+	<ul><li>
+	If the HDF5 datatype size is 24-bit or less and
+	the offset of the bits in the HDF5 datatype is zero
+	(see <a href="RM_H5T.html#Datatype-SetOffset"><code>H5Tset_offset</code></a>  
+	or <a href="RM_H5T.html#Datatype-GetOffset"><code>H5Tget_offset</code></a>), 
+	the data is the in lowest N bits of the data element. 
+	In this case, the SZIP <code>bits_per_pixel</code> 
+	is set to the precision 
+	of the HDF5 datatype.
+	<li>
+	If the offset is not zero, the SZIP <code>bits_per_pixel</code> 
+	will be set to the number of bits in the full size of the data 
+	element.
+	<li>
+	If the HDF5 datatype precision is 25-bit to 32-bit, 
+	the SZIP <code>bits_per_pixel</code> will be set to 32.
+	<li>
+	If the HDF5 datatype precision is 33-bit to 64-bit, 
+	the SZIP <code>bits_per_pixel</code> will be set to 64.
+	</ul>
+
+	<p>
+	HDF5 always modifies the options mask provided by the user
+        to set up usage of <code>RAW_OPTION_MASK</code>, 
+        <code>ALLOW_K13_OPTION_MASK</code>, and one of
+        <code>LSB_OPTION_MASK</code> or <code>MSB_OPTION_MASK</code>, 
+        depending on endianness of the datatype.
+ 
   <dt><strong>Fortran90 Interface:</strong> h5pset_szip_f
     <dd>
 	<pre>

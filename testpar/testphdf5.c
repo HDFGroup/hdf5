@@ -434,8 +434,7 @@ int main(int argc, char **argv)
 	      "collective to independent chunk io",PARATESTFILE);
     }
 
-    #ifdef KYANG 
-
+#ifdef KYANG 
     AddTest("ccontw",coll_irregular_cont_write,NULL,
             "collective irregular contiguous write",PARATESTFILE);
     AddTest("ccontr",coll_irregular_cont_read,NULL,
@@ -451,9 +450,8 @@ int main(int argc, char **argv)
 
     AddTest("ccchunkr",coll_irregular_complex_chunk_read,NULL,
             "collective irregular complex chunk read",PARATESTFILE);
-
 #endif
-    
+
     AddTest("null", null_dataset, NULL, 
 	    "null dataset test", PARATESTFILE);
 
@@ -463,6 +461,7 @@ int main(int argc, char **argv)
     AddTest("I/Omodeconf", io_mode_confusion, NULL, 
 	    "I/O mode confusion test -- hangs quickly on failure", 
             &io_mode_confusion_params);
+
     /* Display testing information */
     TestInfo(argv[0]);
 
@@ -473,14 +472,6 @@ int main(int argc, char **argv)
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
 
-    /*
-    if (parse_options(argc, argv) != 0){
-	if (MAINPROCESS)
-	    usage();
-	goto finish;
-    }
-    */
-
     if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
 	printf("===================================\n"
 	       "   Using MPIPOSIX driver\n"
@@ -490,7 +481,6 @@ int main(int argc, char **argv)
     /* Perform requested testing */
     PerformTests();
 
-finish:
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */

@@ -239,11 +239,7 @@ main(void)
 	}
         if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	    H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-            H5Eprint(stdout);
-#else
             H5Eprint_stack(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 	    goto error;
 	}
     }

@@ -30,7 +30,7 @@
 /* Disable certain warnings in PC-Lint: */
 /*lint --emacro( {534, 830}, H5P_FILE_ACCESS) */
 /*lint --emacro( {534, 830}, H5F_ACC_RDWR, H5F_ACC_EXCL) */
-/*lint -esym( 534, H5Eclear, H5Epush) */
+/*lint -esym( 534, H5Eclear_stack, H5Epush_stack) */
 
 #include "hdf5.h"
 

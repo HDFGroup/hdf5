@@ -52,7 +52,7 @@
 
 void *tts_cancel_thread(void *);
 void tts_cancel_barrier(void);
-herr_t tts_cancel_callback(void *, hid_t, hsize_t, hssize_t *, void *);
+herr_t tts_cancel_callback(void *, hid_t, unsigned , const hsize_t *, void *);
 void cancellation_cleanup(void *);
 
 hid_t cancel_file;
@@ -149,8 +149,8 @@ void *tts_cancel_thread(void UNUSED *arg)
     return NULL;
 }
 
-herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, hsize_t UNUSED ndim,
-			   hssize_t UNUSED *point, void *operator_data)
+herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, unsigned UNUSED ndim,
+			   const hsize_t UNUSED *point, void *operator_data)
 {
     int value = *(int *)elem;
     hid_t dataset = *(hid_t *)operator_data;

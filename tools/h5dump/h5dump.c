@@ -628,7 +628,6 @@ usage(const char *prog)
     fprintf(stdout, "\n");
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    print_datatype
  *
@@ -955,7 +954,6 @@ print_datatype(hid_t type,unsigned in_group)
         }
     } /* end else */
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -2036,7 +2034,6 @@ dump_oid(hid_t oid)
     printf("%s %s %d %s\n", OBJID, BEGIN, oid, END);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    dump_comment
  *
@@ -2429,7 +2426,6 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  indent -= COL;
  indentation(indent + COL);
  printf("%s\n",END);
-
 }
 
 /*-------------------------------------------------------------------------
@@ -2453,27 +2449,15 @@ dump_fcpl(hid_t fid)
  hsize_t  userblock; /* userblock size retrieved from FCPL */
  size_t   off_size;  /* size of offsets in the file */
  size_t   len_size;  /* size of lengths in the file */
-#ifdef H5_WANT_H5_V1_6_COMPAT
- int      super;     /* superblock version # */
- int      freelist;  /* free list version # */
- int      stab;      /* symbol table entry version # */
- int      shhdr;     /* shared object header version # */
-#else 
  unsigned super;     /* superblock version # */
  unsigned freelist;  /* free list version # */
  unsigned stab;      /* symbol table entry version # */
  unsigned shhdr;     /* shared object header version # */
-#endif 
  hid_t    fdriver;    /* file driver */
  char     dname[15]; /* buffer to store driver name */
  unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
-#ifdef H5_WANT_H5_V1_6_COMPAT
- int      sym_ik;    /* symbol table B-tree initial 'K' value */
- int      istore_ik; /* indexed storage B-tree initial 'K' value */
-#else 
- unsigned sym_ik;    /* symbol table B-tree initial 'K' value */
- unsigned istore_ik; /* indexed storage B-tree initial 'K' value */
-#endif 
+ unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
+ unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
 
  fcpl=H5Fget_create_plist(fid);
  H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
@@ -2492,19 +2476,19 @@ dump_fcpl(hid_t fid)
  */
  printf("%s %s\n",SUPER_BLOCK, BEGIN);
  indentation(indent + COL);
- printf("%s %d\n","SUPERBLOCK_VERSION", super);
+ printf("%s %u\n","SUPERBLOCK_VERSION", super);
  indentation(indent + COL);
- printf("%s %d\n","FREELIST_VERSION", freelist);
+ printf("%s %u\n","FREELIST_VERSION", freelist);
  indentation(indent + COL);
- printf("%s %d\n","SYMBOLTABLE_VERSION", stab);
+ printf("%s %u\n","SYMBOLTABLE_VERSION", stab);
  indentation(indent + COL);
- printf("%s %d\n","OBJECTHEADER_VERSION", (int)shhdr);
+ printf("%s %u\n","OBJECTHEADER_VERSION", shhdr);
  indentation(indent + COL);
  HDfprintf(stdout,"%s %Hd\n","OFFSET_SIZE", (long_long)off_size);
  indentation(indent + COL);
  HDfprintf(stdout,"%s %Hd\n","LENGTH_SIZE", (long_long)len_size);
  indentation(indent + COL);
- printf("%s %d\n","BTREE_RANK", sym_ik); 
+ printf("%s %u\n","BTREE_RANK", sym_ik); 
  indentation(indent + COL);
  printf("%s %d\n","BTREE_LEAF", sym_lk);
 
@@ -2550,7 +2534,7 @@ dump_fcpl(hid_t fid)
  indentation(indent + COL);
  printf("%s %s\n","FILE_DRIVER", dname);
  indentation(indent + COL);
- printf("%s %d\n","ISTORE_K", istore_ik);
+ printf("%s %u\n","ISTORE_K", istore_ik);
  printf("%s\n",END);
 
 /*-------------------------------------------------------------------------
@@ -2607,10 +2591,6 @@ static void dump_fcontents(hid_t fid)
 
  printf(" %s\n",END);
 }
-
-
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -2756,7 +2736,7 @@ parse_subset_params(char *dset)
             *brace++ = '\0';
 
             s = calloc(1, sizeof(struct subset_t));
-            s->start = (hssize_t *)parse_hsize_list(brace);
+            s->start = parse_hsize_list(brace);
 
             while (*brace && *brace != ';')
                 brace++;
@@ -3285,7 +3265,7 @@ parse_start:
              */
             do {
                 switch ((char)opt) {
-                case 's': free(s->start); s->start = (hssize_t *)parse_hsize_list(opt_arg); break;
+                case 's': free(s->start); s->start = parse_hsize_list(opt_arg); break;
                 case 'S': free(s->stride); s->stride = parse_hsize_list(opt_arg); break;
                 case 'c': free(s->count); s->count = parse_hsize_list(opt_arg); break;
                 case 'k': free(s->block); s->block = parse_hsize_list(opt_arg); break;
@@ -3487,10 +3467,8 @@ main(int argc, const char *argv[])
     H5Giterate(fid, "/", NULL, fill_ref_path_table, NULL);
     H5Gclose(gid);
 
-
     if (doxml) {
 	/* initialize XML */
-
 
 	/* reset prefix! */
 	strcpy(prefix, "");
@@ -3743,290 +3721,6 @@ print_enum(hid_t type)
 	printf("\n%*s <empty>", indent + 4, "");
 }
 
-#if 0
-
-/*
- *   XML support
- */
-
-/*
- *  XML needs a table to look up a path name for an object
- *  reference.
- *
- *  This table stores mappings of reference -> path
- *  for all objects in the file that may be the target of
- *  an object reference.
- *
- *  The 'path' is an absolute path by which the object
- *  can be accessed.  When an object has > 1 such path,
- *  only one will be used in the table, with no particular
- *  method of selecting which one.
- */
-
-
-ref_path_table_entry_t *ref_path_table = NULL;	/* the table */
-
-/*-------------------------------------------------------------------------
- * Function:    ref_path_table_lookup
- *
- * Purpose:     Looks up a table entry given a path name.
- *              Used during construction of the table.
- *
- * Return:      The table entre (pte) or NULL if not in the
- *              table.
- *
- * Programmer:  REMcG
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static ref_path_table_entry_t *
-ref_path_table_lookup(const char *thepath)
-{
-    H5G_stat_t              sb;
-    ref_path_table_entry_t *pte = ref_path_table;
-
-    if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0) {
-	/*  fatal error ? */
-	return NULL;
-    }
-
-    while(pte!=NULL) {
-	if (sb.objno==pte->statbuf.objno)
-	    return pte;
-	pte = pte->next;
-    }
-
-    return NULL;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    ref_path_table_put
- *
- * Purpose:     Enter the 'obj' with 'path' in the table if
- *              not already there.
- *              Create an object reference, pte, and store them
- *              in the table.
- *
- * Return:      The object reference for the object.
- *
- * Programmer:  REMcG
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static ref_path_table_entry_t *
-ref_path_table_put(hid_t obj, const char *path)
-{
-    ref_path_table_entry_t *pte;
-
-    /* look up 'obj'.  If already in table, return */
-    pte = ref_path_table_lookup(path);
-    if (pte != NULL)
-	return pte;
-
-    /* if not found, then make new entry */
-
-    pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
-    if (pte == NULL) {
-	/* fatal error? */
-	return NULL;
-    }
-
-    pte->obj = obj;
-
-    pte->apath = HDstrdup(path);
-
-    if(H5Gget_objinfo(thefile, path, TRUE, &pte->statbuf)<0) {
-	/* fatal error? */
-	free(pte);
-	return NULL;
-    }
-
-    pte->next = ref_path_table;
-    ref_path_table = pte;
-
-    return pte;
-}
-
-/*
- *  counter used to disambiguate multiple instances of same object.
- */
-static int xid = 1;
-
-static int get_next_xid() {
-	return xid++;
-}
-
-/*
- *  This counter is used to create fake object ID's
- *  The idea is to set it to the largest possible offest, which
- *  minimizes the chance of collision with a real object id.
- *
- */
-haddr_t fake_xid = HADDR_MAX;
-static haddr_t
-get_fake_xid () {
-	return (fake_xid--);
-}
-
-/*
- * for an object that does not have an object id (e.g., soft link),
- * create a table entry with a fake object id as the key.
- */
-
-static ref_path_table_entry_t *
-ref_path_table_gen_fake(const char *path)
-{
-	ref_path_table_entry_t *pte;
-
-    /* look up 'obj'.  If already in table, return */
-    pte = ref_path_table_lookup(path);
-    if (pte != NULL) {
-	return pte;
-	}
-
-    /* if not found, then make new entry */
-
-    pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
-    if (pte == NULL) {
-	/* fatal error? */
-	return NULL;
-    }
-
-    pte->obj = (hid_t)-1;
-
-    memset(&pte->statbuf,0,sizeof(H5G_stat_t));
-    pte->statbuf.objno = get_fake_xid();
-
-    pte->apath = HDstrdup(path);
-
-    pte->next = ref_path_table;
-    ref_path_table = pte;
-
-    return pte;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    lookup_ref_path
- *
- * Purpose:     Lookup the path to the object with refernce 'ref'.
- *
- * Return:      Return a path to the object, or NULL if not found.
- *
- * Programmer:  REMcG
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-char *
-lookup_ref_path(hobj_ref_t ref)
-{
-    ref_path_table_entry_t *pte = ref_path_table;
-
-    while(pte!=NULL) {
-	if (ref==pte->statbuf.objno)
-	    return pte->apath;
-	pte = pte->next;
-    }
-    return NULL;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    fill_ref_path_table
- *
- * Purpose:     Called by interator to create references for
- *              all objects and enter them in the table.
- *
- * Return:      Error status.
- *
- * Programmer:  REMcG
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
-{
-    hid_t                   obj;
-    char                   *tmp;
-    H5G_stat_t              statbuf;
-    ref_path_table_entry_t *pte;
-    char                   *thepath;
-
-    H5Gget_objinfo(group, name, FALSE, &statbuf);
-    tmp = (char *) malloc(strlen(prefix) + strlen(name) + 2);
-
-    if (tmp == NULL)
-	return FAIL;
-
-    thepath = (char *) malloc(strlen(prefix) + strlen(name) + 2);
-
-    if (thepath == NULL) {
-	free(tmp);
-	return FAIL;
-    }
-
-    strcpy(tmp, prefix);
-
-    strcpy(thepath, prefix);
-    strcat(thepath, "/");
-    strcat(thepath, name);
-
-    switch (statbuf.type) {
-    case H5G_DATASET:
-	if ((obj = H5Dopen(group, name)) >= 0) {
-	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL) {
-		ref_path_table_put(obj, thepath);
-	    }
-	    H5Dclose(obj);
-	} else {
-            error_msg(progname, "unable to get dataset \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-	}
-	break;
-    case H5G_GROUP:
-	if ((obj = H5Gopen(group, name)) >= 0) {
-	    strcat(strcat(prefix, "/"), name);
-	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL) {
-		ref_path_table_put(obj, thepath);
-		H5Giterate(obj, ".", NULL, fill_ref_path_table, NULL);
-		strcpy(prefix, tmp);
-	    }
-	    H5Gclose(obj);
-	} else {
-            error_msg(progname, "unable to dump group \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-	}
-	break;
-    case H5G_TYPE:
-	if ((obj = H5Topen(group, name)) >= 0) {
-	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL) {
-		ref_path_table_put(obj, thepath);
-	    }
-	    H5Tclose(obj);
-	} else {
-            error_msg(progname, "unable to get dataset \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-	}
-	break;
-    default:
-        break;
-    }
-
-    free(tmp);
-    free(thepath);
-    return 0;
-}
-
-#endif
 
 /*
  * create a string suitable for and XML NCNAME.  Uses the 
@@ -4040,11 +3734,8 @@ int
 xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
 {
     ref_path_table_entry_t *r;
-    char *os;
 
     if (outlen < 22) return 1;
-
-    os = outstr;
 
     r = ref_path_table_lookup(str);
     if (r == NULL) {
@@ -4052,9 +3743,8 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
             r = ref_path_table_lookup("/");
             if (r == NULL) {
                 if (gen) {
-                    sprintf(os," "); /* ?? */
                     r = ref_path_table_gen_fake(str);
-                    sprintf(os, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
+                    sprintf(outstr, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
                     return 0;
                 } else {
                     return 1;
@@ -4062,9 +3752,8 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
             }
         } else {
             if (gen) {
-                sprintf(os," "); /* ?? */
                 r = ref_path_table_gen_fake(str);
-                sprintf(os, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
+                sprintf(outstr, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
                 return 0;
             } else {
                 return 1;
@@ -4072,7 +3761,7 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
         }
     }
 
-    sprintf(os, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
+    sprintf(outstr, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
 
     return(0);
 }
@@ -4793,7 +4482,7 @@ xml_dump_dataspace(hid_t space)
         default:
 	    printf("<!-- unknown dataspace -->\n");
     }
-    
+
     indentation(indent + COL);
     printf("</%sDataspace>\n", xmlnsprefix);
 }

@@ -638,7 +638,7 @@ static void make_dset_reg_ref(hid_t loc_id)
  hid_t           sid2;  /* Dataspace ID #2  */
  hsize_t         dims1[] = {SPACE1_DIM1};
  hsize_t         dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
- hssize_t        start[SPACE2_RANK];     /* Starting location of hyperslab */
+ hsize_t         start[SPACE2_RANK];     /* Starting location of hyperslab */
  hsize_t         stride[SPACE2_RANK];    /* Stride of hyperslab */
  hsize_t         count[SPACE2_RANK];     /* Element count of hyperslab */
  hsize_t         block[SPACE2_RANK];     /* Block size of hyperslab */

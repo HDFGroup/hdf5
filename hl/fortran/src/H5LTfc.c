@@ -870,7 +870,7 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
  ret = H5LTget_dataset_info(c_loc_id, c_name, c_dims, &c_classtype, &c_type_size);
 
  *type_class = c_classtype;
- *type_size = c_type_size;
+ *type_size = (size_t_f)c_type_size;
  for (i = 0; i < 32 ; i++) {
   dims[i] = (hsize_t_f) c_dims[i];
  }
@@ -1000,7 +1000,7 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
  ret = H5LTget_attribute_info(c_loc_id,c_name,c_attrname,c_dims,&c_classtype,&c_type_size);
 
  *type_class = c_classtype;
- *type_size = c_type_size;
+ *type_size = (size_t_f)c_type_size;
  for (i = 0; i < 32 ; i++) {
   dims[i] = (hsize_t_f) c_dims[i];
  }

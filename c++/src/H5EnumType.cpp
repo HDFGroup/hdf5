@@ -255,7 +255,7 @@ int EnumType::getNmembers() const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void EnumType::getMemberValue( int memb_no, void *value ) const
+void EnumType::getMemberValue( unsigned memb_no, void *value ) const
 {
    // Call C routine H5Tget_member_value to get the datatype member's value
    hid_t ret_value = H5Tget_member_value( id, memb_no, value );

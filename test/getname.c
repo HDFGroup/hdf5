@@ -1197,7 +1197,6 @@ int main( void )
  /* Get datatype*/
  if((type_id=H5Dget_type(dataset_id))<0) goto out;
 
-
  /* Get name */
  if (H5Iget_name( type_id, name, size )< 0) goto out;
 
@@ -1212,7 +1211,7 @@ int main( void )
  PASSED();
 
 
- /*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  * Test H5Iget_name with objects that have two names
  *-------------------------------------------------------------------------
  */
@@ -1237,7 +1236,6 @@ if(H5Dclose(dataset_id)<0) goto out;
 if(H5Dclose(dataset2_id)<0) goto out;
 
 PASSED();
-
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with different files, test1
@@ -1390,14 +1388,11 @@ PASSED();
 
  if ( name3 )
   free(name3);
-
   
  /* Close */
  H5Gclose( group_id );
 
  PASSED();
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -1464,7 +1459,7 @@ PASSED();
  if (H5Iget_name( group2_id, name, size )<0) goto out;
  if (check_name( name, "/g18/g2" )!=0) goto out;
 
-  /* Get name for the dataset ID in the first file, should be "/g18/g2/d2" still */
+ /* Get name for the dataset ID in the first file, should be "/g18/g2/d2" still */
  if (H5Iget_name( dataset_id, name, size )<0) goto out;
  if (check_name( name, "/g18/d2" )!=0) goto out;
 
@@ -1531,9 +1526,8 @@ PASSED();
  H5Gclose( group5_id );
  H5Gclose( group6_id );
  H5Fclose( file1_id );
- 
- PASSED();
 
+PASSED();
   
 
 /*-------------------------------------------------------------------------

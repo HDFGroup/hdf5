@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* @(#) $Id$ */
-
 /* ===========================================================================
  * Usage:  zip_perf [-d] [-f] [-h] [-1 to -9] [files...]
  *   -d : decompress

@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "H5CppDoc.h"   // included only for Doxygen to generate part of RM
+#include "H5CppDoc.h"	// included only for Doxygen to generate part of RM 
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5Library.h"
@@ -60,7 +60,7 @@ void H5Library::close()
 
 //--------------------------------------------------------------------------
 // Function:	H5Library::dontAtExit
-///\brief	Instructs library not to install \c atexit cleanup routine.
+///\brief	Instructs library not to install \c atexit cleanup routine
 ///\exception	H5::LibraryIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -95,9 +95,9 @@ void H5Library::getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& rel
 // Function:	H5Library::checkVersion
 ///\brief	Verifies that the arguments match the version numbers 
 ///		compiled into the library
-///\param	majnum - OUT: Major version of the library
-///\param	minnum - OUT: Minor version of the library
-///\param	relnum - OUT: Release number of the library
+///\param	majnum - IN: Major version of the library
+///\param	minnum - IN: Minor version of the library
+///\param	relnum - IN: Release number of the library
 ///\exception	H5::LibraryIException
 ///\par Description
 ///		For information about library version, please refer to

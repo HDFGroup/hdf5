@@ -43,8 +43,8 @@ const char *FILENAME[] = {
 static herr_t
 rsrv_heap(void)
 {
-    hid_t       file_id, dataset_id, dataspace_id;
-    hid_t       fapl, fcpl;
+    hid_t       file_id=(-1), dataset_id=(-1), dataspace_id=(-1);
+    hid_t       fapl=(-1), fcpl=(-1);
     hsize_t     dims[1] = {1};
     char        filename[1024], dset_name[10];
     int         i;
@@ -54,10 +54,6 @@ rsrv_heap(void)
     /* Create a new file. */
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-/*    H5Pset_userblock(fapl, (hsize_t)0);
-    H5Pset_sym_k(fapl, 1, 1);
-    H5Pset_istore_k(fapl, 1);
-*/
     /* Set file address sizes to be very small. */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     if(fcpl < 0) TEST_ERROR;
@@ -160,8 +156,8 @@ rsrv_heap(void)
 static herr_t
 rsrv_ohdr(void)
 {
-    hid_t       file_id, dataset_id, dataspace_id;
-    hid_t       fapl, fcpl, aid, attr_id;
+    hid_t       file_id=(-1), dataset_id=(-1), dataspace_id=(-1);
+    hid_t       fapl=(-1), fcpl=(-1), aid, attr_id;
     hsize_t     dims[2];
     herr_t      status;
     int         attrval[4][6];
@@ -176,9 +172,6 @@ rsrv_ohdr(void)
 
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     if(fcpl < 0) TEST_ERROR;
-/*    H5Pset_userblock(pfc_id, (hsize_t)0);
-    H5Pset_sym_k(pfc_id, 1, 1);
-    H5Pset_istore_k(pfc_id, 1); */
     if( H5Pset_sizes(fcpl, (size_t)2,(size_t)2) < 0) TEST_ERROR;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -289,10 +282,10 @@ rsrv_ohdr(void)
 static herr_t
 rsrv_vlen(void)
 {
-    hid_t       file_id, dataset_id, dataspace_id, type_id;
-    hid_t       fapl, fcpl, mem_space_id;
+    hid_t       file_id=(-1), dataset_id=(-1), dataspace_id=(-1), type_id=(-1);
+    hid_t       fapl=(-1), fcpl=(-1), mem_space_id=(-1);
     hssize_t    offset[1];
-    hssize_t    start[1];
+    hsize_t     start[1];
     hsize_t     dims[1], count[1];
     herr_t      status;
     int         i;
@@ -309,11 +302,6 @@ rsrv_vlen(void)
     /* Make file address space very small */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     if( fcpl < 0) TEST_ERROR;
-/*
-    H5Pset_userblock(pfc_id, (hsize_t)0);
-    H5Pset_sym_k(pfc_id, 1, 1);
-    H5Pset_istore_k(pfc_id, 1);
-*/
     if( H5Pset_sizes(fcpl, (size_t)2,(size_t)2) < 0) TEST_ERROR;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);

@@ -436,9 +436,9 @@
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
-            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
                                              !Starting coordinates of the bounding box. 
-            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
                                              !Ending coordinates of the bounding box,
                                              !i.e., the coordinates of the diagonally 
                                              !opposite corner 
@@ -454,8 +454,8 @@
 !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_BOUNDS_C'::h5sget_select_bounds_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
-              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
-              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
               END FUNCTION h5sget_select_bounds_c
             END INTERFACE
 
@@ -635,13 +635,13 @@
             INTEGER, INTENT(IN) :: rank     ! Number of dataspace dimensions 
             INTEGER(SIZE_T), INTENT(IN) :: num_elements  ! Number of elements to be
                                                  ! selected
-            INTEGER(HSSIZE_T), & 
+            INTEGER(HSIZE_T), & 
             DIMENSION(rank,num_elements), INTENT(IN) :: coord 
                                           ! Array with the coordinates
                                           ! of the selected elements
                                           ! coord(rank, num_elements)
             INTEGER, INTENT(OUT) :: hdferr     ! Error code
-            INTEGER(HSSIZE_T), ALLOCATABLE, DIMENSION(:,:) :: c_coord
+            INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:,:) :: c_coord
             INTEGER :: error, i,j
 
 !            INTEGER, EXTERNAL :: h5sselect_elements_c
@@ -657,7 +657,7 @@
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(IN) :: operator
               INTEGER(SIZE_T), INTENT(IN) :: num_elements
-              INTEGER(HSSIZE_T),DIMENSION(*) :: c_c_coord
+              INTEGER(HSIZE_T),DIMENSION(*) :: c_c_coord
               END FUNCTION h5sselect_elements_c
             END INTERFACE
 
@@ -1492,7 +1492,7 @@
                                                 ! H5S_SELECT_SET_F (0)
                                                 ! H5S_SELECT_OR_F (1)
                                                 !  
-            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
                                           ! Starting coordinates of the hyperslab 
             INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count 
                                           ! Number of blocks to select 
@@ -1520,7 +1520,7 @@
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(IN) :: operator
-              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count
               INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: stride
               INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: block 
@@ -1638,7 +1638,7 @@
 						!  H5S_SELECT_APPEND_F 
 						!  H5S_SELECT_PREPEND_F 
                                                 !  
-!            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+!            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
                                           ! Starting coordinates of the hyperslab 
 !            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count 
                                           ! Number of blocks to select 
@@ -1664,7 +1664,7 @@
               !DEC$ ENDIF
 !              INTEGER(HID_T), INTENT(IN) :: space_id
 !              INTEGER, INTENT(IN) :: operator
-!              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+!              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
 !              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count
 !              INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: stride
 !              INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: block 

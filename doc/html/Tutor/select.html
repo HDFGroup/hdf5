@@ -195,7 +195,7 @@ add to the current selected region for a specified dataspace.
 <I><B>C</B></I>:
 <pre>
     herr_t H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t operator,
-        const hssize_t *start, const hsize_t *stride,
+        const hsize_t *start, const hsize_t *stride,
         const hsize_t *count, const hsize_t *block ) 
 </pre>
 <P>
@@ -206,7 +206,7 @@ add to the current selected region for a specified dataspace.
 
             space_id    IN: INTEGER(HID_T) 
             operator    IN: INTEGER 
-            start       IN: INTEGER(HSSIZE_T), DIMENSION(*)
+            start       IN: INTEGER(HSIZE_T), DIMENSION(*)
             count       IN: INTEGER(HSIZE_T), DIMENSION(*)
             hdferr     OUT: INTEGER
             stride      IN: INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL

@@ -226,7 +226,6 @@ test_family(void)
     int         buf[FAMILY_NUMBER][FAMILY_SIZE];
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
     hsize_t     file_size;
-    herr_t      ret;
 
     TESTING("FAMILY file driver");
 
@@ -239,7 +238,7 @@ test_family(void)
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         goto error;
 
-    if((ret=H5Fclose(file))<0)
+    if(H5Fclose(file)<0)
         goto error;
    
     /* Tries to reopen the file with member file size smaller than 

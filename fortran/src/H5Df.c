@@ -386,7 +386,6 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
      return ret_value;
 }
 
-
 /*----------------------------------------------------------------------------
  * Name:        h5dread_ref_obj_c
  * Purpose:     Call H5Dread to read a dataset  of object references

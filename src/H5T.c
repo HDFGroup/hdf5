@@ -2609,12 +2609,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tencode(hid_t obj_id, void *buf, size_t* nalloc)
+H5Tencode(hid_t obj_id, void *buf, size_t *nalloc)
 {
     H5T_t       *dtype;
     herr_t      ret_value=SUCCEED;
     
     FUNC_ENTER_API (H5Tencode, FAIL);
+    H5TRACE3("e","ix*z",obj_id,buf,nalloc);
 
     /* Check argument and retrieve object */
     if (NULL==(dtype=H5I_object_verify(obj_id, H5I_DATATYPE)))

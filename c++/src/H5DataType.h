@@ -106,6 +106,7 @@ class H5_DLLCPP DataType : public H5Object {
 	// Default constructor
 	DataType();
 
+	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();
 
    protected:

@@ -638,7 +638,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Enlarge member array */
         if (file->nmembs>=file->amembs) {
-            int n = MAX(64, 2*file->amembs);
+            unsigned n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
 
             if (!x)
@@ -911,7 +911,7 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
 
         /* Enlarge member array */
         if (u>=file->amembs) {
-            int n = MAX(64, 2*file->amembs);
+            unsigned n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
             if (!x)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
@@ -989,7 +989,7 @@ H5FD_family_get_eof(H5FD_t *_file)
      */
     assert(file->nmembs>0);
     for (i=(int)file->nmembs-1; i>=0; --i) {
-        if ((eof=H5FD_get_eof(file->memb[i])))
+        if ((eof=H5FD_get_eof(file->memb[i]))!=0)
             break;
         if (0==i)
             break;

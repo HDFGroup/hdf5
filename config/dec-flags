@@ -66,15 +66,15 @@ case "$cc_vendor-$cc_version" in
 
     DEC-V6.*)
 	# Production
-	PROD_CFLAGS="-std1 -verbose -warnprotos -ieee -misalign -O4 -fp_reorder -readonly_strings -inline speed"
+	PROD_CFLAGS="-c99 -verbose -warnprotos -ieee -misalign -O4 -fp_reorder -readonly_strings -inline speed"
 	PROD_CPPFLAGS="-D_INTRINSICS -D_INLINE_INTRINSICS"
 
 	# Debug
-	DEBUG_CFLAGS="-g -std1 -verbose -warnprotos -ieee -misalign"
+	DEBUG_CFLAGS="-g -c99 -verbose -warnprotos -ieee -misalign"
 	DEBUG_CPPFLAGS=
 
 	# Profile
-	PROFILE_CFLAGS="-pg -std1 -verbose -warnprotos -ieee -misalign"
+	PROFILE_CFLAGS="-pg -c99 -verbose -warnprotos -ieee -misalign"
 	PROFILE_CPPFLAGS=
 
 	# Flags are set

@@ -667,7 +667,7 @@ H5S_mpio_span_hyper_type( const H5S_t *space, size_t elmt_size,
 
    MPI_Aint              extent,lb;
 
-  FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_span_hyper_type);
+  FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_span_hyper_type);
 
   printf("coming to hyper type \n");
   /* Check args */
@@ -729,15 +729,15 @@ static herr_t obtain_datatype(const hsize_t size[], H5S_hyper_span_t* span,MPI_D
   MPI_Datatype          temp_type;
   MPI_Datatype          tempinner_type;
   MPI_Datatype          *inner_type;
-  int                   inner_blocklen;
-  MPI_Aint              inner_disp;
   int                   *blocklen;
   MPI_Aint              *disp;
   MPI_Aint              stride;
   MPI_Aint              extent,lb;
   H5S_hyper_span_info_t *down;
   H5S_hyper_span_t      *tspan;
+#ifdef H5_HAVE_MPI2
   MPI_Aint              sizeaint,sizedtype;
+#endif /* H5_HAVE_MPI2 */
   hsize_t               total_lowd,total_lowd1;
   int                   i;
   int                   ret;

@@ -23,6 +23,7 @@ namespace H5 {
 // class for file access properties
 class H5_DLLCPP FileCreatPropList : public PropList {
    public:
+	// Default file creation property list.
 	static const FileCreatPropList DEFAULT;
 	
 	// Retrieves version information for various parts of a file.
@@ -34,26 +35,26 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// Gets the size of a user block in this file creation property list.
 	hsize_t getUserblock() const;
 
-	// Sets file size-of addresses and sizes.
-	void setSizes( size_t sizeof_addr = 4, size_t sizeof_size = 4 ) const;
-
 	// Retrieves the size-of address and size quantities stored in a 
 	// file according to this file creation property list.
 	void getSizes( size_t& sizeof_addr, size_t& sizeof_size ) const;
 
-	// Sets the size of parameters used to control the symbol table nodes.
-	void setSymk( unsigned int_nodes_k, unsigned leaf_nodes_k ) const;
+	// Sets file size-of addresses and sizes.
+	void setSizes( size_t sizeof_addr = 4, size_t sizeof_size = 4 ) const;
 
 	// Retrieves the size of the symbol table B-tree 1/2 rank and the
 	// symbol table leaf node 1/2 size.
 	void getSymk( unsigned& int_nodes_k, unsigned& leaf_nodes_k ) const;
 
-	// Sets the size of parameter used to control the B-trees for
-	// indexing chunked datasets.
-	void setIstorek( unsigned ik ) const;
+	// Sets the size of parameters used to control the symbol table nodes.
+	void setSymk( unsigned int_nodes_k, unsigned leaf_nodes_k ) const;
 
 	// Returns the 1/2 rank of an indexed storage B-tree.
 	unsigned getIstorek() const;
+
+	// Sets the size of parameter used to control the B-trees for
+	// indexing chunked datasets.
+	void setIstorek( unsigned ik ) const;
 
 	// Creates a file create property list.
 	FileCreatPropList();

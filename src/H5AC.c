@@ -89,7 +89,7 @@ hid_t H5AC_ind_dxpl_id=(-1);
  * Private file-scope function declarations:
  */
 
-static herr_t H5AC_check_if_write_permitted(H5F_t *f, 
+static herr_t H5AC_check_if_write_permitted(const H5F_t *f, 
                                             hid_t dxpl_id,
                                             hbool_t * write_permitted_ptr);
 
@@ -340,7 +340,7 @@ H5AC_term_interface(void)
  *-------------------------------------------------------------------------
  */
 
-const char * H5AC_entry_type_names[H5AC_NTYPES] =
+static const char * H5AC_entry_type_names[H5AC_NTYPES] =
 {
     "B-tree nodes",
     "symbol table nodes",
@@ -349,10 +349,9 @@ const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "object headers"
 };
 
-int
+herr_t
 H5AC_create(const H5F_t *f, int UNUSED size_hint)
 {
-    H5AC_t * cache_ptr = NULL;
     int ret_value = SUCCEED;      /* Return value */
 #if 1 /* JRM */ /* test code -- remove when done */
     H5C_auto_size_ctl_t auto_size_ctl =
@@ -416,46 +415,28 @@ H5AC_create(const H5F_t *f, int UNUSED size_hint)
      * in proper size hints.
      *                                             -- JRM
      */
-    cache_ptr = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
+    f->shared->cache = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
                            H5C__DEFAULT_MIN_CLEAN_SIZE,
                            (H5AC_NTYPES - 1),
                            (const char **)H5AC_entry_type_names,
                            H5AC_check_if_write_permitted);
 
-    if ( NULL == cache_ptr ) {
+    if ( NULL == f->shared->cache ) {
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    } else {
-
-        f->shared->cache = cache_ptr;
 
     }
 
 #if 1 /* JRM */ /* test code -- remove when done */
-    if ( cache_ptr ) {
+    if ( H5C_set_cache_auto_resize_config(f->shared->cache, &auto_size_ctl) 
+         != SUCCEED ) {
 
-        if ( H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl) 
-             != SUCCEED ) {
-
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                        "auto resize config test failed")
-        }
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "auto resize config test failed")
     }
 #endif /* JRM */
 
 done:
-
-    if ( ret_value < 0 ) {
-
-        if ( cache_ptr != NULL ) {
-
-            H5C_dest_empty(cache_ptr);
-            f->shared->cache = NULL;
-
-        } /* end if */
-
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -791,8 +772,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_rename(H5F_t *f, hid_t UNUSED dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
-	    haddr_t new_addr)
+H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_addr)
 {
     herr_t		result;
     herr_t ret_value=SUCCEED;      /* Return value */
@@ -826,8 +806,7 @@ H5AC_rename(H5F_t *f, hid_t UNUSED dxpl_id, const H5AC_class_t *type, haddr_t ol
 #endif  /* H5_HAVE_FPHDF5 */
 #endif  /* H5_HAVE_PARALLEL */
 
-    result = H5C_rename_entry(f,
-                              f->shared->cache,
+    result = H5C_rename_entry(f->shared->cache,
                               type,
                               old_addr,
                               new_addr);
@@ -994,7 +973,7 @@ H5AC_protect(H5F_t *f,
                     HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, NULL, \
                                 "can't unlock data on SAP!")
 
-                HGOTO_DONE(NULL);
+                HGOTO_DONE(NULL)
             }
         
             info = (H5AC_info_t *)thing;
@@ -1018,7 +997,7 @@ H5AC_protect(H5F_t *f,
             info->aux_next = NULL;
             info->aux_prev = NULL;
 
-            HGOTO_DONE(thing);
+            HGOTO_DONE(thing)
         }
     }
 #endif  /* H5_HAVE_FPHDF5 */
@@ -1231,7 +1210,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_stats(H5F_t UNUSED *f)
+H5AC_stats(const H5F_t *f)
 {
     herr_t		ret_value = SUCCEED;   /* Return value */
 
@@ -1240,7 +1219,7 @@ H5AC_stats(H5F_t UNUSED *f)
     HDassert(f);
     HDassert(f->shared->cache);
 
-    H5C_stats(f->shared->cache, f->name, FALSE); /* at present, this can't fail */
+    (void)H5C_stats(f->shared->cache, f->name, FALSE); /* at present, this can't fail */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1276,12 +1255,12 @@ done:
 
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_check_if_write_permitted(H5F_t *f,
+H5AC_check_if_write_permitted(const H5F_t *f,
                               hid_t dxpl_id,
                               hbool_t * write_permitted_ptr)
 #else /* H5_HAVE_PARALLEL */
 static herr_t
-H5AC_check_if_write_permitted(H5F_t UNUSED * f,
+H5AC_check_if_write_permitted(const H5F_t UNUSED * f,
                               hid_t UNUSED dxpl_id,
                               hbool_t * write_permitted_ptr)
 #endif /* H5_HAVE_PARALLEL */

@@ -29,7 +29,7 @@
 static void *H5O_sdspace_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_sdspace_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_sdspace_size(H5F_t *f, const void *_mesg);
+static size_t H5O_sdspace_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_sdspace_reset(void *_mesg);
 static herr_t H5O_sdspace_free (void *_mesg);
 static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -324,7 +324,7 @@ done:
 	instead of just four bytes.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sdspace_size(H5F_t *f, const void *mesg)
+H5O_sdspace_size(const H5F_t *f, const void *mesg)
 {
     const H5S_extent_t	   *space = (const H5S_extent_t *) mesg;
     

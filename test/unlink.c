@@ -1894,7 +1894,7 @@ error:
 static int
 test_resurrect_datatype(void)
 {
-    hid_t       file=-1, type=-1, fapl=-1, loc_id=-1;
+    hid_t       file=-1, type=-1, fapl=-1;
     char        filename[1024];
 
     TESTING("Resurrecting datatype after deletion");

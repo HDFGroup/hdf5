@@ -27,7 +27,7 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 
 ## Test programs and scripts.
 ##
-TEST_PROGS=h5repacktst 
+TEST_PROGS=h5repacktst
 TEST_SCRIPTS=./h5repack.sh
 PRIV_PROGS=testh5repack_detect_szip
 

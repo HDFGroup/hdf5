@@ -118,7 +118,7 @@ test_file_create(void)
 	*/
 	try { 
 	    file1 = new H5File( FILE1, H5F_ACC_EXCL );  // should throw E
-	    verify_val(file1->getId(), FAIL, "H5File constructor", __LINE__, __FILE__); 
+	    verify_val(file1->getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -131,7 +131,7 @@ test_file_create(void)
      	*/
     	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);   // should throw E
-	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__); 
+	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -141,7 +141,7 @@ test_file_create(void)
      	*/
     	try {
 	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
-	    verify_val(file3.getId(), FAIL, "H5File constructor", __LINE__, __FILE__); 
+	    verify_val(file3.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
     	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -149,12 +149,12 @@ test_file_create(void)
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
 
 	hsize_t ublock = tmpl1.getUserblock();
-	verify_val(ublock, F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__); 
+	verify_val(ublock, F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1.getSizes( parm1, parm2);
-    	verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-    	verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
         unsigned  iparm1,iparm2;        /*file-creation parameters      */
         tmpl1.getSymk( iparm1, iparm2);
@@ -198,12 +198,12 @@ test_file_create(void)
 
 	/* Get the file-creation parameters */
 	hsize_t ublock = tmpl1->getUserblock();
-	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__); 
+	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1->getSizes( parm1, parm2);
-    	verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-    	verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
         unsigned  iparm1,iparm2;        /*file-creation parameters      */
         tmpl1->getSymk( iparm1, iparm2);
@@ -231,15 +231,15 @@ test_file_create(void)
 
 	/* Get the file-creation parameters */
 	ublock = tmpl1->getUserblock();
-	verify_val(ublock, F3_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__); 
+	verify_val(ublock, F3_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
 	tmpl1->getSizes( parm1, parm2);
-    	verify_val(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-    	verify_val(parm2, F3_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm2, F3_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
     	tmpl1->getSymk( iparm1, iparm2);
-    	verify_val(iparm1, F3_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
-    	verify_val(iparm2, F3_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+	verify_val(iparm1, F3_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+	verify_val(iparm2, F3_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 
 	/* Dynamically release file-creation template */
 	delete tmpl1;
@@ -394,12 +394,14 @@ test_file_name()
 
         // Get file name from the file instance.
         file_name = file4.getFileName();
+	verify_val(file_name, FILE4, "H5File::getFileName", __LINE__, __FILE__);
 
 	/* Create a group in the root group */
 	Group group(file4.createGroup(GROUPNAME, 0));
 
 	/* Get and verify file name */
 	file_name = group.getFileName();
+	verify_val(file_name, FILE4, "Group::getFileName", __LINE__, __FILE__);
 
 	/* Create the data space  */
 	hsize_t dims[RANK] = {NX, NY};
@@ -410,12 +412,14 @@ test_file_name()
 
 	/* Get and verify file name */
 	file_name = dataset.getFileName();
+	verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__);
 
 	/* Create an attribute for the dataset */
 	Attribute attr(dataset.createAttribute(ATTRNAME, PredType::NATIVE_INT, space));
 
 	/* Get and verify file name */
 	file_name = attr.getFileName();
+	verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
 
 	/* Create a compound datatype */
 	CompType comp_type (sizeof(s1_t));
@@ -429,6 +433,7 @@ test_file_name()
 
 	/* Get and verify file name */
 	comp_type.getFileName();
+	verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
     }   // end of try block
     catch (Exception E) {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);

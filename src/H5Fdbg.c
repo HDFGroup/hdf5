@@ -63,7 +63,7 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
     H5P_genplist_t *plist;              /* Property list */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5F_debug, FAIL)
 
     /* check args */
     assert(f);
@@ -73,18 +73,18 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
 
     /* Get property list */
     if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size")
     if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version")
     if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version")
     if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version")
     if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header format version");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header format version")
 
     /* debug */
     HDfprintf(stream, "%*sFile Super Block...\n", indent, "");
@@ -140,6 +140,6 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 

@@ -352,11 +352,11 @@ done:
  PURPOSE
     Count the number of objects in a skip list
  USAGE
-    ssize_t H5SL_count(slist)
+    size_t H5SL_count(slist)
         H5SL_t *slist;            IN: Pointer to skip list to count
 
  RETURNS
-    Returns non-negative on success, negative on failure.
+    Returns number of objects on success, can't fail
  DESCRIPTION
     Count elements in a skip list.
  GLOBAL VARIABLES
@@ -364,7 +364,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-ssize_t
+size_t
 H5SL_count(H5SL_t *slist)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_count);

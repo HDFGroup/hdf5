@@ -228,10 +228,6 @@ dnl Check for programs.
 dnl
 AC_PROG_CC
 CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
-AC_PROG_MAKE_SET
-AC_PROG_INSTALL
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
 
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the Fortran interface compiled
@@ -435,6 +431,11 @@ AC_SUBST([AR])
 dnl Export the AR macro so that it will be placed in the libtool file
 dnl correctly.
 export AR
+
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_LIBTOOL_DLOPEN
+AC_PROG_LIBTOOL
 
 dnl Post processing to patch up some deficiencies in libtool
 case $host_os in
@@ -1761,7 +1762,7 @@ AC_CACHE_VAL([hdf5_cv_printf_ll],
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
 
-for hdf5_cv_printf_ll in l L ll q unknown; do
+for hdf5_cv_printf_ll in l ll L q unknown; do
    AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
@@ -2824,18 +2825,17 @@ AC_SUBST(HL) HL=""
 AC_SUBST(HL_FOR) HL_FOR=""
 AC_MSG_CHECKING([if high level library is enabled])
 AC_ARG_ENABLE([hl],
-              [AC_HELP_STRING([--enable-hl],
-	                      [Enable the high level library [default=yes]])],
-              [HDF5_HL=$enableval],
-	      [HDF5_HL=yes])
-							  
+     [AC_HELP_STRING([--enable-hl],
+                     [Enable the high level library [default=yes]])],
+     [HDF5_HL=$enableval],
+     [HDF5_HL=yes])
+
 if test "X$HDF5_HL" = "Xyes"; then
  echo "yes"
  HL="hl"
 else
  echo "no"
 fi
-  
 
 dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
@@ -2935,8 +2935,6 @@ if test "X$HDF5_HL" = "Xyes" &&  test "X$HDF_FORTRAN" = "Xyes"; then
 # name of folder inside "hl"
 HL_FOR="fortran"	   
 fi
-		       
-
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  config/depend1
@@ -2957,6 +2955,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5dump/testh5dump.sh
                  tools/h5import/Makefile
                  tools/h5diff/Makefile
+                 tools/h5jam/Makefile
+                 tools/h5jam/testh5jam.sh
                  tools/h5repack/Makefile
                  tools/h5repack/h5repack.sh
                  tools/h5ls/Makefile
@@ -2964,8 +2964,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/Makefile
                  tools/misc/h5cc
                  tools/gifconv/Makefile
-                 tools/h5jam/Makefile
-                 tools/h5jam/testh5jam.sh                 
                  examples/Makefile
                  doc/Makefile
                  doc/html/Makefile

@@ -54,7 +54,7 @@ integer(SIZE_T)    :: type_sized                       ! Size of the double prec
 integer(SIZE_T)    :: type_sizer                       ! Size of the real datatype
 integer(HID_T)     :: type_id_c                        ! Memory datatype identifier (for character field)
 integer(SIZE_T)    :: offset                           ! Member's offset
-integer(HSIZE_T)   :: start                            ! start record
+integer(HSIZE_T)   :: start = 0                        ! start record
 integer, dimension(nrecords) :: bufi                   ! Data buffer
 integer, dimension(nrecords) :: bufir                  ! Data buffer
 real, dimension(nrecords) :: bufr                      ! Data buffer

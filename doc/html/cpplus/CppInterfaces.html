@@ -253,10 +253,10 @@ class CompType : public DataType
 	int getNmembers() const;
 
 	// Returns the name of a member of this compound datatype. 
-	string getMemberName( int member_num ) const;
+	string getMemberName( unsigned member_num ) const;
 
 	// Returns the offset of a member of this compound datatype. 
-	size_t getMemberOffset( int memb_no ) const;
+	size_t getMemberOffset( unsigned memb_no ) const;
 
 	// Returns the dimensionality of the specified member of this compound datatype. 
 	int getMemberDims( int member_num, size_t* dims, int* perm ) const;
@@ -264,7 +264,7 @@ class CompType : public DataType
 	// Returns the type class of the specified member of this compound 
 	// datatype.  It provides to the user a way of knowing what type 
 	// to create another datatype of the same class.
-	H5T_class_t getMemberClass( int member_num ) const;
+	H5T_class_t getMemberClass( unsigned member_num ) const;
 
 	// Returns the generic datatype of the specified member in 
 	// this compound datatype.
@@ -405,7 +405,7 @@ class DataSpace : public IdComponent
 
 	// Selects array elements to be included in the selection for 
 	// this dataspace.
-	void selectElements ( H5S_seloper_t op, const size_t num_elements, const hssize_t* coord[ ] ) const;
+	void selectElements ( H5S_seloper_t op, const size_t num_elements, const hsize_t* coord[ ] ) const;
 
 	// Selects the entire dataspace.
 	void selectAll () const;
@@ -417,7 +417,7 @@ class DataSpace : public IdComponent
 	bool selectValid () const;
 
 	// Selects a hyperslab region to add to the current selected region.
-	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
+	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
 
 	// Default constructor
 	DataSpace();
@@ -560,7 +560,7 @@ class DSetCreatPropList : public PropList
 	int getExternalCount() const;
 
 	// Returns information about an external file
-	void getExternal( int idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const;
+	void getExternal( unsigned idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const;
 
 	// Creates a copy of an existing dataset creation property list 
 	// using the property list id
@@ -674,7 +674,7 @@ class EnumType : public DataType
 	void valueOf( const char* name, void *value ) const;
 
 	// Returns the value of an enumeration datatype member
-	void getMemberValue( int memb_no, void *value ) const;
+	void getMemberValue( unsigned memb_no, void *value ) const;
 
 	// Default constructor
 	EnumType();
@@ -872,7 +872,7 @@ class FileCreatPropList : public PropList
 	FileCreatPropList& operator=( const FileCreatPropList& rhs );
 
 	// Retrieves version information for various parts of a file.
-	void getVersion( int& boot, int& freelist, int& stab, int& shhdr ) const;
+	void getVersion( unsigned& boot, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const;
 
 	// Sets the userblock size field of a file creation property list.
 	void setUserblock( hsize_t size ) const;
@@ -888,18 +888,18 @@ class FileCreatPropList : public PropList
 	void getSizes( size_t& sizeof_addr, size_t& sizeof_size ) const;
 
 	// Sets the size of parameters used to control the symbol table nodes.
-	void setSymk( int int_nodes_k, int leaf_nodes_k ) const;
+	void setSymk( unsigned int_nodes_k, unsigned leaf_nodes_k ) const;
 
 	// Retrieves the size of the symbol table B-tree 1/2 rank and the
 	// symbol table leaf node 1/2 size.
-	void getSymk( int& int_nodes_k, int& leaf_nodes_k ) const;
+	void getSymk( unsigned& int_nodes_k, unsigned& leaf_nodes_k ) const;
 
 	// Sets the size of parameter used to control the B-trees for
 	// indexing chunked datasets.
-	void setIstorek( int ik ) const;
+	void setIstorek( unsigned ik ) const;
 
 	// Returns the 1/2 rank of an indexed storage B-tree.
-	int getIstorek() const;
+	unsigned getIstorek() const;
 
 	// Creates a copy of an existing file create property list
 	// using the property list id.

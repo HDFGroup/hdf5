@@ -145,31 +145,31 @@ void tts_acreate(void)
 
 void *tts_acreate_thread(void *client_data)
 {
-	hid_t   attribute;
-	char    *attribute_name;
-	int     *attribute_data;	/* data for attributes */
+    hid_t   attribute;
+    char    *attribute_name;
+    int     *attribute_data;	/* data for attributes */
 
-	ttsafe_name_data_t *attrib_data;
+    ttsafe_name_data_t *attrib_data;
 
-	attrib_data = (ttsafe_name_data_t *)client_data;
+    attrib_data = (ttsafe_name_data_t *)client_data;
 
-	/* Create attribute */
-	attribute_name = gen_name(attrib_data->current_index);
-	attribute = H5Acreate(attrib_data->dataset, attribute_name,
-			      attrib_data->datatype, attrib_data->dataspace,
-			      H5P_DEFAULT);
+    /* Create attribute */
+    attribute_name = gen_name(attrib_data->current_index);
+    attribute = H5Acreate(attrib_data->dataset, attribute_name,
+                          attrib_data->datatype, attrib_data->dataspace,
+                          H5P_DEFAULT);
 
-	/* Write data to the attribute */
-	attribute_data = malloc(sizeof(int));
-	*attribute_data = attrib_data->current_index;
-	H5Awrite(attribute, H5T_NATIVE_INT, attribute_data);
-	H5Aclose(attribute);
-	return NULL;
+    /* Write data to the attribute */
+    attribute_data = malloc(sizeof(int));
+    *attribute_data = attrib_data->current_index;
+    H5Awrite(attribute, H5T_NATIVE_INT, attribute_data);
+    H5Aclose(attribute);
+    return NULL;
 }
 
 void cleanup_acreate(void)
 {
-	HDunlink(FILENAME);
+    HDunlink(FILENAME);
 }
 
 #endif /*H5_HAVE_THREADSAFE*/

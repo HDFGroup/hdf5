@@ -243,6 +243,7 @@ int h5repack_addlayout(const char* str,
 static int check_options(pack_opt_t *options)
 {
  int   i, k, j, has_cp=0, has_ck=0;
+ char  slayout[30];
 
 /*-------------------------------------------------------------------------
  * objects to layout
@@ -252,7 +253,22 @@ static int check_options(pack_opt_t *options)
  {
   printf("Objects to modify layout are...\n");
   if (options->all_layout==1)  {
-   printf(" Apply layout to all\n ");
+   switch (options->layout_g)
+   {
+   case H5D_COMPACT:
+    strcpy(slayout,"compact");
+    break;
+   case H5D_CONTIGUOUS:
+    strcpy(slayout,"contiguous");
+    break;
+   case H5D_CHUNKED:
+    strcpy(slayout,"chunked");
+    break;
+   default:
+    strcpy(slayout,"unknown");
+    break;
+   }
+   printf(" Apply %s layout to all\n", slayout);
    if (H5D_CHUNKED==options->layout_g) {
     printf("with dimension [");
     for ( j = 0; j < options->chunk_g.rank; j++)  
@@ -336,7 +352,6 @@ static int check_options(pack_opt_t *options)
 
    has_cp=1;
 
-
   } /* j */
  } /* i */
  
@@ -345,6 +360,8 @@ static int check_options(pack_opt_t *options)
    is present with other objects\n");
   return -1;
  }
+ 
+
  return 0;
 }
 

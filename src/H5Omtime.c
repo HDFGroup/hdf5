@@ -35,12 +35,12 @@
 
 static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static size_t H5O_mtime_new_size(H5F_t *f, const void *_mesg);
+static size_t H5O_mtime_new_size(const H5F_t *f, const void *_mesg);
 
 static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_mtime_size(H5F_t *f, const void *_mesg);
+static size_t H5O_mtime_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_mtime_reset(void *_mesg);
 static herr_t H5O_mtime_free(void *_mesg);
 static herr_t H5O_mtime_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -229,6 +229,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     /* Irix5.3 */
     {
         struct timezone tz;
+
         if (HDBSDgettimeofday(NULL, &tz)<0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to obtain local timezone information");
         the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
@@ -430,7 +431,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_new_size(H5F_t UNUSED * f, const void UNUSED * mesg)
+H5O_mtime_new_size(const H5F_t UNUSED * f, const void UNUSED * mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_size);
 
@@ -463,7 +464,7 @@ H5O_mtime_new_size(H5F_t UNUSED * f, const void UNUSED * mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_size(H5F_t UNUSED * f, const void UNUSED * mesg)
+H5O_mtime_size(const H5F_t UNUSED * f, const void UNUSED * mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_size);
 

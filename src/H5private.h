@@ -289,7 +289,7 @@
 #   define FALSE 0
 #endif
 #ifndef TRUE
-#   define TRUE (!FALSE)
+#   define TRUE 1
 #endif
 
 /*

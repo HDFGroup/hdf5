@@ -46,7 +46,7 @@ template <class Type1, class Type2>
         cerr << "*** UNEXPECTED VALUE from " << where << " should be "
 	     << value << ", but is " << x << " at line " << line
 	     << " in " << file_name << endl;
-        H5Eprint (stdout);
+        H5Eprint (stderr);
     }
 }
 

@@ -514,13 +514,13 @@ h5_fileaccess(void)
 	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
     } else if (!HDstrcmp(name, "log")) {
-        long log_flags = H5FD_LOG_LOC_IO;
+        unsigned log_flags = H5FD_LOG_LOC_IO;
 
         /* Log file access */
         if ((val = HDstrtok(NULL, " \t\n\r")))
-            log_flags = HDstrtol(val, NULL, 0);
+            log_flags = (unsigned)HDstrtol(val, NULL, 0);
 
-        if (H5Pset_fapl_log(fapl, NULL, (unsigned)log_flags, 0) < 0)
+        if (H5Pset_fapl_log(fapl, NULL, log_flags, 0) < 0)
 	    return -1;
     } else {
 	/* Unknown driver */

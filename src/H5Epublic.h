@@ -51,13 +51,13 @@ typedef struct H5E_error_t {
     const char	*desc;		/*optional supplied description      */
 } H5E_error_t;
 
-/* When this header is included from H5Eprivate.h, don't make calls to H5open() */
+/* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5Eprivate_H
+#ifndef _H5private_H
 #define H5OPEN          H5open(),
-#else   /* _H5Eprivate_H */
+#else   /* _H5private_H */
 #define H5OPEN
-#endif  /* _H5Eprivate_H */
+#endif  /* _H5private_H */
 
 /* HDF5 error class */
 #define H5E_ERR_CLS		(H5OPEN H5E_ERR_CLS_g)

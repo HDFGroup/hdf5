@@ -132,7 +132,7 @@ static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 			 H5HG_heap_t *heap);
 static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
 static herr_t H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy);
-static herr_t H5HG_compute_size(H5F_t *f, H5HG_heap_t *heap, size_t *size_ptr);
+static herr_t H5HG_compute_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_ptr);
 
 /*
  * H5HG inherits cache-like properties from H5AC
@@ -628,7 +628,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_compute_size(H5F_t UNUSED *f, H5HG_heap_t *heap, size_t *size_ptr)
+H5HG_compute_size(const H5F_t UNUSED *f, const H5HG_heap_t *heap, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_compute_size);
 
@@ -662,13 +662,13 @@ H5HG_compute_size(H5F_t UNUSED *f, H5HG_heap_t *heap, size_t *size_ptr)
  *
  *-------------------------------------------------------------------------
  */
-static unsigned
+static size_t
 H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
 {
-    unsigned	idx;
+    size_t	idx;
     uint8_t	*p = NULL;
     size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
-    unsigned ret_value;         /* Return value */
+    size_t ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HG_alloc);
 
@@ -897,7 +897,7 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
 {
     size_t	need;		/*total space needed for object		*/
     int	cwfsno;
-    unsigned	idx;
+    size_t	idx;
     haddr_t	addr = HADDR_UNDEF;
     H5HG_heap_t	*heap = NULL;
     hbool_t     found=0;        /* Flag to indicate a heap with enough space was found */
@@ -1004,7 +1004,6 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
 
     /* Split the free space to make room for the new object */
     idx = H5HG_alloc (f, heap, size);
-    assert (idx>0);
     
     /* Copy data into the heap */
     if(size>0) {
@@ -1067,7 +1066,7 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
 
-    assert (hobj->idx>0 && hobj->idx<heap->nused);
+    assert (hobj->idx<heap->nused);
     assert (heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size;
     p = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
@@ -1141,7 +1140,7 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
         if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_WRITE)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
 
-        assert (hobj->idx>0 && hobj->idx<heap->nused);
+        assert (hobj->idx<heap->nused);
         assert (heap->obj[hobj->idx].begin);
         if (heap->obj[hobj->idx].nrefs+adjust<0)
             HGOTO_ERROR (H5E_HEAP, H5E_BADRANGE, FAIL, "new link count would be out of range");
@@ -1199,7 +1198,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
 
-    assert (hobj->idx>0 && hobj->idx<heap->nused);
+    assert (hobj->idx<heap->nused);
     assert (heap->obj[hobj->idx].begin);
     obj_start = heap->obj[hobj->idx].begin;
     /* Include object header size */

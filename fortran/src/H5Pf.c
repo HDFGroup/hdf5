@@ -749,21 +749,18 @@ int_f
 nh5pget_driver_c (hid_t_f *prp_id, hid_t_f* driver)
 {
      int ret_value = -1;
-     /*
-     hid_t c_prp_id;
      hid_t c_driver;
-     */
 
      /*
       * Call H5Pget_driver function.
       */
-     /*
-     c_prp_id = *prp_id;
-     c_driver = H5Pget_driver(c_prp_id);
+     c_driver = H5Pget_driver((hid_t)*prp_id);
+     if (c_driver < 0) goto DONE;
+
      *driver = (hid_t_f) c_driver;
-     if (c_driver < 0) return ret_value;
-     */
      ret_value = 0;
+
+DONE:
      return ret_value;
 } 
 
@@ -1631,7 +1628,7 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     int c_idx;
+     unsigned c_idx;
      herr_t status;
      size_t c_namelen;
      char* c_name = NULL;
@@ -1649,7 +1646,7 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
       * Call H5Pget_external function.
       */
      c_prp_id = (hid_t)*prp_id;
-     c_idx = (int)*idx;
+     c_idx = (unsigned)*idx;
      status = H5Pget_external(c_prp_id, c_idx, c_namelen, c_name, &c_offset, &size );
 
      if (status < 0) goto DONE;
@@ -1841,7 +1838,7 @@ nh5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 
   c_prp_id = (hid_t)*prp_id;
   c_size = H5Pget_buffer(c_prp_id, NULL, NULL);
-  if ( c_size <= 0  ) return ret_value;
+  if ( c_size == 0  ) return ret_value;
   *size = (hsize_t_f)c_size;
   ret_value = 0;
   return ret_value;
@@ -2240,7 +2237,7 @@ nh5pregisterc_c(hid_t_f *class, _fcd name, int_f *name_len, size_t_f *size, _fcd
 int_f
 nh5pregister_c(hid_t_f *class, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_class;
      char* c_name;
      size_t c_size;
@@ -2276,7 +2273,7 @@ DONE:
 int_f
 nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f *value_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      
      /*
       * Call h5pinsert_c function
@@ -2301,7 +2298,7 @@ nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd v
 int_f
 nh5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_plist;
      char* c_name;
      size_t c_size;
@@ -2337,7 +2334,7 @@ DONE:
 int_f
 nh5pexist_c(hid_t_f *class, _fcd name, int_f *name_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_class;
      char* c_name;
      htri_t status;
@@ -2370,7 +2367,7 @@ DONE:
 int_f
 nh5pisa_class_c(hid_t_f *plist, hid_t_f *class)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_class;
      hid_t c_plist;
      htri_t status;
@@ -2400,7 +2397,7 @@ nh5pisa_class_c(hid_t_f *plist, hid_t_f *class)
 int_f
 nh5pget_size_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_plist;
      char* c_name;
      size_t c_size;
@@ -2433,7 +2430,7 @@ DONE:
 int_f
 nh5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_plist;
      size_t c_nprops;
 
@@ -2462,7 +2459,7 @@ nh5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
 int_f
 nh5pget_class_parent_c(hid_t_f *prp_id, hid_t_f *parent_id)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_prp_id;
      hid_t c_parent_id;
 
@@ -2494,7 +2491,7 @@ nh5pget_class_parent_c(hid_t_f *prp_id, hid_t_f *parent_id)
 int_f
 nh5pcopy_prop_c(hid_t_f *dst_id, hid_t_f *src_id, _fcd name, int_f *name_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_dst_id, c_src_id;
      char* c_name;
 
@@ -2527,7 +2524,7 @@ DONE:
 int_f
 nh5premove_c(hid_t_f *plid, _fcd name, int_f *name_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_plid;
      char* c_name;
 
@@ -2559,7 +2556,7 @@ DONE:
 int_f
 nh5punregister_c(hid_t_f *class, _fcd name, int_f *name_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_class;
      char* c_name;
 
@@ -2589,7 +2586,7 @@ DONE:
 int_f
 nh5pclose_class_c(hid_t_f *class)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_class;
 
      c_class = (hid_t)*class;
@@ -2614,7 +2611,7 @@ nh5pclose_class_c(hid_t_f *class)
 int_f
 nh5pget_class_name_c(hid_t_f *class, _fcd name, int_f *name_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_class;
      char* c_name;
 
@@ -2648,7 +2645,7 @@ DONE:
 int_f
 nh5psetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f *value_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      
      /*
       * Call h5pset_c function
@@ -2672,7 +2669,7 @@ nh5psetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f *value_
 int_f
 nh5pset_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_plist;
      char* c_name;
 
@@ -2705,7 +2702,7 @@ DONE:
 int_f
 nh5pgetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f *value_len)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      
      /*
       * Call h5pget_c function
@@ -2729,7 +2726,7 @@ nh5pgetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f *value_
 int_f
 nh5pget_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_plist;
      char* c_name;
 
@@ -2761,7 +2758,7 @@ DONE:
 int_f 
 nh5pset_shuffle_c ( hid_t_f *prp_id )
 {
-  int ret_value = 0;
+  int_f ret_value = 0;
   hid_t c_prp_id;
   herr_t status;
 
@@ -2783,7 +2780,7 @@ nh5pset_shuffle_c ( hid_t_f *prp_id )
 int_f 
 nh5pset_fletcher32_c ( hid_t_f *prp_id )
 {
-  int ret_value = 0;
+  int_f ret_value = 0;
   hid_t c_prp_id;
   herr_t status;
 
@@ -2807,7 +2804,7 @@ nh5pset_fletcher32_c ( hid_t_f *prp_id )
 int_f 
 nh5pset_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 {
-  int ret_value = 0;
+  int_f ret_value = 0;
   hid_t c_prp_id;
   H5Z_EDC_t c_flag;
   herr_t status;
@@ -2833,7 +2830,7 @@ nh5pset_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 int_f 
 nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 {
-  int ret_value = 0;
+  int_f ret_value = 0;
   hid_t c_prp_id;
   H5Z_EDC_t c_flag;
 
@@ -2857,7 +2854,7 @@ nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 int_f 
 nh5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
 {
-  int ret_value = 0;
+  int_f ret_value = 0;
   hid_t c_prp_id;
   hsize_t c_offset;
   herr_t status;
@@ -2889,11 +2886,11 @@ int_f
 /*nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, haddr_t_f *memb_addr, int_f *flag) */
 nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag)
 {
-  int ret_value = -1;
+  int_f ret_value = -1;
   hid_t c_prp_id;
   H5FD_mem_t c_memb_map[H5FD_MEM_NTYPES];
   hid_t c_memb_fapl[H5FD_MEM_NTYPES];
-  const char *c_memb_name[H5FD_MEM_NTYPES]; 
+  char *c_memb_name[H5FD_MEM_NTYPES]; 
   haddr_t c_memb_addr[H5FD_MEM_NTYPES]; 
   hbool_t relax; 
   herr_t status;
@@ -2916,9 +2913,9 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
   if (tmp ==NULL) return ret_value; 
   tmp_p = tmp;
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
-       c_memb_name[i] = (char *) malloc((size_t)len[i] + 1);
-       memcpy((char *)c_memb_name[i], tmp_p, (size_t)len[i]);
-       tmp_pp = (char *)c_memb_name[i];
+       c_memb_name[i] = malloc((size_t)len[i] + 1);
+       memcpy(c_memb_name[i], tmp_p, (size_t)len[i]);
+       tmp_pp = c_memb_name[i];
        tmp_pp[len[i]] = '\0';
        tmp_p = tmp_p + c_lenmax;
 /*       printf(" %d \n", len[i]);
@@ -2949,7 +2946,7 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
 
 DONE:
   free(tmp);
-  for (i=0; i < H5FD_MEM_NTYPES; i++) free((char *)c_memb_name[i]);
+  for (i=0; i < H5FD_MEM_NTYPES; i++) free(c_memb_name[i]);
   return ret_value;
 }
 
@@ -2966,7 +2963,7 @@ DONE:
 int_f 
 nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
 {
-  int ret_value = -1;
+  int_f ret_value = -1;
   hid_t c_prp_id;
   hbool_t relax; 
   herr_t status;
@@ -3001,7 +2998,7 @@ nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
 int_f 
 nh5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag, int_f *maxlen_out)
 {
-  int ret_value = -1;
+  int_f ret_value = -1;
   hid_t c_prp_id;
   H5FD_mem_t c_memb_map[H5FD_MEM_NTYPES];
   hid_t c_memb_fapl[H5FD_MEM_NTYPES];
@@ -3075,7 +3072,7 @@ HD5packFstring(tmp, _fcdtocp(memb_name), (int)(c_lenmax*H5FD_MEM_NTYPES));
 int_f 
 nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block)
 {
-  int ret_value = -1;
+  int_f ret_value = -1;
   hid_t c_prp_id;
   unsigned   c_options_mask;
   unsigned  c_pixels_per_block;
@@ -3107,7 +3104,7 @@ nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block)
 int_f 
 nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status)
 {
-  int ret_value = -1;
+  int_f ret_value = -1;
   hid_t c_prp_id;
   htri_t c_status;
   
@@ -3144,7 +3141,7 @@ nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status)
 int_f
 nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_prp_id;
      H5Z_filter_t c_filter_id;
      unsigned int  c_flags;
@@ -3206,7 +3203,7 @@ DONE:
 int_f
 nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values )
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_prp_id;
      herr_t ret;
      size_t c_cd_nelmts;
@@ -3250,9 +3247,8 @@ DONE:
 int_f
 nh5premove_filter_c (hid_t_f *prp_id, int_f* filter)
 {
-     int ret_value = -1;
+     int_f ret_value = -1;
      hid_t c_prp_id;
-     herr_t ret;
      H5Z_filter_t c_filter;
      
      c_filter = (H5Z_filter_t)*filter;
@@ -3261,9 +3257,7 @@ nh5premove_filter_c (hid_t_f *prp_id, int_f* filter)
      /*
       * Call H5Premove_filter function.
       */
-     ret = H5Premove_filter(c_prp_id, c_filter);
-
-     if (ret < 0) goto DONE;
+     if(H5Premove_filter(c_prp_id, c_filter) < 0) goto DONE;
      ret_value = 0;
 
 DONE:

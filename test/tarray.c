@@ -1959,7 +1959,7 @@ test_compat(void)
 
         /* Check the array's base datatype */
         tid2=H5Tget_super(mtid);
-        CHECK(tid2, FAIL, "H5Tget_member_type");
+        CHECK(tid2, FAIL, "H5Tget_super");
 
         if((ret=H5Tequal(tid2,H5T_IEEE_F32LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
@@ -2004,7 +2004,7 @@ test_compat(void)
 
         /* Check the array's base datatype */
         tid2=H5Tget_super(mtid);
-        CHECK(tid2, FAIL, "H5Tget_member_type");
+        CHECK(tid2, FAIL, "H5Tget_super");
 
         if((ret=H5Tequal(tid2,H5T_STD_I32LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);

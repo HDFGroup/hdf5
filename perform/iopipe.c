@@ -203,7 +203,7 @@ main (void)
     int			i, fd;
     hssize_t		n;
     off_t		offset;
-    hssize_t		start[2];
+    hsize_t		start[2];
     hsize_t		count[2];
 
 

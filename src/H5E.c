@@ -169,15 +169,15 @@ H5E_init_interface(void)
 
     /* Initialize the atom group for the error class IDs */
     if(H5I_register_type(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_unregister_class)<0)
+                    (H5I_free_t)H5E_unregister_class)<H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the major error IDs */
     if(H5I_register_type(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_close_msg)<0)
+                    (H5I_free_t)H5E_close_msg)<H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the error stacks */
     if(H5I_register_type(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_close_stack)<0)
+                    (H5I_free_t)H5E_close_stack)<H5I_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
 #ifndef H5_HAVE_THREADSAFE
@@ -809,7 +809,7 @@ H5Eget_major(H5E_major_t maj)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one");
 
     /* Don't know who is going to free it */
-    msg_str = (char*)H5MM_malloc((++size)*sizeof(char));
+    msg_str = (char*)H5MM_malloc((size_t)(++size)*sizeof(char));
 
     if(H5E_get_msg(msg, NULL, msg_str, (size_t)size)<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
@@ -859,7 +859,7 @@ H5Eget_minor(H5E_minor_t min)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one");
     
     /* Don't know who is going to free it */
-    msg_str = (char*)H5MM_malloc((++size)*sizeof(char));
+    msg_str = (char*)H5MM_malloc((size_t)(++size)*sizeof(char));
 
     if(H5E_get_msg(msg, NULL, msg_str, (size_t)size)<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")

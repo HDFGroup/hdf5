@@ -38,9 +38,9 @@ H5FL_EXTERN(H5T_t);
 H5FL_EXTERN(H5T_shared_t);
 
 /* Static local functions */
-static char *H5T_enum_nameof(H5T_t *dt, const void *value, char *name/*out*/,
+static char *H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/,
 			      size_t size);
-static herr_t H5T_enum_valueof(H5T_t *dt, const char *name,
+static herr_t H5T_enum_valueof(const H5T_t *dt, const char *name,
 				void *value/*out*/);
 
 
@@ -141,7 +141,7 @@ H5T_enum_create(const H5T_t *parent)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if (NULL==(ret_value->shared=H5FL_CALLOC(H5T_shared_t))) {
         H5FL_FREE(H5T_t, ret_value);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     }
     ret_value->shared->type = H5T_ENUM;
     ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
@@ -223,7 +223,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_enum_insert(H5T_t *dt, const char *name, const void *value)
+H5T_enum_insert(const H5T_t *dt, const char *name, const void *value)
 {
     unsigned	i;
     char	**names=NULL;
@@ -285,17 +285,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-herr_t
-H5Tget_member_value(hid_t type, int _membno, void *value/*out*/)
-#else /* H5_WANT_H5_V1_6_COMPAT */
 herr_t
 H5Tget_member_value(hid_t type, unsigned membno, void *value/*out*/)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    unsigned membno = (unsigned)_membno;
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
@@ -429,7 +421,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static char *
-H5T_enum_nameof(H5T_t *dt, const void *value, char *name/*out*/, size_t size)
+H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t size)
 {
     unsigned	lt, md=0, rt;		/*indices for binary search	*/
     int	cmp=(-1);		/*comparison result		*/
@@ -549,7 +541,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
+H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
 {
     unsigned	lt, md=0, rt;		/*indices for binary search	*/
     int	cmp=(-1);		/*comparison result		*/

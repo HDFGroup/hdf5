@@ -12,7 +12,7 @@ if test -z "$CC"; then
    CC_BASENAME=gcc
 fi
 
-# Figure out GNU compiler flags
+# Figure out GNU C compiler flags
 . $srcdir/config/gnu-flags
 
 # Figure out PGI C compiler flags

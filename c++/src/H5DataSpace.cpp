@@ -417,7 +417,7 @@ void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, 
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectBounds
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSpace::getSelectBounds ( hssize_t* start, hssize_t* end ) const
+void DataSpace::getSelectBounds ( hsize_t* start, hsize_t* end ) const
 {
    herr_t ret_value = H5Sget_select_bounds( id, start, end );
    if( ret_value < 0 )
@@ -443,7 +443,7 @@ void DataSpace::getSelectBounds ( hssize_t* start, hssize_t* end ) const
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectElements
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, const hssize_t *coord[ ] ) const
+void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord[ ] ) const
 {
    herr_t ret_value;
    ret_value = H5Sselect_elements( id, op, num_elements, coord );
@@ -523,7 +523,7 @@ bool DataSpace::selectValid () const
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectHyperslab
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride, const hsize_t *block ) const
+void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride, const hsize_t *block ) const
 {
    herr_t ret_value;
    ret_value = H5Sselect_hyperslab( id, op, start, stride, count, block );

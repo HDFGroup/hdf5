@@ -72,7 +72,7 @@ static H5HL_t *H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udat
 static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap);
 static herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
 static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
-static herr_t H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr);
+static herr_t H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr);
 
 /*
  * H5HL inherits cache-like properties from H5AC
@@ -695,7 +695,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr)
+H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_compute_size);
 

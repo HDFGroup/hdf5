@@ -69,9 +69,6 @@ H5FL_DEFINE(H5S_t);
 /* Declare a free list to manage the array's of hsize_t's */
 H5FL_ARR_DEFINE(hsize_t,H5S_MAX_RANK);
 
-/* Declare a free list to manage the array's of hssize_t's */
-H5FL_ARR_DEFINE(hssize_t,H5S_MAX_RANK);
-
 
 /*--------------------------------------------------------------------------
 NAME
@@ -1737,7 +1734,6 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 {
     size_t      extent_size;
     hssize_t    select_size;
-    H5S_class_t space_type;
     H5F_t       f;                /* fake file structure*/
     herr_t      ret_value = SUCCEED;
 
@@ -1750,9 +1746,6 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
     /* Find out the size of buffer needed for extent */
     if((extent_size=H5O_raw_size(H5O_SDSPACE_ID, &f, obj))==0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size");
-
-    /* Get space type */
-    space_type = H5S_GET_EXTENT_TYPE(obj);
 
     if((select_size=H5S_SELECT_SERIAL_SIZE(obj))<0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size");
@@ -1771,7 +1764,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
     *buf++ = H5S_ENCODE_VERSION;
 
     /* Encode the "size of size" information */
-    *buf++ = f.shared->sizeof_size;
+    *buf++ = (unsigned char)f.shared->sizeof_size;
 
     /* Encode size of extent information. Pointer is actually moved in this macro. */
     UINT32ENCODE(buf, extent_size);
@@ -1914,6 +1907,37 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_raw_size
+ *
+ * Purpose:	Compute the 'raw' size of the extent, as stored on disk.
+ *
+ * Return:	Success:	non-zero
+ *		Failure:	zero
+ *
+ * Programmer:	Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              October 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5S_raw_size(const H5F_t *f, const H5S_t *space)
+{
+    size_t      ret_value;
+
+    FUNC_ENTER_NOAPI(H5S_raw_size, 0);
+
+    /* Find out the size of buffer needed for extent */
+    ret_value=H5O_raw_size(H5O_SDSPACE_ID, f, &(space->extent));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5S_raw_size() */
 
 
 /*-------------------------------------------------------------------------

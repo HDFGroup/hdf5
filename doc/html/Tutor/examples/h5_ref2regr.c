@@ -24,8 +24,8 @@ main(void)
     hid_t		sid1,       /* Dataspace ID	#1		*/
                 sid2;       /* Dataspace ID	#2		*/
     hsize_t *   coords;             /* Coordinate buffer */
-    hssize_t		low[SPACE2_RANK];   /* Selection bounds */
-    hssize_t		high[SPACE2_RANK];     /* Selection bounds */
+    hsize_t		low[SPACE2_RANK];   /* Selection bounds */
+    hsize_t		high[SPACE2_RANK];     /* Selection bounds */
     hdset_reg_ref_t      *rbuf;      /* buffer to to read disk */
     int    *drbuf;      /* Buffer for reading numeric data from disk */
     int        i, j;          /* counting variables */

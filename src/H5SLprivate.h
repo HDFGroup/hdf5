@@ -58,7 +58,7 @@ typedef herr_t (*H5SL_operator_t)(void *item, void *key,
 /* Private routines */
 /********************/
 H5_DLL H5SL_t *H5SL_create(H5SL_type_t type, double p, size_t max_level);
-H5_DLL ssize_t H5SL_count(H5SL_t *slist);
+H5_DLL size_t H5SL_count(H5SL_t *slist);
 H5_DLL herr_t H5SL_insert(H5SL_t *slist, void *item, void *key);
 H5_DLL void *H5SL_remove(H5SL_t *slist, void *key);
 H5_DLL void *H5SL_search(H5SL_t *slist, void *key);

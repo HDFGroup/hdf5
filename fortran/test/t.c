@@ -28,11 +28,10 @@
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5_fixname_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl, _fcd full_name, int_f *full_namelen)
+nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl, _fcd full_name, size_t_f *full_namelen)
 {
      int ret_value = -1;
      char *c_base_name;
-     int c_base_namelen;
      char *c_full_name;
      hid_t c_fapl;
 
@@ -43,8 +42,7 @@ nh5_fixname_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl, _fcd full_name
      /*
       * Convert FORTRAN name to C name
       */
-     c_base_namelen = *base_namelen;
-     c_base_name = (char *)HD5f2cstring(base_name, c_base_namelen); 
+     c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen); 
      if (c_base_name == NULL) goto DONE;
      c_full_name = (char *) HDmalloc((size_t)*full_namelen + 1);
      if (c_full_name == NULL) goto DONE;
@@ -53,10 +51,11 @@ nh5_fixname_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl, _fcd full_name
       * Call h5_fixname function.
       */
      if (NULL != h5_fixname(c_base_name, c_fapl, c_full_name, (size_t)*full_namelen + 1)) {
-     HD5packFstring(c_full_name, _fcdtocp(full_name), *full_namelen);         
-     ret_value = 0;
-     goto DONE;
+         HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);         
+         ret_value = 0;
+         goto DONE;
      }
+
 DONE:
      if (NULL != c_base_name) HDfree(c_base_name);
      if (NULL != c_full_name) HDfree(c_full_name);
@@ -75,12 +74,11 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5_cleanup_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl)
+nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl)
 {
      char filename[1024];
      int ret_value = -1;
      char *c_base_name[1];
-     int c_base_namelen;
      hid_t c_fapl;
 
      /*
@@ -91,8 +89,7 @@ nh5_cleanup_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl)
      /*
       * Convert FORTRAN name to C name
       */
-     c_base_namelen = *base_namelen;
-     c_base_name[0] = (char *)HD5f2cstring(base_name, c_base_namelen); 
+     c_base_name[0] = (char *)HD5f2cstring(base_name, (size_t)*base_namelen); 
      if (c_base_name[0] == NULL) goto DONE;
 
      /*
@@ -104,10 +101,27 @@ nh5_cleanup_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl)
      }
 */
      h5_fixname(c_base_name[0], c_fapl, filename, sizeof(filename)); 
-     remove(filename);
+     HDremove(filename);
      ret_value =0;
+
 DONE:
      if (NULL != c_base_name[0]) HDfree(c_base_name[0]);
      return ret_value; 
     
 } 
+
+/*----------------------------------------------------------------------------
+ * Name:        h5_exit_c
+ * Purpose:     Call 'exit()' to terminate application
+ * Inputs:      status - status for exit() to return
+ * Returns:     none
+ * Programmer:  Quincey Koziol
+ *              Tuesday, December 14, 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+void
+nh5_exit_c(int_f *status)
+{
+    HDexit((int)*status);
+}   /* h5_exit_c */
+

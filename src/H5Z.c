@@ -1198,8 +1198,10 @@ herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags
     fclass = H5Z_find(filter);
 
 #ifdef H5_WANT_H5_V1_6_COMPAT
-    if(fclass == NULL && filter_config_flags != NULL)
+    if(fclass == NULL && filter_config_flags != NULL) {
         *filter_config_flags = 0;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
 #else
     if(fclass == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Filter not defined")
@@ -1218,3 +1220,4 @@ herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags
 done:
     FUNC_LEAVE_API(ret_value)
 }
+

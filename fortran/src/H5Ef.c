@@ -183,7 +183,7 @@ nh5eset_auto_c(int_f* printflag)
   herr_t status;
 
   if (*printflag == 1)
-    status = H5Eset_auto_stack(H5E_DEFAULT, (H5E_auto_t)H5Eprint, stderr);
+    status = H5Eset_auto_stack(H5E_DEFAULT, (H5E_auto_stack_t)H5Eprint, stderr);
   if (*printflag == 0)
     status = H5Eset_auto_stack(H5E_DEFAULT, NULL,NULL);
   if (status >= 0) ret_val = 0;

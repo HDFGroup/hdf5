@@ -187,44 +187,56 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 }
 
 #define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (DT)(D_MAX)) {					      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (D_MAX);					      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+        else                                                                  \
             *((DT*)D) = (D_MAX);					      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-    } else if (*((ST*)S) < (D_MIN)) {					      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    } else if (*((ST*)S) < (D_MIN)) {                                         \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (D_MIN);					      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+        else                                                                  \
             *((DT*)D) = (D_MIN);					      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
-}                                                                               
+}
 
 #define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (D_MAX)) {						      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (D_MAX);					      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+        else                                                                  \
             *((DT*)D) = (D_MAX);					      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -235,17 +247,21 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 }
 
 #define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S)<0) {							      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    if (*((ST*)S) < 0) {                                                      \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = 0;					              \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
-            *((DT*)D) = 0;                                                    \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        else                                                                  \
+            *((DT*)D) = 0;					              \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -256,17 +272,21 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 }
 
 #define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {		      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
-            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
-                    src_id, dst_id, S, D, cb_struct.user_data);               \
+    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {                      \
+        if(cb_struct.func) {                                                  \
+            H5T_conv_ret_t      except_ret;     /*callback return*/               \
+                                                                                  \
+            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
+                    src_id, dst_id, S, D, cb_struct.user_data);                   \
+            if(except_ret == H5T_CONV_UNHANDLED)                                  \
+                /* Let compiler convert if case is ignored by user handler*/      \
+                *((DT*)D) = (D_MAX);					      \
+            else if(except_ret == H5T_CONV_ABORT)                                 \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+        else                                                                  \
             *((DT*)D) = (D_MAX);					      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -287,29 +307,36 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 }
 
 #define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) < 0) {						      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    if (*((ST*)S) < 0) {                                                      \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = 0;					              \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
+        else                                                                  \
+            *((DT*)D) = 0;					              \
+    } else if (sizeof(ST)>sizeof(DT) && *((ST*)S) > (D_MAX)) {                \
+        if(cb_struct.func) {                                                  \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
                                                                               \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
-            *((DT*)D) = 0;                                                    \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-    } else if (sizeof(ST)>sizeof(DT) && *((ST*)S)>(ST)(D_MAX)) {	      \
-        /*sign vs. unsign ok in previous line*/				      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (D_MAX);					      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+        else                                                                  \
             *((DT*)D) = (D_MAX);					      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -331,17 +358,21 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
-    if (*((ST*)S)<0) {							      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    if (*((ST*)S) < 0) {                                                      \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = 0;					              \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
-            *((DT*)D) = 0;                                                    \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+        else                                                                  \
+            *((DT*)D) = 0;					              \
     }									      \
 }
 
@@ -352,17 +383,21 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
-    if (*((ST*)S) > (D_MAX)) {						      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    if (*((ST*)S) > (D_MAX)) {                                                \
+        if(cb_struct.func) {                                                  \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
-        }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (D_MAX);					      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
+        }								      \
+        else                                                                  \
             *((DT*)D) = (D_MAX);					      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
     }									      \
 }
 
@@ -380,28 +415,36 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * when an overflow occurs, use the 'float' infinity values.
  */
 #define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (DT)(D_MAX)) {					      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    if (*((ST*)S) > (DT)(D_MAX)) {                                            \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,           \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);		      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+        else                                                                  \
             *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);			      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
-    } else if (*((ST*)S) < (D_MIN)) {					      \
-        if(cb_struct.func) { /*If user's exception handler is present, use it*/ \
+    } else if (*((ST*)S) < (D_MIN)) {                                         \
+        if(cb_struct.func) {			                              \
+            H5T_conv_ret_t      except_ret;     /*callback return*/           \
+                                                                              \
             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW,          \
                     src_id, dst_id, S, D, cb_struct.user_data);               \
+            if(except_ret == H5T_CONV_UNHANDLED)                              \
+                /* Let compiler convert if case is ignored by user handler*/  \
+                *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);		      \
+            else if(except_ret == H5T_CONV_ABORT)                             \
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
+            /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
         }                                                                     \
-                                                                              \
-        if(except_ret == H5T_CONV_UNHANDLED) {                                \
-            /*let compiler convert if case is ignored by user handler*/       \
+        else                                                                  \
             *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);			      \
-        } else if(except_ret == H5T_CONV_ABORT)                               \
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -431,7 +474,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     size_t      safe;                   /*how many elements are safe to process in each pass */ \
     H5P_genplist_t      *plist;         /*Property list pointer         */    \
     H5T_conv_cb_t       cb_struct;      /*conversion callback structure */    \
-    H5T_conv_ret_t      except_ret;     /*callback return*/                   \
                                                                               \
     switch (cdata->command) {						      \
     case H5T_CONV_INIT:							      \
@@ -440,7 +482,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	if (NULL==(st=H5I_object(src_id)) || NULL==(dt=H5I_object(dst_id)))   \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
 			  "unable to dereference datatype object ID")	      \
-	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))		      \
+	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))     \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
 			  "disagreement about datatype size")		      \
 	CI_ALLOC_PRIV	                                                      \
@@ -457,7 +499,8 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	if (buf_stride) {						      \
             assert(buf_stride>=sizeof(ST));				      \
             assert(buf_stride>=sizeof(DT));				      \
-	    s_stride = d_stride = buf_stride;				      \
+            H5_CHECK_OVERFLOW(buf_stride,size_t,ssize_t);                     \
+	    s_stride = d_stride = (ssize_t)buf_stride;			      \
 	} else {							      \
             s_stride = sizeof(ST);					      \
             d_stride = sizeof(DT);					      \
@@ -513,8 +556,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
                 src = dst = buf;					      \
                 safe=nelmts;						      \
             } /* end else */						      \
-                                                                              \
-	    except_ret = H5T_CONV_UNHANDLED; 			              \
                                                                               \
             /* Perform loop over elements to convert */			      \
             if (s_mv && d_mv) {						      \
@@ -1237,7 +1278,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     uint8_t	dbuf[256];		/*temp destination buffer	*/
     size_t	msb_pad_offset;		/*offset for dest MSB padding	*/
     size_t	i;
-    uint8_t     *src_rev;               /*order-reversed source buffer  */
+    uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     H5P_genplist_t      *plist;         /*property list pointer         */
     H5T_conv_cb_t       cb_struct={NULL, NULL};      /*conversion callback structure */
     H5T_conv_ret_t      except_ret;     /*return of callback function   */
@@ -1432,8 +1473,6 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
             }
             
-            H5MM_free(src_rev);
-
             break;
 
         default:
@@ -1441,6 +1480,8 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }
 
 done:
+    if(src_rev)
+        H5MM_free(src_rev);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 	    
@@ -2322,7 +2363,6 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         n = *((int*)s);
                     }
                     n -= priv->base;
-
                     if (n<0 || n>=priv->length || priv->src2dst[n]<0) {
                         /*overflow*/
                         except_ret = H5T_CONV_UNHANDLED;
@@ -2494,14 +2534,19 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (buf_stride) {
                 assert(buf_stride>=src->shared->size);
                 assert(buf_stride>=dst->shared->size);
-                s_stride = d_stride = buf_stride;
+                H5_CHECK_OVERFLOW(buf_stride,size_t,ssize_t);
+                s_stride = d_stride = (ssize_t)buf_stride;
             } else {
-                s_stride = src->shared->size;
-                d_stride = dst->shared->size;
+                H5_CHECK_OVERFLOW(src->shared->size,size_t,ssize_t);
+                H5_CHECK_OVERFLOW(dst->shared->size,size_t,ssize_t);
+                s_stride = (ssize_t)src->shared->size;
+                d_stride = (ssize_t)dst->shared->size;
             }
             if(bkg) {
-                if(bkg_stride)
-                    b_stride=bkg_stride;
+                if(bkg_stride) {
+                    H5_CHECK_OVERFLOW(bkg_stride,size_t,ssize_t);
+                    b_stride=(ssize_t)bkg_stride;
+                } /* end if */
                 else
                     b_stride=d_stride;
             } /* end if */
@@ -2911,7 +2956,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	half_size;		/*half the type size		*/
     size_t	olap;			/*num overlapping elements	*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
-    uint8_t     *src_rev;               /*order-reversed source buffer  */
+    uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
     size_t	first;
     ssize_t	sfirst;			/*a signed version of `first'	*/
@@ -3266,8 +3311,6 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
             }
             
-            H5MM_free(src_rev);
-
             break;
 
         default:
@@ -3275,6 +3318,8 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }
 
 done:
+    if(src_rev)
+        H5MM_free(src_rev);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -3323,7 +3368,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	olap;			/*num overlapping elements	*/
     ssize_t	bitno;			/*bit number			*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
-    uint8_t     *src_rev;               /*order-reversed source buffer  */
+    uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
 
     /* Conversion-related variables */
@@ -3539,7 +3584,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if (H5T_NORM_NONE==dst.u.f.norm)
                     mrsh++;
-                
+
                 /*
                  * Calculate the destination exponent by adding the destination
                  * bias and clipping by the minimum and maximum possible
@@ -3723,8 +3768,6 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
             }
             
-            H5MM_free(src_rev);
-
             break;
                 
         default:
@@ -3732,6 +3775,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }
 
 done:
+    if(src_rev)
+        H5MM_free(src_rev);
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -8686,13 +8732,13 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     ssize_t	bitno;			/*bit number			*/
     size_t	olap;			/*num overlapping elements	*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
-    uint8_t     *src_rev;               /*order-reversed source buffer  */
+    uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
 
     /* Conversion-related variables */
     hssize_t	expo;			/*source exponent		*/
     hssize_t    sign;                   /*source sign bit value         */
-    uint8_t     *int_buf;               /*buffer for temporary value    */ 
+    uint8_t     *int_buf=NULL;          /*buffer for temporary value    */ 
     size_t      buf_size;               /*buffer size for temporary value */
     size_t	i;			/*miscellaneous counters	*/
     size_t	first;                  /*first bit(MSB) in an integer  */
@@ -9102,9 +9148,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HDmemset(int_buf, 0, buf_size);
             }
            
-            H5MM_xfree(int_buf);
-            H5MM_free(src_rev);
-
             break;
                 
         default:
@@ -9112,6 +9155,10 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }
 
 done:
+    if(int_buf)
+        H5MM_xfree(int_buf);
+    if(src_rev)
+        H5MM_free(src_rev);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -9152,7 +9199,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	half_size;		/*half the type size		*/
     size_t	olap;			/*num overlapping elements	*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
-    uint8_t     *src_rev;               /*order-reversed source buffer  */
+    uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
     uint8_t	dbuf[64];		/*temp destination buffer	*/
 
     /* Conversion-related variables */
@@ -9161,7 +9208,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t      sign;                   /*source sign bit value         */
     hbool_t     is_max_neg;             /*source is maximal negative value*/
     hbool_t     do_round;               /*whether there is roundup      */
-    uint8_t     *int_buf;               /*buffer for temporary value    */ 
+    uint8_t     *int_buf=NULL;          /*buffer for temporary value    */ 
     size_t      buf_size;               /*buffer size for temporary value */
     size_t	i;			/*miscellaneous counters	*/
     size_t	first;                  /*first bit(MSB) in an integer  */
@@ -9512,9 +9559,6 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HDmemset(int_buf, 0, buf_size);
             }
            
-            H5MM_xfree(int_buf);
-            H5MM_free(src_rev);
-
             break;
                 
         default:
@@ -9522,6 +9566,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }
 
 done:
+    if(int_buf)
+        H5MM_xfree(int_buf);
+    if(src_rev)
+        H5MM_free(src_rev);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

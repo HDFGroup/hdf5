@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:	 tfile
@@ -87,11 +85,7 @@ test_file_create(void)
     hsize_t		ublock;		/*sizeof userblock		*/
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    int			iparm;
-#else /* H5_WANT_H5_V1_6_COMPAT */
     unsigned		iparm;
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     unsigned		iparm2;
     herr_t		ret;		/*generic return value		*/
 
@@ -326,11 +320,7 @@ test_file_open(void)
     hsize_t		ublock;		/*sizeof user block		*/
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    int			iparm;
-#else /* H5_WANT_H5_V1_6_COMPAT */
     unsigned		iparm;
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     unsigned		iparm2;
     herr_t		ret;		/*generic return value		*/
 
@@ -1264,4 +1254,5 @@ cleanup_file(void)
     remove(FILE1);
     remove(FILE2);
     remove(FILE3);
+    remove(FILE4);
 }

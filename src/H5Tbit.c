@@ -75,7 +75,7 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
      *      ... v v v v v V V V V V
      *      ...+---------------+---------------+
      *      ...|7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|
-           ...+---------------+---------------+
+     *      ...+---------------+---------------+
      *           dst[d_idx+1]      dst[d_idx]
      */
     while (src_offset && size>0) {
@@ -492,8 +492,8 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Raymond Lu
- *              Mar 17, 2004
+ * Programmer:	Robb Matzke
+ *              Friday, June 26, 1998
  *
  * Modifications:
  *

@@ -41,7 +41,6 @@ extern char  *progname;
 extern int   d_status;
 
 
-
 ref_path_table_entry_t *ref_path_table = NULL;	/* the table */
 
 /*-------------------------------------------------------------------------
@@ -65,10 +64,9 @@ ref_path_table_lookup(const char *thepath)
     H5G_stat_t              sb;
     ref_path_table_entry_t *pte = ref_path_table;
 
-    if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0) {
+    if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0)
 	/*  fatal error ? */
 	return NULL;
-    }
 
     while(pte!=NULL) {
 	if (sb.objno==pte->statbuf.objno)
@@ -108,10 +106,9 @@ ref_path_table_put(hid_t obj, const char *path)
     /* if not found, then make new entry */
 
     pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
-    if (pte == NULL) {
+    if (pte == NULL)
 	/* fatal error? */
 	return NULL;
-    }
 
     pte->obj = obj;
 
@@ -158,21 +155,19 @@ get_fake_xid () {
 ref_path_table_entry_t *
 ref_path_table_gen_fake(const char *path)
 {
-	ref_path_table_entry_t *pte;
+    ref_path_table_entry_t *pte;
 
     /* look up 'obj'.  If already in table, return */
     pte = ref_path_table_lookup(path);
-    if (pte != NULL) {
+    if (pte != NULL)
 	return pte;
-	}
 
     /* if not found, then make new entry */
 
     pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
-    if (pte == NULL) {
+    if (pte == NULL)
 	/* fatal error? */
 	return NULL;
-    }
 
     pte->obj = (hid_t)-1;
 
@@ -259,9 +254,8 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
     case H5G_DATASET:
 	if ((obj = H5Dopen(group, name)) >= 0) {
 	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL) {
+	    if (pte == NULL)
 		ref_path_table_put(obj, thepath);
-	    }
 	    H5Dclose(obj);
 	} else {
             error_msg(progname, "unable to get dataset \"%s\"\n", name);
@@ -286,9 +280,8 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
     case H5G_TYPE:
 	if ((obj = H5Topen(group, name)) >= 0) {
 	    pte = ref_path_table_lookup(thepath);
-	    if (pte == NULL) {
+	    if (pte == NULL)
 		ref_path_table_put(obj, thepath);
-	    }
 	    H5Tclose(obj);
 	} else {
             error_msg(progname, "unable to get dataset \"%s\"\n", name);

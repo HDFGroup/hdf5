@@ -1,4 +1,3 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -46,7 +45,7 @@ main (void)
     hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t      chunk_dims[2] ={2, 5};
     hsize_t      size[2];
-    hssize_t     offset[2];
+    hsize_t      offset[2];
 
     herr_t      status;                             
 

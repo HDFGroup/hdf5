@@ -39,17 +39,17 @@ static hid_t create_file(const char *filename);
 static hid_t create_group(hid_t loc, const char *grp_name, size_t size_hint);
 static hid_t create_dset(hid_t loc, const char *dset_name);
 static void access_dset(hid_t loc, const char *dset_name);
-static void slab_set(hssize_t start[], hsize_t count[],
+static void slab_set(hsize_t start[], hsize_t count[],
                      hsize_t stride[], hsize_t block[]);
-static void fill_data(hssize_t start[], hsize_t count[]);
+static void fill_data(void);
 static void write_data(hid_t loc, const char *dset_name, 
-                       hssize_t start[], hsize_t count[],
+                       hsize_t start[], hsize_t count[],
                        hsize_t stride[], hsize_t block[]);
 static void verify_complete_dataset(hid_t loc, const char *dset_name);
 static void verify_partial_dataset(hid_t loc, const char *dset_name, 
-                                   hssize_t start[], hsize_t count[],
+                                   hsize_t start[], hsize_t count[],
                                    hsize_t stride[], hsize_t block[],
-                                   int * buf, int buf_len);
+                                   int * buf, hsize_t buf_len);
 static void test_group_creation(hid_t loc);
 static void test_dataset_creation(hid_t loc);
 static void test_dataset_access(hid_t loc);
@@ -105,7 +105,7 @@ static int     *local_orig_data = NULL;  /* data that's written to datasets */
 static hsize_t dims[RANK] = {0, 0};
 
 /* Hyperslab settings */
-static hssize_t start[RANK];
+static hsize_t  start[RANK];
 static hsize_t  count[RANK];
 static hsize_t  stride[RANK];
 static hsize_t  block[RANK];
@@ -137,7 +137,7 @@ static void
 check_globals(char * location_name)
 {
     static hsize_t local_dims[RANK] = {0,0};
-    static hssize_t local_start[RANK] = {0,0};
+    static hsize_t local_start[RANK] = {0,0};
     static hsize_t  local_count[RANK] = {0,0};
     static hsize_t  local_stride[RANK] = {0,0};
     static hsize_t  local_block[RANK] = {0,0};
@@ -241,12 +241,12 @@ create_file(const char *filename)
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_group(hid_t loc, const char *grp_name, size_t size_hint)
+create_group(hid_t loc, const char *group_name, size_t size_hint)
 {
     hid_t   group;
 
-    VRFY(((group = H5Gcreate(loc, grp_name, size_hint)) >= 0), "H5Gcreate");
-    printf("%d: Created group \"%s\"\n", mpi_rank, grp_name);
+    VRFY(((group = H5Gcreate(loc, group_name, size_hint)) >= 0), "H5Gcreate");
+    printf("%d: Created group \"%s\"\n", mpi_rank, group_name);
     return group;
 }
 
@@ -265,7 +265,7 @@ create_group(hid_t loc, const char *grp_name, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_dset(hid_t loc, const char *dset_name)
+create_dset(hid_t loc, const char *dataset_name)
 {
     hid_t   dset, sid;
 
@@ -274,9 +274,9 @@ create_dset(hid_t loc, const char *dset_name)
     VRFY(((sid = H5Screate_simple(RANK, dims, NULL)) >= 0), "H5Screate_simple");
     printf("%d: Created simple dataspace\n", mpi_rank);
 
-    dset = H5Dcreate(loc, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    dset = H5Dcreate(loc, dataset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
     VRFY((dset >= 0), "H5Dcreate");
-    printf("%d: Created dataset \"%s\"\n", mpi_rank, dset_name);
+    printf("%d: Created dataset \"%s\"\n", mpi_rank, dataset_name);
 
     VRFY((H5Sclose(sid) >= 0), "H5Sclose");
     return dset;
@@ -292,11 +292,11 @@ create_dset(hid_t loc, const char *dset_name)
  *-------------------------------------------------------------------------
  */
 static void
-access_dset(hid_t loc, const char *dset_name)
+access_dset(hid_t loc, const char *dataset_name)
 {
     hid_t   dataset;
 
-    VRFY(((dataset = H5Dopen(loc, dset_name)) >= 0), "H5Dopen");
+    VRFY(((dataset = H5Dopen(loc, dataset_name)) >= 0), "H5Dopen");
     VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 }
 
@@ -314,24 +314,24 @@ access_dset(hid_t loc, const char *dset_name)
  *-------------------------------------------------------------------------
  */
 static void
-slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[])
+slab_set(hsize_t my_start[], hsize_t my_count[], hsize_t my_stride[], hsize_t my_block[])
 {
     /* initialize dims according to the number of processes: */
     dims[0] = DIM0 * mpi_size;
     dims[1] = DIM1;
 
     /* Each process takes a slab of rows. */
-    block[0] = DIM0;
-    block[1] = DIM1;
+    my_block[0] = DIM0;
+    my_block[1] = DIM1;
 
-    stride[0] = block[0];
-    stride[1] = block[1];
+    my_stride[0] = my_block[0];
+    my_stride[1] = my_block[1];
 
-    count[0] = 1;
-    count[1] = 1;
+    my_count[0] = 1;
+    my_count[1] = 1;
 
-    start[0] = mpi_rank * block[0];
-    start[1] = 0;
+    my_start[0] = mpi_rank * my_block[0];
+    my_start[1] = 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -356,7 +356,7 @@ slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[])
  *-------------------------------------------------------------------------
  */
 static void
-fill_data(hssize_t start[], hsize_t count[])
+fill_data(void)
 {
     int col;
     int row;
@@ -406,36 +406,36 @@ fill_data(hssize_t start[], hsize_t count[])
  *-------------------------------------------------------------------------
  */
 static void
-write_data(hid_t loc, const char *dset_name, hssize_t start[], hsize_t count[],
-           hsize_t stride[], hsize_t block[])
+write_data(hid_t loc, const char *dataset_name, hsize_t my_start[], hsize_t my_count[],
+           hsize_t my_stride[], hsize_t my_block[])
 {
     herr_t      hrc;
     hid_t       file_dataspace, mem_dataspace;
     hid_t       dataset;
 
     /* See if dataset is there */
-    VRFY(((dataset = H5Dopen(loc, dset_name)) >= 0), "H5Dopen");
+    VRFY(((dataset = H5Dopen(loc, dataset_name)) >= 0), "H5Dopen");
 
     file_dataspace = H5Dget_space(dataset);
     VRFY((file_dataspace >= 0), "H5Dget_space");
 
     hrc = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET,
-                              start, stride, count, block);
+                              my_start, my_stride, my_count, my_block);
 #if 0
     /* some debugging code we may want to keep for a time.  JRM - 4/13/04 */
     if ( hrc < 0 ) { /* dump the parameters */
         printf("%d: start=[%d,%d], count=[%d, %d], stride=[%d,%d], block=[%d,%d]\n",
                mpi_rank,
-               (int)(start[0]), (int)(start[1]),
-               (int)(count[0]), (int)(count[1]),
-               (int)(stride[0]), (int)(stride[1]),
-               (int)(block[0]), (int)(block[1]));
+               (int)(my_start[0]), (int)(my_start[1]),
+               (int)(my_count[0]), (int)(my_count[1]),
+               (int)(my_stride[0]), (int)(my_stride[1]),
+               (int)(my_block[0]), (int)(my_block[1]));
     }
 #endif
     VRFY((hrc >= 0), "H5Sselect_hyperslab in write_data");
 
     /* create a memory dataspace independently */
-    mem_dataspace = H5Screate_simple(RANK, block, NULL);
+    mem_dataspace = H5Screate_simple(RANK, my_block, NULL);
     VRFY((mem_dataspace >= 0), "H5Screate_simple");
 
     hrc = H5Dwrite(dataset, H5T_NATIVE_INT, mem_dataspace,
@@ -460,18 +460,18 @@ write_data(hid_t loc, const char *dset_name, hssize_t start[], hsize_t count[],
  *-------------------------------------------------------------------------
  */
 static void
-verify_complete_dataset(hid_t loc, const char *dset_name)
+verify_complete_dataset(hid_t loc, const char *dataset_name)
 {
     hid_t       dataset;
     int        *data_array = NULL;
     size_t      data_array_len = 0;
-    int		col;
-    int		row;
+    unsigned	col;
+    unsigned	row;
     int		offset = 0;
     int         vrfyerrs = 0;
 
     /* Open the dataset */
-    VRFY(((dataset = H5Dopen(loc, dset_name)) >= 0), "H5Dopen");
+    VRFY(((dataset = H5Dopen(loc, dataset_name)) >= 0), "H5Dopen");
 
     /* allocate a buffer to receive the contents of the file dataset */
     VRFY((dims[0] != 0), "dims array initialized.");
@@ -490,7 +490,7 @@ verify_complete_dataset(hid_t loc, const char *dset_name)
             if ( data_array[offset] != orig_data[offset] ) {
                 if ( vrfyerrs++ < MAX_ERR_REPORT ) {
 		    fprintf(stdout, "%d: Dataset Verify failed at "
-                            "row %d, col %d: expect %d, got %d\n", mpi_rank,
+                            "row %u, col %u: expect %d, got %d\n", mpi_rank,
                             row, col, orig_data[offset], data_array[offset]);
                 }
             }
@@ -527,30 +527,30 @@ verify_complete_dataset(hid_t loc, const char *dset_name)
  *-------------------------------------------------------------------------
  */
 static void
-verify_partial_dataset(hid_t loc, const char *dset_name, 
-                       hssize_t start[], hsize_t count[],
-                       hsize_t stride[], hsize_t block[],
-                       int * buf, int buf_len)
+verify_partial_dataset(hid_t loc, const char *dataset_name, 
+                       hsize_t my_start[], hsize_t my_count[],
+                       hsize_t my_stride[], hsize_t my_block[],
+                       int * buf, hsize_t buf_len)
 {
     hid_t       dataset, file_dataspace, mem_dataspace;
     int        *data_array;
-    int		col;
-    int		row;
-    int		offset = 0;
+    unsigned	col;
+    unsigned	row;
+    hsize_t	offset = 0;
     int         vrfyerrs = 0;
 
     /* Open the dataset */
-    VRFY(((dataset = H5Dopen(loc, dset_name)) >= 0), "H5Dopen");
+    VRFY(((dataset = H5Dopen(loc, dataset_name)) >= 0), "H5Dopen");
 
     /* Create a file dataspace */
     file_dataspace = H5Dget_space(dataset);
     VRFY((file_dataspace >= 0), "H5Dget_space");
     VRFY((H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET,
-                              start, stride, count, block) >= 0), 
+                              my_start, my_stride, my_count, my_block) >= 0), 
          "H5Sselect_hyperslab in verify_partial_dataset");
 
     /* Create a memory dataspace */
-    mem_dataspace = H5Screate_simple(RANK, block, NULL);
+    mem_dataspace = H5Screate_simple(RANK, my_block, NULL);
     VRFY((mem_dataspace >= 0), "H5Screate_simple");
     VRFY(((block[0] * block[1]) == buf_len), "buf_len matches.");
 
@@ -568,7 +568,7 @@ verify_partial_dataset(hid_t loc, const char *dset_name,
             if ( data_array[offset] != buf[offset] ) {
                 if ( vrfyerrs++ < MAX_ERR_REPORT ) {
 		    fprintf(stdout, "%d: Dataset Verify failed at "
-                            "row %d, col %d: expected %d, got %d\n", mpi_rank,
+                            "row %u, col %u: expected %d, got %d\n", mpi_rank,
                             row, col, buf[offset], data_array[offset]);
                 }
             }
@@ -837,7 +837,7 @@ usage(const char *prog)
 int
 main(int argc, char *argv[])
 {
-    hid_t   fid, fapl2;
+    hid_t   fid;
     herr_t  hrc;
     int     nargs;
 
@@ -910,7 +910,7 @@ main(int argc, char *argv[])
                                         sizeof(int));
         VRFY((orig_data != NULL), "local_orig_data malloc succeeded");
 
-        fill_data(start, count);
+        fill_data();
 
         for (i = 0; i < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++i) {
             if (h5_fixname(FILENAME[i], fapl, filenames[i], sizeof(filenames[i])) == NULL) {
@@ -941,7 +941,7 @@ main(int argc, char *argv[])
              * Reverify that the data is still "correct"
              *===------------------------------------------------------------===
              */
-            for (i = 0; i < mpi_size; ++i)
+            for (i = 0; i < (unsigned)mpi_size; ++i)
                 if (i != SAP_RANK) {
                     hid_t   group;
 
@@ -1009,7 +1009,6 @@ main(int argc, char *argv[])
         fprintf(stderr, "===================================\n");
     }
 
-done:
     H5close();
     MPI_Finalize();
     return nerrors;

@@ -260,7 +260,7 @@ test_h5s_basic(void)
     H5E_BEGIN_TRY {
     ret = H5Dfill(NULL, H5T_NATIVE_INT, &n, H5T_NATIVE_INT, sid1);
     } H5E_END_TRY
-    VERIFY(ret, FAIL, "H5Dfill");    
+    VERIFY(ret, FAIL, "H5Dfill");
 
     /* Now use the bad dataspace as the space for an attribute */
     H5E_BEGIN_TRY {
@@ -351,7 +351,7 @@ test_h5s_null(void)
 
     /* Check to be sure we can't set a hyperslab selection on a null dataspace */
     H5E_BEGIN_TRY {
-        hssize_t start[1]={0};
+        hsize_t start[1]={0};
         hsize_t count[1]={0};
 
 	ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL);
@@ -360,10 +360,10 @@ test_h5s_null(void)
 
     /* Check to be sure we can't set a point selection on a null dataspace */
     H5E_BEGIN_TRY {
-        hssize_t	coord[1][1]; /* Coordinates for point selection */
+        hsize_t	coord[1][1]; /* Coordinates for point selection */
 
         coord[0][0]=0;
-	ret = H5Sselect_elements(sid, H5S_SELECT_SET, 1, (const hssize_t **)coord);
+	ret = H5Sselect_elements(sid, H5S_SELECT_SET, 1, (const hsize_t **)coord);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
@@ -532,7 +532,7 @@ test_h5s_encode(void)
     unsigned char       *sbuf=NULL, *null_sbuf=NULL, *scalar_buf=NULL;
     hsize_t		tdims[4];	/* Dimension array to test with */
     hssize_t		n;	 	/* Number of dataspace elements */
-    hssize_t            start[] = {0, 0, 0};
+    hsize_t             start[] = {0, 0, 0};
     hsize_t             stride[] = {2, 5, 3};
     hsize_t             count[] = {2, 2, 2};
     hsize_t             block[] = {1, 3, 1};

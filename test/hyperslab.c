@@ -160,7 +160,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     uint8_t	*dst = NULL;		/*destination array		*/
     hsize_t	hs_size[3];	    	/*hyperslab size		*/
     hsize_t	dst_size[3];	    	/*destination total size	*/
-    hssize_t	dst_offset[3];	    	/*offset of hyperslab in dest   */
+    hsize_t	dst_offset[3];	    	/*offset of hyperslab in dest   */
     unsigned	ref_value;  		/*reference value		*/
     unsigned	acc;	    		/*accumulator		    	*/
     size_t	i, j, k, dx, dy, dz;	/*counters		   	*/
@@ -206,9 +206,9 @@ test_fill(size_t nx, size_t ny, size_t nz,
 			    dst_size[0] = nx;
 			    dst_size[1] = ny;
 			    dst_size[2] = nz;
-			    dst_offset[0] = (hssize_t)i;
-			    dst_offset[1] = (hssize_t)j;
-			    dst_offset[2] = (hssize_t)k;
+			    dst_offset[0] = i;
+			    dst_offset[1] = j;
+			    dst_offset[2] = k;
 			    hs_size[0] = dx;
 			    hs_size[1] = dy;
 			    hs_size[2] = dz;
@@ -221,13 +221,13 @@ test_fill(size_t nx, size_t ny, size_t nz,
 				 * original * fill values and add the new ones.
 				 */
 				ref_value = init_full(dst, nx, ny, nz);
-				for (u=(size_t)dst_offset[0];
+				for (u=dst_offset[0];
 				     u<dst_offset[0]+dx;
 				     u++) {
-				    for (v = (size_t)dst_offset[1];
+				    for (v = dst_offset[1];
 					 v < dst_offset[1] + dy;
 					 v++) {
-					for (w = (size_t)dst_offset[2];
+					for (w = dst_offset[2];
 					     w < dst_offset[2] + dz;
 					     w++) {
 					    ref_value -= dst[u*ny*nz+v*nz+w];
@@ -333,8 +333,8 @@ test_copy(int mode,
     hsize_t	hs_size[3];		/*hyperslab size		*/
     hsize_t	dst_size[3];		/*destination total size	*/
     hsize_t	src_size[3];		/*source total size		*/
-    hssize_t	dst_offset[3];		/*offset of hyperslab in dest	*/
-    hssize_t	src_offset[3];		/*offset of hyperslab in source */
+    hsize_t	dst_offset[3];		/*offset of hyperslab in dest	*/
+    hsize_t	src_offset[3];		/*offset of hyperslab in source */
     unsigned	ref_value;		/*reference value		*/
     unsigned	acc;			/*accumulator			*/
     hsize_t	i, j, k, dx, dy, dz;	/*counters		     	*/
@@ -422,25 +422,25 @@ test_copy(int mode,
 				dst_offset[0] = 0;
 				dst_offset[1] = 0;
 				dst_offset[2] = 0;
-				src_offset[0] = (hssize_t)i;
-				src_offset[1] = (hssize_t)j;
-				src_offset[2] = (hssize_t)k;
+				src_offset[0] = i;
+				src_offset[1] = j;
+				src_offset[2] = k;
 				break;
 			    case VARIABLE_DST:
-				dst_offset[0] = (hssize_t)i;
-				dst_offset[1] = (hssize_t)j;
-				dst_offset[2] = (hssize_t)k;
+				dst_offset[0] = i;
+				dst_offset[1] = j;
+				dst_offset[2] = k;
 				src_offset[0] = 0;
 				src_offset[1] = 0;
 				src_offset[2] = 0;
 				break;
 			    case VARIABLE_BOTH:
-				dst_offset[0] = (hssize_t)i;
-				dst_offset[1] = (hssize_t)j;
-				dst_offset[2] = (hssize_t)k;
-				src_offset[0] = (hssize_t)i;
-				src_offset[1] = (hssize_t)j;
-				src_offset[2] = (hssize_t)k;
+				dst_offset[0] = i;
+				dst_offset[1] = j;
+				dst_offset[2] = k;
+				src_offset[0] = i;
+				src_offset[1] = j;
+				src_offset[2] = k;
 				break;
 			    default:
 				abort();
@@ -608,8 +608,8 @@ test_multifill(size_t nx)
 {
     hsize_t		    i, j;
     hsize_t		    size;
-    hssize_t		    src_stride;
-    hssize_t		    dst_stride;
+    hsize_t		    src_stride;
+    hsize_t		    dst_stride;
     char		    s[64];
 	
     struct a_struct {
@@ -743,7 +743,7 @@ test_endian(size_t nx)
     size[1] = 4;
 
     /* Copy the array */
-    H5V_stride_copy(2, (hsize_t)1, size, dst_stride, dst + 3, src_stride, src);
+    H5V_stride_copy_s(2, (hsize_t)1, size, dst_stride, dst + 3, src_stride, src);
 
     /* Compare */
     for (i = 0; i < nx; i++) {
@@ -802,7 +802,7 @@ test_transpose(size_t nx, size_t ny)
     int	*src = NULL;
     int	*dst = NULL;
     hsize_t	i, j;
-    hssize_t	src_stride[2], dst_stride[2];
+    hsize_t	src_stride[2], dst_stride[2];
     hsize_t	size[2];
     char	s[256];
 
@@ -906,8 +906,8 @@ test_sub_super(size_t nx, size_t ny)
     uint8_t	*full = NULL;	/*original image		*/
     uint8_t	*half = NULL;	/*image at 1/2 resolution	*/
     uint8_t	*twice = NULL;	/*2x2 pixels			*/
-    hssize_t	src_stride[4];	/*source stride info		*/
-    hssize_t	dst_stride[4];	/*destination stride info	*/
+    hsize_t	src_stride[4];	/*source stride info		*/
+    hsize_t	dst_stride[4];	/*destination stride info	*/
     hsize_t	size[4];	/*number of sample points	*/
     hsize_t	i, j;
     char	s[256];
@@ -1125,8 +1125,8 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     hsize_t     off;            /* Offset in array */
     size_t	u, v, w;        /* Local index variables        */
     hsize_t     dims[ARRAY_OFFSET_NDIMS];        /* X, Y & X coordinates of array to check */
-    hssize_t    coords[ARRAY_OFFSET_NDIMS];      /* X, Y & X coordinates to check offset of */
-    hssize_t    new_coords[ARRAY_OFFSET_NDIMS];  /* X, Y & X coordinates of offset */
+    hsize_t     coords[ARRAY_OFFSET_NDIMS];      /* X, Y & X coordinates to check offset of */
+    hsize_t     new_coords[ARRAY_OFFSET_NDIMS];  /* X, Y & X coordinates of offset */
     char	s[256];
 
     sprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z,(unsigned long)y,(unsigned long)x);

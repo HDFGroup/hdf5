@@ -3027,7 +3027,7 @@ hsize_t diff_long(unsigned char *mem1,
 			memcpy(&temp1_long, mem1, sizeof(long));
 			memcpy(&temp2_long, mem2, sizeof(long));
 			
-			if (labs(temp1_long-temp2_long) > options->delta)
+			if (labs(temp1_long-temp2_long) > (long)options->delta)
 			{
 				if ( print_data(options) ) 
 				{
@@ -3084,7 +3084,7 @@ hsize_t diff_long(unsigned char *mem1,
 			memcpy(&temp2_long, mem2, sizeof(long));
 			
 			if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > options->percent && 
-				labs(temp1_long-temp2_long) > options->delta )
+				labs(temp1_long-temp2_long) > (long)options->delta )
 			{
 				if ( print_data(options) ) 
 				{
@@ -3170,7 +3170,7 @@ hsize_t diff_ulong(unsigned char *mem1,
 			memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
 			memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
 			
-			if (labs(temp1_ulong-temp2_ulong) > options->delta)
+			if (labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta)
 			{
 				if ( print_data(options) ) 
 				{

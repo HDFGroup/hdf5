@@ -1706,7 +1706,7 @@ static herr_t H5C_epoch_marker_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                                      haddr_t addr, void *thing);
 static herr_t H5C_epoch_marker_dest(H5F_t *f, void *thing);
 static herr_t H5C_epoch_marker_clear(H5F_t *f, void *thing, hbool_t dest);
-static herr_t H5C_epoch_marker_size(H5F_t *f, void *thing, size_t *size_ptr);
+static herr_t H5C_epoch_marker_size(const H5F_t *f, const void *thing, size_t *size_ptr);
 
 const H5C_class_t epoch_marker_class =
 {
@@ -1795,8 +1795,8 @@ done:
 }
 
 static herr_t 
-H5C_epoch_marker_size(UNUSED H5F_t *f, 
-                      UNUSED void *thing, 
+H5C_epoch_marker_size(UNUSED const H5F_t *f, 
+                      UNUSED const void *thing, 
                       UNUSED size_t *size_ptr)
 {
     herr_t ret_value = FAIL;      /* Return value */
@@ -2940,8 +2940,7 @@ done:
  */
 
 herr_t
-H5C_rename_entry(H5F_t *	     f, 
-                 H5C_t *	     cache_ptr,
+H5C_rename_entry(H5C_t *	     cache_ptr,
                  const H5C_class_t * type, 
                  haddr_t 	     old_addr,
 	         haddr_t 	     new_addr)
@@ -2954,7 +2953,6 @@ H5C_rename_entry(H5F_t *	     f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( H5F_addr_defined(old_addr) );
     HDassert( H5F_addr_defined(new_addr) );
@@ -3546,7 +3544,6 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
 
         default: /* should be unreachable */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown incr_mode?!?!?.")
-            break;
     }
 
     switch ( config_ptr->decr_mode )
@@ -3588,7 +3585,6 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
 
         default: /* should be unreachable */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown decr_mode?!?!?.")
-            break;
     }
 
     if ( config_ptr->max_size == config_ptr->min_size ) {
@@ -4352,7 +4348,6 @@ H5C__auto_adjust_cache_size(H5C_t * cache_ptr,
 
         default:
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unknown incr_mode.")
-            break;
     }
 
     /* If the decr_mode is either age out or age out with threshold, we 
@@ -4478,7 +4473,6 @@ H5C__auto_adjust_cache_size(H5C_t * cache_ptr,
 
             default:
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unknown incr_mode.")
-                break;
         }
     }
 

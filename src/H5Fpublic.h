@@ -35,13 +35,13 @@
  *
  */
 
-/* When this header is included from H5Fprivate.h, don't make calls to H5check() */
+/* When this header is included from a private header, don't make calls to H5check() */
 #undef H5CHECK
-#ifndef _H5Fprivate_H
+#ifndef _H5private_H
 #define H5CHECK          H5check(),
-#else   /* _H5Fprivate_H */
+#else   /* _H5private_H */
 #define H5CHECK
-#endif  /* _H5Fprivate_H */
+#endif  /* _H5private_H */
 
 #define H5F_ACC_RDONLY	(H5CHECK 0x0000u)	/*absence of rdwr => rd-only */
 #define H5F_ACC_RDWR	(H5CHECK 0x0001u)	/*open for read and write    */

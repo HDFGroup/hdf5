@@ -247,14 +247,13 @@ if test "x$do_compile" = "xyes"; then
   fi
 fi
 
-
 if test "x$do_link" = "xyes"; then
   shared_link=""
 # conditionnaly link with the hl library  
   if test "X$HL" = "Xhl"; then
    libraries=" $libraries -lhdf5_hl -lhdf5 "
   else
-   libraries=" $libraries  -lhdf5 "	  
+   libraries=" $libraries  -lhdf5 "
   fi
   link_args="$link_args -L${libdir}"
 

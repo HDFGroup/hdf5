@@ -15,6 +15,9 @@
    long long values. */
 #undef FP_TO_ULLONG_RIGHT_MAXIMUM
 
+/* Define if gettimeofday() populates the tz pointer passed in */
+#undef GETTIMEOFDAY_GIVES_TZ
+
 /* Define if the __attribute__(()) extension is present */
 #undef HAVE_ATTRIBUTE
 
@@ -376,9 +379,6 @@
 
 /* Define if `__tm_gmtoff' is a member of `struct tm' */
 #undef HAVE___TM_GMTOFF
-
-/* Define if gettimeofday() populates the tz pointer passed in */
-#undef GETTIMEOFDAY_GIVES_TZ
 
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */

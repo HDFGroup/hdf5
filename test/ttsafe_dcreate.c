@@ -137,7 +137,7 @@ void tts_dcreate(void)
             assert(ret>=0);
 
             if (datavalue != i) {
-                TestErrPrintf(stderr, "Wrong value read %d for dataset name %s - test failed\n",
+                TestErrPrintf("Wrong value read %d for dataset name %s - test failed\n",
                             datavalue, dsetname[i]);
                 H5Dclose(dataset);
                 H5Fclose(file);

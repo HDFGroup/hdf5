@@ -70,8 +70,8 @@ extern "C" {
 #endif
 
 /* Define the operator function pointer for H5Diterate() */
-typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, hsize_t ndim,
-				 hssize_t *point, void *operator_data);
+typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
+				 const hsize_t *point, void *operator_data);
 
 H5_DLL hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
 			 hid_t space_id, hid_t plist_id);

@@ -442,7 +442,7 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
 	}
       else
 	{
-	  nchars = HDread (infid, buf, howmuch);
+	  nchars = HDread (infid, buf, (unsigned)howmuch);
 	}
 
       if (nchars <= 0)
@@ -498,7 +498,7 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
 hsize_t
 compute_user_block_size (hsize_t ublock_size)
 {
-  ssize_t where = 512;
+  hsize_t where = 512;
 
   if (ublock_size == 0)
     return 0;

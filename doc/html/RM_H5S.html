@@ -234,6 +234,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 -->
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Sclose" -->
 <hr>
@@ -500,8 +501,8 @@ END SUBROUTINE h5sextent_copy_f
 <dt><strong>Name:</strong> <a name="Dataspace-SelectBounds">H5Sget_select_bounds</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Sget_select_bounds</code>(<em>hid_t </em><code>space_id</code>,
-        <em>hssize_t *</em><code>start</code>,
-        <em>hssize_t *</em><code>end</code>
+        <em>hsize_t *</em><code>start</code>,
+        <em>hsize_t *</em><code>end</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Gets the bounding box containing the current selection.
@@ -529,10 +530,10 @@ END SUBROUTINE h5sextent_copy_f
 		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
           <td valign="top">IN: Identifier of dataspace to query.</td></tr>
         <tr>
-		  <td valign="top"><em>hssize_t *</em><code>start</code></td>
+		  <td valign="top"><em>hsize_t *</em><code>start</code></td>
           <td valign="top">OUT: Starting coordinates of the bounding box.</td></tr>
         <tr>
-		  <td valign="top"><em>hssize_t *</em><code>end</code></td>
+		  <td valign="top"><em>hsize_t *</em><code>end</code></td>
           <td valign="top">OUT: Ending coordinates of the bounding box, 
                 i.e., the coordinates of the diagonally opposite corner.</td></tr>
     </table></ul>
@@ -546,9 +547,9 @@ SUBROUTINE  h5sget_select_bounds_f(space_id, start, end, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id 
                                    ! Dataspace identifier 
-  INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
                                    ! Starting coordinates of the bounding box 
-  INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
                                    ! Ending coordinates of the bounding box,
                                    ! i.e., the coordinates of the diagonally 
                                    ! opposite corner 
@@ -662,7 +663,7 @@ END SUBROUTINE h5sget_select_elem_npoints_f
 <dt><strong>Fortran90 Interface:</strong> h5sget_select_elem_pointlist_f
     <dd>
 	<pre>
-SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, num_points, &
+SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, num_points,
                                           buf, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN)   :: space_id   ! Dataspace identifier
@@ -741,7 +742,7 @@ END SUBROUTINE h5sget_select_elem_pointlist_f
 <dt><strong>Fortran90 Interface:</strong> h5sget_select_hyper_blocklist_f
     <dd>
 	<pre>
-SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, num_blocks, &
+SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, num_blocks,
                                            buf, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN)   :: space_id   ! Dataspace identifier
@@ -1270,7 +1271,7 @@ END SUBROUTINE h5sselect_all_f
     <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
         <em>H5S_seloper_t</em> <code>op</code>,
         <em>const size_t</em> <code>num_elements</code>,
-        <em>const hssize_t *</em><code>coord</code>[ ]
+        <em>const hsize_t *</em><code>coord</code>[ ]
     )
 <dt><strong>Purpose:</strong>
     <dd>Selects array elements to be included in the selection for a dataspace.
@@ -1336,7 +1337,7 @@ END SUBROUTINE h5sselect_all_f
 		  <td valign="top"><em>const&nbsp;size_t</em>&nbsp;<code>num_elements&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
           <td valign="top">Number of elements to be selected.</td></tr>
         <tr>
-		  <td valign="top"><em>const hssize_t *</em><code>coord</code>[ ]</td>
+		  <td valign="top"><em>const hsize_t *</em><code>coord</code>[ ]</td>
           <td valign="top">A 2-dimensional array of 0-based values specifying the 
                 coordinates of the elements being selected.</td></tr>
     </table></ul>
@@ -1346,7 +1347,7 @@ END SUBROUTINE h5sselect_all_f
 <dt><strong>Fortran90 Interface:</strong> h5sselect_elements_f
     <dd>
 	<pre>
-SUBROUTINE h5sselect_elements_f(space_id, operator, num_elements, &
+SUBROUTINE h5sselect_elements_f(space_id, operator, num_elements,
                                 coord, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
@@ -1354,7 +1355,7 @@ SUBROUTINE h5sselect_elements_f(space_id, operator, num_elements, &
                                           !    H5S_SELECT_SET_F 
                                           !    H5S_SELECT_OR_F 
   INTEGER, INTENT(IN) :: num_elements     ! Number of elements to be selected
-  INTEGER(HSSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
+  INTEGER(HSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
                                           ! Array with the coordinates
                                           ! of the selected elements:
                                           ! coord(num_elements, rank)</pre>
@@ -1381,7 +1382,7 @@ END SUBROUTINE h5sselect_elements_f
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
         <em>H5S_seloper_t</em> <code>op</code>,
-        <em>const hssize_t *</em><code>start</code>,
+        <em>const hsize_t *</em><code>start</code>,
         <em>const hsize_t *</em><code>stride</code>,
         <em>const hsize_t *</em><code>count</code>,
         <em>const hsize_t *</em><code>block</code>
@@ -1492,7 +1493,7 @@ END SUBROUTINE h5sselect_elements_f
 		  <td valign="top"><em>H5S_seloper_t</em> <code>op</code></td>
           <td valign="top">IN: Operation to perform on current selection.</td></tr>
         <tr>
-		  <td valign="top"><em>const hssize_t *</em><code>start</code></td>
+		  <td valign="top"><em>const hsize_t *</em><code>start</code></td>
           <td valign="top">IN: Offset of start of hyperslab</td></tr>
         <tr>
 		  <td valign="top"><em>const hsize_t *</em><code>count</code></td>
@@ -1510,14 +1511,14 @@ END SUBROUTINE h5sselect_elements_f
 <dt><strong>Fortran90 Interface:</strong> h5sselect_hyperslab_f
     <dd>
 	<pre>
-SUBROUTINE h5sselect_hyperslab_f(space_id, operator, start, count, &
+SUBROUTINE h5sselect_hyperslab_f(space_id, operator, start, count,
                                  hdferr, stride, block) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
   INTEGER, INTENT(IN) :: op               ! Flag, valid values are:
                                           !    H5S_SELECT_SET_F
                                           !    H5S_SELECT_OR_F
-  INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
                                           ! Starting coordinates of hyperslab 
   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count 
                                           ! Number of blocks to select 
@@ -1719,7 +1720,7 @@ END SUBROUTINE h5sset_extent_none_f
 <dt><strong>Fortran90 Interface:</strong> h5sset_extent_simple_f
     <dd>
 	<pre>
-SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &
+SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size,
                                   maximum_size, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id     ! Dataspace identifier 

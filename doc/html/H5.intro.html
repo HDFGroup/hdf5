@@ -1387,7 +1387,7 @@ A hyperslab specifies a regular pattern of elements in a dataset.  It is also po
 hsize_t dim2[] = {MSPACE2_DIM};       /* Dimension size of the second 
                                          dataset (in memory) */ 
 int     values[] = {53, 59, 61, 67};  /* New values to be written */
-hssize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
+hsize_t coord[NPOINTS][FSPACE_RANK];  /* Array to store selected points 
                                          from the file dataspace */ 
 
 /*
@@ -1404,7 +1404,7 @@ coord[2][0] = 3; coord[2][1] = 5;
 coord[3][0] = 5; coord[3][1] = 6;
 
 ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS, 
-                         (const hssize_t **)coord);
+                         (const hsize_t **)coord);
 
 /*
  * Write new selection of points to the dataset.

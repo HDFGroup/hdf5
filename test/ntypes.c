@@ -2020,7 +2020,7 @@ test_refer_dtype2(hid_t file)
     hid_t               dtype, native_type;
     hsize_t		dims1[] = {1},
             	        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hssize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
@@ -2286,7 +2286,7 @@ test_bitfield_dtype(hid_t file)
     hid_t		type=-1, space=-1, dset=-1;
     hid_t               dataset, dtype, native_type;
     size_t		i;
-    unsigned char	wbuf[32], rbuf[32];
+    unsigned char	wbuf[32];
     hsize_t		nelmts;
     
     TESTING("bitfield datatype");
@@ -2330,7 +2330,10 @@ test_bitfield_dtype(hid_t file)
                                                                       
 error:                                                       
     return -1;
-} /* test_opaque_dtype */
+} /* test_bitfield_dtype */
+
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -2352,21 +2355,18 @@ error:
 static herr_t
 test_ninteger(void)
 {
-    hid_t     fid1;                  /* file ID */
-    hid_t     fid2;                  /* file ID */
-    hid_t     did1;                  /* dataset ID */
-    hid_t     did2;                  /* dataset ID */
-    hid_t     sid1;                  /* dataspace ID */ 
-    hid_t     dcpl1;                 /* dataset creation property list ID */
-    hid_t     dcpl2;                 /* dataset creation property list ID */
-    hid_t     tid1;                  /* file datatype */
-    hid_t     tid2;                  /* file datatype */
-    hid_t     nid1;                  /* native datatype */
-    hid_t     nid2;                  /* native datatype */
-    size_t    prec1;                 /* precision */
-    size_t    prec2;                 /* precision */
+    hid_t     fid1=(-1);             /* file ID */
+    hid_t     fid2=(-1);             /* file ID */
+    hid_t     did1=(-1);             /* dataset ID */
+    hid_t     did2=(-1);             /* dataset ID */
+    hid_t     sid1=(-1);             /* dataspace ID */ 
+    hid_t     dcpl1=(-1);            /* dataset creation property list ID */
+    hid_t     dcpl2=(-1);            /* dataset creation property list ID */
+    hid_t     tid1=(-1);             /* file datatype */
+    hid_t     tid2=(-1);             /* file datatype */
+    hid_t     nid1=(-1);             /* native datatype */
+    hid_t     nid2=(-1);             /* native datatype */
     hsize_t   dims[1]={DIM3};        /* dataspace dimensions */
-    size_t    nsize;                 /* size of native type */
     hsize_t   nelmts;                /* number of elements in dataset */
     int       rank=1;                /* rank of dataset */
     int       buf[DIM3];
@@ -2435,7 +2435,7 @@ test_ninteger(void)
      goto error;
 
     /* get size */
-    if ((nsize=H5Tget_size(nid1))==0)
+    if (H5Tget_size(nid1)==0)
      goto error;
 
     /* get rank */
@@ -2478,7 +2478,7 @@ test_ninteger(void)
      goto error;
 
     /* check */
-    if ((prec1=H5Tget_precision(nid1))!=(prec2=H5Tget_precision(nid2))) {
+    if (H5Tget_precision(nid1)!=H5Tget_precision(nid2)) {
      printf("    Precision differ.\n");
      goto error;
     }

@@ -33,7 +33,6 @@
 #endif
 
 #include "testhdf5.h"
-#include "h5test.h"
 #include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -603,7 +602,7 @@ test_compression(H5File& file)
 	TESTING("compression (partial I/O)");
 
 	const hsize_t	hs_size[2] = {4, 50};
-	const hssize_t	hs_offset[2] = {7, 30};
+	const hsize_t	hs_offset[2] = {7, 30};
 	for (i = 0; i < hs_size[0]; i++) {
 	    for (j = 0; j < hs_size[1]; j++) {
 		points[hs_offset[0]+i][hs_offset[1]+j] = rand ();

@@ -75,9 +75,9 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 #undef H5OPEN
 #ifndef _H5private_H
 #define H5OPEN        H5open(),
-#else   /* _H5Pprivate_H */
+#else   /* _H5private_H */
 #define H5OPEN
-#endif  /* _H5Pprivate_H */
+#endif  /* _H5private_H */
 
 #define H5P_NO_CLASS		   	(H5OPEN H5P_CLS_NO_CLASS_g)
 #define H5P_FILE_CREATE 		(H5OPEN H5P_CLS_FILE_CREATE_g)
@@ -163,15 +163,9 @@ H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 H5_DLL herr_t H5Pclose(hid_t plist_id);
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
-H5_DLL herr_t H5Pget_version(hid_t plist_id, int *boot/*out*/,
-         int *freelist/*out*/, int *stab/*out*/,
-         int *shhdr/*out*/);
-#else /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot/*out*/,
          unsigned *freelist/*out*/, unsigned *stab/*out*/,
          unsigned *shhdr/*out*/);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pset_userblock(hid_t plist_id, hsize_t size);
 H5_DLL herr_t H5Pget_userblock(hid_t plist_id, hsize_t *size);
 H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,
@@ -182,17 +176,10 @@ H5_DLL herr_t H5Pset_sizes(hid_t plist_id, size_t sizeof_addr,
        size_t sizeof_size);
 H5_DLL herr_t H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr/*out*/,
        size_t *sizeof_size/*out*/);
-#ifdef H5_WANT_H5_V1_6_COMPAT
-H5_DLL herr_t H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk);
-H5_DLL herr_t H5Pget_sym_k(hid_t plist_id, int *ik/*out*/, unsigned *lk/*out*/);
-H5_DLL herr_t H5Pset_istore_k(hid_t plist_id, int ik);
-H5_DLL herr_t H5Pget_istore_k(hid_t plist_id, int *ik/*out*/);
-#else /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk);
 H5_DLL herr_t H5Pget_sym_k(hid_t plist_id, unsigned *ik/*out*/, unsigned *lk/*out*/);
 H5_DLL herr_t H5Pset_istore_k(hid_t plist_id, unsigned ik);
 H5_DLL herr_t H5Pget_istore_k(hid_t plist_id, unsigned *ik/*out*/);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[]);
@@ -202,15 +189,9 @@ H5_DLL ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, s
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
 H5_DLL int H5Pget_external_count(hid_t plist_id);
-#ifdef H5_WANT_H5_V1_6_COMPAT
-H5_DLL herr_t H5Pget_external(hid_t plist_id, int idx, size_t name_size,
-          char *name/*out*/, off_t *offset/*out*/,
-          hsize_t *size/*out*/);
-#else /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
           char *name/*out*/, off_t *offset/*out*/,
           hsize_t *size/*out*/);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
@@ -233,7 +214,7 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
         const unsigned int c_values[]);
 H5_DLL int H5Pget_nfilters(hid_t plist_id);
 #ifdef H5_WANT_H5_V1_6_COMPAT
-H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
+H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, unsigned filter,
        unsigned int *flags/*out*/,
        size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/,

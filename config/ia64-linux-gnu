@@ -13,11 +13,7 @@ fi
 #----------------------------------------------------------------------------
 # Compiler flags. The CPPFLAGS values should not include package debug
 # flags like `-DH5G_DEBUG' since these are added with the
-# `--enable-debug' switch of configure.  For ecc 7.1, because of the 
-# overlapping definitions of int64_t(starting from int8_t) in sys/types.h 
-# and stdint.h, we added -D__GNUC__ to CFLAGS.
-# This problem is no longer true and the -D_GNUC__ actually caused failure.
-# So it is removed.
+# `--enable-debug' switch of configure.
 
 case $CC_BASENAME in
     ecc|icc)

@@ -168,7 +168,13 @@ h5tools_close(void)
  *-------------------------------------------------------------------------
  */
 static hid_t
-h5tools_get_fapl(const char *driver, unsigned *drivernum, int argc, const char *argv[])
+h5tools_get_fapl(const char *driver, unsigned *drivernum,
+#ifdef H5_HAVE_PARALLEL
+int argc, const char *argv[]
+#else /* H5_HAVE_PARALLEL */
+int UNUSED argc, const char UNUSED *argv[]
+#endif /* H5_HAVE_PARALLEL */
+)
 {
     hid_t               fapl = H5P_DEFAULT;
 
@@ -692,7 +698,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     herr_t              ret;                    /*the value to return   */
     hid_t		f_space;		/*file data space	*/
     int			i;                      /*counters		*/
-    hssize_t		zero = 0;               /*vector of zeros	*/
+    hsize_t		zero = 0;               /*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
 
@@ -744,10 +750,10 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
                       count--) {
         /* calculate the potential number of elements we're going to print */
         H5Sselect_hyperslab(f_space, H5S_SELECT_SET, 
-        (hssize_t*)sset->start, 
-        (hsize_t*)sset->stride,
-        (hsize_t*)sset->count, 
-        (hsize_t*)sset->block);
+            sset->start, 
+            sset->stride,
+            sset->count, 
+            sset->block);
         sm_nelmts = H5Sget_select_npoints(f_space);
 
         /*
@@ -856,7 +862,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		elmtno;			/*counter		*/
     int			i;			/*counter		*/
     int			carry;			/*counter carry value	*/
-    hssize_t		zero[8];		/*vector of zeros	*/
+    hsize_t		zero[8];		/*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
 
@@ -873,7 +879,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hid_t		sm_space;		/*stripmine data space	*/
     
     /* Hyperslab info */
-    hssize_t		hs_offset[H5S_MAX_RANK];/*starting offset	*/
+    hsize_t		hs_offset[H5S_MAX_RANK];/*starting offset	*/
     hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
     hsize_t		hs_nelmts;		/*elements in request	*/
 
@@ -994,7 +1000,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
             ctx.p_min_idx[i - 1] = ctx.p_max_idx[i - 1];
             hs_offset[i - 1] += hs_size[i - 1];
 
-            if (hs_offset[i - 1] == (hssize_t)total_size[i - 1])
+            if (hs_offset[i - 1] == total_size[i - 1])
                 hs_offset[i - 1] = 0;
             else
                 carry = 0;

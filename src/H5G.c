@@ -285,7 +285,6 @@ H5Gopen(hid_t loc_id, const char *name)
     H5G_t       *grp = NULL;
     H5G_entry_t	*loc = NULL;
     H5G_entry_t	 ent;
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open group */
 
     FUNC_ENTER_API(H5Gopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
@@ -297,12 +296,13 @@ H5Gopen(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
 
     /* Open the parent group, making sure it's a group */
-    if (H5G_find(loc, name, NULL, &ent/*out*/, dxpl_id) < 0)
+    if (H5G_find(loc, name, NULL, &ent/*out*/, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
 
     /* Open the group */
     if ((grp = H5G_open(&ent, H5AC_dxpl_id))==NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
+
     /* Register an atom for the group */
     if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
@@ -2155,6 +2155,7 @@ herr_t
 H5G_free(H5G_t *grp)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_free, FAIL);
 
     assert(grp && grp->shared);
@@ -3405,7 +3406,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_replace_name(int type, H5G_entry_t *loc,
+H5G_replace_name(H5G_obj_t type, H5G_entry_t *loc,
     H5RS_str_t *src_name, H5G_entry_t *src_loc,
     H5RS_str_t *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op )
 {

@@ -14,7 +14,6 @@
 #
 my $depend_file;
 my $new_depend_file;
-
 my $srcdir;
 my $top_srcdir;
 my $top_builddir;

@@ -32,7 +32,7 @@
 #include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Static local functions */
-static herr_t H5T_set_offset(H5T_t *dt, size_t offset);
+static herr_t H5T_set_offset(const H5T_t *dt, size_t offset);
 
 
 /*--------------------------------------------------------------------------
@@ -225,7 +225,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_set_offset(H5T_t *dt, size_t offset)
+H5T_set_offset(const H5T_t *dt, size_t offset)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 

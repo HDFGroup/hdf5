@@ -238,7 +238,6 @@ hsize_t diff_datum(void       *_mem1,
 
 
 
-
 hsize_t diff_float(unsigned char *mem1,
 																			unsigned char *mem2,
 																			hsize_t       nelmts,
@@ -370,7 +369,6 @@ hsize_t diff_ullong(unsigned char *mem1,
 																			const char    *obj1, 
 																			const char    *obj2,
 																			int           *ph);
-
 
 
 

@@ -112,7 +112,7 @@ TOOLTEST tgroup-2.ddl --group=/g2 --group / -g /y tgroup.h5
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ddl tdset.h5
 # test for displaying selected datasets
-TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 tdset.h5
+TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 
 # test for displaying attributes
 TOOLTEST tattr-1.ddl tattr.h5

@@ -24,3 +24,5 @@
 #include "H5FloatType.h"
 #include "H5StrType.h"
 #include "H5CompType.h"
+#include "H5ArrayType.h"
+#include "H5VarLenType.h"

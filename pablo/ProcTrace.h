@@ -84,6 +84,9 @@
 /*======================================================================*/
 /* Assign HDF identifier routine tags					*/
 /*======================================================================*/
+#ifdef RUNTIME_TRACE
+#undef RUNTIME_TRACE
+#endif
 enum HDF_IDS {
 NO_TRACE = 0,
 RUNTIME_TRACE = 1,

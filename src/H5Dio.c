@@ -44,7 +44,7 @@ typedef struct H5D_chunk_info_t {
     hsize_t index;              /* "Index" of chunk in dataset (must be first for TBBT routines) */
     size_t chunk_points;        /* Number of elements selected in chunk */
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
-    hssize_t coords[H5O_LAYOUT_NDIMS];    /* Coordinates of chunk in file dataset's dataspace */
+    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
     H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
     unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
 } H5D_chunk_info_t;
@@ -117,16 +117,16 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     unsigned flags, hbool_t *use_par_opt_io, H5D_io_info_t *io_info);
 
 /* Chunk operations */
-static herr_t H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type,
+static herr_t H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type,
         const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_destroy_chunk_map(const fm_map *fm);
 static void H5D_free_chunk_info(void *chunk_info);
-static herr_t H5D_create_chunk_file_map_hyper(fm_map *fm);
+static herr_t H5D_create_chunk_file_map_hyper(const fm_map *fm);
 static herr_t H5D_create_chunk_mem_map_hyper(const fm_map *fm);
-static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, hsize_t ndims,
-    hssize_t *coords, void *fm);
-static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, hsize_t ndims,
-    hssize_t *coords, void *fm);
+static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
+    const hsize_t *coords, void *fm);
+static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
+    const hsize_t *coords, void *fm);
 
 /* Declare a free list to manage blocks of single datatype element data */
 H5FL_BLK_DEFINE(type_elem);
@@ -337,11 +337,7 @@ H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
 
     /* Get B-tree split ratios */
     if(H5P_get(dx_plist, H5D_XFER_BTREE_SPLIT_RATIO_NAME, &cache->btree_split_ratio)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type")
-
-    /* Get B-tree split ratios */
-    if(H5P_get(dx_plist, H5D_XFER_BTREE_SPLIT_RATIO_NAME, &cache->btree_split_ratio)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type")
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve B-tree split ratios")
 
     /* Get I/O vector size */
     if(H5P_get(dx_plist, H5D_XFER_HYPER_VECTOR_SIZE_NAME, &cache->vec_size)<0)
@@ -2356,7 +2352,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_space, 
+H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_space, 
             const H5S_t *mem_space, fm_map *fm)
 {
     H5S_t *tmp_mspace=NULL;     /* Temporary memory dataspace */
@@ -2435,9 +2431,9 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     fm->mem_space_copy=equiv_mspace_init;       /* Make certain to copy memory dataspace if necessary */
 
     /* Get type of selection on disk & in memory */
-    if((fsel_type=H5S_GET_SELECT_TYPE(file_space))<0)
+    if((fsel_type=H5S_GET_SELECT_TYPE(file_space))<H5S_SEL_NONE)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
-    if((fm->msel_type=H5S_GET_SELECT_TYPE(equiv_mspace))<0)
+    if((fm->msel_type=H5S_GET_SELECT_TYPE(equiv_mspace))<H5S_SEL_NONE)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
 
     /* Check if file selection is a point selection */
@@ -2664,14 +2660,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5D_create_chunk_file_map_hyper(fm_map *fm)
+H5D_create_chunk_file_map_hyper(const fm_map *fm)
 {
-    hssize_t    sel_points;                 /* Number of elements in file selection */
-    hssize_t    sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
-    hssize_t    sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
-    hssize_t    start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
-    hssize_t    coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
-    hssize_t    end[H5O_LAYOUT_NDIMS];      /* Current coordinates of chunk */
+    hssize_t    ssel_points;                /* Number of elements in file selection */
+    hsize_t     sel_points;                 /* Number of elements in file selection */
+    hsize_t    sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hsize_t    sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hsize_t    start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
+    hsize_t    coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
+    hsize_t    end[H5O_LAYOUT_NDIMS];      /* Current coordinates of chunk */
     hsize_t     chunk_index;                /* Index of chunk */
     int         curr_dim;                   /* Current dimension to increment */
     unsigned    u;                          /* Local index variable */
@@ -2683,8 +2680,9 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
     assert(fm->f_ndims>0);
 
     /* Get number of elements selected in file */
-    if((sel_points=H5S_GET_SELECT_NPOINTS(fm->file_space))<0)
+    if((ssel_points=H5S_GET_SELECT_NPOINTS(fm->file_space))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
+    H5_ASSIGN_OVERFLOW(sel_points,ssel_points,hssize_t,hsize_t);
 
     /* Get bounding box for selection (to reduce the number of chunks to iterate over) */
     if(H5S_SELECT_BOUNDS(fm->file_space, sel_start, sel_end)<0)
@@ -2692,8 +2690,7 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
 
     /* Set initial chunk location & hyperslab size */
     for(u=0; u<fm->f_ndims; u++) {
-        H5_CHECK_OVERFLOW(fm->layout->u.chunk.dim[u],hsize_t,hssize_t);
-        start_coords[u]=(sel_start[u]/(hssize_t)fm->layout->u.chunk.dim[u])*(hssize_t)fm->layout->u.chunk.dim[u];
+        start_coords[u]=(sel_start[u]/fm->layout->u.chunk.dim[u])*fm->layout->u.chunk.dim[u];
         coords[u]=start_coords[u];
         end[u]=(coords[u]+fm->chunk_dim[u])-1;
     } /* end for */
@@ -2716,12 +2713,16 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
             /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
-            if(H5S_hyper_convert(tmp_fchunk)<0)
+            if(H5S_hyper_convert(tmp_fchunk)<0) {
+                (void)H5S_close(tmp_fchunk);
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+            } /* end if */
 
             /* Normalize hyperslab selections by adjusting them by the offset */
-            if(H5S_hyper_normalize_offset(tmp_fchunk)<0)
+            if(H5S_hyper_normalize_offset(tmp_fchunk)<0) {
+                (void)H5S_close(tmp_fchunk);
                 HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+            } /* end if */
 
             /* "AND" temporary chunk and current chunk */
             if(H5S_select_hyperslab(tmp_fchunk,H5S_SELECT_AND,coords,NULL,fm->chunk_dim,NULL)<0) {
@@ -2736,7 +2737,7 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
             } /* end if */
 
             /* Move selection back to have correct offset in chunk */
-            if(H5S_hyper_adjust(tmp_fchunk,coords)<0) {
+            if(H5S_hyper_adjust_u(tmp_fchunk,coords)<0) {
                 (void)H5S_close(tmp_fchunk);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
             } /* end if */
@@ -2778,7 +2779,7 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
             H5_ASSIGN_OVERFLOW(new_chunk_info->chunk_points,schunk_points,hssize_t,size_t);
 
             /* Decrement # of points left in file selection */
-            sel_points-=schunk_points;
+            sel_points-=(hsize_t)schunk_points;
 
             /* Leave if we are done */
             if(sel_points==0)
@@ -2794,8 +2795,8 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
 
         /* Increment chunk location in fastest changing dimension */
         H5_CHECK_OVERFLOW(fm->chunk_dim[curr_dim],hsize_t,hssize_t);
-        coords[curr_dim]+=(hssize_t)fm->chunk_dim[curr_dim];
-        end[curr_dim]+=(hssize_t)fm->chunk_dim[curr_dim];
+        coords[curr_dim]+=fm->chunk_dim[curr_dim];
+        end[curr_dim]+=fm->chunk_dim[curr_dim];
 
         /* Bring chunk location back into bounds, if necessary */
         if(coords[curr_dim]>sel_end[curr_dim]) {
@@ -2808,8 +2809,8 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
                 curr_dim--;
 
                 /* Increment chunk location in current dimension */
-                coords[curr_dim]+=(hssize_t)fm->chunk_dim[curr_dim];
-                end[curr_dim]=(coords[curr_dim]+(hssize_t)fm->chunk_dim[curr_dim])-1;
+                coords[curr_dim]+=fm->chunk_dim[curr_dim];
+                end[curr_dim]=(coords[curr_dim]+fm->chunk_dim[curr_dim])-1;
             } while(coords[curr_dim]>sel_end[curr_dim]);
 
             /* Re-Calculate the index of this chunk */
@@ -2845,10 +2846,10 @@ static herr_t
 H5D_create_chunk_mem_map_hyper(const fm_map *fm)
 {
     H5TB_NODE *curr_node;                   /* Current node in TBBT */
-    hssize_t    file_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
-    hssize_t    file_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
-    hssize_t    mem_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
-    hssize_t    mem_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hsize_t    file_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hsize_t    file_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hsize_t    mem_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hsize_t    mem_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     hssize_t adjust[H5O_LAYOUT_NDIMS];      /* Adjustment to make to all file chunks */
     hssize_t chunk_adjust[H5O_LAYOUT_NDIMS];  /* Adjustment to make to a particular chunk */
     unsigned    u;                          /* Local index variable */
@@ -2896,8 +2897,11 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
 
         /* Calculate the adjustment for memory selection from file selection */
         assert(fm->m_ndims==fm->f_ndims);
-        for(u=0; u<fm->f_ndims; u++)
-            adjust[u]=file_sel_start[u]-mem_sel_start[u];
+        for(u=0; u<fm->f_ndims; u++) {
+            H5_CHECK_OVERFLOW(file_sel_start[u],hsize_t,hssize_t);
+            H5_CHECK_OVERFLOW(mem_sel_start[u],hsize_t,hssize_t);
+            adjust[u]=(hssize_t)file_sel_start[u]-(hssize_t)mem_sel_start[u];
+        } /* end for */
 
         /* Iterate over each chunk in the chunk list */
         curr_node=H5TB_first(fm->fsel->root);
@@ -2923,11 +2927,13 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection")
 
             /* Compensate for the chunk offset */
-            for(u=0; u<fm->f_ndims; u++)
-                chunk_adjust[u]=adjust[u]-chunk_info->coords[u]; /*lint !e771 The adjust array will always be initialized */
+            for(u=0; u<fm->f_ndims; u++) {
+                H5_CHECK_OVERFLOW(chunk_info->coords[u],hsize_t,hssize_t);
+                chunk_adjust[u]=adjust[u]-(hssize_t)chunk_info->coords[u]; /*lint !e771 The adjust array will always be initialized */
+            } /* end for */
 
             /* Adjust the selection */
-            if(H5S_hyper_adjust(chunk_info->mspace,chunk_adjust)<0) /*lint !e772 The chunk_adjust array will always be initialized */
+            if(H5S_hyper_adjust_s(chunk_info->mspace,chunk_adjust)<0) /*lint !e772 The chunk_adjust array will always be initialized */
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
 
             /* Get the next chunk node in the TBBT */
@@ -2956,11 +2962,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_t *coords, void *_fm)
+H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_fm)
 {
     fm_map      *fm = (fm_map*)_fm;             /* File<->memory chunk mapping info */
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
-    hssize_t    coords_in_chunk[H5O_LAYOUT_NDIMS];        /* Coordinates of element in chunk */
+    hsize_t    coords_in_chunk[H5O_LAYOUT_NDIMS];        /* Coordinates of element in chunk */
     hsize_t     chunk_index;                    /* Chunk index */
     unsigned    u;                              /* Local index variable */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
@@ -2968,7 +2974,7 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_file_cb)
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
+    if(H5V_chunk_index(ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Find correct chunk in file & memory TBBTs */
@@ -3051,7 +3057,7 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize
         coords_in_chunk[u]=coords[u]%fm->layout->u.chunk.dim[u];
 
     /* Add point to file selection for chunk */
-    if(H5S_select_elements(chunk_info->fspace,H5S_SELECT_APPEND,1,(const hssize_t **)coords_in_chunk)<0)
+    if(H5S_select_elements(chunk_info->fspace,H5S_SELECT_APPEND,1,(const hsize_t **)coords_in_chunk)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
 
     /* Increment the number of elemented selected in chunk */
@@ -3081,18 +3087,18 @@ done:
  */
 /* ARGSUSED */
 static herr_t 
-H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_t *coords, void *_fm)
+H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_fm)
 {
     fm_map      *fm = (fm_map*)_fm;             /* File<->memory chunk mapping info */
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
-    hssize_t    coords_in_mem[H5O_LAYOUT_NDIMS];        /* Coordinates of element in memory */
+    hsize_t    coords_in_mem[H5O_LAYOUT_NDIMS];        /* Coordinates of element in memory */
     hsize_t     chunk_index;                    /* Chunk index */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
     
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_mem_cb)
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
+    if(H5V_chunk_index(ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Find correct chunk in file & memory TBBTs */
@@ -3133,7 +3139,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
 
     /* Add point to memory selection for chunk */
     if(fm->msel_type==H5S_SEL_POINTS) {
-        if(H5S_select_elements(chunk_info->mspace,H5S_SELECT_APPEND,1,(const hssize_t **)coords_in_mem)<0)
+        if(H5S_select_elements(chunk_info->mspace,H5S_SELECT_APPEND,1,(const hsize_t **)coords_in_mem)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
     } /* end if */
     else {
@@ -3151,7 +3157,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5S_get_collective_io_consensus
+ * Function:    H5D_get_collective_io_consensus
  *
  * Purpose:     Compare notes with all other processes involved in this I/O
  *              and see if all are go for collective I/O.
@@ -3248,7 +3254,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_mem_cb
+ * Function:	H5D_ioinfo_init
  *
  * Purpose:	Routine for determining correct I/O operations for
  *              each I/O action.
@@ -3264,15 +3270,34 @@ done:
  */
 static herr_t 
 H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    const H5S_t *mem_space, const H5S_t *file_space,
-    unsigned flags, hbool_t *use_par_opt_io, H5D_io_info_t *io_info)
+    const H5S_t 
+#if !(defined H5_HAVE_PARALLEL || defined H5S_DEBUG)
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    *mem_space, const H5S_t 
+#if !(defined H5_HAVE_PARALLEL || defined H5S_DEBUG)
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    *file_space, unsigned
+#ifndef H5_HAVE_PARALLEL
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    flags, hbool_t 
+#ifndef H5_HAVE_PARALLEL
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    *use_par_opt_io, H5D_io_info_t *io_info)
 {
 #ifdef H5_HAVE_PARALLEL
     htri_t opt;         /* Flag whether a selection is optimizable */
 #endif /* H5_HAVE_PARALLEL */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
+#if defined H5_HAVE_PARALLEL || defined H5S_DEBUG
     FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_init)
+#else /* defined H5_HAVE_PARALLEL || defined H5S_DEBUG */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_ioinfo_init)
+#endif /* defined H5_HAVE_PARALLEL || defined H5S_DEBUG */
 
     /* check args */
     HDassert(dset);
@@ -3325,7 +3350,6 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     } /* end if */
     else {
         /* Indicate that the I/O will _NOT_ be parallel */
-
         *use_par_opt_io=FALSE;
         io_info->ops.read = H5D_select_read;
         io_info->ops.write = H5D_select_write;
@@ -3343,6 +3367,8 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "can't set up selection statistics");
 #endif /* H5S_DEBUG */
 
+#if defined H5_HAVE_PARALLEL || defined H5S_DEBUG
 done:
+#endif /* H5_HAVE_PARALLEL || H5S_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_ioinfo_init() */

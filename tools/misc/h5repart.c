@@ -208,8 +208,7 @@ main (int argc, char *argv[])
     int		dst_is_family;		/*is dst name a family name?	*/
     int		dst_membno=0;		/*destination member number	*/
 
-#ifdef WIN32
-
+#if defined(WIN32) && ! defined (__MWERKS__)
     _int64	left_overs=0;		/*amount of zeros left over	*/
     _int64	src_offset=0;		/*offset in source member	*/
     _int64	dst_offset=0;		/*offset in destination member	*/

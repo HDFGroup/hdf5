@@ -60,7 +60,7 @@ char **sort_uniq_words;
 
 static int tst_strcmp(const void *_s1, const void *_s2)
 {
-    return(HDstrcmp(*(const char **)_s1,*(const char **)_s2));
+    return(HDstrcmp(*(const char * const *)_s1,*(const char * const *)_s2));
 }
 
 /****************************************************************
@@ -73,7 +73,7 @@ static void
 test_tst_init(void)
 {
     time_t curr_time;   /* Current time, for seeding random number generator */
-    char *tmp_word=NULL;/* Temporary pointer to word in word set */
+    char *tmp_word;/* Temporary pointer to word in word set */
     size_t u,v,w;       /* Local index variables */
 
     /* Compute the number of words in the test set */
@@ -122,7 +122,7 @@ test_tst_init(void)
     /* Create randomized set of unique words */
     for(u=0; u<num_uniq_words; u++)
         rand_uniq_words[u]=uniq_words[u];
-    curr_time=time(NULL);
+    curr_time=HDtime(NULL);
     HDsrandom((unsigned long)curr_time);
     for(u=0; u<num_uniq_words; u++) {
         v=u+(HDrandom()%(num_uniq_words-u));

@@ -93,4 +93,3 @@ void issue_fail_msg(const char* where, int line, const char* file_name)
     }
 }
 
-

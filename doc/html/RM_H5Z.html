@@ -143,18 +143,18 @@ are as follows:
 <table align=center border=0>
   <tr valign=top align=left>
   <td>
-    <code>H5Z_FILTER_DEFLATE</code></td><td>The gzip compression, 
+    <code>H5Z_FILTER_DEFLATE</code></td><td>The gzip compression,
           or deflation, filter
   </td></tr><tr><td>
     <code>H5Z_FILTER_SZIP</code></td><td>The SZIP compression filter
   </td></tr><tr><td>
     <code>H5Z_FILTER_SHUFFLE</code></td><td>The shuffle algorithm filter
   </td></tr><tr><td>
-    <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code></td><td>The Fletcher32 checksum, 
+    <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code></td><td>The Fletcher32 checksum,
           or error checking, filter
   </td></tr>
 </table>
-Custom filters that have been registered with the library will have 
+Custom filters that have been registered with the library will have
 additional unique identifiers.
 <p>
 See <a href="Datasets.html"><cite>The Dataset Interface (H5D)</cite></a> 
@@ -162,6 +162,7 @@ in the <cite>HDF5 User's Guide</cite> for further information regarding
 data compression.
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Zfilter_avail" -->
 <hr>
@@ -301,7 +302,8 @@ END SUBROUTINE h5zfilter_avail_f
     <dd>Returns a non-negative value on success,
         a negative value on failure.
 
-<dt><strong>Fortran90 Interface:</strong>
+<!-- NEW PAGE -->
+<dt><strong>Fortran90 Interface:</strong> 
     <dd>
     <pre>
 SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)

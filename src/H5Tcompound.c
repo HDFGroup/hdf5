@@ -36,7 +36,7 @@
 #define H5T_COMPND_INC	64	/*typical max numb of members per struct */
 
 /* Static local functions */
-static herr_t H5T_pack(H5T_t *dt);
+static herr_t H5T_pack(const H5T_t *dt);
 
 
 /*--------------------------------------------------------------------------
@@ -81,17 +81,9 @@ H5T_init_compound_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-size_t
-H5Tget_member_offset(hid_t type_id, int _membno)
-#else /* H5_WANT_H5_V1_6_COMPAT */
 size_t
 H5Tget_member_offset(hid_t type_id, unsigned membno)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    unsigned membno = (unsigned)_membno;
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt = NULL;
     size_t	ret_value;
 
@@ -138,7 +130,7 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
 {
     size_t	ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_member_offset, 0)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_member_offset)
 
     assert(dt);
     assert(membno < dt->shared->u.compnd.nmembs);
@@ -146,7 +138,6 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
     /* Value */
     ret_value = dt->shared->u.compnd.memb[membno].offset;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -167,17 +158,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-H5T_class_t
-H5Tget_member_class(hid_t type_id, int _membno)
-#else /* H5_WANT_H5_V1_6_COMPAT */
 H5T_class_t
 H5Tget_member_class(hid_t type_id, unsigned membno)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    unsigned membno = (unsigned)_membno;
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt = NULL;
     H5T_class_t	ret_value;
 
@@ -222,22 +205,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-hid_t
-H5Tget_member_type(hid_t type_id, int _membno)
-#else /* H5_WANT_H5_V1_6_COMPAT */
 hid_t
 H5Tget_member_type(hid_t type_id, unsigned membno)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    unsigned membno = (unsigned)_membno;
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt = NULL, *memb_dt = NULL;
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_type, FAIL)
-    H5TRACE2("i","iIs",type_id,membno);
+    H5TRACE2("i","iIu",type_id,membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
@@ -250,8 +225,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register datatype atom")
     
 done:
-    if(ret_value<0)
-{
+    if(ret_value<0) {
         if(memb_dt!=NULL)
             if(H5T_close(memb_dt)<0)
 	        HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
@@ -316,11 +290,11 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5T_get_member_size(H5T_t *dt, unsigned membno)
+H5T_get_member_size(const H5T_t *dt, unsigned membno)
 {
     size_t	ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5T_get_member_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_member_size)
 
     assert(dt);
     assert(membno < dt->shared->u.compnd.nmembs);
@@ -328,8 +302,7 @@ H5T_get_member_size(H5T_t *dt, unsigned membno)
     /* Value */
     ret_value = dt->shared->u.compnd.memb[membno].type->shared->size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -444,7 +417,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
+H5T_insert(const H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
     unsigned	idx, i;
     size_t	total_size;
@@ -481,7 +454,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Increase member array if necessary */
     if (parent->shared->u.compnd.nmembs >= parent->shared->u.compnd.nalloc) {
-        size_t na = parent->shared->u.compnd.nalloc + H5T_COMPND_INC;
+        unsigned na = parent->shared->u.compnd.nalloc + H5T_COMPND_INC;
         H5T_cmemb_t *x = H5MM_realloc (parent->shared->u.compnd.memb,
                            na * sizeof(H5T_cmemb_t));
 
@@ -551,7 +524,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_pack(H5T_t *dt)
+H5T_pack(const H5T_t *dt)
 {
     unsigned	i;
     size_t	offset;
@@ -564,7 +537,7 @@ H5T_pack(H5T_t *dt)
     if(H5T_detect_class(dt,H5T_COMPOUND)>0) {
         /* If datatype has been packed, skip packing it and indicate success */
         if(H5T_is_packed(dt)== TRUE)
-            HGOTO_DONE(SUCCEED);
+            HGOTO_DONE(SUCCEED)
 
         /* Check for packing unmodifiable datatype */
         if (H5T_STATE_TRANSIENT!=dt->shared->state)
@@ -627,7 +600,7 @@ H5T_is_packed(const H5T_t *dt)
 {
     htri_t      ret_value=TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_is_packed,FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_is_packed)
 
     assert(dt);
 
@@ -639,7 +612,6 @@ H5T_is_packed(const H5T_t *dt)
     if(dt->shared->type==H5T_COMPOUND)
         ret_value=(htri_t)dt->shared->u.compnd.packed;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_packed() */
 

@@ -41,7 +41,7 @@
      CHARACTER(LEN=80), DIMENSION(2) ::  attr_data  ! Attribute data
 
      INTEGER     ::   error ! Error flag
-     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(1) :: data_dims
      
 
      !

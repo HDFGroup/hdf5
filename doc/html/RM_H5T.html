@@ -164,6 +164,7 @@ of a dataset.
 
 <br>
 
+<!-- NEW PAGE -->
 <i>Alphabetical Listing</i>
 <table border="0" width=100%>
   <tr>
@@ -376,6 +377,7 @@ See <a href="Datatypes.html"><cite>The Datatype Interface (H5T)</cite></a>
 in the <cite>HDF5 User's Guide</cite> for further information, including a complete list of all supported datatypes.
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Tarray_create" -->
 <hr>
@@ -1593,7 +1595,7 @@ END SUBROUTINE h5tget_inpad_f
 <dt><strong>Signature:</strong>
     <dd><em>H5T_class_t</em> <code>H5Tget_member_class</code>(
                        <em>hid_t</em> <code>cdtype_id</code>,
-                       <em>int </em><code>member_no</code>
+                       <em>unsigned </em><code>member_no</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Returns datatype class of compound datatype member.
@@ -1607,7 +1609,7 @@ END SUBROUTINE h5tget_inpad_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>cdtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Datatype identifier of compound object.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>member_no</code></td>
+		    <td valign="top"><em>unsigned</em> <code>member_no</code></td>
             <td valign="top">IN: Compound object member number.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1684,7 +1686,7 @@ END SUBROUTINE h5tget_inpad_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberName">H5Tget_member_name</a>
 <dt><strong>Signature:</strong>
     <dd><em>char *</em> <code>H5Tget_member_name</code>(<em>hid_t </em><code>type_id</code>,
-        <em>int</em> <code>field_idx</code>
+        <em>unsigned</em> <code>field_idx</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves the name of a compound or enumeration datatype member.
@@ -1708,7 +1710,7 @@ END SUBROUTINE h5tget_inpad_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">Identifier of datatype to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>field_idx</code></td>
+		    <td valign="top"><em>unsigned</em> <code>field_idx</code></td>
             <td valign="top">Zero-based index of the field or element whose name
                 is to be retrieved.</td></tr>
     </table></ul>
@@ -1746,7 +1748,7 @@ END SUBROUTINE h5tget_member_name_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberOffset">H5Tget_member_offset</a>
 <dt><strong>Signature:</strong>
     <dd><em>size_t</em> <code>H5Tget_member_offset</code>(<em>hid_t </em><code>type_id</code>,
-        <em>int</em> <code>memb_no</code>
+        <em>unsigned</em> <code>memb_no</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves the offset of a field of a compound datatype.
@@ -1761,7 +1763,7 @@ END SUBROUTINE h5tget_member_name_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">Identifier of datatype to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>memb_no</code></td>
+		    <td valign="top"><em>unsigned</em> <code>memb_no</code></td>
             <td valign="top">Number of the field whose offset is requested.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1799,7 +1801,7 @@ END SUBROUTINE h5tget_member_offset_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberType">H5Tget_member_type</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Tget_member_type</code>(<em>hid_t </em><code>type_id</code>,
-        <em>int</em> <code>field_idx</code>
+        <em>unsigned</em> <code>field_idx</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Returns the datatype of the specified member.
@@ -1812,7 +1814,7 @@ END SUBROUTINE h5tget_member_offset_f
 		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">Identifier of datatype to query.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>field_idx</code></td>
+		    <td valign="top"><em>unsigned</em> <code>field_idx</code></td>
             <td valign="top">Field index (0-based) of the field type to retrieve.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -1848,7 +1850,7 @@ END SUBROUTINE h5tget_member_type_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberValue">H5Tget_member_value</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Tget_member_value</code>(<em>hid_t</em> <code>type</code>
-        <em>int</em> <code>memb_no</code>,
+        <em>unsigned</em> <code>memb_no</code>,
         <em>void</em> *<code>value</code>
     )
 <dt><strong>Purpose:</strong>
@@ -1865,7 +1867,7 @@ END SUBROUTINE h5tget_member_type_f
 		    <td valign="top"><em>hid_t</em> <code>type</code></td>
             <td valign="top">IN: Datatype identifier for the enumeration datatype.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>memb_no</code>,</td>
+		    <td valign="top"><em>unsigned</em> <code>memb_no</code>,</td>
             <td valign="top">IN: Number of the enumeration datatype member.</td></tr>
         <tr>
 		    <td valign="top"><em>void</em>&nbsp;*<code>value&nbsp;&nbsp;&nbsp;</code></td>

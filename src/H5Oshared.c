@@ -42,7 +42,7 @@
 static void *H5O_shared_decode (H5F_t*, hid_t dxpl_id, const uint8_t*, H5O_shared_t *sh);
 static herr_t H5O_shared_encode (H5F_t*, uint8_t*, const void*);
 static void *H5O_shared_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_shared_size (H5F_t*, const void *_mesg);
+static size_t H5O_shared_size (const H5F_t*, const void *_mesg);
 static herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_shared_debug (H5F_t*, hid_t dxpl_id, const void*, FILE*, int, int);
@@ -385,7 +385,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shared_size (H5F_t *f, const void *_mesg)
+H5O_shared_size (const H5F_t *f, const void *_mesg)
 {
     const H5O_shared_t  *shared = (const H5O_shared_t *) _mesg;
     size_t	ret_value;

@@ -1,48 +1,21 @@
-// Define the __FUNCTION__ so we don't get warnings about using it.
--d__FUNCTION__="NoFunctionName"
-
-// Turn off warnings about not using the return value from these functions:
--esym(534, HDfprintf, HDsnprintf, HDvsnprintf)
--esym(534, H5E_clear_stack, H5E_push_stack)
--esym(534, H5FL_arr_free, H5FL_blk_free, H5FL_reg_free)
--esym(534, H5I_clear_group, H5I_destroy_group)
--esym(534, H5MM_xfree)
--esym(534, H5TB_dfree)
--esym(534, H5V_array_fill)
+// Lint options shared by both PC-Lint for Windows and Flexelint for Linux
 
 // Turn off warnings about not using the inlined H5V* functions:
 -esym(528, H5V_vector_reduce_product, H5V_vector_inc)
 -esym(528, H5V_vector_cmp, H5V_vector_cmp_s, H5V_vector_cmp_u)
 -esym(528, H5V_vector_zerop_s, H5V_vector_zerop_u)
 
-// Turn off warnings about "Ignoring return value of function" for
-// H5open() in public error macros
--emacro(534, H5Epush_ret, H5Epush_goto)
-
-// Turn off warnings about "Expression-like macro not parenthesized" for
-// enumerated type increment & decrement macros:
--esym(773, H5_INC_ENUM, H5_DEC_ENUM)
-
-// Turn off warnings about not using PABLO_MASK macro
--esym(750, PABLO_MASK)
-
-// Suppress message about our use of 'goto' in our error macros
--emacro(801,HGOTO_DONE, H5Epush_goto)
-
 // Suppress message about using 'goto' in a few functions
 -efunc(801,H5_term_library,H5_trace)
 
 // Suppress message about "boolean test of a paranthesized assignment"
--e820
+-efunc(820,H5_term_library)
 
 // Suppress message about "Constant value boolean" in FUNC_ENTER* macros
 -emacro(506,FUNC_ENTER_API,FUNC_ENTER_API_NOCLEAR, FUNC_ENTER_NOAPI)
 
-// Suppress message about "Suspicious cast" in FUNC_ENTER* macros
--emacro(611,FUNC_ENTER_API,FUNC_ENTER_NOAPI)
-
-// Suppress message about "Boolean within 'if' always evaluates false" in FUNC_ENTER* macros
--emacro(774,FUNC_ENTER_API,FUNC_ENTER_NOAPI)
+// Suppress message about "Constant value boolean" in TRUE macros
+-emacro(506,TRUE)
 
 // Suppress message about "Constant value boolean" in IS_H5FD_MPI* macros
 -emacro(506,IS_H5FD_MPI)
@@ -50,38 +23,39 @@
 // Suppress message about "Boolean within 'if' always evaluates false" in IS_H5FD_MPI* macros
 -emacro((774),IS_H5FD_MPI)
 
-// Suppress message about "Static variable found within inline function" in FUNC_ENTER* macros
--emacro(1534,FUNC_ENTER_NOINIT)
+// Suppress message about our use of 'goto' in our error macros
+-emacro(801,HGOTO_DONE, H5Epush_goto)
 
-// Suppress message about "Shift right of signed quantity" in H5I_GRP macro
--emacro(702,H5I_GRP)
+// Turn off warnings about not using the return value from these functions:
+-esym(534, HDfprintf, HDsnprintf, HDvsnprintf)
+-esym(534, H5E_clear_stack, H5E_push_stack)
+-esym(534, H5FL_arr_free, H5FL_blk_free, H5FL_reg_free, H5FL_seq_free)
+-esym(534, H5FS_push, H5FS_pop)
+-esym(534, H5I_clear_type, H5I_dec_type_ref)
+-esym(534, H5MM_xfree)
+-esym(534, H5RC_decr)
+-esym(534, H5TB_dfree)
+-esym(534, H5V_array_fill)
 
-// Suppress message about "Constant expression evaluates to 0 in expression" in H5FL_ARR* macros
--emacro(778,H5FL_ARR_DEFINE_COMMON)
+// Turn off warnings about not using PABLO_MASK macro
+-esym(750, PABLO_MASK)
 
-// Suppress message about "Union initialization" in H5FL_ARR* macros
--emacro(708,H5FL_ARR_DEFINE_COMMON)
-
-// Suppress message about "enum constant not used within defaulted switch"
--e788
-
-// Indicate functions that are like printf()
--printf(2,HDfprintf)
-
-// Tell lint about additional printf() format codes that HDfprintf understands
--printf_code(a,haddr_t)
--printf_code(Hu,hsize_t)
--printf_code(Hd,hssize_t)
--printf_code(Zu,size_t)
--printf_code(Zd,ssize_t)
+// Turn off warnings about "Expression-like macro not parenthesized" for
+// enumerated type increment & decrement macros:
+-esym(773, H5_INC_ENUM, H5_DEC_ENUM)
 
 /* So far, the following files have been linted with these options:
         H5.c
         H5A.c
         H5AC.c
         H5B.c
+
         H5D.c
+        H5Dcompact.c
+        H5Dcontig.c
+        H5Defl.c
         H5Dio.c
+        H5Distore.c
         H5E.c
         H5F.c
         H5FD.c
@@ -94,6 +68,7 @@
         H5FL.c
         H5FO.c
 
+        H5Tcommit.c
 	H5Tcompound.c
 
         H5Tcset.c

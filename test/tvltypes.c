@@ -175,18 +175,18 @@ test_vltypes_vlen_atomic(void)
     hvl_t wdata2[SPACE1_DIM1];  /* Information to write */
     hvl_t rdata[SPACE1_DIM1];   /* Information read in */
     hvl_t fill;                 /* Fill value */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t       sid2;       /* ID of bad dataspace (no extent set) */
-    hid_t		tid1;       /* Datatype ID			*/
-    hid_t       dcpl_pid;   /* Dataset creation property list ID */
-    hid_t       xfer_pid;   /* Dataset transfer property list ID */
-    hsize_t		dims1[] = {SPACE1_DIM1};
-    hsize_t     size;       /* Number of bytes which will be used */
-    unsigned       i,j;        /* counting variables */
-    size_t         mem_used=0; /* Memory used during allocation */
-    herr_t		ret;		/* Generic return value		*/
+    hid_t fid1;		/* HDF5 File IDs		*/
+    hid_t dataset;	/* Dataset ID			*/
+    hid_t sid1;         /* Dataspace ID			*/
+    hid_t sid2;         /* ID of bad dataspace (no extent set) */
+    hid_t tid1;         /* Datatype ID			*/
+    hid_t dcpl_pid;     /* Dataset creation property list ID */
+    hid_t xfer_pid;     /* Dataset transfer property list ID */
+    hsize_t dims1[] = {SPACE1_DIM1};
+    hsize_t size;       /* Number of bytes which will be used */
+    unsigned i,j;       /* counting variables */
+    size_t mem_used=0;  /* Memory used during allocation */
+    herr_t ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Atomic VL Datatype Functionality\n"));
@@ -1805,8 +1805,7 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
             TestErrPrintf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
-        for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++)
-{
+        for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++) {
             if(t1->len!=t2->len) {
                 TestErrPrintf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;

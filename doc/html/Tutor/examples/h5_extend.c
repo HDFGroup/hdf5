@@ -32,7 +32,7 @@ main (void)
 
     hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t      size[2];
-    hssize_t     offset[2];
+    hsize_t      offset[2];
     hsize_t      i,j;
     herr_t       status, status_n;                             
     int          data1[3][3] = { {1, 1, 1},      /* data to write */

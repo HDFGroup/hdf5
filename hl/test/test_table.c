@@ -934,9 +934,9 @@ int test_table(hid_t fid, int write)
          rbuf[i].longi       != position_in[i].longi ||
          rbuf[i].pressure    != pressure_in[i] ) 
     {
-     fprintf(stderr,"%d %f %d\n",
+     fprintf(stderr,"%ld %f %d\n",
       rbuf[i].longi,rbuf[i].pressure,rbuf[i].lati);
-     fprintf(stderr,"%d %f %d\n",
+     fprintf(stderr,"%ld %f %d\n",
       position_in[i].longi,pressure_in[i],position_in[i].lati);
       goto out;
     }
@@ -1560,9 +1560,9 @@ static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
   rbuf[i].pressure != wbuf[j].pressure ||
   rbuf[i].temperature != wbuf[j].temperature ) {
   fprintf(stderr,"read and write buffers have differences\n");
-  fprintf(stderr,"%s %d %f %f %d\n",
+  fprintf(stderr,"%s %ld %f %f %d\n",
    rbuf[i].name,rbuf[i].longi,rbuf[i].pressure,rbuf[i].temperature,rbuf[i].lati);
-  fprintf(stderr,"%s %d %f %f %d\n",
+  fprintf(stderr,"%s %ld %f %f %d\n",
    wbuf[j].name,wbuf[j].longi,wbuf[j].pressure,wbuf[j].temperature,wbuf[j].lati);
   return -1;
  }

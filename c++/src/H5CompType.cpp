@@ -113,7 +113,7 @@ int CompType::getNmembers() const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string CompType::getMemberName( int member_num ) const
+string CompType::getMemberName( unsigned member_num ) const
 {
     char* member_name_C = H5Tget_member_name( id, member_num );
     if( member_name_C == NULL )  // NULL means failure
@@ -169,7 +169,7 @@ int CompType::getMemberIndex(const string& name) const
 //		Note that byte offset being returned as 0 doesn't indicate
 //		a failure. (According to Quincey)
 //--------------------------------------------------------------------------
-size_t CompType::getMemberOffset( int member_num ) const
+size_t CompType::getMemberOffset( unsigned member_num ) const
 {
    size_t offset = H5Tget_member_offset( id, member_num );
    return( offset );
@@ -191,7 +191,7 @@ int CompType::getMemberDims( int member_num, size_t* dims, int* perm ) const
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5T_class_t CompType::getMemberClass( int member_num ) const
+H5T_class_t CompType::getMemberClass( unsigned member_num ) const
 {
    // get the member datatype first
    hid_t member_type_id = H5Tget_member_type( id, member_num );
@@ -215,7 +215,7 @@ H5T_class_t CompType::getMemberClass( int member_num ) const
 // of the specified member.  It provides the id to construct appropriate
 // sub-types in the functions getMemberXxxType below, where Xxx indicates
 // the sub-types.
-hid_t CompType::p_get_member_type(int member_num) const
+hid_t CompType::p_get_member_type(unsigned member_num) const
 {
    // get the id of the specified member first
    hid_t member_type_id = H5Tget_member_type( id, member_num );
@@ -325,27 +325,27 @@ StrType CompType::getMemberStrType( int member_num ) const
    May, 2004: These should be reconsidered to provide more convenience.
 // Returns the datatype of the specified member in this compound datatype. 
 // Several overloading of getMemberType are for different datatypes
-void CompType::getMemberType( int member_num, EnumType& enumtype ) const
+void CompType::getMemberType( unsigned member_num, EnumType& enumtype ) const
 {
    p_get_member_type(member_num, enumtype); 
 }
 
-void CompType::getMemberType( int member_num, CompType& comptype ) const
+void CompType::getMemberType( unsigned member_num, CompType& comptype ) const
 {
    p_get_member_type(member_num, comptype); 
 }
 
-void CompType::getMemberType( int member_num, IntType& inttype ) const
+void CompType::getMemberType( unsigned member_num, IntType& inttype ) const
 {
    p_get_member_type(member_num, inttype); 
 }
 
-void CompType::getMemberType( int member_num, FloatType& floatype ) const
+void CompType::getMemberType( unsigned member_num, FloatType& floatype ) const
 {
    p_get_member_type(member_num, floatype); 
 }
 
-void CompType::getMemberType( int member_num, StrType& strtype ) const
+void CompType::getMemberType( unsigned member_num, StrType& strtype ) const
 {
    p_get_member_type(member_num, strtype); 
 }

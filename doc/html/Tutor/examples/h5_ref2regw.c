@@ -18,18 +18,18 @@
 int
 main(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dset1,	/* Dataset ID			*/
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dset1,		/* Dataset ID			*/
                 dset2;      /* Dereferenced dataset ID */
-    hid_t		sid1,       /* Dataspace ID	#1		*/
+    hid_t	sid1,       /* Dataspace ID	#1		*/
                 sid2;       /* Dataspace ID	#2		*/
-    hsize_t		dims1[] = {SPACE1_DIM1},
+    hsize_t	dims1[] = {SPACE1_DIM1},
             	dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hssize_t	start[SPACE2_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
-    hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; 
+    hsize_t	start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t	stride[SPACE2_RANK];    /* Stride of hyperslab */
+    hsize_t	count[SPACE2_RANK];     /* Element count of hyperslab */
+    hsize_t	block[SPACE2_RANK];     /* Block size of hyperslab */
+    hsize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; 
                                     /* Coordinates for point selection */
     hdset_reg_ref_t      *wbuf;      /* buffer to write to disk */
     int     *dwbuf;      /* Buffer for writing numeric data to disk */
@@ -88,7 +88,7 @@ main(void)
     coord1[7][0]=9; coord1[7][1]=0;
     coord1[8][0]=7; coord1[8][1]=1;
     coord1[9][0]=3; coord1[9][1]=3;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
 
     /* Store second dataset region */
     ret = H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);

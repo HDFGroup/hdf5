@@ -93,12 +93,12 @@ documented below.
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
     <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
+    <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
     <li><a href="#File-GetName">H5Fget_name</a>
     <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
     <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
-    <li><a href="#File-GetFreespace">H5Fget_freespace</a>
+    <li><a href="#File-GetFreeSpace">H5Fget_freespace</a>
 </ul>
 </td></tr>
 </table>
@@ -123,7 +123,7 @@ documented below.
     
     <td valign="top">
 	<ul>
-      <li><a href="#File-GetFreespace">H5Fget_freespace</a>
+      <li><a href="#File-GetFreeSpace">H5Fget_freespace</a>
       <li><a href="#File-GetName">H5Fget_name</a>
       <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
       <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
@@ -147,18 +147,10 @@ documented below.
 
 <br>
 <strong>The FORTRAN90 Interfaces:</strong>
-
 <br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below (electronic versions only) go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font><br>
+In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  
+<br>
 
 <table border=0>
 <tr><td valign=top>
@@ -190,6 +182,7 @@ facilitate moving easily between them.</i>
 </table>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Fclose" -->
 <hr>
@@ -429,6 +422,7 @@ END SUBROUTINE h5fcreate_f
         <p>
         <code>scope</code> specifies whether the scope of the flushing 
         action is global or local.  Valid values are
+        <center>
         <table border=0>
         <tr><td align=left valign=top><code>H5F_SCOPE_GLOBAL</code></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -437,6 +431,7 @@ END SUBROUTINE h5fcreate_f
             <td></td>
             <td align=left valign=top>Flushes only the specified file.</td></tr>
         </table>
+        </center>       
 <dt><strong>Note:</strong>
         <dd>HDF5 does not possess full control over buffering.
         <code>H5Fflush</code> flushes the internal HDF5 buffers then 
@@ -639,7 +634,7 @@ END SUBROUTINE h5fget_filesize_f
 <!-- HEADER RIGHT "H5Fget_freespace" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="File-GetFreespace">H5Fget_freespace</a>
+<dt><strong>Name:</strong> <a name="File-GetFreeSpace">H5Fget_freespace</a>
 <dt><strong>Signature:</strong>
     <dd><em>hssize_t </em><code>H5Fget_freespace</code>(<em>hid_t</em> <code>file_id</code>)
 <dt><strong>Purpose:</strong>
@@ -749,8 +744,6 @@ SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
   INTEGER(SIZE_T), INTENT(OUT) :: size     ! Size of the filename
   INTEGER, INTENT(OUT) :: hdferr           ! Error code: 0 on success,
                                            ! -1 if fail
-  INTEGER(SIZE_T) :: buflen
-
 END SUBROUTINE h5fget_name_f
 	</pre>		
 		

@@ -80,7 +80,7 @@ static char *fix_name(const char *path, const char *base);
 
 hid_t thefile;
 char  *prefix;
-char  *progname;
+const char *progname="h5ls";
 int   d_status;
 
 
@@ -99,7 +99,7 @@ int   d_status;
  *-------------------------------------------------------------------------
  */
 static void
-usage (const char *progname)
+usage (void)
 {
     fprintf(stderr, "\
 usage: %s [OPTIONS] [OBJECTS...]\n\
@@ -1356,6 +1356,10 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
                 /* null dataspace */
                 puts(" null");
                 break;
+            default:
+                /* Unknown dataspace type */
+                puts(" unknown");
+                break;
         }
 
         /* Data type */
@@ -2022,7 +2026,6 @@ main (int argc, const char *argv[])
 {
     hid_t file=-1, root=-1;
     char *fname=NULL, *oname=NULL, *x;
-    const char *progname="h5ls";
     const char *s = NULL;
     char *rest, *container=NULL;
     int  argno;
@@ -2061,7 +2064,7 @@ main (int argc, const char *argv[])
             argno++;
             break;
         } else if (!strcmp(argv[argno], "--help")) {
-            usage(progname);
+            usage();
             leave(0);
         } else if (!strcmp(argv[argno], "--address")) {
             address_g = TRUE;
@@ -2087,19 +2090,19 @@ main (int argc, const char *argv[])
         } else if (!strncmp(argv[argno], "--width=", 8)) {
             width_g = (int)strtol(argv[argno]+8, &rest, 0);
             if (width_g<=0 || *rest) {
-                usage(progname);
+                usage();
                 leave(1);
             }
         } else if (!strcmp(argv[argno], "--width")) {
             if (argno+1>=argc) {
-                usage(progname);
+                usage();
                 leave(1);
             } else {
                 s = argv[++argno];
             }
             width_g = (int)strtol(s, &rest, 0);
             if (width_g<=0 || *rest) {
-                usage(progname);
+                usage();
                 leave(1);
             }
         } else if (!strcmp(argv[argno], "--verbose")) {
@@ -2113,14 +2116,14 @@ main (int argc, const char *argv[])
             if (argv[argno][2]) {
                 s = argv[argno]+2;
             } else if (argno+1>=argc) {
-                usage(progname);
+                usage();
                 leave(1);
             } else {
                 s = argv[++argno];
             }
             width_g = (int)strtol(s, &rest, 0);
             if (width_g<=0 || *rest) {
-                usage(progname);
+                usage();
                 leave(1);
             }
         } else if ('-'!=argv[argno][1]) {
@@ -2129,7 +2132,7 @@ main (int argc, const char *argv[])
                 switch (*s) {
                     case '?':
                     case 'h': /* --help */
-                        usage(progname);
+                        usage();
                         leave(0);
                     case 'a': /* --address */
                         address_g = TRUE;
@@ -2169,12 +2172,12 @@ main (int argc, const char *argv[])
                         hexdump_g = TRUE;
                         break;
                     default:
-                        usage(progname);
+                        usage();
                         leave(1);
                 }
             }
         } else {
-            usage(progname);
+            usage();
             leave(1);
         }
     }
@@ -2182,7 +2185,7 @@ main (int argc, const char *argv[])
     /* If no arguments remain then print a usage message (instead of doing
      * absolutely nothing ;-) */
     if (argno>=argc) {
-        usage(progname);
+        usage();
         leave(1);
     }
 

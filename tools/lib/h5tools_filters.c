@@ -94,7 +94,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
     if (name)
      print_warning(name,"user defined");
     return 0;
-   break;
+
 /*-------------------------------------------------------------------------
  * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
  *-------------------------------------------------------------------------
@@ -172,7 +172,6 @@ int h5tools_can_encode( H5Z_filter_t filtn)
  int          have_szip=0;
  int          have_shuffle=0; 
  int          have_fletcher=0;
- herr_t       status;
  unsigned int filter_config_flags;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -193,7 +192,7 @@ int h5tools_can_encode( H5Z_filter_t filtn)
     /* user defined filter	   */
   default:
     return 0;
-   break;
+
   case H5Z_FILTER_DEFLATE:
    if (!have_deflate)
    {
@@ -205,7 +204,8 @@ int h5tools_can_encode( H5Z_filter_t filtn)
    {
     return 0;
    }
-   status =H5Zget_filter_info(filtn, &filter_config_flags);
+   if(H5Zget_filter_info(filtn, &filter_config_flags)<0)
+       return -1;
    if ((filter_config_flags & 
           (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
     /* filter present but neither encode nor decode is supported (???) */

@@ -1609,8 +1609,8 @@ test_compound_9(void)
         goto error;      
     if(H5Tclose(cmpd_tid)<0)
         goto error;      
-    /*if(H5Tclose(dup_tid)<0)
-        goto error;*/      
+    if(H5Tclose(dup_tid)<0)
+        goto error;
     if(H5Tclose(str_id)<0)
         goto error;      
     if(H5Sclose(space_id)<0)
@@ -1644,7 +1644,7 @@ test_compound_9(void)
     } /* end if */
 
     rdata.i1 = rdata.i2 = 0;
-    free(rdata.str);
+    if(rdata.str) free(rdata.str);
 
     if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
         H5_FAILED(); AT();
@@ -1657,6 +1657,8 @@ test_compound_9(void)
         printf("incorrect read data\n");
         goto error;
     } /* end if */
+
+    if(rdata.str) free(rdata.str);
 
     if(H5Dclose(dset_id)<0)
         goto error;      
@@ -2092,7 +2094,7 @@ test_compound_12(void)
 {
     hid_t                   complex_id;
     size_t                  size = 0;
-    size_t                  offset, new_size;
+    size_t                  offset, new_size, tmp_size;
     herr_t ret;
 
     TESTING("adjust size of compound data types");
@@ -2101,31 +2103,35 @@ test_compound_12(void)
     if ((complex_id = H5Tcreate(H5T_COMPOUND, 1))<0) goto error;
     
     /* Verify the size */
-    if((new_size=H5Tget_size(complex_id))<0) goto error; 
+    if((new_size=H5Tget_size(complex_id))==0) goto error; 
     if(new_size!=1) goto error;
 
     /* Add a couple fields and adjust the size */
     offset = size;
-    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size+=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
     if (H5Tinsert(complex_id, "real", offset,
 		  H5T_NATIVE_DOUBLE)<0) goto error;
 
     offset = size;
-    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size+=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
     if (H5Tinsert(complex_id, "imaginary", offset,
 		  H5T_NATIVE_DOUBLE)<0) goto error;
 
     /* Increase and decrease the size. */
-    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size+=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
    
-    if((size-=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size-=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
 
     /* Verify the size */
-    if((new_size=H5Tget_size(complex_id))<0) goto error; 
+    if((new_size=H5Tget_size(complex_id))==0) goto error; 
     if(new_size!=size) goto error;
 
     /* Tries to cut last member.  Supposed to fail. */
@@ -2149,23 +2155,23 @@ test_compound_12(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_encode
+ * Function:    test_query
  *
- * Purpose:     Tests functions of encoding and decoding data type.
+ * Purpose:     Tests query functions of compound and enumeration types.
  *
  * Return:      Success:        0
  *      
  *              Failure:        number of errors
  *
  * Programmer:  Raymond Lu
- *              July 14, 2004
+ *              Thursday, April 4, 2002
  *  
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static int 
-test_encode(void)
+test_query(void)
 {
     struct s1 {
         int    a;
@@ -2174,26 +2180,17 @@ test_encode(void)
         double d;
     };
     hid_t       file=-1, tid1=-1, tid2=-1;
-    hid_t       decoded_tid1=-1, decoded_tid2=-1;
     char        filename[1024];
     char        compnd_type[]="Compound_type", enum_type[]="Enum_type";
     short       enum_val;
-    size_t      cmpd_buf_size = 0;
-    size_t      enum_buf_size = 0;
-    unsigned char       *cmpd_buf=NULL, *enum_buf=NULL;
-    herr_t      ret;
 
-    TESTING("functions of encoding and decoding data types");
+    TESTING("query functions of compound and enumeration types");
 
     /* Create File */
-    h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
+    h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof filename);
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
         goto error;
 
-    /*-----------------------------------------------------------------------
-     * Create compound and enumerate data types
-     *-----------------------------------------------------------------------
-     */
     /* Create a compound datatype */
     if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1)))<0) { 
         H5_FAILED();
@@ -2252,110 +2249,31 @@ test_encode(void)
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    
-    /*-----------------------------------------------------------------------
-     * Test encoding and decoding compound and enumerate data types
-     *-----------------------------------------------------------------------
-     */
-    /* Encode compound type in a buffer */
-    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode compound type\n");
-        goto error;
-    } /* end if */
-
-    if(cmpd_buf_size>0)
-        cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
-
-    /* Try decoding bogus buffer */
-    H5E_BEGIN_TRY {
-	ret = H5Tdecode(cmpd_buf);
-    } H5E_END_TRY;
-    if(ret!=FAIL) {
-        H5_FAILED();
-        printf("Decoded bogus buffer!\n");
-        goto error;
-    }
-
-    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode compound type\n");
-        goto error;
-    } /* end if */
-
-    /* Decode from the compound buffer and return an object handle */
-    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
-        H5_FAILED();
-        printf("Can't decode compound type\n");
-        goto error;
-    } /* end if */
-
-    /* Verify that the datatype was copied exactly */
-    if(H5Tequal(decoded_tid1, tid1)<=0) {
-        H5_FAILED();
-        printf("Datatype wasn't encoded & decoded identically\n");
-        goto error;
-    } /* end if */
 
     /* Query member number and member index by name, for compound type. */
-    if(H5Tget_nmembers(decoded_tid1)!=4) {
+    if(H5Tget_nmembers(tid1)!=4) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(decoded_tid1, "c")!=2) {
+    if(H5Tget_member_index(tid1, "c")!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
-        goto error;
-    } /* end if */
-
-   
-    /* Encode enumerate type in a buffer */
-    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode enumerate type\n");
-        goto error;
-    } /* end if */
-
-    if(enum_buf_size>0)
-        enum_buf = (unsigned char*)calloc(1, enum_buf_size);
-
-    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode enumerate type\n");
-        goto error;
-    } /* end if */
-
-    /* Decode from the enumerate buffer and return an object handle */
-    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
-        H5_FAILED();
-        printf("Can't decode enumerate type\n");
-        goto error;
-    } /* end if */
-
-    /* Verify that the datatype was copied exactly */
-    if(H5Tequal(decoded_tid2, tid2)<=0) {
-        H5_FAILED();
-        printf("Datatype wasn't encoded & decoded identically\n");
         goto error;
     } /* end if */
 
     /* Query member number and member index by name, for enumeration type. */
-    if(H5Tget_nmembers(decoded_tid2)!=5) {
+    if(H5Tget_nmembers(tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(decoded_tid2, "ORANGE")!=3) {
+    if(H5Tget_member_index(tid2, "ORANGE")!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
-    /*-----------------------------------------------------------------------
-     * Commit and reopen the compound and enumerate data types
-     *-----------------------------------------------------------------------
-     */
     /* Commit compound datatype and close it */
     if(H5Tcommit(file, compnd_type, tid1)<0) {
         H5_FAILED();
@@ -2367,13 +2285,6 @@ test_encode(void)
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(decoded_tid1)<0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-    free(cmpd_buf);
-    cmpd_buf_size = 0;
 
     /* Commit enumeration datatype and close it */
     if(H5Tcommit(file, enum_type, tid2)<0) {
@@ -2386,13 +2297,6 @@ test_encode(void)
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(decoded_tid2)<0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-    free(enum_buf);
-    enum_buf_size = 0;
 
     /* Open the dataytpe for query */
     if((tid1=H5Topen(file, compnd_type))<0) {
@@ -2406,99 +2310,30 @@ test_encode(void)
         goto error;
     } /* end if */
 
-
-    /* Encode compound type in a buffer */
-    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode compound type\n");
-        goto error;
-    } /* end if */
-
-    if(cmpd_buf_size>0)
-        cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
-
-    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode compound type\n");
-        goto error;
-    } /* end if */
-
-    /* Decode from the compound buffer and return an object handle */
-    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
-        H5_FAILED();
-        printf("Can't decode compound type\n");
-        goto error;
-    } /* end if */
-
-    /* Verify that the datatype was copied exactly */
-    if(H5Tequal(decoded_tid1, tid1)<=0) {
-        H5_FAILED();
-        printf("Datatype wasn't encoded & decoded identically\n");
-        goto error;
-    } /* end if */
-
-    /* Query member number and member index by name, for compound type. */
-    if(H5Tget_nmembers(decoded_tid1)!=4) {
+    /* Query member number and member index by name, for compound type */
+    if(H5Tget_nmembers(tid1)!=4) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(decoded_tid1, "c")!=2) {
+    if(H5Tget_member_index(tid1, "c")!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
-    /*-----------------------------------------------------------------------
-     * Test encoding and decoding compound and enumerate data types
-     *-----------------------------------------------------------------------
-     */
-    /* Encode enumerate type in a buffer */
-    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode enumerate type\n");
-        goto error;
-    } /* end if */
-
-    if(enum_buf_size>0)
-        enum_buf = (unsigned char*)calloc(1, enum_buf_size);
-
-    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
-        H5_FAILED();
-        printf("Can't encode enumerate type\n");
-        goto error;
-    } /* end if */
-
-    /* Decode from the enumerate buffer and return an object handle */
-    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
-        H5_FAILED();
-        printf("Can't decode enumerate type\n");
-        goto error;
-    } /* end if */
-
-    /* Verify that the datatype was copied exactly */
-    if(H5Tequal(decoded_tid2, tid2)<=0) {
-        H5_FAILED();
-        printf("Datatype wasn't encoded & decoded identically\n");
-        goto error;
-    } /* end if */
-
-    /* Query member number and member index by name, for enumeration type. */
-    if(H5Tget_nmembers(decoded_tid2)!=5) {
+    /* Query member number and member index by name, for enumeration type */
+    if(H5Tget_nmembers(tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(decoded_tid2, "ORANGE")!=3) {
+    if(H5Tget_member_index(tid2, "ORANGE")!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
-    /*-----------------------------------------------------------------------
-     * Close and release
-     *-----------------------------------------------------------------------
-     */
     /* Close data type and file */
     if(H5Tclose(tid1)<0) {
         H5_FAILED();
@@ -2511,25 +2346,11 @@ test_encode(void)
         goto error;
     } /* end if */
 
-    if(H5Tclose(decoded_tid1)<0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-    if(H5Tclose(decoded_tid2)<0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-
     if(H5Fclose(file)<0) {
         H5_FAILED();
         printf("Can't close file\n");
         goto error;
     } /* end if */
-
-    free(cmpd_buf);
-    free(enum_buf);
 
     PASSED();
     return 0;
@@ -2538,8 +2359,6 @@ test_encode(void)
     H5E_BEGIN_TRY {
         H5Tclose (tid1);
         H5Tclose (tid2);
-        H5Tclose (decoded_tid1);
-        H5Tclose (decoded_tid2);
         H5Fclose (file);
     } H5E_END_TRY;
     return 1;
@@ -3868,8 +3687,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
-    src_sign = H5Tget_sign(src); /* not 8*src_size, esp on J90 - QAK */
-    dst_sign = H5Tget_sign(dst); /* not 8*dst_size, esp on J90 - QAK */
+    src_sign = H5Tget_sign(src);
+    dst_sign = H5Tget_sign(dst);
     buf = aligned_malloc(nelmts*MAX(src_size, dst_size));
     saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(sizeof(long_long));
@@ -4474,8 +4293,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 }
 	    } else {
                 if (src_nbits>dst_nbits &&
-                    H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
-                         H5T_BIT_LSB, 1)>=0) {
+                        H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
+                             H5T_BIT_LSB, 1)>=0) {
                     /*
                      * The unsigned source has a value which is too large for
                      * the unsigned destination.  The destination should be
@@ -4710,6 +4529,578 @@ test_conv_int_2(void)
     }
     PASSED();
     return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	my_isnan
+ *
+ * Purpose:	Determines whether VAL points to NaN.
+ *
+ * Return:	TRUE or FALSE
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+my_isnan(dtype_t type, void *val)
+{
+    int retval;
+    char s[256];
+
+    if (FLT_FLOAT==type) {
+	float x;
+	HDmemcpy(&x, val, sizeof(float));
+	retval = (x!=x);
+    } else if (FLT_DOUBLE==type) {
+	double x;
+	HDmemcpy(&x, val, sizeof(double));
+	retval = (x!=x);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+    } else if (FLT_LDOUBLE==type) {
+	long double x;
+	HDmemcpy(&x, val, sizeof(long double));
+	retval = (x!=x);
+#endif
+    } else {
+	return 0;
+    }
+
+    /*
+     * Sometimes NaN==NaN (e.g., DEC Alpha) so we try to print it and see if
+     * the result contains a NaN string.
+     */
+    if (!retval) {
+	if (FLT_FLOAT==type) {
+	    float x;
+	    HDmemcpy(&x, val, sizeof(float));
+	    sprintf(s, "%g", x);
+	} else if (FLT_DOUBLE==type) {
+	    double x;
+	    HDmemcpy(&x, val, sizeof(double));
+	    sprintf(s, "%g", x);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+	} else if (FLT_LDOUBLE==type) {
+	    long double x;
+	    HDmemcpy(&x, val, sizeof(long double));
+	    sprintf(s, "%Lg", x);
+#endif
+	} else {
+	    return 0;
+	}
+	 if (HDstrstr(s, "NaN") || HDstrstr(s, "NAN") || HDstrstr(s, "nan")) 
+	    retval = 1;
+    }
+
+    return retval;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_conv_flt_1
+ *
+ * Purpose:	Test conversion of random floating point values from SRC to
+ *		DST.  These types should be H5T_NATIVE_FLOAT,
+ *		H5T_NATIVE_DOUBLE, or H5T_NATIVE_LDOUBLE.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June 23, 1998
+ *
+ * Modifications:
+ *	     Albert Cheng, Apr 16, 2004
+ *	     Check for underflow condition. If the src number is
+ *	     smaller than the dst MIN float number, consider it okay
+ *	     if the converted sw and hw dst are both less than or
+ *	     equal to the dst MIN float number.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
+{
+    dtype_t		src_type, dst_type;	/*data types		*/
+    const size_t	ntests=NTESTS;		/*number of tests	*/
+    const size_t	nelmts=NTESTELEM;		/*num values per test	*/
+    const size_t	max_fails=8;		/*max number of failures*/
+    size_t		fails_all_tests=0;	/*number of failures	*/
+    size_t		fails_this_test;	/*fails for this test	*/
+    const char		*src_type_name = NULL;	/*source type name	*/
+    const char		*dst_type_name = NULL;	/*destination type name	*/
+    size_t		src_size, dst_size;	/*type sizes		*/
+    unsigned char	*buf = NULL;		/*buffer for conversion	*/
+    unsigned char	*saved = NULL;		/*original values	*/
+    char		str[256];		/*hello string		*/
+    float		hw_f;			/*hardware-converted 	*/
+    double		hw_d;			/*hardware-converted	*/
+    void		*aligned=NULL;		/*aligned buffer	*/
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+    long double		hw_ld;			/*hardware-converted	*/
+#endif
+    unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
+    int			underflow;		/*underflow occurred	*/
+    int 		uflow=0;		/*underflow debug counters*/
+    size_t		i, j, k;		/*counters		*/
+    int			endian;			/*machine endianess	*/
+    size_t		dst_ebias;		/* Destination type's exponent bias */
+    size_t		src_epos;		/* Source type's exponent position */
+    size_t		src_esize;		/* Source type's exponent size */
+    size_t		dst_epos;		/* Destination type's exponent position */
+    size_t		dst_esize;		/* Destination type's exponent size */
+    size_t		dst_msize;		/* Destination type's mantissa size */
+
+#ifdef HANDLE_SIGFPE
+    pid_t		child_pid;		/*process ID of child	*/
+    int			status;			/*child exit status	*/
+    
+    /*
+     * Some systems generage SIGFPE during floating point overflow and we
+     * cannot assume that we can continue from such a signal.  Therefore, we
+     * fork here and let the child run the test and return the number of
+     * failures with the exit status.
+     */
+    HDfflush(stdout);
+    HDfflush(stderr);
+    if ((child_pid=fork())<0) {
+	HDperror("fork");
+	return 1;
+    } else if (child_pid>0) {
+	while (child_pid!=waitpid(child_pid, &status, 0)) /*void*/;
+	if (WIFEXITED(status) && 255==WEXITSTATUS(status)) {
+	    return 0; /*child exit after catching SIGFPE*/
+	} else if (WIFEXITED(status)) {
+	    return WEXITSTATUS(status);
+	} else {
+	    HDputs("   Child didn't exit normally.");
+	    return 1;
+	}
+    }
+#endif
+
+    /*
+     * The remainder of this function is executed only by the child if
+     * HANDLE_SIGFPE is defined.
+     */
+#ifndef __WATCOMC__
+    signal(SIGFPE,fpe_handler);
+#endif
+
+    /* What are the names of the source and destination types */
+    if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
+	src_type_name = "float";
+	src_type = FLT_FLOAT;
+    } else if (H5Tequal(src, H5T_NATIVE_DOUBLE)) {
+	src_type_name = "double";
+	src_type = FLT_DOUBLE;
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+    } else if (H5Tequal(src, H5T_NATIVE_LDOUBLE)) {
+	src_type_name = "long double";
+	src_type = FLT_LDOUBLE;
+#endif
+    } else {
+	src_type_name = "UNKNOWN";
+	src_type = OTHER;
+    }
+    
+    if (H5Tequal(dst, H5T_NATIVE_FLOAT)) {
+	dst_type_name = "float";
+	dst_type = FLT_FLOAT;
+    } else if (H5Tequal(dst, H5T_NATIVE_DOUBLE)) {
+	dst_type_name = "double";
+	dst_type = FLT_DOUBLE;
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+    } else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE)) {
+	dst_type_name = "long double";
+	dst_type = FLT_LDOUBLE;
+#endif
+    } else {
+	dst_type_name = "UNKNOWN";
+	dst_type = OTHER;
+    }
+
+    /* Sanity checks */
+    if(sizeof(float)==sizeof(double))
+        HDputs("Sizeof(float)==sizeof(double) - some tests may not be sensible.");
+    if (OTHER==src_type || OTHER==dst_type) {
+	sprintf(str, "Testing random %s %s -> %s conversions",
+		name, src_type_name, dst_type_name);
+	printf("%-70s", str);
+	H5_FAILED();
+	HDputs("    Unknown data type.");
+	goto error;
+    }
+    
+    /* Get "interesting" values */
+    src_size = H5Tget_size(src);
+    dst_size = H5Tget_size(dst);
+    dst_ebias=H5Tget_ebias(dst);
+    H5Tget_fields(src,NULL,&src_epos,&src_esize,NULL,NULL);
+    H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,NULL,&dst_msize);
+
+    /* Allocate buffers */
+    endian = H5Tget_order(H5T_NATIVE_FLOAT);
+    buf   = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    aligned = HDmalloc(32); /*should be big enough for any type*/
+#ifdef SHOW_OVERFLOWS
+    noverflows_g = 0;
+#endif
+
+    for (i=0; i<ntests; i++) {
+
+	/*
+	 * If it looks like it might take a long time then print a progress
+	 * report between each test.
+	 */
+	if (ntests>1) {
+	    sprintf(str, "Testing random %s %s -> %s conversions (test %d/%d)",
+		    name, src_type_name, dst_type_name, (int)i+1, (int)ntests);
+	} else {
+	    sprintf(str, "Testing random %s %s -> %s conversions",
+		    name, src_type_name, dst_type_name);
+	}
+	printf("%-70s", str);
+	HDfflush(stdout);
+	fails_this_test = 0;
+
+	/*
+	 * Initialize the source buffers to random bits.  The `buf' buffer
+	 * will be used for the conversion while the `saved' buffer will be
+	 * used for the comparison later.
+	 */
+	if (!skip_overflow_tests_g) {
+	    for (j=0; j<nelmts*src_size; j++)
+                buf[j] = saved[j] = HDrand();
+	} else {
+	    for (j=0; j<nelmts; j++) {
+		/* Do it this way for alignment reasons */
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+		long double temp[1];
+#else
+		double temp[1];
+#endif
+		if (src_size<=dst_size) {
+		    for (k=0; k<dst_size; k++) buf[j*src_size+k] = HDrand();
+		} else {
+		    for (k=0; k<dst_size; k++)
+			((unsigned char*)temp)[k] = HDrand();
+		    if (FLT_DOUBLE==src_type && FLT_FLOAT==dst_type) {
+			hw_d = *((float*)temp);
+			HDmemcpy(buf+j*src_size, &hw_d, src_size);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+		    } else if (FLT_LDOUBLE==src_type && FLT_FLOAT==dst_type) {
+			hw_ld = *((float*)temp);
+			HDmemcpy(buf+j*src_size, &hw_ld, src_size);
+		    } else if (FLT_LDOUBLE==src_type && FLT_DOUBLE==dst_type) {
+			hw_ld = *((double*)temp);
+			HDmemcpy(buf+j*src_size, &hw_ld, src_size);
+#endif
+		    }
+		}
+		HDmemcpy(saved+j*src_size, buf+j*src_size, src_size);
+	    }
+	}
+
+	/* Perform the conversion in software */
+	if (H5Tconvert(src, dst, nelmts, buf, NULL, H5P_DEFAULT)<0)
+            goto error;
+
+	/* Check the software results against the hardware */
+	for (j=0; j<nelmts; j++) {
+	    underflow = 0;
+	    hw_f = 911.0;
+	    hw_d = 911.0;
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+	    hw_ld = 911.0;
+#endif
+
+	    /* The hardware conversion */
+	    /* Check for underflow when src is a "larger" float than dst.*/
+	    if (FLT_FLOAT==src_type) {
+		HDmemcpy(aligned, saved+j*sizeof(float), sizeof(float));
+		if (FLT_FLOAT==dst_type) {
+		    hw_f = *((float*)aligned);
+		    hw = (unsigned char*)&hw_f;
+		} else if (FLT_DOUBLE==dst_type) {
+		    hw_d = *((float*)aligned);
+		    hw = (unsigned char*)&hw_d;
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+		} else {
+		    hw_ld = *((float*)aligned);
+		    hw = (unsigned char*)&hw_ld;
+#endif
+		}
+	    } else if (FLT_DOUBLE==src_type) {
+		HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
+		if (FLT_FLOAT==dst_type) {
+		    hw_f = (float)(*((double*)aligned));
+		    hw = (unsigned char*)&hw_f;
+		    underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
+		} else if (FLT_DOUBLE==dst_type) {
+		    hw_d = *((double*)aligned);
+		    hw = (unsigned char*)&hw_d;
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+		} else {
+		    hw_ld = *((double*)aligned);
+		    hw = (unsigned char*)&hw_ld;
+#endif
+		}
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+	    } else {
+		HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double)); 
+		if (FLT_FLOAT==dst_type) {
+		    hw_f = *((long double*)aligned); 
+		    hw = (unsigned char*)&hw_f;
+		    underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
+		} else if (FLT_DOUBLE==dst_type) {
+		    hw_d = *((long double*)aligned); 
+		    hw = (unsigned char*)&hw_d;
+		    underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
+		} else {
+		    hw_ld = *((long double*)aligned);
+		    hw = (unsigned char*)&hw_ld;
+		}
+#endif
+	    }
+	    if (underflow){
+		uflow++;
+	    }
+
+	    /* Are the two results the same? */
+	    for (k=0; k<dst_size; k++)
+		if (buf[j*dst_size+k]!=hw[k])
+                    break;
+	    if (k==dst_size)
+                continue; /*no error*/
+
+	    /*
+	     * Assume same if both results are NaN.  There are many NaN bit
+	     * patterns and the software doesn't attemt to emulate the
+	     * hardware in this regard.  Instead, software uses a single bit
+	     * pattern for NaN by setting the significand to all ones.
+	     */
+	    if (FLT_FLOAT==dst_type &&
+                    my_isnan(dst_type, buf+j*sizeof(float)) &&
+                    my_isnan(dst_type, hw)) {
+		continue;
+	    } else if (FLT_DOUBLE==dst_type &&
+                    my_isnan(dst_type, buf+j*sizeof(double)) &&
+                    my_isnan(dst_type, hw)) {
+		continue;
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+	    } else if (FLT_LDOUBLE==dst_type &&
+                    my_isnan(dst_type, buf+j*sizeof(long double)) &&
+                    my_isnan(dst_type, hw)) {
+		continue;
+#endif
+	    }
+
+	    /*
+	     * Assume same if hardware result is NaN.  This is because the
+	     * hardware conversions on some machines return NaN instead of
+	     * overflowing to +Inf or -Inf or underflowing to +0 or -0.
+	     */
+	    if (my_isnan(dst_type, hw))
+                continue;
+
+	    /*
+	     * Instead of matching down to the bit, just make sure the
+	     * exponents are the same and the mantissa is the same to a
+	     * certain precision.  This is needed on machines that don't
+	     * round as expected.
+	     * If the src number is smaller than the dst MIN float number,
+	     * consider it okay if the converted sw and hw dst are both
+	     * less than or equal to the dst MIN float number.
+	     */
+	    {
+		double		check_mant[2];
+		int		check_expo[2];
+		
+		if (FLT_FLOAT==dst_type) {
+		    float x;
+		    HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
+		    if (underflow &&
+			    HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
+			continue;	/* all underflowed, no error */
+		    check_mant[0] = HDfrexpf(x, check_expo+0);
+		    check_mant[1] = HDfrexpf(hw_f, check_expo+1);
+		} else if (FLT_DOUBLE==dst_type) {
+		    double x;
+		    HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
+		    if (underflow &&
+			    HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
+			continue;	/* all underflowed, no error */
+		    check_mant[0] = HDfrexp(x, check_expo+0);
+		    check_mant[1] = HDfrexp(hw_d, check_expo+1);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+		} else {
+		    long double x;
+		    HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
+		    /* dst is largest float, no need to check underflow. */
+		    check_mant[0] = HDfrexpl(x, check_expo+0);
+		    check_mant[1] = HDfrexpl(hw_ld, check_expo+1);
+#endif
+		}
+#ifdef H5_CONVERT_DENORMAL_FLOAT
+		/* Special check for denormalized values */
+		if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
+		    int expo_diff=check_expo[0]-check_expo[1];
+		    int valid_bits=(int)((dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
+		    double epsilon=1.0;
+
+		    /* Re-scale the mantissas based on any exponent difference */
+		    if(expo_diff!=0)
+		        check_mant[0] = HDldexp(check_mant[0],expo_diff);
+
+		    /* Compute the proper epsilon */
+		    epsilon=HDldexp(epsilon,-valid_bits);
+
+		    /* Check for "close enough" fit with scaled epsilon value */
+		    if (HDfabs(check_mant[0]-check_mant[1])<=epsilon)
+		        continue;
+		} /* end if */
+		else {
+		    if (check_expo[0]==check_expo[1] &&
+                            HDfabs(check_mant[0]-check_mant[1])<FP_EPSILON)
+		        continue;
+		} /* end else */
+#else /* H5_CONVERT_DENORMAL_FLOAT */
+                {
+                hssize_t	expo;			/*exponent			*/
+                uint8_t tmp[32];
+
+                assert(src_size<=sizeof(tmp));
+                if(endian==H5T_ORDER_LE)
+                    HDmemcpy(tmp,&saved[j*src_size],src_size);
+                else
+                    for (k=0; k<src_size; k++)
+                        tmp[k]=saved[j*src_size+(src_size-(k+1))];
+                expo = H5T_bit_get_d(tmp, src_epos, src_esize);
+                if(expo==0)
+                    continue;   /* Denormalized floating-point value detected */
+                else {
+                    assert(dst_size<=sizeof(tmp));
+                    if(endian==H5T_ORDER_LE)
+                        HDmemcpy(tmp,&buf[j*dst_size],dst_size);
+                    else
+                        for (k=0; k<dst_size; k++)
+                            tmp[k]=buf[j*dst_size+(dst_size-(k+1))];
+                    expo = H5T_bit_get_d(tmp, dst_epos, dst_esize);
+                    if(expo==0)
+                        continue;   /* Denormalized floating-point value detected */
+                    else {
+                        if (check_expo[0]==check_expo[1] &&
+                                HDfabs(check_mant[0]-check_mant[1])<FP_EPSILON)
+                            continue;
+                    } /* end else */
+                } /* end else */
+                }
+#endif /* H5_CONVERT_DENORMAL_FLOAT */
+	    }
+
+	    if (0==fails_this_test++)
+                H5_FAILED();
+	    printf("    test %u, elmt %u\n", (unsigned)i+1, (unsigned)j);
+	    
+	    printf("        src =");
+	    for (k=0; k<src_size; k++)
+		printf(" %02x", saved[j*src_size+ENDIAN(src_size,k)]);
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
+	    if (FLT_FLOAT==src_type) {
+		float x;
+		HDmemcpy(&x, &saved[j*dst_size], sizeof(float));
+		printf(" %29.20e\n", x);
+	    } else if (FLT_DOUBLE==src_type) {
+		double x;
+		HDmemcpy(&x, &saved[j*dst_size], sizeof(double));
+		printf(" %29.20e\n", x);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+	    } else {
+		long double x;
+		HDmemcpy(&x, &saved[j*src_size], sizeof(long double));
+		HDfprintf(stdout," %29.20Le\n", x);
+#endif
+	    }
+
+	    printf("        dst =");
+	    for (k=0; k<dst_size; k++)
+		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k)]);
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
+	    if (FLT_FLOAT==dst_type) {
+		float x;
+		HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
+		printf(" %29.20e\n", x);
+	    } else if (FLT_DOUBLE==dst_type) {
+		double x;
+		HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
+		printf(" %29.20e\n", x);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+	    } else {
+		long double x;
+		HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
+		HDfprintf(stdout," %29.20Le\n", x);
+#endif
+	    }
+
+	    printf("        ans =");
+	    for (k=0; k<dst_size; k++)
+		printf(" %02x", hw[ENDIAN(dst_size,k)]);
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
+	    if (FLT_FLOAT==dst_type)
+		printf(" %29.20e\n", hw_f);
+	    else if (FLT_DOUBLE==dst_type)
+		printf(" %29.20e\n", hw_d);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+	    else
+		HDfprintf(stdout," %29.20Le\n", hw_ld);
+#endif
+
+	    if (++fails_all_tests>=max_fails) {
+		HDputs("    maximum failures reached, aborting test...");
+		goto done;
+	    }
+	}
+	PASSED();
+    }
+#ifdef SHOW_OVERFLOWS
+    if (noverflows_g>0)
+	printf("   %d overflow%s in previous test\n",
+	       noverflows_g, 1==noverflows_g?"":"s");
+#endif
+
+ done:
+#ifdef AKCDEBUG
+     printf("uflow=%d, fails_all_tests=%d\n", uflow, fails_all_tests);
+#endif
+    if (buf) aligned_free(buf);
+    if (saved) aligned_free(saved);
+    if (aligned) HDfree(aligned);
+    HDfflush(stdout);
+#ifdef HANDLE_SIGFPE
+    HDexit(MIN((int)fails_all_tests, 254));
+#else
+    reset_hdf5();
+    return (int)fails_all_tests;
+#endif
+
+ error:
+    if (buf) aligned_free(buf);
+    if (saved) aligned_free(saved);
+    if (aligned) HDfree(aligned);
+    HDfflush(stdout);
+#ifdef HANDLE_SIGFPE
+    HDexit(MIN(MAX((int)fails_all_tests, 1), 254));
+#else
+    reset_hdf5();
+    return MAX((int)fails_all_tests, 1);
+#endif
 }
 
 
@@ -5723,578 +6114,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	my_isnan
- *
- * Purpose:	Determines whether VAL points to NaN.
- *
- * Return:	TRUE or FALSE
- *
- * Programmer:	Robb Matzke
- *              Monday, July  6, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static int
-my_isnan(dtype_t type, void *val)
-{
-    int retval;
-    char s[256];
-
-    if (FLT_FLOAT==type) {
-	float x;
-	HDmemcpy(&x, val, sizeof(float));
-	retval = (x!=x);
-    } else if (FLT_DOUBLE==type) {
-	double x;
-	HDmemcpy(&x, val, sizeof(double));
-	retval = (x!=x);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-    } else if (FLT_LDOUBLE==type) {
-	long double x;
-	HDmemcpy(&x, val, sizeof(long double));
-	retval = (x!=x);
-#endif
-    } else {
-	return 0;
-    }
-
-    /*
-     * Sometimes NaN==NaN (e.g., DEC Alpha) so we try to print it and see if
-     * the result contains a NaN string.
-     */
-    if (!retval) {
-	if (FLT_FLOAT==type) {
-	    float x;
-	    HDmemcpy(&x, val, sizeof(float));
-	    sprintf(s, "%g", x);
-	} else if (FLT_DOUBLE==type) {
-	    double x;
-	    HDmemcpy(&x, val, sizeof(double));
-	    sprintf(s, "%g", x);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-	} else if (FLT_LDOUBLE==type) {
-	    long double x;
-	    HDmemcpy(&x, val, sizeof(long double));
-	    sprintf(s, "%Lg", x);
-#endif
-	} else {
-	    return 0;
-	}
-	 if (HDstrstr(s, "NaN") || HDstrstr(s, "NAN") || HDstrstr(s, "nan")) 
-	    retval = 1;
-    }
-
-    return retval;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	test_conv_flt_1
- *
- * Purpose:	Test conversion of random floating point values from SRC to
- *		DST.  These types should be H5T_NATIVE_FLOAT,
- *		H5T_NATIVE_DOUBLE, or H5T_NATIVE_LDOUBLE.
- *
- * Return:	Success:	0
- *
- *		Failure:	number of errors
- *
- * Programmer:	Robb Matzke
- *              Tuesday, June 23, 1998
- *
- * Modifications:
- *	     Albert Cheng, Apr 16, 2004
- *	     Check for underflow condition. If the src number is
- *	     smaller than the dst MIN float number, consider it okay
- *	     if the converted sw and hw dst are both less than or
- *	     equal to the dst MIN float number.
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
-{
-    dtype_t		src_type, dst_type;	/*data types		*/
-    const size_t	ntests=NTESTS;		/*number of tests	*/
-    const size_t	nelmts=NTESTELEM;		/*num values per test	*/
-    const size_t	max_fails=8;		/*max number of failures*/
-    size_t		fails_all_tests=0;	/*number of failures	*/
-    size_t		fails_this_test;	/*fails for this test	*/
-    const char		*src_type_name = NULL;	/*source type name	*/
-    const char		*dst_type_name = NULL;	/*destination type name	*/
-    size_t		src_size, dst_size;	/*type sizes		*/
-    unsigned char	*buf = NULL;		/*buffer for conversion	*/
-    unsigned char	*saved = NULL;		/*original values	*/
-    char		str[256];		/*hello string		*/
-    float		hw_f;			/*hardware-converted 	*/
-    double		hw_d;			/*hardware-converted	*/
-    void		*aligned=NULL;		/*aligned buffer	*/
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-    long double		hw_ld;			/*hardware-converted	*/
-#endif
-    unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
-    int			underflow;		/*underflow occurred	*/
-    int 		uflow=0;		/*underflow debug counters*/
-    size_t		i, j, k;		/*counters		*/
-    int			endian;			/*machine endianess	*/
-    size_t		dst_ebias;		/* Destination type's exponent bias */
-    size_t		src_epos;		/* Source type's exponent position */
-    size_t		src_esize;		/* Source type's exponent size */
-    size_t		dst_epos;		/* Destination type's exponent position */
-    size_t		dst_esize;		/* Destination type's exponent size */
-    size_t		dst_msize;		/* Destination type's mantissa size */
-
-#ifdef HANDLE_SIGFPE
-    pid_t		child_pid;		/*process ID of child	*/
-    int			status;			/*child exit status	*/
-    
-    /*
-     * Some systems generage SIGFPE during floating point overflow and we
-     * cannot assume that we can continue from such a signal.  Therefore, we
-     * fork here and let the child run the test and return the number of
-     * failures with the exit status.
-     */
-    HDfflush(stdout);
-    HDfflush(stderr);
-    if ((child_pid=fork())<0) {
-	HDperror("fork");
-	return 1;
-    } else if (child_pid>0) {
-	while (child_pid!=waitpid(child_pid, &status, 0)) /*void*/;
-	if (WIFEXITED(status) && 255==WEXITSTATUS(status)) {
-	    return 0; /*child exit after catching SIGFPE*/
-	} else if (WIFEXITED(status)) {
-	    return WEXITSTATUS(status);
-	} else {
-	    HDputs("   Child didn't exit normally.");
-	    return 1;
-	}
-    }
-#endif
-
-    /*
-     * The remainder of this function is executed only by the child if
-     * HANDLE_SIGFPE is defined.
-     */
-#ifndef __WATCOMC__
-    signal(SIGFPE,fpe_handler);
-#endif
-
-    /* What are the names of the source and destination types */
-    if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
-	src_type_name = "float";
-	src_type = FLT_FLOAT;
-    } else if (H5Tequal(src, H5T_NATIVE_DOUBLE)) {
-	src_type_name = "double";
-	src_type = FLT_DOUBLE;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-    } else if (H5Tequal(src, H5T_NATIVE_LDOUBLE)) {
-	src_type_name = "long double";
-	src_type = FLT_LDOUBLE;
-#endif
-    } else {
-	src_type_name = "UNKNOWN";
-	src_type = OTHER;
-    }
-    
-    if (H5Tequal(dst, H5T_NATIVE_FLOAT)) {
-	dst_type_name = "float";
-	dst_type = FLT_FLOAT;
-    } else if (H5Tequal(dst, H5T_NATIVE_DOUBLE)) {
-	dst_type_name = "double";
-	dst_type = FLT_DOUBLE;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-    } else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE)) {
-	dst_type_name = "long double";
-	dst_type = FLT_LDOUBLE;
-#endif
-    } else {
-	dst_type_name = "UNKNOWN";
-	dst_type = OTHER;
-    }
-
-    /* Sanity checks */
-    if(sizeof(float)==sizeof(double))
-        HDputs("Sizeof(float)==sizeof(double) - some tests may not be sensible.");
-    if (OTHER==src_type || OTHER==dst_type) {
-	sprintf(str, "Testing random %s %s -> %s conversions",
-		name, src_type_name, dst_type_name);
-	printf("%-70s", str);
-	H5_FAILED();
-	HDputs("    Unknown data type.");
-	goto error;
-    }
-    
-    /* Get "interesting" values */
-    src_size = H5Tget_size(src);
-    dst_size = H5Tget_size(dst);
-    dst_ebias=H5Tget_ebias(dst);
-    H5Tget_fields(src,NULL,&src_epos,&src_esize,NULL,NULL);
-    H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,NULL,&dst_msize);
-
-    /* Allocate buffers */
-    endian = H5Tget_order(H5T_NATIVE_FLOAT);
-    buf   = aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
-    aligned = HDmalloc(32); /*should be big enough for any type*/
-#ifdef SHOW_OVERFLOWS
-    noverflows_g = 0;
-#endif
-
-    for (i=0; i<ntests; i++) {
-
-	/*
-	 * If it looks like it might take a long time then print a progress
-	 * report between each test.
-	 */
-	if (ntests>1) {
-	    sprintf(str, "Testing random %s %s -> %s conversions (test %d/%d)",
-		    name, src_type_name, dst_type_name, (int)i+1, (int)ntests);
-	} else {
-	    sprintf(str, "Testing random %s %s -> %s conversions",
-		    name, src_type_name, dst_type_name);
-	}
-	printf("%-70s", str);
-	HDfflush(stdout);
-	fails_this_test = 0;
-
-	/*
-	 * Initialize the source buffers to random bits.  The `buf' buffer
-	 * will be used for the conversion while the `saved' buffer will be
-	 * used for the comparison later.
-	 */
-	if (!skip_overflow_tests_g) {
-	    for (j=0; j<nelmts*src_size; j++)
-                buf[j] = saved[j] = HDrand();
-	} else {
-	    for (j=0; j<nelmts; j++) {
-		/* Do it this way for alignment reasons */
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-		long double temp[1];
-#else
-		double temp[1];
-#endif
-		if (src_size<=dst_size) {
-		    for (k=0; k<dst_size; k++) buf[j*src_size+k] = HDrand();
-		} else {
-		    for (k=0; k<dst_size; k++)
-			((unsigned char*)temp)[k] = HDrand();
-		    if (FLT_DOUBLE==src_type && FLT_FLOAT==dst_type) {
-			hw_d = *((float*)temp);
-			HDmemcpy(buf+j*src_size, &hw_d, src_size);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-		    } else if (FLT_LDOUBLE==src_type && FLT_FLOAT==dst_type) {
-			hw_ld = *((float*)temp);
-			HDmemcpy(buf+j*src_size, &hw_ld, src_size);
-		    } else if (FLT_LDOUBLE==src_type && FLT_DOUBLE==dst_type) {
-			hw_ld = *((double*)temp);
-			HDmemcpy(buf+j*src_size, &hw_ld, src_size);
-#endif
-		    }
-		}
-		HDmemcpy(saved+j*src_size, buf+j*src_size, src_size);
-	    }
-	}
-
-	/* Perform the conversion in software */
-	if (H5Tconvert(src, dst, nelmts, buf, NULL, H5P_DEFAULT)<0)
-            goto error;
-
-	/* Check the software results against the hardware */
-	for (j=0; j<nelmts; j++) {
-	    underflow = 0;
-	    hw_f = 911.0;
-	    hw_d = 911.0;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-	    hw_ld = 911.0;
-#endif
-
-	    /* The hardware conversion */
-	    /* Check for underflow when src is a "larger" float than dst.*/
-	    if (FLT_FLOAT==src_type) {
-		HDmemcpy(aligned, saved+j*sizeof(float), sizeof(float));
-		if (FLT_FLOAT==dst_type) {
-		    hw_f = *((float*)aligned);
-		    hw = (unsigned char*)&hw_f;
-		} else if (FLT_DOUBLE==dst_type) {
-		    hw_d = *((float*)aligned);
-		    hw = (unsigned char*)&hw_d;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-		} else {
-		    hw_ld = *((float*)aligned);
-		    hw = (unsigned char*)&hw_ld;
-#endif
-		}
-	    } else if (FLT_DOUBLE==src_type) {
-		HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
-		if (FLT_FLOAT==dst_type) {
-		    hw_f = (float)(*((double*)aligned));
-		    hw = (unsigned char*)&hw_f;
-		    underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
-		} else if (FLT_DOUBLE==dst_type) {
-		    hw_d = *((double*)aligned);
-		    hw = (unsigned char*)&hw_d;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-		} else {
-		    hw_ld = *((double*)aligned);
-		    hw = (unsigned char*)&hw_ld;
-#endif
-		}
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-	    } else {
-		HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double)); 
-		if (FLT_FLOAT==dst_type) {
-		    hw_f = *((long double*)aligned); 
-		    hw = (unsigned char*)&hw_f;
-		    underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
-		} else if (FLT_DOUBLE==dst_type) {
-		    hw_d = *((long double*)aligned); 
-		    hw = (unsigned char*)&hw_d;
-		    underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
-		} else {
-		    hw_ld = *((long double*)aligned);
-		    hw = (unsigned char*)&hw_ld;
-		}
-#endif
-	    }
-	    if (underflow){
-		uflow++;
-	    }
-
-	    /* Are the two results the same? */
-	    for (k=0; k<dst_size; k++)
-		if (buf[j*dst_size+k]!=hw[k])
-                    break;
-	    if (k==dst_size)
-                continue; /*no error*/
-
-	    /*
-	     * Assume same if both results are NaN.  There are many NaN bit
-	     * patterns and the software doesn't attemt to emulate the
-	     * hardware in this regard.  Instead, software uses a single bit
-	     * pattern for NaN by setting the significand to all ones.
-	     */
-	    if (FLT_FLOAT==dst_type &&
-                    my_isnan(dst_type, buf+j*sizeof(float)) &&
-                    my_isnan(dst_type, hw)) {
-		continue;
-	    } else if (FLT_DOUBLE==dst_type &&
-                    my_isnan(dst_type, buf+j*sizeof(double)) &&
-                    my_isnan(dst_type, hw)) {
-		continue;
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-	    } else if (FLT_LDOUBLE==dst_type &&
-                    my_isnan(dst_type, buf+j*sizeof(long double)) &&
-                    my_isnan(dst_type, hw)) {
-		continue;
-#endif
-	    }
-
-	    /*
-	     * Assume same if hardware result is NaN.  This is because the
-	     * hardware conversions on some machines return NaN instead of
-	     * overflowing to +Inf or -Inf or underflowing to +0 or -0.
-	     */
-	    if (my_isnan(dst_type, hw))
-                continue;
-
-	    /*
-	     * Instead of matching down to the bit, just make sure the
-	     * exponents are the same and the mantissa is the same to a
-	     * certain precision.  This is needed on machines that don't
-	     * round as expected.
-	     * If the src number is smaller than the dst MIN float number,
-	     * consider it okay if the converted sw and hw dst are both
-	     * less than or equal to the dst MIN float number.
-	     */
-	    {
-		double		check_mant[2];
-		int		check_expo[2];
-		
-		if (FLT_FLOAT==dst_type) {
-		    float x;
-		    HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
-		    if (underflow &&
-			    HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
-			continue;	/* all underflowed, no error */
-		    check_mant[0] = HDfrexpf(x, check_expo+0);
-		    check_mant[1] = HDfrexpf(hw_f, check_expo+1);
-		} else if (FLT_DOUBLE==dst_type) {
-		    double x;
-		    HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
-		    if (underflow &&
-			    HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
-			continue;	/* all underflowed, no error */
-		    check_mant[0] = HDfrexp(x, check_expo+0);
-		    check_mant[1] = HDfrexp(hw_d, check_expo+1);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-		} else {
-		    long double x;
-		    HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
-		    /* dst is largest float, no need to check underflow. */
-		    check_mant[0] = HDfrexpl(x, check_expo+0);
-		    check_mant[1] = HDfrexpl(hw_ld, check_expo+1);
-#endif
-		}
-#ifdef H5_CONVERT_DENORMAL_FLOAT
-		/* Special check for denormalized values */
-		if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
-		    int expo_diff=check_expo[0]-check_expo[1];
-		    int valid_bits=(int)((dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
-		    double epsilon=1.0;
-
-		    /* Re-scale the mantissas based on any exponent difference */
-		    if(expo_diff!=0)
-		        check_mant[0] = HDldexp(check_mant[0],expo_diff);
-
-		    /* Compute the proper epsilon */
-		    epsilon=HDldexp(epsilon,-valid_bits);
-
-		    /* Check for "close enough" fit with scaled epsilon value */
-		    if (HDfabs(check_mant[0]-check_mant[1])<=epsilon)
-		        continue;
-		} /* end if */
-		else {
-		    if (check_expo[0]==check_expo[1] &&
-                            HDfabs(check_mant[0]-check_mant[1])<FP_EPSILON)
-		        continue;
-		} /* end else */
-#else /* H5_CONVERT_DENORMAL_FLOAT */
-                {
-                hssize_t	expo;			/*exponent			*/
-                uint8_t tmp[32];
-
-                assert(src_size<=sizeof(tmp));
-                if(endian==H5T_ORDER_LE)
-                    HDmemcpy(tmp,&saved[j*src_size],src_size);
-                else
-                    for (k=0; k<src_size; k++)
-                        tmp[k]=saved[j*src_size+(src_size-(k+1))];
-                expo = H5T_bit_get_d(tmp, src_epos, src_esize);
-                if(expo==0)
-                    continue;   /* Denormalized floating-point value detected */
-                else {
-                    assert(dst_size<=sizeof(tmp));
-                    if(endian==H5T_ORDER_LE)
-                        HDmemcpy(tmp,&buf[j*dst_size],dst_size);
-                    else
-                        for (k=0; k<dst_size; k++)
-                            tmp[k]=buf[j*dst_size+(dst_size-(k+1))];
-                    expo = H5T_bit_get_d(tmp, dst_epos, dst_esize);
-                    if(expo==0)
-                        continue;   /* Denormalized floating-point value detected */
-                    else {
-                        if (check_expo[0]==check_expo[1] &&
-                                HDfabs(check_mant[0]-check_mant[1])<FP_EPSILON)
-                            continue;
-                    } /* end else */
-                } /* end else */
-                }
-#endif /* H5_CONVERT_DENORMAL_FLOAT */
-	    }
-
-	    if (0==fails_this_test++)
-                H5_FAILED();
-	    printf("    test %u, elmt %u\n", (unsigned)i+1, (unsigned)j);
-	    
-	    printf("        src =");
-	    for (k=0; k<src_size; k++)
-		printf(" %02x", saved[j*src_size+ENDIAN(src_size,k)]);
-	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
-	    if (FLT_FLOAT==src_type) {
-		float x;
-		HDmemcpy(&x, &saved[j*dst_size], sizeof(float));
-		printf(" %29.20e\n", x);
-	    } else if (FLT_DOUBLE==src_type) {
-		double x;
-		HDmemcpy(&x, &saved[j*dst_size], sizeof(double));
-		printf(" %29.20e\n", x);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-	    } else {
-		long double x;
-		HDmemcpy(&x, &saved[j*src_size], sizeof(long double));
-		HDfprintf(stdout," %29.20Le\n", x);
-#endif
-	    }
-
-	    printf("        dst =");
-	    for (k=0; k<dst_size; k++)
-		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k)]);
-	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
-	    if (FLT_FLOAT==dst_type) {
-		float x;
-		HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
-		printf(" %29.20e\n", x);
-	    } else if (FLT_DOUBLE==dst_type) {
-		double x;
-		HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
-		printf(" %29.20e\n", x);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-	    } else {
-		long double x;
-		HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
-		HDfprintf(stdout," %29.20Le\n", x);
-#endif
-	    }
-
-	    printf("        ans =");
-	    for (k=0; k<dst_size; k++)
-		printf(" %02x", hw[ENDIAN(dst_size,k)]);
-	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
-	    if (FLT_FLOAT==dst_type)
-		printf(" %29.20e\n", hw_f);
-	    else if (FLT_DOUBLE==dst_type)
-		printf(" %29.20e\n", hw_d);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-	    else
-		HDfprintf(stdout," %29.20Le\n", hw_ld);
-#endif
-
-	    if (++fails_all_tests>=max_fails) {
-		HDputs("    maximum failures reached, aborting test...");
-		goto done;
-	    }
-	}
-	PASSED();
-    }
-#ifdef SHOW_OVERFLOWS
-    if (noverflows_g>0)
-	printf("   %d overflow%s in previous test\n",
-	       noverflows_g, 1==noverflows_g?"":"s");
-#endif
-
- done:
-#ifdef AKCDEBUG
-     printf("uflow=%d, fails_all_tests=%d\n", uflow, fails_all_tests);
-#endif
-    if (buf) aligned_free(buf);
-    if (saved) aligned_free(saved);
-    if (aligned) HDfree(aligned);
-    HDfflush(stdout);
-#ifdef HANDLE_SIGFPE
-    HDexit(MIN((int)fails_all_tests, 254));
-#else
-    reset_hdf5();
-    return (int)fails_all_tests;
-#endif
-
- error:
-    if (buf) aligned_free(buf);
-    if (saved) aligned_free(saved);
-    if (aligned) HDfree(aligned);
-    HDfflush(stdout);
-#ifdef HANDLE_SIGFPE
-    HDexit(MIN(MAX((int)fails_all_tests, 1), 254));
-#else
-    reset_hdf5();
-    return MAX((int)fails_all_tests, 1);
-#endif
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	run_integer_tests
  *
  * Purpose:	Runs all integer tests.
@@ -6607,6 +6426,404 @@ run_float_int_conv(const char *name)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_encode
+ *
+ * Purpose:     Tests functions of encoding and decoding data type.
+ *
+ * Return:      Success:        0
+ *      
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              July 14, 2004
+ *  
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int 
+test_encode(void)
+{
+    struct s1 {
+        int    a;
+        float  b;
+        long   c;
+        double d;
+    };
+    hid_t       file=-1, tid1=-1, tid2=-1;
+    hid_t       decoded_tid1=-1, decoded_tid2=-1;
+    char        filename[1024];
+    char        compnd_type[]="Compound_type", enum_type[]="Enum_type";
+    short       enum_val;
+    size_t      cmpd_buf_size = 0;
+    size_t      enum_buf_size = 0;
+    unsigned char       *cmpd_buf=NULL, *enum_buf=NULL;
+    herr_t      ret;
+
+    TESTING("functions of encoding and decoding data types");
+
+    /* Create File */
+    h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+        goto error;
+
+    /*-----------------------------------------------------------------------
+     * Create compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
+    /* Create a compound datatype */
+    if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1)))<0) { 
+        H5_FAILED();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'a'\n");
+        goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'b'\n");
+        goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'c'\n");
+        goto error;
+    } /* end if */
+    if(H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'd'\n");
+        goto error;
+    } /* end if */
+
+    /* Create a enumerate datatype */
+    if((tid2=H5Tcreate(H5T_ENUM, sizeof(short)))<0) {
+        H5_FAILED();
+        printf("Can't create enumerate type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "RED", (enum_val=0,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "GREEN", (enum_val=1,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "BLUE", (enum_val=2,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=3,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=4,&enum_val))<0) {
+        H5_FAILED();
+        printf("Can't insert field into enumeration type\n");
+        goto error;
+    } /* end if */
+    
+    /*-----------------------------------------------------------------------
+     * Test encoding and decoding compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
+    /* Encode compound type in a buffer */
+    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    if(cmpd_buf_size>0)
+        cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
+
+    /* Try decoding bogus buffer */
+    H5E_BEGIN_TRY {
+	ret = H5Tdecode(cmpd_buf);
+    } H5E_END_TRY;
+    if(ret!=FAIL) {
+        H5_FAILED();
+        printf("Decoded bogus buffer!\n");
+        goto error;
+    }
+
+    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the compound buffer and return an object handle */
+    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode compound type\n");
+        goto error;
+    } /* end if */
+
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid1, tid1)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for compound type. */
+    if(H5Tget_nmembers(decoded_tid1)!=4) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if(H5Tget_member_index(decoded_tid1, "c")!=2) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+   
+    /* Encode enumerate type in a buffer */
+    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    if(enum_buf_size>0)
+        enum_buf = (unsigned char*)calloc(1, enum_buf_size);
+
+    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the enumerate buffer and return an object handle */
+    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid2, tid2)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for enumeration type. */
+    if(H5Tget_nmembers(decoded_tid2)!=5) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if(H5Tget_member_index(decoded_tid2, "ORANGE")!=3) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /*-----------------------------------------------------------------------
+     * Commit and reopen the compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
+    /* Commit compound datatype and close it */
+    if(H5Tcommit(file, compnd_type, tid1)<0) {
+        H5_FAILED();
+        printf("Can't commit compound datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(decoded_tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    free(cmpd_buf);
+    cmpd_buf_size = 0;
+
+    /* Commit enumeration datatype and close it */
+    if(H5Tcommit(file, enum_type, tid2)<0) {
+        H5_FAILED();
+        printf("Can't commit compound datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(decoded_tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    free(enum_buf);
+    enum_buf_size = 0;
+
+    /* Open the dataytpe for query */
+    if((tid1=H5Topen(file, compnd_type))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    } /* end if */
+    if((tid2=H5Topen(file, enum_type))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    } /* end if */
+
+
+    /* Encode compound type in a buffer */
+    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    if(cmpd_buf_size>0)
+        cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
+
+    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the compound buffer and return an object handle */
+    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode compound type\n");
+        goto error;
+    } /* end if */
+
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid1, tid1)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for compound type. */
+    if(H5Tget_nmembers(decoded_tid1)!=4) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if(H5Tget_member_index(decoded_tid1, "c")!=2) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /*-----------------------------------------------------------------------
+     * Test encoding and decoding compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
+    /* Encode enumerate type in a buffer */
+    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    if(enum_buf_size>0)
+        enum_buf = (unsigned char*)calloc(1, enum_buf_size);
+
+    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the enumerate buffer and return an object handle */
+    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid2, tid2)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for enumeration type. */
+    if(H5Tget_nmembers(decoded_tid2)!=5) {
+        H5_FAILED();
+        printf("Can't get member number\n");
+        goto error;
+    } /* end if */
+    if(H5Tget_member_index(decoded_tid2, "ORANGE")!=3) {
+        H5_FAILED();
+        printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /*-----------------------------------------------------------------------
+     * Close and release
+     *-----------------------------------------------------------------------
+     */
+    /* Close data type and file */
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tclose(decoded_tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(decoded_tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Fclose(file)<0) {
+        H5_FAILED();
+        printf("Can't close file\n");
+        goto error;
+    } /* end if */
+
+    free(cmpd_buf);
+    free(enum_buf);
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Tclose (tid1);
+        H5Tclose (tid2);
+        H5Tclose (decoded_tid1);
+        H5Tclose (decoded_tid2);
+        H5Fclose (file);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the data type interface.
@@ -6642,6 +6859,7 @@ main(void)
     nerrors += test_copy();
     nerrors += test_detect();
     nerrors += test_compound_1();
+    nerrors += test_query();
     nerrors += test_transient (fapl);
     nerrors += test_named (fapl);
     nerrors += test_encode();
@@ -6669,7 +6887,6 @@ main(void)
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
-
 
     /* Test degenerate cases */
     nerrors += test_conv_flt_1("noop", H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT);

@@ -195,7 +195,7 @@ test(fill_t fill_style, const double splits[],
     hsize_t	ch_size[1] = {1};		/*chunk size		*/
     hsize_t	cur_size[1] = {1000};		/*current dataset size	*/
     hsize_t	max_size[1] = {H5S_UNLIMITED};	/*maximum dataset size	*/
-    hssize_t	hs_start[1];			/*hyperslab start offset*/
+    hsize_t	hs_start[1];			/*hyperslab start offset*/
     hsize_t	hs_count[1] = {1};		/*hyperslab nelmts	*/
     int		fd = (-1);			/*h5 file direct	*/
     static int	*had = NULL;			/*for random filling	*/

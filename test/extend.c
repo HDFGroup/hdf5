@@ -55,7 +55,7 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
     static const hsize_t 	dims[2] = {NX, NY};
     static const hsize_t 	half_dims[2] = {NX/2, NY/2};
     static hsize_t		size[2];
-    hssize_t			offset[2];
+    hsize_t			offset[2];
     int				i, j, k, m;
 
     TESTING(msg);

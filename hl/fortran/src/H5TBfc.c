@@ -65,7 +65,6 @@ nh5tbmake_table_c(int_f *namelen1,
  hsize_t c_nfields    = *nfields;
  hsize_t c_nrecords   = *nrecords;
  hsize_t c_chunk_size = *chunk_size;
- int     c_compress   = *compress;
  size_t  c_type_size  = *type_size;
  size_t  *c_field_offset;
  hid_t   *c_field_types; 
@@ -689,11 +688,11 @@ nh5tbget_field_info_c(hid_t_f *loc_id,
  HD5packFstring(tmp, _fcdtocp(field_names), (int)(c_lenmax*c_nfields));
 
 
-	*type_size = c_type_size;
+	*type_size = (size_t_f)c_type_size;
 	for (i=0; i < num_elem; i++) 
 	{
-		field_sizes[i]   = c_field_sizes[i];
-		field_offsets[i] = c_field_offsets[i];
+		field_sizes[i]   = (size_t_f)c_field_sizes[i];
+		field_offsets[i] = (size_t_f)c_field_offsets[i];
  }
 
 

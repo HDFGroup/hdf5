@@ -13,7 +13,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5A_PACKAGE		/*suppress error about including H5Apkg	*/
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	*/
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5A_init_interface
@@ -29,7 +28,7 @@
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Spkg.h"		/* Dataspace functions			*/
+#include "H5Sprivate.h"		/* Dataspace functions			*/
 
 /* PRIVATE PROTOTYPES */
 static hid_t H5A_create(const H5G_entry_t *ent, const char *name,
@@ -81,7 +80,7 @@ H5A_init_interface(void)
     /*
      * Create attribute group.
      */
-    if (H5I_register_type(H5I_ATTR, H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close)<0)
+    if (H5I_register_type(H5I_ATTR, H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close)<H5I_FILE)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
     
 done:
@@ -113,10 +112,10 @@ H5A_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_term_interface)
     
     if (H5_interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_ATTR))) {
-	    H5I_clear_type(H5I_ATTR, FALSE);
+	if ((n=H5I_nmembers(H5I_ATTR))>0) {
+	    (void)H5I_clear_type(H5I_ATTR, FALSE);
 	} else {
-	    H5I_dec_type_ref(H5I_ATTR);
+	    (void)H5I_dec_type_ref(H5I_ATTR);
 	    H5_interface_initialize_g = 0;
 	    n = 1;
 	}
@@ -161,7 +160,7 @@ H5A_term_interface(void)
  *
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
- *	The LOC_ID can also be a committed data type.
+ *	The LOC_ID can also be a committed datatype.
  *	
 --------------------------------------------------------------------------*/
 /* ARGSUSED */
@@ -291,7 +290,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     else
         attr->dt_size=H5O_raw_size(H5O_DTYPE_ID,attr->ent.file,type);
     assert(attr->dt_size>0);
-    attr->ds_size=H5O_raw_size(H5O_SDSPACE_ID,attr->ent.file,&(space->extent));
+    attr->ds_size=H5S_raw_size(attr->ent.file,space);
     assert(attr->ds_size>0);
     H5_ASSIGN_OVERFLOW(attr->data_size,H5S_GET_EXTENT_NPOINTS(attr->ds)*H5T_get_size(attr->dt),hssize_t,size_t);
 
@@ -436,7 +435,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
- *	The LOC_ID can also be a named (committed) data type.
+ *	The LOC_ID can also be a named (committed) datatype.
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
@@ -493,7 +492,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
- *	The LOC_ID can also be a named (committed) data type.
+ *	The LOC_ID can also be a named (committed) datatype.
  *	
 --------------------------------------------------------------------------*/
 hid_t
@@ -614,7 +613,7 @@ H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
     if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if (NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
@@ -648,7 +647,7 @@ done:
 static herr_t
 H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 {
-    uint8_t		*tconv_buf = NULL;	/* data type conv buffer */
+    uint8_t		*tconv_buf = NULL;	/* datatype conv buffer */
     uint8_t		*bkg_buf = NULL;	/* temp conversion buffer */
     hssize_t		snelmts;		/* elements in attribute */
     size_t		nelmts;		    	/* elements in attribute */
@@ -679,7 +678,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
         /* Convert memory buffer into disk buffer */
         /* Set up type conversion function */
         if (NULL == (tpath = H5T_path_find(mem_type, attr->dt, NULL, NULL, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
+            HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dst datatypes")
 
         /* Check for type conversion required */
         if (!H5T_path_noop(tpath)) {
@@ -695,9 +694,9 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
             /* Copy the user's data into the buffer for conversion */
             HDmemcpy(tconv_buf,buf,(src_type_size*nelmts));
 
-            /* Perform data type conversion */
+            /* Perform datatype conversion */
             if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed")
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
 
             /* Free the previous attribute data buffer, if there is one */
             if(attr->data)
@@ -776,7 +775,7 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
     if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if (NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
@@ -810,7 +809,7 @@ done:
 static herr_t
 H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 {
-    uint8_t		*tconv_buf = NULL;	/* data type conv buffer*/
+    uint8_t		*tconv_buf = NULL;	/* datatype conv buffer*/
     uint8_t		*bkg_buf = NULL;	/* background buffer */
     hssize_t		snelmts;		/* elements in attribute */
     size_t		nelmts;			/* elements in attribute*/
@@ -845,7 +844,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
             /* Convert memory buffer into disk buffer */
             /* Set up type conversion function */
             if (NULL == (tpath = H5T_path_find(attr->dt, mem_type, NULL, NULL, dxpl_id)))
-                HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
+                HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dst datatypes")
 
             /* Check for type conversion required */
             if (!H5T_path_noop(tpath)) {
@@ -861,9 +860,9 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
                 /* Copy the attribute data into the buffer for conversion */
                 HDmemcpy(tconv_buf,attr->data,(src_type_size*nelmts));
 
-                /* Perform data type conversion.  */
+                /* Perform datatype conversion.  */
                 if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed")
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
 
                 /* Copy the converted data into the user's buffer */
                 HDmemcpy(buf,tconv_buf,(dst_type_size*nelmts));
@@ -958,10 +957,10 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 4 Jun 1998
- *	The data type is reopened if it's a named type before returning it to
- *	the application.  The data types returned by this function are always
- *	read-only. If an error occurs when atomizing the return data type
- *	then the data type is closed.
+ *	The datatype is reopened if it's a named type before returning it to
+ *	the application.  The datatypes returned by this function are always
+ *	read-only. If an error occurs when atomizing the return datatype
+ *	then the datatype is closed.
 --------------------------------------------------------------------------*/
 hid_t
 H5Aget_type(hid_t attr_id)
@@ -978,7 +977,7 @@ H5Aget_type(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /*
-     * Copy the attribute's data type.  If the type is a named type then
+     * Copy the attribute's datatype.  If the type is a named type then
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
@@ -989,7 +988,7 @@ H5Aget_type(hid_t attr_id)
     if (H5T_set_loc(dst, NULL, H5T_LOC_MEMORY)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
     if (H5T_lock(dst, FALSE)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient data type")
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
     
     /* Atomize */
     if ((ret_value=H5I_register(H5I_DATATYPE, dst))<0)
@@ -1160,7 +1159,7 @@ H5A_get_storage_size(const H5A_t *attr)
  *
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
- *	The LOC_ID can also be a named (committed) data type.
+ *	The LOC_ID can also be a named (committed) datatype.
 --------------------------------------------------------------------------*/
 int
 H5Aget_num_attrs(hid_t loc_id)
@@ -1183,14 +1182,14 @@ H5Aget_num_attrs(hid_t loc_id)
             break;
         case H5I_DATATYPE:
             if (NULL==(ent=H5T_entof ((H5T_t*)obj)))
-                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "target data type is not committed")
+                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "target datatype is not committed")
             break;
         case H5I_GROUP:
             ent = H5G_entof ((H5G_t*)obj);
             break;
         default:
             HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "inappropriate attribute target")
-    }
+    } /*lint !e788 All appropriate cases are covered */
 
     /* Look up the attribute for the object */
     ret_value=H5O_count(ent, H5O_ATTR_ID, H5AC_ind_dxpl_id);
@@ -1352,7 +1351,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
- *	The LOC_ID can also be a named (committed) data type.
+ *	The LOC_ID can also be a named (committed) datatype.
  *
  * 	Robb Matzke, 5 Jun 1998
  *	Like the group iterator, if ATTR_NUM is the null pointer then all
@@ -1433,7 +1432,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 5 Jun 1998
- *	The LOC_ID can also be a named (committed) data type.
+ *	The LOC_ID can also be a named (committed) datatype.
  *	
 --------------------------------------------------------------------------*/
 herr_t

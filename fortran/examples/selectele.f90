@@ -52,7 +52,7 @@
                                                    ! Memory dataspace dimensions 
      INTEGER(HSIZE_T), DIMENSION(2) :: dimsf = (/3,4/)
                                                    ! File dataspace dimensions
-     INTEGER(HSSIZE_T), DIMENSION(RANK,NUMP) :: coord ! Elements coordinates
+     INTEGER(HSIZE_T), DIMENSION(RANK,NUMP) :: coord ! Elements coordinates
                                                       ! in the file 
 
      INTEGER, DIMENSION(3,4) :: buf1, buf2, bufnew ! Data buffers

@@ -1,4 +1,3 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -96,10 +95,10 @@ int dowrite=1;				/* write test */
 int docleanup=1;			/* cleanup */
 
 /* Prototypes */
-void slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], int mode);
-void dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset);
-void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset);
-int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original);
+void slab_set(hsize_t start[], hsize_t count[], hsize_t stride[], int mode);
+void dataset_fill(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset);
+void dataset_print(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset);
+int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original);
 void phdf5writeInd(char *filename);
 void phdf5readInd(char *filename);
 void phdf5writeAll(char *filename);
@@ -117,7 +116,7 @@ void cleanup(void);
  * Assume dimension rank is 2.
  */
 void
-slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], int mode)
+slab_set(hsize_t start[], hsize_t count[], hsize_t stride[], int mode)
 {
     switch (mode){
     case BYROW:
@@ -157,10 +156,10 @@ slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], int mode)
  * Assume dimension rank is 2 and data is stored contiguous.
  */
 void
-dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
+dataset_fill(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
-    int i, j;
+    hsize_t i, j;
 
     /* put some trivial data in the data_array */
     for (i=0; i < count[0]; i++){
@@ -174,14 +173,14 @@ dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dat
 /*
  * Print the content of the dataset.
  */
-void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
+void dataset_print(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
-    int i, j;
+    hsize_t i, j;
 
     /* print the slab read */
     for (i=0; i < count[0]; i++){
-	printf("Row %d: ", (int)(i*stride[0]+start[0]));
+	printf("Row %lu: ", (unsigned long)(i*stride[0]+start[0]));
 	for (j=0; j < count[1]; j++){
 	    printf("%03d ", *dataptr++);
 	}
@@ -193,11 +192,12 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE
 /*
  * Print the content of the dataset.
  */
-int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original)
+int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original)
 {
 #define MAX_ERR_REPORT	10		/* Maximum number of errors reported */
 
-    int i, j, nerr;
+    hsize_t i, j;
+    int nerr;
 
     /* print it if verbose */
     if (verbose)
@@ -209,9 +209,9 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
 	    if (*dataset++ != *original++){
 		nerr++;
 		if (nerr <= MAX_ERR_REPORT){
-		    printf("Dataset Verify failed at [%d][%d](row %d, col %d): expect %d, got %d\n",
-			i, j,
-			(int)(i*stride[0]+start[0]), (int)(j*stride[1]+start[1]),
+		    printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
+			(unsigned long)i, (unsigned long)j,
+			(unsigned long)(i*stride[0]+start[0]), (unsigned long)(j*stride[1]+start[1]),
 			*(dataset-1), *(original-1));
 		}
 	    }
@@ -246,7 +246,7 @@ phdf5writeInd(char *filename)
 	{SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
@@ -311,8 +311,10 @@ phdf5writeInd(char *filename)
     stride[0] = 1;
     stride[1] =1;
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
-	start[0], start[1], count[0], count[1], count[0]*count[1]);
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), total datapoints=%lu\n",
+	(unsigned long)start[0], (unsigned long)start[1],
+        (unsigned long)count[0], (unsigned long)count[1],
+        (unsigned long)(count[0]*count[1]));
 
     /* put some trivial data in the data_array */
     dataset_fill(start, count, stride, &data_array1[0][0]);
@@ -373,7 +375,7 @@ phdf5readInd(char *filename)
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
     DATATYPE data_origin1[SPACE1_DIM1][SPACE1_DIM2];	/* expected data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
@@ -417,8 +419,10 @@ phdf5readInd(char *filename)
     stride[0] = 1;
     stride[1] =1;
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
-    start[0], start[1], count[0], count[1], count[0]*count[1]);
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), total datapoints=%lu\n",
+        (unsigned long)start[0], (unsigned long)start[1],
+        (unsigned long)count[0], (unsigned long)count[1],
+        (unsigned long)(count[0]*count[1]));
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);
@@ -489,7 +493,7 @@ phdf5writeAll(char *filename)
 	{SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
@@ -549,8 +553,10 @@ phdf5writeAll(char *filename)
     /* Dataset1: each process takes a block of rows. */
     slab_set(start, count, stride, BYROW);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
-	start[0], start[1], count[0], count[1], count[0]*count[1]);
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), total datapoints=%lu\n",
+	(unsigned long)start[0], (unsigned long)start[1],
+        (unsigned long)count[0], (unsigned long)count[1],
+        (unsigned long)(count[0]*count[1]));
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);				    
@@ -596,8 +602,10 @@ if (verbose)
     /* Dataset2: each process takes a block of columns. */
     slab_set(start, count, stride, BYCOL);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
-	start[0], start[1], count[0], count[1], count[0]*count[1]);
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), total datapoints=%lu\n",
+	(unsigned long)start[0], (unsigned long)start[1],
+        (unsigned long)count[0], (unsigned long)count[1],
+        (unsigned long)(count[0]*count[1]));
 
     /* put some trivial data in the data_array */
     dataset_fill(start, count, stride, &data_array1[0][0]);
@@ -685,7 +693,7 @@ phdf5readAll(char *filename)
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
     DATATYPE data_origin1[SPACE1_DIM1][SPACE1_DIM2];	/* expected data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
@@ -738,8 +746,10 @@ phdf5readAll(char *filename)
     /* Dataset1: each process takes a block of columns. */
     slab_set(start, count, stride, BYCOL);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
-	start[0], start[1], count[0], count[1], count[0]*count[1]);
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), total datapoints=%lu\n",
+	(unsigned long)start[0], (unsigned long)start[1],
+        (unsigned long)count[0], (unsigned long)count[1],
+        (unsigned long)(count[0]*count[1]));
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);				    
@@ -789,8 +799,10 @@ if (verbose)
     /* Dataset2: each process takes a block of rows. */
     slab_set(start, count, stride, BYROW);
 if (verbose)
-    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
-	start[0], start[1], count[0], count[1], count[0]*count[1]);
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), total datapoints=%lu\n",
+	(unsigned long)start[0], (unsigned long)start[1],
+        (unsigned long)count[0], (unsigned long)count[1],
+        (unsigned long)(count[0]*count[1]));
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);				    
@@ -918,7 +930,7 @@ test_split_comm_access(char filenames[][PATH_MAX])
  * Show command usage
  */
 void
-usage()
+usage(void)
 {
     printf("Usage: testphdf5 [-f <prefix>] [-r] [-w] [-v]\n");
     printf("\t-f\tfile prefix for parallel test files.\n");
@@ -1111,7 +1123,7 @@ finish:
 #else /* H5_HAVE_PARALLEL */
 /* dummy program since H5_HAVE_PARALLE is not configured in */
 int
-main()
+main(void)
 {
 printf("No PHDF5 example because parallel is not configured in\n");
 return(0);

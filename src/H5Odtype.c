@@ -29,7 +29,7 @@
 static herr_t H5O_dtype_encode (H5F_t *f, uint8_t *p, const void *mesg);
 static void *H5O_dtype_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_dtype_copy (const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_dtype_size (H5F_t *f, const void *_mesg);
+static size_t H5O_dtype_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset (void *_mesg);
 static herr_t H5O_dtype_free (void *_mesg);
 static herr_t H5O_dtype_get_share (H5F_t *f, const void *_mesg,
@@ -453,7 +453,6 @@ done:
         if(dt != NULL)
             H5FL_FREE(H5T_t, dt);
     }
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -985,7 +984,7 @@ done:
     sized "properties" field.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_dtype_size(H5F_t *f, const void *mesg)
+H5O_dtype_size(const H5F_t *f, const void *mesg)
 {
     unsigned		    i;
     size_t		    ret_value = 8;

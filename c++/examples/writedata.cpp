@@ -98,7 +98,7 @@ int main (void)
        * Select hyperslab for the dataset in the file, using 3x2 blocks, 
        * (4,3) stride and (2,4) count starting at the position (0,1).
        */
-      hssize_t start[2]; // Start of hyperslab
+      hsize_t start[2]; // Start of hyperslab
       hsize_t stride[2]; // Stride of hyperslab
       hsize_t count[2];  // Block count
       hsize_t block[2];  // Block sizes
@@ -156,14 +156,14 @@ int main (void)
       /*
        * Select sequence of NPOINTS points in the file dataspace.
        */
-      hssize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
+      hsize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
                                               from the file dataspace */ 
       coord[0][0] = 0; coord[0][1] = 0;
       coord[1][0] = 3; coord[1][1] = 3;
       coord[2][0] = 3; coord[2][1] = 5;
       coord[3][0] = 5; coord[3][1] = 6;
 
-      fspace.selectElements( H5S_SELECT_SET, NPOINTS, (const hssize_t **)coord);
+      fspace.selectElements( H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord);
 
       /*
        * Write new selection of points to the dataset.

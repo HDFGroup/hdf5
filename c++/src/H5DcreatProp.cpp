@@ -357,6 +357,7 @@ H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, unsigned int &flags
 ///\param	name      -     OUT: Name of the filter
 ///\param	filter_config - OUT: Flags indicating whether filter can encode/decode
 ///\exception	H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts,
                                       unsigned int* cd_values, size_t namelen, char name[],
@@ -622,7 +623,7 @@ int DSetCreatPropList::getExternalCount() const
 ///		will not be returned.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::getExternal( int idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const
+void DSetCreatPropList::getExternal( unsigned idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const
 {
    herr_t ret_value = H5Pget_external( id, idx, name_size, name, &offset, &size );
    if( ret_value < 0 )

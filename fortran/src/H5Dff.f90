@@ -307,7 +307,6 @@
 
           END SUBROUTINE h5dclose_f
 
-
           SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
@@ -4604,7 +4603,7 @@
                                 file_space_id_default, xfer_prp_default, buf, dims)
            
           END SUBROUTINE h5dread_double_7
-!
+
 !----------------------------------------------------------------------
 ! Name:		h5dget_space_f 
 !

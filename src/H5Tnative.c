@@ -170,7 +170,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
         
     assert(dtype); 
 
-    if((h5_class = H5T_get_class(dtype))<0)
+    if((h5_class = H5T_get_class(dtype))==H5T_NO_CLASS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
         
     if((size =  H5T_get_size(dtype))==0)
@@ -478,6 +478,8 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
             }
             break;   
 
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "data type doesn't match any native type")
     }   
@@ -647,9 +649,9 @@ H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             align = H5T_NATIVE_LLONG_COMP_ALIGN_g;            
             break;
             
+        case H5T_NATIVE_INT_MATCH_UNKNOWN:
         default:
-            assert(0 && "Unknown native integer match!");
-            break;
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "Unknown native integer match")
     } /* end switch */
         
     /* Create new native type */
@@ -764,9 +766,9 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
             align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
             break;
 
+        case H5T_NATIVE_FLOAT_MATCH_UNKNOWN:
         default:
-            assert(0 && "Unknown native floating-point match!");
-            break;
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "Unknown native floating-point match")
     } /* end switch */
    
     /* Create new native type */

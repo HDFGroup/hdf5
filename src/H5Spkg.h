@@ -54,7 +54,7 @@ typedef struct {
  */
 /* Node in point selection list (typedef'd in H5Sprivate.h) */
 struct H5S_pnt_node_t {
-    hssize_t *pnt;          /* Pointer to a selected point */
+    hsize_t *pnt;          /* Pointer to a selected point */
     struct H5S_pnt_node_t *next;  /* pointer to next point in list */
 };
 
@@ -67,7 +67,7 @@ typedef struct {
 
 /* Information a particular hyperslab span */
 struct H5S_hyper_span_t {
-    hssize_t low, high;         /* Low & high bounds of span */
+    hsize_t low, high;          /* Low & high bounds of span */
     hsize_t nelem;              /* Number of elements in span (only needed during I/O) */
     hsize_t pstride;            /* Pseudo-stride from start of previous span (only used during I/O) */
     struct H5S_hyper_span_info_t *down;     /* Pointer to list of spans in next dimension down */
@@ -118,7 +118,7 @@ typedef herr_t (*H5S_sel_serialize_func_t)(const H5S_t *space, uint8_t *buf);
 /* Method to store create selection from "serialized" form (a byte sequence suitable for storing on disk) */
 typedef herr_t (*H5S_sel_deserialize_func_t)(H5S_t *space, const uint8_t *buf);
 /* Method to determine to smallest n-D bounding box containing the current selection */
-typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hssize_t *start, hssize_t *end);
+typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hsize_t *start, hsize_t *end);
 /* Method to determine if current selection is contiguous */
 typedef htri_t (*H5S_sel_is_contiguous_func_t)(const H5S_t *space);
 /* Method to determine if current selection is a single block */
@@ -166,9 +166,9 @@ struct H5S_t {
 
 /* Selection iteration methods */
 /* Method to retrieve the current coordinates of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter, hssize_t *coords);
+typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter, hsize_t *coords);
 /* Method to retrieve the current block of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
+typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 /* Method to determine number of elements left in iterator for current selection */
 typedef hsize_t (*H5S_sel_iter_nelmts_func_t)(const H5S_sel_iter_t *iter);
 /* Method to determine if there are more blocks left in the current selection */

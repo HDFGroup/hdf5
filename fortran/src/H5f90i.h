@@ -67,7 +67,6 @@ typedef float             real_f;
 
 #endif /*APPLE*/
 
-
 /* LINUX definitions */
 #if (defined(linux) || defined(__gnu_linux__) || defined(__linux__))
 
@@ -106,7 +105,7 @@ typedef long              hssize_t_f;
 typedef long              size_t_f;
 #define FNAME_POST_UNDERSCORE
 
-#endif /* IA64 LINUX*/
+#endif /* IA64 */
 #endif /* LINUX*/
 
 #if defined(IRIX) || defined(IRIS4) || defined(sgi) || defined(__sgi__) || defined(__sgi)

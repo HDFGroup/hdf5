@@ -203,7 +203,7 @@ coll_irregular_complex_chunk_read(void)
 void coll_write_test(int chunk_factor)
 {
 
-  char *filename;
+  const char *filename;
   hid_t   acc_plist,xfer_plist;
   hid_t   file, datasetc,dataseti;           /* File and dataset identifiers */
   hid_t   mspaceid1, mspaceid, fspaceid,fspaceid1; /* Dataspace identifiers */
@@ -219,7 +219,7 @@ void coll_write_test(int chunk_factor)
 						  read selection from the
 						  dataset on the disk */
 
-  hssize_t start[2]; /* Start of hyperslab */
+  hsize_t start[2];   /* Start of hyperslab */
   hsize_t  stride[2]; /* Stride of hyperslab */
   hsize_t  count[2];  /* Block count */
   hsize_t  block[2];  /* Block sizes */
@@ -245,7 +245,7 @@ void coll_write_test(int chunk_factor)
 
 
   /* Obtain file name */
-  filename = (char *) GetTestParameters();    
+  filename = GetTestParameters();    
 
   /*
    * Buffers' initialization.
@@ -564,7 +564,7 @@ void coll_write_test(int chunk_factor)
 void coll_read_test(int chunk_factor)
 {
 
-  char *filename;
+  const char *filename;
   hid_t   acc_plist,xfer_plist;
   hid_t   file, dataseti;           /* File and dataset identifiers */
   hid_t   mspaceid, fspaceid1; /* Dataspace identifiers */
@@ -575,7 +575,7 @@ void coll_read_test(int chunk_factor)
 						  read selection from the
 						  dataset on the disk */
 
-  hssize_t start[2]; /* Start of hyperslab */
+  hsize_t  start[2]; /* Start of hyperslab */
   hsize_t  stride[2]; /* Stride of hyperslab */
   hsize_t  count[2];  /* Block count */
   hsize_t  block[2];  /* Block sizes */
@@ -598,7 +598,7 @@ void coll_read_test(int chunk_factor)
 
 
   /* Obtain file name */
-  filename = (char *) GetTestParameters();    
+  filename = GetTestParameters();    
 
   /*
    * Buffers' initialization.

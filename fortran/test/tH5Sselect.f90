@@ -371,7 +371,7 @@
     !
     !Points positions in the file 
     !
-    INTEGER(HSSIZE_T), DIMENSION(RANK,NUMP) :: coord
+    INTEGER(HSIZE_T), DIMENSION(RANK,NUMP) :: coord
 
     !
     !data buffers 
@@ -760,7 +760,7 @@
      !
      !array to give selected points' coordinations 
      !
-     INTEGER(HSSIZE_T), DIMENSION(RANK, NUMPS) :: coord
+     INTEGER(HSIZE_T), DIMENSION(RANK, NUMPS) :: coord
 
      !
      !Size of the hyperslab in memory 
@@ -793,7 +793,7 @@
      !
      !start and end bounds in the current dataspace selection 
      !
-     INTEGER(HSSIZE_T), DIMENSION(RANK) :: startout, endout
+     INTEGER(HSIZE_T), DIMENSION(RANK) :: startout, endout
 
      !
      !data to write 

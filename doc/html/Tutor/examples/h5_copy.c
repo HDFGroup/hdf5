@@ -38,7 +38,7 @@ int main (void)
      int bufnew[DIM1][DIM2];
      int val[] = {53, 59};
      hsize_t marray[] = {2};
-     hssize_t coord[NUMP][RANK];
+     hsize_t coord[NUMP][RANK];
      herr_t ret;
      uint  i, j;
 
@@ -95,7 +95,7 @@ int main (void)
      coord[0][0] = 0; coord[0][1] = 3;
      coord[1][0] = 0; coord[1][1] = 1;
 
-     ret = H5Sselect_elements (fid1, H5S_SELECT_SET, NUMP, (const hssize_t **)coord);
+     ret = H5Sselect_elements (fid1, H5S_SELECT_SET, NUMP, (const hsize_t **)coord);
 
      ret = H5Dwrite (dataset1, H5T_NATIVE_INT, mid1, fid1, H5P_DEFAULT, val); 
 

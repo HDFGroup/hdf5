@@ -51,7 +51,7 @@ Example 2: Create a simple fixed size 3-D dataspace in memory and on disk and
     hid_t dataset;                  /* Dataset ID */
     hid_t mem_space, file_space;    /* Dataspaces for memory and the file */
     uint8 *buf;                     /* Buffer for data */
-    hssize_t start[3]={3,4,5};      /* Start of hyperslab */
+    hsize_t start[3]={3,4,5};       /* Start of hyperslab */
     hsize_t stride[3]={1,2,2};      /* Stride for hyperslab */
     hsize_t count[3]={3,3,3};       /* Hyperslab block count in each dimension */
     hsize_t block[3]={2,2,2};       /* Hyperslab block size in each dimension */
@@ -169,7 +169,7 @@ Example 4: Create a simple fixed size 3-D dataspace in memory and on disk and
     hid_t dataset;                  /* Dataset ID */
     hid_t mem_space, file_space;    /* Dataspaces for memory and the file */
     uint8 *buf;                     /* Buffer for data */
-    hssize_t start[3];              /* Start of hyperslab */
+    hsize_t start[3];               /* Start of hyperslab */
     hsize_t stride[3];              /* Stride for hyperslab */
     hsize_t count[3];               /* Hyperslab block count in each dimension */
     hsize_t block[3];               /* Hyperslab block size in each dimension */
@@ -299,7 +299,7 @@ Example 6:  Create a stored dataspace on disk and use the H5Ssubspace function
 {
     hid_t file;                     /* File ID */
     hid_t space1, space2;           /* Dataspace IDs */
-    hssize_t start[3];              /* Start of hyperslab */
+    hsize_t start[3];               /* Start of hyperslab */
     hsize_t count[3];               /* Hyperslab block count in each dimension */
     hsize_t curr_dims[3]={13,14,15};/* Dimensions of the dataset */
 

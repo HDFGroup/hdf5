@@ -766,6 +766,8 @@
 
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
 ./src/hdf5.lnt				_DO_NOT_DISTRIBUTE_
+./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
+./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
 ./src/Dependencies
 ./src/H5.c
 ./src/H5api_adpt.h
@@ -1017,6 +1019,7 @@
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
+./test/gen_nullspace.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_

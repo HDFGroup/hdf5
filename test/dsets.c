@@ -1,4 +1,4 @@
- /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -23,7 +23,6 @@
 #include <time.h>
 
 #include "h5test.h"
-#include "H5private.h"
 
 /*
  * This file needs to access private datatypes from the H5Z package.
@@ -1296,7 +1295,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     hid_t		write_dxpl;     /* Dataset xfer property list ID for writing */
     hid_t		sid;            /* Dataspace ID */
     const hsize_t	size[2] = {DSET_DIM1, DSET_DIM2};           /* Dataspace dimensions */
-    const hssize_t	hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
+    const hsize_t	hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
     const hsize_t	hs_size[2] = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};   /* Hyperslab size */
     void		*tconv_buf = NULL;      /* Temporary conversion buffer */
     hsize_t		i, j, n;        /* Local index variables */
@@ -1634,115 +1633,200 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_FILTER_SZIP
 static herr_t
 test_filter_noencoder(const char *dset_name)
 {
-	hid_t file_id = -1;
-	hid_t dset_id = -1;
-	hid_t test_dset_id = -1;
-	hid_t dcpl_id = -1;
-	hid_t space_id = -1;
-	hsize_t dims = 10;
-	herr_t err;
-	int test_ints[10] = { 12 };
-	int read_buf[10];
-	int i;
-        char * srcdir = HDgetenv("srcdir"); /* Source directory */
-        char testfile[512]=""; /* Buffer to hold name of test file */
+    hid_t file_id = -1;
+    hid_t dset_id = -1;
+    hid_t test_dset_id = -1;
+    hid_t dcpl_id = -1;
+    hid_t space_id = -1;
+    hsize_t dims = 10;
+    herr_t err;
+    int test_ints[10] = { 12 };
+    int read_buf[10];
+    int i;
+    char * srcdir = HDgetenv("srcdir"); /* The source directory */
+    char testfile[512]="";	/* Buffer to hold name of test file */
 
-        /*
-         * Create the name of the file to open (in case we are using the --srcdir
-         * option and the file is in a different directory from this test).
-         */
-        if (srcdir && ((HDstrlen(srcdir) + HDstrlen(NOENCODER_FILENAME) + 1) < sizeof(testfile)) )
-        {
-            HDstrcpy(testfile, srcdir);
-            HDstrcat(testfile, "/");
-        }
-        HDstrcat(testfile, NOENCODER_FILENAME);
+    /*
+     * Create the name of the file to open (in case we are using the --srcdir
+     * option and the file is in a different directory from this test).
+     */
+    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(NOENCODER_FILENAME) + 1) < sizeof(testfile)) )
+    {
+        HDstrcpy(testfile, srcdir);
+        HDstrcat(testfile, "/");
+    }
+    HDstrcat(testfile, NOENCODER_FILENAME);
 
-	file_id = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
-	if (file_id < 0) goto error;
+    file_id = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
+    if (file_id < 0) goto error;
 
-	dset_id = H5Dopen(file_id, dset_name);
-	if (dset_id < 0) goto error;
+    dset_id = H5Dopen(file_id, dset_name);
+    if (dset_id < 0) goto error;
 
-        space_id = H5Screate_simple(1, &dims, NULL);
-	if (space_id < 0) goto error;
+    space_id = H5Screate_simple(1, &dims, NULL);
+    if (space_id < 0) goto error;
 
     TESTING("    decoding without encoder");
 
     /* Read the dataset and make sure the decoder is working correctly */
-	err = H5Dread(dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, read_buf);
-	if (err < 0) goto error;
+    err = H5Dread(dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, read_buf);
+    if (err < 0) goto error;
 
-	for(i = 0; i < 10; i++)
-		if ( read_buf[i] != i ) goto error;
+    for(i = 0; i < 10; i++)
+            if ( read_buf[i] != i ) goto error;
 
-	H5Sclose(space_id);
+    H5Sclose(space_id);
 
-	PASSED();
+    PASSED();
 
-	/* Attempt to copy the DCPL and use it to create a new dataset.
-	 * Since the filter does not have an encoder, the creation
-	 * should fail.
-	 */
+    /* Attempt to copy the DCPL and use it to create a new dataset.
+     * Since the filter does not have an encoder, the creation
+     * should fail.
+     */
     TESTING("    trying to write without encoder");
 
-	dcpl_id = H5Dget_create_plist(dset_id);
-	if (dcpl_id < 0) goto error;
+    dcpl_id = H5Dget_create_plist(dset_id);
+    if (dcpl_id < 0) goto error;
 
-	space_id = H5Screate_simple(1, &dims, NULL);
-	if (space_id < 0) goto error;
+    space_id = H5Screate_simple(1, &dims, NULL);
+    if (space_id < 0) goto error;
 
-	H5E_BEGIN_TRY{
-	test_dset_id = H5Dcreate(file_id, NOENCODER_TEST_DATASET, H5T_NATIVE_INT, space_id , dcpl_id);
-	}H5E_END_TRY
+    H5E_BEGIN_TRY{
+    test_dset_id = H5Dcreate(file_id, NOENCODER_TEST_DATASET, H5T_NATIVE_INT, space_id , dcpl_id);
+    }H5E_END_TRY
 
-	if (test_dset_id >= 0) goto error;
+    if (test_dset_id >= 0) goto error;
 
-	/* Attempt to extend the dataset.  This should fail because
-	 * the dataset has a fill value and is instructed to fill on
-	 * allocation.
-	 */
-	dims = 20; /* Dataset is originally of size 10 */
-	H5E_BEGIN_TRY{
-	err = H5Dextend(dset_id, &dims);
-	}H5E_END_TRY
+    /* Attempt to extend the dataset.  This should fail because
+     * the dataset has a fill value and is instructed to fill on
+     * allocation.
+     */
+    dims = 20; /* Dataset is originally of size 10 */
+    H5E_BEGIN_TRY{
+    err = H5Dextend(dset_id, &dims);
+    }H5E_END_TRY
 
-	if (err >= 0) goto error;
+    if (err >= 0) goto error;
 
-	/* Attempt to write to the dataset.  This should fail because
-	 * the filter does not have an encoder.
-	 */
-	H5E_BEGIN_TRY{
-	err = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, test_ints);
-	}H5E_END_TRY
+    /* Attempt to write to the dataset.  This should fail because
+     * the filter does not have an encoder.
+     */
+    H5E_BEGIN_TRY{
+    err = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, test_ints);
+    }H5E_END_TRY
 
-	if (err >= 0) goto error;
+    if (err >= 0) goto error;
 
-	H5Fclose(file_id);
-	H5Dclose(dset_id);
-	H5Sclose(space_id);
-	H5Pclose(dcpl_id);
+    H5Fclose(file_id);
+    H5Dclose(dset_id);
+    H5Sclose(space_id);
+    H5Pclose(dcpl_id);
 
-	PASSED();
+    PASSED();
 
-	return 0;
+    return 0;
 
 error:
-	H5_FAILED();
-	if (dset_id != -1)
-		H5Dclose(dset_id);
-	if (test_dset_id != -1)
-		H5Dclose(test_dset_id);
-	if (space_id != -1)
-		H5Sclose(space_id);
-	if (dcpl_id != -1)
-		H5Pclose(dcpl_id);
-	if (file_id != -1)
-		H5Fclose(file_id);
-	return -1;
+    H5_FAILED();
+    if (dset_id != -1)
+            H5Dclose(dset_id);
+    if (test_dset_id != -1)
+            H5Dclose(test_dset_id);
+    if (space_id != -1)
+            H5Sclose(space_id);
+    if (dcpl_id != -1)
+            H5Pclose(dcpl_id);
+    if (file_id != -1)
+            H5Fclose(file_id);
+    return -1;
+}
+#endif /* H5_HAVE_FILTER_SZIP */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_get_filter_info
+ *
+ * Purpose:     Tests the H5Zget_filter_info function. 
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Nat Furrer and James Laird 
+ *              Thursday, June 10, 2004 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_get_filter_info(void)
+{
+  unsigned int flags;  /* flags returned from H5Zget_filter_info */
+  herr_t err;
+
+  TESTING("H5Zget_filter_info");
+
+  /* Verify that each filter is reported as having the right combination
+   * of encoder and decoder. 
+   */
+#ifdef H5_HAVE_FILTER_FLETCHER32
+  if(H5Zget_filter_info(H5Z_FILTER_FLETCHER32, &flags) < 0) TEST_ERROR
+
+  if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
+     ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+      TEST_ERROR
+#endif
+
+#ifdef H5_HAVE_FILTER_SHUFFLE
+  if(H5Zget_filter_info(H5Z_FILTER_SHUFFLE, &flags) < 0) TEST_ERROR
+
+  if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) || 
+     ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+      TEST_ERROR
+#endif
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+  if(H5Zget_filter_info(H5Z_FILTER_DEFLATE, &flags) < 0) TEST_ERROR
+
+  if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) || 
+     ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+      TEST_ERROR
+#endif
+
+#ifdef H5_HAVE_FILTER_SZIP
+  if(H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0) TEST_ERROR
+
+#ifdef H5_SZIP_CAN_ENCODE
+  if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) || 
+         ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+          TEST_ERROR
+#else
+ if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) || 
+     ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+      TEST_ERROR
+#endif /* H5_SZIP_CAN_ENCODE */
+#endif /* H5_HAVE_FILTER_SZIP */
+
+  /* Verify that get_filter_info throws an error when given a bad filter */
+  /* (Depends on 1.6 compatibility flag) */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+  if (H5Zget_filter_info(-1, &flags) < 0) TEST_ERROR
+  if (flags != 0) TEST_ERROR
+#else /* H5_WANT_H5_V1_6_COMPAT */
+  H5E_BEGIN_TRY {
+    err = H5Zget_filter_info(-1, &flags);
+  } H5E_END_TRY;
+  if (err >= 0) TEST_ERROR
+#endif /* H5_WANT_H5_V1_6_COMPAT */
+
+  PASSED();
+  return 0;
+
+error:
+  return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -1782,7 +1866,7 @@ test_filters(hid_t file)
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
-#ifdef H5_HAVE_FILTER_SZIP 
+#ifdef H5_HAVE_FILTER_SZIP
     hsize_t     szip_size;       /* Size of dataset with szip filter */
     unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=4;
@@ -1795,7 +1879,10 @@ test_filters(hid_t file)
 #if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP) && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
     hsize_t     combo_size;     /* Size of dataset with shuffle+deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
-    
+   
+    /* test the H5Zget_filter_info function */
+    if(test_get_filter_info() < 0) goto error;
+ 
     /*----------------------------------------------------------
      * STEP 0: Test null I/O filter by itself.
      *----------------------------------------------------------
@@ -1917,9 +2004,7 @@ test_filters(hid_t file)
      * STEP 4: Test shuffling by itself.
      *----------------------------------------------------------
      */
-
 #ifdef H5_HAVE_FILTER_SHUFFLE
-
     puts("Testing shuffle filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
@@ -1945,7 +2030,6 @@ test_filters(hid_t file)
      *----------------------------------------------------------
      */
 #if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 
-
     puts("Testing shuffle+deflate+checksum filters(checksum first)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
@@ -2008,9 +2092,9 @@ test_filters(hid_t file)
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
 	
-	TESTING("shuffle+szip+checksum filters(checksum last, with encoder)");
-	/* Make sure encoding is enabled */
+    TESTING("shuffle+szip+checksum filters(checksum last, with encoder)");
 
+    /* Make sure encoding is enabled */
     if ( h5_szip_can_encode() == 1) {
 	puts("");
 	if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
@@ -2644,7 +2728,7 @@ test_can_apply(hid_t file)
     } /* end if */
 
     /* Create new dataset */
-   /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
+    /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
     H5E_BEGIN_TRY {
         dsid = H5Dcreate(file, DSET_CAN_APPLY_NAME, H5T_NATIVE_DOUBLE, sid, dcpl);
     } H5E_END_TRY;
@@ -2782,139 +2866,140 @@ file)
 
     if (h5_szip_can_encode() == 1) {
     /* Create the data space */
-      if ((sid = H5Screate_simple(2, dims, NULL))<0) {
+    if ((sid = H5Screate_simple(2, dims, NULL))<0) {
         H5_FAILED();
         printf("    Line %d: Can't open dataspace\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Create dcpl with special filter */
-      if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
+    /* Create dcpl with special filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
         H5_FAILED();
         printf("    Line %d: Can't create dcpl\n",__LINE__);
         goto error;
-      } /* end if */
-      if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) {
+    } /* end if */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Set (invalid at property set time) szip parameters */
-      szip_pixels_per_block=3;
-      H5E_BEGIN_TRY {
+    /* Set (invalid at property set time) szip parameters */
+    szip_pixels_per_block=3;
+    H5E_BEGIN_TRY {
         ret=H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block);
-      } H5E_END_TRY;
-      if(ret>=0) {
+    } H5E_END_TRY;
+    if(ret>=0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't be able to set szip filter\n",__LINE__);
         goto error;
-      }
+    }
 
-      /* Set (invalid at property set time) szip parameters */
-      szip_pixels_per_block=512;
-      H5E_BEGIN_TRY {
+    /* Set (invalid at property set time) szip parameters */
+    szip_pixels_per_block=512;
+    H5E_BEGIN_TRY {
         ret=H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block);
-      } H5E_END_TRY;
-      if(ret>=0) {
+    } H5E_END_TRY;
+    if(ret>=0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't be able to set szip filter\n",__LINE__);
         goto error;
-      }
+    }
 
-      /* Set (invalid at dataset creation time) szip parameters */
-      szip_pixels_per_block=2;
-      if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
+    /* Set (invalid at dataset creation time) szip parameters */
+    szip_pixels_per_block=2;
+    if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set szip filter\n",__LINE__);
         goto error;
-      }
+    }
 
-      /* Create new dataset */
-      /* (Should succeed; according to the new algorithm, scanline should be reset 
+    /* Create new dataset */
+    /* (Should succeed; according to the new algorithm, scanline should be reset
         to 2*128 satisfying 'maximum blocks per scanline' condition) */
-      H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY {
         dsid = H5Dcreate(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, dcpl);
-      } H5E_END_TRY;
-      if (dsid <=0) {
+    } H5E_END_TRY;
+    if (dsid <=0) {
         H5_FAILED();
         printf("    Line %d: Should have created dataset!\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Close dataset */
-      if(H5Dclose(dsid)<0) {
+    /* Close dataset */
+    if(H5Dclose(dsid)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dataset\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Close dataspace */
-      if(H5Sclose(sid)<0) {
+    /* Close dataspace */
+    if(H5Sclose(sid)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dataspace\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Close dataset creation property list */
-      if(H5Pclose(dcpl)<0) {
+    /* Close dataset creation property list */
+    if(H5Pclose(dcpl)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dcpl\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Create another data space */
-      if ((sid = H5Screate_simple(2, dims2, NULL))<0) {
+    /* Create another data space */
+    if ((sid = H5Screate_simple(2, dims2, NULL))<0) {
         H5_FAILED();
         printf("    Line %d: Can't open dataspace\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Create dcpl with special filter */
-      if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
+    /* Create dcpl with special filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
         H5_FAILED();
         printf("    Line %d: Can't create dcpl\n",__LINE__);
         goto error;
-      } /* end if */
-      if(H5Pset_chunk(dcpl, 2, chunk_dims2)<0) {
+    } /* end if */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims2)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Set (invalid at dataset creation time) szip parameters */
-      szip_pixels_per_block=32;
-      if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
+    /* Set (invalid at dataset creation time) szip parameters */
+    szip_pixels_per_block=32;
+    if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set szip filter\n",__LINE__);
         goto error;
-      }
+    }
 
-      /* Create new dataset */
-      /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
-      H5E_BEGIN_TRY {
+    /* Create new dataset */
+    /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
+    H5E_BEGIN_TRY {
         dsid = H5Dcreate(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, dcpl);
-      } H5E_END_TRY;
-      if (dsid >=0) {
+    } H5E_END_TRY;
+    if (dsid >=0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't have created dataset!\n",__LINE__);
         H5Dclose(dsid);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Close dataspace */
-      if(H5Sclose(sid)<0) {
+    /* Close dataspace */
+    if(H5Sclose(sid)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dataspace\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
 
-      /* Close dataset creation property list */
-      if(H5Pclose(dcpl)<0) {
+    /* Close dataset creation property list */
+    if(H5Pclose(dcpl)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dcpl\n",__LINE__);
         goto error;
-      } /* end if */
+    } /* end if */
+
 
     PASSED();
 } else {
@@ -3701,7 +3786,7 @@ static herr_t
 test_missing_chunk(hid_t file)
 {
     hid_t       s=-1, d=-1, dcpl=-1;
-    hssize_t	hs_start[1];
+    hsize_t	hs_start[1];
     hsize_t	hs_stride[1],
                 hs_count[1],
                 hs_block[1];

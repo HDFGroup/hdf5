@@ -42,7 +42,7 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	void setChunk( int ndims, const hsize_t* dim ) const;
 
 	// Returns information about an external file.
-	void getExternal( int idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const;
+	void getExternal( unsigned idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const;
 
 	// Returns the number of external files for a dataset.
 	int getExternalCount() const;

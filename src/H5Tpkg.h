@@ -143,9 +143,9 @@ typedef struct H5T_enum_t {
 } H5T_enum_t;
 
 /* VL function pointers */
-typedef ssize_t (*H5T_vlen_getlenfunc_t)(void *vl_addr);
+typedef ssize_t (*H5T_vlen_getlenfunc_t)(const void *vl_addr);
 typedef void * (*H5T_vlen_getptrfunc_t)(void *vl_addr);
-typedef htri_t (*H5T_vlen_isnullfunc_t)(H5F_t *f, void *vl_addr);
+typedef htri_t (*H5T_vlen_isnullfunc_t)(const H5F_t *f, void *vl_addr);
 typedef herr_t (*H5T_vlen_readfunc_t)(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t len);
 typedef herr_t (*H5T_vlen_writefunc_t)(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size);
 typedef herr_t (*H5T_vlen_setnullfunc_t)(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
@@ -329,14 +329,14 @@ H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
 H5_DLL char  *H5T_get_member_name(H5T_t const *dt, unsigned membno);
 H5_DLL herr_t H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value);
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
-H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
+H5_DLL herr_t H5T_insert(const H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
 H5_DLL H5T_t *H5T_enum_create(const H5T_t *parent);
-H5_DLL herr_t H5T_enum_insert(H5T_t *dt, const char *name, const void *value);
+H5_DLL herr_t H5T_enum_insert(const H5T_t *dt, const char *name, const void *value);
 H5_DLL int    H5T_get_array_ndims(H5T_t *dt);
 H5_DLL int    H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[]);
-H5_DLL herr_t H5T_sort_value(H5T_t *dt, int *map);
-H5_DLL herr_t H5T_sort_name(H5T_t *dt, int *map);
+H5_DLL herr_t H5T_sort_value(const H5T_t *dt, int *map);
+H5_DLL herr_t H5T_sort_name(const H5T_t *dt, int *map);
 H5_DLL herr_t H5T_set_size(H5T_t *dt, size_t size);
 
 /* Conversion functions */
@@ -1082,7 +1082,7 @@ H5_DLL void H5T_bit_neg(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
 H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);
-H5_DLL htri_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
+H5_DLL htri_t H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 
 /* Array functions */
 H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
@@ -1091,7 +1091,7 @@ H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
 /* Compound functions */
 H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
-H5_DLL size_t H5T_get_member_size(H5T_t *dt, unsigned membno);
+H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 
 #endif

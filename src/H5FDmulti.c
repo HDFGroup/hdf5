@@ -30,7 +30,7 @@
 /*lint --emacro( {534, 830}, H5P_DEFAULT, H5P_FILE_ACCESS, H5P_DATASET_XFER) */
 /*lint --emacro( {534, 830}, H5F_ACC_DEBUG, H5F_ACC_RDWR) */
 /*lint --emacro( {534, 830}, H5FD_MULTI) */
-/*lint -esym( 534, H5Eclear, H5Epush) */
+/*lint -esym( 534, H5Eclear_stack, H5Epush_stack) */
 
 #include "hdf5.h"
 
@@ -1497,7 +1497,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, haddr_t eoa)
 	    status = H5FDset_eoa(file->memb[mmt], eoa-file->fa.memb_addr[mmt]);
 	} H5E_END_TRY;
 	if (status<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
     }
     
     /* Save new eoa for return later */
@@ -1541,7 +1541,7 @@ H5FD_multi_get_eof(H5FD_t *_file)
 		tmp = H5FDget_eof(file->memb[mt]);
 	    } H5E_END_TRY;
 	    if (HADDR_UNDEF==tmp)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF)
 	    if (tmp>0) tmp += file->fa.memb_addr[mt];
 	    
 	} else if (file->fa.relax) {
@@ -1553,7 +1553,7 @@ H5FD_multi_get_eof(H5FD_t *_file)
 	    assert(HADDR_UNDEF!=tmp);
 	    
 	} else {
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eof", HADDR_UNDEF)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eof", HADDR_UNDEF)
 	}
 
 	if (tmp>eof) eof = tmp;
@@ -1623,9 +1623,8 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     mmt = file->fa.memb_map[type];
     if (H5FD_MEM_DEFAULT==mmt) mmt = type;
     
-    if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], type, dxpl_id, size))) {
+    if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], type, dxpl_id, size)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file can't alloc", HADDR_UNDEF)
-    }
     addr += file->fa.memb_addr[mmt];
     if (addr+size>file->eoa) file->eoa = addr+size;
     return addr;

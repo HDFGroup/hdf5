@@ -223,13 +223,13 @@
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/2,9/)  ! Datasets dimensions
           INTEGER(HSIZE_T), DIMENSION(1) :: dimsr = (/2/)   ! 
-          INTEGER(HSSIZE_T), DIMENSION(2) :: start
+          INTEGER(HSIZE_T), DIMENSION(2) :: start
           INTEGER(HSIZE_T), DIMENSION(2) :: count
           INTEGER :: rankr = 1 
           INTEGER :: rank = 2
           INTEGER , DIMENSION(2,9) ::  data 
           INTEGER , DIMENSION(2,9) ::  data_out = 0 
-          INTEGER(HSSIZE_T) , DIMENSION(2,3) :: coord
+          INTEGER(HSIZE_T) , DIMENSION(2,3) :: coord
           INTEGER(SIZE_T) ::num_points = 3  ! Number of selected points
           INTEGER :: i, j
           coord = reshape((/1,1,2,7,1,9/), (/2,3/))   ! Coordinates of selected points

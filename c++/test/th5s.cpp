@@ -27,8 +27,8 @@
 #include <iostream>
 #endif
 
-#include "H5Cpp.h"
 #include "testhdf5.h"
+#include "H5Cpp.h"
 #include "h5cpputil.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -159,7 +159,7 @@ test_h5s_basic(void)
     }	// end of first try block
     catch( DataSpaceIException error ) 
     {
-        issue_fail_msg(error.getCFuncName(), __LINE__, __FILE__); 
+        issue_fail_msg(error.getCFuncName(), __LINE__, __FILE__);
     }
 
     /*
@@ -229,8 +229,8 @@ test_h5s_basic(void)
     try {
 	sid3.setExtentSimple( SPACE1_RANK, dims1 );
 
-	// but didn't, issue an error message
-	issue_fail_msg("DataSpace::setExtentSimple", __LINE__, __FILE__); 
+        // but didn't, issue an error message
+        issue_fail_msg("DataSpace::setExtentSimple", __LINE__, __FILE__);
     }
     catch (DataSpaceIException error) {}  // do nothing, FAIL expected
 }				/* test_h5s_basic() */

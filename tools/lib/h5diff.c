@@ -55,7 +55,7 @@ hsize_t h5diff(const char *fname1,
  int          nobjects1, nobjects2;
  trav_info_t  *info1=NULL;
  trav_info_t  *info2=NULL;
- hid_t        file1_id, file2_id; 
+ hid_t        file1_id=(-1), file2_id=(-1); 
  hsize_t      nfound=0;
 
  if (options->m_quiet && 
@@ -414,10 +414,10 @@ hsize_t diff( hid_t      file1_id,
               diff_opt_t *options, 
               H5G_obj_t  type )
 {
- hid_t       type1_id;
- hid_t       type2_id;
- hid_t       grp1_id;
- hid_t       grp2_id;
+ hid_t       type1_id=(-1);
+ hid_t       type2_id=(-1);
+ hid_t       grp1_id=(-1);
+ hid_t       grp2_id=(-1);
  int         ret;
  H5G_stat_t  sb1;
  H5G_stat_t  sb2;
@@ -436,7 +436,7 @@ hsize_t diff( hid_t      file1_id,
   /* always print name */
   if (options->m_verbose)
   {
-   if (print_objname(options,1))
+   if (print_objname(options,(hsize_t)1))
     printf( "Dataset:     <%s> and <%s>\n",path1,path2);
    nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
    

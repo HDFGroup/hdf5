@@ -272,9 +272,9 @@ static void gent_dataset(void)
               dset2[i][j] = 0.0001*j+i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+  
     H5Sclose(space);
     H5Dclose(dataset);
-
     H5Fclose(fid);
 }
 
@@ -382,10 +382,10 @@ static void gent_attribute(void)
     H5Tset_size(type, 17);
     attr = H5Acreate (root, "attr5", type, space, H5P_DEFAULT);
     H5Awrite(attr, type, string);
+
+    H5Tclose(type);
     H5Sclose(space);
     H5Aclose(attr);
-   
-    H5Tclose(type);
     H5Gclose(root);
     H5Fclose(fid);
 }
@@ -1358,7 +1358,7 @@ static void gent_str2(void)
 hid_t fid, group, attr, dataset, space, space2, mem_space, hyper_space;
 hid_t fxdlenstr, fxdlenstr2, memtype;
 hsize_t dims[1], size[1], stride[1], count[1], block[1];
-hssize_t start[1];
+hsize_t start[1];
 
 
 int i;
@@ -1657,11 +1657,11 @@ static void gent_datareg(void)
                 sid2;       /* Dataspace ID #2  */
     hsize_t  dims1[] = {SPACE1_DIM1},
              dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hssize_t start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t  start[SPACE2_RANK];     /* Starting location of hyperslab */
     hsize_t  stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t  count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t  block[SPACE2_RANK];     /* Block size of hyperslab */
-    hssize_t coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t  coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hdset_reg_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
@@ -1724,7 +1724,7 @@ static void gent_datareg(void)
     coord1[7][0]=9; coord1[7][1]=0;
     coord1[8][0]=7; coord1[8][1]=1;
     coord1[9][0]=3; coord1[9][1]=3;
-    H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
 
     H5Sget_select_npoints(sid2);
 
@@ -3077,7 +3077,7 @@ static void gent_char(void)
  *
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype) 
  *
- * Return: 
+ * Return: void
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -3517,7 +3517,7 @@ static void write_attr_in(hid_t loc_id,
  *
  * Purpose: write datasets in LOC_ID 
  *
- * Return: 
+ * Return: void
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -3984,8 +3984,8 @@ static void write_dset_in(hid_t loc_id,
 
 static void gent_attr_all(void)
 {
-    hid_t   file_id; 
-    hid_t   dset_id;
+ hid_t   file_id; 
+ hid_t   dset_id;
  hid_t   group_id;
  hid_t   group2_id;
  hid_t   root_id;
@@ -4432,8 +4432,6 @@ int make_dset(hid_t loc_id,
 
 
 
-
-
 /*-------------------------------------------------------------------------
  * Function: make_external
  *
@@ -4805,7 +4803,6 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
  
  return(SUCCEED);
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: gent_fcontents
@@ -5258,8 +5255,6 @@ static void gent_aindices(void)
 }
 
 
-
-
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -5322,3 +5317,4 @@ int main(void)
 
     return 0;
 }
+

@@ -27,7 +27,7 @@ void parse_command_line (int argc, const char *argv[]);
 #define TRUE 1
 #define FALSE 0
 
-static char *progname="getub";
+static const char *progname="getub";
 char *nbytes = NULL;
 
 static const char *s_opts = "c:";	/* add more later ? */
@@ -153,7 +153,7 @@ main (int argc, const char *argv[])
 
   res = HDread (fd, buf, (unsigned)size);
 
-  if (res < size)
+  if (res < (long)size)
     {
       if (buf)
 	free (buf);

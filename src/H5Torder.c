@@ -127,14 +127,14 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
-    if (order < 0 || order > H5T_ORDER_NONE)
+    if (order < H5T_ORDER_LE || order > H5T_ORDER_NONE)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order")
     if (H5T_ENUM==dt->shared->type && dt->shared->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
     if (!H5T_IS_ATOMIC(dt->shared))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "operation not defined for specified data type")
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
 
     /* Commit */
     dt->shared->u.atomic.order = order;

@@ -6340,7 +6340,7 @@
 ! Inputs:  
 !		prp_id		- data creation or transfer property list 
 !				  identifier
-!		filter		- filter to be deleted
+!		filter		- filter to be removed
 ! Outputs:  
 !		hdferr:		- error code		
 !				 	Success:  0
@@ -6364,10 +6364,10 @@
 !DEC$endif
 !
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER, INTENT(IN) :: filter  !Filter to be modified
-
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property list
+                                                 ! identifier
+            INTEGER, INTENT(IN) :: filter        ! Filter to be removed
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
 
 !            INTEGER, EXTERNAL :: h5premove_filter_c
 !  MS FORTRAN needs explicit interface for C functions called here.
@@ -6376,7 +6376,7 @@
               INTEGER FUNCTION h5premove_filter_c(prp_id, filter)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PMODIFY_FILTER_C'::h5premove_filter_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREMOVE_FILTER_C'::h5premove_filter_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER, INTENT(IN) :: filter 

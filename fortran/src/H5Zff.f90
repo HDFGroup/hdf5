@@ -131,7 +131,7 @@
           END SUBROUTINE h5zfilter_avail_f
 
 !----------------------------------------------------------------------
-! Name:		h5zfilter_avail_f
+! Name:		h5zget_filter_info_f
 !
 ! Purpose:      Queries if filter has its encoder and/or decoder 
 !               available	

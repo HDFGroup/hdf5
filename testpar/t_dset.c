@@ -43,7 +43,7 @@
  * ZCOL		same as BYCOL except process 0 gets 0 columns
  */
 static void
-slab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
+slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
 	 hsize_t stride[], hsize_t block[], int mode)
 {
     switch (mode){
@@ -110,8 +110,8 @@ if (VERBOSE_MED) printf("slab_set wholeset\n");
 	break;
     }
 if (VERBOSE_MED){
-    printf("start[]=(%ld,%ld), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
-	(long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
+	(unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
 	(unsigned long)(block[0]*block[1]*count[0]*count[1]));
     }
@@ -123,7 +123,7 @@ if (VERBOSE_MED){
  * Assume dimension rank is 2 and data is stored contiguous.
  */
 static void
-dataset_fill(hssize_t start[], hsize_t block[], DATATYPE * dataset)
+dataset_fill(hsize_t start[], hsize_t block[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
     hsize_t i, j;
@@ -142,7 +142,7 @@ dataset_fill(hssize_t start[], hsize_t block[], DATATYPE * dataset)
  * Print the content of the dataset.
  */
 static void
-dataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
+dataset_print(hsize_t start[], hsize_t block[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
     hsize_t i, j;
@@ -150,13 +150,13 @@ dataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
     /* print the column heading */
     printf("%-8s", "Cols:");
     for (j=0; j < block[1]; j++){
-	printf("%3ld ", (long)(start[1]+j));
+	printf("%3lu ", (unsigned long)(start[1]+j));
     }
     printf("\n");
 
     /* print the slab data */
     for (i=0; i < block[0]; i++){
-	printf("Row %2ld: ", (long)(i+start[0]));
+	printf("Row %2lu: ", (unsigned long)(i+start[0]));
 	for (j=0; j < block[1]; j++){
 	    printf("%03d ", *dataptr++);
 	}
@@ -168,7 +168,8 @@ dataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
 /*
  * Print the content of the dataset.
  */
-int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
+int
+dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
 {
     hsize_t i, j;
     int vrfyerrs;
@@ -176,8 +177,8 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
 	printf("dataset_vrfy dumping:::\n");
-	printf("start(%ld, %ld), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-	    (long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+	printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+	    (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	    (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
 	printf("original values:\n");
 	dataset_print(start, block, original);
@@ -190,9 +191,9 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
 	for (j=0; j < block[1]; j++){
 	    if (*dataset != *original){
 		if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
-		    printf("Dataset Verify failed at [%ld][%ld](row %ld, col %ld): expect %d, got %d\n",
-			(long)i, (long)j,
-			(long)(i+start[0]), (long)(j+start[1]),
+		    printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
+			(unsigned long)i, (unsigned long)j,
+			(unsigned long)(i+start[0]), (unsigned long)(j+start[1]),
 			*(original), *(dataset));
 		}
 		dataset++;
@@ -234,7 +235,7 @@ dataset_writeInd(void)
     DATATYPE *data_array1 = NULL;	/* data buffer */
     const char *filename;
 
-    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 
@@ -380,7 +381,7 @@ dataset_readInd(void)
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
     const char *filename;
 
-    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 
@@ -506,7 +507,7 @@ dataset_writeAll(void)
     DATATYPE *data_array1 = NULL;	/* data buffer */
     const char *filename;
 
-    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 
@@ -865,7 +866,7 @@ dataset_readAll(void)
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
     const char *filename;
 
-    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 
@@ -1092,7 +1093,7 @@ extend_writeInd(void)
     hsize_t	chunk_dims[RANK];		/* chunk sizes */
     hid_t	dataset_pl;			/* dataset create prop. list */
 
-    hssize_t	start[RANK];			/* for hyperslab setting */
+    hsize_t	start[RANK];			/* for hyperslab setting */
     hsize_t	count[RANK];			/* for hyperslab setting */
     hsize_t	stride[RANK];			/* for hyperslab setting */
     hsize_t 	block[RANK];			/* for hyperslab setting */
@@ -1434,7 +1435,7 @@ extend_writeInd2(void)
             printf("%s%d", i?", ":"", written[i]);
         printf("\n");
     }
-    ret = H5Sselect_hyperslab(fs, H5S_SELECT_SET, (hssize_t *)&orig_size, NULL, &one, &orig_size);
+    ret = H5Sselect_hyperslab(fs, H5S_SELECT_SET, &orig_size, NULL, &one, &orig_size);
     VRFY((ret >= 0), "H5Sselect_hyperslab succeeded");
     ret = H5Dwrite(dataset, H5T_NATIVE_INT, ms, fs, H5P_DEFAULT, written);
     VRFY((ret >= 0), "H5Dwrite succeeded");
@@ -1483,7 +1484,7 @@ extend_readInd(void)
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
     const char *filename;
 
-    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 
@@ -1666,7 +1667,7 @@ extend_writeAll(void)
     hsize_t	chunk_dims[RANK];		/* chunk sizes */
     hid_t	dataset_pl;			/* dataset create prop. list */
 
-    hssize_t	start[RANK];			/* for hyperslab setting */
+    hsize_t	start[RANK];			/* for hyperslab setting */
     hsize_t	count[RANK];			/* for hyperslab setting */
     hsize_t	stride[RANK];			/* for hyperslab setting */
     hsize_t 	block[RANK];			/* for hyperslab setting */
@@ -1905,7 +1906,7 @@ extend_readAll(void)
     DATATYPE *data_array2 = NULL;	/* data buffer */
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
 
-    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
     hsize_t block[RANK];			/* for hyperslab setting */
 

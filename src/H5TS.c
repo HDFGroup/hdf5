@@ -105,8 +105,10 @@ H5TS_first_thread_init(void)
 
     /* initialize key for thread-specific error stacks */
     pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
+
     /* initialize key for thread-specific function stacks */
     pthread_key_create(&H5TS_funcstk_key_g, H5TS_key_destructor);
+
     /* initialize key for thread cancellability mechanism */
     pthread_key_create(&H5TS_cancel_key_g, H5TS_key_destructor);
 }

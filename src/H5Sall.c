@@ -43,15 +43,15 @@ static htri_t H5S_all_is_valid(const H5S_t *space);
 static hssize_t H5S_all_serial_size(const H5S_t *space);
 static herr_t H5S_all_serialize(const H5S_t *space, uint8_t *buf);
 static herr_t H5S_all_deserialize(H5S_t *space, const uint8_t *buf);
-static herr_t H5S_all_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
+static herr_t H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static htri_t H5S_all_is_contiguous(const H5S_t *space);
 static htri_t H5S_all_is_single(const H5S_t *space);
 static htri_t H5S_all_is_regular(const H5S_t *space);
 static herr_t H5S_all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
-static herr_t H5S_all_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
-static herr_t H5S_all_iter_block(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
+static herr_t H5S_all_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
+static herr_t H5S_all_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 static hsize_t H5S_all_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S_all_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S_all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
@@ -145,7 +145,7 @@ H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_all_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
+H5S_all_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
 {
     herr_t ret_value=SUCCEED;        /* Return value */
 
@@ -180,7 +180,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_all_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
+H5S_all_iter_block (const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
     unsigned u;                 /* Local index variable */
 
@@ -565,8 +565,8 @@ done:
  USAGE
     herr_t H5S_all_bounds(space, start, end)
         H5S_t *space;           IN: Dataspace pointer of selection to query
-        hssize_t *start;         OUT: Starting coordinate of bounding box
-        hssize_t *end;           OUT: Opposite coordinate of bounding box
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -583,7 +583,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
+H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 {
     int rank;                  /* Dataspace rank */
     int i;                     /* index variable */
@@ -600,7 +600,7 @@ H5S_all_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
     /* Just copy over the complete extent */
     for(i=0; i<rank; i++) {
         start[i]=0;
-        H5_ASSIGN_OVERFLOW(end[i],space->extent.size[i]-1,hsize_t,hssize_t);
+        end[i]=space->extent.size[i]-1;
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED);

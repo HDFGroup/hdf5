@@ -33,7 +33,7 @@
 
 /* Local functions */
 #ifdef LATER
-static herr_t H5S_select_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
+static herr_t H5S_select_iter_block (const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 static htri_t H5S_select_iter_has_next_block (const H5S_sel_iter_t *iter);
 static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
 #endif /* LATER */
@@ -488,8 +488,8 @@ done:
  USAGE
     herr_t H5S_get_select_bounds(space, start, end)
         hid_t dsid;             IN: Dataspace ID of selection to query
-        hssize_t *start;         OUT: Starting coordinate of bounding box
-        hssize_t *end;           OUT: Opposite coordinate of bounding box
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -511,13 +511,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_select_bounds(hid_t spaceid, hssize_t *start, hssize_t *end)
+H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value;        /* return value */
 
     FUNC_ENTER_API(H5Sget_select_bounds, FAIL);
-    H5TRACE3("e","i*Hs*Hs",spaceid,start,end);
+    H5TRACE3("e","i*h*h",spaceid,start,end);
 
     /* Check args */
     if(start==NULL || end==NULL)
@@ -540,8 +540,8 @@ done:
  USAGE
     herr_t H5S_get_select_bounds(space, start, end)
         H5S_t *space;           IN: Dataspace ID of selection to query
-        hssize_t *start;         OUT: Starting coordinate of bounding box
-        hssize_t *end;           OUT: Opposite coordinate of bounding box
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -560,7 +560,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_get_select_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
+H5S_get_select_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 {
     herr_t ret_value;        /* return value */
 
@@ -746,7 +746,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
  USAGE
     herr_t H5S_select_iter_coords(sel_iter,coords)
         H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
-        hssize_t *coords;         OUT: Array to place iterator coordinates in
+        hsize_t *coords;         OUT: Array to place iterator coordinates in
  RETURNS
     Non-negative on success, negative on failure.
  DESCRIPTION
@@ -761,7 +761,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iter_coords (const H5S_sel_iter_t *sel_iter, hssize_t *coords)
+H5S_select_iter_coords (const H5S_sel_iter_t *sel_iter, hsize_t *coords)
 {
     herr_t ret_value;         /* return value */
 
@@ -787,8 +787,8 @@ H5S_select_iter_coords (const H5S_sel_iter_t *sel_iter, hssize_t *coords)
  USAGE
     herr_t H5S_select_iter_block(sel_iter,start,end)
         const H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
-        hssize_t *start;    OUT: Array to place iterator start block coordinates
-        hssize_t *end;      OUT: Array to place iterator end block coordinates
+        hsize_t *start;    OUT: Array to place iterator start block coordinates
+        hsize_t *end;      OUT: Array to place iterator end block coordinates
  RETURNS
     Non-negative on success, negative on failure.
  DESCRIPTION
@@ -803,7 +803,7 @@ H5S_select_iter_coords (const H5S_sel_iter_t *sel_iter, hssize_t *coords)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_select_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
+H5S_select_iter_block (const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
     herr_t ret_value;         /* return value */
 
@@ -1057,7 +1057,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     H5S_sel_iter_t iter;        /* Selection iteration info */
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     uint8_t *loc;               /* Current element location in buffer */
-    hssize_t coords[H5O_LAYOUT_NDIMS];  /* Coordinates of element in dataspace */
+    hsize_t coords[H5O_LAYOUT_NDIMS];  /* Coordinates of element in dataspace */
     hssize_t nelmts;            /* Number of elements in selection */
     hsize_t space_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
     hsize_t off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
@@ -1070,7 +1070,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     size_t nelem;               /* Number of elements used in sequences */
     size_t max_elem;            /* Maximum number of elements allowed in sequences */
     size_t elmt_size;           /* Datatype size */
-    int ndims;                  /* Number of dimensions in dataspace */
+    unsigned ndims;             /* Number of dimensions in dataspace */
     int	i;			/* Local Index variable */
     herr_t user_ret=0;          /* User's return value */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -1137,7 +1137,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
                 loc=(unsigned char *)buf+curr_off;
 
                 /* Call user's callback routine */
-                user_ret=(*op)(loc,type_id,(hsize_t)ndims,coords,operator_data);
+                user_ret=(*op)(loc,type_id,ndims,coords,operator_data);
 
                 /* Increment offset in dataspace */
                 curr_off+=elmt_size;
@@ -1315,12 +1315,12 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
     } /* end if */
     /* Iterate through all the blocks in the selection */
     else {
-        hssize_t start1[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #1 */
-        hssize_t start2[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #2 */
-        hssize_t end1[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #1 */
-        hssize_t end2[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #2 */
-        hssize_t off1[H5O_LAYOUT_NDIMS];        /* Offset of selection #1 blocks */
-        hssize_t off2[H5O_LAYOUT_NDIMS];        /* Offset of selection #2 blocks */
+        hsize_t start1[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #1 */
+        hsize_t start2[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #2 */
+        hsize_t end1[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #1 */
+        hsize_t end2[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #2 */
+        hsize_t off1[H5O_LAYOUT_NDIMS];        /* Offset of selection #1 blocks */
+        hsize_t off2[H5O_LAYOUT_NDIMS];        /* Offset of selection #2 blocks */
         htri_t status1,status2;         /* Status from next block checks */
         unsigned first_block=1;         /* Flag to indicate the first block */
 

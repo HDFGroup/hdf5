@@ -70,7 +70,7 @@ int dowrite=1;				/* write test */
  * Assume dimension rank is 2.
  */
 void
-slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], int mode)
+slab_set(hsize_t start[], hsize_t count[], hsize_t stride[], int mode)
 {
     switch (mode){
     case BYROW:
@@ -110,7 +110,7 @@ slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], int mode)
  * Assume dimension rank is 2 and data is stored contiguous.
  */
 void
-dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
+dataset_fill(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
     int i, j;
@@ -127,7 +127,7 @@ dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dat
 /*
  * Print the content of the dataset.
  */
-void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
+void dataset_print(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
     int i, j;
@@ -146,7 +146,7 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE
 /*
  * Print the content of the dataset.
  */
-int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original)
+int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original)
 {
 #define MAX_ERR_REPORT	10		/* Maximum number of errors reported */
     DATATYPE *dataptr = dataset;
@@ -204,7 +204,7 @@ phdf5writeInd(char *filename)
 	{SPACE1_DIM1,SPACE1_DIM2}; 	/* local dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
@@ -342,7 +342,7 @@ phdf5readInd(char *filename)
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
     DATATYPE data_origin1[SPACE1_DIM1][SPACE1_DIM2];	/* expected data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t   start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
@@ -466,7 +466,7 @@ phdf5writeAll(char *filename)
 	{SPACE1_DIM1,SPACE1_DIM2};	/* dataspace dim sizes */
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
@@ -670,7 +670,7 @@ phdf5readAll(char *filename)
     DATATYPE data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
     DATATYPE data_origin1[SPACE1_DIM1][SPACE1_DIM2];	/* expected data buffer */
 
-    hssize_t   start[SPACE1_RANK];			/* for hyperslab setting */
+    hsize_t start[SPACE1_RANK];			/* for hyperslab setting */
     hsize_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */

@@ -1659,16 +1659,11 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
 void *
 H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
 {
-    void *ret_value=NULL;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FL_seq_free, NULL)
-
-    /* The H5MM_xfree code allows obj to null */
-    if (!obj)
-        HGOTO_DONE (NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_seq_free)
 
     /* Double check parameters */
     assert(head);
+    assert(obj);
 
     /* Make certain that the free list is initialized */
     assert(head->queue.init);
@@ -1676,8 +1671,7 @@ H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
     /* Use block routine */
     H5FL_blk_free(&(head->queue),obj);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(NULL)
 }   /* end H5FL_seq_free() */
 
 

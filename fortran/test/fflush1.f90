@@ -145,7 +145,7 @@
 
      ! if errors detected, exit with non-zero code. This is not truly fortran
      ! standard but likely supported by most fortran compilers.
-     IF (total_error .ne. 0) CALL exit (total_error)
+     IF (total_error .ne. 0) CALL h5_exit_f (total_error)
 
 
      001 STOP

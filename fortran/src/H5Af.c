@@ -167,7 +167,7 @@ nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 
 /*----------------------------------------------------------------------------
  * Name:        h5aread_c
- * Purpose:     Call H5Araed to read an attribute 
+ * Purpose:     Call H5Aread to read an attribute 
  * Inputs:      dset_id - dataset identifier 
  *              mem_type_id - memory datatype identifier
  *              dims     - array to store dimensions sizes of buf; used only

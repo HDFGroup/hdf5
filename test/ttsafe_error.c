@@ -166,7 +166,7 @@ void *tts_error_thread(void UNUSED *arg)
     /* define datatype for the data using native little endian integers */
     datatype = H5Tcopy(H5T_NATIVE_INT);
     H5Tset_order(datatype, H5T_ORDER_LE);
-    
+
     /* create a new dataset within the file */
     dataset = H5Dcreate(error_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
     if (dataset >= 0) {   /* not an error */

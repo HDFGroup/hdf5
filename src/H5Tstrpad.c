@@ -146,7 +146,7 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
-    if (strpad < 0 || strpad >= H5T_NSTR)
+    if (strpad < H5T_STR_NULLTERM || strpad >= H5T_NSTR)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type")
     while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
         dt = dt->shared->parent;  /*defer to parent*/

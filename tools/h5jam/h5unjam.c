@@ -100,7 +100,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 
-void
+static void
 parse_command_line(int argc, const char *argv[])
 {
     int                 opt  = FALSE;
@@ -268,7 +268,7 @@ main(int argc, const char *argv[])
     /* copy from usize to end of file into h5fid, 
      * starting at end of user block if present
      */ 
-    copy_to_file( ifid, h5fid, (ssize_t) usize, (fsize - (ssize_t)usize) );
+    copy_to_file( ifid, h5fid, (ssize_t) usize, (ssize_t)(fsize - (ssize_t)usize) );
 
 
     close(ufid);

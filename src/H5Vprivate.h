@@ -47,28 +47,31 @@
 
 H5_DLL hsize_t H5V_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *total_size,
-				 const hssize_t *offset,
-				 hssize_t *stride);
-H5_DLL htri_t H5V_hyper_disjointp(unsigned n, const hssize_t *offset1,
+				 const hsize_t *offset,
+				 hsize_t *stride);
+H5_DLL htri_t H5V_hyper_disjointp(unsigned n, const hsize_t *offset1,
 				   const size_t *size1,
-				   const hssize_t *offset2,
+				   const hsize_t *offset2,
 				   const size_t *size2);
-H5_DLL htri_t H5V_hyper_eq(int n, const hssize_t *offset1,
-			    const hsize_t *size1, const hssize_t *offset2,
+H5_DLL htri_t H5V_hyper_eq(unsigned n, const hsize_t *offset1,
+			    const hsize_t *size1, const hsize_t *offset2,
 			    const hsize_t *size2);
 H5_DLL herr_t H5V_hyper_fill(unsigned n, const hsize_t *_size,
 			      const hsize_t *total_size,
-			      const hssize_t *offset, void *_dst,
+			      const hsize_t *offset, void *_dst,
 			      unsigned fill_value);
 H5_DLL herr_t H5V_hyper_copy(unsigned n, const hsize_t *size,
 			      const hsize_t *dst_total_size,
-			      const hssize_t *dst_offset, void *_dst,
+			      const hsize_t *dst_offset, void *_dst,
 			      const hsize_t *src_total_size,
-			      const hssize_t *src_offset, const void *_src);
+			      const hsize_t *src_offset, const void *_src);
 H5_DLL herr_t H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
-			       const hssize_t *stride, void *_dst,
+			       const hsize_t *stride, void *_dst,
 			       unsigned fill_value);
 H5_DLL herr_t H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *_size,
+			       const hsize_t *dst_stride, void *_dst,
+			       const hsize_t *src_stride, const void *_src);
+H5_DLL herr_t H5V_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *_size,
 			       const hssize_t *dst_stride, void *_dst,
 			       const hssize_t *src_stride, const void *_src);
 H5_DLL herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
@@ -76,12 +79,12 @@ H5_DLL herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
 H5_DLL herr_t H5V_array_down(unsigned n, const hsize_t *total_size,
     hsize_t *down);
 H5_DLL hsize_t H5V_array_offset_pre(unsigned n,
-    const hsize_t *acc, const hssize_t *offset);
+    const hsize_t *acc, const hsize_t *offset);
 H5_DLL hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
-    const hssize_t *offset);
+    const hsize_t *offset);
 H5_DLL herr_t H5V_array_calc(hsize_t offset, unsigned n,
-    const hsize_t *total_size, hssize_t *coords);
-H5_DLL herr_t H5V_chunk_index(unsigned ndims, const hssize_t *coord,
+    const hsize_t *total_size, hsize_t *coords);
+H5_DLL herr_t H5V_chunk_index(unsigned ndims, const hsize_t *coord,
     const size_t *chunk, const hsize_t *down_nchunks, hsize_t *chunk_idx);
 H5_DLL ssize_t H5V_memcpyvv(void *_dst,
     size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[], hsize_t dst_off_arr[],
@@ -213,7 +216,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5_inline int UNUSED
-H5V_vector_cmp_u (int n, const hsize_t *v1, const hsize_t *v2)
+H5V_vector_cmp_u (unsigned n, const hsize_t *v1, const hsize_t *v2)
 {
     int ret_value=0;    /* Return value */
 

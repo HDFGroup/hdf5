@@ -1,4 +1,3 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -39,7 +38,7 @@ main (void)
     hsize_t     chunk_dims[2];
     hsize_t     col_dims[1];
     hsize_t     count[2];
-    hssize_t    offset[2];
+    hsize_t     offset[2];
 
     herr_t      status, status_n;                             
 
@@ -68,24 +67,6 @@ main (void)
 	   rank, (unsigned long)(dims[0]), (unsigned long)(dims[1]));
 
     /*
-     * Get creation properties list.
-     */
-    cparms = H5Dget_create_plist(dataset); /* Get properties handle first. */
-
-    /* 
-     * Check if dataset is chunked.
-     */
-    if (H5D_CHUNKED == H5Pget_layout(cparms))  {
-
-	/*
-	 * Get chunking information: rank and dimensions
-	 */
-	rank_chunk = H5Pget_chunk(cparms, 2, chunk_dims);
-	printf("chunk rank %d, dimensions %lu x %lu\n", rank_chunk,
-	       (unsigned long)(chunk_dims[0]), (unsigned long)(chunk_dims[1]));
-    }
- 
-    /*
      * Define the memory space to read dataset.
      */
     memspace = H5Screate_simple(RANK,dims,NULL);
@@ -101,6 +82,11 @@ main (void)
 	for (i = 0; i < dims[1]; i++) printf("%d ", data_out[j][i]);
 	printf("\n");
     }     
+
+    /*
+     * Close/release resources.
+     */
+    H5Sclose(memspace);
 
     /*
      *	    dataset rank 2, dimensions 10 x 5 
@@ -145,6 +131,11 @@ main (void)
     }
 
     /*
+     * Close/release resources.
+     */
+    H5Sclose(memspace);
+
+    /*
      *	    Third column: 
      *	    1 
      *	    1 
@@ -159,36 +150,56 @@ main (void)
      */
 
     /*
-     * Define the memory space to read a chunk.
+     * Get creation properties list.
      */
-    memspace = H5Screate_simple(rank_chunk,chunk_dims,NULL);
+    cparms = H5Dget_create_plist(dataset); /* Get properties handle first. */
 
-    /*
-     * Define chunk in the file (hyperslab) to read.
-     */
-    offset[0] = 2;
-    offset[1] = 0;
-    count[0]  = chunk_dims[0];
-    count[1]  = chunk_dims[1];
-    status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, 
-				 count, NULL);
+    if (H5D_CHUNKED == H5Pget_layout(cparms))  {
 
-    /*
-     * Read chunk back and display.
-     */
-    status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-		     H5P_DEFAULT, chunk_out);
-    printf("\n");
-    printf("Chunk: \n");
-    for (j = 0; j < chunk_dims[0]; j++) {
-	for (i = 0; i < chunk_dims[1]; i++) printf("%d ", chunk_out[j][i]);
-	printf("\n");
-    }     
-    /*
-     *	 Chunk: 
-     *	 1 1 1 0 0 
-     *	 2 0 0 0 0 
-     */
+	/*
+	 * Get chunking information: rank and dimensions
+	 */
+	rank_chunk = H5Pget_chunk(cparms, 2, chunk_dims);
+	printf("chunk rank %d, dimensions %lu x %lu\n", rank_chunk,
+	       (unsigned long)(chunk_dims[0]), (unsigned long)(chunk_dims[1]));
+
+        /*
+         * Define the memory space to read a chunk.
+         */
+        memspace = H5Screate_simple(rank_chunk,chunk_dims,NULL);
+
+        /*
+         * Define chunk in the file (hyperslab) to read.
+         */
+        offset[0] = 2;
+        offset[1] = 0;
+        count[0]  = chunk_dims[0];
+        count[1]  = chunk_dims[1];
+        status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, 
+                                     count, NULL);
+
+        /*
+         * Read chunk back and display.
+         */
+        status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
+                         H5P_DEFAULT, chunk_out);
+        printf("\n");
+        printf("Chunk: \n");
+        for (j = 0; j < chunk_dims[0]; j++) {
+            for (i = 0; i < chunk_dims[1]; i++) printf("%d ", chunk_out[j][i]);
+            printf("\n");
+        }     
+        /*
+         *	 Chunk: 
+         *	 1 1 1 0 0 
+         *	 2 0 0 0 0 
+         */
+
+        /*
+         * Close/release resources.
+         */
+        H5Sclose(memspace);
+    }
 
     /*
      * Close/release resources.
@@ -196,7 +207,6 @@ main (void)
     H5Pclose(cparms);
     H5Dclose(dataset);
     H5Sclose(filespace);
-    H5Sclose(memspace);
     H5Fclose(file);
 
     return 0;

@@ -158,17 +158,9 @@ done:
  *	Also works with enumeration datatypes.
  *-------------------------------------------------------------------------
  */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-char *
-H5Tget_member_name(hid_t type_id, int _membno)
-#else /* H5_WANT_H5_V1_6_COMPAT */
 char *
 H5Tget_member_name(hid_t type_id, unsigned membno)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    unsigned membno = (unsigned)_membno;
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt = NULL;
     char	*ret_value;
 
@@ -229,7 +221,7 @@ H5T_get_member_name(H5T_t const *dt, unsigned membno)
             
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class")
-    }
+    } /*lint !e788 All appropriate cases are covered */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -285,7 +277,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
             break;
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for this type")
-    }
+    } /*lint !e788 All appropriate cases are covered */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -311,7 +303,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_value(H5T_t *dt, int *map)
+H5T_sort_value(const H5T_t *dt, int *map)
 {
     unsigned	i, j, nmembs;
     size_t	size;
@@ -422,7 +414,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_name(H5T_t *dt, int *map)
+H5T_sort_name(const H5T_t *dt, int *map)
 {
     unsigned	i, j, nmembs;
     size_t	size;

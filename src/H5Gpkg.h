@@ -152,12 +152,12 @@ H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, int n);
 
 /* Functions that understand symbol table nodes */
-H5_DLL int H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
-		     void *_rt_key, void *_udata);
-H5_DLL int H5G_node_sumup(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
-		     void *_rt_key, void *_udata);
-H5_DLL int H5G_node_name(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
-		     void *_rt_key, void *_udata);
-H5_DLL int H5G_node_type(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
-		     void *_rt_key, void *_udata);
+H5_DLL int H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+		     const void *_rt_key, void *_udata);
+H5_DLL int H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+		     const void *_rt_key, void *_udata);
+H5_DLL int H5G_node_name(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+		     const void *_rt_key, void *_udata);
+H5_DLL int H5G_node_type(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+		     const void *_rt_key, void *_udata);
 #endif

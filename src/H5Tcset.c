@@ -134,7 +134,7 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
-    if (cset < 0 || cset >= H5T_NCSET)
+    if (cset < H5T_CSET_ASCII || cset >= H5T_NCSET)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal character set type")
     while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
         dt = dt->shared->parent;  /*defer to parent*/

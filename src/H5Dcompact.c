@@ -57,23 +57,23 @@
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5D_compact_readvv(H5D_io_info_t *io_info,
+H5D_compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
     void *buf)
 {
     ssize_t ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5D_compact_readvv, FAIL);
+    FUNC_ENTER_NOAPI(H5D_compact_readvv, FAIL)
 
     assert(io_info->dset);
 
     /* Use the vectorized memory copy routine to do actual work */
     if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,io_info->dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
 done:   
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5D_compact_readvv() */
 
 
@@ -101,23 +101,23 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5D_compact_writevv(H5D_io_info_t *io_info,
+H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
     const void *buf)
 {
     ssize_t ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5D_compact_writevv, FAIL);
+    FUNC_ENTER_NOAPI(H5D_compact_writevv, FAIL)
 
     assert(io_info->dset);
 
     /* Use the vectorized memory copy routine to do actual work */
     if((ret_value=H5V_memcpyvv(io_info->dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
     io_info->dset->shared->layout.u.compact.dirty = TRUE;
 
 done:   
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5D_compact_writevv() */

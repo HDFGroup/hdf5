@@ -110,7 +110,7 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
 
     if ((flags&H5S_CONV_STORAGE_MASK)==H5S_CONV_STORAGE_CHUNKED) {
         hsize_t chunk_dim[H5O_LAYOUT_NDIMS];        /* Chunk dimensions */
-        hssize_t startf[H5S_MAX_RANK],      /* Selection start bounds */
+        hsize_t startf[H5S_MAX_RANK],      /* Selection start bounds */
             endf[H5S_MAX_RANK];     /* Selection end bounds */
         unsigned dim_rankf;         /* Number of dimensions of file dataspace */
         int pcheck_hyper,check_hyper,   /* Flags for checking if selection is in one chunk */

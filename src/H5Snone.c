@@ -44,15 +44,15 @@ static htri_t H5S_none_is_valid(const H5S_t *space);
 static hssize_t H5S_none_serial_size(const H5S_t *space);
 static herr_t H5S_none_serialize(const H5S_t *space, uint8_t *buf);
 static herr_t H5S_none_deserialize(H5S_t *space, const uint8_t *buf);
-static herr_t H5S_none_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
+static herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static htri_t H5S_none_is_contiguous(const H5S_t *space);
 static htri_t H5S_none_is_single(const H5S_t *space);
 static htri_t H5S_none_is_regular(const H5S_t *space);
 static herr_t H5S_none_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
-static herr_t H5S_none_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
-static herr_t H5S_none_iter_block(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
+static herr_t H5S_none_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
+static herr_t H5S_none_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 static hsize_t H5S_none_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S_none_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S_none_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
@@ -139,7 +139,7 @@ H5S_none_iter_init (H5S_sel_iter_t *iter, const H5S_t UNUSED *space)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_none_iter_coords (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *coords)
+H5S_none_iter_coords (const H5S_sel_iter_t UNUSED *iter, hsize_t UNUSED *coords)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_coords);
 
@@ -167,7 +167,7 @@ H5S_none_iter_coords (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *coords
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_none_iter_block (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *start, hssize_t UNUSED *end)
+H5S_none_iter_block (const H5S_sel_iter_t UNUSED *iter, hsize_t UNUSED *start, hsize_t UNUSED *end)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_block);
 
@@ -533,8 +533,8 @@ done:
  USAGE
     herr_t H5S_none_bounds(space, start, end)
         H5S_t *space;           IN: Dataspace pointer of selection to query
-        hssize_t *start;         OUT: Starting coordinate of bounding box
-        hssize_t *end;           OUT: Opposite coordinate of bounding box
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -551,7 +551,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_bounds(const H5S_t UNUSED *space, hssize_t UNUSED *start, hssize_t UNUSED *end)
+H5S_none_bounds(const H5S_t UNUSED *space, hsize_t UNUSED *start, hsize_t UNUSED *end)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_bounds);
 

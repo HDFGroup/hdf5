@@ -19,7 +19,6 @@
 
 typedef struct ref_path_table_entry_t {
     hid_t                 obj;
-    hobj_ref_t             *obj_ref;
     char                   *apath;
     H5G_stat_t  statbuf;
     struct ref_path_table_entry_t *next;
@@ -28,7 +27,6 @@ typedef struct ref_path_table_entry_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 char*       lookup_ref_path(hobj_ref_t ref);
 herr_t      fill_ref_path_table(hid_t, const char *, void *);

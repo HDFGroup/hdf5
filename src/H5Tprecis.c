@@ -32,7 +32,7 @@
 #include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Static local functions */
-static herr_t H5T_set_precision(H5T_t *dt, size_t prec);
+static herr_t H5T_set_precision(const H5T_t *dt, size_t prec);
 
 
 /*--------------------------------------------------------------------------
@@ -195,7 +195,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_set_precision(H5T_t *dt, size_t prec)
+H5T_set_precision(const H5T_t *dt, size_t prec)
 {
     size_t	offset, size;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -252,9 +252,8 @@ H5T_set_precision(H5T_t *dt, size_t prec)
                     break;
 
                 default:
-                    assert("not implemented yet" && 0);
                     HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
-	    } /* end switch */
+	    } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
 	    /* Commit */
 	    dt->shared->size = size;

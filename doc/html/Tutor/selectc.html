@@ -71,7 +71,7 @@ included in the selection for a dataspace:
 <pre>
    herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t operator,
                               size_t num_elements, 
-                              const hssize_t **coord ) 
+                              const hsize_t **coord ) 
 </pre>
 <P>
 <I><B>FORTRAN</B></I>:
@@ -81,7 +81,7 @@ included in the selection for a dataspace:
       space_id       IN: INTEGER(HID_T) 
       operator       IN: INTEGER
       num_elements   IN: INTEGER
-      coord          IN: INTEGER(HSSIZE_T), DIMENSION(*,*)
+      coord          IN: INTEGER(HSIZE_T), DIMENSION(*,*)
       hdferr        OUT: INTEGER
 </pre>
 <P>
