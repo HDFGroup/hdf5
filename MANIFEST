@@ -7,6 +7,7 @@
 
 ./COPYING
 ./INSTALL
+./INSTALL_GLOBUS
 ./INSTALL_TFLOPS
 ./INSTALL_parallel
 ./INSTALL_Windows.txt

@@ -43,8 +43,5 @@
 /* Define if we have Globus GASS support */
 #undef HAVE_GASS
 
-/* Define if we have Globus support */
-#undef HAVE_GLOBUS
-
 /* Define if we have Globus Grid Storage support */
 #undef HAVE_GRIDSTORAGE
