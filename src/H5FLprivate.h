@@ -47,7 +47,7 @@ typedef struct H5FL_reg_head_t {
     unsigned onlist;       /* Number of blocks on free list */
     size_t list_mem;    /* Amount of memory on free list */
     const char *name;   /* Name of the type */
-    hsize_t size;       /* Size of the blocks in the list */
+    size_t size;       /* Size of the blocks in the list */
     H5FL_reg_node_t *list;  /* List of free blocks */
 } H5FL_reg_head_t;
 
@@ -75,7 +75,7 @@ typedef struct H5FL_reg_head_t {
 
 /* Data structure to store each block in free list */
 typedef struct H5FL_blk_list_t {
-    hsize_t size;               /* Size of the page */
+    size_t size;               /* Size of the page */
     struct H5FL_blk_list_t *next;   /* Pointer to next block in free list */
     union {
         double unused1;         /* Unused normally, just here for aligment */
@@ -85,7 +85,7 @@ typedef struct H5FL_blk_list_t {
 
 /* Data structure for priority queue node of block free lists */
 typedef struct H5FL_blk_node_t {
-    hsize_t size;            /* Size of the blocks in the list */
+    size_t size;            /* Size of the blocks in the list */
     H5FL_blk_list_t *list;      /* List of free blocks */
     struct H5FL_blk_node_t *next;    /* Pointer to next free list in queue */
     struct H5FL_blk_node_t *prev;    /* Pointer to previous free list in queue */
@@ -96,7 +96,7 @@ typedef struct H5FL_blk_head_t {
     unsigned init;         /* Whether the free list has been initialized */
     unsigned allocated;    /* Number of blocks allocated */
     unsigned onlist;       /* Number of blocks on free list */
-    hsize_t list_mem;   /* Amount of memory in block on free list */
+    size_t list_mem;   /* Amount of memory in block on free list */
     const char *name;   /* Name of the type */
     H5FL_blk_node_t *head;  /* Pointer to first free list in queue */
 } H5FL_blk_head_t;

@@ -672,7 +672,11 @@ typedef struct stat             h5_stat_t;
 #define HDsqrt(X)		sqrt(X)
 #define HDsrand(N)		srand(N)
 /* sscanf() variable arguments */
+#ifdef WIN32
+#define HDstat(S,B)             _stati64(S,B)
+#else
 #define HDstat(S,B)		stat(S,B)
+#endif
 #define HDstrcat(X,Y)		strcat(X,Y)
 #define HDstrchr(S,C)		strchr(S,C)
 #define HDstrcmp(X,Y)		strcmp(X,Y)
