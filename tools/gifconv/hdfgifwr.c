@@ -62,10 +62,12 @@ typedef long int	count_int;
 /* MONO returns total intensity of r,g,b components */
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
 
+#ifdef UNUSED
 static int  Width, Height;
 static int  curx, cury;
 static long CountDown;
 static int  Interlace;
+#endif /* UNUSED */
 
 #ifdef __STDC__
 static void compress(int, FILE *, byte *, int);
@@ -80,43 +82,57 @@ static void compress(), output(), cl_block(), cl_hash();
 static void char_init(), char_out(), flush_char();
 #endif  /* __STDC__ */
 
-static byte pc2nc[256],r1[256],g1[256],b1[256];
+static byte pc2nc[256];
+#ifdef UNUSED
+static byte r1[256],g1[256],b1[256];
+#endif /* UNUSED */
 
 /*************************************************************/
 int hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap,
                 byte *gmap, byte *bmap, byte *pc2ncmap, int numcols,
                 int colorstyle, int BitsPerPixel)
 {
+#ifdef UNUSED
     int RWidth, RHeight;
     int LeftOfs, TopOfs;
-    int ColorMapSize, InitCodeSize, Background;
+    int ColorMapSize, Background;
+#endif /* UNUSED */
+    int InitCodeSize;
     int i;
     byte *pic8 = pic;
 
+#ifdef UNUSED
     Interlace = 0;
     Background = 0;
+#endif /* UNUSED */
 
     for (i = 0; i < 256; i++) { 
       pc2nc[i] = pc2ncmap[i];
+#ifdef UNUSED
       r1[i] = rmap[i];
       g1[i] = gmap[i];
       b1[i] = bmap[i];
+#endif /* UNUSED */
     }
 
+#ifdef UNUSED
     ColorMapSize = 1 << BitsPerPixel;
 
-    RWidth  = Width  = w;
+    RWidth  = Width = w;
     RHeight = Height = h;
     LeftOfs = TopOfs = 0;
 
     CountDown = w * h;    /* # of pixels we'll be doing */
+#endif /* UNUSED */
 
     if (BitsPerPixel <= 1)
         InitCodeSize = 2;
     else
         InitCodeSize = BitsPerPixel;
 
+#ifdef UNUSED
     curx = cury = 0;
+#endif /* UNUSED */
 
     if (!fp) {
         fprintf(stderr,  "WriteGIF: file not open for writing\n" );

@@ -1128,7 +1128,7 @@ nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts,  size_t_
  * Modifications: Changed type of the rdcc_w0 parameter to be real_f instead of double
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts, size_t_f* rdcc_nbytes , real_f* rdcc_w0)
+nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_t_f* rdcc_nbytes , real_f* rdcc_w0)
 {
      int ret_value = -1;
      hid_t c_prp_id;

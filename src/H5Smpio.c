@@ -17,6 +17,7 @@
 #include "H5Eprivate.h"
 #include "H5Fpkg.h"         /* Ugly, but necessary for the MPIO I/O accesses */
 #include "H5FDprivate.h"    /* Necessary for the H5FD_write & H5FD_read prototypes.. */
+#include "H5Pprivate.h"		/* Property Lists */
 #include "H5Spkg.h"
 
 #include "H5FDmpio.h"		/*the MPIO file driver			*/

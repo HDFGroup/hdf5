@@ -3161,7 +3161,7 @@ test_select(void)
     hid_t plist_id;     /* Property list for reading random hyperslabs */
     hid_t fapl;         /* Property list accessing the file */
     int mdc_nelmts;     /* Metadata number of elements */
-    unsigned rdcc_nelmts;   /* Raw data number of elements */
+    size_t rdcc_nelmts;   /* Raw data number of elements */
     size_t rdcc_nbytes; /* Raw data number of bytes */
     double rdcc_w0;     /* Raw data write percentage */
     herr_t	ret;	/* Generic return value		*/

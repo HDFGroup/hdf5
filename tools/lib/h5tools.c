@@ -180,7 +180,7 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
         SPLIT_IDX,
         MULTI_IDX,
 #ifdef H5_HAVE_STREAM
-        STREAM_IDX,
+        STREAM_IDX
 #endif	/* H5_HAVE_STREAM */
     };
 #define NUM_DRIVERS     (sizeof(drivers_list) / sizeof(struct d_list))

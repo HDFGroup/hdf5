@@ -77,13 +77,16 @@ int main(int argc , char **argv)
     BYTE  Blue[256];
 
     int   RWidth, RHeight;
+#ifdef UNUSED
     int   LeftOfs, TopOfs;
-    int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
-    int   j,nc;
-    int	  w,h,i;
-    int   numcols = 256;
     int   CountDown;
     int   curx , cury;
+    int	  w,h;
+#endif /* UNUSED */
+    int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
+    int   j,nc;
+    int	  i;
+    int   numcols = 256;
     int   time_out = 0;		/* time between two images in the animation */
     int   n_images , idx;
 
@@ -175,8 +178,8 @@ int main(int argc , char **argv)
     has_local_palette = true;
 
     /* Do Endian Order testing and set Endian Order */
-    w = 0x0001;
-    b = (BYTE *) &w;
+    idx = 0x0001;
+    b = (BYTE *) &idx;
     EndianOrder = (b[0] ? 1:0);
     
     if (!(fpGif = fopen(GIFName , "wb"))) {
@@ -205,12 +208,14 @@ int main(int argc , char **argv)
             return -1;
         }
 
+        RWidth  = dim_sizes[1];
+        RHeight = dim_sizes[0];
+#ifdef UNUSED
         w = dim_sizes[1];
         h = dim_sizes[0];
 
-        RWidth  = dim_sizes[1];
-        RHeight = dim_sizes[0];
         LeftOfs = TopOfs = 0;
+#endif /* UNUSED */
 
 
         /*
@@ -271,14 +276,18 @@ int main(int argc , char **argv)
         BitsPerPixel = i;
         ColorMapSize = 1 << BitsPerPixel;
 
+#ifdef UNUSED
         CountDown = w * h;  /* # of pixels we'll be doing */
+#endif /* UNUSED */
         
         if (BitsPerPixel <= 1)
             InitCodeSize = 2;
         else
             InitCodeSize = BitsPerPixel;
 
+#ifdef UNUSED
         curx = cury = 0;
+#endif /* UNUSED */
 
         if (!fpGif) {
             fprintf(stderr,  "WriteGIF: file not open for writing\n" );

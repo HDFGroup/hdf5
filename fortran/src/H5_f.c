@@ -120,19 +120,19 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
 
     int ret_value = -1;
     hid_t c_type_id;
-    herr_t err;
     int i;
+
     for (i = 0; i < *lentypes; i++) {
-    c_type_id = types[i];
-    if ( (err = H5Tclose(c_type_id)) < 0) return ret_value;
+        c_type_id = types[i];
+        if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     for (i = 0; i < *floatinglen; i++) {
-    c_type_id = floatingtypes[i];
-    if ( (err = H5Tclose(c_type_id)) < 0) return ret_value;
+        c_type_id = floatingtypes[i];
+        if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     for (i = 0; i < *integerlen; i++) {
-    c_type_id = integertypes[i];
-    if ( (err = H5Tclose(c_type_id)) < 0) return ret_value;
+        c_type_id = integertypes[i];
+        if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     ret_value = 0; 
     return ret_value;

@@ -417,7 +417,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 
 	/* increase chunk array size */
 	if (oh->nchunks >= oh->alloc_nchunks) {
-	    size_t na = oh->alloc_nchunks + H5O_NCHUNKS;
+	    uintn na = oh->alloc_nchunks + H5O_NCHUNKS;
 	    H5O_chunk_t *x = H5FL_ARR_REALLOC (H5O_chunk_t, oh->chunk, na);
 
 	    if (!x) {
@@ -1722,7 +1722,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, uintn chunkno, size_t size)
 
     /* create a new null message */
     if (oh->nmesgs >= oh->alloc_nmesgs) {
-        size_t na = oh->alloc_nmesgs + H5O_NMESGS;
+        uintn na = oh->alloc_nmesgs + H5O_NMESGS;
         H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 
         if (NULL==x) {
@@ -1863,7 +1863,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      * Create the new chunk without giving it a file address.
      */
     if (oh->nchunks >= oh->alloc_nchunks) {
-        size_t na = oh->alloc_nchunks + H5O_NCHUNKS;
+        uintn na = oh->alloc_nchunks + H5O_NCHUNKS;
         H5O_chunk_t *x = H5FL_ARR_REALLOC (H5O_chunk_t, oh->chunk, na);
 
         if (!x) {
@@ -1888,7 +1888,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      */
     if (oh->nmesgs + 3 > oh->alloc_nmesgs) {
         int old_alloc=oh->alloc_nmesgs;
-        size_t na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
+        uintn na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
         H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 
         if (!x) {
@@ -2046,7 +2046,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 
 	if (oh->nmesgs >= oh->alloc_nmesgs) {
 	    int old_alloc=oh->alloc_nmesgs;
-	    size_t na = oh->alloc_nmesgs + H5O_NMESGS;
+	    uintn na = oh->alloc_nmesgs + H5O_NMESGS;
 	    H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 
 	    if (!x) {

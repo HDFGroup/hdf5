@@ -34,7 +34,6 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             CHAR *h5_file, CHAR *dset_name, CHAR *pal_name) 
 {
     hid_t fHfile;       /* H5 file to open                              */
-    herr_t status;      /* status variable                              */
     hid_t dspace;       /* dataspace identifier for the the dataset     */
     hid_t dset;	        /* dataset identifier                           */
     hid_t pal_set;      /* dataset for palette                          */
@@ -88,7 +87,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     }
 
     /* get the actual image */
-    if ((status = H5Dread(dset , H5Dget_type(dset) , H5S_ALL , H5S_ALL , H5P_DEFAULT , *data)) < 0) {
+    if (H5Dread(dset , H5Dget_type(dset) , H5S_ALL , H5S_ALL , H5P_DEFAULT , *data) < 0) {
         fprintf(stderr , "Unable to read data \n");
         cleanup(*data);
         return -1;
@@ -139,7 +138,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
         }
 
         /* get the actual palette */
-        if ((status = H5Dread(pal_set , H5Dget_type(pal_set) , H5S_ALL , H5S_ALL , H5P_DEFAULT , temp_buf)) < 0) {
+        if (H5Dread(pal_set , H5Dget_type(pal_set) , H5S_ALL , H5S_ALL , H5P_DEFAULT , temp_buf) < 0) {
             fprintf(stderr , "Unable to read data \n");
             cleanup(*data);
             cleanup(temp_buf);
@@ -166,8 +165,8 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     }
 
     /* close everything */
-    status = H5Dclose(dset);
-    status = H5Sclose(dspace);
-    status = H5Fclose(fHfile);
+    H5Dclose(dset);
+    H5Sclose(dspace);
+    H5Fclose(fHfile);
     return 0;
 }

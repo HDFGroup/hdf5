@@ -2107,7 +2107,7 @@
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: mdc_nelmts  !Number of elements (objects)
                                                         ! in the meta data cache
-            INTEGER, INTENT(OUT) :: rdcc_nelmts  !Number of elements (objects)
+            INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts  !Number of elements (objects)
                                                         ! in the meta data cache
             INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes !Total size of the raw data 
                                                       !chunk cache, in bytes 
@@ -2126,7 +2126,7 @@
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: mdc_nelmts 
-              INTEGER, INTENT(OUT) :: rdcc_nelmts 
+              INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts 
               INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes
               REAL, INTENT(OUT) :: rdcc_w0
               END FUNCTION h5pget_cache_c

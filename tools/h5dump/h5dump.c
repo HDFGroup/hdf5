@@ -3237,9 +3237,9 @@ static const char      *apos = "&apos;";
 static char                   *
 xml_escape_the_name(const char *str)
 {
-    int                     extra;
-    int                     len;
-    int                     i;
+    size_t                     extra;
+    size_t                     len;
+    size_t                     i;
     const char             *cp;
     char                   *ncp;
     char                   *rcp;
@@ -3323,9 +3323,9 @@ xml_escape_the_name(const char *str)
 static char                   *
 xml_escape_the_string(const char *str, int slen)
 {
-    int                     extra;
-    int                     len;
-    int                     i;
+    size_t                     extra;
+    size_t                     len;
+    size_t                     i;
     const char             *cp;
     char                   *ncp;
     char                   *rcp;
@@ -3360,7 +3360,7 @@ xml_escape_the_string(const char *str, int slen)
     }
 
     cp = str;
-    rcp = ncp = calloc((size_t)(len + extra + 1), sizeof(char));
+    rcp = ncp = calloc((len + extra + 1), sizeof(char));
 
     if (ncp == NULL)
 	return NULL;		/* ?? */
@@ -3472,7 +3472,7 @@ xml_print_datatype(hid_t type)
 	}
 	printf("\" Size=\"");
 	sz = H5Tget_size(type);
-	printf("%d", sz);
+	printf("%lu", (unsigned long)sz);
 	printf("\" />\n");
 	indent -= COL;
 	indentation(indent);
@@ -3503,12 +3503,12 @@ xml_print_datatype(hid_t type)
 	}
 	printf("\" Size=\"");
 	sz = H5Tget_size(type);
-	printf("%d", sz);
+	printf("%lu", (unsigned long)sz);
 	H5Tget_fields(type, &spos, &epos, &esize, &mpos, &msize);
-	printf("\" SignBitLocation=\"%d\" ", spos);
-	printf("ExponentBits=\"%d\" ExponentLocation=\"%d\" ", esize, epos);
-	printf("MantissaBits=\"%d\" MantissaLocation=\"%d\" />\n",
-	       msize, mpos);
+	printf("\" SignBitLocation=\"%lu\" ", (unsigned long)spos);
+	printf("ExponentBits=\"%lu\" ExponentLocation=\"%lu\" ", (unsigned long)esize, (unsigned long)epos);
+	printf("MantissaBits=\"%lu\" MantissaLocation=\"%lu\" />\n",
+	       (unsigned long)msize, (unsigned long)mpos);
 	indent -= COL;
 	indentation(indent);
 	printf("</AtomicType>\n");
@@ -3577,7 +3577,7 @@ xml_print_datatype(hid_t type)
 	    printf("ERROR_UNKNOWN");
 	}
 	size = H5Tget_size(type);
-	printf("\" Size=\"%d\"/>\n", size);
+	printf("\" Size=\"%lu\"/>\n", (unsigned long)size);
 	indent -= COL;
 	indentation(indent);
 	printf("</AtomicType>\n");
@@ -3592,7 +3592,7 @@ xml_print_datatype(hid_t type)
 	indentation(indent);
 	printf("<OpaqueType Tag=\"%s\" ", H5Tget_tag(type));
 	size = H5Tget_size(type);
-	printf("Size=\"%d\"/>\n", size);
+	printf("Size=\"%lu\"/>\n", (unsigned long)size);
 	indent -= COL;
 	indentation(indent);
 	printf("</AtomicType>\n");

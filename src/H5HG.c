@@ -984,9 +984,9 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 	    if (u>maxobj) maxobj = u;
 	}
     }
-    fprintf (stream, "%*s%-*s %u/%u/", indent, "", fwidth,
+    fprintf (stream, "%*s%-*s %u/%lu/", indent, "", fwidth,
 	     "Objects defined/allocated/max:",
-	     nused, h->nalloc);
+	     nused, (unsigned long)h->nalloc);
     fprintf (stream, nused ? "%u\n": "NA\n", maxobj);
 
     fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,

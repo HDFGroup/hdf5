@@ -180,13 +180,13 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         /* Get the driver ID */
         if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+            HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
         /* Check if we are using the MPIO driver */
         if(H5FD_MPIO==driver_id) {
             /* Get the driver information */
             if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+                HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
             /* Check if we are not using independent I/O */
             if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
@@ -309,7 +309,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
             /* Track the number of reads to gather */
             if(H5P_set(dxpl_id, H5D_XFER_GATHER_READS_NAME, &gather_reads)<0)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve gather reads");
+                HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve gather reads");
 
 #else
             for (z=0; z<nelmts; z++) {
@@ -467,13 +467,13 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         /* Get the driver ID */
         if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+            HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
         /* Check if we are using the MPIO driver */
         if(H5FD_MPIO==driver_id) {
             /* Get the driver information */
             if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+                HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
             /* Check if we are not using independent I/O */
             if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
