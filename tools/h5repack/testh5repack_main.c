@@ -60,10 +60,29 @@ int main (void)
  */
 
 /*-------------------------------------------------------------------------
+ * file with fill values
+ *-------------------------------------------------------------------------
+ */
+ TESTING("    copy of datasets (fill values)");
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME0,FNAME0OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME0,FNAME0OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME0OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME0,FNAME0OUT)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ PASSED();
+
+/*-------------------------------------------------------------------------
  * file with all kinds of dataset datatypes
  *-------------------------------------------------------------------------
  */
- TESTING("    copy of datasets");
+ TESTING("    copy of datasets (all datatypes)");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack(FNAME1,FNAME1OUT,&pack_options)<0)
@@ -71,6 +90,8 @@ int main (void)
  if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME1,FNAME1OUT)<=0)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
@@ -80,7 +101,7 @@ int main (void)
  * file with attributes
  *-------------------------------------------------------------------------
  */
- TESTING("    copy of attributes");
+ TESTING("    copy of datasets (attributes)");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack(FNAME2,FNAME2OUT,&pack_options)<0)
@@ -89,7 +110,9 @@ int main (void)
   TEST_ERROR;
  if (h5repack_verify(FNAME2OUT,&pack_options)<=0)
   TEST_ERROR;
-  if (h5repack_end (&pack_options)<0)
+ if (h5repack_cmpdcpl(FNAME2,FNAME2OUT)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED();
 
@@ -98,7 +121,7 @@ int main (void)
  * file with hardlinks
  *-------------------------------------------------------------------------
  */
- TESTING("    copy of hardlinks");
+ TESTING("    copy of datasets (hardlinks)");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack(FNAME3,FNAME3OUT,&pack_options)<0)
@@ -106,6 +129,8 @@ int main (void)
  if (h5diff(FNAME3,FNAME3OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  if (h5repack_verify(FNAME3OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME3,FNAME3OUT)<=0)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
@@ -128,6 +153,11 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
   PASSED();  
+
+/*-------------------------------------------------------------------------
+ * the remaining files differ in the dcpl's
+ *-------------------------------------------------------------------------
+ */
 
 /*-------------------------------------------------------------------------
  * deflate
