@@ -915,7 +915,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_spaces_write(H5F_t *f, const H5O_layout_t *layout,
+H5S_mpio_spaces_write(H5F_t *f, H5O_layout_t *layout,
                     H5P_genplist_t UNUSED *dc_plist, size_t elmt_size,
 		    const H5S_t *file_space, const H5S_t *mem_space,
 		    hid_t dxpl_id, const void *buf)

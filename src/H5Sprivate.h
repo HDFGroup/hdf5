@@ -109,7 +109,7 @@ typedef struct H5S_conv_t {
 
 
     /* Write directly from app buffer to file */
-    herr_t (*write)(H5F_t *f, const struct H5O_layout_t *layout,
+    herr_t (*write)(H5F_t *f, struct H5O_layout_t *layout,
                    H5P_genplist_t *dc_plist, size_t elmt_size,
 		   const H5S_t *file_space, const H5S_t *mem_space,
 		   hid_t dxpl_id, const void *buf);
@@ -156,7 +156,7 @@ __DLL__ int H5S_cmp(const H5S_t *ds1, const H5S_t *ds2);
 __DLL__ htri_t H5S_is_simple(const H5S_t *sdim);
 __DLL__ herr_t H5S_extent_release(H5S_t *space);
 __DLL__ int H5S_extend(H5S_t *space, const hsize_t *size);
-__DLL__ herr_t H5S_set_extent(H5S_t *space, const hsize_t *size);
+__DLL__ int H5S_set_extent(H5S_t *space, const hsize_t *size);
 __DLL__ herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
 
@@ -168,7 +168,7 @@ __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				H5D_operator_t op, void *operator_data);
 __DLL__ herr_t H5S_select_fill(void *fill, size_t fill_size,
                                 const H5S_t *space, void *buf);
-__DLL__ herr_t H5S_select_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+__DLL__ herr_t H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
         H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
         H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
         const void *_buf);
@@ -185,7 +185,7 @@ __DLL__ hsize_t H5S_select_mgath (const void *_buf, size_t elmt_size,
 __DLL__ herr_t H5S_select_read(H5F_t *f, const struct H5O_layout_t *layout,
         H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
         const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/);
-__DLL__ herr_t H5S_select_write(H5F_t *f, const struct H5O_layout_t *layout,
+__DLL__ herr_t H5S_select_write(H5F_t *f, struct H5O_layout_t *layout,
         H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
         const H5S_t *mem_space, hid_t dxpl_id, const void *buf/*out*/);
 
@@ -206,7 +206,7 @@ __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 
 /* MPI-IO function to write directly from app buffer to file rky980813 */
 __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
-				    const struct H5O_layout_t *layout,
+				    struct H5O_layout_t *layout,
                                     H5P_genplist_t *dc_plist,
 				    size_t elmt_size, const H5S_t *file_space,
 				    const H5S_t *mem_space, hid_t dxpl_id,

@@ -44,9 +44,9 @@ static int              interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_compact_readv(H5F_t *f, const H5O_layout_t *layout, size_t nseq, 
+H5F_compact_readv(H5F_t UNUSED *f, const H5O_layout_t *layout, size_t nseq, 
                   size_t size_arr[], hsize_t offset_arr[], 
-                  hid_t dxpl_id, void *_buf/*out*/)
+                  hid_t UNUSED dxpl_id, void *_buf/*out*/)
 {
     unsigned char       *buf=(unsigned char *)_buf;
     size_t              size;
@@ -93,11 +93,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_compact_writev(H5F_t *f, H5O_layout_t *layout, size_t nseq,
+H5F_compact_writev(H5F_t UNUSED *f, H5O_layout_t *layout, size_t nseq,
                   size_t size_arr[], hsize_t offset_arr[], 
-                  hid_t dxpl_id, const void *_buf)
+                  hid_t UNUSED dxpl_id, const void *_buf)
 {
-    unsigned char       *buf=(unsigned char *)_buf;
+    const unsigned char       *buf=(const unsigned char *)_buf;
     size_t              size;
     haddr_t             offset;
     unsigned            u;

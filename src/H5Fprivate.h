@@ -345,8 +345,6 @@ __DLL__ herr_t H5F_get_obj_count(H5F_t *f, unsigned types,
 __DLL__ herr_t H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *obj_id_list);
 
 /* Functions that operate on array storage */
-__DLL__ herr_t H5F_arr_create(H5F_t *f,
-			      struct H5O_layout_t *layout /*in,out*/);
 __DLL__ herr_t H5F_arr_read (H5F_t *f, hid_t dxpl_id,
                             const struct H5O_layout_t *layout,
                             struct H5P_genplist_t *dc_plist,
@@ -393,7 +391,14 @@ __DLL__ herr_t H5F_seq_writev(H5F_t *f, hid_t dxpl_id,
         size_t seq_len[], hsize_t file_offset[], const void *_buf);
 
 
+/* Functions that operate on contiguous storage */
+__DLL__ herr_t H5F_contig_fill(H5F_t *f, hid_t dxpl_id,
+        struct H5O_layout_t *layout, struct H5P_genplist_t *dc_plist,
+        const struct H5S_t *space, size_t elmt_size);
+
 /* Functions that operate on indexed storage */
+__DLL__ herr_t H5F_istore_create(H5F_t *f,
+				 struct H5O_layout_t *layout/*in,out*/);
 __DLL__ herr_t H5F_istore_allocate (H5F_t *f, hid_t dxpl_id,
                                 const struct H5O_layout_t *layout,
                                 const hsize_t *space_dim,

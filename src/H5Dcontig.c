@@ -14,11 +14,19 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"
 #include "H5FDprivate.h"	/*file driver				  */
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Vprivate.h"		/* Vector and array functions		*/
+
+/* MPIO & MPIPOSIX drivers needed for special checks */
+#include "H5FDmpio.h"
+#include "H5FDmpiposix.h"
 
 /* Interface initialization */
 #define PABLO_MASK	H5Fcontig_mask
@@ -27,6 +35,187 @@ static int		interface_initialize_g = 0;
 
 /* Declare a PQ free list to manage the sieve buffer information */
 H5FL_BLK_DEFINE(sieve_buf);
+
+/* Extern the free list to manage blocks of type conversion data */
+H5FL_BLK_EXTERN(type_conv);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_contig_fill
+ *
+ * Purpose:	Write fill values to a contiguously stored dataset.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		August 22, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
+    struct H5P_genplist_t *dc_plist, const struct H5S_t *space,
+    size_t elmt_size)
+{
+    H5O_fill_t  fill;           /* Fill value information */
+    H5O_efl_t   efl;            /* External File List info */
+    hssize_t    snpoints;       /* Number of points in space (for error checking) */
+    size_t      npoints;        /* Number of points in space */
+    size_t      ptsperbuf;      /* Maximum # of points which fit in the buffer */
+    size_t	bufsize=64*1024; /* Size of buffer to write */
+    size_t	size;           /* Current # of points to write */
+    hsize_t	addr;           /* Offset in dataset */
+    void       *buf = NULL;     /* Buffer for fill value writing */
+#ifdef H5_HAVE_PARALLEL
+    MPI_Comm	mpi_comm=MPI_COMM_NULL;	/* MPI communicator for file */
+    int         mpi_rank=(-1);  /* This process's rank  */
+    int         mpi_size=(-1);  /* Total # of processes */
+    int         mpi_round=0;    /* Current process responsible for I/O */
+    int         mpi_code;       /* MPI return code */
+    unsigned    blocks_written=0; /* Flag to indicate that chunk was actually written */
+    unsigned    using_mpi=0;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
+#endif /* H5_HAVE_PARALLEL */
+    herr_t	ret_value=SUCCEED;	/* Return value */
+    
+    FUNC_ENTER_NOAPI(H5F_contig_fill, FAIL);
+
+    /* Check args */
+    assert(f);
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(layout && H5D_CONTIGUOUS==layout->type);
+    assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+    assert(H5F_addr_defined(layout->addr));
+    assert(dc_plist!=NULL);
+    assert(space);
+    assert(elmt_size>0);
+
+    /* Get necessary properties from dataset creation property list */
+    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get fill value");
+    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
+
+#ifdef H5_HAVE_PARALLEL
+    /* Retrieve up MPI parameters */
+    if(IS_H5FD_MPIO(f)) {
+        /* Get the MPI communicator */
+        if (MPI_COMM_NULL == (mpi_comm=H5FD_mpio_communicator(f->shared->lf)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+
+        /* Get the MPI rank & size */
+        if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+        if ((mpi_size=H5FD_mpio_mpi_size(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
+        /* Set the MPI-capable file driver flag */
+        using_mpi=1;
+    } /* end if */
+    else {
+        if(IS_H5FD_MPIPOSIX(f)) {
+            /* Get the MPI communicator */
+            if (MPI_COMM_NULL == (mpi_comm=H5FD_mpiposix_communicator(f->shared->lf)))
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+
+            /* Get the MPI rank & size */
+            if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+            if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
+            /* Set the MPI-capable file driver flag */
+            using_mpi=1;
+        } /* end if */
+    } /* end else */
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Get the number of elements in the dataset's dataspace */
+    snpoints = H5S_get_simple_extent_npoints(space);
+    assert(snpoints>=0);
+    H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
+
+    /* Don't write default fill-values to external files */
+    if(efl.nused>0 && !fill.buf)
+        HGOTO_DONE(SUCCEED);
+
+    /* If fill value is library default, use the element size */
+    if(!fill.buf)
+        fill.size=elmt_size;
+
+    /*
+     * Fill the entire current extent with the fill value.  We can do
+     * this quite efficiently by making sure we copy the fill value
+     * in relatively large pieces.
+     */
+     ptsperbuf = MAX(1, bufsize/fill.size);
+     bufsize = ptsperbuf*fill.size;
+
+     /* Allocate temporary buffer */
+     if ((buf=H5FL_BLK_ALLOC(type_conv,bufsize,0))==NULL)
+         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
+
+     /* Fill the buffer with the user's fill value */
+     if(fill.buf)
+        H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
+     else /* Fill the buffer with the default fill value */
+        HDmemset(buf,0,bufsize);
+     
+     /* Start at the beginning of the dataset */
+     addr = 0;
+
+     /* Loop through writing the fill value to the dataset */
+     while (npoints>0) {
+          size = MIN(ptsperbuf, npoints) * fill.size;
+
+#ifdef H5_HAVE_PARALLEL
+            /* Check if this file is accessed with an MPI-capable file driver */
+            if(using_mpi) {
+                /* Round-robin write the chunks out from only one process */
+                if(mpi_round==mpi_rank) {
+                    if (H5F_seq_write(f, dxpl_id, layout, dc_plist, space,
+                            fill.size, size, addr, buf)<0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
+                } /* end if */
+                mpi_round=(++mpi_round)%mpi_size;
+
+                /* Indicate that blocks are being written */
+                blocks_written=1;
+            } /* end if */
+            else {
+#endif /* H5_HAVE_PARALLEL */
+                if (H5F_seq_write(f, dxpl_id, layout, dc_plist, space,
+                        fill.size, size, addr, buf)<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
+#ifdef H5_HAVE_PARALLEL
+            } /* end else */
+#endif /* H5_HAVE_PARALLEL */
+
+          npoints -= MIN(ptsperbuf, npoints);
+          addr += size;
+      } /* end while */
+            
+#ifdef H5_HAVE_PARALLEL
+    /* Only need to block at the barrier if we actually wrote fill values */
+    /* And if we are using an MPI-capable file driver */
+    if(using_mpi && blocks_written) {
+        /* Wait at barrier to avoid race conditions where some processes are
+         * still writing out fill values and other processes race ahead to data
+         * in, getting bogus data.
+         */
+        if (MPI_SUCCESS != (mpi_code=MPI_Barrier(mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+done:
+    /* Free the buffer for fill values */
+    if (buf)
+        H5FL_BLK_FREE(type_conv,buf);
+
+    FUNC_LEAVE(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------

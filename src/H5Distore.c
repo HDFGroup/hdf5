@@ -1758,7 +1758,6 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         if ((chunk_size>f->shared->rdcc_nbytes && pline.nfilters==0 &&
                 chunk_addr!=HADDR_UNDEF)
 
-#ifdef H5_HAVE_PARALLEL
         /*
          * If MPIO or MPIPOSIX is used and file can be written to, we must bypass the
          * chunk-cache scheme because other MPI processes could be writing to
@@ -1766,7 +1765,6 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
          * Do a direct write-through of only the elements requested.
          */
             || ((IS_H5FD_MPIO(f) ||IS_H5FD_MPIPOSIX(f)) && (H5F_ACC_RDWR & f->shared->flags))
-#endif /* H5_HAVE_PARALLEL */
             ) {
             H5O_layout_t	l;	/* temporary layout */
 
@@ -1942,14 +1940,12 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         if ((chunk_size>f->shared->rdcc_nbytes && pline.nfilters==0 &&
                 chunk_addr!=HADDR_UNDEF)
 
-#ifdef H5_HAVE_PARALLEL
         /*
          * If MPIO or MPIPOSIX is used, must bypass the chunk-cache scheme because other
          * MPI processes could be writing to other elements in the same chunk.
          * Do a direct write-through of only the elements requested.
          */
             || ((IS_H5FD_MPIO(f) ||IS_H5FD_MPIPOSIX(f)) && (H5F_ACC_RDWR & f->shared->flags))
-#endif /* H5_HAVE_PARALLEL */
             ) {
             H5O_layout_t	l;	/* temporary layout */
 
@@ -2334,6 +2330,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5P_genplist_t *dx_plist;   /* Data xfer property list */
     double	split_ratios[3];/* B-tree node splitting ratios		*/
 #ifdef H5_HAVE_PARALLEL
+    MPI_Comm	mpi_comm=MPI_COMM_NULL;	/* MPI communicator for file */
     int         mpi_rank=(-1);  /* This process's rank  */
     int         mpi_size=(-1);  /* Total # of processes */
     int         mpi_round=0;    /* Current process responsible for I/O */
@@ -2342,6 +2339,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned    using_mpi=0;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
 #endif /* H5_HAVE_PARALLEL */
     int		carry;          /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
+    unsigned	chunk_exists;   /* Flag to indicate whether a chunk exists already */
     int		i;              /* Local index variable */
     unsigned	u;              /* Local index variable */
     herr_t	ret_value=SUCCEED;	/* Return value */
@@ -2374,6 +2372,11 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve up MPI parameters */
     if(IS_H5FD_MPIO(f)) {
+        /* Get the MPI communicator */
+        if (MPI_COMM_NULL == (mpi_comm=H5FD_mpio_communicator(f->shared->lf)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+
+        /* Get the MPI rank & size */
         if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
         if ((mpi_size=H5FD_mpio_mpi_size(f->shared->lf))<0)
@@ -2384,6 +2387,10 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     } /* end if */
     else {
         if(IS_H5FD_MPIPOSIX(f)) {
+            /* Get the MPI communicator */
+            if (MPI_COMM_NULL == (mpi_comm=H5FD_mpiposix_communicator(f->shared->lf)))
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+
             /* Get the MPI rank & size */
             if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
@@ -2394,12 +2401,6 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             using_mpi=1;
         } /* end if */
     } /* end else */
-#endif /* H5_HAVE_PARALLEL */
-
-#ifdef H5_HAVE_PARALLEL
-    /* Can't use data I/O pipeline in parallel (yet) */
-    if (using_mpi && pline.nfilters>0)
-        HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, FAIL, "can't use data pipeline in parallel");
 #endif /* H5_HAVE_PARALLEL */
 
     /*
@@ -2450,8 +2451,32 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     /* Loop over all chunks */
     carry=0;
     while (carry==0) {
-        /* Check if the chunk exists yet */
+        /* Check if the chunk exists yet on disk */
+        chunk_exists=1;
         if(H5F_istore_get_addr(f,layout,chunk_offset)==HADDR_UNDEF) {
+            H5F_rdcc_t             *rdcc = &(f->shared->rdcc);	/*raw data chunk cache */
+            H5F_rdcc_ent_t         *ent = NULL;              	/*cache entry  */
+
+            /* Didn't find the chunk on disk */
+            chunk_exists = 0;
+
+            /* Look for chunk in cache */
+            for(ent = rdcc->head; ent && !chunk_exists; ent = ent->next) {
+                /* Make certain we are dealing with the correct B-tree, etc */
+                if (layout->ndims==ent->layout->ndims &&
+                        H5F_addr_eq(layout->addr, ent->layout->addr)) {
+
+                    /* Assume a match */
+                    chunk_exists = 1;
+                    for(u = 0; u < layout->ndims && chunk_exists; u++) {
+                        if(ent->offset[u] != chunk_offset[u])
+                            chunk_exists = 0;       /* Reset if no match */
+                    } /* end for */
+                } /* end if */
+            } /* end for */
+        } /* end if */
+
+        if(!chunk_exists) {
             /* Initialize the chunk information */
             udata.mesg = *layout;
             udata.key.filter_mask = 0;
@@ -2507,17 +2532,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
          * still writing out chunks and other processes race ahead to read
          * them in, getting bogus data.
          */
-        if(IS_H5FD_MPIO(f)) {
-            if (MPI_SUCCESS != (mpi_code=MPI_Barrier(H5FD_mpio_communicator(f->shared->lf))))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
-        } /* end if */
-        else {
-            /* Sanity Check */
-            assert(IS_H5FD_MPIPOSIX(f));
-
-            if (MPI_SUCCESS!=(mpi_code=MPI_Barrier(H5FD_mpiposix_communicator(f->shared->lf))))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
-        } /* end else */
+        if (MPI_SUCCESS != (mpi_code=MPI_Barrier(mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2662,13 +2678,17 @@ H5F_istore_prune_by_extent(H5F_t *f, const H5O_layout_t *layout, const H5S_t * s
     for(ent = rdcc->head; ent; ent = next) {
 	next = ent->next;
 
-	found = 0;
-	for(u = 0; u < ent->layout->ndims - 1; u++) {
-	    if((hsize_t)ent->offset[u] > curr_dims[u]) {
-		found = 1;
-		break;
-	    }
-	}
+        /* Make certain we are dealing with the correct B-tree, etc */
+        if (layout->ndims==ent->layout->ndims &&
+                H5F_addr_eq(layout->addr, ent->layout->addr)) {
+            found = 0;
+            for(u = 0; u < ent->layout->ndims - 1; u++) {
+                if((hsize_t)ent->offset[u] > curr_dims[u]) {
+                    found = 1;
+                    break;
+                }
+            }
+        } /* end if */
 
 	if(found) {
 #if defined (H5F_ISTORE_DEBUG)

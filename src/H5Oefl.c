@@ -532,7 +532,7 @@ H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "write past logical end of file");
 	if (H5F_OVERFLOW_HSIZET2OFFT (efl->slot[i].offset+skip))
 	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed");
-	if ((fd=HDopen (efl->slot[i].name, O_RDWR, 0))<0) {
+	if ((fd=HDopen (efl->slot[i].name, O_CREAT|O_RDWR, 0666))<0) {
 	    if (HDaccess (efl->slot[i].name, F_OK)<0) {
 		HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL, "external raw data file does not exist");
 	    } else {

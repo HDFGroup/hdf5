@@ -20,7 +20,6 @@
 #include "H5Fpkg.h"
 #include "H5FDprivate.h"	/*file driver				  */
 #include "H5Iprivate.h"
-#include "H5MFprivate.h"
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Oprivate.h"
 #include "H5Pprivate.h"
@@ -34,69 +33,6 @@
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
 
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_arr_create
- *
- * Purpose:	Creates an array of bytes.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Friday, January 16, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
-{
-    unsigned	u;
-    hsize_t	nbytes;
-    herr_t      ret_value = SUCCEED;            /* Return value */
-   
-    FUNC_ENTER_NOAPI(H5F_arr_create, FAIL);
-
-    /* check args */
-    assert (f);
-    assert (layout);
-    layout->addr = HADDR_UNDEF; /*just in case we fail*/
-   
-    switch (layout->type) {
-        case H5D_CONTIGUOUS:
-            /* Reserve space in the file for the entire array */
-            for (u=0, nbytes=1; u<layout->ndims; u++)
-                nbytes *= layout->dim[u];
-            assert (nbytes>0);
-            if (HADDR_UNDEF==(layout->addr=H5MF_alloc(f, H5FD_MEM_DRAW, nbytes)))
-                HGOTO_ERROR (H5E_IO, H5E_NOSPACE, FAIL, "unable to reserve file space");
-            break;
-
-        case H5D_CHUNKED:
-            /* Create the root of the B-tree that describes chunked storage */
-            if (H5F_istore_create (f, layout/*out*/)<0)
-                HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
-            break;
-
-        case H5D_COMPACT:               
-            /* Reserve space in layout header message for the entire array. */
-            assert(layout->size>0);
-            if (NULL==(layout->buf=H5MM_malloc(layout->size)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset");
-            layout->dirty = TRUE;
-            break;
-            
-        default:
-            assert ("not implemented yet" && 0);
-            HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
-                   "unsupported storage layout");
-    } /* end switch */
-
-done:
-    FUNC_LEAVE (ret_value);
-}
 
 
 /*-------------------------------------------------------------------------

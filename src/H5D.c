@@ -22,6 +22,7 @@
 #include "H5Gprivate.h"		/* Group headers		  	*/
 #include "H5HLprivate.h"	/* Name heap				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File space management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -44,7 +45,10 @@
 #   include "H5Rpublic.h"
 #endif /*H5_HAVE_PARALLEL*/
 
+/* Pablo information */
 #define PABLO_MASK	H5D_mask
+
+/* Local typedefs */
 
 /*
  * A dataset is the following struct.
@@ -56,11 +60,22 @@ struct H5D_t {
     H5O_layout_t	layout;		/* data layout			*/
 };
 
+/* Enumerated type for allocating dataset's storage */
+typedef enum {
+    H5D_ALLOC_CREATE,           /* Dataset is being created */
+    H5D_ALLOC_OPEN,             /* Dataset is being opened */
+    H5D_ALLOC_EXTEND,           /* Dataset's dataspace is being extended */
+    H5D_ALLOC_WRITE             /* Dataset is being extended */
+} H5D_alloc_time_t;
 
+/* Interface initialization */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
+
+/* Local functions */
 static herr_t H5D_init_interface(void);
-static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
+static herr_t H5D_alloc_storage (H5F_t *f, H5D_t *dset,H5D_alloc_time_t alloc_time);
+static herr_t H5D_init_storage(H5D_t *dataset);
 H5D_t * H5D_new(hid_t dcpl_id);
 static herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     const H5T_t *buf_type, const H5S_t *space);
@@ -70,7 +85,7 @@ static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation);
 H5FL_DEFINE_STATIC(H5D_t);
 
 /* Declare a free list to manage blocks of type conversion data */
-H5FL_BLK_DEFINE_STATIC(type_conv);
+H5FL_BLK_DEFINE(type_conv);
 
 /* Declare a free list to manage blocks of single datatype element data */
 H5FL_BLK_DEFINE(type_elem);
@@ -1533,22 +1548,46 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve pipeline filter");
     if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &dcpl_layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout");
-    if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
     if(dcpl_pline.nfilters > 0 && H5D_CHUNKED != dcpl_layout)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout");
-    if(dcpl_layout==H5D_COMPACT && space_time==H5D_SPACE_ALLOC_LATE)
+    if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+
+    /* Check if the space_time is the default and set it accordingly */
+    if(space_time==H5D_SPACE_ALLOC_DEFAULT) {
+        switch(dcpl_layout) {
+            case H5D_COMPACT:
+                space_time=H5D_SPACE_ALLOC_EARLY;
+                break;
+
+            case H5D_CONTIGUOUS:
+                space_time=H5D_SPACE_ALLOC_LATE;
+                break;
+
+            case H5D_CHUNKED:
+                space_time=H5D_SPACE_ALLOC_INCR;
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
+        } /* end switch */
+    } /* end if */
+
+    /* Don't allow compact datasets to allocate space later */
+    if(dcpl_layout==H5D_COMPACT && space_time!=H5D_SPACE_ALLOC_EARLY)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset doesn't support late space allocation");
 
     /* What file is the dataset being added to? */
     if (NULL==(f=H5G_insertion_file(loc, name)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point");
 
-#ifdef H5_HAVE_PARALLEL
     /* If MPIO or MPIPOSIX is used, no filter support yet. */
     if((IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f)) && dcpl_pline.nfilters > 0) 
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel I/O does not support filters yet");
-#endif /*H5_HAVE_PARALLEL*/
+
+    /* Check if this dataset is going into a parallel file and set space allocation time */
+    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f))
+        space_time=H5D_SPACE_ALLOC_EARLY;
    
     if(H5P_get(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill time");
@@ -1576,6 +1615,10 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if (NULL == (new_plist = H5I_object(new_dset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
 
+    /* Set the space_time for the dataset, in case the default was used */
+    if(H5P_set(new_plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set allocation time");  
+
     if(H5P_get(new_plist, H5D_CRT_CHUNK_DIM_NAME, &chunk_ndims) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout");
     
@@ -1588,6 +1631,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     new_dset->layout.ndims = H5S_get_simple_extent_ndims(space) + 1;
     assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
     new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size(new_dset->type);    
+    new_dset->layout.addr = HADDR_UNDEF;        /* Initialize to no address */
 
     switch (new_dset->layout.type) {
         case H5D_CONTIGUOUS:
@@ -1741,34 +1785,11 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
 
     /*
-     * Allocate storage.  We assume that external storage is already
-     * allocated by the caller, or at least will be before I/O is performed.
-     * For parallelization, space is always allocated now except using 
-     * external storage. For contiguous layout, space is allocated now if 
-     * space allocate time is early; otherwise delay allocation until H5Dwrite.
-     * For compact dataset, space is allocated regardless of space allocation
-     * time.
+     * Allocate storage if space allocate time is early; otherwise delay allocation until later.
      */
-#ifdef H5_HAVE_PARALLEL
-    if (0==efl.nused) {
-        if(H5F_arr_create(f, &(new_dset->layout))<0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
-    } /* end if */
-    else
-	new_dset->layout.addr = HADDR_UNDEF;
-#else /*H5_HAVE_PARALLEL*/
-    if (0==efl.nused) {
-        if(dcpl_layout==H5D_CHUNKED || dcpl_layout==H5D_COMPACT || 
-            (dcpl_layout==H5D_CONTIGUOUS && space_time==H5D_SPACE_ALLOC_EARLY)) {
-            if (H5F_arr_create(f, &(new_dset->layout))<0)
-            	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage"); 
-        } /* end if */
-        else
-	    new_dset->layout.addr = HADDR_UNDEF;
-    } /* end if */
-    else
-        new_dset->layout.addr = HADDR_UNDEF;
-#endif /*H5_HAVE_PARALLEL*/
+    if(space_time==H5D_SPACE_ALLOC_EARLY)
+        if (H5D_alloc_storage(f, new_dset,H5D_ALLOC_CREATE)<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage"); 
 
     /* Update external storage message */
     if (efl.nused>0) {
@@ -1791,34 +1812,9 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to update external file list message");
     } /* end if */
 
-    /* Initialize the raw data when it's 
-     *  1. Parallel I/O
-     *  2. layout is contiguous, space allocation time is early, fill value 
-     *     writing time is upon allocation 
-     *  3. external space is treated the same as internal except it's always
-     *     assumed as early for space allocation time
-     *  4. compact dataset and fill value writing time is upon allocation
-     */
-#ifdef H5_HAVE_PARALLEL
-    if (H5D_init_storage(new_dset, space)<0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
-#else /*H5_HAVE_PARALLEL*/
-    if(fill_time==H5D_FILL_TIME_ALLOC) {
-        if((dcpl_layout==H5D_CONTIGUOUS && space_time==H5D_SPACE_ALLOC_EARLY)
-            || (dcpl_layout==H5D_CHUNKED && space_time==H5D_SPACE_ALLOC_EARLY) 
-            || dcpl_layout==H5D_COMPACT ) {
-	    if (H5D_init_storage(new_dset, space)<0) {
-	        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
-            }
-        }
-     }
-#endif /*H5_HAVE_PARALLEL*/
-
     /* Update layout message */
     if (H5D_COMPACT != new_dset->layout.type && H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, 0, &(new_dset->layout))<0)
          HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to update layout"); 
-    if (H5D_COMPACT == new_dset->layout.type)
-         new_dset->layout.dirty = TRUE;
     
     /* Success */
     ret_value = new_dset;
@@ -1969,7 +1965,6 @@ H5D_open_oid(H5G_entry_t *ent)
 {
     H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
     H5D_t 	*ret_value = NULL;	/*return value			*/
-    H5S_t	*space = NULL;		/*data space			*/
     H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_SPACE_ALLOC_LATE, H5D_FILL_TIME_ALLOC, TRUE}; 
     H5O_fill_t      fill_prop = {NULL, 0, NULL};
     H5O_pline_t pline;                  /* I/O pipeline information */
@@ -1997,46 +1992,10 @@ H5D_open_oid(H5G_entry_t *ent)
     /* Get the type and space */
     if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to load type info from dataset header");
-    if (NULL==(space=H5S_read (&(dataset->ent))))
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to read data space info from dataset header");
 
     /* Get dataset creation property list object */
     if (NULL == (plist = H5I_object(dataset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
-
-    /* Retrieve & release the previous fill-value settings */
-    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't get fill value");
-    H5O_reset(H5O_FILL, &fill_prop);
-
-    /* Get the new fill value message */
-    if(NULL == H5O_read(&(dataset->ent), H5O_FILL_NEW, 0, &fill)) {
-        H5E_clear();
-        HDmemset(&fill, 0, sizeof(fill));
-    }
-    if(fill.fill_defined) {
-        if(NULL==H5O_copy(H5O_FILL, &fill, &fill_prop))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy fill value");
-    } else {
-	/* For compatibility with v1.4.  Retrieve the old fill value message.
- 	 * If size is 0, make it -1 for undefined. */
-        if(NULL == H5O_read(&(dataset->ent), H5O_FILL, 0, &fill_prop)) {
-            H5E_clear();
-            HDmemset(&fill_prop, 0, sizeof(fill_prop));
-        }
-        if(fill_prop.size == 0) {
-	    fill_prop.type = fill_prop.buf = NULL;
-	    fill_prop.size = (size_t)-1;
-	}
-    } /* end else */
-	
-    /* Set fill value properties */ 
-    if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
-    if(H5P_set(plist, H5D_CRT_SPACE_TIME_NAME, &fill.space_time) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
-    if(H5P_set(plist, H5D_CRT_FILL_TIME_NAME, &fill.fill_time) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
 
     /* Get the optional filters message */
     HDmemset(&pline,0,sizeof(H5O_pline_t));
@@ -2047,11 +2006,9 @@ H5D_open_oid(H5G_entry_t *ent)
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set pipeline");
 
-#ifdef H5_HAVE_PARALLEL
     /* If MPIO or MPIPOSIX is used, no filter support yet. */
     if((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file)) && pline.nfilters > 0)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel IO does not support filters yet");
-#endif /*H5_HAVE_PARALLEL*/
     
     /*
      * Get the raw data layout info.  It's actually stored in two locations:
@@ -2094,6 +2051,58 @@ H5D_open_oid(H5G_entry_t *ent)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
     } /* end switch */
 
+    /* Retrieve & release the previous fill-value settings */
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't get fill value");
+    H5O_reset(H5O_FILL, &fill_prop);
+
+    /* Get the new fill value message */
+    if(NULL == H5O_read(&(dataset->ent), H5O_FILL_NEW, 0, &fill)) {
+        H5E_clear();
+        HDmemset(&fill, 0, sizeof(fill));
+
+        /* Set the space allocation time appropriately, based on the type of dataset storage */
+        switch (dataset->layout.type) {
+            case H5D_COMPACT:
+                fill.space_time=H5D_SPACE_ALLOC_EARLY;
+                break;
+
+            case H5D_CONTIGUOUS:
+                fill.space_time=H5D_SPACE_ALLOC_LATE;
+                break;
+
+            case H5D_CHUNKED:
+                fill.space_time=H5D_SPACE_ALLOC_INCR;
+                break;
+                
+            default:
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
+        } /* end switch */
+    } /* end if */
+    if(fill.fill_defined) {
+        if(NULL==H5O_copy(H5O_FILL, &fill, &fill_prop))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy fill value");
+    } else {
+	/* For compatibility with v1.4.  Retrieve the old fill value message.
+ 	 * If size is 0, make it -1 for undefined. */
+        if(NULL == H5O_read(&(dataset->ent), H5O_FILL, 0, &fill_prop)) {
+            H5E_clear();
+            HDmemset(&fill_prop, 0, sizeof(fill_prop));
+        }
+        if(fill_prop.size == 0) {
+	    fill_prop.type = fill_prop.buf = NULL;
+	    fill_prop.size = (size_t)-1;
+	}
+    } /* end else */
+	
+    /* Set fill value properties */ 
+    if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
+    if(H5P_set(plist, H5D_CRT_SPACE_TIME_NAME, &fill.space_time) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
+    if(H5P_set(plist, H5D_CRT_FILL_TIME_NAME, &fill.fill_time) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
+
     /* Get the external file list message, which might not exist.  Space is
      * also undefined when space allocate time is H5D_SPACE_ALLOC_LATE. */
     if( !H5F_addr_defined(dataset->layout.addr)) {
@@ -2103,12 +2112,14 @@ H5D_open_oid(H5G_entry_t *ent)
             	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set external file list");
     }
     /*
-     * Make sure all storage is properly initialized for chunked datasets.
-     * This is especially important for parallel I/O where the B-tree must
-     * be fully populated before I/O can happen.
+     * Make sure all storage is properly initialized.
+     * This is important only for parallel I/O where the space must
+     * be fully allocated before I/O can happen.
      */
-    if ((H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR) && H5D_CHUNKED==dataset->layout.type) {
-        if (H5D_init_storage(dataset, space)<0)
+    if ((H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR)
+            && (dataset->layout.type!=H5D_COMPACT && dataset->layout.addr==HADDR_UNDEF)
+            && (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file))) {
+        if (H5D_alloc_storage(dataset->ent.file, dataset,H5D_ALLOC_OPEN)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize file storage");
     }
 
@@ -2116,8 +2127,6 @@ H5D_open_oid(H5G_entry_t *ent)
     ret_value = dataset;
 
 done:
-    if (space)
-        H5S_close(space);
     if (ret_value==NULL && dataset) {
         if (H5F_addr_defined(dataset->ent.header))
             H5O_close(&(dataset->ent));
@@ -2360,7 +2369,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * fill time is NEVER, there is no way to tell whether part of data
      * has been overwritten.  So just proceed in reading.     
      */ 
-    if(nelmts > 0 && efl.nused==0 && dataset->layout.type==H5D_CONTIGUOUS 
+    if(nelmts > 0 && efl.nused==0 && dataset->layout.type!=H5D_COMPACT 
             && dataset->layout.addr==HADDR_UNDEF) {
 
         /* Should be impossible, but check anyway... */
@@ -2695,6 +2704,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5O_efl_t   efl;                    /* External File List info */
     H5O_fill_t  fill;                   /* Fill value info */
     H5D_fill_time_t	fill_time;      /* When to write the fill values */
+    H5D_space_time_t    space_time;     /* When to allocate raw data space */
     H5P_genplist_t *dx_plist=NULL;      /* Data transfer property list */
     H5P_genplist_t *dc_plist;           /* Dataset creation roperty list */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
@@ -2728,14 +2738,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         mem_space = file_space;                                                                                                          
     nelmts = (*mem_space->select.get_npoints)(mem_space);            
 
-#ifdef H5_HAVE_PARALLEL
     /* If MPIO or MPIPOSIX is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
     if ( (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file)) && H5T_get_class(mem_type)==H5T_VLEN)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet");
-#endif /*H5_HAVE_PARALLEL*/
-#ifdef H5_HAVE_PARALLEL
     /* If MPIO or MPIPOSIX is used, no dataset region reference datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
@@ -2743,7 +2750,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             H5T_get_class(mem_type)==H5T_REFERENCE &&
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet");
-#endif /*H5_HAVE_PARALLEL*/
 
     if (0==(H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
@@ -2794,24 +2800,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill time");
     if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
+    if(H5P_get(dc_plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
 
-    /* Allocate data space and initialize it if it hasn't been.  Also modify
-     * header message for layout(this is only for forward compatibility). */
-    if(nelmts > 0 && efl.nused==0 && dataset->layout.type==H5D_CONTIGUOUS &&
+    /* Allocate data space and initialize it if it hasn't been. */
+    if(nelmts > 0 && dataset->layout.type!=H5D_COMPACT &&
             dataset->layout.addr==HADDR_UNDEF) {
  	/* Allocate storage */
-        if(H5F_arr_create(dataset->ent.file, &(dataset->layout))<0)
+        if(H5D_alloc_storage(dataset->ent.file, dataset,H5D_ALLOC_WRITE)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
-
-        /* Initialize raw data */
-        if(fill_time==H5D_FILL_TIME_ALLOC)
-            if(H5D_init_storage(dataset, file_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
-
-        /* Update layout message */
-        if (H5O_modify (&(dataset->ent), H5O_LAYOUT, 0, H5O_FLAG_CONSTANT, 
-	    		&(dataset->layout)) < 0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
     } /* end if */
 
     /*
@@ -3084,16 +3081,23 @@ done:
 herr_t
 H5D_extend (H5D_t *dataset, const hsize_t *size)
 {
-    herr_t	changed, ret_value=SUCCEED;
-    H5S_t	*space = NULL;
-    H5O_fill_t  fill;
-    H5P_genplist_t *plist;      /* Property list */
+    int	changed;                        /* Flag to indicate that the dataspace was successfully extended */
+    H5S_t	*space = NULL;          /* Dataset's dataspace */
+    H5D_space_time_t    space_time;     /* When to allocate raw data space */
+    H5P_genplist_t *plist;              /* Property list */
+    herr_t	ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_extend, FAIL);
 
     /* Check args */
     assert (dataset);
     assert (size);
+
+    /* Get the dataset creation property list */
+    if (NULL == (plist = H5I_object(dataset->dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+    if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
 
     /*
      * NOTE: Restrictions on extensions were checked when the dataset was
@@ -3112,26 +3116,10 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
 	if (H5S_modify (&(dataset->ent), space)<0)
 	    HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace");
 
-	/* Initialize the new parts of the dataset */
-#ifdef LATER
-	if (H5S_select_all(space)<0 ||
-                H5S_select_hyperslab(space, H5S_SELECT_DIFF, zero, NULL, old_dims, NULL)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to select new extents for fill value");
-#else
-	/*
-	 * We don't have the H5S_SELECT_DIFF operator yet.  We really only
-	 * need it for contiguous datasets because the chunked datasets will
-	 * either fill on demand during I/O or attempt a fill of all chunks.
-	 */
-        if (NULL == (plist = H5I_object(dataset->dcpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-        if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
-        if(H5D_CONTIGUOUS == dataset->layout.type && fill.buf) 
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to select fill value region"); 
-#endif
-	if (H5D_init_storage(dataset, space)<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
+	/* Allocate space for the new parts of the dataset, if appropriate */
+        if(space_time==H5D_SPACE_ALLOC_EARLY)
+            if (H5D_alloc_storage(dataset->ent.file, dataset, H5D_ALLOC_EXTEND)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
     } /* end if */
 
 done:
@@ -3226,6 +3214,128 @@ H5D_get_file (const H5D_t *dset)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_alloc_storage
+ *
+ * Purpose:	Allocate storage for the raw data of a dataset.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January 16, 1998
+ *
+ * Modifications:
+ *              Quincey Koziol
+ *              Thursday, August 22, 2002
+ *              Moved here from H5F_arr_create and moved more logic into
+ *              this function from places where it was being called.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_alloc_storage (H5F_t *f, H5D_t *dset/*in,out*/, H5D_alloc_time_t alloc_time)
+{
+    H5P_genplist_t     *plist;          /* Dataset's creation property list */
+    H5O_efl_t           efl;            /* External File List info */
+    H5D_fill_time_t fill_time;          /* When to write fill values */
+    H5D_space_time_t    space_time;     /* When to allocate raw data space */
+    struct H5O_layout_t *layout;        /* The dataset's layout information */
+    hsize_t	nbytes;                 /* The number of bytes in the dataset */
+    unsigned space_allocated=0;         /* Flag to indicate that space was allocated */
+    unsigned	u;                      /* Local index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+   
+    FUNC_ENTER_NOINIT(H5D_alloc_storage);
+
+    /* check args */
+    assert (f);
+    assert (dset);
+
+    /* Get external file list properties */
+    if (NULL == (plist = H5I_object(dset->dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
+
+    /* If the data is stored in external files, don't set an address for the layout
+     * We assume that external storage is already
+     * allocated by the caller, or at least will be before I/O is performed.
+     */
+    if(efl.nused==0) {
+        /* Get properties needed */
+        if(H5P_get(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time");
+        if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+
+        /* Get a pointer to the dataset's layout information */
+        layout=&(dset->layout);
+
+        switch (layout->type) {
+            case H5D_CONTIGUOUS:
+                if(layout->addr==HADDR_UNDEF) {
+                    /* Reserve space in the file for the entire array */
+                    for (u=0, nbytes=1; u<layout->ndims; u++)
+                        nbytes *= layout->dim[u];
+                    assert (nbytes>0);
+                    if (HADDR_UNDEF==(layout->addr=H5MF_alloc(f, H5FD_MEM_DRAW, nbytes)))
+                        HGOTO_ERROR (H5E_IO, H5E_NOSPACE, FAIL, "unable to reserve file space");
+
+                    /* Indicate that we allocated space */
+                    space_allocated=1;
+                } /* end if */
+                break;
+
+            case H5D_CHUNKED:
+                if(layout->addr==HADDR_UNDEF) {
+                    /* Create the root of the B-tree that describes chunked storage */
+                    if (H5F_istore_create (f, layout/*out*/)<0)
+                        HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
+
+                    /* Indicate that we allocated space */
+                    space_allocated=1;
+                } /* end if */
+                break;
+
+            case H5D_COMPACT:               
+                /* Check if space is already allocated */
+                if(layout->buf==NULL) {
+                    /* Reserve space in layout header message for the entire array. */
+                    assert(layout->size>0);
+                    if (NULL==(layout->buf=H5MM_malloc(layout->size)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset");
+                    layout->dirty = TRUE;
+
+                    /* Indicate that we allocated space */
+                    space_allocated=1;
+                } /* end if */
+                break;
+                
+            default:
+                assert ("not implemented yet" && 0);
+                HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
+        } /* end switch */
+
+        /* If we are filling the dataset on allocation, do that now */
+        if(fill_time==H5D_FILL_TIME_ALLOC
+                && !(space_time==H5D_SPACE_ALLOC_INCR && alloc_time==H5D_ALLOC_WRITE)) {
+            if(H5D_init_storage(dset) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
+        } /* end if */
+
+        /* Also update header message for layout with new address
+          * (this is only for forward compatibility).
+          */
+        if(space_allocated && alloc_time!=H5D_ALLOC_CREATE)
+            if (H5O_modify (&(dset->ent), H5O_LAYOUT, 0, H5O_FLAG_CONSTANT, &(dset->layout)) < 0)
+                HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
+    } /* end if */
+
+done:
+    FUNC_LEAVE (ret_value);
+} /* end H5D_alloc_storage() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_init_storage
  *
  * Purpose:	Initialize the data for a new dataset.  If a selection is
@@ -3247,32 +3357,31 @@ H5D_get_file (const H5D_t *dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_init_storage(H5D_t *dset, const H5S_t *space)
+H5D_init_storage(H5D_t *dset)
 {
     hssize_t            snpoints;       /* Number of points in space (for error checking) */
     size_t              npoints;        /* Number of points in space */
-    size_t              ptsperbuf;      /* Maximum # of points which fit in the buffer */
-    size_t		bufsize=64*1024;    /* Size of buffer to write */
-    size_t		size;           /* Current # of points to write */
-    hsize_t		addr;           /* Offset in dataset */
-    void		*buf = NULL;    /* Buffer for fill value writing */
+    H5S_t	        *space = NULL;	/* Dataset's dataspace */
     H5O_fill_t          fill;           /* Fill value information */
-    H5D_space_time_t    space_time;     /* When to allocate space */
+    H5O_efl_t           efl;            /* External File List info */
     H5P_genplist_t     *plist;          /* Property list */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOINIT(H5D_init_storage);
 
     assert(dset);
-    assert(space);
 
     /* Get fill value, external file list, and data pipeline properties */
     if (NULL == (plist = H5I_object(dset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
-    if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
+    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
+
+    /* Get the dataset's dataspace */
+    if (NULL==(space=H5S_read (&(dset->ent))))
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data space from dataset header");
 
     /* Get the number of elements in the dataset's dataspace */
     snpoints = H5S_get_simple_extent_npoints(space);
@@ -3290,54 +3399,17 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
             break;
 
         case H5D_CONTIGUOUS:
-            /* If fill value is library default, get the dataset's type's size */
-            if(!fill.buf) {
-                fill.size=H5T_get_size(dset->type);
-                assert(fill.size);
-            } /* end if */
-            
-            /*
-             * Fill the entire current extent with the fill value.  We can do
-             * this quite efficiently by making sure we copy the fill value
-             * in relatively large pieces.
-             */
-             ptsperbuf = MAX(1, bufsize/fill.size);
-             bufsize = ptsperbuf*fill.size;
-
-             /* Allocate temporary buffer */
-             if ((buf=H5FL_BLK_ALLOC(type_conv,bufsize,0))==NULL)
-                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
-
-             /* Fill the buffer with the user's fill value */
-             if(fill.buf)
-                H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
-             else /* Fill the buffer with the default fill value */
-                HDmemset(buf,0,bufsize);
-             
-             /* Start at the beginning of the dataset */
-             addr = 0;
-
-             /* Loop through writing the fill value to the dataset */
-             while (npoints>0) {
-                  size = MIN(ptsperbuf, npoints) * fill.size;
-                  if (H5F_seq_write(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
-                          &(dset->layout), plist, space, fill.size, size, addr, buf)<0)
-                      HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
-                  npoints -= MIN(ptsperbuf, npoints);
-                  addr += size;
-              } /* end while */
+            if (H5F_contig_fill(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
+                     &(dset->layout), plist, space, H5T_get_size(dset->type))<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset");
              break;
 
         case H5D_CHUNKED:
             /*        
-             * If the dataset is accessed via parallel I/O, allocate file space                    
+             * Allocate file space                    
              * for all chunks now and initialize each chunk with the fill value.                                 
              */
-            if (space_time==H5D_SPACE_ALLOC_EARLY
-#ifdef H5_HAVE_PARALLEL
-                    || (IS_H5FD_MPIO(dset->ent.file) || IS_H5FD_MPIPOSIX(dset->ent.file))
-#endif /*H5_HAVE_PARALLEL*/
-                    ) {
+            {
                 /* We only handle simple data spaces so far */
                 int             ndims;
                 hsize_t         dim[H5O_LAYOUT_NDIMS];
@@ -3345,7 +3417,6 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
                 if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple data space info");
                 dim[ndims] = dset->layout.dim[ndims];
-                ndims++;
 
                 if (H5F_istore_allocate(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
                          &(dset->layout), dim, plist)<0)
@@ -3355,8 +3426,8 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     } /* end switch */
     
 done:
-    if (buf)
-        H5FL_BLK_FREE(type_conv,buf);
+    if (space)
+        H5S_close(space);
 
     FUNC_LEAVE(ret_value);
 }
@@ -3430,23 +3501,29 @@ H5D_get_storage_size(H5D_t *dset)
 
     switch(dset->layout.type) {
         case H5D_CHUNKED:
-            ret_value = H5F_istore_allocated(dset->ent.file, dset->layout.ndims,
+            if(dset->layout.addr == HADDR_UNDEF)
+                ret_value=0;
+            else
+                ret_value = H5F_istore_allocated(dset->ent.file, dset->layout.ndims,
                                              dset->layout.addr);
             break;
+
         case H5D_CONTIGUOUS:
             /* Datasets which are not allocated yet are using no space on disk */
             if(dset->layout.addr == HADDR_UNDEF)
-                 ret_value=0;
+                ret_value=0;
             else {
                  for (u=0, ret_value=1; u<dset->layout.ndims; u++)
                      ret_value *= dset->layout.dim[u];
             } /* end else */
             break;
+
         case H5D_COMPACT:
             ret_value = dset->layout.size;
             break;
+
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset type");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset type");
     }
      
 done:
@@ -4001,8 +4078,11 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
     herr_t                  ret_value = SUCCEED;        /* Return value */
     H5S_t                  *space = NULL;
     H5P_genplist_t         *plist;
+    H5D_space_time_t        space_time;         /* When to allocate raw data space */
     int                     u;
-    int                     shrink = 0;
+    unsigned                shrink = 0;         /* Flag to indicate a dimension has shrank */
+    unsigned                expand = 0;         /* Flag to indicate a dimension has grown */
+    int                     changed = 0;
 
     FUNC_ENTER_NOAPI(H5D_set_extent, FAIL);
 
@@ -4018,56 +4098,62 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data space info from dset header");
 
  /*-------------------------------------------------------------------------
-  * Check if we are shrinking in any of the dimensions
+  * Check if we are shrinking or expanding any of the dimensions
   *-------------------------------------------------------------------------
   */
     if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
 
     for(u = 0; u < rank; u++) {
-	if(size[u] < curr_dims[u]) {
+	if(size[u] < curr_dims[u])
 	    shrink = 1;
-	    break;
-	}
+	if(size[u] > curr_dims[u])
+	    expand = 1;
     }
 
  /*-------------------------------------------------------------------------
   * Modify the size of the data space
   *-------------------------------------------------------------------------
   */
-    if(H5S_set_extent(space, size) < 0)
+    if((changed=H5S_set_extent(space, size)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space");
 
- /*-------------------------------------------------------------------------
-  * Modify the dataset storage
-  *-------------------------------------------------------------------------
-  */
-    /* Save the new dataspace in the file if necessary */
-    if(H5S_modify(&(dset->ent), space) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace");
-
-    /* Initialize the new parts of the dset */
-    if(H5D_init_storage(dset, space) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage");
-
-
- /*-------------------------------------------------------------------------
-  * Remove chunk information in the case of chunked datasets
-  * This removal takes place only in case we are shrinking the dateset
-  *-------------------------------------------------------------------------
-  */
-    if(shrink && H5D_CHUNKED == dset->layout.type) {
-        /* Remove excess chunks */
-	if(H5F_istore_prune_by_extent(dset->ent.file, &dset->layout, space) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ");
-
+    /* Don't bother updating things, unless they've changed */
+    if(changed) {
         /* Get the dataset creation property list */
-	if(NULL == (plist = H5I_object(dset->dcpl_id)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset creation property list");
+        if(NULL == (plist = H5I_object(dset->dcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset creation property list");
+        if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
 
-        /* Reset the elements outsize the new dimensions, but in existing chunks */
-	if(H5F_istore_initialize_by_extent(dset->ent.file, &dset->layout, plist, space) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ");
+     /*-------------------------------------------------------------------------
+      * Modify the dataset storage
+      *-------------------------------------------------------------------------
+      */
+        /* Save the new dataspace in the file if necessary */
+        if(H5S_modify(&(dset->ent), space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace");
+
+	/* Allocate space for the new parts of the dataset, if appropriate */
+        if(expand && space_time==H5D_SPACE_ALLOC_EARLY)
+            if(H5D_alloc_storage(dset->ent.file, dset, H5D_ALLOC_EXTEND) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage");
+
+
+     /*-------------------------------------------------------------------------
+      * Remove chunk information in the case of chunked datasets
+      * This removal takes place only in case we are shrinking the dateset
+      *-------------------------------------------------------------------------
+      */
+        if(shrink && H5D_CHUNKED == dset->layout.type) {
+            /* Remove excess chunks */
+            if(H5F_istore_prune_by_extent(dset->ent.file, &dset->layout, space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ");
+
+            /* Reset the elements outsize the new dimensions, but in existing chunks */
+            if(H5F_istore_initialize_by_extent(dset->ent.file, &dset->layout, plist, space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ");
+        } /* end if */
     } /* end if */
 
 done:

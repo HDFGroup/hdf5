@@ -211,7 +211,6 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     if(mesg->type==H5D_COMPACT) {
         UINT32ENCODE(p, mesg->size);
         if(mesg->size>0 && mesg->buf) {
-            H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
             HDmemcpy(p, mesg->buf, mesg->size);
             p += mesg->size;
         }

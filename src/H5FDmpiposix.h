@@ -31,12 +31,12 @@
 #   define H5FD_MPIPOSIX	(-1)
 #endif
 
-#ifdef H5_HAVE_PARALLEL
-
 /* Macros */
 
 #define IS_H5FD_MPIPOSIX(f)	/* (H5F_t *f) */				    \
     (H5FD_MPIPOSIX==H5F_get_driver_id(f))
+
+#ifdef H5_HAVE_PARALLEL
 
 /* Function prototypes */
 #ifdef __cplusplus

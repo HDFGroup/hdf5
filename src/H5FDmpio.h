@@ -34,17 +34,18 @@ typedef struct H5FD_mpio_dxpl_t {
     H5FD_mpio_xfer_t	xfer_mode;	/*collective or independent I/O	*/
 } H5FD_mpio_dxpl_t;
     
-#ifdef H5_HAVE_PARALLEL
 /* Macros */
+
+#define IS_H5FD_MPIO(f)	/* (H5F_t *f) */				    \
+    (H5FD_MPIO==H5F_get_driver_id(f))
+
+#ifdef H5_HAVE_PARALLEL
 /*Turn on H5FDmpio_debug if H5F_DEBUG is on */
 #ifdef H5F_DEBUG
 #ifndef H5FDmpio_DEBUG
 #define H5FDmpio_DEBUG
 #endif
 #endif
-
-#define IS_H5FD_MPIO(f)	/* (H5F_t *f) */				    \
-    (H5FD_MPIO==H5F_get_driver_id(f))
 
 /* Function prototypes */
 #ifdef __cplusplus

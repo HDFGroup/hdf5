@@ -1899,11 +1899,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+int
 H5S_set_extent( H5S_t *space, const hsize_t *size )
 {
     unsigned u;
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value=0;
        
     FUNC_ENTER_NOAPI( H5S_set_extent, FAIL );
 
@@ -1911,19 +1911,21 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
     assert( space && H5S_SIMPLE==space->extent.type );
     assert( size);
 
-    /* Check for changing dimensions of a scalar dataspace */
-    if(space->extent.u.simple.rank==0)
-
     /* Verify that the dimensions being changed are allowed to change */
-    for ( u = 0; u < space->extent.u.simple.rank; u++ )
+    for ( u = 0; u < space->extent.u.simple.rank; u++ ) {
         if ( space->extent.u.simple.max &&
                  H5S_UNLIMITED != space->extent.u.simple.max[u] &&
-                 space->extent.u.simple.max[u]<size[u] )
+                 space->extent.u.simple.max[u]!=size[u] )
              HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
+        ret_value++;
+    } /* end for */
 
-    /* Update dimensions with new values */
-    for ( u = 0; u < space->extent.u.simple.rank; u++ )
-        space->extent.u.simple.size[u] = size[u];
+    /* Update */
+    if (ret_value) {
+        /* Update dimensions with new values */
+        for ( u = 0; u < space->extent.u.simple.rank; u++ )
+            space->extent.u.simple.size[u] = size[u];
+    } /* end if */
 
 done:
     FUNC_LEAVE( ret_value );

@@ -33,8 +33,10 @@ typedef enum H5D_layout_t {
 /* Values for the space allocation time property */
 typedef enum H5D_space_time_t {
     H5D_SPACE_ALLOC_ERROR	=-1,
-    H5D_SPACE_ALLOC_LATE  	=0,
-    H5D_SPACE_ALLOC_EARLY	=1
+    H5D_SPACE_ALLOC_DEFAULT  	=0,
+    H5D_SPACE_ALLOC_EARLY	=1,
+    H5D_SPACE_ALLOC_LATE	=2,
+    H5D_SPACE_ALLOC_INCR	=3
 } H5D_space_time_t;   
 
 /* Values for the status of space allocation */
