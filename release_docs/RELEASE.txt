@@ -370,6 +370,12 @@ Footnotes:  (1) Using mpich 1.2.4
 
 Known Problems
 ==============
+* test/big fails sometimes with the message "Possible overlap with another
+  region."  The test selects regions randomly, and this error occurs when
+  two regions overlap each other; it is an bug in the test and not in
+  HDF5.  Since the error is triggered by a random situation, it will
+  usually disappear if the test is re-run.
+
 * Cray SV1 fails to correctly convert between floating-point and "long double"
   for software conversion.  Problem is being investigated. SLU - 2005/03/04
 * Newer SGI MIPSpro compilers (version 7.4.x) support C99 features but it
