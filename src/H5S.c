@@ -1973,9 +1973,7 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
     FUNC_LEAVE(SUCCEED);
 }
 
-
-
-
+
 /*-------------------------------------------------------------------------
  * Function: H5S_set_extent
  *
@@ -1991,39 +1989,30 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
  *
  *-------------------------------------------------------------------------
  */
-
 int H5S_set_extent( H5S_t *space, const hsize_t *size )
 {
- int ret_value = 0;
- unsigned u;
-    
- FUNC_ENTER( H5S_set_extent, FAIL );
+    int ret_value;
+    unsigned u;
+       
+    FUNC_ENTER( H5S_set_extent, FAIL );
 
- /* Check args */
- assert( space && H5S_SIMPLE==space->extent.type );
- assert( size);
+    /* Check args */
+    assert( space && H5S_SIMPLE==space->extent.type );
+    assert( size);
 
- for ( u = 0; u < space->extent.u.simple.rank; u++ ) 
- {
-  if ( space->extent.u.simple.max &&
-       H5S_UNLIMITED != space->extent.u.simple.max[u] &&
-       space->extent.u.simple.max[u]<size[u] )
-		{
-   HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
-  }
-            
-  ret_value++;
- }
+    for ( u = 0; u < space->extent.u.simple.rank; u++ )
+        if ( space->extent.u.simple.max &&
+                 H5S_UNLIMITED != space->extent.u.simple.max[u] &&
+                 space->extent.u.simple.max[u]<size[u] )
+             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
 
- /* Update */
- if ( ret_value ) 
- {
-  for ( u = 0; u < space->extent.u.simple.rank; u++ ) 
-		{
-   space->extent.u.simple.size[u] = size[u];
-		}
- }
+    /* Update dimensions with new values */
+    for ( u = 0; u < space->extent.u.simple.rank; u++ )
+        space->extent.u.simple.size[u] = size[u];
 
- FUNC_LEAVE( ret_value );
+    /* Set return value */
+    ret_value=space->extent.u.simple.rank;
+
+    FUNC_LEAVE( ret_value );
 }
 

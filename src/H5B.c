@@ -2153,6 +2153,119 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5B_prune_by_extent
+ *
+ * Purpose: Search for chunks that are no longer necessary in the B-tree. 
+ *      The function iterates through the B-tree and calls an operator
+ *      function prune_extent
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: March 26, 2002
+ *
+ * Comments: Private function
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B_prune_by_extent(H5F_t *f, const H5B_class_t *type, haddr_t addr,
+	void *udata, hsize_t *size)
+{
+    H5B_t                  *bt = NULL;
+    haddr_t                 next_addr;
+    haddr_t                 cur_addr = HADDR_UNDEF;
+    uint8_t                *key = NULL;
+    int                     i, nchildren;
+    herr_t                  ret_value = FAIL;
+
+    FUNC_ENTER(H5B_prune_by_extent, FAIL);
+
+/*
+ * Check arguments.
+ */
+    assert(f);
+    assert(type);
+    assert(type->prune_extent);
+    assert(H5F_addr_defined(addr));
+    assert(udata);
+
+    if(NULL == (bt = H5AC_find(f, H5AC_BT, addr, type, udata))) {
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
+		"unable to load B-tree node");
+    }
+
+    if(bt->level > 0) {
+	/* Keep following the left-most child until we reach a leaf node. */
+	if((ret_value =
+		    H5B_prune_by_extent(f, type, bt->child[0], udata,
+			size)) < 0) {
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL,
+		    "unable to list B-tree node");
+	}
+    }
+    else {
+
+/*
+ * We've reached the left-most leaf.  Now follow the right-sibling
+ * pointer from leaf to leaf until we've processed all leaves.
+ */
+
+	if(NULL == (key =
+		    H5MM_malloc((2 * H5B_Kvalue(f,
+				type) + 1) * type->sizeof_nkey))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		    "memory allocation failed");
+	}
+
+	for(cur_addr = addr, ret_value = 0;
+		H5F_addr_defined(cur_addr) && !ret_value;
+		cur_addr = next_addr) {
+
+	    /*
+	     * Save all the native keys since we can't leave the B-tree node protected during an application callback.
+	     */
+
+	    if(NULL == (bt = H5AC_find(f, H5AC_BT, cur_addr, type, udata))) {
+		HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node");
+	    }
+
+	    for(i = 0; i < bt->nchildren + 1; i++) {
+		if(!bt->key[i].nkey)
+		    H5B_decode_key(f, bt, i);
+		HDmemcpy(key + i * type->sizeof_nkey, bt->key[i].nkey,
+			type->sizeof_nkey);
+	    }
+
+	    next_addr = bt->right;
+	    nchildren = bt->nchildren;
+	    bt = NULL;
+
+	    /* Figure out what chunks are no longer in use for the specified extent and release them */
+
+	    for(i = 0, ret_value = 0; i < nchildren && !ret_value; i++) {
+		ret_value =
+			(type->prune_extent) (f, key + i * type->sizeof_nkey,
+			addr, udata, size);
+		if(ret_value < 0) {
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
+			    "iterator function failed");
+		}
+	    }			/*i */
+	}			/*addr */
+    }				/*level */
+
+done:
+    if(key != NULL)
+	H5MM_xfree(key);
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B_debug
  *
  * Purpose:	Prints debugging info about a B-tree.
@@ -2367,113 +2480,3 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
     FUNC_LEAVE(SUCCEED);
 }
 #endif /* H5B_DEBUG */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5B_prune_by_extent
- *
- * Purpose: Search for chunks that are no longer necessary in the B-tree. 
-	*  The function iterates trough the B-tree and calls an operator function prune_extent
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: March 26, 2002
- *
- * Comments: Private function
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5B_prune_by_extent( H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata, 
-																											 hsize_t *size )
-{
- H5B_t    *bt = NULL;
- haddr_t  next_addr;
- haddr_t  cur_addr = HADDR_UNDEF;
- uint8_t  *key = NULL;
- int      i, nchildren;
- herr_t   ret_value = FAIL;
- 
- FUNC_ENTER( H5B_prune_by_extent, FAIL);
- 
-/*
- * Check arguments.
- */
- assert( f );
- assert( type );
- assert( type->prune_extent);
- assert( H5F_addr_defined( addr ) );
- assert( udata );
- 
- if ( NULL == ( bt = H5AC_find( f, H5AC_BT, addr, type, udata ))) 
-	{
-  HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node" );
- }
- 
- if ( bt->level > 0 ) 
- {
-  /* Keep following the left-most child until we reach a leaf node. */
-  if (( ret_value = H5B_prune_by_extent(f, type, bt->child[0], udata, size )) < 0 ) 
-		{
-   HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "unable to list B-tree node");
-  }
- }
- else 
- {
-  
-/*
- * We've reached the left-most leaf.  Now follow the right-sibling
- * pointer from leaf to leaf until we've processed all leaves.
- */
-  
-  if ( NULL== ( key = H5MM_malloc((2*H5B_Kvalue(f, type)+1)*type->sizeof_nkey ))) 
-		{
-   HGOTO_ERROR( H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed" );
-  }
-
-  for ( cur_addr = addr, ret_value = 0; H5F_addr_defined(cur_addr) && !ret_value; cur_addr = next_addr) 
-  {
-   
- /*
-  * Save all the native keys since we can't leave the B-tree node protected during an application callback.
-  */
-   
-   if ( NULL == ( bt = H5AC_find( f, H5AC_BT, cur_addr, type, udata ))) 
-   {
-    HGOTO_ERROR( H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node" );
-   }
-
-   for ( i = 0; i < bt->nchildren+1; i++ ) 
-   {
-    if ( !bt->key[i].nkey ) 
-     H5B_decode_key(f, bt, i);
-    HDmemcpy( key+i*type->sizeof_nkey, bt->key[i].nkey, type->sizeof_nkey );
-   }
-
-   next_addr = bt->right;
-   nchildren = bt->nchildren;
-   bt = NULL;
- 
-			/* Figure out what chunks are no longer in use for the specified extent and release them */
-
-   for ( i = 0, ret_value = 0; i < nchildren && !ret_value; i++ ) 
-   {
-    ret_value = ( type->prune_extent )( f, key+i*type->sizeof_nkey, addr, udata, size );
-    if ( ret_value < 0 ) 
-				{
-     HGOTO_ERROR( H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed" );
-    }
-   } /*i*/
-  } /*addr*/
- } /*level*/
- 
-done:
- if( key != NULL )
-  H5MM_xfree( key );
- FUNC_LEAVE( ret_value );
-}
-
