@@ -201,8 +201,11 @@ Platforms Tested
                                   MPIch 1.2.4
     Linux 2.4.21-2.9.5ws #3       gcc 3.2.3 (Red Hat Linux 3.2.3-16)
           SMP x86_64              g++ 3.2.3
+    Linux 2.4.19-SMP  x86_64      gcc (GCC) 3.2.2 (SuSE Linux)
+                                  g++ 3.2.2
 
-    Linux 2.4.21-sgi SMP ia64     Intel(R) C++ Version 7.1
+    Linux 2.4.21-sgi Altix 
+          SMP ia64                Intel(R) C++ Version 7.1
                                   Intel(R) Fortran Itanium(R) Version 7.1
                                   SGI MPI
     OSF1 V5.1                     Compaq C V6.4-014
@@ -330,7 +333,7 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 Known Problems
 ==============
 * Fortran subroutine h5pget_driver_f doesn't return a correct driver information.
-  The fix willl be available in the 1.6.2 release. 
+
 * There are two h5dump xml tests(h5dump --xml thlink.h5 and h5dump --xml tmany.h5)
   failed on windows xp with .NET for debug and debug dll. Release and Release
   dll work fine. 
