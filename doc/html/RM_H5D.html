@@ -105,6 +105,11 @@ and set and retrieve their constant or persistent properties.
         Dataset creation properties are specified by the argument
         <code>create_plist_id</code>.
         <p>
+        Dataset names within a group are unique:
+        <code>H5Dcreate</code> will return an error if a dataset with
+        the name specified in <code>name</code> already exists at the
+        location specified in <code>loc_id</code>.
+        <p>
         <code>create_plist_id</code> is a <code>H5P_DATASET_CREATE</code>
         property list created with <code>H5Pcreate()</code> and
         initialized with the various functions described above.
@@ -303,7 +308,7 @@ and set and retrieve their constant or persistent properties.
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-VLReclaim">H5Dvlen_reclaim</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Dvlen_reclaim</code>(<em>hid_t </em><code>type_id</code>
+    <dd><em>herr_t </em><code>H5Dvlen_reclaim</code>(<em>hid_t </em><code>type_id</code>,
     <em>hid_t</em> <code>space_id</code>,
     <em>hid_t</em> <code>plist_id</code>,
     <em>void</em> *<code>buf</code>

@@ -115,19 +115,19 @@ documented below.
         <dt><em>const char *</em><code>name</code>
             <dd>Name of the file to access.
         <dt><em>unsigned</em> <code>flags</code>
-            <dd>File access flags.  Allowable values include:
+            <dd>File access flags.  Allowable values are:
                 <ul><dl>
                     <dt>H5F_ACC_RDWR
                         <dd>Allow read and write access to file.
                     <dt>H5F_ACC_RDONLY
                         <dd>Allow read-only access to file.
-                    <dt>H5F_ACC_DEBUG
-                        <dd>Print debug information.
-                            (Used only by HDF5 library developers.
-                             Do not use this flag in applications.)
                 </dl></ul>
-                <code>H5F_ACC_RDWR</code> and <code>H5F_ACC_RDONLY</code> 
+                <li><code>H5F_ACC_RDWR</code> and <code>H5F_ACC_RDONLY</code> 
                 are mutually exclusive; use exactly one.
+                <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints debug 
+                information.  This flag is used only by HDF5 library 
+                developers; it is neither tested nor supported
+                for use in applications.
         <dt><em>hid_t</em> <code>access_id</code>
             <dd>Identifier for the file access properties list.
                 If parallel file access is desired, this is a collective
@@ -166,27 +166,26 @@ documented below.
             are controlled through the file-creation and file-access
             property lists.  The value of <code>H5P_DEFAULT</code> for 
             a property list value indicates that the library should use
-            the default values for the appropriate property list.  Also see
-            <code>H5Fpublic.h</code> for the list of supported flags. 
+            the default values for the appropriate property list.  
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>const char *</em><code>name</code>
             <dd>Name of the file to access.
         <dt><em>uintn</em> <code>flags</code>
-            <dd>File access flags.  Allowable values include:
+            <dd>File access flags.  Allowable values are:
                 <ul><dl>
                     <dt>H5F_ACC_TRUNC
                         <dd>Truncate file, if it already exists,  
                             erasing all data previously stored in the file.
                     <dt>H5F_ACC_EXCL
                         <dd>Fail if file already exists.
-                    <dt>H5F_ACC_DEBUG
-                        <dd>Print debug information.
-                            (Used only by HDF5 library developers.
-                             Do not use this flag in applications.)
                 </dl></ul>
-                <code>H5F_ACC_TRUNC</code> and <code>H5F_ACC_EXCL</code> 
+                <li><code>H5F_ACC_TRUNC</code> and <code>H5F_ACC_EXCL</code> 
                 are mutually exclusive; use exactly one.
+                <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints debug 
+                information.  This flag is used only by HDF5 library 
+                developers; it is neither tested nor supported
+                for use in applications.
         <dt><em>hid_t</em> <code>create_id</code>
             <dd>File creation property list identifier, used when modifying
                 default file meta-data.
