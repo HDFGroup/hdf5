@@ -1010,7 +1010,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	*obj_ent = *loc_ent;
     }
     HDmemset(grp_ent, 0, sizeof(H5G_entry_t));
-    grp_ent->header = H5F_ADDR_UNDEF;
+    grp_ent->header = HADDR_UNDEF;
 
     /* traverse the name */
     while ((name = H5G_component(name, &nchars)) && *name) {
@@ -1040,7 +1040,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	 */
 	*grp_ent = *obj_ent;
 	HDmemset(obj_ent, 0, sizeof(H5G_entry_t));
-	obj_ent->header = H5F_ADDR_UNDEF;
+	obj_ent->header = HADDR_UNDEF;
 
 	if (H5G_stab_find(grp_ent, comp, obj_ent/*out*/)<0) {
 	    /*
@@ -1832,6 +1832,7 @@ H5G_loc (hid_t loc_id)
     case H5I_BADID:
     case H5I_FILE_CLOSING:
     case H5I_REFERENCE:
+    case H5I_VFL:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 
@@ -1926,7 +1927,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	 * undefined and the cache contains the link-value offset.
 	 */
 	HDmemset (&cur_obj, 0, sizeof cur_obj);
-	cur_obj.header = H5F_ADDR_UNDEF;
+	cur_obj.header = HADDR_UNDEF;
 	cur_obj.file = grp_ent.file;
 	cur_obj.type = H5G_CACHED_SLINK;
 	cur_obj.cache.slink.lval_offset = offset;

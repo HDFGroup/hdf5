@@ -78,7 +78,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -110,7 +110,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -143,7 +143,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -175,7 +175,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -210,7 +210,7 @@ main(void)
 	    goto error;
 	}
     }
-    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -230,7 +230,7 @@ main(void)
 	    H5Eprint(stdout);
 	    goto error;
 	}
-        if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
+        if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
 	    FAILED();
 	    H5Eprint(stdout);
 	    goto error;

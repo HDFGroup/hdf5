@@ -79,28 +79,41 @@ test_file_create(void)
     fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
-    /* try to create the same file with H5F_ACC_TRUNC (should fail) */
+    /*
+     * try to create the same file with H5F_ACC_TRUNC. This should fail
+     * because fid1 is the same file and is currently open.
+     */
     fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
 
-    /* Close the file */
+    /* Close all files */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(fid2);
+    VERIFY(ret, FAIL, "H5Fclose"); /*file should already be closed*/
 
-    /* Try again with H5F_ACC_EXCL (should fail) */
+    /*
+     * Try again with H5F_ACC_EXCL. This should fail because the file already
+     * exists from the previous steps.
+     */
     fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid1, FAIL, "H5Fcreate");
 
-    /* Test create with H5F_ACC_TRUNC */
-    /* Create first file */
+    /* Test create with H5F_ACC_TRUNC. This will truncate the existing file. */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
-    /* Try to create first file again (should fail) */
+    /*
+     * Try to truncate first file again. This should fail because fid1 is the
+     * same file and is currently open.
+     */
     fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
 
-    /* Try with H5F_ACC_EXCL (should fail too) */
+    /*
+     * Try with H5F_ACC_EXCL. This should fail too because the file already
+     * exists.
+     */
     fid2 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
 

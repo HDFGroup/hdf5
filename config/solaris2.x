@@ -19,7 +19,7 @@ fi
 if test "X-" = "X-$cc_flags_set"; then
     CFLAGS="-erroff=%none"
     DEBUG_CFLAGS=-g
-    DEBUG_CPPFLAGS="-DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    DEBUG_CPPFLAGS=
     PROD_CFLAGS=-xO2
     PROD_CPPFLAGS=
     PROFILE_CFLAGS=-xpg

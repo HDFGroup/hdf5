@@ -219,8 +219,8 @@ dataset_writeInd(char *filename)
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "H5Pset_mpi succeeded");
+    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
+    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -345,7 +345,7 @@ dataset_readInd(char *filename)
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl >= 0), "");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
     VRFY((ret >= 0), "");
 
 
@@ -472,8 +472,8 @@ dataset_writeAll(char *filename)
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "H5Pset_mpi succeeded");
+    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
+    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -533,9 +533,9 @@ dataset_writeAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    xfer_plist = H5Pcreate (H5P_DATA_XFER);
     VRFY((xfer_plist >= 0), "");
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
 
     /* write data collectively */
@@ -580,9 +580,9 @@ dataset_writeAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    xfer_plist = H5Pcreate (H5P_DATA_XFER);
     VRFY((xfer_plist >= 0), "");
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
 
     /* write data independently */
@@ -665,8 +665,8 @@ dataset_readAll(char *filename)
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "H5Pset_mpi succeeded");
+    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
+    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
 
     /* open the file collectively */
     fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
@@ -714,9 +714,9 @@ dataset_readAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    xfer_plist = H5Pcreate (H5P_DATA_XFER);
     VRFY((xfer_plist >= 0), "");
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
 
     /* read data collectively */
@@ -757,9 +757,9 @@ dataset_readAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    xfer_plist = H5Pcreate (H5P_DATA_XFER);
     VRFY((xfer_plist >= 0), "");
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
 
     /* read data independently */
@@ -856,8 +856,8 @@ extend_writeInd(char *filename)
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "H5Pset_mpi succeeded");
+    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
+    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -1066,7 +1066,7 @@ extend_readInd(char *filename)
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl >= 0), "");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
     VRFY((ret >= 0), "");
 
     /* open the file collectively */

@@ -23,8 +23,11 @@
 #include <H5Eprivate.h>			/*error handling	  	*/
 #include <H5Fprivate.h>			/*file access                   */
 #include <H5HLprivate.h>		/*self				*/
-#include <H5MFprivate.h>		/*file memory management  	*/
+#include <H5MFprivate.h>		/*file memory management	*/
 #include <H5MMprivate.h>		/*core memory management  	*/
+#include <H5Pprivate.h>			/*property lists		*/
+
+#include <H5FDmpio.h>			/*for H5FD_mpio_tas_allsame()	*/
 
 #define H5HL_FREE_NULL	1		/*end of free list on disk	*/
 #define PABLO_MASK	H5HL_mask
@@ -111,8 +114,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
 
     /* allocate file version */
     total_size = H5HL_SIZEOF_HDR(f) + size_hint;
-    if (H5MF_alloc(f, H5MF_META, (hsize_t)total_size, addr_p/*out*/) < 0) {
-	*addr_p = H5F_ADDR_UNDEF;
+    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_LHEAP, total_size))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "unable to allocate file memory");
     }
@@ -154,7 +156,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
  done:
     if (ret_value<0) {
 	if (H5F_addr_defined(*addr_p)) {
-	    H5MF_xfree (f, *addr_p, total_size);
+	    H5MF_xfree(f, H5FD_MEM_LHEAP, *addr_p, total_size);
 	}
 	if (heap) {
 	    H5MM_xfree (heap->chunk);
@@ -203,8 +205,8 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     assert(!udata1);
     assert(!udata2);
 
-    if (H5F_block_read(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
-		       &H5F_xfer_dflt, hdr) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f), H5P_DEFAULT,
+		       hdr) < 0) {
 	HRETURN_ERROR(H5E_HEAP, H5E_READERROR, NULL,
 		      "unable to read heap header");
     }
@@ -244,7 +246,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     }
     if (heap->disk_alloc &&
 	H5F_block_read(f, heap->addr, (hsize_t)(heap->disk_alloc),
-		       &H5F_xfer_dflt, heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
+		       H5P_DEFAULT, heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
 		    "unable to read heap data");
     }
@@ -332,13 +334,13 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	 */
 	if (heap->mem_alloc > heap->disk_alloc) {
 	    haddr_t old_addr = heap->addr, new_addr;
-	    if (H5MF_alloc(f, H5MF_META, (hsize_t)(heap->mem_alloc),
-			   &new_addr/*out*/)<0) {
+	    if (HADDR_UNDEF==(new_addr=H5MF_alloc(f, H5FD_MEM_LHEAP,
+						  heap->mem_alloc))) {
 		HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			      "unable to allocate file space for heap");
 	    }
 	    heap->addr = new_addr;
-	    H5MF_xfree(f, old_addr, (hsize_t)(heap->disk_alloc));
+	    H5MF_xfree(f, H5FD_MEM_LHEAP, old_addr, heap->disk_alloc);
 	    H5E_clear(); /*don't really care if the free failed */
 	    heap->disk_alloc = heap->mem_alloc;
 	}
@@ -378,28 +380,28 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	if (H5F_addr_eq(heap->addr, hdr_end_addr)) {
 	    /* The header and data are contiguous */
 #ifdef HAVE_PARALLEL
-	    H5F_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
+	    H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* HAVE_PARALLEL */
 	    if (H5F_block_write(f, addr,
 				(hsize_t)(H5HL_SIZEOF_HDR(f)+heap->disk_alloc),
-				&H5F_xfer_dflt, heap->chunk) < 0) {
+				H5P_DEFAULT, heap->chunk) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			    "unable to write heap header and data to file");
 	    }
 	} else {
 #ifdef HAVE_PARALLEL
-	    H5F_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
+	    H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* HAVE_PARALLEL */
 	    if (H5F_block_write(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
-				&H5F_xfer_dflt, heap->chunk)<0) {
+				H5P_DEFAULT, heap->chunk)<0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			      "unable to write heap header to file");
 	    }
 #ifdef HAVE_PARALLEL
-	    H5F_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
+	    H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* HAVE_PARALLEL */
 	    if (H5F_block_write(f, heap->addr, (hsize_t)(heap->disk_alloc),
-				&H5F_xfer_dflt,
+				H5P_DEFAULT,
 				heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			      "unable to write heap data to file");

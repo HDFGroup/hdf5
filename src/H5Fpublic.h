@@ -34,30 +34,20 @@
 #define H5F_ACC_TRUNC	(H5check(),0x0002u)	/*overwrite existing files   */
 #define H5F_ACC_EXCL	(H5check(),0x0004u)	/*fail if file already exists*/
 #define H5F_ACC_DEBUG	(H5check(),0x0008u)	/*print debug info	     */
+#define H5F_ACC_CREAT	(H5check(),0x0010u)	/*create non-existing files  */
+
 
 #ifdef HAVE_PARALLEL
-/* Use this constant string as the MPI_Info key to set H5Fmpio debug flags.
- * To turn on H5Fmpio debug flags,
- * set the MPI_Info value with this key to have the value of a string
- * consisting of the characters that turn on the desired flags. */
+/*
+ * Use this constant string as the MPI_Info key to set H5Fmpio debug flags.
+ * To turn on H5Fmpio debug flags, set the MPI_Info value with this key to
+ * have the value of a string consisting of the characters that turn on the
+ * desired flags.
+ */
 #define H5F_MPIO_DEBUG_KEY "H5F_mpio_debug_key"
 #endif
 
-/*
- * Low-level file drivers.  These values are returned by H5Pget_file_driver()
- * and are set by the various H5Pset_...() functions that set file driver
- * properties.
- */
-typedef enum H5F_driver_t {
-    H5F_LOW_ERROR	= -1,	/*error return value			*/
-    H5F_LOW_STDIO	= 0,	/*use functions declared in stdio.h	*/
-    H5F_LOW_SEC2	= 1, 	/*use functions declared in unistd.h	*/
-    H5F_LOW_MPIO	= 2,	/*use indep or collective MPI-IO	*/
-    H5F_LOW_CORE	= 3,	/*use malloc() and free()		*/
-    H5F_LOW_SPLIT	= 4,	/*separate meta data from raw data	*/
-    H5F_LOW_FAMILY	= 5 	/*split addr space over many files	*/
-} H5F_driver_t;
-
+/* The difference between a single file and a set of mounted files */
 typedef enum H5F_scope_t {
     H5F_SCOPE_LOCAL	= 0,	/*specified file handle only		*/
     H5F_SCOPE_GLOBAL	= 1,	/*entire virtual file			*/

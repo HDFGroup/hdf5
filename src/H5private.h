@@ -394,11 +394,6 @@ typedef int intn;
 typedef unsigned uintn;
 
 /*
- * File addresses.
- */
-typedef uint64_t haddr_t;
-
-/*
  * Maximum and minimum values.	These should be defined in <limits.h> for the
  * most part.
  */

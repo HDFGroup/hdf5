@@ -30,6 +30,9 @@
 #include <H5MFprivate.h>	/*file memory management		*/
 #include <H5MMprivate.h>	/*core memory management		*/
 #include <H5Oprivate.h>		/*header messages			*/
+#include <H5Pprivate.h>		/*property lists			*/
+
+#include <H5FDmpio.h>		/*the MPIO file driver			*/
 
 #define PABLO_MASK	H5G_node_mask
 
@@ -252,7 +255,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
 		       "memory allocation failed");
     }
     size = H5G_node_size(f);
-    if (H5MF_alloc(f, H5MF_META, size, addr_p/*out*/) < 0) {
+    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, size))) {
 	H5MM_xfree(sym);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to allocate file space");
@@ -354,9 +357,9 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 	HDmemset(p, 0, size - (p - buf));
 
 #ifdef HAVE_PARALLEL
-	H5F_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
+	H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif /* HAVE_PARALLEL */
-	status = H5F_block_write(f, addr, (hsize_t)size, &H5F_xfer_dflt, buf);
+	status = H5F_block_write(f, addr, (hsize_t)size, H5P_DEFAULT, buf);
 	buf = H5MM_xfree(buf);
 	if (status < 0)
 	    HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
@@ -425,7 +428,7 @@ H5G_node_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, &H5F_xfer_dflt, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, H5P_DEFAULT, buf) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL,
 		    "unabel to read symbol table node");
     }
@@ -971,7 +974,7 @@ H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
 	sn->dirty = TRUE;
 	if (H5AC_unprotect(f, H5AC_SNODE, addr, sn)<0 ||
 	    H5AC_flush(f, H5AC_SNODE, addr, TRUE)<0 ||
-	    H5MF_xfree(f, addr, H5G_node_size(f))<0) {
+	    H5MF_xfree(f, H5FD_MEM_BTREE, addr, H5G_node_size(f))<0) {
 	    sn = NULL;
 	    HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR,
 			"unable to free symbol table node");

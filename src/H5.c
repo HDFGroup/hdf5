@@ -21,6 +21,7 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5ACprivate.h>        /*cache                           	*/
 #include <H5Bprivate.h>         /*B-link trees                    	*/
 #include <H5Eprivate.h>         /*error handling          		*/
+#include <H5FDprivate.h>	/*file driver				*/
 #include <H5Iprivate.h>		/*atoms					*/
 #include <H5MMprivate.h>        /*memory management               	*/
 #include <H5Pprivate.h>		/*property lists			*/
@@ -28,6 +29,10 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5Sprivate.h>		/*data spaces				*/
 #include <H5Tprivate.h>         /*data types                      	*/
 #include <H5Zprivate.h>		/*filters				*/
+
+/* datatypes of predefined drivers needed by H5_trace() */
+#include <H5FDmpio.h>
+
 
 /* We need this on Irix64 even though we've included stdio.h as documented */
 FILE *fdopen(int fd, const char *mode);
@@ -152,6 +157,7 @@ H5_term_library(void)
     do {
 	pending = 0;
 	pending += DOWN(F);
+	pending += DOWN(FD);
 	pending += DOWN(D);
 	pending += DOWN(TB);
 	pending += DOWN(Z);
@@ -1124,6 +1130,9 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
  *              Tuesday, June 16, 1998
  *
  * Modifications:
+ * 		Robb Matzke, 1999-08-02
+ *		Added the `a' type letter for haddr_t arguments and `Mt' for
+ *		H5FD_mem_t arguments.
  *
  *-------------------------------------------------------------------------
  */
@@ -1193,6 +1202,19 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	/* The value */
 	if (ptr) vp = va_arg (ap, void*);
 	switch (type[0]) {
+	case 'a':
+	    if (ptr) {
+		if (vp) {
+		    fprintf(out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
+	    } else {
+		haddr_t addr = va_arg(ap, haddr_t);
+		HDfprintf(out, "%a", addr);
+	    }
+	    break;
+
 	case 'b':
 	    if (ptr) {
 		if (vp) {
@@ -1260,16 +1282,13 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5D_transfer_t transfer = va_arg (ap, H5D_transfer_t);
+		    H5FD_mpio_xfer_t transfer = va_arg(ap, H5FD_mpio_xfer_t);
 		    switch (transfer) {
-		    case H5D_XFER_INDEPENDENT:
-			fprintf (out, "H5D_XFER_INDEPENDENT");
+		    case H5FD_MPIO_INDEPENDENT:
+			fprintf (out, "H5FD_MPIO_INDEPENDENT");
 			break;
-		    case H5D_XFER_COLLECTIVE:
-			fprintf (out, "H5D_XFER_COLLECTIVE");
-			break;
-		    case H5D_XFER_DFLT:
-			fprintf (out, "H5D_XFER_DFLT");
+		    case H5FD_MPIO_COLLECTIVE:
+			fprintf (out, "H5FD_MPIO_COLLECTIVE");
 			break;
 		    default:
 			fprintf (out, "%ld", (long)transfer);
@@ -1345,44 +1364,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'F':
 	    switch (type[1]) {
-	    case 'd':
-		if (ptr) {
-		    if (vp) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5F_driver_t driver = va_arg(ap, H5F_driver_t);
-		    switch (driver) {
-		    case H5F_LOW_ERROR:
-			fprintf(out, "H5F_LOW_ERROR");
-			break;
-		    case H5F_LOW_STDIO:
-			fprintf(out, "H5F_LOW_STDIO");
-			break;
-		    case H5F_LOW_SEC2:
-			fprintf(out, "H5F_LOW_SEC2");
-			break;
-		    case H5F_LOW_MPIO:
-			fprintf(out, "H5F_LOW_MPIO");
-			break;
-		    case H5F_LOW_CORE:
-			fprintf(out, "H5F_LOW_CORE");
-			break;
-		    case H5F_LOW_SPLIT:
-			fprintf(out, "H5F_LOW_SPLIT");
-			break;
-		    case H5F_LOW_FAMILY:
-			fprintf(out, "H5F_LOW_FAMILY");
-			break;
-		    default:
-			fprintf(out, "%ld", (long)driver);
-			break;
-		    }
-		}
-		break;
-
 	    case 's':
 		if (ptr) {
 		    if (vp) {
@@ -1783,8 +1764,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			case H5P_DATASET_CREATE:
 			    fprintf(out, "H5P_DATASET_CREATE");
 			    break;
-			case H5P_DATASET_XFER:
-			    fprintf(out, "H5P_DATASET_XFER");
+			case H5P_DATA_XFER:
+			    fprintf(out, "H5P_DATA_XFER");
 			    break;
 			case H5P_MOUNT:
 			    fprintf(out, "H5P_MOUNT");
@@ -1865,6 +1846,53 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 #endif
 		}
 		break;
+	    case 't':
+		if (ptr) {
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5FD_mem_t mt = va_arg(ap, H5FD_mem_t);
+		    switch (mt) {
+		    case H5FD_MEM_NOLIST:
+			fprintf(out, "H5FD_MEM_NOLIST");
+			break;
+		    case H5FD_MEM_DEFAULT:
+			fprintf(out, "H5FD_MEM_DEFAULT");
+			break;
+		    case H5FD_MEM_SUPER:
+			fprintf(out, "H5FD_MEM_SUPER");
+			break;
+		    case H5FD_MEM_BTREE:
+			fprintf(out, "H5FD_MEM_BTREE");
+			break;
+		    case H5FD_MEM_DRAW:
+			fprintf(out, "H5FD_MEM_DRAW");
+			break;
+		    case H5FD_MEM_META:
+			fprintf(out, "H5FD_MEM_META");
+			break;
+		    case H5FD_MEM_GROUP:
+			fprintf(out, "H5FD_MEM_GROUP");
+			break;
+		    case H5FD_MEM_GHEAP:
+			fprintf(out, "H5FD_MEM_GHEAP");
+			break;
+		    case H5FD_MEM_LHEAP:
+			fprintf(out, "H5FD_MEM_LHEAP");
+			break;
+		    case H5FD_MEM_OHDR:
+			fprintf(out, "H5FD_MEM_OHDR");
+			break;
+		    default:
+			fprintf(out, "%lu", (unsigned long)mt);
+			break;
+		    }
+		}
+		break;
+
 	    default:
 		goto error;
 	    }
@@ -1905,8 +1933,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		case H5P_DATASET_CREATE:
 		    fprintf (out, "H5P_DATASET_CREATE");
 		    break;
-		case H5P_DATASET_XFER:
-		    fprintf (out, "H5P_DATASET_XFER");
+		case H5P_DATA_XFER:
+		    fprintf (out, "H5P_DATA_XFER");
 		    break;
 		default:
 		    fprintf (out, "%ld", (long)plist_class);

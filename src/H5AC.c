@@ -114,7 +114,7 @@ H5AC_dest(H5F_t *f)
     assert(f->shared->cache);
     cache = f->shared->cache;
 
-    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE) < 0) {
+    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE) < 0) {
         HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                       "unable to flush cache");
     }
@@ -320,7 +320,7 @@ H5AC_compare(const void *_a, const void *_b)
  *
  * Purpose:     Flushes (and destroys if DESTROY is non-zero) the specified
  *              entry from the cache.  If the entry TYPE is CACHE_FREE and
- *              ADDR is H5F_ADDR_UNDEF then all types of entries are
+ *              ADDR is HADDR_UNDEF then all types of entries are
  *              flushed. If TYPE is CACHE_FREE and ADDR is defined then
  *              whatever is cached at ADDR is flushed.  Otherwise the thing
  *              at ADDR is flushed if it is the correct type.
@@ -666,7 +666,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
         cache->diagnostics[slot->type->id].nhits++;
         thing = slot->thing;
         slot->type = NULL;
-	slot->addr = H5F_ADDR_UNDEF;
+	slot->addr = HADDR_UNDEF;
         slot->thing = NULL;
 
     } else if (slot->type && H5F_addr_eq(slot->addr, addr)) {

@@ -197,7 +197,7 @@ test(fill_t fill_style, const double splits[],
     if ((file=H5Fcreate(FILE_NAME_1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if ((dcpl=H5Pcreate(H5P_DATA_CREATE))<0) goto error;
     if (H5Pset_chunk(dcpl, 1, ch_size)<0) goto error;
     if ((xfer=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
     if (H5Pset_btree_ratios(xfer, splits[0], splits[1], splits[2])<0) {
@@ -335,7 +335,7 @@ main(int argc, char *argv[])
 
     /* Default split ratios */
     H5Eset_auto(display_error_cb, NULL);
-    if ((xfer=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
+    if ((xfer=H5Pcreate(H5P_DATA_XFER))<0) goto error;
     if (H5Pget_btree_ratios(xfer, splits+0, splits+1, splits+2)<0) {
 	goto error;
     }

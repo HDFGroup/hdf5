@@ -22,6 +22,11 @@
 #include <H5MFprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
+#include <H5Pprivate.h>
+
+/* The MPIO driver for H5FD_mpio_tas_allsame() */
+#include <H5FDmpio.h>
+
 
 #define PABLO_MASK	H5O_mask
 
@@ -148,7 +153,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     /* allocate disk space for header and first chunk */
     size = H5O_SIZEOF_HDR(f) + size_hint;
     ent->file = f;
-    if (H5MF_alloc(f, H5MF_META, (hsize_t)size, &(ent->header)/*out*/) < 0) {
+    if (HADDR_UNDEF==(ent->header=H5MF_alloc(f, H5FD_MEM_OHDR, size))) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "file allocation failed for object header header");
     }
@@ -352,7 +357,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 
     /* read fixed-lenth part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
-    if (H5F_block_read(f, addr, (hsize_t)hdr_size, &H5F_xfer_dflt, buf) < 0) {
+    if (H5F_block_read(f, addr, hdr_size, H5P_DEFAULT, buf) < 0) {
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 		    "unable to read object header");
     }
@@ -409,7 +414,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
-	if (H5F_block_read(f, chunk_addr, (hsize_t)chunk_size, &H5F_xfer_dflt,
+	if (H5F_block_read(f, chunk_addr, chunk_size, H5P_DEFAULT,
 			   oh->chunk[chunkno].image) < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 			"unable to read object header data");
@@ -458,7 +463,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	assert(p == oh->chunk[chunkno].image + chunk_size);
 
 	/* decode next object header continuation message */
-	for (chunk_addr=H5F_ADDR_UNDEF;
+	for (chunk_addr=HADDR_UNDEF;
 	     !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs;
 	     curmesg++) {
 	    if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
@@ -552,10 +557,10 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 
 	/* write the object header header */
 #ifdef HAVE_PARALLEL
-	H5F_mpio_tas_allsame( f->shared->lf, TRUE );	/* only p0 will write */
+	H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif /* HAVE_PARALLEL */
 	if (H5F_block_write(f, addr, (hsize_t)H5O_SIZEOF_HDR(f), 
-			    &H5F_xfer_dflt, buf) < 0) {
+			    H5P_DEFAULT, buf) < 0) {
 	    HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
 			  "unable to write object header hdr to disk");
 	}
@@ -586,11 +591,12 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 			assert(cont->chunkno < oh->nchunks);
 			assert(!H5F_addr_defined(oh->chunk[cont->chunkno].addr));
 			cont->size = oh->chunk[cont->chunkno].size;
-			if (H5MF_alloc(f, H5MF_META, (hsize_t)(cont->size),
-				       &(cont->addr)/*out*/) < 0) {
+			if (HADDR_UNDEF==(cont->addr=H5MF_alloc(f,
+								H5FD_MEM_OHDR,
+								cont->size))) {
 			    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-				      "unable to allocate space for object "
-					  "header data");
+					  "unable to allocate space for "
+					  "object header data");
 			}
 			oh->chunk[cont->chunkno].addr = cont->addr;
 		    }
@@ -627,11 +633,11 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 	    if (oh->chunk[i].dirty) {
 		assert(H5F_addr_defined(oh->chunk[i].addr));
 #ifdef HAVE_PARALLEL
-		H5F_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 write */
+		H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 write*/
 #endif /* HAVE_PARALLEL */
 		if (H5F_block_write(f, oh->chunk[i].addr,
 				    (hsize_t)(oh->chunk[i].size),
-				    &H5F_xfer_dflt, oh->chunk[i].image) < 0) {
+				    H5P_DEFAULT, oh->chunk[i].image) < 0) {
 		    HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
 			      "unable to write object header data to disk");
 		}
@@ -1788,7 +1794,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     }
     chunkno = oh->nchunks++;
     oh->chunk[chunkno].dirty = TRUE;
-    oh->chunk[chunkno].addr = H5F_ADDR_UNDEF;
+    oh->chunk[chunkno].addr = HADDR_UNDEF;
     oh->chunk[chunkno].size = size;
     if (NULL==(oh->chunk[chunkno].image = p = H5MM_calloc(size))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -1871,7 +1877,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
-    cont->addr = H5F_ADDR_UNDEF;
+    cont->addr = HADDR_UNDEF;
     cont->size = 0;
     cont->chunkno = chunkno;
     oh->mesg[found_null].native = cont;

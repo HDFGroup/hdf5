@@ -49,6 +49,7 @@ typedef enum {
     H5I_TEMPBUF,	        /*group ID for Temporary buffer objects	    */
     H5I_RAGGED,		        /*group ID for Ragged array objects	    */
     H5I_REFERENCE,	        /*group ID for Reference objects	    */
+    H5I_VFL,			/*group ID for virtual file layer	    */
     
     H5I_NGROUPS		        /*number of valid groups, MUST BE LAST!	    */
 } H5I_type_t;

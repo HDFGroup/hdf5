@@ -134,6 +134,9 @@ test_large(hid_t fapl)
     if ((cwg=H5Gcreate(file, "/big", (size_t)nsyms*16+2))<0) goto error;
     for (i=0; i<nsyms; i++) {
         sprintf(name, "%05d%05d", rand()%100000, i);
+#if 0
+	fprintf(stderr, "%s\n", name);
+#endif
 	if ((dir=H5Gcreate(cwg, name, 0))<0) goto error;
         if (H5Gclose(dir)<0) goto error;
     }

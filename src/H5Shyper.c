@@ -8,13 +8,14 @@
  * Purpose:	Hyperslab selection data space I/O functions.
  */
 #include <H5private.h>
+#include <H5Dprivate.h>
 #include <H5Eprivate.h>
 #include <H5Iprivate.h>
-#include <H5Sprivate.h>
-#include <H5Vprivate.h>
 #include <H5MMprivate.h>
+#include <H5Pprivate.h>
+#include <H5Sprivate.h>
 #include <H5TBprivate.h>
-#include <H5Dprivate.h>
+#include <H5Vprivate.h>
 
 /* Interface initialization */
 #define PABLO_MASK      H5Shyper_mask
@@ -33,7 +34,7 @@ typedef struct {
     const H5S_t *space;
     H5S_sel_iter_t *iter;
 	size_t nelmts;
-    const H5F_xfer_t *xfer_parms;
+    hid_t dxpl_id;
     const void *src;
     void *dst;
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];
@@ -79,14 +80,14 @@ static size_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5F_xfer_t *xfer_parms, void *buf/*out*/);
+			       hid_t dxpl_id, void *buf/*out*/);
 static herr_t H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
 			       const struct H5O_fill_t *fill,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5F_xfer_t *xfer_parms, const void *buf);
+			       hid_t dxpl_id, const void *buf);
 static size_t H5S_hyper_mgath (const void *_buf, size_t elmt_size,
 			       const H5S_t *mem_space,
 			       H5S_sel_iter_t *mem_iter, size_t nelmts,
@@ -474,10 +475,10 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node,
             hsize[i]=(node->end[i]-node->start[i])+1;
         hsize[io_info->space->extent.u.simple.rank]=io_info->elmt_size;
 
-        if (H5F_arr_read (io_info->f, io_info->xfer_parms,
-			  io_info->layout, io_info->pline,
-			  io_info->fill, io_info->efl, hsize, hsize,
-			  zero, file_offset, node->cinfo.block/*out*/)<0)
+        if (H5F_arr_read(io_info->f, io_info->dxpl_id,
+			 io_info->layout, io_info->pline,
+			 io_info->fill, io_info->efl, hsize, hsize,
+			 zero, file_offset, node->cinfo.block/*out*/)<0)
             HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
     } /* end if */
     else {
@@ -595,10 +596,10 @@ H5S_hyper_block_write (H5S_hyper_node_t *node,
             hsize[i]=(node->end[i]-node->start[i])+1;
         hsize[io_info->space->extent.u.simple.rank]=io_info->elmt_size;
 
-        if (H5F_arr_write (io_info->f, io_info->xfer_parms,
-			   io_info->layout, io_info->pline,
-			   io_info->fill, io_info->efl, hsize, hsize,
-			   zero, file_offset, node->cinfo.block/*out*/)<0)
+        if (H5F_arr_write(io_info->f, io_info->dxpl_id, io_info->layout,
+			  io_info->pline, io_info->fill, io_info->efl, hsize,
+			  hsize, zero, file_offset,
+			  node->cinfo.block/*out*/)<0)
             HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Release the temporary buffer */
@@ -639,10 +640,17 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
     size_t i;                   /* Counters */
     intn j;
     size_t num_read=0;          /* Number of elements read */
+    const H5F_xfer_t *xfer_parms;/* Data transfer property list */
 
     FUNC_ENTER (H5S_hyper_fread, 0);
 
     assert(io_info);
+    if (H5P_DEFAULT==io_info->dxpl_id) {
+	xfer_parms = &H5F_xfer_dflt;
+    } else {
+	xfer_parms = H5I_object(io_info->dxpl_id);
+	assert(xfer_parms);
+    }
 
 #ifdef QAK
     printf("%s: check 1.0, dim=%d\n",FUNC,dim);
@@ -680,9 +688,9 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
 
                 /* Check if this hyperslab block is cached or could be cached */
                 if(!regions[i].node->cinfo.cached &&
-		   (io_info->xfer_parms->cache_hyper &&
-		    (io_info->xfer_parms->block_limit==0 ||
-		     io_info->xfer_parms->block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
+		   (xfer_parms->cache_hyper &&
+		    (xfer_parms->block_limit==0 ||
+		     xfer_parms->block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
                     /* if we aren't cached, attempt to cache the block */
                     H5S_hyper_block_cache(regions[i].node,io_info,1);
                 } /* end if */
@@ -713,11 +721,12 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                     /*
                      * Gather from file.
                      */
-                    if (H5F_arr_read (io_info->f, io_info->xfer_parms,
-				      io_info->layout, io_info->pline,
-				      io_info->fill, io_info->efl,
-				      io_info->hsize, io_info->hsize, zero, io_info->offset,
-				      io_info->dst/*out*/)<0) {
+                    if (H5F_arr_read(io_info->f, io_info->dxpl_id,
+				     io_info->layout, io_info->pline,
+				     io_info->fill, io_info->efl,
+				     io_info->hsize, io_info->hsize,
+				     zero, io_info->offset,
+				     io_info->dst/*out*/)<0) {
                         HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0,
 				       "read error");
                     }
@@ -807,7 +816,9 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
  *              Tuesday, June 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -816,8 +827,7 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_fill_t *fill,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		 size_t nelmts, const H5F_xfer_t *xfer_parms,
-		 void *_buf/*out*/)
+		 size_t nelmts, hid_t dxpl_id, void *_buf/*out*/)
 {
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
     H5S_hyper_bound_t **hi_bounds;    /* Upper (farthest from the origin) bound array for each dimension */
@@ -864,7 +874,7 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     io_info.space=file_space;
     io_info.iter=file_iter;
     io_info.nelmts=nelmts;
-    io_info.xfer_parms=xfer_parms;
+    io_info.dxpl_id = dxpl_id;
     io_info.src=NULL;
     io_info.dst=_buf;
 
@@ -921,10 +931,17 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
     size_t i;                   /* Counters */
     intn j;
     size_t num_written=0;          /* Number of elements read */
+    const H5F_xfer_t *xfer_parms;	/* Data transfer properties */
 
     FUNC_ENTER (H5S_hyper_fwrite, 0);
 
     assert(io_info);
+    if (H5P_DEFAULT==io_info->dxpl_id) {
+	xfer_parms = &H5F_xfer_dflt;
+    } else {
+	xfer_parms = H5I_object(io_info->dxpl_id);
+	assert(xfer_parms);
+    }
 
 #ifdef QAK
     printf("%s: check 1.0\n", FUNC);
@@ -958,7 +975,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
                 region_size=MIN(io_info->nelmts, (regions[i].end-regions[i].start)+1);
 
                 /* Check if this hyperslab block is cached or could be cached */
-                if(!regions[i].node->cinfo.cached && (io_info->xfer_parms->cache_hyper && (io_info->xfer_parms->block_limit==0 || io_info->xfer_parms->block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
+                if(!regions[i].node->cinfo.cached && (xfer_parms->cache_hyper && (xfer_parms->block_limit==0 || xfer_parms->block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
                     /* if we aren't cached, attempt to cache the block */
                     H5S_hyper_block_cache(regions[i].node,io_info,0);
                 } /* end if */
@@ -985,11 +1002,11 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
                     /*
                      * Scatter to file.
                      */
-                    if (H5F_arr_write (io_info->f, io_info->xfer_parms,
-				       io_info->layout, io_info->pline,
-				       io_info->fill, io_info->efl,
-				       io_info->hsize, io_info->hsize, zero, io_info->offset,
-				       io_info->src)<0) {
+                    if (H5F_arr_write(io_info->f, io_info->dxpl_id,
+				      io_info->layout, io_info->pline,
+				      io_info->fill, io_info->efl,
+				      io_info->hsize, io_info->hsize, zero,
+				      io_info->offset, io_info->src)<0) {
                         HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
                     }
                 } /* end else */
@@ -1063,7 +1080,9 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
  *              Tuesday, June 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1072,8 +1091,7 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_fill_t *fill,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		 size_t nelmts, const H5F_xfer_t *xfer_parms,
-		 const void *_buf)
+		 size_t nelmts, hid_t dxpl_id, const void *_buf)
 {
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
     H5S_hyper_bound_t **hi_bounds;    /* Upper (farthest from the origin) bound array for each dimension */
@@ -1121,7 +1139,7 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     io_info.space=file_space;
     io_info.iter=file_iter;
     io_info.nelmts=nelmts;
-    io_info.xfer_parms=xfer_parms;
+    io_info.dxpl_id = dxpl_id;
     io_info.src=_buf;
     io_info.dst=NULL;
 

@@ -24,6 +24,10 @@
 #include <H5HLprivate.h>
 #include <H5Oprivate.h>
 
+/* File drivers */
+#include <H5FDfamily.h>
+
+
 #define INDENT  3
 #define VCOL    50
 
@@ -60,7 +64,7 @@ main(int argc, char *argv[])
      */
     if (strchr (argv[1], '%')) {
 	plist = H5Pcreate (H5P_FILE_ACCESS);
-	H5Pset_family (plist, 0, H5P_DEFAULT);
+	H5Pset_fapl_family (plist, 0, H5P_DEFAULT);
     }
     if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, plist)) < 0) {
         fprintf(stderr, "cannot open file\n");
@@ -85,8 +89,7 @@ main(int argc, char *argv[])
      * Read the signature at the specified file position.
      */
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
-    if (H5F_block_read(f, addr, (hsize_t)sizeof(sig), &H5F_xfer_dflt,
-		       sig)<0) {
+    if (H5F_block_read(f, addr, (hsize_t)sizeof(sig), H5P_DEFAULT, sig)<0) {
         fprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }

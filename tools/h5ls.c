@@ -16,6 +16,11 @@
 #include <h5tools.h>
 
 /*
+ * File drivers
+ */
+#include <H5FDfamily.h>
+
+/*
  * If defined then include the file name as part of the object name when
  * printing full object names. Otherwise leave the file name off.
  */
@@ -2033,7 +2038,7 @@ main (int argc, char *argv[])
 	    /* Choose a file driver*/
 	    plist = H5Pcreate(H5P_FILE_ACCESS);
 	    if (strchr(fname, '%')) {
-		H5Pset_family(plist, 0, H5P_DEFAULT);
+		H5Pset_fapl_family(plist, 0, H5P_DEFAULT);
 	    }
 
 	    /* Try to open the file */

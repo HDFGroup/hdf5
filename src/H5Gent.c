@@ -298,7 +298,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
         }
     } else {
         H5F_encode_length(f, *pp, 0);
-        H5F_addr_encode(f, pp, H5F_ADDR_UNDEF);
+        H5F_addr_encode(f, pp, HADDR_UNDEF);
         UINT32ENCODE(*pp, H5G_NOTHING_CACHED);
 	UINT32ENCODE(*pp, 0); /*reserved*/
     }

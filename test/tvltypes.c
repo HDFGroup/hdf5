@@ -152,7 +152,7 @@ test_vltypes_vlen_atomic(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid=H5Pcreate(H5P_DATA_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
@@ -284,7 +284,7 @@ test_vltypes_vlen_compound(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid=H5Pcreate(H5P_DATA_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
@@ -428,7 +428,7 @@ test_vltypes_compound_vlen_atomic(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid=H5Pcreate(H5P_DATA_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
@@ -567,7 +567,7 @@ test_vltypes_vlen_vlen_atomic(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid=H5Pcreate(H5P_DATA_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);

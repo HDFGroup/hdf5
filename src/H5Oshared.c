@@ -235,7 +235,7 @@ H5O_shared_debug (H5F_t UNUSED *f, const void *_mesg,
 		   "Sharing method",
 		   "Obj Hdr");
 	H5G_ent_debug (f, &(mesg->u.ent), stream, indent, fwidth,
-		       H5F_ADDR_UNDEF);
+		       HADDR_UNDEF);
     }
     
     FUNC_LEAVE (SUCCEED);

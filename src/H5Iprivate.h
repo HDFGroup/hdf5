@@ -37,6 +37,7 @@
 #define H5I_TEMPBUFID_HASHSIZE		64
 #define H5I_RAGGED_HASHSIZE		64
 #define H5I_REFID_HASHSIZE		64
+#define H5I_VFL_HASHSIZE		64
 
 /*
  * Function for freeing objects. This function will be called with an object
@@ -82,5 +83,6 @@ __DLL__ H5I_type_t H5I_get_type(hid_t id);
 __DLL__ void *H5I_remove(hid_t id);
 __DLL__ void *H5I_search(H5I_type_t grp, H5I_search_func_t func,
 			 const void *key);
+__DLL__ intn H5I_inc_ref(hid_t id);
 __DLL__ intn H5I_dec_ref(hid_t id);
 #endif

@@ -1,0 +1,1642 @@
+/*
+ * Copyright © 1999 NCSA
+ *                  All rights reserved.
+ *
+ * Programmer:  Robb Matzke <matzke@llnl.gov>
+ *              Monday, July 26, 1999
+ *
+ * Purpose:	The Virtual File Layer as described in documentation. This is
+ *		the greatest common denominator for all types of storage
+ *		access whether a file, memory, network, etc. This layer
+ *		usually just dispatches the request to an actual file driver
+ *		layer.
+ */
+
+/* Packages needed by this file */
+#include <H5private.h>		/*library functions			*/
+#include <H5Eprivate.h>		/*error handling			*/
+#include <H5Fprivate.h>		/*files					*/
+#include <H5FDprivate.h>	/*virtual file driver			*/
+#include <H5Iprivate.h>		/*interface abstraction layer		*/
+#include <H5MMprivate.h>	/*memory management			*/
+#include <H5Pprivate.h>		/*property lists			*/
+
+/* Interface initialization */
+#define PABLO_MASK	H5FD_mask
+#define INTERFACE_INIT	H5FD_init_interface
+static intn interface_initialize_g = 0;
+
+/* static prototypes */
+static herr_t H5FD_init_interface(void);
+static herr_t H5FD_free_cls(H5FD_class_t *cls);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_init_interface
+ *
+ * Purpose:	Initialize the virtual file layer.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 26, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_init_interface(void)
+{
+    FUNC_ENTER(H5FD_init_interface, FAIL);
+
+    if (H5I_init_group(H5I_VFL, H5I_VFL_HASHSIZE, 0,
+		       (H5I_free_t)H5FD_free_cls)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "unable to initialize interface");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_term_interface
+ *
+ * Purpose:	Terminate this interface: free all memory and reset global
+ *		variables to their initial values.  Release all ID groups
+ *		associated with this interface.
+ *
+ * Return:	Success:	Positive if anything was done that might
+ *				have affected other interfaces; zero
+ *				otherwise.
+ *
+ *		Failure:        Never fails.
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5FD_term_interface(void)
+{
+    intn	n = 0;
+
+    if (interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_VFL))) {
+	    H5I_clear_group(H5I_VFL, FALSE);
+	} else {
+	    H5I_destroy_group(H5I_VFL);
+	    interface_initialize_g = 0;
+	    n = 1; /*H5I*/
+	}
+    }
+    return n;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_free_cls
+ *
+ * Purpose:	Frees a file driver class struct and returns an indication of
+ *		success. This function is used as the free callback for the
+ *		virtual file layer object identifiers (cf H5FD_init_interface).
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 26, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_free_cls(H5FD_class_t *cls)
+{
+    FUNC_ENTER(H5FD_free_cls, FAIL);
+    H5MM_xfree(cls);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDregister
+ *
+ * Purpose:	Registers a new file driver as a member of the virtual file
+ *		driver class.  Certain fields of the class struct are
+ *		required and that is checked here so it doesn't have to be
+ *		checked every time the field is accessed.
+ *
+ * Return:	Success:	A file driver ID which is good until the
+ *				library is closed or the driver is
+ *				unregistered.
+ *
+ *		Failure:	A negative value.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 26, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5FDregister(const H5FD_class_t *cls)
+{
+    hid_t		retval;
+    H5FD_class_t	*saved;
+    H5FD_mem_t		type;
+
+    FUNC_ENTER(H5FDregister, FAIL);
+    H5TRACE1("i","x",cls);
+
+    /* Check arguments */
+    if (!cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
+		      "null class pointer is disallowed");
+    }
+    if (!cls->open || !cls->close) {
+	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
+		      "`open' and/or `close' methods are not defined");
+    }
+    if (!cls->get_eoa || !cls->set_eoa) {
+	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
+		      "`get_eoa' and/or `set_eoa' methods are not defined");
+    }
+    if (!cls->get_eof) {
+	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
+		      "`get_eof' method is not defined");
+    }
+    if (!cls->read || !cls->write) {
+	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
+		      "`read' and/or `write' method is not defined");
+    }
+    for (type=0; type<H5FD_MEM_NTYPES; type++) {
+	if (cls->fl_map[type]<H5FD_MEM_NOLIST ||
+	    cls->fl_map[type]>=H5FD_MEM_NTYPES) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+			  "invalid free-list mapping");
+	}
+    }
+
+    /* Copy the class structure so the caller can reuse or free it */
+    if (NULL==(saved=H5MM_malloc(sizeof(H5FD_class_t)))) {
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		      "memory allocation failed for file driver class struct");
+    }
+    *saved = *cls;
+
+    /* Create the new class ID */
+    if ((retval=H5I_register(H5I_VFL, saved))<0) {
+	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		      "unable to register file driver ID");
+    }
+
+    FUNC_LEAVE(retval);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDunregister
+ *
+ * Purpose:	Removes a driver ID from the library. This in no way affects
+ *		file access property lists which have been defined to use
+ *		this driver or files which are already opened under this
+ *		driver.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 26, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDunregister(hid_t driver_id)
+{
+    FUNC_ENTER(H5FDunregister, FAIL);
+    H5TRACE1("e","i",driver_id);
+
+    /* Check arguments */
+    if (H5I_VFL!=H5I_get_type(driver_id) ||
+	NULL==H5I_object(driver_id)) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file driver");
+    }
+
+    /* The H5FD_class_t struct will be freed by this function */
+    if (H5I_dec_ref(driver_id)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "unable to unregister file driver");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_fapl_copy
+ *
+ * Purpose:	Copies the driver-specific part of the file access property
+ *		list.
+ *
+ * Return:	Success:	Pointer to new driver-specific file access
+ *				properties.
+ *
+ *		Failure:	NULL, but also returns null with no error
+ *				pushed onto the error stack if the OLD_FAPL
+ *				is null.
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  3, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
+{
+    void		*new_fapl = NULL;
+    H5FD_class_t	*driver=NULL;
+    
+    FUNC_ENTER(H5FD_fapl_copy, NULL);
+
+    /* Check args */
+    if (H5I_VFL!=H5I_get_type(driver_id) ||
+	NULL==(driver=H5I_object(driver_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
+    }
+    if (!old_fapl) HRETURN(NULL); /*but no error*/
+
+    /* Allow the driver to copy or do it ourselves */
+    if (driver->fapl_copy) {
+	new_fapl = (driver->fapl_copy)(old_fapl);
+    } else if (driver->fapl_size>0) {
+	new_fapl = H5MM_malloc(driver->fapl_size);
+	HDmemcpy(new_fapl, old_fapl, driver->fapl_size);
+    } else {
+	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL,
+		      "no way to copy driver file access property list");
+    }
+
+    FUNC_LEAVE(new_fapl);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_fapl_free
+ *
+ * Purpose:	Frees the driver-specific file access property list.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  3, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_fapl_free(hid_t driver_id, void *fapl)
+{
+    H5FD_class_t	*driver=NULL;
+
+    FUNC_ENTER(H5FD_fapl_free, FAIL);
+    H5TRACE2("e","ix",driver_id,fapl);
+
+    /* Check args */
+    if (H5I_VFL!=H5I_get_type(driver_id) ||
+	NULL==(driver=H5I_object(driver_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
+    }
+    
+    /* Allow driver to free or do it ourselves */
+    if (fapl && driver->fapl_free) {
+	if ((driver->fapl_free)(fapl)<0) {
+	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+			  "driver fapl_free request failed");
+	}
+    } else {
+	H5MM_xfree(fapl);
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_dxpl_copy
+ *
+ * Purpose:	Copies the driver-specific part of the data transfer property
+ *		list.
+ *
+ * Return:	Success:	Pointer to new driver-specific data transfer
+ *				properties.
+ *
+ *		Failure:	NULL, but also returns null with no error
+ *				pushed onto the error stack if the OLD_DXPL
+ *				is null.
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  3, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl)
+{
+    void		*new_dxpl = NULL;
+    H5FD_class_t	*driver=NULL;
+    
+    FUNC_ENTER(H5FD_dxpl_copy, NULL);
+
+    /* Check args */
+    if (H5I_VFL!=H5I_get_type(driver_id) ||
+	NULL==(driver=H5I_object(driver_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
+		      "not a driver ID");
+    }
+    if (!old_dxpl) HRETURN(NULL); /*but no error*/
+
+    /* Allow the driver to copy or do it ourselves */
+    if (driver->dxpl_copy) {
+	new_dxpl = (driver->dxpl_copy)(old_dxpl);
+    } else if (driver->dxpl_size>0) {
+	new_dxpl = H5MM_malloc(driver->dxpl_size);
+	HDmemcpy(new_dxpl, old_dxpl, driver->dxpl_size);
+    } else {
+	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL,
+		      "no way to copy driver file access property list");
+    }
+
+    FUNC_LEAVE(new_dxpl);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_dxpl_free
+ *
+ * Purpose:	Frees the driver-specific data transfer property list.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  3, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_dxpl_free(hid_t driver_id, void *dxpl)
+{
+    H5FD_class_t	*driver=NULL;
+
+    FUNC_ENTER(H5FD_dxpl_free, FAIL);
+    H5TRACE2("e","ix",driver_id,dxpl);
+
+    /* Check args */
+    if (H5I_VFL!=H5I_get_type(driver_id) ||
+	NULL==(driver=H5I_object(driver_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
+    }
+    
+    /* Allow driver to free or do it ourselves */
+    if (dxpl && driver->dxpl_free) {
+	if ((driver->dxpl_free)(dxpl)<0) {
+	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+			  "driver dxpl_free request failed");
+	}
+    } else {
+	H5MM_xfree(dxpl);
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDopen
+ *
+ * Purpose:	Opens a file named NAME for the type(s) of access described
+ *		by the bit vector FLAGS according to a file access property
+ *		list FAPL_ID (which may be the constant H5P_DEFAULT). The
+ *		file should expect to handle format addresses in the range [0,
+ *		MAXADDR] (if MAXADDR is the undefined address then the caller
+ *		doesn't care about the address range).
+ *
+ * 		Possible values for the FLAGS bits are:
+ *
+ *		H5F_ACC_RDWR:	Open the file for read and write access. If
+ *				this bit is not set then open the file for
+ *				read only access. It is permissible to open a
+ *				file for read and write access when only read
+ *				access is requested by the library (the
+ *				library will never attempt to write to a file
+ *				which it opened with only read access).
+ *
+ *		H5F_ACC_CREATE:	Create the file if it doesn't already exist.
+ *				However, see H5F_ACC_EXCL below.
+ *
+ *		H5F_ACC_TRUNC:	Truncate the file if it already exists. This
+ *				is equivalent to deleting the file and then
+ *				creating a new empty file.
+ *
+ *		H5F_ACC_EXCL:	When used with H5F_ACC_CREATE, if the file
+ *				already exists then the open should fail.
+ *				Note that this is unsupported/broken with
+ *				some file drivers (e.g., sec2 across nfs) and
+ *				will contain a race condition when used to
+ *				perform file locking.
+ *
+ *		The MAXADDR is the maximum address which will be requested by
+ *		the library during an allocation operation. Usually this is
+ *		the same value as the MAXADDR field of the class structure,
+ *		but it can be smaller if the driver is being used under some
+ *		other driver.
+ *
+ *		Note that when the driver `open' callback gets control that
+ *		the public part of the file struct (the H5FD_t part) will be
+ *		incomplete and will be filled in after that callback returns.
+ *
+ * Return:	Success:	Pointer to a new file driver struct.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 27, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_t *
+H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
+{
+    H5FD_t	*ret_value=NULL;
+
+    FUNC_ENTER(H5FDopen, NULL);
+
+    if (NULL==(ret_value=H5FD_open(name, flags, fapl_id, maxaddr))) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL,
+		      "unable to open file");
+    }
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_open
+ *
+ * Purpose:	Private version of H5FDopen()
+ *
+ * Return:	Success:	Pointer to a new file driver struct
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_t *
+H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
+{
+    const H5F_access_t	*fapl=NULL;
+    H5FD_class_t	*driver;
+    H5FD_t		*file=NULL;
+    
+    FUNC_ENTER(H5FD_open, NULL);
+
+    /* Check arguments */
+    if (H5P_DEFAULT==fapl_id) {
+	fapl = &H5F_access_dflt;
+    } else if (H5P_FILE_ACCESS != H5P_get_class(fapl_id) ||
+	       NULL == (fapl = H5I_object(fapl_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
+		      "not a file access property list");
+    }
+    if (0==maxaddr) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+		      "zero format address range");
+    }
+
+    /* Get driver info */
+    if (H5I_VFL!=H5I_get_type(fapl->driver_id) ||
+	NULL==(driver=H5I_object(fapl->driver_id))) {
+	HRETURN_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
+		      "invalid driver ID in file access property list");
+    }
+    if (NULL==driver->open) {
+	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL,
+		      "file driver has no `open' method");
+    }
+    
+    /* Dispatch to file driver */
+    if (HADDR_UNDEF==maxaddr) maxaddr = driver->maxaddr;
+    if (NULL==(file=(driver->open)(name, flags, fapl_id, maxaddr))) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed");
+    }
+
+    /*
+     * Fill in public fields. We must increment the reference count on the
+     * driver ID to prevent it from being freed while this file is open.
+     */
+    file->driver_id = fapl->driver_id;
+    H5I_inc_ref(file->driver_id);
+    file->cls = driver;
+    file->maxaddr = maxaddr;
+    HDmemset(file->fl, 0, sizeof(file->fl));
+    
+    FUNC_LEAVE(file);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDclose
+ *
+ * Purpose:     Closes the file by calling the driver `close' callback, which
+ *		should free all driver-private data and free the file struct.
+ *		Note that the public part of the file struct (the H5FD_t part)
+ *		will be all zero during the driver close callback like during
+ *		the `open' callback.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 27, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDclose(H5FD_t *file)
+{
+    FUNC_ENTER(H5FDclose, FAIL);
+    H5TRACE1("e","x",file);
+
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    }
+
+    if (H5FD_close(file)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to close file");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_close
+ *
+ * Purpose:	Private version of H5FDclose()
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_close(H5FD_t *file)
+{
+    const H5FD_class_t	*driver;
+    H5FD_free_t		*cur, *next;
+    H5FD_mem_t		i;
+#ifdef H5F_DEBUG
+    uintn		nblocks=0;
+    hsize_t		nbytes=0;
+#endif
+    
+    FUNC_ENTER(H5FD_close, FAIL);
+    assert(file && file->cls);
+
+    /* Free all free-lists, leaking any memory thus described */
+    for (i=0; i<H5FD_MEM_NTYPES; i++) {
+	for (cur=file->fl[i]; cur; cur=next) {
+#ifdef H5F_DEBUG
+	    nblocks++;
+	    nbytes += cur->size;
+#endif
+	    next = cur->next;
+	    H5MM_xfree(cur);
+	}
+	file->fl[i]=NULL;
+    }
+#ifdef H5F_DEBUG
+    if (nblocks && H5DEBUG(F)) {
+	fprintf(H5DEBUG(F),
+		"H5F: leaked %lu bytes of file memory in %u blocks\n",
+		(unsigned long)nbytes, nblocks);
+    }
+#endif
+
+    /* Prepare to close file by clearing all public fields */
+    driver = file->cls;
+    H5I_dec_ref(file->driver_id);
+    HDmemset(file, 0, sizeof(H5FD_t));
+
+    /*
+     * Dispatch to the driver for actual close. If the driver fails to
+     * close the file then the file will be in an unusable state.
+     */
+    assert(driver->close);
+    if ((driver->close)(file)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDcmp
+ *
+ * Purpose:	Compare the keys of two files using the file driver callback
+ *		if the files belong to the same driver, otherwise sort the
+ *		files by driver class pointer value.
+ *
+ * Return:	Success:	A value like strcmp()
+ *
+ *		Failure:	Must never fail. If both file handles are
+ *				invalid then they compare equal. If one file
+ *				handle is invalid then it compares less than
+ *				the other.  If both files belong to the same
+ *				driver and the driver doesn't provide a
+ *				comparison callback then the file pointers
+ *				themselves are compared.
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 27, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
+{
+    intn	ret_value;
+    
+    FUNC_ENTER(H5FDcmp, -1); /*return value is arbitrary*/
+    H5TRACE2("Is","xx",f1,f2);
+    
+    ret_value = H5FD_cmp(f1, f2);
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_cmp
+ *
+ * Purpose:	Private version of H5FDcmp()
+ *
+ * Return:	Success:	A value like strcmp()
+ *
+ *		Failure:	Must never fail.
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
+{
+    intn	ret_value;
+
+    FUNC_ENTER(H5FD_cmp, -1); /*return value is arbitrary*/
+
+    if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) return 0;
+    if (!f1 || !f1->cls) return -1;
+    if (!f2 || !f2->cls) return 1;
+    if (f1->cls < f2->cls) return -1;
+    if (f1->cls > f2->cls) return 1;
+
+    /* Files are same driver; no cmp callback */
+    if (!f1->cls->cmp) {
+	if (f1<f2) return -1;
+	if (f1>f2) return 1;
+	return 0;
+    }
+
+    ret_value = (f1->cls->cmp)(f1, f2);
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDalloc
+ *
+ * Purpose:	Allocates SIZE bytes of memory from the FILE. The memory will
+ *		be used according to the allocation class TYPE. First we try
+ *		to satisfy the request from one of the free lists, according
+ *		to the free list map provided by the driver. The free list
+ *		array has one entry for each request type and the value of
+ *		that array element can be one of four possibilities:
+ *
+ *		      It can be the constant H5FD_MEM_DEFAULT (or zero) which
+ *		      indicates that the identity mapping is used. In other
+ *		      words, the request type maps to its own free list.
+ *
+ *		      It can be the request type itself, which has the same
+ *		      effect as the H5FD_MEM_DEFAULT value above.
+ *
+ *		      It can be the ID for another request type, which
+ *		      indicates that the free list for the specified type
+ *		      should be used instead.
+ *
+ *		      It can be the constant H5FD_MEM_NOLIST which means that
+ *		      no free list should be used for this type of request.
+ *
+ *		If the request cannot be satisfied from a free list then
+ *		either the driver's `alloc' callback is invoked (if one was
+ *		supplied) or the end-of-address marker is extended. The
+ *		`alloc' callback is always called with the same arguments as
+ * 		the H5FDalloc().
+ *
+ * Return:	Success:	The format address of the new file memory.
+ *
+ *		Failure:	The undefined address HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 27, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
+{
+    haddr_t	ret_value = HADDR_UNDEF;
+    
+    FUNC_ENTER(H5FDalloc, HADDR_UNDEF);
+    H5TRACE3("a","xMth",file,type,size);
+
+    /* Check args */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
+		      "invalid file pointer");
+    }
+    if (type<0 || type>=H5FD_MEM_NTYPES) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
+		      "invalid request type");
+    }
+    if (size<=0) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
+		      "zero-size request");
+    }
+
+    /* Do the real work */
+    if (HADDR_UNDEF==(ret_value=H5FD_alloc(file, type, size))) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+		      "unable to allocate file memory");
+    }
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_alloc
+ *
+ * Purpose:	Private version of H5FDalloc()
+ *
+ * Return:	Success:	The format address of the new file memory.
+ *
+ *		Failure:	The undefined address HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
+{
+    haddr_t	ret_value = HADDR_UNDEF;
+    H5FD_mem_t	mapped_type;
+
+    FUNC_ENTER(H5FD_alloc, HADDR_UNDEF);
+
+    /* Check args */
+    assert(file && file->cls);
+    assert(type>=0 && type<H5FD_MEM_NTYPES);
+    assert(size>0);
+    
+    /* Map the allocation request to a free list */
+    if (H5FD_MEM_DEFAULT==file->cls->fl_map[type]) {
+	mapped_type = type;
+    } else {
+	mapped_type = file->cls->fl_map[type];
+    }
+
+    /*
+     * Try to satisfy the request from the free list. First try to find an
+     * exact match, otherwise use the best match.
+     */
+    if (mapped_type>=0) {
+	H5FD_free_t *prev=NULL, *best=NULL;
+	H5FD_free_t *cur = file->fl[mapped_type];
+	while (cur) {
+	    if (cur->size==size) {
+		ret_value = cur->addr;
+		if (prev) prev->next = cur->next;
+		else file->fl[mapped_type] = cur->next;
+		H5MM_xfree(cur);
+		HRETURN(ret_value);
+	    } else if (cur->size>size &&
+		       (!best || cur->size<best->size)) {
+		best = cur;
+	    }
+	    prev = cur;
+	    cur = cur->next;
+	}
+	if (best) {
+	    ret_value = best->addr;
+	    best->addr += size;
+	    best->size -= size;
+	    HRETURN(ret_value);
+	}
+    }
+
+    /*
+     * Dispatch to driver `alloc' callback or extend the end-of-address
+     * marker
+     */
+    if (file->cls->alloc) {
+	ret_value = (file->cls->alloc)(file, type, size);
+	if (HADDR_UNDEF==ret_value) {
+	    HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
+			  "driver allocation request failed");
+	}
+    } else {
+	haddr_t eoa = (file->cls->get_eoa)(file);
+	if (H5F_addr_overflow(eoa, size) || eoa+size>file->maxaddr) {
+	    HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
+			  "file allocation request failed");
+	}
+	ret_value = eoa;
+	eoa += size;
+	if ((file->cls->set_eoa)(file, eoa)<0) {
+	    HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
+			  "file allocation request failed");
+	}
+    }
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDfree
+ *
+ * Purpose:	Frees format addresses starting with ADDR and continuing for
+ *		SIZE bytes in the file FILE. The type of space being freed is
+ *		specified by TYPE, which is mapped to a free list as
+ *		described for the H5FDalloc() function above.  If the request
+ *		doesn't map to a free list then either the application `free'
+ *		callback is invoked (if defined) or the memory is leaked.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, July 28, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
+{
+    FUNC_ENTER(H5FDfree, FAIL);
+    H5TRACE4("e","xMtah",file,type,addr,size);
+    
+    /* Check args */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    }
+    if (type<0 || type>=H5FD_MEM_NTYPES) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request type");
+    }
+
+    /* Do the real work */
+    if (H5FD_free(file, type, addr, size)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "file deallocation request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_free
+ *
+ * Purpose:	Private version of H5FDfree()
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
+{
+    H5FD_mem_t		mapped_type;
+    
+    FUNC_ENTER(H5FD_free, FAIL);
+
+    /* Check args */
+    assert(file && file->cls);
+    assert(type>=0 && type<H5FD_MEM_NTYPES);
+    if (!H5F_addr_defined(addr) || addr>file->maxaddr || 0==size ||
+	H5F_addr_overflow(addr, size) || addr+size>file->maxaddr) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid region");
+    }
+
+    /* Map request type to free list */
+    if (H5FD_MEM_DEFAULT==file->cls->fl_map[type]) {
+	mapped_type = type;
+    } else {
+	mapped_type = file->cls->fl_map[type];
+    }
+
+    /*
+     * If the request maps to a free list then add memory to the free list
+     * without ever telling the driver that it was freed.  Otherwise let the
+     * driver deallocate the memory.
+     */
+    if (mapped_type>=0) {
+	H5FD_free_t *cur = H5MM_malloc(sizeof(H5FD_free_t));
+	cur->addr = addr;
+	cur->size = size;
+	cur->next = file->fl[mapped_type];
+	file->fl[mapped_type] = cur;
+    } else if (file->cls->free) {
+	if ((file->cls->free)(file, type, addr, size)<0) {
+	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+			  "driver free request failed");
+	}
+    } else {
+	/* leak memory */
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDrealloc
+ *
+ * Purpose:	Changes the size of an allocated chunk of memory, possibly
+ *		also changing its location in the file.
+ *
+ * Return:	Success:	New address of the block of memory, not
+ *				necessarily the same as the original address.
+ *
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  3, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
+	    hsize_t new_size)
+{
+    haddr_t	ret_value=HADDR_UNDEF;
+
+    FUNC_ENTER(H5FDrealloc, HADDR_UNDEF);
+    H5TRACE5("a","xMtahh",file,type,old_addr,old_size,new_size);
+
+    if (HADDR_UNDEF==(ret_value=H5FD_realloc(file, type, old_addr, old_size,
+					     new_size))) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+		      "file reallocation request failed");
+    }
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_realloc
+ *
+ * Purpose:	Private version of H5FDrealloc()
+ *
+ * Return:	Success:	New address of the block of memory, not
+ *				necessarily the same as the original address.
+ *
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
+	     hsize_t new_size)
+{
+    haddr_t	new_addr=old_addr;
+    uint8_t	_buf[8192];
+    uint8_t	*buf=_buf;
+    
+    FUNC_ENTER(H5FD_realloc, HADDR_UNDEF);
+
+    if (new_size==old_size) {
+	/*nothing to do*/
+	
+    } else if (0==old_size) {
+	/* allocate memory */
+	assert(!H5F_addr_defined(old_addr));
+	if (HADDR_UNDEF==(new_addr=H5FDalloc(file, type, new_size))) {
+	    HRETURN_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF,
+			  "file allocation failed");
+	}
+	
+    } else if (0==new_size) {
+	/* free memory */
+	assert(H5F_addr_defined(old_addr));
+	H5FDfree(file, type, old_addr, old_size);
+	new_addr = HADDR_UNDEF;
+	
+    } else if (new_size<old_size) {
+	/* free the end of the block */
+	H5FDfree(file, type, old_addr+old_size, old_size-new_size);
+	
+    } else {
+	/* move memory to new location */
+	if (HADDR_UNDEF==(new_addr=H5FDalloc(file, type, new_size))) {
+	    HRETURN_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF,
+			  "file allocation failed");
+	}
+	if (old_size>sizeof(_buf) && NULL==(buf=H5MM_malloc(old_size))) {
+	    H5FDfree(file, type, new_addr, new_size);
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF,
+			  "memory allocation failed");
+	}
+	if (H5FDread(file, H5P_DEFAULT, old_addr, old_size, buf)<0 ||
+	    H5FDwrite(file, H5P_DEFAULT, new_addr, old_size, buf)) {
+	    H5FDfree(file, type, new_addr, new_size);
+	    H5MM_xfree(buf);
+	    HRETURN_ERROR(H5E_FILE, H5E_READERROR, HADDR_UNDEF,
+			  "unable to move file block");
+	}
+	
+	if (buf!=_buf) H5MM_xfree(buf);
+	H5FDfree(file, type, old_addr, old_size);
+    }
+
+    FUNC_LEAVE(new_addr);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDget_eoa
+ *
+ * Purpose:	Returns the address of the first byte after the last
+ *		allocated memory in the file.
+ *
+ * Return:	Success:	First byte after allocated memory.
+ *
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, July 30, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FDget_eoa(H5FD_t *file)
+{
+    haddr_t	addr;
+
+    FUNC_ENTER(H5FDget_eoa, HADDR_UNDEF);
+    H5TRACE1("a","x",file);
+
+    /* Check args */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
+		      "invalid file pointer");
+    }
+
+    /* The real work */
+    if (HADDR_UNDEF==(addr=H5FD_get_eoa(file))) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+		      "file get eoa request failed");
+    }
+
+    FUNC_LEAVE(addr);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_get_eoa
+ *
+ * Purpose:	Private version of H5FDget_eoa()
+ *
+ * Return:	Success:	First byte after allocated memory.
+ *
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FD_get_eoa(H5FD_t *file)
+{
+    haddr_t	addr;
+    
+    FUNC_ENTER(H5FD_get_eoa, HADDR_UNDEF);
+    assert(file && file->cls);
+    
+    /* Dispatch to driver */
+    if (HADDR_UNDEF==(addr=(file->cls->get_eoa)(file))) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+		      "driver get_eoa request failed");
+    }
+
+    FUNC_LEAVE(addr);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDset_eoa
+ *
+ * Purpose:	Set the end-of-address marker for the file. The ADDR is the
+ *		address of the first byte past the last allocated byte of the
+ *		file. This function is called from two places:
+ *
+ *		    It is called after an existing file is opened in order to
+ *		    "allocate" enough space to read the superblock and then
+ *		    to "allocate" the entire hdf5 file based on the contents
+ *		    of the superblock.
+ *
+ *		    It is called during file memory allocation if the
+ *		    allocation request cannot be satisfied from the free list
+ *		    and the driver didn't supply an allocation callback.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative, no side effect
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, July 30, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDset_eoa(H5FD_t *file, haddr_t addr)
+{
+    FUNC_ENTER(H5FDset_eoa, FAIL);
+    H5TRACE2("e","xa",file,addr);
+
+    /* Check args */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    }
+    if (!H5F_addr_defined(addr) || addr>file->maxaddr) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "invalid end-of-address value");
+    }
+
+    /* The real work */
+    if (H5FD_set_eoa(file, addr)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "file set eoa request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_set_eoa
+ *
+ * Purpose:	Private version of H5FDset_eoa()
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative, no side effect
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_set_eoa(H5FD_t *file, haddr_t addr)
+{
+    FUNC_ENTER(H5FD_set_eoa, FAIL);
+    assert(file && file->cls);
+    assert(H5F_addr_defined(addr) && addr<=file->maxaddr);
+    
+    /* Dispatch to driver */
+    if ((file->cls->set_eoa)(file, addr)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "driver set_eoa request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDget_eof
+ *
+ * Purpose:	Returns the end-of-file address, which is the greater of the
+ *		end-of-format address and the actual EOF marker. This
+ *		function is called after an existing file is opened in order
+ *		for the library to learn the true size of the underlying file
+ *		and to determine whether the hdf5 data has been truncated.
+ *
+ *		It is also used when a file is first opened to learn whether
+ *		the file is empty or not.
+ *
+ * 		It is permissible for the driver to return the maximum address
+ *		for the file size if the file is not empty.
+ *
+ * Return:	Success:	The EOF address.
+ *
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 29, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FDget_eof(H5FD_t *file)
+{
+    haddr_t	addr;
+    
+    FUNC_ENTER(H5FDget_eof, HADDR_UNDEF);
+    H5TRACE1("a","x",file);
+
+    /* Check arguments */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
+		      "invalid file pointer");
+    }
+
+    /* The real work */
+    if (HADDR_UNDEF==(addr=H5FD_get_eof(file))) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+		      "file get eof request failed");
+    }
+
+    FUNC_LEAVE(addr);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_get_eof
+ *
+ * Purpose:	Private version of H5FDget_eof()
+ *
+ * Return:	Success:	The EOF address.
+ *
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FD_get_eof(H5FD_t *file)
+{
+    haddr_t	addr=HADDR_UNDEF;
+
+    FUNC_ENTER(H5FD_get_eof, HADDR_UNDEF);
+    assert(file && file->cls);
+    
+    /* Dispatch to driver */
+    if (file->cls->get_eof) {
+	if (HADDR_UNDEF==(addr=(file->cls->get_eof)(file))) {
+	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+			  "driver get_eof request failed");
+	}
+    } else {
+	addr = file->maxaddr;
+    }
+
+    FUNC_LEAVE(addr);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDread
+ *
+ * Purpose:	Reads SIZE bytes from FILE beginning at address ADDR
+ *		according to the data transfer property list DXPL_ID (which may
+ *		be the constant H5P_DEFAULT). The result is written into the
+ *		buffer BUF.
+ *
+ * Return:	Success:	Non-negative. The read result is written into
+ *				the BUF buffer which should be allocated by
+ *				the caller.
+ *
+ *		Failure:	Negative. The contents of BUF is undefined.
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 29, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+	 void *buf/*out*/)
+{
+    FUNC_ENTER(H5FDread, FAIL);
+    H5TRACE5("e","xiahx",file,dxpl_id,addr,size,buf);
+
+    /* Check args */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    }
+    if (H5P_DEFAULT!=dxpl_id &&
+	(H5P_DATA_XFER!=H5P_get_class(dxpl_id) ||
+	 NULL==H5I_object(dxpl_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a data transfer property list");
+    }
+    if (!buf) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer");
+    }
+
+    /* Do the real work */
+    if (H5FD_read(file, dxpl_id, addr, size, buf)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file read request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_read
+ *
+ * Purpose:	Private version of H5FDread()
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_read(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+	  void *buf/*out*/)
+{
+    FUNC_ENTER(H5FD_read, FAIL);
+    assert(file && file->cls);
+    assert(H5P_DEFAULT==dxpl_id ||
+	   (H5P_DATA_XFER==H5P_get_class(dxpl_id) || H5I_object(dxpl_id)));
+    assert(buf);
+
+    /* The no-op case */
+    if (0==size) HRETURN(SUCCEED);
+
+    /* Dispatch to driver */
+    if ((file->cls->read)(file, dxpl_id, addr, size, buf)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "driver read request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDwrite
+ *
+ * Purpose:	Writes SIZE bytes to FILE beginning at address ADDR according
+ *		to the data transfer property list DXPL_ID (which may be the
+ *		constant H5P_DEFAULT). The bytes to be written come from the
+ *		buffer BUF.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 29, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDwrite(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+	  const void *buf)
+{
+    FUNC_ENTER(H5FDwrite, FAIL);
+    H5TRACE5("e","xiahx",file,dxpl_id,addr,size,buf);
+
+    /* Check args */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    }
+    if (H5P_DEFAULT!=dxpl_id &&
+	(H5P_DATA_XFER!=H5P_get_class(dxpl_id) ||
+	 NULL==H5I_object(dxpl_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a data transfer property list");
+    }
+    if (!buf) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer");
+    }
+
+    /* The real work */
+    if (H5FD_write(file, dxpl_id, addr, size, buf)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "file write request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_write
+ *
+ * Purpose:	Private version of H5FDwrite()
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_write(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+	   const void *buf)
+{
+    FUNC_ENTER(H5FD_write, FAIL);
+    assert(file && file->cls);
+    assert(H5P_DEFAULT==dxpl_id ||
+	   (H5P_DATA_XFER==H5P_get_class(dxpl_id) && H5I_object(dxpl_id)));
+    assert(buf);
+    
+    /* The no-op case */
+    if (0==size) HRETURN(SUCCEED);
+
+    /* Dispatch to driver */
+    if ((file->cls->write)(file, dxpl_id, addr, size, buf)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "driver write request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDflush
+ *
+ * Purpose:	Notify driver to flush all cached data.  If the driver has no
+ *		flush method then nothing happens.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 29, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDflush(H5FD_t *file)
+{
+    FUNC_ENTER(H5FDflush, FAIL);
+    H5TRACE1("e","x",file);
+
+    /* Check args */
+    if (!file || !file->cls) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    }
+
+    /* Do the real work */
+    if (H5FD_flush(file)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "file flush request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_flush
+ *
+ * Purpose:	Private version of H5FDflush()
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_flush(H5FD_t *file)
+{
+    FUNC_ENTER(H5FD_flush, FAIL);
+    assert(file && file->cls);
+
+    if (file->cls->flush &&
+	(file->cls->flush)(file)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "driver flush request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}

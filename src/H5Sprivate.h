@@ -20,6 +20,7 @@
 
 /* Private headers needed by this file */
 #include <H5private.h>
+#include <H5Dpublic.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>		/*for H5G_entry_t			     */
 #include <H5Oprivate.h>
@@ -196,8 +197,7 @@ typedef struct H5S_fconv_t {
 		   const struct H5O_fill_t *fill,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, const struct H5F_xfer_t *xfer_parms,
-		   void *tconv_buf/*out*/);
+		   size_t nelmts, hid_t dxpl_id, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to disk */
     herr_t (*scat)(H5F_t *f, const struct H5O_layout_t *layout,
@@ -205,8 +205,7 @@ typedef struct H5S_fconv_t {
 		   const struct H5O_fill_t *fill,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, const struct H5F_xfer_t *xfer_parms,
-		   const void *tconv_buf);
+		   size_t nelmts, hid_t dxpl_id, const void *tconv_buf);
 } H5S_fconv_t;
 
 typedef struct H5S_mconv_t {
@@ -255,7 +254,7 @@ typedef struct H5S_conv_t {
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, const H5S_t *mem_space,
-		   const H5F_xfer_t *xfer_parms, void *buf/*out*/,
+		   hid_t dxpl_id, void *buf/*out*/,
 		   hbool_t *must_convert/*out*/);
 
 
@@ -264,7 +263,7 @@ typedef struct H5S_conv_t {
 		    const struct H5O_pline_t *pline,
 		    const struct H5O_efl_t *efl, size_t elmt_size,
 		    const H5S_t *file_space, const H5S_t *mem_space,
-		    const H5F_xfer_t *xfer_parms, const void *buf,
+		    hid_t dxpl_id, const void *buf,
 		    hbool_t *must_convert/*out*/);
     
 #ifdef H5S_DEBUG
@@ -343,7 +342,7 @@ __DLL__ herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ htri_t H5S_select_contiguous(const H5S_t *space);
 __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-                H5D_operator_t op, void *operator_data);
+				  H5D_operator_t op, void *operator_data);
 
 /* Point select functions */
 __DLL__ herr_t H5S_point_add(H5S_t *space, size_t num_elemn,
@@ -358,7 +357,12 @@ __DLL__ herr_t H5S_point_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 __DLL__ htri_t H5S_point_select_contiguous(const H5S_t *space);
 __DLL__ herr_t H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space,
+<<<<<<< H5Sprivate.h
+					H5D_operator_t operator,
+					void *operator_data);
+=======
             H5D_operator_t op, void *operator_data);
+>>>>>>> 1.53
 
 /* "All" select functions */
 __DLL__ herr_t H5S_all_release(H5S_t *space);
@@ -370,16 +374,21 @@ __DLL__ herr_t H5S_all_read(H5F_t *f, const struct H5O_layout_t *layout,
 			    const struct H5O_pline_t *pline,
 			    const struct H5O_efl_t *efl, size_t elmt_size,
 			    const H5S_t *file_space, const H5S_t *mem_space,
-			    const H5F_xfer_t *xfer_parms, void *buf/*out*/,
+			    hid_t dxpl_id, void *buf/*out*/,
 			    hbool_t *must_convert/*out*/);
 __DLL__ herr_t H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space, const H5S_t *mem_space,
-			     const H5F_xfer_t *xfer_parms, const void *buf,
+			     hid_t dxpl_id, const void *buf,
 			     hbool_t *must_convert/*out*/);
 __DLL__ herr_t H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space,
+<<<<<<< H5Sprivate.h
+				      H5D_operator_t operator,
+				      void *operator_data);
+=======
         H5D_operator_t op, void *operator_data);
+>>>>>>> 1.53
 
 /* Hyperslab selection functions */
 __DLL__ herr_t H5S_hyper_add(H5S_t *space, const hssize_t *start,
@@ -409,7 +418,12 @@ __DLL__ herr_t H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 __DLL__ herr_t H5S_none_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_none_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space,
+<<<<<<< H5Sprivate.h
+				       H5D_operator_t operator,
+				       void *operator_data);
+=======
                 H5D_operator_t op, void *operator_data);
+>>>>>>> 1.53
 
 #ifdef HAVE_PARALLEL
 /* MPI-IO function to read directly from app buffer to file rky980813 */
@@ -418,8 +432,7 @@ __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 				    const struct H5O_pline_t *pline,
 				    const struct H5O_efl_t *efl,
 				    size_t elmt_size, const H5S_t *file_space,
-				    const H5S_t *mem_space,
-				    const H5F_xfer_t *xfer_parms,
+				    const H5S_t *mem_space, hid_t dxpl_id,
 				    void *buf/*out*/,
 				    hbool_t *must_convert /*out*/ );
 
@@ -429,8 +442,7 @@ __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
 				     const struct H5O_pline_t *pline,
 				     const struct H5O_efl_t *efl,
 				     size_t elmt_size, const H5S_t *file_space,
-				     const H5S_t *mem_space,
-				     const H5F_xfer_t *xfer_parms,
+				     const H5S_t *mem_space, hid_t dxpl_id,
 				     const void *buf,
 				     hbool_t *must_convert /*out*/ );
 #ifndef _H5S_IN_H5S_C

@@ -12,10 +12,10 @@ h5test.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -24,6 +24,10 @@ h5test.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -44,10 +48,10 @@ big.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -56,6 +60,10 @@ big.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -76,10 +84,10 @@ bittests.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -88,6 +96,10 @@ bittests.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -107,10 +119,10 @@ chunk.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -118,7 +130,11 @@ chunk.lo: \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
-   ../src/H5Tpublic.h
+   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h
 cmpd_dset.lo: \
    cmpd_dset.c \
    h5test.h \
@@ -133,10 +149,10 @@ cmpd_dset.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -145,6 +161,10 @@ cmpd_dset.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -165,10 +185,10 @@ dsets.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -177,6 +197,10 @@ dsets.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -197,10 +221,10 @@ dtypes.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -209,6 +233,10 @@ dtypes.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -229,10 +257,10 @@ extend.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -241,6 +269,10 @@ extend.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -261,10 +293,10 @@ external.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -273,6 +305,10 @@ external.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -293,10 +329,10 @@ fillval.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -305,6 +341,10 @@ fillval.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -325,10 +365,10 @@ flush1.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -337,6 +377,10 @@ flush1.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -357,10 +401,10 @@ flush2.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -369,6 +413,10 @@ flush2.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -389,10 +437,10 @@ gheap.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -401,6 +449,10 @@ gheap.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -431,10 +483,10 @@ iopipe.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -442,7 +494,11 @@ iopipe.lo: \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
-   ../src/H5Tpublic.h
+   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h
 istore.lo: \
    istore.c \
    h5test.h \
@@ -457,10 +513,10 @@ istore.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -469,6 +525,10 @@ istore.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -498,10 +558,10 @@ lheap.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -510,6 +570,10 @@ lheap.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -533,10 +597,10 @@ links.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -545,6 +609,10 @@ links.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -565,10 +633,10 @@ mount.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -577,6 +645,10 @@ mount.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -597,10 +669,10 @@ mtime.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -609,6 +681,10 @@ mtime.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -629,10 +705,10 @@ ohdr.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -641,6 +717,10 @@ ohdr.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -666,10 +746,10 @@ overhead.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -677,7 +757,11 @@ overhead.lo: \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
-   ../src/H5Tpublic.h
+   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h
 ragged.lo: \
    ragged.c \
    ../src/hdf5.h \
@@ -691,10 +775,10 @@ ragged.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -703,6 +787,10 @@ ragged.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h
 stab.lo: \
    stab.c \
@@ -718,10 +806,10 @@ stab.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -730,6 +818,10 @@ stab.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -755,17 +847,20 @@ tattr.lo: \
    ../src/H5Bpublic.h \
    ../src/H5Dpublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
    ../src/H5Zpublic.h \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
-   ../src/H5Spublic.h
+   ../src/H5Spublic.h \
+   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h
 testhdf5.lo: \
    testhdf5.c \
    testhdf5.h \
@@ -789,7 +884,10 @@ tfile.lo: \
    ../src/H5Bpublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
-   ../src/H5Dpublic.h
+   ../src/H5FDpublic.h \
+   ../src/H5MMpublic.h \
+   ../src/H5Pprivate.h \
+   ../src/H5Ppublic.h
 th5s.lo: \
    th5s.c \
    testhdf5.h \
@@ -804,9 +902,11 @@ th5s.lo: \
    ../src/H5Bpublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
-   ../src/H5Dpublic.h \
+   ../src/H5FDpublic.h \
+   ../src/H5MMpublic.h \
    ../src/H5Sprivate.h \
    ../src/H5Spublic.h \
+   ../src/H5Dpublic.h \
    ../src/H5Gprivate.h \
    ../src/H5Gpublic.h \
    ../src/H5Oprivate.h \
@@ -815,8 +915,9 @@ th5s.lo: \
    ../src/H5HGpublic.h \
    ../src/H5Tprivate.h \
    ../src/H5Tpublic.h \
-   ../src/H5Zprivate.h \
-   ../src/H5Zpublic.h
+   ../src/H5Rprivate.h \
+   ../src/H5Rpublic.h \
+   ../src/H5Zprivate.h
 tmeta.lo: \
    tmeta.c \
    testhdf5.h \
@@ -845,17 +946,20 @@ trefer.lo: \
    ../src/H5Bpublic.h \
    ../src/H5Dpublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
    ../src/H5Zpublic.h \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
-   ../src/H5Spublic.h
+   ../src/H5Spublic.h \
+   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h
 tselect.lo: \
    tselect.c \
    testhdf5.h \
@@ -872,17 +976,20 @@ tselect.lo: \
    ../src/H5Bpublic.h \
    ../src/H5Dpublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
    ../src/H5Zpublic.h \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
-   ../src/H5Spublic.h
+   ../src/H5Spublic.h \
+   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h
 tvltypes.lo: \
    tvltypes.c \
    testhdf5.h \
@@ -899,17 +1006,20 @@ tvltypes.lo: \
    ../src/H5Bpublic.h \
    ../src/H5Dpublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
    ../src/H5Zpublic.h \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
-   ../src/H5Spublic.h
+   ../src/H5Spublic.h \
+   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h
 unlink.lo: \
    unlink.c \
    h5test.h \
@@ -924,10 +1034,10 @@ unlink.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -936,6 +1046,10 @@ unlink.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
@@ -956,10 +1070,10 @@ enum.lo: \
    ../src/H5Dpublic.h \
    ../src/H5Epublic.h \
    ../src/H5Fpublic.h \
+   ../src/H5FDpublic.h \
    ../src/H5Gpublic.h \
    ../src/H5HGpublic.h \
    ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
    ../src/H5Ppublic.h \
@@ -968,166 +1082,10 @@ enum.lo: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
-   ../src/H5private.h \
-   ../src/H5Tpkg.h \
-   ../src/H5HGprivate.h \
-   ../src/H5Fprivate.h \
-   ../src/H5Rprivate.h \
-   ../src/H5Tprivate.h
-h5test.lo: \
-   h5test.c \
-   h5test.h \
-   ../src/hdf5.h \
-   ../src/H5public.h \
-   ../src/H5config.h \
-   ../src/H5api_adpt.h \
-   ../src/H5Ipublic.h \
-   ../src/H5Apublic.h \
-   ../src/H5ACpublic.h \
-   ../src/H5Bpublic.h \
-   ../src/H5Dpublic.h \
-   ../src/H5Epublic.h \
-   ../src/H5Fpublic.h \
-   ../src/H5Gpublic.h \
-   ../src/H5HGpublic.h \
-   ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
-   ../src/H5MMpublic.h \
-   ../src/H5Opublic.h \
-   ../src/H5Ppublic.h \
-   ../src/H5Zpublic.h \
-   ../src/H5Rpublic.h \
-   ../src/H5RApublic.h \
-   ../src/H5Spublic.h \
-   ../src/H5Tpublic.h \
-   ../src/H5private.h \
-   ../src/H5Tpkg.h \
-   ../src/H5HGprivate.h \
-   ../src/H5Fprivate.h \
-   ../src/H5Rprivate.h \
-   ../src/H5Tprivate.h
-fillval.lo: \
-   fillval.c \
-   h5test.h \
-   ../src/hdf5.h \
-   ../src/H5public.h \
-   ../src/H5config.h \
-   ../src/H5api_adpt.h \
-   ../src/H5Ipublic.h \
-   ../src/H5Apublic.h \
-   ../src/H5ACpublic.h \
-   ../src/H5Bpublic.h \
-   ../src/H5Dpublic.h \
-   ../src/H5Epublic.h \
-   ../src/H5Fpublic.h \
-   ../src/H5Gpublic.h \
-   ../src/H5HGpublic.h \
-   ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
-   ../src/H5MMpublic.h \
-   ../src/H5Opublic.h \
-   ../src/H5Ppublic.h \
-   ../src/H5Zpublic.h \
-   ../src/H5Rpublic.h \
-   ../src/H5RApublic.h \
-   ../src/H5Spublic.h \
-   ../src/H5Tpublic.h \
-   ../src/H5private.h \
-   ../src/H5Tpkg.h \
-   ../src/H5HGprivate.h \
-   ../src/H5Fprivate.h \
-   ../src/H5Rprivate.h \
-   ../src/H5Tprivate.h
-dtypes.lo: \
-   dtypes.c \
-   h5test.h \
-   ../src/hdf5.h \
-   ../src/H5public.h \
-   ../src/H5config.h \
-   ../src/H5api_adpt.h \
-   ../src/H5Ipublic.h \
-   ../src/H5Apublic.h \
-   ../src/H5ACpublic.h \
-   ../src/H5Bpublic.h \
-   ../src/H5Dpublic.h \
-   ../src/H5Epublic.h \
-   ../src/H5Fpublic.h \
-   ../src/H5Gpublic.h \
-   ../src/H5HGpublic.h \
-   ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
-   ../src/H5MMpublic.h \
-   ../src/H5Opublic.h \
-   ../src/H5Ppublic.h \
-   ../src/H5Zpublic.h \
-   ../src/H5Rpublic.h \
-   ../src/H5RApublic.h \
-   ../src/H5Spublic.h \
-   ../src/H5Tpublic.h \
-   ../src/H5private.h \
-   ../src/H5Tpkg.h \
-   ../src/H5HGprivate.h \
-   ../src/H5Fprivate.h \
-   ../src/H5Rprivate.h \
-   ../src/H5Tprivate.h
-flush1.lo: \
-   flush1.c \
-   h5test.h \
-   ../src/hdf5.h \
-   ../src/H5public.h \
-   ../src/H5config.h \
-   ../src/H5api_adpt.h \
-   ../src/H5Ipublic.h \
-   ../src/H5Apublic.h \
-   ../src/H5ACpublic.h \
-   ../src/H5Bpublic.h \
-   ../src/H5Dpublic.h \
-   ../src/H5Epublic.h \
-   ../src/H5Fpublic.h \
-   ../src/H5Gpublic.h \
-   ../src/H5HGpublic.h \
-   ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
-   ../src/H5MMpublic.h \
-   ../src/H5Opublic.h \
-   ../src/H5Ppublic.h \
-   ../src/H5Zpublic.h \
-   ../src/H5Rpublic.h \
-   ../src/H5RApublic.h \
-   ../src/H5Spublic.h \
-   ../src/H5Tpublic.h \
-   ../src/H5private.h \
-   ../src/H5Tpkg.h \
-   ../src/H5HGprivate.h \
-   ../src/H5Fprivate.h \
-   ../src/H5Rprivate.h \
-   ../src/H5Tprivate.h
-flush2.lo: \
-   flush2.c \
-   h5test.h \
-   ../src/hdf5.h \
-   ../src/H5public.h \
-   ../src/H5config.h \
-   ../src/H5api_adpt.h \
-   ../src/H5Ipublic.h \
-   ../src/H5Apublic.h \
-   ../src/H5ACpublic.h \
-   ../src/H5Bpublic.h \
-   ../src/H5Dpublic.h \
-   ../src/H5Epublic.h \
-   ../src/H5Fpublic.h \
-   ../src/H5Gpublic.h \
-   ../src/H5HGpublic.h \
-   ../src/H5HLpublic.h \
-   ../src/H5MFpublic.h \
-   ../src/H5MMpublic.h \
-   ../src/H5Opublic.h \
-   ../src/H5Ppublic.h \
-   ../src/H5Zpublic.h \
-   ../src/H5Rpublic.h \
-   ../src/H5RApublic.h \
-   ../src/H5Spublic.h \
-   ../src/H5Tpublic.h \
+   ../src/H5FDcore.h \
+   ../src/H5FDfamily.h \
+   ../src/H5FDmpio.h \
+   ../src/H5FDsec2.h \
    ../src/H5private.h \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \

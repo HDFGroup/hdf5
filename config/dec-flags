@@ -44,7 +44,7 @@ case "$cc_vendor-$cc_version" in
 
 	# Debug
 	DEBUG_CFLAGS="-g -std -verbose -warnprotos"
-	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	DEBUG_CPPFLAGS=
 
 	# Profile
 	PROFILE_CFLAGS="-pg -std -verbose -warnprotos"

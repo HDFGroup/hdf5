@@ -228,7 +228,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			       "memory allocation failed");
 	    }
-	    dt->u.compnd.memb[i].type->ent.header = H5F_ADDR_UNDEF;
+	    dt->u.compnd.memb[i].type->ent.header = HADDR_UNDEF;
 	    if (H5O_dtype_decode_helper(f, pp, dt->u.compnd.memb[i].type)<0) {
 		for (j=0; j<=i; j++) H5MM_xfree(dt->u.compnd.memb[j].name);
 		H5MM_xfree(dt->u.compnd.memb);
@@ -261,7 +261,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			  "memory allocation failed");
 	}
-	dt->parent->ent.header = H5F_ADDR_UNDEF;
+	dt->parent->ent.header = HADDR_UNDEF;
 	if (H5O_dtype_decode_helper(f, pp, dt->parent)<0) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
 			  "unable to decode parent data type");
@@ -297,7 +297,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
     case H5T_VLEN:  /* Variable length datatypes...  */
         /* Decode base type of VL information */
-        dt->parent->ent.header = H5F_ADDR_UNDEF;
+        dt->parent->ent.header = HADDR_UNDEF;
 	    if (H5O_dtype_decode_helper(f, pp, dt->parent)<0) {
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
         }
@@ -685,7 +685,7 @@ H5O_dtype_decode(H5F_t *f, const uint8_t *p,
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
-    dt->ent.header = H5F_ADDR_UNDEF;
+    dt->ent.header = HADDR_UNDEF;
 
     if (H5O_dtype_decode_helper(f, &p, dt) < 0) {
 	H5MM_xfree(dt);

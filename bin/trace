@@ -14,16 +14,18 @@ $Source = "";
 # Two-character strings begin with an upper-case letter which is
 # usually the same as the package name.
 #
-%TypeString = ("hbool_t"                   => "b",
+%TypeString = ("haddr_t"		   => "a",
+	       "hbool_t"                   => "b",
                "htri_t"                    => "b",
                "double"                    => "d",
                "H5D_layout_t"              => "Dl",
-               "H5D_transfer_t"            => "Dt",
+               "H5FD_mpio_xfer_t"          => "Dt",
                "herr_t"                    => "e",
                "H5E_direction_t"           => "Ed",
                "H5E_error_t*"              => "Ee",
-	       "H5F_driver_t"              => "Fd",
 	       "H5F_scope_t"               => "Fs",
+	       "H5FD_t*"		   => "x",
+	       "H5FD_class_t*"		   => "x",
                "H5G_link_t"                => "Gl",
                "H5G_stat_t*"               => "Gs",
                "hsize_t"                   => "h",
@@ -35,6 +37,7 @@ $Source = "";
                "H5I_type_t"                => "It",
                "MPI_Comm"                  => "Mc",
                "MPI_Info"                  => "Mi",
+	       "H5FD_mem_t"		   => "Mt",
                "off_t"                     => "o",
                "H5P_class_t"               => "p",
                "href_t"                    => "r",
@@ -206,7 +209,7 @@ sub rewrite_func ($$$$$) {
     # Added an H5TRACE macro after a FUNC_ENTER macro.
   } else {
     errmesg $file, $name, "unable to insert tracing information";
-    print "body=\n>>>>>", $body, "<<<<<\n";
+    print "body = ", $body, "\n";
     goto error;
   }
 

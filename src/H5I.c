@@ -878,6 +878,44 @@ H5I_dec_ref(hid_t id)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5I_inc_ref
+ *
+ * Purpose:	Increment the reference count for an object.
+ *
+ * Return:	Success:	The new reference count.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 29, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5I_inc_ref(hid_t id)
+{
+    H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
+    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the ID		*/
+
+    FUNC_ENTER(H5I_inc_ref, FAIL);
+
+    /* Check arguments */
+    if (id<0) HRETURN(FAIL);
+    grp_ptr = H5I_id_group_list_g[grp];
+    if (!grp_ptr || grp_ptr->count<=0) HRETURN(FAIL);
+
+    /* General lookup of the ID */
+    if (NULL==(id_ptr=H5I_find_id(id))) HRETURN(FAIL);
+    id_ptr->count++;
+
+    FUNC_LEAVE(id_ptr->count);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5I_search
  *
  * Purpose:	Apply function FUNC to each member of group GRP and return a

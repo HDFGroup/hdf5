@@ -1856,7 +1856,7 @@ test_select_hyper_union(void)
     dataset=H5Dcreate(fid1,"Dataset4",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    xfer = H5Pcreate (H5P_DATASET_XFER);
+    xfer = H5Pcreate (H5P_DATA_XFER);
     CHECK(xfer, FAIL, "H5Pcreate");
 
     ret = H5Pset_hyper_cache(xfer,0,1);

@@ -56,7 +56,7 @@ test_split_comm_access(char *filename[])
 	VRFY((acc_tpl >= 0), "");
 	
 	/* set Parallel access with communicator */
-	ret = H5Pset_mpi(acc_tpl, comm, info);     
+	ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
 	VRFY((ret >= 0), "");
 
 	/* create the file collectively */

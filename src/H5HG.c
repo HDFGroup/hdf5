@@ -29,7 +29,8 @@
 #include <H5Eprivate.h>		/*error handling			*/
 #include <H5HGprivate.h>	/*global heaps				*/
 #include <H5MFprivate.h>	/*file memory management		*/
-#include <H5MMprivate.h>	/*memory management			*/
+#include <H5MMprivate.h>	/*core memory management		*/
+#include <H5Pprivate.h>		/*property lists			*/
 
 #define PABLO_MASK	H5HG_mask
 
@@ -106,7 +107,7 @@ H5HG_create (H5F_t *f, size_t size)
     size = H5HG_ALIGN(size);
 
     /* Create it */
-    if (H5MF_alloc (f, H5MF_META, (hsize_t)size, &addr/*out*/)<0) {
+    if (HADDR_UNDEF==(addr=H5MF_alloc(f, H5FD_MEM_GHEAP, (hsize_t)size))) {
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, NULL,
 		     "unable to allocate file space for global heap");
     }
@@ -234,8 +235,8 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read (f, addr, (hsize_t)H5HG_MINSIZE, &H5F_xfer_dflt,
-			heap->chunk)<0) {
+    if (H5F_block_read(f, addr, (hsize_t)H5HG_MINSIZE, H5P_DEFAULT,
+		       heap->chunk)<0) {
 	HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
 		     "unable to read global heap collection");
     }
@@ -271,7 +272,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 			 "memory allocation failed");
 	}
 	if (H5F_block_read (f, next_addr, (hsize_t)(heap->size-H5HG_MINSIZE),
-			    &H5F_xfer_dflt, heap->chunk+H5HG_MINSIZE)<0) {
+			    H5P_DEFAULT, heap->chunk+H5HG_MINSIZE)<0) {
 	    HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
 			 "unable to read global heap collection");
 	}
@@ -396,7 +397,7 @@ H5HG_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap)
 
     if (heap->dirty) {
 	if (H5F_block_write (f, addr, (hsize_t)(heap->size),
-			     &H5F_xfer_dflt, heap->chunk)<0) {
+			     H5P_DEFAULT, heap->chunk)<0) {
 	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
 			   "unable to write global heap collection to file");
 	}
@@ -869,7 +870,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
 	 * to the file free list.
 	 */
 	heap->dirty = FALSE;
-	H5MF_xfree (f, heap->addr, (hsize_t)(heap->size));
+	H5MF_xfree(f, H5FD_MEM_GHEAP, heap->addr, heap->size);
 	H5AC_flush (f, H5AC_GHEAP, heap->addr, TRUE);
 	heap = NULL;
     } else {

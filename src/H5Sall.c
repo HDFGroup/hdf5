@@ -29,14 +29,14 @@ static size_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
-			     const H5F_xfer_t *xfer_parms, void *buf/*out*/);
+			     hid_t dxpl_id, void *buf/*out*/);
 static herr_t H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_fill_t *fill,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
-			     const H5F_xfer_t *xfer_parms, const void *buf);
+			     hid_t dxpl_id, const void *buf);
 static size_t H5S_all_mgath (const void *_buf, size_t elmt_size,
 			     const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 			     size_t nelmts, void *_tconv_buf/*out*/);
@@ -182,7 +182,9 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
  *              Tuesday, June 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -190,8 +192,8 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline,
 	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 	       size_t elmt_size, const H5S_t *file_space,
-	       H5S_sel_iter_t *file_iter, size_t nelmts,
-	       const H5F_xfer_t *xfer_parms, void *_buf/*out*/)
+	       H5S_sel_iter_t *file_iter, size_t nelmts, hid_t dxpl_id,
+	       void *_buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -244,9 +246,9 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Gather from file.
      */
-    if (H5F_arr_read (f, xfer_parms, layout, pline, fill, efl, hsize, hsize,
-		      zero, file_offset, buf/*out*/)<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
+    if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, hsize, hsize,
+		     zero, file_offset, buf/*out*/)<0) {
+	HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
     /* Advance iterator */
@@ -271,7 +273,9 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  *              Tuesday, June 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -279,7 +283,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline, const struct H5O_fill_t *fill,
 	       const struct H5O_efl_t *efl, size_t elmt_size,
 	       const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-	       size_t nelmts, const H5F_xfer_t *xfer_parms, const void *_buf)
+	       size_t nelmts, hid_t dxpl_id, const void *_buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -328,7 +332,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Scatter to file.
      */
-    if (H5F_arr_write (f, xfer_parms, layout, pline, fill, efl, hsize, hsize,
+    if (H5F_arr_write (f, dxpl_id, layout, pline, fill, efl, hsize, hsize,
 		       zero, file_offset, buf)<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
     }
@@ -538,15 +542,19 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
  *              Thursday, April 22, 1999
  *
  * Modifications:
- *    Modified to allow contiguous hyperslabs to be written out - QAK - 5/25/99
+ *    		Quincey Koziol, 1999-05-25
+ *		Modified to allow contiguous hyperslabs to be written out.
  *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	     const H5O_efl_t *efl, size_t elmt_size, const H5S_t *file_space,
-	     const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
-	     void *buf/*out*/, hbool_t *must_convert/*out*/)
+	     const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/,
+	     hbool_t *must_convert/*out*/)
 {
     H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
@@ -611,7 +619,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     mem_offset[i] = 0;
 
     /* Read data from the file */
-    if (H5F_arr_read(f, xfer_parms, layout, pline, NULL, efl, size,
+    if (H5F_arr_read(f, dxpl_id, layout, pline, NULL, efl, size,
 		     size, mem_offset, file_offset, buf/*out*/)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 		      "unable to read data from the file");
@@ -639,16 +647,20 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
  *              Wednesday, April 21, 1999
  *
  * Modifications:
- *    Modified to allow contiguous hyperslabs to be written out - QAK - 5/25/99
+ * 		Quincey Koziol, 1999-05-25
+ *		Modified to allow contiguous hyperslabs to be written out.
  *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	      const H5O_pline_t *pline, const H5O_efl_t *efl,
 	      size_t elmt_size, const H5S_t *file_space,
-	      const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
-	      const void *buf, hbool_t *must_convert/*out*/)
+	      const H5S_t *mem_space, hid_t dxpl_id, const void *buf,
+	      hbool_t *must_convert/*out*/)
 {
     H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
@@ -713,7 +725,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     mem_offset[i] = 0;
 
     /* Write data to the file */
-    if (H5F_arr_write(f, xfer_parms, layout, pline, NULL, efl, size,
+    if (H5F_arr_write(f, dxpl_id, layout, pline, NULL, efl, size,
 		      size, mem_offset, file_offset, buf)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 		      "unable to write data to the file");

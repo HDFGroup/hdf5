@@ -35,7 +35,8 @@ dep depend: .distdep
 	      obj=`echo $$dep | sed 's/\.c/\\\\.lo/'`;			      \
 	      sed '\%$$obj%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;		      \
 	      $(TRACE) $$dep;						      \
-	      $(CC) -M -MG $(CPPFLAGS) $$dep |sed 's/\.o/.lo/' >>$@;	      \
+	      $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |		      \
+	          sed 's/\.o/.lo/' >>$@;	      			      \
 	   fi;								      \
 	done;
 	-perl -p $(top_srcdir)/bin/distdep .depend >$(srcdir)/.distdep

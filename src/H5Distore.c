@@ -33,10 +33,15 @@
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
 #include <H5Fprivate.h>
+#include <H5Iprivate.h>
 #include <H5MFprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
+#include <H5Pprivate.h>
 #include <H5Vprivate.h>
+
+/* MPIO driver needed for special checks */
+#include <H5FDmpio.h>
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
@@ -487,7 +492,8 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
 #ifdef AKC
     printf("calling H5MF_alloc for new chunk\n");
 #endif
-    if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, addr_p/*out*/) < 0) {
+    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE,
+					 udata->key.nbytes))) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
 		      "couldn't allocate new file storage");
     }
@@ -669,8 +675,9 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 #ifdef AKC
 	    printf("calling H5MF_realloc for new chunk\n");
 #endif
-	    if (H5MF_realloc (f, H5MF_RAW, lt_key->nbytes, addr,
-			      udata->key.nbytes, new_node_p/*out*/)<0) {
+	    if (HADDR_UNDEF==(*new_node_p=H5MF_realloc(f, H5FD_MEM_BTREE, addr,
+						      lt_key->nbytes,
+						      udata->key.nbytes))) {
 		HRETURN_ERROR (H5E_STORAGE, H5E_WRITEERROR, H5B_INS_ERROR,
 			       "unable to reallocate chunk storage");
 	    }
@@ -707,7 +714,8 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 #ifdef AKC
 	printf("calling H5MF_alloc for new chunk\n");
 #endif
-	if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, new_node_p/*out*/)<0) {
+	if (HADDR_UNDEF==(*new_node_p=H5MF_alloc(f, H5FD_MEM_BTREE,
+						 udata->key.nbytes))) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR,
 			  "file allocation failed");
 	}
@@ -798,9 +806,9 @@ H5F_istore_init (H5F_t *f)
     FUNC_ENTER (H5F_istore_init, FAIL);
 
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
-    if (f->shared->access_parms->rdcc_nbytes>0 &&
-	f->shared->access_parms->rdcc_nelmts>0) {
-	rdcc->nslots = f->shared->access_parms->rdcc_nelmts;
+    if (f->shared->fapl->rdcc_nbytes>0 &&
+	f->shared->fapl->rdcc_nelmts>0) {
+	rdcc->nslots = f->shared->fapl->rdcc_nelmts;
 	rdcc->slot = H5MM_calloc (rdcc->nslots*sizeof(H5F_rdcc_ent_t*));
 	if (NULL==rdcc->slot) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -830,7 +838,7 @@ H5F_istore_init (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
+H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 {
     herr_t		ret_value=FAIL;	/*return value			*/
     H5F_istore_ud1_t 	udata;		/*pass through B-tree		*/
@@ -839,16 +847,16 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
     size_t		alloc;		/*bytes allocated for BUF	*/
     hbool_t		point_of_no_return = FALSE;
     
-    FUNC_ENTER (H5F_istore_flush_entry, FAIL);
+    FUNC_ENTER(H5F_istore_flush_entry, FAIL);
     assert(f);
     assert(ent);
-    assert (!ent->locked);
+    assert(!ent->locked);
 
     buf = ent->chunk;
     if (ent->dirty) {
 	udata.mesg = *(ent->layout);
 	udata.key.filter_mask = 0;
-	udata.addr = H5F_ADDR_UNDEF;
+	udata.addr = HADDR_UNDEF;
 	udata.key.nbytes = ent->chunk_size;
 	for (i=0; i<ent->layout->ndims; i++) {
 	    udata.key.offset[i] = ent->offset[i];
@@ -893,13 +901,13 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 	 */
 	if (H5B_insert(f, H5B_ISTORE, ent->layout->addr, ent->split_ratios,
 		       &udata)<0) {
-	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-			 "unable to allocate chunk");
+	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+			"unable to allocate chunk");
 	}
-	if (H5F_block_write (f, udata.addr, udata.key.nbytes,
-			     &H5F_xfer_dflt, buf)<0) {
-	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-			 "unable to write raw data to file");
+	if (H5F_block_write(f, udata.addr, udata.key.nbytes, H5P_DEFAULT,
+			    buf)<0) {
+	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+			"unable to write raw data to file");
 	}
 
 	/* Mark cache entry as clean */
@@ -933,7 +941,7 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 	ent->pline = H5O_free(H5O_PLINE, ent->pline);
 	ent->chunk = H5MM_xfree(ent->chunk);
     }
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -1103,7 +1111,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
 {
     intn		i, j, nerrors=0;
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    size_t		total = f->shared->access_parms->rdcc_nbytes;
+    size_t		total = f->shared->fapl->rdcc_nbytes;
     const int		nmeth=2;	/*number of methods		*/
     intn		w[1];		/*weighting as an interval	*/
     H5F_rdcc_ent_t	*p[2], *cur;	/*list pointers			*/
@@ -1121,7 +1129,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
-    w[0] = rdcc->nused * f->shared->access_parms->rdcc_w0;
+    w[0] = rdcc->nused * f->shared->fapl->rdcc_w0;
     p[0] = rdcc->head;
     p[1] = NULL;
 
@@ -1214,14 +1222,16 @@ H5F_istore_prune (H5F_t *f, size_t size)
  *              Thursday, May 21, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-02
+ *		The split ratios are passed in as part of the data transfer
+ *		property list.
  *-------------------------------------------------------------------------
  */
 static void *
-H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
-		 const double split_ratios[], const H5O_pline_t *pline,
-		 const H5O_fill_t *fill, const hssize_t offset[],
-		 hbool_t relax, intn *idx_hint/*in,out*/)
+H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+		const H5O_pline_t *pline, const H5O_fill_t *fill,
+		const hssize_t offset[], hbool_t relax,
+		intn *idx_hint/*in,out*/)
 {
     uintn		idx=0;			/*hash index number	*/
     hbool_t		found = FALSE;		/*already in cache?	*/
@@ -1236,7 +1246,6 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     void		*ret_value=NULL;	/*return value		*/
 
     FUNC_ENTER (H5F_istore_lock, NULL);
-    assert(split_ratios);
 
     if (rdcc->nslots>0) {
 	/* We don't care about loss of precision in the following statement. */
@@ -1299,7 +1308,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	}
 	chunk_alloc = chunk_size;
 	udata.mesg = *layout;
-	udata.addr = H5F_ADDR_UNDEF;
+	udata.addr = HADDR_UNDEF;
 	status = H5B_find (f, H5B_ISTORE, layout->addr, &udata);
 	H5E_clear ();
 	if (NULL==(chunk = H5MM_malloc (chunk_alloc))) {
@@ -1310,8 +1319,8 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	    /*
 	     * The chunk exists on disk.
 	     */
-	    if (H5F_block_read(f, udata.addr, udata.key.nbytes,
-	        &H5F_xfer_dflt, chunk)<0) {
+	    if (H5F_block_read(f, udata.addr, udata.key.nbytes, H5P_DEFAULT,
+			       chunk)<0) {
 		HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
 			     "unable to read raw data chunk");
 	    }
@@ -1345,7 +1354,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     assert (found || chunk_size>0);
     
     if (!found && rdcc->nslots>0 &&
-	chunk_size<=f->shared->access_parms->rdcc_nbytes &&
+	chunk_size<=f->shared->fapl->rdcc_nbytes &&
 	(!ent || !ent->locked)) {
 	/*
 	 * Add the chunk to the cache only if the slot is not already locked.
@@ -1392,10 +1401,15 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	ent->rd_count = chunk_size;
 	ent->wr_count = chunk_size;
 	ent->chunk = chunk;
-	ent->split_ratios[0] = split_ratios[0];
-	ent->split_ratios[1] = split_ratios[1];
-	ent->split_ratios[2] = split_ratios[2];
-
+	
+	{
+	    H5F_xfer_t *dxpl;
+	    dxpl = (H5P_DEFAULT==dxpl_id)?&H5F_xfer_dflt:H5I_object(dxpl_id);
+	    ent->split_ratios[0] = dxpl->split_ratios[0];
+	    ent->split_ratios[1] = dxpl->split_ratios[1];
+	    ent->split_ratios[2] = dxpl->split_ratios[2];
+	}
+	
 	/* Add it to the cache */
 	assert(NULL==rdcc->slot[idx]);
 	rdcc->slot[idx] = ent;
@@ -1485,15 +1499,16 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
  *              Thursday, May 21, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-02
+ *		The split_ratios are passed as part of the data transfer
+ *		property list.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
-		   const double split_ratios[],
-		   const H5O_pline_t *pline, hbool_t dirty,
-		   const hssize_t offset[], intn *idx_hint,
-		   uint8_t *chunk, size_t naccessed)
+H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+		  const H5O_pline_t *pline, hbool_t dirty,
+		  const hssize_t offset[], intn *idx_hint,
+		  uint8_t *chunk, size_t naccessed)
 {
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
     H5F_rdcc_ent_t	*ent = NULL;
@@ -1529,9 +1544,14 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
 	    }
 	    x.alloc_size = x.chunk_size;
 	    x.chunk = chunk;
-	    x.split_ratios[0] = split_ratios[0];
-	    x.split_ratios[1] = split_ratios[1];
-	    x.split_ratios[2] = split_ratios[2];
+	    {
+		H5F_xfer_t *dxpl;
+		dxpl = (H5P_DEFAULT==dxpl_id)?&H5F_xfer_dflt:H5I_object(dxpl_id);
+		x.split_ratios[0] = dxpl->split_ratios[0];
+		x.split_ratios[1] = dxpl->split_ratios[1];
+		x.split_ratios[2] = dxpl->split_ratios[2];
+	    }
+	    
 	    H5F_istore_flush_entry (f, &x, TRUE);
 	} else {
 	    H5MM_xfree (chunk);
@@ -1567,11 +1587,13 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
  *		Wednesday, October 15, 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-02
+ *		The data transfer property list is passed as an object ID
+ *		since that's how the virtual file layer wants it.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
+H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		const H5O_pline_t *pline, const H5O_fill_t *fill,
 		const hssize_t offset_f[], const hsize_t size[], void *buf)
 {
@@ -1592,13 +1614,13 @@ H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
     FUNC_ENTER(H5F_istore_read, FAIL);
 
     /* Check args */
-    assert (f);
-    assert (layout && H5D_CHUNKED==layout->type);
-    assert (layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
-    assert (H5F_addr_defined(layout->addr));
-    assert (offset_f);
-    assert (size);
-    assert (buf);
+    assert(f);
+    assert(layout && H5D_CHUNKED==layout->type);
+    assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+    assert(H5F_addr_defined(layout->addr));
+    assert(offset_f);
+    assert(size);
+    assert(buf);
 
     /*
      * For now, a hyperslab of the file must be read into an array in
@@ -1611,9 +1633,9 @@ H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
     
 #ifndef NDEBUG
     for (i=0; i<layout->ndims; i++) {
-	assert (offset_f[i]>=0); /*negative offsets not supported*/
-	assert (offset_m[i]>=0); /*negative offsets not supported*/
-	assert (size[i]<SIZET_MAX);
+	assert(offset_f[i]>=0); /*negative offsets not supported*/
+	assert(offset_m[i]>=0); /*negative offsets not supported*/
+	assert(size[i]<SIZET_MAX);
 	assert(offset_m[i]+(hssize_t)size[i]<=(hssize_t)size_m[i]);
 	assert(layout->dim[i]>0);
     }
@@ -1634,7 +1656,7 @@ H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
     while (1) {
 	for (i=0, naccessed=1; i<layout->ndims; i++) {
 	    /* The location and size of the chunk being accessed */
-	    assert (layout->dim[i] < HSSIZET_MAX);
+	    assert(layout->dim[i] < HSSIZET_MAX);
 	    chunk_offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
 
 	    /* The offset and size wrt the chunk */
@@ -1651,32 +1673,29 @@ H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 	}
 #ifdef HAVE_PARALLEL
 	/*
-	 * If MPIO is used, must bypass the chunk-cache scheme
-	 * because other MPI processes could be writing to other
-	 * elements in the same chunk.
+	 * If MPIO is used, must bypass the chunk-cache scheme because other
+	 * MPI processes could be writing to other elements in the same chunk.
 	 * Do a direct write-through of only the elements requested.
 	 */
-	 if (f->shared->access_parms->driver==H5F_LOW_MPIO){
+	if (H5FD_MPIO==f->shared->fapl->driver_id) {
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
-	    H5F_xfer_t		tmp_xfer = *xfer;
+
 	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 				"unable to locate raw data chunk");
 	    };
+	    
 	    /*
 	     * use default transfer mode as we do not support collective
 	     * transfer mode since each data write could decompose into
-	     * multiple chunk writes and we are not doing the calculation
-	     * yet.
+	     * multiple chunk writes and we are not doing the calculation yet.
 	     */
 	    l.type = H5D_CONTIGUOUS;
 	    l.ndims = layout->ndims;
-	    for (i=l.ndims; i-- > 0;)
-		l.dim[i] = layout->dim[i];
+	    for (i=l.ndims; i-- > 0; /*void*/) l.dim[i] = layout->dim[i];
 	    l.addr = udata.addr;
-	    tmp_xfer.xfer_mode = H5D_XFER_DFLT;
-	    if (H5F_arr_read(f, &tmp_xfer, &l, pline, fill, NULL/*no efl*/,
+	    if (H5F_arr_read(f, H5P_DEFAULT, &l, pline, fill, NULL/*no efl*/,
 			     sub_size, size_m, sub_offset_m, offset_wrt_chunk,
 			     buf)<0){
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
@@ -1696,19 +1715,19 @@ H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 	     * Lock the chunk, transfer data to the application, then unlock
 	     * the chunk.
 	     */
-	    if (NULL==(chunk=H5F_istore_lock (f, layout, xfer->split_ratios, 
-					      pline, fill, chunk_offset,
-					      FALSE, &idx_hint))) {
-		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
-			       "unable to read raw data chunk");
+	    if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, pline, fill,
+					     chunk_offset, FALSE,
+					     &idx_hint))) {
+		HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			      "unable to read raw data chunk");
 	    }
 	    H5V_hyper_copy(layout->ndims, sub_size, size_m, sub_offset_m,
 			   (void*)buf, layout->dim, offset_wrt_chunk, chunk);
-	    if (H5F_istore_unlock (f, layout, xfer->split_ratios, pline,
-				   FALSE, chunk_offset, &idx_hint, chunk,
-				   naccessed)<0) {
-		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
-			       "unable to unlock raw data chunk");
+	    if (H5F_istore_unlock(f, dxpl_id, layout, pline, FALSE,
+				  chunk_offset, &idx_hint, chunk,
+				  naccessed)<0) {
+		HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			      "unable to unlock raw data chunk");
 	    }
 #ifdef HAVE_PARALLEL
 	}
@@ -1737,11 +1756,13 @@ H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
  *		Wednesday, October 15, 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-02
+ *		The data transfer property list is passed as an object ID
+ *		since that's how the virtual file layer wants it.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_write(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
+H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		 const H5O_pline_t *pline, const H5O_fill_t *fill,
 		 const hssize_t offset_f[], const hsize_t size[],
 		 const void *buf)
@@ -1783,8 +1804,8 @@ H5F_istore_write(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 
 #ifndef NDEBUG
     for (i=0; i<layout->ndims; i++) {
-	assert (offset_f[i]>=0); /*negative offsets not supported*/
-	assert (offset_m[i]>=0); /*negative offsets not supported*/
+	assert(offset_f[i]>=0); /*negative offsets not supported*/
+	assert(offset_m[i]>=0); /*negative offsets not supported*/
 	assert(size[i]<SIZET_MAX);
 	assert(offset_m[i]+(hssize_t)size[i]<=(hssize_t)size_m[i]);
 	assert(layout->dim[i]>0);
@@ -1808,7 +1829,7 @@ H5F_istore_write(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 	
 	for (i=0, naccessed=1; i<layout->ndims; i++) {
 	    /* The location and size of the chunk being accessed */
-	    assert (layout->dim[i] < HSSIZET_MAX);
+	    assert(layout->dim[i] < HSSIZET_MAX);
 	    chunk_offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
 
 	    /* The offset and size wrt the chunk */
@@ -1826,32 +1847,28 @@ H5F_istore_write(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 
 #ifdef HAVE_PARALLEL
 	/*
-	 * If MPIO is used, must bypass the chunk-cache scheme
-	 * because other MPI processes could be writing to other
-	 * elements in the same chunk.
+	 * If MPIO is used, must bypass the chunk-cache scheme because other
+	 * MPI processes could be writing to other elements in the same chunk.
 	 * Do a direct write-through of only the elements requested.
 	 */
-	 if (f->shared->access_parms->driver==H5F_LOW_MPIO){
+	if (H5FD_MPIO==f->shared->fapl->driver_id) {
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
-	    H5F_xfer_t		tmp_xfer = *xfer;
 	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 				"unable to locate raw data chunk");
 	    };
+	    
 	    /*
 	     * use default transfer mode as we do not support collective
 	     * transfer mode since each data write could decompose into
-	     * multiple chunk writes and we are not doing the calculation
-	     * yet.
+	     * multiple chunk writes and we are not doing the calculation yet.
 	     */
 	    l.type = H5D_CONTIGUOUS;
 	    l.ndims = layout->ndims;
-	    for (i=l.ndims; i-- > 0;)
-		l.dim[i] = layout->dim[i];
+	    for (i=l.ndims; i-- > 0; /*void*/) l.dim[i] = layout->dim[i];
 	    l.addr = udata.addr;
-	    tmp_xfer.xfer_mode = H5D_XFER_DFLT;
-	    if (H5F_arr_write(f, &tmp_xfer, &l, pline, fill, NULL/*no efl*/,
+	    if (H5F_arr_write(f, H5P_DEFAULT, &l, pline, fill, NULL/*no efl*/,
 			      sub_size, size_m, sub_offset_m, offset_wrt_chunk,
 			      buf)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
@@ -1871,19 +1888,19 @@ H5F_istore_write(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 	     * Lock the chunk, copy from application to chunk, then unlock the
 	     * chunk.
 	     */
-	    if (NULL==(chunk=H5F_istore_lock (f, layout, xfer->split_ratios,
-					      pline, fill, chunk_offset,
-					      naccessed==chunk_size,
-					      &idx_hint))) {
+	    if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, pline, fill,
+					     chunk_offset,
+					     naccessed==chunk_size,
+					     &idx_hint))) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "unable to read raw data chunk");
 	    }
 	    H5V_hyper_copy(layout->ndims, sub_size,
 			   layout->dim, offset_wrt_chunk, chunk,
 			   size_m, sub_offset_m, buf);
-	    if (H5F_istore_unlock (f, layout, xfer->split_ratios, pline, TRUE,
-				   chunk_offset, &idx_hint, chunk,
-				   naccessed)<0) {
+	    if (H5F_istore_unlock(f, dxpl_id, layout, pline, TRUE,
+				  chunk_offset, &idx_hint, chunk,
+				  naccessed)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "uanble to unlock raw data chunk");
 	    }
@@ -2151,7 +2168,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 	udata->key.offset[i] = offset[i];
     }
     udata->mesg = *layout;
-    udata->addr = H5F_ADDR_UNDEF;
+    udata->addr = HADDR_UNDEF;
     status = H5B_find (f, H5B_ISTORE, layout->addr, udata);
     H5E_clear ();
     if (status>=0 && H5F_addr_defined(udata->addr))
@@ -2180,20 +2197,23 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
  *		June 26, 1998
  *
  * Modifications:
+ *		rky, 1998-09-23
+ *		Added barrier to preclude racing with data writes.
  *
- * rky 980923
- * Added barrier to preclude racing with data writes.
+ *		rky, 1998-12-07
+ *		Added Wait-Signal wrapper around unlock-lock critical region
+ *		to prevent race condition (unlock reads, lock writes the
+ *		chunk).
  *
- * rky 19981207
- * Added Wait-Signal wrapper around unlock-lock critical region
- * to prevent race condition (unlock reads, lock writes the chunk).
- *
+ * 		Robb Matzke, 1999-08-02
+ *		The split_ratios are passed in as part of the data transfer
+ *		property list.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
-		     const hsize_t *space_dim, const double split_ratios[],
-		     const H5O_pline_t *pline, const H5O_fill_t *fill)
+H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+		    const hsize_t *space_dim, const H5O_pline_t *pline,
+		    const H5O_fill_t *fill)
 {
 
     intn		i, carry;
@@ -2256,28 +2276,26 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 #ifdef HAVE_PARALLEL
 	    /* rky 981207 Serialize access to this critical region. */
 	    if (SUCCEED!=
-		H5PC_Wait_for_left_neighbor(f->shared->access_parms->u.mpio.comm))
-	    {
+		H5FD_mpio_wait_for_left_neighbor(f->shared->lf)) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "unable to lock the data chunk");
 	    }
 #endif
-	    if (NULL==(chunk=H5F_istore_lock (f, layout, split_ratios, pline,
+	    if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, pline,
 					      fill, chunk_offset, FALSE,
 					      &idx_hint))) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "unable to read raw data chunk");
 	    }
-	    if (H5F_istore_unlock (f, layout, split_ratios, pline, TRUE,
-				   chunk_offset, &idx_hint, chunk,
-				   chunk_size)<0) {
+	    if (H5F_istore_unlock(f, dxpl_id, layout, pline, TRUE,
+				  chunk_offset, &idx_hint, chunk,
+				  chunk_size)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "uanble to unlock raw data chunk");
 	    }
 #ifdef HAVE_PARALLEL
 	    if (SUCCEED!=
-		H5PC_Signal_right_neighbor(f->shared->access_parms->u.mpio.comm))
-	    {
+		H5FD_mpio_signal_right_neighbor(f->shared->lf)) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "unable to unlock the data chunk");
 	    }
@@ -2314,7 +2332,7 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
      * removed, when H5D_init_storage is changed to call H5MF_alloc directly
      * to allocate space, instead of calling H5F_istore_unlock.
      */
-    if (MPI_Barrier( f->shared->access_parms->u.mpio.comm )) {
+    if (MPI_Barrier(H5FD_mpio_communicator(f->shared->lf))) {
 	HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Barrier failed");
     }
 #endif

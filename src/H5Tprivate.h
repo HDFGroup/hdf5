@@ -21,6 +21,7 @@
 /* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Gprivate.h>         /*for H5G_entry_t                            */
+#include <H5Rprivate.h>		/*for H5R_type_t			     */
 
 #define H5T_RESERVED_ATOMS 	8
 #define H5T_NAMELEN		32	/*length of debugging name buffer    */
@@ -108,5 +109,6 @@ __DLL__ herr_t H5T_enum_valueof(H5T_t *dt, const char *name,
 				void *value/*out*/);
 __DLL__ herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void UNUSED *_op_data);
 __DLL__ herr_t H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc);
+__DLL__ H5R_type_t H5T_get_ref_type(const H5T_t *dt);
 
 #endif

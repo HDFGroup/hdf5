@@ -87,13 +87,16 @@
  *-------------------------------------------------------------------------
  */
 /* private headers */
-#include <H5private.h>		/*library		  */
-#include <H5ACprivate.h>	/*cache				  */
-#include <H5Bprivate.h>		/*B-link trees			  */
-#include <H5Eprivate.h>		/*error handling	  */
-#include <H5Fprivate.h>		/*file access */
-#include <H5MFprivate.h>	/*File memory management  */
-#include <H5MMprivate.h>	/*Core memory management	  */
+#include <H5private.h>		/*library				*/
+#include <H5ACprivate.h>	/*cache					*/
+#include <H5Bprivate.h>		/*B-link trees				*/
+#include <H5Eprivate.h>		/*error handling			*/
+#include <H5Fprivate.h>		/*file access				*/
+#include <H5MFprivate.h>	/*file memory management		*/
+#include <H5MMprivate.h>	/*core memory management		*/
+#include <H5Pprivate.h>		/*property lists			*/
+
+#include <H5FDmpio.h>		/*for H5FD_mpio_tas_allsame()		*/
 
 #define PABLO_MASK	H5B_mask
 
@@ -187,8 +190,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
      */
     sizeof_rkey = (type->get_sizeof_rkey) (f, udata);
     size = H5B_nodesize(f, type, &total_native_keysize, sizeof_rkey);
-    if (H5MF_alloc(f, H5MF_META, (hsize_t)size, addr_p/*out*/) < 0) {
-	*addr_p = H5F_ADDR_UNDEF;
+    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, size))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "file allocation failed for B-tree root node");
     }
@@ -202,8 +204,8 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     bt->ndirty = 0;
     bt->type = type;
     bt->level = 0;
-    bt->left = H5F_ADDR_UNDEF;
-    bt->right = H5F_ADDR_UNDEF;
+    bt->left = HADDR_UNDEF;
+    bt->right = HADDR_UNDEF;
     bt->nchildren = 0;
     if (NULL==(bt->page=H5MM_calloc(size)) ||
         NULL==(bt->native=H5MM_malloc(total_native_keysize)) ||
@@ -225,7 +227,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
 	bt->key[i].dirty = FALSE;
 	bt->key[i].rkey = bt->page + offset;
 	bt->key[i].nkey = NULL;
-	bt->child[i] = H5F_ADDR_UNDEF;
+	bt->child[i] = HADDR_UNDEF;
     }
 
     /*
@@ -249,7 +251,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     
  done:
     if (ret_value<0) {
-	H5MF_xfree (f, *addr_p, (hsize_t)size);
+	H5MF_xfree(f, H5FD_MEM_BTREE, *addr_p, size);
 	if (bt) {
 	    H5MM_xfree (bt->page);
 	    H5MM_xfree (bt->native);
@@ -315,7 +317,7 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, &H5F_xfer_dflt, bt->page) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, H5P_DEFAULT, bt->page)<0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL,
 		      "can't read B-tree node");
     }
@@ -353,7 +355,7 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
 	if (i < bt->nchildren) {
 	    H5F_addr_decode(f, (const uint8_t **) &p, bt->child + i);
 	} else {
-	    bt->child[i] = H5F_ADDR_UNDEF;
+	    bt->child[i] = HADDR_UNDEF;
 	    p += H5F_SIZEOF_ADDR(f);
 	}
     }
@@ -461,10 +463,9 @@ H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 	 * for the final unchanged children.
 	 */
 #ifdef HAVE_PARALLEL
-	H5F_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
+	H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
 #endif /* HAVE_PARALLEL */
-	if (H5F_block_write(f, addr, (hsize_t)size, &H5F_xfer_dflt,
-	    bt->page) < 0) {
+	if (H5F_block_write(f, addr, (hsize_t)size, H5P_DEFAULT, bt->page)<0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 			  "unable to save B-tree node to disk");
 	}
@@ -924,7 +925,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
-    if (H5MF_alloc(f, H5MF_META, (hsize_t)size, &old_root/*out*/) < 0) {
+    if (HADDR_UNDEF==(old_root=H5MF_alloc(f, H5FD_MEM_BTREE, size))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "unable to allocate file space to move root");
     }
@@ -932,11 +933,11 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 		    "unable to flush B-tree root node");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, &H5F_xfer_dflt, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, H5P_DEFAULT, buf)<0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, FAIL,
 		    "unable to read B-tree root node");
     }
-    if (H5F_block_write(f, old_root, (hsize_t)size, &H5F_xfer_dflt, buf)<0) {
+    if (H5F_block_write(f, old_root, (hsize_t)size, H5P_DEFAULT, buf)<0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_WRITEERROR, FAIL,
 		    "unable to move B-tree root node");
     }
@@ -960,8 +961,8 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     }
     bt->dirty = TRUE;
     bt->ndirty = 0;
-    bt->left = H5F_ADDR_UNDEF;
-    bt->right = H5F_ADDR_UNDEF;
+    bt->left = HADDR_UNDEF;
+    bt->right = HADDR_UNDEF;
     bt->nchildren = 0;
 
     /* the new root */
@@ -1508,7 +1509,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
     H5B_t		*bt = NULL;
     haddr_t		next_addr;
-    haddr_t		cur_addr = H5F_ADDR_UNDEF;
+    haddr_t		cur_addr = HADDR_UNDEF;
     haddr_t		*child = NULL;
     uint8_t		*key = NULL;
     intn		i, nchildren;
@@ -1774,13 +1775,13 @@ H5B_remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
 		sibling->left = bt->left;
 		sibling->dirty = TRUE;
 	    }
-	    bt->left = H5F_ADDR_UNDEF;
-	    bt->right = H5F_ADDR_UNDEF;
+	    bt->left = HADDR_UNDEF;
+	    bt->right = HADDR_UNDEF;
 	    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
 	    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
 	    if (H5AC_unprotect(f, H5AC_BT, addr, bt)<0 ||
 		H5AC_flush(f, H5AC_BT, addr, TRUE)<0 ||
-		H5MF_xfree(f, addr, sizeof_node)<0) {
+		H5MF_xfree(f, H5FD_MEM_BTREE, addr, sizeof_node)<0) {
 		bt = NULL;
 		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR,
 			    "unable to free B-tree node");

@@ -30,16 +30,14 @@ static size_t H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5F_xfer_t *xfer_parms,
-			       void *buf/*out*/);
+			       hid_t dxpl_id, void *buf/*out*/);
 static herr_t H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
 			       const struct H5O_fill_t *fill,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5F_xfer_t *xfer_parms,
-			       const void *buf);
+			       hid_t dxpl_id, const void *buf);
 static size_t H5S_point_mgath (const void *_buf, size_t elmt_size,
 			       const H5S_t *mem_space,
 			       H5S_sel_iter_t *mem_iter, size_t nelmts,
@@ -263,7 +261,9 @@ H5S_point_favail (const H5S_t UNUSED *space,
  *              Tuesday, June 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -271,8 +271,8 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 		 size_t elmt_size, const H5S_t *file_space,
-		 H5S_sel_iter_t *file_iter, size_t nelmts,
-		 const H5F_xfer_t *xfer_parms, void *_buf/*out*/)
+		 H5S_sel_iter_t *file_iter, size_t nelmts, hid_t dxpl_id,
+		 void *_buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -321,9 +321,9 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
                 file_offset[i] += file_space->select.offset[i];
 
             /* Go read the point */
-            if (H5F_arr_read (f, xfer_parms, layout, pline, fill, efl, hsize,
-			      hsize, zero, file_offset, buf/*out*/)<0) {
-                HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
+            if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, hsize,
+			     hsize, zero, file_offset, buf/*out*/)<0) {
+                HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
             }
 
 #ifdef QAK
@@ -370,7 +370,9 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  *              Tuesday, June 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-03
+ *		The data transfer properties are passed by ID since that's
+ *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -378,8 +380,8 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 		 size_t elmt_size, const H5S_t *file_space,
-		 H5S_sel_iter_t *file_iter, size_t nelmts,
-		 const H5F_xfer_t *xfer_parms, const void *_buf)
+		 H5S_sel_iter_t *file_iter, size_t nelmts, hid_t dxpl_id,
+		 const void *_buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -447,9 +449,9 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	}
 #endif /* QAK */
         /* Go write the point */
-        if (H5F_arr_write (f, xfer_parms, layout, pline, fill, efl, hsize,
-			   hsize, zero, file_offset, buf)<0) {
-            HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+        if (H5F_arr_write(f, dxpl_id, layout, pline, fill, efl, hsize,
+			  hsize, zero, file_offset, buf)<0) {
+            HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
         }
 
         /* Increment the offset of the buffer */

@@ -18,7 +18,7 @@ case "X-$CC_BASENAME" in
     X-gcc)
 	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
 	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	DEBUG_CPPFLAGS=
 	PROD_CFLAGS="-O3"
 	PROD_CPPFLAGS=
 	PROFILE_CFLAGS="-pg"
