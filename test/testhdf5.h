@@ -118,7 +118,7 @@ H5TEST_DLL void TestSummary(void);
 H5TEST_DLL void TestCleanup(void);
 H5TEST_DLL void TestInit(void);
 H5TEST_DLL int  GetTestVerbosity(void);
-H5TEST_DLL int  SetTestVerbosity(int new);
+H5TEST_DLL int  SetTestVerbosity(int newval);
 H5TEST_DLL int  GetTestNumErrs(void);
 H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 

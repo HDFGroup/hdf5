@@ -306,13 +306,13 @@ int GetTestVerbosity(void)
  * Set the verbosity level for the testing framework.
  * Return previous verbosity level.
  */
-int SetTestVerbosity(int new)
+int SetTestVerbosity(int newval)
 {
-    int old;
+    int oldval;
 
-    old = Verbosity;
-    Verbosity = new;
-    return(old);
+    oldval = Verbosity;
+    Verbosity = newval;
+    return(oldval);
 }
 
 
