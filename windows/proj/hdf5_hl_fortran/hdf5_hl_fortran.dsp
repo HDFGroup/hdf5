@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\..\proj\hdf5_hl_fortran\Release"
 # PROP Target_Dir ""
 # ADD BASE F90 /compile_only /nologo /warn:nofileopt
-# ADD F90 /compile_only /define:"HDF5F90_WINDOWS" /include:"..\..\proj\hdf5_fortran\Release/" /nologo /warn:nofileopt
+# ADD F90 /compile_only /define:"HDF5F90_WINDOWS" /include:"..\..\..\proj\hdf5_fortran\Release/" /nologo /warn:nofileopt
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /O2 /I "../../../src" /I "../../../hl/src" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -67,7 +67,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\..\proj\hdf5_hl_fortran\Debug"
 # PROP Target_Dir ""
 # ADD BASE F90 /check:bounds /compile_only /dbglibs /debug:full /nologo /traceback /warn:argument_checking /warn:nofileopt
-# ADD F90 /check:bounds /compile_only /dbglibs /debug:full /define:"HDF5F90_WINDOWS" /include:"..\..\proj\hdf5_fortran\Debug/" /nologo /traceback /warn:argument_checking /warn:nofileopt
+# ADD F90 /check:bounds /compile_only /dbglibs /debug:full /define:"HDF5F90_WINDOWS" /include:"..\..\..\proj\hdf5_fortran\Debug/" /nologo /traceback /warn:argument_checking /warn:nofileopt
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "../../../src" /I "../../../hl/src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -96,9 +96,9 @@ SOURCE=..\..\..\hl\fortran\src\H5IMfc.c
 
 SOURCE=..\..\..\hl\fortran\src\H5IMff.f90
 NODEP_F90_H5IMF=\
-	"..\hdf5_fortran\Release\H5FORTRAN_TYPES.MOD"\
-	"..\hdf5_fortran\Release\H5GLOBAL.MOD"\
-	"..\hdf5_fortran\Release\HDF5.MOD"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\H5FORTRAN_TYPES.mod"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\H5GLOBAL.mod"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
@@ -109,9 +109,9 @@ SOURCE=..\..\..\hl\fortran\src\H5LTfc.c
 
 SOURCE=..\..\..\hl\fortran\src\H5LTff.f90
 NODEP_F90_H5LTF=\
-	"..\hdf5_fortran\Release\H5FORTRAN_TYPES.MOD"\
-	"..\hdf5_fortran\Release\H5GLOBAL.MOD"\
-	"..\hdf5_fortran\Release\HDF5.MOD"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\H5FORTRAN_TYPES.mod"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\H5GLOBAL.mod"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
@@ -122,9 +122,9 @@ SOURCE=..\..\..\hl\fortran\src\H5TBfc.c
 
 SOURCE=..\..\..\hl\fortran\src\H5TBff.f90
 NODEP_F90_H5TBF=\
-	"..\hdf5_fortran\Release\H5FORTRAN_TYPES.MOD"\
-	"..\hdf5_fortran\Release\H5GLOBAL.MOD"\
-	"..\hdf5_fortran\Release\HDF5.MOD"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\H5FORTRAN_TYPES.mod"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\H5GLOBAL.mod"\
+	"..\..\..\proj\hdf5_hl_fortran\Debug\HDF5.mod"\
 	
 # End Source File
 # End Group
