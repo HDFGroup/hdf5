@@ -370,9 +370,9 @@ Platforms Tested
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.4.0.2
                                 mpich-1.2.1
-  Linux 2.4.4                   gcc-2.95.3
+  Linux 2.4.18                  gcc-2.95.3
                                 g++ 2.95.3
-  Linux 2.2.16-3smp             gcc-2.95.2
+  Linux 2.2.18smp               gcc-2.95.2
                                 g++ 2.95.2
                                 pgf90 3.1-3
   OSF1 V4.0                     DEC-V5.2-040
@@ -461,7 +461,7 @@ Supported Configuration Features Summary
                     in serial mode.
                 (4) No HDF4-related tools.
                 (5) Shared libraries are provided only for the C library.
-		(6) Exception of (5): DLL is available for C++ API on Windows
+                (6) Exception of (5): DLL is available for C++ API on Windows
 
 
 Known Problems
