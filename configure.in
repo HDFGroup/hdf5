@@ -2465,6 +2465,43 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine can accurately convert
+dnl 'float' or 'double' to 'unsigned (long) long' values.
+dnl (This flag should be set for all machines, except for PGI compiler 
+dnl where round-up happens when the fraction of float-point value is greater 
+dnl than 0.5.
+dnl
+AC_MSG_CHECKING([if accurately converting floating-point to unsigned long long values works])
+
+AC_CACHE_VAL([hdf5_cv_fp_to_ullong_bottom_bit_works],
+    [AC_TRY_RUN([
+    int main(void)
+    {
+        float f = 111.60;
+        double d = 222.55;
+        unsigned long long l1 = (unsigned long long)f;
+        unsigned long long l2 = (unsigned long long)d;
+        int           ret = 0;
+
+        if(l1 == 112)
+            ret = 1;
+        if(l2 == 223)
+            ret = 1;
+
+done:
+        exit(ret);
+    }
+    ], [hdf5_cv_fp_to_ullong_bottom_bit_works=yes], [hdf5_cv_fp_to_ullong_bottom_bit_works=no],)])
+
+if test ${hdf5_cv_fp_to_ullong_bottom_bit_works} = "yes"; then
+  AC_DEFINE([FP_TO_ULLONG_BOTTOM_BIT_WORKS], [1],
+            [Define if your system can accurately convert floating-point to unsigned long long values.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can _compile_
 dnl 'unsigned long long' to 'float' and 'double' typecasts.
 dnl (This flag should be set for all machines, except for under Windows when
