@@ -38,6 +38,9 @@
 #ifdef H5_HAVE_STDINT_H
 #   include <stdint.h>		/*for C9x types				     */
 #endif
+#ifdef H5_HAVE_INTTYPES_H
+#   include <inttypes.h>	/* For uint64_t on some platforms 	     */
+#endif
 #ifdef H5_HAVE_STDDEF_H
 #   include <stddef.h>
 #endif
@@ -56,7 +59,6 @@
 #ifdef H5_HAVE_SRB              /*for SRB I/O                                */
 #include <srbClient.h>
 #endif
-
 #include "H5api_adpt.h"
 
 /* Version numbers */

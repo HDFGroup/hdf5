@@ -409,3 +409,6 @@
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
+
+/* Define if you have the <inttypes.h> header file.  */
+#undef HAVE_INTTYPES_H
