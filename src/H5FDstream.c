@@ -30,6 +30,7 @@
 #include <H5FDpublic.h>               /* VFD structures                      */
 #include <H5MMprivate.h>              /* memory allocation                   */
 #include <H5Ppublic.h>                /* files                               */
+#include <H5Pprivate.h>               /* VFD prototypes                      */
 #include <H5FDstream.h>               /* Stream VFD header                   */
 
 #ifdef H5FD_STREAM_HAVE_UNIX_SOCKETS
@@ -43,6 +44,9 @@
 #include <netinet/in.h>               /* socket stuff                        */
 #ifdef H5_HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>              /* socket stuff                        */
+#endif
+#ifdef H5_HAVE_SYS_FILIO_H
+#include <sys/filio.h>                /* socket stuff                        */
 #endif
 #endif
 
@@ -898,7 +902,7 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_query (const UNUSED H5FD_t *_f,
+static herr_t H5FD_stream_query (const H5FD_t UNUSED *_f,
                                  unsigned long *flags /* out */)
 {
     FUNC_ENTER (H5FD_stream_query, SUCCEED);
