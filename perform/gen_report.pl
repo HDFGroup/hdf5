@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -116,7 +116,7 @@ while (<INPUT>) {
 		$avg_type = "read-only";
 	}
 
-	if (/Maximum Throughput: (-?[0-9]+\.[0-9]{2}) MB\/s/) {
+	if (/Maximum Throughput: ( ?[0-9]+\.[0-9]{2}) MB\/s/) {
 		$results{$num_procs}{$xfer_size}[$type]{$avg_type} = $1;
 	}
 }
