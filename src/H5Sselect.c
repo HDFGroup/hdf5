@@ -598,6 +598,14 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
 
     /* Check for a "regular" hyperslab selection */
     if(space->select.sel_info.hslab.diminfo != NULL) {
+
+#ifdef QAK
+{
+H5S_hyper_dim_t *diminfo=space->select.sel_info.hslab.diminfo;
+for(i=0; i<space->extent.u.simple.rank; i++)
+    printf("%s: (%d) start=%d, stride=%d, count=%d, block=%d\n",FUNC,i,(int)diminfo[i].start,(int)diminfo[i].stride,(int)diminfo[i].count,(int)diminfo[i].block);
+}
+#endif /*QAK */
         /* Check each dimension */
         for(ret_value=1,i=0; i<space->extent.u.simple.rank; i++)
             ret_value*=space->select.sel_info.hslab.diminfo[i].count;
