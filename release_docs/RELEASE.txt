@@ -357,6 +357,8 @@ Footnotes:  (1) Using mpich 1.2.4
 
 Known Problems
 ==============
+* Cray SV1 fails to correctly convert between floating-point and "long double"
+  for software conversion.  Problem is being investigated. SLU - 2005/03/04
 * Newer SGI MIPSpro compilers (version 7.4.x) support C99 features but it
   has a "guard" statement in stdint.h that will #error and skip the rest
   of the header file if C99 option is not used explicitely.  Hardset
