@@ -207,21 +207,27 @@ of the <cite>HDF5 User's Guide.</cite>.
         <em>const hsize_t *</em> <code>maxdims</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Creates a new simple data space and opens it for access. 
+    <dd>Creates a new simple dataspace and opens it for access. 
 <dt><strong>Description:</strong>
-    <dd><code>H5Screate_simple</code> creates a new simple data space 
-        and opens it for access. The <code>rank</code> is the number of 
-        dimensions used in the dataspace.  
-        The <code>dims</code> argument is the size 
-        of the simple dataset and the <code>maxdims</code> argument is
-        the upper limit on the size of the dataset.  <code>maxdims</code> 
-        may be the null pointer in which case the upper limit is the 
-        same as <code>dims</code>.  If an element of <code>maxdims</code> 
-        is zero then the corresponding dimension is unlimited, otherwise 
-        no element of <code>maxdims</code> should be smaller than the 
-        corresponding element of <code>dims</code>.  The dataspace 
-        identifier returned from this function should be released with
-        <code>H5Sclose</code> or resource leaks will occur.
+    <dd><code>H5Screate_simple</code> creates a new simple dataspace 
+        and opens it for access. 
+        <p>
+        <code>rank</code> is the number of dimensions used in the dataspace.  
+        <p>
+        <code>dims</code> is an array specifying the size of each dimension
+        of the dataset while
+        <code>maxdims</code> is an array specifying the upper limit on 
+        the size of each dimension.  
+        <code>maxdims</code> may be the null pointer, in which case the 
+        upper limit is the same as <code>dims</code>.  
+        <p>
+        No element of <code>maxdims</code> should be smaller than the 
+        corresponding element of <code>dims</code>.  
+        If an element of <code>maxdims</code> is <code>H5S_UNLIMITED</code>, 
+        the corresponding dimension is unlimited.
+        <p>
+        The dataspace identifier returned from this function must be 
+        released with <code>H5Sclose</code> or resource leaks will occur.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>int</em> <code>rank</code>
@@ -1234,7 +1240,7 @@ H5S&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  12 June 2000
+Last modified:  5 July 2001
 <br>
 Describes HDF5 Release 1.4.1, April 2001
 
