@@ -903,10 +903,18 @@ H5Fget_access_plist(hid_t file_id)
     if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->lf->def_sdata_block_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size");
 
+    /*
+     * Since we're resetting the driver ID and info, close them if they
+     * exist in this new property list.
+     */
+    if (H5F_acs_close(ret_value, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free the old driver information");
+
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID");
 
     driver_info = H5FD_fapl_get(f->shared->lf);
+
     if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info");
 
