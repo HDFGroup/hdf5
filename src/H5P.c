@@ -2285,7 +2285,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     size_t ret_value=0;         /* Type conversion buffer size */
 
     FUNC_ENTER (H5Pget_buffer, 0);
-    H5TRACE3("h","ixx",plist_id,tconv,bkg);
+    H5TRACE3("z","ixx",plist_id,tconv,bkg);
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
