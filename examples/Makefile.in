@@ -1,8 +1,16 @@
 ## HDF5 Library Examples Makefile(.in)
 ##
-## Copyright (C) 1997, 1998, 1999, 2000, 2001
-##    National Center for Supercomputing Applications
-##    All rights reserved.
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
+##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
 top_srcdir=@top_srcdir@
 top_builddir=..
@@ -39,40 +47,40 @@ EXAMPLE_PROGS=$(TEST_SRC)
 
 ## How to build the programs... they all depend on the hdf5 library
 $(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
-h5_chunk_read: h5_chunk_read.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_chunk_read.lo
+h5_chunk_read: h5_chunk_read.c
+	$(CC) $(CPPFLAGS) -o $@ h5_chunk_read.c
 
-h5_compound: h5_compound.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_compound.lo
+h5_compound: h5_compound.c
+	$(CC) $(CPPFLAGS) -o $@ h5_compound.c
 
-h5_extend_write: h5_extend_write.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_extend_write.lo
+h5_extend_write: h5_extend_write.c
+	$(CC) $(CPPFLAGS) -o $@ h5_extend_write.c
 
-h5_group: h5_group.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_group.lo
+h5_group: h5_group.c
+	$(CC) $(CPPFLAGS) -o $@ h5_group.c
 
-h5_write: h5_write.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_write.lo
+h5_write: h5_write.c
+	$(CC) $(CPPFLAGS) -o $@ h5_write.c
 
-h5_read: h5_read.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_read.lo
+h5_read: h5_read.c
+	$(CC) $(CPPFLAGS) -o $@ h5_read.c
 
-h5_select: h5_select.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_select.lo
+h5_select: h5_select.c
+	$(CC) $(CPPFLAGS) -o $@ h5_select.c
 
-h5_attribute: h5_attribute.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_attribute.lo
+h5_attribute: h5_attribute.c
+	$(CC) $(CPPFLAGS) -o $@ h5_attribute.c
 
-h5_mount: h5_mount.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_mount.lo
+h5_mount: h5_mount.c
+	$(CC) $(CPPFLAGS) -o $@ h5_mount.c
 
-h5_reference: h5_reference.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_reference.lo
+h5_reference: h5_reference.c
+	$(CC) $(CPPFLAGS) -o $@ h5_reference.c
 
-h5_drivers: h5_drivers.lo
-	@$(CC) $(CPPFLAGS) -o $@ h5_drivers.lo
+h5_drivers: h5_drivers.c
+	$(CC) $(CPPFLAGS) -o $@ h5_drivers.c
 
-ph5example: ph5example.lo
-	@$(CC) $(CPPFLAGS) -o $@ $@.lo
+ph5example: ph5example.c
+	$(CC) $(CPPFLAGS) -o $@ $@.c
 
 @CONCLUDE@
