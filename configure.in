@@ -166,7 +166,7 @@ AC_ARG_ENABLE(parallel,
   PARALLEL=$enableval)
 AC_MSG_CHECKING(for parallel support);
 AC_SUBST(PARALLEL_SRC)
-AC_SUBST(RUNTEST) RUNTEST=""
+AC_SUBST(RUNTEST)
 
 case "X-$PARALLEL" in
 
