@@ -855,6 +855,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                 for (x = 0; x < ctx->indent_level + 1; x++)
                     h5tools_str_append(str,"%s",OPT(info->line_indent,""));
             } /* end if */
+            else if(i && info->arr_sep)
+                h5tools_str_append(str, " ");
 
             ctx->indent_level++;
 
@@ -883,7 +885,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         for (i = 0; i < nelmts; i++) {
             if (i)
                 h5tools_str_append(str, "%s",
-                          OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
+                          OPT(info->vlen_sep, "," OPTIONAL_LINE_BREAK));
 
 #ifdef LATER
 /* Need to fix so VL data breaks at correct location on end of line -QAK */
