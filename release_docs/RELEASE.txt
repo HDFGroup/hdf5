@@ -73,6 +73,8 @@ Library
       filesystem or the MPI-IO can really handle greater than 2GB files.
       If it fails, it prints information message only without failing the
       test.
+    * Fixed a bug when reading chunked datasets where the edge of the dataset
+      would be incorrectly detected and generate an assertion failure.
 
 Configuration
 -------------
