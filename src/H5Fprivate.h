@@ -49,8 +49,8 @@
 #define H5F_SIGNATURE_LEN 8
 
 /* size of size_t and off_t as they exist on disk */
-#define H5F_SIZEOF_ADDR(F)	((F)->shared->create_parms.sizeof_addr)
-#define H5F_SIZEOF_SIZE(F)	((F)->shared->create_parms.sizeof_size)
+#define H5F_SIZEOF_ADDR(F)	((F)->shared->create_parms->sizeof_addr)
+#define H5F_SIZEOF_SIZE(F)	((F)->shared->create_parms->sizeof_size)
 
 /*
  * Private file open flags.
@@ -249,7 +249,7 @@ typedef struct H5F_access_t {
 	/* Properties for file families */
 	struct {
 	    struct H5F_access_t *memb_access; /*plist for the members	*/
-	    size_t	offset_bits;	/*number of bits in offset	*/
+	    haddr_t	memb_size;	/*number of bits in offset	*/
 	} fam;
 
 	/* Properties for the split driver */
@@ -323,7 +323,7 @@ typedef struct H5F_low_t {
 	    intn	nmemb;	/* Number of family members		*/
 	    intn	nalloc;	/* Size of member table in elements	*/
 	    struct H5F_low_t **memb; /* An array of family members	*/
-	    size_t	offset_bits; /* Number of bits in a member offset*/
+	    haddr_t	memb_size; /*Size of each family member		*/
 	} fam;
 
 	/* Split meta/raw data */
@@ -401,8 +401,8 @@ typedef struct H5F_file_t {
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
     struct H5AC_t *cache;	/* The object cache			*/
-    H5F_create_t create_parms;	/* File-creation property list		*/
-    H5F_access_t access_parms;  /* File-access property list		*/
+    H5F_create_t *create_parms;	/* File-creation property list		*/
+    H5F_access_t *access_parms;	/* File-access property list		*/
     struct H5G_t *root_grp;	/* Open root group			*/
     intn	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/

@@ -201,6 +201,7 @@
 ./src/Makefile.in
 ./src/debug.c
 ./src/h5ls.c
+./src/h5repart.c
 ./src/hdf5.h
 ./test/.distdep
 ./test/Makefile.in

@@ -5,7 +5,6 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, March 23, 1998
  */
-#include <assert.h>
 #include <hdf5.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +18,16 @@
 #else
 #   define __unused__ __attribute__((unused))
 #endif
+
+static void
+usage (const char *progname)
+{
+    fprintf (stderr, "usage: %s FILE [GROUP]\n", progname);
+    fprintf (stderr, "   The file name may contain a printf integer format "
+	     "to open a file family.\n");
+    exit (1);
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -111,11 +120,14 @@ int
 main (int argc, char *argv[])
 {
     hid_t	file, plist=H5P_DEFAULT;
-    herr_t	status;
     const char	*fname = NULL;
     const char	*gname = "/";
-    
-    assert (argc>=2 && argc<=3);
+    const char	*progname;
+
+    /* Arguments */
+    if ((progname=strrchr (argv[0], '/'))) progname++;
+    else progname = argv[0];
+    if (argc<2 || argc>3) usage (progname);
     fname = argv[1];
     if (argc>=3) gname = argv[2];
 
@@ -127,12 +139,8 @@ main (int argc, char *argv[])
 	plist = H5Pcreate (H5P_FILE_ACCESS);
 	H5Pset_family (plist, 0, H5P_DEFAULT);
     }
-    file = H5Fopen (fname, H5F_ACC_RDONLY, plist);
-    assert (file>=0);
-
-    status = H5Giterate (file, gname, NULL, list, NULL);
-    assert (status>=0);
-
-    H5Fclose (file);
+    if ((file = H5Fopen (fname, H5F_ACC_RDONLY, plist))<0) exit (1);
+    if (H5Giterate (file, gname, NULL, list, NULL)<0) exit (1);
+    if (H5Fclose (file)<0) exit (1);
     return 0;
 }

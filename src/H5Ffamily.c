@@ -30,9 +30,10 @@
 static hbool_t		interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
-#define H5F_FAM_MASK(N)		(((uint64)1<<(N))-1)
-#define H5F_FAM_OFFSET(ADDR,N)	((off_t)((ADDR)->offset & H5F_FAM_MASK(N)))
-#define H5F_FAM_MEMBNO(ADDR,N)	((intn)((ADDR)->offset >> (N)))
+#define H5F_FAM_OFFSET(LF,ADDR)	((off_t)((ADDR)->offset %		     \
+					 (LF)->u.fam.memb_size.offset))
+#define H5F_FAM_MEMBNO(LF,ADDR)	((intn)((ADDR)->offset /		     \
+					(LF)->u.fam.memb_size.offset))
 
 static hbool_t H5F_fam_access(const char *name,
 			      const H5F_access_t *access_parms, int mode,
@@ -92,7 +93,6 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
     H5F_low_t	*member = NULL;		/*a family member		*/
     char	member_name[4096];	/*name of family member		*/
     intn	membno;			/*member number (zero-origin)	*/
-    size_t	nbits; 			/*num bits in an offset     */
     haddr_t	tmp_addr;		/*temporary address		*/
     const H5F_low_class_t *memb_type;	/*type of family member		*/
 
@@ -156,68 +156,70 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	member = NULL;
     }
 
-    /* Calculate member size */
-    if (lf->u.fam.nmemb >= 2) {
+    H5F_low_size (lf->u.fam.memb[0], &tmp_addr);
+    if (1==lf->u.fam.nmemb &&
+	H5F_addr_gt (&tmp_addr, &(access_parms->u.fam.memb_size))) {
 	/*
-	 * If the first and second files exists then round the first file size
-	 * up to the next power of two and use that as the number of bits per
-	 * family member.
+	 * If there's only one member and the member is larger than the
+	 * specified member size, then adjust the specified member size to be
+	 * the same as the actual member size, but at least 1kB
 	 */
-	size_t size = H5F_low_size(lf->u.fam.memb[0], &tmp_addr);
-	for (nbits=8*sizeof(size_t)-1; nbits>0; --nbits) {
-	    size_t mask = (size_t)1 << nbits;
-	    if (size & mask) {
-		if (size != mask) {
-		    size++;
 #ifdef H5F_DEBUG
-		    fprintf(stderr, "H5F: family member size was "
-			    "rounded up to a power of 2");
+	HDfprintf (stderr, "H5F: family member size has been increased "
+		   "from %a to %a\n", &(access_parms->u.fam.memb_size),
+		   &tmp_addr);
 #endif
-		}
-		break;
+	if (tmp_addr.offset<1024) tmp_addr.offset = 1024;
+	lf->u.fam.memb_size = tmp_addr;
+	
+    } else if (1==lf->u.fam.nmemb) {
+	/*
+	 * If there's just one member then use the specified size for the
+	 * family members.
+	 */
+	lf->u.fam.memb_size = access_parms->u.fam.memb_size;
+	
+    } else if (lf->u.fam.nmemb>1 &&
+	       H5F_addr_ne (&tmp_addr, &(access_parms->u.fam.memb_size))) {
+	/*
+	 * If there are more than one member then use the size of the first
+	 * member as the member size.
+	 */
+#ifdef H5F_DEBUG
+	HDfprintf (stderr, "H5F: family member size adjusted from %a to %a\n",
+		   &(access_parms->u.fam.memb_size), &tmp_addr);
+#endif
+	lf->u.fam.memb_size = tmp_addr;
+	for (membno=1; membno<lf->u.fam.nmemb; membno++) {
+	    H5F_low_size (lf->u.fam.memb[membno], &tmp_addr);
+	    if (H5F_addr_gt (&tmp_addr, &(lf->u.fam.memb_size))) {
+		HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL, "family contains "
+			     "member(s) larger than first member");
 	    }
 	}
+	    
     } else {
-	/*
-	 * Typically, the number of bits in the member offset can be up to two
-	 * less than the number of bits in an `off_t'.  On a 32-bit machine,
-	 * for instance, files can be up to 2GB-1byte in size, but since HDF5
-	 * must have a power of two we're restricted to just 1GB.  Smaller
-	 * values result in files of a more manageable size (from a human
-	 * perspective) but also limit the total logical size of the hdf5 file
-	 * since most OS's only allow a certain number of open file
-	 * descriptors (all family members are open at once).
-	 */
-#ifdef H5F_DEBUG
-	if (access_parms->u.fam.offset_bits+2>8*sizeof(off_t)) {
-	    fprintf (stderr, "H5F: family member size may be too large.\n");
-	}
-#endif
-	nbits = MAX (access_parms->u.fam.offset_bits, 10); /*1K min*/
+	/* The family member size is the size of the first family member */
+	lf->u.fam.memb_size = tmp_addr;
     }
-    lf->u.fam.offset_bits = nbits;
-
+    
 #ifdef H5F_DEBUG
-    if (nbits >= 30) {
-	fprintf(stderr, "H5F: family members are %dGB\n",
-		1 << (nbits-30));
-    } else if (nbits >= 20) {
-	fprintf(stderr, "H5F: family members are %dMB\n",
-		1 << (nbits-20));
-    } else if (nbits >= 10) {
-	fprintf(stderr, "H5F: family members are %dkB\n",
-		1 << (nbits-10));
-    } else {
-	fprintf(stderr, "H5F: family members are %d bytes\n",
-		1 << nbits);
+    /*
+     * Check for funny member sizes.  One common mistake is to use 2^32 as the
+     * member size but on a 32-bit machine this isn't possible.  The largest
+     * file on a 32-bit machine is 2^32-1.
+     */
+    if (lf->u.fam.memb_size.offset == ((size_t)1<<(sizeof(off_t)-1))) {
+	HDfprintf (stderr, "H5F: family member size may be too large: %a\n",
+		   &(lf->u.fam.memb_size));
     }
 #endif
-
+	
     /*
      * Get the total family size and store it in the max_addr field.
      */
     assert(lf->u.fam.nmemb >= 1);
-    lf->eof.offset = (size_t)1 << lf->u.fam.offset_bits;
+    lf->eof = lf->u.fam.memb_size;
     lf->eof.offset *= (lf->u.fam.nmemb-1);
     lf->eof.offset += lf->u.fam.memb[lf->u.fam.nmemb-1]->eof.offset;
 
@@ -232,6 +234,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_fam_close
@@ -296,11 +299,10 @@ static herr_t
 H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	     const haddr_t *addr, size_t size, uint8 *buf)
 {
-    size_t		    nbytes;
-    haddr_t		    cur_addr;
-    intn		    membno;
-    off_t		    offset;
-    hsize_t		    member_size;
+    size_t		nbytes;
+    haddr_t		cur_addr;
+    haddr_t		offset, member_size;
+    intn		membno;
 
     FUNC_ENTER(H5F_fam_read, FAIL);
 
@@ -308,9 +310,10 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(addr && H5F_addr_defined(addr));
     assert(buf);
 
-    member_size = (hsize_t) 1 << lf->u.fam.offset_bits;
-    membno = H5F_FAM_MEMBNO(addr, lf->u.fam.offset_bits);
-    offset = H5F_FAM_OFFSET(addr, lf->u.fam.offset_bits);
+    member_size = lf->u.fam.memb_size;
+    membno = H5F_FAM_MEMBNO(lf, addr);
+    H5F_addr_reset (&offset);
+    offset.offset = H5F_FAM_OFFSET(lf, addr);
     cur_addr = *addr;
 
     while (size > 0) {
@@ -318,8 +321,8 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	    HDmemset(buf, 0, size);
 	    break;
 	} else {
-	    nbytes = MIN(size, member_size-offset);
-	    cur_addr.offset = offset;
+	    nbytes = MIN(size, member_size.offset-offset.offset);
+	    cur_addr = offset;
 	    if (H5F_low_read(lf->u.fam.memb[membno],
 			     access_parms->u.fam.memb_access,
 			     &cur_addr, nbytes, buf) < 0) {
@@ -329,7 +332,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	    buf += nbytes;
 	    size -= nbytes;
 	    membno++;
-	    offset = 0;
+	    H5F_addr_reset (&offset);
 	}
     }
 
@@ -363,11 +366,10 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     size_t		   	nbytes;
     haddr_t		    	cur_addr, max_addr;
     intn		    	membno;
-    off_t		    	offset;
+    haddr_t			offset, member_size;
     H5F_low_t		   	*member = NULL;
     char		    	member_name[4096];
     intn		    	i;
-    hsize_t		    	member_size;
     const H5F_low_class_t	*memb_type = NULL;
     
     FUNC_ENTER(H5F_fam_write, FAIL);
@@ -382,20 +384,27 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 
     /* Get the member driver */
     memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
-    member_size = (hsize_t) 1 << lf->u.fam.offset_bits;
-    membno = H5F_FAM_MEMBNO(addr, lf->u.fam.offset_bits);
-    offset = H5F_FAM_OFFSET(addr, lf->u.fam.offset_bits);
+    member_size = lf->u.fam.memb_size;
+    membno = H5F_FAM_MEMBNO(lf, addr);
+    H5F_addr_reset (&offset);
+    offset.offset = H5F_FAM_OFFSET(lf, addr);
     cur_addr = *addr;
 
     while (size > 0) {
-	nbytes = MIN(size, member_size - offset);
-	cur_addr.offset = offset;
+	nbytes = MIN(size, member_size.offset - offset.offset);
+	cur_addr = offset;
 
 	if (membno >= lf->u.fam.nmemb) {
 	    /*
 	     * We're writing past the end of the last family member--create the
 	     * new family member(s)
 	     */
+	    if (membno >= lf->u.fam.nalloc) {
+		lf->u.fam.nalloc = (membno+1)*2;
+		lf->u.fam.memb = H5MM_xrealloc(lf->u.fam.memb,
+					       (lf->u.fam.nalloc *
+						sizeof(H5F_low_t *)));
+	    }
 	    for (i = lf->u.fam.nmemb; i <= membno; i++) {
 		sprintf(member_name, lf->u.fam.name, i);
 		member = H5F_low_open(memb_type, member_name,
@@ -406,24 +415,20 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 		    HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, FAIL,
 				  "can't create a new member");
 		}
+		
 		/*
 		 * For members in the middle, set their logical eof to the
 		 * maximum possible value.
 		 */
 		if (i < membno) {
 		    H5F_addr_reset(&max_addr);
-		    H5F_addr_inc(&max_addr, member_size);
+		    H5F_addr_inc(&max_addr, member_size.offset);
 		    H5F_low_seteof(member, &max_addr);
-		}
-		if (lf->u.fam.nmemb >= lf->u.fam.nalloc) {
-		    lf->u.fam.nalloc *= 2;
-		    lf->u.fam.memb = H5MM_xrealloc(lf->u.fam.memb,
-						   (lf->u.fam.nalloc *
-						    sizeof(H5F_low_t *)));
 		}
 		lf->u.fam.memb[lf->u.fam.nmemb++] = member;
 	    }
 	}
+	
 	/*
 	 * Make sure the logical eof is large enough to handle the request.
 	 */
@@ -441,11 +446,12 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	buf += nbytes;
 	size -= nbytes;
 	membno++;
-	offset = 0;
+	H5F_addr_reset (&offset);
     }
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_fam_flush
@@ -479,11 +485,11 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     /*
      * Make sure that the first family member is the maximum size because
      * H5F_fam_open() looks at the size of the first member to determine the
-     * number of bits to use for each family member offset.  We do this by
-     * reading the last possible byte from the member (which defaults to zero
-     * if we're reading past the end of the member) and then writing it back.
+     * size of each family member.  We do this by reading the last possible
+     * byte from the member (which defaults to zero if we're reading past the
+     * end of the member) and then writing it back.
      */
-    max_offset = H5F_FAM_MASK(lf->u.fam.offset_bits);
+    max_offset = lf->u.fam.memb_size.offset - 1;
     H5F_addr_reset(&addr1);
     H5F_addr_inc(&addr1, max_offset);
     H5F_low_size(lf->u.fam.memb[0], &addr2);	/*remember logical eof */
@@ -518,6 +524,7 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     }
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_fam_access

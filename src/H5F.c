@@ -260,7 +260,7 @@ H5Fget_create_template(hid_t fid)
     
     /* Create the template object to return */
     if (NULL==(tmpl=H5P_copy (H5P_FILE_CREATE,
-			      &(file->shared->create_parms)))) {
+			      file->shared->create_parms))) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		       "unable to copy file creation properties");
     }
@@ -310,7 +310,7 @@ H5Fget_access_template (hid_t file_id)
 
     /* Create the template object to return */
     if (NULL==(tmpl=H5P_copy (H5P_FILE_ACCESS,
-			      &(f->shared->access_parms)))) {
+			      f->shared->access_parms))) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		       "unable to copy file access properties");
     }
@@ -548,6 +548,8 @@ H5F_dest(H5F_t *f)
 		ret_value = FAIL; /*but keep going*/
 	    }
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
+	    H5P_close (H5P_FILE_CREATE, f->shared->create_parms);
+	    H5P_close (H5P_FILE_ACCESS, f->shared->access_parms);
 	    f->shared = H5MM_xfree(f->shared);
 	}
 	f->name = H5MM_xfree(f->name);
@@ -819,14 +821,14 @@ H5F_open(const char *name, uintn flags,
      * the properties may need to be updated.
      */
     if (1 == f->shared->nrefs) {
-	f->shared->create_parms = *create_parms;
-	f->shared->access_parms = *access_parms;
-	if (H5F_LOW_FAMILY==f->shared->access_parms.driver) {
-	    size_t x = f->shared->lf->u.fam.offset_bits;
-	    f->shared->access_parms.u.fam.offset_bits = x;
+	f->shared->create_parms = H5P_copy (H5P_FILE_CREATE, create_parms);
+	f->shared->access_parms = H5P_copy (H5P_FILE_ACCESS, access_parms);
+	if (H5F_LOW_FAMILY==f->shared->access_parms->driver) {
+	    haddr_t x = f->shared->lf->u.fam.memb_size;
+	    f->shared->access_parms->u.fam.memb_size = x;
 	}
     }
-    cp = &(f->shared->create_parms);
+    cp = f->shared->create_parms;
 
     /*
      * Read or write the file boot block.
@@ -840,7 +842,7 @@ H5F_open(const char *name, uintn flags,
 	 */
 	H5F_addr_reset(&(f->shared->boot_addr));
 	H5F_addr_inc(&(f->shared->boot_addr),
-		     f->shared->create_parms.userblock_size);
+		     f->shared->create_parms->userblock_size);
 	f->shared->base_addr = f->shared->boot_addr;
 
 	f->shared->consist_flags = 0x03;
@@ -852,7 +854,7 @@ H5F_open(const char *name, uintn flags,
     } else if (1 == f->shared->nrefs) {
 	/* For existing files we must read the boot block. */
 	if (H5F_locate_signature(f->shared->lf,
-				 &(f->shared->access_parms),
+				 f->shared->access_parms,
 				 &(f->shared->boot_addr)) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "can't find signature");
 	}
@@ -957,7 +959,7 @@ H5F_open(const char *name, uintn flags,
 	 * The userdefined data is the area of the file before the base
 	 * address.
 	 */
-	f->shared->create_parms.userblock_size = f->shared->base_addr.offset;
+	f->shared->create_parms->userblock_size = f->shared->base_addr.offset;
     }
     
     /*
@@ -1265,18 +1267,18 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     HDmemcpy(p, H5F_SIGNATURE, H5F_SIGNATURE_LEN);
     p += H5F_SIGNATURE_LEN;
 
-    *p++ = f->shared->create_parms.bootblock_ver;
-    *p++ = f->shared->create_parms.freespace_ver;
-    *p++ = f->shared->create_parms.objectdir_ver;
+    *p++ = f->shared->create_parms->bootblock_ver;
+    *p++ = f->shared->create_parms->freespace_ver;
+    *p++ = f->shared->create_parms->objectdir_ver;
     *p++ = 0;			/*reserved*/
-    *p++ = f->shared->create_parms.sharedheader_ver;
+    *p++ = f->shared->create_parms->sharedheader_ver;
     assert (H5F_SIZEOF_ADDR(f)<=255);
     *p++ = (uint8)H5F_SIZEOF_ADDR(f);
     assert (H5F_SIZEOF_SIZE(f)<=255);
     *p++ = (uint8)H5F_SIZEOF_SIZE(f);
     *p++ = 0;			/*reserved */
-    UINT16ENCODE(p, f->shared->create_parms.sym_leaf_k);
-    UINT16ENCODE(p, f->shared->create_parms.btree_k[H5B_SNODE_ID]);
+    UINT16ENCODE(p, f->shared->create_parms->sym_leaf_k);
+    UINT16ENCODE(p, f->shared->create_parms->btree_k[H5B_SNODE_ID]);
     UINT32ENCODE(p, f->shared->consist_flags);
     H5F_addr_encode(f, &p, &(f->shared->base_addr));
     H5F_addr_encode(f, &p, &(f->shared->freespace_addr));
@@ -1291,13 +1293,13 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     }
     
     /* write the boot block to disk */
-    if (H5F_low_write(f->shared->lf, &(f->shared->access_parms),
+    if (H5F_low_write(f->shared->lf, f->shared->access_parms,
 		      &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't write header");
     }
     
     /* Flush file buffers to disk */
-    if (H5F_low_flush(f->shared->lf, &(f->shared->access_parms)) < 0) {
+    if (H5F_low_flush(f->shared->lf, f->shared->access_parms) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
     }
     FUNC_LEAVE(SUCCEED);
@@ -1372,7 +1374,7 @@ H5F_close(H5F_t *f)
 	if (f->intent & H5F_ACC_DEBUG) H5AC_debug(f);
 
 	/* Close files and release resources */
-	H5F_low_close(f->shared->lf, &(f->shared->access_parms));
+	H5F_low_close(f->shared->lf, f->shared->access_parms);
     }
     if (H5F_dest(f)<0) {
 	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
@@ -1478,7 +1480,7 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf)
     H5F_addr_add(&abs_addr, addr);
 
     /* Read the data */
-    if (H5F_low_read(f->shared->lf, &(f->shared->access_parms),
+    if (H5F_low_read(f->shared->lf, f->shared->access_parms,
 		     &abs_addr, (size_t)size, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "low-level read failed");
     }
@@ -1526,7 +1528,7 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size, const void *buf)
     H5F_addr_add(&abs_addr, addr);
 
     /* Write the data */
-    if (H5F_low_write(f->shared->lf, &(f->shared->access_parms),
+    if (H5F_low_write(f->shared->lf, f->shared->access_parms,
 		      &abs_addr, (size_t)size, buf)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low-level write failed");
     }
@@ -1606,31 +1608,31 @@ H5F_debug(H5F_t *f, const haddr_t __unused__ *addr, FILE * stream,
 
     fprintf(stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
 	    "Size of user block:",
-	    (unsigned long) (f->shared->create_parms.userblock_size));
+	    (unsigned long) (f->shared->create_parms->userblock_size));
     fprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
 	    "Size of file size_t type:",
-	    (unsigned) (f->shared->create_parms.sizeof_size));
+	    (unsigned) (f->shared->create_parms->sizeof_size));
     fprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
 	    "Size of file haddr_t type:",
-	    (unsigned) (f->shared->create_parms.sizeof_addr));
+	    (unsigned) (f->shared->create_parms->sizeof_addr));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Symbol table leaf node 1/2 rank:",
-	    (unsigned) (f->shared->create_parms.sym_leaf_k));
+	    (unsigned) (f->shared->create_parms->sym_leaf_k));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Symbol table internal node 1/2 rank:",
-	    (unsigned) (f->shared->create_parms.btree_k[H5B_SNODE_ID]));
+	    (unsigned) (f->shared->create_parms->btree_k[H5B_SNODE_ID]));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Boot block version number:",
-	    (unsigned) (f->shared->create_parms.bootblock_ver));
+	    (unsigned) (f->shared->create_parms->bootblock_ver));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Free list version number:",
-	    (unsigned) (f->shared->create_parms.freespace_ver));
+	    (unsigned) (f->shared->create_parms->freespace_ver));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Object directory version number:",
-	    (unsigned) (f->shared->create_parms.objectdir_ver));
+	    (unsigned) (f->shared->create_parms->objectdir_ver));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Shared header version number:",
-	    (unsigned) (f->shared->create_parms.sharedheader_ver));
+	    (unsigned) (f->shared->create_parms->sharedheader_ver));
 
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Root group symbol table entry:",

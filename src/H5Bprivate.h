@@ -40,7 +40,7 @@
     2*H5F_SIZEOF_ADDR(F))       /*left and right sibling addresses        */
      
 #define H5B_K(F,TYPE)           /*K value given file and Btree subclass */    \
-   ((F)->shared->create_parms.btree_k[(TYPE)->id])
+   ((F)->shared->create_parms->btree_k[(TYPE)->id])
 
 typedef enum H5B_ins_t {
     H5B_INS_ERROR        = -1,  /*error return value                         */

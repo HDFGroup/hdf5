@@ -81,8 +81,8 @@ herr_t H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
 		     hid_t *meta_properties/*out*/, size_t raw_ext_size,
 		     char *raw_ext/*out*/, hid_t *raw_properties/*out*/);
 
-herr_t H5Pset_family (hid_t tid, size_t offset_bits, hid_t memb_tid);
-herr_t H5Pget_family (hid_t tid, size_t *offset_bits/*out*/,
+herr_t H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid);
+herr_t H5Pget_family (hid_t tid, hsize_t *memb_size/*out*/,
 		      hid_t *memb_tid/*out*/);
 herr_t H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg);
 size_t H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/);

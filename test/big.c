@@ -16,6 +16,7 @@
 #define FNAME		"big%05d.h5"
 #define WRT_N		50
 #define WRT_SIZE	4*1024
+#define FAMILY_SIZE	1024*1024*1024
 
 static hsize_t
 randll (hsize_t limit)
@@ -66,7 +67,7 @@ writer (int wrt_n)
      * which is a family of files.  Each member of the family will be 1GB
      */
     plist = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_family (plist, 30, H5P_DEFAULT);
+    H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT);
     file = H5Fcreate (FNAME, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
     H5Pclose (plist);
 
@@ -131,7 +132,7 @@ reader (const char *script_name)
 
     /* Open HDF5 file */
     plist = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_family (plist, 30, H5P_DEFAULT);
+    H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT);
     file = H5Fopen (FNAME, H5F_ACC_RDONLY, plist);
     H5Pclose (plist);
 
@@ -145,7 +146,7 @@ reader (const char *script_name)
     /* Read each region */
     while (fgets (ln, sizeof(ln), script)) {
 	if ('#'!=ln[0]) break;
-	i = strtol (ln+1, &s, 10);
+	i = (int)strtol (ln+1, &s, 10);
 	hs_offset[0] = HDstrtoll (s, NULL, 0);
 	HDfprintf (stdout, "#%03d 0x%016Hx", i, hs_offset[0]);
 	fflush (stdout);
@@ -198,7 +199,7 @@ main (int argc, char *argv[])
     if (1==argc) {
 	writer (WRT_N);
     } else if (isdigit (argv[1][0])) {
-	writer (strtol (argv[1], NULL, 0));
+	writer ((int)strtol(argv[1], NULL, 0));
     } else {
 	reader (argv[1]);
     }

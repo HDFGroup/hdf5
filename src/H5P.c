@@ -1574,10 +1574,10 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
  * Function:	H5Pset_family
  *
  * Purpose:	Sets the low-level driver to stripe the hdf5 address space
- *		across a family of files.  The OFFSET_BITS argument indicates
- *		how many of the low-order bits of an address will be used for
- *		the offset within the file, and is only meaningful when
- *		creating new files.
+ *		across a family of files.  The MEMB_SIZE argument indicates
+ *		the size in bytes of each family member and is only
+ *		meaningful when creating new files or opening families that
+ *		have only one member.
  *
  * Return:	Success:	SUCCEED
  *
@@ -1591,7 +1591,7 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_family (hid_t tid, size_t offset_bits, hid_t memb_tid)
+H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
 {
     
     H5F_access_t	*tmpl = NULL;
@@ -1605,6 +1605,10 @@ H5Pset_family (hid_t tid, size_t offset_bits, hid_t memb_tid)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
+    if (memb_size && memb_size<1024) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		       "family member size is too small");
+    }
     if (H5P_DEFAULT!=memb_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(memb_tid) ||
 	 NULL == (tmpl = H5I_object(memb_tid)))) {
@@ -1614,7 +1618,8 @@ H5Pset_family (hid_t tid, size_t offset_bits, hid_t memb_tid)
 
     /* Set driver */
     tmpl->driver = H5F_LOW_FAMILY;
-    tmpl->u.fam.offset_bits = offset_bits;
+    H5F_addr_reset (&(tmpl->u.fam.memb_size));
+    H5F_addr_inc (&(tmpl->u.fam.memb_size), memb_size);
     tmpl->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS, memb_tmpl);
 
     FUNC_LEAVE (SUCCEED);
@@ -1644,7 +1649,7 @@ H5Pset_family (hid_t tid, size_t offset_bits, hid_t memb_tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_family (hid_t tid, size_t *offset_bits/*out*/, hid_t *memb_tid/*out*/)
+H5Pget_family (hid_t tid, hsize_t *memb_size/*out*/, hid_t *memb_tid/*out*/)
 {
     H5F_access_t	*tmpl = NULL;
 
@@ -1662,13 +1667,15 @@ H5Pget_family (hid_t tid, size_t *offset_bits/*out*/, hid_t *memb_tid/*out*/)
     }
 
     /* Output args */
+    if (memb_size) {
+	*memb_size = tmpl->u.fam.memb_size.offset;
+    }
     if (memb_tid) {
 	assert (tmpl->u.fam.memb_access);
 	*memb_tid = H5P_create (H5P_FILE_ACCESS,
 				H5P_copy (H5P_FILE_ACCESS,
 					  tmpl->u.fam.memb_access));
     }
-    if (offset_bits) *offset_bits = tmpl->u.fam.offset_bits;
 	
     FUNC_LEAVE (SUCCEED);
 }
@@ -2356,6 +2363,8 @@ H5P_copy (H5P_class_t type, const void *src)
     int			i;
     const H5D_create_t	*dc_src = NULL;
     H5D_create_t	*dc_dst = NULL;
+    const H5F_access_t	*fa_src = NULL;
+    H5F_access_t	*fa_dst = NULL;
     
     FUNC_ENTER (H5P_copy, NULL);
     
@@ -2392,6 +2401,29 @@ H5P_copy (H5P_class_t type, const void *src)
 	break;
 	
     case H5P_FILE_ACCESS:
+	fa_src = (const H5F_access_t*)src;
+	fa_dst = (H5F_access_t*)dst;
+	switch (fa_src->driver) {
+	case H5F_LOW_ERROR:
+	case H5F_LOW_SEC2:
+	case H5F_LOW_STDIO:
+	case H5F_LOW_CORE:
+	case H5F_LOW_MPIO:
+	    /* Nothing to do */
+	    break;
+	    
+	case H5F_LOW_FAMILY:
+	    fa_dst->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS,
+						  fa_src->u.fam.memb_access);
+	    break;
+
+	case H5F_LOW_SPLIT:
+	    fa_dst->u.split.meta_access=H5P_copy (H5P_FILE_ACCESS,
+						  fa_src->u.split.meta_access);
+	    fa_dst->u.split.raw_access = H5P_copy (H5P_FILE_ACCESS,
+						   fa_src->u.split.raw_access);
+	    break;
+	}
 	break;
 	
     case H5P_DATASET_CREATE:
