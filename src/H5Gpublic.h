@@ -70,8 +70,7 @@ herr_t H5Gstat (hid_t loc_id, const char *name, hbool_t follow_link,
 herr_t H5Gget_linkval (hid_t loc_id, const char *name, size_t size,
 		       char *buf/*out*/);
 herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
-herr_t H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
-		      char *buf);
+int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf);
 
 #ifdef __cplusplus
 }

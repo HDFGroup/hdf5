@@ -697,7 +697,8 @@ H5S_extent_ndims(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sextent_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
+H5Sextent_dims (hid_t space_id, hsize_t dims[]/*out*/,
+		hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
@@ -706,7 +707,8 @@ H5Sextent_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+	NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     }
     ret_value = H5S_extent_dims(ds, dims, maxdims);

@@ -6,6 +6,7 @@
  *              Monday, March 23, 1998
  */
 #include <ctype.h>
+#include <h5tools.h>
 #include <hdf5.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,8 +21,10 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
-/* Verbosity level */
+/* Command-line switches */
 static int verbose_g = 0;
+static int dump_g = 0;
+static int width_g = 80;
 
 
 /*-------------------------------------------------------------------------
@@ -45,6 +48,8 @@ usage (const char *progname)
 usage: %s [OPTIONS] FILE [GROUP]\n\
    OPTIONS\n\
       -h, -?, --help   Print a usage message and exit\n\
+      -d, --dump       Print the values of datasets\n\
+      -wN, --width=N   Set the number of columns of output\n\
       -v, --verbose    Generate more verbose output\n\
       -V, --version    Print version number and exit\n\
    FILE\n\
@@ -73,41 +78,72 @@ usage: %s [OPTIONS] FILE [GROUP]\n\
 static void
 dump_dataset_values(hid_t dset)
 {
-    hid_t		file_space, mem_space, type;
-    hsize_t		file_nelmts, mem_nelmts;
-    hssize_t		start, zero=0;
-    unsigned char	buf[1024];
-    hsize_t		i;
+    hid_t		f_type, m_type=-1;
+    h5dump_t		info;
+    size_t		size;
 
-    file_space = H5Dget_space(dset);
-    type = H5Dget_type(dset);
+    /* Set to all default values and then override */
+    memset(&info, 0, sizeof info);
+    info.idx_fmt = "        (%s) ";
+    info.line_ncols = width_g;
 
-    if (H5Tequal(type, H5T_NATIVE_CHAR)) {
-	printf("%*svalue = \"", 26, "");
-	file_nelmts = H5Sextent_npoints(file_space);
-	mem_nelmts = sizeof(buf);
-	mem_space = H5Screate_simple(1, &mem_nelmts, NULL);
-	for (start=0;
-	     start<(hssize_t)file_nelmts;
-	     start+=(hssize_t)mem_nelmts) {
-	    mem_nelmts = MIN(mem_nelmts, file_nelmts-(hsize_t)start);
-	    H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &start, NULL,
-				&mem_nelmts, NULL);
-	    H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, &zero, NULL,
-				&mem_nelmts, NULL);
-	    H5Dread(dset, H5T_NATIVE_CHAR, mem_space, file_space, H5P_DEFAULT,
-		    buf);
-	    for (i=0; i<mem_nelmts; i++) {
-		if (isprint(buf[i])) putchar(buf[i]);
-		else printf("\\%03o", buf[i]);
-	    }
+    /*
+     * Decide which data type to use for printing the values and make any
+     * necessary adjustments to the way the values will be formatted.
+     */
+    f_type = H5Dget_type(dset);
+    size = H5Tget_size(f_type);
+    switch (H5Tget_class(f_type)) {
+    case H5T_INTEGER:
+	if (1==size) {
+	    /*
+	     * Assume that the dataset is being used to hold character values
+	     * and print the values as strings.
+	     */
+	    info.elmt_suf1 = "";
+	    info.elmt_suf2 = "";
+	    info.idx_fmt = "        (%s) \"";
+	    info.line_suf = "\"";
 	}
-	H5Sclose(mem_space);
-	printf("\"\n");
-    }
 
-    H5Sclose(file_space);
-    H5Tclose(type);
+	/*
+	 * For printing use an integer which is the same width and sign as
+	 * the file but in native byte order.
+	 */
+	m_type = H5Tcopy(H5T_NATIVE_INT);
+	H5Tset_offset(m_type, 0);
+	H5Tset_precision(m_type, size*8);
+	H5Tset_size(m_type, size);
+	H5Tset_sign(m_type, H5Tget_sign(f_type));
+	break;
+
+    case H5T_FLOAT:
+	if (size==sizeof(float)) {
+	    m_type = H5Tcopy(H5T_NATIVE_FLOAT);
+	} else {
+	    m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
+	}
+	break;
+
+    case H5T_COMPOUND:
+	printf("    Data: printing of compound data types is not implemented "
+	       "yet\n");
+	break;
+
+    default:
+	/*unable to print*/
+	printf("    Data: [unable to print]\n");
+	break;
+    }
+    H5Tclose(f_type);
+    if (m_type<0) return; /*not printable*/
+    
+    /*
+     * Print all the values.
+     */
+    printf("    Data:\n");
+    h5dump(stdout, &info, dset, m_type);
+    H5Tclose(m_type);
 }
 
 
@@ -209,7 +245,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	printf ("}\n");
 	H5Dclose (space);
 	H5Aiterate (obj, NULL, list_attr, NULL);
-	dump_dataset_values(obj);
+	if (dump_g) dump_dataset_values(obj);
 	H5Dclose (obj);
     } else if ((obj=H5Gopen (group, name))>=0) {
 	printf ("Group\n");
@@ -229,6 +265,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     }
 
     /* Display the comment if the object has one */
+    comment[0] = '\0';
     H5Gget_comment(group, name, sizeof(comment), comment);
     strcpy(comment+sizeof(comment)-4, "...");
     if (comment[0]) printf("%26s%s\n", "", comment);
@@ -264,6 +301,7 @@ main (int argc, char *argv[])
     const char	*gname = "/";
     const char	*progname;
     const char	*s;
+    char	*rest;
     int		argno;
 
     /* Name of this program without the path */
@@ -279,12 +317,34 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "--help")) {
 	    usage(progname);
 	    exit(0);
+	} else if (!strcmp(argv[argno], "--dump")) {
+	    dump_g++;
+	} else if (!strncmp(argv[argno], "--width=", 8)) {
+	    width_g = strtol(argv[argno]+8, &rest, 0);
+	    if (width_g<=0 || *rest) {
+		usage(progname);
+		exit(1);
+	    }
 	} else if (!strcmp(argv[argno], "--verbose")) {
 	    verbose_g++;
 	} else if (!strcmp(argv[argno], "--version")) {
 	    printf("This is %s version %u.%u release %u\n",
 		   progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 	    exit(0);
+	} else if (!strncmp(argv[argno], "-w", 2)) {
+	    if (argv[argno][2]) {
+		s = argv[argno]+2;
+	    } else if (argno+1>=argc) {
+		usage(progname);
+		exit(1);
+	    } else {
+		s = argv[++argno];
+	    }
+	    width_g = strtol(s, &rest, 0);
+	    if (width_g<=0 || *rest) {
+		usage(progname);
+		exit(1);
+	    }
 	} else if ('-'!=argv[argno][1]) {
 	    /* Single-letter switches */
 	    for (s=argv[argno]+1; *s; s++) {
@@ -293,6 +353,9 @@ main (int argc, char *argv[])
 		case 'h':	/* --help */
 		    usage(progname);
 		    exit(0);
+		case 'd':	/* --dump */
+		    dump_g++;
+		    break;
 		case 'v':	/* --verbose */
 		    verbose_g++;
 		    break;

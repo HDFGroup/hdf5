@@ -767,9 +767,12 @@ H5Gset_comment (hid_t loc_id, const char *name, const char *comment)
  *		specified object.  If BUFSIZE is large enough to hold the
  *		entire comment then the comment string will be null
  *		terminated, otherwise it will not.  If the object does not
- *		have a comment value then the empty string is returned.
+ *		have a comment value then no bytes are copied to the BUF
+ *		buffer.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	Number of characters in the comment counting
+ *				the null terminator.  The value returned may
+ *				be larger than the BUFSIZE argument.
  *
  *		Failure:	FAIL
  *
@@ -780,13 +783,14 @@ H5Gset_comment (hid_t loc_id, const char *name, const char *comment)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+int
 H5Gget_comment (hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5G_t	*loc = NULL;
+    intn	retval = FAIL;
     
     FUNC_ENTER(H5Gget_comment, FAIL);
-    H5TRACE4("e","iszs",loc_id,name,bufsize,buf);
+    H5TRACE4("Is","iszs",loc_id,name,bufsize,buf);
 
     if (NULL==(loc=H5G_loc(loc_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
@@ -794,16 +798,16 @@ H5Gget_comment (hid_t loc_id, const char *name, size_t bufsize, char *buf)
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
     }
-    if (bufsize<1 || !buf) {
+    if (bufsize>0 && !buf) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified");
     }
 
-    if (H5G_get_comment(loc, name, bufsize, buf)<0) {
+    if ((retval=H5G_get_comment(loc, name, bufsize, buf))<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to set comment value");
     }
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(retval);
 }
 
 /*
@@ -2131,7 +2135,9 @@ H5G_set_comment(H5G_t *loc, const char *name, const char *buf)
  *
  * Purpose:	Get the comment value for an object.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	Number of bytes in the comment including the
+ *				null terminator.  Zero if the object has no
+ *				comment.
  *
  *		Failure:	FAIL
  *
@@ -2142,11 +2148,12 @@ H5G_set_comment(H5G_t *loc, const char *name, const char *buf)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+intn
 H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize, char *buf)
 {
     H5O_name_t	comment;
     H5G_entry_t	obj_ent;
+    intn	retval = FAIL;
     
     FUNC_ENTER(H5G_get_comment, FAIL);
 
@@ -2159,12 +2166,14 @@ H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize, char *buf)
     /* Get the message */
     comment.s = NULL;
     if (NULL==H5O_read(&obj_ent, H5O_NAME, 0, &comment)) {
-	buf[0] = '\0';
+	if (buf && bufsize>0) buf[0] = '\0';
+	retval = 0;
     } else {
 	strncpy(buf, comment.s, bufsize);
+	retval = strlen(comment.s);
 	H5O_reset(H5O_NAME, &comment);
     }
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(retval);
 }
     

@@ -118,8 +118,7 @@ herr_t H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
 herr_t H5G_linkval (H5G_t *loc, const char *name, size_t size,
 		    char *buf/*out*/);
 herr_t H5G_set_comment(H5G_t *loc, const char *name, const char *buf);
-herr_t H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize,
-		       char *buf);
+intn H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize, char *buf);
 herr_t H5G_insert (H5G_t *cwg, const char *name, H5G_entry_t *ent);
 herr_t H5G_find (H5G_t *cwg, const char *name, H5G_entry_t *grp_ent/*out*/,
                  H5G_entry_t *ent/*out*/);

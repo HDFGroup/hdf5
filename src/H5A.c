@@ -1025,10 +1025,10 @@ H5Aget_type (hid_t attr_id)
  PURPOSE
     Gets a copy of the name for an attribute
  USAGE
-    size_t H5Aget_name (attr_id, buf, buf_size)
+    size_t H5Aget_name (attr_id, buf_size, buf)
         hid_t attr_id;      IN: Attribute to get name of
-        char *buf;          IN: Buffer to store name in
         size_t buf_size;    IN: The size of the buffer to store the string in.
+        char *buf;          IN: Buffer to store name in
  RETURNS
     This function returns the length of the attribute's name (which may be
     longer than 'buf_size') on success or negative for failure.
@@ -1043,14 +1043,14 @@ H5Aget_type (hid_t attr_id)
     properly terminate the string.
 --------------------------------------------------------------------------*/
 size_t
-H5Aget_name (hid_t attr_id, char *buf, size_t buf_size)
+H5Aget_name (hid_t attr_id, size_t buf_size, char *buf)
 {
     H5A_t		*attr = NULL;
     size_t              copy_len=0;
     size_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Aget_name, FAIL);
-    H5TRACE3("z","isz",attr_id,buf,buf_size);
+    H5TRACE3("z","izs",attr_id,buf_size,buf);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||

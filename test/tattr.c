@@ -494,7 +494,7 @@ test_attr_compound_read(void)
              } /* end if */
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,attr_name,ATTR_NAME_LEN);
+    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR4_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR4_NAME)) {
         printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR4_NAME);
@@ -830,7 +830,7 @@ test_attr_mult_read(void)
          } /* end if */
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,attr_name,ATTR_NAME_LEN);
+    name_len=H5Aget_name(attr, ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR1_NAME)) {
         printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
@@ -838,7 +838,7 @@ test_attr_mult_read(void)
      } /* end if */
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr,attr_name,HDstrlen(ATTR1_NAME));
+    name_len=H5Aget_name(attr,HDstrlen(ATTR1_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     HDstrcpy(temp_name,ATTR1_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR1_NAME)-1]='\0';   /* truncate it to match the one retrieved */
@@ -896,7 +896,7 @@ test_attr_mult_read(void)
          } /* end if */
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,attr_name,ATTR_NAME_LEN);
+    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR2_NAME)) {
         printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR2_NAME);
@@ -904,7 +904,7 @@ test_attr_mult_read(void)
      } /* end if */
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr,attr_name,HDstrlen(ATTR2_NAME));
+    name_len=H5Aget_name(attr,HDstrlen(ATTR2_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
     HDstrcpy(temp_name,ATTR2_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR2_NAME)-1]='\0';   /* truncate it to match the one retrieved */
@@ -967,7 +967,7 @@ test_attr_mult_read(void)
                  } /* end if */
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,attr_name,ATTR_NAME_LEN);
+    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME)) {
         printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
@@ -975,7 +975,7 @@ test_attr_mult_read(void)
      } /* end if */
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr,attr_name,HDstrlen(ATTR3_NAME));
+    name_len=H5Aget_name(attr,HDstrlen(ATTR3_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     HDstrcpy(temp_name,ATTR3_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR3_NAME)-1]='\0';   /* truncate it to match the one retrieved */
@@ -1133,7 +1133,7 @@ test_attr_delete(void)
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,attr_name,ATTR_NAME_LEN);
+    name_len=H5Aget_name(attr,ATTR_NAME_LEN,attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR1_NAME)) {
         printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
@@ -1149,7 +1149,7 @@ test_attr_delete(void)
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,attr_name,ATTR_NAME_LEN);
+    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME)) {
         printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
@@ -1173,7 +1173,7 @@ test_attr_delete(void)
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr,attr_name,ATTR_NAME_LEN);
+    name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME)) {
         printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
