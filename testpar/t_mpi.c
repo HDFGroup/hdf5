@@ -415,7 +415,7 @@ main(int argc, char **argv)
     }
 
 	MPI_BANNER("MPIO OFFSET overflow test...");
-	test_mpio_offset(filenames[0]);
+	test_mpio_offset();
 	MPI_BANNER("MPIO GB size file test...");
 	test_mpio_gb_file(filenames[0]);
 	MPI_BANNER("MPIO independent overlapping writes...");
