@@ -86,6 +86,8 @@ Library
       currently.
     * Fixed a bug where 'or'ing a hyperslab with a 'none' selection would
       fail.  Now adds that hyperslab as the first hyperlab in the selection.
+    * Fixed a bug in internal B-tree code where a B-tree was not being copied
+      correctly.
 
 Configuration
 -------------
