@@ -1800,9 +1800,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5B2_insert
  *
- * Purpose:	Adds a new record to the B-tree.  If the root node of
- *		the B-tree splits then the B-tree header tracks the new
- *              root node created.
+ * Purpose:	Adds a new record to the B-tree.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2047,7 +2045,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
     /* Must have a leaf node with enough space to insert a record now */
     HDassert(H5F_addr_defined(leaf_ptr.addr));
-    HDassert(leaf_nrec < shared->split_leaf_nrec); /* node pointer to leaf has already been incremented */
+    HDassert(leaf_nrec < shared->split_leaf_nrec);
 
     /* Look up the B-tree leaf node */
     if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_ptr.addr, &leaf_nrec, bt2_shared, H5AC_WRITE)))
@@ -2061,17 +2059,9 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     if(leaf->nrec==0)
         idx=0;
     else {
-        /* Sanity check for the leaf node being full */
-        HDassert(leaf->nrec!=shared->split_leaf_nrec);
-
         /* Find correct location to insert this record */
-        if((cmp = H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx)) == 0) {
-            /* Release the B-tree leaf node */
-            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
-
+        if((cmp = H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx)) == 0)
             HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
-        } /* end if */
         if(cmp > 0)
             idx++;
 
@@ -2081,13 +2071,8 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end else */
 
     /* Make callback to store record in native form */
-    if((shared->type->store)(udata,H5B2_LEAF_NREC(leaf,shared,idx))<0) {
-        /* Release the B-tree leaf node */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
-
+    if((shared->type->store)(H5B2_LEAF_NREC(leaf,shared,idx),udata)<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into leaf node")
-    } /* end if */
 
     /* Update number of records in node */
     leaf->nrec++;
@@ -2095,14 +2080,16 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Mark leaf node as dirty also */
     leaf->cache_info.is_dirty = TRUE;
 
+done:
     /* Release the B-tree leaf node */
+    if (leaf) {
 #ifdef H5B2_DEBUG
 H5B2_assert_leaf(shared,leaf);
 #endif /* H5B2_DEBUG */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
+    } /* end if */
 
-done:
     /* Check if we need to decrement the reference count for the B-tree's shared info */
     if(incr_rc)
         H5RC_DEC(bt2_shared);
@@ -2773,6 +2760,213 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_index() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_remove
+ *
+ * Purpose:	Removes a record from a B-tree.
+ *              
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 25 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
+           void *udata)
+{
+    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
+    hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
+    H5AC_info_t *parent_cache_info=NULL;/* Parent node's cache info */
+    haddr_t     parent_addr=HADDR_UNDEF;/* Address of parent which contain's node pointer to current node */
+    void        *parent_ptr=NULL;       /* Pointer to parent structure in memory */
+    H5B2_node_ptr_t *curr_node_ptr=NULL;/* Pointer to node pointer info for current node (in parent node) */
+    H5B2_leaf_t *leaf=NULL;             /* Pointer to leaf node */
+    haddr_t     leaf_addr=HADDR_UNDEF;  /* Leaf address on disk */
+    unsigned    leaf_unprotect_flags=H5C__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
+    unsigned    depth;                  /* Depth of B-tree */
+    int         cmp;                    /* Comparison value of records */
+    unsigned    idx;                    /* Location of record which matches key */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5B2_remove, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the B-tree header */
+    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+
+    /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
+    bt2_shared=bt2->shared;
+    H5RC_INC(bt2_shared);
+    incr_rc=TRUE;
+
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
+    /* Get B-tree depth */
+    depth = bt2->depth;
+
+    /* Check for empty B-tree */
+    if(bt2->root.all_nrec==0) {
+        /* Release B-tree header node */
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
+        bt2=NULL;
+
+        /* Indicate error */
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record is not in B-tree")
+    } /* end if */
+
+    /* Check for non-trivial B-tree */
+    if(bt2->depth>0) {
+HDfprintf(stderr,"%s: Deleting record in non-trival B-tree!\n",FUNC);
+HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
+    } /* end if */
+    else {
+        /* Set initial "parent" information to the B-tree header */
+        parent_cache_info=&(bt2->cache_info);
+        parent_addr=addr;
+        parent_ptr=bt2;
+
+        /* Set initial node pointer for "current" node */
+        curr_node_ptr=&(bt2->root);
+    } /* end else */
+
+    /* Must have a leaf node with enough space to insert a record now */
+    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+    /* Root only B-tree must break a few rules */
+    if(depth>0)
+        HDassert(curr_node_ptr->node_nrec > shared->merge_leaf_nrec);
+
+    /* Look up the B-tree leaf node */
+    leaf_addr = curr_node_ptr->addr;
+    if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
+
+    /* Sanity check number of records */
+    HDassert(curr_node_ptr->all_nrec == curr_node_ptr->node_nrec);
+    HDassert(leaf->nrec == curr_node_ptr->node_nrec);
+
+    /* Find correct location to insert this record */
+    if((cmp = H5B2_locate_record(shared->type,leaf->nrec,shared->nat_off,leaf->leaf_native,udata,&idx)) != 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record is not in B-tree")
+
+    /* Make callback to retrieve record in native form */
+    if((shared->type->retrieve)(udata,H5B2_LEAF_NREC(leaf,shared,idx))<0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record into leaf node")
+
+    /* Update number of records in node */
+    leaf->nrec--;
+
+    /* Mark leaf node as dirty also */
+    leaf->cache_info.is_dirty = TRUE;
+
+    if(leaf->nrec>0) {
+        /* Pack record out of leaf */
+        HDmemmove(H5B2_LEAF_NREC(leaf,shared,idx),H5B2_LEAF_NREC(leaf,shared,idx+1),shared->type->nrec_size*(leaf->nrec-idx));
+    } /* end if */
+    else {
+        /* Sanity check - we are only allowed to delete a leaf when it's the root node */
+        HDassert(depth == 0);
+        HDassert(parent_cache_info->type == H5AC_BT2_HDR);
+
+        /* Release space for B-tree node on disk */
+        if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, leaf_addr, (hsize_t)shared->node_size)<0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
+    
+        /* Let the cache know that the object is deleted */
+        leaf_unprotect_flags = H5C__DELETED_FLAG;
+
+        /* Reset address of parent node pointer */
+        curr_node_ptr->addr = HADDR_UNDEF;
+    } /* end else */
+
+    /* Update record count for parent of leaf node */
+    curr_node_ptr->all_nrec--;
+    curr_node_ptr->node_nrec--;
+
+    /* Mark parent node as dirty */
+    parent_cache_info->is_dirty = TRUE;
+
+done:
+    /* Release parent of leaf node */
+    if(parent_ptr) {
+        /* Unlock parent node (possibly the B-tree header) */
+        if (H5AC_unprotect(f, dxpl_id, parent_cache_info->type, parent_addr, parent_ptr, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree info")
+    } /* end if */
+
+    /* Release the B-tree leaf node */
+    if (leaf) {
+#ifdef H5B2_DEBUG
+H5B2_assert_leaf(shared,leaf);
+#endif /* H5B2_DEBUG */
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_unprotect_flags) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
+    } /* end if */
+
+    /* Check if we need to decrement the reference count for the B-tree's shared info */
+    if(incr_rc)
+        H5RC_DEC(bt2_shared);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_get_nrec
+ *
+ * Purpose:	Retrieves the number of records in a B-tree
+ *              
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 25 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
+           hsize_t *nrec)
+{
+    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5B2_get_nrec, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(nrec);
+
+    /* Look up the B-tree header */
+    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+
+    /* Get B-tree number of records */
+    *nrec = bt2->root.all_nrec;
+
+done:
+    /* Release B-tree header node */
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_get_nrec() */
 
 #ifdef H5B2_DEBUG
 

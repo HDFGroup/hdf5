@@ -193,6 +193,10 @@ H5_DLL herr_t H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 H5_DLL herr_t H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type,
     haddr_t hdr_addr, unsigned nrec);
+#ifdef H5B2_TESTING
+H5_DLL herr_t H5B2_get_root_addr(H5F_t *f, hid_t dxpl_id,
+    const H5B2_class_t *type, haddr_t addr, haddr_t *root_addr);
+#endif /* H5B2_TESTING */
 
 #endif /* _H5B2pkg_H */
 

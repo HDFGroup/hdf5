@@ -24,9 +24,11 @@
 /* Private headers */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* B-trees				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
 
 /* Static Prototypes */
-static herr_t H5B2_test_store(const void *udata, void *nrecord);
+static herr_t H5B2_test_store(void *nrecord, const void *udata);
+static herr_t H5B2_test_retrieve(void *udata, const void *nrecord);
 static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
 static herr_t H5B2_test_encode(const H5F_t *f, uint8_t *raw,
     const void *nrecord);
@@ -40,6 +42,7 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_TEST_ID,                   /* Type of B-tree */
     sizeof(hsize_t),                /* Size of native key */
     H5B2_test_store,                /* Record storage callback */
+    H5B2_test_retrieve,             /* Record retrieval callback */
     H5B2_test_compare,              /* Record comparison callback */
     H5B2_test_encode,               /* Record encoding callback */
     H5B2_test_decode,               /* Record decoding callback */
@@ -64,7 +67,7 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_store(const void *udata, void *nrecord)
+H5B2_test_store(void *nrecord, const void *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_store)
 
@@ -72,6 +75,33 @@ H5B2_test_store(const void *udata, void *nrecord)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5B2_test_store() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_test_retrieve
+ *
+ * Purpose:	Retrieve native information from record for B-tree
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, February 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2_test_retrieve(void *udata, const void *nrecord)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_retrieve)
+
+    *(hsize_t *)udata=*(const hsize_t *)nrecord;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* H5B2_test_retrieve() */
 
 
 /*-------------------------------------------------------------------------
@@ -182,4 +212,51 @@ H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5B2_test_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_get_root_addr
+ *
+ * Purpose:	Retrieve the root node's address
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, February 26, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_get_root_addr(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, haddr_t *root_addr)
+{
+    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_get_root_addr)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(root_addr);
+
+    /* Look up the B-tree header */
+    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+
+    /* Get B-tree root addr */
+    *root_addr = bt2->root.addr;
+
+done:
+    /* Release B-tree header node */
+    if (bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_get_root_addr() */
 

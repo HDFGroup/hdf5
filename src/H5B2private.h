@@ -70,8 +70,9 @@ typedef struct H5B2_class_t {
     H5B2_subid_t id;				/*id as found in file*/
     size_t	nrec_size;			/*size of native (memory) record*/
 
-    /* Store record from application to B-tree 'native' form */
-    herr_t (*store)(const void *udata, void *nrecord);                  /*  Store record in native record table */
+    /* Store & retrieve record from application to B-tree 'native' form */
+    herr_t (*store)(void *nrecord, const void *udata);                  /*  Store record in native record table */
+    herr_t (*retrieve)(void *udata, const void *nrecord);               /*  Retrieve record in native record table */
 
     /* Compare records, according to a key */
     herr_t (*compare)(const void *rec1, const void *rec2);              /*  Compare two native records */
@@ -101,6 +102,10 @@ H5_DLL herr_t H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata, H5B2_found_t op, void *op_data);
 H5_DLL herr_t H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, hsize_t idx, H5B2_found_t op, void *op_data);
+H5_DLL herr_t H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, void *udata);
+H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, hsize_t *nrec);
 
 #endif /* _H5B2private_H */
 
