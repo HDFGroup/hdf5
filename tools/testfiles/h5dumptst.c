@@ -19,8 +19,18 @@
 #define FILE12 "tmany.h5"
 #define FILE13 "tstr.h5"
 #define FILE14 "tstr2.h5"
+#define FILE15 "enum.h5"
 #define LENSTR 50
 #define LENSTR2 11
+
+typedef enum{
+	RED,
+	GREEN,
+	BLUE,
+	WHITE,
+	BLACK,
+} enumtype;
+
 static void test_group(void) {
 hid_t fid, group;
 
@@ -1227,6 +1237,38 @@ hsize_t sdim, maxdim;
 
 }
 
+
+void test_enum(){
+/*this code is taken from enum.c in the test dir */
+	hid_t file, type, space, dset;
+	int val;
+	signed char val8;
+	enumtype data[] = {RED,   GREEN, BLUE,  GREEN, WHITE,
+			 WHITE, BLACK, GREEN, BLUE,  RED,
+			 RED,   BLUE,  GREEN, BLACK, WHITE,
+			 RED,   WHITE, GREEN, GREEN, BLUE};
+	hsize_t size[1] = {NELMTS(data)};
+
+	file = H5Fcreate(FILE15,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+
+	type = H5Tcreate(H5T_ENUM, sizeof(enumtype));
+    H5Tenum_insert(type, "RED",   (val = 0, &val));
+    H5Tenum_insert(type, "GREEN", (val = 1, &val));
+    H5Tenum_insert(type, "BLUE",  (val = 2, &val));
+    H5Tenum_insert(type, "WHITE", (val = 3, &val));
+    H5Tenum_insert(type, "BLACK", (val = 4, &val));
+    H5Tcommit(file, "enum normal", type);
+
+	space = H5Screate_simple(1,size,NULL);
+	dset = H5Dcreate(file,"table",type, space, H5P_DEFAULT);
+	H5Dwrite(dset,type,space,space,H5P_DEFAULT,data);
+
+	H5Dclose(dset);
+	H5Sclose(space);
+	H5Fclose(file);
+}
+
 int main(void){
 
 test_group();
@@ -1246,6 +1288,7 @@ test_many();
 test_str();
 test_str2();
 
+test_enum();
 return 0;
 
 }
