@@ -120,7 +120,7 @@ typedef struct H5G_t H5G_t;
  * is allocated dynamically.
  */
 typedef struct H5G_typeinfo_t {
-    H5G_obj_t	type;			        /*one of the public H5G_* types	     */
+    int 	type;			        /*one of the public H5G_* types	     */
     htri_t	(*isa)(H5G_entry_t*, hid_t);	/*function to determine type	     */
     char	*desc;			        /*description of object type	     */
 } H5G_typeinfo_t;
@@ -148,7 +148,7 @@ struct H5O_stab_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5_DLL herr_t H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t),
+H5_DLL herr_t H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*, hid_t),
 				 const char *desc);
 H5_DLL H5G_entry_t *H5G_loc(hid_t loc_id);
 H5_DLL herr_t H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_entry);
@@ -158,7 +158,7 @@ H5_DLL H5G_t *H5G_open(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL H5G_t *H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL H5G_t *H5G_rootof(H5F_t *f);
-H5_DLL H5G_obj_t H5G_get_type(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL int H5G_get_type(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_get_objinfo(H5G_entry_t *loc, const char *name,
 			       hbool_t follow_link,
 			       H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);
@@ -167,7 +167,7 @@ H5_DLL herr_t H5G_insert(H5G_entry_t *loc, const char *name,
 H5_DLL herr_t H5G_find(H5G_entry_t *loc, const char *name,
 			H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/, hid_t dxpl_id);
 H5_DLL H5F_t *H5G_insertion_file(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
-H5_DLL  herr_t H5G_replace_name(H5G_obj_t type, H5G_entry_t *loc,
+H5_DLL  herr_t H5G_replace_name(int type, H5G_entry_t *loc,
         H5RS_str_t *src_name, H5G_entry_t *src_loc,
         H5RS_str_t *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op);
 H5_DLL  herr_t H5G_free_grp_name(H5G_t *grp);

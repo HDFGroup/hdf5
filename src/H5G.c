@@ -156,7 +156,7 @@ static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
 static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 static herr_t H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs, hid_t dxpl_id);
 static ssize_t H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
-static H5G_obj_t H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id);
+static int H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id);
 static herr_t H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key);
 static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
                   H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
@@ -511,12 +511,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5G_obj_t
+#ifdef H5_WANT_H5_V1_4_COMPAT
+int
 H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
 {
     H5G_t		*group = NULL;
     hsize_t             num_objs;
-    H5G_obj_t		ret_value = H5G_UNKNOWN;
+    int 		ret_value = H5G_UNKNOWN;
     
     FUNC_ENTER_API(H5Gget_objtype_by_idx, FAIL);
     H5TRACE2("Is","ih",group_id,idx);
@@ -537,6 +538,35 @@ done:
     FUNC_LEAVE_API(ret_value);
 
 }
+
+#else /*H5_WANT_H5_V1_4_COMPAT*/
+H5G_obj_t
+H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
+{
+    H5G_t		*group = NULL;
+    hsize_t             num_objs;
+    H5G_obj_t		ret_value = H5G_UNKNOWN;
+    
+    FUNC_ENTER_API(H5Gget_objtype_by_idx, FAIL);
+    H5TRACE2("Is","ih",group_id,idx);
+
+    /* Check args */
+    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+        
+    if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
+    if(idx >= num_objs)    
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
+        
+    /*call private function*/
+    ret_value = (H5G_obj_t)H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+
+}
+#endif /*H5_WANT_H5_V1_4_COMPAT*/
 
 
 /*-------------------------------------------------------------------------
@@ -1003,7 +1033,7 @@ H5G_term_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t), const char *_desc)
+H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*, hid_t), const char *_desc)
 {
     char	*desc = NULL;
     size_t	i;
@@ -2298,7 +2328,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5G_obj_t
+int
 H5G_get_type(H5G_entry_t *ent, hid_t dxpl_id)
 {
     htri_t	isa;
@@ -2521,10 +2551,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5G_obj_t 
+static int 
 H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id)
 {
-    H5G_obj_t		ret_value = H5G_UNKNOWN;
+    int		        ret_value = H5G_UNKNOWN;
     H5G_bt_ud3_t	udata;
     
     FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, FAIL);
@@ -3057,7 +3087,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_replace_name(H5G_obj_t type, H5G_entry_t *loc,
+H5G_replace_name(int type, H5G_entry_t *loc,
     H5RS_str_t *src_name, H5G_entry_t *src_loc,
     H5RS_str_t *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op )
 {

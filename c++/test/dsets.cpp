@@ -650,7 +650,11 @@ test_compression(H5File& file)
 	TESTING("compression (app-defined method)");
 
 	// BMR: not sure how to handle this yet
-	if (H5Zregister (H5Z_BOGUS)<0) goto error;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+        if (H5Zregister (H5Z_FILTER_BOGUS, "bogus", bogus)<0) goto error;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+        if (H5Zregister (H5Z_BOGUS)<0) goto error;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 	if (H5Pset_filter (dscreatplist.getId(), H5Z_FILTER_BOGUS, 0, 0, NULL)<0) goto error;
 	dscreatplist.setFilter (H5Z_FILTER_BOGUS, 0, 0, NULL);
 

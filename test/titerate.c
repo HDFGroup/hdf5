@@ -671,8 +671,8 @@ static void test_grp_memb_funcs(void)
         obj_names[i]=HDstrdup(dataset_name);
         CHECK(dnames[i], NULL, "strdup");           
         
-        ret = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
-        CHECK(ret, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
+        ret = (herr_t)H5Gget_objtype_by_idx(root_group, (hsize_t)i);
+        CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
 
         if(!HDstrcmp(dataset_name, "grp"))
             VERIFY(ret, H5G_GROUP, "H5Gget_objsname_by_idx");

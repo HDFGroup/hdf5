@@ -2253,7 +2253,11 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    if(H5Zregister (H5Z_FILTER_BOGUS, "bogus", filter_bogus)<0) {
+#else /* H5_WANT_H5_V1_4_COMPAT */
     if(H5Zregister (H5Z_CAN_APPLY)<0) {
+#endif /* H5_WANT_H5_V1_4_COMPAT */
         H5_FAILED();
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
         goto error;
@@ -2555,7 +2559,11 @@ test_set_local(const char *filename, hid_t fapl)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    if(H5Zregister (H5Z_FILTER_BOGUS2, "bogus2", filter_bogus2)<0) {
+#else /* H5_WANT_H5_V1_4_COMPAT */
     if(H5Zregister (H5Z_SET_LOCAL)<0) {
+#endif /* H5_WANT_H5_V1_4_COMPAT */
         H5_FAILED();
         printf("    Line %d: Can't register 'set local' filter\n",__LINE__);
         goto error;
