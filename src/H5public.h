@@ -49,8 +49,9 @@ typedef int herr_t;
 /*
  * Boolean type.  Successful return values are zero (false) or positive
  * (true). The typical true value is 1 but don't bet on it.  Boolean
- * functions can also fail, returning a negative value as described above.
- * The proper way to test for truth is:
+ * functions cannot fail.  Functions that return `htri_t' however return zero
+ * (false), positive (true), or negative (failure). The proper way to test
+ * for truth from a htri_t function is:
  *
  * 	if ((retval = H5Tcommitted(type))>0) {
  *	    printf("data type is committed\n");
@@ -60,8 +61,9 @@ typedef int herr_t;
  * 	    printf("error determining whether data type is committed\n");
  *	}
  */
-typedef unsigned int hbool_t;           /* For truly boolean values */
-typedef int htri_t;                     /* For values that might be TRUE/FALSE/FAIL */
+typedef unsigned int hbool_t;
+typedef int htri_t;
+
 
 /*
  * The sizes of file-objects in hdf5 have their own types defined here.  On

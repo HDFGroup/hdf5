@@ -43,8 +43,8 @@ hsize_t H5V_hyper_stride(intn n, const hsize_t *size,
 			 const hsize_t *total_size, const hssize_t *offset,
 			 hssize_t *stride);
 htri_t H5V_hyper_disjointp(intn n, const hssize_t *offset1,
-			    const hsize_t *size1, const hssize_t *offset2,
-			    const hsize_t *size2);
+			   const hsize_t *size1, const hssize_t *offset2,
+			   const hsize_t *size2);
 htri_t H5V_hyper_eq(intn n, const hssize_t *offset1, const hsize_t *size1,
 		     const hssize_t *offset2, const hsize_t *size2);
 herr_t H5V_hyper_fill(intn n, const hsize_t *_size, const hsize_t *total_size,

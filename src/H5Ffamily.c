@@ -36,8 +36,8 @@ static hbool_t		interface_initialize_g = FALSE;
 					(LF)->u.fam.memb_size.offset))
 
 static htri_t H5F_fam_access(const char *name,
-			      const H5F_access_t *access_parms, int mode,
-			      H5F_search_t *key/*out*/);
+			     const H5F_access_t *access_parms, int mode,
+			     H5F_search_t *key/*out*/);
 static H5F_low_t *H5F_fam_open(const char *name,
 			       const H5F_access_t *access_parms, uintn flags,
 			       H5F_search_t *key/*out*/);

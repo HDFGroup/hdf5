@@ -417,8 +417,7 @@ H5_debug_mask(const char *s)
  * 		printf("%u.%u.%u", maj, min, rel)		or
  *		printf("version %u.%u release %u", maj, min, rel)
  *
- * Return:
- *  Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Unknown
  *
@@ -495,8 +494,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
  *              is failing inexplicably, then try calling this function
  *              first.
  *
- * Return:
- *  Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -519,8 +517,7 @@ H5open(void)
  *
  * Purpose:	Terminate the library and release all resources.
  *
- * Return:
- *  Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, January 30, 1998

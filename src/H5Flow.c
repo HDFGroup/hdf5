@@ -510,9 +510,12 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
  *		end of file marker.  A subclass can override this function by
  *		providing its own allocation method.
  *
- * Return:	Non-negative on success (the address of the old end-of-file is
- *              returned through the ADDR argument and the logical size of the
- *              file has been extended by SIZE bytes.) /Negative on failure
+ * Return:	Success:	Non-negative.  The address of the old
+ *				end-of-file is returned through the ADDR
+ *				argument and the logical size of the file has
+ *				been extended by SIZE bytes.
+ *
+ * 		Failure:	Negative.
  *
  * Programmer:	Robb Matzke
  *		Thursday, November 13, 1997

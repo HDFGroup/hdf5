@@ -26,8 +26,8 @@ static hbool_t		interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
 static htri_t H5F_core_access(const char *name,
-			       const H5F_access_t *access_parms, int mode,
-			       H5F_search_t *key/*out*/);
+			      const H5F_access_t *access_parms, int mode,
+			      H5F_search_t *key/*out*/);
 static H5F_low_t *H5F_core_open(const char *name,
 				const H5F_access_t *access_parms, uintn flags,
 				H5F_search_t *key/*out*/);
@@ -140,7 +140,7 @@ H5F_core_open(const char __unused__ *name,
  *
  * Errors:
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:  	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 22, 1997

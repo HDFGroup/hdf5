@@ -480,8 +480,8 @@ H5Gunlink(hid_t loc_id, const char *name)
  *		non-zero then all symbolic links are followed; otherwise all
  *		links except the last component of the name are followed.
  *
- * Return:	Non-negative on success (with the fields of STATBUF (if
- *              non-null) initialized.) /Negative on failure
+ * Return:	Non-negative on success, with the fields of STATBUF (if
+ *              non-null) initialized. Negative on failure.
  *
  * Programmer:	Robb Matzke
  *              Monday, April 13, 1998

@@ -100,19 +100,21 @@ static int H5F_mpio_Debug[256] =
 #endif
 
 static htri_t H5F_mpio_access(const char *name,
-			       const H5F_access_t *access_parms, int mode,
-			       H5F_search_t *key/*out*/);
+			      const H5F_access_t *access_parms, int mode,
+			      H5F_search_t *key/*out*/);
 static H5F_low_t *H5F_mpio_open(const char *name,
 				const H5F_access_t *access_parms, uintn flags,
 				H5F_search_t *key/*out*/);
 static herr_t H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 			    const H5D_transfer_t xfer_mode,
-			    const haddr_t *addr, size_t size, uint8 *buf/*out*/);
+			    const haddr_t *addr, size_t size,
+			    uint8 *buf/*out*/);
 htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
 static herr_t H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 			     const H5D_transfer_t xfer_mode,
-			     const haddr_t *addr, size_t size, const uint8 *buf);
+			     const haddr_t *addr, size_t size,
+			     const uint8 *buf);
 static herr_t H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr);
 static herr_t H5F_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off);
@@ -942,7 +944,7 @@ H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  * Problems and limitations:
  *
  * Return:      Non-negative on success (the haddr_t contains the converted
- *                  value) /Negative on failure (the haddr_t is undefined)
+ *              value). Negative on failure (the haddr_t is undefined).
  *
  * Programmer:  
  *              January 30, 1998
@@ -971,7 +973,7 @@ H5F_MPIOff_to_haddr( MPI_Offset mpi_off, haddr_t *addr )
  * Problems and limitations:
  *
  * Return:      Non-negative on success (the MPIOffset contains the converted
- *                  value.) /Negative on failure (the MPIOffset is undefined.)
+ *              value). Negative on failure (the MPIOffset is undefined).
  *
  * Programmer:  
  *              January 30, 1998

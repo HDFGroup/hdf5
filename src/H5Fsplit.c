@@ -26,8 +26,8 @@ static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
 static htri_t H5F_split_access(const char *name,
-				const H5F_access_t *access_parms, int mode,
-				H5F_search_t *key/*out*/);
+			       const H5F_access_t *access_parms, int mode,
+			       H5F_search_t *key/*out*/);
 static H5F_low_t *H5F_split_open(const char *name,
 				 const H5F_access_t *access_parms, uintn flags,
 				 H5F_search_t *key/*out*/);
@@ -346,7 +346,7 @@ static htri_t
 H5F_split_access(const char *name, const H5F_access_t *access_parms,
 		 int mode, H5F_search_t *key/*out*/)
 {
-    char                   	 fullname[4096];
+    char                   	fullname[4096];
     htri_t                 	status;
     const char			*ext; /*file extension*/
     const H5F_low_class_t	*meta_type = NULL;

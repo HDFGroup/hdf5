@@ -490,8 +490,8 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
  *		from the parent node.
  *
  * Return:	Non-negative on success (if found, values returned through the
- *              UDATA argument.) /Negative on failure (if not found, UDATA is
- *              undefined.)
+ *              UDATA argument). Negative on failure (if not found, UDATA is
+ *              undefined).
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -589,7 +589,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
  *		node.
  *
  * Return:	Non-negative on success (The address of the new node is
- *              returned through the NEW_ADDR argument.) /Negative on failure
+ *              returned through the NEW_ADDR argument). Negative on failure.
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1859,8 +1859,8 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
  *
  * Note:	The current version does not attempt to rebalance the tree.
  *
- * Return:	Non-negative on success/Negative on failure (Failure includes not
- *              being able to find the object which is to be removed.)
+ * Return:	Non-negative on success/Negative on failure (failure includes
+ *		not being able to find the object which is to be removed).
  *
  * Programmer:	Robb Matzke
  *              Wednesday, September 16, 1998

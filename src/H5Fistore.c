@@ -442,9 +442,11 @@ H5F_istore_cmp3(H5F_t __unused__ *f, void *_lt_key, void *_udata,
  *		the domain represented by UDATA doesn't intersect the domain
  *		already represented by the B-tree.
  *
- * Return:	Non-negative on success (The address of leaf is returned through
- *                  the ADDR argument.  It is also added to the UDATA.)
- *                  /Negative on failure
+ * Return:	Success:	Non-negative. The address of leaf is returned
+ *				through the ADDR argument.  It is also added
+ *				to the UDATA.
+ *
+ * 		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Tuesday, October 14, 1997
@@ -532,8 +534,8 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
  *		called with the maximum stored chunk indices less than the
  *		requested chunk indices.
  *
- * Return:	Non-negative on success (with information about the chunk returned
- *                  through the UDATA argument.) /Negative on failure
+ * Return:	Non-negative on success with information about the chunk
+ *		returned through the UDATA argument. Negative on failure.
  *
  * Programmer:	Robb Matzke
  *		Thursday, October  9, 1997
@@ -1852,8 +1854,8 @@ H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
  *		This function must be called before passing ISTORE to any of
  *		the other indexed storage functions!
  *
- * Return:	Non-negative on success (with the ISTORE argument initialized and
- *              ready to write to an object header.) /Negative on failure
+ * Return:	Non-negative on success (with the ISTORE argument initialized
+ *		and ready to write to an object header). Negative on failure.
  *
  * Programmer:	Robb Matzke
  *		Tuesday, October 21, 1997

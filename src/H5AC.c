@@ -328,7 +328,7 @@ H5AC_compare(const void *_a, const void *_b)
  *              items before this function returns failure.
  *
  * Return:      Non-negative on success/Negative on failure if there was a
- *                  request to flush all items and something was protected.
+ *              request to flush all items and something was protected.
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
