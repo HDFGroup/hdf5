@@ -269,7 +269,7 @@ test_mpio_gb_file(char *filename)
 
 	mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE|MPI_MODE_RDWR,
 		    info, &fh);
-	VRFY((mrc==MPI_SUCCESS), "");
+	VRFY((mrc==MPI_SUCCESS), "MPI_FILE_OPEN");
 
 	printf("MPIO GB file write test %s\n", filename);
 
