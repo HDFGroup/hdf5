@@ -87,7 +87,7 @@
      ! during write/read to/from dataset with compound datatype.
      !
      CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-     CALL h5pset_preserve_f(plist_id, 1, error)
+     CALL h5pset_preserve_f(plist_id, .TRUE., error)
 
      !
      ! Create a new file using default properties.
