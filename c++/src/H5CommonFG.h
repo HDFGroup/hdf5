@@ -115,16 +115,16 @@ class H5_DLLCPP CommonFG {
 	StrType openStrType(const string& name) const;
 
 	// Returns the number of objects in this group.
-	hsize_t CommonFG::getNumObjs() const;
+	hsize_t getNumObjs() const;
 
 	// Retrieves the name of an object in this group by giving the
 	// object's index.
-	ssize_t CommonFG::getObjnameByIdx(hsize_t idx, string& name, size_t size) const;
+	ssize_t getObjnameByIdx(hsize_t idx, string& name, size_t size) const;
 
 	// Returns the type of an object in this group by giving the
 	// object's index.
-	H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const;
-	H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, string& type_name) const;
+	H5G_obj_t getObjTypeByIdx(hsize_t idx) const;
+	H5G_obj_t getObjTypeByIdx(hsize_t idx, string& type_name) const;
 
 	/// For H5File and Group to throw appropriate exception.
 	virtual void throwException(const string func_name, const string msg) const = 0;
