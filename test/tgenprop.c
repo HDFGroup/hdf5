@@ -177,6 +177,10 @@ test_genprop_basic_class_prop(void)
     CHECK_I(ret, "H5Pget_nprops");
     VERIFY(nprops, 0, "H5Pget_nprops");
 
+    /* Check the existance of the first property (should fail) */
+    ret = H5Pexist(cid1,PROP1_NAME);
+    VERIFY(ret, 0, "H5Pexist");
+
     /* Insert first property into class (with no callbacks) */
     ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
@@ -184,6 +188,10 @@ test_genprop_basic_class_prop(void)
     /* Try to insert the first property again (should fail) */
     ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL);
     VERIFY(ret, FAIL, "H5Pregister");
+
+    /* Check the existance of the first property */
+    ret = H5Pexist(cid1,PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
 
     /* Check the size of the first property */
     ret = H5Pget_size(cid1,PROP1_NAME,&size);
@@ -203,6 +211,10 @@ test_genprop_basic_class_prop(void)
     ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL);
     VERIFY(ret, FAIL, "H5Pregister");
 
+    /* Check the existance of the second property */
+    ret = H5Pexist(cid1,PROP2_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
     /* Check the size of the second property */
     ret = H5Pget_size(cid1,PROP2_NAME,&size);
     CHECK_I(ret, "H5Pget_size");
@@ -216,6 +228,10 @@ test_genprop_basic_class_prop(void)
     /* Insert third property into class (with no callbacks) */
     ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
+
+    /* Check the existance of the third property */
+    ret = H5Pexist(cid1,PROP3_NAME);
+    VERIFY(ret, 1, "H5Pexist");
 
     /* Check the size of the third property */
     ret = H5Pget_size(cid1,PROP3_NAME,&size);
@@ -340,8 +356,7 @@ test_genprop_class_iter(void)
     VERIFY(ret, 0, "H5Piterate");
 
     /* Iterate over last three properties in class */
-    idx=1;
-    iter_struct.iter_count=1;
+    idx=iter_struct.iter_count=1;
     ret = H5Piterate(cid1,&idx,test_genprop_iter1,&iter_struct);
     VERIFY(ret, 0, "H5Piterate");
     VERIFY(idx, (int)nprops, "H5Piterate");
