@@ -528,7 +528,7 @@ errcode=0			# error code of the whole test
 skiptest=no			# if test is skipped
 CC_SAVED="$CC"			# CC & PATH maybe changed within a test.
 PATH_SAVED=$PATH		# These save the original values.
-
+timelimit=`expr 3600 \* 5`	# time limit for the timekeeper
 
 #################################
 # Parse options
@@ -747,8 +747,8 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     cd ${SNAPYARD}/log
     # Fork off timekeeper if concurrent tests will be used.
     if [ -n "$SRCDIR" ]; then
-	($SNAPYARD/current/bin/timekeeper 300 &)
-	PRINT "    Fork off timekeeper 300"
+	($SNAPYARD/current/bin/timekeeper $timelimit &)
+	PRINT "    Fork off timekeeper $timelimit"
     fi
     n_test=0
     runtest_type="hosts"
