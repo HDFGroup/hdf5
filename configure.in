@@ -385,6 +385,7 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 dnl Unix
 AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h)
+AC_CHECK_HEADERS(sys/socket.h sys/types.h)
 AC_CHECK_HEADERS(stddef.h setjmp.h)
 AC_CHECK_HEADERS(stdint.h, C9x=yes)
 dnl Windows
@@ -798,6 +799,27 @@ case "$withval" in
       AC_MSG_RESULT(yes)
       AC_CHECK_HEADERS(netinet/tcp.h)
       AC_DEFINE(HAVE_STREAM)
+
+      dnl Check if we have struct socklen_t available
+      AC_MSG_CHECKING([if struct socklen_t is defined])
+      AC_TRY_COMPILE(
+         [
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+         ],
+         [socklen_t foo; return 0;],
+         AC_DEFINE(HAVE_STRUCT_SOCKLEN_T) AC_MSG_RESULT(yes),
+         AC_MSG_RESULT(no)
+      )
       ;;
    *)
       AC_MSG_RESULT(not configured)
