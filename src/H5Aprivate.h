@@ -63,7 +63,8 @@
 #define H5A_DATATYPEID_HASHSIZE	64
 #define H5A_DATASPACEID_HASHSIZE 64
 #define H5A_DATASETID_HASHSIZE	64
-#define H5A_OID_HASHSIZE	    64
+#define H5A_OID_HASHSIZE	64
+#define H5A_GROUPID_HASHSIZE	64
 
 /* Atom information structure used */
 typedef struct atom_info_struct_tag {

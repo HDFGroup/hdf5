@@ -37,7 +37,7 @@ static char RcsId[] = "@(#)$Revision$";
  */
 struct H5D_t {
    H5F_t		*file;		/*file store for this object	*/
-   H5G_entry_t		*ent;		/*cached object header stuff	*/
+   H5G_entry_t		ent;		/*cached object header stuff	*/
    H5T_t		*type;		/*datatype of this dataset	*/
    H5P_t		*space;		/*dataspace of this dataset	*/
    H5D_create_t		create_parms;	/*creation parameters		*/
@@ -53,7 +53,7 @@ const H5D_create_t H5D_create_dflt = {
    1, 				/* Chunk dimensions			*/
    {1, 1, 1, 1, 1, 1, 1, 1,	/* Chunk size.  These default values....*/
     1, 1, 1, 1, 1, 1, 1, 1,	/*...are quite useless.  Larger chunks..*/
-    1, 1, 1, 1, 1, 1, 1, 1,	/*...produces fewer, but larger I/O.....*/
+    1, 1, 1, 1, 1, 1, 1, 1,	/*...produce fewer, but larger I/O......*/
     1, 1, 1, 1, 1, 1, 1, 1}, 	/*...requests.				*/
 };
 
@@ -576,26 +576,22 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
    /* Initialize the dataset object */
    new_dset = H5MM_xcalloc (1, sizeof(H5D_t));
    new_dset->file = f;
+   H5F_addr_undef (&(new_dset->ent.header));
    new_dset->type = H5T_copy (type);
    new_dset->space = H5P_copy (space);
    new_dset->create_parms = *create_parms;
 
    /*
-    * Open (and create) a new file object and update the object header
-    * immediately with the new information so when others access the dataset
-    * they see the most current info.  This `write through the dataset'
-    * policy is used throughout this package, and because the object header
-    * is cached it shouldn't cause any disk activity.
+    * Create (open for write access) an object header.
     */
-   if (NULL==(new_dset->ent = H5G_create (f, name, H5D_MINHDR_SIZE))) {
+   if (H5O_create (f, 0, &(new_dset->ent))<0) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-		   "problem with the dataset name");
+		   "unable to create dataset object header");
    }
 
    /* Update the type and space header messages */
-   if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_DTYPE, 0,
-		   new_dset->type)<0 ||
-       H5P_modify (f, new_dset->ent, new_dset->space)<0) {
+   if (H5O_modify (f, &(new_dset->ent), H5O_DTYPE, 0, new_dset->type)<0 ||
+       H5P_modify (f, &(new_dset->ent), new_dset->space)<0) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		   "can't update type or space header messages");
    }
@@ -612,7 +608,7 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 	 HGOTO_ERROR (H5E_DATASET, H5E_NOSPACE, NULL,
 		      "can't allocate raw file storage");
       }
-      if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_CSTORE, 0,
+      if (H5O_modify (f, &(new_dset->ent), H5O_CSTORE, 0,
 		      &(new_dset->storage.cstore))<0) {
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		      "can't update dataset object header");
@@ -639,7 +635,7 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		      "can't initialize chunked storage");
       }
-      if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_ISTORE, 0,
+      if (H5O_modify (f, &(new_dset->ent), H5O_ISTORE, 0,
 		      &(new_dset->storage.istore))<0) {
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		      "can't update dataset object header");
@@ -651,6 +647,11 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
    }
 
+   /* Give the dataset a name */
+   if (H5G_insert (f, name, &(new_dset->ent))<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
+   }
+
    /* Success */
    ret_value = new_dset;
    
@@ -659,7 +660,9 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
    if (!ret_value && new_dset) {
       if (new_dset->type) H5T_close (new_dset->type);
       if (new_dset->space) H5P_close (new_dset->space);
-      if (new_dset->ent) H5G_close (f, new_dset->ent);
+      if (H5F_addr_defined (&(new_dset->ent.header))) {
+	 H5O_close (f, &(new_dset->ent));
+      }
       new_dset->file = NULL;
       H5MM_xfree (new_dset);
    }
@@ -704,16 +707,20 @@ H5D_open (H5F_t *f, const char *name)
    dataset = H5MM_xcalloc (1, sizeof(H5D_t));
    dataset->file = f;
    dataset->create_parms = H5D_create_dflt;
+   H5F_addr_undef (&(dataset->ent.header));
     
    /* Open the dataset object */
-   if (NULL==(dataset->ent=H5G_open (f, name))) {
+   if (H5G_find (f, name, NULL, &(dataset->ent))<0) {
       HGOTO_ERROR (H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
+   }
+   if (H5O_open (f, &(dataset->ent))<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open");
    }
 
    /* Get the type and space */
-   if (NULL==(dataset->type = H5O_read (f, NO_ADDR, dataset->ent, H5O_DTYPE,
+   if (NULL==(dataset->type = H5O_read (f, &(dataset->ent), H5O_DTYPE,
 					0, NULL)) ||
-       NULL==(dataset->space = H5P_read (f, dataset->ent))) {
+       NULL==(dataset->space = H5P_read (f, &(dataset->ent)))) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		   "can't load type of space info from dataset header");
    }
@@ -724,12 +731,12 @@ H5D_open (H5F_t *f, const char *name)
     * values are copied to the dataset create template so the user can query
     * them.
     */
-   if (H5O_read (dataset->file, NO_ADDR, dataset->ent, H5O_CSTORE, 0,
+   if (H5O_read (dataset->file, &(dataset->ent), H5O_CSTORE, 0,
 		 &(dataset->storage.cstore))) {
       /* Contiguous storage */
       dataset->create_parms.layout = H5D_CONTIGUOUS;
       
-   } else if (H5O_read (dataset->file, NO_ADDR, dataset->ent, H5O_ISTORE, 0,
+   } else if (H5O_read (dataset->file, &(dataset->ent), H5O_ISTORE, 0,
 			&(dataset->storage.istore))) {
       /*
        * Chunked storage.  The creation template's dimension is one less than
@@ -755,7 +762,9 @@ H5D_open (H5F_t *f, const char *name)
 
  done:
    if (!ret_value && dataset) {
-      if (dataset->ent) H5G_close (f, dataset->ent);
+      if (H5F_addr_defined (&(dataset->ent.header))) {
+	 H5O_close (f, &(dataset->ent));
+      }
       if (dataset->type) H5T_close (dataset->type);
       if (dataset->space) H5P_close (dataset->space);
       dataset->file = NULL;
@@ -799,8 +808,7 @@ H5D_close (H5D_t *dataset)
    assert (dataset && dataset->file);
    
    /* Close the dataset object */
-   H5G_close (dataset->file, dataset->ent);
-   dataset->ent = NULL;
+   H5O_close (dataset->file, &(dataset->ent));
 
    /*
     * Release dataset type and space - there isn't much we can do if one of

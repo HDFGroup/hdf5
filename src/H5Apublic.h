@@ -38,6 +38,7 @@ typedef enum {
 #ifndef NDEBUG
    H5_TEMPLATE_MAX, 		/* Not really a group ID */
 #endif
+   H5_GROUP,			/* Group ID for Group objects */
    H5_DATATYPE,                 /* Group ID for Datatype objects */
    H5_DATASPACE,                /* Group ID for Dataspace objects */
    H5_DATASET,                  /* Group ID for Dataset objects */

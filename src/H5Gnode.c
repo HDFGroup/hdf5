@@ -15,12 +15,6 @@
  *
  * Modifications:
  *
- * 	Robb Matzke, 5 Aug 1997
- *	Added calls to H5E.
- *
- * 	Robb Matzke, 18 Sep 1997
- *	Added shadow entries.
- *
  *-------------------------------------------------------------------------
  */
 #define H5G_PACKAGE	/*suppress error message about including H5Gpkg.h*/
@@ -216,10 +210,10 @@ H5G_node_size (H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_create
  *
- * Purpose:	Creates a new empty symbol table.  This function is called
- *		by the B-tree insert function for an empty tree.  It is
- *		also called internally to split a symbol node with
- *		LT_KEY and RT_KEY null pointers.
+ * Purpose:	Creates a new empty symbol table node.  This function is
+ *		called by the B-tree insert function for an empty tree.  It
+ *		is also called internally to split a symbol node with LT_KEY
+ *		and RT_KEY null pointers.
  *
  * Return:	Success:	SUCCEED.  The address of symbol table node is
  *				returned through the ADDR argument.
@@ -285,10 +279,7 @@ H5G_node_create (H5F_t *f, H5B_ins_t op,
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_flush
  *
- * Purpose:	Flush a symbol table node to disk.  If any entries have dirty
- *		shadows, the shadow value is copied into the entry before the
- *		entry is flushed.  The association between shadows and
- *		entries is broken.
+ * Purpose:	Flush a symbol table node to disk.
  *
  * Return:	Success:	SUCCEED
  *
@@ -321,15 +312,9 @@ H5G_node_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
    assert (sym);
 
    /*
-    * Synchronize all entries with their corresponding shadow if they have
-    * one.  Also look for dirty entries and set the node dirty flag.
+    * Look for dirty entries and set the node dirty flag.
     */
    for (i=0; i<sym->nsyms; i++) {
-      if (H5G_shadow_sync (sym->entry+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL,
-			"unable to synchronize symbol table node with open "
-			"objects");
-      }
       if (sym->entry[i].dirty) sym->dirty = TRUE;
    }
 
@@ -366,13 +351,9 @@ H5G_node_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
 
    /*
     * Destroy the symbol node?  This might happen if the node is being
-    * preempted from the cache.  We should also dissociate the shadow
-    * from the entry.
+    * preempted from the cache.
     */
    if (destroy) {
-      for (i=0; i<sym->nsyms; i++) {
-	 H5G_shadow_dissociate (sym->entry+i);
-      }
       sym->entry = H5MM_xfree (sym->entry);
       H5MM_xfree (sym);
    }
@@ -384,8 +365,7 @@ H5G_node_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_load
  *
- * Purpose:	Loads a symbol table from the file and associates shadows
- *		with their entries.
+ * Purpose:	Loads a symbol table node from the file.
  *
  * Return:	Success:	Ptr to the new table.
  *
@@ -407,7 +387,6 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
    size_t	size = 0;
    uint8	*buf = NULL;
    const uint8	*p = NULL;
-   const H5G_ac_ud1_t *ac_udata = (const H5G_ac_ud1_t*)_udata1;
    H5G_node_t	*ret_value = NULL; /*for error handling*/
 
    FUNC_ENTER (H5G_node_load, NULL);
@@ -417,7 +396,7 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
     */
    assert (f);
    assert (addr && H5F_addr_defined (addr));
-   assert (ac_udata);
+   assert (!_udata1);
    assert (NULL==_udata2);
 
    /*
@@ -459,18 +438,6 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
    }
    buf = H5MM_xfree (buf);
 
-   /*
-    * shadows.  If we are running this under the debugger, then the grp_addr
-    * field of ac_udata might be undefined.  If that's the case, then we
-    * don't try to associate any shadows with this symbol table node.
-    */
-   if (H5F_addr_defined (&(ac_udata->grp_addr)) &&
-       H5G_shadow_assoc_node (f, sym, ac_udata)<0) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL,
-		   "unable to associate symbol table node with open "
-		   "objects");
-   }
-   
    ret_value = sym;
    
 
@@ -609,8 +576,8 @@ H5G_node_cmp3 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *		entry field.  Otherwise the entry is copied from the
  *		UDATA entry field to the symbol table.
  *
- * Return:	Success:	SUCCEED if found and data returned through the
- *				UDATA pointer.
+ * Return:	Success:	SUCCEED if found and data returned through
+ *				the UDATA pointer.
  *
  *		Failure:	FAIL if not found.
  *
@@ -627,7 +594,6 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
 		void *_udata, const void *_rt_key)
 {
    H5G_bt_ud1_t		*bt_udata = (H5G_bt_ud1_t *)_udata;
-   H5G_ac_ud1_t		ac_udata;
    H5G_node_t		*sn = NULL;
    intn			lt=0, idx=0, rt, cmp=1;
    const char		*s;
@@ -642,13 +608,11 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
    assert (addr && H5F_addr_defined (addr));
    assert (bt_udata);
 
-   ac_udata.grp_addr = bt_udata->grp_addr;
-   ac_udata.heap_addr = bt_udata->heap_addr;
 
    /*
     * Load the symbol table node for exclusive access.
     */
-   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata, NULL))) {
+   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, NULL, NULL))) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL,
 		   "unable to protect symbol table node");
    }
@@ -680,10 +644,7 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
        * The caller is querying the symbol entry.  Return just a pointer to
        * the entry.  The pointer is valid until the next call to H5AC.
        */
-      H5G_shadow_sync (sn->entry+idx);
-      bt_udata->entry_ptr = sn->entry+idx;
-      bt_udata->node_addr = *addr;
-      bt_udata->node_ptr = sn;
+      bt_udata->ent = sn->entry[idx];
       break;
 
    default:
@@ -694,16 +655,9 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
    ret_value = SUCCEED;
 
 done:
-   /*
-    * Don't unprotect the symbol table entry if we're returning success since
-    * this might invalidate the bt_udata->entry_ptr and bt_udata->node_ptr
-    * pointers. Instead, we unprotect it in H5G_stab_find().
-    */
-   if (ret_value<0) {
-      if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL,
-			"unable to release symbol table node");
-      }
+   if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL,
+		     "unable to release symbol table node");
    }
 
    FUNC_LEAVE (ret_value);
@@ -744,10 +698,6 @@ done:
  *
  * Modifications:
  *
- * 	Robb Matzke, 18 Sep 1997
- *	If the shadow pointer is non-null then the shadow is updated to point
- *	to the new entry.
- *
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
@@ -761,15 +711,12 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
    H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
    H5G_bt_ud1_t 	*bt_udata = (H5G_bt_ud1_t *)_udata;
 
-   H5G_ac_ud1_t		ac_udata;
    H5G_node_t		*sn=NULL, *snrt=NULL;
    size_t		offset;			/*offset of name in heap*/
    const char		*s;
    intn			idx=-1, cmp=1;
    intn			lt=0, rt;		/*binary search cntrs	*/
-   intn			i;
    H5B_ins_t		ret_value = H5B_INS_ERROR;
-   H5G_shadow_t		*shadow = NULL;
    H5G_node_t		*insert_into=NULL;	/*node that gets new entry*/
    haddr_t		insert_addr;		/*address of that node	*/
 
@@ -785,17 +732,10 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
    assert (bt_udata);
    assert (new_node);
 
-   /* Init return value */
-   H5F_addr_undef (&(bt_udata->node_addr));
-   bt_udata->node_ptr = NULL;
-   bt_udata->entry_ptr = NULL;
-
    /*
     * Load the symbol node.
     */
-   ac_udata.grp_addr = bt_udata->grp_addr;
-   ac_udata.heap_addr = bt_udata->heap_addr;
-   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata, NULL))) {
+   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, NULL, NULL))) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
 		   "unable to protect symbol table node");
    }
@@ -831,7 +771,7 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
     */
    offset = H5H_insert (f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name)+1,
 			bt_udata->name);
-   bt_udata->entry.name_off = offset;
+   bt_udata->ent.name_off = offset;
    if (offset<=0) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR,
 		   "unable to insert symbol name into heap");
@@ -851,7 +791,7 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR,
 		      "unable to split symbol table node");
       }
-      if (NULL==(snrt=H5AC_find (f, H5AC_SNODE, new_node, &ac_udata, NULL))) {
+      if (NULL==(snrt=H5AC_find (f, H5AC_SNODE, new_node, NULL, NULL))) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
 		      "unable to split symbol table node");
       }
@@ -860,13 +800,6 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
       snrt->nsyms = H5G_NODE_K(f);
       snrt->dirty = TRUE;
 
-      /* Right shadows */
-      for (i=0; i<H5G_NODE_K(f); i++) {
-	 if ((shadow = snrt->entry[i].shadow)) {
-	    shadow->main = snrt->entry + i;
-	 }
-      }
-	    
       /* The left node */
       HDmemset (sn->entry + H5G_NODE_K(f), 0,
 		H5G_NODE_K(f) * sizeof(H5G_entry_t));
@@ -899,55 +832,18 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
       }
    }
 
-   /* Adjust shadows */
-   for (i=idx; i<insert_into->nsyms; i++) {
-      if (insert_into->entry[i].shadow) {
-	 insert_into->entry[i].shadow->main = insert_into->entry + i + 1;
-      }
-   }
-   if (bt_udata->entry.shadow) {
-      H5G_shadow_move (f, bt_udata->entry.shadow,
-		       bt_udata->name, 
-		       insert_into->entry + idx,
-		       &(bt_udata->grp_addr));
-   }
-
    /* Move entries */
    HDmemmove (insert_into->entry + idx + 1,
 	      insert_into->entry + idx,
 	      (insert_into->nsyms-idx) * sizeof(H5G_entry_t));
-   insert_into->entry[idx] = bt_udata->entry;
-   insert_into->entry[idx].name_off = offset;
+   insert_into->entry[idx] = bt_udata->ent;
    insert_into->entry[idx].dirty = TRUE;
    insert_into->nsyms += 1;
 
-   /* Update udata return values */
-   bt_udata->node_addr = insert_addr;
-   bt_udata->node_ptr = insert_into;
-   bt_udata->entry_ptr = insert_into->entry + idx;
-
 done:
-   if (ret_value<0) {
-      /* failing... */
-      if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, H5B_INS_ERROR,
-			"unable to release symbol table node");
-      }
-   } else if (insert_into!=sn) {
-      /* unprotect the first node and protect the return value */
-      if (H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, H5B_INS_ERROR,
-			"unable to release symbol table node");
-      }
-      if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, &insert_addr, &ac_udata,
-				  NULL))) {
-	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
-		      "unable to protect symbol table node");
-      }
-      bt_udata->node_ptr = sn;
-      bt_udata->entry_ptr = sn->entry + idx;
-   } else {
-      /* keep the node protected until we get back to H5G_stab_insert() */
+   if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_PROTECT, H5B_INS_ERROR,
+		     "unable to release symbol table node");
    }
 
    FUNC_LEAVE (ret_value);
@@ -980,7 +876,6 @@ H5G_node_list (H5F_t *f, const haddr_t *addr, void *_udata)
    intn			i;
    const char		*s;
    herr_t		ret_value = FAIL;
-   H5G_ac_ud1_t		ac_udata;
    
    FUNC_ENTER (H5G_node_list, FAIL);
 
@@ -991,9 +886,7 @@ H5G_node_list (H5F_t *f, const haddr_t *addr, void *_udata)
    assert (addr && H5F_addr_defined (addr));
    assert (bt_udata);
 
-   ac_udata.grp_addr = bt_udata->grp_addr;
-   ac_udata.heap_addr = bt_udata->heap_addr;
-   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata, NULL))) {
+   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, NULL, NULL))) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL,
 		   "unable to protect symbol table node");
    }
@@ -1013,7 +906,6 @@ H5G_node_list (H5F_t *f, const haddr_t *addr, void *_udata)
     */
    if (bt_udata->entry) {
       for (i=0; i<sn->nsyms && bt_udata->nsyms+i<bt_udata->maxentries; i++) {
-	 H5G_shadow_sync (sn->entry+i);
 	 bt_udata->entry[bt_udata->nsyms+i] = sn->entry[i];
       }
    }
@@ -1065,11 +957,10 @@ herr_t
 H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 		intn fwidth, const haddr_t *heap)
 {
-   int		i, acc;
+   int		i;
    H5G_node_t	*sn = NULL;
    herr_t	status;
    const char	*s;
-   H5G_ac_ud1_t	ac_udata;
 
    FUNC_ENTER (H5G_node_debug, FAIL);
 
@@ -1082,23 +973,12 @@ H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    assert (indent>=0);
    assert (fwidth>=0);
 
-   /*
-    * We have absolutely no idea where the object header for the symbol table
-    * to which this node belongs is located.  In fact, if the file is corrupt,
-    * there may not even be an object header for that symbol table.  So we
-    * supply UNDEF as the group address which causes no open objects to be
-    * associated with the node.  For that reason, we flush this node from the
-    * cache when we're done so if some later caller knows the header address
-    * they'll be able to access the open objects.
-    */
-   H5F_addr_undef (&(ac_udata.grp_addr));
-   ac_udata.heap_addr = *heap;
 
    /*
     * If we couldn't load the symbol table node, then try loading the
     * B-tree node.
     */
-   if (NULL==(sn=H5AC_protect(f, H5AC_SNODE, addr, &ac_udata, NULL))) {
+   if (NULL==(sn=H5AC_protect(f, H5AC_SNODE, addr, NULL, NULL))) {
       H5ECLEAR; /*discard that error*/
       status = H5B_debug (f, addr, stream, indent, fwidth, H5B_SNODE, NULL);
       if (status<0) {
@@ -1116,11 +996,6 @@ H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    fprintf (stream, "%*s%-*s %d of %d\n", indent, "", fwidth,
 	    "Number of Symbols:",
 	    sn->nsyms, 2*H5G_NODE_K(f));
-   for (i=acc=0; i<sn->nsyms; i++) {
-      if (sn->entry[i].shadow) acc++;
-   }
-   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
-	    "Shadows:", acc);
    
 
    indent += 3;
@@ -1134,13 +1009,9 @@ H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 		  s);
       }
       H5G_ent_debug (f, sn->entry+i, stream, indent, fwidth);
-      fprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
-	       "Shadow:",
-	       sn->entry[i].shadow ? "Yes":"No");
    }
 
    H5AC_unprotect (f, H5AC_SNODE, addr, sn);
-   H5AC_flush (f, H5AC_SNODE, addr, TRUE); /*see note above*/
    FUNC_LEAVE (SUCCEED);
 }
    

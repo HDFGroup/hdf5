@@ -15,10 +15,10 @@
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
 
-#if 0
+#if 1
 #  define FILETYPE	H5F_LOW_DFLT
 #  define FILENAME	"istore.h5"
-#elif 1
+#elif 0
 #  define FILETYPE	H5F_LOW_FAM
 #  define FILENAME	"istore-%05d.h5"
 #  define TEST_FAMILY	1
@@ -96,22 +96,21 @@ print_array (uint8 *array, size_t nx, size_t ny, size_t nz)
  *
  *-------------------------------------------------------------------------
  */
-static H5G_entry_t *
-new_object (H5F_t *f, const char *name, size_t ndims)
+static int
+new_object (H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
 {
-   H5G_entry_t	*handle = NULL;
    H5O_istore_t	istore;
    size_t	alignment[H5O_ISTORE_NDIMS];
    intn		i;
    
-   /* Create the object symbol table entry and header */
-   if (NULL==(handle=H5G_create (f, name, 64))) {
+   /* Create the object header */
+   if (H5O_create (f, 64, ent)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
-	 printf ("   H5G_create (f, name=\"%s\") = NULL\n", name);
+	 printf ("   H5O_create() = NULL\n");
       }
-      return NULL;
+      return -1;
    }
 
    /* Add the indexed-storage message */
@@ -122,19 +121,30 @@ new_object (H5F_t *f, const char *name, size_t ndims)
 	 alignment[i] = 2;
       }
    }
-   
    H5F_istore_create (f, &istore, ndims, alignment);
-   if (H5O_modify (f, NO_ADDR, handle, H5O_ISTORE, H5O_NEW_MESG,
-		   &istore)<0) {
+   if (H5O_modify (f, ent, H5O_ISTORE, H5O_NEW_MESG, &istore)<0) {
       printf ("*FAILED*\n");
       if (!isatty (1)) {
 	 AT();
-	 printf ("   H5G_modify istore message failure\n");
+	 printf ("   H5O_modify istore message failure\n");
       }
-      return NULL;
+      return -1;
    }
 
-   return handle;
+   /* Give the object header a name */
+   if (H5G_insert (f, name, ent)<0) {
+      printf ("*FAILED*\n");
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   H5G_insert(f, name=\"%s\", ent) failed\n", name);
+      }
+      return -1;
+   }
+
+   /* Close the header */
+   H5O_close (f, ent);
+
+   return 0;
 }
 
 
@@ -158,7 +168,7 @@ new_object (H5F_t *f, const char *name, size_t ndims)
 static herr_t
 test_create (H5F_t *f, const char *prefix)
 {
-   H5G_entry_t	*handle = NULL;
+   H5G_entry_t	handle;
    intn		i;
    char		name[256];
    
@@ -166,8 +176,7 @@ test_create (H5F_t *f, const char *prefix)
 
    for (i=1; i<=H5O_ISTORE_NDIMS; i++) {
       sprintf (name, "%s_%02d", prefix, i);
-      if (NULL==(handle=new_object (f, name, i))) return FAIL;
-      H5G_close (f, handle);
+      if (new_object (f, name, i, &handle)<0) return FAIL;
    }
 
    puts (" PASSED");
@@ -198,7 +207,7 @@ static herr_t
 test_extend (H5F_t *f, const char *prefix,
 	     size_t nx, size_t ny, size_t nz)
 {
-   H5G_entry_t	*handle = NULL;
+   H5G_entry_t	handle;
    int		i, j, k, ndims, ctr;
    uint8	*buf=NULL, *check=NULL, *whole=NULL;
    char		dims[64], s[256], name[256];
@@ -234,14 +243,14 @@ test_extend (H5F_t *f, const char *prefix,
 
    /* Build the new empty object */
    sprintf (name, "%s_%s", prefix, dims);
-   if (NULL==(handle=new_object (f, name, ndims))) {
+   if (new_object (f, name, ndims, &handle)<0) {
       if (!isatty (1)) {
 	 AT ();
 	 printf ("   Cannot create %d-d object `%s'\n", ndims, name);
       }
       goto error;
    }
-   if (NULL==H5O_read (f, NO_ADDR, handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (f, &handle, H5O_ISTORE, 0, &istore)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -377,7 +386,6 @@ test_extend (H5F_t *f, const char *prefix,
       }
    }
    
-   H5G_close (f, handle);
    puts (" PASSED");
    H5MM_xfree (buf);
    H5MM_xfree (check);
@@ -417,7 +425,7 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
    intn		ndims, ctr;
    char		dims[64], s[256], name[256];
    size_t	offset[3], size[3], total=0;
-   H5G_entry_t	*handle = NULL;
+   H5G_entry_t	handle;
    H5O_istore_t	istore;
    uint8	*buf = NULL;
    
@@ -443,14 +451,14 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
 
    /* Build the new empty object */
    sprintf (name, "%s_%s", prefix, dims);
-   if (NULL==(handle=new_object (f, name, ndims))) {
+   if (new_object (f, name, ndims, &handle)<0) {
       if (!isatty (1)) {
 	 AT ();
 	 printf ("   Cannot create %d-d object `%s'\n", ndims, name);
       }
       goto error;
    }
-   if (NULL==H5O_read (f, NO_ADDR, handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (f, &handle, H5O_ISTORE, 0, &istore)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -493,7 +501,6 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
    }
    
 
-   H5G_close (f, handle);
    puts (" PASSED");
    H5MM_xfree (buf);
    return SUCCEED;
@@ -528,9 +535,9 @@ main (int argc, char *argv[])
    int		nerrors = 0;
    uintn	size_of_test;
    size_t	offset_size;
-   H5G_entry_t	*ent = NULL;
    hid_t	template_id;
    H5F_create_t	*creation_template = NULL;
+   H5G_t	*dir = NULL;
 
    setbuf (stdout, NULL);
 
@@ -591,9 +598,9 @@ main (int argc, char *argv[])
     * By creating a group we cause the library to emit it's debugging
     * diagnostic messages before we begin testing...
     */
-   ent = H5G_new (f, "flushing_diagnostics", 0);
-   H5G_close (f, ent);
-   ent = NULL;
+   dir = H5G_create (f, "flushing_diagnostics", 0);
+   H5G_close (dir);
+   dir = NULL;
 
 
    /*

@@ -417,14 +417,6 @@ H5F_new (H5F_file_t *shared)
 
       /* Create a main cache */
       H5AC_create (f, H5AC_NSLOTS);
-
-      /* Create the shadow hash table */
-      f->shared->nshadows = H5G_NSHADOWS;
-      f->shared->shadow = H5MM_xcalloc (f->shared->nshadows,
-					sizeof(struct H5G_hash_t*));
-
-      /* Create a root symbol slot */
-      f->shared->root_sym = H5G_ent_calloc ();
    }
 
    f->shared->nrefs++;
@@ -463,9 +455,7 @@ H5F_dest (H5F_t *f)
    if (f) {
       if (0 == --(f->shared->nrefs)) {
 	 H5AC_dest (f);
-	 f->shared->root_sym = H5MM_xfree (f->shared->root_sym);
-	 f->shared->nshadows = 0;
-	 f->shared->shadow = H5MM_xfree (f->shared->shadow);
+	 f->shared->root_ent = H5MM_xfree (f->shared->root_ent);
 	 f->shared = H5MM_xfree (f->shared);
       }
       f->name = H5MM_xfree (f->name);
@@ -586,6 +576,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
    size_t	variable_size;		/*variable part of boot block	*/
    H5F_create_t	*cp=NULL;		/*file creation parameters	*/
    haddr_t	addr1, addr2;		/*temporary address		*/
+   H5G_entry_t	root_ent;		/*root symbol table entry	*/
    const char	*s = name;
    
    FUNC_ENTER (H5F_open, NULL);
@@ -887,10 +878,15 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       H5F_addr_decode (f, &p, &(f->shared->smallobj_addr));
       H5F_addr_decode (f, &p, &(f->shared->freespace_addr));
       H5F_addr_decode (f, &p, &(f->shared->hdf5_eof));
-      if (H5G_ent_decode (f, &p, f->shared->root_sym)<0) {
+      if (H5G_ent_decode (f, &p, &root_ent)<0) {
 	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
 		      "can't read root symbol entry");
       }
+      if (H5F_addr_defined (&(root_ent.header))) {
+	 f->shared->root_ent = H5MM_xmalloc (sizeof(H5G_entry_t));
+	 *(f->shared->root_ent) = root_ent;
+      }
+      
 
       /*
        * The userdefined data is the area of the file before the base
@@ -1150,8 +1146,6 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL
- *				-2 if the there are open objects and
- * 				INVALIDATE was non-zero.
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1165,7 +1159,6 @@ static herr_t
 H5F_flush (H5F_t *f, hbool_t invalidate)
 {
    uint8	buf[2048], *p=buf;
-   herr_t	shadow_flush;
    
    FUNC_ENTER (H5F_flush, FAIL);
 
@@ -1177,12 +1170,6 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
     */
    if (0==(H5F_ACC_WRITE & f->shared->flags)) HRETURN (SUCCEED);
 
-   /*
-    * Flush all open object info. If this fails just remember it and return
-    * failure at the end.  At least that way we get a consistent file.
-    */
-   shadow_flush = H5G_shadow_flush (f,  invalidate);
-      
    /* flush (and invalidate) the entire cache */
    if (H5AC_flush (f, NULL, 0, invalidate)<0) {
       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush cache");
@@ -1207,7 +1194,7 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
    H5F_addr_encode (f, &p, &(f->shared->smallobj_addr));
    H5F_addr_encode (f, &p, &(f->shared->freespace_addr));
    H5F_addr_encode (f, &p, &(f->shared->hdf5_eof));
-   H5G_ent_encode (f, &p, f->shared->root_sym);
+   H5G_ent_encode (f, &p, f->shared->root_ent);
 
    /* update file length if necessary */
    if (!H5F_addr_defined (&(f->shared->hdf5_eof))) {
@@ -1226,11 +1213,6 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
    }
 
-   /* Did shadow flush fail above? */
-   if (shadow_flush<0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, -2, "object are still open");
-   }
-   
    FUNC_LEAVE (SUCCEED);
 }
 
@@ -1242,8 +1224,7 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
  *
  * Return:	Success:	SUCCEED
  *
- *		Failure:	FAIL, or -2 if the failure is due to objects
- *				still being open.
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *              Tuesday, September 23, 1997
@@ -1255,27 +1236,24 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
 herr_t
 H5F_close (H5F_t *f)
 {
-   herr_t	ret_value = FAIL;
-
    FUNC_ENTER (H5F_close, FAIL);
 
-   if (-2==(ret_value=H5F_flush (f, TRUE))) {
-      /*objects are still open, but don't fail yet*/
-   } else if (ret_value<0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
-		     "can't flush cache");
+   /* Close all current working groups */
+   while (H5G_pop (f)>=0) /*void*/;
+
+   /* Flush the boot block and caches */
+   if (H5F_flush (f, TRUE)<0) {
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush cache");
    }
+
+   /* Dump debugging info */
    if (f->intent & H5F_ACC_DEBUG) H5AC_debug (f);
 
+   /* Close files and release resources */
    H5F_low_close (f->shared->lf);
-   H5F_dest (f);
+   f = H5F_dest (f);
 
-   /* Did the H5F_flush() fail because of open objects? */
-   if (ret_value<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, ret_value, "objects are open");
-   }
-
-   FUNC_LEAVE (ret_value);
+   FUNC_LEAVE (SUCCEED);
 }
 
 /*--------------------------------------------------------------------------
@@ -1537,8 +1515,14 @@ H5F_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 	    "Shared header version number:",
 	    (unsigned)(f->shared->create_parms.sharedheader_ver));
 
-   fprintf (stream, "%*sRoot symbol table entry:\n", indent, "");
-   H5G_ent_debug (f, f->shared->root_sym, stream, indent+3, MAX(0, fwidth-3));
+   fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth, 
+	    "Root symbol table entry:",
+	    f->shared->root_ent ? "" : "(none)");
+   if (f->shared->root_ent) {
+      H5G_ent_debug (f, f->shared->root_ent, stream,
+		     indent+3, MAX(0, fwidth-3));
+   }
+   
 	    
    FUNC_LEAVE (SUCCEED);
 }

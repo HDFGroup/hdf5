@@ -26,21 +26,6 @@
 #define H5G_DEFAULT_ROOT_SIZE  32
 
 /*
- * A symbol table entry.  The two important fields are `name_off' and
- * `header'.  The remaining fields are used for caching information that
- * also appears in the object header to which this symbol table entry
- * points.
- */
-struct H5G_entry_t {
-   hbool_t	dirty;		/*entry out-of-date?			*/
-   size_t	name_off;	/*offset of name within name heap	*/
-   haddr_t	header;		/*file address of object header		*/
-   H5G_type_t	type;		/*type of information cached		*/
-   H5G_cache_t	cache;		/*cached data from object header	*/
-   H5G_shadow_t *shadow;	/*optional ptr to the shadow		*/
-};
-
-/*
  * A symbol table node is a collection of symbol table entries.  It can
  * be thought of as the lowest level of the B-link tree that points to
  * a collection of symbol table entries that belong to a specific symbol
@@ -53,23 +38,6 @@ typedef struct H5G_node_t {
 } H5G_node_t;
 
 /*
- * A shadow is a copy of a symbol table entry which corresponds to an
- * `open' object.  Shadows are necessary because normal symbol table
- * entries can be preempted from the main cache.  The `shadow' field
- * of the `entry' points to the beginning of the shadow just like the
- * shadow field from symbol table entries in H5G_node_t.
- */
-struct H5G_shadow_t {
-   char		*name;		/*name for this entry			*/
-   haddr_t	grp_addr;	/*hdr addr for group containing shadow	*/
-   uintn	nrefs;		/*reference counter			*/
-   H5G_entry_t	entry;		/*local copy of symbol table entry	*/
-   H5G_entry_t	*main;		/*main entry in stab node if cached	*/
-   struct H5G_shadow_t *next;	/*next shadow for same symbol table	*/
-   struct H5G_shadow_t *prev;	/*previous shadow for same symbol table	*/
-};
-
-/*
  * Each key field of the B-link tree that points to symbol table
  * nodes consists of this structure...
  */
@@ -78,13 +46,23 @@ typedef struct H5G_node_key_t {
 } H5G_node_key_t;
 
 /*
+ * A group handle passed around through layers of the library within and
+ * above the H5G layer.
+ */
+struct H5G_t {
+   H5F_t	*file;		/*file containing group			*/
+   int		nref;		/*open reference count			*/
+   H5G_entry_t	ent;		/*info about the group			*/
+};
+
+/*
  * Each file has a stack of open groups with the latest entry on the
  * stack the current working group.  If the stack is empty then the
  * current working group is the root object.
  */
 typedef struct H5G_cwgstk_t {
-   H5G_entry_t	*handle;	/*a handle to an open group		*/
-   struct H5G_cwgstk_t *next;	/*next item (earlier) on stack		*/
+   H5G_t		*grp;	/*a handle to an open group		*/
+   struct H5G_cwgstk_t	*next;	/*next item (earlier) on stack		*/
 } H5G_cwgstk_t;
 
 /*
@@ -106,16 +84,10 @@ typedef struct H5G_bt_ud1_t {
    /* downward */
    H5G_oper_t	operation;	/*what operation to perform		*/
    const char	*name;		/*points to temporary memory		*/
-   haddr_t	grp_addr;	/*symbol table header address		*/
    haddr_t	heap_addr;	/*symbol table heap address		*/
 
-   /* downward for INSERT */
-   H5G_entry_t	entry;		/*entry to insert into table		*/
-
-   /* upward for FIND and INSERT */
-   haddr_t	node_addr;	/*address of node for this entry	*/
-   H5G_node_t	*node_ptr;	/*ptr to the node containing the entry	*/
-   H5G_entry_t	*entry_ptr;	/*ptr into cached symbol table node	*/
+   /* downward for INSERT, upward for FIND */
+   H5G_entry_t	ent;		/*entry to insert into table		*/
 
 } H5G_bt_ud1_t;
 
@@ -129,7 +101,6 @@ typedef struct H5G_bt_ud2_t {
    H5G_entry_t	*entry;		/*array of entries, alloc'd by caller	*/
    char		**name;		/*array of string ptrs, allocd by caller*/
    intn		maxentries;	/*size of the ADDR and NAME arrays	*/
-   haddr_t	grp_addr;	/*symbol table header address		*/
    haddr_t	heap_addr;	/*heap address				*/
 
    /* upward */
@@ -142,14 +113,6 @@ typedef struct H5G_bt_ud2_t {
  */
 extern H5B_class_t H5B_SNODE[1];
 
-/*
- * This struct passes information through the H5AC layer.
- */
-typedef struct H5G_ac_ud1_t {
-   haddr_t	heap_addr;
-   haddr_t	grp_addr;
-} H5G_ac_ud1_t;
-
 /* The cache subclass */
 extern const H5AC_class_t H5AC_SNODE[1];
 
@@ -158,29 +121,13 @@ extern const H5AC_class_t H5AC_SNODE[1];
  * functions that understand names are exported to the rest of
  * the library and appear in H5Gprivate.h.
  */
-herr_t H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init);
-H5G_entry_t *H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
-			    const char *name);
-H5G_entry_t *H5G_stab_insert (H5F_t *f, H5G_entry_t *self,
-			      const char *name, H5G_entry_t *ent);
+herr_t H5G_stab_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
+herr_t H5G_stab_find (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
+		      H5G_entry_t *obj_ent/*out*/);
+herr_t H5G_stab_insert (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
+			H5G_entry_t *obj_ent);
 intn H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
 		    char *names[], H5G_entry_t entries[]);
-
-/*
- * Functions that understand shadow entries.
- */
-herr_t H5G_shadow_sync (H5G_entry_t *ent);
-H5G_entry_t *H5G_shadow_open (H5F_t *f, H5G_entry_t *grp,
-			      H5G_entry_t *ent);
-herr_t H5G_shadow_close (H5F_t *f, H5G_entry_t *ent);
-hbool_t H5G_shadow_p (H5G_entry_t *ent);
-herr_t H5G_shadow_dissociate (H5G_entry_t *ent);
-herr_t H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym,
-			      const H5G_ac_ud1_t *ac_udata);
-H5G_shadow_t *H5G_shadow_list (H5F_t *f, const haddr_t *stab_header_addr);
-herr_t H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow,
-			const char *new_name, H5G_entry_t *new_entry,
-			const haddr_t *grp_addr);
 
 /*
  * Functions that understand symbol table entries.

@@ -74,10 +74,13 @@ static const H5O_class_t *const message_type_g[] = {
  * Function:	H5O_create
  *
  * Purpose:	Creates a new object header, sets the link count
- *		to NLINK, and caches the header.
+ *		to 0, and caches the header.  The object header is opened for
+ *		write access and should eventually be closed by calling
+ *		H5O_close().
  *
- * Return:	Success:	SUCCEED, the address of new header is
- *				returned through the ADDR argument.
+ * Return:	Success:	SUCCEED, the ENT argument contains
+ *				information about the object header,
+ *				including its address.
  *
  *		Failure:	FAIL
  *
@@ -90,7 +93,7 @@ static const H5O_class_t *const message_type_g[] = {
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
+H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 {
    size_t	size;		/*total size of object header	*/
    H5O_t	*oh = NULL;
@@ -100,14 +103,14 @@ H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
 
    /* check args */
    assert (f);
-   assert (nlink>=0);
-   assert (addr);
+   assert (ent);
+   HDmemset (ent, 0, sizeof(H5G_entry_t));
    if (size_hint<H5O_MIN_SIZE) size_hint = H5O_MIN_SIZE;
    H5O_ALIGN (size_hint, H5O_ALIGNMENT);
 
    /* allocate disk space for header and first chunk */
    size = H5O_SIZEOF_HDR(f) + size_hint;
-   if (H5MF_alloc (f, H5MF_META, size, addr/*out*/)<0) {
+   if (H5MF_alloc (f, H5MF_META, size, &(ent->header)/*out*/)<0) {
       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "unable to allocate file space for object header hdr");
    }
@@ -117,14 +120,14 @@ H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
    oh->dirty = TRUE;
    oh->version = H5O_VERSION;
    oh->alignment = H5O_ALIGNMENT;
-   oh->nlink = nlink;
+   oh->nlink = 0;
 
    /* create the chunk list and initialize the first chunk */
    oh->nchunks = 1;
    oh->alloc_nchunks = H5O_NCHUNKS;
    oh->chunk = H5MM_xmalloc (oh->alloc_nchunks * sizeof (H5O_chunk_t));
 
-   tmp_addr = *addr;
+   tmp_addr = ent->header;
    H5F_addr_inc (&tmp_addr, H5O_SIZEOF_HDR (f));
    oh->chunk[0].dirty = TRUE;
    oh->chunk[0].addr = tmp_addr;
@@ -144,11 +147,81 @@ H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
    oh->mesg[0].chunkno = 0;
 
    /* cache it */
-   if (H5AC_set (f, H5AC_OHDR, addr, oh)<0) {
+   if (H5AC_set (f, H5AC_OHDR, &(ent->header), oh)<0) {
       H5MM_xfree (oh);
       HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
 		     "unable to cache object header");
    }
+
+   /* open it */
+   if (H5O_open (f, ent)<0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTOPENOBJ, FAIL,
+		     "unable to open object header");
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_open
+ *
+ * Purpose:	Opens an object header which is described by the symbol table
+ *		entry OBJ_ENT.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, January  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_open (H5F_t *f, H5G_entry_t *obj_ent)
+{
+   FUNC_ENTER (H5O_open, FAIL);
+
+   /*
+    * There is nothing to do here now.  Opening an object header should
+    * eventually do something to prevent the object header from being deleted,
+    * but since object deletion isn't implemented yet, we don't care.
+    */
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_close
+ *
+ * Purpose:	Closes an object header that was previously open.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, January  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_close (H5F_t *f, H5G_entry_t *obj_ent)
+{
+   FUNC_ENTER (H5O_close, FAIL);
+
+   /*
+    * There is nothing to do here now.  See H5O_open().  Eventually this
+    * function will free resources if the object header hard link count is
+    * zero and this was the last oustanding open for the object.  Since
+    * object deletion isn't implemented yet, we don't care.
+    */
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -590,52 +663,40 @@ H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
-	  const H5O_class_t *type, intn sequence, void *mesg)
+H5O_read (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
+	  intn sequence, void *mesg)
 {
    H5O_t	*oh = NULL;
    void		*retval = NULL;
    intn		idx;
    H5G_cache_t	*cache = NULL;
    H5G_type_t	cache_type;
-   haddr_t	_addr;
    
    FUNC_ENTER (H5O_read, NULL);
 
    /* check args */
    assert (f);
-   if (!addr) {
-      if (!ent || H5G_ent_addr (ent, &_addr/*out*/)) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
-			"invalid symbol table entry");
-      }
-      addr = &_addr;
-   }
-   assert (H5F_addr_defined (addr));
+   assert (ent);
+   assert (H5F_addr_defined (&(ent->header)));
+   assert (type);
    assert (sequence>=0);
 
    /* can we get it from the symbol table? */
-   if (ent) {
-      cache = H5G_ent_cache (ent, &cache_type);
-      if (type && cache_type==type->cache_type && type->fast) {
-	 retval = (type->fast)(cache, mesg);
-	 if (retval) HRETURN (retval);
-	 H5ECLEAR;
-      }
+   cache = H5G_ent_cache (ent, &cache_type);
+   if (type && cache_type==type->cache_type && type->fast) {
+      retval = (type->fast)(cache, mesg);
+      if (retval) HRETURN (retval);
+      H5ECLEAR;
    }
 
    /* can we get it from the object header? */
-   if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
+   if ((idx = H5O_find_in_ohdr (f, &(ent->header), &type, sequence))<0) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
 		     "unable to find message in object header");
    }
 
-#ifdef LATER
-   /* should we cache it in ENT? */
-#endif
-
    /* copy the message to the user-supplied buffer */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
 		     "unable to load object header");
    }
@@ -740,7 +801,7 @@ H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
  *-------------------------------------------------------------------------
  */
 const void *
-H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
+H5O_peek (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
 	  intn sequence)
 {
    intn		idx;
@@ -750,13 +811,13 @@ H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
 
    /* check args */
    assert (f);
-   assert (addr && H5F_addr_defined (addr));
+   assert (ent && H5F_addr_defined (&(ent->header)));
 
-   if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
+   if ((idx = H5O_find_in_ohdr (f, &(ent->header), &type, sequence))<0) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
 		     "unable to find object header message");
    }
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
 		     "unable to load object header");
    }
@@ -769,11 +830,8 @@ H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
  * Function:	H5O_modify
  *
  * Purpose:	Modifies an existing message or creates a new message.
- *		The object header is at file address ADDR of file F (but if
- *		ENT is present then its `header' field is used instead).  An
- *		optional symbol table entry ENT can be supplied in which
- *		case the cache fields in that symbol table are updated if
- *		appropriate.
+ *		The cache fields in that symbol table entry ENT are updated
+ *		as appropriate.
  *
  * 		The OVERWRITE argument is either a sequence number of a
  *		message to overwrite (usually zero) or the constant
@@ -798,30 +856,23 @@ H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
  *-------------------------------------------------------------------------
  */
 intn
-H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
-	    const H5O_class_t *type, intn overwrite, const void *mesg)
+H5O_modify (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
+	    intn overwrite, const void *mesg)
 {
    H5O_t	*oh = NULL;
    intn		idx, sequence;
    size_t	size;
-   haddr_t	_addr;
    
    FUNC_ENTER (H5O_modify, FAIL);
 
    /* check args */
    assert (f);
+   assert (ent);
+   assert (H5F_addr_defined (&(ent->header)));
    assert (type);
    assert (mesg);
-   if (!addr) {
-      if (!ent || H5G_ent_addr (ent, &_addr)<0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
-			"invalid object header address");
-      }
-      addr = &_addr;
-   }
-   assert (H5F_addr_defined (addr));
    
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
 		     "unable to load object header");
    }
@@ -866,7 +917,7 @@ H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
    oh->dirty = TRUE;
 
    /* Copy into the symbol table entry */
-   if (oh->nlink<=1 && ent && type->cache) {
+   if (oh->nlink<=1 && type->cache) {
       H5G_type_t cache_type;
       H5G_cache_t *cache = H5G_ent_cache (ent, &cache_type);
       hbool_t modified = (type->cache)(&cache_type, cache, mesg);
@@ -909,29 +960,21 @@ H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
-	    const H5O_class_t *type, intn sequence)
+H5O_remove (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 {
    H5O_t	*oh = NULL;
    intn		i, seq;
-   haddr_t	_addr;
    
    FUNC_ENTER (H5O_remove, FAIL);
 
    /* check args */
    assert (f);
+   assert (ent);
+   assert (H5F_addr_defined (&(ent->header)));
    assert (type);
-   if (!addr) {
-      if (!ent || H5G_ent_addr (ent, &_addr)<0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
-			"invalid object header address");
-      }
-      addr = &_addr;
-   }
-   assert (H5F_addr_defined (addr));
 
    /* load the object header */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
 		     "unable to load object header");
    }

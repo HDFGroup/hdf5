@@ -180,16 +180,18 @@ typedef struct H5O_stab_t {
 
 
 
-herr_t H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t*);
+herr_t H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
+herr_t H5O_open (H5F_t *f, H5G_entry_t *ent);
+herr_t H5O_close (H5F_t *f, H5G_entry_t *ent);
 intn H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust);
-void *H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
-		const H5O_class_t *type, intn sequence, void *mesg);
-const void *H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
+void *H5O_read (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
+		intn sequence, void *mesg);
+const void *H5O_peek (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
 		      intn sequence);
-intn H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
-		 const H5O_class_t *type, intn overwrite, const void *mesg);
-herr_t H5O_remove (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
-		   const H5O_class_t *type, intn sequence);
+intn H5O_modify (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
+		 intn overwrite, const void *mesg);
+herr_t H5O_remove (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
+		   intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream,
 		  intn indent, intn fwidth);

@@ -610,7 +610,7 @@ H5P_modify (H5F_t *f, H5G_entry_t *ent, const H5P_t *ds)
 		     "scalar data spaces are not implemented yet");
 
    case H5P_SIMPLE:
-      if (H5O_modify (f, NO_ADDR, ent, H5O_SDSPACE, 0, &(ds->u.simple))<0) {
+      if (H5O_modify (f, ent, H5O_SDSPACE, 0, &(ds->u.simple))<0) {
 	 HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 			"can't update simple data space message");
       }
@@ -658,7 +658,7 @@ H5P_read (H5F_t *f, H5G_entry_t *ent)
 
    ds = H5MM_xcalloc (1, sizeof(H5P_t));
 
-   if (H5O_read (f, NO_ADDR, ent, H5O_SDSPACE, 0, &(ds->u.simple))) {
+   if (H5O_read (f, ent, H5O_SDSPACE, 0, &(ds->u.simple))) {
       ds->type = H5P_SIMPLE;
       
    } else {

@@ -22,7 +22,7 @@
 #include <H5public.h>  			/* Include Public Definitions 	*/
 
 /* Version #'s of library code */
-#define HDF5_MAJOR_VERSION      0   	/* For major interface changes	*/
+#define HDF5_MAJOR_VERSION      5   	/* For major interface changes	*/
 #define HDF5_MINOR_VERSION      0   	/* For minor interface changes	*/
 #define HDF5_RELEASE_VERSION    0   	/* For interface tweaks & bug-fixes */
 #define HDF5_PATCH_VERSION      0   	/* For small groups of bug fixes*/

@@ -364,35 +364,42 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
    /* check arguments */
    assert (f);
    assert (pp);
-   assert (ent);
 
-   /* encode header */
-   H5F_encode_length (f, *pp, ent->name_off);
-   H5F_addr_encode (f, pp, &(ent->header));
-   UINT32ENCODE (*pp, ent->type);
+   if (ent) {
+      /* encode header */
+      H5F_encode_length (f, *pp, ent->name_off);
+      H5F_addr_encode (f, pp, &(ent->header));
+      UINT32ENCODE (*pp, ent->type);
 
-   /* encode scratch-pad */
-   switch (ent->type) {
-   case H5G_NOTHING_CACHED:
-      break;
+      /* encode scratch-pad */
+      switch (ent->type) {
+      case H5G_NOTHING_CACHED:
+	 break;
 
-   case H5G_CACHED_SDSPACE:
-      assert (5*4 <= H5G_SIZEOF_SCRATCH);
-      UINT32ENCODE (*pp, ent->cache.sdspace.ndim);
-      UINT32ENCODE (*pp, ent->cache.sdspace.dim[0]);
-      UINT32ENCODE (*pp, ent->cache.sdspace.dim[1]);
-      UINT32ENCODE (*pp, ent->cache.sdspace.dim[2]);
-      UINT32ENCODE (*pp, ent->cache.sdspace.dim[3]);
-      break;
+      case H5G_CACHED_SDSPACE:
+	 assert (5*4 <= H5G_SIZEOF_SCRATCH);
+	 UINT32ENCODE (*pp, ent->cache.sdspace.ndim);
+	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[0]);
+	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[1]);
+	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[2]);
+	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[3]);
+	 break;
 
-   case H5G_CACHED_STAB:
-      assert (2*H5F_SIZEOF_ADDR (f) <= H5G_SIZEOF_SCRATCH);
-      H5F_addr_encode (f, pp, &(ent->cache.stab.btree_addr));
-      H5F_addr_encode (f, pp, &(ent->cache.stab.heap_addr));
-      break;
+      case H5G_CACHED_STAB:
+	 assert (2*H5F_SIZEOF_ADDR (f) <= H5G_SIZEOF_SCRATCH);
+	 H5F_addr_encode (f, pp, &(ent->cache.stab.btree_addr));
+	 H5F_addr_encode (f, pp, &(ent->cache.stab.heap_addr));
+	 break;
 
-   default:
-      HDabort();
+      default:
+	 HDabort();
+      }
+   } else {
+      haddr_t undef;
+      H5F_encode_length (f, *pp, 0);
+      H5F_addr_undef (&undef);
+      H5F_addr_encode (f, pp, &undef);
+      UINT32ENCODE (*pp, H5G_NOTHING_CACHED);
    }
 
    /* fill with zero */
@@ -443,11 +450,6 @@ H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
    fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Dirty:",
 	    ent->dirty ? "Yes" : "No");
-   fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
-	    "Has a shadow:",
-	    H5G_shadow_p (ent)?"This is a shadow!" :
-	       (ent->shadow ? "Yes" : "No"));
-      
    fprintf (stream, "%*s%-*s ", indent, "", fwidth,
 	    "Symbol type:");
    switch (ent->type) {

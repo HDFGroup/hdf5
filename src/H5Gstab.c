@@ -26,21 +26,14 @@ static hbool_t interface_initialize_g = FALSE;
  *
  * Purpose:	Creates a new empty symbol table (object header, name heap,
  *		and B-tree).  The caller can specify an initial size for the
- *		name heap.
+ *		name heap.  The object header of the group is opened for
+ *		write access.
  *
  * 		In order for the B-tree to operate correctly, the first
  *		item in the heap is the empty string, and must appear at
  *		heap offset zero.
  *
  * Errors:
- *		INTERNAL  CANTINIT      B-tree's won't work if the first
- *		                        name isn't at the beginning of the
- *		                        heap. 
- *		SYM       CANTINIT      Can't create B-tree. 
- *		SYM       CANTINIT      Can't create header. 
- *		SYM       CANTINIT      Can't create heap. 
- *		SYM       CANTINIT      Can't create message. 
- *		SYM       CANTINIT      Can't initialize heap. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -55,10 +48,9 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
+H5G_stab_create (H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
 {
    size_t	name;				/*offset of "" name	*/
-   haddr_t	addr;				/*object header address	*/
    H5O_stab_t	stab;				/*symbol table message	*/
 
    FUNC_ENTER (H5G_stab_create, FAIL);
@@ -77,14 +69,11 @@ H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
    if ((name = H5H_insert (f, &(stab.heap_addr), 1, "")<0)) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap");
    }
-   if (0!=name) {
-      /*
-       * B-tree's won't work if the first name isn't at the beginning
-       * of the heap.
-       */
-      HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		     "internal error (heap doesn't begin at zero)");
-   }
+   /*
+    * B-tree's won't work if the first name isn't at the beginning
+    * of the heap.
+    */
+   assert (0==name);
 
    /* Create the B-tree */
    if (H5B_create (f, H5B_SNODE, NULL, &(stab.btree_addr)/*out*/)<0) {
@@ -96,14 +85,13 @@ H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
     * since nothing refers to it yet.  The link count will be
     * incremented if the object is added to the group directed graph.
     */
-   if (H5O_create (f, 0, 4+2*H5F_SIZEOF_ADDR(f), &addr/*out*/)<0) {
+   if (H5O_create (f, 4+2*H5F_SIZEOF_ADDR(f), self/*out*/)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create header");
    }
    
    /* insert the symbol table message */
-   memset (self, 0, sizeof(H5G_entry_t));
-   self->header = addr;
-   if (H5O_modify(f, NO_ADDR, self, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
+   if (H5O_modify (f, self, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
+      H5O_close (f, self);
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create message");
    }
 
@@ -115,23 +103,14 @@ H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
  * Function:	H5G_stab_find
  *
  * Purpose:	Finds a symbol named NAME in the symbol table whose
- *		description is stored in SELF in file F and returns a
- *		pointer to the symbol table entry.  SELF is optional if the
- *		symbol table address is supplied through ADDR.
+ *		description is stored in GRP_ENT in file F and returns its
+ *	        symbol table entry through OBJ_ENT (which is optional).
  *
  * Errors:
- *		SYM       BADMESG       Can't read message. 
- *		SYM       NOTFOUND      Not found. 
  *
- * Return:	Success:	Pointer to the symbol table entry.
- *				The pointer is intended for immediate
- *				read-only access since it points
- *				directly to an entry in a cached
- *				symbol table node.  The pointer is
- *				guaranteed to be valid only until the
- *				next call to one of the H5AC functions.
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	NULL
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -141,75 +120,50 @@ H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
  *
  *-------------------------------------------------------------------------
  */
-H5G_entry_t *
-H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
-	       const char *name)
+herr_t
+H5G_stab_find (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
+	       H5G_entry_t *obj_ent/*out*/)
 {
    H5G_bt_ud1_t         udata;		/*data to pass through B-tree	*/
    H5O_stab_t		stab;		/*symbol table message		*/
 
-   FUNC_ENTER (H5G_stab_find, NULL);
+   FUNC_ENTER (H5G_stab_find, FAIL);
 
    /* Check arguments */
    assert (f);
-   assert (!addr || H5F_addr_defined (addr));
-   if (!addr && (!self || !H5F_addr_defined (&(self->header)))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "bad address");
-   }
-   if (!name || !*name) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "no name");
-   }
-   if (!addr) addr = &(self->header);
+   assert (grp_ent);
+   assert (name && *name);
 
    /* set up the udata */
-   if (NULL==H5O_read (f, addr, self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, NULL, "can't read message");
+   if (NULL==H5O_read (f, grp_ent, H5O_STAB, 0, &stab)) {
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL, "can't read message");
    }
    udata.operation = H5G_OPER_FIND;
    udata.name = name;
    udata.heap_addr = stab.heap_addr;
-   udata.grp_addr = *addr;
-   udata.node_ptr = NULL;
 
    /* search the B-tree */
    if (H5B_find (f, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
-      if (udata.node_ptr) {
-	 H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr), udata.node_ptr);
-      }
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "not found");
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
    }
 
-   /* Unprotect the symbol table node */
-   if (udata.node_ptr) {
-      if (H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr),
-			  udata.node_ptr)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, NULL,
-			"unable to release symbol table node");
-      }
-   }
-
-   /* return the result */
-   FUNC_LEAVE (udata.entry_ptr);
+   if (obj_ent) *obj_ent = udata.ent;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_insert
  *
- * Purpose:	Insert a new symbol into the table described by SELF in
+ * Purpose:	Insert a new symbol into the table described by GRP_ENT in
  *		file F.  The name of the new symbol is NAME and its symbol
- *		table entry is ENT.
+ *		table entry is OBJ_ENT.
  *
  * Errors:
- *		SYM       BADMESG       Can't read message. 
- *		SYM       CANTINSERT    Can't insert entry. 
  *
- * Return:	Success:	Pointer to the cached symbol table entry.
- *				This is a pointer directly into a symbol
- *				table node and will become invalid on the
- *				next call to the H5AC package.
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	NULL
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -217,61 +171,41 @@ H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
  *
  * Modifications:
  *
- * 	Robb Matzke, 18 Sep 1997
- *	If ENT has a shadow, then the shadow will be associated with the
- *	entry when it is added to the symbol table.
- *
  *-------------------------------------------------------------------------
  */
-H5G_entry_t *
-H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
-		 H5G_entry_t *ent)
+herr_t
+H5G_stab_insert (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
+		 H5G_entry_t *obj_ent)
 {
    H5O_stab_t		stab;		/*symbol table message		*/
    H5G_bt_ud1_t		udata;		/*data to pass through B-tree	*/
 
-   FUNC_ENTER (H5G_stab_insert, NULL);
+   FUNC_ENTER (H5G_stab_insert, FAIL);
 
    /* check arguments */
    assert (f);
-   assert (self && H5F_addr_defined (&(self->header)));
+   assert (grp_ent && H5F_addr_defined (&(grp_ent->header)));
    assert (name && *name);
-   assert (ent);
+   assert (obj_ent && H5F_addr_defined (&(obj_ent->header)));
    
    /* initialize data to pass through B-tree */
-   if (NULL==H5O_read (f, &(self->header), self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, NULL, "can't read message");
+   if (NULL==H5O_read (f, grp_ent, H5O_STAB, 0, &stab)) {
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
    }
 
    udata.operation = H5G_OPER_INSERT;
    udata.name = name;
    udata.heap_addr = stab.heap_addr;
-   udata.grp_addr = self->header;
-   udata.entry = *ent;
-   udata.entry.name_off = -1;
-   udata.node_ptr = NULL;
+   udata.ent = *obj_ent;
 
    /* insert */
    if (H5B_insert (f, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
-      if (udata.node_ptr) {
-	 H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr), udata.node_ptr);
-      }
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, NULL, "can't insert entry");
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert entry");
    }
 
-   /*
-    * The H5G_node_insert() called H5AC_protect() for the node so that the
-    * udata.entry_ptr field didn't become invalid on the way back out of the
-    * B-tree code.  We unprotect it now, but the pointer will remain valid
-    * until the next call to H5AC.
-    */
-   if (H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr), udata.node_ptr)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_PROTECT, NULL, "can't unprotect");
-   }
-      
    /* update the name offset in the entry */
-   ent->name_off = udata.entry.name_off;
-   FUNC_LEAVE (udata.entry_ptr);
+   obj_ent->name_off = udata.ent.name_off;
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -307,7 +241,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
  *-------------------------------------------------------------------------
  */
 intn
-H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
+H5G_stab_list (H5F_t *f, H5G_entry_t *grp_ent, intn maxentries,
 	       char *names[], H5G_entry_t entries[])
 {
    H5G_bt_ud2_t		udata;
@@ -318,16 +252,15 @@ H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
 
    /* check args */
    assert (f);
-   assert (self && H5F_addr_defined (&(self->header)));
+   assert (grp_ent && H5F_addr_defined (&(grp_ent->header)));
    assert (maxentries>=0);
 
    /* initialize data to pass through B-tree */
-   if (NULL==H5O_read (f, &(self->header), self, H5O_STAB, 0, &stab)) {
+   if (NULL==H5O_read (f, grp_ent, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
    }
    udata.entry = entries;
    udata.name = names;
-   udata.grp_addr = self->header;
    udata.heap_addr = stab.heap_addr;
    udata.maxentries = maxentries;
    udata.nsyms = 0;

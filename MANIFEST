@@ -63,7 +63,6 @@
 ./src/H5Gpkg.h
 ./src/H5Gprivate.h
 ./src/H5Gpublic.h
-./src/H5Gshad.c
 ./src/H5Gstab.c
 ./src/H5H.c
 ./src/H5Hprivate.h

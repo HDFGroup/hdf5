@@ -24,11 +24,7 @@
 #include <H5Fprivate.h>
 
 /*
- * FEATURE: If this macro is defined then H5G_shadow_check() is occassionally
- *	    (actually, quite often) called to check the consistency of the
- *	    shadow table.  If there's something wrong with the table then
- *	    abort() is called. Shadow table checking is a rather expensive
- *	    operation.
+ * Define this to enable debugging.
  */
 #ifdef NDEBUG
 #  undef H5G_DEBUG
@@ -37,7 +33,6 @@
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
 #define H5G_NODE_SIZEOF_MAGIC 4 /*sizeof symbol node magic number	*/
 #define H5G_NO_CHANGE	(-1)	/*see H5G_ent_modified()		*/
-#define H5G_NSHADOWS	10331	/*default size of shadow hash table	*/
 
 /*
  * The disk size for a symbol table entry...
@@ -78,24 +73,33 @@ typedef union H5G_cache_t {
 } H5G_cache_t;
 
 /*
- * An H5G_shadow_t is the struct used to describe object headers that
- * are currently open for modification.  It's contents is not
- * important outside H5G.
+ * A symbol table entry.  The two important fields are `name_off' and
+ * `header'.  The remaining fields are used for caching information that
+ * also appears in the object header to which this symbol table entry
+ * points.
  */
-typedef struct H5G_shadow_t H5G_shadow_t;
-typedef struct H5G_entry_t H5G_entry_t;
+typedef struct H5G_entry_t {
+   hbool_t	dirty;		/*entry out-of-date?			*/
+   size_t	name_off;	/*offset of name within name heap	*/
+   haddr_t	header;		/*file address of object header		*/
+   H5G_type_t	type;		/*type of information cached		*/
+   H5G_cache_t	cache;		/*cached data from object header	*/
+} H5G_entry_t;
+
+typedef struct H5G_t H5G_t;
 
 /*
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5G_entry_t *H5G_new (H5F_t *f, const char *name, size_t size_hint);
-herr_t H5G_set (H5F_t *f, const char *name);
-herr_t H5G_push (H5F_t *f, const char *name);
+H5G_t *H5G_create (H5F_t *f, const char *name, size_t size_hint);
+H5G_t *H5G_open (H5F_t *f, const char *name);
+H5G_t *H5G_reopen (H5G_t *grp);
+herr_t H5G_close (H5G_t *grp);
+herr_t H5G_set (H5F_t *f, H5G_t *grp);
+herr_t H5G_push (H5F_t *f, H5G_t *grp);
 herr_t H5G_pop (H5F_t *f);
-H5G_entry_t *H5G_create (H5F_t *f, const char *name, size_t ohdr_hint);
-H5G_entry_t *H5G_open (H5F_t *f, const char *name);
-herr_t H5G_close (H5F_t *f, H5G_entry_t *ent);
+herr_t H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent);
 herr_t H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent,
 		 H5G_entry_t *ent);
 herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
@@ -106,11 +110,6 @@ herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent);
  */
 herr_t H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream,
 		       intn indent, intn fwidth, const haddr_t *heap);
-
-/*
- * These functions operate on shadow entries.
- */
-herr_t H5G_shadow_flush (H5F_t *f, hbool_t invalidate);
 
 /*
  * These functions operate on symbol table entries.  They're used primarily

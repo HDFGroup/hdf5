@@ -163,8 +163,8 @@ int main(int argc, char *argv[])
     H5version(&major, &minor, &release, &patch);
 
     print_func("\nFor help use: testhdf5 -help\n");
-    print_func("Built with HDF5 Library Version: %u.%ur%u, patch %u\n\n", (unsigned) major,
-           (unsigned) minor, (unsigned) release, (unsigned)patch);
+    print_func("Linked with HDF %u.%u.%u%c\n\n", (unsigned) major,
+           (unsigned) minor, (unsigned) release, 'a'+patch);
     for (CLLoop = 1; CLLoop < argc; CLLoop++)
       {
           if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
