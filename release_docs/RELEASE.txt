@@ -312,9 +312,6 @@ Known Problems
 
     * IRIX 6.5 fails to compile if configured with --enable-static-exec.
     
-    * After "make install" or "make install-doc" one may need to reload
-      the source from the tar file before doing another build.
-
     * The HDF5_MPI_OPT_TYPES optimization code in the parallel HDF5 will cause
       a hang in some cases when chunked storage is used.  This is now set to
       be off by default.  One may turn it on by setting environment variable
