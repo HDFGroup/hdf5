@@ -125,12 +125,12 @@ And in this document, the
       <dt><code>hid_t H5Topen (hid_t <em>location</em>, const char
 	  *<em>name</em>)</code>
       <dd>A named data type can be opened by calling this function,
-	which returns a handle to the data type.  The handle should
-	eventually be closed by calling <code>H5Tclose()</code> to
+	which returns a data type identifier.  The identifier should
+	eventually be released by calling <code>H5Tclose()</code> to
 	release resources. The named data type returned by this
 	function is read-only or a negative value is returned for
 	failure.  The <em>location</em> is either a file or group
-	handle.
+	identifier.
 
 	<br><br>
       <dt><code>herr_t H5Tcommit (hid_t <em>location</em>, const char
@@ -138,7 +138,7 @@ And in this document, the
       <dd>A transient data type (not immutable) can be committed to a
 	file and turned into a named data type by calling this
 	function.  The <em>location</em> is either a file or group
-	handle and when combined with <em>name</em> refers to a new
+	identifier and when combined with <em>name</em> refers to a new
 	named data type.
 
 	<br><br>
@@ -154,7 +154,7 @@ And in this document, the
       <dt><code>hid_t H5Tcopy (hid_t <em>type</em>)</code>
       <dd>This function returns a modifiable transient data type
 	which is a copy of <em>type</em> or a negative value for
-	failure.  If <em>type</em> is a dataset handle then the type
+	failure.  If <em>type</em> is a dataset identifier then the type
 	returned is a modifiable transient copy of the data type of
 	the specified dataset.
 
