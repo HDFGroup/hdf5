@@ -38,16 +38,21 @@ New Features
 ============
   o Configuration
   ================
+    * The H4 to H5 tools were removed from the main source and placed in a
+      separate package. You can get these tools from the HDF ftp site
+	  (ftp://hdf.ncsa.uiuc.edu/). The "--with-hdf4" command-line option during
+      configure is no longer valid.  BW - 2002/06/25
+
 
   o Library
   =========
     o General
     --------- 
       * Fill-value's forward-compatibility with 1.5 was added.  SLU -
-	2002/04/11
+        2002/04/11
       * A new query function H5Tget_member_index has been added for compound
-	and enumeration data types, to retrieve member's index by name.
-	SLU - 2002/04/05
+        and enumeration data types, to retrieve member's index by name.
+        SLU - 2002/04/05
       * Added serial multi-gigabyte file size test.  "test/big -h" shows
         the help page.  AKC - 2002/03/29
  
@@ -69,6 +74,7 @@ New Features
       * Improved internal metadata caching, which can reduce the number of
         actual I/O calls made by a substantial amount, improving
         performance.  QAK - 2002/06/03
+
 
   o Parallel Library
   ==================
@@ -107,9 +113,9 @@ New Features
 
   o Support for new platforms and languages
   =========================================
-      * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
-        EIP - 2002/05/06
-      * Intel C++ and F90 compilers Version 6.0 are supported on Linux 2.4
+    * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
+      EIP - 2002/05/06
+    * Intel C++ and F90 compilers Version 6.0 are supported on Linux 2.4
 
 
 Bug Fixes since HDF5-1.4.3 Release
