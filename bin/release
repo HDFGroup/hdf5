@@ -99,11 +99,22 @@ test -h ../hdf5-$VERS && rm ../hdf5-$VERS
 ln -s `pwd` ../hdf5-$VERS || exit 1
 mv Makefile ../Makefile.x 2>/dev/null #might fail
 cp -p Makefile.dist Makefile
-# synchronize the HISTORY and RELEASE files in the doc area
-cp HISTORY.txt RELEASE.txt doc/html/ADGuide/.
+
+# Update some files with release information.
+# Make sure new files are of the right access mode
+umask 0133
+# update README
 echo "This is hdf5-$VERS released on `date`" >README.x
 tail +2l README >>README.x
 mv README.x README
+# update RELEASE.txt
+echo "HDF5 version $VERS released on `date`" >RELEASE.x
+tail +2l RELEASE.txt >>RELEASE.x
+mv RELEASE.x RELEASE.txt
+# synchronize the HISTORY and RELEASE files in the doc area
+cp HISTORY.txt RELEASE.txt doc/html/ADGuide/.
+
+# Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
 ( \
     cd ..; \
@@ -112,8 +123,6 @@ test "$verbose" && echo "   Running tar..." 1>&2
 )
 
 # Compress
-# Make sure new files are of the right access mode
-umask 0133
 for comp in $methods; do
     case $comp in
 	tar)
@@ -129,6 +138,10 @@ for comp in $methods; do
 	    bzip2 -9 <../x.tar >$DEST/hdf5-$VERS.tar.bz2;;
     esac
 done
+
+# Copy the RELEASE.txt to the release area.  Make it ended with
+# .txt to ensure easy display via web.
+cp RELEASE.txt $DEST/hdf5-$VERS-RELEASE.txt
 
 # Remove temporary things
 test -f ../Makefile.x && mv ../Makefile.x Makefile
