@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined (__MWERKS__)
+#include <string.h>
+#endif
+
 #include "h5dump.h"
 #include "H5private.h"
 #include "h5tools.h"
@@ -2414,7 +2418,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_attributes;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -2426,7 +2430,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_datasets;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     hand[i].subset_info = parse_subset_params(hand[i].obj);
                     last_dset = hand;
                     break;
@@ -2440,7 +2444,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_groups;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -2452,7 +2456,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_links;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -2464,7 +2468,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_datatypes;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -3058,7 +3062,7 @@ ref_path_table_put(hid_t obj, const char *path)
 
     pte->obj_ref = ref;
 
-    pte->apath = strdup(path);
+    pte->apath = HDstrdup(path);
 
     pte->next = ref_path_table;
     ref_path_table = pte;
@@ -3249,7 +3253,7 @@ xml_escape_the_name(const char *str)
     }
 
     if (extra == 0)
-	return strdup(str);
+	return HDstrdup(str);
 
     cp = str;
     rcp = ncp = calloc((size_t)(len + extra + 1), sizeof(char));
@@ -4049,16 +4053,10 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 		indentation(indent);
 		printf("<Data>\n");
 		indentation(indent);
-                if (!H5Tequal(type, H5T_STD_REF_OBJ)) {
-                    printf("<!-- Note: Region references not supported -->\n");
-                    indentation(indent);
-                    printf("<NoData />\n");
-                } else {
-		    printf("<DataFromFile>\n");
-		    xml_print_refs(attr_id, ATTRIBUTE_DATA);
-		    indentation(indent);
-		    printf("</DataFromFile>\n");
-                }
+		printf("<DataFromFile>\n");
+		xml_print_refs(attr_id, ATTRIBUTE_DATA);
+		indentation(indent);
+		printf("</DataFromFile>\n");
 		indentation(indent);
 		printf("</Data>\n");
 		break;
@@ -4169,8 +4167,6 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	nmembers = H5Tget_nmembers(type);
 
 	indentation(indent);
-	printf("<DataType>\n");
-	indentation(indent);
 	printf("<CompoundType>\n");
 
 	indent += COL;
@@ -4220,17 +4216,11 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	indent -= COL;
 	indentation(indent);
 	printf("</CompoundType>\n");
-	indentation(indent);
-	printf("</DataType>\n");
     } else {
 	/* Other data types: call print_datatype */
-	indentation(indent);
-	printf("<DataType>\n");
 	indent += COL;
 	xml_print_datatype(type);
 	indent -= COL;
-	indentation(indent);
-	printf("</DataType>\n");
     }
 
     indent -= COL;
@@ -4268,7 +4258,7 @@ xml_dump_group(hid_t gid, const char *name)
     } else {
 	tmp = malloc(strlen(prefix) + strlen(name) + 2);
 	strcpy(tmp, prefix);
-	par = strdup(tmp);
+	par = HDstrdup(tmp);
 	cp = strrchr(par, '/');
 	if (cp != NULL) {
 	    if ((cp == par) && strlen(par) > 1) {
@@ -4754,16 +4744,10 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED *sset)
 	    indentation(indent);
 	    printf("<Data>\n");
 	    indentation(indent);
-            if (!H5Tequal(type, H5T_STD_REF_OBJ)) {
-                printf("<!-- Note: Region references not supported -->\n");
-                indentation(indent);
-                printf("<NoData />\n");
-            } else {
-	        printf("<DataFromFile>\n");
-	        xml_print_refs(did, DATASET_DATA);
-	        indentation(indent);
-	        printf("</DataFromFile>\n");
-            }
+	    printf("<DataFromFile>\n");
+	    xml_print_refs(did, DATASET_DATA);
+	    indentation(indent);
+	    printf("</DataFromFile>\n");
 	    indentation(indent);
 	    printf("</Data>\n");
 	    break;
