@@ -66,18 +66,18 @@ SUBDIRS=src test @TESTPARALLEL@ tools @HL@  @subdirs@
 ##		programs and C compilers.  At the other extreme, the GNU
 ##		make used in combination with gcc will maintain dependency
 ##		information automatically.
-lib progs check test _test uninstall:
+lib progs check test _test:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
-tests TAGS dep depend:
+tests TAGS dep depend uninstall:
 	@@SETX@; for d in $(SUBDIRS) perform; do		              \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
 install-all:
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @subdirs@ perform; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -91,7 +91,7 @@ uninstall-all:
 	@$(MAKE) uninstall-doc
 
 install:
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) perform; do			      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 	@$(MAKE) install-examples

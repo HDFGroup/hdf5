@@ -48,8 +48,9 @@ TEST_SRC_PARA=$(PIO_PERF_SRC)
 TEST_SRC=iopipe.c chunk.c overhead.c zip_perf.c perf_meta.c $(TEST_SRC_PARA)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
-## How to build the programs... they all depend on the hdf5 library
-$(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
+## How to build the programs... they all depend on the hdf5 library,
+## and most depend on the testhdf5 library as well.
+$(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5) $(LIBH5TEST)
 
 h5perf: $(PIO_PERF_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(PIO_PERF_OBJ) $(LIBH5TEST) \
