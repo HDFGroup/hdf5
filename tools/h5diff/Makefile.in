@@ -199,8 +199,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 @BUILD_PARALLEL_CONDITIONAL_FALSE@H5DIFF_SCRIPT = $(srcdir)/testh5diff.sh
 
 # Our main target, h5diff
-bin_PROGRAMS = h5diff
-bin_SCRIPTS = $(H5PDIFF)
+bin_PROGRAMS = h5diff $(H5PDIFF)
 
 # Test programs and scripts
 TEST_PROG = h5difftst
@@ -210,7 +209,8 @@ check_PROGRAMS = $(TEST_PROG)
 check_SCRIPTS = $(TEST_SCRIPT)
 
 # Source files for the program
-h5diff_SOURCES = h5diff_main.c
+h5diff_SOURCES = h5diff_main.c h5diff_common.c
+ph5diff_SOURCES = ph5diff_main.c h5diff_common.c
 h5difftst_SOURCES = testh5diff_main.c testh5diff_attr.c    \
     testh5diff_basic.c testh5diff_dset.c testh5diff_util.c
 
@@ -238,11 +238,13 @@ subdir = tools/h5diff
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = h5diff$(EXEEXT)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@bin_PROGRAMS = h5diff$(EXEEXT) \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@	ph5diff$(EXEEXT)
+@BUILD_PARALLEL_CONDITIONAL_FALSE@bin_PROGRAMS = h5diff$(EXEEXT)
 check_PROGRAMS = h5difftst$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_h5diff_OBJECTS = h5diff_main.$(OBJEXT)
+am_h5diff_OBJECTS = h5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
 h5diff_OBJECTS = $(am_h5diff_OBJECTS)
 h5diff_LDADD = $(LDADD)
 h5diff_DEPENDENCIES = $(top_builddir)/tools/lib/libh5tools.la \
@@ -256,8 +258,12 @@ h5difftst_LDADD = $(LDADD)
 h5difftst_DEPENDENCIES = $(top_builddir)/tools/lib/libh5tools.la \
 	$(top_builddir)/src/libhdf5.la
 h5difftst_LDFLAGS =
-SCRIPTS = $(bin_SCRIPTS)
-
+am_ph5diff_OBJECTS = ph5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
+ph5diff_OBJECTS = $(am_ph5diff_OBJECTS)
+ph5diff_LDADD = $(LDADD)
+ph5diff_DEPENDENCIES = $(top_builddir)/tools/lib/libh5tools.la \
+	$(top_builddir)/src/libhdf5.la
+ph5diff_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)/src
@@ -265,7 +271,9 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/h5diff_main.Po \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/h5diff_common.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/h5diff_main.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ph5diff_main.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/testh5diff_attr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/testh5diff_basic.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/testh5diff_dset.Po \
@@ -279,9 +287,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
-DIST_SOURCES = $(h5diff_SOURCES) $(h5difftst_SOURCES)
+DIST_SOURCES = $(h5diff_SOURCES) $(h5difftst_SOURCES) $(ph5diff_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(h5diff_SOURCES) $(h5difftst_SOURCES)
+SOURCES = $(h5diff_SOURCES) $(h5difftst_SOURCES) $(ph5diff_SOURCES)
 
 all: all-am
 
@@ -334,26 +342,9 @@ h5diff$(EXEEXT): $(h5diff_OBJECTS) $(h5diff_DEPENDENCIES)
 h5difftst$(EXEEXT): $(h5difftst_OBJECTS) $(h5difftst_DEPENDENCIES) 
 	@rm -f h5difftst$(EXEEXT)
 	$(LINK) $(h5difftst_LDFLAGS) $(h5difftst_OBJECTS) $(h5difftst_LDADD) $(LIBS)
-binSCRIPT_INSTALL = $(INSTALL_SCRIPT)
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f $$d$$p; then \
-	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	    echo " $(binSCRIPT_INSTALL) $$d$$p $(DESTDIR)$(bindir)/$$f"; \
-	    $(binSCRIPT_INSTALL) $$d$$p $(DESTDIR)$(bindir)/$$f; \
-	  else :; fi; \
-	done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
-	done
+ph5diff$(EXEEXT): $(ph5diff_OBJECTS) $(ph5diff_DEPENDENCIES) 
+	@rm -f ph5diff$(EXEEXT)
+	$(LINK) $(ph5diff_LDFLAGS) $(ph5diff_OBJECTS) $(ph5diff_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -361,7 +352,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diff_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diff_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ph5diff_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_attr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testh5diff_dset.Po@am__quote@
@@ -465,10 +458,10 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) all-local
+all-am: Makefile $(PROGRAMS) all-local
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(bindir)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
 
 install: install-am
 install-exec: install-exec-am
@@ -515,7 +508,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS
+install-exec-am: install-binPROGRAMS
 
 install-info: install-info-am
 
@@ -532,25 +525,20 @@ mostlyclean: mostlyclean-am
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-info-am
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am all-local check check-TESTS check-am clean \
 	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
 	clean-libtool distclean distclean-compile distclean-depend \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-binSCRIPTS install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-binSCRIPTS uninstall-info-am
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
-
-ph5diff: h5diff
-	@$(CP) $? $@ 
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

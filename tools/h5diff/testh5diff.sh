@@ -127,8 +127,7 @@ TOOLTEST() {
 	    echo " PASSED"
 	else
 	    echo "*FAILED*"
-# still under construction. Don't flag the error.
-#	    nerrors="`expr $nerrors + 1`"
+	    nerrors="`expr $nerrors + 1`"
 	    if test yes = "$verbose"; then
 		echo "    Expected result (*.txt) differs from actual result (*.out)"
 		$DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
