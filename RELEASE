@@ -32,6 +32,11 @@ CONTENTS
 - Platforms Tested
 
 
+Features added since HDF5-1.2.1
+===============================
+   * Added internal free-lists to reduce memory required by the library and
+     H5garbage_collect API function
+
 Bug fixes since HDF5-1.2.1
 ==========================
    * h5dump correctly displays compound datatypes.
