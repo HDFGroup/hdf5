@@ -134,7 +134,7 @@ int
 get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
 {
     static int sp = 1;    /* character index in current token */
-    int opt_opt='?';      /* option character passed back to user */
+    int opt_opt = '?';    /* option character passed back to user */
 
     if (sp == 1) {
         /* check for more flag-like tokens */
