@@ -1497,6 +1497,84 @@ test_genprop_path(void)
 
 /****************************************************************
 **
+**  test_genprop_refcount(): Test basic generic property list code.
+**      Tests for correct reference counting
+** 
+****************************************************************/
+static void 
+test_genprop_refcount(void)
+{
+    hid_t		cid1;		/* Generic Property class ID */
+    hid_t		lid1;		/* Generic Property class ID */
+    char               *name;           /* Name of class */
+    herr_t		ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Generic Property List Reference Count Functionality\n"));
+
+    /* Create a new generic class, derived from the root of the class hierarchy */
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(cid1, "H5Pcreate_class");
+
+    /* Insert first property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Create a new generic list, derived from the root of the class hierarchy */
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
+
+    /* Check class name */
+    name = H5Pget_class_name(cid1);
+    CHECK_PTR(name, "H5Pget_class_name");
+    if(HDstrcmp(name,CLASS1_NAME)!=0) {
+        num_errs++;
+        printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
+    } /* end if */
+    free(name);
+
+    /* Close class */
+    ret = H5Pclose_class(cid1);
+    CHECK_I(ret, "H5Pclose_class");
+
+    /* Get the list's class */
+    cid1 = H5Pget_class(lid1);
+    CHECK_I(cid1, "H5Pget_class");
+
+    /* Check correct "is a" class/list relationship */
+    ret = H5Pisa_class(lid1,cid1);
+    VERIFY(ret, 1, "H5Pisa_class");
+
+    /* Check class name */
+    name = H5Pget_class_name(cid1);
+    CHECK_PTR(name, "H5Pget_class_name");
+    if(HDstrcmp(name,CLASS1_NAME)!=0) {
+        num_errs++;
+        printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
+    } /* end if */
+    free(name);
+
+    /* Close list */
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
+
+    /* Check class name */
+    name = H5Pget_class_name(cid1);
+    CHECK_PTR(name, "H5Pget_class_name");
+    if(HDstrcmp(name,CLASS1_NAME)!=0) {
+        num_errs++;
+        printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
+    } /* end if */
+    free(name);
+
+    /* Close class */
+    ret = H5Pclose_class(cid1);
+    CHECK_I(ret, "H5Pclose_class");
+
+} /* ent test_genprop_refcount() */
+
+/****************************************************************
+**
 **  test_genprop(): Main generic property testing routine.
 ** 
 ****************************************************************/
@@ -1522,6 +1600,7 @@ test_genprop(void)
 
     test_genprop_equal();       /* Tests for more H5Pequal verification */
     test_genprop_path();        /* Tests for class path verification */
+    test_genprop_refcount();    /* Tests for class reference counting */
 
 }   /* test_genprop() */
 
