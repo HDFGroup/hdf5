@@ -47,9 +47,6 @@
 /* Define if it's safe to use `long long' for hsize_t and hssize_t */
 #undef HAVE_LARGE_HSIZET
 
-/* Define if it's safe to use `long long' for hsize_t and hssize_t */
-#undef DEV_T_IS_SCALAR
-
 /* Define if the HDF5 v1.4 compatibility functions are to be compiled in */
 #undef WANT_H5_V1_4_COMPAT
 
@@ -89,14 +86,14 @@
 /* Define if the SRB is defined */
 #undef HAVE_SRB
 
-/* Define if the Grid Storage is defined */
-#undef HAVE_GRIDSTORAGE
-
 /* Define if the stream virtual file driver should be compiled */
 #undef HAVE_STREAM
 
 /* Define if `socklen_t' is defined */
 #undef HAVE_SOCKLEN_T
+
+/* Define if `dev_t' is a scalar */
+#undef DEV_T_IS_SCALAR
 
 /* The number of bytes in a __int64.  */
 #undef SIZEOF___INT64
@@ -281,11 +278,11 @@
 /* Define if you have the waitpid function.  */
 #undef HAVE_WAITPID
 
+/* Define if you have the <features.h> header file.  */
+#undef HAVE_FEATURES_H
+
 /* Define if you have the <globus_common.h> header file.  */
 #undef HAVE_GLOBUS_COMMON_H
-
-/* Define if you have the <grid_storage_file.h> header file.  */
-#undef HAVE_GRID_STORAGE_FILE_H
 
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
@@ -314,9 +311,6 @@
 /* Define if you have the <stdint.h> header file.  */
 #undef HAVE_STDINT_H
 
-/* Define if you have the <features.h> header file.  */
-#undef HAVE_FEATURES_H
-
 /* Define if you have the <sys/filio.h> header file.  */
 #undef HAVE_SYS_FILIO_H
 
@@ -334,9 +328,6 @@
 
 /* Define if you have the <sys/stat.h> header file.  */
 #undef HAVE_SYS_STAT_H
-
-/* Define if you have the <sys/resource.h> header file.  */
-#undef HAVE_SYS_RESOURCE_H
 
 /* Define if you have the <sys/sysinfo.h> header file.  */
 #undef HAVE_SYS_SYSINFO_H
@@ -397,12 +388,6 @@
 
 /* Define if you have the globus_io library (-lglobus_io).  */
 #undef HAVE_LIBGLOBUS_IO
-
-/* Define if you have the grid_storage_client library (-lgrid_storage_client).  */
-#undef HAVE_LIBGRID_STORAGE_CLIENT
-
-/* Define if you have the grid_storage_file library (-lgrid_storage_file).  */
-#undef HAVE_LIBGRID_STORAGE_FILE
 
 /* Define if you have the jpeg library (-ljpeg).  */
 #undef HAVE_LIBJPEG

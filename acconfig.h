@@ -57,3 +57,6 @@
 
 /* Define if `socklen_t' is defined */
 #undef HAVE_SOCKLEN_T
+
+/* Define if `dev_t' is a scalar */
+#undef DEV_T_IS_SCALAR
