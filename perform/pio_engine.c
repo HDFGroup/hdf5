@@ -1709,7 +1709,7 @@ gpfs_access_range(int handle, off_t start, off_t length, int is_write)
     if (gpfs_fcntl(handle, &access_range) != 0) {
         fprintf(stderr,
                 "gpfs_fcntl DS start directive failed. errno=%d errorOffset=%d\n",
-                errno, ds_start.hdr.errorOffset);
+                errno, access_range.hdr.errorOffset);
         exit(EXIT_FAILURE);
     }
 }
@@ -1845,7 +1845,7 @@ gpfs_cancel_hints(int handle)
     if (gpfs_fcntl(handle, &cancel_hints) != 0) {
         fprintf(stderr,
                 "gpfs_fcntl cancel hints directive failed. errno=%d errorOffset=%d\n",
-                errno, ds_start.hdr.errorOffset);
+                errno, cancel_hints.hdr.errorOffset);
         exit(EXIT_FAILURE);
     }
 }
