@@ -217,7 +217,7 @@ static void run_test_loop(FILE *output, struct options *options);
 static int run_test(FILE *output, iotype iot, parameters parms);
 static void get_minmax(minmax *mm);
 static minmax accumulate_minmax_stuff(minmax *mm, int count);
-static int create_comm_world(int num_procs);
+static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
 static void output_report(FILE *output, const char *fmt, ...);
 static void print_indent(register FILE *output, register int indent);
@@ -305,6 +305,7 @@ run_test_loop(FILE *output, struct options *opts)
 {
     parameters parms;
     long num_procs;
+    int		doing_pio;		/* if this process is doing PIO */
     int io_runs = PIO_HDF5 | PIO_MPI | PIO_RAW; /* default to run all tests */
 
     if (opts->io_types & ~0x7) {
@@ -332,10 +333,12 @@ run_test_loop(FILE *output, struct options *opts)
 
         parms.num_procs = num_procs;
 
-        if (create_comm_world(parms.num_procs) != SUCCESS) {
+        if (create_comm_world(parms.num_procs, &doing_pio) != SUCCESS) {
             /* do something harsh */
         }
 
+	/* only processes doing PIO will run the tests */
+	if (doing_pio){
         output_report(output, "Number of processors = %ld\n", parms.num_procs);
 
         /* multiply the xfer buffer size by 2 for each loop iteration */
@@ -364,6 +367,7 @@ run_test_loop(FILE *output, struct options *opts)
         if (destroy_comm_world() != SUCCESS) {
             /* do something harsh */
         }
+	}
     }
 }
 
@@ -525,7 +529,7 @@ accumulate_minmax_stuff(minmax *mm, int count)
  * Modifications:
  */
 static int
-create_comm_world(int num_procs)
+create_comm_world(int num_procs, int *doing_pio)
 {
     /* MPI variables */
     int     mrc, ret_value;     /* return values                */
@@ -567,6 +571,7 @@ create_comm_world(int num_procs)
     MPI_Comm_rank(pio_comm_g, &pio_mpi_rank_g);
 
 done:
+    *doing_pio = color;
     return ret_value;
 
 error_done:
