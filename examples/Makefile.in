@@ -21,7 +21,7 @@ TEST_PROGS= h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
-CLEAN=*.h5
+CLEAN=*.h5 *.o *.lo
 
 # List all source files here.  The list of object files will be
 # created by replacing the `.c' with a `.o'.  This list is necessary
