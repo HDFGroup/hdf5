@@ -201,8 +201,8 @@ test_1 (void)
    VERIFY (status_ptr, NULL, "H5O_read [didn't fail but should have]");
 
    /* close the file */
-   H5Fclose (fid);
-   
+   status = H5Fclose (fid);
+   CHECK_I (status, "H5Fclose");
 }
 
 
@@ -268,7 +268,8 @@ test_2 (void)
    
 
    /* close the file */
-   H5Fclose (fid);
+   status = H5Fclose (fid);
+   CHECK_I (status, "H5Fclose");
 }   
 
 

@@ -1,8 +1,6 @@
 # Site configuration -- do not distribute this file.
 
 if test "x$CFLAGS" = "x"; then
-   CFLAGS="-g -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings  \
-       -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \
-       -Wnested-externs"
+   CFLAGS="-g -DH5AC_DEBUG_PROTECT -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
 fi
 

@@ -67,8 +67,8 @@ test_ohdr (void)
     * Test creation of a new message.
     */
    MESSAGE (8, ("Creating new message...\n"));
-   stab.btree = 11111111;
-   stab.heap  = 22222222;
+   stab.btree_addr = 11111111;
+   stab.heap_addr  = 22222222;
    status = H5O_modify (f, oh, NULL, NULL, H5O_STAB, H5O_NEW_MESG, &stab);
    VERIFY (status, 0, "H5O_modify");
 
@@ -76,15 +76,15 @@ test_ohdr (void)
    ptr = H5O_read (f, oh, NULL, H5O_STAB, 0, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
-   VERIFY (ro.btree, stab.btree, "H5O_read");
-   VERIFY (ro.heap, stab.heap, "H5O_read");
+   VERIFY (ro.btree_addr, stab.btree_addr, "H5O_read");
+   VERIFY (ro.heap_addr, stab.heap_addr, "H5O_read");
 
    /*
     * Test modification of an existing message.
     */
    MESSAGE (8, ("Modifying message...\n"));
-   stab.btree = 33333333;
-   stab.heap  = 44444444;
+   stab.btree_addr = 33333333;
+   stab.heap_addr  = 44444444;
    status = H5O_modify (f, oh, NULL, NULL, H5O_STAB, 0, &stab);
    VERIFY (status, 0, "H5O_modify");
 
@@ -92,8 +92,8 @@ test_ohdr (void)
    ptr = H5O_read (f, oh, NULL, H5O_STAB, 0, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
-   VERIFY (ro.btree, stab.btree, "H5O_read");
-   VERIFY (ro.heap, stab.heap, "H5O_read");
+   VERIFY (ro.btree_addr, stab.btree_addr, "H5O_read");
+   VERIFY (ro.heap_addr, stab.heap_addr, "H5O_read");
 
    /*
     * Test creation of a second message of the same type with a symbol
@@ -102,41 +102,41 @@ test_ohdr (void)
    MESSAGE (8, ("Creating a duplicate message...\n"));
    ent.header = 0;
    ent.type = H5G_NOTHING_CACHED;
-   stab.btree = 55555555;
-   stab.heap  = 66666666;
+   stab.btree_addr = 55555555;
+   stab.heap_addr  = 66666666;
    status = H5O_modify (f, oh, &ent, &ent_mod, H5O_STAB, H5O_NEW_MESG, &stab);
    VERIFY (status, 1, "H5O_modify");
    VERIFY (ent_mod, TRUE, "H5O_modify");
    VERIFY (ent.type, H5G_CACHED_STAB, "H5O_modify");
-   VERIFY (ent.cache.stab.heap, stab.heap, "H5O_modify");
-   VERIFY (ent.cache.stab.btree, stab.btree, "H5O_modify");
+   VERIFY (ent.cache.stab.heap_addr, stab.heap_addr, "H5O_modify");
+   VERIFY (ent.cache.stab.btree_addr, stab.btree_addr, "H5O_modify");
 
    H5AC_flush (f, NULL, 0, TRUE);
    ptr = H5O_read (f, oh, NULL, H5O_STAB, 1, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
-   VERIFY (ro.btree, stab.btree, "H5O_read");
-   VERIFY (ro.heap, stab.heap, "H5O_read");
+   VERIFY (ro.btree_addr, stab.btree_addr, "H5O_read");
+   VERIFY (ro.heap_addr, stab.heap_addr, "H5O_read");
 
    /*
     * Test modification of the second message with a symbol table.
     */
    MESSAGE (8, ("Modifying the duplicate message...\n"));
-   stab.btree = 77777777;
-   stab.heap  = 88888888;
+   stab.btree_addr = 77777777;
+   stab.heap_addr  = 88888888;
    status = H5O_modify (f, oh, &ent, &ent_mod, H5O_STAB, 1, &stab);
    VERIFY (status, 1, "H5O_modify");
    VERIFY (ent_mod, TRUE, "H5O_modify");
    VERIFY (ent.type, H5G_CACHED_STAB, "H5O_modify");
-   VERIFY (ent.cache.stab.heap, stab.heap, "H5O_modify");
-   VERIFY (ent.cache.stab.btree, stab.btree, "H5O_modify");
+   VERIFY (ent.cache.stab.heap_addr, stab.heap_addr, "H5O_modify");
+   VERIFY (ent.cache.stab.btree_addr, stab.btree_addr, "H5O_modify");
 
    H5AC_flush (f, NULL, 0, TRUE);
    ptr = H5O_read (f, oh, NULL, H5O_STAB, 1, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
-   VERIFY (ro.btree, stab.btree, "H5O_read");
-   VERIFY (ro.heap, stab.heap, "H5O_read");
+   VERIFY (ro.btree_addr, stab.btree_addr, "H5O_read");
+   VERIFY (ro.heap_addr, stab.heap_addr, "H5O_read");
 
    /*
     * Test creation of a bunch of messages one after another to see
@@ -144,8 +144,8 @@ test_ohdr (void)
     */
    MESSAGE (8, ("Overflowing header in core...\n"));
    for (i=0; i<40; i++) {
-      stab.btree = (i+1)*1000 + 1;
-      stab.heap  = (i+1)*1000 + 2;
+      stab.btree_addr = (i+1)*1000 + 1;
+      stab.heap_addr  = (i+1)*1000 + 2;
       status = H5O_modify (f, oh, NULL, NULL, H5O_STAB, H5O_NEW_MESG, &stab);
       VERIFY (status, 2+i, "H5O_modify");
    }
@@ -157,8 +157,8 @@ test_ohdr (void)
     */
    MESSAGE (8, ("Overflowing header on disk...\n"));
    for (i=0; i<10; i++) {
-      stab.btree = (i+1)*1000 + 10;
-      stab.heap  = (i+1)*1000 + 20;
+      stab.btree_addr = (i+1)*1000 + 10;
+      stab.heap_addr  = (i+1)*1000 + 20;
       status = H5O_modify (f, oh, NULL, NULL, H5O_STAB, H5O_NEW_MESG, &stab);
       VERIFY (status, 42+i, "H5O_modify");
       H5AC_flush (f, NULL, 0, TRUE);
