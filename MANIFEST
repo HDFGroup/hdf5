@@ -633,6 +633,9 @@
 ./doc/html/cpplus_RM/namespacestd.html
 ./doc/html/cpplus_RM/writedata_8cpp-example.html
 
+./doc/html/cpplus_RM/header_files/Dependencies
+./doc/html/cpplus_RM/header_files/Makefile.in
+./doc/html/cpplus_RM/header_files/filelist.xml
 ./doc/html/cpplus_RM/header_files/filelist.xml
 ./doc/html/cpplus_RM/header_files/image001.jpg
 ./doc/html/cpplus_RM/header_files/image002.jpg
