@@ -654,7 +654,7 @@ H5Gstat (hid_t loc_id, const char *name, hbool_t follow_link,
     H5G_t	*loc = NULL;
     
     FUNC_ENTER (H5Gstat, FAIL);
-    H5TRACE3("e","isb",loc_id,name,follow_link);
+    H5TRACE4("e","isbx",loc_id,name,follow_link,statbuf);
 
     /* Check arguments */
     if (NULL==(loc=H5G_loc (loc_id))) {
@@ -697,7 +697,7 @@ H5Gget_linkval (hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
     H5G_t	*loc = NULL;
     
     FUNC_ENTER (H5Gget_linkval, FAIL);
-    H5TRACE3("e","isz",loc_id,name,size);
+    H5TRACE4("e","iszx",loc_id,name,size,buf);
 
     /* Check arguments */
     if (NULL==(loc=H5G_loc (loc_id))) {

@@ -223,7 +223,7 @@ herr_t
 H5Eclear (void)
 {
     FUNC_ENTER (H5Eclear, FAIL);
-    H5TRACE0("e", "");
+    H5TRACE0("e","");
     /* FUNC_ENTER() does all the work */
     FUNC_LEAVE (SUCCEED);
 }

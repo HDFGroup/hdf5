@@ -42,6 +42,9 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <sys/time.h>
 #include <sys/resource.h>
 
+/* We need this on Irix64 even though we've included stdio.h as documented */
+FILE *fdopen(int fd, const char *mode);
+
 /* private headers */
 #include <H5private.h>          /*library                 		*/
 #include <H5ACprivate.h>        /*cache                           	*/
@@ -95,7 +98,7 @@ H5_init_library(void)
 	const char *s = getenv ("HDF5_TRACE");
 	if (s && isdigit(*s)) {
 	    int fd = HDstrtol (s, NULL, 0);
-	    H5_trace_g = fdopen (fd, "w");
+	    H5_trace_g = HDfdopen (fd, "w");
 	}
     }
 #endif
@@ -1119,6 +1122,48 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		
 	    default:
 		fprintf (out, "BADTYPE(E%c)", type[1]);
+		goto error;
+	    }
+	    break;
+
+	case 'F':
+	    switch (type[1]) {
+	    case 'd':
+		if (ptr) {
+		    fprintf(out, "0x%lx", (unsigned long)vp);
+		} else {
+		    H5F_driver_t driver = va_arg(ap, H5F_driver_t);
+		    switch (driver) {
+		    case H5F_LOW_ERROR:
+			fprintf(out, "H5F_LOW_ERROR");
+			break;
+		    case H5F_LOW_STDIO:
+			fprintf(out, "H5F_LOW_STDIO");
+			break;
+		    case H5F_LOW_SEC2:
+			fprintf(out, "H5F_LOW_SEC2");
+			break;
+		    case H5F_LOW_MPIO:
+			fprintf(out, "H5F_LOW_MPIO");
+			break;
+		    case H5F_LOW_CORE:
+			fprintf(out, "H5F_LOW_CORE");
+			break;
+		    case H5F_LOW_SPLIT:
+			fprintf(out, "H5F_LOW_SPLIT");
+			break;
+		    case H5F_LOW_FAMILY:
+			fprintf(out, "H5F_LOW_FAMILY");
+			break;
+		    default:
+			fprintf(out, "%ld", (long)driver);
+			break;
+		    }
+		}
+		break;
+
+	    default:
+		fprintf(out, "BADTYPE(F%c)", type[1]);
 		goto error;
 	    }
 	    break;

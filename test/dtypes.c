@@ -53,6 +53,9 @@ typedef enum flt_t {
     FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER
 } flt_t;
 
+/* Count the number of overflows */
+static int noverflows_g = 0;
+
 /*
  * Some machines generate SIGFPE on floating point overflows.  According to
  * the Posix standard, we cannot assume that we can continue from such a
@@ -85,6 +88,31 @@ fpe_handler(int __unused__ signo)
     exit(255);
 }
 #endif
+
+
+/*-------------------------------------------------------------------------
+ * Function:	overflow_handler
+ *
+ * Purpose:	Gets called for all data type conversion overflows.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+overflow_handler(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		 void __unused__ *src_buf, void __unused__ *dst_buf)
+{
+    noverflows_g++;
+    return -1;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -895,6 +923,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     buf   = malloc(nelmts*MAX(src_size, dst_size));
     saved = malloc(nelmts*MAX(src_size, dst_size));
+    noverflows_g = 0;
 
     for (i=0; i<ntests; i++) {
 
@@ -1074,6 +1103,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	}
 	puts(" PASSED");
     }
+    if (noverflows_g>0) {
+	printf("  %d overflow%s\n", noverflows_g, 1==noverflows_g?"":"s");
+    }
 
  done:
     if (buf) free (buf);
@@ -1118,6 +1150,9 @@ main(void)
 
     /* Set the error handler */
     H5Eset_auto (display_error_cb, NULL);
+
+    /* Set the overflow handler */
+    H5Tset_overflow(overflow_handler);
 
     /* Do the tests */
     nerrors += test_classes()<0 ? 1 : 0;

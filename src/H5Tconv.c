@@ -14,6 +14,7 @@
 #include <H5MMprivate.h>
 #include <H5Tpkg.h>
 #include <math.h>		/*for ceil()				     */
+#include <float.h>		/*for FLT_MAX and HUGE_VAL		     */
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {
@@ -551,6 +552,9 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  *
  * Modifications:
  *
+ * 	Robb Matzke, 7 Jul 1998
+ *	Added overflow handling.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -701,8 +705,11 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 				 dst->u.atomic.prec-src->u.atomic.prec, FALSE);
 		} else if (first>=dst->u.atomic.prec) {
 		    /*overflow*/
-		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec,
-				 TRUE);
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			H5T_bit_set (d, dst->u.atomic.offset,
+				     dst->u.atomic.prec, TRUE);
+		    }
 		} else {
 		    H5T_bit_copy (d, dst->u.atomic.offset,
 				  s, src->u.atomic.offset,
@@ -715,13 +722,16 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		 * If the source is signed and the destination isn't then we
 		 * can have overflow if the source contains more bits than
 		 * the destination (destination is set to the maximum
-		 * possible value) or underflow if the source is negative
+		 * possible value) or overflow if the source is negative
 		 * (destination is set to zero).
 		 */
 		if (first+1 == src->u.atomic.prec) {
-		    /*underflow*/
-		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec,
-				 FALSE);
+		    /*overflow*/
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			H5T_bit_set (d, dst->u.atomic.offset,
+				     dst->u.atomic.prec, FALSE);
+		    }
 		} else if (src->u.atomic.prec < dst->u.atomic.prec) {
 		    H5T_bit_copy (d, dst->u.atomic.offset,
 				  s, src->u.atomic.offset,
@@ -731,8 +741,11 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 				 FALSE);
 		} else if (first>=dst->u.atomic.prec) {
 		    /*overflow*/
-		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec,
-				 TRUE);
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			H5T_bit_set (d, dst->u.atomic.offset,
+				     dst->u.atomic.prec, TRUE);
+		    }
 		} else {
 		    H5T_bit_copy (d, dst->u.atomic.offset,
 				  s, src->u.atomic.offset,
@@ -748,10 +761,13 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		 */
 		if (first+1 >= dst->u.atomic.prec) {
 		    /*overflow*/
-		    H5T_bit_set (d, dst->u.atomic.offset,
-				 dst->u.atomic.prec-1, TRUE);
-		    H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec-1,
-				 1, FALSE);
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			H5T_bit_set (d, dst->u.atomic.offset,
+				     dst->u.atomic.prec-1, TRUE);
+			H5T_bit_set (d, (dst->u.atomic.offset +
+					 dst->u.atomic.prec-1), 1, FALSE);
+		    }
 		} else if (src->u.atomic.prec<dst->u.atomic.prec) {
 		    H5T_bit_copy (d, dst->u.atomic.offset,
 				  s, src->u.atomic.offset,
@@ -767,7 +783,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    } else if (first+1 == src->u.atomic.prec) {
 		/*
 		 * Both the source and the destination are signed and the
-		 * source value is negative.  We could experience underflow
+		 * source value is negative.  We could experience overflow
 		 * if the destination isn't wide enough in which case the
 		 * destination is set to a negative number with the largest
 		 * possible magnitude.
@@ -778,11 +794,14 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		size_t fz = (size_t)sfz;
 		
 		if (sfz>=0 && fz+1>=dst->u.atomic.prec) {
-		    /*underflow*/
-		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1,
-				 FALSE);
-		    H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec-1,
-				 1, TRUE);
+		    /*overflow*/
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			H5T_bit_set (d, dst->u.atomic.offset,
+				     dst->u.atomic.prec-1, FALSE);
+			H5T_bit_set (d, (dst->u.atomic.offset +
+					 dst->u.atomic.prec-1), 1, TRUE);
+		    }
 		} else if (src->u.atomic.prec<dst->u.atomic.prec) {
 		    H5T_bit_copy (d, dst->u.atomic.offset,
 				  s, src->u.atomic.offset,
@@ -804,10 +823,13 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		 */
 		if (first+1>=dst->u.atomic.prec) {
 		    /*overflow*/
-		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1,
-				 TRUE);
-		    H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec-1,
-				 1, FALSE);
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			H5T_bit_set (d, dst->u.atomic.offset,
+				     dst->u.atomic.prec-1, TRUE);
+			H5T_bit_set (d, (dst->u.atomic.offset +
+					 dst->u.atomic.prec-1), 1, FALSE);
+		    }
 		} else if (src->u.atomic.prec<dst->u.atomic.prec) {
 		    H5T_bit_copy (d, dst->u.atomic.offset,
 				  s, src->u.atomic.offset,
@@ -887,6 +909,9 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *              Tuesday, June 23, 1998
  *
  * Modifications:
+ *
+ * 	Robb Matzke, 7 Jul 1998
+ *	Added overflow handling.
  *
  *-------------------------------------------------------------------------
  */
@@ -1143,12 +1168,30 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		/*
 		 * The exponent is too large to fit in the available region
 		 * or it results in the maximum possible value.  Use positive
-		 * or negative infinity instead.
+		 * or negative infinity instead unless the application
+		 * specifies something else.  Before calling the overflow
+		 * handler make sure the source buffer we hand it is in the
+		 * original byte order.
 		 */
+		if (H5T_overflow_g) {
+		    uint8 over_src[256];
+		    assert(src_p->size<=sizeof over_src);
+		    if (H5T_ORDER_BE==src.order) {
+			for (i=0; i<src_p->size; i++) {
+			    over_src[src_p->size-(i+1)] = s[i];
+			}
+		    } else {
+			for (i=0; i<src_p->size; i++) {
+			    over_src[i] = s[i];
+			}
+		    }
+		    if ((H5T_overflow_g)(src_id, dst_id, over_src, d)>=0) {
+			goto next;
+		    }
+		}
 		expo = expo_max;
 		H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
 		msize = 0;
-		
 	    }
 
 	    /*
@@ -1239,6 +1282,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	     * If we had used a temporary buffer for the destination then we
 	     * should copy the value to the true destination buffer.
 	     */
+	next:
 	    if (d==dbuf) HDmemcpy (dp, d, dst_p->size);
 	    sp += direction * src_p->size;
 	    dp += direction * dst_p->size;
@@ -1324,12 +1368,14 @@ H5T_conv_float_double (hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *
  * Modifications:
  *
+ * 	Robb Matzke, 7 Jul 1998
+ *	Added overflow handling.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_float (hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		       H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		       void __unused__ *bkg)
+H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		       size_t nelmts, void *buf, void __unused__ *bkg)
 {
     size_t	elmtno;			/*element number		*/
     double	*s;			/*source buffer			*/
@@ -1349,8 +1395,20 @@ H5T_conv_double_float (hid_t __unused__ src_id, hid_t __unused__ dst_id,
 	s = (double*)buf;
 	d = (float*)buf;
 
-	for (elmtno=0; elmtno<nelmts; elmtno++) {
-	    *d++ = *s++;
+	for (elmtno=0; elmtno<nelmts; elmtno++, d++, s++) {
+	    if (*s > FLT_MAX) {
+		if (!H5T_overflow_g ||
+		    (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+		    *d = HUGE_VAL;
+		}
+	    } else if (*s < -FLT_MAX) {
+		if (!H5T_overflow_g ||
+		    (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+		    *d = -HUGE_VAL;
+		}
+	    } else {
+		*d = *s;
+	    }
 	}
 	break;
 	    

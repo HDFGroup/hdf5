@@ -116,6 +116,9 @@ typedef enum H5T_sdir_t {
     H5T_BIT_MSB				/*search msb toward lsb		     */
 } H5T_sdir_t;
 
+/* The overflow handler */
+extern H5T_overflow_t H5T_overflow_g;
+
 /* Function prototypes for H5T package scope */
 H5T_path_t *H5T_path_find (const char *name, const H5T_t *src,
 			   const H5T_t *dst, hbool_t create, H5T_conv_t func);

@@ -209,7 +209,7 @@ H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if (create_parms_id >= 0) {
-	if (H5P_DATASET_CREATE != H5Pget_class(create_parms_id) ||
+	if (H5P_DATASET_CREATE != H5P_get_class(create_parms_id) ||
 	    NULL == (create_parms = H5I_object(create_parms_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "not a dataset creation property list");
@@ -552,8 +552,8 @@ H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5D_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dread, FAIL);
-    H5TRACE5("e","iiiii",dataset_id,mem_type_id,mem_space_id,file_space_id,
-             xfer_parms_id);
+    H5TRACE6("e","iiiiix",dataset_id,mem_type_id,mem_space_id,file_space_id,
+             xfer_parms_id,buf);
 
     /* check arguments */
     if (H5_DATASET != H5I_group(dataset_id) ||
@@ -579,7 +579,7 @@ H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
     if (H5P_DEFAULT == xfer_parms_id) {
 	xfer_parms = &H5D_xfer_dflt;
-    } else if (H5P_DATASET_XFER != H5Pget_class(xfer_parms_id) ||
+    } else if (H5P_DATASET_XFER != H5P_get_class(xfer_parms_id) ||
 	       NULL == (xfer_parms = H5I_object(xfer_parms_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
@@ -670,7 +670,7 @@ H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
     if (H5P_DEFAULT == xfer_parms_id) {
 	xfer_parms = &H5D_xfer_dflt;
-    } else if (H5P_DATASET_XFER != H5Pget_class(xfer_parms_id) ||
+    } else if (H5P_DATASET_XFER != H5P_get_class(xfer_parms_id) ||
 	       NULL == (xfer_parms = H5I_object(xfer_parms_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }

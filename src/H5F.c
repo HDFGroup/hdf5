@@ -1153,14 +1153,14 @@ H5Fcreate (const char *filename, unsigned flags, hid_t create_id,
     }
     if (H5P_DEFAULT==create_id) {
 	create_parms = &H5F_create_dflt;
-    } else if (H5P_FILE_CREATE!=H5Pget_class (create_id) ||
+    } else if (H5P_FILE_CREATE!=H5P_get_class (create_id) ||
 	       NULL == (create_parms = H5I_object(create_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file creation property list");
     }
     if (H5P_DEFAULT==access_id) {
 	access_parms = &H5F_access_dflt;
-    } else if (H5P_FILE_ACCESS!=H5Pget_class (access_id) ||
+    } else if (H5P_FILE_ACCESS!=H5P_get_class (access_id) ||
 	       NULL == (access_parms = H5I_object(access_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file access property list");
@@ -1259,7 +1259,7 @@ H5Fopen (const char *filename, unsigned flags, hid_t access_id)
     }
     if (H5P_DEFAULT==access_id) {
 	access_parms = &H5F_access_dflt;
-    } else if (H5P_FILE_ACCESS!=H5Pget_class (access_id) ||
+    } else if (H5P_FILE_ACCESS!=H5P_get_class (access_id) ||
 	       NULL == (access_parms = H5I_object(access_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file access property list");

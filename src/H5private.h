@@ -481,40 +481,45 @@ extern char *strdup(const char *s);
  *------------------------------------------------------------------------- 
  */
 #ifdef H5_DEBUG_API
-#define H5TRACE_DECL			  const char *RTYPE=NULL
-#define H5TRACE0(R,T)			  RTYPE=R;			      \
-                                          H5_trace(0,FUNC,T)
-#define H5TRACE1(R,T,A0)		  RTYPE=R;			      \
-                                          H5_trace(0,FUNC,T,#A0,A0)
-#define H5TRACE2(R,T,A0,A1)		  RTYPE=R;			      \
-                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1)
-#define H5TRACE3(R,T,A0,A1,A2)	  	  RTYPE=R;			      \
-                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
-                                                   #A2,A2)
-#define H5TRACE4(R,T,A0,A1,A2,A3)	  RTYPE=R;			      \
-                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
-                                                   #A2,A2,#A3,A3)
-#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	  RTYPE=R;			      \
-                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
-                                                   #A2,A2,#A3,A3,#A4,A4)
-#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	  RTYPE=R;			      \
-                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
-                                                   #A2,A2,#A3,A3,#A4,A4,      \
-                                                   #A5,A5)
-#define H5TRACE_RETURN(V)		  if (RTYPE) {			      \
-                                             H5_trace(1,NULL,RTYPE,NULL,V);   \
-                                             RTYPE=NULL;		      \
-                                          }
+#define H5TRACE_DECL			   const char *RTYPE=NULL
+#define H5TRACE0(R,T)			   RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T)
+#define H5TRACE1(R,T,A0)		   RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T,#A0,A0)
+#define H5TRACE2(R,T,A0,A1)		   RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T,#A0,A0,#A1,A1)
+#define H5TRACE3(R,T,A0,A1,A2)	  	   RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
+                                                    #A2,A2)
+#define H5TRACE4(R,T,A0,A1,A2,A3)	   RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
+                                                    #A2,A2,#A3,A3)
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	   RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
+                                                    #A2,A2,#A3,A3,#A4,A4)
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	   RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
+                                                    #A2,A2,#A3,A3,#A4,A4,     \
+                                                    #A5,A5)
+#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6) RTYPE=R;			      \
+                                           H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
+                                                    #A2,A2,#A3,A3,#A4,A4,     \
+                                                    #A5,A5,#A6,A6)
+#define H5TRACE_RETURN(V)		   if (RTYPE) {			      \
+                                              H5_trace(1,NULL,RTYPE,NULL,V);  \
+                                              RTYPE=NULL;		      \
+                                           }
 #else
-#define H5TRACE_DECL			  /*void*/
-#define H5TRACE0(R,T)			  /*void*/
-#define H5TRACE1(R,T,A0)		  /*void*/
-#define H5TRACE2(R,T,A0,A1)		  /*void*/
-#define H5TRACE3(R,T,A0,A1,A2)		  /*void*/
-#define H5TRACE4(R,T,A0,A1,A2,A3)	  /*void*/
-#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	  /*void*/
-#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	  /*void*/
-#define H5TRACE_RETURN(V)		  /*void*/
+#define H5TRACE_DECL			   /*void*/
+#define H5TRACE0(R,T)			   /*void*/
+#define H5TRACE1(R,T,A0)		   /*void*/
+#define H5TRACE2(R,T,A0,A1)		   /*void*/
+#define H5TRACE3(R,T,A0,A1,A2)		   /*void*/
+#define H5TRACE4(R,T,A0,A1,A2,A3)	   /*void*/
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	   /*void*/
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	   /*void*/
+#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6) /*void*/
+#define H5TRACE_RETURN(V)		   /*void*/
 #endif
 
 void H5_trace (hbool_t returning, const char *func, const char *type, ...);

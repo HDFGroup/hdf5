@@ -99,6 +99,9 @@ static intn H5T_nsoft_g = 0;			/*num soft funcs defined */
 static intn H5T_asoft_g = 0;			/*num slots allocated	*/
 static H5T_soft_t *H5T_soft_g = NULL;		/*master soft list	*/
 
+/* The overflow handler */
+H5T_overflow_t H5T_overflow_g = NULL;
+
 /*--------------------------------------------------------------------------
 NAME
    H5T_init_interface -- Initialize interface-specific information
@@ -1201,11 +1204,12 @@ H5Tlock (hid_t type_id)
  *-------------------------------------------------------------------------
  */
 H5T_class_t
-H5Tget_class(hid_t type_id)
+H5Tget_class (hid_t type_id)
 {
     H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tget_class, H5T_NO_CLASS);
+    H5TRACE1("Tt","i",type_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -1384,12 +1388,13 @@ H5Tset_size (hid_t type_id, size_t size)
  *-------------------------------------------------------------------------
  */
 H5T_order_t
-H5Tget_order(hid_t type_id)
+H5Tget_order (hid_t type_id)
 {
     H5T_t		*dt = NULL;
     H5T_order_t		order;
 
     FUNC_ENTER(H5Tget_order, H5T_ORDER_ERROR);
+    H5TRACE1("To","i",type_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -1751,7 +1756,7 @@ H5Tget_pad (hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
     H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tget_pad, FAIL);
-    H5TRACE1("e","i",type_id);
+    H5TRACE3("e","ixx",type_id,lsb,msb);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -1830,12 +1835,13 @@ H5Tset_pad (hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
  *-------------------------------------------------------------------------
  */
 H5T_sign_t
-H5Tget_sign(hid_t type_id)
+H5Tget_sign (hid_t type_id)
 {
     H5T_t		*dt = NULL;
     H5T_sign_t		sign;
 
     FUNC_ENTER(H5Tget_sign, H5T_SGN_ERROR);
+    H5TRACE1("Ts","i",type_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -1925,7 +1931,7 @@ H5Tget_fields (hid_t type_id, size_t *spos/*out*/,
     H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tget_fields, FAIL);
-    H5TRACE1("e","i",type_id);
+    H5TRACE6("e","ixxxxx",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -2126,12 +2132,13 @@ H5Tset_ebias (hid_t type_id, size_t ebias)
  *-------------------------------------------------------------------------
  */
 H5T_norm_t
-H5Tget_norm(hid_t type_id)
+H5Tget_norm (hid_t type_id)
 {
     H5T_t	*dt = NULL;
     H5T_norm_t	norm;
 
     FUNC_ENTER(H5Tget_norm, H5T_NORM_ERROR);
+    H5TRACE1("Tn","i",type_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -2213,12 +2220,13 @@ H5Tset_norm (hid_t type_id, H5T_norm_t norm)
  *-------------------------------------------------------------------------
  */
 H5T_pad_t
-H5Tget_inpad(hid_t type_id)
+H5Tget_inpad (hid_t type_id)
 {
     H5T_t	*dt = NULL;
     H5T_pad_t	pad;
 
     FUNC_ENTER(H5Tget_inpad, H5T_PAD_ERROR);
+    H5TRACE1("Tp","i",type_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -2302,12 +2310,13 @@ H5Tset_inpad (hid_t type_id, H5T_pad_t pad)
  *-------------------------------------------------------------------------
  */
 H5T_cset_t
-H5Tget_cset(hid_t type_id)
+H5Tget_cset (hid_t type_id)
 {
     H5T_t	*dt = NULL;
     H5T_cset_t	cset;
 
     FUNC_ENTER(H5Tget_cset, H5T_CSET_ERROR);
+    H5TRACE1("Tc","i",type_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -2390,12 +2399,13 @@ H5Tset_cset (hid_t type_id, H5T_cset_t cset)
  *-------------------------------------------------------------------------
  */
 H5T_str_t
-H5Tget_strpad(hid_t type_id)
+H5Tget_strpad (hid_t type_id)
 {
     H5T_t	*dt = NULL;
     H5T_str_t	strpad;
 
     FUNC_ENTER(H5Tget_strpad, H5T_STR_ERROR);
+    H5TRACE1("Tz","i",type_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -2614,7 +2624,7 @@ H5Tget_member_dims (hid_t type_id, int membno,
     intn	ndims, i;
 
     FUNC_ENTER(H5Tget_member_dims, FAIL);
-    H5TRACE2("Is","iIs",type_id,membno);
+    H5TRACE4("Is","iIsxx",type_id,membno,dims,perm);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(type_id) ||
@@ -2831,7 +2841,8 @@ H5Tpack (hid_t type_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tregister_hard (const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
+H5Tregister_hard (const char *name, hid_t src_id, hid_t dst_id,
+		  H5T_conv_t func)
 {
     H5T_t	*src = NULL;
     H5T_t	*dst = NULL;
@@ -3139,12 +3150,13 @@ H5Tunregister (H5T_conv_t func)
  *-------------------------------------------------------------------------
  */
 H5T_conv_t
-H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
+H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
 {
     H5T_conv_t	ret_value = NULL;
     H5T_t	*src = NULL, *dst = NULL;
 
     FUNC_ENTER(H5Tfind, NULL);
+    H5TRACE3("x","iix",src_id,dst_id,pcdata);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(src_id) ||
@@ -3227,6 +3239,71 @@ H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 
     FUNC_LEAVE (SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_overflow
+ *
+ * Purpose:	Returns a pointer to the current global overflow function.
+ *		This is an application-defined function that is called
+ *		whenever a data type conversion causes an overflow.
+ *
+ * Return:	Success:	Ptr to an application-defined function.
+ *
+ *		Failure:	NULL (this can happen if no overflow handling
+ *				function is registered).
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_overflow_t
+H5Tget_overflow (void)
+{
+    FUNC_ENTER(H5Tget_overflow, NULL);
+    H5TRACE0("x","");
+
+    if (NULL==H5T_overflow_g) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNINITIALIZED, NULL,
+		      "no overflow handling function is registered");
+    }
+
+    FUNC_LEAVE(H5T_overflow_g);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tset_overflow
+ *
+ * Purpose:	Sets the overflow handler to be the specified function.  FUNC
+ *		will be called for all data type conversions that result in
+ *		an overflow.  See the definition of `H5T_overflow_t' for
+ *		documentation of arguments and return values.  The NULL
+ *		pointer may be passed to remove the overflow handler.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tset_overflow (H5T_overflow_t func)
+{
+    FUNC_ENTER(H5Tset_overflow, FAIL);
+    H5TRACE1("e","x",func);
+    H5T_overflow_g = func;
+    FUNC_LEAVE(SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * API functions are above; library-private functions are below...

@@ -694,7 +694,7 @@ H5Sget_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
     intn		   ret_value = 0;
 
     FUNC_ENTER(H5Sget_dims, FAIL);
-    H5TRACE1("Is","i",space_id);
+    H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {

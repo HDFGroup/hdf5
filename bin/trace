@@ -21,6 +21,7 @@ $Source = "";
                "herr_t"                    => "e",
                "H5E_direction_t"           => "Ed",
                "H5E_error_t*"              => "Ee",
+	       "H5F_driver_t"              => "Fd",
                "H5G_link_t"                => "Gl",
                "H5G_stat_t*"               => "Gs",
                "hsize_t"                   => "h",
@@ -47,7 +48,9 @@ $Source = "";
 	       "H5E_auto_t"                => "x",
                "H5E_walk_t"                => "x",
                "H5G_iterate_t"             => "x",
+	       "H5T_cdata_t**"             => "x",
                "H5T_conv_t"                => "x",
+	       "H5T_overflow_t"            => "x",
                "H5Z_func_t"                => "x",
                "size_t"                    => "z",
                "H5Z_method_t"              => "Zm",
@@ -76,6 +79,7 @@ sub errmesg ($$@) {
 sub argstring ($$$) {
   my ($file, $func, $atype) = @_;
   my ($ptr, $tstr) = (0,"!");
+  my ($fq_atype);
 
   # Normalize the data type by removing redundant white space,
   # certain type qualifiers, and indirection.
@@ -85,8 +89,12 @@ sub argstring ($$$) {
   $ptr = length $1 if  $atype =~ s/(\*+)//;
   $atype =~ s/^\s+//;
   $atype =~ s/\s+$//;
-  
-  if ($ptr>0 && exists $TypeString{"$atype*"}) {
+  $fq_atype = $atype . ('*' x $ptr);
+
+  if ($ptr>0 && exists $TypeString{$fq_atype}) {
+    $ptr = 0;
+    $tstr = $TypeString{$fq_atype};
+  } elsif ($ptr>0 && exists $TypeString{"$atype*"}) {
     --$ptr;
     $tstr = $TypeString{"$atype*"};
   } elsif (!exists $TypeString{$atype}) {
@@ -113,23 +121,31 @@ sub rewrite_func ($$$$$) {
 
   # Parse arguments
   if ($args eq "void") {
-    $trace = "H5TRACE0(\"$rettype\", \"\");\n";
+    $trace = "H5TRACE0(\"$rettype\",\"\");\n";
   } else {
+    # Split arguments.  First convert `/*in,out*/' to get rid of the
+    # comma, then split the arguments on commas.
+    $args =~ s/(\/\*\s*in),\s*(out\s*\*\/)/$1_$2/g;
     my @args = split /,[\s\n]*/, $args;
+
     for $arg (@args) {
       unless ($arg=~/^(([a-z_A-Z]\w*\s+)+\**)
 	      ([a-z_A-Z]\w*)(\[\])?
-	      (\s*\/\*\s*(in|out|in,\s*out)\s*\*\/)?\s*$/x) {
+	      (\s*\/\*\s*(in|out|in_out)\s*\*\/)?\s*$/x) {
 	errmesg $file, $name, "unable to parse \`$arg\'";
 	goto error;
       } else {
 	my ($atype, $aname, $array, $adir) = ($1, $3, $4, $6);
 	$adir ||= "in";
-	next if $adir eq "out";
 	$atype =~ s/\s+$//;
-	$atype .= "*" if $array;
 	push @arg_name, $aname;
-	push @arg_str, argstring $file, $name, $atype;
+
+	if ($adir eq "out") {
+	  push @arg_str, "x";
+	} else {
+	  $atype .= "*" if $array;
+	  push @arg_str, argstring $file, $name, $atype;
+	}
       }
     }
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\",\"";
@@ -183,7 +199,7 @@ for $file (@ARGV) {
 
   # Make modifications
   my $original = $Source;
-  my $napi = $Source =~ s/\n([a-z]\w*(\s+[a-z]\w*)*)\s*\n #type
+  my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[a-z]\w*)*)\s*\n #type
                             (H5[A-Z]{1,2}[^_A-Z]\w*)      #name
                             \s*\((.*?)\)                  #args
                             (.*?\n\}[^\n]*)               #body

@@ -195,7 +195,7 @@ H5Acreate (hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if (H5P_DEFAULT!=create_plist &&
-	(H5P_DATASET_CREATE != H5Pget_class(create_plist) ||
+	(H5P_DATASET_CREATE != H5P_get_class(create_plist) ||
 	 NULL == H5I_object(create_plist))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");

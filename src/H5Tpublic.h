@@ -118,6 +118,19 @@ typedef struct H5T_cdata_t {
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, void *buf, void *bkg);
 
+/*
+ * If an error occurs during a data type conversion then the function
+ * registered with H5Tset_overflow() is called.  It's arguments are the
+ * source and destination data types, a buffer which has the source value,
+ * and a buffer to receive an optional result for the overflow conversion.
+ * If the overflow handler chooses a value for the result it should return
+ * non-negative; otherwise the hdf5 library will choose an appropriate
+ * result.
+ */
+typedef herr_t (*H5T_overflow_t)(hid_t src_id, hid_t dst_id,
+				 void *src_buf, void *dst_buf);
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -379,6 +392,8 @@ herr_t H5Tunregister (H5T_conv_t func);
 H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 herr_t H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 		   void *background);
+H5T_overflow_t H5Tget_overflow(void);
+herr_t H5Tset_overflow(H5T_overflow_t func);
 
 #ifdef __cplusplus
 }
