@@ -3,9 +3,9 @@ HDF5 HISTORY
 
 CONTENTS
 I.   Release Information for hdf5-1.4.0
-II.   Release Information for hdf5-1.2.2
-III.  Release Information for hdf5-1.2.1
-IV. Release Information for hdf5-1.2.0
+II.  Release Information for hdf5-1.2.2
+III. Release Information for hdf5-1.2.1
+IV.  Release Information for hdf5-1.2.0
      A. Platforms Supported
      B. Known Problems
      C. Changes Since Version 1.0.1  
