@@ -449,3 +449,156 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_get_total_size() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_remove_find_cb
+ *
+ * Purpose:	v2 B-tree find callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 11, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5BT_remove_find_cb(const void *_record, void *_op_data)
+{
+    const H5BT_blk_info_t *record = (const H5BT_blk_info_t *)_record;
+    H5BT_blk_info_t *search = (H5BT_blk_info_t *)_op_data;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5BT_remove_find_cb)
+
+    /* Copy the data out */
+    *search = *record;
+
+    FUNC_LEAVE_NOAPI(0);
+} /* end H5BT_remove_find_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_remove
+ *
+ * Purpose:	Remove a block (offset/length) from a block tracker.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 11 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5BT_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t length)
+{
+    H5BT_t *bt = NULL;                  /* The new B-tree header information */
+    H5BT_blk_info_t found;              /* Block info found */
+    hsize_t nblks;                      /* Number of blocks tracked */
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5BT_remove, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the block tracker header */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
+
+    /* Check for block at this address already */
+    if (H5B2_find(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &offset, H5BT_remove_find_cb, &found) < 0) {
+        /* Clear any errors from H5B2_find() */
+        H5E_clear_stack(NULL);
+
+        /* Find next block lower */
+HDfprintf(stderr,"%s: Need to search for lower & upper block!\n",FUNC);
+HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
+    } /* end if */
+    else {
+        /* Found block at address */
+
+        /* Check for exact fit */
+        if(found.len == length) {
+            /* Delete recode from B-tree */
+            if(H5B2_remove(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &found)<0)
+                HGOTO_ERROR(H5E_BLKTRK, H5E_CANTDELETE, FAIL, "can't remove block")
+
+            /* Determine the number of blocks being tracked */
+            if(H5B2_get_nrec(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &nblks) < 0)
+                HGOTO_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to determine # of blocks")
+
+            /* Check for no blocks left */
+            if(nblks == 0) {
+                bt->max_block_size = 0;             /* Indicate that the value is invalid */
+                bt->max_block_cnt = 0;
+                bt->min_block_size = HSIZET_MAX;    /* Indicate that the value is invalid */
+                bt->min_block_cnt = 0;
+                bt->status = 0;
+            } /* end if */
+            else {
+                /* Update max. block metadata */
+                if(found.len == bt->max_block_size) {
+                    /* Decrement maximum block count */
+                    bt->max_block_cnt--;
+
+                    /* Check if we don't know the maximum size any longer */
+                    if(bt->max_block_cnt==0) {
+                        if(bt->min_block_size < HSIZET_MAX) {
+                            bt->max_block_size = bt->min_block_size;
+                            bt->max_block_cnt = bt->min_block_cnt;
+                        } /* end if */
+                        else
+                            bt->max_block_size = 0;
+                        bt->status &= ~H5BT_STATUS_MAX_VALID;
+                    } /* end if */
+                } /* end if */
+
+                /* Update min. block metadata */
+                if(found.len == bt->min_block_size) {
+                    /* Decrement minimum block count */
+                    bt->min_block_cnt--;
+
+                    /* Check if we don't know the minimum size any longer */
+                    if(bt->min_block_cnt==0) {
+                        if(bt->max_block_size > 0) {
+                            bt->min_block_size = bt->max_block_size;
+                            bt->min_block_cnt = bt->max_block_cnt;
+                        } /* end if */
+                        else
+                            bt->min_block_size = HSIZET_MAX;
+                        bt->status &= ~H5BT_STATUS_MIN_VALID;
+                    } /* end if */
+                } /* end if */
+            } /* end else */
+
+            /* Decrement total amount of blocks tracked */
+            bt->tot_block_size -= length;
+        } /* end if */
+        else if(found.len > length) {
+HDfprintf(stderr,"%s: found={%a/%Hu}\n",FUNC,found.addr,found.len);
+HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
+        } /* end if */
+        else {
+            /* Check for blocks at higher address, if necessary */
+HDfprintf(stderr,"%s: found={%a/%Hu}\n",FUNC,found.addr,found.len);
+HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
+        } /* end else */
+    } /* end else */
+
+done:
+    /* Release the block tracker info */
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5BT_remove() */
+

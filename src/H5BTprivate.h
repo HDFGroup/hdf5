@@ -48,6 +48,8 @@
 H5_DLL herr_t H5BT_create(H5F_t *f, hid_t dxpl_id, haddr_t *addr_p);
 H5_DLL herr_t H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset,
     hsize_t length);
+H5_DLL herr_t H5BT_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset,
+    hsize_t length);
 H5_DLL herr_t H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     hsize_t *tot_size);
 
