@@ -2268,6 +2268,60 @@
       </table>
     </center>
 
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Bit Field for Bitfield types (Class 4)</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="10%">Bits</th>
+	  <th width="90%">Meaning</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>0</td>
+	  <td><b>Byte Order.</b> If zero, byte order is little-endian;
+	    otherwise, byte order is big endian.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>1, 2</td>
+	  <td><b>Padding type.</b>  Bit 1 is the lo_pad type and bit 2
+	    is the hi_pad type.  If a datum has unused bits at either
+	    end, then the lo_pad or hi_pad bit is copied to those
+	    locations.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>3-23</td>
+	  <td>Reserved (zero).</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Properties for Bitfield types (Class 4)</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=2>Bit Offset</td>
+	  <td colspan=2>Bit Precision</td>
+	</tr>
+      </table>
+    </center>
+
     <p>Data type examples are <a href="Datatypes.html">here</a>.
       
 

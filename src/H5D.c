@@ -1455,7 +1455,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t             must_convert;        /*have to xfer the slow way*/
-#if defined(H5S_DEBUG) || defined(H5T_DEBUG)
+#ifdef H5S_DEBUG
     H5_timer_t		timer;
 #endif
 
@@ -1827,7 +1827,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t             must_convert;        /*have to xfer the slow way*/
-#if defined(H5S_DEBUG) || defined(H5T_DEBUG)
+#ifdef H5S_DEBUG
     H5_timer_t		timer;
 #endif
 

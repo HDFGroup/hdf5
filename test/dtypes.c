@@ -1133,6 +1133,131 @@ test_conv_enum_1(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_conv_bitfield
+ *
+ * Purpose:	Test bitfield conversions.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_bitfield(void)
+{
+    unsigned char	buf[4];
+    hid_t		st=-1, dt=-1;
+
+    TESTING("bitfield conversions");
+
+    /*
+     * First test a simple bitfield conversion:
+     *                   1010101010101010
+     *   ________________1010101010101010
+     */
+    st = H5Tcopy(H5T_STD_B16LE);
+    dt = H5Tcopy(H5T_STD_B32LE);
+    buf[0] = buf[1] = 0xAA;
+    buf[2] = buf[3] = 0x55; /*irrelevant*/
+    if (H5Tconvert(st, dt, 1, buf, NULL)<0) goto error;
+    if (buf[0]!=0xAA || buf[1]!=0xAA || buf[2]!=0 || buf[3]!=0) {
+	FAILED();
+	printf("    s=0xaaaa, d=0x%02x%02x%02x%02x (test 1)\n",
+	       buf[3], buf[2], buf[1], buf[0]);
+	goto error;
+    }
+
+    /*
+     * Test2: Offset a 12-byte value in the middle of a 16 and 32 byte
+     * field.
+     *              __10 1010 1010 10__
+     *    ____ ____ __10 1010 1010 10__ ____ ____
+     */
+    H5Tset_precision(st, 12);
+    H5Tset_offset(st, 2);
+    H5Tset_precision(dt, 12);
+    H5Tset_offset(dt, 10);
+    buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
+    if (H5Tconvert(st, dt, 1, buf, NULL)<0) goto error;
+    if (buf[0]!=0 || buf[1]!=0xA8 || buf[2]!=0x2A || buf[3]!=0) {
+	FAILED();
+	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 2)\n",
+	       buf[3], buf[2], buf[1], buf[0]);
+	goto error;
+    }
+
+    /*
+     * Same as previous test except unused bits of the destination will
+     * be filled with ones.
+     */
+    H5Tset_pad(dt, H5T_PAD_ONE, H5T_PAD_ONE);
+    buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
+    if (H5Tconvert(st, dt, 1, buf, NULL)<0) goto error;
+    if (buf[0]!=0xff || buf[1]!=0xAB || buf[2]!=0xEA || buf[3]!=0xff) {
+	FAILED();
+	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 3)\n",
+	       buf[3], buf[2], buf[1], buf[0]);
+	goto error;
+    }
+
+    H5Tclose(st);
+    H5Tclose(dt);
+    PASSED();
+    reset_hdf5();
+    return 0;
+
+ error:
+    H5Tclose(st);
+    H5Tclose(dt);
+    reset_hdf5();
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_opaque
+ *
+ * Purpose:	Test opaque datatypes
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_opaque(void)
+{
+    hid_t	st=-1, dt=-1;
+
+    TESTING("opaque datatypes");
+    
+    if ((st=H5Tcreate(H5T_OPAQUE, 4))<0) goto error;
+
+    H5Tclose(st);
+    PASSED();
+    return 0;
+
+ error:
+    if (st>0) H5Tclose(st);
+    if (dt>0) H5Tclose(dt);
+    FAILED();
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_conv_int
  *
  * Purpose:	Test atomic number conversions.
@@ -3016,6 +3141,8 @@ main(void)
     nerrors += test_conv_str_2()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
     nerrors += test_conv_enum_1()<0 ? 1 : 0;
+    nerrors += test_conv_bitfield()<0 ? 1 : 0;
+    nerrors += test_opaque()<0 ? 1 : 0;
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();

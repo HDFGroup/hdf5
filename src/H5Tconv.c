@@ -496,6 +496,213 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_conv_b_b
+ *
+ * Purpose:	Convert from one bitfield to any other bitfield.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, May 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+	     void *_buf, void UNUSED *background)
+{
+    uint8_t	*buf = (uint8_t*)_buf;
+    H5T_t	*src=NULL, *dst=NULL;	/*source and dest data types	*/
+    intn	direction;		/*direction of traversal	*/
+    size_t	elmtno;			/*element number		*/
+    size_t	olap;			/*num overlapping elements	*/
+    size_t	half_size;		/*1/2 of total size for swapping*/
+    uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
+    uint8_t	dbuf[256];		/*temp destination buffer	*/
+    size_t	msb_pad_offset;		/*offset for dest MSB padding	*/
+    size_t	i;
+
+    FUNC_ENTER(H5T_conv_b_b, FAIL);
+
+    switch(cdata->command) {
+    case H5T_CONV_INIT:
+	/* Capability query */
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
+	    NULL == (src = H5I_object(src_id)) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
+	    NULL == (dst = H5I_object(dst_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	if (H5T_ORDER_LE!=src->u.atomic.order &&
+	    H5T_ORDER_BE!=src->u.atomic.order) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			   "unsupported byte order");
+	}
+	if (H5T_ORDER_LE!=dst->u.atomic.order &&
+	    H5T_ORDER_BE!=dst->u.atomic.order) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			   "unsupported byte order");
+	}
+	cdata->need_bkg = H5T_BKG_NO;
+	break;
+
+    case H5T_CONV_FREE:
+	break;
+
+    case H5T_CONV_CONV:
+	/* Get the data types */
+	if (H5I_DATATYPE!=H5I_get_type (src_id) ||
+	    NULL==(src=H5I_object (src_id)) ||
+	    H5I_DATATYPE!=H5I_get_type (dst_id) ||
+	    NULL==(dst=H5I_object (dst_id))) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+
+	/*
+	 * Do we process the values from beginning to end or vice versa? Also,
+	 * how many of the elements have the source and destination areas
+	 * overlapping?
+	 */
+	if (src->size==dst->size) {
+	    sp = dp = (uint8_t*)buf;
+	    direction = 1;
+	    olap = nelmts;
+	} else if (src->size>=dst->size) {
+	    double olap_d = HDceil((double)(dst->size)/
+				   (double)(src->size-dst->size));
+	    
+	    olap = (size_t)olap_d;
+	    sp = dp = (uint8_t*)buf;
+	    direction = 1;
+	} else {
+	    double olap_d = HDceil((double)(src->size)/
+				   (double)(dst->size-src->size));
+	    olap = (size_t)olap_d;
+	    sp = (uint8_t*)buf + (nelmts-1) * src->size;
+	    dp = (uint8_t*)buf + (nelmts-1) * dst->size;
+	    direction = -1;
+	}
+
+	/* The conversion loop */
+	for (elmtno=0; elmtno<nelmts; elmtno++) {
+
+	    /*
+	     * If the source and destination buffers overlap then use a
+	     * temporary buffer for the destination.
+	     */
+	    if (direction>0) {
+		s = sp;
+		d = elmtno<olap ? dbuf : dp;
+	    } else {
+		s = sp;
+		d = elmtno+olap >= nelmts ? dbuf : dp;
+	    }
+#ifndef NDEBUG
+	    /* I don't quite trust the overlap calculations yet --rpm */
+	    if (d==dbuf) {
+		assert ((dp>=sp && dp<sp+src->size) ||
+			(sp>=dp && sp<dp+dst->size));
+	    } else {
+		assert ((dp<sp && dp+dst->size<=sp) ||
+			(sp<dp && sp+src->size<=dp));
+	    }
+#endif
+	    
+	    /*
+	     * Put the data in little endian order so our loops aren't so
+	     * complicated.  We'll do all the conversion stuff assuming
+	     * little endian and then we'll fix the order at the end.
+	     */
+	    if (H5T_ORDER_BE==src->u.atomic.order) {
+		half_size = src->size/2;
+		for (i=0; i<half_size; i++) {
+		    uint8_t tmp = s[src->size-(i+1)];
+		    s[src->size-(i+1)] = s[i];
+		    s[i] = tmp;
+		}
+	    }
+
+	    /*
+             * Copy the significant part of the value. If the source is larger
+             * than the destination then invoke the overflow function or copy
+             * as many bits as possible.
+             */
+	    if (src->u.atomic.prec>dst->u.atomic.prec) {
+		if (!H5T_overflow_g ||
+		    (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+		    H5T_bit_copy(d, dst->u.atomic.offset,
+				 s, src->u.atomic.offset, dst->u.atomic.prec);
+		}
+	    } else {
+		H5T_bit_copy(d, dst->u.atomic.offset,
+			     s, src->u.atomic.offset,
+			     src->u.atomic.prec);
+	    }
+
+	    /*
+             * Fill the destination padding areas.
+             */
+	    switch (dst->u.atomic.lsb_pad) {
+	    case H5T_PAD_ZERO:
+		H5T_bit_set(d, 0, dst->u.atomic.offset, FALSE);
+		break;
+	    case H5T_PAD_ONE:
+		H5T_bit_set(d, 0, dst->u.atomic.offset, TRUE);
+		break;
+	    default:
+		HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			      "unsupported LSB padding");
+	    }
+	    msb_pad_offset = dst->u.atomic.offset + dst->u.atomic.prec;
+	    switch (dst->u.atomic.msb_pad) {
+	    case H5T_PAD_ZERO:
+		H5T_bit_set(d, msb_pad_offset, 8*dst->size-msb_pad_offset,
+			    FALSE);
+		break;
+	    case H5T_PAD_ONE:
+		H5T_bit_set(d, msb_pad_offset, 8*dst->size-msb_pad_offset,
+			    TRUE);
+		break;
+	    default:
+		HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			      "unsupported MSB padding");
+	    }
+
+	    /*
+	     * Put the destination in the correct byte order.  See note at
+	     * beginning of loop.
+	     */
+	    if (H5T_ORDER_BE==dst->u.atomic.order) {
+		half_size = dst->size/2;
+		for (i=0; i<half_size; i++) {
+		    uint8_t tmp = d[dst->size-(i+1)];
+		    d[dst->size-(i+1)] = d[i];
+		    d[i] = tmp;
+		}
+	    }
+
+	    /*
+	     * If we had used a temporary buffer for the destination then we
+	     * should copy the value to the true destination buffer.
+	     */
+	    if (d==dbuf) HDmemcpy (dp, d, dst->size);
+	    sp += direction * src->size;
+	    dp += direction * dst->size;
+	}
+	
+	break;
+
+    default:
+	HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+		       "unknown conversion command");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+	    
+/*-------------------------------------------------------------------------
  * Function:	H5T_conv_struct_init
  *
  * Purpose:	Initialize the `priv' field of `cdata' with conversion

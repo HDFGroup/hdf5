@@ -53,11 +53,11 @@ typedef struct H5T_atomic_t {
 	struct {
 	    H5T_cset_t	cset;	/*character set				     */
 	    H5T_str_t	pad;	/*space or null padding of extra bytes	     */
-	} s;
+	} s;			/*string types				     */
 
 	struct {
-	    H5R_type_t	rtype;	/* Type of reference stored */
-	} r;
+	    H5R_type_t	rtype;	/*type of reference stored		     */
+	} r;			/*reference types			     */
     } u;
 } H5T_atomic_t;
 
@@ -85,6 +85,11 @@ typedef struct H5T_enum_t {
     char		**name;		/*array of symbol names		     */
 } H5T_enum_t;
 
+/* An opaque data type */
+typedef struct H5T_opaque_t {
+    char		*tag;		/*short type description string	     */
+} H5T_opaque_t;
+
 typedef enum H5T_state_t {
     H5T_STATE_TRANSIENT, 		/*type is a modifiable transient     */
     H5T_STATE_RDONLY,			/*transient, not modifiable, closable*/
@@ -104,6 +109,7 @@ struct H5T_t {
 	H5T_atomic_t	atomic; /*an atomic data type			     */
 	H5T_compnd_t	compnd; /*a compound data type (struct)		     */
 	H5T_enum_t	enumer; /*an enumeration type (enum)		     */
+	H5T_opaque_t	opaque; /*an opaque data type			     */
     } u;
 };
 
@@ -170,6 +176,8 @@ __DLL__ herr_t H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 __DLL__ herr_t H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, void *_buf, void *bkg);
 __DLL__ herr_t H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *_buf, void *bkg);
+__DLL__ herr_t H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, void *_buf, void *bkg);
 
 __DLL__ herr_t H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id,

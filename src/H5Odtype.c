@@ -72,14 +72,16 @@ static intn		interface_initialize_g = 0;
  *		Monday, December  8, 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, Thursday, May 20, 1999
+ *		Added support for bitfields and opaque data types.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 {
-    uintn		    flags, perm_word, version;
-    intn		    i, j;
+    uintn		flags, perm_word, version;
+    intn		i, j;
+    size_t		z;
 
     FUNC_ENTER(H5O_dtype_decode_helper, FAIL);
 
@@ -109,6 +111,32 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 	dt->u.atomic.u.i.sign = (flags & 0x8) ? H5T_SGN_2 : H5T_SGN_NONE;
 	UINT16DECODE(*pp, dt->u.atomic.offset);
 	UINT16DECODE(*pp, dt->u.atomic.prec);
+	break;
+
+    case H5T_BITFIELD:
+	/*
+         * Bit fields...
+         */
+	dt->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
+	dt->u.atomic.lsb_pad = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
+	dt->u.atomic.msb_pad = (flags & 0x4) ? H5T_PAD_ONE : H5T_PAD_ZERO;
+	UINT16DECODE(*pp, dt->u.atomic.offset);
+	UINT16DECODE(*pp, dt->u.atomic.prec);
+	break;
+
+    case H5T_OPAQUE:
+	/*
+         * Opaque types...
+         */
+	z = flags & 0xff;
+	assert(0==(z&0x7)); /*must be aligned*/
+	if (NULL==(dt->u.opaque.tag=H5MM_malloc(z+1))) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "memory allocation failed");
+	}
+	HDmemcpy(dt->u.opaque.tag, *pp, z);
+	dt->u.opaque.tag[z] = '\0';
+	*pp += z;
 	break;
 
     case H5T_STRING:
@@ -283,7 +311,8 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
  *		Monday, December  8, 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, Thursday, May 20, 1999
+ *		Added support for bitfields and opaque types.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -293,7 +322,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     uintn		perm_word;
     char		*hdr = (char *)*pp;
     intn		i, j;
-    size_t		n, z;
+    size_t		n, z, aligned;
 
     FUNC_ENTER(H5O_dtype_encode_helper, FAIL);
 
@@ -356,6 +385,61 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
 	UINT16ENCODE(*pp, dt->u.atomic.offset);
 	UINT16ENCODE(*pp, dt->u.atomic.prec);
+	break;
+
+    case H5T_BITFIELD:
+	/*
+	 * Bitfield data types...
+	 */
+	switch (dt->u.atomic.order) {
+	case H5T_ORDER_LE:
+	    break;		/*nothing */
+	case H5T_ORDER_BE:
+	    flags |= 0x01;
+	    break;
+	default:
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "byte order is not supported in file format yet");
+	}
+
+	switch (dt->u.atomic.lsb_pad) {
+	case H5T_PAD_ZERO:
+	    break;		/*nothing */
+	case H5T_PAD_ONE:
+	    flags |= 0x02;
+	    break;
+	default:
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "bit padding is not supported in file format yet");
+	}
+
+	switch (dt->u.atomic.msb_pad) {
+	case H5T_PAD_ZERO:
+	    break;		/*nothing */
+	case H5T_PAD_ONE:
+	    flags |= 0x04;
+	    break;
+	default:
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "bit padding is not supported in file format yet");
+	}
+
+	UINT16ENCODE(*pp, dt->u.atomic.offset);
+	UINT16ENCODE(*pp, dt->u.atomic.prec);
+	break;
+
+    case H5T_OPAQUE:
+	/*
+         * Opaque data types...  The tag is stored in a field which is a
+         * multiple of eight characters and null padded (not necessarily
+         * null terminated).
+         */
+	z = HDstrlen(dt->u.opaque.tag);
+	aligned = (z+7) & 0xf8;
+	flags |= aligned;
+	HDmemcpy(*pp, dt->u.opaque.tag, MIN(z,aligned));
+	for (n=MIN(z,aligned); n<aligned; n++) (*pp)[n] = 0;
+	*pp += aligned;
 	break;
 
     case H5T_STRING:
@@ -694,6 +778,14 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
 	ret_value += 4;
 	break;
 
+    case H5T_BITFIELD:
+	ret_value += 4;
+	break;
+
+    case H5T_OPAQUE:
+	ret_value += (HDstrlen(dt->u.opaque.tag)+7) & 0xf8;
+	break;
+
     case H5T_FLOAT:
 	ret_value += 12;
 	break;
@@ -964,6 +1056,10 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
 	    fprintf(stream, "\n");
 	}
 	
+    } else if (H5T_OPAQUE==dt->type) {
+	fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
+		"Tag:", dt->u.opaque.tag);
+
     } else {
 	switch (dt->u.atomic.order) {
 	case H5T_ORDER_LE:

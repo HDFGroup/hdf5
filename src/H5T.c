@@ -176,6 +176,7 @@ H5T_init_interface(void)
 {
     H5T_t	*dt = NULL;
     hid_t	fixedpt=-1, floatpt=-1, string=-1, compound=-1, enum_type=-1;
+    hid_t	bitfield=-1;
     herr_t	status;
     herr_t	ret_value=FAIL;
 
@@ -239,11 +240,7 @@ H5T_init_interface(void)
     H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_OPAQUE;
     dt->size = 1;
-    dt->u.atomic.order = H5T_ORDER_NONE;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 8 * dt->size;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.opaque.tag = H5MM_strdup("");
     if ((H5T_NATIVE_OPAQUE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to initialize H5T layer");
@@ -702,6 +699,7 @@ H5T_init_interface(void)
     fixedpt = H5T_NATIVE_INT;
     floatpt = H5T_NATIVE_FLOAT;
     string  = H5T_C_S1;
+    bitfield = H5T_STD_B8LE;
     compound = H5Tcreate(H5T_COMPOUND, 1);
     enum_type = H5Tcreate(H5T_ENUM, 1);
     status = 0;
@@ -718,6 +716,9 @@ H5T_init_interface(void)
     status |= H5Tregister(H5T_PERS_SOFT, "s_s",
 			  string, string,
 			  H5T_conv_s_s);
+    status |= H5Tregister(H5T_PERS_SOFT, "b_b",
+			  bitfield, bitfield,
+			  H5T_conv_b_b);
     status |= H5Tregister(H5T_PERS_SOFT, "ibo",
 			  fixedpt, fixedpt,
 			  H5T_conv_order);
@@ -1718,9 +1719,9 @@ H5Tget_order(hid_t type_id)
 		      "not a data type");
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type) {
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
-		      "operation not defined for compound data types");
+		      "operation not defined for specified data type");
     }
 
     /* Order */
@@ -1771,9 +1772,9 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 		      "operation not allowed after members are defined");
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type) {
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
-		      "operation not defined for compound data types");
+		      "operation not defined for specified data type");
     }
 
     /* Commit */
@@ -1820,9 +1821,9 @@ H5Tget_precision(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
     }
     if (dt->parent) dt = dt->parent;	/*defer to parent*/
-    if (H5T_COMPOUND==dt->type) {
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
-		      "operation not defined for compound data types");
+		      "operation not defined for specified data type");
     }
     
     /* Precision */
@@ -1946,9 +1947,9 @@ H5Tget_offset(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an atomic data type");
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type) {
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for compound data types");
+		      "operation not defined for specified data type");
     }
     
     /* Offset */
@@ -2065,9 +2066,9 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type) {
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for compound data types");
+		      "operation not defined for specified data type");
     }
     
     /* Get values */
@@ -2119,9 +2120,9 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 		      "operation not allowed after members are defined");
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type) {
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for compound data types");
+		      "operation not defined for specified data type");
     }
 
     /* Commit */
@@ -3603,7 +3604,94 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
     }
     FUNC_LEAVE(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tset_tag
+ *
+ * Purpose:	Tag an opaque datatype with a unique ASCII identifier.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, May 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tset_tag(hid_t type_id, const char *tag)
+{
+    H5T_t	*dt=NULL;
+
+    FUNC_ENTER(H5Tset_tag, FAIL);
+    H5TRACE2("e","is",type_id,tag);
+
+    /* Check args */
+    if (H5I_DATATYPE != H5I_get_type(type_id) ||
+	NULL == (dt = H5I_object(type_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+    if (H5T_STATE_TRANSIENT!=dt->state) {
+	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    }
+    if (H5T_OPAQUE!=dt->type) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type");
+    }
+    if (!tag) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag");
+    }
+
+    /* Commit */
+    H5MM_xfree(dt->u.opaque.tag);
+    dt->u.opaque.tag = H5MM_strdup(tag);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_tag
+ *
+ * Purpose:	Get tha tag associated with an opaque datatype.
+ *
+ * Return:	A pointer to an allocated string. The caller should free
+ *              the string. NULL is returned for errors.
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, May 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5Tget_tag(hid_t type_id)
+{
+    H5T_t	*dt=NULL;
+    char	*ret_value=NULL;
+
+    FUNC_ENTER(H5Tget_tag, NULL);
+
+    /* Check args */
+    if (H5I_DATATYPE != H5I_get_type(type_id) ||
+	NULL == (dt = H5I_object(type_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+    }
+    if (dt->parent) dt = dt->parent; /*defer to parent*/
+    if (H5T_OPAQUE != dt->type) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
+		      "operation not defined for data type class");
+    }
     
+    /* result */
+    if (NULL==(ret_value=H5MM_strdup(dt->u.opaque.tag))) {
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "memory allocation failed");
+    }
+    FUNC_LEAVE(ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tregister
@@ -4104,10 +4192,10 @@ H5T_create(H5T_class_t type, size_t size)
     case H5T_TIME:
     case H5T_STRING:
     case H5T_BITFIELD:
-    case H5T_OPAQUE:
 	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
 		      "type class is not appropriate - use H5Tcopy()");
 
+    case H5T_OPAQUE:
     case H5T_COMPOUND:
 	if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -4304,6 +4392,9 @@ H5T_open_oid (H5G_entry_t *ent)
  * 	Robb Matzke, 22 Dec 1998
  *	Now able to copy enumeration data types.
  *
+ *      Robb Matzke, 20 May 1999
+ *	Now able to copy opaque types.
+ *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -4410,6 +4501,12 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 	    s = old_dt->u.enumer.name[i];
 	    new_dt->u.enumer.name[i] = H5MM_xstrdup(s);
 	}
+	
+    } else if (H5T_OPAQUE == new_dt->type) {
+	/*
+         * Copy the tag name.
+         */
+	new_dt->u.opaque.tag = HDstrdup(new_dt->u.opaque.tag);
     }
     
     FUNC_LEAVE(new_dt);
@@ -4550,6 +4647,8 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
  * 		Robb Matzke, 1999-04-27
  *		This function fails if the datatype state is IMMUTABLE.
  *
+ *		Robb Matzke, 1999-05-20
+ *		Closes opaque types also.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4601,6 +4700,11 @@ H5T_close(H5T_t *dt)
 	H5MM_xfree(dt);
 	break;
 
+    case H5T_OPAQUE:
+	H5MM_xfree(dt->u.opaque.tag);
+	H5MM_xfree(dt);
+	break;
+
     default:
 	H5MM_xfree(dt);
     }
@@ -4639,7 +4743,7 @@ H5T_is_atomic(const H5T_t *dt)
     FUNC_ENTER(H5T_is_atomic, FAIL);
 
     assert(dt);
-    if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type) {
+    if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type &&	H5T_OPAQUE!=dt->type) {
 	ret_value = TRUE;
     } else {
 	ret_value = FALSE;
@@ -4718,6 +4822,7 @@ H5T_set_size(H5T_t *dt, size_t size)
 	case H5T_TIME:
 	case H5T_BITFIELD:
 	case H5T_ENUM:
+	case H5T_OPAQUE:
 	    /* nothing to check */
 	    break;
 
@@ -4737,17 +4842,6 @@ H5T_set_size(H5T_t *dt, size_t size)
 		HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 			      "adjust sign, mantissa, and exponent fields "
 			      "first");
-	    }
-	    break;
-
-	case H5T_OPAQUE:
-	    /*
-	     * The significant bits of an opaque type are not allowed to
-	     * change implicitly.
-	     */
-	    if (prec != dt->u.atomic.prec) {
-		HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-			      "unable to change precision of an opaque type");
 	    }
 	    break;
 
@@ -4845,9 +4939,9 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 	}
 	dt->size = dt->parent->size;
     } else {
-	if (H5T_COMPOUND==dt->type) {
+	if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "operation not defined for compound data types");
+			  "operation not defined for specified data type");
 
 	} else if (H5T_ENUM==dt->type) {
 	    /*nothing*/
@@ -4865,7 +4959,6 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 	    case H5T_INTEGER:
 	    case H5T_TIME:
 	    case H5T_BITFIELD:
-	    case H5T_OPAQUE:
 		/* nothing to check */
 		break;
 
@@ -4961,9 +5054,9 @@ H5T_set_offset(H5T_t *dt, size_t offset)
 	}
 	dt->size = dt->parent->size;
     } else {
-	if (H5T_COMPOUND==dt->type) {
+	if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "operation not defined for compound data types");
+			  "operation not defined for specified data type");
 	} else if (H5T_ENUM==dt->type) {
 	    /*nothing*/
 	} else {
@@ -5574,6 +5667,8 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
  * 	Robb Matzke, 22 Dec 1998
  *	Able to compare enumeration data types.
  *
+ *	Robb Matzke, 20 May 1999
+ *	Compares bitfields and opaque types.
  *-------------------------------------------------------------------------
  */
 intn
@@ -5758,6 +5853,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    if (tmp>0) HGOTO_DONE(1);
 	}
 	
+    } else if (H5T_OPAQUE==dt1->type) {
+	HGOTO_DONE(HDstrcmp(dt1->u.opaque.tag,dt2->u.opaque.tag));
+
     } else {
 	/*
 	 * Atomic data types...
@@ -6425,8 +6523,7 @@ H5T_debug(H5T_t *dt, FILE *stream)
 		s1 = "sign?";
 		break;
 	    }
-	    if (s1)
-		fprintf(stream, ", %s", s1);
+	    if (s1) fprintf(stream, ", %s", s1);
 	    break;
 
 	case H5T_FLOAT:
@@ -6501,6 +6598,9 @@ H5T_debug(H5T_t *dt, FILE *stream)
 	    }
 	}
 	fprintf(stream, "\n");
+	
+    } else if (H5T_OPAQUE==dt->type) {
+	fprintf(stream, ", tag=\"%s\"", dt->u.opaque.tag);
 
     } else {
 	/* Unknown */

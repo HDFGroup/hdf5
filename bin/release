@@ -4,6 +4,8 @@
 #
 #  -d DIR	The name of the directory where the releas(es) should be
 #               placed.  By default, the directory is ./releases
+#
+#  --nocheck	Ignore errors in MANIFEST file.
 #          
 # The other command-line options are the names of the programs to use
 # for compressing the resulting tar archive (if none are given then
@@ -34,17 +36,36 @@ DEST=releases
 VERS=`perl bin/h5vers`
 test "$VERS" || exit 1
 verbose=yes
+check=yes
 
 # Command-line arguments
-if [ "X$1" = "X-d" ]; then
-    DEST="$2"
+while [ -n "$1" ]; do
+    arg=$1
     shift
-    shift
-fi
-methods="$*"
+    case "$arg" in
+	-d)
+	    DEST=$1
+	    shift
+	    ;;
+	--nocheck)
+	    check=no
+	    ;;
+	-*)
+	    echo "Unknown switch: $arg" 1>&2
+	    exit 1
+	    ;;
+	*)
+	    methods="$methods $arg"
+	    ;;
+    esac
+done
+
+# Default method is tar
 if [ "X$methods" = "X" ]; then
     methods=tar
 fi
+
+
 test "$verbose" && echo "Releasing hdf5-$VERS to $DEST" 1>&2
 if [ ! -d $DEST ]; then
     echo "   Destination directory $DEST does not exist" 1>&2
@@ -94,7 +115,11 @@ The MANIFEST is out of date. Files marked with a minus sign (-) no
 longer exist; files marked with a plus sign (+) are CVS-managed but do
 not appear in the MANIFEST.  Please remedy the situation and try again.
 EOF
-    exit 1
+    if [ $check = yes ]; then
+        exit 1
+    else
+	echo "Continuing anyway..."
+    fi
 fi
 
 # Create a manifest that contains only files for distribution.
