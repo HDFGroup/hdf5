@@ -13,6 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
@@ -21,6 +22,8 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"         /* Files                                */
+#include "H5Fpkg.h"             /* Files access                         */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
@@ -29,6 +32,10 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
+
+#ifdef H5_HAVE_FPHDF5
+#include "H5FPprivate.h"        /* Flexible PHDF5                       */
+#endif  /* H5_HAVE_FPHDF5 */
 
 /*#define H5D_DEBUG*/
 
@@ -1602,6 +1609,10 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     H5P_genplist_t 	*dc_plist=NULL;         /* New Property list */
     hbool_t             has_vl_type=FALSE;      /* Flag to indicate a VL-type for dataset */
     H5D_t		*ret_value;             /* Return value */
+#ifdef H5_HAVE_FPHDF5
+    hbool_t             locked_grp = FALSE;     /* The parent group is locked */
+    hobj_ref_t          grp_oid;
+#endif  /* H5_HAVE_FPHDF5 */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL)
 
@@ -1640,6 +1651,55 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     /* What file is the dataset being added to? */
     if (NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point")
+
+#ifdef H5_HAVE_FPHDF5
+    if (H5FD_is_fphdf5_driver(file->shared->lf)) {
+        unsigned file_id = H5FD_fphdf5_file_id(file->shared->lf);
+        char *tmp_name = H5MM_xstrdup(name);
+        char *last = HDstrrchr(tmp_name, '/');
+        hid_t gid;
+        H5G_t *grp = NULL;
+        H5G_entry_t *grp_loc = NULL;
+        H5FP_status_t status;
+        unsigned req_id;
+
+        /* Chop off the dataset name (we only want to lock the group) */
+        if (last)
+            last[1] = '\0';
+
+        /* Open the group */
+        if ((grp = H5G_open(loc, tmp_name, dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
+
+        /* Register the group so we can grab information about it */
+        if ((gid = H5I_register(H5I_GROUP, grp)) < 0) {
+            H5G_close(grp);
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register group");
+        }
+
+        /* Grab the location of the group */
+        if ((grp_loc = H5G_loc(gid)) == NULL) {
+            H5I_dec_ref(gid);
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location ID")
+        }
+
+        grp_oid = grp_loc->header;
+
+        if (H5FP_request_lock(file_id, grp_oid, H5FP_LOCK_WRITE,
+                              TRUE, &req_id, &status) != SUCCEED) {
+            /* FIXME: This is bad. We should check the "status" variable */
+            H5I_dec_ref(gid);
+            H5MM_xfree(tmp_name);
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, "unable to lock group");
+        }
+
+        if (H5I_dec_ref(gid) != SUCCEED)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to close group");
+
+        locked_grp = TRUE;
+        H5MM_xfree(tmp_name);
+    }
+#endif  /* H5_HAVE_FPHDF5 */
 
     /* Copy datatype for dataset */
     if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
@@ -1862,6 +1922,20 @@ done:
         new_dset->ent.file = NULL;
         H5FL_FREE(H5D_t,new_dset);
     }
+
+#ifdef H5_HAVE_FPHDF5
+    if (locked_grp) {
+        unsigned file_id = H5FD_fphdf5_file_id(file->shared->lf);
+        H5FP_status_t status;
+        unsigned req_id;
+
+        /* Request a release of the lock */
+        if (H5FP_request_release_lock(file_id, grp_oid, TRUE, &req_id, &status)) {
+            /* FIXME: This is bad. We should check the "status" variable */
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, "unable to lock group");
+        }
+    }
+#endif  /* H5_HAVE_FPHDF5 */
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

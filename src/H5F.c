@@ -1573,6 +1573,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 */
 	if ((n=H5AC_create(f, f->shared->mdc_nelmts))<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache");
+
 	f->shared->mdc_nelmts = n;
 
 	/* Create the chunk cache */
@@ -1917,6 +1918,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	 */
 	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object");
+
 	file->shared->flags = flags;
 	file->shared->lf = lf;
     }
@@ -1984,9 +1986,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	if (H5F_flush(file, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_ALLOC_ONLY) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock");
 
-	/* Create and open the root group */
-	if (H5G_mkroot(file, dxpl_id, NULL)<0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group");
+        /* Create and open the root group */
+        if (H5G_mkroot(file, dxpl_id, NULL)<0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group");
 
 #ifdef H5_HAVE_FPHDF5
         /*
@@ -1995,6 +1997,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
          */
         if (H5FD_is_fphdf5_driver(lf)) {
             H5P_genplist_t *d_plist;
+
+            /* Wait for all processes to catch up */
+            MPI_Barrier(H5FP_SAP_BARRIER_COMM);
 
             /* Get the data xfer property list */
             if ((d_plist = H5I_object(dxpl_id)) == NULL)
@@ -2302,8 +2307,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
-	  hid_t fapl_id)
+H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
@@ -2348,7 +2352,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
      */
     if (NULL==(new_file=H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
-    
+
     /* Get an atom for the file */
     if ((ret_value = H5I_register(H5I_FILE, new_file))<0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file");
@@ -2647,11 +2651,12 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
              * the clients...
              */
             if (H5FD_is_fphdf5_driver(f->shared->lf) && !H5FD_fphdf5_is_sap(f->shared->lf)) {
-                unsigned        req_id;
-                H5FP_status_t   status;
+                unsigned        req_id = 0;
+                H5FP_status_t   status = H5FP_STATUS_OK;
 
                 /* Send the request to the SAP */
-                if (H5FP_request_free(f->shared->lf, &req_id, &status) != SUCCEED)
+                if (H5FP_request_update_eoma_eosda(f->shared->lf,
+                                                   &req_id, &status) != SUCCEED)
                     /* FIXME: Should we check the "status" variable here? */
                     HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL,
                                 "server couldn't free from file");
@@ -2704,11 +2709,17 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         } /* end if */
 
         /* flush the entire raw data cache */
-        if (H5F_istore_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE|H5F_FLUSH_CLEAR_ONLY)) < 0)
+        if (H5F_istore_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache");
         
         /* flush (and invalidate) the entire meta data cache */
-        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & (H5F_FLUSH_INVALIDATE|H5F_FLUSH_CLEAR_ONLY)) < 0)
+        /*
+         * FIXME: This should be CLEAR_ONLY for non-captain processes.
+         * Need to fix the H5G_mkroot() call so that only the captain
+         * allocates object headers (calls the H5O_init function...via a
+         * lot of other functions first)....
+         */
+        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
     } /* end if */
 
@@ -3122,7 +3133,6 @@ H5F_close(H5F_t *f)
             if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
                           H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
-
         }
 
         /* Let's all meet up now... */

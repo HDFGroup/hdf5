@@ -652,7 +652,7 @@ H5Pset_dxpl_fphdf5(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
                     "can't set values in default property list");
 
     /* Check arguments */
-    if ((plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)) == NULL)
+    if ((plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)) == NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     if (xfer_mode != H5FD_MPIO_INDEPENDENT && xfer_mode != H5FD_MPIO_COLLECTIVE)
@@ -663,7 +663,7 @@ H5Pset_dxpl_fphdf5(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
     /* Initialize driver-specific properties */
-    ret_value = H5P_set_driver(plist, H5FD_MPIO, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_FPHDF5, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -692,7 +692,7 @@ H5Pget_dxpl_fphdf5(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode)
     FUNC_ENTER_API(H5Pget_dxpl_fphdf5, FAIL);
     H5TRACE2("e","i*Dt",dxpl_id,xfer_mode);
 
-    if ((plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)) == NULL)
+    if ((plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)) == NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     if (H5P_get_driver(plist) != H5FD_FPHDF5)
@@ -783,8 +783,7 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     hsize_t                     threshold;
     hsize_t                     alignment;
     unsigned                    file_id;
-    unsigned                    req_id;
-    MPI_Status                  status;
+    unsigned                    req_id = 0;
     H5FD_t                     *ret_value = NULL;
 
     /* Flag to indicate that the file was successfully opened */
@@ -847,17 +846,15 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTOPENFILE, NULL,
                     "can't inform SAP of file open");
 
-    /* Grab the rank of this process */
-    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &mpi_rank)) != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(NULL, "MPI_Comm_rank failed", mrc);
-
-    HDmemset(&status, 0, sizeof(status));
-
     /* Broadcast the file ID */
     if ((mrc = MPI_Bcast(&file_id, 1, MPI_UNSIGNED,
                          (int)H5FP_capt_barrier_rank,
                          H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc);
+
+    /* Grab the rank of this process */
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &mpi_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(NULL, "MPI_Comm_rank failed", mrc);
 
     /* The captain rank will get the filesize and broadcast it. */
     if ((unsigned)mpi_rank == H5FP_capt_rank)
@@ -924,8 +921,8 @@ static herr_t
 H5FD_fphdf5_close(H5FD_t *_file)
 {
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t *)_file;
-    H5FP_status_t   status;
-    unsigned        req_id;
+    unsigned        req_id = 0;
+    H5FP_status_t   status = H5FP_STATUS_OK;
     int             mrc;
     herr_t          ret_value = SUCCEED;
 
@@ -935,13 +932,18 @@ H5FD_fphdf5_close(H5FD_t *_file)
     assert(file);
     assert(file->pub.driver_id == H5FD_FPHDF5);
 
-    /* MPI_File_close sets argument to MPI_FILE_NULL */
-    if ((mrc = MPI_File_close(&file->f)) != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_File_close failed", mrc);
-
+    /* Tell the SAP that we're closing the file... */
     if (H5FP_request_close(_file, file->file_id, &req_id, &status) == FAIL)
         HGOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL,
                     "can't inform SAP of file close");
+
+    /* Let all of the processes catch up to this point. */
+    if ((mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mrc);
+
+    /* MPI_File_close sets argument to MPI_FILE_NULL */
+    if ((mrc = MPI_File_close(&file->f)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_File_close failed", mrc);
 
     /* Clean up other stuff */
     H5MM_xfree(file);
@@ -968,9 +970,6 @@ H5FD_fphdf5_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_query, FAIL);
-
-    /* check args */
-    assert(flags);
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -1189,7 +1188,7 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     assert(file->pub.driver_id == H5FD_FPHDF5);
     assert(buf);
 
-    /* make certain we have the correct type of property list */
+    /* Make certain we have the correct type of property list */
     assert(H5I_get_type(dxpl_id) == H5I_GENPROP_LST);
     assert(H5P_isa_class(dxpl_id, H5P_DATASET_XFER) == TRUE);
 
@@ -1260,8 +1259,8 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
          * This is metadata - we want to try to read it from the SAP
          * first.
          */
-        H5FP_status_t   sap_status;
-        unsigned        req_id;
+        unsigned        req_id = 0;
+        H5FP_status_t   sap_status = H5FP_STATUS_OK;
 
         if (H5FP_request_read_metadata(_file, file->file_id, dxpl_id, mem_type,
                                        mpi_off, size, (uint8_t**)&buf,
@@ -1288,49 +1287,11 @@ HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mrc);
     } else {
         if ((mrc = MPI_File_read_at_all(file->f, mpi_off, buf, size_i,
-                                        buf_type, &status )) != MPI_SUCCESS)
+                                        buf_type, &status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mrc);
     }
 
     /*
-     * KLUDGE, Robb Matzke, 2000-12-29
-     * The LAM implementation of MPI_Get_count() says
-     *
-     *    MPI_Get_count: invalid argument (rank 0, MPI_COMM_WORLD)
-     *
-     * So I'm commenting this out until it can be investigated. The
-     * returned `bytes_written' isn't used anyway because of Kim's kludge
-     * to avoid bytes_written < 0. Likewise in H5FD_fphdf5_write().
-     */
-
-#ifdef H5_HAVE_MPI_GET_COUNT /* Bill and Albert's kludge*/
-    /*
-     * Yet Another KLUDGE, Albert Cheng & Bill Wendling, 2001-05-11.
-     * Many systems don't support MPI_Get_count so we need to do a
-     * configure thingy to fix this.
-     */
-
-    /*
-     * Calling MPI_Get_count with "MPI_BYTE" is only valid when we
-     * actually had the 'buf_type' set to MPI_BYTE -QAK
-     */
-    if (use_view_this_time) {
-        /*
-         * Figure out the mapping from the MPI 'buf_type' to bytes,
-         * someday... If this gets fixed (and MPI_Get_count() is
-         * reliable), the kludge below where the 'bytes_read' value from
-         * MPI_Get_count() is overwritten with the 'size_i' parameter can
-         * be removed. -QAK
-         */
-    } else {
-        /* How many bytes were actually read? */
-        if ((mrc = MPI_Get_count(&status, MPI_BYTE, &bytes_read)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_count failed", mrc);
-    }
-#endif /* H5_HAVE_MPI_GET_COUNT */
-
-    /*
-     * KLUGE rky 1998-02-02
      * MPI_Get_count incorrectly returns negative count; fake a complete
      * read.
      */
@@ -1459,8 +1420,8 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
      * dumping the data from the SAP...
      */
     if (mem_type != H5FD_MEM_DRAW && !dumping) {
-        unsigned req_id;
-        H5FP_status_t sap_status;
+        unsigned        req_id = 0;
+        H5FP_status_t   sap_status = H5FP_STATUS_OK;
 
         if (H5FP_request_write_metadata(_file, file->file_id, dxpl_id, mem_type,
                                         mpi_off, size_i, buf, &req_id,
@@ -1517,7 +1478,6 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
     MPI_Status          status;
     MPI_Datatype        buf_type;
     MPI_Datatype        file_type;
-    MPI_Offset          mpi_disp;
     int                 mrc;
     int                 bytes_written;
     unsigned            use_view_this_time = 0;
@@ -1553,7 +1513,10 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
         if (H5P_get(plist, H5FD_FPHDF5_XFER_USE_VIEW_NAME, &use_view_this_time) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
 
+
     if (use_view_this_time) {
+        MPI_Offset          mpi_disp;
+
         /* Prepare for a full-blown xfer using btype, ftype, and disp */
         if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
@@ -1576,11 +1539,10 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
     } else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes. The
-         * btype, ftype, and disp fields are not used.
+         * btype and ftype.
          */
         buf_type = MPI_BYTE;
         file_type = MPI_BYTE;
-        mpi_disp = 0;   /* mpi_off is already set */
     }
 
 
@@ -1602,43 +1564,6 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
                                          size, buf_type, &status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mrc);
     }
-
-    /*
-     * KLUDGE, Robb Matzke, 2000-12-29
-     * The LAM implementation of MPI_Get_count() says
-     *
-     *    MPI_Get_count: invalid argument (rank 0, MPI_COMM_WORLD)
-     *
-     * So I'm commenting this out until it can be investigated. The
-     * returned `bytes_written' isn't used anyway because of Kim's kludge
-     * to avoid bytes_written<0. Likewise in H5FD_fphdf5_read().
-     */
-
-#ifdef H5_HAVE_MPI_GET_COUNT /* Bill and Albert's kludge*/
-    /*
-     * Yet Another KLUDGE, Albert Cheng & Bill Wendling, 2001-05-11.
-     * Many systems don't support MPI_Get_count so we need to do a
-     * configure thingy to fix this.
-     */
-
-    /*
-     * Calling MPI_Get_count with "MPI_BYTE" is only valid when we
-     * actually had the 'buf_type' set to MPI_BYTE -QAK
-     */
-    if (use_view_this_time) {
-        /*
-         * Figure out the mapping from the MPI 'buf_type' to bytes,
-         * someday... If this gets fixed (and MPI_Get_count() is
-         * reliable), the kludge below where the 'bytes_written' value
-         * from MPI_Get_count() is overwritten with the 'size'
-         * parameter can be removed. -QAK
-         */
-    } else {
-        /* How many bytes were actually written? */
-        if ((mrc = MPI_Get_count(&status, MPI_BYTE, &bytes_written)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_count failed", mrc);
-    }
-#endif /* H5_HAVE_MPI_GET_COUNT */
 
     /* Reset the file view when we used MPI derived types */
     if (use_view_this_time)
@@ -1680,8 +1605,8 @@ H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
     MPI_Offset      mpi_off;
     int	            mrc;
-    unsigned        req_id;
-    H5FP_status_t   status;
+    unsigned        req_id = 0;
+    H5FP_status_t   status = H5FP_STATUS_OK;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_flush, FAIL);

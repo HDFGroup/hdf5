@@ -70,7 +70,7 @@ static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const vo
 static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 			     H5G_node_t *sym);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
-static herr_t H5G_node_clear(H5G_node_t *sym);
+static herr_t H5G_node_clear(H5G_node_t *sym, hbool_t destroy);
 
 /* B-tree callbacks */
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
@@ -550,9 +550,10 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_clear(H5G_node_t *sym)
+H5G_node_clear(H5G_node_t *sym, hbool_t destroy)
 {
     int i;              /* Local index variable */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5G_node_clear);
 
@@ -567,7 +568,16 @@ H5G_node_clear(H5G_node_t *sym)
         sym->entry[i].dirty=FALSE;
     sym->cache_info.dirty = FALSE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    /*
+     * Destroy the symbol node?	 This might happen if the node is being
+     * preempted from the cache.
+     */
+    if (destroy)
+        if (H5G_node_dest(NULL, sym) < 0)
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5G_node_clear() */
 
 

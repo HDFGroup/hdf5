@@ -154,7 +154,7 @@ static herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_
 static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
 static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b);
 static herr_t H5B_dest(H5F_t *f, H5B_t *b);
-static herr_t H5B_clear(H5B_t *b);
+static herr_t H5B_clear(H5B_t *b, hbool_t destroy);
 
 /* H5B inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_BT[1] = {{
@@ -560,9 +560,10 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_clear(H5B_t *bt)
+H5B_clear(H5B_t *bt, hbool_t destroy)
 {
     unsigned	u;      /* Local index variable */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5B_clear)
 
@@ -575,8 +576,13 @@ H5B_clear(H5B_t *bt)
     for (u=0; u<=bt->nchildren; u++)
         bt->key[u].dirty = FALSE;
     bt->cache_info.dirty = FALSE;
+ 
+    if (destroy)
+        if (H5B_dest(NULL, bt) < 0)
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node");
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5B_clear() */
 
 

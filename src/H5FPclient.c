@@ -25,6 +25,7 @@
 #include "H5Iprivate.h"         /* ID Functions                         */
 #include "H5MMprivate.h"        /* Memory Allocation                    */
 #include "H5Oprivate.h"         /* Object Headers                       */
+#include "H5Rprivate.h"         /* References                           */
 #include "H5Spkg.h"             /* Dataspace Functions                  */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
@@ -135,7 +136,7 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
+H5FP_request_lock(unsigned file_id, hobj_ref_t obj_oid,
                   H5FP_lock_t rw_lock, int last, unsigned *req_id,
                   H5FP_status_t *status)
 {
@@ -162,7 +163,7 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
     req.rw_lock = rw_lock;
     req.md_size = 0;
     req.proc_rank = my_rank;
-    H5FP_COPY_OID(req.oid, obj_oid);
+    req.oid = obj_oid;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS) {
@@ -208,7 +209,7 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
+H5FP_request_release_lock(unsigned file_id, hobj_ref_t obj_oid,
                           int last, unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_request_t req;
@@ -228,7 +229,7 @@ H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
 
     *status = H5FP_STATUS_OK;
-    H5FP_COPY_OID(req.oid, obj_oid);
+    req.oid = obj_oid;
     req.req_type = last ? H5FP_REQ_RELEASE_END : H5FP_REQ_RELEASE;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
@@ -424,6 +425,7 @@ H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL, "can't send metadata to server");
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
+    HDmemset(&sap_reply, 0, sizeof(sap_reply));
 
     if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                         H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
@@ -484,8 +486,7 @@ H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
     H5FP_reply_t sap_reply;
     H5FP_request_t req;
     MPI_Status mpi_status;
-    int mrc, my_rank;
-    int ret_value = SUCCEED;
+    int mrc, ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_request_flush_metadata, FAIL);
 
@@ -496,13 +497,12 @@ H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
 
     HDmemset(&req, 0, sizeof(req));
 
-    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &req.proc_rank)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
 
     req.req_type = H5FP_REQ_FLUSH;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
-    req.proc_rank = my_rank;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -669,7 +669,8 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_free(H5FD_t *file, unsigned *req_id, H5FP_status_t *status)
+H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr, hsize_t size,
+                  unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_alloc_t    sap_alloc;
     H5FP_request_t  req;
@@ -684,9 +685,75 @@ H5FP_request_free(H5FD_t *file, unsigned *req_id, H5FP_status_t *status)
     assert(req_id);
     assert(status);
 
+    /* Allow zero-sized frees to occur without penalty */
+    if (size == 0)
+        HGOTO_DONE(SUCCEED);
+
     HDmemset(&req, 0, sizeof(req));
 
     req.req_type = H5FP_REQ_FREE;
+    req.req_id = H5FP_gen_request_id();
+    req.file_id = H5FD_fphdf5_file_id(file);
+    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.mem_type = mem_type;
+    req.addr = addr;
+    req.meta_block_size = size;
+
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
+                        H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+
+    HDmemset(&mpi_status, 0, sizeof(mpi_status));
+
+    if ((mrc = MPI_Recv(&sap_alloc, 1, H5FP_alloc, (int)H5FP_sap_rank,
+                        H5FP_TAG_ALLOC, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+
+    if (sap_alloc.status != H5FP_STATUS_OK)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't free space on server");
+
+    if ((mrc = MPI_Bcast(&sap_alloc, 1, H5FP_alloc, (int)H5FP_capt_barrier_rank,
+                         H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed!", mrc);
+
+    /* Set the EOA for all processes. This call doesn't fail. */
+    file->cls->set_eoa(file, sap_alloc.eoa);
+    *status = H5FP_STATUS_OK;
+
+done:
+    *req_id = req.req_id;
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*
+ * Function:    H5FP_request_update_eoma_eosda
+ * Purpose:     Request the SAP updates the EOMA and EOSDA information
+ *              for the file.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ * Programmer:  Bill Wendling, 02. April 2003
+ * Modifications:
+ */
+herr_t
+H5FP_request_update_eoma_eosda(H5FD_t *file, unsigned *req_id,
+                               H5FP_status_t *status)
+{
+    H5FP_alloc_t    sap_alloc;
+    H5FP_request_t  req;
+    MPI_Status      mpi_status;
+    int             mrc;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5FP_request_update_eoma_eosda, FAIL);
+
+    /* check args */
+    assert(file);
+    assert(req_id);
+    assert(status);
+
+    HDmemset(&req, 0, sizeof(req));
+
+    req.req_type = H5FP_REQ_UPDATE_EOMA_EOSDA;
     req.req_id = H5FP_gen_request_id();
     req.file_id = H5FD_fphdf5_file_id(file);
     req.proc_rank = H5FD_fphdf5_mpi_rank(file);
@@ -750,11 +817,11 @@ H5FP_gen_request_id()
 static herr_t
 H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
 {
-    H5FP_read_t sap_read;
-    hid_t new_dxpl_id = FAIL;
+    H5FP_read_t     sap_read;
+    hid_t           new_dxpl_id = FAIL;
     H5P_genplist_t *plist = NULL, *old_plist;
-    unsigned dumping = 1;
-    herr_t ret_value = SUCCEED;
+    unsigned        dumping = 1;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5FP_dump_to_file);
 
@@ -766,9 +833,6 @@ H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
 
     /* Compare property lists */
     if ((new_dxpl_id = H5P_copy_plist(old_plist)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
-
-    if (new_dxpl_id == FAIL)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
 
     if ((plist = H5P_object_verify(new_dxpl_id, H5P_DATASET_XFER)) == NULL)
@@ -791,6 +855,7 @@ H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
         char *mdata;
 
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
+        HDmemset(&sap_read, 0, sizeof(sap_read));
 
         if ((mrc = MPI_Recv(&sap_read, 1, H5FP_read, (int)H5FP_sap_rank,
                             H5FP_TAG_DUMP, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
@@ -818,9 +883,8 @@ H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
     }
 
 done:
-    if (plist)
-        /* FIXME: What can I do if this fails?? */
-        H5P_close(plist);
+    if (new_dxpl_id > 0)
+        H5Pclose(new_dxpl_id);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }

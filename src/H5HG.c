@@ -119,7 +119,7 @@ static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void 
 static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 			 H5HG_heap_t *heap);
 static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
-static herr_t H5HG_clear(H5HG_heap_t *heap);
+static herr_t H5HG_clear(H5HG_heap_t *heap, hbool_t destroy);
 
 /*
  * H5HG inherits cache-like properties from H5AC
@@ -519,7 +519,7 @@ H5HG_dest (H5F_t *f, H5HG_heap_t *heap)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_clear(H5HG_heap_t *heap)
+H5HG_clear(H5HG_heap_t *heap, hbool_t destroy)
 {
     FUNC_ENTER_NOINIT(H5HG_clear);
 
@@ -528,6 +528,12 @@ H5HG_clear(H5HG_heap_t *heap)
 
     /* Mark heap as clean */
     heap->cache_info.dirty = 0;
+
+    if (destroy) {
+        heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
+        heap->obj = H5FL_ARR_FREE(H5HG_obj_t,heap->obj);
+        H5FL_FREE(H5HG_heap_t, heap);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5HG_clear() */

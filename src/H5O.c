@@ -33,11 +33,16 @@
 #include "H5Eprivate.h"
 #include "H5Fpkg.h"
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5FSprivate.h"        /* Function Stack                           */
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
 #include "H5Opkg.h"             /* Object header functions                 */
 #include "H5Pprivate.h"
+
+#ifdef H5_HAVE_FPHDF5
+#include "H5FDfphdf5.h"         /* FPHDF5 File Descriptor                  */
+#endif  /* H5_HAVE_FPHDF5 */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
 #include <sys/time.h>
@@ -82,7 +87,7 @@ static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata
 		       void *_udata2);
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
-static herr_t H5O_clear(H5O_t *oh);
+static herr_t H5O_clear(H5O_t *oh, hbool_t destroy);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
@@ -228,7 +233,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/)
 
     /* initialize the object header */
     if (H5O_init(f, dxpl_id, size_hint, ent, header) != SUCCEED)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to initialize object header");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to initialize object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -261,6 +266,9 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     H5O_t      *oh = NULL;
     haddr_t     tmp_addr;
     herr_t      ret_value = SUCCEED;    /* return value */
+#ifdef H5_HAVE_FPHDF5
+    unsigned    capt_only = 0;
+#endif  /* H5_HAVE_FPHDF5 */
 
     FUNC_ENTER_NOINIT(H5O_init);
 
@@ -308,6 +316,29 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     oh->mesg[0].raw = oh->chunk[0].image + H5O_SIZEOF_MSGHDR(f);
     oh->mesg[0].raw_size = size_hint - H5O_SIZEOF_MSGHDR(f);
     oh->mesg[0].chunkno = 0;
+
+#ifdef H5_HAVE_FPHDF5
+    if (H5FD_is_fphdf5_driver(f->shared->lf)) {
+        H5P_genplist_t *plist;
+
+        /* Get the data xfer property list */
+        if ((plist = H5I_object(dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list");
+
+        /* Check if the "Captain Only" flag's been set */
+        if (H5P_exist_plist(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) > 0)
+            if (H5P_get(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY, &capt_only) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't retrieve FPHDF5 property");
+    }
+
+    /*
+     * We only want to initialize the object header if this isn't an
+     * FPHDF5 driver or it is, but the captain only flag is set or if the
+     * captain only flag just isn't set.
+     */
+    if (!H5FD_is_fphdf5_driver(f->shared->lf) || !capt_only || (H5FD_fphdf5_is_captain(f->shared->lf) && capt_only))
+        ;
+#endif  /* H5_HAVE_FPHDF5 */
 
     /* cache it */
     if (H5AC_set(f, dxpl_id, H5AC_OHDR, ent->header, oh) < 0)
@@ -864,9 +895,10 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_clear(H5O_t *oh)
+H5O_clear(H5O_t *oh, hbool_t destroy)
 {
     unsigned	u;      /* Local index variable */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5O_clear);
 
@@ -884,7 +916,12 @@ H5O_clear(H5O_t *oh)
     /* Mark whole header as clean */
     oh->cache_info.dirty=FALSE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    if (destroy)
+        if (H5O_dest(NULL, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_clear() */
 
 
