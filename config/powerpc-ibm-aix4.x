@@ -14,6 +14,9 @@
 #CFLAGS="$CFLAGS -ansi"
 #CPPFLAGS="$CPPFLAGS -I."
 
+# CFLAGS must be set else configure set it to -g
+CFLAGS="$CFLAGS"
+
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS=
 DEBUG_CPPFLAGS=
