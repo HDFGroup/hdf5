@@ -45,6 +45,7 @@
 
 /* String for testing attributes */
 static const char *string_att = "This is the string for the attribute";
+static char *string_att_write=NULL;
 
 void *test_vlstr_alloc_custom(size_t size, void *info);
 void test_vlstr_free_custom(void *mem, void *info);
@@ -166,7 +167,7 @@ test_vlstrings_basic(void)
     CHECK(dataset, FAIL, "H5Dcreate");
 
     wdata2 = (char*)HDcalloc(65534, sizeof(char));
-    memset(wdata2, 65, 65534);
+    HDmemset(wdata2, 'A', 65533);
 
     ret=H5Dwrite(dataset2,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -260,10 +261,7 @@ static void test_vlstring_type(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing VL String type\n"));
 
-    /* Create file */
-    /*fid = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid, FAIL, "H5Fcreate");*/
-
+    /* Open file */
     fid = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
@@ -344,10 +342,9 @@ static void test_write_vl_string_attribute(void)
     hid_t type;
     herr_t ret;
     char *string_att_check;
-    char *string_att_write;
 
-    /*file = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);*/
-    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /* Open the file */
+    file = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     /* Create a datatype to refer to. */
@@ -363,12 +360,32 @@ static void test_write_vl_string_attribute(void)
     dataspace = H5Screate(H5S_SCALAR);
     CHECK(dataspace, FAIL, "H5Screate");
 
+    /* Test creating a "normal" sized string attribute */
     att = H5Acreate(root, "test_scalar", type, dataspace, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate");
 
+    ret = H5Awrite(att, type, &string_att);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    ret = H5Aread(att, type, &string_att_check);
+    CHECK(ret, FAIL, "H5Aread");
+
+    if(HDstrcmp(string_att_check,string_att)!=0) {
+        num_errs++;
+        printf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
+    } /* end if */
+
+    HDfree(string_att_check);
+
+    ret = H5Aclose(att);
+    CHECK(ret, FAIL, "HAclose");
+
+    /* Test creating a "large" sized string attribute */
+    att = H5Acreate(root, "test_scalar_large", type, dataspace, H5P_DEFAULT);
+    CHECK(att, FAIL, "H5Acreate");
+
     string_att_write = (char*)HDcalloc(8192, sizeof(char));
-    memset(string_att_write, 65, 8192);
-printf("string_att_write=%s\n", string_att_write);
+    HDmemset(string_att_write, 'A', 8191);
 
     ret = H5Awrite(att, type, &string_att_write);
     CHECK(ret, FAIL, "H5Awrite");
@@ -378,11 +395,12 @@ printf("string_att_write=%s\n", string_att_write);
 
     if(HDstrcmp(string_att_check,string_att_write)!=0) {
         num_errs++;
-        printf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att_write,string_att_check);
+        printf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
     } /* end if */
 
-    free(string_att_check);
-    free(string_att_write);
+    HDfree(string_att_check);
+    /* The attribute string written is freed below, in the test_read_vl_string_attribute() test */
+    /* HDfree(string_att_write); */
 
     ret = H5Aclose(att);
     CHECK(ret, FAIL, "HAclose");
@@ -415,6 +433,7 @@ static void test_read_vl_string_attribute(void)
     herr_t ret;
     char *string_att_check;
 
+    /* Open file */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
@@ -428,6 +447,7 @@ static void test_read_vl_string_attribute(void)
     root = H5Gopen(file, "/");
     CHECK(root, FAIL, "H5Gopen");
 
+    /* Test reading "normal" sized string attribute */
     att = H5Aopen_name(root, "test_scalar");
     CHECK(att, FAIL, "H5Aopen_name");
     
@@ -439,7 +459,25 @@ static void test_read_vl_string_attribute(void)
         printf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
     } /* end if */
 
-    free(string_att_check);
+    HDfree(string_att_check);
+
+    ret = H5Aclose(att);
+    CHECK(ret, FAIL, "HAclose");
+
+    /* Test reading "large" sized string attribute */
+    att = H5Aopen_name(root, "test_scalar_large");
+    CHECK(att, FAIL, "H5Aopen_name");
+    
+    ret = H5Aread(att, type, &string_att_check);
+    CHECK(ret, FAIL, "H5Aread");
+
+    if(HDstrcmp(string_att_check,string_att_write)!=0) {
+        num_errs++;
+        printf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
+    } /* end if */
+
+    HDfree(string_att_check);
+    HDfree(string_att_write);   /* Free string allocated in test_write_vl_string_attribute */
 
     ret = H5Aclose(att);
     CHECK(ret, FAIL, "HAclose");
@@ -470,11 +508,11 @@ test_vlstrings(void)
     /* These next tests use the same file */
     /* Test basic VL string datatype */
     test_vlstrings_basic();
- /*   test_vlstring_type();         
-  */
-    /*Test using VL strings in attributes */
- /*   test_write_vl_string_attribute();
-    test_read_vl_string_attribute();*/
+    test_vlstring_type();         
+
+    /* Test using VL strings in attributes */
+    test_write_vl_string_attribute();
+    test_read_vl_string_attribute();
 }   /* test_vlstrings() */
 
 
