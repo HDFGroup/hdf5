@@ -328,3 +328,15 @@ Known Problems:
 * The ./dsets tests failed in the TFLOPS machine if the test program,
   dsets.c, is compiled with the -O option.  The hdf5 library still works
   correctly with the -O option.
+
+* Certain platforms give false negatives when testing h5ls:
+    - Solaris x86 2.5.1, Cray T3E and Cray J90 give errors during testing
+        when displaying object references in certain files.  These are benign 
+        differences due to the difference in sizes of the objects created on
+        those platforms.  h5ls appears to be dumping object references
+        correctly.
+    - Cray J90 (and Cray T3E?) give errors during testing when displaying
+        some floating-point values.  These are benign differences due to the
+        different precision in the values displayed and h5ls appears to be
+        dumping floating-point numbers correctly.
+        
