@@ -976,7 +976,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 	    case 'd':
 	    case 'i':
 		if (!HDstrcmp(modifier, "h")) {
-		    short x = va_arg (ap, short);
+		    short x = (short)va_arg (ap, int);
 		    n = fprintf (stream, format_templ, x);
 		} else if (!*modifier) {
 		    int x = va_arg (ap, int);
@@ -995,7 +995,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 	    case 'x':
 	    case 'X':
 		if (!HDstrcmp (modifier, "h")) {
-		    unsigned short x = va_arg (ap, unsigned short);
+		    unsigned short x = (unsigned short)va_arg (ap, unsigned int);
 		    n = fprintf (stream, format_templ, x);
 		} else if (!*modifier) {
 		    unsigned int x = va_arg (ap, unsigned int);
