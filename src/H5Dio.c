@@ -2393,7 +2393,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         size_t elmt_size;           /* Memory datatype size */
 
         /* Make a copy of equivalent memory space */
-        if((tmp_mspace = H5S_copy(equiv_mspace))==NULL)
+        if((tmp_mspace = H5S_copy(equiv_mspace,TRUE))==NULL)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
      
         /* De-select the mem space copy */
@@ -2633,8 +2633,8 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
             hssize_t    schunk_points;          /* Number of elements in chunk selection */
 
             /* Create "temporary" chunk for selection operations (copy file space) */
-            if((tmp_fchunk = H5S_copy(fm->file_space))==NULL)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+            if((tmp_fchunk = H5S_copy(fm->file_space,TRUE))==NULL)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
             /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
             if(H5S_hyper_convert(tmp_fchunk)<0)
@@ -2804,7 +2804,7 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
         /* Check if it's OK to share dataspace */
         if(fm->mem_space_copy) {
             /* Copy the memory dataspace & selection to be the chunk's dataspace & selection */
-            if((chunk_info->mspace = H5S_copy(fm->mem_space))==NULL)
+            if((chunk_info->mspace = H5S_copy(fm->mem_space,FALSE))==NULL)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
         } /* end if */
         else {
@@ -2857,16 +2857,16 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
             /* Copy the information */
 
             /* Copy the memory dataspace */
-            if((chunk_info->mspace = H5S_copy(fm->mem_space))==NULL)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+            if((chunk_info->mspace = H5S_copy(fm->mem_space,TRUE))==NULL)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
             /* Release the current selection */
             if(H5S_select_release(chunk_info->mspace)<0)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
 
             /* Copy the file chunk's selection */
-            if(H5S_select_copy(chunk_info->mspace,chunk_info->fspace)<0)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection");
+            if(H5S_select_copy(chunk_info->mspace,chunk_info->fspace,FALSE)<0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection")
 
             /* Compensate for the chunk offset */
             for(u=0; u<fm->f_ndims; u++) {
@@ -3103,7 +3103,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
         /* Check if the chunk already has a memory space */
         if(chunk_info->mspace==NULL) {
             /* Copy the template memory chunk dataspace */
-            if((chunk_info->mspace = H5S_copy(fm->mchunk_tmpl))==NULL)
+            if((chunk_info->mspace = H5S_copy(fm->mchunk_tmpl,FALSE))==NULL)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file space")
         } /* end else */
 

@@ -244,7 +244,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
     /* Copy the dataspace for the attribute */
-    attr->ds=H5S_copy(space);
+    attr->ds=H5S_copy(space, FALSE);
 
     /* Mark it initially set to initialized */
     attr->initialized = TRUE; /*for now, set to false later*/
@@ -865,7 +865,7 @@ H5Aget_space(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
 
     /* Copy the attribute's dataspace */
-    if (NULL==(dst=H5S_copy (attr->ds)))
+    if (NULL==(dst=H5S_copy (attr->ds, FALSE)))
 	HGOTO_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy dataspace");
 
     /* Atomize */
@@ -1499,7 +1499,7 @@ H5A_copy(const H5A_t *old_attr)
     /* Copy the guts of the attribute */
     new_attr->name=HDstrdup(old_attr->name);
     new_attr->dt=H5T_copy(old_attr->dt, H5T_COPY_ALL);
-    new_attr->ds=H5S_copy(old_attr->ds);
+    new_attr->ds=H5S_copy(old_attr->ds, FALSE);
     if(old_attr->data) {
         if (NULL==(new_attr->data=H5MM_malloc(old_attr->data_size)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");

@@ -173,7 +173,7 @@ typedef struct H5S_conv_t {
 } H5S_conv_t;
 
 /* Operations on dataspaces */
-H5_DLL H5S_t *H5S_copy(const H5S_t *src);
+H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection);
 H5_DLL herr_t H5S_close(H5S_t *ds);
 H5_DLL H5S_conv_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space,
                 unsigned flags, hbool_t *use_par_opt_io);
@@ -228,7 +228,7 @@ H5_DLL htri_t H5S_select_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_get_select_npoints(const H5S_t *space);
 H5_DLL herr_t H5S_get_select_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
 H5_DLL herr_t H5S_select_offset(H5S_t *space, const hssize_t *offset);
-H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
+H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
 H5_DLL htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 H5_DLL herr_t H5S_select_release(H5S_t *ds);
 
