@@ -422,7 +422,7 @@ FLUSH_FILES()
 USAGE()
 {
 cat <<EOF
-Usage: runtest [-h] [-debug] [-r<version>] [-all] [-nocvs] [<host> ...]
+Usage: runtest [-h] [-debug] [-r<version>] [-all] [-nocvs] [-nodiff] [<host> ...]
     -h
 	print this help page
     -debug
@@ -433,6 +433,8 @@ Usage: runtest [-h] [-debug] [-r<version>] [-all] [-nocvs] [<host> ...]
 	launch tests for all pre-defined testing hosts
     -nocvs
 	do not do cvs commands
+    -nodiff
+	do not do diff commands
     <host>
 	launch tests for <host>
     
@@ -480,6 +482,10 @@ while [ $# -gt 0 ]; do
 	-nocvs)
 	    # do not do cvs commands
 	    NOCVS=nocvs
+	    ;;
+	-nodiff)
+	    # do not do diff commands
+	    NODIFF=nodiff
 	    ;;
 	-*) # Unknow option
 	    PRINT "Unknown option ($1)"
@@ -599,17 +605,20 @@ fi
 
 # run a snapshot diff to see if any significant differences between
 # the current and previous versions
-($SNAPSHOT diff ) >> $DIFFLOG 2>&1
-errcode=$?
-if [ $errcode -eq 0 ]; then
-    # no need to run test
-    PRINT "NO TEST: no significant differences between current and previous versions" |
-        tee -a $PASSEDLOG
-    exit 0
+if [ -z "$NODIFF" ]; then
+    $SNAPSHOT diff >> $DIFFLOG 2>&1
+    errcode=$?
+    if [ $errcode -eq 0 ]; then
+	# no need to run test
+	PRINT "NO TEST: no significant differences between current and previous versions" |
+	    tee -a $PASSEDLOG
+	exit 0
+    fi
 fi
 
 # we can use the version of script in SNAPYARD/current now
-PROGNAME="$SNAPYARD/current/$PROGNAME"
+# Don't do the diff any more.
+PROGNAME="$SNAPYARD/current/$PROGNAME -nodiff"
 
 # Decide to do test for the local host or for remote hosts
 if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
