@@ -87,6 +87,20 @@ typedef float             real_f;
 
 #endif /*LINUX*/
 
+/* LINUX64 definitions */
+#if defined  __x86_64__
+
+typedef char              *_fcd;
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
+typedef int               int_f;
+typedef int               hid_t_f;
+typedef float             real_f;
+#define FNAME_POST_UNDERSCORE
+#define _fcdtocp(desc) (desc)
+#endif /*LINUX64*/
+
 /* IA64 LINUX definitions */
 #if defined __ia64
 
