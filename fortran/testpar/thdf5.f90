@@ -20,7 +20,7 @@
 
 !        Dataset dimensions
 
-           INTEGER, PARAMETER ::  DIM1 = 64, &
-                                  DIM2 = 128
+           INTEGER, PARAMETER ::  DIM1 = 120, &
+                                  DIM2 = 240
 
          END MODULE THDF5
