@@ -117,7 +117,7 @@ int MPI_Init(int *argc, char ***argv)
 static void
 usage(void)
 {
-    printf("Usage: testphdf5 [-r] [-w] [-v] [-m<n_datasets>] [-n<n_groups>] "
+    printf("Usage: testphdf5 [-r] [-w] [-v<verbosity>] [-m<n_datasets>] [-n<n_groups>] "
 	"[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-r\t\tno read test\n");
     printf("\t-w\t\tno write test\n");
@@ -128,7 +128,7 @@ usage(void)
     printf("\t-o\t\tno compact dataset test\n");
     printf("\t-i\t\tno independent read test\n");
     printf("\t-b\t\trun big dataset test\n");
-    printf("\t-v\t\tverbose on\n");
+    printf("\t-v<verbosity>\tset verbose level (0-9,l,m,h)\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-s\t\tuse Split-file together with MPIO\n");
     printf("\t-p\t\tuse combo MPI-POSIX driver\n");
@@ -182,7 +182,10 @@ parse_options(int argc, char **argv)
                             break;
                 case 'b':   dobig = 1;
                             break;
-		case 'v':   SetTestVerbosity(VERBO_MED);
+		case 'v':   if (*((*argv+1)+1))
+				ParseTestVerbosity((*argv+1)+1);
+			    else
+				SetTestVerbosity(VERBO_MED);
 			    break;
 		case 'f':   if (--argc < 1) {
 				nerrors++;

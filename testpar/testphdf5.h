@@ -73,10 +73,12 @@
 } while(0)
 
 #define MPI_BANNER(mesg) do {                                           \
-    printf("--------------------------------\n");                       \
-    printf("Proc %d: ", mpi_rank);                                      \
-    printf("*** %s\n", mesg);                                           \
-    printf("--------------------------------\n");                       \
+    if (VERBOSE_MED || MAINPROCESS){                                    \
+	printf("--------------------------------\n");                   \
+	printf("Proc %d: ", mpi_rank);                                  \
+	printf("*** %s\n", mesg);                                       \
+	printf("--------------------------------\n");                   \
+    }                                                                   \
 } while(0)
 
 #define MAINPROCESS     (!mpi_rank) /* define process 0 as main process */
