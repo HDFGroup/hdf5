@@ -190,7 +190,11 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;current_dims&gt; ::= &lt;dims&gt;
 
-&lt;max_dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ) where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer or H5S_UNLIMITED
+&lt;max_dims&gt; ::= `(' &lt;max_dim_list&gt; `)'
+
+&lt;max_dim_list&gt; ::= &lt;max_dim&gt; | &lt;max_dim&gt;, &lt;max_dim_list&gt;
+
+&lt;max_dim&gt; ::= &lt;int_value&gt; | H5S_UNLIMITED
 
 &lt;complex_space_definition&gt; ::= TBD
 
