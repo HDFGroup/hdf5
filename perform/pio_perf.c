@@ -79,6 +79,8 @@
 #define MB_PER_SEC(bytes,t) (((bytes) / ONE_MB) / t)
 
 /* global variables */
+int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK */
+int         comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD */
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
 int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
 int         pio_mpi_nprocs_g;   /* Number of processes of pio_comm_g    */
@@ -242,17 +244,30 @@ static void usage(const char *prog);
 int
 main(int argc, char **argv)
 {
-    int world_size, ret;
+    int ret;
     int exit_value = EXIT_SUCCESS;
     FILE *output = stdout;
     struct options *opts = NULL;
 
     /* initialize MPI and get the maximum num of processors we started with */
     MPI_Init(&argc, &argv);
-    ret = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    ret = MPI_Comm_size(MPI_COMM_WORLD, &comm_world_nprocs_g);
 
     if (ret != MPI_SUCCESS) {
         fprintf(stderr, "%s: MPI_Comm_size call failed\n", progname);
+
+        if (ret == MPI_ERR_COMM)
+            fprintf(stderr, "invalid MPI communicator\n");
+        else
+            fprintf(stderr, "invalid argument\n");
+
+        exit_value = EXIT_FAILURE;
+        goto finish;
+    }
+    ret = MPI_Comm_rank(MPI_COMM_WORLD, &comm_world_rank_g);
+
+    if (ret != MPI_SUCCESS) {
+        fprintf(stderr, "%s: MPI_Comm_rank call failed\n", progname);
 
         if (ret == MPI_ERR_COMM)
             fprintf(stderr, "invalid MPI communicator\n");
@@ -334,9 +349,10 @@ run_test_loop(FILE *output, struct options *opts)
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
 
-    /* multiply the maximum number of processors by 2 for each loop iter */
-    for (num_procs = opts->min_num_procs;
-            num_procs <= opts->max_num_procs; num_procs <<= 1) {
+    /* start with max_num_procs and decrement it by half for each loop. */
+    /* if performance needs restart, fewer processes may be needed. */
+    for (num_procs = opts->max_num_procs;
+            num_procs >= opts->min_num_procs; num_procs >>= 1) {
         register long buf_size;
 
         parms.num_procs = num_procs;
@@ -791,7 +807,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->num_dsets = 1;
     cl_opts->num_files = 1;
     cl_opts->num_iters = 1;
-    cl_opts->max_num_procs = 1;
+    cl_opts->max_num_procs = comm_world_nprocs_g;
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
@@ -938,7 +954,7 @@ usage(const char *prog)
         fprintf(stdout, "     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
         fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test\n");
         fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
-        fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: 1]\n");
+        fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: all MPI_COMM_WORLD processes ]\n");
         fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
         fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
