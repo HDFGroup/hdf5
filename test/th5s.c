@@ -168,12 +168,26 @@ test_h5s_basic(void)
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
      * the instructions in space_overflow.c for regenating the th5s.h5 file.
      */
-    fid1 = H5Fopen(TESTFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    {
+    char testfile[512]="";
+    char *srcdir = getenv("srcdir");
+    if (srcdir && ((strlen(srcdir) + strlen(TESTFILE) + 1) < sizeof(testfile))){
+	strcpy(testfile, srcdir);
+	strcat(testfile, "/");
+    }
+    strcat(testfile, TESTFILE);
+    fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
-    dset1 = H5Dopen(fid1, "dset");
-    VERIFY(dset1, FAIL, "H5Dopen");
-    ret = H5Fclose(fid1);
-    CHECK_I(ret, "H5Fclose");
+    if (fid1 >= 0){
+	dset1 = H5Dopen(fid1, "dset");
+	VERIFY(dset1, FAIL, "H5Dopen");
+	ret = H5Fclose(fid1);
+	CHECK_I(ret, "H5Fclose");
+    }
+    else
+	printf("***cannot open the pre-created H5S_MAX_RANK test file (%s)\n",
+	    testfile);
+    }
 
     /* Verify that incorrect dimensions don't work */
     dims1[0]=0;
