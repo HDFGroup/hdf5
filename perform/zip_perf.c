@@ -38,7 +38,7 @@
 #include "hdf5.h"
 #include "h5tools_utils.h"
 
-#ifdef H5_HAVE_COMPRESSION
+#ifdef H5_HAVE_FILTER_DEFLATE
 
 #include <zlib.h>
 
@@ -675,4 +675,4 @@ main(void)
     return EXIT_SUCCESS;
 }
 
-#endif  /* !H5_HAVE_COMPRESSION */
+#endif  /* !H5_HAVE_FILTER_DEFLATE */
