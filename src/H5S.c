@@ -448,7 +448,7 @@ H5S_close(H5S_t *ds)
     assert(ds);
 
     /* Release selection (this should come before the extent release) */
-    H5S_select_release(ds);
+    H5S_SELECT_RELEASE(ds);
 
     /* Release extent */
     H5S_extent_release(ds);
@@ -907,7 +907,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-    ret_value = H5S_get_simple_extent_ndims(ds);
+    ret_value = H5S_GET_SIMPLE_EXTENT_NDIMS(ds);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -927,6 +927,10 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, December 11, 1997
  *
+ * Note:        This routine participates in the "Inlining C function pointers"
+ *              pattern, don't call it directly, use the appropriate macro
+ *              defined in H5Sprivate.h.
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
@@ -943,9 +947,6 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
 
     switch (ds->extent.type) {
         case H5S_SCALAR:
-            ret_value = 0;
-            break;
-
         case H5S_SIMPLE:
             ret_value = ds->extent.u.simple.rank;
             break;
@@ -1383,9 +1384,6 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     /* Check args */
     assert(rank<=H5S_MAX_RANK);
     assert(0==rank || dims);
-    
-    /* Set offset to zeros */
-    HDmemset(space->select.offset,0,sizeof(hssize_t)*rank);
 
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->extent.type) {
@@ -1434,6 +1432,16 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
             HDmemcpy(space->extent.u.simple.max, max, sizeof(hsize_t) * rank);
         } /* end if */
     }
+
+    /* Selection related cleanup */
+
+    /* Set offset to zeros */
+    HDmemset(space->select.offset,0,sizeof(hssize_t)*rank);
+
+    /* If the selection is 'all', update the number of elements selected */
+    if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
+        if(H5S_select_all(space, FALSE)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1653,6 +1661,11 @@ H5S_extend (H5S_t *space, const hsize_t *size)
             nelem*=space->extent.u.simple.size[u];
         }
         space->extent.nelem = nelem;
+
+        /* If the selection is 'all', update the number of elements selected */
+        if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
+            if(H5S_select_all(space, FALSE)<0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
     }
 
 done:
@@ -1790,6 +1803,10 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, September 28, 2000
  *
+ * Note:        This routine participates in the "Inlining C function pointers"
+ *              pattern, don't call it directly, use the appropriate macro
+ *              defined in H5Sprivate.h.
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
@@ -1841,7 +1858,7 @@ H5Sget_simple_extent_type(hid_t sid)
     if (NULL == (space = H5I_object_verify(sid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
 
-    ret_value=H5S_get_simple_extent_type(space);
+    ret_value=H5S_GET_SIMPLE_EXTENT_TYPE(space);
     
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2007,6 +2024,11 @@ H5S_set_extent_real( H5S_t *space, const hsize_t *size )
         nelem*=space->extent.u.simple.size[u];
     } /* end for */
     space->extent.nelem = nelem;
+
+    /* If the selection is 'all', update the number of elements selected */
+    if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
+        if(H5S_select_all(space, FALSE)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

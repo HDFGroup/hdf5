@@ -344,7 +344,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
 *  Construct contig type for inner contig dims:
 *******************************************************/
 #ifdef H5Smpi_DEBUG
-    HDfprintf(stderr, "%s: Making contig type %d MPI_BYTEs\n", FUNC, elmt_size );
+    HDfprintf(stderr, "%s: Making contig type %d MPI_BYTEs\n", FUNC,elmt_size );
     for (i=rank-1; i>=0; --i)
         HDfprintf(stderr, "d[%d].xtent=%Hu \n", i, d[i].xtent);
 #endif
@@ -363,12 +363,12 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
 #endif
 
 #ifdef H5Smpi_DEBUG
-        HDfprintf(stderr, "%s: i=%d  Making vector-type \n", FUNC, i);
+        HDfprintf(stderr, "%s: i=%d  Making vector-type \n", FUNC,i);
 #endif
        /****************************************
        *  Build vector in current dimension:
        ****************************************/
-        mpi_code =MPI_Type_vector((int)(d[i].count),        /* count */
+	mpi_code =MPI_Type_vector((int)(d[i].count),        /* count */
 				  (int)(d[i].block),        /* blocklength */
 				  (int)(d[i].strid),   	    /* stride */
 				  inner_type,	            /* old type */
@@ -486,7 +486,7 @@ empty:
 done:
     /* Release selection iterator */
     if(sel_iter_init) {
-        if (H5S_select_iter_release(&sel_iter)<0)
+        if (H5S_SELECT_ITER_RELEASE(&sel_iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
@@ -629,9 +629,9 @@ done:
  */
 static herr_t
 H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
-                     const H5S_t *file_space, const H5S_t *mem_space,
-		     hid_t dxpl_id, void *_buf /*out*/,
-		     hbool_t do_write )
+     const H5S_t *file_space, const H5S_t *mem_space,
+     hid_t dxpl_id, void *_buf /*out*/,
+     hbool_t do_write )
 {
     haddr_t	 addr;                  /* Address of dataset (or selection) within file */
     size_t	 mpi_buf_count, mpi_file_count;       /* Number of "objects" to transfer */
@@ -837,8 +837,8 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
         HGOTO_DONE(FALSE);
 
     /* Check whether both selections are "regular" */
-    c1=(*file_space->select.is_regular)(file_space);
-    c2=(*mem_space->select.is_regular)(mem_space);
+    c1=H5S_SELECT_IS_REGULAR(file_space);
+    c2=H5S_SELECT_IS_REGULAR(mem_space);
     if(c1==FAIL || c2==FAIL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
     if(c1==FALSE || c2==FALSE)

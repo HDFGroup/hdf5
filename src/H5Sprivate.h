@@ -172,6 +172,52 @@ typedef struct H5S_conv_t {
 #endif
 } H5S_conv_t;
 
+/* If the module using this macro is allowed access to the private variables, access them directly */
+#ifdef H5S_PACKAGE
+#define H5S_GET_SIMPLE_EXTENT_TYPE(S)   ((S)->extent.type)
+#define H5S_GET_SIMPLE_EXTENT_NDIMS(S)  ((S)->extent.u.simple.rank)
+#define H5S_GET_SELECT_NPOINTS(S)       ((S)->select.num_elem)
+#define H5S_GET_SELECT_TYPE(S)          ((S)->select.type)
+#define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
+#define H5S_SELECT_VALID(S)             ((*(S)->select.is_valid)(S))
+#define H5S_SELECT_RELEASE(S)           ((*(S)->select.release)(S))
+#define H5S_SELECT_SERIAL_SIZE(S)       ((*(S)->select.serial_size)(S))
+#define H5S_SELECT_SERIALIZE(S,BUF)     ((*(S)->select.serialize)(S,BUF))
+#define H5S_SELECT_BOUNDS(S,START,END)  ((*(S)->select.bounds)(S,START,END))
+#define H5S_SELECT_IS_CONTIGUOUS(S)     ((*(S)->select.is_contiguous)(S))
+#define H5S_SELECT_IS_SINGLE(S)         ((*(S)->select.is_single)(S))
+#define H5S_SELECT_IS_REGULAR(S)        ((*(S)->select.is_regular)(S))
+#define H5S_SELECT_ITER_COORDS(ITER,COORDS)     ((*(ITER)->iter_coords)(ITER,COORDS))
+#define H5S_SELECT_ITER_BLOCK(ITER,START,END)   ((*(ITER)->iter_block)(ITER,START,END))
+#define H5S_SELECT_ITER_NELMTS(ITER)    ((*(ITER)->iter_nelmts)(ITER))
+#define H5S_SELECT_ITER_HAS_NEXT_BLOCK(ITER)    ((*(ITER)->iter_has_next_block)(ITER))
+#define H5S_SELECT_ITER_NEXT(ITER,NELEM)((*(ITER)->iter_next)(ITER,NELEM))
+#define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        ((*(ITER)->iter_next_block)(ITER))
+#define H5S_SELECT_ITER_RELEASE(ITER)   ((*(ITER)->iter_release)(ITER))
+#else /* H5S_PACKAGE */
+#define H5S_GET_SIMPLE_EXTENT_TYPE(S)   (H5S_get_simple_extent_type(S))
+#define H5S_GET_SIMPLE_EXTENT_NDIMS(S)  (H5S_get_simple_extent_ndims(S))
+#define H5S_GET_SELECT_NPOINTS(S)       (H5S_get_select_npoints(S))
+#define H5S_GET_SELECT_TYPE(S)          (H5S_get_select_type(S))
+#define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)       (H5S_select_get_seq_list(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
+#define H5S_SELECT_VALID(S)             (H5S_select_valid(S))
+#define H5S_SELECT_RELEASE(S)           (H5S_select_release(S))
+#define H5S_SELECT_SERIAL_SIZE(S)       (H5S_select_serial_size(S))
+#define H5S_SELECT_SERIALIZE(S,BUF)     (H5S_select_serialize(S,BUF))
+#define H5S_SELECT_BOUNDS(S,START,END)  (H5S_get_select_bounds(S,START,END))
+#define H5S_SELECT_IS_CONTIGUOUS(S)     (H5S_select_is_contiguous(S))
+#define H5S_SELECT_IS_SINGLE(S)         (H5S_select_is_single(S))
+#define H5S_SELECT_IS_REGULAR(S)        (H5S_select_is_regular(S))
+#define H5S_SELECT_ITER_COORDS(ITER,COORDS)     (H5S_select_iter_coords(ITER,COORDS))
+#define H5S_SELECT_ITER_BLOCK(ITER,START,END)   (H5S_select_iter_block(ITER,START,END))
+#define H5S_SELECT_ITER_NELMTS(ITER)    (H5S_select_iter_nelmts(ITER))
+#define H5S_SELECT_ITER_HAS_NEXT_BLOCK(ITER)    (H5S_select_iter_has_next_block(ITER))
+#define H5S_SELECT_ITER_NEXT(ITER,NELEM)(H5S_select_iter_next(ITER,NELEM))
+#define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        (H5S_select_iter_next_block(ITER))
+#define H5S_SELECT_ITER_RELEASE(ITER)   (H5S_select_iter_release(ITER))
+#endif /* H5S_PACKAGE */
+
+
 /* Operations on dataspaces */
 H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection);
 H5_DLL herr_t H5S_close(H5S_t *ds);
@@ -231,6 +277,12 @@ H5_DLL herr_t H5S_select_offset(H5S_t *space, const hssize_t *offset);
 H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
 H5_DLL htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 H5_DLL herr_t H5S_select_release(H5S_t *ds);
+H5_DLL herr_t H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
+    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
+    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+H5_DLL htri_t H5S_select_is_contiguous(const H5S_t *space);
+H5_DLL htri_t H5S_select_is_single(const H5S_t *space);
+H5_DLL htri_t H5S_select_is_regular(const H5S_t *space);
 
 /* Operations on all selections */
 H5_DLL herr_t H5S_select_all(H5S_t *space, unsigned rel_prev);
