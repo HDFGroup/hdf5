@@ -95,7 +95,7 @@ typedef struct H5F_file_t {
 
     unsigned	super_chksum;	/* Superblock checksum                  */
     unsigned	drvr_chksum;	/* Driver info block checksum           */
-    struct H5AC_t *cache;	/* The object cache			*/
+    H5AC_t      *cache;		/* The object cache			*/
     hid_t       fcpl_id;	/* File creation property list ID 	*/
     int         mdc_nelmts;	/* Size of meta data cache (elements)	*/
     size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/

@@ -24,12 +24,16 @@
  *
  *-------------------------------------------------------------------------
  */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5MM_mask
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5MMprivate.h"
 
 /* Interface initialization? */
-#define PABLO_MASK H5MM_mask
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
@@ -58,7 +62,7 @@ static int interface_initialize_g = 0;
 void *
 H5MM_malloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT here to avoid performance issues */
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_malloc);
 
     assert(size);
@@ -91,7 +95,7 @@ H5MM_malloc(size_t size)
 void *
 H5MM_calloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT here to avoid performance issues */
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_calloc);
 
     assert(size);

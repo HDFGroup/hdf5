@@ -88,7 +88,7 @@ H5O_cont_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t U
     H5O_cont_t             *cont = NULL;
     void                   *ret_value;
 
-    FUNC_ENTER_NOAPI(H5O_cont_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cont_decode);
 
     /* check args */
     assert(f);
@@ -128,9 +128,8 @@ static herr_t
 H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_cont_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cont_encode);
 
     /* check args */
     assert(f);
@@ -141,8 +140,7 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     H5F_addr_encode(f, &p, cont->addr);
     H5F_ENCODE_LENGTH(f, p, cont->size);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -166,9 +164,8 @@ H5O_cont_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
 	       int indent, int fwidth)
 {
     const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_cont_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cont_debug);
 
     /* check args */
     assert(f);
@@ -187,6 +184,5 @@ H5O_cont_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
 	      "Points to chunk number:",
 	      (int) (cont->chunkno));
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

@@ -72,7 +72,8 @@ static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const vo
 static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 			     H5G_node_t *sym);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
-static herr_t H5G_node_clear(H5G_node_t *sym);
+static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
+static herr_t H5G_compute_size(H5F_t *f, H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
 static size_t H5G_node_sizeof_rkey(const H5F_t *f, const void *_udata);
@@ -109,6 +110,7 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     (H5AC_flush_func_t)H5G_node_flush,
     (H5AC_dest_func_t)H5G_node_dest,
     (H5AC_clear_func_t)H5G_node_clear,
+    (H5AC_size_func_t)H5G_compute_size,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -638,11 +640,12 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_clear(H5G_node_t *sym)
+H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
 {
     int i;              /* Local index variable */
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_clear);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_clear);
 
     /*
      * Check arguments.
@@ -655,8 +658,50 @@ H5G_node_clear(H5G_node_t *sym)
         sym->entry[i].dirty=FALSE;
     sym->cache_info.is_dirty = FALSE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    /*
+     * Destroy the symbol node?	 This might happen if the node is being
+     * preempted from the cache.
+     */
+    if (destroy)
+        if (H5G_node_dest(f, sym) < 0)
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5G_node_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_compute_size
+ *
+ * Purpose:	Compute the size in bytes of the specified instance of
+ *		H5G_node_t on disk, and return it in *size_ptr.  On failure
+ *		the value of size_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *		5/13/04
+ *
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_compute_size(H5F_t *f, H5G_node_t UNUSED *sym, size_t *size_ptr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_compute_size);
+
+    /*
+     * Check arguments.
+     */
+    assert(f);
+    assert(size_ptr);
+
+    *size_ptr = H5G_node_size(f);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* H5G_compute_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1748,9 +1793,7 @@ done:
 herr_t
 H5G_node_close(const H5F_t *f)
 {
-    herr_t ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5G_node_close,FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_close)
 
     /* Check arguments. */
     assert(f);
@@ -1758,8 +1801,7 @@ H5G_node_close(const H5F_t *f)
     /* Free the raw B-tree node buffer */
     H5RC_DEC(H5F_GRP_BTREE_SHARED(f));
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_node_close */
 
 

@@ -30,7 +30,7 @@ LIB=libhdf5.la
 DISTCLEAN=libhdf5.settings
 
 ## Source and object files for the library (lexicographically)...
-LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5Dcontig.c H5Dcompact.c H5Defl.c       \
+LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dcontig.c H5Dcompact.c H5Defl.c \
         H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c       \
         H5FD.c \
         H5FDcore.c H5FDfamily.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c     \
@@ -54,7 +54,8 @@ LIB_OBJ=$(LIB_SRC:.c=.lo)
 MOSTLYCLEAN=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
 
 ## Public header files (to be installed)...
-PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h           \
+PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Cpublic.h           \
+        H5Dpublic.h \
         H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDfamily.h          \
         H5FDgass.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h H5FDsrb.h H5FDstdio.h H5FDstream.h             \
@@ -64,6 +65,7 @@ PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h           \
 
 ## Other header files (not to be installed)...
 PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h      \
+        H5Cprivate.h \
         H5Dprivate.h H5Eprivate.h H5Fprivate.h H5FDprivate.h H5FLprivate.h    \
         H5FOprivate.h H5FSprivate.h H5Gprivate.h H5Gpkg.h                     \
         H5HGprivate.h H5HLprivate.h H5HPprivate.h H5Iprivate.h H5MFprivate.h  \

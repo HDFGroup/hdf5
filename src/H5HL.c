@@ -71,7 +71,8 @@ static H5HL_t *H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udat
 			 void *udata2);
 static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap);
 static herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
-static herr_t H5HL_clear(H5HL_t *heap);
+static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
+static herr_t H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr);
 
 /*
  * H5HL inherits cache-like properties from H5AC
@@ -82,6 +83,7 @@ const H5AC_class_t H5AC_LHEAP[1] = {{
     (H5AC_flush_func_t)H5HL_flush,
     (H5AC_dest_func_t)H5HL_dest,
     (H5AC_clear_func_t)H5HL_clear,
+    (H5AC_size_func_t)H5HL_compute_size,
 }};
 
 /* Interface initialization */
@@ -660,9 +662,11 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_clear(H5HL_t *heap)
+H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_clear);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HL_clear);
 
     /* check arguments */
     assert(heap);
@@ -670,8 +674,44 @@ H5HL_clear(H5HL_t *heap)
     /* Mark heap as clean */
     heap->cache_info.is_dirty = FALSE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    if (destroy)
+        if (H5HL_dest(f, heap) < 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap collection");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HL_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_compute_size
+ *
+ * Purpose:	Compute the size in bytes of the specified instance of
+ *              H5HL_t on disk, and return it in *len_ptr.  On failure,
+ *              the value of *len_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *		5/13/04
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_compute_size);
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(heap);
+    HDassert(size_ptr);
+
+    *size_ptr = H5HL_SIZEOF_HDR(f) + heap->disk_alloc;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5HL_compute_size() */
 
 
 /*-------------------------------------------------------------------------

@@ -87,7 +87,8 @@ static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata
 		       void *_udata2);
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
-static herr_t H5O_clear(H5O_t *oh);
+static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
+static herr_t H5O_compute_size(H5F_t *f, H5O_t *oh, size_t *size_ptr);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
@@ -96,6 +97,7 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
     (H5AC_flush_func_t)H5O_flush,
     (H5AC_dest_func_t)H5O_dest,
     (H5AC_clear_func_t)H5O_clear,
+    (H5AC_size_func_t)H5O_compute_size,
 }};
 
 /* Interface initialization */
@@ -867,11 +869,12 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_clear(H5O_t *oh)
+H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy)
 {
     unsigned	u;      /* Local index variable */
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_clear);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_clear);
 
     /* check args */
     assert(oh);
@@ -887,8 +890,63 @@ H5O_clear(H5O_t *oh)
     /* Mark whole header as clean */
     oh->cache_info.is_dirty=FALSE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    if (destroy)
+        if (H5O_dest(f, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_compute_size
+ *
+ * Purpose:	Compute the size in bytes of the specified instance of
+ *              H5O_t on disk, and return it in *len_ptr.  On failure,
+ *              the value of *len_ptr is undefined.
+ *
+ *		The value returned will probably be low unless the object
+ *		has just been flushed, as we simply total up the size of
+ *		the header with the sizes of the chunks.  Thus any message
+ *		that has been added since the last flush will not be 
+ *		reflected in the total.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *		5/13/04
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_compute_size(H5F_t *f, H5O_t *oh, size_t *size_ptr)
+{
+    unsigned	u;
+    size_t	size;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_compute_size);
+
+    /* check args */
+    HDassert(f);
+    HDassert(oh);
+    HDassert(size_ptr);
+
+    size = H5O_SIZEOF_HDR(f);
+
+    for (u = 0; u < oh->nchunks; u++) 
+    {
+        size += oh->chunk[u].size;
+    }
+
+    HDassert(size >= H5O_SIZEOF_HDR(f));
+
+    *size_ptr = size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* H5O_compute_size() */
 
 
 /*-------------------------------------------------------------------------

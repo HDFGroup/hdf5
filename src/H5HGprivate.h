@@ -45,6 +45,8 @@ H5_DLL herr_t H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj,
 H5_DLL void *H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object);
 H5_DLL int H5HG_link(H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust);
 H5_DLL herr_t H5HG_remove(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj);
+
+/* Debugging functions */
 H5_DLL herr_t H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 			  int fwidth);
 

@@ -2590,7 +2590,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         } /* end if */
 
         /* flush (and invalidate) the entire meta data cache */
-        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & (H5F_FLUSH_INVALIDATE|H5F_FLUSH_CLEAR_ONLY)) < 0)
+        if (H5AC_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE|H5F_FLUSH_CLEAR_ONLY)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
     } /* end if */
 
@@ -2987,9 +2987,9 @@ H5F_close(H5F_t *f)
     /* Only flush at this point if the file will be closed */
     if (closing) {
         /* Dump debugging info */
-#ifdef H5AC_DEBUG
-        H5AC_debug(f);
-#endif /* H5AC_DEBUG */
+#if H5AC_DUMP_STATS_ON_CLOSE
+    H5AC_stats(f);
+#endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
         /* Only try to flush the file if it was opened with write access */
         if(f->intent&H5F_ACC_RDWR) {
@@ -3952,401 +3952,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_block_read
- *
- * Purpose:	Reads some data from a file/server/etc into a buffer.
- *		The data is contiguous.	 The address is relative to the base
- *		address for the file.
- *
- * Errors:
- *		IO	  READERROR	Low-level read failed. 
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
- * Modifications:
- *		Albert Cheng, 1998-06-02
- *		Added XFER_MODE argument
- *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- * 		Robb Matzke, 1999-08-02
- *		Modified to use the virtual file layer. The data transfer
- *		property list is passed in by object ID since that's how the
- *		virtual file layer needs it.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t dxpl_id,
-	       void *buf/*out*/)
-{
-    haddr_t		    abs_addr;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_block_read, FAIL);
-
-    assert (f);
-    assert (f->shared);
-    assert(size<SIZET_MAX);
-    assert (buf);
-
-    /* convert the relative address to an absolute address */
-    abs_addr = f->shared->base_addr + addr;
-
-    /* Read the data */
-    if (H5FD_read(f->shared->lf, type, dxpl_id, abs_addr, size, buf)<0)
-	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_block_write
- *
- * Purpose:	Writes some data from memory to a file/server/etc.  The
- *		data is contiguous.  The address is relative to the base
- *		address.
- *
- * Errors:
- *		IO	  WRITEERROR	Low-level write failed. 
- *		IO	  WRITEERROR	No write intent. 
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
- * Modifications:
- *		Albert Cheng, 1998-06-02
- *		Added XFER_MODE argument
- *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- * 		Robb Matzke, 1999-08-02
- *		Modified to use the virtual file layer. The data transfer
- *		property list is passed in by object ID since that's how the
- *		virtual file layer needs it.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
-        hid_t dxpl_id, const void *buf)
-{
-    haddr_t		    abs_addr;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_block_write, FAIL);
-
-    assert (f);
-    assert (f->shared);
-    assert (size<SIZET_MAX);
-    assert (buf);
-
-    if (0==(f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "no write intent");
-
-    /* Convert the relative address to an absolute address */
-    abs_addr = f->shared->base_addr + addr;
-
-    /* Write the data */
-    if (H5FD_write(f->shared->lf, type, dxpl_id, abs_addr, size, buf))
-	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_encode
- *
- * Purpose:	Encodes an address into the buffer pointed to by *PP and
- *		then increments the pointer to the first byte after the
- *		address.  An undefined value is stored as all 1's.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *-------------------------------------------------------------------------
- */
-void
-H5F_addr_encode(H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
-{
-    unsigned		    i;
-
-    assert(f);
-    assert(pp && *pp);
-
-    if (H5F_addr_defined(addr)) {
-	for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
-	    *(*pp)++ = (uint8_t)(addr & 0xff);
-	    addr >>= 8;
-	}
-	assert("overflow" && 0 == addr);
-
-    } else {
-	for (i=0; i<H5F_SIZEOF_ADDR(f); i++)
-	    *(*pp)++ = 0xff;
-    }
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_decode
- *
- * Purpose:	Decodes an address from the buffer pointed to by *PP and
- *		updates the pointer to point to the next byte after the
- *		address.
- *
- *		If the value read is all 1's then the address is returned
- *		with an undefined value.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-H5F_addr_decode(H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
-{
-    unsigned		    i;
-    haddr_t		    tmp;
-    uint8_t		    c;
-    hbool_t		    all_zero = TRUE;
-
-    assert(f);
-    assert(pp && *pp);
-    assert(addr_p);
-
-    *addr_p = 0;
-
-    for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
-	c = *(*pp)++;
-	if (c != 0xff)
-            all_zero = FALSE;
-
-	if (i<sizeof(*addr_p)) {
-	    tmp = c;
-	    tmp <<= i * 8;	/*use tmp to get casting right */
-	    *addr_p |= tmp;
-	} else if (!all_zero) {
-	    assert(0 == **pp);	/*overflow */
-	}
-    }
-    if (all_zero)
-        *addr_p = HADDR_UNDEF;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_pack
- *
- * Purpose:	Converts a long[2] array (usually returned from
- *		H5G_get_objinfo) back into a haddr_t
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, October  23, 1998
- *
- * Modifications:
- *		Albert Cheng, 1999-02-18
- *		Changed objno to unsigned long type to be consistent with
- *      	addr->offset and how it is being called.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
-	      const unsigned long objno[2])
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_addr_pack);
-
-    assert(f);
-    assert(objno);
-    assert(addr_p);
-
-    *addr_p = objno[0];
-#if H5_SIZEOF_LONG<H5_SIZEOF_UINT64_T
-    *addr_p |= ((uint64_t)objno[1]) << (8*sizeof(long));
-#endif
-    
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5Fget_freespace
- *
- * Purpose:     Retrieves the amount of free space (of a given type) in the
- *              file.  If TYPE is 'H5FD_MEM_DEFAULT', then the amount of free
- *              space for all types is returned.
- *
- * Return:      Success:        Amount of free space for type
- *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
- *              Oct  6, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hssize_t
-H5Fget_freespace(hid_t file_id)
-{
-    H5F_t      *file=NULL;      /* File object for file ID */
-    hssize_t    ret_value;      /* Return value */
-
-    FUNC_ENTER_API(H5Fget_freespace, FAIL)
-
-    /* Check args */
-    if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
-    /* Go get the actual amount of free space in the file */
-    if((ret_value = H5FD_get_freespace(file->shared->lf))<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Fget_freespace() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_debug
- *
- * Purpose:	Prints a file header to the specified stream.  Each line
- *		is indented and the field name occupies the specified width
- *		number of characters.
- *
- * Errors:
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  1 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- * 		
- *		Raymond Lu, 2001-10-14
- * 		Changed to the new generic property list.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE * stream, int indent,
-	  int fwidth)
-{
-    hsize_t userblock_size;
-    int     super_vers, freespace_vers, obj_dir_vers, share_head_vers;
-    H5P_genplist_t *plist;              /* Property list */
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_debug, FAIL);
-
-    /* check args */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
-
-    /* Get property list */
-    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
-    if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size");
-    if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
-    if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
-    if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version");
-    if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header format version");
-
-    /* debug */
-    HDfprintf(stream, "%*sFile Super Block...\n", indent, "");
-
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "File name:",
-	      f->name);
-    HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth,
-	      "File access flags",
-	      (unsigned) (f->shared->flags));
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "File open reference count:",
-	      (unsigned) (f->shared->nrefs));
-    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
-	      "Address of super block:", f->shared->super_addr);
-    HDfprintf(stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
-	      "Size of user block:", (unsigned long) userblock_size);
-
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Super block version number:", (unsigned) super_vers);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Free list version number:", (unsigned) freespace_vers);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Root group symbol table entry version number:", (unsigned) obj_dir_vers);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Shared header version number:", (unsigned) share_head_vers);
-    HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-	      "Size of file offsets (haddr_t type):", (unsigned) f->shared->sizeof_addr);
-    HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-	      "Size of file lengths (hsize_t type):", (unsigned) f->shared->sizeof_size);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Symbol table leaf node 1/2 rank:", f->shared->sym_leaf_k);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Symbol table internal node 1/2 rank:",
-              (unsigned) (f->shared->btree_k[H5B_SNODE_ID]));
-    HDfprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
-	      "File consistency flags:",
-	      (unsigned long) (f->shared->consist_flags));
-    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
-	      "Base address:", f->shared->base_addr);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
-	      "Free list address:", f->shared->freespace_addr);
-
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
-	      "Address of driver information block:", f->shared->driver_addr);
-
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Root group symbol table entry:",
-	      f->shared->root_grp ? "" : "(none)");
-    if (f->shared->root_grp) {
-	H5G_ent_debug(f, dxpl_id, H5G_entof(f->shared->root_grp), stream,
-		      indent+3, MAX(0, fwidth-3), HADDR_UNDEF);
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_get_id
  *
  * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
@@ -4557,6 +4162,287 @@ H5RC_t *H5F_grp_btree_shared(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_block_read
+ *
+ * Purpose:	Reads some data from a file/server/etc into a buffer.
+ *		The data is contiguous.	 The address is relative to the base
+ *		address for the file.
+ *
+ * Errors:
+ *		IO	  READERROR	Low-level read failed. 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Jul 10 1997
+ *
+ * Modifications:
+ *		Albert Cheng, 1998-06-02
+ *		Added XFER_MODE argument
+ *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
+ *
+ * 		Robb Matzke, 1999-08-02
+ *		Modified to use the virtual file layer. The data transfer
+ *		property list is passed in by object ID since that's how the
+ *		virtual file layer needs it.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t dxpl_id,
+	       void *buf/*out*/)
+{
+    haddr_t		    abs_addr;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_block_read, FAIL)
+
+    assert (f);
+    assert (f->shared);
+    assert(size<SIZET_MAX);
+    assert (buf);
+
+    /* convert the relative address to an absolute address */
+    abs_addr = f->shared->base_addr + addr;
+
+    /* Read the data */
+    if (H5FD_read(f->shared->lf, type, dxpl_id, abs_addr, size, buf)<0)
+	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_block_write
+ *
+ * Purpose:	Writes some data from memory to a file/server/etc.  The
+ *		data is contiguous.  The address is relative to the base
+ *		address.
+ *
+ * Errors:
+ *		IO	  WRITEERROR	Low-level write failed. 
+ *		IO	  WRITEERROR	No write intent. 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Jul 10 1997
+ *
+ * Modifications:
+ *		Albert Cheng, 1998-06-02
+ *		Added XFER_MODE argument
+ *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
+ *
+ * 		Robb Matzke, 1999-08-02
+ *		Modified to use the virtual file layer. The data transfer
+ *		property list is passed in by object ID since that's how the
+ *		virtual file layer needs it.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
+        hid_t dxpl_id, const void *buf)
+{
+    haddr_t		    abs_addr;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_block_write, FAIL)
+
+    assert (f);
+    assert (f->shared);
+    assert (size<SIZET_MAX);
+    assert (buf);
+
+    if (0==(f->intent & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "no write intent")
+
+    /* Convert the relative address to an absolute address */
+    abs_addr = f->shared->base_addr + addr;
+
+    /* Write the data */
+    if (H5FD_write(f->shared->lf, type, dxpl_id, abs_addr, size, buf))
+	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_addr_encode
+ *
+ * Purpose:	Encodes an address into the buffer pointed to by *PP and
+ *		then increments the pointer to the first byte after the
+ *		address.  An undefined value is stored as all 1's.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
+{
+    unsigned		    i;
+
+    assert(f);
+    assert(pp && *pp);
+
+    if (H5F_addr_defined(addr)) {
+	for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
+	    *(*pp)++ = (uint8_t)(addr & 0xff);
+	    addr >>= 8;
+	}
+	assert("overflow" && 0 == addr);
+
+    } else {
+	for (i=0; i<H5F_SIZEOF_ADDR(f); i++)
+	    *(*pp)++ = 0xff;
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_addr_decode
+ *
+ * Purpose:	Decodes an address from the buffer pointed to by *PP and
+ *		updates the pointer to point to the next byte after the
+ *		address.
+ *
+ *		If the value read is all 1's then the address is returned
+ *		with an undefined value.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
+{
+    unsigned		    i;
+    haddr_t		    tmp;
+    uint8_t		    c;
+    hbool_t		    all_zero = TRUE;
+
+    assert(f);
+    assert(pp && *pp);
+    assert(addr_p);
+
+    *addr_p = 0;
+
+    for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
+	c = *(*pp)++;
+	if (c != 0xff)
+            all_zero = FALSE;
+
+	if (i<sizeof(*addr_p)) {
+	    tmp = c;
+	    tmp <<= (i * 8);	/*use tmp to get casting right */
+	    *addr_p |= tmp;
+	} else if (!all_zero) {
+	    assert(0 == **pp);	/*overflow */
+	}
+    }
+    if (all_zero)
+        *addr_p = HADDR_UNDEF;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_addr_pack
+ *
+ * Purpose:	Converts a long[2] array (usually returned from
+ *		H5G_get_objinfo) back into a haddr_t
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, October  23, 1998
+ *
+ * Modifications:
+ *		Albert Cheng, 1999-02-18
+ *		Changed objno to unsigned long type to be consistent with
+ *      	addr->offset and how it is being called.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
+	      const unsigned long objno[2])
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_addr_pack);
+
+    assert(f);
+    assert(objno);
+    assert(addr_p);
+
+    *addr_p = objno[0];
+#if H5_SIZEOF_LONG<H5_SIZEOF_UINT64_T
+    *addr_p |= ((uint64_t)objno[1]) << (8*sizeof(long));
+#endif
+    
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_freespace
+ *
+ * Purpose:     Retrieves the amount of free space (of a given type) in the
+ *              file.  If TYPE is 'H5FD_MEM_DEFAULT', then the amount of free
+ *              space for all types is returned.
+ *
+ * Return:      Success:        Amount of free space for type
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              Oct  6, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hssize_t
+H5Fget_freespace(hid_t file_id)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    hssize_t    ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Fget_freespace, FAIL)
+    H5TRACE1("Hs","i",file_id);
+
+    /* Check args */
+    if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Go get the actual amount of free space in the file */
+    if((ret_value = H5FD_get_freespace(file->shared->lf))<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_freespace() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fget_filesize
  *
  * Purpose:     Retrieves the file size of the HDF5 file. This function 
@@ -4649,3 +4535,117 @@ done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Fget_name() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_debug
+ *
+ * Purpose:	Prints a file header to the specified stream.  Each line
+ *		is indented and the field name occupies the specified width
+ *		number of characters.
+ *
+ * Errors:
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug  1 1997
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
+ * 		
+ *		Raymond Lu, 2001-10-14
+ * 		Changed to the new generic property list.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE * stream, int indent,
+	  int fwidth)
+{
+    hsize_t userblock_size;
+    int     super_vers, freespace_vers, obj_dir_vers, share_head_vers;
+    H5P_genplist_t *plist;              /* Property list */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_debug, FAIL);
+
+    /* check args */
+    assert(f);
+    assert(H5F_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+
+    /* Get property list */
+    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size");
+    if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
+    if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
+    if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version");
+    if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header format version");
+
+    /* debug */
+    HDfprintf(stream, "%*sFile Super Block...\n", indent, "");
+
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "File name:",
+	      f->name);
+    HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth,
+	      "File access flags",
+	      (unsigned) (f->shared->flags));
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "File open reference count:",
+	      (unsigned) (f->shared->nrefs));
+    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
+	      "Address of super block:", f->shared->super_addr);
+    HDfprintf(stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
+	      "Size of user block:", (unsigned long) userblock_size);
+
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Super block version number:", (unsigned) super_vers);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Free list version number:", (unsigned) freespace_vers);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Root group symbol table entry version number:", (unsigned) obj_dir_vers);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Shared header version number:", (unsigned) share_head_vers);
+    HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
+	      "Size of file offsets (haddr_t type):", (unsigned) f->shared->sizeof_addr);
+    HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
+	      "Size of file lengths (hsize_t type):", (unsigned) f->shared->sizeof_size);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Symbol table leaf node 1/2 rank:", f->shared->sym_leaf_k);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Symbol table internal node 1/2 rank:",
+              (unsigned) (f->shared->btree_k[H5B_SNODE_ID]));
+    HDfprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
+	      "File consistency flags:",
+	      (unsigned long) (f->shared->consist_flags));
+    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
+	      "Base address:", f->shared->base_addr);
+    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+	      "Free list address:", f->shared->freespace_addr);
+
+    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+	      "Address of driver information block:", f->shared->driver_addr);
+
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "Root group symbol table entry:",
+	      f->shared->root_grp ? "" : "(none)");
+    if (f->shared->root_grp) {
+	H5G_ent_debug(f, dxpl_id, H5G_entof(f->shared->root_grp), stream,
+		      indent+3, MAX(0, fwidth-3), HADDR_UNDEF);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}

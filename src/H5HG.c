@@ -131,7 +131,8 @@ static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void 
 static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 			 H5HG_heap_t *heap);
 static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
-static herr_t H5HG_clear(H5HG_heap_t *heap);
+static herr_t H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy);
+static herr_t H5HG_compute_size(H5F_t *f, H5HG_heap_t *heap, size_t *size_ptr);
 
 /*
  * H5HG inherits cache-like properties from H5AC
@@ -142,6 +143,7 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     (H5AC_flush_func_t)H5HG_flush,
     (H5AC_dest_func_t)H5HG_dest,
     (H5AC_clear_func_t)H5HG_clear,
+    (H5AC_size_func_t)H5HG_compute_size,
 }};
 
 /* Interface initialization */
@@ -592,9 +594,11 @@ H5HG_dest (H5F_t *f, H5HG_heap_t *heap)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_clear(H5HG_heap_t *heap)
+H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_clear);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_clear);
 
     /* Check arguments */
     assert (heap);
@@ -602,8 +606,44 @@ H5HG_clear(H5HG_heap_t *heap)
     /* Mark heap as clean */
     heap->cache_info.is_dirty = FALSE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    if (destroy)
+        if (H5HG_dest(f, heap) < 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5HG_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HG_compute_size
+ *
+ * Purpose:	Compute the size in bytes of the specified instance of
+ *              H5HG_heap_t on disk, and return it in *len_ptr.  On failure,
+ *              the value of *len_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *              5/13/04
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HG_compute_size(H5F_t UNUSED *f, H5HG_heap_t *heap, size_t *size_ptr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_compute_size);
+
+    /* Check arguments */
+    HDassert(heap);
+    HDassert(size_ptr);
+
+    *size_ptr = heap->size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* H5HG_compute_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -990,7 +1030,6 @@ done:
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.");
 
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5HG_insert() */
 
 
@@ -1230,4 +1269,3 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
-

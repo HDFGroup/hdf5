@@ -40,9 +40,9 @@ static int		interface_initialize_g = 0;
 
 /* Information about object objects in a file */
 typedef struct H5FO_open_obj_t {
-    haddr_t addr;                       /* Address of object header for object  */
+    haddr_t addr;                       /* Address of object header for object */
                                         /* THIS MUST BE FIRST FOR TBBT ROUTINES */
-    void *obj;                       /* Pointer to the object                */
+    void *obj;                          /* Pointer to the object            */
     hbool_t deleted;                    /* Flag to indicate that the object was deleted from the file */
 } H5FO_open_obj_t;
 
@@ -94,12 +94,12 @@ done:
  PURPOSE
     Checks if an object at an address is already open in the file.
  USAGE
-    void *H5FO_opened(f,addr)
+    void * H5FO_opened(f,addr)
         const H5F_t *f;         IN: File to check opened object info set
         haddr_t addr;           IN: Address of object to check
 
  RETURNS
-    Returns a non-negative ID for the object on success, negative on failure
+    Returns a pointer to the object on success, NULL on failure
  DESCRIPTION
     Check is an object at an address (the address of the object's object header)
     is already open in the file and return the ID for that object if it is open.
@@ -142,12 +142,12 @@ done:
  NAME
     H5FO_insert
  PURPOSE
-    Insert a newly opened object/ID pair into the opened object info set
+    Insert a newly opened object/pointer pair into the opened object info set
  USAGE
     herr_t H5FO_insert(f,addr,obj)
         H5F_t *f;               IN/OUT: File's opened object info set
         haddr_t addr;           IN: Address of object to insert
-        void *obj;                 IN: Pointer to object to insert
+        void *obj;              IN: Pointer to object to insert
         int type;               IN: Type of object being inserted
 
  RETURNS
@@ -160,7 +160,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_insert(const H5F_t *f, haddr_t addr, void * obj)
+H5FO_insert(const H5F_t *f, haddr_t addr, void *obj)
 {
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;   /* Return value */

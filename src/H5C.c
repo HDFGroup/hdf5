@@ -95,6 +95,10 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
+/* Interface initialization? */
+#define INTERFACE_INIT NULL
+static int interface_initialize_g = 0;
+
 
 /****************************************************************************
  *
@@ -139,7 +143,7 @@ if ( ( (head_ptr) == NULL ) ||                                               \
        )                                                                     \
      )                                                                       \
    ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL pre remove SC failed")     \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fv), "DLL pre remove SC failed")   \
 }
 
 #define H5C__DLL_SC(head_ptr, tail_ptr, len, Size, fv)                   \
@@ -159,7 +163,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&           \
        )                                                                 \
      )                                                                   \
    ) {                                                                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL sanity check failed")  \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fv), "DLL sanity check failed") \
 }
 
 #define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
@@ -181,7 +185,7 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
        )                                                                     \
      )                                                                       \
    ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL pre insert SC failed")     \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fv), "DLL pre insert SC failed")   \
 }
 
 #else /* H5C_DO_SANITY_CHECKS */
@@ -282,7 +286,7 @@ if ( ( (hd_ptr) == NULL ) ||                                                   \
        )                                                                       \
      )                                                                         \
    ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "aux DLL pre remove SC failed")   \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fv), "aux DLL pre remove SC failed") \
 }
 
 #define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                  \
@@ -302,7 +306,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
        )                                                                    \
      )                                                                      \
    ) {                                                                      \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "AUX DLL sanity check failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fv), "AUX DLL sanity check failed") \
 }
 
 #define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
@@ -324,7 +328,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
        )                                                                       \
      )                                                                         \
    ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "AUX DLL pre insert SC failed")   \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, (fv), "AUX DLL pre insert SC failed") \
 }
 
 #else /* H5C_DO_SANITY_CHECKS */
@@ -595,7 +599,7 @@ if ( ( (cache_ptr) == NULL ) ||                               \
      ( (entry_ptr)->size <= 0 ) ||                            \
      ( (k = H5C__HASH_FCN((entry_ptr)->addr)) < 0 ) ||        \
      ( k >= H5C__HASH_TABLE_LEN ) ) {                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,              \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, fail_val,            \
                "Pre HT insert SC failed")                     \
 }
 
@@ -617,7 +621,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))] ==    \
          (entry_ptr) ) &&                                               \
        ( (entry_ptr)->ht_prev != NULL ) ) ) {                           \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Pre HT remove SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Pre HT remove SC failed") \
 }
 
 #define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                    \
@@ -626,7 +630,7 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
      ( ! H5F_addr_defined(Addr) ) ||                                        \
      ( H5C__HASH_FCN(Addr) < 0 ) ||                                         \
      ( H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN ) ) {                     \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "Pre HT search SC failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, fail_val, "Pre HT search SC failed") \
 }
 
 #define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
@@ -646,7 +650,7 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
        ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||                \
      ( ( (entry_ptr)->ht_next != NULL ) &&                                  \
        ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {               \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                            \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, fail_val,                          \
                 "Post successful HT search SC failed")                      \
 }
 
@@ -654,7 +658,7 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
 if ( ( (cache_ptr) == NULL ) ||                                        \
      ( ((cache_ptr)->index)[k] != (entry_ptr) ) ||                     \
      ( (entry_ptr)->ht_prev != NULL ) ) {                              \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                       \
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, fail_val,                     \
                "Post HT shift to front SC failed")                     \
 }
 
@@ -806,7 +810,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
                                                                                \
     if ( loc_node_ptr == NULL ) {                                              \
                                                                                \
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't insert entry in tree") \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Can't insert entry in tree") \
     }                                                                          \
                                                                                \
     (entry_ptr)->in_tree = TRUE;                                               \
@@ -860,7 +864,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     if ( H5TB_rem(&((cache_ptr)->tree_ptr->root), (node_ptr), NULL) \
          != (entry_ptr) ) {                                         \
                                                                     \
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                    \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                  \
                     "Can't delete entry from tree.")                \
                                                                     \
     } else {                                                        \
@@ -2350,7 +2354,7 @@ H5C_dest_empty(H5C_t * cache_ptr)
          ( cache_ptr->magic != H5C__H5C_T_MAGIC ) || 
          ( cache_ptr->index_len != 0 ) ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, \
                     "Bad cache_ptr or non-empty cache on entry.")
     }
 
@@ -2660,7 +2664,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
     if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
 
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, \
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADSIZE, FAIL, \
                     "Can't get size of thing")
     }
 
@@ -2691,7 +2695,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
             if ( result < 0 ) {
 
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, \
                             "Can't get write_permitted")
             }
         }
@@ -2734,7 +2738,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
         if ( result < 0 ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, \
                         "H5C_make_space_in_cache failed.")
         }
     }
@@ -2749,12 +2753,12 @@ H5C_insert_entry(H5F_t * 	     f,
 
         if ( test_entry_ptr == entry_ptr ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, \
                         "entry already in cache.")
 
         } else {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, \
                         "duplicate entry in cache.")
         }
     }
@@ -2861,12 +2865,12 @@ H5C_rename_entry(H5F_t *	     f,
         
         if ( test_entry_ptr->type == type ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, \
                         "Target already renamed & reinserted???.")
 
         } else {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, \
                         "New address already in use?.")
         }
     }
@@ -3012,7 +3016,7 @@ H5C_protect(H5F_t *	       f,
 
                 if ( result < 0 ) {
 
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
+                    HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, NULL, \
                                "Can't get write_permitted")
                 }
             }
@@ -3052,7 +3056,7 @@ H5C_protect(H5F_t *	       f,
 
             if ( result < 0 ) {
 
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
+                HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, NULL, \
                             "H5C_make_space_in_cache failed.")
             }
         }
@@ -3075,7 +3079,7 @@ H5C_protect(H5F_t *	       f,
 
     if ( entry_ptr->is_protected ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, NULL, \
                     "Target already protected?!?.")
     }
 
@@ -3170,7 +3174,7 @@ H5C_unprotect(H5F_t *		  f,
 
     if ( ! (entry_ptr->is_protected) ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                         "Entry already unprotected??")
     }
 
@@ -3211,12 +3215,12 @@ H5C_unprotect(H5F_t *		  f,
 
         if ( test_entry_ptr == NULL ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                         "entry not in hash table?!?.")
         }
         else if ( test_entry_ptr != entry_ptr ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                         "hash table contains multiple entries for addr?!?.")
         }
 
@@ -3231,7 +3235,7 @@ H5C_unprotect(H5F_t *		  f,
                                     &dummy_first_flush, 
                                     TRUE) < 0 ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush.")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
         }
     }
 
@@ -3301,7 +3305,7 @@ H5C_stats(H5C_t * cache_ptr,
          ( cache_ptr->magic != H5C__H5C_T_MAGIC ) || 
          ( !cache_name ) ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr or cache_name")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache_ptr or cache_name")
     }
 
 #if H5C_COLLECT_CACHE_STATS
@@ -3617,7 +3621,7 @@ H5C_set_skip_flags(H5C_t * cache_ptr,
      */
     if ( ( ! cache_ptr ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache_ptr")
     }
 
     cache_ptr->skip_file_checks    = skip_file_checks;
@@ -3740,7 +3744,7 @@ H5C_flush_single_entry(H5F_t *		   f,
              ( entry_ptr->addr != addr ) ||
              ( node_ptr->data != node_ptr->key ) ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, \
                         "Hash table and tree out of sync.")
         }
     } else if ( entry_ptr != NULL ) {
@@ -3749,7 +3753,7 @@ H5C_flush_single_entry(H5F_t *		   f,
              ( entry_ptr->is_dirty ) ||
              ( entry_ptr->addr != addr ) ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, \
                         "entry failed sanity checks.")
         }
     }
@@ -3952,7 +3956,7 @@ H5C_load_entry(H5F_t *             f,
 
     if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
 
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, NULL, \
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADSIZE, NULL, \
                     "Can't get size of thing")
     }
 

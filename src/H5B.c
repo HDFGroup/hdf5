@@ -151,7 +151,8 @@ static herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_
 static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
 static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b);
 static herr_t H5B_dest(H5F_t *f, H5B_t *b);
-static herr_t H5B_clear(H5B_t *b);
+static herr_t H5B_clear(H5F_t *f, H5B_t *b, hbool_t destroy);
+static herr_t H5B_compute_size(H5F_t *f, H5B_t *bt, size_t *size_ptr);
 
 /* H5B inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_BT[1] = {{
@@ -160,6 +161,7 @@ static const H5AC_class_t H5AC_BT[1] = {{
     (H5AC_flush_func_t)H5B_flush,
     (H5AC_dest_func_t)H5B_dest,
     (H5AC_clear_func_t)H5B_clear,
+    (H5AC_size_func_t)H5B_compute_size,
 }};
 
 /* Interface initialization? */
@@ -563,9 +565,11 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_clear(H5B_t *bt)
+H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_clear)
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B_clear)
 
     /*
      * Check arguments.
@@ -574,9 +578,68 @@ H5B_clear(H5B_t *bt)
 
     /* Reset the dirty flag.  */
     bt->cache_info.is_dirty = FALSE;
+ 
+    if (destroy)
+        if (H5B_dest(f, bt) < 0)
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B_compute_size
+ *
+ * Purpose:	Compute the size in bytes of the specified instance of 
+ *		H5B_t on disk, and return it in *len_ptr.  On failure, 
+ *		the value of *len_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *		5/13/04
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B_compute_size(H5F_t *f, H5B_t *bt, size_t *size_ptr)
+{
+    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    size_t	size;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B_compute_size)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(bt);
+    HDassert(bt->rc_shared);
+    shared=H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(shared);
+    HDassert(shared->type);
+    HDassert(size_ptr);
+
+    size = H5B_nodesize(f, shared, NULL);
+
+    if ( size == 0 ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADSIZE, FAIL, \
+                    "H5B_nodesize() failed");
+
+    } else {
+
+        *size_ptr = size;
+
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5B_H5B_compute_size() */
 
 
 /*-------------------------------------------------------------------------
