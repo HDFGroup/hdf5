@@ -398,6 +398,7 @@
 ./testpar/Makefile.in
 ./testpar/t_dset.c
 ./testpar/t_file.c
+./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
