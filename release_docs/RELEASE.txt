@@ -435,6 +435,12 @@ Known Problems
   occasionally as 1**-308.  This has been reported to the system staff.
   All other tests have passed.
 
+* The C++ library's tests fails when compiling with PGI C++ compiler.  The
+  workaround until the problem is correctly handled is to use the
+  flag "--instantiate=local" prior to the configure and build steps, as:
+        setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
+        setenv CXX "pgCC -tlocal" for others
+
 * On at least one system, (SDSC DataStar), the scheduler (in this case
   LoadLeveler) sends job status updates to standard error when you run
   any executable that was compiled with the parallel compilers.
