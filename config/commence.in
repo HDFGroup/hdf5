@@ -6,7 +6,7 @@
 
 ## Things that Make needs
 .SUFFIXES:
-.SUFFIXES: .c .o .lo
+.SUFFIXES: .c .f90 .cpp .o .lo
 @SET_MAKE@
 
 ## Directories to search
@@ -15,7 +15,14 @@
 ## Programs
 SHELL=/bin/sh
 CC=@CC@
+CXX=@CXX@
+F9X=@F9X@
+F9XMODEXT=@F9XMODEXT@
+F9XMODFLAG=@F9XMODFLAG@
+FSEARCH_DIRS=@FSEARCH_DIRS@
 CFLAGS=@CFLAGS@
+CXXFLAGS=@CXXFLAGS@
+FFLAGS=@FFLAGS@
 CPPFLAGS=@CPPFLAGS@
 LDFLAGS=@LDFLAGS@
 ROOT=@ROOT@
@@ -32,6 +39,10 @@ RUNSERIAL=@RUNSERIAL@
 RUNPARALLEL=@RUNPARALLEL@
 RUNTEST=$(RUNSERIAL)
 TRACE=:
+
+## Languages
+HDF_FORTRAN="no"
+HDF_CXX="no"
 
 ## Installation points
 prefix=@prefix@
@@ -53,6 +64,16 @@ LT_RUN=$(LT) --mode=execute
 LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
 LT_INSTALL_LIB=$(LT) --mode=install $(INSTALL_DATA)
 LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
+
+# Fortran compilation/linking stuff
+LT_FCOMPILE=$(LT) --mode=compile $(F9X)
+LT_LINK_FLIB=$(LT) --mode=link $(F9X) -static $(DYNAMIC_DIRS)
+LT_LINK_FEXE=$(LT) --mode=link $(F9X) $(LT_STATIC_EXEC) $(DYNAMIC_DIRS)
+
+# C++ compilation/linking stuff
+LT_CXX_COMPILE=$(LT) --mode=compile $(CXX)
+LT_LINK_CXX_LIB=$(LT) --mode=link $(CXX) -static -rpath $(libdir) $(DYNAMIC_DIRS)
+LT_LINK_CXX_EXE=$(LT) --mode=link $(CXX) -static $(LT_STATIC_EXEC) -dlopen self -rpath $(bindir) $(DYNAMIC_DIRS)
 
 ## Optional variables. We must declare them here because Irix pmake
 ## complains if it sees a reference to a variable which has never been

@@ -54,7 +54,6 @@ get_output_file="no"
 SHOW="eval"
 CXXBASE="@CXX@"
 CXXLINKERBASE="@CXX@"
-CFLAGS="@CFLAGS@"
 CXXFLAGS="@CXXFLAGS@"
 CPPFLAGS="@CPPFLAGS@"
 LDFLAGS="@LDFLAGS@"
@@ -213,7 +212,7 @@ if test "x$do_compile" = "xyes"; then
     compile_args="-c $compile_args"
   fi
 
-  $SHOW $CXX -I$includedir $CPPFLAGS $CXXFLAGS $CFLAGS $compile_args
+  $SHOW $CXX -I$includedir $CPPFLAGS $CXXFLAGS $compile_args
   status=$?
 
   if test "$status" != "0"; then
@@ -223,7 +222,7 @@ fi
 
 if test "x$do_link" = "xyes"; then
   link_args="$link_args ${libdir}/libhdf5_cpp.a ${libdir}/libhdf5.a $LIBS"
-  $SHOW $CXXLINKER -I$includedir $CPPFLAGS $CXXFLAGS $CFLAGS $LDFLAGS $clibpath $link_objs $link_args
+  $SHOW $CXXLINKER -I$includedir $CPPFLAGS $CXXFLAGS $LDFLAGS $clibpath $link_objs $link_args
   status=$?
 fi
 

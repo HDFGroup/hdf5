@@ -16,10 +16,12 @@
 ##
 ##
 ##
-top_srcdir=@top_srcdir@/..
+top_srcdir=@top_srcdir@
 top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
+
+HDF_CXX="yes"
 
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src

@@ -543,5 +543,4 @@ H5FDmpiof.lo: \
    $(top_srcdir)/src/H5FDstream.h \
    $(srcdir)/H5f90i.h \
    $(srcdir)/H5f90proto.h \
-   $(srcdir)/H5Git.h \
-   H5pubconf_fortran.h
+   $(srcdir)/H5Git.h

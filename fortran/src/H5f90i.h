@@ -94,7 +94,8 @@ typedef float             real_f;
 #endif /*IBM6000*/
 
 /* LINUX definitions */
-#if defined(i386) && defined(linux)
+#if (defined(i386) || defined(__i386__)) && (defined(linux) || defined(__linux__))
+
 #define DF_MT             DFMT_LINIX
 typedef char              *_fcd;
 typedef long long         hsize_t_f;
@@ -115,6 +116,7 @@ typedef float             real_f;
 
 /* IA64 LINUX definitions */
 #if defined __ia64
+
 typedef char              *_fcd;
 typedef long              hsize_t_f;
 typedef long              hssize_t_f;
@@ -170,6 +172,7 @@ typedef float         real_f;
 #endif /* IRIX */
 
 #if (defined(SUN) || defined(sun) || defined(__sun__) || defined(__SUNPRO_C)) & !defined(__i386)
+
 #ifdef __STDC__
 #define ANSISUN
 #else /* __STDC__ */
@@ -232,7 +235,7 @@ typedef float            real_f;
 
 #endif /* DEC_ALPHA */
 
-#if defined  __alpha__ && defined __linux__
+#if defined __alpha__ && defined __linux__
 
 #ifndef DEC_ALPHA_LINUX
 #define DEC_ALPHA_LINUX
@@ -291,6 +294,7 @@ typedef float          real_f;
 
 
 #if defined _WINDOWS || defined WIN32
+
 #define GOT_MACHINE 1
 
 #pragma comment( lib, "oldnames" )

@@ -191,13 +191,16 @@ dnl Check for programs.
 dnl
 AC_PROG_CC
 CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
-
-AC_SUBST([config_dirs]) config_dirs=""
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_LIBTOOL_DLOPEN
+AC_PROG_LIBTOOL
 
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the Fortran interface compiled
 dnl
-AC_MSG_CHECKING([if fortran interface enabled])
+AC_SUBST([HDF5_INTERFACES]) HDF5_INTERFACES=""
+AC_MSG_CHECKING([if Fortran interface enabled])
 AC_ARG_ENABLE([fortran],
               [AC_HELP_STRING([--enable-fortran],
                               [Compile the Fortran interface [default=no]])],
@@ -205,11 +208,52 @@ AC_ARG_ENABLE([fortran],
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   echo "yes"
-  if test -z "$config_dirs"; then
-    config_dirs="fortran"
-  else
-    config_dirs="${config_dirs} fortran"
-  fi
+
+  HDF5_INTERFACES="$HDF5_INTERFACES fortran"
+
+  dnl --------------------------------------------------------------------
+  dnl HDF5 integer variables for the H5fortran_types.f90 file.
+  dnl
+  AC_SUBST([R_LARGE])
+  AC_SUBST([R_INTEGER])
+  AC_SUBST([HSIZE_T])
+  AC_SUBST([HSSIZE_T])
+  AC_SUBST([HID_T])
+  AC_SUBST([SIZE_T])
+  AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
+
+  dnl --------------------------------------------------------------------
+  dnl General Fortran flags
+  dnl
+  AC_SUBST([FFLAGS])
+  AC_SUBST([F9XSUFFIXFLAG])
+  AC_SUBST([FSEARCH_DIRS])
+
+  dnl --------------------------------------------------------------------
+  dnl Check for a Fortran 9X compiler and how to include modules.
+  dnl 
+  AC_PROG_F9X
+  AC_F9X_MODS
+
+  dnl Change to the Fortran 90 language
+  AC_LANG_FORTRAN9X
+
+  dnl --------------------------------------------------------------------
+  dnl See if the compiler will support the "-I." option
+  dnl
+  FFLAGS_saved=$FFLAGS
+  FFLAGS="$FFLAGS -I."
+
+  AC_MSG_CHECKING(if compiler supports -I. option)
+  AC_TRY_FCOMPILE([
+      program conftest
+      end
+  ], AC_MSG_RESULT(yes),
+     AC_MSG_RESULT(no)
+     FFLAGS="$FFLAGS_saved")
+
+  dnl Change to the C language
+  AC_LANG_C
 else
   echo "no"
 fi
@@ -225,17 +269,94 @@ AC_ARG_ENABLE([cxx],
 
 if test "X$HDF_CXX" = "Xyes"; then
   echo "yes"
-  if test -z "$config_dirs"; then
-    config_dirs="c++"
-  else
-    config_dirs="${config_dirs} c++"
-  fi
+  HDF5_INTERFACES="$HDF5_INTERFACES c++"
+  AC_PROG_CXX
+  AC_PROG_CXXCPP	dnl this is checked for when AC_HEADER_STDC is done
+
+  dnl Change to the C++ language
+  AC_LANG_CPLUSPLUS
+
+  AC_MSG_CHECKING([if $CXX needs old style header files in includes])
+  AC_TRY_RUN([
+#include <iostream>
+
+int main(void) { return 0; }
+  ], [
+    echo no
+  ], [
+    echo yes
+    CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
+  ])
+
+  AC_MSG_CHECKING([if $CXX can handle namespaces])
+  AC_TRY_RUN([
+namespace H5 {
+int fnord;
+}
+
+int main(void) {
+   using namespace H5;
+   fnord = 37;
+   return 0;
+} 
+  ], [
+     echo yes
+  ], [
+     echo no
+     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
+  ])
+
+  AC_MSG_CHECKING([if $CXX supports std])
+  AC_TRY_RUN([
+#include <string>
+
+using namespace std;
+
+int main(void) {
+   string myString("testing namespace std");
+   return 0;
+}
+  ], [
+     echo yes
+  ], [
+     echo no
+     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
+  ])
+
+  AC_MSG_CHECKING([if $CXX supports bool types])
+  AC_TRY_RUN([
+int main(void) {
+   bool flag;
+   return 0;
+}
+  ], [
+     echo yes
+  ], [
+     echo no
+     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
+  ])
+
+  AC_MSG_CHECKING([if $CXX can handle static cast])
+  AC_TRY_RUN([
+int main(void) {
+   float test_float;
+   int test_int;
+   test_float = 37.0;
+   test_int = static_cast <int> (test_float);
+   return 0;
+}
+  ], [
+    echo yes
+  ], [
+    echo no
+    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
+  ])
+
+  dnl Change to the C language
+  AC_LANG_C
 else
   echo "no"
 fi
-
-dnl Run configure in the subdirectories if specified
-AC_CONFIG_SUBDIRS([${config_dirs}])
 
 dnl ----------------------------------------------------------------------
 dnl If we should build only static executables
@@ -277,11 +398,6 @@ AC_SUBST([AR])
 dnl Export the AR macro so that it will be placed in the libtool file
 dnl correctly.
 export AR
-
-AC_PROG_MAKE_SET
-AC_PROG_INSTALL
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
 
 dnl Post processing to patch up some deficiencies in libtool
 case $host_os in
@@ -460,8 +576,20 @@ case "X-$enable_production" in
       CFLAGS=$CFLAGS_temp
     fi
 
+    CXXFLAGS_temp=""
+    if test -n "$CXXFLAGS"; then
+      for d in $CXXFLAGS ; do
+        if test "X$d" != "X-g"; then
+          CXXFLAGS_temp="$CXXFLAGS_temp $d"
+        fi
+      done
+      CXXFLAGS=$CXXFLAGS_temp
+    fi
+
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
+    CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     ;;
   X-|X-no)
@@ -469,6 +597,7 @@ case "X-$enable_production" in
     AC_MSG_RESULT([development])
     CONFIG_MODE=development
     CFLAGS="$CFLAGS $DEBUG_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
     ;;
   X-pg|X-profile)
@@ -476,6 +605,7 @@ case "X-$enable_production" in
     AC_MSG_RESULT([profile])
     CONFIG_MODE=profile
     CFLAGS="$CFLAGS $PROFILE_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
     ;;
   *)
@@ -836,8 +966,7 @@ case $withval in
 esac
 
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
-    AC_DEFINE(HAVE_FILTER_DEFLATE, 1,
-            [Define if support for deflate filter is enabled])
+    AC_DEFINE([HAVE_FILTER_DEFLATE], [1], [Define if support for deflate filter is enabled])
 
     dnl Add "deflate" to external filter list
     if test "X$EXTERNAL_FILTERS" != "X"; then
@@ -1017,9 +1146,11 @@ case "$withval" in
     ;;
 esac
 
-dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage
-dnl driver.  SSL must be tested before them.
-AC_SUBST(SSL) SSL=yes
+dnl ----------------------------------------------------------------------
+dnl Is SSL library present? It is needed by GLOBUS-GASS and Grid Storage
+dnl driver. SSL must be tested before them.
+dnl
+AC_SUBST([SSL]) SSL=yes
 AC_ARG_WITH([ssl],
             [AC_HELP_STRING([--with-ssl=LIB],
                             [Use the SSL library [default=no]])],,
@@ -1027,12 +1158,12 @@ AC_ARG_WITH([ssl],
 
 case "$withval" in
    yes)
-      AC_CHECK_LIB(crypto,main,,unset SSL)
-      AC_CHECK_LIB(ssl,SSL_get_version,,unset SSL)
+      AC_CHECK_LIB([crypto], [main],, [unset SSL])
+      AC_CHECK_LIB([ssl], [SSL_get_version],, [unset SSL])
       ;;
    no)
-      AC_MSG_CHECKING(for SSL)
-      AC_MSG_RESULT(suppressed)
+      AC_MSG_CHECKING([for SSL])
+      AC_MSG_RESULT([suppressed])
       unset SSL
       ;;
    *)
@@ -1040,8 +1171,8 @@ case "$withval" in
       if test "X$with_ssl" != "X/usr/lib"; then
         LDFLAGS="$LDFLAGS -L$with_ssl"
       fi
-      AC_CHECK_LIB(crypto,main,, LDFLAGS="$saved_LDFLAGS"; unset SSL)
-      AC_CHECK_LIB(ssl,SSL_get_version,, LDFLAGS="$saved_LDFLAGS"; unset SSL)
+      AC_CHECK_LIB([crypto], [main],, [LDFLAGS="$saved_LDFLAGS"; unset SSL])
+      AC_CHECK_LIB([ssl], [SSL_get_version],, [LDFLAGS="$saved_LDFLAGS"; unset SSL])
       ;;
 esac
 
@@ -1049,8 +1180,8 @@ dnl ----------------------------------------------------------------------
 dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present? It is also needed by 
 dnl the Grid Storage driver.
 dnl
-AC_SUBST(GASS) GASS="yes"
-AC_SUBST(TESTGASS) TESTGASS='$(srcdir)/testgass'
+AC_SUBST([GASS]) GASS="yes"
+AC_SUBST([TESTGASS]) TESTGASS='$(srcdir)/testgass'
 AC_ARG_WITH([gass],
             [AC_HELP_STRING([--with-gass=DIR],
                             [Use the GASS library [default=no]])],,
@@ -1069,13 +1200,11 @@ case "$withval" in
     AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
     AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
     ;;
-
   no)
-    AC_MSG_CHECKING(for GASS)
-    AC_MSG_RESULT(suppressed)
+    AC_MSG_CHECKING([for GASS])
+    AC_MSG_RESULT([suppressed])
     unset GASS TESTGASS
     ;;
-
   *)
     case "$withval" in
       *,*)
@@ -1102,11 +1231,11 @@ case "$withval" in
     if test -n "$gass_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$gass_inc"
-      AC_CHECK_HEADERS(globus_common.h,,
+      AC_CHECK_HEADERS([globus_common.h],,
                        CPPFLAGS="$saved_CPPFLAGS"
                        unset GASS TESTGASS)
     else
-      AC_CHECK_HEADERS(globus_common.h)
+      AC_CHECK_HEADERS([globus_common.h])
     fi
 
     if test -n "$gass_lib"; then
@@ -1136,15 +1265,14 @@ case "$withval" in
 esac
 
 if test -n "$GASS"; then
-  AC_DEFINE([HAVE_GASS], [1],
-            [Define if the Globus GASS is defined])
+  AC_DEFINE([HAVE_GASS], [1], [Define if the Globus GASS is defined])
 fi
 
 dnl ----------------------------------------------------------------------
 dnl Are SRB Client and other system libraries(socket, elf) present?  
 dnl
-AC_SUBST(SRB) SRB="yes"
-AC_SUBST(TESTSRB) TESTSRB='$(srcdir)/testsrb'
+AC_SUBST([SRB]) SRB="yes"
+AC_SUBST([TESTSRB]) TESTSRB='$(srcdir)/testsrb'
 AC_ARG_WITH([srb],
             [AC_HELP_STRING([--with-srb=DIR],
                             [Use the SRB library [default=no]])],,
@@ -1152,14 +1280,14 @@ AC_ARG_WITH([srb],
 
 case "$withval" in
   yes)
-    AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
-    AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
-    AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
-    AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+    AC_CHECK_HEADERS([srbClient.h],, [unset SRB TESTSRB])
+    AC_CHECK_LIB([elf], [main],, [unset SRB TESTSRB])
+    AC_CHECK_LIB([socket], [main],, [unset SRB TESTSRB])
+    AC_CHECK_LIB([SrbClient], [clConnect],, [unset SRB TESTSRB])
     ;;
   no)
-    AC_MSG_CHECKING(for SRB)
-    AC_MSG_RESULT(suppressed)
+    AC_MSG_CHECKING([for SRB])
+    AC_MSG_RESULT([suppressed])
     unset SRB TESTSRB
     ;;
   *)
@@ -1210,18 +1338,17 @@ case "$withval" in
 esac
 
 if test -n "$SRB"; then
-  AC_DEFINE(HAVE_SRB, 1,
-            [Define if the SRB is defined])
+  AC_DEFINE([HAVE_SRB], [1], [Define if the SRB is defined])
 fi
 
 dnl ----------------------------------------------------------------------
 dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
 dnl translator.
 dnl
-AC_SUBST(PDB2HDF)
-AC_CHECK_LIB(pdb, PD_open)
-AC_CHECK_LIB(silo, lite_PD_open)
-AC_CHECK_HEADERS(pdb.h, PDB2HDF=pdb2hdf)
+AC_SUBST([PDB2HDF])
+AC_CHECK_LIB([pdb], [PD_open])
+AC_CHECK_LIB([silo], [lite_PD_open])
+AC_CHECK_HEADERS([pdb.h], [PDB2HDF=pdb2hdf])
 
 dnl Checkpoint the cache
 AC_CACHE_SAVE
@@ -1233,8 +1360,7 @@ dnl `--with-pthread' command-line switch.  The value is an include path
 dnl and/or a library path.  If the library path is specified then it must
 dnl be preceded by a comma.
 dnl
-AC_SUBST(PTHREAD) PTHREAD=yes
-
+AC_SUBST([PTHREAD]) PTHREAD=yes
 AC_ARG_WITH([pthread],
             [AC_HELP_STRING([--with-pthread=DIR],
                             [Use the Pthreads library [default=no]])],,
@@ -1242,12 +1368,12 @@ AC_ARG_WITH([pthread],
 
 case "$withval" in
   yes)
-    AC_CHECK_HEADERS(pthread.h)
-    AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
+    AC_CHECK_HEADERS([pthread.h])
+    AC_CHECK_LIB([pthread], [pthread_create],, [unset PTHREAD])
     ;;
   no)
-    AC_MSG_CHECKING(for pthread)
-    AC_MSG_RESULT(suppressed)
+    AC_MSG_CHECKING([for pthread])
+    AC_MSG_RESULT([suppressed])
     unset PTHREAD
     ;;
   *)
@@ -1276,18 +1402,18 @@ case "$withval" in
     if test -n "$pthread_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-      AC_CHECK_HEADERS(pthread.h,,CPPFLAGS="$saved_CPPFLAGS"; unset PTHREAD)
+      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; unset PTHREAD])
     else
-      AC_CHECK_HEADERS(pthread.h,,unset PTHREAD)
+      AC_CHECK_HEADERS([pthread.h],, [unset PTHREAD])
     fi
 
     if test -n "$pthread_lib"; then
       saved_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS -L$pthread_lib"
-      AC_CHECK_LIB(pthread, pthread_create,,
-                   LDFLAGS="$saved_LDFLAGS"; unset PTHREAD)
+      AC_CHECK_LIB([pthread], [pthread_create],,
+                   [LDFLAGS="$saved_LDFLAGS"; unset PTHREAD])
     else
-      AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
+      AC_CHECK_LIB([pthread], [pthread_create],, [unset PTHREAD])
     fi
     ;;
 esac
@@ -1295,7 +1421,7 @@ esac
 dnl ----------------------------------------------------------------------
 dnl Enable thread-safe version of library.  It requires Pthreads support.
 dnl
-AC_MSG_CHECKING(for thread safe support)
+AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AC_HELP_STRING([--enable-threadsafe],
                               [Enable thread safe capability])],
@@ -1303,23 +1429,22 @@ AC_ARG_ENABLE([threadsafe],
 
 case "X-$THREADSAFE" in
   X-|X-no)
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT([no])
     ;;
   X-yes)
     dnl Check that we can link a simple Pthread program.
-    AC_TRY_LINK(,pthread_create(),
-    AC_MSG_RESULT(yes); THREADSAFE=yes,
-    AC_MSG_ERROR(needed pthread library not available))
+    AC_TRY_LINK(, [pthread_create()],
+                [AC_MSG_RESULT([yes]); THREADSAFE=yes],
+                [AC_MSG_ERROR([needed pthread library not available])])
     ;;
   *)
-    AC_MSG_RESULT(error)
-    AC_MSG_ERROR(\'$enableval\' is not a valid threadsafe type)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid threadsafe type])
     ;;
 esac
 
 if test "X$THREADSAFE" = "Xyes"; then
-  AC_DEFINE([HAVE_THREADSAFE], [1],
-            [Define if we have thread safe support])
+  AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
 fi
 
 dnl ----------------------------------------------------------------------
@@ -1373,8 +1498,7 @@ if test "$STREAM_VFD" = "yes"; then
 #endif
   ],
     [socklen_t foo; return 0;],
-    AC_DEFINE([HAVE_SOCKLEN_T], 1,
-              [Define if \`socklen_t' is defined])
+    AC_DEFINE([HAVE_SOCKLEN_T], 1, [Define if \`socklen_t' is defined])
     AC_MSG_RESULT([yes]),
     AC_MSG_RESULT([no])
   )
@@ -1388,57 +1512,57 @@ dnl Posix way to do this?
 dnl
 
 dnl First check if `struct tm' has a `tm_gmtoff' member.
-AC_MSG_CHECKING(for tm_gmtoff in struct tm)
+AC_MSG_CHECKING([for tm_gmtoff in struct tm])
 AC_TRY_COMPILE([
 #include <sys/time.h>
-#include <time.h>],[struct tm tm; tm.tm_gmtoff=0;],
-AC_DEFINE(HAVE_TM_GMTOFF, 1,
+#include <time.h>], [struct tm tm; tm.tm_gmtoff=0;],
+AC_DEFINE([HAVE_TM_GMTOFF], [1],
           [Define if \`tm_gmtoff' is a member of \`struct tm'])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
 dnl check if `struct tm' has a `__tm_gmtoff' member.
-AC_MSG_CHECKING(for __tm_gmtoff in struct tm)
+AC_MSG_CHECKING([for __tm_gmtoff in struct tm])
 AC_TRY_COMPILE([
 #include <sys/time.h>
-#include <time.h>],[struct tm tm; tm.__tm_gmtoff=0;],
-AC_DEFINE(HAVE___TM_GMTOFF, 1,
+#include <time.h>], [struct tm tm; tm.__tm_gmtoff=0;],
+AC_DEFINE([HAVE___TM_GMTOFF], [1],
           [Define if \`__tm_gmtoff' is a member of \`struct tm'])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
 dnl Check whether the global variable `timezone' is defined.
-AC_MSG_CHECKING(for global timezone variable)
+AC_MSG_CHECKING([for global timezone variable])
 AC_TRY_LINK([
 #include <sys/time.h>
 #include <time.h>], [timezone=0;],
-AC_DEFINE(HAVE_TIMEZONE, 1,
+AC_DEFINE([HAVE_TIMEZONE], [1],
           [Define if \`timezone' is a global variable])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
 dnl Check whether `struct timezone' is defined.
 AC_STRUCT_TIMEZONE
-AC_MSG_CHECKING(for struct timezone)
+AC_MSG_CHECKING([for struct timezone])
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/time.h>
-#include <time.h>],[struct timezone tz; tz.tz_minuteswest=0;],
-AC_DEFINE(HAVE_STRUCT_TIMEZONE, 1,
+#include <time.h>], [struct timezone tz; tz.tz_minuteswest=0;],
+AC_DEFINE([HAVE_STRUCT_TIMEZONE], [1],
           [Define if \`struct timezone' is defined])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
 dnl ----------------------------------------------------------------------
 dnl Does the struct stat have the st_blocks field?  This field is not Posix.
 dnl
-AC_MSG_CHECKING(for st_blocks in struct stat)
+AC_MSG_CHECKING([for st_blocks in struct stat])
 AC_TRY_COMPILE([
 #include <sys/stat.h>],[struct stat sb; sb.st_blocks=0;],
-AC_DEFINE(HAVE_STAT_ST_BLOCKS, 1,
+AC_DEFINE([HAVE_STAT_ST_BLOCKS], [1],
           [Define if \`struct stat' has the \`st_blocks' field])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
 dnl ----------------------------------------------------------------------
 dnl How do we figure out the width of a tty in characters?
@@ -1446,33 +1570,33 @@ dnl
 AC_CHECK_FUNCS(_getvideoconfig gettextinfo GetConsoleScreenBufferInfo)
 AC_CHECK_FUNCS(_scrsize ioctl)
 
-AC_MSG_CHECKING(for struct videoconfig)
+AC_MSG_CHECKING([for struct videoconfig])
 AC_TRY_COMPILE(,[struct videoconfig w; w.numtextcols=0;],
-AC_DEFINE(HAVE_STRUCT_VIDEOCONFIG, 1,
+AC_DEFINE([HAVE_STRUCT_VIDEOCONFIG], [1],
           [Define if \`struct videoconfig' is defined])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
-AC_MSG_CHECKING(for struct text_info)
-AC_TRY_COMPILE(,[struct text_info w; w.screenwidth=0;],
-AC_DEFINE(HAVE_STRUCT_TEXT_INFO, 1,
+AC_MSG_CHECKING([for struct text_info])
+AC_TRY_COMPILE(, [struct text_info w; w.screenwidth=0;],
+AC_DEFINE([HAVE_STRUCT_TEXT_INFO], [1],
           [Define if \`struct text_info' is defined])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
-AC_MSG_CHECKING(for TIOCGWINSZ)
+AC_MSG_CHECKING([for TIOCGWINSZ])
 AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGWINSZ;],
-AC_DEFINE(HAVE_TIOCGWINSZ, 1,
+AC_DEFINE([HAVE_TIOCGWINSZ], [1],
           [Define if the ioctl TIOGWINSZ is defined])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
-AC_MSG_CHECKING(for TIOCGGETD)
+AC_MSG_CHECKING([for TIOCGGETD])
 AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
-AC_DEFINE(HAVE_TIOCGETD, 1,
+AC_DEFINE([HAVE_TIOCGETD], [1],
           [Define if the ioctl TIOCGETD is defined])
-AC_MSG_RESULT(yes),
-AC_MSG_RESULT(no))
+AC_MSG_RESULT([yes]),
+AC_MSG_RESULT([no]))
 
 
 dnl ----------------------------------------------------------------------
@@ -1490,17 +1614,17 @@ AC_C_INLINE
 
 AC_MSG_CHECKING([for __attribute__ extension])
 AC_TRY_COMPILE(,[int __attribute__((unused)) x],
-               AC_DEFINE(HAVE_ATTRIBUTE, 1,
+               AC_DEFINE([HAVE_ATTRIBUTE], [1],
                          [Define if the __attribute__(()) extension is present])
                AC_MSG_RESULT(yes),
                AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING([for __FUNCTION__ extension])
 AC_TRY_COMPILE(,[(void)__FUNCTION__],
-               AC_DEFINE(HAVE_FUNCTION, 1,
+               AC_DEFINE([HAVE_FUNCTION], [1],
                          [Define if the compiler understand the __FUNCTION__ keyword])
-               AC_MSG_RESULT(yes),
-               AC_MSG_RESULT(no))
+               AC_MSG_RESULT([yes]),
+               AC_MSG_RESULT([no]))
 
 dnl ----------------------------------------------------------------------
 dnl Try to figure out how to print `long long'.  Some machines use `%lld'
@@ -1510,7 +1634,7 @@ dnl Need to patch up LD_LIBRARY_PATH so that the execution can find all
 dnl the dynamic library.  The correct way to do it should be updating
 dnl LD_LIBRARY_PATH along with LDFLAGS or do it with the AC_TRY_RUN macro.
 dnl
-AC_MSG_CHECKING(how to print long long)
+AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll],
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
@@ -1531,16 +1655,16 @@ int main(void)
    ], break,,continue)
 done)dnl
 
-AC_MSG_RESULT(%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u)
-AC_DEFINE_UNQUOTED(PRINTF_LL_WIDTH, "$hdf5_cv_printf_ll", 
+AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
+AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"], 
                    [Width for printf() for type \`long long' or \`__int64', us. \`ll'])
 
 dnl ----------------------------------------------------------------------
 dnl Check if malloc(0) returns valid pointer
 dnl
 AC_MSG_CHECKING([if malloc of zero bytes returns valid pointer])
-AC_CACHE_VAL(hdf5_cv_malloc_works,
-AC_TRY_RUN([
+AC_CACHE_VAL([hdf5_cv_malloc_works],
+[AC_TRY_RUN([
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
@@ -1549,14 +1673,14 @@ int main(void)
 {
     exit(malloc (0) ? 0 : 1);
 }
-], hdf5_cv_malloc_works=yes, hdf5_cv_malloc_works=no,))
+], [hdf5_cv_malloc_works=yes], [hdf5_cv_malloc_works=no],)])
 
 if test ${hdf5_cv_malloc_works} = "yes"; then
-  AC_DEFINE(MALLOC_WORKS, 1,
+  AC_DEFINE([MALLOC_WORKS], [1],
             [Define if your system has a working \`malloc' function.])
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT([yes])
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 fi
 
 dnl ----------------------------------------------------------------------
@@ -1564,8 +1688,8 @@ dnl Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
 dnl is supported on this system
 dnl
 AC_MSG_CHECKING([Threads support system scope])
-AC_CACHE_VAL(hdf5_cv_system_scope_threads,
-AC_TRY_RUN([
+AC_CACHE_VAL([hdf5_cv_system_scope_threads],
+[AC_TRY_RUN([
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <pthread.h>
@@ -1580,14 +1704,14 @@ int main(void)
     ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
     exit(ret==0 ? 0 : 1);
 }
-], hdf5_cv_system_scope_threads=yes, hdf5_cv_system_scope_threads=no,))
+], [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no],)])
 
 if test ${hdf5_cv_system_scope_threads} = "yes"; then
-  AC_DEFINE(SYSTEM_SCOPE_THREADS, 1,
+  AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
             [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT([yes])
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 fi
 
 dnl ----------------------------------------------------------------------
@@ -1695,14 +1819,14 @@ dnl ----------------------------------------------------------------------
 dnl Enable tracing of the API
 dnl This must come after the enable-debug since it depends on debug.
 dnl
-AC_MSG_CHECKING(for API tracing);
+AC_SUBST([TRACE_API])
+AC_MSG_CHECKING([for API tracing]);
 AC_ARG_ENABLE([trace],
               [AC_HELP_STRING([--enable-trace],
-                              [Enable API tracing capability.
-			       Default=no if debug is disabled.])],
+                              [Enable API tracing capability. Default=no
+                               if debug is disabled.])],
               TRACE=$enableval)
 
-AC_SUBST(TRACE_API)
 dnl Default to no if debug is disabled
 if test "X-$TRACE" = X- ; then
   if test -z "$DEBUG_PKG" ; then
@@ -1711,14 +1835,15 @@ if test "X-$TRACE" = X- ; then
     TRACE=yes
   fi
 fi
+
 case "X-$TRACE" in
   X-yes)
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT([yes])
     TRACE_API=yes
     CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
     ;;
   X-no|*)
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT([no])
     TRACE_API=no
     CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
     ;;
@@ -1764,10 +1889,10 @@ dnl			   protect the expansion until make executes the
 dnl			   command).  The value of this variable is
 dnl			   substituted in *.in files.
 dnl
-AC_SUBST(PARALLEL)
-AC_SUBST(RUNSERIAL)
-AC_SUBST(RUNPARALLEL)
-AC_SUBST(TESTPARALLEL)
+AC_SUBST([PARALLEL])
+AC_SUBST([RUNSERIAL])
+AC_SUBST([RUNPARALLEL])
+AC_SUBST([TESTPARALLEL])
 
 dnl ----------------------------------------------------------------------
 dnl If the compiler is obviously a parallel compiler then we're building
@@ -1855,6 +1980,64 @@ case "$CC_BASENAME" in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl If the Fortran compiler is obviously a parallel compiler then we're
+dnl building a parallel version of hdf5 and should define HAVE_PARALLEL.
+dnl Furthermore, the name of the compiler might tell us how to run the
+dnl resulting executable. For `mpif90' the executable should be run with
+dnl `mpirun' from the same directory as mpif90 if it exists.
+dnl
+if test "X$HDF_FORTRAN" = "Xyes"; then
+  dnl Change to the Fortran 90 language
+  AC_LANG_FORTRAN9X
+
+  case "$F9X" in
+    *mpif90*)
+      dnl The Fortran mpich compiler. Use mpirun from the same directory
+      dnl if it exists.
+      PARALLEL=mpif90
+      AC_MSG_CHECKING([for mpirun])
+
+      dnl Find the path where mpif90 is located.
+      cmd=`echo $F9X |cut -f1 -d' '`
+      if (echo $cmd |grep / >/dev/null); then
+        path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+      else
+        for path in `echo $PATH |tr : ' '`; do
+          if test -x $path/$cmd; then
+            break;
+          fi
+        done
+      fi
+
+      dnl Is there an mpirun at that path?
+      if test -x $path/mpirun; then
+        AC_MSG_RESULT([$path/mpirun])
+        RUNSERIAL="${RUNSERIAL:-none}"
+
+        if test -z "$RUNPARALLEL"; then
+          RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+        fi
+      else
+        AC_MSG_RESULT([none])
+      fi
+      ;;
+
+    *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
+      dnl The IBM compiler
+      PARALLEL="$F9X"
+      ;;
+
+    *)
+      dnl Probably not a parallel compiler, but if `--enable-parallel'
+      dnl is defined below then we're still building a parallel hdf5.
+      ;;
+  esac
+
+  dnl Change to the C language
+  AC_LANG_C
+fi
+
+dnl ----------------------------------------------------------------------
 dnl What header files and libraries do we have to look for for parallel
 dnl support?  For the most part, search paths are already specified with
 dnl CPPFLAGS and LDFLAGS or are known to the compiler.  If the user says
@@ -1872,23 +2055,48 @@ case "X-$enable_parallel" in
     dnl Either we are not compiling for parallel or the header and
     dnl library files and locations are known to the compiler (this is
     dnl the case for a correct installation of mpicc for instance).
-    AC_MSG_RESULT(skipped)
+    AC_MSG_RESULT([skipped])
     ;;
 
   X-yes)
     dnl We want to compile a parallel library with a compiler that
     dnl may already know how to link with MPI and MPI-IO.
-    AC_MSG_RESULT(provided by compiler)
+    AC_MSG_RESULT([provided by compiler])
     PARALLEL=yes
 
     dnl Try link a simple MPI program.  If fail, try again with -lmpi.
-    AC_TRY_LINK(,MPI_Init(),,AC_CHECK_LIB(mpi,MPI_Init,,PARALLEL=no))
+    AC_TRY_LINK(, MPI_Init(),, AC_CHECK_LIB(mpi, MPI_Init,, PARALLEL=no))
 
     dnl Then try link a simple MPI-IO program. If fail, try again with
     dnl -lmpio.
     if test "X$PARALLEL" = "Xyes"; then
-      AC_TRY_LINK(,MPI_File_open(),,
-                  AC_CHECK_LIB(mpio,MPI_File_open,,PARALLEL=no))
+      AC_TRY_LINK(, [MPI_File_open()],,
+                  [AC_CHECK_LIB([mpio], [MPI_File_open],, [PARALLEL=no])])
+    fi
+
+    if test "X$HDF_FORTRAN" = "Xyes"; then
+      dnl Change to the Fortran 90 language
+      AC_LANG_FORTRAN9X
+
+      dnl Try link a simple MPI program.  If fail, try again with -lmpi.
+      AC_TRY_FLINK(mpif.h, [
+          call mpi_file_open( ierr )],,
+          AC_CHECK_FLIB(mpi, [
+            include 'mpif.h'
+            call mpi_file_open( ierr )],, PARALLEL=no))
+
+      dnl Then try link a simple MPI-IO program.  If fail, try again with
+      dnl -lmpio.
+      if test "X$PARALLEL" = "Xyes"; then
+        AC_TRY_FLINK(mpif.h, [
+            call mpi_file_open( ierr )],,
+            AC_CHECK_FLIB(mpio, [
+              include 'mpif.h'
+              call mpi_file_open( ierr )],, PARALLEL=no))
+      fi
+
+      dnl Change to the C language
+      AC_LANG_C
     fi
 
     dnl Set RUNPARALLEL to mpirun if not set yet.
@@ -1898,43 +2106,40 @@ case "X-$enable_parallel" in
     ;;
 
   *)
-    AC_MSG_RESULT(error)
-    AC_MSG_ERROR(\'$enable_parallel\' is not a valid parallel search type)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enable_parallel\' is not a valid parallel search type])
     ;;
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Should the 'testpar' directory participate in the build?
-dnl
-if test -n "$PARALLEL"; then
-  TESTPARALLEL=testpar
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Print some other parallel information and do some sanity checks.
 dnl
+AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
+
 if test -n "$PARALLEL"; then
+  dnl Should the 'testpar' directory participate in the build?
+  TESTPARALLEL=testpar
+
   dnl We are building a parallel library
-  AC_DEFINE(HAVE_PARALLEL, 1,
-            [Define if we have parallel support])
+  AC_DEFINE([HAVE_PARALLEL], [1], [Define if we have parallel support])
 
   dnl Display what we found about running programs
-  AC_MSG_CHECKING(prefix for running on one processor)
-  AC_MSG_RESULT($RUNSERIAL)
-  AC_MSG_CHECKING(prefix for running in parallel)
-  AC_MSG_RESULT($RUNPARALLEL)
+  AC_MSG_CHECKING([prefix for running on one processor])
+  AC_MSG_RESULT([$RUNSERIAL])
+  AC_MSG_CHECKING([prefix for running in parallel])
+  AC_MSG_RESULT([$RUNPARALLEL])
 
   dnl Check that we can link a simple MPI and MPI-IO application
-  AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
-  AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
-              AC_MSG_RESULT(yes),
-              AC_MSG_RESULT(no)
-              AC_MSG_ERROR('unable to link a simple MPI-IO application'))
+  AC_MSG_CHECKING([whether a simple MPI-IO program can be linked])
+  AC_TRY_LINK(, [MPI_Init(); MPI_File_open();],
+              AC_MSG_RESULT([yes]),
+              AC_MSG_RESULT([no])
+              AC_MSG_ERROR([unable to link a simple MPI-IO application]))
 
   dnl There *must* be some way to run in parallel even if it's just the
   dnl word `none'.
   if test -z "$RUNPARALLEL"; then
-    AC_MSG_ERROR(no way to run a parallel program)
+    AC_MSG_ERROR([no way to run a parallel program])
   fi
 
   dnl If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
@@ -1944,6 +2149,28 @@ if test -n "$PARALLEL"; then
   fi
   if test "X$RUNPARALLEL" = "Xnone"; then
     RUNPARALLEL=""
+  fi
+
+  if test "X$HDF_FORTRAN" = "Xyes"; then
+    ADD_PARALLEL_FILES="yes"
+    AC_MSG_CHECKING([for MPI_Comm_c2f and MPI_Comm_f2c functions])
+
+    AC_TRY_LINK([#include <mpi.h>],
+      [MPI_Comm c_comm; MPI_Comm_c2f(c_comm)],
+      AC_DEFINE([HAVE_MPI_MULTI_LANG_Comm], [1],
+                [Define if \`MPI_Comm_c2f' and \`MPI_Comm_f2c' exists])
+      AC_MSG_RESULT([yes]),
+      AC_MSG_RESULT([no])
+    )
+
+    AC_MSG_CHECKING([for MPI_Info_c2f and MPI_Info_f2c functions])
+    AC_TRY_LINK([#include <mpi.h>],
+      [MPI_Info c_info; MPI_Info_c2f(c_info)],
+      AC_DEFINE([HAVE_MPI_MULTI_LANG_Info], [1],
+                [Define if \`MPI_Info_c2f' and \`MPI_Info_f2c' exists])
+      AC_MSG_RESULT([yes]),
+      AC_MSG_RESULT([no])
+    )
   fi
 
 dnl ----------------------------------------------------------------------
@@ -1981,7 +2208,7 @@ dnl ----------------------------------------------------------------------
   dnl This must be done after enable-parallel is checked since it depends
   dnl on a mpich compiler.
   dnl
-  AC_SUBST(MPE) MPE=yes
+  AC_SUBST([MPE]) MPE=yes
   AC_ARG_WITH([mpe],
               [AC_HELP_STRING([--with-mpe=DIR],
                               [Use MPE instrumentation [default=no]])],,
@@ -2073,7 +2300,8 @@ dnl an example of an internal filter, while the gzip filter is an example of
 dnl an external filter.  Each external filter is controlled with an
 dnl "--with-foo=" configure flag.
 dnl
-AC_MSG_CHECKING(for I/O filters)
+AC_SUBST([FILTERS])
+AC_MSG_CHECKING([for I/O filters])
 AC_ARG_ENABLE([filters],
               [AC_HELP_STRING([--enable-filters=all],
                               [Turn on all internal I/O filters. One may
@@ -2082,35 +2310,34 @@ AC_ARG_ENABLE([filters],
                                I/O filters.])],
               [FILTERS=$enableval])
 
-AC_SUBST([FILTERS])
 dnl Eventually: all_filters="shuffle,foo,bar,baz"
 all_filters="shuffle,fletcher32"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
-    AC_MSG_RESULT(all ($FILTERS))
+    AC_MSG_RESULT([all ($FILTERS)])
     ;;
   X-no|X-none)
-    AC_MSG_RESULT(none)
+    AC_MSG_RESULT([none])
     FILTERS="none"
     ;;
   *)
-    AC_MSG_RESULT($FILTERS)
+    AC_MSG_RESULT([$FILTERS])
     ;;
 esac
 
 if test -n "$FILTERS"; then
   for filter in `echo $FILTERS | tr 'a-z,' 'A-Z '`; do
-dnl ----------------------------------------------------------------------
-dnl Have to use separate 'if' construct for each filter, so that autoheader
-dnl can detect the AC_DEFINE for each one...
-dnl
+    dnl ------------------------------------------------------------------
+    dnl Have to use separate 'if' construct for each filter, so that
+    dnl autoheader can detect the AC_DEFINE for each one...
+    dnl
     if test $filter = "SHUFFLE"; then
-        AC_DEFINE(HAVE_FILTER_SHUFFLE, 1,
+      AC_DEFINE([HAVE_FILTER_SHUFFLE], [1],
                 [Define if support for shuffle filter is enabled])
     fi
     if test $filter = "FLETCHER32"; then
-        AC_DEFINE(HAVE_FILTER_FLETCHER32, 1,
+      AC_DEFINE([HAVE_FILTER_FLETCHER32], [1],
                 [Define if support for Fletcher32 checksum is enabled])
     fi
   done
@@ -2121,7 +2348,7 @@ dnl This is defined only when we're using CodeWarrior, since it has a
 dnl broken "open()" call.
 dnl
 if test 1 = 2; then
-  AC_DEFINE(NO_SHARED_WRITING, 1,
+  AC_DEFINE([NO_SHARED_WRITING], [1],
             [Define if shared writing must be disabled (CodeWarrior only)])
 fi
 
@@ -2132,22 +2359,22 @@ dnl
 
 dnl HDF5 version from the first line of the README.txt file.
 H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
-AC_SUBST(H5_VERSION)
+AC_SUBST([H5_VERSION])
 
 dnl Configuration date
-AC_SUBST(CONFIG_DATE) CONFIG_DATE="`date`"
+AC_SUBST([CONFIG_DATE]) CONFIG_DATE="`date`"
 
 dnl User doing the configuration
-AC_SUBST(CONFIG_USER) CONFIG_USER="`whoami`@`hostname`"
+AC_SUBST([CONFIG_USER]) CONFIG_USER="`whoami`@`hostname`"
 if test -n "$ORGANIZATION"; then
   CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
 fi
 
 dnl Configuration mode (production, development, profile, etc) saved above.
-AC_SUBST(CONFIG_MODE)
+AC_SUBST([CONFIG_MODE])
 
 dnl Byte sex from the AC_C_BIGENDIAN macro.
-AC_SUBST(BYTESEX)
+AC_SUBST([BYTESEX])
 if test "X$ac_cv_c_bigendian" = "Xyes"; then
   BYTESEX="big-endian"
 else
@@ -2161,17 +2388,19 @@ dnl might have decided that one or the other is simply not possible.
 dnl Therefore we have to look in the generated `libtool' shell script for
 dnl lines that set the value of `build_libtool_libs' (shared) and
 dnl `build_old_libs' (static).
-AC_SUBST(STATIC_SHARED)
+AC_SUBST([STATIC_SHARED])
 if (grep '^build_libtool_libs=yes' libtool >/dev/null); then
   enable_shared=yes
 else
   enable_shared=no
 fi
+
 if (grep '^build_old_libs=yes' libtool >/dev/null); then
   enable_static=yes
 else
   enable_static=no
 fi
+
 if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
   STATIC_SHARED="static, shared"
 elif test "X$enable_static" = "Xyes"; then
@@ -2187,7 +2416,7 @@ PARALLEL=${PARALLEL:-no}
 
 dnl Compiler with version information. This consists of the full path
 dnl name of the compiler and the reported version number.
-AC_SUBST(CC_VERSION)
+AC_SUBST([CC_VERSION])
 if `echo $CC | grep / 2>&1 /dev/null`; then
   CC_VERSION="$CC"	
 else
@@ -2214,14 +2443,15 @@ if test -x /bin/pwd; then
 else
   pwd=pwd
 fi
-AC_SUBST(ROOT) ROOT="`$pwd`"
+AC_SUBST([ROOT]) ROOT="`$pwd`"
 
 dnl ----------------------------------------------------------------------
 dnl Determine the runtime libraries we may need to include in the
 dnl libtools command so that executables will find the correct dynamic
 dnl libraries.
 dnl 
-DYNAMIC_DIRS=""
+AC_SUBST([DYNAMIC_DIRS]) DYNAMIC_DIRS=""
+
 if test -n "$LDFLAGS"; then
   for d in $LDFLAGS ; do
     case "$d" in
@@ -2239,7 +2469,6 @@ if test -n "$LDFLAGS"; then
     esac
   done
 fi
-AC_SUBST(DYNAMIC_DIRS)
 
 if test -n "$CPPFLAGS"; then
   TEMP_CPPFLAGS=""
@@ -2262,11 +2491,11 @@ dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
 dnl `@COMMENCE@' and end with the line `@CONCLUDE@'.  These lines insert
 dnl various files from the config directory into the Makefile.
 dnl
-AC_SUBST_FILE(COMMENCE) COMMENCE=config/commence
-AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
+AC_SUBST_FILE([COMMENCE]) COMMENCE=config/commence
+AC_SUBST_FILE([CONCLUDE]) CONCLUDE=config/conclude
 
 dnl The directory search list
-AC_SUBST(SEARCH) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
+AC_SUBST([SEARCH]) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
 cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
 SEARCH="$SEARCH_RULE`eval $cmd`"
 export SEARCH
@@ -2274,9 +2503,9 @@ export SEARCH
 dnl We don't need to say when we're entering directories if we're using
 dnl GNU make becuase make does it for us.
 if test "X$GMAKE" = "Xyes"; then
-  AC_SUBST(SETX) SETX=":"
+  AC_SUBST([SETX]) SETX=":"
 else
-  AC_SUBST(SETX) SETX="set -x"
+  AC_SUBST([SETX]) SETX="set -x"
 fi
 
 dnl Some cleanup stuff
@@ -2296,21 +2525,45 @@ saved_no_create=$no_create
 no_create=yes
 
 PARALLEL_MAKE=""
+FORTRAN_PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
   PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
+
+  if test "X$HDF_FORTRAN" = "Xyes"; then
+    FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
+  fi
 fi
 
 PABLO_MAKE=""
 
-AC_SUBST(PARALLEL_PABLO) PARALLEL_PABLO=""
+AC_SUBST([PARALLEL_PABLO]) PARALLEL_PABLO=""
 
-if test "$HAVE_PABLO" = "yes"; then
+if test "X$HAVE_PABLO" = "Xyes"; then
   PABLO_MAKE="pablo/Makefile"
 
   if test -n "$TESTPARALLEL"; then
     PARALLEL_PABLO="yes"
   fi
+fi
+
+if test "X$HDF_FORTRAN" = "Xyes"; then
+  FORTRAN_FILES="fortran/Makefile
+                 fortran/src/h5fc
+                 fortran/src/H5fortran_types.f90
+                 fortran/src/libhdf5_fortran.settings
+                 fortran/src/Makefile
+                 fortran/test/Makefile
+                 $FORTRAN_PARALLEL_MAKE
+                 fortran/examples/Makefile"
+fi
+
+if test "X$HDF_CXX" = "Xyes"; then
+  CXX_FILES="c++/Makefile
+             c++/src/Makefile
+             c++/src/h5c++
+             c++/test/Makefile
+             c++/examples/Makefile"
 fi
 
 AC_CONFIG_FILES([src/libhdf5.settings
@@ -2350,7 +2603,9 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  doc/html/Tutor/Graphics/Makefile
                  doc/html/Tutor/examples/Makefile
                  doc/html/cpplus/Makefile
-                 doc/html/fortran/Makefile])
+                 doc/html/fortran/Makefile
+                 $FORTRAN_FILES
+                 $CXX_FILES])
 
 AC_OUTPUT
 no_create=$saved_no_create
@@ -2362,6 +2617,14 @@ touch ./config/stamp2
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 chmod 755 tools/misc/h5cc
+
+if test "X$HDF_FORTRAN" = "Xyes"; then
+  chmod 755 fortran/src/h5fc
+fi
+
+if test "X$HDF_CXX" = "Xyes"; then
+  chmod 755 c++/src/h5c++
+fi
 
 dnl We don't want inline defined for C++ compilers
 dnl Don't worry about the C++ ifdef wrappers in the H5pubconf file, since

@@ -13,6 +13,7 @@
 ./Makefile.in
 ./README.txt
 ./aclocal.m4
+./acsite.m4
 ./configure
 ./configure.in
 
@@ -525,50 +526,7 @@
 #
 #------------------------------------------------------------------------------
 
-./fortran/Makefile.dist
 ./fortran/Makefile.in
-./fortran/aclocal.m4
-./fortran/acsite.m4
-./fortran/configure
-./fortran/configure.in
-
-./fortran/config/BlankForm
-./fortran/config/commence.in
-./fortran/config/conclude.in
-./fortran/config/dec-flags
-./fortran/config/dec-osf4.x
-./fortran/config/dec-osf5.x
-./fortran/config/depend
-./fortran/config/depend1.in
-./fortran/config/depend2.in
-./fortran/config/depend3.in
-./fortran/config/depend4.in
-./fortran/config/dependN.in
-./fortran/config/freebsd
-./fortran/config/gnu-flags
-./fortran/config/hpux10.20
-./fortran/config/hpux11.00
-./fortran/config/hpux9.03
-./fortran/config/i386-pc-cygwin32
-./fortran/config/ia64-linux-gnu
-./fortran/config/intel-osf1
-./fortran/config/irix5.x
-./fortran/config/irix6.x
-./fortran/config/linux-gnu
-./fortran/config/linux-gnuaout
-./fortran/config/linux-gnulibc1
-./fortran/config/linux-gnulibc2
-./fortran/config/powerpc-ibm-aix4.x
-./fortran/config/powerpc-ibm-aix5.x
-./fortran/config/rs6000-ibm-aix4.x
-./fortran/config/solaris2.x
-./fortran/config/sv1-cray
-./fortran/config/unicos
-./fortran/config/unicos10.0.X
-./fortran/config/unicosmk
-./fortran/config/unicosmk2.0.X
-./fortran/config/unicosmk2.0.5.X
-./fortran/config/unicosmk2.0.6.X
 
 ./fortran/examples/Dependencies
 ./fortran/examples/Makefile.in
@@ -593,7 +551,6 @@
 ./fortran/src/H5_ff.f90
 ./fortran/src/H5Af.c
 ./fortran/src/H5Aff.f90
-./fortran/src/H5config_fortran.h.in
 ./fortran/src/H5Df.c
 ./fortran/src/H5Dff.f90
 ./fortran/src/H5Ef.c
@@ -673,29 +630,6 @@
 #------------------------------------------------------------------------------
 
 ./c++/Makefile.in
-./c++/aclocal.m4
-./c++/configure
-./c++/configure.in
-
-./c++/config/BlankForm
-./c++/config/commence.in
-./c++/config/conclude.in
-./c++/config/depend1.in
-./c++/config/depend2.in
-./c++/config/depend3.in
-./c++/config/depend4.in
-./c++/config/dependN.in
-./c++/config/hpux11.00
-./c++/config/linux-gnu
-./c++/config/linux-gnulibc1
-./c++/config/linux-gnulibc2
-./c++/config/powerpc-ibm-aix
-./c++/config/rs6000-ibm-aix4.x
-./c++/config/solaris2.x
-./c++/config/irix6.x
-./c++/config/sv1-cray
-./c++/config/unicos10.0.X
-./c++/config/unicosmk2.0.6.X
 
 ./c++/examples/Dependencies
 ./c++/examples/Attributes.h5

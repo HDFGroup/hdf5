@@ -13,10 +13,12 @@
 ## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
-top_srcdir=@top_srcdir@/..
+top_srcdir=@top_srcdir@
 top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
+
+HDF_FORTRAN="yes"
 
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
@@ -24,7 +26,7 @@ hdf5_builddir=$(top_builddir)/src
 TRACE=perl $(top_srcdir)/bin/trace
 
 ## Add `-I.' to the C preprocessor flags.
-CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
+CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) -I$(srcdir) @CPPFLAGS@
 
 ## This is our main target
 LIB=libhdf5_fortran.la
@@ -34,7 +36,7 @@ LIB=libhdf5_fortran.la
 DISTCLEAN=H5fortran_types.f90 h5fc libhdf5_fortran.settings
 
 ## Public header files (to be installed)...
-PUB_HDR=H5pubconf_fortran.h
+PUB_HDR=
 PUB_PROGS=h5fc
 
 ## Source and object files for the library

@@ -28,8 +28,8 @@
 #       used within this file.
 
 if test "X-" =  "X-$CC"; then
-    CC=cc
-    CC_BASENAME=cc
+  CC=cc
+  CC_BASENAME=cc
 fi
 # no need to use RANLIB
 RANLIB=:
@@ -88,35 +88,35 @@ RANLIB=:
 # above).
 
 case $CC_BASENAME in
-    gcc)
-	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
-	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O3 -fomit-frame-pointer"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  gcc)
+    CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
+    DEBUG_CFLAGS="-g -fverbose-asm"
+    DEBUG_CPPFLAGS=
+    PROD_CFLAGS="-O3 -fomit-frame-pointer"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 
-    cc)
-	CFLAGS="$CFLAGS"
-	DEBUG_CFLAGS="-g -h zero"
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O2 -h scalar0"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  cc)
+    CFLAGS="$CFLAGS"
+    DEBUG_CFLAGS="-g -h zero"
+    DEBUG_CPPFLAGS=
+    PROD_CFLAGS="-O2 -h scalar0"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 
-    *)
-	CFLAGS="$CFLAGS -ansi"
-	DEBUG_CFLAGS="-g"
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  *)
+    CFLAGS="$CFLAGS -ansi"
+    DEBUG_CFLAGS="-g"
+    DEBUG_CPPFLAGS=
+    PROD_CFLAGS="-O"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 esac
 
 
@@ -136,3 +136,37 @@ esac
 # long'.  For instance, if the format would be `%lld' then set it to
 # `ll' or if the format would be `%qd' set it to `q'.
 #hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
+
+# The default Fortran 90 compiler
+
+#
+# HDF5 integers
+#
+# 	R_LARGE is the number of digits for the bigest integer supported.
+#	R_INTEGER is the number of digits in INTEGER
+#
+# (for the UNICOS architechture)
+#
+R_LARGE=18
+R_INTEGER=18
+HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HID_T='SELECTED_INT_KIND(R_INTEGER)'
+SIZE_T='SELECTED_INT_KIND(R_LARGE)'
+OBJECT_NAMELEN_DEFAULT_F=-1
+
+if test "X-" = "X-$F9X"; then
+  F9X=f90
+fi
+
+if test "X-" = "X-$f9x_flags_set"; then
+  # -Wl passes flags to the linker and -M# will ignore warnings with
+  # number #. Warning 405 was stopping the executable from being built.
+  F9XSUFFIXFLAG=""
+  FSEARCH_DIRS=""
+  FFLAGS="-dp -Wl-M405"
+  DEBUG_FFLAGS=""
+  PROD_FFLAGS=""
+  PROFILE_FFLAGS=""
+  f9x_flags_set=yes
+fi

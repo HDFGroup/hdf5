@@ -185,6 +185,12 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #undef HAVE_MPE_H
 
+/* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
+#undef HAVE_MPI_MULTI_LANG_Comm
+
+/* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
+#undef HAVE_MPI_MULTI_LANG_Info
+
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
 

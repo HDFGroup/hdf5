@@ -1,4 +1,0 @@
-#							-*- shell-script -*-
-# This is the same as linux-gnulibc1
-
-. $srcdir/config/linux-gnulibc1

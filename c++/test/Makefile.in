@@ -15,10 +15,12 @@
 ##
 ##
 ##
-top_srcdir=@top_srcdir@/..
+top_srcdir=@top_srcdir@
 top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
+
+HDF_CXX="yes"
 
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
@@ -31,7 +33,7 @@ CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(top_srcdir)/test -I$(hdf5_builddir)
 LIB=../src/libhdf5_cpp.la
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 
-LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
+LT_LINK_CXX_LIB=$(LT) --mode=link $(CXX) -static -rpath $(libdir)
 
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.
@@ -52,9 +54,9 @@ DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o)
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 
 testhdf5: $(TEST_OBJ)
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS) $(DEFAULT_LIBS)
+	@$(LT_LINK_CXX_EXE) -static $(CXXFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS) $(DEFAULT_LIBS)
 
 dsets: dsets.lo h5cpputil.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.lo h5cpputil.lo $(hdf5_builddir)/../test/h5test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS) $(DEFAULT_LIBS)
+	@$(LT_LINK_CXX_EXE) -static $(CXXFLAGS) -o $@ dsets.lo h5cpputil.lo $(hdf5_builddir)/../test/h5test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS) $(DEFAULT_LIBS)
 
 @CONCLUDE@

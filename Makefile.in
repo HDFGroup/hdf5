@@ -25,7 +25,7 @@ srcdir=@srcdir@
 # Subdirectories in build-order (not including `examples')
 # TESTPARALLEL must be after test since it uses libtest.a.  Putting it
 # before tools allows parallel tests to run sooner.
-SUBDIRS=src test @TESTPARALLEL@ tools @PABLO@ @subdirs@
+SUBDIRS=src test @TESTPARALLEL@ tools @PABLO@ @HDF5_INTERFACES@
 
 ##############################################################################
 ##		    T A R G E T S
@@ -72,12 +72,12 @@ lib progs check test _test uninstall:
 	done
 
 tests TAGS dep depend:
-	@@SETX@; for d in $(SUBDIRS) perform; do		      \
+	@@SETX@; for d in $(SUBDIRS) perform; do		              \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
 install-all:
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -98,7 +98,7 @@ install:
 	@$(LT) --mode=finish $(libdir)
 
 install-examples:
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -106,7 +106,7 @@ install-examples:
 	(cd examples && $(MAKE) $@) || exit 1;
 
 uninstall-examples:
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -125,7 +125,7 @@ uninstall-doc:
 ## This requires a proper "make install" has been done.
 check-install:
 	(cd examples && $(MAKE) check) || exit 1
-	@@SETX@; for d in dummy @subdirs@; do				      \
+	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
 	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
 	  fi;								      \
@@ -142,13 +142,13 @@ H5Tinit.c:
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) conftest conftest.c
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config/commence config/conclude
@@ -160,7 +160,7 @@ distclean:
 maintainer-clean:
 	@echo "This target is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config.cache config.log config.status src/H5config.h

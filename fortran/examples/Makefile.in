@@ -12,10 +12,12 @@
 ## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
-top_srcdir=@top_srcdir@/..
+top_srcdir=@top_srcdir@
 top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
+
+HDF_FORTRAN="yes"
 
 hdf5_builddir=$(top_builddir)/src
 

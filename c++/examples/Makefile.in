@@ -15,11 +15,13 @@
 ##
 ##
 ##
-top_srcdir=@top_srcdir@/..
+top_srcdir=@top_srcdir@
 top_builddir=../..
 srcdir=@srcdir@
 
 @COMMENCE@
+
+HDF_CXX="yes"
 
 ## Replace building CC with the just installed h5cc
 CXX=$(bindir)/h5c++
