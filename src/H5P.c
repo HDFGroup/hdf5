@@ -1787,7 +1787,7 @@ H5Pget_driver(hid_t plist_id)
 
         /* Get the information from the multi file driver */
         if (H5Pget_fapl_multi(plist_id,memb_map,NULL,NULL,memb_addr,NULL)<0) {
-            HRETURN_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,
+            HRETURN_ERROR (H5E_PLIST, H5E_NOTFOUND, H5F_LOW_ERROR,
                    "can't get multi file information");
         }
 
@@ -2604,7 +2604,7 @@ H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
     }
 
     if(data_xfer_mode) {
-        if(H5Pget_fapl_mpio(plist_id,&dx_xfer_mode)<0) {
+        if(H5Pget_dxpl_mpio(plist_id,&dx_xfer_mode)<0) {
             HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                   "not a dataset transfer property list");
         }
@@ -2616,6 +2616,9 @@ H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
             H5FD_MPIO_COLLECTIVE:
                 *data_xfer_mode = H5D_XFER_COLLECTIVE;
                 break;
+	    default:
+		HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		    "unknown transfer mode");
         } /* end switch */
     } /* end if */
 
