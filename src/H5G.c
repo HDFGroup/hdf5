@@ -375,26 +375,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Giterate(hid_t loc_id, const char *name, int *idx,
+H5Giterate(hid_t loc_id, const char *name, int *idx_p,
 	    H5G_iterate_t op, void *op_data)
 {
-    int			_idx = 0;
+    int			idx;
     H5G_bt_ud2_t	udata;
     H5G_entry_t		*loc = NULL;
     H5G_t		*grp = NULL;
     herr_t		ret_value;
     
     FUNC_ENTER_API(H5Giterate, FAIL);
-    H5TRACE5("e","is*Isxx",loc_id,name,idx,op,op_data);
+    H5TRACE5("e","is*Isxx",loc_id,name,idx_p,op,op_data);
 
     /* Check args */
     if (NULL==(loc=H5G_loc (loc_id)))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     if (!name || !*name)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
-    if (!idx)
-        idx = &_idx;
-    if (*idx<0)
+    idx = (idx_p == NULL ? 0 : *idx_p);
+    if (!idx_p)
+        idx_p = &idx;
+    if (idx<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
     if (!op)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
@@ -411,7 +412,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     }
     
     /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
-    udata.skip = *idx;
+    udata.skip = idx;
     udata.ent = &(grp->ent);
     udata.op = op;
     udata.op_data = op_data;
@@ -428,11 +429,11 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 
     /* Check for too high of a starting index (ex post facto :-) */
     /* (Skipping exactly as many entries as are in the group is currently an error) */
-    if (*idx>0 && *idx>=udata.final_ent)
+    if (idx>0 && idx>=udata.final_ent)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
     /* Set the index we stopped at */
-    *idx=udata.final_ent;
+    *idx_p=udata.final_ent;
 
 done:
     FUNC_LEAVE_API(ret_value);
