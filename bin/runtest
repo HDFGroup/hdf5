@@ -1,4 +1,18 @@
 #! /bin/sh
+#
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+#
+
 # run the hdf5/bin/snapshot
 # Usage:
 #	runtest		run the test for the local host
@@ -296,17 +310,18 @@ RUNSNAPTEST()
     done
     [ $retcode -ne 0 ] && errcode=$retcode && return $retcode
 
-    # Track down the HDF4 software
-    ans=`$SNAPYARD/current/bin/locate_hdf4`
-    H4_SW=`echo $ans | cut -f1 -d' '`
-    H4_BIN=`echo $ans | cut -f2 -s -d' '`
-    if [ -n "$H4_SW" ]; then
-	SNAPCMD_OPT="$SNAPCMD_OPT hdf4 $H4_SW"
+    # Track down the zlib software
+    ans=`$SNAPYARD/current/bin/locate_sw zlib`
+    if [ $? = 0 ]; then
+	Z_INC=`echo $ans | cut -f1 -d,`
+	Z_LIB=`echo $ans | cut -f2 -d,`
+	SNAPCMD_OPT="$SNAPCMD_OPT zlib $Z_INC,$Z_LIB"
+    else
+	# cannot locate zlib software.
+	# continue the test, maybe configure can find it.
+	:
     fi
-    if [ -n "$H4_BIN" ]; then
-	PATH=${PATH}:${H4_BIN}
-    fi
-	
+
     if [ -n "${SRCDIRNAME}" ]; then
 	SNAPCMD_OPT="$SNAPCMD_OPT srcdirname ${SRCDIRNAME}"
     fi

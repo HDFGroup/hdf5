@@ -1,4 +1,17 @@
 #!/bin/sh
+#
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+#
 echo "====================================="
 echo "$0 $*"
 echo "====================================="
@@ -21,10 +34,11 @@ PATH="/usr/local/bin:$PATH"
 ARCHIVES_default=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
 ARCHIVES=$ARCHIVES_default
 
-# Where are the HDF4 library?
-# At NCSA, the standard place to find HDF4 software is in /usr/ncsa/.
-HDF4LIB_default="/usr/ncsa/include,/usr/ncsa/lib"
-HDF4LIB=$HDF4LIB_default
+# Where is the zlib library?
+# At NCSA, half of the machines have it in /usr/lib, the other half at
+# /usr/ncsa/lib.  Leave it unset.
+ZLIB_default=
+ZLIB=$ZLIB_default
 
 # What compression methods to use?
 METHODS="gzip bzip2"
@@ -86,15 +100,15 @@ while [ $# -gt 0 ] ; do
 	    cmd="help"
 	    break
 	    ;;
-	hdf4)
+	zlib)
 	    shift
 	    if [ $# -lt 1 ]; then
-		echo "HDF4LIB information missing"
+		echo "ZLIB information missing"
 		errcode=1
 		cmd="help"
 		break
 	    fi
-	    HDF4LIB="$1"
+	    ZLIB="$1"
 	    ;;
 	archive)
 	    shift
@@ -133,7 +147,7 @@ if [ "$cmd" = help ]; then
     set -
     cat <<EOF
 Usage: $0 [all] [checkout] [diff] [test] [srcdir] [release] [help]
-          [hdf4 <hdf4lib_path>] [archive <arch_path>] [dir <dir>]
+          [zlib <zlib_path>] [archive <arch_path>] [dir <dir>]
 	  [op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
               [Default is all]
@@ -153,9 +167,9 @@ Usage: $0 [all] [checkout] [diff] [test] [srcdir] [release] [help]
               E.g., "snapshot srcdir srcdirname -xx" uses hostname-xx
               [Default is hostname]
     help:     Print this message
-    hdf4 <hdf4lib_path>:
-              Use <hdf4lib_path> as the HDF4LIB locations
-              [Default is $HDF4LIB_default]
+    zlib <zlib_path>:
+              Use <zlib_path> as the ZLIB locations
+              [Default is $ZLIB_default]
     archive <arch_path>:
               Use <arch_path> as the release ARCHIVE area
               [Default is $ARCHIVES_default]
@@ -171,10 +185,10 @@ EOF
     exit $errcode
 fi
 
-# Setup the proper configure option (--with-hdf4) to use hdf4 library
-# provide HDF4LIB is non-empty.
-HDF4LIB=${HDF4LIB:+"--with-hdf4="$HDF4LIB}
-CONFIGURE="./configure $HDF4LIB $OP_CONFIGURE"
+# Setup the proper configure option (--with-zlib) to use zlib library
+# provide ZLIB is non-empty.
+ZLIB=${ZLIB:+"--with-zlib="$ZLIB}
+CONFIGURE="./configure $ZLIB $OP_CONFIGURE"
 
 # Execute the requests
 snapshot=yes
