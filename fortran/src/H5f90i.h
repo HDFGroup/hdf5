@@ -47,6 +47,35 @@ typedef double             real_f;
 
 #endif /* UNICOS */
 
+#if defined(IBM6000) || defined(_AIX)
+
+#ifndef IBM6000
+#define IBM6000
+#endif
+
+#ifdef GOT_MACHINE
+If you get an error on this line more than one machine type has been defined.
+Please check your Makefile.
+#endif
+#define GOT_MACHINE
+
+#   define BSD
+
+#ifndef __GNUC__
+#include <memory.h>
+#endif /* __GNUC__ */
+#include <sys/file.h>               /* for unbuffered i/o stuff */
+#include <sys/stat.h>
+#define DF_MT             DFMT_IBM6000
+typedef char              *_fcd;
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
+typedef int               int_f;
+typedef int               hid_t_f;
+typedef float             real_f;
+#define _fcdtocp(desc) (desc)
+#endif /*IBM6000*/
 
 /* LINUX definitions */
 #if defined(i386) && defined(linux)
@@ -147,8 +176,7 @@ typedef float             real_f;
 
 #endif     /*SUN*/
 
-
-#if defined DEC_ALPHA || (defined __alpha && defined __unix__)
+#if defined DEC_ALPHA || (defined __alpha && defined __unix__ && !defined __linux__)
 
 #ifndef DEC_ALPHA
 #define DEC_ALPHA
@@ -159,7 +187,6 @@ If you get an error on this line more than one machine type has been defined.
 Please check your Makefile.
 #endif
 #define GOT_MACHINE
-
 #include <sys/file.h>               /* for unbuffered i/o stuff */
 #include <sys/stat.h>
 #define DF_MT            DFMT_ALPHA
@@ -175,6 +202,32 @@ typedef float            real_f;
 
 #endif /* DEC_ALPHA */
 
+#if defined  __alpha__ && defined __linux__
+
+#ifndef DEC_ALPHA_LINUX
+#define DEC_ALPHA_LINUX
+#endif
+
+#ifdef GOT_MACHINE
+If you get an error on this line more than one machine type has been defined.
+Please check your Makefile.
+#endif
+#define GOT_MACHINE
+
+#include <sys/file.h>               /* for unbuffered i/o stuff */
+#include <sys/stat.h>
+#define DF_MT            DFMT_ALPHA
+typedef char             *_fcd;
+typedef long long            hsize_t_f;
+typedef long long            hssize_t_f;
+typedef long long            size_t_f;
+typedef int              int_f;
+typedef int              hid_t_f;
+typedef float            real_f;
+#define FNAME_POST2_UNDERSCORE
+#define _fcdtocp(desc) (desc)
+
+#endif /* DEC_ALPHA_LINUX */
 
 #if defined(HP9000) || (!defined(__convexc__) && (defined(hpux) || defined(__hpux)))
 
@@ -275,6 +328,9 @@ typedef float             real_f;
 #endif
 #if !defined(FNAME_PRE_UNDERSCORE) && !defined(FNAME_POST_UNDERSCORE)
 #   define FNAME(x)     x
+#endif
+#if !defined(FNAME_PRE_UNDERSCORE) && defined(FNAME_POST2_UNDERSCORE)
+#   define FNAME(x)     x##__
 #endif
 
 #  define HDfree(p)        (free((void*)p))
