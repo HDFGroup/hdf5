@@ -4,14 +4,15 @@
 #define COLS    18
 
 int compare_int(int* a, int* b, int tol);
-int compare_float(float* a, float* b, float tol);
+int compare_float(float* a, float* b, double tol);
 
 int main(void)
 {
-    hid_t file_id, dxpl_id_f_to_c, dxpl_id_c_to_f, dxpl_id_simple, dset_id_int, dset_id_float, datatype, dataspace;
+    hid_t file_id, dxpl_id_f_to_c, dxpl_id_c_to_f, dxpl_id_c_to_f_copy, dxpl_id_simple, dxpl_id_polynomial, dxpl_id_polynomial_copy, dset_id_int, dset_id_float, datatype, dataspace;
     hsize_t dim[2] = {ROWS, COLS};
     const char* f_to_c = "(5/9.0)*(x-32)";
     const char* c_to_f = "(9/5.0)*x + 32";
+    const char* polynomial = "(2+x)* ((x-8)/2)";
     const char* simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */ 
     int windchillFint[ROWS][COLS] =
     {   {36, 31, 25, 19, 13, 7, 1, -5, -11, -16, -22, -28, -34, -40, -46, -52, -57, -63 }, 
@@ -43,6 +44,10 @@ int main(void)
 	{25.0, 17.0, 10.0, 3.0, -4.0, -11.0, -19.0, -26.0, -33.0, -40.0, -48.0, -55.0, -62.0, -69.0, -76.0, -84.0, -91.0, -98.0} 
     };
     float windchillFfloatread[ROWS][COLS];
+    float polyflres[ROWS][COLS];
+    int   polyintres[ROWS][COLS];
+    float polyflread[ROWS][COLS];
+    int   polyintread[ROWS][COLS];
     int windchillCint[ROWS][COLS];
     herr_t err;
     int row, col;
@@ -54,15 +59,30 @@ int main(void)
 	for(col = 0; col<COLS; col++)
 	    windchillCint[row][col] = (5/9.0)*(windchillFint[row][col] - 32);
     }
-    
+
+    for(row = 0; row<ROWS; row++)
+    {
+	for(col = 0; col<COLS; col++)
+	    polyflres[row][col] = (2.0+windchillCint[row][col])*((windchillCint[row][col]-8.0)/2.0);
+    }
+
+    for(row = 0; row<ROWS; row++)
+    {
+	for(col = 0; col<COLS; col++)
+	    polyintres[row][col] = (2+windchillCint[row][col])*((windchillCint[row][col]-8)/2);
+    }
+
     if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
     if((dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
     if((dxpl_id_simple = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
+    if((dxpl_id_polynomial =  H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
     
     if((err= H5Pset_data_transform(dxpl_id_f_to_c, f_to_c))<0) TEST_ERROR;
     if((err= H5Pset_data_transform(dxpl_id_c_to_f, c_to_f))<0) TEST_ERROR;
     if((err = H5Pset_data_transform(dxpl_id_simple, simple))<0) TEST_ERROR;
-
+    if((err = H5Pset_data_transform(dxpl_id_polynomial, polynomial))<0) TEST_ERROR;
+    if((dxpl_id_polynomial_copy = H5Pcopy(dxpl_id_polynomial)) < 0) TEST_ERROR;
+    if((dxpl_id_c_to_f_copy = H5Pcopy(dxpl_id_c_to_f)) < 0) TEST_ERROR;
 
     if((file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) TEST_ERROR;
 
@@ -132,6 +152,49 @@ int main(void)
     else
        PASSED();
 
+    TESTING("data transform, linear transform w/ copied property")
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f_copy, windchillFintread))<0) TEST_ERROR;
+    if( (compare_int(*windchillFint, *windchillFintread, 2)) == 0)
+    {   
+	fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
+        TEST_ERROR;
+    }
+    else
+       PASSED();
+
+    TESTING("data transform, polynomial transform (float->int)")
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyintread))<0) TEST_ERROR;
+    if( (compare_int(*polyintres, *polyintread, 2)) == 0)
+    {   
+	fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
+        TEST_ERROR;
+    }
+    else
+       PASSED();
+
+    TESTING("data transform, polynomial transform w/ copied property")
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial_copy, polyintread))<0) TEST_ERROR;
+    if( (compare_int(*polyintres, *polyintread, 2)) == 0)
+    {   
+	fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
+        TEST_ERROR;
+    }
+    else
+       PASSED();
+
+
+    TESTING("data transform, polynomial transform (int-float)")
+    if((err = H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyflread))<0) TEST_ERROR;
+    if( (compare_float(*polyflres, *polyflread, 2.0)) == 0)
+    {   
+	fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
+        TEST_ERROR;
+    }
+    else
+       PASSED();
+
+
+    
     TESTING("data transform, trivial transform, without type conversion")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFfloatread))<0) TEST_ERROR;
     for(row = 0; row<ROWS; row++)
@@ -190,7 +253,7 @@ int compare_int(int* a, int* b, int tol)
    
 }
     
-int compare_float(float* a, float* b, float tol)
+int compare_float(float* a, float* b, double tol)
 {
     int i;
     for(i=0; i<ROWS*COLS; i++)
