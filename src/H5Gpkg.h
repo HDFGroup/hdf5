@@ -31,10 +31,8 @@
 #include "H5Gprivate.h"
 
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
-#define H5G_SIZE_HINT   1024            /*default root grp size hint         */
+#define H5G_SIZE_HINT   256             /*default root grp size hint         */
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
-
-#define H5G_DEFAULT_ROOT_SIZE  32
 
 /*
  * A symbol table node is a collection of symbol table entries.  It can

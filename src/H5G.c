@@ -1550,7 +1550,7 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
     if (!ent) {
 	ent = &new_root;
         HDmemset(ent, 0, sizeof(H5G_entry_t));
-	if (H5G_stab_create (f, dxpl_id, 256, ent/*out*/)<0)
+	if (H5G_stab_create (f, dxpl_id, H5G_SIZE_HINT, ent/*out*/)<0)
 	    HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create root group");
 	if (1 != H5O_link (ent, 1, dxpl_id))
 	    HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL, "internal error (wrong link count)");
@@ -2768,13 +2768,13 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     
     /* Remove the name from the symbol table */
     if (H5G_stab_remove(&grp_ent, base, dxpl_id)<0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink name from symbol table");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to unlink name from symbol table");
 
     /* Search the open IDs and replace names for unlinked object */
     name_r=H5RS_wrap(name);
     assert(name_r);
     if (H5G_replace_name(statbuf.type, &obj_ent, name_r, NULL, NULL, NULL, OP_UNLINK )<0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name");
     H5RS_decr(name_r);
 
 done:
