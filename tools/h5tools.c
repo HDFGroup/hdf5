@@ -454,6 +454,10 @@ h5dump_escape(char *s/*in,out*/, size_t size, int escape_spaces)
  *		Made this function safe from overflow problems by allowing it
  *		to reallocate the output string.
  *
+ * 		Robb Matzke, 1999-06-04
+ *		Added support for object references. The new `container'
+ *		argument is the dataset where the reference came from.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -463,7 +467,7 @@ h5dump_escape(char *s/*in,out*/, size_t size, int escape_spaces)
 */
 static char *
 h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
-	      hid_t type, void *vp)
+	      hid_t container, hid_t type, void *vp)
 {
     size_t	i, n, offset, size, dims[H5S_MAX_RANK], nelmts, start;
     char	*name, quote='\0';
@@ -699,7 +703,8 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 						OPT(info->arr_sep,
 						"," OPTIONAL_LINE_BREAK));
 				}
-				h5dump_sprint(str, info, memb, (char*)vp+offset+i*size);
+				h5dump_sprint(str, info, container, memb,
+					      (char*)vp+offset+i*size);
 			}
 			if (nelmts>1) {
 				h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
@@ -720,6 +725,39 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 			}
 		}
 		
+	} else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
+	    /*
+	     * Dataset region reference -- show the type and OID of the
+	     * referenced object, but we are unable to show the region yet
+	     * because there isn't enough support in the data space layer.
+	     * -rpm 19990604
+	     */
+	    int otype = H5Rget_object_type(container, vp);
+	    hid_t obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
+	    switch (otype) {
+	    case H5G_GROUP:
+		h5dump_str_append(str, "GRP-");
+		H5Gclose(obj);
+		break;
+	    case H5G_DATASET:
+		h5dump_str_append(str, "DSET-");
+		H5Dclose(obj);
+		break;
+	    case H5G_TYPE:
+		h5dump_str_append(str, "TYPE-");
+		H5Tclose(obj);
+		break;
+	    default:
+		h5dump_str_append(str, "%u-", otype);
+		/* unable to close `obj' since we don't know the type */
+		break;
+	    }
+	    
+
+	    /* OID */
+
+	    /* SPACE */
+	    
 	} else {
 		h5dump_str_append(str, "0x");
 		n = H5Tget_size(type);
@@ -836,11 +874,14 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
  *              Monday, April 26, 1999
  *
  * Modifications:
+ * 		Robb Matzke, 1999-06-04
+ *		The `container' argument is the optional dataset for
+ *		reference types.
  *
  *-------------------------------------------------------------------------
  */
 static void
-h5dump_simple_data(FILE *stream, const h5dump_t *info,
+h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 		   h5dump_context_t *ctx/*in,out*/, unsigned flags,
 		   hsize_t nelmts, hid_t type, void *_mem)
 {
@@ -863,7 +904,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info,
 	
 	/* Render the element */
 	h5dump_str_reset(&buffer);
-	h5dump_sprint(&buffer, info, type, mem+i*size);
+	h5dump_sprint(&buffer, info, container, type, mem+i*size);
 	if (i+1<nelmts || 0==(flags & END_OF_DATA)) {
 	    h5dump_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 	}
@@ -1089,7 +1130,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 		return FAIL;
 	}
 	else if (programtype == H5LS){
-		h5dump_simple_data(stream, info, &ctx, flags, hs_nelmts, p_type,
+		h5dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts, p_type,
 			sm_buf);
 	}
 	else if (programtype == H5DUMP){
@@ -1198,8 +1239,8 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
     size = H5Tget_size(type);
 
     /* Print it */
-    h5dump_simple_data(stream, info, &ctx, START_OF_DATA|END_OF_DATA,
-		       nelmts, type, mem);
+    h5dump_simple_data(stream, info, -1/*no dataset*/, &ctx,
+		       START_OF_DATA|END_OF_DATA, nelmts, type, mem);
 
     /* Terminate the output */
     if (ctx.cur_column) {
@@ -1226,6 +1267,8 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
  *              Thursday, July 23, 1998
  *
  * Modifications:
+ * 		Robb Matzke, 1999-06-04
+ *		Added support for references.
  *
  *-------------------------------------------------------------------------
  */
@@ -1361,6 +1404,7 @@ h5dump_fixtype(hid_t f_type)
 	break;
 
     case H5T_ENUM:
+    case H5T_REFERENCE:
 	m_type = H5Tcopy(f_type);
 	break;
 
@@ -1554,7 +1598,7 @@ struct h5dump_str_t tempstr;
 
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
-		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes);
+		h5dump_sprint(&tempstr, &info, -1/*no container*/, p_type, sm_buf+i*p_type_nbytes);
          if ((int)(strlen(out_buf)+tempstr.len+1) > (nCols-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
@@ -1666,7 +1710,8 @@ static void display_string
 		row_size++;
 		
 		h5dump_str_reset(&tempstr);		
-		h5dump_sprint(&tempstr, &info,p_type, sm_buf+i*p_type_nbytes);
+		h5dump_sprint(&tempstr, &info, -1/*no container*/, p_type,
+			      sm_buf+i*p_type_nbytes);
 
 		memmove(tempstr.s, tempstr.s + 1, tempstr.len -1);
 		tempstr.s[tempstr.len - 2] = '\0';
@@ -1932,7 +1977,6 @@ int     nmembs, i, j, k, ndims, perm[4];
  *
  *-------------------------------------------------------------------------
  */
-
 static int
 h5dump_simple(hid_t oid, hid_t p_type, int obj_data)
 {

@@ -459,8 +459,9 @@ H5Dget_type(hid_t dset_id)
     }
     /* Mark any VL datatypes as being in memory now */
     if(H5T_get_class(copied_type)==H5T_VLEN) {
-	    if (H5T_vlen_set_loc(copied_type, NULL, H5T_VLEN_MEMORY)<0) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+	if (H5T_vlen_set_loc(copied_type, NULL, H5T_VLEN_MEMORY)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			  "invalid VL location");
         }
     }
     if (H5T_lock (copied_type, FALSE)<0) {

@@ -197,13 +197,12 @@ And in this document, the
     <dl>
       <dt><code>H5T_class_t H5Tget_class (hid_t <em>type</em>)</code>
       <dd>This property holds one of the class names:
-	<code>H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING,
-	H5T_BITFIELD</code>, or <code>H5T_OPAQUE</code>.  This
-	property is read-only and is set when the datatype is
-	created or copied (see <code>H5Tcreate()</code>,
-	<code>H5Tcopy()</code>). If this function fails it returns
-	<code>H5T_NO_CLASS</code> which has a negative value (all
-	other class constants are non-negative).
+	<code>H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, or
+	H5T_BITFIELD</code>.  This property is read-only and is set
+	when the datatype is created or copied (see
+	<code>H5Tcreate()</code>, <code>H5Tcopy()</code>). If this
+	function fails it returns <code>H5T_NO_CLASS</code> which has
+	a negative value (all other class constants are non-negative).
 
 	<br><br>
       <dt><code>size_t H5Tget_size (hid_t <em>type</em>)</code>
@@ -218,13 +217,11 @@ And in this document, the
 	the significant part of the data still extends beyond the edge
 	of the data type then the <code>precision</code> property is
 	decremented a bit at a time.  Decreasing the size of a data
-	type may fail if the precesion must be decremented and the
-	data type is of the <code>H5T_OPAQUE</code> class or the
-	<code>H5T_FLOAT</code> bit fields would extend beyond the
-	significant part of the type.  Adjusting the size of an
-	<code>H5T_STRING</code> automatically adjusts the precision
-	as well.  On error, <code>H5Tget_size()</code> returns zero
-	which is never a valid size.
+	type may fail if the <code>H5T_FLOAT</code> bit fields would
+	extend beyond the significant part of the type.  Adjusting the
+	size of an <code>H5T_STRING</code> automatically adjusts the
+	precision as well.  On error, <code>H5Tget_size()</code>
+	returns zero which is never a valid size.
 
 	<br><br>
       <dt><code>H5T_order_t H5Tget_order (hid_t <em>type</em>)</code>
@@ -486,17 +483,7 @@ And in this document, the
       Otherwise new bits are filled according to the <code>msb</code>
       padding type.
 
-    <h3>3.6. Properties of Opaque Atomic Types</h3>
-
-    <p>Opaque atomic types (<code>class=H5T_OPAQUE</code>) act like
-      bit fields except conversions which change the precision are not
-      allowed.  However, padding can be added or removed from either
-      end and the bytes can be reordered.  Opaque types can be used to
-      create novel data types not directly supported by the library,
-      but the application is responsible for data conversion of these
-      types.
-
-    <h3>3.7 Character and String Datatype Issues</h3>
+    <h3>3.6 Character and String Datatype Issues</h3>
 
       The <code>H5T_NATIVE_CHAR</code> and <code>H5T_NATIVE_UCHAR</code> 
       data types are actually numeric data (1-byte integers).  If the 
@@ -577,8 +564,19 @@ And in this document, the
           <code>unsigned char</code> (<code>H5T_NATIVE_UCHAR</code>) 
           data types to the HDF5 integer type class.
 
+    <h2>4. Properties of Opaque Types</h2>
 
-    <h2>4. Properties of Compound Types</h2>
+    <p>Opaque types (<code>class=H5T_OPAQUE</code>) provide the
+      application with a mechanism for describing data which cannot be 
+      otherwise described by HDF5. The only properties associated with 
+      opaque types are a size in bytes and an ASCII tag which is
+      manipulated with <code>H5Tset_tag()</code> and
+      <code>H5Tget_tag()</code> functions. The library contains no
+      predefined conversion functions but the application is free to
+      register conversions between any two opaque types or between an
+      opaque type and some other type.
+
+    <h2>5. Properties of Compound Types</h2>
 
     <p>A compound data type is similar to a <code>struct</code> in C
       or a common block in Fortran: it is a collection of one or more
@@ -673,7 +671,7 @@ And in this document, the
       This makes it imposible to define recursive data structures.
 
     <a name="DTypes-PredefinedAtomic">
-    <h2>5. Predefined Atomic Data Types</h2>
+    <h2>6. Predefined Atomic Data Types</h2>
     </a>
 
     <p>The library predefines a modest number of data types having
@@ -994,7 +992,7 @@ H5Tset_size (str80, 80);
 	</table>
       </center>
 
-    <h2>6. Defining Compound Data Types</h2>
+    <h2>7. Defining Compound Data Types</h2>
 
     <p>Unlike atomic data types which are derived from other atomic
       data types, compound data types are created from scratch. First,
@@ -1151,7 +1149,7 @@ H5Tinsert (surf_id, "y", HOFFSET(surf_t,y), complex_id);
       </center>
 
     <a name="Datatypes_Enum">&nbsp;</a>
-    <h2>7. <a href="DatatypesEnum.html">Enumeration Data Types</a></h2>
+    <h2>8. <a href="DatatypesEnum.html">Enumeration Data Types</a></h2>
 
       An HDF5 enumeration data type is a 1:1 mapping between a set of
       symbols and a set of integer values, and an order is imposed on
@@ -1164,7 +1162,7 @@ H5Tinsert (surf_id, "y", HOFFSET(surf_t,y), complex_id);
       are discussed on a separate 
       <a href="DatatypesEnum.html">Enumeration Data Types</a> page.
 
-    <h2>8. Sharing Data Types among Datasets</h2>
+    <h2>9. Sharing Data Types among Datasets</h2>
 
     <p>If a file has lots of datasets which have a common data type
       then the file could be made smaller by having all the datasets
@@ -1210,7 +1208,7 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
       </center>
 
     <a name="Datatypes-DataConversion">
-    <h2>9. Data Conversion</h2>
+    <h2>10. Data Conversion</h2>
     </a>
 
     <p>The library is capable of converting data from one type to
@@ -1634,7 +1632,7 @@ And in this document, the
 </address>
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified: 30 April 1999
+Last modified: Fri Jun  4 16:14:04 EDT 1999
 <!-- hhmts end -->
 
 

@@ -28,7 +28,8 @@ static char		RcsId[] = "$Revision$";
 
 #include <hdf5.h>
 
-#define FILE   "trefer.h5"
+#define FILE1   "trefer1.h5"
+#define FILE2	"trefer2.h5"
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -86,7 +87,7 @@ test_reference_obj(void)
     tbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -195,7 +196,7 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -321,7 +322,7 @@ test_reference_region(void)
     drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -410,7 +411,7 @@ test_reference_region(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -569,6 +570,7 @@ test_reference(void)
 void
 cleanup_reference(void)
 {
-    remove(FILE);
+    remove(FILE1);
+    remove(FILE2);
 }
 

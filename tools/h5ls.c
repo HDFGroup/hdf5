@@ -25,6 +25,7 @@ static hbool_t string_g = FALSE;	/*print 1-byte numbers as ASCII?     */
 static hbool_t fullname_g = FALSE;	/*print full path names		     */
 static hbool_t recursive_g = FALSE;	/*recursive descent listing	     */
 static hbool_t grp_literal_g = FALSE;	/*list group, not contents	     */
+static hbool_t hexdump_g = FALSE;	/*show data as raw hexadecimal	     */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
@@ -94,6 +95,7 @@ usage: %s [OPTIONS] FILE [OBJECTS...]\n\
       -wN, --width=N   Set the number of columns of output\n\
       -v, --verbose    Generate more verbose output\n\
       -V, --version    Print version number and exit\n\
+      -x, --hexdump    Show raw data in hexadecimal format\n\
    FILE\n\
       The file name may include a printf(3C) integer format such as\n\
       \"%%05d\" to open a file family.\n\
@@ -897,6 +899,8 @@ display_string_type(hid_t type, int UNUSED indent)
  *              Thursday, November  5, 1998
  *
  * Modifications:
+ * 		Robb Matzke, 1999-06-04
+ *		Knows about object and dataset region references.
  *
  *-------------------------------------------------------------------------
  */
@@ -905,8 +909,15 @@ display_reference_type(hid_t type, int UNUSED indent)
 {
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
-    printf("%lu-byte unknown reference",
-	   (unsigned long)H5Tget_size(type));
+    if (H5Tequal(type, H5T_STD_REF_OBJ)) {
+	printf("object reference");
+    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
+	printf("dataset region reference");
+    } else {
+	printf("%lu-byte unknown reference",
+	       (unsigned long)H5Tget_size(type));
+    }
+    
     return TRUE;
 }
 
@@ -1787,6 +1798,10 @@ main (int argc, char *argv[])
 	    printf("This is %s version %u.%u release %u\n",
 		   progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 	    exit(0);
+	} else if (!strcmp(argv[argno], "--hexdump")) {
+	    hexdump_g = TRUE;
+	    fprintf(stderr, "not implemented yet: --hexdump\n");
+	    exit(1);
 	} else if (!strncmp(argv[argno], "-w", 2)) {
 	    if (argv[argno][2]) {
 		s = argv[argno]+2;
@@ -1839,6 +1854,10 @@ main (int argc, char *argv[])
 			   progname, H5_VERS_MAJOR, H5_VERS_MINOR,
 			   H5_VERS_RELEASE);
 		    exit(0);
+		case 'x':	/* --hexdump */
+		    hexdump_g = TRUE;
+		    fprintf(stderr, "not implemented yet: -x\n");
+		    exit(1);
 		default:
 		    usage(progname);
 		    exit(1);

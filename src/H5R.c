@@ -733,8 +733,11 @@ H5Rget_object_type(hid_t dataset, void *_ref)
 		     "invalid reference pointer");
 
     /* Get the object information */
-    ret_value=H5R_get_object_type(dset,_ref);
-
+    if ((ret_value=H5R_get_object_type(dset,_ref))<0) {
+	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN,
+		    "unable to determine object type");
+    }
+    
 done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Rget_object_type() */
