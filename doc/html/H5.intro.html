@@ -1,10 +1,8 @@
 <HTML>
 <HEAD>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
-<META NAME="Generator" CONTENT="Microsoft Word 97">
 <TITLE>Introduction to HDF5</TITLE>
 </HEAD>
-<BODY LINK="#0000ff" VLINK="#800080" bgcolor="#FFFFFF">
+<BODY  bgcolor="#FFFFFF">
 
 
 
@@ -95,6 +93,11 @@ used in this document.
               <A href="#Intro-PMSelectPoints">Selecting of independent 
               points</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="#Intro-PMCreateVariableLength">Creating 
+              variable-length datatypes</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="#Intro-PMCreateArray">Creating array datatypes</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               <A href="#Intro-PMCreateCompound">Creating compound 
               datatypes</A>
 
@@ -105,7 +108,8 @@ used in this document.
         &nbsp;&nbsp&nbsp;&nbsp;<a href="#Intro-ProgModels">Programming 
               Models</a> <i>(continued)</i><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#Intro-PMCreateExtendible">Creating/writing extendible and</a> <br>
+              <A href="#Intro-PMCreateExtendible">Creating/writing extendible 
+                 and</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               <A href="#Intro-PMCreateExtendible">chunked datasets</A><br>
@@ -117,51 +121,79 @@ used in this document.
               <A href="#Intro-PMWorkRefObjects">Working with references to 
               objects</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#Intro-PMWorkRefRegions">Working with references to dataset</a> <br>
+              <A href="#Intro-PMWorkRefRegions">Working with references to 
+                 dataset</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
                <A href="#Intro-PMWorkRefRegions">regions</A><p>
         </font>
-    <a href="Intro/IntroExamples.html" target="ExampleWin">Introduction to HDF5 -- Example Codes</a><br>
+    <a href="Intro/IntroExamples.html" 
+       target="ExampleWin">Introduction to HDF5 -- Example Codes</a><br>
         <font size=-1>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#CreateExample" target="ExampleWin">1: Creating and writing a
-              dataset</A><br>
+              <A href="Intro/IntroExamples.html#CreateExample" 
+                 target="ExampleWin">1: Creating and writing a dataset</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#CheckAndReadExample" target="ExampleWin">2. Reading a hyperslab</A><br>
+              <A href="Intro/IntroExamples.html#CheckAndReadExample" 
+                 target="ExampleWin">2. Reading a hyperslab</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#WriteSelected" target="ExampleWin">3. Writing selected data</A><br>
+              <A href="Intro/IntroExamples.html#WriteSelected" 
+                 target="ExampleWin">3. Writing selected data</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#Compound" target="ExampleWin">4. Working with compound datatypes</A><br>
-            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#CreateExtendWrite" target="ExampleWin">5. Creating and writing an extendible</a> <br>
+              <A href="Intro/IntroExamples.html#VariableLength" 
+                 target="ExampleWin">4. Working with variable-length</A><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#CreateExtendWrite" target="ExampleWin">dataset</A><br>
+              <A href="Intro/IntroExamples.html#VariableLength"
+                  target="ExampleWin">datatypes</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#ReadExtended" target="ExampleWin">6. Reading data</A><br>
+              <A href="Intro/IntroExamples.html#Array" 
+                 target="ExampleWin">5. Working with array datatypes</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#CreateGroups" target="ExampleWin">7. Creating groups</A><br>
+              <A href="Intro/IntroExamples.html#Compound" 
+                 target="ExampleWin">6. Working with compound datatypes</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="Intro/IntroExamples.html#ReadWriteAttributes" target="ExampleWin">8. Writing and reading 
+              <A href="Intro/IntroExamples.html#CreateExtendWrite" 
+                 target="ExampleWin">7. Creating and writing an 
+                 extendible</a><br>
+              &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="Intro/IntroExamples.html#CreateExtendWrite" 
+                 target="ExampleWin">dataset</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="Intro/IntroExamples.html#ReadExtended" 
+                 target="ExampleWin">8. Reading data</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="Intro/IntroExamples.html#CreateGroups" 
+                 target="ExampleWin">9. Creating groups</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="Intro/IntroExamples.html#ReadWriteAttributes" 
+                 target="ExampleWin">10. Writing and reading 
               attributes</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="Intro/IntroExamples.html#CreateWriteRefObj" target="ExampleWin">9. Creating and writing references</a><br>
+              <a href="Intro/IntroExamples.html#CreateWriteRefObj" 
+                 target="ExampleWin">11. Creating and writing references</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="Intro/IntroExamples.html#CreateWriteRefObj" target="ExampleWin">to objects</a><br>
+              <a href="Intro/IntroExamples.html#CreateWriteRefObj" 
+                 target="ExampleWin">to objects</a><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="Intro/IntroExamples.html#ReadRefObj" target="ExampleWin">10. Reading references to objects</a><br>
+              <a href="Intro/IntroExamples.html#ReadRefObj" 
+                 target="ExampleWin">12. Reading references to objects</a><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="Intro/IntroExamples.html#CreateWriteRefReg" target="ExampleWin">11. Creating and writing references</a><br>
+              <a href="Intro/IntroExamples.html#CreateWriteRefReg" 
+                 target="ExampleWin">13. Creating and writing references</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="Intro/IntroExamples.html#CreateWriteRefReg" target="ExampleWin">to dataset regions</a><br>
+              <a href="Intro/IntroExamples.html#CreateWriteRefReg" 
+                 target="ExampleWin">to dataset regions</a><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="Intro/IntroExamples.html#ReadRefReg" target="ExampleWin">12. Reading references to dataset</a><br>
+              <a href="Intro/IntroExamples.html#ReadRefReg" 
+                 target="ExampleWin">14. Reading references to dataset</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="Intro/IntroExamples.html#ReadRefReg" target="ExampleWin">regions</a>
+              <a href="Intro/IntroExamples.html#ReadRefReg" 
+                 target="ExampleWin">regions</a>
         </font>
 </td></tr>
 </table>
@@ -208,6 +240,10 @@ computing systems.
 HDF5 is currently in Release 1.<i>x</i> (HDF5 Release 1.<i>x</i>).
 </font>
 
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
 <H3><A NAME="Intro-Limits">Limitations of the Current Release</A></H3>
 <FONT FACE="Times"><P>This release includes the basic functionality that was planned for the HDF5 library. However, the library does not implement all of the features detailed in the format and API specifications. Here is a listing of some of the limitations of the current release: 
 
@@ -215,6 +251,10 @@ HDF5 is currently in Release 1.<i>x</i> (HDF5 Release 1.<i>x</i>).
 </FONT><LI>Data compression is supported, though only GZIP is implemented.  GZIP, or GNU Zip, is a compression function from the GNU Project.
 <LI>The library is not currently thread aware although we have planned for that possibility and intend eventually to implement it.
 </UL>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
 
 <H3><A NAME="Intro-Changes">Changes in the Current Release</A></H3>
 <P>A detailed list of changes in HDF5 since the last release,
@@ -239,8 +279,11 @@ will be listed in the <code>RELEASE</code>, <code>HISTORY</code>, and
 to the present are summarized in the file <CODE>hdf5/HISTORY</CODE> 
 in the source code installation.  
 
+
 <p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 <hr>
+
+
 <H2><A NAME="Intro-FileOrg">2. HDF5 File Organization and Data Model</A></H2>
 <FONT FACE="Times"><P>HDF5 files are organized in a hierarchical structure, with two primary structures: <I>groups</I> and <I>datasets</I>.
 
@@ -255,12 +298,21 @@ in the source code installation.
 <CODE><DD>/foo/zoo</CODE> signifies a member of the group <CODE>foo</CODE>, which in turn is a member of the root group.</DD>
 </DL>
 <FONT FACE="Times"><P>Any HDF5 group or dataset may have an associated <I>attribute list.</I> An HDF5 <I>attribute</I> is a user-defined HDF5 structure that provides extra information about an HDF5 object. Attributes are described in more detail below. 
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
 </FONT><H3><A NAME="Intro-OGroups">HDF5 Groups</A></H3>
 <FONT FACE="Times"><P>An<I> HDF5 group</I> is a structure containing zero or more HDF5 objects. A group has two parts:
 
 <UL>
 </FONT><LI>A <I>group header</I>, which contains a group name and a list of group attributes. 
 <LI>A group symbol table, which is a list of the HDF5 objects that belong to the group.</UL>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
 
 <H3><A NAME="Intro-ODatasets">HDF5 Datasets</A></H3>
 <FONT FACE="Times"><P>A dataset is stored in a file in two parts: a header and a data array. 
@@ -425,12 +477,21 @@ See <A HREF="Datatypes.html"><I>Datatypes</I></A></font><FONT FACE="Times"> in t
 <P>
 See <A HREF="Datasets.html"><I>Datasets</I></A> and <A HREF="Chunking.html"><I>Dataset Chunking Issues</I></A></font><FONT FACE="Times"> in the<I> HDF User&#146s Guide</I> for further information.
 We particularly encourage you to read <A HREF="Chunking.html"><I>Dataset Chunking Issues</I></A> since the issue is complex and beyond the scope of this document.
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
 </FONT><H3><A NAME="Intro-OAttributes">HDF5 Attributes</A></H3>
 <I>Attributes </I>are small named datasets that are attached to primary datasets, groups, or named datatypes.  Attributes can be used to describe the nature and/or the intended usage of a dataset or group. An attribute has two parts: (1) a <I>name</I> and (2) a <I>value</I>.  The value part contains one or more data entries of the same datatype. 
 <FONT FACE="Times"><P>The Attribute API (H5A) is used to read or write attribute information. When accessing attributes, they can be identified by name or by an <I>index value</I>.  The use of an index value makes it possible to iterate through all of the attributes associated with a given object.
 <P>The HDF5 format and I/O library are designed with the assumption that attributes are small datasets. They are always stored in the object header of the object they are attached to.  Because of this, large datasets should not be stored as attributes. How large is "large" is not defined by the library and is up to the user's interpretation. (Large datasets with metadata can be stored as supplemental datasets in a group with the primary dataset.) 
 <P>See <A HREF="Attributes.html"><I>Attributes</I></A></font><FONT FACE="Times"> in the<I> HDF User&#146s Guide</I> for further information.
 </FONT>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
 
 <H3><A NAME="Intro-FileTech">The File as Written to Media</A></H3>
 
@@ -508,8 +569,11 @@ We particularly encourage you to read <A HREF="Chunking.html"><I>Dataset Chunkin
     <P>See the <A HREF="H5.format.html"><cite>HDF5 File Format 
       Specification</cite></A><FONT FACE="Times"> for further information.
 
+
 <p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 <hr>
+
+
 </FONT><H2><A NAME="Intro-APIs">3. The HDF5 Applications Programming Interface (API)</A></H2>
 <FONT FACE="Times"><P>The current HDF5 API is implemented only in C. The API provides routines for creating HDF5 files, creating and writing groups, datasets, and their attributes to HDF5 files, and reading groups, datasets and their attributes from HDF5 files.
 </FONT><H3><A NAME="Intro-NameConv">Naming conventions</A></H3>
@@ -539,8 +603,15 @@ Example: <CODE>H5Rcreate</CODE>, which creates a reference.
 <B><LI>H5I</B>: <B>I</B>dentifier routine. <BR>
 Example: <CODE>H5Iget_type</CODE>, which retrieves the type of an object.</UL>
 
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
 <H3><A NAME="Intro-Include">Include Files</A> </H3>
 <FONT FACE="Times"><P>There are a number definitions and declarations that should be included with any HDF5 program. These definitions and declarations are contained in several <I>include</I> files. The main include </FONT>file is <CODE>hdf5.h</CODE>. This file<FONT FACE="Times"> includes all of the other files that your program is likely to need. <I>Be sure to include </i><code>hdf5.h</code><i> in any program that uses the HDF5 library.</I></FONT>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 
 
 <H3><A NAME="Intro-ProgModels">Programming Models</A></H3>
@@ -557,6 +628,9 @@ Example: <CODE>H5Iget_type</CODE>, which retrieves the type of an object.</UL>
 <LI>Create and write extendible datasets.
 <LI>Create and populate groups.
 <LI>Work with attributes. </UL>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 
 
 <h3><A NAME="Intro-PMCreateFile">How to create an HDF5 file</A></h3>
@@ -581,6 +655,11 @@ status = H5Fclose(file); </PRE>
 </CODE><DL>
 <DT>&nbsp;</DT>
 </DL>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
 <h3><A NAME="Intro-PMComponents">How to create and initialize the essential components of a dataset for writing to a file</A></h3>
 <P>Recall that datatypes and dimensionality (dataspace) are independent objects, which are created separately from any dataset that they might be attached to. Because of this the creation of a dataset requires, at a minimum, separate definitions of datatype, dimensionality, and dataset. Hence, to create a dataset the following steps need to be taken:
 <ol>
@@ -612,12 +691,24 @@ status = H5Tset_order(datatype, H5T_ORDER_LE);
  * to little endian is not needed.
  */
 dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);</PRE>
-</CODE><h3><A NAME="Intro-PMDiscard">How to discard objects when they are no longer needed</A></h3>
+</CODE>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
+<h3><A NAME="Intro-PMDiscard">How to discard objects when they are no longer needed</A></h3>
 <FONT FACE="Times"><P>The datatype, dataspace and dataset objects should be released once they are no longer needed by a program. Since each is an independent object, the must be released (or <I>closed</I>) separately. The following lines of code close the datatype, dataspace, and datasets that were created in the preceding section.
 </FONT><CODE><P>H5Tclose(datatype);
 <P>H5Dclose(dataset);
 <P>H5Sclose(dataspace);
-</CODE><h3><A NAME="Intro-PMWriteNew">How to write a dataset to a new file</A></h3>
+</CODE>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
+<h3><A NAME="Intro-PMWriteNew">How to write a dataset to a new file</A></h3>
 <FONT FACE="Times"><P>Having defined the datatype, dataset, and dataspace parameters, you write out the data with a call to </FONT><CODE>H5Dwrite</CODE><FONT FACE="Courier">.
 </FONT><CODE><PRE>/*
 * Write the data to the dataset using default transfer
@@ -626,9 +717,15 @@ dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);</PRE>
 status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 	  H5P_DEFAULT, data);</PRE>
 </CODE><FONT FACE="Times"><P>The third and fourth parameters of </FONT><CODE>H5Dwrite</CODE><FONT FACE="Times"> in the example describe the dataspaces in memory and in the file, respectively. They are set to the value </FONT><CODE>H5S_ALL</CODE><FONT FACE="Times"> to indicate that an entire dataset is to be written. In a later section we look at how we would access a portion of a dataset.
-</FONT><P><A HREF="#CreateExample"><FONT FACE="Times">Example 1</FONT></A><FONT FACE="Times"> contains a program that creates a file and a dataset, and writes the dataset to the file. 
+</FONT><P><A HREF="Intro/IntroExamples.html#CreateExample" target="ExampleWin"><FONT FACE="Times">Example 1</FONT></A><FONT FACE="Times"> contains a program that creates a file and a dataset, and writes the dataset to the file. 
 <P>Reading is analogous to writing. If, in the previous example, we wish to read an entire dataset, we would use the same basic calls with the same parameters. Of course, the routine </FONT><CODE>H5Dread</CODE><FONT FACE="Times"> would replace </FONT><CODE>H5Dwrite</CODE><FONT FACE="Courier">.</FONT><FONT FACE="Times"> 
-</FONT><h3><A NAME="Intro-PMGetInfo">Getting information about a dataset</A></h3>
+</FONT>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
+<h3><A NAME="Intro-PMGetInfo">Getting information about a dataset</A></h3>
 <FONT FACE="Times"><P>Although reading is analogous to writing, it is often necessary to query a file to obtain information about a dataset. For instance, we often need to know about the datatype associated with a dataset, as well dataspace information (e.g. rank and dimensions). There are several "get" routines for obtaining this information.  The following code segment illustrates how we would get this kind of information: 
 </FONT><CODE><PRE>/*
 * Get datatype and dataspace identifiers and then query
@@ -648,7 +745,13 @@ dataspace = H5Dget_space(dataset);    /* dataspace identifier */
 rank      = H5Sget_simple_extent_ndims(dataspace);
 status_n  = H5Sget_simple_extent_dims(dataspace, dims_out);
 printf("rank %d, dimensions %d x %d \n", rank, dims_out[0], dims_out[1]);</PRE>
-</CODE><h3><A NAME="Intro-PMRdWrPortion">Reading and writing a portion of a dataset</A></h3>
+</CODE>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
+<h3><A NAME="Intro-PMRdWrPortion">Reading and writing a portion of a dataset</A></h3>
 <P>In the previous discussion, we describe how to access an entire dataset with one write (or read) operation. HDF5 also supports access to portions (or selections) of a dataset in one read/write operation. Currently selections are limited to hyperslabs, their unions, and the lists of independent points. Both types of selection will be discussed in the following sections. Several sample cases of selection reading/writing are shown on the following figure.
 <center>
 <table bgcolor="#FFFFFF" border=1>
@@ -671,6 +774,8 @@ d&nbsp;<img src="IH_map4.gif">
 In (d) a union of hyperslabs in the file dataspace is read and 
 the data is stored in another union of hyperslabs in the memory dataspace.
 <P>As these examples illustrate, whenever we perform partial read/write operations on the data, the following information must be provided: file dataspace, file dataspace selection, memory dataspace and memory dataspace selection. After the required information is specified, actual read/write operation on the portion of data is done in a single call to the HDF5 read/write functions H5Dread(write).
+
+
 <H5><A NAME="Intro-PMSelectHyper">Selecting hyperslabs</A></H5>
 <FONT FACE="Times"><P>Hyperslabs are portions of datasets.  A hyperslab selection can be a logically contiguous collection of points in a dataspace, or it can be regular pattern of points or blocks in a dataspace.  The following picture illustrates a selection of regularly spaced 3x2 blocks in an 8x12 dataspace.</FONT>
 <p>
@@ -883,7 +988,7 @@ status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
          count_out, NULL);
 
 /*</PRE>
-</CODE><P><A HREF="#CheckAndReadExample"><FONT FACE="Times">Example 2</FONT></A><FONT FACE="Times"> contains a complete program that performs these operations.
+</CODE><P><A HREF="Intro/IntroExamples.html#CheckAndReadExample" target="ExampleWin"><FONT FACE="Times">Example 2</FONT></A><FONT FACE="Times"> contains a complete program that performs these operations.
 <B><P>Example with strides and blocks</B>.  Consider the 8x12 dataspace described above, in which we selected eight 3x2 blocks.  Suppose we wish to fill these eight blocks. </FONT>
 <p>
 
@@ -1274,7 +1379,9 @@ ret = H5Dwrite(dataset, H5T_NATIVE_INT, midd1, fid, H5P_DEFAULT, vector)
 </center>
 
 <P>Notice that the values are inserted in the file dataset in row-major order.
-<P><a href="#WriteSelected">Example 3</a> includes this code and other example code illustrating the use of hyperslab selection.
+<P><a href="Intro/IntroExamples.html#WriteSelected" target="ExampleWin">Example 3</a> includes this code and other example code illustrating the use of hyperslab selection.
+
+
 <H5><A NAME="Intro-PMSelectPoints">Selecting a list of independent points</A></H5>
 A hyperslab specifies a regular pattern of elements in a dataset.  It is also possible to specify a list of independent elements to read or write using the function <CODE>H5Sselect_elements</CODE>.  Suppose, for example, that we wish to write the values 53, 59, 61, 67 to the following elements of the 8x12 array used in the previous example: (0,0), (3,3), (3,5), and (5,6).  The following code selects the points and writes them to the dataset:
 <pre>
@@ -1479,7 +1586,8 @@ ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid2, fid, H5P_DEFAULT, values);
 </TABLE>
 </center>
 
-<P><A HREF="#WriteSelected"><FONT FACE="Times">Example 3</FONT></A><FONT FACE="Times"> contains a complete program that performs these subsetting operations.
+<P><A HREF="Intro/IntroExamples.html#WriteSelected" target="ExampleWin"><FONT FACE="Times">Example 3</FONT></A><FONT FACE="Times"> contains a complete program that performs these subsetting operations.
+
 
 <H5><A NAME="_SelectUnion">Selecting a union of hyperslabs</A></H5>
 
@@ -1659,7 +1767,7 @@ in this example.
 </TR>
 </TABLE>
 <font size=-1><i>(Note: The above table highlights hyperslab selections 
-with green, blue, and yellow <br> shading.  This shading may not 
+with green, blue, and yellow<br> shading.  This shading may not 
 appear properly in black-and-white printed copies.)</i></font>
 </center>
 
@@ -1783,7 +1891,7 @@ when the dataset was initialized.</font>
 </TR>
 </TABLE>
 <font size=-1><i>(Note: The above table highlights hyperslab selections 
-with green, blue, and yellow <br> shading.  This shading may not 
+with green, blue, and yellow<br> shading.  This shading may not 
 appear properly in black-and-white printed copies.)</i></font>
 </center>
 
@@ -1881,9 +1989,399 @@ in memory with one call to the <code>H5Dread</code> function.
 </pre>
 
 <P>
-<A HREF="#WriteSelected">Example 3</a> includes this code along with 
-the previous selection example.
+<A HREF="Intro/IntroExamples.html#WriteSelected" target="ExampleWin">Example 3</a> 
+includes this code along with the previous selection example.
 
+
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
+</FONT><h3><A NAME="Intro-PMCreateVariableLength">Creating variable-length datatypes</A></h3>
+
+Variable-length (VL) datatypes are sequences of an existing datatype
+(atomic, VL, or compound) which are not fixed in length from one dataset location
+to another.  In essence, they are similar to C character strings -- a sequence of 
+a type which is pointed to by a particular type of <em>pointer</em> -- although 
+they are implemented more closely to FORTRAN strings by including an explicit 
+length in the pointer instead of using a particular value to terminate the 
+sequence.
+
+<p>
+VL datatypes are useful to the scientific community in many different ways,
+some of which are listed below:
+<ul>
+    <li>Ragged arrays: Multi-dimensional ragged arrays can be implemented with
+        the last (fastest changing) dimension being ragged by using a
+        VL datatype as the type of the element stored. (Or as a field in a
+        compound datatype.)
+    <li>Fractal arrays: If a compound datatype has a VL field of another compound
+        type with VL fields (a <em>nested</em> VL datatype), this can be used to
+        implement ragged arrays of ragged arrays, to whatever nesting depth is
+        required for the user.
+    <li>Polygon lists: A common storage requirement is to efficiently store arrays
+        of polygons with different numbers of vertices.  VL datatypes can be
+        used to efficiently and succinctly describe an array of polygons with
+        different numbers of vertices.
+    <li>Character strings: Perhaps the most common use of VL datatypes will be to
+        store C-like VL character strings in dataset elements or as attributes
+        of objects.
+    <li>Indices: An array of VL object references could be used as an index to
+        all the objects in a file which contain a particular sequence of
+        dataset values. Perhaps an array something like the following:
+        <pre>
+            Value1: Object1, Object3,  Object9
+            Value2: Object0, Object12, Object14, Object21, Object22
+            Value3: Object2
+            Value4: &lt;none&gt;
+            Value5: Object1, Object10, Object12
+                .
+                .
+        </pre>
+    <li>Object Tracking: An array of VL dataset region references can be used as
+        a method of tracking objects or features appearing in a sequence of
+        datasets.  Perhaps an array of them would look like:
+        <pre>
+            Feature1: Dataset1:Region,  Dataset3:Region,  Dataset9:Region
+            Feature2: Dataset0:Region,  Dataset12:Region, Dataset14:Region,
+                      Dataset21:Region, Dataset22:Region
+            Feature3: Dataset2:Region
+            Feature4: &lt;none&gt;
+            Feature5: Dataset1:Region,  Dataset10:Region, Dataset12:Region
+                .
+                .
+        </pre>
+</ul>
+
+
+<h4>Variable-length datatype memory management</h4>
+
+With each element possibly being of different sequence lengths for a
+dataset with a VL datatype, the memory for the VL datatype must be dynamically
+allocated.  Currently there are two methods of managing the memory for 
+VL datatypes: the standard C malloc/free memory allocation routines or a method
+of calling user-defined memory management routines to allocate or free memory.
+Since the memory allocated when reading (or writing) may be complicated to
+release, an HDF5 routine is provided to traverse a memory buffer and free the
+VL datatype information without leaking memory.
+
+
+<h5>Variable-length datatypes cannot be divided</h5>
+
+VL datatypes are designed so that they cannot be subdivided by the library
+with selections, etc.  This design was chosen due to the complexities in
+specifying selections on each VL element of a dataset through a selection API
+that is easy to understand.  Also, the selection APIs work on dataspaces, not
+on datatypes.  At some point in time, we may want to create a way for
+dataspaces to have VL components to them and we would need to allow selections
+of those VL regions, but that is beyond the scope of this document.
+
+
+<h5>What happens if the library runs out of memory while reading?</h5>
+
+It is possible for a call to <code>H5Dread</code> to fail while reading in 
+VL datatype information if the memory required exceeds that which is available.  
+In this case, the <code>H5Dread</code> call will fail gracefully and any 
+VL data which has been allocated prior to the memory shortage will be returned 
+to the system via the memory management routines detailed below.  
+It may be possible to design a <em>partial read</em> API function at a 
+later date, if demand for such a function warrants.
+
+
+<h5>Strings as variable-length datatypes</h5>
+
+Since character strings are a special case of VL data that is implemented
+in many different ways on different machines and in different programming 
+languages, they are handled somewhat differently from other VL datatypes in HDF5.
+
+<p>
+HDF5 has native VL strings for each language API, which are stored the
+same way on disk, but are exported through each language API in a natural way
+for that language.  When retrieving VL strings from a dataset, users may choose
+to have them stored in memory as a native VL string or in HDF5's <code>hvl_t</code> 
+struct for VL datatypes.
+
+<p>
+VL strings may be created in one of two ways: by creating a VL datatype with
+a base type of <code>H5T_NATIVE_ASCII</code>, <code>H5T_NATIVE_UNICODE</code>, 
+etc., or by creating a string datatype and setting its length to 
+<code>H5T_VARIABLE</code>.  The second method is used to access 
+native VL strings in memory.  The library will convert between the two types, 
+but they are stored on disk using different datatypes and have different 
+memory representations.
+
+<p>
+Multi-byte character representations, such as UNICODE or <em>wide</em> 
+characters in C/C++, will need the appropriate character and string datatypes 
+created so that they can be described properly through the datatype API.  
+Additional conversions between these types and the current ASCII characters 
+will also be required.
+
+<p>
+Variable-width character strings (which might be compressed data or some
+other encoding) are not currently handled by this design.  We will evaluate
+how to implement them based on user feedback.
+
+
+<h4>Variable-length datatype APIs</h4>
+
+<h5>Creation</h5>
+
+VL datatypes are created with the <code>H5Tvlen_create()</code> function 
+as follows:
+<dl>
+    <dd><em>type_id</em> = <code>H5Tvlen_create</code>(<em>hid_t</em> <code>base_type_id</code>);
+</dl>
+
+<p>
+The base datatype will be the datatype that the sequence is composed of,
+characters for character strings, vertex coordinates for polygon lists, etc.
+The base datatype specified for the VL datatype can be of any HDF5 datatype,
+including another VL datatype, a compound datatype, or an atomic datatype.
+
+
+<h5>Querying base datatype of VL datatype</h5>
+
+It may be necessary to know the base datatype of a VL datatype before 
+memory is allocated, etc.  The base datatype is queried with the 
+<code>H5Tget_super()</code> function, described in the H5T documentation.
+
+
+<h5>Querying minimum memory required for VL information</h5>
+
+It order to predict the memory usage that <code>H5Dread</code> may need 
+to allocate to store VL data while reading the data, the 
+<code>H5Dget_vlen_size()</code> function is provided:
+<dl>
+    <dd><em>herr_t</em> 
+        <code>H5Dget_vlen_buf_size</code>(<em>hid_t</em> <code>dataset_id</code>, 
+        <em>hid_t</em> <code>type_id</code>,
+        <em>hid_t</em> <code>space_id</code>, 
+        <em>hsize_t</em> *<code>size</code>) 
+</dl>
+        (This function is not implemented in Release 1.2.)
+
+<p>
+This routine checks the number of bytes required to store the VL data from
+the dataset, using the <code>space_id</code> for the selection in the dataset 
+on disk and the <code>type_id</code> for the memory representation of the 
+VL data in memory.  The *<code>size</code> value is modified according to 
+how many bytes are required to store the VL data in memory.
+
+
+<h5>Specifying how to manage memory for the VL datatype</h5>
+
+The memory management method is determined by dataset transfer properties
+passed into the <code>H5Dread</code> and <code>H5Dwrite</code> functions 
+with the dataset transfer property list.  
+
+<p>
+Default memory management is set by using <code>H5P_DEFAULT</code> 
+for the dataset transfer property list identifier.
+If <code>H5P_DEFAULT</code> is used with <code>H5Dread</code>,
+the system <code>malloc</code> and <code>free</code> calls
+will be used for allocating and freeing memory.
+In such a case,  <code>H5P_DEFAULT</code> should also be passed
+as the property list identifier to <code>H5Dvlen_reclaim</code>.
+
+<p>
+The rest of this subsection is relevant only to those who choose 
+<i>not</i> to use default memory management.
+
+<p>
+The user can choose whether to use the 
+system <code>malloc</code> and <code>free</code> calls  or
+user-defined, or custom, memory management functions.
+If user-defined memory management functions are to be used, 
+the memory allocation and free routines must be defined via 
+<code>H5Pset_vlen_mem_manager()</code>, as follows:
+<dl>
+    <dd><em>herr_t</em> 
+        <code>H5Pset_vlen_mem_manager</code>(<em>hid_t</em> <code>plist_id</code>,
+        <em>H5MM_allocate_t</em> <code>alloc</code>, 
+        <em>void</em> *<code>alloc_info</code>,
+        <em>H5MM_free_t</em> <code>free</code>, 
+        <em>void</em> *<code>free_info</code>)
+</dl>
+
+
+<p>
+The <code>alloc</code> and <code>free</code> parameters 
+identify the memory management routines to be used.
+If the user has defined custom memory management routines,
+<code>alloc</code> and/or <code>free</code> should be set to make 
+those routine calls (i.e., the name of the routine is used as 
+the value of the parameter);  
+if the user prefers to use the system's <code> malloc</code>
+and/or <code>free</code>, the <code>alloc</code> and 
+<code>free</code> parameters, respectively, should be set to 
+<code> NULL</code>
+<p>
+The prototypes for the user-defined functions would appear as follows:
+<dl>
+    <dd><code>typedef</code> <em>void</em> 
+        *(*<code>H5MM_allocate_t</code>)(<em>size_t</em> <code>size</code>, 
+        <em>void</em> *<code>info</code>) ;
+    <dd><code>typedef</code> <em>void</em> 
+        (*<code>H5MM_free_t</code>)(<em>void</em> *<code>mem</code>, 
+        <em>void</em> *<code>free_info</code>) ;
+</dl>
+
+<p>
+The <code>alloc_info</code> and <code>free_info</code> parameters can be 
+used to pass along any required information to the user's memory management 
+routines.
+
+<p>
+In summary, if the user has defined custom memory management 
+routines, the name(s) of the routines are passed in the 
+<code>alloc</code> and <code>free</code> parameters and the 
+custom routines' parameters are passed in the 
+<code>alloc_info</code> and <code>free_info</code> parameters.
+If the user wishes to use the system <code> malloc</code> and 
+<code>free</code> functions, the <code>alloc</code> and/or 
+<code>free</code> parameters are set to <code> NULL</code> 
+and the  <code>alloc_info</code> and <code>free_info</code> 
+parameters are ignored.
+
+<h5>Recovering memory from VL buffers read in</h5>
+
+The complex memory buffers created for a VL datatype may be reclaimed with
+the <code>H5Dvlen_reclaim()</code> function call, as follows:
+<dl>
+    <dd><em>herr_t</em> 
+        <code>H5Dvlen_reclaim</code>(<em>hid_t</em> <code>type_id</code>, 
+        <em>hid_t</em> <code>space_id</code>, 
+        <em>hid_t</em> <code>plist_id</code>,
+        <em>void</em> *<code>buf</code>);
+</dl>
+
+<p>
+The <code>type_id</code> must be the datatype stored in the buffer, 
+<code>space_id</code> describes the selection for the memory buffer 
+to free the VL datatypes within, 
+<code>plist_id</code> is the dataset transfer property list which 
+was used for the I/O transfer to create the buffer, and 
+<code>buf</code> is the pointer to the buffer to free the VL memory within.  
+The VL structures (<code>hvl_t</code>) in the user's buffer are 
+modified to zero out the VL information after it has been freed.
+
+<p>
+If nested VL datatypes were used to create the buffer, 
+this routine frees them from the bottom up, 
+releasing all the memory without creating memory leaks.
+
+<P>
+<A HREF="Intro/IntroExamples.html#VariableLength" target="ExampleWin">Example 4</a>
+creates a dataset with the variable-length datatype using user-defined 
+functions for memory management.
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
+</FONT><h3><A NAME="Intro-PMCreateArray">Creating array datatypes</A></h3>
+
+The array class of datatypes, <code>H5T_ARRAY</code>, allows the 
+construction of true, homogeneous, multi-dimensional arrays.  
+Since these are homogeneous arrays, each element of the array will be 
+of the same datatype, designated at the time the array is created.
+
+<p>
+Arrays can be nested.
+Not only is an array datatype used as an element of an HDF5 dataset,
+but the elements of an array datatype may be of any datatype, 
+including another array datatype.
+
+<p>
+Array datatypes cannot be subdivided for I/O; the entire array must 
+be transferred from one dataset to another. 
+
+<p>
+Within certain limitations, outlined in the next paragraph, array datatypes 
+may be <em>N</em>-dimensional and of any dimension size.  
+Unlimited dimensions, however, are not supported. 
+Functionality similar to unlimited dimension arrays is available through 
+the use of variable-length datatypes.
+
+<p>
+The maximum number of dimensions, i.e., the maximum rank, of an array
+datatype is specified by the HDF5 library constant <code>H5S_MAX_RANK</code>.
+The minimum rank is 1 (one).
+All dimension sizes must be greater than 0 (zero). 
+
+<p>
+One array dataype may only be converted to another array datatype 
+if the number of dimensions and the sizes of the dimensions are equal 
+and the datatype of the first array's elements can be converted 
+to the datatype of the second array's elements.
+
+<h4>Array datatype APIs</h2>
+
+There are three functions that are specific to array datatypes: 
+one, <code>H5Tarray_create</code>, for creating an array datatype, 
+and two, <code>H5Tget_array_ndims</code> and <code>H5Tget_array_dims</code>,
+for working with existing array datatypes.
+
+<h5>Creating</h5>
+
+The function <code>H5Tarray_create</code> creates a new array datatype object.
+Parameters specify 
+  <ul>
+  <li>the base datatype of each element of the array,
+  <li>the rank of the array, i.e., the number of dimensions, 
+  <li>the size of each dimension, and
+  <li>the dimension permutation of the array, i.e., whether the 
+      elements of the array are listed in C or FORTRAN order.
+      (<b>Note:</b> The permutation feature is not implemented in Release 1.4.)
+  </ul>
+
+<dir>
+    <em>hid_t</em> <code>H5Tarray_create</code>(
+                   <em>hid_t</em> <code>base</code>,
+                   <em>int</em> <code>rank</code>,
+                   <em>const hsize_t</em> <code>dims[/*rank*/]</code>,
+                   <em>const int</em> <code>perm[/*rank*/]</code>
+            )
+</dir>
+
+<h5>Working with existing array datatypes</h5>
+
+When working with existing arrays, one must first determine the 
+the rank, or number of dimensions, of the array.
+
+<p>
+The function <code>H5Tget_array_ndims</code> returns the rank of a
+specified array datatype.
+
+<dir>
+    <em>int</em> <code>H5Tget_array_ndims</code>(
+                 <em>hid_t</em> <code>adtype_id</code>
+            )
+</dir>
+
+In many instances, one needs further information.
+The function <code>H5Tget_array_dims</code> retrieves the 
+permutation of the array and the size of each dimension.
+(<b>Note:</b> The permutation feature is not implemented in Release 1.4.)
+
+<dir>
+    <em>herr_t</em> <code>H5Tget_array_dims</code>(
+                 <em>hid_t</em> <code>adtype_id</code>,
+                 <em>hsize_t *</em><code>dims[]</code>,
+                 <em>int *</em><code>perm[]</code>
+            )
+</dir>
+
+
+<p>
+<A HREF="Intro/IntroExamples.html#Array" target="ExampleWin">Example 5</a> 
+creates an array datatype and a dataset containing elements of the 
+array datatype in an HDF5 file.  It then writes the dataset to the file.  
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 
 
 </FONT><h3><A NAME="Intro-PMCreateCompound">Creating compound datatypes</A></h3>
@@ -1917,8 +2415,14 @@ H5Tinsert (complex_id, "real", HOFFSET(tmp,re),
            H5T_NATIVE_DOUBLE);
 H5Tinsert (complex_id, "imaginary", HOFFSET(tmp,im),
            H5T_NATIVE_DOUBLE);</PRE>
-</CODE><P><A HREF="#Compound">Example 4</A><FONT FACE="Times"> shows how to create a compound datatype, write an array that has the compound datatype to the file, and read back subsets of the members.
-</FONT><h3><A NAME="Intro-PMCreateExtendible">Creating and writing extendible and chunked datasets</A></h3>
+</CODE><P><A HREF="Intro/IntroExamples.html#Compound" target="ExampleWin">Example 6</A><FONT FACE="Times"> shows how to create a compound datatype, write an array that has the compound datatype to the file, and read back subsets of the members.
+</FONT>
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
+<h3><A NAME="Intro-PMCreateExtendible">Creating and writing extendible and chunked datasets</A></h3>
 <FONT FACE="Times"><P>An <I>extendible</I> dataset is one whose dimensions can grow. In HDF5, it is possible to define a dataset to have certain initial dimensions, then later to increase the size of any of the initial dimensions. 
 <P>For example, you can create and store the following 3x3 HDF5 dataset:
 </FONT><PRE>     1 1 1
@@ -1992,8 +2496,13 @@ size[0] = dims[0];
 size[1] = dims[1]; 
 status = H5Dextend (dataset, size);</PRE>
 <FONT FACE="Courier" SIZE=2><P>&nbsp;
-</FONT><P><A HREF="#CreateExtendWrite">Example 5</A> shows how to create a 3x3 extendible dataset, write the dataset, extend the dataset to 10x3, write the dataset again, extend it again to 10x5, write the dataset again.
-<P><A HREF="#ReadExtended">Example 6</A> shows how to read the data written by Example 5.  
+</FONT><P><A HREF="Intro/IntroExamples.html#CreateExtendWrite" target="ExampleWin">Example 7</A> shows how to create a 3x3 extendible dataset, write the dataset, extend the dataset to 10x3, write the dataset again, extend it again to 10x5, write the dataset again.
+<P><A HREF="Intro/IntroExamples.html#ReadExtended" target="ExampleWin">Example 8</A> shows how to read the data written by Example 7.  
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
+
 <h3><A NAME="Intro-PMWorkGroups">Working with groups in a file</A></h3>
 <P>Groups provide a mechanism for organizing meaningful and extendible sets of datasets within an HDF5 file. The H5G API contains routines for working with groups. 
 <B><P>Creating a group. </B>To create a group, use 
@@ -2111,12 +2620,15 @@ the dataset.
 </pre>
 
 <p>
-<A HREF="#CreateGroups">Example 7</A> shows 
-how to create a group in a file and a 
+<A HREF="Intro/IntroExamples.html#CreateGroups" target="ExampleWin">Example 9</A> 
+shows how to create a group in a file and a 
 dataset in a group.  It uses the iterator function 
 <code>H5Giterate</code> to find the names of the objects
 in the root group, and <code>H5Glink</code> and <code>H5Gunlink</code>
 to create a new group name and delete the original name.
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 
 
 <h3><A NAME="Intro-PMWorkAttributes">Working with attributes</A></h3>
@@ -2181,7 +2693,11 @@ complex.  For this reason, HDF5 includes a function called
 of a set of attributes.  The user-supplied function can contain the code 
 that interprets, accesses and processes each attribute. 
 <p>
-<a href="#ReadWriteAttributes">Example 8</a> <A NAME="_Toc429885323">illustrates the use of the <code>H5Aiterate</code> function, as well as the other attribute examples described above.</A> 
+<a href="Intro/IntroExamples.html#ReadWriteAttributes" target="ExampleWin">Example 10</a> <A NAME="_Toc429885323">illustrates the use of the <code>H5Aiterate</code> function, as well as the other attribute examples described above.</A> 
+
+
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
 
 <h3><A NAME="Intro-PMWorkRefObjects">Working with references to objects</A></h3>
 
@@ -2197,7 +2713,7 @@ a file index or for grouping related objects by storing references to them in
 one dataset.
 <P>
 
-<h5>Creating and Storing References to Objects</h5>
+<h4>Creating and storing references to objects</h4>
 The following steps are involved in creating and storing file references
 to objects:
 <OL>
@@ -2208,140 +2724,15 @@ to objects:
 </OL>
 
 
-<h5> Programming Example</h5>
-<b>Description:</b>
-The example below [also <a href="#CreateWriteRefObj">Example 9</a>] 
+<h5>Programming example</h5>
+<a href="Intro/IntroExamples.html#CreateWriteRefObj" target="ExampleWin">Example 11</a> 
 creates a group and two datasets and a named datatype in the group. 
 References to these four objects are stored in the dataset in the 
 root group.  
 
-<PRE>
-
-#include &lt;hdf5.h&gt;
-
-#define FILE1   "trefer1.h5"
-
-/* 1-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
-
-/* 2-D dataset with fixed dimensions */
-#define SPACE2_NAME  "Space2"
-#define SPACE2_RANK	2
-#define SPACE2_DIM1	10
-#define SPACE2_DIM2	10
-
-int 
-main(void) {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		group;      /* Group ID             */
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Datatype ID			*/
-    hsize_t		dims1[] = {SPACE1_DIM1};
-    hobj_ref_t      *wbuf;      /* buffer to write to disk */
-    int       *tu32;      /* Temporary pointer to int data */
-    int        i;          /* counting variables */
-    const char *write_comment="Foo!"; /* Comments for group */
-    herr_t		ret;		/* Generic return value		*/
-
-/* Compound datatype */
-typedef struct s1_t {
-    unsigned int a;
-    unsigned int b;
-    float c;
-} s1_t;
-
-    /* Allocate write buffers */
-    wbuf=(hobj_ref_t *)malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
-    tu32=malloc(sizeof(int)*SPACE1_DIM1);
-
-    /* Create file */
-    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    /* Create dataspace for datasets */
-    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
-
-    /* Create a group */
-    group=H5Gcreate(fid1,"Group1",-1);
-
-    /* Set group's comment */
-    ret=H5Gset_comment(group,".",write_comment);
-
-    /* Create a dataset (inside Group1) */
-    dataset=H5Dcreate(group,"Dataset1",H5T_STD_U32LE,sid1,H5P_DEFAULT);
-
-    for(i=0; i &lt; SPACE1_DIM1; i++)
-        tu32[i] = i*3;
-
-    /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,tu32);
-
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-
-    /* Create another dataset (inside Group1) */
-    dataset=H5Dcreate(group,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
-
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-
-    /* Create a datatype to refer to */
-    tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
-
-    /* Insert fields */
-    ret=H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
-
-    ret=H5Tinsert (tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
-
-    ret=H5Tinsert (tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT);
-
-    /* Save datatype for later */
-    ret=H5Tcommit (group, "Datatype1", tid1);
-
-    /* Close datatype */
-    ret = H5Tclose(tid1);
-
-    /* Close group */
-    ret = H5Gclose(group);
-
-    /* Create a dataset to store references */
-    dataset=H5Dcreate(fid1,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
-
-    /* Create reference to dataset */
-    ret = H5Rcreate(&wbuf[0],fid1,"/Group1/Dataset1",H5R_OBJECT,-1);
-
-    /* Create reference to dataset */
-    ret = H5Rcreate(&wbuf[1],fid1,"/Group1/Dataset2",H5R_OBJECT,-1);
-
-    /* Create reference to group */
-    ret = H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
-
-    /* Create reference to named datatype */
-    ret = H5Rcreate(&wbuf[3],fid1,"/Group1/Datatype1",H5R_OBJECT,-1);
-
-    /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
-
-    /* Close disk dataspace */
-    ret = H5Sclose(sid1);
-    
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-
-    /* Close file */
-    ret = H5Fclose(fid1);
-    free(wbuf);
-    free(tu32);
-    return 0;
-}
-
-</PRE>
-
-
-<b>Remarks:</b>
-
+<p>
+<b>Notes:</b>
+Note the following elements of this example:
 <UL>
 <LI> The following code, 
 <PRE>
@@ -2379,7 +2770,7 @@ typedef struct s1_t {
     datatype is used to describe the dataset's memory datatype.
 </UL>
 
-<b>File Contents:</b>
+<b>Output file contents:</b>
 The contents of the <code>trefer1.h5</code> file created by this example 
 are as follows:
 <PRE>
@@ -2423,7 +2814,7 @@ The two numbers with the colon in between represent a unique identifier
 of the object. These numbers are constant for the life of the object.
  
 
-<h5>Reading References and Accessing Objects Using References</h5>
+<h4>Reading references and accessing objects using references</h4>
 
 The following steps are involved:
 <OL>
@@ -2436,116 +2827,18 @@ The following steps are involved:
 <LI> Close all objects when the task is complete. 
 </OL>
 
-<h5>Programming Example</h5>
+<h5>Programming example</h5>
 
-<b>Description:</b>
-The following example [also <a href="#ReadRefObj">Example 10</a>] 
-below opens and reads dataset <code>Dataset3</code> from 
-the file created previously. Then the program dereferences the references 
+<a href="Intro/IntroExamples.html#ReadRefObj" target="ExampleWin">Example 12</a>
+opens and reads dataset <code>Dataset3</code> from the file created created 
+in Example 11. Then the program dereferences the references 
 to dataset <code>Dataset1</code>, the group and the named datatype,
 and opens those objects. 
 The program reads and displays the dataset's data, the group's comment, and 
 the number of members of the compound datatype.
 
-
-<PRE>
-
-#include &lt;stdlib.h&gt;
-#include &lt;hdf5.h&gt;
-
-#define FILE1   "trefer1.h5"
-
-/* dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
-
-int 
-main(void)
-{
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset,	/* Dataset ID			*/
-                dset2;      /* Dereferenced dataset ID */
-    hid_t		group;      /* Group ID             */
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Datatype ID			*/
-    hobj_ref_t      *rbuf;      /* buffer to read from disk */
-    int                *tu32;      /* temp. buffer read from disk */
-    int        i;          /* counting variables */
-    char read_comment[10];
-    herr_t		ret;		/* Generic return value		*/
-
-    /* Allocate read buffers */
-    rbuf = malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
-    tu32 = malloc(sizeof(int)*SPACE1_DIM1);
-
-    /* Open the file */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
-
-    /* Open the dataset */
-    dataset=H5Dopen(fid1,"/Dataset3");
-
-    /* Read selection from disk */
-    ret=H5Dread(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
-
-    /* Open dataset object */
-    dset2 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[0]);
-
-    /* Check information in referenced dataset */
-    sid1 = H5Dget_space(dset2);
-
-    ret=H5Sget_simple_extent_npoints(sid1);
-
-    /* Read from disk */
-    ret=H5Dread(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,tu32);
-    printf("Dataset data : \n");
-     for (i=0; i &lt; SPACE1_DIM1 ; i++) printf (" %d ", tu32[i]);
-    printf("\n");
-    printf("\n");
-
-    /* Close dereferenced Dataset */
-    ret = H5Dclose(dset2);
-
-    /* Open group object */
-    group = H5Rdereference(dataset,H5R_OBJECT,&rbuf[2]);
-
-    /* Get group's comment */
-    ret=H5Gget_comment(group,".",10,read_comment);
-    printf("Group comment is %s \n", read_comment);
-    printf(" \n");
-    /* Close group */
-    ret = H5Gclose(group);
-
-    /* Open datatype object */
-    tid1 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[3]);
-
-    /* Verify correct datatype */
-    {
-        H5T_class_t tclass;
-
-        tclass= H5Tget_class(tid1);
-        if ((tclass == H5T_COMPOUND))
-           printf ("Number of compound datatype members is %d \n", H5Tget_nmembers(tid1)); 
-    printf(" \n");
-    }
-
-    /* Close datatype */
-    ret = H5Tclose(tid1);
-
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-
-    /* Close file */
-    ret = H5Fclose(fid1);
-
-    /* Free memory buffers */
-    free(rbuf);
-    free(tu32);
-    return 0;
-}   
-
-</PRE>
-
+<p>
+<b>Output file contents:</b>
 The output of this program is as follows:
 
 <PRE>
@@ -2559,7 +2852,9 @@ Number of compound datatype members is 3
 </PRE> 
 
 
-<b>Remarks:</b>
+<p>
+<b>Notes:</b>
+Note the following elements of this example:
 
 <UL>
 <LI> The <code>H5Dread</code> function was used to read dataset 
@@ -2588,6 +2883,8 @@ Number of compound datatype members is 3
 </UL>
 
 
+<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
+
 
 <h3><A NAME="Intro-PMWorkRefRegions">Working with references to dataset regions</A></h3>
 
@@ -2599,7 +2896,7 @@ internal mechanism of storing and retrieving dataset selections is transparent
 to the user. A reference to the dataset selection (region) is constant for 
 the life of the dataset.
 
-<H5>Creating and Storing References to Dataset Regions</H5>
+<h4>Creating and storing references to dataset regions</h4>
 The following steps are involved in creating and storing references to
 the dataset regions:
 <OL>
@@ -2616,9 +2913,9 @@ the dataset regions:
 <LI> Close all objects.
 </OL>
 
-<H5> Programming Example</H5>
-<B>Description:</B>
-The example below [also <a href="#CreateWriteRefReg">Example 11</a>] 
+<h5>Programming example</H5>
+
+<a href="Intro/IntroExamples.html#CreateWriteRefReg" target="ExampleWin">Example 13</a>
 creates a dataset in the file. Then it creates a dataset to store 
 references to the dataset regions (selections).
 The first selection is a 6 x 6 hyperslab. 
@@ -2626,123 +2923,9 @@ The second selection is a point selection in the same dataset.
 References to both selections are created and stored in the buffer, 
 and then written to the dataset in the file.
 
-<PRE>
-
-#include &lt;stdlib.h&gt;
-#include &lt;hdf5.h&gt;
-
-#define FILE2	"trefer2.h5"
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK     1
-#define SPACE1_DIM1     4
-
-/* Dataset with fixed dimensions */
-#define SPACE2_NAME  "Space2"
-#define SPACE2_RANK	2
-#define SPACE2_DIM1	10
-#define SPACE2_DIM2	10
-
-/* Element selection information */
-#define POINT1_NPOINTS 10
-
-int
-main(void)
-{
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dset1,	/* Dataset ID			*/
-                dset2;      /* Dereferenced dataset ID */
-    hid_t		sid1,       /* Dataspace ID	#1		*/
-                sid2;       /* Dataspace ID	#2		*/
-    hsize_t		dims1[] = {SPACE1_DIM1},
-            	dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hssize_t	start[SPACE2_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
-    hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; 
-                                    /* Coordinates for point selection */
-    hdset_reg_ref_t      *wbuf;      /* buffer to write to disk */
-    int     *dwbuf;      /* Buffer for writing numeric data to disk */
-    int        i;          /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
-
-
-    /* Allocate write & read buffers */
-    wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    dwbuf=malloc(sizeof(int)*SPACE2_DIM1*SPACE2_DIM2);
-
-    /* Create file */
-    fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    /* Create dataspace for datasets */
-    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
-
-    /* Create a dataset */
-    dset2=H5Dcreate(fid1,"Dataset2",H5T_STD_U8LE,sid2,H5P_DEFAULT);
-
-    for(i=0; i &lt; SPACE2_DIM1*SPACE2_DIM2; i++)
-        dwbuf[i]=i*3;
-
-    /* Write selection to disk */
-    ret=H5Dwrite(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,dwbuf);
-
-    /* Close Dataset */
-    ret = H5Dclose(dset2);
-
-    /* Create dataspace for the reference dataset */
-    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
-
-    /* Create a dataset */
-    dset1=H5Dcreate(fid1,"Dataset1",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT);
-
-    /* Create references */
-
-    /* Select 6x6 hyperslab for first reference */
-    start[0]=2; start[1]=2;
-    stride[0]=1; stride[1]=1;
-    count[0]=6; count[1]=6;
-    block[0]=1; block[1]=1;
-    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
-
-    /* Store first dataset region */
-    ret = H5Rcreate(&wbuf[0],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
-
-    /* Select sequence of ten points for second reference */
-    coord1[0][0]=6; coord1[0][1]=9;
-    coord1[1][0]=2; coord1[1][1]=2;
-    coord1[2][0]=8; coord1[2][1]=4;
-    coord1[3][0]=1; coord1[3][1]=6;
-    coord1[4][0]=2; coord1[4][1]=8;
-    coord1[5][0]=3; coord1[5][1]=2;
-    coord1[6][0]=0; coord1[6][1]=4;
-    coord1[7][0]=9; coord1[7][1]=0;
-    coord1[8][0]=7; coord1[8][1]=1;
-    coord1[9][0]=3; coord1[9][1]=3;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
-
-    /* Store second dataset region */
-    ret = H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
-
-    /* Write selection to disk */
-    ret=H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
-
-    /* Close all objects */
-    ret = H5Sclose(sid1);
-    ret = H5Dclose(dset1);
-    ret = H5Sclose(sid2);
-    
-    /* Close file */
-    ret = H5Fclose(fid1);
-
-    free(wbuf);
-    free(dwbuf);
-    return 0;
-}   
-
-</PRE>
-
-
-<b>Remarks:</b>
+<p>
+<b>Notes:</b>
+Note the following elements of this example:
 <UL>
 <LI> The code, 
 <PRE>
@@ -2781,7 +2964,7 @@ main(void)
 </UL>
 </UL>
 
-<b>File Contents:</b>
+<b>Output file contents:</b>
 The contents of the file <code>trefer2.h5</code> created by this program 
 are as follows:
 
@@ -2825,7 +3008,7 @@ Since only two selections were stored, the third and fourth elements of the
 dataset <code>Dataset1</code> are set to <code>NULL</code>. 
 This was done by the buffer inizialization in the program.
 
-<H5>Reading references to dataset regions</H5>
+<h4>Reading references to dataset regions</h4>
 
 The following steps are involved in reading references to dataset 
 regions and referenced dataset regions (selections).
@@ -2845,10 +3028,9 @@ regions and referenced dataset regions (selections).
 <LI> Close all objects when they are no longer needed.
 </OL>
 
-<H5>Programming Example</H5>
+<H5>Programming example</H5>
 
-<b>Description:</b>
-The following example [also <a href="#ReadRefReg">Example 12</a>]
+<a href="Intro/IntroExamples.html#ReadRefReg" target="ExampleWin">Example 14</a>
 reads a dataset containing dataset region references.
 It reads data from the dereferenced dataset and displays the number of 
 elements and raw data. Then it reads two selections:
@@ -2857,131 +3039,9 @@ number of points in the hyperslab  and the coordinates and displays them.
 Then it queries a number of selected points and their coordinates and 
 displays the information.
 
-<PRE>
-   
-#include &lt;stdlib.h&gt;
-#include &lt;hdf5.h&gt;
-
-#define FILE2	"trefer2.h5"
-#define NPOINTS 10
- 
-/* 1-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
-
-/* 2-D dataset with fixed dimensions */
-#define SPACE2_NAME  "Space2"
-#define SPACE2_RANK	2
-#define SPACE2_DIM1	10
-#define SPACE2_DIM2	10
-
-int 
-main(void)
-{
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dset1,	/* Dataset ID			*/
-                dset2;      /* Dereferenced dataset ID */
-    hid_t		sid1,       /* Dataspace ID	#1		*/
-                sid2;       /* Dataspace ID	#2		*/
-    hsize_t *   coords;             /* Coordinate buffer */
-    hsize_t		low[SPACE2_RANK];   /* Selection bounds */
-    hsize_t		high[SPACE2_RANK];     /* Selection bounds */
-    hdset_reg_ref_t      *rbuf;      /* buffer to to read disk */
-    int    *drbuf;      /* Buffer for reading numeric data from disk */
-    int        i, j;          /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
-
-    /* Output message about test being performed */
-
-    /* Allocate write & read buffers */
-    rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
-    drbuf=calloc(sizeof(int),SPACE2_DIM1*SPACE2_DIM2);
-
-    /* Open the file */
-    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
-
-    /* Open the dataset */
-    dset1=H5Dopen(fid1,"/Dataset1");
-
-    /* Read selection from disk */
-    ret=H5Dread(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
-
-    /* Try to open objects */
-    dset2 = H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf[0]);
-
-    /* Check information in referenced dataset */
-    sid1 = H5Dget_space(dset2);
-
-    ret=H5Sget_simple_extent_npoints(sid1);
-    printf(" Number of elements in the dataset is : %d\n",ret);
-
-    /* Read from disk */
-    ret=H5Dread(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,drbuf);
-
-    for(i=0; i &lt; SPACE2_DIM1; i++) {
-        for (j=0; j &lt; SPACE2_DIM2; j++) printf (" %d ", drbuf[i*SPACE2_DIM2+j]);
-        printf("\n"); }
-
-    /* Get the hyperslab selection */
-    sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[0]);
-
-    /* Verify correct hyperslab selected */
-    ret = H5Sget_select_npoints(sid2);
-    printf(" Number of elements in the hyperslab is : %d \n", ret);
-    ret = H5Sget_select_hyper_nblocks(sid2);
-    coords=malloc(ret*SPACE2_RANK*sizeof(hsize_t)*2); /* allocate space for the hyperslab blocks */
-    ret = H5Sget_select_hyper_blocklist(sid2,0,ret,coords);
-    printf(" Hyperslab coordinates are : \n");
-    printf (" ( %lu , %lu ) ( %lu , %lu ) \n", \
-(unsigned long)coords[0],(unsigned long)coords[1],(unsigned long)coords[2],(unsigned long)coords[3]); 
-    free(coords);
-    ret = H5Sget_select_bounds(sid2,low,high);
-
-    /* Close region space */
-    ret = H5Sclose(sid2);
-
-    /* Get the element selection */
-    sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[1]);
-
-    /* Verify correct elements selected */
-    ret = H5Sget_select_elem_npoints(sid2);
-    printf(" Number of selected elements is : %d\n", ret);
-
-    /* Allocate space for the element points */
-    coords= malloc(ret*SPACE2_RANK*sizeof(hsize_t)); 
-    ret = H5Sget_select_elem_pointlist(sid2,0,ret,coords);
-    printf(" Coordinates of selected elements are : \n");
-    for (i=0; i &lt; 2*NPOINTS; i=i+2) 
-         printf(" ( %lu , %lu ) \n", (unsigned long)coords[i],(unsigned long)coords[i+1]); 
-          
-    free(coords);
-    ret = H5Sget_select_bounds(sid2,low,high);
-
-    /* Close region space */
-    ret = H5Sclose(sid2);
-
-    /* Close first space */
-    ret = H5Sclose(sid1);
-
-    /* Close dereferenced Dataset */
-    ret = H5Dclose(dset2);
-
-    /* Close Dataset */
-    ret = H5Dclose(dset1);
-
-    /* Close file */
-    ret = H5Fclose(fid1);
-
-    /* Free memory buffers */
-    free(rbuf);
-    free(drbuf);
-    return 0;
-}   
-
-</PRE>
 
 <p>
+<b>Output:</b>
 The output of this program is :
 <PRE>
 
@@ -3014,7 +3074,8 @@ The output of this program is :
  
 </PRE>
 
-<b>Remarks:</b>
+<b>Notes:</b>
+Note the following elements of this example:
 <UL>
 <LI> The dataset with the region references was read by <code>H5Dread</code>
    with the <code>H5T_STD_REF_DSETREG</code> datatype specified.
@@ -3057,17 +3118,16 @@ The output of this program is :
 </UL>
 </UL>
 
+
 <p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 <hr>
 
 
 <H2>4. Example Codes</H2>
 For the example codes, see 
-<a href="Intro/IntroExamples.html" target="ExampleWin"><cite>Introduction to HDF5 -- Example Codes</cite></a>.
+<a href="Intro/IntroExamples.html" target="ExampleWin" target="ExampleWin"><cite>Introduction to HDF5 -- Example Codes</cite></a>.
 
 
-
-<p>&nbsp;
 <p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 
 <hr>
@@ -3094,7 +3154,7 @@ Introduction to HDF5&nbsp;<br>
 <tr><td align=left valign=top>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 <br>
-Last modified:  30 January 2001
+Last modified:  15 February 2001
 <br>
 Describes HDF5 Release 1.4, February 2001
 
