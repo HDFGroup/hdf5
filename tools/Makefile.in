@@ -24,7 +24,7 @@ LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
 PUB_PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@ @H4TOH5@ @PDB2HDF@
-PROGS=$(PUB_PROGS) h5dumptst
+PROGS=$(PUB_PROGS) $(TEST_PROGS) h5dumptst
 
 ## Source and object files for the library; do not install
 LIB_SRC=h5tools.c
@@ -40,7 +40,7 @@ H4TOH5_HDR=h4toh5main.h h4toh5util.h
 ## Source and object files for programs...
 PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5toh4.c	\
 	 h5dumptst.c pdb2hdf.c talign.c $(H4TOH5_SRC)
-PROG_OBJ=$(PROG_SRC:.c=.lo) talign.lo $(H4TOH5_OBJ)
+PROG_OBJ=$(PROG_SRC:.c=.lo)
 PRIVATE_HDR=h5tools.h $(H4TOH5_HDR)
 
 ## Source and object files for the tests
@@ -52,7 +52,7 @@ check test _test: $(PROGS)
 
 ## How to build the programs... They all depend on the hdf5 library and
 ## the tools library compiled in this directory.
-$(PROGS): $(LIB) ../src/libhdf5.la
+$(PROGS): $(LIB) $(LIBHDF5)
 
 h5debug: h5debug.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
