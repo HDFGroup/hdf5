@@ -234,6 +234,15 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC20_SPACE2_DIM0      8
 #define MISC20_SPACE2_DIM1      4
 
+/* Definitions for misc. test #21 */
+#define MISC21_FILE             "tmisc21.h5"
+#define MISC21_DSET_NAME        "Dataset"
+#define MISC21_SPACE_RANK       2
+#define MISC21_SPACE_DIM0       7639
+#define MISC21_SPACE_DIM1       6308
+#define MISC21_CHUNK_DIM0       1024
+#define MISC21_CHUNK_DIM1       1024
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -3478,6 +3487,71 @@ test_misc20(void)
     
 /****************************************************************
 **
+**  test_misc21(): Test that late allocation time is treated the same
+**                      as incremental allocation time, for chunked datasets
+**                      when overwriting entire dataset where the chunks
+**                      don't exactly match the dataspace.
+**
+****************************************************************/
+static void
+test_misc21(void)
+{
+    hid_t fid, sid, dcpl, dsid;
+    char *buf;
+    hsize_t dims[2]={MISC21_SPACE_DIM0,MISC21_SPACE_DIM1},
+        chunk_size[2]={MISC21_CHUNK_DIM0,MISC21_CHUNK_DIM1};
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing late allocation time w/chunks & filters\n"));
+
+    /* Allocate space for the buffer */
+    buf = (char *)HDcalloc(MISC21_SPACE_DIM0*MISC21_SPACE_DIM1,1);
+    CHECK(buf, NULL, "HDcalloc");
+
+    /* Create the file */
+    fid = H5Fcreate (MISC21_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create the DCPL */
+    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Set custom DCPL properties */
+    ret = H5Pset_chunk (dcpl, MISC21_SPACE_RANK, chunk_size);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+    ret = H5Pset_deflate (dcpl, 6); 
+    CHECK(ret, FAIL, "H5Pset_deflate");
+    ret = H5Pset_alloc_time (dcpl, H5D_ALLOC_TIME_LATE); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
+
+    /* Create the dataspace for the dataset */
+    sid = H5Screate_simple (MISC21_SPACE_RANK, dims, NULL);
+    CHECK(ret, FAIL, "H5Screate_simple");
+
+    /* Create the dataset */
+    dsid = H5Dcreate (fid, MISC21_DSET_NAME, H5T_NATIVE_UINT8, sid, dcpl);
+    CHECK(dsid, FAIL, "H5Dwrite");
+
+    /* Write out the whole dataset */
+    ret = H5Dwrite (dsid, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close everything */
+    ret = H5Dclose (dsid);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Sclose (sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Pclose (dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Fclose (fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    HDfree(buf);
+} /* end test_misc21() */
+    
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -3486,7 +3560,7 @@ test_misc(void)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Miscellaneous Routines\n"));
-    
+
     test_misc1();       /* Test unlinking a dataset & immediately re-using name */
     test_misc2();       /* Test storing a VL-derived datatype in two different files */
     test_misc3();       /* Test reading from chunked dataset with non-zero fill value */
@@ -3507,6 +3581,9 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
 } /* test_misc() */
 

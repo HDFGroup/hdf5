@@ -2413,10 +2413,12 @@ H5D_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
 
     /* If we are filling the dataset on allocation or "if set" and
      * the fill value _is_ set, _and_ we are not overwriting the new blocks,
+     * or if there are any pipeline filters defined,
      * set the "should fill" flag
      */
-    if(!full_overwrite && (fill_time==H5D_FILL_TIME_ALLOC ||
+    if((!full_overwrite && (fill_time==H5D_FILL_TIME_ALLOC ||
             (fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_USER_DEFINED)))
+            || pline.nused>0)
         should_fill=1;
 
     /* Check if fill values should be written to blocks */
