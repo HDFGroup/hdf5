@@ -377,6 +377,7 @@
 ./test/tmeta.c
 ./test/trefer.c
 ./test/tselect.c
+./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c
 
