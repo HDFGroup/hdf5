@@ -38,7 +38,7 @@ The installation steps are similar to the ones in INSTALL file:
    There is one read testing program called 'gass_read' in the 'test' 
    directory.  It does whole file read through HTTP protocal.  The URL is 
    hard coded as 
-      http://hdf.ncsa.uiuc.edu/GLOBUS/a.h5
+      http://paz.ncsa.uiuc.edu:8080/test/a.h5
 
    The writing really depends on your web server.  You have to set up your 
    server in right way to accept writing in files.  We have tested it using 
