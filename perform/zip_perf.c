@@ -199,6 +199,8 @@ write_file(Bytef *source, uLongf sourceLen)
         d_len -= rc;
         d_ptr += rc;
     }
+
+    free(dest);
 }
 
 /*
@@ -375,6 +377,9 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
     Bytef *src;
 
     for (src_len = min_buf_size; src_len <= max_buf_size; src_len <<= 1) {
+        register int i, iters;
+
+        iters = file_size / src_len;
         src = (Bytef *)calloc(1, sizeof(Bytef) * src_len);
 
         if (!src) {
@@ -395,15 +400,54 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         }
 
         printf("\n");
+
+        /* do uncompressed data write */
         gettimeofday(&timer_start, NULL);
         output = open(filename, O_RDWR | O_TRUNC);
 
         if (output == -1)
             error(strerror(errno));
 
-        for (total_len = 0; total_len < file_size; total_len += src_len) {
-            write_file(src, src_len);
+        for (i = 0; i <= iters; ++i) {
+            Bytef *s_ptr = src;
+            uLong s_len = src_len;
+
+            /* loop to make sure we write everything out that we want to write */
+            for (;;) {
+                int rc = write(output, s_ptr, s_len);
+
+                if (rc == -1)
+                    error(strerror(errno));
+
+                if (rc == s_len)
+                    break;
+
+                s_len -= rc;
+                s_ptr += rc;
+            }
         }
+
+        close(output);
+        gettimeofday(&timer_stop, NULL);
+
+        total_time = ((double)timer_stop.tv_sec +
+                            ((double)timer_stop.tv_usec) / MICROSECOND) -
+                     ((double)timer_start.tv_sec +
+                            ((double)timer_start.tv_usec) / MICROSECOND);
+
+        printf("\tUncompressed Write Time: %.2fs\n", total_time);
+        printf("\tUncompressed Write Throughput: %.2fMB/s\n",
+               MB_PER_SEC(file_size, total_time));
+
+        /* do compressed data write */
+        output = open(filename, O_RDWR | O_TRUNC);
+
+        if (output == -1)
+            error(strerror(errno));
+
+
+        for (total_len = 0; total_len < file_size; total_len += src_len)
+            write_file(src, src_len);
 
         close(output);
         gettimeofday(&timer_stop, NULL);
