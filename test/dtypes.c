@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <H5Aprivate.h>
+#include <H5Iprivate.h>
 #include <H5Tprivate.h>
 
 #ifndef HAVE_FUNCTION
@@ -193,7 +193,7 @@ test_compound(void)
     puts(" PASSED");
 
     /* Just for debugging... */
-    H5T_debug(H5A_object(complex_id), stdout);
+    H5T_debug(H5I_object(complex_id), stdout);
     printf("\n");
 
     return SUCCEED;

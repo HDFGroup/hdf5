@@ -20,7 +20,7 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* Private header files */
 #include <H5private.h>		/* Generic Functions			*/
-#include <H5Aprivate.h>		/* Atoms			  	*/
+#include <H5Iprivate.h>		/* IDs			  	*/
 #include <H5Bprivate.h>		/* B-tree subclass names	  	*/
 #include <H5Dprivate.h>		/* Datasets				*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
@@ -76,8 +76,8 @@ H5P_init_interface(void)
      * atom groups aren't.
      */
     for (i = 0; i < H5P_NCLASSES; i++) {
-	status = H5A_init_group((group_t)(H5_TEMPLATE_0 +i),
-				H5A_TEMPID_HASHSIZE, 0, NULL);
+	status = H5I_init_group((H5I_group_t)(H5_TEMPLATE_0 +i),
+				H5I_TEMPID_HASHSIZE, 0, NULL);
 	if (status < 0) ret_value = FAIL;
     }
     if (ret_value < 0) {
@@ -119,7 +119,7 @@ H5P_term_interface(void)
     intn		    i;
 
     for (i = 0; i < H5P_NCLASSES; i++) {
-	H5A_destroy_group((group_t)(H5_TEMPLATE_0 + i));
+	H5I_destroy_group((H5I_group_t)(H5_TEMPLATE_0 + i));
     }
 }
 
@@ -215,7 +215,7 @@ H5P_create(H5P_class_t type, void *tmpl)
     assert(tmpl);
 
     /* Atomize the new template */
-    if ((ret_value=H5A_register((group_t)(H5_TEMPLATE_0+type), tmpl)) < 0) {
+    if ((ret_value=H5I_register((H5I_group_t)(H5_TEMPLATE_0+type), tmpl)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "can't register template");
     }
@@ -246,17 +246,17 @@ H5Pclose(hid_t tid)
 
     /* Check arguments */
     if ((type=H5Pget_class (tid))<0 ||
-	NULL==(tmpl=H5A_object (tid))) {
+	NULL==(tmpl=H5I_object (tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     }
 	
     /*
      * Chuck the object!  When the reference count reaches zero then
-     * H5A_dec_ref() removes it from the group and we should free it.  The
+     * H5I_dec_ref() removes it from the group and we should free it.  The
      * free function is not registered as part of the group because it takes
      * an extra argument.
      */
-    if (0==H5A_dec_ref(tid)) H5P_close (type, tmpl);
+    if (0==H5I_dec_ref(tid)) H5P_close (type, tmpl);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -365,12 +365,12 @@ H5P_close (H5P_class_t type, void *tmpl)
 H5P_class_t
 H5Pget_class(hid_t tid)
 {
-    group_t		    group;
+    H5I_group_t		    group;
     H5P_class_t		    ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5Pget_class, H5P_NO_CLASS);
 
-    if ((group = H5A_group(tid)) < 0 ||
+    if ((group = H5I_group(tid)) < 0 ||
 #ifndef NDEBUG
 	group >= H5_TEMPLATE_MAX ||
 #endif
@@ -417,7 +417,7 @@ H5Pget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -462,7 +462,7 @@ H5Pset_userblock(hid_t tid, size_t size)
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -506,7 +506,7 @@ H5Pget_userblock(hid_t tid, size_t *size)
 
     /* Check args */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -544,7 +544,7 @@ H5Pset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -599,7 +599,7 @@ H5Pget_sizes(hid_t tid,
 
     /* Check args */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -650,7 +650,7 @@ H5Pset_sym_k(hid_t tid, int ik, int lk)
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -692,7 +692,7 @@ H5Pget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -732,7 +732,7 @@ H5Pset_istore_k(hid_t tid, int ik)
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -773,7 +773,7 @@ H5Pget_istore_k(hid_t tid, int *ik /*out */ )
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
@@ -809,7 +809,7 @@ H5Pset_layout(hid_t tid, H5D_layout_t layout)
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation template");
     }
@@ -848,7 +848,7 @@ H5Pget_layout(hid_t tid)
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
 		      "not a dataset creation template");
     }
@@ -886,7 +886,7 @@ H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation template");
     }
@@ -947,7 +947,7 @@ H5Pget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation template");
     }
@@ -1001,7 +1001,7 @@ H5Pset_external (hid_t plist_id, const char *name, size_t offset, size_t size)
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(plist_id) ||
-	NULL == (plist = H5A_object(plist_id))) {
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
@@ -1071,7 +1071,7 @@ H5Pget_external_count (hid_t plist_id)
     
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(plist_id) ||
-	NULL == (plist = H5A_object(plist_id))) {
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
@@ -1119,7 +1119,7 @@ H5Pget_external (hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(plist_id) ||
-	NULL == (plist = H5A_object(plist_id))) {
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
@@ -1165,7 +1165,7 @@ H5Pget_driver (hid_t tid)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
-	NULL == (tmpl = H5A_object (tid))) {
+	NULL == (tmpl = H5I_object (tid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5F_LOW_ERROR,
 		       "not a file access property list");
     }
@@ -1201,7 +1201,7 @@ H5Pset_stdio (hid_t tid)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
@@ -1241,7 +1241,7 @@ H5Pget_stdio (hid_t tid)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
-	NULL == (tmpl = H5A_object (tid))) {
+	NULL == (tmpl = H5I_object (tid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -1281,7 +1281,7 @@ H5Pset_sec2 (hid_t tid)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
@@ -1321,7 +1321,7 @@ H5Pget_sec2 (hid_t tid)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
-	NULL == (tmpl = H5A_object (tid))) {
+	NULL == (tmpl = H5I_object (tid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -1365,7 +1365,7 @@ H5Pset_core (hid_t tid, size_t increment)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
@@ -1412,7 +1412,7 @@ H5Pget_core (hid_t tid, size_t *increment/*out*/)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
-	NULL == (tmpl = H5A_object (tid))) {
+	NULL == (tmpl = H5I_object (tid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -1459,19 +1459,19 @@ H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
     if (H5P_DEFAULT!=meta_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(meta_tid) ||
-	 NULL == (tmpl = H5A_object(meta_tid)))) {
+	 NULL == (tmpl = H5I_object(meta_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
     if (H5P_DEFAULT!=raw_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(raw_tid) ||
-	 NULL == (tmpl = H5A_object(raw_tid)))) {
+	 NULL == (tmpl = H5I_object(raw_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
@@ -1529,7 +1529,7 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
-	NULL == (tmpl = H5A_object (tid))) {
+	NULL == (tmpl = H5I_object (tid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -1603,13 +1603,13 @@ H5Pset_family (hid_t tid, hid_t memb_tid)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
     if (H5P_DEFAULT!=memb_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(memb_tid) ||
-	 NULL == (tmpl = H5A_object(memb_tid)))) {
+	 NULL == (tmpl = H5I_object(memb_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
@@ -1656,7 +1656,7 @@ H5Pget_family (hid_t tid, hid_t *memb_tid)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
-	NULL == (tmpl = H5A_object (tid))) {
+	NULL == (tmpl = H5I_object (tid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -1716,7 +1716,7 @@ H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg)
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
-	NULL == (plist = H5A_object (plist_id))) {
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
     }
@@ -1759,7 +1759,7 @@ H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
-	NULL == (plist = H5A_object (plist_id))) {
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, 0,
 		       "not a dataset transfer property list");
     }
@@ -1801,7 +1801,7 @@ H5Pset_preserve (hid_t plist_id, hbool_t status)
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
-	NULL == (plist = H5A_object (plist_id))) {
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
     }
@@ -1838,7 +1838,7 @@ H5Pget_preserve (hid_t plist_id)
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
-	NULL == (plist = H5A_object (plist_id))) {
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
     }
@@ -1913,7 +1913,7 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
-	NULL == (tmpl = H5A_object(tid))) {
+	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
@@ -1991,7 +1991,7 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, unsigned *access_mode)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
-	NULL == (tmpl = H5A_object (tid))) {
+	NULL == (tmpl = H5I_object (tid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -2040,14 +2040,14 @@ H5Pcopy(hid_t tid)
     void		   *new_tmpl = NULL;
     H5P_class_t		    type;
     hid_t		    ret_value = FAIL;
-    group_t		    group;
+    H5I_group_t		    group;
 
     FUNC_ENTER(H5Pcopy, FAIL);
 
     /* Check args */
-    if (NULL == (tmpl = H5A_object(tid)) ||
+    if (NULL == (tmpl = H5I_object(tid)) ||
 	(type = H5Pget_class(tid)) < 0 ||
-	(group = H5A_group(tid)) < 0) {
+	(group = H5I_group(tid)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
 		      "can't unatomize template");
     }
@@ -2059,7 +2059,7 @@ H5Pcopy(hid_t tid)
     }
 
     /* Register the atom for the new template */
-    if ((ret_value = H5A_register(group, new_tmpl)) < 0) {
+    if ((ret_value = H5I_register(group, new_tmpl)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to atomize template pointer");
     }

@@ -12,10 +12,10 @@
 
 /*
  * This file contains function prototypes for each exported function in
- * the H5A module.
+ * the H5I module.
  */
-#ifndef _H5Apublic_H
-#define _H5Apublic_H
+#ifndef _H5Ipublic_H
+#define _H5Ipublic_H
 
 /* Public headers needed by this file */
 #include <H5public.h>
@@ -41,7 +41,7 @@ typedef enum {
     H5_DATASET,                 /*group ID for Dataset objects               */
     H5_DIRECTORY,               /*group ID for Directory objects             */
     MAXGROUP               /*highest group in group_t (Invalid as true group)*/
-} group_t;
+} H5I_group_t;
 
 /* Type of atoms to return to users */
 typedef int hid_t;
@@ -51,12 +51,12 @@ typedef int hid_t;
 #define GROUP_MASK  0xFF
 
 /* # of bits to use for the Atom index in each atom (assumes 8-bit bytes) */
-#define ATOM_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
-#define ATOM_MASK   0x0FFFFFFF
+#define ID_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
+#define ID_MASK   0x0FFFFFFF
 
 /* Combine a Group number and an atom index into an atom */
-#define MAKE_ATOM(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ATOM_BITS)|      \
-                             ((hid_t)(i)&ATOM_MASK))
+#define MAKE_ID(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|      \
+                             ((hid_t)(i)&ID_MASK))
 
 #ifdef __cplusplus
 extern "C" {

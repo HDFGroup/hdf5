@@ -19,7 +19,6 @@
 #define _HDF5_H
 
 #include <H5public.h>
-#include <H5Apublic.h>      /* Atoms */
 #include <H5ACpublic.h>     /* Metadata cache */
 #include <H5Bpublic.h>      /* B-trees */
 #include <H5Dpublic.h>      /* Datasets */
@@ -27,6 +26,7 @@
 #include <H5Fpublic.h>      /* Files */
 #include <H5Gpublic.h>      /* Groups */
 #include <H5Hpublic.h>
+#include <H5Ipublic.h>      /* IDs */
 #include <H5MFpublic.h>
 #include <H5MMpublic.h>
 #include <H5Opublic.h>      /* Object headers */

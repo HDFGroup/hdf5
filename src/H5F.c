@@ -38,7 +38,7 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
-#include <H5Aprivate.h>		/*atoms					  */
+#include <H5Iprivate.h>		/* IDs					  */
 #include <H5ACprivate.h>	/*cache					  */
 #include <H5Eprivate.h>		/*error handling			  */
 #include <H5Gprivate.h>		/*symbol tables				  */
@@ -133,7 +133,7 @@ H5F_init_interface(void)
     FUNC_ENTER(H5F_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if (H5A_init_group(H5_FILE, H5A_FILEID_HASHSIZE, 0,
+    if (H5I_init_group(H5_FILE, H5I_FILEID_HASHSIZE, 0,
 		       (herr_t (*)(void*))H5F_close)<0 ||
 	H5_add_exit(H5F_term_interface)<0) {	
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
@@ -184,7 +184,7 @@ H5F_init_interface(void)
 static void
 H5F_term_interface(void)
 {
-    H5A_destroy_group(H5_FILE);
+    H5I_destroy_group(H5_FILE);
 }
 
 
@@ -254,7 +254,7 @@ H5Fget_create_template(hid_t fid)
     FUNC_ENTER(H5Fget_create_template, FAIL);
 
     /* check args */
-    if (H5_FILE != H5A_group(fid) || NULL==(file=H5A_object (fid))) {
+    if (H5_FILE != H5I_group(fid) || NULL==(file=H5I_object (fid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     
@@ -304,7 +304,7 @@ H5Fget_access_template (hid_t file_id)
     FUNC_ENTER (H5Fget_access_template, FAIL);
 
     /* Check args */
-    if (H5_FILE!=H5A_group (file_id) || NULL==(f=H5A_object (file_id))) {
+    if (H5_FILE!=H5I_group (file_id) || NULL==(f=H5I_object (file_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
 
@@ -707,7 +707,7 @@ H5F_open(const char *name, uintn flags,
 	    HRETURN_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
 			  "file is not writable");
 	}
-	if ((old = H5A_search(H5_FILE, H5F_compare_files, &search))) {
+	if ((old = H5I_search(H5_FILE, H5F_compare_files, &search))) {
 	    if (flags & H5F_ACC_TRUNC) {
 		HRETURN_ERROR(H5E_FILE, H5E_FILEOPEN, NULL,
 			      "file already open - TRUNC failed");
@@ -1074,14 +1074,14 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_id,
     if (H5P_DEFAULT==create_id) {
 	create_parms = &H5F_create_dflt;
     } else if (H5P_FILE_CREATE!=H5Pget_class (create_id) ||
-	       NULL == (create_parms = H5A_object(create_id))) {
+	       NULL == (create_parms = H5I_object(create_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file creation property list");
     }
     if (H5P_DEFAULT==access_id) {
 	access_parms = &H5F_access_dflt;
     } else if (H5P_FILE_ACCESS!=H5Pget_class (access_id) ||
-	       NULL == (access_parms = H5A_object(access_id))) {
+	       NULL == (access_parms = H5I_object(access_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file access property list");
     }
@@ -1105,7 +1105,7 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_id,
     }
     
     /* Get an atom for the file */
-    if ((ret_value = H5A_register(H5_FILE, new_file)) < 0) {
+    if ((ret_value = H5I_register(H5_FILE, new_file)) < 0) {
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		    "unable to atomize file");
     }
@@ -1179,7 +1179,7 @@ H5Fopen(const char *filename, uintn flags, hid_t access_id)
     if (H5P_DEFAULT==access_id) {
 	access_parms = &H5F_access_dflt;
     } else if (H5P_FILE_ACCESS!=H5Pget_class (access_id) ||
-	       NULL == (access_parms = H5A_object(access_id))) {
+	       NULL == (access_parms = H5I_object(access_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a file access property list");
     }
@@ -1190,7 +1190,7 @@ H5Fopen(const char *filename, uintn flags, hid_t access_id)
     }
 
     /* Get an atom for the file */
-    if ((ret_value = H5A_register(H5_FILE, new_file)) < 0) {
+    if ((ret_value = H5I_register(H5_FILE, new_file)) < 0) {
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't atomize file");
     }
 
@@ -1392,10 +1392,10 @@ H5Fclose(hid_t fid)
     FUNC_ENTER(H5Fclose, FAIL);
 
     /* Check/fix arguments. */
-    if (H5_FILE != H5A_group(fid)) {
+    if (H5_FILE != H5I_group(fid)) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
     }
-    if (NULL == H5A_object(fid)) {
+    if (NULL == H5I_object(fid)) {
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
     }
 
@@ -1403,7 +1403,7 @@ H5Fclose(hid_t fid)
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    H5A_dec_ref (fid);
+    H5I_dec_ref (fid);
 
  done:
     FUNC_LEAVE(ret_value < 0 ? FAIL : SUCCEED);

@@ -20,7 +20,7 @@
 
 /* Public headers needed by this file */
 #include <H5public.h>
-#include <H5Apublic.h>
+#include <H5Ipublic.h>
 
 /*
  * Declare an enumerated type which holds all the valid major HDF error codes.

@@ -17,7 +17,7 @@
 #include <testhdf5.h>
 
 #include <H5private.h>
-#include <H5Aprivate.h>
+#include <H5Iprivate.h>
 #include <H5ACprivate.h>
 #include <H5Pprivate.h>
 #include <H5Fprivate.h>
@@ -57,8 +57,8 @@ test_heap(void)
     /* Create the file */
     fid = H5Fcreate("theap.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
-    f = H5A_object(fid);
-    CHECK(f, NULL, "H5Aatom_object");
+    f = H5I_object(fid);
+    CHECK(f, NULL, "H5I_object");
 
     /* Create a new heap */
     status = H5H_create(f, H5H_LOCAL, 0, &heap_addr /*out */ );

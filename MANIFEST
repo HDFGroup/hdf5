@@ -89,12 +89,9 @@
 ./html/symtab
 ./src/.indent.pro
 ./src/H5.c
-./src/H5A.c
 ./src/H5AC.c
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
-./src/H5Aprivate.h
-./src/H5Apublic.h
 ./src/H5B.c
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
@@ -126,6 +123,9 @@
 ./src/H5H.c
 ./src/H5Hprivate.h
 ./src/H5Hpublic.h
+./src/H5I.c
+./src/H5Iprivate.h
+./src/H5Ipublic.h
 ./src/H5MF.c
 ./src/H5MFprivate.h
 ./src/H5MFpublic.h

@@ -18,7 +18,7 @@
 
 /* Public header files needed by this file */
 #include <H5public.h>
-#include <H5Apublic.h>
+#include <H5Ipublic.h>
 
 /*
  * These are the bits that can be passed to the `flags' argument of

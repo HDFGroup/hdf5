@@ -17,7 +17,7 @@ static char		RcsId[] = "@(#)$Revision$";
 /* $Id$ */
 
 #include <H5private.h>		/* Generic Functions			  */
-#include <H5Aprivate.h>		/* Atom Functions		  */
+#include <H5Iprivate.h>		/* ID Functions		  */
 #include <H5Eprivate.h>		/* Error handling		  */
 #include <H5MMprivate.h>	/* Memory Management functions		  */
 #include <H5Oprivate.h>		/*object headers		  */
@@ -50,7 +50,7 @@ H5S_init_interface(void)
     FUNC_ENTER(H5S_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5A_init_group(H5_DATASPACE, H5A_DATASPACEID_HASHSIZE,
+    if ((ret_value = H5I_init_group(H5_DATASPACE, H5I_DATASPACEID_HASHSIZE,
 				    H5S_RESERVED_ATOMS,
 				    (herr_t (*)(void *)) H5S_close)) != FAIL) {
 	ret_value = H5_add_exit(&H5S_term_interface);
@@ -79,7 +79,7 @@ H5S_init_interface(void)
 static void
 H5S_term_interface(void)
 {
-    H5A_destroy_group(H5_DATASPACE);
+    H5I_destroy_group(H5_DATASPACE);
 }
 
 /*-------------------------------------------------------------------------
@@ -162,7 +162,7 @@ H5Screate_simple(int rank, const size_t *dims, const size_t *maxdims)
 #endif /* LATER */
     
     /* Register the new data space and get an ID for it */
-    if ((ret_value = H5A_register(H5_DATASPACE, ds)) < 0) {
+    if ((ret_value = H5I_register(H5_DATASPACE, ds)) < 0) {
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		    "unable to register data space for ID");
     }
@@ -198,12 +198,12 @@ H5Sclose(hid_t space_id)
     FUNC_ENTER(H5Sclose, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE != H5A_group(space_id) ||
-	NULL == H5A_object(space_id)) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+	NULL == H5I_object(space_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     /* When the reference count reaches zero the resources are freed */
-    if (H5A_dec_ref(space_id) < 0) {
+    if (H5I_dec_ref(space_id) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
     }
     FUNC_LEAVE(SUCCEED);
@@ -287,8 +287,8 @@ H5Scopy (hid_t space_id)
     FUNC_ENTER (H5Scopy, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE!=H5A_group (space_id) ||
-	NULL==(src=H5A_object (space_id))) {
+    if (H5_DATASPACE!=H5I_group (space_id) ||
+	NULL==(src=H5I_object (space_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
 
@@ -299,7 +299,7 @@ H5Scopy (hid_t space_id)
     }
 
     /* Atomize */
-    if ((ret_value=H5A_register (H5_DATASPACE, dst))<0) {
+    if ((ret_value=H5I_register (H5_DATASPACE, dst))<0) {
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register data space atom");
     }
@@ -401,8 +401,8 @@ H5Sget_npoints(hid_t space_id)
     FUNC_ENTER(H5Sget_npoints, 0);
 
     /* Check args */
-    if (H5_DATASPACE != H5A_group(space_id) ||
-	NULL == (ds = H5A_object(space_id))) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+	NULL == (ds = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
     ret_value = H5S_get_npoints(ds);
@@ -565,8 +565,8 @@ H5Sget_ndims(hid_t space_id)
     FUNC_ENTER(H5Sget_ndims, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE != H5A_group(space_id) ||
-	NULL == (ds = H5A_object(space_id))) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+	NULL == (ds = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     ret_value = H5S_get_ndims(ds);
@@ -651,8 +651,8 @@ H5Sget_dims(hid_t space_id, size_t dims[]/*out*/)
     FUNC_ENTER(H5Sget_dims, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE != H5A_group(space_id) ||
-	NULL == (ds = H5A_object(space_id))) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+	NULL == (ds = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if (!dims) {
@@ -955,7 +955,7 @@ H5Sis_simple(hid_t sid)
     FUNC_ENTER(H5Sis_simple, FAIL);
 
     /* Check args and all the boring stuff. */
-    if ((space = H5A_object(sid)) == NULL)
+    if ((space = H5I_object(sid)) == NULL)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     ret_value = H5S_is_simple(space);
@@ -1000,7 +1000,7 @@ H5Sset_space(hid_t sid, int rank, const size_t *dims)
     FUNC_ENTER(H5Sset_space, FAIL);
 
     /* Check args */
-    if ((space = H5A_object(sid)) == NULL)
+    if ((space = H5I_object(sid)) == NULL)
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (rank > 0 && dims == NULL)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
@@ -1103,7 +1103,7 @@ H5Sset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t 
     FUNC_ENTER(H5Sset_hyperslab, FAIL);
 
     /* Get the object */
-    if (H5_DATASPACE != H5A_group(sid) || (space = H5A_object(sid)) == NULL)
+    if (H5_DATASPACE != H5I_group(sid) || (space = H5I_object(sid)) == NULL)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (start == NULL || count==NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1186,7 +1186,7 @@ H5Sget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
     FUNC_ENTER (H5Sget_hyperslab, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE!=H5A_group (sid) || NULL==(ds=H5A_object (sid))) {
+    if (H5_DATASPACE!=H5I_group (sid) || NULL==(ds=H5I_object (sid))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
 

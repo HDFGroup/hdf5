@@ -18,7 +18,7 @@
 
 /* Public headers needed by this file */
 #include <H5public.h>
-#include <H5Apublic.h>
+#include <H5Ipublic.h>
 
 #define HOFFSET(S,M)    ((const char*)&S.M-(const char*)&S)
 #define HPOFFSET(P,M)   ((const char*)&(P->M)-(const char*)P)

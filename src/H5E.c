@@ -29,7 +29,7 @@
  *
  */
 #include <H5private.h>		/* Generic Functions			  */
-#include <H5Aprivate.h>		/* Atoms				  */
+#include <H5Iprivate.h>		/* IDs				  */
 #include <H5Eprivate.h>		/* Private error routines		  */
 #include <H5MMprivate.h>	/* Memory management			  */
 

@@ -8,7 +8,7 @@
  * Purpose:     Tests various aspects of indexed raw data storage.
  */
 #include <H5private.h>
-#include <H5Aprivate.h>
+#include <H5Iprivate.h>
 #include <H5Pprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
@@ -577,7 +577,7 @@ main(int argc, char *argv[])
      */
     template_id = H5Pcreate(H5P_FILE_CREATE);
     H5Pset_sizes(template_id, 8, 0);
-    creation_template = H5A_object(template_id);
+    creation_template = H5I_object(template_id);
 
     /* Create the test file */
     if (NULL == (f = H5F_open(FILENAME,

@@ -71,7 +71,7 @@ herr_t H5D_read (H5D_t *dataset, const H5T_t *mem_type,
 herr_t H5D_write (H5D_t *dataset, const H5T_t *mem_type,
                   const H5S_t *mem_space, const H5S_t *file_space,
                   const H5D_xfer_t *xfer_parms, const void *buf);
-hid_t H5D_find_name (hid_t file_id, group_t UNUSED, const char *name);
+hid_t H5D_find_name (hid_t file_id, H5I_group_t UNUSED, const char *name);
 herr_t H5D_extend (H5D_t *dataset, const size_t *size);
 
 #endif

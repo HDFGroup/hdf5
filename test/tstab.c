@@ -17,7 +17,7 @@
 #include <testhdf5.h>
 
 #include <H5private.h>
-#include <H5Aprivate.h>
+#include <H5Iprivate.h>
 #include <H5ACprivate.h>
 #include <H5Pprivate.h>
 #include <H5Fprivate.h>
@@ -69,8 +69,8 @@ test_1(void)
     /* create the file */
     fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
-    f = H5A_object(fid);
-    CHECK(f, NULL, "H5Aatom_object");
+    f = H5I_object(fid);
+    CHECK(f, NULL, "H5I_object");
 
     /* create the object */
     status = H5O_create(f, 0, &ent1);
@@ -132,8 +132,8 @@ test_1(void)
     /* create the file */
     fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
-    f = H5A_object(fid);
-    CHECK(f, NULL, "H5Aatom_object");
+    f = H5I_object(fid);
+    CHECK(f, NULL, "H5I_object");
 
     /* create the object */
     status = H5O_create(f, 0, &ent1);
@@ -266,8 +266,8 @@ test_2(void)
     /* create the file */
     fid = H5Fcreate("tstab2.h5", H5F_ACC_TRUNC, create_plist, access_plist);
     CHECK(fid, FAIL, "H5Fcreate");
-    f = H5A_object(fid);
-    CHECK(f, NULL, "H5Aatom_object");
+    f = H5I_object(fid);
+    CHECK(f, NULL, "H5I_object");
     f->intent |= H5F_ACC_DEBUG;
 
     /*
