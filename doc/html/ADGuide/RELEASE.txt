@@ -1,4 +1,4 @@
-HDF5 version 1.5.38 released on Sat Oct 12 03:39:55 CDT 2002
+HDF5 version 1.5.39 released on Sat Oct 26 03:48:35 CDT 2002
 ================================================================================
 
 
@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed an assertion of H5S_select_iterate that did not account for scalar
+      type that has no dimension sizes.   AKC - 2002/10/15
     * Partially fixed space allocation inefficiencies in the file by
       improving our algorithms for re-using freed space.  QAK - 2002/08/27
     * Fixed data corruption problem which could occur when fill values were
@@ -67,8 +69,6 @@ Library
       written to the file and then subsequently queried with the
       H5Sget_simple_extent_type function, type was reported H5S_SIMPLE instead
       of H5S_SCALAR. EIP - 2002/06/04
-C
-C
     * Clear symbol table node "dirty" flag when flushing symbol tables to
       disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
     * Fixed bug where an object's header could get corrupted in certain obscure
@@ -189,6 +189,8 @@ Configuration
 Tools
 -----
 
+    * Fixed segfault if h5dump was invoked with some options but no file (e.g.,
+      h5dump -H). -AKC, 2002/10/15
     * Fixed limitation in h5dumper with object names which reached over 1024
       characters in length. We can now handle arbitrarily larger sizes for
       object names. BW - 2002/02/27
@@ -223,6 +225,13 @@ Documentation
 New Features
 ============
 
+    * Added environment variable "HDF5_DISABLE_VERSION_CHECK", which disables
+      the version checking between the header files and the library linked into
+      an application if set to '1'.  This should be used with caution, mis-
+      matched headers and library binaries can cause _serious_ problems.
+      QAK - 2002/10/15
+    * Added new API function to get the name of an object in a file, using
+      an open ID (hid_t).  QAK - 2002/10/14
     * Added API functions to return pointer to low-level file handle
       (H5Fget_vfd_handle and H5FDget_vfd_handle) and related property list
       setting functions(H5Pset_family_offset and H5Pset_multi_type).
