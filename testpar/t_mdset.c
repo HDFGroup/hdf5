@@ -315,6 +315,9 @@ void big_dataset(void)
     MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
 
+    /* Verify MPI_Offset can handle larger than 2GB sizes */
+    VRFY((sizeof(MPI_Offset)>4), "sizeof(MPI_Offset)>4");
+
     filename = (char *) GetTestParameters();
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
