@@ -1,7 +1,7 @@
 #include <testphdf5.h>
 
 #define DIM  2
-#define SIZE 10
+#define SIZE 32
 #define NUMITEMS 500 /* 988 */
 
 void multiple_dset_write(char *filename)
@@ -14,6 +14,8 @@ void multiple_dset_write(char *filename)
 
   MPI_Comm_rank (MPI_COMM_WORLD, &rank);
   MPI_Comm_size (MPI_COMM_WORLD, &nprocs);
+
+  VRFY((nprocs <= SIZE), "nprocs <= SIZE");
 
   chunk_origin [0] = 0;
   chunk_origin [1] = rank * (SIZE / nprocs);
@@ -42,10 +44,7 @@ void multiple_dset_write(char *filename)
 
     sprintf (dname, "dataset %d", i);
     dataset = H5Dcreate (iof, dname, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT);
-    if (dataset < 0) {
-      fprintf (stderr, "proc %d: failed to create dataset %d\n", rank, i);
-      exit (-1);
-    }
+    VRFY((dataset > 0), "dataset create succeeded"); 
 
     H5Dwrite (dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, outme);
 

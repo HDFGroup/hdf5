@@ -46,7 +46,7 @@ char    *filenames[]={ "ParaEg1.h5f",
 #include <sys/types.h>
 #include <sys/stat.h>
 
-void pause_proc()
+void pause_proc(void)
 {
 
     int pid;
