@@ -37,6 +37,7 @@ New Features
 ============
     * Added perform programs to test the HDF5 library performance.  Programs
       are installed in directory perform/.
+    * Improved performance of byte-swapping during data conversions.
 
 
          
