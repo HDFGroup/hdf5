@@ -135,7 +135,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 }
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent::incRefCount
+// Function:	IdComponent::setId
 ///\brief	Sets the identifier of this object to a new value.
 ///\exception	H5::IdComponentException when the attempt to close the HDF5
 ///		object fails
@@ -162,7 +162,7 @@ void IdComponent::setId( hid_t new_id )
 }
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent::incRefCount
+// Function:	IdComponent::getId
 ///\brief	Returns the id of this object 
 ///\return	HDF5 id
 // Programmer	Binh-Minh Ribler - 2000

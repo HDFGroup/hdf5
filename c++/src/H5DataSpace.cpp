@@ -78,11 +78,11 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 // Function:	DataSpace overloaded constructor
 ///\brief	Creates an DataSpace object using the id of an existing 
 ///		dataspace.
-///\param	existing_id - IN: Id of an existing datatype
+///\param	existing_id - IN: Id of an existing dataspace
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace( const hid_t space_id ) : IdComponent( space_id ) {}
+DataSpace::DataSpace(const hid_t existing_id) : IdComponent(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace copy constructor
@@ -282,9 +282,9 @@ void DataSpace::extentCopy ( DataSpace& dest_space ) const
 //--------------------------------------------------------------------------
 // Function:	DataSpace::setExtentSimple
 ///\brief	Sets or resets the size of an existing dataspace.
-///\param	rank  - IN: 
-///\param	current_size - IN: 
-///\param	maximum_size  - IN: 
+///\param	rank  - IN: Rank of the dataspace
+///\param	current_size - IN: Array containing current size of dataspace
+///\param	maximum_size - IN: Array containing maximum size of dataspace
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -421,7 +421,7 @@ void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, 
 ///\par Description
 ///		For more information, please refer to the C layer Reference
 ///		Manual at:
-/// http:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectBounds
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::getSelectBounds ( hssize_t* start, hssize_t* end ) const
@@ -447,7 +447,7 @@ void DataSpace::getSelectBounds ( hssize_t* start, hssize_t* end ) const
 ///\par Description
 ///		For more information, please refer to the C layer Reference
 ///		Manual at:
-/// http:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectElements
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, const hssize_t *coord[ ] ) const

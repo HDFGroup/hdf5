@@ -216,7 +216,7 @@ DataSet CommonFG::openDataSet( const string& name ) const
 //--------------------------------------------------------------------------
 // Function:	CommonFG::link
 ///\brief	Creates a link of the specified type from \a new_name to 
-///		\a curr_name;
+///		\a curr_name.
 ///\param	link_type  - IN: Link type; possible values are 
 ///		\li \c H5G_LINK_HARD
 ///		\li \c H5G_LINK_SOFT
@@ -374,9 +374,9 @@ string CommonFG::getLinkval( const string& name, size_t size ) const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::setComment
-///\brief	Sets the comment for an object specified by its name.
-///\param	name  - IN: 
-///\param	comment - IN: New comment; 
+///\brief	Sets or resets the comment for an object specified by its name.
+///\param	name  - IN: Name of the object
+///\param	comment - IN: New comment
 ///\exception	H5::FileIException or H5::GroupIException
 ///\par	Description
 ///		If \a comment is an empty string or a null pointer, the comment 
@@ -448,7 +448,7 @@ string CommonFG::getComment( const string& name, size_t bufsize ) const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::mount
-///\brief	Mounts the file 'child' onto this group.
+///\brief	Mounts the file \a child onto this group.
 ///\param	name  - IN: Name of the group
 ///\param	child - IN: File to mount
 ///\param	plist - IN: Property list to use

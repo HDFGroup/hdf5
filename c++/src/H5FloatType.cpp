@@ -277,7 +277,7 @@ void FloatType::setInpad( H5T_pad_t inpad ) const
 
 //--------------------------------------------------------------------------
 // Function:	FloatType destructor
-///\brief	Properly terminates access to this file.
+///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::~FloatType() {}

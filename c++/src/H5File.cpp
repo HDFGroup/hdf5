@@ -80,7 +80,7 @@ H5File::H5File() : IdComponent() {}
 //--------------------------------------------------------------------------
 H5File::H5File( const string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
 {
-   getFile( name.c_str(), flags, create_plist, access_plist );
+   p_get_file( name.c_str(), flags, create_plist, access_plist );
 }
 
 //--------------------------------------------------------------------------
@@ -99,7 +99,7 @@ H5File::H5File( const string& name, unsigned int flags, const FileCreatPropList&
 //--------------------------------------------------------------------------
 H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
 {
-   getFile( name, flags, create_plist, access_plist );
+   p_get_file( name, flags, create_plist, access_plist );
 }
 
 //--------------------------------------------------------------------------
@@ -107,7 +107,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 // constructors taking a string or a char*
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5File::getFile( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist )
+void H5File::p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist )
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.

@@ -257,8 +257,8 @@ void AtomType::setPad( H5T_pad_t lsb, H5T_pad_t msb ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    AtomType destructor
-///\brief       Properly terminates access to this object.
+// Function:	AtomType destructor
+///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 AtomType::~AtomType() {}

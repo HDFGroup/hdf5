@@ -187,9 +187,13 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///\param	user_op - IN: User's function to operate on each attribute
 ///\param	idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
 ///\param	op_data - IN: User's data to pass to user's operator function 
-///\return	Returned value of the last operator if it was non-zero, or 
+///\return	Returned value of the last operator if it was non-zero, or
 ///		zero if all attributes were processed
 ///\exception	H5::AttributeIException
+///\par Description
+///		For information, please refer to the C layer Reference Manual
+///		at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5A.html#Annot-Iterate
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_data )
@@ -284,7 +288,31 @@ void H5Object::flush(H5F_scope_t scope ) const
 
 //--------------------------------------------------------------------------
 // Function:	H5Object::Reference
-///\brief	Creates a reference to an Hdf5 object.
+///\brief	Creates a reference to an Hdf5 object or to a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\param	dataspace - IN: Dataspace with selection
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\return	A reference
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* H5Object::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   void *ref;
+   herr_t ret_value = H5Rcreate(ref, id, name, ref_type, dataspace.getId());
+   if (ret_value < 0)
+   {
+      throw AttributeIException("H5Object::Reference", 
+		"H5Rcreate failed");
+   }
+   return(ref);
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::Reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it only creates
+///             a reference to an Hdf5 object, not to a dataset region.
 ///\param	name - IN: Name of the object to be referenced
 ///\return	A reference
 ///\exception	H5::ReferenceIException
@@ -305,29 +333,6 @@ void* H5Object::Reference(const char* name) const
    }
    return(ref);
 }
-
-//--------------------------------------------------------------------------
-// Function:	H5Object::Reference
-///\brief	Creates a reference.
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-///\return	A reference
-///\exception	H5::ReferenceIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* H5Object::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
-{
-   void *ref;
-   herr_t ret_value = H5Rcreate(ref, id, name, ref_type, dataspace.getId());
-   if (ret_value < 0)
-   {
-      throw AttributeIException("H5Object::Reference", 
-		"H5Rcreate failed");
-   }
-   return(ref);
-}
-
 //--------------------------------------------------------------------------
 // Function:	H5Object destructor
 ///\brief	Noop destructor.

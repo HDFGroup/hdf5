@@ -92,7 +92,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
    private:
 	// This function is private and contains common code between the
 	// constructors taking a string or a char*
-	void getFile( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
+	void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
 
 };
 #ifndef H5_NO_NAMESPACE

@@ -338,7 +338,11 @@ H5Z_EDC_t DSetMemXferPropList::getEDCCheck()
    return(check);
 }
 
-// Default destructor
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DSetMemXferPropList::~DSetMemXferPropList() {}
 
 #ifndef H5_NO_NAMESPACE

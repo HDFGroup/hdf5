@@ -128,7 +128,7 @@ void IntType::setSign( H5T_sign_t sign ) const
 
 //--------------------------------------------------------------------------
 // Function:	IntType destructor
-///\brief	Properly terminates access to this integer datatype.
+///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IntType::~IntType() {}

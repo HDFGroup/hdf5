@@ -165,8 +165,8 @@ StrType AbstractDs::getStrType() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	StrType destructor
-///\brief	Default destructor
+// Function:	AbstractDs destructor
+///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 AbstractDs::~AbstractDs() {}

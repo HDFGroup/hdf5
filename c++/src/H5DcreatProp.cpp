@@ -592,7 +592,11 @@ void DSetCreatPropList::getExternal( int idx, size_t name_size, char* name, off_
    }
 }
 
-// Default destructor
+//--------------------------------------------------------------------------
+// Function:	DSetCreatPropList destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DSetCreatPropList::~DSetCreatPropList () {}
 
 #ifndef H5_NO_NAMESPACE

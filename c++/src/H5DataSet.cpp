@@ -227,7 +227,7 @@ void DataSet::vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList
 ///\param	file_space - IN: Dataset's dataspace in the file
 ///\param	xfer_plist - IN: Transfer property list for this I/O operation
 ///\exception	H5::DataSetIException
-///par Description
+///\par Description
 ///		This function reads raw data from this dataset into the 
 ///		buffer \a buf, converting from file datatype and dataspace 
 ///		to memory datatype \a mem_type and dataspace \a mem_space. 
@@ -277,7 +277,7 @@ void DataSet::read( string& strg, const DataType& mem_type, const DataSpace& mem
 ///\param	file_space - IN: Dataset's dataspace in the file
 ///\param	xfer_plist - IN: Transfer property list for this I/O operation
 ///\exception	H5::DataSetIException
-///par Description
+///\par Description
 ///		This function writes raw data from an application buffer 
 ///		\a buf to a dataset, converting from memory datatype 
 ///		\a mem_type and dataspace \a mem_space to file datatype 

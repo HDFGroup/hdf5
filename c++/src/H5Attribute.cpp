@@ -58,7 +58,7 @@ Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute::Attribute( const hid_t attr_id ) : AbstractDs( attr_id ) {}
+Attribute::Attribute(const hid_t existing_id) : AbstractDs(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::write

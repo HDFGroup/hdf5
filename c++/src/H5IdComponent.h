@@ -72,6 +72,9 @@ class H5_DLLCPP IdComponent {
 	// Default constructor
 	IdComponent();
 
+	// Gets the id of the H5 file in which the given object is located.
+	hid_t p_get_file_id();
+
 	// Creates a reference to an HDF5 object or a dataset region.
 	void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const;
 	
