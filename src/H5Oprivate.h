@@ -114,13 +114,13 @@ typedef struct H5O_t {
  * Null Message.
  */
 #define H5O_NULL_ID	0x0000
-extern const H5O_class_t H5O_NULL[1];
+__DLLVAR__ const H5O_class_t H5O_NULL[1];
 
 /*
  * Simple Data Space Message.
  */
 #define H5O_SDSPACE_ID	0x0001
-extern const H5O_class_t H5O_SDSPACE[1];
+__DLLVAR__ const H5O_class_t H5O_SDSPACE[1];
 
 /* operates on an H5S_simple_t struct */
 
@@ -128,7 +128,7 @@ extern const H5O_class_t H5O_SDSPACE[1];
  * Data Type Message.
  */
 #define H5O_DTYPE_ID	0x0003
-extern const H5O_class_t H5O_DTYPE[1];
+__DLLVAR__ const H5O_class_t H5O_DTYPE[1];
 
 /* operates on an H5T_t struct */
 
@@ -136,7 +136,7 @@ extern const H5O_class_t H5O_DTYPE[1];
  * Fill Value Message.
  */
 #define H5O_FILL_ID		0x0004
-extern const H5O_class_t	H5O_FILL[1];
+__DLLVAR__ const H5O_class_t	H5O_FILL[1];
 
 typedef struct H5O_fill_t {
     H5T_t	*type;			/*type. Null implies same as dataset */
@@ -151,7 +151,7 @@ typedef struct H5O_fill_t {
 #define H5O_EFL_ID		0x0007	/*external file list id		     */
 #define H5O_EFL_ALLOC		16	/*number of slots to alloc at once   */
 #define H5O_EFL_UNLIMITED	H5F_UNLIMITED /*max possible file size	     */
-extern const H5O_class_t H5O_EFL[1];	/*external file list class	     */
+__DLLVAR__ const H5O_class_t H5O_EFL[1];	/*external file list class	     */
 
 typedef struct H5O_efl_entry_t {
     size_t	name_offset;		/*offset of name within heap	     */
@@ -172,7 +172,7 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_ID		0x0008
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
-HDF5GLOBAL const H5O_class_t H5O_LAYOUT[1];
+__DLLVAR__ const H5O_class_t H5O_LAYOUT[1];
 
 typedef struct H5O_layout_t {
     int		type;			/*type of layout, H5D_layout_t	     */
@@ -185,7 +185,7 @@ typedef struct H5O_layout_t {
  * Filter pipeline message.
  */
 #define H5O_PLINE_ID	0x000b
-extern const H5O_class_t H5O_PLINE[1];
+__DLLVAR__ const H5O_class_t H5O_PLINE[1];
 
 typedef struct H5O_pline_t {
     size_t	nfilters;		/*num filters defined		     */
@@ -203,7 +203,7 @@ typedef struct H5O_pline_t {
  * Attribute Message.
  */
 #define H5O_ATTR_ID	0x000c
-extern const H5O_class_t H5O_ATTR[1];
+__DLLVAR__ const H5O_class_t H5O_ATTR[1];
 
 /* operates on an H5A_t struct */
 
@@ -211,7 +211,7 @@ extern const H5O_class_t H5O_ATTR[1];
  * Object name message.
  */
 #define H5O_NAME_ID	0x000d
-extern const H5O_class_t H5O_NAME[1];
+__DLLVAR__ const H5O_class_t H5O_NAME[1];
 
 typedef struct H5O_name_t {
     char	*s;			/*ptr to malloc'd memory	     */
@@ -221,7 +221,7 @@ typedef struct H5O_name_t {
  * Modification time message.  The message is just a `time_t'.
  */
 #define H5O_MTIME_ID	0x000e
-extern const H5O_class_t H5O_MTIME[1];
+__DLLVAR__ const H5O_class_t H5O_MTIME[1];
 
 /*
  * Shared object message.  This message ID never really appears in an object
@@ -229,7 +229,7 @@ extern const H5O_class_t H5O_MTIME[1];
  * will be the ID of the pointed-to message.
  */
 #define H5O_SHARED_ID	0x000f
-extern const H5O_class_t H5O_SHARED[1];
+__DLLVAR__ const H5O_class_t H5O_SHARED[1];
 
 typedef struct H5O_shared_t {
     hbool_t		in_gh;		/*shared by global heap?	     */
@@ -243,7 +243,7 @@ typedef struct H5O_shared_t {
  * Object header continuation message.
  */
 #define H5O_CONT_ID	0x0010
-extern const H5O_class_t H5O_CONT[1];
+__DLLVAR__ const H5O_class_t H5O_CONT[1];
 
 typedef struct H5O_cont_t {
     haddr_t	addr;			/*address of continuation block	     */
@@ -257,7 +257,7 @@ typedef struct H5O_cont_t {
  * Symbol table message.
  */
 #define H5O_STAB_ID	0x0011
-HDF5GLOBAL const H5O_class_t H5O_STAB[1];
+__DLLVAR__ const H5O_class_t H5O_STAB[1];
 
 void *H5O_stab_fast (const H5G_cache_t *cache, const H5O_class_t *type,
 		     void *_mesg);
@@ -268,36 +268,36 @@ typedef struct H5O_stab_t {
 } H5O_stab_t;
 
 /* General message operators */
-HDF5API herr_t H5O_create (H5F_t *f, size_t size_hint,
+__DLL__ herr_t H5O_create (H5F_t *f, size_t size_hint,
 			   H5G_entry_t *ent/*out*/);
-herr_t H5O_open (H5G_entry_t *ent);
-HDF5API herr_t H5O_close (H5G_entry_t *ent);
-intn H5O_link (H5G_entry_t *ent, intn adjust);
-intn H5O_count (H5G_entry_t *ent, const H5O_class_t *type);
-htri_t H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
-HDF5API void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type,
+__DLL__ herr_t H5O_open (H5G_entry_t *ent);
+__DLL__ herr_t H5O_close (H5G_entry_t *ent);
+__DLL__ intn H5O_link (H5G_entry_t *ent, intn adjust);
+__DLL__ intn H5O_count (H5G_entry_t *ent, const H5O_class_t *type);
+__DLL__ htri_t H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
+__DLL__ void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type,
 			intn sequence, void *mesg);
-HDF5API intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type,
+__DLL__ intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type,
 			 intn overwrite, uintn flags, const void *mesg);
-herr_t H5O_touch(H5G_entry_t *ent, hbool_t force);
-HDF5API herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type,
+__DLL__ herr_t H5O_touch(H5G_entry_t *ent, hbool_t force);
+__DLL__ herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type,
 			   intn sequence);
-herr_t H5O_reset (const H5O_class_t *type, void *native);
-void *H5O_free (const H5O_class_t *type, void *mesg);
-void *H5O_copy (const H5O_class_t *type, const void *mesg, void *dst);
-herr_t H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
+__DLL__ herr_t H5O_reset (const H5O_class_t *type, void *native);
+__DLL__ void *H5O_free (const H5O_class_t *type, void *mesg);
+__DLL__ void *H5O_copy (const H5O_class_t *type, const void *mesg, void *dst);
+__DLL__ herr_t H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
 		  H5HG_t *hobj/*out*/);
-HDF5API herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
+__DLL__ herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
 			  intn indent, intn fwidth);
 
 /* EFL operators */
-hsize_t H5O_efl_total_size (H5O_efl_t *efl);
-herr_t H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+__DLL__ hsize_t H5O_efl_total_size (H5O_efl_t *efl);
+__DLL__ herr_t H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
 		     hsize_t size, uint8_t *buf);
-herr_t H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+__DLL__ herr_t H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
 		      hsize_t size, const uint8_t *buf);
 
 /* Fill value operators */
-herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type);
+__DLL__ herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type);
 
 #endif

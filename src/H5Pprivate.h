@@ -22,9 +22,9 @@
 #include <H5private.h>
 #include <H5Fprivate.h>
 
-hid_t H5P_create (H5P_class_t type, void *tmpl);
-void *H5P_copy (H5P_class_t type, const void *src);
-herr_t H5P_close (H5P_class_t type, void *tmpl);
-H5P_class_t H5P_get_class(hid_t tid);
+__DLL__ hid_t H5P_create (H5P_class_t type, void *tmpl);
+__DLL__ void *H5P_copy (H5P_class_t type, const void *src);
+__DLL__ herr_t H5P_close (H5P_class_t type, void *tmpl);
+__DLL__ H5P_class_t H5P_get_class(hid_t tid);
 
 #endif

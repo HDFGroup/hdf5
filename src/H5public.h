@@ -99,12 +99,12 @@ extern "C" {
 #endif
 
 /* Functions in H5.c */
-HDF5API herr_t H5open (void);
-HDF5API herr_t H5close (void);
-HDF5API herr_t H5dont_atexit (void);
-HDF5API herr_t H5get_libversion (unsigned *majnum, unsigned *minnum,
+__DLL__ herr_t H5open (void);
+__DLL__ herr_t H5close (void);
+__DLL__ herr_t H5dont_atexit (void);
+__DLL__ herr_t H5get_libversion (unsigned *majnum, unsigned *minnum,
 				 unsigned *relnum);
-HDF5API herr_t H5check_version (unsigned majnum, unsigned minnum,
+__DLL__ herr_t H5check_version (unsigned majnum, unsigned minnum,
 				unsigned relnum);
 
 #ifdef __cplusplus

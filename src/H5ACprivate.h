@@ -106,21 +106,21 @@ typedef struct H5AC_t {
 /*
  * Library prototypes.
  */
-herr_t H5AC_dest (H5F_t *f);
-void *H5AC_find_f (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
+__DLL__ herr_t H5AC_dest (H5F_t *f);
+__DLL__ void *H5AC_find_f (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 		   const void *udata1, void *udata2);
-void *H5AC_protect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
+__DLL__ void *H5AC_protect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 		    const void *udata1, void *udata2);
-herr_t H5AC_unprotect (H5F_t *f, const H5AC_class_t *type,
+__DLL__ herr_t H5AC_unprotect (H5F_t *f, const H5AC_class_t *type,
 		       const haddr_t *addr, void *thing);
-HDF5API herr_t H5AC_flush (H5F_t *f, const H5AC_class_t *type,
+__DLL__ herr_t H5AC_flush (H5F_t *f, const H5AC_class_t *type,
 			   const haddr_t *addr, hbool_t destroy);
-herr_t H5AC_create (H5F_t *f, intn size_hint);
-herr_t H5AC_rename (H5F_t *f, const H5AC_class_t *type,
+__DLL__ herr_t H5AC_create (H5F_t *f, intn size_hint);
+__DLL__ herr_t H5AC_rename (H5F_t *f, const H5AC_class_t *type,
 		    const haddr_t *old_addr, const haddr_t *new_addr);
-herr_t H5AC_set (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
+__DLL__ herr_t H5AC_set (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 		 void *thing);
-herr_t H5AC_debug (H5F_t *f);
+__DLL__ herr_t H5AC_debug (H5F_t *f);
 
 #define H5AC_find(F,TYPE,ADDR_P,UDATA1,UDATA2)				      \
    (((F)->shared->cache->slot[H5AC_HASH(F,ADDR_P)].type==(TYPE) &&	      \

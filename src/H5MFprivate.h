@@ -37,9 +37,9 @@
 /*
  * Library prototypes...
  */
-herr_t H5MF_alloc (H5F_t *f, intn, hsize_t size, haddr_t *addr/*out*/);
-herr_t H5MF_xfree (H5F_t *f, const haddr_t *addr, hsize_t size);
-herr_t H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size,
+__DLL__ herr_t H5MF_alloc (H5F_t *f, intn, hsize_t size, haddr_t *addr/*out*/);
+__DLL__ herr_t H5MF_xfree (H5F_t *f, const haddr_t *addr, hsize_t size);
+__DLL__ herr_t H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size,
 		     const haddr_t *orig_addr, hsize_t new_size,
 		     haddr_t *new_addr/*out*/);
 

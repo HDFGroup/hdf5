@@ -92,14 +92,14 @@ typedef struct H5HG_t {
 
 typedef struct H5HG_heap_t H5HG_heap_t;
 
-H5HG_heap_t *H5HG_create (H5F_t *f, size_t size);
-HDF5API herr_t H5HG_insert (H5F_t *f, size_t size, void *obj,
+__DLL__ H5HG_heap_t *H5HG_create (H5F_t *f, size_t size);
+__DLL__ herr_t H5HG_insert (H5F_t *f, size_t size, void *obj,
 			    H5HG_t *hobj/*out*/);
-void *H5HG_peek (H5F_t *f, H5HG_t *hobj);
-HDF5API void *H5HG_read (H5F_t *f, H5HG_t *hobj, void *object);
-intn H5HG_link (H5F_t *f, H5HG_t *hobj, intn adjust);
-HDF5API herr_t H5HG_remove (H5F_t *f, H5HG_t *hobj);
-HDF5API herr_t H5HG_debug(H5F_t *f, const haddr_t *addr, FILE *stream,
+__DLL__ void *H5HG_peek (H5F_t *f, H5HG_t *hobj);
+__DLL__ void *H5HG_read (H5F_t *f, H5HG_t *hobj, void *object);
+__DLL__ intn H5HG_link (H5F_t *f, H5HG_t *hobj, intn adjust);
+__DLL__ herr_t H5HG_remove (H5F_t *f, H5HG_t *hobj);
+__DLL__ herr_t H5HG_debug(H5F_t *f, const haddr_t *addr, FILE *stream,
 			  intn indent, intn fwidth);
 
 #endif
