@@ -83,9 +83,9 @@ typedef struct malign_t {
 } malign_t;
 
 /* global variables types detection code */
-static detected_t	d[MAXDETECT];
-static malign_t        m[MAXDETECT];
-static volatile int	nd = 0, na = 0;
+static detected_t	d_g[MAXDETECT];
+static malign_t        m_g[MAXDETECT];
+static volatile int	nd_g = 0, na_g = 0;
    
 static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
@@ -1114,14 +1114,14 @@ bit.\n";
 static void
 detect_C89_integers(void)
 {
-    DETECT_I(signed char,	  SCHAR,        d[nd]); nd++;
-    DETECT_I(unsigned char,	  UCHAR,        d[nd]); nd++;
-    DETECT_I(short,		  SHORT,        d[nd]); nd++; 
-    DETECT_I(unsigned short,	  USHORT,       d[nd]); nd++;
-    DETECT_I(int,		  INT,	        d[nd]); nd++;
-    DETECT_I(unsigned int,	  UINT,	        d[nd]); nd++;
-    DETECT_I(long,		  LONG,	        d[nd]); nd++;
-    DETECT_I(unsigned long,	  ULONG,        d[nd]); nd++;
+    DETECT_I(signed char,	  SCHAR,        d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned char,	  UCHAR,        d_g[nd_g]); nd_g++;
+    DETECT_I(short,		  SHORT,        d_g[nd_g]); nd_g++; 
+    DETECT_I(unsigned short,	  USHORT,       d_g[nd_g]); nd_g++;
+    DETECT_I(int,		  INT,	        d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned int,	  UINT,	        d_g[nd_g]); nd_g++;
+    DETECT_I(long,		  LONG,	        d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned long,	  ULONG,        d_g[nd_g]); nd_g++;
 }
 
 
@@ -1142,8 +1142,8 @@ detect_C89_integers(void)
 static void
 detect_C89_floats(void)
 {
-    DETECT_F(float,		  FLOAT,        d[nd]); nd++;
-    DETECT_F(double,		  DOUBLE,       d[nd]); nd++;
+    DETECT_F(float,		  FLOAT,        d_g[nd_g]); nd_g++;
+    DETECT_F(double,		  DOUBLE,       d_g[nd_g]); nd_g++;
 }
 
 
@@ -1165,22 +1165,22 @@ static void
 detect_C99_integers8(void)
 {
 #if H5_SIZEOF_INT8_T>0
-    DETECT_I(int8_t, 		  INT8,         d[nd]); nd++;
+    DETECT_I(int8_t, 		  INT8,         d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT8_T>0
-    DETECT_I(uint8_t, 		  UINT8,        d[nd]); nd++;
+    DETECT_I(uint8_t, 		  UINT8,        d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_LEAST8_T>0
-    DETECT_I(int_least8_t, 	  INT_LEAST8,   d[nd]); nd++;
+    DETECT_I(int_least8_t, 	  INT_LEAST8,   d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_LEAST8_T>0
-    DETECT_I(uint_least8_t, 	  UINT_LEAST8,  d[nd]); nd++;
+    DETECT_I(uint_least8_t, 	  UINT_LEAST8,  d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_FAST8_T>0
-    DETECT_I(int_fast8_t, 	  INT_FAST8,    d[nd]); nd++;
+    DETECT_I(int_fast8_t, 	  INT_FAST8,    d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_FAST8_T>0
-    DETECT_I(uint_fast8_t, 	  UINT_FAST8,   d[nd]); nd++;
+    DETECT_I(uint_fast8_t, 	  UINT_FAST8,   d_g[nd_g]); nd_g++;
 #endif
 }
 
@@ -1203,22 +1203,22 @@ static void
 detect_C99_integers16(void)
 {
 #if H5_SIZEOF_INT16_T>0
-    DETECT_I(int16_t, 		  INT16,        d[nd]); nd++;
+    DETECT_I(int16_t, 		  INT16,        d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT16_T>0
-    DETECT_I(uint16_t, 		  UINT16,       d[nd]); nd++;
+    DETECT_I(uint16_t, 		  UINT16,       d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_LEAST16_T>0
-    DETECT_I(int_least16_t, 	  INT_LEAST16,  d[nd]); nd++;
+    DETECT_I(int_least16_t, 	  INT_LEAST16,  d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_LEAST16_T>0
-    DETECT_I(uint_least16_t, 	  UINT_LEAST16, d[nd]); nd++;
+    DETECT_I(uint_least16_t, 	  UINT_LEAST16, d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_FAST16_T>0
-    DETECT_I(int_fast16_t, 	  INT_FAST16,   d[nd]); nd++;
+    DETECT_I(int_fast16_t, 	  INT_FAST16,   d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_FAST16_T>0
-    DETECT_I(uint_fast16_t, 	  UINT_FAST16,  d[nd]); nd++;
+    DETECT_I(uint_fast16_t, 	  UINT_FAST16,  d_g[nd_g]); nd_g++;
 #endif
 }
 
@@ -1241,22 +1241,22 @@ static void
 detect_C99_integers32(void)
 {
 #if H5_SIZEOF_INT32_T>0
-    DETECT_I(int32_t, 		  INT32,        d[nd]); nd++;
+    DETECT_I(int32_t, 		  INT32,        d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT32_T>0
-    DETECT_I(uint32_t, 		  UINT32,       d[nd]); nd++;
+    DETECT_I(uint32_t, 		  UINT32,       d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_LEAST32_T>0
-    DETECT_I(int_least32_t, 	  INT_LEAST32,  d[nd]); nd++;
+    DETECT_I(int_least32_t, 	  INT_LEAST32,  d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_LEAST32_T>0
-    DETECT_I(uint_least32_t, 	  UINT_LEAST32, d[nd]); nd++;
+    DETECT_I(uint_least32_t, 	  UINT_LEAST32, d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_FAST32_T>0
-    DETECT_I(int_fast32_t, 	  INT_FAST32,   d[nd]); nd++;
+    DETECT_I(int_fast32_t, 	  INT_FAST32,   d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_FAST32_T>0
-    DETECT_I(uint_fast32_t, 	  UINT_FAST32,  d[nd]); nd++;
+    DETECT_I(uint_fast32_t, 	  UINT_FAST32,  d_g[nd_g]); nd_g++;
 #endif
 }
 
@@ -1279,35 +1279,35 @@ static void
 detect_C99_integers64(void)
 {
 #if H5_SIZEOF_INT64_T>0
-    DETECT_I(int64_t, 		  INT64,        d[nd]); nd++;
+    DETECT_I(int64_t, 		  INT64,        d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT64_T>0
-    DETECT_I(uint64_t, 		  UINT64,       d[nd]); nd++;
+    DETECT_I(uint64_t, 		  UINT64,       d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_LEAST64_T>0
-    DETECT_I(int_least64_t, 	  INT_LEAST64,  d[nd]); nd++;
+    DETECT_I(int_least64_t, 	  INT_LEAST64,  d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_LEAST64_T>0
-    DETECT_I(uint_least64_t, 	  UINT_LEAST64, d[nd]); nd++;
+    DETECT_I(uint_least64_t, 	  UINT_LEAST64, d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_FAST64_T>0
-    DETECT_I(int_fast64_t, 	  INT_FAST64,   d[nd]); nd++;
+    DETECT_I(int_fast64_t, 	  INT_FAST64,   d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_FAST64_T>0
-    DETECT_I(uint_fast64_t, 	  UINT_FAST64,  d[nd]); nd++;
+    DETECT_I(uint_fast64_t, 	  UINT_FAST64,  d_g[nd_g]); nd_g++;
 #endif
     
 #if H5_SIZEOF_LONG_LONG>0
-    DETECT_I(long_long,		  LLONG,        d[nd]); nd++;
-    DETECT_I(unsigned long_long,  ULLONG,       d[nd]); nd++;
+    DETECT_I(long_long,		  LLONG,        d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned long_long,  ULLONG,       d_g[nd_g]); nd_g++;
 #else
     /*
      * This architecture doesn't support an integer type larger than `long'
      * so we'll just make H5T_NATIVE_LLONG the same as H5T_NATIVE_LONG since
      * `long long' is probably equivalent to `long' here anyway.
      */
-    DETECT_I(long,		  LLONG,        d[nd]); nd++;
-    DETECT_I(unsigned long,	  ULLONG,       d[nd]); nd++;
+    DETECT_I(long,		  LLONG,        d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned long,	  ULLONG,       d_g[nd_g]); nd_g++;
 #endif
 }
 
@@ -1362,9 +1362,9 @@ detect_C99_floats(void)
      * some systems and `long double' is probably the same as `double' here
      * anyway.
      */
-    DETECT_F(double,		  LDOUBLE,      d[nd]); nd++;
+    DETECT_F(double,		  LDOUBLE,      d_g[nd_g]); nd_g++;
 #else
-    DETECT_F(long double,	  LDOUBLE,      d[nd]); nd++;
+    DETECT_F(long double,	  LDOUBLE,      d_g[nd_g]); nd_g++;
 #endif
 }
 
@@ -1387,10 +1387,10 @@ static void
 detect_alignments(void)
 {
     /* Detect structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
-    DETECT_M(void *,              POINTER,      m[na]); na++;
-    DETECT_M(hvl_t,               HVL,          m[na]); na++;
-    DETECT_M(hobj_ref_t,          HOBJREF,      m[na]); na++;
-    DETECT_M(hdset_reg_ref_t,     HDSETREGREF,  m[na]); na++;
+    DETECT_M(void *,              POINTER,      m_g[na_g]); na_g++;
+    DETECT_M(hvl_t,               HVL,          m_g[na_g]); na_g++;
+    DETECT_M(hobj_ref_t,          HOBJREF,      m_g[na_g]); na_g++;
+    DETECT_M(hdset_reg_ref_t,     HDSETREGREF,  m_g[na_g]); na_g++;
 }
 
 
@@ -1453,7 +1453,7 @@ main(void)
     /* Detect structure alignment */
     detect_alignments();
     
-    print_results (nd, d, na, m);
+    print_results (nd_g, d_g, na_g, m_g);
     
     return 0;
 }
