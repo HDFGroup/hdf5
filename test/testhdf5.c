@@ -158,9 +158,7 @@ int main(int argc, char *argv[])
     InitTest("ohdr", test_ohdr, "Object Headers");
     InitTest("stab", test_stab, "Symbol Tables");
     InitTest("h5t", test_h5t, "Datatypes");
-#ifdef QAK
     InitTest("h5p", test_h5p, "Dataspaces");
-#endif /* QAK */
 
     Verbosity = 4;  /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);

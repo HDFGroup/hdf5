@@ -104,6 +104,7 @@ void test_heap (void);
 void test_ohdr (void);
 void test_stab (void);
 void test_h5t (void);
+void test_h5p (void);
 
 #endif /* HDF5TEST_H */
 
