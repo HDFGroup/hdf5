@@ -319,7 +319,7 @@ RUNSNAPTEST()
 	esac
 	shift
     done
-echo CC=$CC, PATH=$PATH
+
     if [ $retcode -ne 0 -o $skiptest = yes ]; then
 	errcode=$retcode 
 	return $retcode
@@ -716,10 +716,11 @@ fi
 # If -s is used with the first field, it will suppress completely
 # a $TYPE_TYPES that has no ';' (only 1 tst ).  That results in no
 # test at all.
+# Note that n_test must start as 1.
 # 
-n_test=0
+n_test=1
 runtest_type="tests"
-TEST="`echo $TEST_TYPES | cut -f1 -d';'`"
+TEST="`echo $TEST_TYPES | cut -f$n_test -d';'`"
 while [ -n "$TEST" ]; do
     StartTime=`SecOfDay`
     RUNSNAPTEST $TEST
@@ -729,6 +730,8 @@ while [ -n "$TEST" ]; do
     n_test=`expr $n_test + 1`
     TEST="`echo $TEST_TYPES | cut -f$n_test -s -d';'`"
 done
+# dec n_test to show the actual number of tests ran.
+n_test=`expr $n_test - 1`
 
 FLUSH_FILES
 
