@@ -20,11 +20,11 @@ LIB=libh5tools.a
 PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@
 
 # Source and object files for the library.
-LIB_SRC=h5tools.c
+LIB_SRC=h5tools.c h5findshd.c
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
 # Source and object files for programs...
-PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c
+PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c h5toh4.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 PRIVATE_HDR=h5tools.h
 
@@ -53,5 +53,8 @@ h5repart: h5repart.o
 
 h5dump: h5dump.o h5dumputil.o
 	$(CC) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LDFLAGS) $(LIBS)
+
+h5toh4: h5toh4.o
+	$(CC) $(CFLAGS) -o $@ h5toh4.o $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
