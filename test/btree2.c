@@ -5237,7 +5237,6 @@ main(void)
 
     /* Test B-tree record insertion */
     /* Iteration, find & index routines tested in these routines as well */
-#ifndef QAK
     nerrors += test_insert_basic(fapl);
     nerrors += test_insert_split_root(fapl);
     nerrors += test_insert_level1_2leaf_redistrib(fapl);
@@ -5252,11 +5251,7 @@ main(void)
     nerrors += test_insert_level2_3internal_redistrib(fapl);
     nerrors += test_insert_level2_3internal_split(fapl);
     nerrors += test_insert_lots(fapl);
-#else /* QAK */
-HDfprintf(stderr,"Uncomment tests!\n");
-#endif /* QAK */
 
-#ifndef QAK
     /* Test B-tree record removal */
     /* Querying the number of records routine also tested in these routines as well */
     nerrors += test_remove_basic(fapl);
@@ -5280,24 +5275,13 @@ HDfprintf(stderr,"Uncomment tests!\n");
     nerrors += test_remove_level2_3internal_merge(fapl);
     nerrors += test_remove_level2_collapse_right(fapl);
     nerrors += test_remove_lots(fapl);
-#else /* QAK */
-HDfprintf(stderr,"Uncomment tests!\n");
-#endif /* QAK */
 
-#ifndef QAK
     /* Test more complex B-tree queries */
     nerrors += test_find_neighbor(fapl);
-#else /* QAK */
-HDfprintf(stderr,"Uncomment tests!\n");
-#endif /* QAK */
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");
-#ifndef QAK
     h5_cleanup(FILENAME, fapl);
-#else /* QAK */
-HDfprintf(stderr,"Uncomment cleanup!\n");
-#endif /* QAK */
     return 0;
 
 error:
