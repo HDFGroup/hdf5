@@ -7,9 +7,9 @@ installing the parallel and sequential versions of the HDF5 library.
 Software locations
 ------------------
 The zlib compression library is installed in /usr/community/hdf5/ZLIB.
-The latest version is zlib v1.1.3.
+The latest version is zlib v1.1.4.
 The mpich library, including mpi-io support, is in /usr/community/mpich/.
-The latest version used is mpich-1.2.3.
+The latest version used is mpich-1.2.4.
 
 ---------------
 Parallel HDF5:
@@ -26,7 +26,7 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) CC=/usr/community/mpich/mpich-1.2.3/bin/mpicc \
+2) CC=/usr/community/mpich/mpich-1.2.4/bin/mpicc \
       ./configure --host=i386-intel-osf1 --with-zlib=/usr/community/hdf5/ZLIB
 
    Skip the "--with-zlib=..." option if you do not wish to include the zlib
