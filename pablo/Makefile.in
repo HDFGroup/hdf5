@@ -178,7 +178,7 @@ ProcMasks.h: $(top_srcdir)/src/*.c
 ProcIDs.h: HDFidList.h ProcMasks.h
 
 ProcTrace.inc: HDFidList.h
-	sed "=" $? | sed -f $(top_srcdir)/PabloSedscr > $@
+	sed "=" $? | sed -f $(top_srcdir)/pablo/PabloSedscr > $@
 
 PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES) 
 	$(CC) -g $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
