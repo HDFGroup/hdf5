@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include <hdf5.h>
 
-#ifdef STDC_HEADERS
+#ifdef H5_STDC_HEADERS
 #   include <ctype.h>
 #   include <fcntl.h>
 #   include <stdlib.h>
@@ -20,20 +20,20 @@
 #   include <string.h>
 #endif
 
-#ifdef HAVE_IO_H
+#ifdef H5_HAVE_IO_H
 #	include <io.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#ifdef H5_HAVE_UNISTD_H
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
 
-#ifdef HAVE_IO_H
+#ifdef H5_HAVE_IO_H
 #   include <io.h>
 #endif
 
-#ifndef HAVE_ATTRIBUTE
+#ifndef H5_HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define UNUSED /*void*/
