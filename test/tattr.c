@@ -68,6 +68,9 @@ double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{2.3,-26.1},{0.123,-10.0
 #define ATTR4_FIELDNAME1	"i"
 #define ATTR4_FIELDNAME2	"d"
 #define ATTR4_FIELDNAME3	"c"
+size_t attr4_field1_off=0;
+size_t attr4_field2_off=0;
+size_t attr4_field3_off=0;
 struct attr4_struct {
     int32 i;
     double d;
@@ -304,11 +307,14 @@ test_attr_complex_write(void)
     /* Create the attribute datatype.  */
     tid1 = H5Tcreate (H5T_COMPOUND, sizeof(struct attr4_struct));
     CHECK(tid1, FAIL, "H5Tcreate");
-    ret = H5Tinsert(tid1, ATTR4_FIELDNAME1, HOFFSET(struct attr4_struct, i), H5T_NATIVE_INT32);
+    attr4_field1_off=HOFFSET(struct attr4_struct, i);
+    ret = H5Tinsert(tid1, ATTR4_FIELDNAME1, attr4_field1_off, H5T_NATIVE_INT32);
     CHECK(ret, FAIL, "H5Tinsert");
-    ret = H5Tinsert(tid1, ATTR4_FIELDNAME2, HOFFSET(struct attr4_struct, d), H5T_NATIVE_DOUBLE);
+    attr4_field2_off=HOFFSET(struct attr4_struct, d);
+    ret = H5Tinsert(tid1, ATTR4_FIELDNAME2, attr4_field2_off, H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
-    ret = H5Tinsert(tid1, ATTR4_FIELDNAME3, HOFFSET(struct attr4_struct, c), H5T_NATIVE_CHAR);
+    attr4_field3_off=HOFFSET(struct attr4_struct, c);
+    ret = H5Tinsert(tid1, ATTR4_FIELDNAME3, attr4_field3_off, H5T_NATIVE_CHAR);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create dataspace for 1st attribute */
@@ -429,11 +435,11 @@ test_attr_complex_read(void)
         free(fieldname);
       } /* end for */
     offset=H5Tget_member_offset(type,0);
-    VERIFY(offset, 0, "H5Tget_member_offset");
+    VERIFY(offset, attr4_field1_off, "H5Tget_member_offset");
     offset=H5Tget_member_offset(type,1);
-    VERIFY(offset, 4, "H5Tget_member_offset");
+    VERIFY(offset, attr4_field2_off, "H5Tget_member_offset");
     offset=H5Tget_member_offset(type,2);
-    VERIFY(offset, 12, "H5Tget_member_offset");
+    VERIFY(offset, attr4_field3_off, "H5Tget_member_offset");
 
     /* Verify each field's type, class & size */
     field=H5Tget_member_type(type,0);
