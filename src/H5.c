@@ -1049,12 +1049,12 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         /*lint --e{506} Don't issue warnings about constant value booleans */
                         /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
 			if (sizeof(x)==H5_SIZEOF_INT) {
-			    HDstrcat(format_templ, "d");
+			    HDstrcat(format_templ, "u");
 			} else if (sizeof(x)==H5_SIZEOF_LONG) {
-			    HDstrcat(format_templ, "ld");
+			    HDstrcat(format_templ, "lu");
 			} else if (sizeof(x)==H5_SIZEOF_LONG_LONG) {
 			    HDstrcat(format_templ, H5_PRINTF_LL_WIDTH);
-			    HDstrcat(format_templ, "d");
+			    HDstrcat(format_templ, "u");
 			}
 			n = fprintf(stream, format_templ, x);
 		    } else {
