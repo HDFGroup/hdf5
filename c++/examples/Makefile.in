@@ -16,11 +16,6 @@ EXAMPLEDIR=$(docdir)/hdf5/examples/c++
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
 
-## Obtain default library; the current version of libtool does not fully
-## support C++ yet, and it does not know which default library to find.
-## With libtool 1.5, this support can be removed.  - BMR - Jan, 2002 
-DEFAULT_LIBS=@DEFAULT_LIBS@
-
 ## Add include directory to the cpp preprocessor flags
 CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 

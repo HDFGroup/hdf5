@@ -1,7 +1,7 @@
 dnl ----------------------------------------------------------------------
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 2000, 2001
+dnl Copyright (C) 2000, 2001, 2002
 dnl     National Center for Supercomputing Applications.
 dnl     All rights reserved.
 dnl ----------------------------------------------------------------------
@@ -90,6 +90,12 @@ case "$host_os" in
       host_os_novers=$host_os
       ;;
 esac
+
+dnl Different compilers may need default libraries. They are specified in
+dnl the config/* files, so we put this statement here so that it'll be
+dnl set by the code which follows...
+dnl
+AC_SUBST(DEFAULT_LIBS) DEFAULT_LIBS=""
 
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \

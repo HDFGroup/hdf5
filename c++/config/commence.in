@@ -40,6 +40,11 @@ includedir=@includedir@
 docdir=@exec_prefix@/doc
 PUB_LIB=$(LIB)
 
+## Obtain default library; the current version of libtool does not fully
+## support C++ yet, and it does not know which default library to find.
+## With libtool 1.5, this support can be removed.  - BMR - Jan, 2002 
+DEFAULT_LIBS=@DEFAULT_LIBS@
+
 ## Shared libraries
 LT_STATIC_EXEC=@LT_STATIC_EXEC@
 DYNAMIC_DIRS=@DYNAMIC_DIRS@
