@@ -149,44 +149,23 @@ int apply_filters(const char* name,    /* object name from traverse list */
     name,options->threshold);
    return 0;
   }
-  
 
  /* get information about input filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
   return -1;
- 
-/*-------------------------------------------------------------------------
- * check if we have the H5Z_FILTER_NONE filter
- * if so, just delete all filters from the DCPL and exit
- *-------------------------------------------------------------------------
- */
-
- for ( i=0; i<obj->nfilters; i++)
- {
-  if (obj->filter[i].filtn==H5Z_FILTER_NONE)
-  {
-   if (nfilters && H5Premove_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
-    return -1;
-   return 0;
-  }
- }
-
 /*-------------------------------------------------------------------------
  * check if we have filters in the pipeline
  * we want to replace them with the input filters
  *-------------------------------------------------------------------------
  */
-
  if (nfilters) {
   if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0) 
    return -1;
  }
-
 /*-------------------------------------------------------------------------
  * filters require CHUNK layout; if we do not have one define a default
  *-------------------------------------------------------------------------
  */
- 
  if (obj->chunk.rank<=0)
  {
   obj->chunk.rank=rank;
@@ -204,7 +183,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
  * H5Z_FILTER_SZIP       4 , szip compression 
  *-------------------------------------------------------------------------
  */
- 
  for ( i=0; i<obj->nfilters; i++)
  {
   switch (obj->filter[i].filtn)

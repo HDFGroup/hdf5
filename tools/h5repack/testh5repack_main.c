@@ -42,27 +42,29 @@ test_copy(void)
  memset(&diff_options, 0, sizeof (diff_opt_t));
 
 
- TESTING("    copy with no filters");
+ TESTING("    copy with no input filters");
+
+/*-------------------------------------------------------------------------
+ * file with all kinds of dataset datatypes
+ *-------------------------------------------------------------------------
+ */
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
-
-#if defined(H5_REPACK_DEBUG)
- diff_options.verbose=1;
- pack_options.verbose=1;
-#endif
-
  if (h5repack(FNAME1,FNAME1OUT,&pack_options)<0)
   TEST_ERROR;
  if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
   TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME1,FNAME1OUT)<=0)
+  TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED(); 
-
- TESTING("    copy of attributes");
+/*-------------------------------------------------------------------------
+ * file with attributes
+ *-------------------------------------------------------------------------
+ */
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack(FNAME2,FNAME2OUT,&pack_options)<0)
@@ -71,11 +73,16 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME2OUT,&pack_options)<=0)
   TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME2,FNAME2OUT)<=0)
+  TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED();      
 
- TESTING("    copy of hardlinks");
+/*-------------------------------------------------------------------------
+ * file with hardlinks
+ *-------------------------------------------------------------------------
+ */
+
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack(FNAME3,FNAME3OUT,&pack_options)<0)
@@ -84,10 +91,33 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME3OUT,&pack_options)<=0)
   TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME3,FNAME3OUT)<=0)
+  TEST_ERROR;
   if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED();          
+
+/*-------------------------------------------------------------------------
+ * file with filters
+ *-------------------------------------------------------------------------
+ */
  
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME4,FNAME4OUT)<=0)
+  TEST_ERROR;
+  if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+/*-------------------------------------------------------------------------
+ * end
+ *-------------------------------------------------------------------------
+ */
+ PASSED();          
  return 0; 
  
 error:                                                       
@@ -100,7 +130,7 @@ error:
  *
  * Purpose: 
  *
- * 1) delete filters form the filter pipeline
+ * 1) remove filters form the filter pipeline
  * 2) use the h5diff utility to compare the input and output file; 
  *     it returns RET==0 if the objects have the same data
  * 3) use API functions to verify the compression/chunking input on the output file
@@ -122,7 +152,7 @@ test_filter_none(void)
  memset(&diff_options, 0, sizeof (diff_opt_t));
  memset(&pack_options, 0, sizeof (pack_opt_t));
 
- TESTING("    delete filters");
+ TESTING("    removing filters");
 
 /*-------------------------------------------------------------------------
  * test the NONE global option
@@ -131,7 +161,7 @@ test_filter_none(void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset_gzip:NONE",&pack_options)<0)
+ if (h5repack_addfilter("NONE",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -167,8 +197,6 @@ test_filter_none(void)
  
 error:                                                       
  return 1;
-
-
 }
 
 /*-------------------------------------------------------------------------

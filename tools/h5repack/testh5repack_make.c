@@ -36,52 +36,48 @@ int make_testfiles(void)
 
  TESTING("    generating datasets");
 
- /* create a file for general copy test */
+/*-------------------------------------------------------------------------
+ * create a file for general copy test 
+ *-------------------------------------------------------------------------
+ */
  if((loc_id = H5Fcreate(FNAME1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
- 
  if (make_all_objects(loc_id)<0)
   goto out;
-
   /* close */
  if(H5Fclose(loc_id)<0)
   return -1;
 
- /* create a file for attributes copy test */
+/*-------------------------------------------------------------------------
+ * create a file for attributes copy test
+ *-------------------------------------------------------------------------
+ */
  if((loc_id = H5Fcreate(FNAME2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
-
  if (make_attributes(loc_id)<0)
   goto out;
-
   /* close */
  if(H5Fclose(loc_id)<0)
   return -1;
-
- /* create a file for special items test */
+/*-------------------------------------------------------------------------
+ * create a file for special items test
+ *-------------------------------------------------------------------------
+ */
  if((loc_id = H5Fcreate(FNAME3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
-
  if (make_special_objects(loc_id)<0)
   goto out;
-
  /* close */
  if(H5Fclose(loc_id)<0)
   return -1;
-
- /* create a file for the filters test */
+/*-------------------------------------------------------------------------
+ * create a file for the filters test
+ *-------------------------------------------------------------------------
+ */
  if((loc_id = H5Fcreate(FNAME4,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
-
- if (make_nofilters(loc_id)<0)
+ if (make_filters(loc_id)<0)
   goto out;
-
- if (make_deflate(loc_id)<0)
-  goto out;
-
- if (make_szip(loc_id)<0)
-  goto out;
-
  /* close */
  if(H5Fclose(loc_id)<0)
   return -1;

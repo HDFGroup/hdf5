@@ -22,180 +22,169 @@
 #define CDIM2 DIM2/2
 #define RANK  2
 
-
-
 /*-------------------------------------------------------------------------
- * Function: make_deflate
+ * Function: make_dset
  *
- * Purpose: make a dataset using DEFLATE (GZIP) compression in LOC_ID
- *
+ * Purpose: utility function to create and write a dataset in LOC_ID
  *-------------------------------------------------------------------------
  */
-int make_deflate(hid_t loc_id)
+
+static 
+int make_dset(hid_t loc_id,const char *name,hid_t sid, hid_t dcpl,void *buf)
 {
- hid_t    dcpl; /* dataset creation property list */
- hid_t    dsid; /* dataset ID */
- hid_t    sid;  /* dataspace ID */
- hsize_t  dims[RANK]={DIM1,DIM2};
- hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
- int      buf[DIM1][DIM2];
- int      i, j, n=0;
-
- for (i=0; i<DIM1; i++){
-  for (j=0; j<DIM2; j++){
-   buf[i][j]=n++;
-  }
- }
- 
- /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
-  return -1;
-
- /* create the dataset creation property list */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
-  goto out;
- 
- /* set up for deflated data */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
-  goto out;
- if(H5Pset_deflate(dcpl, 9)<0)
-  goto out;
-
+ hid_t   dsid;
  /* create the dataset */
- if((dsid = H5Dcreate (loc_id, "dset_gzip", H5T_NATIVE_INT, sid, dcpl))<0)
+ if((dsid = H5Dcreate (loc_id,name,H5T_NATIVE_INT,sid,dcpl))<0)
+  return -1;
+ /* write */
+ if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
   goto out;
-
- /* write the data to the dataset */
- if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
-  goto out;
- 
  /* close */
  if(H5Dclose(dsid)<0)
-  goto out;
-
-/*-------------------------------------------------------------------------
- * close
- *-------------------------------------------------------------------------
- */
-
- if(H5Sclose(sid)<0)
-  goto out;
- if(H5Pclose(dcpl)<0)
-  goto out;
- 
- return 0;                                                 
- 
-out:
+  return -1;
+ return 0;
+ out:
  H5E_BEGIN_TRY {
   H5Dclose(dsid);
-  H5Pclose(dcpl);
-  H5Sclose(sid);
  } H5E_END_TRY;
  return -1;
+  
 }
 
 /*-------------------------------------------------------------------------
- * Function: make_szip
+ * Function: make_filters
  *
- * Purpose: make a dataset using SZIP compression in LOC_ID
+ * Purpose: make several datasets with filters in location LOC_ID
  *
  *-------------------------------------------------------------------------
  */
-int make_szip(hid_t loc_id)
+int make_filters(hid_t loc_id)
 {
  hid_t    dcpl; /* dataset creation property list */
- hid_t    dsid; /* dataset ID */
  hid_t    sid;  /* dataspace ID */
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
- unsigned szip_pixels_per_block;
+ unsigned szip_pixels_per_block=8;
  hsize_t  dims[RANK]={DIM1,DIM2};
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf[DIM1][DIM2];
- int      i, j, n=0;
+ char     name[5];
+ int      i, j, n;
 
- for (i=0; i<DIM1; i++){
+ for (i=n=0; i<DIM1; i++){
   for (j=0; j<DIM2; j++){
    buf[i][j]=n++;
   }
  }
- 
-  /* 
-  pixels_per_block must be an even number, and <= pixels_per_scanline 
-  and <= MAX_PIXELS_PER_BLOCK
-  */
- szip_pixels_per_block=8;
- 
+  
  /* create a space */
  if((sid = H5Screate_simple(RANK, dims, NULL))<0)
   return -1;
-
- /* create the dataset creation property list */
+ /* create a dataset creation property list; the same DCPL is used for all dsets */
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
- 
- /* set up for sziped data */
+ /* set up chunk */
  if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
   goto out;
- if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0)
-  goto out;
-
- /* create the dataset */
- if((dsid = H5Dcreate (loc_id, "dset_szip", H5T_NATIVE_INT, sid, dcpl))<0)
-  goto out;
-
- /* write the data to the dataset */
- if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
-  goto out;
- 
- /* close */
- if(H5Dclose(dsid)<0)
-  goto out;
- if(H5Pclose(dcpl)<0)
-  goto out;
- if(H5Sclose(sid)<0)
-  goto out;
- 
- return 0;                                                 
- 
-out:
- H5E_BEGIN_TRY {
-  H5Dclose(dsid);
-  H5Pclose(dcpl);
-  H5Sclose(sid);
- } H5E_END_TRY;
- return -1;
-}
-
 
 /*-------------------------------------------------------------------------
- * Function: make_nofilters
- *
- * Purpose: make several dataset with no filters
- *
+ * make several dataset with no filters
  *-------------------------------------------------------------------------
  */
-int make_nofilters(hid_t loc_id)
-{
- char     name[5];
- hsize_t  dims[RANK]={DIM1,DIM2};
- int      buf[DIM1][DIM2];
- int      i, j, n=0;
-
- for (i=0; i<DIM1; i++){
-  for (j=0; j<DIM2; j++){
-   buf[i][j]=n++;
-  }
- }
- 
  for (i=0; i<4; i++)
  {
   sprintf(name,"dset%d",i+1);
   if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf)<0)
    return -1;
  }
+/*-------------------------------------------------------------------------
+ * SZIP
+ *-------------------------------------------------------------------------
+ */
+ /* set szip data */
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * GZIP
+ *-------------------------------------------------------------------------
+ */
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set deflate data */
+ if(H5Pset_deflate(dcpl, 9)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_gzip",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * shuffle
+ *-------------------------------------------------------------------------
+ */
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set the shuffle filter */
+ if (H5Pset_shuffle(dcpl)<0) 
+  goto out;
+ if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * checksum
+ *-------------------------------------------------------------------------
+ */
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set the checksum filter */
+ if (H5Pset_fletcher32(dcpl)<0) 
+  goto out;
+ if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * shuffle + checksum + SZIP
+ *-------------------------------------------------------------------------
+ */
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set the shuffle filter */
+ if (H5Pset_shuffle(dcpl)<0) 
+  goto out;
+ /* set the checksum filter */
+ if (H5Pset_fletcher32(dcpl)<0) 
+  goto out;
+ /* set szip data */
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_all",sid,dcpl,buf)<0)
+  goto out;
 
 
- return 0;
+/*-------------------------------------------------------------------------
+ * close space and dcpl
+ *-------------------------------------------------------------------------
+ */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
 }
+
+
+
 
 
