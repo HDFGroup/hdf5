@@ -740,10 +740,10 @@ done:
                                     position of interest in selection.
         size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxbytes;        IN: Maximum number of bytes to include in the
+        size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
         size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nbytes;         OUT: Actual number of bytes in sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
         hsize_t *off;           OUT: Array of offsets
         size_t *len;            OUT: Array of lengths
  RETURNS
@@ -761,7 +761,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_iter_t UNUSED *iter,
-    size_t UNUSED elem_size, size_t UNUSED maxseq, size_t UNUSED maxbytes, size_t *nseq, size_t *nbytes,
+    size_t UNUSED elem_size, size_t UNUSED maxseq, size_t UNUSED maxelem, size_t *nseq, size_t *nelem,
     hsize_t UNUSED *off, size_t UNUSED *len)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -773,17 +773,17 @@ H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_
     assert(iter);
     assert(elem_size>0);
     assert(maxseq>0);
-    assert(maxbytes>0);
+    assert(maxelem>0);
     assert(nseq);
-    assert(nbytes);
+    assert(nelem);
     assert(off);
     assert(len);
 
-    /* "none" selection don't generate sequences of bytes */
+    /* "none" selections don't generate sequences of bytes */
     *nseq=0;
 
-    /* The don't use any bytes, either */
-    *nbytes=0;
+    /* They don't use any elements, either */
+    *nelem=0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
