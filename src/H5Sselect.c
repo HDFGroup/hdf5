@@ -1205,6 +1205,24 @@ HDfprintf(stderr,"%s: Entering\n",FUNC);
         unsigned first_block=1;         /* Flag to indicate the first block */
 #ifdef QAK
 HDfprintf(stderr,"%s: Check 10.0\n",FUNC);
+HDfprintf(stderr,"%s: space1 selection type=%d\n",FUNC,(int)space1->select.type);
+if(space1->select.sel_info.hslab.span_lst) {
+    HDfprintf(stderr,"%s: Dumping space1 span list\n",FUNC);
+    H5S_hyper_print_spans(stderr,space1->select.sel_info.hslab.span_lst);
+} /* end if */
+else {
+    HDfprintf(stderr,"%s: Dumping space1 diminfo\n",FUNC);
+    H5S_hyper_print_diminfo(stderr,space1);
+} /* end else */
+HDfprintf(stderr,"%s: space2 selection type=%d\n",FUNC,(int)space2->select.type);
+if(space2->select.sel_info.hslab.span_lst) {
+    HDfprintf(stderr,"%s: Dumping space2 span list\n",FUNC);
+    H5S_hyper_print_spans(stderr,space2->select.sel_info.hslab.span_lst);
+} /* end if */
+else {
+    HDfprintf(stderr,"%s: Dumping space2 diminfo\n",FUNC);
+    H5S_hyper_print_diminfo(stderr,space2);
+} /* end else */
 #endif /* QAK */
 
         /* Initialize iterator for each dataspace selection

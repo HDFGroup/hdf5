@@ -93,6 +93,10 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed bug with flattened hyperslab selections that would generate
+            incorrect hyperslab information with certain high-dimensionality
+            combinations of start/stride/count/block information.
+            QAK - 2003/12/31
         - Fixed bug with variable-length datatypes used in compound datatypes.
             SLU - 2003/12/29
         - Fixed bug in parallel I/O routines that would cause reads from
