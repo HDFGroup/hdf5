@@ -343,6 +343,8 @@ H5Eclear(void)
  *              Friday, February 27, 1998
  *
  * Modifications:
+ *	Albert Cheng, 2000/12/02
+ *	Show MPI process rank id if applicable.
  *
  *-------------------------------------------------------------------------
  */
@@ -357,11 +359,21 @@ H5Eprint(FILE *stream)
     /*NO TRACE*/
     
     if (!stream) stream = stderr;
-#ifdef H5_HAVE_THREADSAFE
-    fprintf (stream, "HDF5-DIAG: Error detected in thread %d."
-	     ,(int)pthread_self());
+    fprintf (stream, "HDF5-DIAG: Error detected in ");
+    /* try show the process or thread id in multiple processes cases*/
+#ifdef H5_HAVE_PARALLEL
+    {   int mpi_rank, mpi_initialized;
+	MPI_Initialized(&mpi_initialized);
+	if (mpi_initialized){
+	    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+	    fprintf (stream, "MPI-process %d.", mpi_rank);
+	}else
+	    fprintf (stream, "thread 0.");
+    }
+#elif defined(H5_HAVE_THREADSAFE)
+    fprintf (stream, "thread %d.", (int)pthread_self());
 #else
-    fprintf (stream, "HDF5-DIAG: Error detected in thread 0.");
+    fprintf (stream, "thread 0.");
 #endif
     if (estack && estack->nused>0) fprintf (stream, "  Back trace follows.");
     HDfputc ('\n', stream);
