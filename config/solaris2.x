@@ -17,7 +17,7 @@ fi
 
 # Try solaris native compiler flags
 if test "X-" = "X-$cc_flags_set"; then
-  CFLAGS="-erroff=%none -DBSD_COMP"
+  CFLAGS="$CFLAGS -erroff=%none -DBSD_COMP"
   DEBUG_CFLAGS="-g -xildoff"
   DEBUG_CPPFLAGS=
   PROD_CFLAGS="-O -s"
@@ -60,7 +60,7 @@ fi
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FFLAGS=""
+  FFLAGS="$FFLAGS"
   DEBUG_FFLAGS=""
   PROD_FFLAGS=""
   PROFILE_FFLAGS=""
@@ -88,14 +88,14 @@ cxx_vers_patch=`echo $cxx_version | cut -f3 -d.`
 # Specify the "-features=tmplife" if the compiler can handle this...
 if test -n "$cxx_version"; then
   if test $cxx_vers_major -ge 5 -a $cxx_vers_minor -ge 3 -o $cxx_vers_major -gt 5; then
-    CXXFLAGS="-features=tmplife"
+    CXXFLAGS="$CXXFLAGS -features=tmplife"
   fi
 fi
 
 # Try solaris native compiler flags
 if test -z "$cxx_flags_set"; then
   CXXFLAGS="$CXXFLAGS -instances=global"
-  CPPFLAGS="-LANG:std"
+  CPPFLAGS="$CPPFLAGS -LANG:std"
   DEBUG_CXXFLAGS=-g
   DEBUG_CPPFLAGS=
   PROD_CXXFLAGS="-O -s"

@@ -60,7 +60,7 @@ fi
 if test "X$f9x_flags_set" = "X"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FFLAGS="-O"
+  FFLAGS="$FFLAGS -O"
   DEBUG_FFLAGS="-O"
   PROD_FFLAGS="-O"
   PROFILE_FFLAGS="-O"
@@ -76,8 +76,8 @@ fi
 
 if test -z "$cxx_flags_set"; then
   # +Z for PIC, +A for using archived libraries
-  CXXFLAGS="+Z +A"
-  CFLAGS="-g +O2"
+  CXXFLAGS="$CXXFLAGS +Z +A"
+  CFLAGS="$CFLAGS -g +O2"
   DEBUG_CXXFLAGS=-g
   DEBUG_CPPFLAGS=
   PROD_CXXFLAGS="-O -s"

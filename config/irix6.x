@@ -105,7 +105,7 @@ fi
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FFLAGS="-64 -mips4 -O -s"
+  FFLAGS="$FFLAGS -64 -mips4 -O -s"
   DEBUG_FFLAGS="-64 -mips4 -O -s"
   PROD_FFLAGS="-64 -mips4 -O -s"
   PROFILE_FFLAGS="-64 -mips4 -O -s"
@@ -124,7 +124,7 @@ fi
 if test -z "$cxx_flags_set"; then
   # -LANG:std required for std use; -ptused causes templates used to be
   # instantiated
-  CPPFLAGS="-LANG:std -ptused"
+  CPPFLAGS="$CPPFLAGS -LANG:std -ptused"
 
   # libCio is a default library, since libtool before 1.5 doesn't fully 
   # support C++ yet, default libraries must be explicitly specified.

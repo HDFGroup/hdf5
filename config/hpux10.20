@@ -60,7 +60,7 @@ fi
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FFLAGS="-O"
+  FFLAGS="$FFLAGS -O"
   DEBUG_FFLAGS="-O"
   PROD_FFLAGS="-O"
   PROFILE_FFLAGS="-O"
