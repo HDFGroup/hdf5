@@ -164,6 +164,10 @@ Documentation
 New Features
 ============
 
+    * Added feature to parallel chunk allocation routine to not write fill
+      values to chunks allocated if the user has set the "fill time" to never.
+      This can improve parallel I/O performance for chunked
+      datasets.  QAK - 2002/05/17
     * Changed method for allocating chunked dataset blocks in parallel to only
       allocate blocks that don't already exist, instead of attempting to create
       all the blocks all the time.  This improves parallel I/O performance for
