@@ -278,6 +278,7 @@
 ./src/H5Sall.c
 ./src/H5Shyper.c
 ./src/H5Smpio.c
+./src/H5Snone.c
 ./src/H5Spoint.c
 ./src/H5Sprivate.h
 ./src/H5Spublic.h
