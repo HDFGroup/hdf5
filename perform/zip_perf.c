@@ -28,7 +28,7 @@
 #include "hdf5.h"
 #include "h5tools_utils.h"
 
-#if !(defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ))
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
 
 #include <zlib.h>
 
