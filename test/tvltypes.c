@@ -1323,6 +1323,7 @@ rewrite_vltypes_vlen_vlen_atomic(void)
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i,j,k;      /* counting variables */
     size_t         mem_used=0; /* Memory used during allocation */
+    int			increment=3;
     herr_t              ret;            /* Generic return value         */
 
     /* Output message about test being performed */
@@ -1330,14 +1331,14 @@ rewrite_vltypes_vlen_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
-        wdata[i].p=malloc((i+1)*sizeof(hvl_t));
+        wdata[i].p=malloc((i+increment)*sizeof(hvl_t));
         if(wdata[i].p==NULL) {
             printf("Cannot allocate memory for VL data! i=%u\n",i);
             num_errs++;
             return;
         } /* end if */
-        wdata[i].len=i+1;
-        for(t1=wdata[i].p,j=0; j<(i+1); j++, t1++) {
+        wdata[i].len=i+increment;
+        for(t1=wdata[i].p,j=0; j<(i+increment); j++, t1++) {
             t1->p=malloc((j+1)*sizeof(unsigned int));
             if(t1->p==NULL) {
                 printf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
@@ -1346,7 +1347,7 @@ rewrite_vltypes_vlen_vlen_atomic(void)
             } /* end if */
             t1->len=j+1;
             for(k=0; k<(j+1); k++)
-                ((unsigned int *)t1->p)[k]=i*100+j*10+k;
+                ((unsigned int *)t1->p)[k]=i*1000+j*100+k*10;
         } /* end for */
     } /* end for */
 
@@ -1414,18 +1415,18 @@ rewrite_vltypes_vlen_vlen_atomic(void)
     ret=H5Dvlen_get_buf_size(dataset,tid2,sid1,&size);
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
-    /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func(SPACE1_DIM1)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
+    /* 18 hvl_t elements allocated = 3 + 4 + 5 + 6 elements for each array position */
+    /* 52 unsigned int elements allocated = 6 + 10 + 15 + 21 elements */
+    VERIFY(size,18*sizeof(hvl_t)+52*sizeof(unsigned int),"H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Make certain the correct amount of memory has been used */
-    /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func(SPACE1_DIM1)*sizeof(unsigned int),"H5Dread");
+    /* 18 hvl_t elements allocated = 3+4+5+6elements for each array position */
+    /* 52 unsigned int elements allocated = 6+10+15+21 elements */
+    VERIFY(mem_used,18*sizeof(hvl_t)+52*sizeof(unsigned int),"H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -1443,7 +1444,7 @@ rewrite_vltypes_vlen_vlen_atomic(void)
             } /* end if */
             for(k=0; k<t2->len; k++) {
                 if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {                    num_errs++;
-                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
+                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d, i=%d, j=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k], i, j);
                     continue;
                 } /* end if */
             } /* end for */
@@ -1500,9 +1501,9 @@ test_vltypes(void)
     test_vltypes_vlen_atomic();       /* Test VL atomic datatypes */
     rewrite_vltypes_vlen_atomic();    /* Check VL memory leak	  */
     test_vltypes_vlen_compound();     /* Test VL compound datatypes */
-    rewrite_vltypes_vlen_compound();     /* Check VL memory leak	  */
-    test_vltypes_compound_vlen_atomic();     /* Test compound datatypes with VL atomic components */
-    rewrite_vltypes_compound_vlen_atomic();  /* Check VL memory leak	*/
+    rewrite_vltypes_vlen_compound();  /* Check VL memory leak	  */
+    test_vltypes_compound_vlen_atomic(); /* Test compound datatypes with VL atomic components */
+    rewrite_vltypes_compound_vlen_atomic();/* Check VL memory leak	*/
     test_vltypes_vlen_vlen_atomic();  /* Test VL datatype with VL atomic components */
     rewrite_vltypes_vlen_vlen_atomic();  /* Check VL memory leak	*/
 }   /* test_vltypes() */
