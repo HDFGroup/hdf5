@@ -74,6 +74,7 @@ usage() {
   echo "    -prefix=DIR  Prefix directory to find HDF5 lib/ and include/"
   echo "                   subdirectories [default: $prefix]"
   echo "    -show        Show the commands without executing them"
+  echo "    -showconfig  Show the HDF5 library configuration summary"
   echo " "
   echo "  <compile line>  - the normal compile line options for your compiler."
   echo "                    $prog_name uses the same compiler you used to compile"
@@ -89,6 +90,17 @@ usage() {
   echo " "
   exit 1
 }
+
+# Show the configuration summary of the library recorded in the
+# libhdf5.settings file reside in the lib directory.
+showconfigure()
+{
+  cat ${libdir}/libhdf5.settings
+  status=$?
+}
+
+# Main
+status=0
 
 if test "$#" = "0"; then
   # No parameters specified, issue usage statement and exit.
@@ -163,6 +175,10 @@ for arg in $@ ; do
       ;;
     -show)
       SHOW="echo"
+      ;;
+    -showconfig)
+      showconfigure
+      exit $status
       ;;
     -help)
       usage
