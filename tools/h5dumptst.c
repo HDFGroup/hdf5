@@ -112,7 +112,7 @@ int i, j;
   dataset = H5Dcreate(fid, "/dset1", H5T_NATIVE_INT, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 20; j++)
-            dset1[i][j] = j;
+            dset1[i][j] = j+i;
   H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -123,7 +123,7 @@ int i, j;
   dataset = H5Dcreate(fid, "/dset2", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT);
   for (i = 0; i < 30; i++)
        for (j = 0; j < 20; j++)
-            dset2[i][j] = 0.0001*j;
+            dset2[i][j] = 0.0001*j+i;
   H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -204,7 +204,7 @@ int point = 100;
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
   attr = H5Acreate (root, "attr2", H5T_NATIVE_INT, space, H5P_DEFAULT);
-  for (i = 0; i < 10; i++) data[i] = i+1;
+  for (i = 0; i < 20; i++) data[i] = i+1;
   H5Awrite(attr, H5T_NATIVE_INT, data);
   H5Sclose(space);
   H5Aclose(attr);
@@ -1076,7 +1076,7 @@ size_t mdims[2];
       for (j = 0; j < 6; j++) {
            for (k = 0 ; k < 8; k++)
                 for (l = 0; l < 10; l++)
-                   comp1[i][j].a[k][l] = l;
+                   comp1[i][j].a[k][l] = (l+j+k) * (l+j+k);
            for (k = 0 ; k < 12; k++)
                sprintf(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
       }
