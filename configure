@@ -33808,7 +33808,7 @@ else
         unsigned long long l2 = (unsigned long long)d1;
         unsigned long long l3 = (unsigned long long)d2;
         unsigned long long l4;
-        unsigned long long l5 = 0x7fffffffffffffffLLU;
+        unsigned long long l5 = 0x7fffffffffffffffULL;
         int           ret = 0;
 
         if(l1 <= l5 || l2 <= l5 || l3 <= l5)
@@ -33874,6 +33874,94 @@ if test ${hdf5_cv_ullong_to_fp_cast_works} = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define ULLONG_TO_FP_CAST_WORKS 1
+_ACEOF
+
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+echo "$as_me:$LINENO: checking if converting unsigned long long to long double with precision work" >&5
+echo $ECHO_N "checking if converting unsigned long long to long double with precision work... $ECHO_C" >&6
+if test "${hdf5_cv_ullong_to_ldouble_precision_works+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+    int main(void)
+    {
+        unsigned long long l = 0xa601e80bda85fcefULL;
+        long double ld;
+        unsigned char *c1, *c2;
+        int endian, size;
+        int tst_value = 1;
+        int i;
+        int           ret = 0;
+
+        /* Determine this system's endianess */
+        c1 = (unsigned char*)calloc(1, sizeof(int));
+        memcpy(c1, &tst_value, sizeof(int));
+        if(c1[0]==1)
+            endian = 0;  /* little endian */
+        else
+            endian = 1;  /* big endian */
+
+        memset(&ld, 0, 12);
+        ld = (long double)l;
+
+        size = sizeof(long double);
+        c2 = (unsigned char*)malloc(size);
+        memcpy(c2, &ld, size);
+
+        /* Test if the last 2 bytes of mantissa are lost.  Mainly for FreeBSD on Intel
+         * architecture(sleipnir) where it happens. */
+        if(endian==0 && c2[0]==0 && c2[1]==0) /*little endian*/
+            ret = 1;
+
+        free(c1);
+        free(c2);
+done:
+        exit(ret);
+    }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  hdf5_cv_ullong_to_ldouble_precision_works=yes
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+hdf5_cv_ullong_to_ldouble_precision_works=no
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+fi
+
+
+if test ${hdf5_cv_ullong_to_ldouble_precision_works} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ULLONG_TO_LDOUBLE_PRECISION_WORKS 1
 _ACEOF
 
   echo "$as_me:$LINENO: result: yes" >&5

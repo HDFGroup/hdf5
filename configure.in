@@ -2685,7 +2685,7 @@ AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
         unsigned long long l2 = (unsigned long long)d1;
         unsigned long long l3 = (unsigned long long)d2;
         unsigned long long l4;
-        unsigned long long l5 = 0x7fffffffffffffffLLU;
+        unsigned long long l5 = 0x7fffffffffffffffULL;
         int           ret = 0;
 
         if(l1 <= l5 || l2 <= l5 || l3 <= l5) 
@@ -2722,6 +2722,61 @@ AC_CACHE_VAL([hdf5_cv_ullong_to_fp_cast_works], [hdf5_cv_ullong_to_fp_cast_works
 if test ${hdf5_cv_ullong_to_fp_cast_works} = "yes"; then
   AC_DEFINE([ULLONG_TO_FP_CAST_WORKS], [1],
             [Define if your system can compile unsigned long long to floating-point casts.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine can convert from
+dnl 'unsigned long long' to 'long double' without precision loss.
+dnl (This flag should be set for all machines, except for FreeBSD(sleipnir)
+dnl where the last 2 bytes of mantissa are lost when compiler tries to do 
+dnl the conversion.)
+dnl
+AC_MSG_CHECKING([if converting unsigned long long to long double with precision work])
+AC_CACHE_VAL([hdf5_cv_ullong_to_ldouble_precision_works],
+    [AC_TRY_RUN([
+    int main(void)
+    {
+        unsigned long long l = 0xa601e80bda85fcefULL;
+        long double ld;
+        unsigned char *c1, *c2;
+        int endian, size;
+        int tst_value = 1; 
+        int i;
+        int           ret = 0;
+
+        /* Determine this system's endianess */
+        c1 = (unsigned char*)calloc(1, sizeof(int));
+        memcpy(c1, &tst_value, sizeof(int));
+        if(c1[0]==1)
+            endian = 0;  /* little endian */
+        else 
+            endian = 1;  /* big endian */
+             
+        memset(&ld, 0, 12); 
+        ld = (long double)l;
+
+        size = sizeof(long double);
+        c2 = (unsigned char*)malloc(size);
+        memcpy(c2, &ld, size);
+
+        /* Test if the last 2 bytes of mantissa are lost.  Mainly for FreeBSD on Intel
+         * architecture(sleipnir) where it happens. */        
+        if(endian==0 && c2[0]==0 && c2[1]==0) /*little endian*/
+            ret = 1;
+        
+        free(c1);
+        free(c2);
+done:
+        exit(ret);
+    }
+    ], [hdf5_cv_ullong_to_ldouble_precision_works=yes], [hdf5_cv_ullong_to_ldouble_precision_works=no],)])
+
+if test ${hdf5_cv_ullong_to_ldouble_precision_works} = "yes"; then
+  AC_DEFINE([ULLONG_TO_LDOUBLE_PRECISION_WORKS], [1],
+            [Define if your system can convert unsigned long long to long double with correct precision.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])

@@ -545,6 +545,10 @@
    casts. */
 #undef ULLONG_TO_FP_CAST_WORKS
 
+/* Define if your system can convert unsigned long long to long double with
+   correct precision. */
+#undef ULLONG_TO_LDOUBLE_PRECISION_WORKS
+
 /* Define if the HDF5 v1.6 compatibility functions are to be compiled in */
 #undef WANT_H5_V1_6_COMPAT
 
