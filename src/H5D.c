@@ -188,6 +188,7 @@ H5D_init_interface(void)
     size_t          chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;
     H5O_fill_t      fill                     = H5D_CRT_FILL_VALUE_DEF;
     H5D_alloc_time_t    alloc_time           = H5D_CRT_ALLOC_TIME_DEF;
+    unsigned        alloc_time_state         = H5D_CRT_ALLOC_TIME_STATE_DEF;
     H5D_fill_time_t     fill_time            = H5D_CRT_FILL_TIME_DEF;   
     H5O_efl_t       efl                      = H5D_CRT_EXT_FILE_LIST_DEF;
     H5O_pline_t     pline                    = H5D_CRT_DATA_PIPELINE_DEF;
@@ -330,6 +331,10 @@ H5D_init_interface(void)
         if(H5P_register(crt_pclass, H5D_CRT_ALLOC_TIME_NAME, H5D_CRT_ALLOC_TIME_SIZE, &alloc_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+        /* Register the space allocation time state property */
+        if(H5P_register(crt_pclass, H5D_CRT_ALLOC_TIME_STATE_NAME, H5D_CRT_ALLOC_TIME_STATE_SIZE, &alloc_time_state, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
         /* Register the fill value writing time property */
         if(H5P_register(crt_pclass, H5D_CRT_FILL_TIME_NAME, H5D_CRT_FILL_TIME_SIZE, &fill_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -362,8 +367,6 @@ H5D_init_interface(void)
     /* Set up the default allocation time information */
     if(H5P_get(def_dcpl, H5D_CRT_ALLOC_TIME_NAME, &H5D_def_dset.alloc_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time")
-    if(H5D_def_dset.alloc_time==H5D_ALLOC_TIME_DEFAULT)
-        H5D_def_dset.alloc_time=H5D_ALLOC_TIME_LATE;
 
     /* Get the default external file list information */
     if(H5P_get(def_dcpl, H5D_CRT_EXT_FILE_LIST_NAME, &H5D_def_dset.efl) < 0)
@@ -2081,25 +2084,9 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         if(H5P_get(dc_plist, H5D_CRT_ALLOC_TIME_NAME, &alloc_time) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time")
 
-        /* Check if the alloc_time is the default and set it accordingly */
-        if(alloc_time==H5D_ALLOC_TIME_DEFAULT) {
-            switch(dcpl_layout) {
-                case H5D_COMPACT:
-                    alloc_time=H5D_ALLOC_TIME_EARLY;
-                    break;
-
-                case H5D_CONTIGUOUS:
-                    alloc_time=H5D_ALLOC_TIME_LATE;
-                    break;
-
-                case H5D_CHUNKED:
-                    alloc_time=H5D_ALLOC_TIME_INCR;
-                    break;
-
-                default:
-                    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
-            } /* end switch */
-        } /* end if */
+        /* Check if the alloc_time is the default and error out */
+        if(alloc_time==H5D_ALLOC_TIME_DEFAULT)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "invalid space allocation state")
 
         /* Don't allow compact datasets to allocate space later */
         if(dcpl_layout==H5D_COMPACT && alloc_time!=H5D_ALLOC_TIME_EARLY)
@@ -2489,6 +2476,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
 {
     H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
     H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_CRT_FILL_TIME_DEF, TRUE}; 
+    unsigned    alloc_time_state;       /* Allocation time state */
     H5O_fill_t     *fill_prop;          /* Pointer to dataset's fill value area */
     H5O_pline_t  pline;                 /* I/O pipeline information */
     H5P_genplist_t *plist;              /* Property list */
@@ -2652,16 +2640,23 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
 	    fill_prop->size = (size_t)-1;
 	}
     } /* end else */
+    alloc_time_state=0;
+    if( (dataset->shared->layout.type==H5D_COMPACT && fill.alloc_time==H5D_ALLOC_TIME_EARLY)
+            || (dataset->shared->layout.type==H5D_CONTIGUOUS && fill.alloc_time==H5D_ALLOC_TIME_LATE)
+            || (dataset->shared->layout.type==H5D_CHUNKED && fill.alloc_time==H5D_ALLOC_TIME_INCR))
+        alloc_time_state=1;
 	
     /* Set revised fill value properties */ 
     if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value")
     dataset->shared->alloc_time=fill.alloc_time;        /* Cache this for later */
     if(H5P_set(plist, H5D_CRT_ALLOC_TIME_NAME, &fill.alloc_time) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set allocation time")
+    if(H5P_set(plist, H5D_CRT_ALLOC_TIME_STATE_NAME, &alloc_time_state) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set allocation time state")
     dataset->shared->fill_time=fill.fill_time;          /* Cache this for later */
     if(H5P_set(plist, H5D_CRT_FILL_TIME_NAME, &fill.fill_time) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill time")
 
     /* Get the external file list message, which might not exist.  Space is
      * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */
