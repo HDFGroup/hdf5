@@ -5420,7 +5420,7 @@ H5T_set_size(H5T_t *dt, size_t size)
 
     /* Check args */
     assert(dt);
-    assert(size>0);
+    assert(size!=0);
     assert(H5T_ENUM!=dt->type || 0==dt->u.enumer.nmembs);
 
     if (dt->parent) {
