@@ -4,7 +4,7 @@
  * Parallel tests for file operations
  */
 
-#include <testphdf5.h>
+#include "testphdf5.h"
 
 /*
  * test file access by communicator besides COMM_WORLD.
