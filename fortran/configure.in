@@ -960,25 +960,38 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Checking to see if GPFS is available on this filesystem
 dnl
+AC_ARG_ENABLE([gpfs],
+              [AC_HELP_STRING([--enable-gpfs],
+                              [Enable GPFS hints for the MPI/POSIX file
+                               driver. [default=no]])],,
+              [enableval=no])
 
-dnl Change to the C language
-AC_LANG_C
+case "X-$enableval" in
+  X-yes)
+    dnl Change to the C language
+    AC_LANG_C
 
-AC_CHECK_HEADERS([gpfs.h],
-                 AC_MSG_CHECKING([for GPFS support])
-                 AC_TRY_COMPILE([#include <gpfs.h>],
-                                [int fd = 0; gpfs_fcntl(fd, (void *)0);],
-                                AC_DEFINE(HAVE_GPFS, 1,
-                                          [Define if we have GPFS support])
-                                AC_MSG_RESULT(yes)
-                                LIBS="$LIBS -lgpfs"
-                                GPFS="yes",
-                                AC_MSG_RESULT(no)
-                                GPFS="no"))
+    AC_CHECK_HEADERS([gpfs.h],
+                     AC_MSG_CHECKING([for GPFS support])
+                     AC_TRY_COMPILE([#include <gpfs.h>],
+                                    [int fd = 0; gpfs_fcntl(fd, (void *)0);],
+                                    AC_DEFINE(HAVE_GPFS, 1,
+                                              [Define if we have GPFS support])
+                                    AC_MSG_RESULT(yes)
+                                    LIBS="$LIBS -lgpfs"
+                                    GPFS="yes",
+                                    AC_MSG_RESULT(no)
+                                    GPFS="no"))
 
-dnl Change back to the Fortran 90 language
-AC_LANG_FORTRAN9X
-
+    dnl Change back to the Fortran 90 language
+    AC_LANG_FORTRAN9X
+    ;;
+  X-no|*)
+    AC_MSG_CHECKING([for gpfs])
+    AC_MSG_RESULT([suppressed])
+    ;;
+esac
+   
 dnl Some cleanup stuff
 rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
 

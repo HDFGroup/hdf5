@@ -1610,17 +1610,31 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Checking to see if GPFS is available on this filesystem
 dnl
-AC_CHECK_HEADERS([gpfs.h],
-                 AC_MSG_CHECKING([for GPFS support])
-                 AC_TRY_COMPILE([#include <gpfs.h>],
-                                [int fd = 0; gpfs_fcntl(fd, (void *)0);],
-                                AC_DEFINE(HAVE_GPFS, 1,
-                                          [Define if we have GPFS support])
-                                AC_MSG_RESULT(yes)
-                                LIBS="$LIBS -lgpfs"
-                                GPFS="yes",
-                                AC_MSG_RESULT(no)
-                                GPFS="no"))
+AC_ARG_ENABLE([gpfs],
+              [AC_HELP_STRING([--enable-gpfs],
+                              [Enable GPFS hints for the MPI/POSIX file
+                               driver. [default=no]])],,
+              [enableval=no])
+
+case "X-$enableval" in
+  X-yes)
+    AC_CHECK_HEADERS([gpfs.h],
+                     AC_MSG_CHECKING([for GPFS support])
+                     AC_TRY_COMPILE([#include <gpfs.h>],
+                                    [int fd = 0; gpfs_fcntl(fd, (void *)0);],
+                                    AC_DEFINE(HAVE_GPFS, 1,
+                                              [Define if we have GPFS support])
+                                    AC_MSG_RESULT(yes)
+                                    LIBS="$LIBS -lgpfs"
+                                    GPFS="yes",
+                                    AC_MSG_RESULT(no)
+                                    GPFS="no"))
+    ;;
+  X-no|*)
+    AC_MSG_CHECKING([for gpfs])
+    AC_MSG_RESULT([suppressed])
+    ;;
+esac
    
 dnl ----------------------------------------------------------------------
 dnl Turn on debugging by setting compiler flags
@@ -1972,7 +1986,7 @@ AC_SUBST(MPE) MPE=yes
 AC_ARG_ENABLE([mpe],
               [AC_HELP_STRING([--enable-mpe],
                               [Enable MPE instrumentation [default=no]])],,
-	      enableval=no)
+              [enableval=no])
 
 AC_MSG_CHECKING([for MPE instrumentation])
 case "X-$enableval" in
