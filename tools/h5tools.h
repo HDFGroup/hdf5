@@ -277,6 +277,57 @@ typedef struct h5dump_t {
 } h5dump_t;
 
 
+typedef struct dump_header{
+	const char *name;
+	const char *filebegin;
+	const char *fileend;
+	const char *bootblockbegin;
+	const char *bootblockend;
+	const char *groupbegin;
+	const char *groupend;
+	const char *datasetbegin;
+	const char *datasetend;
+	const char *attributebegin;
+	const char *attributeend;
+	const char *datatypebegin;
+	const char *datatypeend;
+	const char *dataspacebegin;
+	const char *dataspaceend;
+	const char *databegin;
+	const char *dataend;
+	const char *softlinkbegin;
+	const char *softlinkend;
+
+	const char *fileblockbegin;
+	const char *fileblockend;
+	const char *bootblockblockbegin;
+	const char *bootblockblockend;
+	const char *groupblockbegin;
+	const char *groupblockend;
+	const char *datasetblockbegin;
+	const char *datasetblockend;
+	const char *attributeblockbegin;
+	const char *attributeblockend;
+	const char *datatypeblockbegin;
+	const char *datatypeblockend;
+	const char *dataspaceblockbegin;
+	const char *dataspaceblockend;
+	const char *datablockbegin;
+	const char *datablockend;
+	const char *softlinkblockbegin;
+	const char *softlinkblockend;
+	const char *strblockbegin;
+	const char *strblockend;
+	const char *enumblockbegin;
+	const char *enumblockend;
+
+	const char *dataspacedescriptionbegin;
+	const char *dataspacedescriptionend;
+	const char *dataspacedimbegin;
+	const char *dataspacedimend;
+
+} dump_header;
+
 hid_t h5dump_fixtype(hid_t f_type);
 int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_typ,int indentlevel);
 int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
