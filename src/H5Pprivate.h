@@ -29,6 +29,7 @@ typedef struct H5P_genclass_t H5P_genclass_t;
 H5_DLL herr_t H5P_init(void);
 
 /* Internal versions of API routines */
+H5_DLL herr_t H5P_close(void *_plist);
 H5_DLL hid_t H5P_create_id(H5P_genclass_t *pclass);
 H5_DLL hid_t H5P_copy_plist(H5P_genplist_t *old_plist);
 H5_DLL herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value);
@@ -42,6 +43,7 @@ H5_DLL htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name);
 H5_DLL char *H5P_get_class_name(H5P_genclass_t *pclass);
 H5_DLL char *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
+H5_DLL herr_t H5P_close_class(void *_pclass);
 H5_DLL herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops);
 H5_DLL herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,

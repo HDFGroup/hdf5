@@ -92,6 +92,8 @@ struct H5P_genplist_t {
 };
 
 /* Private functions, not part of the publicly documented API */
+H5_DLL herr_t H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop);
+H5_DLL herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
 
 #endif /* _H5Ppkg_H */
 

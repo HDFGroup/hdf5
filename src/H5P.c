@@ -1,14 +1,16 @@
-/****************************************************************************
-* NCSA HDF				                                    *
-* Software Development Group			                            *
-* National Center for Supercomputing Applications	                    *
-* University of Illinois at Urbana-Champaign		                    *
-* 605 E. Springfield, Champaign IL 61820		                    *
-*							                    *
-* For conditions of distribution and use, see the accompanying		    *
-* COPYING file.                                                             *
-*									    *
-****************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* $Id$ */
 
@@ -68,12 +70,8 @@ static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
      H5P_cls_create_func_t cls_create, void *create_data,
      H5P_cls_copy_func_t cls_copy, void *copy_data,
      H5P_cls_close_func_t cls_close, void *close_data);
-static herr_t H5P_close(void *_plist);
-static herr_t H5P_close_class(void *_pclass);
 static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
 static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop);
-static herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
-static herr_t H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop);
 static herr_t H5P_free_prop(H5P_genprop_t *prop);
 
 
@@ -787,7 +785,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop)
 {
     unsigned loc;                  /* Hash table location */
@@ -976,7 +974,7 @@ H5P_free_all_prop(H5P_genprop_t *hash[], unsigned hashsize, unsigned make_cb)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 {
     FUNC_ENTER_NOINIT(H5P_access_class);
@@ -1501,6 +1499,7 @@ hid_t H5Pcreate(hid_t cls_id)
     /* Create the new property list */
     if((ret_value=H5P_create_id(pclass))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
+
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5Pcreate() */
@@ -4527,7 +4526,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5P_close(void *_plist)
 {
     H5P_genplist_t *plist=(H5P_genplist_t *)_plist;
@@ -5020,7 +5019,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5P_close_class(void *_pclass)
 {
     H5P_genclass_t *pclass=(H5P_genclass_t *)_pclass;
