@@ -259,9 +259,12 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     while(num_read<nelmts) {
         if(file_iter->pnt.elmt_left>0) {
             /* Copy the location of the point to get */
-            HDmemcpy(file_offset, file_iter->pnt.curr->pnt,
-		     ndims*sizeof(hssize_t));
+            HDmemcpy(file_offset, file_iter->pnt.curr->pnt,ndims*sizeof(hssize_t));
             file_offset[ndims] = 0;
+
+            /* Add in the offset */
+            for(i=0; i<file_space->extent.u.simple.rank; i++)
+                file_offset[i] += file_space->select.offset[i];
 
             /* Go read the point */
             if (H5F_arr_read (f, layout, comp, efl, hsize, hsize, zero,
@@ -375,6 +378,10 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
         HDmemcpy(file_offset,file_iter->pnt.curr->pnt,ndims*sizeof(hssize_t));
         file_offset[ndims] = 0;
 
+        /* Add in the offset, if there is one */
+        for(i=0; i<file_space->extent.u.simple.rank; i++)
+            file_offset[i] += file_space->select.offset[i];
+
 #ifdef QAK
 	printf("%s: check 3.0\n",FUNC);
 	{
@@ -466,7 +473,7 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
         if(mem_iter->pnt.elmt_left>0) {
             /* Compute the location of the point to get */
             for(i=space_ndims-1,acc=1,off=0; i>=0; i--) {
-                off+=mem_iter->pnt.curr->pnt[i]*acc;
+                off+=(mem_iter->pnt.curr->pnt[i]+mem_space->select.offset[i])*acc;
                 acc*=mem_size[i];
             } /* end for */
 
@@ -550,7 +557,7 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
         if(mem_iter->pnt.elmt_left>0) {
             /* Compute the location of the point to get */
             for(i=space_ndims-1,acc=1,off=0; i>=0; i--) {
-                off+=mem_iter->pnt.curr->pnt[i]*acc;
+                off+=(mem_iter->pnt.curr->pnt[i]+mem_space->select.offset[i])*acc;
                 acc*=mem_size[i];
             } /* end for */
 
@@ -718,4 +725,55 @@ H5S_point_copy (H5S_t *dst, const H5S_t *src)
 done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_point_copy() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_select_valid
+ PURPOSE
+    Check whether the selection fits within the extent, with the current
+    offset defined.
+ USAGE
+    hbool_t H5S_point_select_valid(space);
+        H5S_t *space;             IN: Dataspace pointer to query
+ RETURNS
+    TRUE if the selection fits within the extent, FALSE if it does not and
+        FAIL on an error.
+ DESCRIPTION
+    Determines if the current selection at the current offet fits within the
+    extent for the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hbool_t
+H5S_point_select_valid (const H5S_t *space)
+{
+    H5S_pnt_node_t *curr;       /* Point information nodes */
+    intn i;                     /* Counter */
+    hbool_t ret_value=TRUE;     /* return value */
+
+    FUNC_ENTER (H5S_point_select_valid, FAIL);
+
+    assert(space);
+
+    /* Check each point to determine whether selection+offset is within extent */
+    curr=space->select.sel_info.pnt_lst->head;
+    while(curr!=NULL) {
+        /* Check each dimension */
+        for(i=0; i<space->extent.u.simple.rank; i++) {
+            /* Check if an offset has been defined */
+            /* Bounds check the selected point + offset against the extent */
+            if(((curr->pnt[i]+space->select.offset[i])>(hssize_t)space->extent.u.simple.size[i])
+                    || ((curr->pnt[i]+space->select.offset[i])<0)) {
+                ret_value=FALSE;
+                break;
+            } /* end if */
+        } /* end for */
+
+        curr=curr->next;
+    } /* end while */
+
+    FUNC_LEAVE (ret_value);
+} /* end H5S_point_select_valid() */
 

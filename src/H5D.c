@@ -575,12 +575,20 @@ H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    NULL == (mem_space = H5I_object(mem_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
+    /* Check for valid selection */
+    if(H5S_select_valid(mem_space)!=TRUE) {
+	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
     }
     if (H5S_ALL != file_space_id) {
 	if (H5_DATASPACE != H5I_group(file_space_id) ||
 	    NULL == (file_space = H5I_object(file_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
+    /* Check for valid selection */
+    if(H5S_select_valid(file_space)!=TRUE) {
+	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
     }
     if (H5P_DEFAULT == plist_id) {
 	xfer_parms = &H5D_xfer_dflt;
@@ -666,12 +674,20 @@ H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    NULL == (mem_space = H5I_object(mem_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
+    /* Check for valid selection */
+    if(H5S_select_valid(mem_space)!=TRUE) {
+	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
     }
     if (H5S_ALL != file_space_id) {
 	if (H5_DATASPACE != H5I_group(file_space_id) ||
 	    NULL == (file_space = H5I_object(file_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
+    /* Check for valid selection */
+    if(H5S_select_valid(file_space)!=TRUE) {
+	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
     }
     if (H5P_DEFAULT == plist_id) {
 	xfer_parms = &H5D_xfer_dflt;

@@ -66,6 +66,8 @@ herr_t H5Sset_extent_none (hid_t space_id);
 herr_t H5Sextent_copy (hid_t dst_id,hid_t src_id);
 herr_t H5Sselect_all (hid_t spaceid);
 herr_t H5Sselect_none (hid_t spaceid);
+herr_t H5Soffset_simple (hid_t space_id, const hssize_t *offset);
+hbool_t H5Sselect_valid (hid_t spaceid);
 
 #ifdef __cplusplus
 }

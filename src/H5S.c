@@ -237,6 +237,10 @@ H5S_close(H5S_t *ds)
 
     assert(ds);
 
+    /* If there was a previous offset for the selection, release it */
+    if(ds->select.offset!=NULL)
+        ds->select.offset=H5MM_xfree(ds->select.offset);
+
     /* Release selection (this should come before the extent release) */
     H5S_select_release(ds);
 
@@ -485,8 +489,7 @@ H5S_copy(const H5S_t *src)
     FUNC_ENTER(H5S_copy, NULL);
 
     if (NULL==(dst = H5MM_malloc(sizeof(H5S_t)))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
     *dst = *src;
 
@@ -933,6 +936,11 @@ H5S_read(H5G_entry_t *ent)
     /* Default to entire dataspace being selected */
     ds->select.type=H5S_SEL_ALL;
 
+    /* Allocate space for the offset and set it to zeros */
+    if (NULL==(ds->select.offset = H5MM_calloc(ds->extent.u.simple.rank*sizeof(hssize_t)))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    }
+
     FUNC_LEAVE(ds);
 }
 
@@ -1181,6 +1189,15 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
     assert(rank>=0);
     assert(0==rank || dims);
     
+    /* If there was a previous offset for the selection, release it */
+    if(space->select.offset!=NULL)
+        space->select.offset=H5MM_xfree(space->select.offset);
+
+    /* Allocate space for the offset and set it to zeros */
+    if (NULL==(space->select.offset = H5MM_calloc(rank*sizeof(hssize_t)))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    }
+
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->extent.type) {
         case H5S_SCALAR:
@@ -1567,7 +1584,7 @@ H5Sset_extent_none (hid_t space_id)
     H5TRACE1("e","i",space_id);
 
     /* Check args */
-    if ((space = H5I_object(space_id)) == NULL) {
+    if (H5_DATASPACE != H5I_group(space_id) || NULL == (space = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     }
 
@@ -1579,6 +1596,51 @@ H5Sset_extent_none (hid_t space_id)
 
     FUNC_LEAVE(SUCCEED);
 }   /* end H5Sset_extent_none() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Soffset_simple
+ PURPOSE
+    Changes the offset of a selection within a simple dataspace extent
+ USAGE
+    herr_t H5Soffset_simple(space_id, offset)
+        hid_t space_id;	        IN: Dataspace object to reset
+        const hssize_t *offset; IN: Offset to position the selection at
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+	This function creates an offset for the selection within an extent, allowing
+    the same shaped selection to be moved to different locations within a
+    dataspace without requiring it to be re-defined.
+--------------------------------------------------------------------------*/
+herr_t
+H5Soffset_simple (hid_t space_id, const hssize_t *offset)
+{
+    H5S_t		   *space = NULL;	/* dataspace to modify */
+
+    FUNC_ENTER(H5Soffset_simple, FAIL);
+    H5TRACE2("e","i*Hs",space_id,offset);
+
+    /* Check args */
+    if (H5_DATASPACE != H5I_group(space_id) || NULL == (space = H5I_object(space_id))) {
+        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+    }
+    if (offset == NULL) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
+    }
+
+    /* Allocate space for new offset */
+    if(space->select.offset==NULL) {
+        if (NULL==(space->select.offset = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        }
+    }
+
+    /* Copy the offset over */
+    HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.u.simple.rank);
+
+    FUNC_LEAVE(SUCCEED);
+}   /* end H5Soffset_simple() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_debug

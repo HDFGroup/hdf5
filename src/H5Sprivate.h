@@ -99,7 +99,7 @@ typedef struct {
 /* Selection information container */
 typedef struct {
     H5S_sel_type type;  /* Type of selection (list of points or hyperslabs) */
-    hsize_t *offset;    /* Offset within the extent (NULL means a 0 offset) */
+    hssize_t *offset;   /* Offset within the extent (NULL means a 0 offset) */
     hsize_t *order;     /* Selection order.  (NULL means a specific ordering of points) */
     hsize_t num_elem;   /* Number of elements in selection */
     union {
@@ -227,6 +227,7 @@ hsize_t H5S_select_npoints (const H5S_t *space);
 intn H5S_extend (H5S_t *space, const hsize_t *size);
 herr_t H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 			      const hsize_t *max);
+hbool_t H5S_select_valid (const H5S_t *space);
 herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
 		 intn fwidth);
 
@@ -288,6 +289,7 @@ herr_t H5S_point_add (H5S_t *space, size_t num_elemn, const hssize_t **coord);
 herr_t H5S_point_release (H5S_t *space);
 hsize_t H5S_point_npoints (const H5S_t *space);
 herr_t H5S_point_copy (H5S_t *dst, const H5S_t *src);
+hbool_t H5S_point_select_valid (const H5S_t *space);
 
 /* "All" select functions */
 herr_t H5S_all_init (const struct H5O_layout_t *layout,
@@ -341,5 +343,6 @@ hsize_t H5S_hyper_npoints (const H5S_t *space);
 int H5S_hyper_compare_regions (const void *r1, const void *r2);
 int H5S_hyper_compare_bounds (const void *r1, const void *r2);
 herr_t H5S_hyper_copy (H5S_t *dst, const H5S_t *src);
+hbool_t H5S_hyper_select_valid (const H5S_t *space);
 
 #endif

@@ -104,7 +104,14 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
     /* Copy regular fields */
     dst->select=src->select;
 
-/* Need to copy offset and order information still */
+/* Need to copy order information still */
+
+    /* Copy offset information */
+    if (NULL==(dst->select.offset = H5MM_calloc(src->extent.u.simple.rank*sizeof(hssize_t)))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    }
+    if(src->select.offset!=NULL)
+        HDmemcpy(dst->select.offset,src->select.offset,(src->extent.u.simple.rank*sizeof(hssize_t)));
 
     /* Perform correct type of copy based on the type of selection */
     switch (src->extent.type) {
@@ -631,7 +638,7 @@ H5S_select_npoints (const H5S_t *space)
 {
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5Sselect_npoints, FAIL);
+    FUNC_ENTER (H5S_select_npoints, FAIL);
 
     assert(space);
 
@@ -701,3 +708,90 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_sel_iter_release() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_valid
+ PURPOSE
+    Check whether the selection fits within the extent, with the current
+    offset defined.
+ USAGE
+    hbool_t H5Sselect_void(dsid)
+        hid_t dsid;             IN: Dataspace ID to query
+ RETURNS
+    TRUE if the selection fits within the extent, FALSE if it does not and
+        FAIL on an error.
+ DESCRIPTION
+    Determines if the current selection at the current offet fits within the
+    extent for the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hbool_t
+H5Sselect_valid (hid_t spaceid)
+{
+    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
+    hbool_t ret_value=FAIL;     /* return value */
+
+    FUNC_ENTER (H5Sselect_valid, 0);
+    H5TRACE1("b","i",spaceid);
+
+    /* Check args */
+    if (H5_DATASPACE != H5I_group(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
+    }
+
+    ret_value = H5S_select_valid(space);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Sselect_valid() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_valid
+ PURPOSE
+    Check whether the selection fits within the extent, with the current
+    offset defined.
+ USAGE
+    hbool_t H5Sselect_void(space)
+        H5S_t *space;             IN: Dataspace pointer to query
+ RETURNS
+    TRUE if the selection fits within the extent, FALSE if it does not and
+        FAIL on an error.
+ DESCRIPTION
+    Determines if the current selection at the current offet fits within the
+    extent for the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hbool_t
+H5S_select_valid (const H5S_t *space)
+{
+    hbool_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_select_valid, FAIL);
+
+    assert(space);
+
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_valid(space);
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_valid(space);
+            break;
+
+        case H5S_SEL_ALL:            /* Entire extent selected */
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=TRUE;
+            break;
+    } /* end switch */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_valid() */
