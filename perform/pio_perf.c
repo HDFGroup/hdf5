@@ -117,9 +117,9 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ha:A:cD:f:P:p:X:x:nd:F:i:Io:stT:w";
+static const char *s_opts = "ha:A:cCD:f:P:p:X:x:nd:F:i:Io:stT:w";
 #else
-static const char *s_opts = "ha:A:bcD:f:P:p:X:x:nd:F:i:Io:stT:w";
+static const char *s_opts = "ha:A:bcCD:f:P:p:X:x:nd:F:i:Io:stT:w";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -143,6 +143,15 @@ static struct long_options l_opts[] = {
     { "chun", no_arg, 'c' },
     { "chu", no_arg, 'c' },
     { "ch", no_arg, 'c' },
+    { "collective", no_arg, 'C' },
+    { "collectiv", no_arg, 'C' },
+    { "collecti", no_arg, 'C' },
+    { "collect", no_arg, 'C' },
+    { "collec", no_arg, 'C' },
+    { "colle", no_arg, 'C' },
+    { "coll", no_arg, 'C' },
+    { "col", no_arg, 'C' },
+    { "co", no_arg, 'C' },
     { "debug", require_arg, 'D' },
     { "debu", require_arg, 'D' },
     { "deb", require_arg, 'D' },
@@ -260,6 +269,7 @@ struct options {
     size_t max_xfer_size;       /* maximum transfer buffer size         */
     size_t min_xfer_size;       /* minimum transfer buffer size         */
     unsigned interleaved;       /* Interleaved vs. contiguous blocks    */
+    unsigned collective;        /* Collective vs. independent I/O       */
     int print_times;       	/* print times as well as throughputs   */
     int print_raw;         	/* print raw data throughput info       */
     off_t h5_alignment;         /* alignment in HDF5 file               */
@@ -401,6 +411,7 @@ run_test_loop(struct options *opts)
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
     parms.interleaved = opts->interleaved;
+    parms.collective = opts->collective;
     parms.h5_align = opts->h5_alignment;
     parms.h5_thresh = opts->h5_threshold;
     parms.h5_use_chunks = opts->h5_use_chunks;
@@ -1001,11 +1012,17 @@ report_parameters(struct options *opts)
     recover_size_and_print((long_long)opts->min_xfer_size, ":");
     recover_size_and_print((long_long)opts->max_xfer_size, "\n");
 
-    HDfprintf(output, "rank %d: Block Pattern in Dataset:", rank);
+    HDfprintf(output, "rank %d: Block Pattern in Dataset=", rank);
     if(opts->interleaved)
-        HDfprintf(output, "Interleaved");
+        HDfprintf(output, "Interleaved\n");
     else
-        HDfprintf(output, "Contiguous");
+        HDfprintf(output, "Contiguous\n");
+
+    HDfprintf(output, "rank %d: I/O Method for MPI and HDF5=", rank);
+    if(opts->collective)
+        HDfprintf(output, "Collective\n");
+    else
+        HDfprintf(output, "Independent\n");
 
     {
         char *prefix = getenv("HDF5_PARAPREFIX");
@@ -1048,6 +1065,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
     cl_opts->interleaved = 0;       /* Default to contiguous blocks in dataset */
+    cl_opts->collective = 0;        /* Default to independent I/O access */
     cl_opts->print_times = FALSE;   /* Printing times is off by default */
     cl_opts->print_raw = FALSE;     /* Printing raw data throughput is off by default */
     cl_opts->h5_alignment = 1;      /* No alignment for HDF5 objects by default */
@@ -1104,6 +1122,9 @@ parse_command_line(int argc, char *argv[])
         case 'c':
             /* Turn on chunked HDF5 dataset creation */
             cl_opts->h5_use_chunks = TRUE;
+            break;
+        case 'C':
+            cl_opts->collective = 1;
             break;
         case 'd':
             cl_opts->num_dsets = atoi(opt_arg);
@@ -1199,14 +1220,14 @@ parse_command_line(int argc, char *argv[])
         case 'T':
             cl_opts->h5_threshold = parse_size_directive(opt_arg);
             break;
+        case 'w':
+            cl_opts->h5_write_only = TRUE;
+            break;
         case 'x':
             cl_opts->min_xfer_size = parse_size_directive(opt_arg);
             break;
         case 'X':
             cl_opts->max_xfer_size = parse_size_directive(opt_arg);
-            break;
-        case 'w':
-            cl_opts->h5_write_only = TRUE;
             break;
         case 'h':
         case '?':
@@ -1298,6 +1319,7 @@ usage(const char *prog)
         printf("     -b, --binary                The elusive binary option\n");
 #endif  /* 0 */
         printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
+        printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs [default: off (i.e. independent I/O)]\n");
         printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
         printf("     -D DL, --debug=DL           Indicate the debugging level\n");
         printf("                                 [default: no debugging]\n");
