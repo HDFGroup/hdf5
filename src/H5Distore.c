@@ -121,9 +121,43 @@ typedef struct H5F_rdcc_ent_t {
 } H5F_rdcc_ent_t;
 typedef H5F_rdcc_ent_t *H5F_rdcc_ent_ptr_t; /* For free lists */
 
+/*
+ * B-tree key.	A key contains the minimum logical N-dimensional address and
+ * the logical size of the chunk to which this key refers.  The
+ * fastest-varying dimension is assumed to reference individual bytes of the
+ * array, so a 100-element 1-d array of 4-byte integers would really be a 2-d
+ * array with the slow varying dimension of size 100 and the fast varying
+ * dimension of size 4 (the storage dimensionality has very little to do with
+ * the real dimensionality).
+ *
+ * Only the first few values of the OFFSET and SIZE fields are actually
+ * stored on disk, depending on the dimensionality.
+ *
+ * The chunk's file address is part of the B-tree and not part of the key.
+ */
+typedef struct H5F_istore_key_t {
+    size_t	nbytes;				/*size of stored data	*/
+    hssize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    unsigned	filter_mask;			/*excluded filters	*/
+} H5F_istore_key_t;
+
+typedef struct H5F_istore_ud1_t {
+    H5F_istore_key_t	key;	                /*key values		*/
+    haddr_t		addr;			/*file address of chunk */
+    H5O_layout_t	mesg;		        /*layout message	*/
+    hsize_t		total_storage;	        /*output from iterator	*/
+    FILE		*stream;		/*debug output stream	*/
+    hsize_t		*dims;		        /*dataset dimensions	*/
+} H5F_istore_ud1_t;
+
+#define H5F_HASH_DIVISOR 1     /* Attempt to spread out the hashing */
+                               /* This should be the same size as the alignment of */
+                               /* of the smallest file format object written to the file.  */
+#define H5F_HASH(F,ADDR) H5F_addr_hash((ADDR/H5F_HASH_DIVISOR),(F)->shared->rdcc.nslots)
+
 /* Private prototypes */
 static haddr_t H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-				  const hssize_t offset[]);
+    const hssize_t offset[], H5F_istore_ud1_t *_udata);
 static void *H5F_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5F_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
 
@@ -162,35 +196,6 @@ static herr_t H5F_istore_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
                                 int indent, int fwidth, const void *key,
                                     const void *udata);
 
-/*
- * B-tree key.	A key contains the minimum logical N-dimensional address and
- * the logical size of the chunk to which this key refers.  The
- * fastest-varying dimension is assumed to reference individual bytes of the
- * array, so a 100-element 1-d array of 4-byte integers would really be a 2-d
- * array with the slow varying dimension of size 100 and the fast varying
- * dimension of size 4 (the storage dimensionality has very little to do with
- * the real dimensionality).
- *
- * Only the first few values of the OFFSET and SIZE fields are actually
- * stored on disk, depending on the dimensionality.
- *
- * The chunk's file address is part of the B-tree and not part of the key.
- */
-typedef struct H5F_istore_key_t {
-    size_t	nbytes;				/*size of stored data	*/
-    hssize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
-    unsigned	filter_mask;			/*excluded filters	*/
-} H5F_istore_key_t;
-
-typedef struct H5F_istore_ud1_t {
-    H5F_istore_key_t	key;	                /*key values		*/
-    haddr_t		addr;			/*file address of chunk */
-    H5O_layout_t	mesg;		        /*layout message	*/
-    hsize_t		total_storage;	        /*output from iterator	*/
-    FILE		*stream;		/*debug output stream	*/
-    hsize_t		*dims;		        /*dataset dimensions	*/
-} H5F_istore_ud1_t;
-
 /* inherits B-tree like properties from H5B */
 H5B_class_t H5B_ISTORE[1] = {{
     H5B_ISTORE_ID,		/*id			*/
@@ -208,12 +213,6 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5F_istore_encode_key,	/*encode		*/
     H5F_istore_debug_key,	/*debug			*/
 }};
-
-#define H5F_HASH_DIVISOR 1     /* Attempt to spread out the hashing */
-                               /* This should be the same size as the alignment of */
-                               /* of the smallest file format object written to the file.  */
-#define H5F_HASH(F,ADDR) H5F_addr_hash((ADDR/H5F_HASH_DIVISOR),(F)->shared->rdcc.nslots)
-
 
 /* Declare a free list to manage H5F_rdcc_ent_t objects */
 H5FL_DEFINE_STATIC(H5F_rdcc_ent_t);
@@ -1363,7 +1362,6 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
     H5F_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
     unsigned		u;			/*counters		*/
     size_t		chunk_size=0;		/*size of a chunk	*/
-    herr_t		status;			/*func return status	*/
     void		*chunk=NULL;		/*the file chunk	*/
     void		*ret_value;	        /*return value		*/
 
@@ -1371,6 +1369,11 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
     
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
+    /* Get the chunk's size */
+    assert(layout->chunk_size>0);
+    H5_ASSIGN_OVERFLOW(chunk_size,layout->chunk_size,hsize_t,size_t);
+
+    /* Search for the chunk in the cache */
     if (rdcc->nslots>0) {
         for (u=0, temp_idx=0; u<layout->ndims; u++) {
             temp_idx += offset[u];
@@ -1409,27 +1412,20 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
         HDfflush(stderr);
 #endif
         rdcc->nhits++;
-        assert(layout->chunk_size>0);
-        H5_ASSIGN_OVERFLOW(chunk_size,layout->chunk_size,hsize_t,size_t);
         if (NULL==(chunk=H5F_istore_chunk_alloc (chunk_size,pline)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
         
     } else {
         H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
+        haddr_t chunk_addr;             /* Address of chunk on disk */
 
         /*
          * Not in the cache.  Read it from the file and count this as a miss
          * if it's in the file or an init if it isn't.
          */
-        for (u=0; u<layout->ndims; u++)
-            udata.key.offset[u] = offset[u];
-        assert(layout->chunk_size>0);
-        H5_ASSIGN_OVERFLOW(chunk_size,layout->chunk_size,hsize_t,size_t);
-        udata.mesg = *layout;
-        udata.addr = HADDR_UNDEF;
-        status = H5B_find (f, dxpl_id, H5B_ISTORE, layout->addr, &udata);
+        chunk_addr = H5F_istore_get_addr(f, dxpl_id, layout, offset, &udata);
 
-        if (status>=0 && H5F_addr_defined(udata.addr)) {
+        if (H5F_addr_defined(chunk_addr)) {
             size_t		chunk_alloc=0;		/*allocated chunk size	*/
 
             /*
@@ -1440,7 +1436,7 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
             chunk_alloc = udata.key.nbytes;
             if (NULL==(chunk = H5F_istore_chunk_alloc (chunk_alloc,pline)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
-            if (H5F_block_read(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
+            if (H5F_block_read(f, H5FD_MEM_DRAW, chunk_addr, udata.key.nbytes, dxpl_id, chunk)<0)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk");
             if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata.key.filter_mask), dxpl_cache->err_detect, 
                      dxpl_cache->filter_cb, &(udata.key.nbytes), &chunk_alloc, &chunk)<0) {
@@ -1735,7 +1731,7 @@ HDfprintf(stderr,"%s: chunk_coords_in_elmts={",FUNC);
 for(u=0; u<layout->ndims; u++)
     HDfprintf(stderr,"%Hd%s",chunk_coords_in_elmts[u],(u<(layout->ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts);
+    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts, NULL);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,layout->chunk_size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -1842,7 +1838,7 @@ HDfprintf(stderr,"%s: chunk_coords_in_elmts={",FUNC);
 for(u=0; u<layout->ndims; u++)
     HDfprintf(stderr,"%Hd%s",chunk_coords_in_elmts[u],(u<(layout->ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts);
+    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts, NULL);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,layout->chunk_size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -2020,9 +2016,10 @@ done:
  */
 static haddr_t
 H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-		    const hssize_t offset[])
+		    const hssize_t offset[], H5F_istore_ud1_t *_udata)
 {
-    H5F_istore_ud1_t	udata;                  /* Information about a chunk */
+    H5F_istore_ud1_t	tmp_udata;      /* Information about a chunk */
+    H5F_istore_ud1_t	*udata;         /* Pointer to information about a chunk */
     unsigned	u;
     haddr_t	ret_value;		/* Return value */
     
@@ -2032,20 +2029,24 @@ H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(layout && (layout->ndims > 0));
     assert(offset);
 
+    /* Check for udata struct to return */
+    udata = (_udata!=NULL ? _udata : &tmp_udata);
+
     /* Initialize the information about the chunk we are looking for */
     for (u=0; u<layout->ndims; u++)
-	udata.key.offset[u] = offset[u];
-    udata.mesg = *layout;
-    udata.addr = HADDR_UNDEF;
+	udata->key.offset[u] = offset[u];
+    udata->mesg = *layout;
+    udata->addr = HADDR_UNDEF;
 
     /* Go get the chunk information */
-    if (H5B_find (f, dxpl_id, H5B_ISTORE, layout->addr, &udata)<0) {
+    if (H5B_find (f, dxpl_id, H5B_ISTORE, layout->addr, udata)<0) {
         H5E_clear();
+
 	HGOTO_ERROR(H5E_BTREE,H5E_NOTFOUND,HADDR_UNDEF,"Can't locate chunk info");
     } /* end if */
 
     /* Success!  Set the return value */
-    ret_value=udata.addr;
+    ret_value=udata->addr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2323,7 +2324,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     while (carry==0) {
         /* Check if the chunk exists yet on disk */
         chunk_exists=1;
-        if(H5F_istore_get_addr(f,dxpl_id,layout,chunk_offset)==HADDR_UNDEF) {
+        if(H5F_istore_get_addr(f,dxpl_id,layout,chunk_offset, NULL)==HADDR_UNDEF) {
             H5F_rdcc_t             *rdcc = &(f->shared->rdcc);	/*raw data chunk cache */
             H5F_rdcc_ent_t         *ent = NULL;              	/*cache entry  */
 
