@@ -47,6 +47,12 @@ typedef int H5Z_filter_t;
 #define H5Z_FLAG_REVERSE	0x0100	/*reverse direction; read	*/
 #define H5Z_FLAG_SKIP_EDC	0x0200	/*skip EDC filters for read	*/
 
+/* Special parameters for szip compression */
+#ifdef H5_HAVE_FILTER_SZIP
+#define H5_SZIP_RAW_OPTION_MASK 128
+#define H5_SZIP_NN_OPTION_MASK   32
+#endif /* H5_HAVE_FILTER_SZIP */
+
 /* Values to decide if EDC is enabled for reading data */
 typedef enum H5Z_EDC_t {
     H5Z_ERROR_EDC       = -1,   /* error value */
