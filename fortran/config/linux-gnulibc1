@@ -7,7 +7,7 @@
 # See BlankForm in this directory for details.
 
 # The default compiler is `gcc'.
-if test "X-" =  "X-$CC"; then
+if test -z "$CC"; then
     CC=gcc
     CC_BASENAME=gcc
 fi
@@ -36,11 +36,11 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-if test "X-" = "X-$F9X"; then
+if test -z "$F9X"; then
     F9X=pgf90
 fi
 
-if test "X-" = "X-$f9x_flags_set"; then
+if test -z "$f9x_flags_set"; then
     FFLAGS=
     DEBUG_FFLAGS=
     PROD_FFLAGS=

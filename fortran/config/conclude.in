@@ -138,13 +138,13 @@ uninstall-doc:
 ##
 mostlyclean:
 	@if test -n "$(LIB_OBJ)"; then                                        \
-	    -$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o);                              \
+	    $(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o);                               \
 	fi
 	@if test -n "$(TEST_OBJ)"; then                                       \
-	    -$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o);                            \
+	    $(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o);                             \
 	fi
 	@if test -n "$(PROG_OBJ)" || test -n "$(MOSTLYCLEAN)"; then           \
-	    -$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN);             \
+	    $(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN);              \
 	fi
 
 ## Like `mostlyclean' except it also removes the final targets: things like
@@ -153,7 +153,7 @@ mostlyclean:
 ##
 clean: mostlyclean
 	@if test -n "$(LIB)" -o -n "$(TEST_PROGS)" -o -n "$(PROGS)" -o -n "$(CLEAN)"; then \
-	    -$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN);                    \
+	    $(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN);                     \
 	fi
 	-$(RM) *.M *.a *.mod
 	-$(RM) -r .libs
