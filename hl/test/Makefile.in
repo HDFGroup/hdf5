@@ -1,0 +1,66 @@
+## HDF5 Library Test Makefile(.in)
+##
+## Copyright (C) 2001 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+## 
+top_srcdir=@top_srcdir@
+top_builddir=../..
+srcdir=@srcdir@
+@COMMENCE@
+
+## Add include directory to the C preprocessor flags and the h5test and hdf5
+## libraries to the library list.
+CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdir)/hl/src  @CPPFLAGS@
+		  
+
+## These are our main targets. They should be listed in the order to be
+## executed, generally most specific tests to least specific tests.
+RUNTEST=$(LT_RUN)
+
+TEST_PROGS=test_lite test_image test_table 
+
+## The libh5test.a library provides common support code for the tests. We link
+## this library statically because some systems can only link executables to
+## a single shared library and libhdf5 is much bigger than libh5test.
+LIBHDF5=$(top_builddir)/src/libhdf5.la
+LIBHDF5_HL=../src/libhdf5_hl.la
+LIB_SRC=
+LIB_OBJ=$(LIB_SRC:.c=.lo)
+PUB_LIB=
+
+## Temporary files.  These files are the ones created by setting the
+## HDF5_NOCLEANUP environment variable and running `make test' without
+## specifying a file prefix or low-level driver.  Changing the file
+## prefix or low-level driver with environment variables will influence 
+## the temporary file name in ways that the makefile is not aware of.
+MOSTLYCLEAN=$(TEST_PROGS)
+CLEAN=*.h5
+
+## Source and object files for programs...  The TEST_SRC list contains all the
+## source files and is used for things like dependencies, archiving, etc.  The
+## other source lists are for the individual tests, the files of which may
+## overlap with other tests.
+
+TEST_SRC=test_lite.c test_image.c test_table.c
+
+TEST_OBJ=$(TEST_SRC:.c=.lo)
+
+## Private header files (not to be installed)...
+PRIVATE_HDR=
+
+## How to build the tests...  They all depend on the hdf5_hl and hdf5
+## libraries.
+$(TEST_PROGS): $(LIBHDF5_HL) $(LIBHDF5)
+
+test_lite: test_lite.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ test_lite.lo $(LIBHDF5_HL) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+test_image: test_image.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ test_image.lo $(LIBHDF5_HL) $(LIBHDF5)  $(LDFLAGS) $(LIBS)
+
+test_table: test_table.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ test_table.lo $(LIBHDF5_HL) $(LIBHDF5)  $(LDFLAGS) $(LIBS)
+
+	
+@CONCLUDE@
