@@ -55,8 +55,8 @@ New Features
          
 Bug Fixes since HDF5-1.4.2 Release
 ==================================
-
-
+    * Fixed a bug when reading chunked datasets where the edge of the dataset
+      would be incorrectly detected and generate an assertion failure.
 
 
 Documentation
