@@ -5737,7 +5737,7 @@ my_isnan(dtype_t type, void *val)
 	} else if (FLT_LDOUBLE==type) {
 	    long double x;
 	    HDmemcpy(&x, val, sizeof(long double));
-	    sprintf(s, "%LLg", x);
+	    sprintf(s, "%Lg", x);
 #endif
 	} else {
 	    return 0;
@@ -6617,9 +6617,6 @@ test_conv_int_float(const char *name, hbool_t run_special, hid_t src, hid_t dst)
 
 	/* Check the results from the library against hardware */
 	for (j=0; j<nelmts; j++) {
-            if(FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
-                if(my_isnan(src_type, saved+j*src_size))
-                    continue;
 
 	    if (FLT_FLOAT==dst_type) {
 		hw = (unsigned char*)&hw_float;
@@ -7059,6 +7056,33 @@ test_conv_int_float(const char *name, hbool_t run_special, hid_t src, hid_t dst)
                     }
                 }
             }
+            
+            /*          Test library's handling of NaN:
+ 	     * Hardware usually doesn't handle NaN too gracefully. The
+	     * hardware conversion result is usually garbage so we must handle 
+             * those cases differetly when checking results.
+             *
+             *          Test user's exception handler when NaN happens:  
+             * Try to follow the except_func callback function to check if the 
+             * desired value was set.
+	     */
+            if (run_special && (FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)) {
+                if (my_isnan(src_type, src_bits)) {
+                    if(!except_set) {
+                        if(!strcmp(name, "sw")) {
+                            if (H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 1)<0)
+                                continue; /*no error. Software conversion set integer to 0.*/
+                        } else if(!strcmp(name, "hw")) {
+                            continue; /*don't compare because hardware conversion may fill in garbage*/
+                        } 
+                    } else {
+                        /* fill_value is small so we know only the 1st byte is set */
+                        if (dst_bits[0] == fill_value)
+                            continue; /*no error*/
+                    }
+                }
+            }
+
 /* On some machines (notably the SGI and Solaris 64-bit machines) unsigned long 
  * values are not converted to float or double values correctly, they are
  * consistently off by the lowest bit being rounded oppositely to our
