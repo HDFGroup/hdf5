@@ -2124,6 +2124,19 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	if (H5G_ent_decode(file, &p, &root_ent/*out*/)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root symbol entry");
 
+        /* Check if superblock address is different from base address and
+         * adjust base address and "end of address" address if so.
+         */
+        if(!H5F_addr_eq(shared->super_addr,shared->base_addr)) {
+            /* Check if the superblock moved earlier in the file */
+            if(H5F_addr_lt(shared->super_addr,shared->base_addr))
+                stored_eoa -= (shared->base_addr-shared->super_addr);
+            /* The superblock moved later in the file */
+            else
+                stored_eoa += (shared->super_addr-shared->base_addr);
+            shared->base_addr = shared->super_addr;
+        } /* end if */
+
         /* Compute super block checksum */
         assert(sizeof(chksum)==sizeof(shared->super_chksum));
         for(q=(uint8_t *)&chksum, chksum=0, i=0; i<(fixed_size+variable_size); i++)
@@ -2196,7 +2209,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         
 	/*
 	 * Tell the file driver how much address space has already been
-	 * allocated so that it knows how to allocated additional memory.
+	 * allocated so that it knows how to allocate additional memory.
 	 */
 	if (H5FD_set_eoa(lf, stored_eoa)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to set end-of-address marker for file");
