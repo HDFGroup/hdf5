@@ -53,14 +53,14 @@ uninstall:
 # remove things like object files but not libraries or executables.
 #
 mostlyclean:
-	$(RM) $(LIB_OBJ) $(PROG_OBJ)
+	$(RM) $(LIB_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
 
 # Like `mostlyclean' except it also removes the final targets: things like
 # libraries and executables.  This target doesn't remove any file that
 # is part of the HDF5 distribution.
 #
 clean: mostlyclean
-	$(RM) $(LIB) $(PROGS)
+	$(RM) $(LIB) $(PROGS) $(CLEAN)
 
 # Like `clean' except it also removes files that were created by running
 # configure.  If you've unpacked the source and built HDF5 without creating
@@ -68,7 +68,7 @@ clean: mostlyclean
 # in the distribution.
 #
 distclean: clean
-	$(RM) .depend TAGS *~ core *.bak *.old *.new
+	$(RM) .depend TAGS *~ core *.bak *.old *.new $(DISTCLEAN)
 	@if test -f Makefile.in; then					      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
@@ -77,7 +77,6 @@ distclean: clean
 # the makefile, including those generated from autoheader and autoconf.
 #
 maintainer-clean: distclean
-
 
 # Implicit rules
 .c.a:
