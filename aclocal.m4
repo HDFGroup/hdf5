@@ -1502,24 +1502,16 @@ else
 	archive_expsym_cmds="\$CC $shared_flag"' -o $output_objdir/$soname ${wl}-h$soname $libobjs $deplibs $compiler_flags ${wl}${allow_undefined_flag} '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols"
       else
         #######################################################################
-        # This is a MAJOR HACK(tm) to get HDF5 to compile on Pacific Blue.
+        # This is a MAJOR HACK(tm) to get HDF5 to compile on AIX systems.
         # The ``-b nolibpath -b ...'' flags were messing with the mpicc
         # compiler's already defined library paths and it wasn't able to find
         # the libraries it needed to run....DOH!
-	# s[0-9][0-9][0-9][0-9][0-9] are seaborg.nersc.gov nodes
-	# Cu[0-9][0-9] are copper.ncsa.uiuc.edu nodes
-        hname="`hostname`"
-
-        case "$hname" in
-          *pacific.llnl.gov | snow*.llnl.gov | \
-          s[[0-9]][[0-9]][[0-9]][[0-9]][[0-9]] | \
-          Cu[[0-9]][[0-9]])
+        # Apply the fix unless HDF5_AIX_LIBTOOL_NOPATCH is defined.
+        if test "$HDF5_AIX_LIBTOOL_NOPATCH" = ""; then
             hardcode_libdir_flag_spec=' '
-            ;;
-          *)
+        else
             hardcode_libdir_flag_spec='${wl}-bnolibpath ${wl}-blibpath:$libdir:/usr/lib:/lib'
-            ;;
-        esac
+        fi
         #
         # End MAJOR HACK
         #
