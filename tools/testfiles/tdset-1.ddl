@@ -1,3 +1,6 @@
+#############################
+Expected output for 'h5dump tdset.h5'
+#############################
 HDF5 "tdset.h5" {
 GROUP "/" {
    DATASET "dset1" {

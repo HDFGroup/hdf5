@@ -1,3 +1,6 @@
+#############################
+Expected output for 'h5dump -header -d dset1 /dset2 dset3 tdset.h5'
+#############################
 HDF5 "tdset.h5" {
 DATASET "dset1" {
    DATATYPE { H5T_STD_I32BE }
