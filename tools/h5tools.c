@@ -29,7 +29,7 @@ ProgType programtype = UNKNOWN;
 static void display_numeric_data(hsize_t hs_nelmts, hid_t p_type,
 				 unsigned char *sm_buf, size_t p_type_nbytes,
 				 hsize_t p_nelmts, hsize_t dim_n_size,
-				 hsize_t elmtno);
+				 hsize_t elmtno, hid_t container);
 static void display_string(hsize_t hs_nelmts, hid_t p_type,
 			   unsigned char *sm_buf, size_t p_type_nbytes,
 			   hsize_t p_nelmts, hsize_t dim_n_size,
@@ -901,9 +901,14 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		H5Tclose(obj);
 		break;
 	    default:
-		h5dump_str_append(str, "%u-", otype);
-		/* unable to close `obj' since we don't know the type */
-		break;
+			if (programtype == H5LS) {
+				h5dump_str_append(str, "%u-", otype);
+			}
+			else if (programtype == H5DUMP) {
+				h5dump_str_append(str, "unknown object reference type");
+			}
+			/* unable to close `obj' since we don't know the type */
+			break;
 	    }
 
 	    /* Print OID */
@@ -1272,12 +1277,12 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	    switch (H5Tget_class(p_type)) {
 	    case H5T_INTEGER:
 		display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes,
-				      p_nelmts, dim_n_size, elmtno);
+				      p_nelmts, dim_n_size, elmtno, dset);
 		break;
 			
 	    case H5T_FLOAT:
 		display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes,
-				      p_nelmts, dim_n_size, elmtno);
+				      p_nelmts, dim_n_size, elmtno, dset);
 		break;
 			
 	    case H5T_TIME:
@@ -1301,6 +1306,9 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 		compound_data = 0;
 		break;
 			
+		case H5T_REFERENCE:
+			display_numeric_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
+				      p_nelmts, dim_n_size, elmtno, dset);
 	    default:
 		break;
 	    }
@@ -1723,7 +1731,7 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
  */
 static void display_numeric_data 
 (hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
- hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno) {
+ hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno, hid_t container) {
 
 hsize_t i;
 /*char p_buf[256];		*/
@@ -1755,7 +1763,9 @@ struct h5dump_str_t tempstr;
 
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
-		h5dump_sprint(&tempstr, &info, -1/*no container*/, p_type, sm_buf+i*p_type_nbytes);
+	//	h5dump_sprint(&tempstr, &info, -1/*no container*/, p_type, sm_buf+i*p_type_nbytes);
+		h5dump_sprint(&tempstr, &info, container, p_type, sm_buf+i*p_type_nbytes);
+
          if ((int)(strlen(out_buf)+tempstr.len+1) > (nCols-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
@@ -2081,12 +2091,12 @@ int     nmembs, i, j, k, ndims, perm[4];
             switch (H5Tget_class(memb)) {
             case H5T_INTEGER:
                  display_numeric_data
-                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0) ;
+                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0, -1) ;
                  break;
 
             case H5T_FLOAT:
                  display_numeric_data
-                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0) ;
+                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0, -1) ;
                  break;
 
             case H5T_TIME:
@@ -2240,12 +2250,12 @@ h5dump_simple(hid_t oid, hid_t p_type, int obj_data)
         switch (H5Tget_class(p_type)) {
         case H5T_INTEGER:
              display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
-                                   p_nelmts, dim_n_size, elmtno);
+                                   p_nelmts, dim_n_size, elmtno, -1);
              break;
 
         case H5T_FLOAT:
              display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
-                                   p_nelmts, dim_n_size, elmtno);
+                                   p_nelmts, dim_n_size, elmtno, -1);
              break;
 
         case H5T_TIME:
@@ -2472,12 +2482,12 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 	switch (H5Tget_class(p_type)) {
 	case H5T_INTEGER:
 		display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
-			nelmts, dim_n_size, 0);
+			nelmts, dim_n_size, 0, oid);
 		break;
 		
 	case H5T_FLOAT:
 		display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
-			nelmts, dim_n_size, 0);
+			nelmts, dim_n_size, 0, oid);
 		break;
 		
 	case H5T_TIME:
@@ -2499,7 +2509,10 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 		display_compound_data (nelmts, p_type, sm_buf, p_type_nbytes, nelmts, 0);
 		compound_data = 0;
 		break;
-		
+	case H5T_REFERENCE:
+		display_numeric_data(nelmts, p_type, sm_buf, p_type_nbytes, 
+			nelmts, dim_n_size, 0, oid);
+		break;
 	default: break;
 	}
 	free(sm_buf);

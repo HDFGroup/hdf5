@@ -317,7 +317,9 @@ H5G_stat_t statbuf;
         }
 
         break;
-
+	case H5T_REFERENCE:
+		printf("H5T_REFERENCE");
+		break;
     default:
         printf( "unknown data type");
         status = 1;
@@ -471,7 +473,7 @@ hid_t  attr_id, type, space;
         if (display_data) dump_data(attr_id, ATTRIBUTE_DATA);
         H5Tclose(type);
         H5Sclose(space);
-	H5Aclose (attr_id);
+		H5Aclose (attr_id);
         indentation (indent);
         end_obj();
 
@@ -929,6 +931,9 @@ hid_t  type, space;
     case H5T_COMPOUND:
          dump_data(did, DATASET_DATA);
          break;
+	case H5T_REFERENCE:
+		 dump_data(did, DATASET_DATA);
+		 break;
     default: break;
     }
 
