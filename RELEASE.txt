@@ -62,13 +62,13 @@ Bug Fixes since HDF5-1.4.0 Release
      Earlier releases of the h4toh5 utility produced images that did not
      correctly conform to the HDF5 Image and Palette Specification.
 
-     http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+       http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
 
      Several required HDF5 attributes are omitted, and the dataspace
      is reversed (i.e., the ht. and width of the image dataset is
      incorrectly described.)  For more information, please see:
 
-     http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.html
+       http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.html
 
    * Fixed bug with contiguous hyperslabs not being detected, causing
      slower I/O than necessary.
@@ -84,7 +84,7 @@ Bug Fixes since HDF5-1.4.0 Release
 Documentation
 =============
 
-   
+
 Platforms Tested
 ================
 
@@ -99,7 +99,7 @@ Due to the nature of this release only C library and tools were tested.
     FreeBSD 4.2                   gcc 2.95.2
                                   g++ 2.95.2
     HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
-    HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
+    HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20
     IRIX 6.5                      MIPSpro cc 7.30
                                   mpich-1.2.1
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
@@ -136,6 +136,8 @@ Supported Configuration Features Summary
 Known Problems
 ==============
 
+    * The --enable-static-exec configure flag fails to compile for HP-UX
+      11.00 platforms.
     * See "Known problems" section for the HDF5 1.4.0 release in the
       HISTORY.txt file.
-      
+
