@@ -1296,6 +1296,15 @@ parse_command_line(int argc, char *argv[])
     if (!cl_opts->io_types)
 	cl_opts->io_types = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* run all API */
 
+    /* verify parameters sanity.  Adjust if needed. */
+    /* cap xfer_size with bytes per process */
+    if (cl_opts->min_xfer_size > cl_opts->num_bpp)
+	cl_opts->min_xfer_size = cl_opts->num_bpp;
+    if (cl_opts->max_xfer_size > cl_opts->num_bpp)
+	cl_opts->max_xfer_size = cl_opts->num_bpp;
+    if (cl_opts->min_xfer_size > cl_opts->max_xfer_size)
+	cl_opts->min_xfer_size = cl_opts->max_xfer_size;
+
     return cl_opts;
 }
 
