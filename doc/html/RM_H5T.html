@@ -601,7 +601,7 @@ END SUBROUTINE h5tcommitted_f
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Tconvert</code>(<em>hid_t</em> <code>src_id</code>,
         <em>hid_t</em> <code>dst_id</code>,
-        <em>hsize_t</em> <code>nelmts</code>,
+        <em>size_t</em> <code>nelmts</code>,
         <em>void *</em><code>buf</code>,
         <em>void *</em><code>background</code>,
         <em>hid_t</em> <code>plist_id</code>
@@ -636,7 +636,7 @@ END SUBROUTINE h5tcommitted_f
 		    <td valign="top"><em>hid_t</em> <code>dst_id</code></td>
             <td valign="top">Identifier for the destination datatype.</td></tr>
         <tr>
-		    <td valign="top"><em>hsize_t</em> <code>nelmts</code></td>
+		    <td valign="top"><em>size_t</em> <code>nelmts</code></td>
             <td valign="top">Size of array <code>buf</code>.</td></tr>
         <tr>
 		    <td valign="top"><em>void *</em><code>buf</code></td>
@@ -2917,7 +2917,7 @@ END SUBROUTINE h5tpack_f
 <pre><code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
                               <em>hid_t </em><code>dst_id</code>, 
                               <em>H5T_cdata_t *</em><code>cdata</code>,
-                              <em>hsize_t </em><code>nelmts</code>, 
+                              <em>size_t </em><code>nelmts</code>, 
                               <em>size_t </em><code>buf_stride</code>, 
                               <em>size_t </em><code>bkg_stride</code>, 
                               <em>void *</em><code>buf</code>, 
@@ -3973,7 +3973,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 24 February 2004");
+document.writeln("Last modified: 8 September 2004");
 -->
 </SCRIPT>
  
