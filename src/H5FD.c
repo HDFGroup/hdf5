@@ -73,16 +73,16 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
 /*
  * Global count of the number of H5FD_t's handed out.  This is used as a
  * "serial number" for files that are currently open and is used for the
- * 'fileno[2]' field in H5G_stat_t.  However, if a VFL driver is not able
+ * 'fileno' field in H5G_stat_t.  However, if a VFL driver is not able
  * to detect whether two files are the same, a file that has been opened
  * by H5Fopen more than once with that VFL driver will have two different
  * serial numbers.  :-/
  *
- * Also, if a file is opened, the 'fileno[2]' field is retrieved for an
- * object and the file is closed and re-opened, the 'fileno[2]' value will
+ * Also, if a file is opened, the 'fileno' field is retrieved for an
+ * object and the file is closed and re-opened, the 'fileno' value will
  * be different.
  */
-static unsigned long file_serial_no[2];
+static unsigned long file_serial_no;
 
 
 /*-------------------------------------------------------------------------
@@ -108,12 +108,11 @@ H5FD_init_interface(void)
 
     FUNC_ENTER_NOINIT(H5FD_init_interface);
 
-    if (H5I_init_group(H5I_VFL, H5I_VFL_HASHSIZE, 0,
-		       (H5I_free_t)H5FD_free_cls)<0)
+    if (H5I_init_group(H5I_VFL, H5I_VFL_HASHSIZE, 0, (H5I_free_t)H5FD_free_cls)<0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* Reset the file serial numbers */
-    HDmemset(file_serial_no,0,sizeof(file_serial_no));
+    file_serial_no=0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -855,12 +854,11 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
 
     /* Increment the global serial number & assign it to this H5FD_t object */
-    if(++file_serial_no[0]==0) {
-        /* (Just error out if we wrap both numbers around for now...) */
-        if(++file_serial_no[1]==0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number");
+    if(++file_serial_no==0) {
+        /* (Just error out if we wrap around for now...) */
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number");
     } /* end if */
-    HDmemcpy(file->fileno,file_serial_no,sizeof(file_serial_no));
+    file->fileno=file_serial_no;
 
     /* Set return value */
     ret_value=file;
@@ -3296,11 +3294,11 @@ H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
     assert(filenum);
 
     /* Retrieve the file's serial number */
-    HDmemcpy(filenum,file->fileno,sizeof(file->fileno));
+    HDmemcpy(filenum,&file->fileno,sizeof(file->fileno));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5F_get_fileno() */
+} /* end H5FD_get_fileno() */
 
 
 /*--------------------------------------------------------------------------
