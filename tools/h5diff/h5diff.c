@@ -844,31 +844,32 @@ static
 int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
                   const char *obj2_name, options_t options )
 {
+ void         *edata;
+ hid_t        (*func)(void*);
+ hid_t        dset1_id  =-1;
+ hid_t        dset2_id  =-1;
+ hid_t        space1_id =-1;
+ hid_t        space2_id =-1;
+ hid_t        f_type1=-1, f_type2=-1; /* file data type */ 
+ hid_t        m_type1=-1, m_type2=-1; /* memory data type */
+ size_t       f_size1, f_size2;       /* size of type in file */
+ size_t       m_size1, m_size2;       /* size of type in memory */
+ H5T_sign_t   sign1, sign2;           /* sign of type */
+ int          rank1, rank2; 
+ void         *buf1=NULL, *buf2=NULL;
+ hsize_t      tot_cnt1, tot_cnt2;
+ hsize_t      dims1[32], dims2[32];
+ hsize_t      maxdim1[32], maxdim2[32];
+ H5T_class_t  tclass1;
+ H5T_class_t  tclass2;
+ int          nfound=0;               /* number of differences found */
+ const char   *name1=NULL;            /* relative names */
+ const char   *name2=NULL;
+ int          maxdim_diff=0;          /* maximum dimensions are different */
+ int          dim_diff=0;             /* current dimensions are different */
+ int          can1, can2;             /* supported diff */
+ int          i;
 
- hid_t   dset1_id  =-1;
- hid_t   dset2_id  =-1;
- hid_t   space1_id =-1;
- hid_t   space2_id =-1;
- hid_t   f_type1=-1, f_type2=-1; /* file data type */ 
- hid_t   m_type1=-1, m_type2=-1; /* memory data type */
- size_t  f_size1, f_size2;       /* size of type in file */
- size_t  m_size1, m_size2;       /* size of type in memory */
- H5T_sign_t sign1, sign2;        /* sign of type */
- int     rank1, rank2; 
- void    *buf1=NULL, *buf2=NULL;
- hsize_t tot_cnt1, tot_cnt2;
- hsize_t dims1[32], dims2[32], maxdim1[32], maxdim2[32];
- H5T_class_t tclass1;
- H5T_class_t tclass2;
- int     i;
- int     nfound=0; /* number of differences found */
- void    *edata;
- hid_t   (*func)(void*);
- const char *name1=NULL; /* relative names */
- const char *name2=NULL;
- int maxdim_diff=0;
- int dim_diff=0;
- int can1, can2;
 
  /* disable error reporting */
  H5Eget_auto(&func, &edata);
@@ -885,7 +886,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   printf("Cannot open dataset <%s>\n", obj1_name );
   goto out;
  }
-
  if ( (dset2_id = H5Dopen(file2_id,obj2_name)) < 0 )
  {
   printf("Cannot open dataset <%s>\n", obj2_name );
@@ -922,7 +922,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  * Get the file data type 
  *-------------------------------------------------------------------------
  */
- 
+
  /* Get the data type */
  if ( (f_type1 = H5Dget_type(dset1_id)) < 0 )
   goto out;
