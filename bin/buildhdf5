@@ -51,12 +51,6 @@ hosts building simultantously using a common source code.
 	  .../arabica     # for SunOS 2.7
 	  .../arabicapp   # for SunOS 2.7 parallel
 	  .../burrwhite   # for Linux 2.4
-
-Installing binary
-=================
-This command always install the binary in \$PWD/installdir.
-This allows multiple install testing in the same host if the srcdir
-configure is used.
 EOF
 }
 
