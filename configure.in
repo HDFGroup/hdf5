@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 1997, 1998, 1999, 2000, 2001
+dnl Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002
 dnl     National Center for Supercomputing Applications
 dnl     All rights reserved.
 
@@ -1745,6 +1745,8 @@ touch ./config/stamp2
 
 # Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+
+chmod 755 tools/misc/h5cc
 
 dnl We don't want inline defined for C++ compilers
 dnl Don't worry about the C++ ifdef wrappers in the H5pubconf file, since
