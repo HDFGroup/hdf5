@@ -87,12 +87,13 @@ converter.*/
 /* 6. define HDF object label.*/
 #define SDSLABEL    "SDS"
 #define VDATALABEL  "Vdata"
+#define VDATTRLAB   "Vdata attribute"
 #define VGROUPLABEL "Vgroup"
 #define GRLABEL     "GR"
 #define RAST8LABEL  "raster8"
 #define RAST24LABEL "raster24"
 #define PALABEL     "palette"
-
+#define LABEL_LENG   20
 /* 7. define "IMAGE" CLASS required by image spec. */
 #define IM_CLASS    "IMAGE"
 
@@ -135,7 +136,13 @@ converter.*/
 independent vdata is hdf chunking table _HDF_CHK_TBL_CLASS, if it becomes
 public constant for hdf lib, this constant can be released.*/
 #define _HDF_CHK_TBL_CLASS "_HDF_CHK_TBL_"
+
+/*11. the compression level currently is set to the maximum level.*/
+#define GZIP_COMLEVEL 9
  
+/*12. fake sds dimension name*/
+#define fakeDim  "fakeDim"
+
 extern int32 estnum_vg;
 extern int32 estnum_vd;
 extern int32 num_sds;
