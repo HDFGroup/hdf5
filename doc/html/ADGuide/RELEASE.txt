@@ -1,4 +1,4 @@
-HDF5 version 1.5.18 released on Fri Jan 11 07:43:37 CST 2002
+HDF5 version 1.5.19 released on Sat Jan 26 05:14:56 CST 2002
 ================================================================================
 
 
@@ -101,6 +101,8 @@ Library
       option).
     * Fixed bug where variable-length datatypes for attributes was not working
       correctly.
+    * Fixed bug where raw data re-allocated from the free-list would sometimes
+      overlap with the metadata accumulator and get corrupted. QAK - 1/23/02
 
 Configuration
 -------------
