@@ -361,8 +361,8 @@ Platforms Tested
     Windows 2000 (NT5.0)          MSVC++ 6.0
                                   DEC Visual Fortran 6.0
                                   Intel C and F90 compilers version 7.1
-    Windows XP                    .NET
-    Windows NT4.0                 Code Warrior 6.0
+				  Code Warrior 8.0
+    Windows XP                    MSVC++.NET
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
