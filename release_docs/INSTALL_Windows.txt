@@ -22,8 +22,9 @@ Preconditions
    3. Run WinZip on hdf5-1_4_2.zip (the entire source tree) and
       extract hdf5 package into c:\MyHDFstuff(or whatever drive 
       and folder name you would like to choose). This creates a 
-      directory called 'hdf5'under MyHDFstuff which contains 
-      several files and directories.
+      directory called 'hdf5xxx'under MyHDFstuff which contains 
+      several files and directories. Rename directory "hdf5xxx"
+      into "hdf5".
 
    4. HDF5 uses zlib for compression and zlib is distributed 
       with hdf5 lib. If you have your own version read section 
