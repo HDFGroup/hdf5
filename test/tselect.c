@@ -49,6 +49,13 @@ static char		RcsId[] = "$Revision$";
 #define SPACE3_DIM1	15
 #define SPACE3_DIM2	26
 
+/* 3-D dataset with fixed dimensions */
+#define SPACE4_NAME  "Space4"
+#define SPACE4_RANK	3
+#define SPACE4_DIM1	11
+#define SPACE4_DIM2	13
+#define SPACE4_DIM3	17
+
 /* Element selection information */
 #define POINT1_NPOINTS 10
 
@@ -1412,7 +1419,716 @@ test_select_point_offset(void)
     /* Free memory buffers */
     free(wbuf);
     free(rbuf);
-}   /* test_select_point() */
+}   /* test_select_point_offset() */
+
+/****************************************************************
+**
+**  test_select_hyper_union(): Test basic H5S (dataspace) selection code.
+**      Tests unions of hyperslabs of various sizes and dimensionalities.
+** 
+****************************************************************/
+static void 
+test_select_hyper_union(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hid_t		xfer;	    /* Dataset Transfer Property List ID */
+    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    size_t      begin[SPACE2_DIM1]=     /* Offset within irregular block */
+        {0,0,0,0,0,0,0,0,0,0,           /* First ten rows start at offset 0 */
+        5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5}; /* Next eighteen rows start at offset 5 */
+    size_t      len[SPACE2_DIM1]=       /* Len of each row within irregular block */
+        {10,10,10,10,10,10,10,10,       /* First eight rows are 10 long */
+         20,20,                         /* Next two rows are 20 long */
+        15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}; /* Next eighteen rows are 15 long */
+    uint8      *wbuf,       /* buffer to write to disk */
+               *rbuf,       /* buffer read from disk */
+               *tbuf,       /* temporary buffer pointer */
+               *tbuf2;      /* temporary buffer pointer */
+    intn        i,j;        /* Counters */
+    herr_t		ret;		/* Generic return value		*/
+    hsize_t	    npoints;	/* Number of elements in selection */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Hyperslab Selection Functions with unions of hyperslabs\n"));
+
+    /* Allocate write & read buffers */
+    wbuf=malloc(sizeof(uint8)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+
+    /* Initialize write buffer */
+    for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
+        for(j=0; j<SPACE2_DIM2; j++)
+            *tbuf++=(uint8)((i*SPACE2_DIM2)+j);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+/* Test simple case of one block overlapping another */
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 2x15x13 hyperslab for disk dataset */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select 8x26 hyperslab for memory dataset */
+    start[0]=15; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=8; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Union overlapping 8x26 hyperslab for memory dataset (to form a 15x26 selection) */
+    start[0]=22; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=8; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    npoints = H5Sget_select_npoints(sid2);
+    VERIFY(npoints, 15*26, "H5Sget_select_npoints");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE3_RANK, dims3, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 15x26 hyperslab for reading memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=15; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read with data written out */
+    for(i=0; i<SPACE3_DIM1; i++) {
+        tbuf=wbuf+((i+15)*SPACE2_DIM2);
+        tbuf2=rbuf+(i*SPACE3_DIM2);
+        for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
+            if(*tbuf!=*tbuf2) {
+                printf("hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",i,j,(int)*tbuf,(int)*tbuf2);
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+/* Test simple case of several block overlapping another */
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 2x15x13 hyperslab for disk dataset */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select 8x15 hyperslab for memory dataset */
+    start[0]=15; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=8; count[1]=15;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Union overlapping 8x15 hyperslab for memory dataset (to form a 15x15 selection) */
+    start[0]=22; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=8; count[1]=15;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Union overlapping 15x15 hyperslab for memory dataset (to form a 15x26 selection) */
+    start[0]=15; start[1]=11;
+    stride[0]=1; stride[1]=1;
+    count[0]=15; count[1]=15;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    npoints = H5Sget_select_npoints(sid2);
+    VERIFY(npoints, 15*26, "H5Sget_select_npoints");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE3_RANK, dims3, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 15x26 hyperslab for reading memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=15; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read with data written out */
+    for(i=0; i<SPACE3_DIM1; i++) {
+        tbuf=wbuf+((i+15)*SPACE2_DIM2);
+        tbuf2=rbuf+(i*SPACE3_DIM2);
+        for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
+            if(*tbuf!=*tbuf2) {
+                printf("hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",i,j,(int)*tbuf,(int)*tbuf2);
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+/* Test disjoint case of two non-overlapping blocks */
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 2x15x13 hyperslab for disk dataset */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select 7x26 hyperslab for memory dataset */
+    start[0]=1; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=7; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Union non-overlapping 8x26 hyperslab for memory dataset (to form a 15x26 disjoint selection) */
+    start[0]=22; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=8; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    npoints = H5Sget_select_npoints(sid2);
+    VERIFY(npoints, 15*26, "H5Sget_select_npoints");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset3",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE3_RANK, dims3, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 15x26 hyperslab for reading memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=15; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read with data written out */
+    for(i=0; i<SPACE3_DIM1; i++) {
+        /* Jump over gap in middle */
+        if(i<7)
+            tbuf=wbuf+((i+1)*SPACE2_DIM2);
+        else
+            tbuf=wbuf+((i+15)*SPACE2_DIM2);
+        tbuf2=rbuf+(i*SPACE3_DIM2);
+        for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
+            if(*tbuf!=*tbuf2) {
+                printf("hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",i,j,(int)*tbuf,(int)*tbuf2);
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+/* Test disjoint case of two non-overlapping blocks with hyperslab caching turned off */
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 2x15x13 hyperslab for disk dataset */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select 7x26 hyperslab for memory dataset */
+    start[0]=1; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=7; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Union non-overlapping 8x26 hyperslab for memory dataset (to form a 15x26 disjoint selection) */
+    start[0]=22; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=8; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    npoints = H5Sget_select_npoints(sid2);
+    VERIFY(npoints, 15*26, "H5Sget_select_npoints");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset4",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    xfer = H5Pcreate (H5P_DATASET_XFER);
+    CHECK(xfer, FAIL, "H5Pcreate");
+
+    ret = H5Pset_hyper_cache(xfer,0,1);
+    CHECK(ret, FAIL, "H5Pset_hyper_cache");
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE3_RANK, dims3, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 15x26 hyperslab for reading memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=15; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Close transfer property list */
+    ret = H5Pclose(xfer);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Compare data read with data written out */
+    for(i=0; i<SPACE3_DIM1; i++) {
+        /* Jump over gap in middle */
+        if(i<7)
+            tbuf=wbuf+((i+1)*SPACE2_DIM2);
+        else
+            tbuf=wbuf+((i+15)*SPACE2_DIM2);
+        tbuf2=rbuf+(i*SPACE3_DIM2);
+        for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
+            if(*tbuf!=*tbuf2) {
+                printf("hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",i,j,(int)*tbuf,(int)*tbuf2);
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+/* Test case of two blocks which overlap corners and must be split */
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 2x15x13 hyperslab for disk dataset */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select 10x10 hyperslab for memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=10; count[1]=10;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Union overlapping 15x20 hyperslab for memory dataset (forming a irregularly shaped region) */
+    start[0]=8; start[1]=5;
+    stride[0]=1; stride[1]=1;
+    count[0]=20; count[1]=15;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    npoints = H5Sget_select_npoints(sid2);
+    VERIFY(npoints, 15*26, "H5Sget_select_npoints");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset5",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE3_RANK, dims3, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 15x26 hyperslab for reading memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=15; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read with data written out */
+    for(i=0,tbuf2=rbuf; i<SPACE2_DIM1; i++) {
+        tbuf=wbuf+(i*SPACE2_DIM2)+begin[i];
+        for(j=0; j<(intn)len[i]; j++, tbuf++, tbuf2++) {
+            if(*tbuf!=*tbuf2) {
+                printf("hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",i,j,(int)*tbuf,(int)*tbuf2);
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
+}   /* test_select_hyper_union() */
+
+/****************************************************************
+**
+**  test_select_hyper_union_3d(): Test basic H5S (dataspace) selection code.
+**      Tests unions of hyperslabs in 3-D
+** 
+****************************************************************/
+static void 
+test_select_hyper_union_3d(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		dims2[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
+    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    struct row_list {
+        size_t z;
+        size_t y;
+        size_t x;
+        size_t l;
+    } rows[]= {             /* Array of x,y,z coordinates & length for each row written from memory */
+        {0,0,0,6},          /* 1st face of 3-D object */
+        {0,1,0,6},
+        {0,2,0,6},
+        {0,3,0,6},
+        {0,4,0,6},
+        {1,0,0,6},          /* 2nd face of 3-D object */
+        {1,1,0,6},
+        {1,2,0,6},
+        {1,3,0,6},
+        {1,4,0,6},
+        {2,0,0,6},          /* 3rd face of 3-D object */
+        {2,1,0,10},
+        {2,2,0,10},
+        {2,3,0,10},
+        {2,4,0,10},
+        {2,5,2,8},
+        {2,6,2,8},
+        {3,0,0,6},          /* 4th face of 3-D object */
+        {3,1,0,10},
+        {3,2,0,10},
+        {3,3,0,10},
+        {3,4,0,10},
+        {3,5,2,8},
+        {3,6,2,8},
+        {4,0,0,6},          /* 5th face of 3-D object */
+        {4,1,0,10},
+        {4,2,0,10},
+        {4,3,0,10},
+        {4,4,0,10},
+        {4,5,2,8},
+        {4,6,2,8},
+        {5,1,2,8},          /* 6th face of 3-D object */
+        {5,2,2,8},
+        {5,3,2,8},
+        {5,4,2,8},
+        {5,5,2,8},
+        {5,6,2,8},
+        {6,1,2,8},          /* 7th face of 3-D object */
+        {6,2,2,8},
+        {6,3,2,8},
+        {6,4,2,8},
+        {6,5,2,8},
+        {6,6,2,8},
+        {7,1,2,8},          /* 8th face of 3-D object */
+        {7,2,2,8},
+        {7,3,2,8},
+        {7,4,2,8},
+        {7,5,2,8},
+        {7,6,2,8}};
+    uint8      *wbuf,       /* buffer to write to disk */
+               *rbuf,       /* buffer read from disk */
+               *tbuf,       /* temporary buffer pointer */
+               *tbuf2;      /* temporary buffer pointer */
+    intn        i,j,k;      /* Counters */
+    herr_t		ret;		/* Generic return value		*/
+    hsize_t	    npoints;	/* Number of elements in selection */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Hyperslab Selection Functions with unions of 3-D hyperslabs\n"));
+
+    /* Allocate write & read buffers */
+    wbuf=malloc(sizeof(uint8)*SPACE4_DIM1*SPACE4_DIM2*SPACE4_DIM3);
+    rbuf=calloc(sizeof(uint8),SPACE3_DIM1*SPACE3_DIM2);
+
+    /* Initialize write buffer */
+    for(i=0, tbuf=wbuf; i<SPACE4_DIM1; i++)
+        for(j=0; j<SPACE4_DIM2; j++)
+            for(k=0; k<SPACE4_DIM3; k++)
+                *tbuf++=(uint8)((((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+/* Test case of two blocks which overlap corners and must be split */
+    /* Create dataspace for dataset on disk */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE4_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 2x15x13 hyperslab for disk dataset */
+    start[0]=1; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=2; count[1]=15; count[2]=13;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select 5x5x6 hyperslab for memory dataset */
+    start[0]=0; start[1]=0; start[2]=0;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=5; count[1]=5; count[2]=6;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Union overlapping 15x20 hyperslab for memory dataset (forming a irregularly shaped region) */
+    start[0]=2; start[1]=1; start[2]=2;
+    stride[0]=1; stride[1]=1; stride[2]=1;
+    count[0]=6; count[1]=6; count[2]=8;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    npoints = H5Sget_select_npoints(sid2);
+    VERIFY(npoints, 15*26, "H5Sget_select_npoints");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE3_RANK, dims3, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 15x26 hyperslab for reading memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=15; count[1]=26;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read with data written out */
+    for(i=0,tbuf2=rbuf; i<(intn)(sizeof(rows)/sizeof(struct row_list)); i++) {
+        tbuf=wbuf+(rows[i].z*SPACE4_DIM3*SPACE4_DIM2)+(rows[i].y*SPACE4_DIM3)+rows[i].x;
+        for(j=0; j<(intn)rows[i].l; j++, tbuf++, tbuf2++) {
+            if(*tbuf!=*tbuf2) {
+                printf("hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",i,j,(int)*tbuf,(int)*tbuf2);
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
+}   /* test_select_hyper_union_3d() */
 
 /****************************************************************
 **
@@ -1435,6 +2151,8 @@ test_select(void)
     test_select_point_copy();   /* Test point selection copying code */
     test_select_hyper_offset(); /* Test selection offset code with hyperslabs */
     test_select_point_offset(); /* Test selection offset code with elements */
+    test_select_hyper_union();  /* Test hyperslab union code */
+    test_select_hyper_union_3d();  /* Test hyperslab union code for 3-D dataset */
 
 }   /* test_select() */
 
