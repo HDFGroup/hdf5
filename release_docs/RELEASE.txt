@@ -376,7 +376,7 @@ Platforms Tested
     SunOS 5.8(32 and 64 bit)      Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    TFLOPS r1.0.4 v4.4.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
+    TFLOPS r1.0.4 v4.4.3 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
     IA-32 Linux 2.4.18            gcc 2.96
                                   Intel(R) C++ Version 7.0
