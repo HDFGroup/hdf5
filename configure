@@ -9841,11 +9841,8 @@ trap 'rm -fr `echo "src/libhdf5.settings
           test/Makefile
           testpar/Makefile
           tools/Makefile
-          tools/h5debug/Makefile
           tools/h5dump/Makefile
-          tools/h5import/Makefile
           tools/h5ls/Makefile
-          tools/h5repart/Makefile
           tools/lib/Makefile
           tools/misc/Makefile
           $EXTRA_H4_MAKEFILES
@@ -10010,11 +10007,8 @@ CONFIG_FILES=\${CONFIG_FILES-"src/libhdf5.settings
           test/Makefile
           testpar/Makefile
           tools/Makefile
-          tools/h5debug/Makefile
           tools/h5dump/Makefile
-          tools/h5import/Makefile
           tools/h5ls/Makefile
-          tools/h5repart/Makefile
           tools/lib/Makefile
           tools/misc/Makefile
           $EXTRA_H4_MAKEFILES
