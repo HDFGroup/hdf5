@@ -4392,7 +4392,6 @@ done:
     FUNC_LEAVE(ret_value);
 } /* end H5Pget_hyper_vector_size() */
 
-#ifdef LATER
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_small_data_block_size
@@ -4485,7 +4484,6 @@ H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
 done:
     FUNC_LEAVE(ret_value);
 } /* end H5Pget_small_data_block_size() */
-#endif /* LATER */
 
 
 /*--------------------------------------------------------------------------
