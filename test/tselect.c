@@ -4186,6 +4186,72 @@ test_select_point_chunk(void)
 
 /****************************************************************
 **
+**  test_select_sclar_chunk(): Test basic H5S (dataspace) selection code.
+**      Tests using a scalar dataspace (in memory) to access chunked datasets.
+** 
+****************************************************************/
+static void 
+test_select_scalar_chunk(void)
+{
+    hid_t file_id;              /* File ID */
+    hid_t dcpl;                 /* Dataset creation property list */
+    hid_t dsid;                 /* Dataset ID */
+    hid_t sid;                  /* Dataspace ID */
+    hid_t m_sid;                /* Memory dataspace */
+    hsize_t dims[] = {2};       /* Dataset dimensions */
+    hsize_t maxdims[] = {H5S_UNLIMITED};        /* Dataset maximum dimensions */
+    hssize_t offset[] = {0};    /* Hyperslab start */
+    hsize_t count[] = {1};      /* Hyperslab count */
+    unsigned data = 2;          /* Data to write */
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Scalar Dataspaces and Chunked Datasets\n"));
+
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    dims[0] = 1024U;
+    ret = H5Pset_chunk(dcpl, 1, dims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    /* Create 1-D dataspace */
+    sid = H5Screate_simple(1, dims, maxdims);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    dsid = H5Dcreate(file_id, "dset", H5T_NATIVE_UINT, sid, dcpl);
+    CHECK(dsid, FAIL, "H5Dcreate");
+
+    /* Select scalar area (offset 0, count 1) */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, offset, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create scalar memory dataspace */
+    m_sid = H5Screate(H5S_SCALAR);
+    CHECK(m_sid, FAIL, "H5Screate");
+
+    /* Write out data using scalar dataspace for memory dataspace */
+    ret = H5Dwrite (dsid, H5T_NATIVE_UINT, m_sid, sid, H5P_DEFAULT, &data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close resources */
+    ret = H5Sclose(m_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Dclose(dsid);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Fclose (file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_select_scalar_chunk() */
+
+/****************************************************************
+**
 **  test_select_valid(): Test basic H5S (dataspace) selection code.
 **      Tests selection validity
 ** 
@@ -6467,6 +6533,9 @@ test_select(void)
 
     /* Test point selections in chunked datasets */
     test_select_point_chunk();
+
+    /* Test scalar dataspaces in chunked datasets */
+    test_select_scalar_chunk();
 
 }   /* test_select() */
 
