@@ -11,20 +11,26 @@
 # is linked from the top-level documents page.  It can also be found at
 # http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
-#
-echo "====================================="
-echo "$0 $*"
-echo "====================================="
-set -x
-date
-uname -a
-#
+
 # This script should be run nightly from cron.  It checks out hdf5
 # from the CVS source tree and compares it against the previous
 # snapshot.  If anything significant changed then a new snapshot is
 # created, the minor version number is incremented, and the change is
 # checked back into the CVS repository.
 #
+
+# function definitions
+TIMESTAMP()
+{
+    echo "=====" "$1": "`date`" "====="
+}
+
+# MAIN
+echo "====================================="
+echo "$0 $*"
+echo "====================================="
+TIMESTAMP MAIN
+uname -a
 
 # The path isn't properly initialized on hawkwind -- /usr/local/bin is
 # either missing or is after /usr/bin when it should be before.
@@ -100,6 +106,10 @@ while [ $# -gt 0 ] ; do
 	    cmd="help"
 	    break
 	    ;;
+	echo)
+	    set -x
+	    break
+	    ;;
 	zlib)
 	    shift
 	    if [ $# -lt 1 ]; then
@@ -167,6 +177,7 @@ Usage: $0 [all] [checkout] [diff] [test] [srcdir] [release] [help]
               E.g., "snapshot srcdir srcdirname -xx" uses hostname-xx
               [Default is hostname]
     help:     Print this message
+    echo:     Turn on shell echo
     zlib <zlib_path>:
               Use <zlib_path> as the ZLIB locations
               [Default is $ZLIB_default]
@@ -220,6 +231,7 @@ done
 # Run CVS checkout
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
+    TIMESTAMP "checkout"
     # Create a working directory.  Hopefully one is left over from last
     # time that still has the contents of the previous release.  But if
     # not, just create one and assume that a snapshot is necessary.
@@ -244,6 +256,7 @@ fi # Do CVS checkout
 # Run Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
+    TIMESTAMP "diff"
     # setup if srcdir is used.
     if [ -z "$srcdir" ]; then
 	TESTDIR=${CURRENT}
@@ -303,11 +316,17 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
     # Build, run tests and install procedures
     if [ "$snapshot" = "yes" ]; then
 	if (cd ${TESTDIR} && \
+	    TIMESTAMP "configure" && \
 	    ${srcdir:+${CURRENT}/}${CONFIGURE} --prefix=$INSTALLDIR && \
+	    TIMESTAMP "make" && \
 	    ${MAKE} && \
+	    TIMESTAMP "check" && \
 	    ${MAKE} check && \
+	    TIMESTAMP "install" && \
 	    ${MAKE} install install-doc && \
+	    TIMESTAMP "check-install" && \
 	    ${MAKE} check-install && \
+	    TIMESTAMP "uninstall" && \
 	    ${MAKE} uninstall uninstall-doc); then
 	    :
 	else
@@ -324,6 +343,7 @@ fi # Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     if [ "$snapshot" = "yes" ]; then
+	TIMESTAMP "release"
 	(cd ${CURRENT} && ${MAKE} distclean)
 	(
 	    # Turn on exit on error in the sub-shell so that it does not
@@ -351,6 +371,7 @@ fi #Release snapshot
 # Clean the test area.  Default is no clean.
 #=============================
 if [ -n "$cmdclean" ]; then
+    TIMESTAMP "clean"
     # setup if srcdir is used.
     if [ -z "$srcdir" ]; then
 	TESTDIR=${CURRENT}
