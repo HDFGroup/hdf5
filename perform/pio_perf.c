@@ -326,7 +326,9 @@ main(int argc, char **argv)
         }
     }
 
-    report_parameters(opts);
+    if ((pio_debug_level == 0 && comm_world_rank_g == 0) || pio_debug_level > 0)
+        report_parameters(opts);
+
     run_test_loop(opts);
 
 finish:
