@@ -161,7 +161,7 @@ main(int argc, const char *argv[])
     int   ufid;
     int   h5fid;
     void               *edata;
-    H5E_auto_t          func;
+    H5E_auto_stack_t          func;
     hid_t               ifile;
     off_t fsize;
     hsize_t usize;

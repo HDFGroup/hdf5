@@ -181,7 +181,7 @@ H5_term_library(void)
     int	pending, ntries=0, n;
     unsigned	at=0;
     char	loop[1024];
-    H5E_auto_t func;
+    H5E_auto_stack_t func;
     
 #ifdef H5_HAVE_THREADSAFE
     /* explicit locking of the API */

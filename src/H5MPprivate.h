@@ -121,6 +121,7 @@
 #define color_H5Eunregister_class "red"
 #define color_H5Ewalk "red"
 #define color_H5Ewalk_stack "red"
+#define color_H5Eauto_is_stack "red"
 
 #define color_H5Fis_hdf5 "red"
 #define color_H5Fcreate "red"

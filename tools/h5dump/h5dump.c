@@ -3369,7 +3369,7 @@ main(int argc, const char *argv[])
     hid_t               fid, gid;
     const char         *fname = NULL;
     void               *edata;
-    H5E_auto_t          func;
+    H5E_auto_stack_t    func;
     find_objs_t         info;
     struct handler_t   *hand;
     int                 i;

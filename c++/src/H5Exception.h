@@ -46,14 +46,14 @@ class H5_DLLCPP Exception {
 	const char* getCFuncName() const;	// function name as a char string 
 
 	// Turns on the automatic error printing.
-	static void setAutoPrint( H5E_auto_t& func, void* client_data);
+	static void setAutoPrint( H5E_auto_stack_t& func, void* client_data);
 
 	// Turns off the automatic error printing.
 	static void dontPrint();
 
 	// Retrieves the current settings for the automatic error stack 
 	// traversal function and its data.
-	static void getAutoPrint( H5E_auto_t& func, void** client_data);
+	static void getAutoPrint( H5E_auto_stack_t& func, void** client_data);
 
 	// Clears the error stack for the current thread.
 	static void clearErrorStack();

@@ -54,13 +54,8 @@
 #define EXPECTED_ERROR_DEPTH	8
 #define WRITE_NUMBER		37
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
 static herr_t error_callback(void *);
-static herr_t walk_error_callback(int, H5E_error_t *, void *);
-#else /*H5_WANT_H5_V1_6_COMPAT*/
-static herr_t error_callback(hid_t, void *);
 static herr_t walk_error_callback(unsigned, const H5E_error_t *, void *);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 static void *tts_error_thread(void *);
 
 /* Global variables */
@@ -154,23 +149,15 @@ void *tts_error_thread(void UNUSED *arg)
 {
     hid_t dataspace, datatype, dataset;
     hsize_t dimsf[1]; /* dataset dimensions */
-    H5E_auto_t old_error_cb;
+    H5E_auto_stack_t old_error_cb;
     void *old_error_client_data;
     int value;
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    /* preserve previous error stack handler */
-    H5Eget_auto(&old_error_cb, &old_error_client_data);
-
-    /* set each thread's error stack handler */
-    H5Eset_auto(error_callback, NULL);
-#else /*H5_WANT_H5_V1_6_COMPAT*/
     /* preserve previous error stack handler */
     H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
 
     /* set each thread's error stack handler */
-    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    H5Eset_auto(error_callback, NULL);
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
@@ -192,16 +179,11 @@ void *tts_error_thread(void UNUSED *arg)
     H5Sclose(dataspace);
 
     /* turn our error stack handler off */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    H5Eset_auto(old_error_cb, old_error_client_data);
-#else /*H5_WANT_H5_V1_6_COMPAT*/
     H5Eset_auto_stack(H5E_DEFAULT, old_error_cb, old_error_client_data);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     return NULL;
 }
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
 static
 herr_t error_callback(void *client_data)
 {
@@ -210,25 +192,9 @@ herr_t error_callback(void *client_data)
     pthread_mutex_unlock(&error_mutex);
     return H5Ewalk(H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
-#else /*H5_WANT_H5_V1_6_COMPAT*/
 
-static
-herr_t error_callback(hid_t estack, void *client_data)
-{
-    pthread_mutex_lock(&error_mutex);
-    error_count++;
-    pthread_mutex_unlock(&error_mutex);
-    return H5Ewalk_stack(estack, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
-}
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-
-#ifdef H5_WANT_H5_V1_6_COMPAT
-static
-herr_t walk_error_callback(int n, H5E_error_t *err_desc, void UNUSED *client_data)
-#else /* H5_WANT_H5_V1_6_COMPAT */
 static
 herr_t walk_error_callback(unsigned n, const H5E_error_t *err_desc, void UNUSED *client_data)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     hid_t maj_num, min_num;
 

@@ -109,7 +109,7 @@ string Exception::getMinorString( hid_t err_minor ) const
 ///		handlers
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::setAutoPrint( H5E_auto_t& func, void* client_data )
+void Exception::setAutoPrint( H5E_auto_stack_t& func, void* client_data )
 {
    // calls the C API routine H5Eset_auto to set the auto printing to
    // the specified function.
@@ -142,7 +142,7 @@ void Exception::dontPrint()
 ///					the error function
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::getAutoPrint( H5E_auto_t& func, void** client_data )
+void Exception::getAutoPrint( H5E_auto_stack_t& func, void** client_data )
 {
    // calls the C API routine H5Eget_auto to get the current setting of
    // the automatic error printing 

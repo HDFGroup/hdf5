@@ -44,7 +44,11 @@ typedef struct H5E_msg_t {
 typedef struct H5E_t {
     size_t nused;		        /* Num slots currently used in stack  */
     H5E_error_t slot[H5E_NSLOTS];	/* Array of error records	     */
-    H5E_auto_t  func;                   /* Function for 'automatic' error reporting */
+    hbool_t  new_api;                   /* Indicate that the function pointer is for the new (stack) API or the old */
+    union {
+        H5E_auto_t  func;                   /* Function for 'automatic' error reporting */
+        H5E_auto_stack_t  func_stack;       /* Function for 'automatic' error reporting */
+    } u;
     void *auto_data;                    /* Callback data for 'automatic error reporting */
 } H5E_t;
 

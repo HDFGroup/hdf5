@@ -159,7 +159,7 @@ main (int argc, const char *argv[])
   int h5fid;
   int ofid;
   void *edata;
-  H5E_auto_t func;
+  H5E_auto_stack_t func;
   hid_t ifile;
   hid_t plist;
   herr_t status;

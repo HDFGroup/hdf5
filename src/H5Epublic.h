@@ -85,13 +85,28 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * purpose.
  */
 #define H5E_BEGIN_TRY {							      \
-    H5E_auto_t H5E_saved_efunc;						      \
+    unsigned H5E_saved_is_stack;					      \
+    union {								      \
+        H5E_auto_stack_t stack_efunc;					      \
+        H5E_auto_t efunc;						      \
+    } H5E_saved;							      \
     void *H5E_saved_edata;						      \
-    (void)H5Eget_auto_stack(H5E_DEFAULT, &H5E_saved_efunc, &H5E_saved_edata); \
-    (void)H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
+								    	      \
+    (void)H5Eauto_is_stack(H5E_DEFAULT, &H5E_saved_is_stack);		      \
+    if(H5E_saved_is_stack) {						      \
+        (void)H5Eget_auto_stack(H5E_DEFAULT, &H5E_saved.stack_efunc, &H5E_saved_edata); \
+        (void)H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);		      \
+    } else {								      \
+        (void)H5Eget_auto(&H5E_saved.efunc, &H5E_saved_edata);		      \
+        (void)H5Eset_auto(NULL, NULL);					      \
+    }
 
 #define H5E_END_TRY							      \
-    (void)H5Eset_auto_stack(H5E_DEFAULT, H5E_saved_efunc, H5E_saved_edata);   \
+    if(H5E_saved_is_stack) {						      \
+        (void)H5Eset_auto_stack(H5E_DEFAULT, H5E_saved.stack_efunc, H5E_saved_edata); \
+    } else {								      \
+        (void)H5Eset_auto(H5E_saved.efunc, H5E_saved_edata);		      \
+    }									      \
 }
 
 /*
@@ -131,7 +146,8 @@ extern "C" {
 
 /* Error stack traversal callback function pointers */
 typedef herr_t (*H5E_walk_t)(unsigned n, const H5E_error_t *err_desc, void *client_data);
-typedef herr_t (*H5E_auto_t)(hid_t estack, void *client_data);
+typedef herr_t (*H5E_auto_t)(void *client_data);
+typedef herr_t (*H5E_auto_stack_t)(hid_t estack, void *client_data);
 
 /* Public API functions */
 H5_DLL hid_t  H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
@@ -142,9 +158,10 @@ H5_DLL hid_t  H5Eget_current_stack(void);
 H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
 H5_DLL ssize_t H5Eget_class_name(hid_t class_id, char *name, size_t size);
 H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size);
-H5_DLL int     H5Eget_num(hid_t error_stack_id);
-H5_DLL herr_t  H5Eset_current_stack(hid_t err_stack_id);
-H5_DLL herr_t  H5Epop(hid_t err_stack, size_t count);
+H5_DLL int    H5Eget_num(hid_t error_stack_id);
+H5_DLL herr_t H5Eset_current_stack(hid_t err_stack_id);
+H5_DLL herr_t H5Epop(hid_t err_stack, size_t count);
+H5_DLL herr_t H5Eauto_is_stack(hid_t err_stack, unsigned *is_stack);
 
 /* These old APIs are kept for backward compatibility.  They don't have
  * the error stack in the parameters. */
@@ -166,8 +183,8 @@ H5_DLL herr_t  H5Epush_stack(hid_t err_stack, const char *file, const char *func
 H5_DLL herr_t  H5Eprint_stack(hid_t err_stack, FILE *stream);
 H5_DLL herr_t  H5Ewalk_stack(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func, 
                             void *client_data);
-H5_DLL herr_t  H5Eget_auto_stack(hid_t estack_id, H5E_auto_t *func, void **client_data);
-H5_DLL herr_t  H5Eset_auto_stack(hid_t estack_id, H5E_auto_t func, void *client_data);
+H5_DLL herr_t  H5Eget_auto_stack(hid_t estack_id, H5E_auto_stack_t *func, void **client_data);
+H5_DLL herr_t  H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data);
 H5_DLL herr_t  H5Eclear_stack(hid_t err_stack);
 #ifdef __cplusplus
 }

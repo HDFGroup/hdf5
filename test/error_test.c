@@ -101,7 +101,7 @@ test_error(hid_t file)
     hid_t               estack_id;
     hsize_t		dims[2];
     const char          *FUNC_test_error="test_error";
-    H5E_auto_t          old_func;
+    H5E_auto_stack_t          old_func;
     void                *old_data;
     
     TESTING("error API based on data I/O");
@@ -129,7 +129,7 @@ test_error(hid_t file)
 	TEST_ERROR;
     if (old_data != NULL) 
 	TEST_ERROR;
-    if (old_func != (H5E_auto_t)H5Eprint_stack)
+    if (old_func != (H5E_auto_stack_t)H5Eprint_stack)
 	TEST_ERROR;
 
     if(H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL)<0)

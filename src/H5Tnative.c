@@ -535,71 +535,70 @@ H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 
     FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL);
 
-    if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) 
-    {         
-     if(prec<=H5Tget_precision(H5T_NATIVE_SCHAR)) {
-      match=H5T_NATIVE_INT_MATCH_CHAR;
-      native_size = sizeof(char); 
-     } else if(prec<=H5Tget_precision(H5T_NATIVE_SHORT)) {
-      match=H5T_NATIVE_INT_MATCH_SHORT;
-      native_size = sizeof(short); 
-     } else if(prec<=H5Tget_precision(H5T_NATIVE_INT)) {
-      match=H5T_NATIVE_INT_MATCH_INT;
-      native_size = sizeof(int); 
-     } else if(prec<=H5Tget_precision(H5T_NATIVE_LONG)) {
-      match=H5T_NATIVE_INT_MATCH_LONG;
-      native_size = sizeof(long); 
-     } else if(prec<=H5Tget_precision(H5T_NATIVE_LLONG)) {
-      match=H5T_NATIVE_INT_MATCH_LLONG;
-      native_size = sizeof(long_long); 
-     } else {  /* If no native type matches the querried datatype, simply choose the type of biggest size. */
-      match=H5T_NATIVE_INT_MATCH_LLONG;
-      native_size = sizeof(long_long); 
-     }
-    } else if(direction == H5T_DIR_DESCEND) {         
-     if(prec>=H5Tget_precision(H5T_NATIVE_LLONG)) { 
-      match=H5T_NATIVE_INT_MATCH_LLONG;
-      native_size = sizeof(long_long); 
-     } else if(prec>=H5Tget_precision(H5T_NATIVE_LONG)) {
-      if(prec==H5Tget_precision(H5T_NATIVE_LONG)) {
-       match=H5T_NATIVE_INT_MATCH_LONG;
-       native_size = sizeof(long); 
-      } else {
-       match=H5T_NATIVE_INT_MATCH_LLONG;
-       native_size = sizeof(long_long); 
-      }
-     }
-     else if(prec>=H5Tget_precision(H5T_NATIVE_INT)) {
-      if(prec==H5Tget_precision(H5T_NATIVE_INT)) {
-       match=H5T_NATIVE_INT_MATCH_INT;
-       native_size = sizeof(int); 
-      } else {
-       match=H5T_NATIVE_INT_MATCH_LONG;
-       native_size = sizeof(long); 
-      }
-     }
-     else if(prec>=H5Tget_precision(H5T_NATIVE_SHORT)) {
-      if(prec==H5Tget_precision(H5T_NATIVE_SHORT)) {
-       match=H5T_NATIVE_INT_MATCH_SHORT;
-       native_size = sizeof(short); 
-      } else {
-       match=H5T_NATIVE_INT_MATCH_INT;
-       native_size = sizeof(int); 
-      }
-     }
-     else if(prec>=H5Tget_precision(H5T_NATIVE_SCHAR)) {
-      if(prec==H5Tget_precision(H5T_NATIVE_SCHAR)) {
-       match=H5T_NATIVE_INT_MATCH_CHAR;
-       native_size = sizeof(char); 
-      } else {
-       match=H5T_NATIVE_INT_MATCH_SHORT;
-       native_size = sizeof(short); 
-      }
-     }
-     else {  /* If no native type matches the querried datatype, simple choose the type of smallest size. */
-      match=H5T_NATIVE_INT_MATCH_CHAR;
-      native_size = sizeof(char); 
-     }
+    if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
+        if(prec<=H5Tget_precision(H5T_NATIVE_SCHAR)) {
+            match=H5T_NATIVE_INT_MATCH_CHAR;
+            native_size = sizeof(char); 
+        } else if(prec<=H5Tget_precision(H5T_NATIVE_SHORT)) {
+            match=H5T_NATIVE_INT_MATCH_SHORT;
+            native_size = sizeof(short); 
+        } else if(prec<=H5Tget_precision(H5T_NATIVE_INT)) {
+            match=H5T_NATIVE_INT_MATCH_INT;
+            native_size = sizeof(int); 
+        } else if(prec<=H5Tget_precision(H5T_NATIVE_LONG)) {
+            match=H5T_NATIVE_INT_MATCH_LONG;
+            native_size = sizeof(long); 
+        } else if(prec<=H5Tget_precision(H5T_NATIVE_LLONG)) {
+            match=H5T_NATIVE_INT_MATCH_LLONG;
+            native_size = sizeof(long_long); 
+        } else {  /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+            match=H5T_NATIVE_INT_MATCH_LLONG;
+            native_size = sizeof(long_long); 
+        }
+    } else if(direction == H5T_DIR_DESCEND) {
+        if(prec>=H5Tget_precision(H5T_NATIVE_LLONG)) { 
+            match=H5T_NATIVE_INT_MATCH_LLONG;
+            native_size = sizeof(long_long); 
+        } else if(prec>=H5Tget_precision(H5T_NATIVE_LONG)) {
+            if(prec==H5Tget_precision(H5T_NATIVE_LONG)) {
+                match=H5T_NATIVE_INT_MATCH_LONG;
+                native_size = sizeof(long); 
+            } else {
+                match=H5T_NATIVE_INT_MATCH_LLONG;
+                native_size = sizeof(long_long); 
+            }
+        }
+        else if(prec>=H5Tget_precision(H5T_NATIVE_INT)) {
+            if(prec==H5Tget_precision(H5T_NATIVE_INT)) {
+                match=H5T_NATIVE_INT_MATCH_INT;
+                native_size = sizeof(int); 
+            } else {
+                match=H5T_NATIVE_INT_MATCH_LONG;
+                native_size = sizeof(long); 
+            }
+        }
+        else if(prec>=H5Tget_precision(H5T_NATIVE_SHORT)) {
+            if(prec==H5Tget_precision(H5T_NATIVE_SHORT)) {
+                match=H5T_NATIVE_INT_MATCH_SHORT;
+                native_size = sizeof(short); 
+            } else {
+                match=H5T_NATIVE_INT_MATCH_INT;
+                native_size = sizeof(int); 
+            }
+        }
+        else if(prec>=H5Tget_precision(H5T_NATIVE_SCHAR)) {
+            if(prec==H5Tget_precision(H5T_NATIVE_SCHAR)) {
+                match=H5T_NATIVE_INT_MATCH_CHAR;
+                native_size = sizeof(char); 
+            } else {
+                match=H5T_NATIVE_INT_MATCH_SHORT;
+                native_size = sizeof(short); 
+            }
+        }
+        else {  /* If no native type matches the queried datatype, simply choose the type of smallest size. */
+            match=H5T_NATIVE_INT_MATCH_CHAR;
+            native_size = sizeof(char); 
+        }
     }
 
     /* Set the appropriate native datatype information */
@@ -656,17 +655,17 @@ H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
     /* Create new native type */
     assert(tid>=0);
     if(NULL==(dt=H5I_object(tid)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
 
     if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot copy type");
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot copy type")
             
     /* compute size and offset of compound type member. */
     if(H5T_cmp_offset(comp_size, offset, native_size, 1, align, struct_align)<0)
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
                         
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 

@@ -113,8 +113,8 @@ static herr_t  H5E_print_stack(const H5E_t *estack, FILE *stream);
 static herr_t  H5E_walk_stack(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
                              void *client_data);
 static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data);
-static herr_t  H5E_get_auto_stack(const H5E_t *estack, H5E_auto_t *func, void **client_data);
-static herr_t  H5E_set_auto_stack(H5E_t *estack, H5E_auto_t func, void *client_data);
+static herr_t  H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void **func, void **client_data);
+static herr_t  H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -183,9 +183,11 @@ H5E_init_interface(void)
 #ifndef H5_HAVE_THREADSAFE
     H5E_stack_g[0].nused = 0;
 #ifdef H5_WANT_H5_V1_6_COMPAT
-    H5E_stack_g[0].func = (H5E_auto_t)H5Eprint;
+    H5E_stack_g[0].new_api = FALSE;
+    H5E_stack_g[0].u.func = (H5E_auto_t)H5Eprint;
 #else  /*H5_WANT_H5_V1_6_COMPAT*/
-    H5E_stack_g[0].func = (H5E_auto_t)H5Eprint_stack;
+    H5E_stack_g[0].new_api = TRUE;
+    H5E_stack_g[0].u.func_stack = (H5E_auto_stack_t)H5Eprint_stack;
 #endif /*H5_WANT_H5_V1_6_COMPAT*/
     H5E_stack_g[0].auto_data = NULL;
 #endif /* H5_HAVE_THREADSAFE */
@@ -310,7 +312,8 @@ H5E_get_stack(void)
         /* no associated value with current thread - create one */
         estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
         estack->nused = 0;
-        estack->func = (H5E_auto_t)H5Eprint_stack;
+        estack->new_api = TRUE;
+        estack->u.func_stack = (H5E_auto_stack_t)H5Eprint_stack;
         estack->auto_data = NULL;
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
@@ -2240,12 +2243,12 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
     FUNC_ENTER_API(H5Eget_auto, FAIL)
     H5TRACE2("e","*xx",func,client_data);
 
-    /* Retieve default error stack */    
+    /* Retrieve default error stack */    
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
     /* Get the automatic error reporting information */
-    if(H5E_get_auto_stack(estack, func, client_data)<0)
+    if(H5E_get_auto_stack(estack, FALSE, (void **)func, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
 
 done:
@@ -2275,7 +2278,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eget_auto_stack(hid_t estack_id, H5E_auto_t *func, void **client_data)
+H5Eget_auto_stack(hid_t estack_id, H5E_auto_stack_t *func, void **client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -2292,7 +2295,7 @@ H5Eget_auto_stack(hid_t estack_id, H5E_auto_t *func, void **client_data)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Get the automatic error reporting information */
-    if(H5E_get_auto_stack(estack, func, client_data)<0)
+    if(H5E_get_auto_stack(estack, TRUE, (void **)func, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
 
 done:
@@ -2318,7 +2321,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_get_auto_stack(const H5E_t *estack, H5E_auto_t *func, void **client_data)
+H5E_get_auto_stack(const H5E_t *estack, hbool_t new_api, void * *func, void **client_data)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -2327,7 +2330,8 @@ H5E_get_auto_stack(const H5E_t *estack, H5E_auto_t *func, void **client_data)
     assert (estack);
         
     /* Retrieve the requested information */
-    if(func) *func = estack->func;
+    if(func)
+        *func = new_api ? (void *)estack->u.func_stack : (void *)estack->u.func;
     if(client_data) *client_data = estack->auto_data;
 
 done:
@@ -2375,7 +2379,7 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
    
     /* Set the automatic error reporting information */
-    if(H5E_set_auto_stack(estack, func, client_data)<0)
+    if(H5E_set_auto_stack(estack, FALSE, (void *)func, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
 
 done:
@@ -2410,7 +2414,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eset_auto_stack(hid_t estack_id, H5E_auto_t func, void *client_data)
+H5Eset_auto_stack(hid_t estack_id, H5E_auto_stack_t func, void *client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -2427,7 +2431,7 @@ H5Eset_auto_stack(hid_t estack_id, H5E_auto_t func, void *client_data)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     
     /* Set the automatic error reporting information */
-    if(H5E_set_auto_stack(estack, func, client_data)<0)
+    if(H5E_set_auto_stack(estack, TRUE, (void *)func, client_data)<0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
 
 done:
@@ -2463,7 +2467,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_set_auto_stack(H5E_t *estack, H5E_auto_t func, void *client_data)
+H5E_set_auto_stack(H5E_t *estack, hbool_t new_api, void *func, void *client_data)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -2472,7 +2476,11 @@ H5E_set_auto_stack(H5E_t *estack, H5E_auto_t func, void *client_data)
     assert(estack);
 
     /* Set the automatic error reporting info */
-    estack->func = func;
+    estack->new_api = new_api;
+    if(new_api)
+        estack->u.func_stack = (H5E_auto_stack_t)func;
+    else
+        estack->u.func = (H5E_auto_t)func;
     estack->auto_data = client_data;
 
 done:
@@ -2508,10 +2516,60 @@ H5E_dump_api_stack(int is_api)
         H5E_t *estack = H5E_get_my_stack();
 
         assert(estack);
-        if (estack->func)
-            (void)((estack->func)(H5E_DEFAULT, estack->auto_data));
+        if(estack->new_api) {
+            if (estack->u.func_stack)
+                (void)((estack->u.func_stack)(H5E_DEFAULT, estack->auto_data));
+        } /* end if */
+        else {
+            if (estack->u.func)
+                (void)((estack->u.func)(estack->auto_data));
+        } /* end else */
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eauto_is_stack
+ *
+ * Purpose:	Determines if the error auto reporting function for an
+ *              error stack conforms to the H5E_auto_stack_t typedef
+ *              or the H5E_auto_t typedef.  The IS_STACK parameter is set
+ *              to 1 for the first case and 0 for the latter case.
+ *		
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, September  8, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eauto_is_stack(hid_t estack_id, unsigned *is_stack)
+{
+    H5E_t   *estack;            /* Error stack to operate on */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_API(H5Eauto_is_stack, FAIL)
+    H5TRACE2("e","ix",estack_id,is_stack);
+
+    if(estack_id == H5E_DEFAULT) {
+    	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
+    } /* end if */
+    else
+        if((estack = H5I_object_verify(estack_id, H5I_ERROR_STACK))==NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+    
+    /* Check if the error stack reporting function is the "newer" stack type */
+    if(is_stack)
+        *is_stack=estack->new_api;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Eauto_is_stack() */
+

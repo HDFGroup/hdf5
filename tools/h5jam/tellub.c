@@ -127,7 +127,7 @@ main (int argc, const char *argv[])
 {
   char *ifname;
   void *edata;
-  H5E_auto_t func;
+  H5E_auto_stack_t func;
   hid_t ifile;
   hsize_t usize;
   htri_t testval;
