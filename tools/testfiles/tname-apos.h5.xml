@@ -2,41 +2,48 @@
 Expected output for 'h5dump --xml tname-apos.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-<HDF5-File>
-<RootGroup OBJ-XID="root">
-   <Attribute Name="attr1&apos;withapos">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="10" MaxDimSize="10"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="1" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
+   <hdf5:Attribute Name="attr1&apos;withapos">
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="1" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          97 98 99 100 101 102 103 104 105 0
-         </DataFromFile>
-      </Data>
-   </Attribute>
-   <Group Name="g1.1&apos;withapos" OBJ-XID="/g1.1&apos;withapos" Parents="/" >
-      <Dataset Name="dset1.1.1&apos;withapos" OBJ-XID="/g1.1&apos;withapos/dset1.1.1&apos;withapos" Parents="/g1.1&apos;withapos">
-         <Dataspace>
-            <SimpleDataspace Ndims="2">
-               <Dimension  DimSize="10" MaxDimSize="10"/>
-               <Dimension  DimSize="10" MaxDimSize="10"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Attribute>
+   <hdf5:Group Name="g1.1&apos;withapos" OBJ-XID="xid_1344-0" H5Path="/g1.1&apos;withapos" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset1.1.1&apos;withapos" OBJ-XID="xid_1720-0" H5Path= "/g1.1&apos;withapos/dset1.1.1&apos;withapos" Parents="xid_1344-0" H5ParentPaths="/g1.1&apos;withapos">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="2">
+               <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+               <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0 0 0 0 0 0 0 
             0 1 2 3 4 5 6 7 8 9 
             0 2 4 6 8 10 12 14 16 18 
@@ -47,9 +54,9 @@ Expected output for 'h5dump --xml tname-apos.h5'
             0 7 14 21 28 35 42 49 56 63 
             0 8 16 24 32 40 48 56 64 72 
             0 9 18 27 36 45 54 63 72 81
-            </DataFromFile>
-         </Data>
-      </Dataset>
-   </Group>
-</RootGroup>
-</HDF5-File>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+   </hdf5:Group>
+</hdf5:RootGroup>
+</hdf5:HDF5-File>

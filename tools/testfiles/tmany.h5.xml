@@ -2,127 +2,133 @@
 Expected output for 'h5dump --xml tmany.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-<HDF5-File>
-<RootGroup OBJ-XID="root">
-   <Group Name="g1" OBJ-XID="/g1" Parents="/" >
-      <Group Name="g1.1" OBJ-XID="/g1/g1.1" Parents="/g1" >
-         <Dataset Name="dset1" OBJ-XID="/g1/g1.1/dset1" Parents="/g1/g1.1">
-            <StorageLayout>
-               <ChunkedLayout Ndims="1">
-                  <ChunkDimension DimSize="2" />
-               </ChunkedLayout>
-            </StorageLayout>
-            <Dataspace>
-               <SimpleDataspace Ndims="1">
-                  <Dimension  DimSize="6" MaxDimSize="UNLIMITED"/>
-               </SimpleDataspace>
-            </Dataspace>
-            <DataType> 
-               <CompoundType>
-                  <Field FieldName="a_array">
-                     <DataType>
-                        <ArrayType Ndims="4">
-                           <ArrayDimension DimSize="2" DimPerm="0"/>
-                           <ArrayDimension DimSize="2" DimPerm="1"/>
-                           <ArrayDimension DimSize="2" DimPerm="2"/>
-                           <ArrayDimension DimSize="2" DimPerm="3"/>
-                           <DataType>
-                              <AtomicType>
-                                 <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                              </AtomicType>
-                           </DataType>
-                        </ArrayType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="b_array">
-                     <DataType>
-                        <ArrayType Ndims="4">
-                           <ArrayDimension DimSize="2" DimPerm="0"/>
-                           <ArrayDimension DimSize="2" DimPerm="1"/>
-                           <ArrayDimension DimSize="2" DimPerm="2"/>
-                           <ArrayDimension DimSize="2" DimPerm="3"/>
-                           <DataType>
-                              <AtomicType>
-                                 <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
-                              </AtomicType>
-                           </DataType>
-                        </ArrayType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="c_array">
-                     <DataType>
-                        <ArrayType Ndims="4">
-                           <ArrayDimension DimSize="2" DimPerm="0"/>
-                           <ArrayDimension DimSize="2" DimPerm="1"/>
-                           <ArrayDimension DimSize="2" DimPerm="2"/>
-                           <ArrayDimension DimSize="2" DimPerm="3"/>
-                           <DataType>
-                              <AtomicType>
-                                 <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
-                              </AtomicType>
-                           </DataType>
-                        </ArrayType>
-                     </DataType>
-                  </Field>
-               </CompoundType>
-            </DataType>
-            <Attribute Name="attr1">
-               <Dataspace>
-                  <SimpleDataspace Ndims="1">
-                     <Dimension  DimSize="10" MaxDimSize="10"/>
-                  </SimpleDataspace>
-               </Dataspace>
-               <DataType> 
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="1" />
-                  </AtomicType>
-               </DataType>
-               <Data>
-                  <DataFromFile>
+<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
+   <hdf5:Group Name="g1" OBJ-XID="xid_1344-0" H5Path="/g1" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Group Name="g1.1" OBJ-XID="xid_2320-0" H5Path="/g1/g1.1" Parents="xid_1344-0" H5ParentPaths="/g1" >
+         <hdf5:Dataset Name="dset1" OBJ-XID="xid_2696-0" H5Path= "/g1/g1.1/dset1" Parents="xid_2320-0" H5ParentPaths="/g1/g1.1">
+            <hdf5:StorageLayout>
+               <hdf5:ChunkedLayout Ndims="1">
+                  <hdf5:ChunkDimension DimSize="2" />
+                  <hdf5:RequiredFilter>
+                  </hdf5:RequiredFilter>
+               </hdf5:ChunkedLayout>
+            </hdf5:StorageLayout>
+            <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+               <hdf5:FillValue>
+                     <hdf5:NoFill/>
+               </hdf5:FillValue>
+            </hdf5:FillValueInfo>
+            <hdf5:Dataspace>
+               <hdf5:SimpleDataspace Ndims="1">
+                  <hdf5:Dimension  DimSize="6" MaxDimSize="UNLIMITED"/>
+               </hdf5:SimpleDataspace>
+            </hdf5:Dataspace>
+            <hdf5:DataType>
+               <hdf5:CompoundType>
+                  <hdf5:Field FieldName="a_array">
+                     <hdf5:DataType>
+                        <hdf5:ArrayType Ndims="4">
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="0"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="1"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="2"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="3"/>
+                           <hdf5:DataType>
+                              <hdf5:AtomicType>
+                                 <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                              </hdf5:AtomicType>
+                           </hdf5:DataType>
+                        </hdf5:ArrayType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="b_array">
+                     <hdf5:DataType>
+                        <hdf5:ArrayType Ndims="4">
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="0"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="1"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="2"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="3"/>
+                           <hdf5:DataType>
+                              <hdf5:AtomicType>
+                                 <hdf5:FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
+                              </hdf5:AtomicType>
+                           </hdf5:DataType>
+                        </hdf5:ArrayType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="c_array">
+                     <hdf5:DataType>
+                        <hdf5:ArrayType Ndims="4">
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="0"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="1"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="2"/>
+                           <hdf5:ArrayDimension DimSize="2" DimPerm="3"/>
+                           <hdf5:DataType>
+                              <hdf5:AtomicType>
+                                 <hdf5:FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
+                              </hdf5:AtomicType>
+                           </hdf5:DataType>
+                        </hdf5:ArrayType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+               </hdf5:CompoundType>
+            </hdf5:DataType>
+            <hdf5:Attribute Name="attr1">
+               <hdf5:Dataspace>
+                  <hdf5:SimpleDataspace Ndims="1">
+                     <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+                  </hdf5:SimpleDataspace>
+               </hdf5:Dataspace>
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="1" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+               <hdf5:Data>
+                  <hdf5:DataFromFile>
                   97 98 99 100 101 102 103 104 105 0
-                  </DataFromFile>
-               </Data>
-            </Attribute>
-            <Attribute Name="attr2">
-               <Dataspace>
-                  <SimpleDataspace Ndims="2">
-                     <Dimension  DimSize="2" MaxDimSize="2"/>
-                     <Dimension  DimSize="2" MaxDimSize="2"/>
-                  </SimpleDataspace>
-               </Dataspace>
-               <DataType> 
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-               <Data>
-                  <DataFromFile>
+                  </hdf5:DataFromFile>
+               </hdf5:Data>
+            </hdf5:Attribute>
+            <hdf5:Attribute Name="attr2">
+               <hdf5:Dataspace>
+                  <hdf5:SimpleDataspace Ndims="2">
+                     <hdf5:Dimension  DimSize="2" MaxDimSize="2"/>
+                     <hdf5:Dimension  DimSize="2" MaxDimSize="2"/>
+                  </hdf5:SimpleDataspace>
+               </hdf5:Dataspace>
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+               <hdf5:Data>
+                  <hdf5:DataFromFile>
                   0 1 
                   2 3
-                  </DataFromFile>
-               </Data>
-            </Attribute>
-            <Attribute Name="attr3">
-               <Dataspace>
-                  <SimpleDataspace Ndims="1">
-                     <Dimension  DimSize="10" MaxDimSize="10"/>
-                  </SimpleDataspace>
-               </Dataspace>
-               <DataType> 
-                  <AtomicType>
-                     <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
-                  </AtomicType>
-               </DataType>
-               <Data>
-                  <DataFromFile>
+                  </hdf5:DataFromFile>
+               </hdf5:Data>
+            </hdf5:Attribute>
+            <hdf5:Attribute Name="attr3">
+               <hdf5:Dataspace>
+                  <hdf5:SimpleDataspace Ndims="1">
+                     <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+                  </hdf5:SimpleDataspace>
+               </hdf5:Dataspace>
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+               <hdf5:Data>
+                  <hdf5:DataFromFile>
                   0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
-                  </DataFromFile>
-               </Data>
-            </Attribute>
+                  </hdf5:DataFromFile>
+               </hdf5:Data>
+            </hdf5:Attribute>
          <!-- Note: format of compound data not specified -->
-            <Data>
-               <DataFromFile>
+            <hdf5:Data>
+               <hdf5:DataFromFile>
                 0 1 
                      0 1 
                      0 1 
@@ -255,34 +261,42 @@ Expected output for 'h5dump --xml tmany.h5'
                      11 12 
                      11 12 
                      11 12 
-               </DataFromFile>
-            </Data>
-         </Dataset>
-      </Group>
-      <Group Name="g1.2" OBJ-XID="/g1/g1.2" Parents="/g1" >
-         <Dataset Name="link1" OBJ-XID="/g1/g1.2/link1" Parents="/g1/g1.2">
-            <DatasetPtr OBJ-XID="/g1/g1.1/dset1"/>
-         </Dataset>
-      </Group>
-   </Group>
-   <Group Name="g2" OBJ-XID="/g2" Parents="/" >
-      <SoftLink LinkName="slink2" Target="/g1" TargetObj="/g2/g1" OBJ-XID="/g2/slink2" Source="/g2"/>
-   </Group>
-   <Group Name="g3" OBJ-XID="/g3" Parents="/" >
-      <Dataset Name="link3" OBJ-XID="/g3/link3" Parents="/g3">
-         <Dataspace>
-            <SimpleDataspace Ndims="2">
-               <Dimension  DimSize="10" MaxDimSize="10"/>
-               <Dimension  DimSize="10" MaxDimSize="10"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+               </hdf5:DataFromFile>
+            </hdf5:Data>
+         </hdf5:Dataset>
+      </hdf5:Group>
+      <hdf5:Group Name="g1.2" OBJ-XID="xid_5832-0" H5Path="/g1/g1.2" Parents="xid_1344-0" H5ParentPaths="/g1" >
+         <hdf5:Dataset Name="link1" OBJ-XID="xid_2696-0-1" H5Path="/g1/g1.2/link1" Parents="xid_5832-0" H5ParentPaths="/g1/g1.2">
+            <hdf5:DatasetPtr OBJ-XID="xid_2696-0" H5Path="/g1/g1.2/link1"/>
+         </hdf5:Dataset>
+      </hdf5:Group>
+   </hdf5:Group>
+   <hdf5:Group Name="g2" OBJ-XID="xid_6808-0" H5Path="/g2" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:SoftLink LinkName="slink2" OBJ-XID="xid_4294967294-4294967293" H5SourcePath="/g2/slink2" TargetPath="/g1" TargetObj="xid_1344-0" Parents="xid_6808-0" H5ParentPaths="/g2" />
+   </hdf5:Group>
+   <hdf5:Group Name="g3" OBJ-XID="xid_7784-0" H5Path="/g3" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Dataset Name="link3" OBJ-XID="xid_8480-0" H5Path= "/g3/link3" Parents="xid_7784-0" H5ParentPaths="/g3">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="2">
+               <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+               <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 1 2 3 4 5 6 7 8 9 
             0 1 2 3 4 5 6 7 8 9 
             0 1 2 3 4 5 6 7 8 9 
@@ -293,33 +307,41 @@ Expected output for 'h5dump --xml tmany.h5'
             0 1 2 3 4 5 6 7 8 9 
             0 1 2 3 4 5 6 7 8 9 
             0 1 2 3 4 5 6 7 8 9
-            </DataFromFile>
-         </Data>
-      </Dataset>
-   </Group>
-   <Group Name="g4" OBJ-XID="/g4" Parents="/" >
-      <Dataset Name="dset2" OBJ-XID="/g4/dset2" Parents="/g4">
-         <DatasetPtr OBJ-XID="/g3/link3"/>
-      </Dataset>
-   </Group>
-   <Group Name="g5" OBJ-XID="/g5" Parents="/" >
-      <SoftLink LinkName="slink4" Target="/g6/dset3" TargetObj="/g5/g6/dset3" OBJ-XID="/g5/slink4" Source="/g5"/>
-   </Group>
-   <Group Name="g6" OBJ-XID="/g6" Parents="/" >
-      <Dataset Name="dset3" OBJ-XID="/g6/dset3" Parents="/g6">
-         <Dataspace>
-            <SimpleDataspace Ndims="2">
-               <Dimension  DimSize="10" MaxDimSize="10"/>
-               <Dimension  DimSize="10" MaxDimSize="10"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+   </hdf5:Group>
+   <hdf5:Group Name="g4" OBJ-XID="xid_8432-0" H5Path="/g4" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset2" OBJ-XID="xid_8480-0-2" H5Path="/g4/dset2" Parents="xid_8432-0" H5ParentPaths="/g4">
+         <hdf5:DatasetPtr OBJ-XID="xid_8480-0" H5Path="/g4/dset2"/>
+      </hdf5:Dataset>
+   </hdf5:Group>
+   <hdf5:Group Name="g5" OBJ-XID="xid_10248-0" H5Path="/g5" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:SoftLink LinkName="slink4" OBJ-XID="xid_4294967292-4294967291" H5SourcePath="/g5/slink4" TargetPath="/g6/dset3" TargetObj="xid_10944-0" Parents="xid_10248-0" H5ParentPaths="/g5" />
+   </hdf5:Group>
+   <hdf5:Group Name="g6" OBJ-XID="xid_10896-0" H5Path="/g6" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset3" OBJ-XID="xid_10944-0" H5Path= "/g6/dset3" Parents="xid_10896-0" H5ParentPaths="/g6">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="2">
+               <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+               <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0 0 0 0 0 0 0 
             1 1 1 1 1 1 1 1 1 1 
             2 2 2 2 2 2 2 2 2 2 
@@ -330,9 +352,9 @@ Expected output for 'h5dump --xml tmany.h5'
             7 7 7 7 7 7 7 7 7 7 
             8 8 8 8 8 8 8 8 8 8 
             9 9 9 9 9 9 9 9 9 9
-            </DataFromFile>
-         </Data>
-      </Dataset>
-   </Group>
-</RootGroup>
-</HDF5-File>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+   </hdf5:Group>
+</hdf5:RootGroup>
+</hdf5:HDF5-File>

@@ -2,124 +2,163 @@
 Expected output for 'h5dump --xml tempty.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-<HDF5-File>
-<RootGroup OBJ-XID="root">
-   <Dataset Name="Dataset1.0" OBJ-XID="/Dataset1.0" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <VLType>
-            <DataType>
-               <AtomicType>
-                  <IntegerType ByteOrder="LE" Sign="true" Size="4" />
-               </AtomicType>
-            </DataType>
-         </VLType>
-      </DataType>
+<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:RootGroup OBJ-XID="xid_928-0" H5Path="/">
+   <hdf5:Dataset Name="Dataset1.0" OBJ-XID="xid_976-0" H5Path= "/Dataset1.0" Parents="xid_928-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:VLType>
+            <hdf5:DataType>
+               <hdf5:AtomicType>
+                  <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="4" />
+               </hdf5:AtomicType>
+            </hdf5:DataType>
+         </hdf5:VLType>
+      </hdf5:DataType>
 <!-- Note: format of VL data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
                     
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Dataset2.0" OBJ-XID="/Dataset2.0" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="LE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Dataset2.0" OBJ-XID="xid_1576-0" H5Path= "/Dataset2.0" Parents="xid_928-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0 0 0 0
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Dataset3.0" OBJ-XID="/Dataset3.0" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="LE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Dataset3.0" OBJ-XID="xid_2128-0" H5Path= "/Dataset3.0" Parents="xid_928-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="LE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0 0 0 0
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Dataset4.0" OBJ-XID="/Dataset4.0" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <ArrayType Ndims="1">
-            <ArrayDimension DimSize="4" DimPerm="0"/>
-            <DataType>
-               <AtomicType>
-                  <IntegerType ByteOrder="LE" Sign="true" Size="4" />
-               </AtomicType>
-            </DataType>
-         </ArrayType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Dataset4.0" OBJ-XID="xid_2400-0" H5Path= "/Dataset4.0" Parents="xid_928-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:ArrayType Ndims="1">
+            <hdf5:ArrayDimension DimSize="4" DimPerm="0"/>
+            <hdf5:DataType>
+               <hdf5:AtomicType>
+                  <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="4" />
+               </hdf5:AtomicType>
+            </hdf5:DataType>
+         </hdf5:ArrayType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
           0 0 0 0   0 0 0 0   0 0 0 0   0 0 0 0 
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Dataset5.0" OBJ-XID="/Dataset5.0" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="a">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="LE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="b">
-               <DataType>
-                  <AtomicType>
-                     <FloatType ByteOrder="LE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="c">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="LE" Sign="true" Size="1" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Dataset5.0" OBJ-XID="xid_2672-0" H5Path= "/Dataset5.0" Parents="xid_928-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="a">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="b">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:FloatType ByteOrder="LE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="c">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="1" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0 0 0 0 0 0 0 0 0 0 0 0
-         </DataFromFile>
-      </Data>
-   </Dataset>
-</RootGroup>
-</HDF5-File>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+</hdf5:RootGroup>
+</hdf5:HDF5-File>

@@ -2,27 +2,33 @@
 Expected output for 'h5dump --xml tsaf.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-<HDF5-File>
-<RootGroup OBJ-XID="root">
-   <Dataset Name=".DSL_METADATA" OBJ-XID="/.DSL_METADATA" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="5919" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="LE" Sign="false" Size="1" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
+   <hdf5:Dataset Name=".DSL_METADATA" OBJ-XID="xid_744-0" H5Path= "/.DSL_METADATA" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="5919" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="LE" Sign="false" Size="1" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          47 32 67 79 78 84 65 73 78 69 82 10 47 46 97 116 116 114 105 98 117 
          116 101 115 32 67 79 78 84 65 73 78 69 82 10 47 46 97 116 116 114 105 
          98 117 116 101 115 47 100 97 116 97 98 97 115 101 32 67 79 78 84 65 73 
@@ -305,424 +311,455 @@ Expected output for 'h5dump --xml tsaf.h5'
          104 59 125 59 10 47 109 101 116 97 98 108 111 98 48 48 48 48 48 46 98 
          108 111 98 32 68 65 84 65 83 69 84 32 68 83 76 95 79 102 102 115 101 
          116 59 10
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Blob" OBJ-XID="/Blob" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="24" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="file_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="dataset_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="offset">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="stride">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="count">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Blob" OBJ-XID="xid_17612-0" H5Path= "/Blob" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="24" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="file_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="dataset_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="offset">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="stride">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="count">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          -1 1 0 1 9 0 1 -1 2 0 1 4 1 1 -1 3 0 1 7 2 1 -1 4 0 1 4 3 1 
          -1 5 0 1 5 4 1 -1 6 0 1 3 5 1 -1 7 0 1 4 6 1 -1 8 0 1 1 7 1 
          -1 9 0 1 10 8 1 -1 10 0 1 4 9 1 -1 11 0 1 3 10 1 -1 12 0 1 5 11 1 
          -1 13 0 1 5 12 1 -1 14 0 1 16 13 1 -1 15 0 1 9 14 1 -1 16 0 1 4 15 1 
          -1 17 0 1 16 16 1 -1 18 0 1 36 17 1 -1 19 0 1 5 18 1 -1 20 0 1 5 19 1 
          -1 21 0 1 36 20 1 -1 22 0 1 12 21 1 -1 23 0 1 7 22 1 -1 24 0 1 2 23 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Cat" OBJ-XID="/Cat" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="5" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="name">
-               <DataType>
-                  <AtomicType>
-                     <StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="role">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="13">
-                        <EnumElement>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Cat" OBJ-XID="xid_169596-0" H5Path= "/Cat" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="5" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="name">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="role">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="13">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            TOPO
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            BND
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            PROC
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            DOMN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            BLOCK
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            4
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ASSY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            5
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            MAT
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            6
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            XPROD
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            7
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            USERD
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            8
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="tdim">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="tdim">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          "nodes" TOPO 0 0 1 "elems" TOPO 2 1 1 "edges" USERD 1 2 1 
          "blocks" BLOCK 2 3 1 "side_sets" USERD 1 4 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Collection" OBJ-XID="/Collection" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="24" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="containing_set_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="cell_type">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="20">
-                        <EnumElement>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Collection" OBJ-XID="xid_425460-0" H5Path= "/Collection" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="24" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="containing_set_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="cell_type">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="20">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            NONE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            POINT
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            LINE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            TRI
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            QUAD
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            4
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            TET
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            5
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            PYRAMID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            6
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            PRISM
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            7
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            HEX
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            8
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            MIXED
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            9
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ARB
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            10
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            1BALL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            11
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            2BALL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            12
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            3BALL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            13
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            1SHELL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            14
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            2SHELL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            15
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="count">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="indexing_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="is_decomp">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="members_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="count">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="indexing_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="is_decomp">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="members_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0 0 POINT 18 0 0 -2 0 1 0 1 MIXED 12 1 1 -2 1 1 0 3 NONE 4 2 1 0 2 1 
          0 4 NONE 2 3 0 1 3 1 1 0 POINT 9 4 0 -2 4 1 1 1 QUAD 4 5 1 -2 5 1 
          1 3 NONE 1 6 1 2 6 1 2 0 POINT 7 7 0 -2 7 1 2 1 MIXED 4 8 1 -2 8 1 
@@ -732,251 +769,268 @@ Expected output for 'h5dump --xml tsaf.h5'
          5 2 LINE 4 16 1 -2 16 1 6 0 POINT 5 17 1 -2 17 1 
          7 0 POINT 5 18 0 -2 18 1 7 1 TRI 3 19 1 -2 19 1 7 3 NONE 1 20 1 5 20 1 
          8 0 POINT 4 21 0 -2 21 1 8 1 QUAD 1 22 1 -2 22 1 8 3 NONE 1 23 1 6 23 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Field" OBJ-XID="/Field" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="14" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="ftmpl_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="name">
-               <DataType>
-                  <AtomicType>
-                     <StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="units_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="storage_decomp_cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="comp_intlv">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="8">
-                        <EnumElement>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Field" OBJ-XID="xid_619980-0" H5Path= "/Field" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="14" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="ftmpl_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="name">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="units_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="storage_decomp_cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="comp_intlv">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="8">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            COMPONENT
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            VECTOR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INDEPENDENT
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NONE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="indexing_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="dof_assoc_cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="assoc_ratio">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="eval_decomp_cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="eval_func">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="8">
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="indexing_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="dof_assoc_cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="assoc_ratio">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="eval_decomp_cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="eval_func">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="8">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            CONSTANT
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNIFORM
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            PWCONST
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            PWLINEAR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="is_homogeneous">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="is_coord_field">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="comp_ids_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="comp_order_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="vbasis_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="dof_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="is_homogeneous">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="is_coord_field">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="comp_ids_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="comp_order_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="vbasis_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="dof_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1 "X" -7 -2 NONE -2 0 1 0 PWLINEAR 1 0 -2 -2 -2 -2 0 1 
          1 "Y" -7 -2 NONE -2 0 1 0 PWLINEAR 1 0 -2 -2 -2 -2 1 1 
          0 "coords" -7 -2 VECTOR -2 0 1 0 PWLINEAR 1 1 7 -2 -2 17 2 1 
@@ -991,236 +1045,253 @@ Expected output for 'h5dump --xml tsaf.h5'
          4 "stress" -7 -2 VECTOR -2 1 1 1 PWCONST 1 0 9 -2 -2 21 11 1 
          6 "temperature" -7 -2 NONE -2 0 1 0 PWLINEAR 1 0 -2 -2 -2 22 12 1 
          7 "pressure" -7 -2 NONE -2 2 1 2 PWCONST 1 0 -2 -2 -2 23 13 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="FieldTmpl" OBJ-XID="/FieldTmpl" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="8" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="name">
-               <DataType>
-                  <AtomicType>
-                     <StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_space_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="alg_type">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="13">
-                        <EnumElement>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="FieldTmpl" OBJ-XID="xid_518404-0" H5Path= "/FieldTmpl" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="8" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="name">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_space_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="alg_type">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="13">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            CONSTANT
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            COMPONENT
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            SCALAR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            VECTOR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            TENSOR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            4
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            SYM_TENSOR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            5
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            FIELD
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            6
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            STATE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            7
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            TUPLE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            8
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="basis">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="11">
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="basis">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="11">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            UNITY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            CARTESIAN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            SPHERICAL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            CYLINDRICAL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UPPER_TRI
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            4
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            FOURIER
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            5
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            VARIABLE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            6
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="quantity_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_comps">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="ftmpl_ids_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="quantity_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_comps">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="ftmpl_ids_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          "coordinate_tmpl" 0 VECTOR CARTESIAN 2 2 0 0 1 
          "coordinate_tmpl_component" 0 SCALAR CARTESIAN 2 1 0 1 1 
          "distrib_factors_tmpl" 5 SCALAR UNITY -5 1 0 2 1 
@@ -1229,146 +1300,158 @@ Expected output for 'h5dump --xml tsaf.h5'
          "stress_on_cell_1_tmpl_component" 1 SCALAR UPPER_TRI 0 1 0 5 1 
          "temp_on_cell_2_tmpl" 2 SCALAR UNITY 1 1 0 6 1 
          "pressure_on_ss1" 4 SCALAR UNITY 0 1 0 7 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="IndexSpec" OBJ-XID="/IndexSpec" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="24" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="ndims">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="origins">
-               <DataType>
-                  <CompoundType>
-                     <Field FieldName="_">
-                        <DataType>
-                           <ArrayType Ndims="1">
-                              <ArrayDimension DimSize="8" DimPerm="0"/>
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </ArrayType>
-                        </DataType>
-                     </Field>
-                  </CompoundType>
-               </DataType>
-            </Field>
-            <Field FieldName="sizes">
-               <DataType>
-                  <CompoundType>
-                     <Field FieldName="_">
-                        <DataType>
-                           <ArrayType Ndims="1">
-                              <ArrayDimension DimSize="8" DimPerm="0"/>
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </ArrayType>
-                        </DataType>
-                     </Field>
-                  </CompoundType>
-               </DataType>
-            </Field>
-            <Field FieldName="order">
-               <DataType>
-                  <CompoundType>
-                     <Field FieldName="_">
-                        <DataType>
-                           <ArrayType Ndims="1">
-                              <ArrayDimension DimSize="8" DimPerm="0"/>
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </ArrayType>
-                        </DataType>
-                     </Field>
-                  </CompoundType>
-               </DataType>
-            </Field>
-            <Field FieldName="index_type">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="6">
-                        <EnumElement>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="IndexSpec" OBJ-XID="xid_51916-0" H5Path= "/IndexSpec" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="24" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="ndims">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="origins">
+               <hdf5:DataType>
+                  <hdf5:CompoundType>
+                     <hdf5:Field FieldName="_">
+                        <hdf5:DataType>
+                           <hdf5:ArrayType Ndims="1">
+                              <hdf5:ArrayDimension DimSize="8" DimPerm="0"/>
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:ArrayType>
+                        </hdf5:DataType>
+                     </hdf5:Field>
+                  </hdf5:CompoundType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="sizes">
+               <hdf5:DataType>
+                  <hdf5:CompoundType>
+                     <hdf5:Field FieldName="_">
+                        <hdf5:DataType>
+                           <hdf5:ArrayType Ndims="1">
+                              <hdf5:ArrayDimension DimSize="8" DimPerm="0"/>
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:ArrayType>
+                        </hdf5:DataType>
+                     </hdf5:Field>
+                  </hdf5:CompoundType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="order">
+               <hdf5:DataType>
+                  <hdf5:CompoundType>
+                     <hdf5:Field FieldName="_">
+                        <hdf5:DataType>
+                           <hdf5:ArrayType Ndims="1">
+                              <hdf5:ArrayDimension DimSize="8" DimPerm="0"/>
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:ArrayType>
+                        </hdf5:DataType>
+                     </hdf5:Field>
+                  </hdf5:CompoundType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="index_type">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="6">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            C_ORDER
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            F_ORDER
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1  0 0 0 0 0 0 0 0   18 0 0 0 0 0 0 0   0 0 0 0 0 0 0 0  C_ORDER 0 1 
          1  0 0 0 0 0 0 0 0   12 0 0 0 0 0 0 0   0 0 0 0 0 0 0 0  C_ORDER 1 1 
          1  0 0 0 0 0 0 0 0   4 0 0 0 0 0 0 0   0 0 0 0 0 0 0 0  C_ORDER 2 1 
@@ -1393,257 +1476,274 @@ Expected output for 'h5dump --xml tsaf.h5'
          1  0 0 0 0 0 0 0 0   4 0 0 0 0 0 0 0   0 0 0 0 0 0 0 0  C_ORDER 21 1 
          1  0 0 0 0 0 0 0 0   1 0 0 0 0 0 0 0   0 0 0 0 0 0 0 0  C_ORDER 22 1 
          1  0 0 0 0 0 0 0 0   1 0 0 0 0 0 0 0   0 0 0 0 0 0 0 0  C_ORDER 23 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Relation" OBJ-XID="/Relation" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="21" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="sub_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="sub_cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="sub_decomp_cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="sup_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="sup_cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="sup_decomp_cat_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="kind">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="11">
-                        <EnumElement>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Relation" OBJ-XID="xid_465812-0" H5Path= "/Relation" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="21" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="sub_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="sub_cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="sub_decomp_cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="sup_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="sup_cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="sup_decomp_cat_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="kind">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="11">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            SUBSET
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            SUPSET
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            BOUND
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            PERMUTE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NEIGHBOR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            4
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            COPY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            5
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            EQUAL
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            6
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="rep_type">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="13">
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="rep_type">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="13">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            IDENTITY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            HLIST
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            TLIST
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            TLIST_1
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ELIST
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            4
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            STRUCTURED
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            5
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNSTRUCTURED
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            6
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ARBITRARY_R
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            7
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ARBITRARY_DR
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            8
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="d_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="r_blob_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="d_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="r_blob_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1 0 -2 0 0 -2 EQUAL TLIST -2 0 0 1 1 1 -2 0 1 -2 EQUAL TLIST -2 1 1 1 
          2 0 -2 0 0 -2 EQUAL TLIST -2 2 2 1 2 1 -2 0 1 -2 EQUAL TLIST -2 3 3 1 
          7 0 -2 0 0 -2 EQUAL TLIST -2 4 4 1 7 1 -2 0 1 -2 EQUAL TLIST -2 5 5 1 
@@ -1660,182 +1760,194 @@ Expected output for 'h5dump --xml tsaf.h5'
          7 1 -2 0 0 -2 SUBSET UNSTRUCTURED -2 14 18 1 
          8 1 -2 0 0 -2 SUBSET UNSTRUCTURED -2 15 19 1 
          3 1 -2 0 0 -2 SUBSET UNSTRUCTURED -2 16 20 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="Set" OBJ-XID="/Set" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="1024" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="9" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="user_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="name">
-               <DataType>
-                  <AtomicType>
-                     <StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="tdim">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="srole">
-               <DataType>
-                  <AtomicType>
-                     <EnumType Nelems="11">
-                        <EnumElement>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="Set" OBJ-XID="xid_254332-0" H5Path= "/Set" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="1024" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="9" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="user_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="name">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="64" StrPad="H5T_STR_NULLTERM"/>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="tdim">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="srole">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:EnumType Nelems="11">
+                     <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                     </hdf5:DataType>
+                        <hdf5:EnumElement>
                            TIME
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            0
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            SPACE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            STATE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            PARAM
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            CTYPE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            4
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ATYPE
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            5
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            USERD
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            6
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            ANY
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -1
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            INVALID
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -2
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            NA
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -3
-                        </EnumValue>
-                        <EnumElement>
+                        </hdf5:EnumValue>
+                        <hdf5:EnumElement>
                            UNKNOWN
-                        </EnumElement>
-                        <EnumValue>
+                        </hdf5:EnumElement>
+                        <hdf5:EnumValue>
                            -4
-                        </EnumValue>
-                     </EnumType>
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="coll_ids">
-               <DataType>
-                  <CompoundType>
-                     <Field FieldName="_">
-                        <DataType>
-                           <ArrayType Ndims="1">
-                              <ArrayDimension DimSize="16" DimPerm="0"/>
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </ArrayType>
-                        </DataType>
-                     </Field>
-                  </CompoundType>
-               </DataType>
-            </Field>
-            <Field FieldName="is_top">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="is_extendible">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="dflt_coordfld_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="bnd_set_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="base_id">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="num_recs">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+                        </hdf5:EnumValue>
+                     </hdf5:EnumType>
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="coll_ids">
+               <hdf5:DataType>
+                  <hdf5:CompoundType>
+                     <hdf5:Field FieldName="_">
+                        <hdf5:DataType>
+                           <hdf5:ArrayType Ndims="1">
+                              <hdf5:ArrayDimension DimSize="16" DimPerm="0"/>
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:ArrayType>
+                        </hdf5:DataType>
+                     </hdf5:Field>
+                  </hdf5:CompoundType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="is_top">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="is_extendible">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="dflt_coordfld_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="bnd_set_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="base_id">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="num_recs">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0 "TOP_CELL" 2 SPACE  0 1 -2 2 3 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2  1 0 -2 -2 0 1 
          0 "CELL_1" 2 SPACE  4 5 -2 6 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2  0 0 -2 -2 1 1 
          0 "CELL_2" 2 SPACE  7 8 -2 9 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2  0 0 -2 -2 2 1 
@@ -1845,758 +1957,972 @@ Expected output for 'h5dump --xml tsaf.h5'
          0 "NODE_SET_1" 0 SPACE  17 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2  0 0 -2 -2 6 1 
          0 "CELL_2_TRIS" 2 SPACE  18 19 -2 20 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2  0 0 -2 -2 7 1 
          0 "CELL_2_QUADS" 2 SPACE  21 22 -2 23 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2 -2  0 0 -2 -2 8 1
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="field-coords_0002" OBJ-XID="/field-coords_0002" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="36" MaxDimSize="36"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="field-coords_0002" OBJ-XID="xid_14968-0" H5Path= "/field-coords_0002" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="36" MaxDimSize="36"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0 4 1 4 2 4 2.5 4 0 3 1 3 2 3 2.5 3 0 2 1 2 2 2 2.5 2 0 1 2 1 2.5 1 0 
          0 2 0 2.5 0
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="field-displacements_0007" OBJ-XID="/field-displacements_0007" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="36" MaxDimSize="36"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="field-displacements_0007" OBJ-XID="xid_15968-0" H5Path= "/field-displacements_0007" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="36" MaxDimSize="36"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 
          0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25 
          0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="field-distribution_factors_0003" OBJ-XID="/field-distribution_factors_0003" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="5" MaxDimSize="5"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="field-distribution_factors_0003" OBJ-XID="xid_15384-0" H5Path= "/field-distribution_factors_0003" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="5" MaxDimSize="5"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          4 3 2 1 0
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="field-pressure_0013" OBJ-XID="/field-pressure_0013" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="2" MaxDimSize="2"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="field-pressure_0013" OBJ-XID="xid_17332-0" H5Path= "/field-pressure_0013" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="2" MaxDimSize="2"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          45 55
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="field-stress_0011" OBJ-XID="/field-stress_0011" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="12" MaxDimSize="12"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="field-stress_0011" OBJ-XID="xid_16384-0" H5Path= "/field-stress_0011" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="12" MaxDimSize="12"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0.5 0.25 0.5 0.5 0.25 0.5 0.5 0.25 0.5 0.5 0.25 0.5
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="field-temperature_0004" OBJ-XID="/field-temperature_0004" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="5" MaxDimSize="5"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="field-temperature_0004" OBJ-XID="xid_15676-0" H5Path= "/field-temperature_0004" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="5" MaxDimSize="5"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          100 150 150 100 75
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="field-temperature_0012" OBJ-XID="/field-temperature_0012" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="7" MaxDimSize="7"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="field-temperature_0012" OBJ-XID="xid_17032-0" H5Path= "/field-temperature_0012" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="7" MaxDimSize="7"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          75 95 120 80 115 85 110
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="metablob00000.blob" OBJ-XID="/metablob00000.blob" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="32" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="19" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="metablob00000.blob" OBJ-XID="xid_761500-0" H5Path= "/metablob00000.blob" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="32" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="19" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1 7 8 3 -2 -2 -2 -2 -2 -2 -2 -2 0 1 5 6 8 9 10
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="metablob00000.index" OBJ-XID="/metablob00000.index" Parents="root">
-      <StorageLayout>
-         <ChunkedLayout Ndims="1">
-            <ChunkDimension DimSize="32" />
-         </ChunkedLayout>
-      </StorageLayout>
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="10" MaxDimSize="UNLIMITED"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <CompoundType>
-            <Field FieldName="index">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="length">
-               <DataType>
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </DataType>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="metablob00000.index" OBJ-XID="xid_758876-0" H5Path= "/metablob00000.index" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ChunkedLayout Ndims="1">
+            <hdf5:ChunkDimension DimSize="32" />
+            <hdf5:RequiredFilter>
+            </hdf5:RequiredFilter>
+         </hdf5:ChunkedLayout>
+      </hdf5:StorageLayout>
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="10" MaxDimSize="UNLIMITED"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:CompoundType>
+            <hdf5:Field FieldName="index">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+            <hdf5:Field FieldName="length">
+               <hdf5:DataType>
+                  <hdf5:AtomicType>
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </hdf5:AtomicType>
+               </hdf5:DataType>
+            </hdf5:Field>
+         </hdf5:CompoundType>
+      </hdf5:DataType>
    <!-- Note: format of compound data not specified -->
-      <Data>
-         <DataFromFile>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          0 4 4 2 6 1 7 2 9 1 10 1 11 1 12 2 14 2 16 3
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0000" OBJ-XID="/ssrel-_0000" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="9" MaxDimSize="9"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0000" OBJ-XID="xid_8924-0" H5Path= "/ssrel-_0000" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="9" MaxDimSize="9"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1 2 3 5 6 7 9 10 11
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0001" OBJ-XID="/ssrel-_0001" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0001" OBJ-XID="xid_9232-0" H5Path= "/ssrel-_0001" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1 2 4 5
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0002" OBJ-XID="/ssrel-_0002" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="7" MaxDimSize="7"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0002" OBJ-XID="xid_9520-0" H5Path= "/ssrel-_0002" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="7" MaxDimSize="7"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          9 10 11 13 14 16 17
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0003" OBJ-XID="/ssrel-_0003" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0003" OBJ-XID="xid_9820-0" H5Path= "/ssrel-_0003" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          7 8 9 11
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0004" OBJ-XID="/ssrel-_0004" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="5" MaxDimSize="5"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0004" OBJ-XID="xid_10108-0" H5Path= "/ssrel-_0004" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="5" MaxDimSize="5"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          9 10 11 13 14
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0005" OBJ-XID="/ssrel-_0005" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="3" MaxDimSize="3"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0005" OBJ-XID="xid_10400-0" H5Path= "/ssrel-_0005" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="3" MaxDimSize="3"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          7 8 9
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0006" OBJ-XID="/ssrel-_0006" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0006" OBJ-XID="xid_10684-0" H5Path= "/ssrel-_0006" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          13 14 16 17
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0007" OBJ-XID="/ssrel-_0007" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="1" MaxDimSize="1"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0007" OBJ-XID="xid_11300-0" H5Path= "/ssrel-_0007" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="1" MaxDimSize="1"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          11
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0008" OBJ-XID="/ssrel-_0008" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="10" MaxDimSize="10"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0008" OBJ-XID="xid_11576-0" H5Path= "/ssrel-_0008" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="10" MaxDimSize="10"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          3 4 7 8 11 12 14 15 17 18
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0009" OBJ-XID="/ssrel-_0009" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0009" OBJ-XID="xid_11888-0" H5Path= "/ssrel-_0009" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          3 6 10 12
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0010" OBJ-XID="/ssrel-_0010" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="3" MaxDimSize="3"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0010" OBJ-XID="xid_12176-0" H5Path= "/ssrel-_0010" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="3" MaxDimSize="3"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          9 10 11
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0011" OBJ-XID="/ssrel-_0011" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="5" MaxDimSize="5"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0011" OBJ-XID="xid_12788-0" H5Path= "/ssrel-_0011" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="5" MaxDimSize="5"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1 5 9 13 16
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="ssrel-_0012" OBJ-XID="/ssrel-_0012" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="5" MaxDimSize="5"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="ssrel-_0012" OBJ-XID="xid_13080-0" H5Path= "/ssrel-_0012" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="5" MaxDimSize="5"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          4 8 12 15 18
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="toporel-_0017" OBJ-XID="/toporel-_0017" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="16" MaxDimSize="16"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="toporel-_0017" OBJ-XID="xid_13372-0" H5Path= "/toporel-_0017" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="16" MaxDimSize="16"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          1 2 6 5 2 3 7 6 5 6 10 9 6 7 11 10
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="toporel-_0018" OBJ-XID="/toporel-_0018" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="9" MaxDimSize="9"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="toporel-_0018" OBJ-XID="xid_13708-0" H5Path= "/toporel-_0018" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="9" MaxDimSize="9"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          9 10 13 10 14 13 10 11 14
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="toporel-_0019" OBJ-XID="/toporel-_0019" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="toporel-_0019" OBJ-XID="xid_14344-0" H5Path= "/toporel-_0019" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          13 14 17 16
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Dataset Name="toporel-_0020" OBJ-XID="/toporel-_0020" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="16" MaxDimSize="16"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="toporel-_0020" OBJ-XID="xid_14632-0" H5Path= "/toporel-_0020" Parents="xid_696-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="16" MaxDimSize="16"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          3 4 8 7 7 8 12 11 11 12 15 14 14 15 18 17
-         </DataFromFile>
-      </Data>
-   </Dataset>
-   <Group Name=".attributes" OBJ-XID="/.attributes" Parents="/" >
-      <Group Name="database" OBJ-XID="/.attributes/database" Parents="/.attributes" >
-         <Dataset Name=".SAF_DbProps" OBJ-XID="/.attributes/database/.SAF_DbProps" Parents="/.attributes/database">
-            <Dataspace>
-               <SimpleDataspace Ndims="1">
-                  <Dimension  DimSize="1" MaxDimSize="1"/>
-               </SimpleDataspace>
-            </Dataspace>
-            <DataType> 
-               <CompoundType>
-                  <Field FieldName="magic">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="SFileDir">
-                     <DataType>
-                        <AtomicType>
-                           <StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="ImportFile">
-                     <DataType>
-                        <AtomicType>
-                           <StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="parallel">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="safapi">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="saflib">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="vbt">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="dsl">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="hdf5">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="mpi">
-                     <DataType>
-                        <CompoundType>
-                           <Field FieldName="vmajor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="vminor">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="rel">
-                              <DataType>
-                                 <AtomicType>
-                                    <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                           <Field FieldName="annot">
-                              <DataType>
-                                 <AtomicType>
-                                    <StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </AtomicType>
-                              </DataType>
-                           </Field>
-                        </CompoundType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="DoToc">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="ReadOnly">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="Clobber">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-                  <Field FieldName="OSModes">
-                     <DataType>
-                        <AtomicType>
-                           <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </AtomicType>
-                     </DataType>
-                  </Field>
-               </CompoundType>
-            </DataType>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Group Name=".attributes" OBJ-XID="xid_5072-0" H5Path="/.attributes" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Group Name="database" OBJ-XID="xid_5728-0" H5Path="/.attributes/database" Parents="xid_5072-0" H5ParentPaths="/.attributes" >
+         <hdf5:Dataset Name=".SAF_DbProps" OBJ-XID="xid_6104-0" H5Path= "/.attributes/database/.SAF_DbProps" Parents="xid_5728-0" H5ParentPaths="/.attributes/database">
+            <hdf5:StorageLayout>
+               <hdf5:ContiguousLayout/>
+            </hdf5:StorageLayout>
+                     <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+               <hdf5:FillValue>
+                     <hdf5:NoFill/>
+               </hdf5:FillValue>
+            </hdf5:FillValueInfo>
+            <hdf5:Dataspace>
+               <hdf5:SimpleDataspace Ndims="1">
+                  <hdf5:Dimension  DimSize="1" MaxDimSize="1"/>
+               </hdf5:SimpleDataspace>
+            </hdf5:Dataspace>
+            <hdf5:DataType>
+               <hdf5:CompoundType>
+                  <hdf5:Field FieldName="magic">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="SFileDir">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="ImportFile">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="parallel">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="safapi">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="saflib">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="vbt">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="dsl">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="hdf5">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="mpi">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="DoToc">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="ReadOnly">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="Clobber">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="OSModes">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+               </hdf5:CompoundType>
+            </hdf5:DataType>
          <!-- Note: format of compound data not specified -->
-            <Data>
-               <DataFromFile>
+            <hdf5:Data>
+               <hdf5:DataFromFile>
                -604320037 "." "don't import" 1 0 0 0 "none" 0 1 0 "devel" 1 3 0 "" 0 0 0 "none" 1 2 1 "" 1 2 0 "" 1 0 1 0
-               </DataFromFile>
-            </Data>
-         </Dataset>
-      </Group>
-   </Group>
-</RootGroup>
-</HDF5-File>
+               </hdf5:DataFromFile>
+            </hdf5:Data>
+         </hdf5:Dataset>
+      </hdf5:Group>
+   </hdf5:Group>
+</hdf5:RootGroup>
+</hdf5:HDF5-File>
