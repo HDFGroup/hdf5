@@ -1393,9 +1393,9 @@ nh5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
   c_name = (char *)HD5f2cstring(name, c_namelen); 
   if (c_name == NULL) return ret_value;
  
-  c_type_id = *type_id;
-  c_value = *value;
-  error = H5Tenum_insert(c_type_id, c_name, (void*)c_value);
+  c_type_id = (hid_t)*type_id;
+  c_value = (int)*value;
+  error = H5Tenum_insert(c_type_id, c_name, &c_value);
   HDfree(c_name);
   if(error < 0) return ret_value;
 
@@ -1428,7 +1428,7 @@ nh5tenum_nameof_c(hid_t_f *type_id, int_f* value, _fcd name, size_t_f* namelen)
   herr_t error;
   int c_value;
   c_value = *value;
-  c_namelen = (size_t)*namelen;
+  c_namelen = ((size_t)*namelen) +1;
   c_name = (char *)malloc(sizeof(char)*c_namelen);
   c_type_id = *type_id;
   error = H5Tenum_nameof(c_type_id, &c_value, c_name, c_namelen);
