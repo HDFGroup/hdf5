@@ -109,6 +109,9 @@ Library
     * Fixed bug where non-zero fill-value was not being read correctly from
       certain chunked datasets when using an "all" or contiguous hyperslab
       selection.  QAK - 2/14/02
+    * Fixed data corruption bug in hyperslab routines when contiguous
+        hyperslab that spans entire dimension and is larger than type
+        conversion buffer is attempted to be read.  QAK - 3/26/02
 
 Configuration
 -------------
