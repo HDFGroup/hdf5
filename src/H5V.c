@@ -433,8 +433,8 @@ done:
  */
 htri_t
 H5V_hyper_disjointp(unsigned n,
-		    const hssize_t *offset1, const hsize_t *size1,
-		    const hssize_t *offset2, const hsize_t *size2)
+		    const hssize_t *offset1, const size_t *size1,
+		    const hssize_t *offset2, const size_t *size2)
 {
     unsigned	u;
     htri_t      ret_value=FALSE;        /* Return value */
@@ -1229,7 +1229,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_chunk_index(unsigned ndims, const hssize_t *coord, const hsize_t *chunk,
+H5V_chunk_index(unsigned ndims, const hssize_t *coord, const size_t *chunk,
     const hsize_t *down_nchunks, hsize_t *chunk_idx)
 {
     hssize_t	scaled_coord[H5V_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
@@ -1246,7 +1246,7 @@ H5V_chunk_index(unsigned ndims, const hssize_t *coord, const hsize_t *chunk,
 
     /* Compute the scaled coordinates for actual coordinates */
     for(u=0; u<ndims; u++) {
-        H5_CHECK_OVERFLOW(chunk[u],hsize_t,hssize_t);
+        H5_CHECK_OVERFLOW(chunk[u],size_t,hssize_t);
         scaled_coord[u]=coord[u]/(hssize_t)chunk[u];
     } /* end for */
 

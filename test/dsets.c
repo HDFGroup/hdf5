@@ -578,6 +578,8 @@ test_compact_io(hid_t fapl)
                  H5_FAILED();
                  printf("    Read different values than written.\n");
                  printf("    At index %d,%d\n", i, j);
+                 printf("    wbuf[%d][%d]=%d\n", i, j, wbuf[i][j]);
+                 printf("    rbuf[%d][%d]=%d\n", i, j, rbuf[i][j]);
                  goto error;
              }
          }

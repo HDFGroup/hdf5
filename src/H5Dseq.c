@@ -227,7 +227,7 @@ H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "external data read failed");
             } else {
                 /* Pass along the vector of sequences to read */
-                if((ret_value=H5F_contig_readvv(f, layout->chunk_size, layout->addr,
+                if((ret_value=H5F_contig_readvv(f, layout->u.contig.size, layout->u.contig.addr,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                         dxpl_id, buf))<0)
@@ -336,7 +336,7 @@ H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "external data write failed");
             } else {
                 /* Pass along the vector of sequences to write */
-                if ((ret_value=H5F_contig_writevv(f, layout->chunk_size, layout->addr,
+                if ((ret_value=H5F_contig_writevv(f, layout->u.contig.size, layout->u.contig.addr,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                         dxpl_id, buf))<0)

@@ -75,8 +75,6 @@ H5FL_BLK_DEFINE_STATIC(zero_fill);
 herr_t
 H5F_contig_create(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout)
 {
-    hsize_t size;               /* Size of contiguous block of data */
-    unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_contig_create, FAIL);
@@ -85,14 +83,8 @@ H5F_contig_create(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout)
     assert(f);
     assert(layout);
 
-    /* Compute size */
-    size=layout->dim[0];
-    for (u = 1; u < layout->ndims; u++)
-        size *= layout->dim[u];
-    assert (size>0);
-
     /* Allocate space for the contiguous data */
-    if (HADDR_UNDEF==(layout->addr=H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, size)))
+    if (HADDR_UNDEF==(layout->u.contig.addr=H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, layout->u.contig.size)))
         HGOTO_ERROR (H5E_IO, H5E_NOSPACE, FAIL, "unable to reserve file space");
 
 done:
@@ -145,8 +137,8 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
     assert(f);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     assert(layout && H5D_CONTIGUOUS==layout->type);
-    assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
-    assert(H5F_addr_defined(layout->addr));
+    assert(H5F_addr_defined(layout->u.contig.addr));
+    assert(layout->u.contig.size>0);
     assert(space);
     assert(elmt_size>0);
 
@@ -167,7 +159,7 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
 #endif  /* H5_HAVE_PARALLEL */
 
     /* Get the number of elements in the dataset's dataspace */
-    snpoints = H5S_get_simple_extent_npoints(space);
+    snpoints = H5S_GET_SIMPLE_EXTENT_NPOINTS(space);
     assert(snpoints>=0);
     H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
 
@@ -214,7 +206,7 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
     } /* end else */
      
     /* Start at the beginning of the dataset */
-    addr = layout->addr;
+    addr = layout->u.contig.addr;
 
     /* Loop through writing the fill value to the dataset */
     while (npoints>0) {
@@ -290,8 +282,6 @@ done:
 herr_t
 H5F_contig_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
 {
-    hsize_t size;               /* Size of contiguous block of data */
-    unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_contig_delete, FAIL);
@@ -300,17 +290,12 @@ H5F_contig_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
     assert(f);
     assert(layout);
 
-    /* Compute size */
-    size=layout->dim[0];
-    for (u = 1; u < layout->ndims; u++)
-        size *= layout->dim[u];
-
     /* Check for overlap with the sieve buffer and reset it */
-    if (H5F_sieve_overlap_clear(f, dxpl_id, layout->addr, size)<0)
+    if (H5F_sieve_overlap_clear(f, dxpl_id, layout->u.contig.addr, layout->u.contig.size)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to clear sieve buffer");
 
     /* Free the file space for the chunk */
-    if (H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, layout->addr, size)<0)
+    if (H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, layout->u.contig.addr, layout->u.contig.size)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header");
 
 done:

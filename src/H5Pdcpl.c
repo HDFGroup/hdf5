@@ -151,7 +151,7 @@ herr_t
 H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
     int			    i;
-    hsize_t real_dims[H5O_LAYOUT_NDIMS]; /* Full-sized array to hold chunk dims */
+    size_t real_dims[H5O_LAYOUT_NDIMS]; /* Full-sized array to hold chunk dims */
     H5D_layout_t           layout;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
@@ -172,12 +172,14 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Initialize chunk dims to 0s */
-    HDmemset(real_dims,0,H5O_LAYOUT_NDIMS*sizeof(hsize_t));
+    HDmemset(real_dims,0,sizeof(real_dims));
     for (i=0; i<ndims; i++) {
-        if (dim[i] <= 0)
+        if (dim[i] == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be positive");
+        if (dim[i] != (dim[i]&0xffffffff))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be less than 2^32");
         real_dims[i]=dim[i]; /* Store user's chunk dimensions */
-    }
+    } /* end for */
 
     layout = H5D_CHUNKED;
     if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
@@ -219,10 +221,8 @@ done:
 int
 H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
 {
-    int			i;
     int                 ndims;
     H5D_layout_t        layout;
-    hsize_t             chunk_size[H5O_LAYOUT_NDIMS];
     H5P_genplist_t *plist;      /* Property list pointer */
     int                 ret_value;
 
@@ -238,14 +238,20 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
     if(H5D_CHUNKED != layout) 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout");
    
-    if(H5P_get(plist, H5D_CRT_CHUNK_SIZE_NAME, chunk_size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk size");
     if(H5P_get(plist, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk dimensionality");
 
-    /* Get the dimension sizes */
-    for (i=0; i<ndims && i<max_ndims && dim; i++)
-        dim[i] = chunk_size[i];
+    if(dim) {
+        int		i;
+        size_t          chunk_size[H5O_LAYOUT_NDIMS];
+
+        if(H5P_get(plist, H5D_CRT_CHUNK_SIZE_NAME, chunk_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk size");
+
+        /* Get the dimension sizes */
+        for (i=0; i<ndims && i<max_ndims; i++)
+            dim[i] = chunk_size[i];
+    } /* end if */
 
     /* Set the return value */
     ret_value=ndims;

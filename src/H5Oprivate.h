@@ -123,15 +123,32 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
 
+typedef struct H5O_layout_contig_t {
+    haddr_t	addr;			/* File address of data              */ 
+    hsize_t     size;                   /* Size of data in bytes             */
+} H5O_layout_contig_t;
+
+typedef struct H5O_layout_chunk_t {
+    haddr_t	addr;			/* File address of B-tree            */ 
+    unsigned	ndims;			/* Num dimensions in chunk           */
+    size_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
+    size_t      size;                   /* Size of chunk in bytes            */
+} H5O_layout_chunk_t;
+
+typedef struct H5O_layout_compact_t {
+    hbool_t     dirty;                  /* Dirty flag for compact dataset    */ 
+    size_t      size;                   /* Size of buffer in bytes           */
+    void        *buf;                   /* Buffer for compact dataset        */
+} H5O_layout_compact_t;
+
 typedef struct H5O_layout_t {
-    int		type;			/*type of layout, H5D_layout_t	     */
-    haddr_t	addr;			/*file address of data or B-tree     */ 
-    unsigned	ndims;			/*num dimensions in stored data	     */
-    hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk in bytes     */
-    hsize_t     chunk_size;             /*size of chunk in bytes   */
-    hbool_t     dirty;                  /*dirty flag for compact dataset     */ 
-    size_t      size;                   /*size of compact dataset in bytes   */
-    void        *buf;                   /*buffer for compact dataset         */
+    H5D_layout_t type;			/* Type of layout                    */
+    unsigned version;                   /* Version of message                */
+    union {
+        H5O_layout_contig_t contig;     /* Information for contiguous layout */
+        H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
+        H5O_layout_compact_t compact;   /* Information for compact layout    */
+    } u;
 } H5O_layout_t;
 
 /* Enable reading/writing "bogus" messages */

@@ -189,7 +189,7 @@ H5D_init_interface(void)
     H5P_genclass_t  *crt_pclass;
     H5D_layout_t    layout                   = H5D_CRT_LAYOUT_DEF;
     unsigned        chunk_ndims              = H5D_CRT_CHUNK_DIM_DEF;
-    hsize_t         chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;
+    size_t          chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;
     H5O_fill_t      fill                     = H5D_CRT_FILL_VALUE_DEF;
     H5D_alloc_time_t    alloc_time           = H5D_CRT_ALLOC_TIME_DEF;
     H5D_fill_time_t     fill_time            = H5D_CRT_FILL_TIME_DEF;   
@@ -1443,7 +1443,7 @@ H5D_get_space_status(const H5D_t *dset, H5D_space_status_t *allocation, hid_t dx
     assert(space);
 
     /* Get the total number of elements in dataset's dataspace */
-    if((total_elem=H5S_get_simple_extent_npoints(space))<0)
+    if((total_elem=H5S_GET_SIMPLE_EXTENT_NPOINTS(space))<0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get # of dataspace elements")
 
     /* Get the size of the dataset's datatype */
@@ -1788,7 +1788,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 
     /* Add the dataset's raw data size to the size of the header, if the raw data will be stored as compact */
     if (layout->type == H5D_COMPACT)
-        ohdr_size += layout->size;
+        ohdr_size += layout->u.compact.size;
 
     /* Create (open for write access) an object header */
     if (H5O_create(file, dxpl_id, ohdr_size, ent) < 0)
@@ -2031,10 +2031,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     H5D_t		*new_dset = NULL;
     int		        i, ndims;
     unsigned		u;
-    hsize_t		max_dim[H5O_LAYOUT_NDIMS]={0};
     H5F_t		*file=NULL;
     unsigned            chunk_ndims = 0;        /* Dimensionality of chunk */
-    hsize_t             chunk_size[H5O_LAYOUT_NDIMS]={0};
     H5P_genplist_t 	*dc_plist=NULL;         /* New Property list */
     hbool_t             has_vl_type=FALSE;      /* Flag to indicate a VL-type for dataset */
     H5D_t		*ret_value;             /* Return value */
@@ -2159,80 +2157,88 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     /* Check if this dataset is going into a parallel file and set space allocation time */
     if(IS_H5FD_MPI(file))
         new_dset->alloc_time=H5D_ALLOC_TIME_EARLY;
-   
-    /* Set up layout information */
-    if((ndims=H5S_GET_SIMPLE_EXTENT_NDIMS(new_dset->space))<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get rank")
-    new_dset->layout.ndims = (unsigned)ndims + 1;
-    assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
-    new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size(new_dset->type);
-    new_dset->layout.addr = HADDR_UNDEF;        /* Initialize to no address */
 
     switch (new_dset->layout.type) {
         case H5D_CONTIGUOUS:
-            /*
-             * The maximum size of the dataset cannot exceed the storage size.
-             * Also, only the slowest varying dimension of a simple data space
-             * can be extendible.
-             */
-	    if ((ndims=H5S_get_simple_extent_dims(new_dset->space, new_dset->layout.dim, max_dim))<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize contiguous storage")
-            for (i=1; i<ndims; i++) {
-                if (max_dim[i]>new_dset->layout.dim[i])
-                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "only the first dimension can be extendible")
-            }
-            if (new_dset->efl.nused>0) {
-                hsize_t max_points = H5S_get_npoints_max (new_dset->space);
-                hsize_t max_storage = H5O_efl_total_size (&new_dset->efl);
+            {
+                hssize_t tmp_size;                      /* Temporary holder for raw data size */
+                hsize_t	dim[H5O_LAYOUT_NDIMS];	        /* Current size of data in elements */
+                hsize_t	max_dim[H5O_LAYOUT_NDIMS];      /* Maximum size of data in elements */
 
-                if (H5S_UNLIMITED==max_points) {
-                    if (H5O_EFL_UNLIMITED!=max_storage)
-                        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unlimited data space but finite storage")
-                } else if (max_points * H5T_get_size (type) < max_points) {
-                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "data space * type size overflowed")
-                } else if (max_points * H5T_get_size (type) > max_storage) {
-                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "data space size exceeds external storage size")
+                /*
+                 * The maximum size of the dataset cannot exceed the storage size.
+                 * Also, only the slowest varying dimension of a simple data space
+                 * can be extendible (currently only for external data storage).
+                 */
+                new_dset->layout.u.contig.addr = HADDR_UNDEF;        /* Initialize to no address */
+
+                if ((ndims=H5S_get_simple_extent_dims(new_dset->space, dim, max_dim))<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize contiguous storage")
+                for (i=1; i<ndims; i++)
+                    if (max_dim[i]>dim[i])
+                        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "only the first dimension can be extendible")
+                if (new_dset->efl.nused>0) {
+                    hsize_t max_points = H5S_get_npoints_max (new_dset->space);
+                    hsize_t max_storage = H5O_efl_total_size (&new_dset->efl);
+
+                    if (H5S_UNLIMITED==max_points) {
+                        if (H5O_EFL_UNLIMITED!=max_storage)
+                            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unlimited data space but finite storage")
+                    } else if (max_points * H5T_get_size (type) < max_points) {
+                        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "data space * type size overflowed")
+                    } else if (max_points * H5T_get_size (type) > max_storage) {
+                        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "data space size exceeds external storage size")
+                    }
+                } else if (ndims>0 && max_dim[0]>dim[0]) {
+                    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "extendible contiguous non-external dataset")
                 }
-            } else if (ndims>0 && max_dim[0]>new_dset->layout.dim[0]) {
-                HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "extendible contiguous non-external dataset")
-            }
 
-            /* Compute the total size of a chunk */
-            for (u=1, new_dset->layout.chunk_size=new_dset->layout.dim[0]; u<new_dset->layout.ndims; u++)
-                new_dset->layout.chunk_size *= new_dset->layout.dim[u];
+                /* Compute the total size of a chunk */
+                tmp_size = H5S_GET_SIMPLE_EXTENT_NPOINTS(new_dset->space) *
+                                        H5T_get_size(new_dset->type);
+                H5_ASSIGN_OVERFLOW(new_dset->layout.u.contig.size,tmp_size,hssize_t,hsize_t);
+            } /* end case */
             break;
 
         case H5D_CHUNKED:
-            /*
-             * Chunked storage allows any type of data space extension, so we
-             * don't even bother checking.
-             */
-            if(chunk_ndims != (unsigned)H5S_GET_SIMPLE_EXTENT_NDIMS(new_dset->space))
-                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "dimensionality of chunks doesn't match the data space")
-            if (new_dset->efl.nused>0)
-                HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL, "external storage not supported with chunked layout")
+            {
+                hsize_t	max_dim[H5O_LAYOUT_NDIMS];      /* Maximum size of data in elements */
 
-            /*
-             * The chunk size of a dimension with a fixed size cannot exceed
-             * the maximum dimension size 
-             */
-            if(H5P_get(dc_plist, H5D_CRT_CHUNK_SIZE_NAME, chunk_size) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve chunk size")
+                /* Set up layout information */
+                if((ndims=H5S_GET_SIMPLE_EXTENT_NDIMS(new_dset->space))<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get rank")
+                new_dset->layout.u.chunk.ndims = (unsigned)ndims + 1;
+                assert((unsigned)(new_dset->layout.u.chunk.ndims) <= NELMTS(new_dset->layout.u.chunk.dim));
 
-            if (H5S_get_simple_extent_dims(new_dset->space, NULL, max_dim)<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to query maximum dimensions")
-            for (u=0; u<new_dset->layout.ndims-1; u++) {
-	        if(max_dim[u] != H5S_UNLIMITED && max_dim[u] < chunk_size[u])
-                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
-            }
+                new_dset->layout.u.chunk.addr = HADDR_UNDEF;        /* Initialize to no address */
+               
+                /*
+                 * Chunked storage allows any type of data space extension, so we
+                 * don't even bother checking.
+                 */
+                if(chunk_ndims != ndims)
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "dimensionality of chunks doesn't match the data space")
+                if (new_dset->efl.nused>0)
+                    HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL, "external storage not supported with chunked layout")
 
-            /* Set the dataset's chunk sizes from the property list's chunk sizes */
-            for (u=0; u<new_dset->layout.ndims-1; u++)
-                new_dset->layout.dim[u] = chunk_size[u];
+                /*
+                 * The chunk size of a dimension with a fixed size cannot exceed
+                 * the maximum dimension size 
+                 */
+                if(H5P_get(dc_plist, H5D_CRT_CHUNK_SIZE_NAME, new_dset->layout.u.chunk.dim) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve chunk size")
+                new_dset->layout.u.chunk.dim[new_dset->layout.u.chunk.ndims-1] = H5T_get_size(new_dset->type);
 
-            /* Compute the total size of a chunk */
-            for (u=1, new_dset->layout.chunk_size=new_dset->layout.dim[0]; u<new_dset->layout.ndims; u++)
-                new_dset->layout.chunk_size *= new_dset->layout.dim[u];
+                if (H5S_get_simple_extent_dims(new_dset->space, NULL, max_dim)<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to query maximum dimensions")
+                for (u=0; u<new_dset->layout.u.chunk.ndims-1; u++)
+                    if(max_dim[u] != H5S_UNLIMITED && max_dim[u] < new_dset->layout.u.chunk.dim[u])
+                        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
+
+                /* Compute the total size of a chunk */
+                for (u=1, new_dset->layout.u.chunk.size=new_dset->layout.u.chunk.dim[0]; u<new_dset->layout.u.chunk.ndims; u++)
+                    new_dset->layout.u.chunk.size *= new_dset->layout.u.chunk.dim[u];
+            } /* end case */
             break;
 
         case H5D_COMPACT:
@@ -2244,19 +2250,17 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                  * Compact dataset is stored in dataset object header message of 
                  * layout.
                  */
-                tmp_size = H5S_get_simple_extent_npoints(space) *
+                tmp_size = H5S_GET_SIMPLE_EXTENT_NPOINTS(space) *
                                         H5T_get_size(new_dset->type);
-                H5_ASSIGN_OVERFLOW(new_dset->layout.size,tmp_size,hssize_t,size_t);
+                H5_ASSIGN_OVERFLOW(new_dset->layout.u.compact.size,tmp_size,hssize_t,size_t);
+
                 /* Verify data size is smaller than maximum header message size
                  * (64KB) minus other layout message fields.
                  */
                 comp_data_size=H5O_MAX_SIZE-H5O_layout_meta_size(file, &(new_dset->layout));
-                if(new_dset->layout.size > comp_data_size)
+                if(new_dset->layout.u.compact.size > comp_data_size)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size")
-                if (H5S_get_simple_extent_dims(space, new_dset->layout.dim, NULL)<0) 
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize dimension size of compact dataset storage");
-            }
-
+            } /* end case */
             break;
             
         default:
@@ -2464,7 +2468,6 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
     H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_CRT_FILL_TIME_DEF, TRUE}; 
     H5O_fill_t     *fill_prop;          /* Pointer to dataset's fill value area */
     H5O_pline_t  pline;                 /* I/O pipeline information */
-    H5D_layout_t layout;                /* Dataset layout */
     H5P_genplist_t *plist;              /* Property list */
     H5D_t 	*ret_value = NULL;	/*return value			*/
     
@@ -2517,11 +2520,21 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
      */
     if (NULL==H5O_read(&(dataset->ent), H5O_LAYOUT_ID, 0, &(dataset->layout), dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to read data layout message")
+    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->layout.type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set layout")
     switch (dataset->layout.type) {
         case H5D_CONTIGUOUS:
-            layout = H5D_CONTIGUOUS; 
-            if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set layout")
+            /* Compute the size of the contiguous storage for versions of the
+             * layout message less than version 3 because versions 1 & 2 would
+             * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
+             */
+            if(dataset->layout.version<3) {
+                hssize_t tmp_size;                      /* Temporary holder for raw data size */
+
+                tmp_size = H5S_GET_SIMPLE_EXTENT_NPOINTS(dataset->space) *
+                                        H5T_get_size(dataset->type);
+                H5_ASSIGN_OVERFLOW(dataset->layout.u.contig.size,tmp_size,hssize_t,hsize_t);
+            } /* end if */
             break;
 
         case H5D_CHUNKED:
@@ -2533,23 +2546,18 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             {
                 unsigned     chunk_ndims;           /* Dimensionality of chunk */
 
-                layout = H5D_CHUNKED;
-                chunk_ndims  = dataset->layout.ndims - 1;
+                chunk_ndims  = dataset->layout.u.chunk.ndims - 1;
        
-                if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set layout")
                 if(H5P_set(plist, H5D_CRT_CHUNK_DIM_NAME, &chunk_ndims) < 0)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set chunk dimensions")
-                if(H5P_set(plist, H5D_CRT_CHUNK_SIZE_NAME, dataset->layout.dim) < 0)
+                if(H5P_set(plist, H5D_CRT_CHUNK_SIZE_NAME, dataset->layout.u.chunk.dim) < 0)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set chunk size")
             }
             break;
             
         case H5D_COMPACT:
-            layout = H5D_COMPACT;
-            if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set layout")
             break;
+
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
     } /* end switch */
@@ -2617,19 +2625,22 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
 
     /* Get the external file list message, which might not exist.  Space is
      * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */
-    if( !H5F_addr_defined(dataset->layout.addr)) {
+    if((dataset->layout.type==H5D_CONTIGUOUS && !H5F_addr_defined(dataset->layout.u.contig.addr))
+            || (dataset->layout.type==H5D_CHUNKED && !H5F_addr_defined(dataset->layout.u.chunk.addr))) {
         HDmemset(&dataset->efl,0,sizeof(H5O_efl_t));
         if(NULL != H5O_read(&(dataset->ent), H5O_EFL_ID, 0, &dataset->efl, dxpl_id))
             if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->efl) < 0)
             	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set external file list")
     }
+
     /*
      * Make sure all storage is properly initialized.
      * This is important only for parallel I/O where the space must
      * be fully allocated before I/O can happen.
      */
     if ((H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR)
-            && (dataset->layout.type!=H5D_COMPACT && dataset->layout.addr==HADDR_UNDEF)
+            && ((dataset->layout.type==H5D_CONTIGUOUS && !H5F_addr_defined(dataset->layout.u.contig.addr))
+                || (dataset->layout.type==H5D_CHUNKED && !H5F_addr_defined(dataset->layout.u.chunk.addr)))
             && IS_H5FD_MPI(dataset->ent.file)) {
         if (H5D_alloc_storage(dataset->ent.file, dxpl_id, dataset,H5D_ALLOC_OPEN, TRUE, FALSE)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize file storage")
@@ -2708,10 +2719,10 @@ H5D_close(H5D_t *dataset)
 			H5I_dec_ref(dataset->dcpl_id) < 0);
 
     /* Update header message of layout for compact dataset. */
-    if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty) {
+    if(dataset->layout.type==H5D_COMPACT && dataset->layout.u.compact.dirty) {
         if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), H5AC_dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message")
-        dataset->layout.dirty = FALSE;
+        dataset->layout.u.compact.dirty = FALSE;
     } /* end if */
 
     /* Remove the dataset from the list of opened objects in the file */
@@ -2732,7 +2743,7 @@ H5D_close(H5D_t *dataset)
     dataset->ent.file = NULL;
     /* Free the buffer for the raw data for compact datasets */
     if(dataset->layout.type==H5D_COMPACT)
-        dataset->layout.buf=H5MM_xfree(dataset->layout.buf);
+        dataset->layout.u.compact.buf=H5MM_xfree(dataset->layout.u.compact.buf);
     H5FL_FREE(H5D_t,dataset);
 
     if (free_failed)
@@ -2924,13 +2935,13 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
      * We assume that external storage is already
      * allocated by the caller, or at least will be before I/O is performed.
      */
-    if(dset->efl.nused==0) {
+    if(!(H5S_NULL == H5S_GET_SIMPLE_EXTENT_TYPE(dset->space) || dset->efl.nused>0)) {
         /* Get a pointer to the dataset's layout information */
         layout=&(dset->layout);
 
         switch (layout->type) {
             case H5D_CONTIGUOUS:
-                if(layout->addr==HADDR_UNDEF) {
+                if(layout->u.contig.addr==HADDR_UNDEF) {
                     /* Reserve space in the file for the entire array */
                     if (H5F_contig_create (f, dxpl_id, layout/*out*/)<0)
                         HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
@@ -2944,7 +2955,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                 break;
 
             case H5D_CHUNKED:
-                if(layout->addr==HADDR_UNDEF) {
+                if(layout->u.chunk.addr==HADDR_UNDEF) {
                     /* Create the root of the B-tree that describes chunked storage */
                     if (H5F_istore_create (f, dxpl_id, layout/*out*/)<0)
                         HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
@@ -2967,12 +2978,12 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
 
             case H5D_COMPACT:               
                 /* Check if space is already allocated */
-                if(layout->buf==NULL) {
+                if(layout->u.compact.buf==NULL) {
                     /* Reserve space in layout header message for the entire array. */
-                    assert(layout->size>0);
-                    if (NULL==(layout->buf=H5MM_malloc(layout->size)))
+                    assert(layout->u.compact.size>0);
+                    if (NULL==(layout->u.compact.buf=H5MM_malloc(layout->u.compact.size)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset")
-                    layout->dirty = TRUE;
+                    layout->u.compact.dirty = TRUE;
 
                     /* Indicate that we set the storage addr */
                     addr_set=1;
@@ -3073,7 +3084,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
     space=dset->space;
 
     /* Get the number of elements in the dataset's dataspace */
-    snpoints = H5S_get_simple_extent_npoints(space);
+    snpoints = H5S_GET_SIMPLE_EXTENT_NPOINTS(space);
     assert(snpoints>=0);
     H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
 
@@ -3084,9 +3095,9 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
                 /* If the fill value is defined, initialize the data buffer with it */
                 if(dset->fill.buf)
                     /* Initialize the cached data buffer with the fill value */
-                    H5V_array_fill(dset->layout.buf, dset->fill.buf, dset->fill.size, npoints);
+                    H5V_array_fill(dset->layout.u.compact.buf, dset->fill.buf, dset->fill.size, npoints);
                 else /* If the fill value is default, zero set data buf. */
-                    HDmemset(dset->layout.buf, 0, dset->layout.size);
+                    HDmemset(dset->layout.u.compact.buf, 0, dset->layout.u.compact.size);
             } /* end if */
             break;
 
@@ -3117,7 +3128,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
                 /* We only handle simple data spaces so far */
                 if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple data space info")
-                dim[ndims] = dset->layout.dim[ndims];
+                dim[ndims] = dset->layout.u.chunk.dim[ndims];
 
                 if (H5F_istore_allocate(dset->ent.file, dxpl_id, &(dset->layout), dim, plist, full_overwrite)<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
@@ -3204,25 +3215,23 @@ H5D_get_storage_size(const H5D_t *dset, hid_t dxpl_id)
 
     switch(dset->layout.type) {
         case H5D_CHUNKED:
-            if(dset->layout.addr == HADDR_UNDEF)
+            if(dset->layout.u.chunk.addr == HADDR_UNDEF)
                 ret_value=0;
             else
-                ret_value = H5F_istore_allocated(dset->ent.file, dxpl_id, dset->layout.ndims,
-                                             dset->layout.addr);
+                ret_value = H5F_istore_allocated(dset->ent.file, dxpl_id, dset->layout.u.chunk.ndims,
+                                             dset->layout.u.chunk.addr);
             break;
 
         case H5D_CONTIGUOUS:
             /* Datasets which are not allocated yet are using no space on disk */
-            if(dset->layout.addr == HADDR_UNDEF)
+            if(dset->layout.u.contig.addr == HADDR_UNDEF)
                 ret_value=0;
-            else {
-                 for (u=0, ret_value=1; u<dset->layout.ndims; u++)
-                     ret_value *= dset->layout.dim[u];
-            } /* end else */
+            else
+                 ret_value=dset->layout.u.contig.size;
             break;
 
         case H5D_COMPACT:
-            ret_value = dset->layout.size;
+            ret_value = dset->layout.u.compact.size;
             break;
 
         default:
@@ -3313,9 +3322,9 @@ H5D_get_offset(const H5D_t *dset)
             /* If there's user block in file, returns the absolute dataset offset
              * from the beginning of file. */
             if(base_addr!=HADDR_UNDEF)
-                ret_value = dset->layout.addr + base_addr;
+                ret_value = dset->layout.u.contig.addr + base_addr;
             else
-                ret_value = dset->layout.addr;
+                ret_value = dset->layout.u.contig.addr;
             break;
 
         default:
@@ -3879,10 +3888,11 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id)
         for(j=0; j<num_dsets; j++) {
             if(NULL==(dataset=H5I_object_verify(id_list[j], H5I_DATASET)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset object")
-            if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty)
+            if(dataset->layout.type==H5D_COMPACT && dataset->layout.u.compact.dirty) {
                 if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), dxpl_id)<0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
-            dataset->layout.dirty = FALSE;
+                dataset->layout.u.compact.dirty = FALSE;
+            } /* end if */
         }
     } /* end if */
 
@@ -3925,9 +3935,9 @@ H5Ddebug(hid_t dset_id)
 
     /* Print B-tree information */
     if (H5D_CHUNKED==dset->layout.type) {
-	(void)H5F_istore_dump_btree(dset->ent.file, H5AC_dxpl_id, stdout, dset->layout.ndims, dset->layout.addr);
+	(void)H5F_istore_dump_btree(dset->ent.file, H5AC_dxpl_id, stdout, dset->layout.u.chunk.ndims, dset->layout.u.chunk.addr);
     } else if (H5D_CONTIGUOUS==dset->layout.type) {
-	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->layout.addr);
+	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->layout.u.contig.addr);
     }
     
 done:

@@ -46,7 +46,7 @@
 #define H5D_CRT_CHUNK_DIM_DEF      1
 /* Definitions for chunk size */
 #define H5D_CRT_CHUNK_SIZE_NAME    "chunk_size"
-#define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(hsize_t[H5O_LAYOUT_NDIMS])
+#define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(size_t[H5O_LAYOUT_NDIMS])
 #define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
                                    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 /* Definitions for fill value.  size=0 means fill value will be 0 as 

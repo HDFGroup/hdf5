@@ -200,7 +200,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
         p += attr->ds_size;
 
     /* Compute the size of the data */
-    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_get_simple_extent_npoints(attr->ds)*H5T_get_size(attr->dt),hsize_t,size_t);
+    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_GET_SIMPLE_EXTENT_NPOINTS(attr->ds)*H5T_get_size(attr->dt),hsize_t,size_t);
 
     /* Go get the data */
     if(attr->data_size) {

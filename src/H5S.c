@@ -752,6 +752,10 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
  *
+ * Note:        This routine participates in the "Inlining C function pointers"
+ *              pattern, don't call it directly, use the appropriate macro
+ *              defined in H5Sprivate.h.
+ *
  * Modifications:
  *  Changed Name - QAK 7/7/98
  *
@@ -805,7 +809,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-    ret_value = H5S_get_simple_extent_npoints(ds);
+    ret_value = H5S_GET_SIMPLE_EXTENT_NPOINTS(ds);
 
 done:
     FUNC_LEAVE_API(ret_value);
