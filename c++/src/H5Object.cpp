@@ -68,7 +68,7 @@ Attribute H5Object::createAttribute( const string& name, const DataType& data_ty
 }
 
 // Opens an attribute given its name; name is given as char*
-Attribute H5Object::openAttribute( const char name[] ) const
+Attribute H5Object::openAttribute( const char* name ) const
 {
    hid_t attr_id = H5Aopen_name( id, name );
    if( attr_id > 0 )
@@ -85,7 +85,7 @@ Attribute H5Object::openAttribute( const char name[] ) const
 // Opens an attribute given its name; name is given as string
 Attribute H5Object::openAttribute( const string& name ) const
 {
-    return( openAttribute( name.c_str()) );
+   return( openAttribute( name.c_str()) );
 }
 
 // Opens an attribute given its index.

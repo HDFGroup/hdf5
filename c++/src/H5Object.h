@@ -56,7 +56,7 @@ class H5Object : public IdComponent {
 
 	// Opens an attribute given its name.
 	Attribute openAttribute( const string& name ) const;
-	Attribute openAttribute( const char name[] ) const;
+	Attribute openAttribute( const char* name ) const;
 
 	// Opens an attribute given its index.
 	Attribute openAttribute( const unsigned int idx ) const;

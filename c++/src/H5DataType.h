@@ -14,10 +14,6 @@ class DataType : public H5Object {
 	// Copy constructor: makes a copy of the original object
 	DataType( const DataType& original );
 
-	// Creates a new variable-length datatype - not implemented yet
-	// Will be moved into a subclass when completed
-	//DataType vlenCreate( const DataType& base_type );
-
 	// Copies an existing datatype to this datatype object
 	void copy( const DataType& like_type );
 
@@ -46,7 +42,13 @@ class DataType : public H5Object {
 	// Returns a pointer to the current global overflow function. 
 	H5T_overflow_t getOverflow(void) const;
 
-	// Determines whether two datatypes are the same. ???
+	// Assignment operator that takes a predefined type
+	virtual DataType& operator=( const PredType& rhs );
+
+	// Assignment operator
+	virtual DataType& operator=( const DataType& rhs );
+
+	// Determines whether two datatypes are the same.
 	bool operator==(const DataType& compared_type ) const;
 
 	// Locks a datatype. 
@@ -73,6 +75,10 @@ class DataType : public H5Object {
 
 	// Gets the tag associated with an opaque datatype. 
 	string getTag() const;
+
+	// Creates a new variable-length datatype - not implemented yet
+	// Will be moved into a subclass when completed
+	//DataType vlenCreate( const DataType& base_type );
 
 	// Used by the API to appropriately close a datatype
         void p_close() const;

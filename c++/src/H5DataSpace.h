@@ -20,64 +20,67 @@ class DataSpace : public IdComponent {
 	// Makes copy of an existing dataspace.
 	void copy( const DataSpace& like_space ); // H5Scopy
 
+	// Assignment operator
+	virtual DataSpace& operator=( const DataSpace& rhs );
+
 	// Determines if this dataspace is a simple one.
-	bool isSimple () const;
+	bool isSimple() const;
 
 	// Sets the offset of this simple dataspace.
-	void offsetSimple ( const hssize_t* offset ) const;
+	void offsetSimple( const hssize_t* offset ) const;
 
 	// Retrieves dataspace dimension size and maximum size.
-	int getSimpleExtentDims ( hsize_t *dims, hsize_t *maxdims = NULL ) const;
+	int getSimpleExtentDims( hsize_t *dims, hsize_t *maxdims = NULL ) const;
 
 	// Gets the dimensionality of this dataspace.
-	int getSimpleExtentNdims () const;
+	int getSimpleExtentNdims() const;
 
 	// Gets the number of elements in this dataspace.
 	// 12/05/00 - changed return type to hssize_t from hsize_t - C API 
-	hssize_t getSimpleExtentNpoints () const;
+	hssize_t getSimpleExtentNpoints() const;
 
 	// Gets the current class of this dataspace.
-	H5S_class_t getSimpleExtentType () const;
+	H5S_class_t getSimpleExtentType() const;
 
 	// Copies the extent of this dataspace.
-	void extentCopy ( DataSpace& dest_space ) const;
+	void extentCopy( DataSpace& dest_space ) const;
 
 	// Sets or resets the size of this dataspace.
 	void setExtentSimple( int rank, const hsize_t *current_size, const hsize_t *maximum_size = NULL ) const;
 
 	// Removes the extent from this dataspace.
-	void setExtentNone () const;
+	void setExtentNone() const;
 
 	// Gets the number of elements in this dataspace selection.
-	hssize_t getSelectNpoints () const;
+	hssize_t getSelectNpoints() const;
 
 	// Get number of hyperslab blocks.
-	hssize_t getSelectHyperNblocks () const;
+	hssize_t getSelectHyperNblocks() const;
 
 	// Gets the list of hyperslab blocks currently selected.
 	void getSelectHyperBlocklist( hsize_t startblock, hsize_t numblocks, hsize_t *buf ) const;
 
 	// Gets the number of element points in the current selection.
-	hssize_t getSelectElemNpoints () const;
+	hssize_t getSelectElemNpoints() const;
 
 	// Retrieves the list of element points currently selected.
-	void getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const;
+	void getSelectElemPointlist( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const;
 
 	// Gets the bounding box containing the current selection.
-	void getSelectBounds ( hsize_t* start, hsize_t* end ) const;
+	void getSelectBounds( hsize_t* start, hsize_t* end ) const;
 
 	// Selects array elements to be included in the selection for 
 	// this dataspace.
-	void selectElements ( H5S_seloper_t op, const size_t num_elements, const hssize_t *coord[ ] ) const;
+	void selectElements( H5S_seloper_t op, const size_t num_elements, const hssize_t *coord[ ] ) const;
 
 	// Selects the entire dataspace.
-	void selectAll () const;
+	void selectAll() const;
 
 	// Resets the selection region to include no elements.
-	void selectNone () const;
+	void selectNone() const;
 
 	// Verifies that the selection is within the extent of the dataspace.
-	bool selectValid () const;
+	bool selectValid() const;
 
 	// Selects a hyperslab region to add to the current selected region.
 	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
