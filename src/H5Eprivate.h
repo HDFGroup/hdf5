@@ -71,7 +71,7 @@ typedef struct H5E_print_t {
  */
 #define HCOMMON_ERROR(maj, min, str)  				              \
    HERROR(maj, min, str);						      \
-   H5E_dump_api_stack(H5_IS_API(FUNC));
+   (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a

@@ -60,6 +60,7 @@ typedef struct H5E_error_t {
 H5_DLLVAR hid_t H5E_ERR_CLS_g;
 
 /* Include the automatically generated public header information */
+/* (This includes the list of major and minor error codes for the library) */
 #include "H5Epubgen.h"
 
 /*
@@ -121,7 +122,7 @@ extern "C" {
 #endif
 
 /* Error stack traversal callback function pointers */
-typedef herr_t (*H5E_walk_t)(unsigned n, H5E_error_t *err_desc, void *client_data);
+typedef herr_t (*H5E_walk_t)(unsigned n, const H5E_error_t *err_desc, void *client_data);
 typedef herr_t (*H5E_auto_t)(hid_t estack, void *client_data);
 
 /* Public API functions */
