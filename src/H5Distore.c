@@ -120,7 +120,9 @@ static H5B_ins_t H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 				   void *_udata, void *_rt_key,
 				   hbool_t *rt_key_changed,
 				   haddr_t *new_node/*out*/);
-static herr_t H5F_istore_iterate(H5F_t *f, void *left_key, haddr_t addr,
+static herr_t H5F_istore_iter_allocated(H5F_t *f, void *left_key, haddr_t addr,
+				 void *right_key, void *_udata);
+static herr_t H5F_istore_iter_dump(H5F_t *f, void *left_key, haddr_t addr,
 				 void *right_key, void *_udata);
 static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
@@ -130,15 +132,11 @@ static herr_t H5F_istore_debug_key(FILE *stream, int indent, int fwidth,
 				   const void *key, const void *udata);
 static haddr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 				  const hssize_t offset[]);
-
-static herr_t H5F_istore_prune_extent( H5F_t *f, void *left_key, haddr_t addr, 
-																																       void *_udata, hsize_t *size );
-static H5B_ins_t H5F_istore_remove( H5F_t *f, haddr_t addr,
-                  void *_lt_key            /*in,out*/,
-                  hbool_t *lt_key_changed  /*out*/,
-                  void UNUSED *_udata      /*in,out*/,
-                  void UNUSED *_rt_key     /*in,out*/,
-                  hbool_t *rt_key_changed  /*out*/);
+static herr_t H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t addr,
+        void *_rt_key, void *_udata);
+static H5B_ins_t H5F_istore_remove( H5F_t *f, haddr_t addr, void *_lt_key,
+                  hbool_t *lt_key_changed, void *_udata, void *_rt_key,
+                  hbool_t *rt_key_changed);
 
 /*
  * B-tree key.	A key contains the minimum logical N-dimensional address and
@@ -166,6 +164,7 @@ typedef struct H5F_istore_ud1_t {
     H5O_layout_t	mesg;		        /*layout message	*/
     hsize_t		total_storage;	        /*output from iterator	*/
     FILE		*stream;		/*debug output stream	*/
+    hsize_t		*dims;		        /*dataset dimensions	*/
 } H5F_istore_ud1_t;
 
 /* inherits B-tree like properties from H5B */
@@ -181,11 +180,9 @@ H5B_class_t H5B_ISTORE[1] = {{
     FALSE,			/*follow min branch?	*/
     FALSE,			/*follow max branch?	*/
     H5F_istore_remove,          /*remove		*/
-    H5F_istore_iterate,		/*iterator		*/
     H5F_istore_decode_key,	/*decode		*/
     H5F_istore_encode_key,	/*encode		*/
     H5F_istore_debug_key,	/*debug			*/
-    H5F_istore_prune_extent,	/*remove chunks, upon H5Dset_extend call */
 }};
 
 #define H5F_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
@@ -840,11 +837,9 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_istore_iterate
+ * Function:	H5F_istore_iter_allocated
  *
- * Purpose:	Simply counts the number of chunks for a dataset. If the
- *		UDATA.STREAM member is non-null then debugging information is
- *		written to that stream.
+ * Purpose:	Simply counts the number of chunks for a dataset.
  *
  * Return:	Success:	Non-negative
  *
@@ -856,10 +851,48 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *		Quincey Koziol, 2002-04-22
+ *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
+H5F_istore_iter_allocated (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
+		    void UNUSED *_rt_key, void *_udata)
+{
+    H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
+    H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
+
+    FUNC_ENTER(H5F_istore_iterate, FAIL);
+
+    bt_udata->total_storage += lt_key->nbytes;
+    FUNC_LEAVE(SUCCEED);
+} /* H5F_istore_iter_allocated() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_iter_dump
+ *
+ * Purpose:	If the UDATA.STREAM member is non-null then debugging
+ *              information is written to that stream.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 21, 1999
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
+ *
+ *		Quincey Koziol, 2002-04-22
+ *		Changed to callback from H5B_iterate
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_istore_iter_dump (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
@@ -885,9 +918,8 @@ H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
         HDfputs("]\n", bt_udata->stream);
     }
 
-    bt_udata->total_storage += lt_key->nbytes;
     FUNC_LEAVE(SUCCEED);
-}
+} /* H5F_istore_iter_dump() */
 
 
 /*-------------------------------------------------------------------------
@@ -2148,7 +2180,7 @@ H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr)
 
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
-    if (H5B_iterate(f, H5B_ISTORE, addr, &udata)<0) {
+    if (H5B_iterate(f, H5B_ISTORE, H5F_istore_iter_allocated, addr, &udata)<0) {
         HRETURN_ERROR(H5E_IO, H5E_CANTINIT, 0,
 		      "unable to iterate over chunk B-tree");
     }
@@ -2184,7 +2216,7 @@ H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims, haddr_t addr)
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
     udata.stream = stream;
-    if (H5B_iterate(f, H5B_ISTORE, addr, &udata)<0) {
+    if (H5B_iterate(f, H5B_ISTORE, H5F_istore_iter_dump, addr, &udata)<0) {
         HRETURN_ERROR(H5E_IO, H5E_CANTINIT, 0,
 		      "unable to iterate over chunk B-tree");
     }
@@ -2669,18 +2701,14 @@ H5F_istore_prune_by_extent(H5F_t *f, H5O_layout_t *layout, H5S_t * space)
     udata.stream = stdout;
     udata.mesg.addr = layout->addr;
     udata.mesg.ndims = layout->ndims;
-    for(u = 0; u < udata.mesg.ndims; u++) {
+    for(u = 0; u < udata.mesg.ndims; u++)
 	udata.mesg.dim[u] = layout->dim[u];
-    }
+    udata.dims = curr_dims;
 
-    if(H5B_prune_by_extent(f, H5B_ISTORE, layout->addr, &udata,
-		curr_dims) < 0) {
-	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, 0,
-		"unable to iterate over B-tree");
-    }
+    if(H5B_iterate(f, H5B_ISTORE, H5F_istore_prune_extent, layout->addr, &udata) < 0)
+	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over B-tree");
 
     FUNC_LEAVE(SUCCEED);
-
 }
 
 
@@ -2702,51 +2730,42 @@ H5F_istore_prune_by_extent(H5F_t *f, H5O_layout_t *layout, H5S_t * space)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t addr, void *_udata,
-	hsize_t *size)
+H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t UNUSED addr,
+        void UNUSED *_rt_key, void *_udata)
 {
     H5F_istore_ud1_t       *bt_udata = (H5F_istore_ud1_t *)_udata;
     H5F_istore_key_t       *lt_key = (H5F_istore_key_t *)_lt_key;
     unsigned                u;
-    int                     found = 0;
     H5F_istore_ud1_t        udata;
 
-    /* The LT_KEY is the left key (the onethat describes the chunk). It points to a chunk of 
+    /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of 
      * storage that contains the beginning of the logical address space represented by UDATA.
      */
 
     FUNC_ENTER(H5F_istore_prune_extent, FAIL);
 
     /* Figure out what chunks are no longer in use for the specified extent and release them */
-
-    for(u = 0; u < bt_udata->mesg.ndims - 1; u++) {
-	if((hsize_t)lt_key->offset[u] > size[u]) {
-	    found = 1;
-	    break;
-	}
-    }
-
-    if(found) {
+    for(u = 0; u < bt_udata->mesg.ndims - 1; u++)
+	if((hsize_t)lt_key->offset[u] > bt_udata->dims[u]) {
 
 #if defined (H5F_ISTORE_DEBUG)
-	HDfputs("b-tree:remove:[", bt_udata->stream);
-	for(u = 0; u < bt_udata->mesg.ndims - 1; u++) {
-	    HDfprintf(bt_udata->stream, "%s%Hd", u ? ", " : "",
-		    lt_key->offset[u]);
-	}
-	HDfputs("]\n", bt_udata->stream);
+            HDfputs("b-tree:remove:[", bt_udata->stream);
+            for(u = 0; u < bt_udata->mesg.ndims - 1; u++) {
+                HDfprintf(bt_udata->stream, "%s%Hd", u ? ", " : "",
+                        lt_key->offset[u]);
+            }
+            HDfputs("]\n", bt_udata->stream);
 #endif
 
-	HDmemset(&udata, 0, sizeof udata);
-	udata.key = *lt_key;
-	udata.mesg = bt_udata->mesg;
+            HDmemset(&udata, 0, sizeof udata);
+            udata.key = *lt_key;
+            udata.mesg = bt_udata->mesg;
 
-	/* Remove */
-	if(H5B_remove(f, H5B_ISTORE, addr, &udata) < 0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		    "unable to remove entry");
-	}
-    }
+            /* Remove */
+            if(H5B_remove(f, H5B_ISTORE, bt_udata->mesg.addr, &udata) < 0)
+                HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry");
+	    break;
+	} /* end if */
 
     FUNC_LEAVE(SUCCEED);
 }

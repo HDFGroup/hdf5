@@ -50,6 +50,10 @@ typedef enum H5B_ins_t {
     H5B_INS_REMOVE	 = 5	/*remove current node			     */
 } H5B_ins_t;
 
+/* Define the operator callback function pointer for H5B_iterate() */
+typedef herr_t (*H5B_operator_t)(H5F_t *f, void *_lt_key, haddr_t addr,
+    void *_rt_key, void *_udata);
+
 /*
  * Each class of object that can be pointed to by a B-link tree has a
  * variable of this type that contains class variables and methods.  Each
@@ -80,19 +84,10 @@ typedef struct H5B_class_t {
     H5B_ins_t	(*remove)(H5F_t*, haddr_t, void*, hbool_t*, void*, void*,
 			  hbool_t*);
 
-    /* iterate through the leaf nodes */
-    herr_t	(*list)(H5F_t*, void*, haddr_t, void*, void*);
-
     /* encode, decode, debug key values */
     herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*debug_key)(FILE*, int, int, const void*, const void*);
-
-				/*pvn */
-
-						/* iterate through the leaf nodes, removing chunks upon H5Dset_extend request */
-    herr_t	(*prune_extent)( H5F_t *f, void *_lt_key, haddr_t addr, 
-					void *_udata, hsize_t *size );
 
 } H5B_class_t;
 
@@ -136,11 +131,8 @@ __DLL__ herr_t H5B_insert (H5F_t *f, const H5B_class_t *type, haddr_t addr,
 			   const double split_ratios[], void *udata);
 __DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 			  void *udata);
-__DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr,
-			    void *udata);
+__DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t
+                            op, haddr_t addr, void *udata);
 __DLL__ int    H5B_Kvalue(H5F_t *f, const H5B_class_t *type);
-__DLL__ herr_t H5B_prune_by_extent( H5F_t *f, const H5B_class_t *type, haddr_t addr, 
-																																			 void *udata, hsize_t *size );
-
 
 #endif

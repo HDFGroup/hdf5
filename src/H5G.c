@@ -330,7 +330,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (H5G_fileof(udata.group), H5B_SNODE,
-              udata.group->ent.cache.stab.btree_addr, &udata))<0) {
+              H5G_node_iterate, udata.group->ent.cache.stab.btree_addr, &udata))<0) {
         HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
     }
 

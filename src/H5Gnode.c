@@ -66,8 +66,6 @@ static H5B_ins_t H5G_node_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 static H5B_ins_t H5G_node_remove(H5F_t *f, haddr_t addr, void *lt_key,
 				 hbool_t *lt_key_changed, void *udata,
 				 void *rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_iterate(H5F_t *f, void *_lt_key, haddr_t addr,
-			       void *_rt_key, void *_udata);
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 
 /* H5G inherits cache-like properties from H5AC */
@@ -90,11 +88,9 @@ H5B_class_t H5B_SNODE[1] = {{
     TRUE,			/*follow min branch?	*/
     TRUE,			/*follow max branch?	*/
     H5G_node_remove,		/*remove		*/
-    H5G_node_iterate,		/*list			*/
     H5G_node_decode_key,	/*decode		*/
     H5G_node_encode_key,	/*encode		*/
     NULL,			/*debug key		*/
-    NULL,	  	        /*remove chunks, upon H5Dset_extend call */
 }};
 
 /* Interface initialization */
@@ -1058,9 +1054,12 @@ H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *		Quincey Koziol, 2002-04-22
+ *		Changed to callback from H5B_iterate
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata)
 {
