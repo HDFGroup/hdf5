@@ -301,7 +301,7 @@ H5P_close (H5P_class_t type, void *tmpl)
 	    /* Nothing to do */
 	    break;
 
-	case H5F_LOW_MPI:
+	case H5F_LOW_MPIO:
 #ifdef LATER
 	    /* Need to free the COMM and INFO objects too. */
 #endif
@@ -1682,7 +1682,7 @@ H5Pget_family (hid_t tid, hid_t *memb_tid)
  * Function:	H5Pset_mpi
  *
  * Signature:	herr_t H5Pset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info,
- *		    uintn access_mode) 
+ *		    unsigned access_mode) 
  *
  * Purpose:	Store the access mode for MPIO call and the user supplied
  *		communicator and info in the access template which can then
@@ -1706,7 +1706,7 @@ H5Pget_family (hid_t tid, hid_t *memb_tid)
  *		    this function call returns may have undetermined effect
  *		    to the access template.  Users should call this function
  *		    again to setup the template.
- *		uintn access_mode 
+ *		unsigned access_mode 
  *		    File data access modes: 
  *			H5ACC_INDEPENDENT 
  *			    Allow independent datasets access. 
@@ -1733,7 +1733,7 @@ H5Pget_family (hid_t tid, hid_t *memb_tid)
  */
 #ifdef HAVE_PARALLEL
 herr_t
-H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
+H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
 {
     H5F_access_t	   *tmpl = NULL;
     MPI_Comm		    lcomm;
@@ -1813,7 +1813,7 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
  */
 #ifdef HAVE_PARALLEL
 herr_t
-H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, uintn *access_mode)
+H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, unsigned *access_mode)
 {
     H5F_access_t	*tmpl = NULL;
 
@@ -1825,7 +1825,7 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, uintn *access_mode)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5F_LOW_MPI != tmpl->driver) {
+    if (H5F_LOW_MPIO != tmpl->driver) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the mpi driver is not set");
     }

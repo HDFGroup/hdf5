@@ -149,7 +149,7 @@ H5F_init_interface(void)
     /* Nothing to initialize */
 #elif (H5F_LOW_DFLT == H5F_LOW_CORE)
     H5F_access_dflt.u.core.increment = 10*1024;
-#elif (H5F_LOW_DFLT == H5F_LOW_MPI)
+#elif (H5F_LOW_DFLT == H5F_LOW_MPIO)
     H5F_access_dflt.u.mpio.access_mode = 0;
     H5F_access_dflt.u.mpio.comm = MPI_COMM_NULL;
     H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
@@ -1327,7 +1327,7 @@ H5F_close(H5F_t *f)
      */
     if (f->nopen > 0) {
 #ifndef NDEBUG
-	fprintf(stderr, "HDF5-DIAG: H5F_close: %d object header%s still "
+	fprintf(stderr, "HDF5-DIAG: H5F_close: %u object header%s still "
 		"open (file close will complete when %s closed)\n",
 		f->nopen,
 		1 == f->nopen ? " is" : "s are",
