@@ -334,8 +334,8 @@ precision (detected_t *d)
 static void
 sigbus_handler(int __unused__ signo)
 {
-    longjmp(jbuf_g, 1);
     signal(SIGBUS, sigbus_handler);
+    longjmp(jbuf_g, 1);
 }
     
 

@@ -62,22 +62,25 @@ all:
 #
 # Graphically, the dependencies are:
 #
-#			    configure.in
-#                              |  |
-#         +--------------------+  +-------------------+
-#         |                                           |
-#      stamp1                                     configure
-#         |                                           |
-#         |                                     config.status
-#         |                                       |   |
-#         | +-------------------------------------+   |
-#         | |                                         |
-#       stamp2          Makefile.in et al             |
-#          |                    |                     |
-#          |                    +-----------+  +------+
-#          +-----------------------------+  |  |
-#                                        |  |  |
-#                                        Makefile
+#		         configure.in
+#                           |  |
+#         +-----------------+  +------------+
+#         |                                 |
+#      stamp1                           configure
+#   (H5config.h.in)                         |
+#       |  |                                |
+#       |  +---------------+    +-----------+
+#       |                  |    |
+#       |               config.status
+#       |                     |
+#       |  +------------------+
+#       |  |
+#      stamp2
+#    (H5config.h)                   Makefile.in et al
+#         |                                 |
+#         +------------------+  +-----------+
+#                            |  |
+#                          Makefile
 #
 # A side effect of updating stamp1 is to generate H5config.h.in and a
 # side effect of updating stamp2 is to generate H5config.h.  When using
@@ -105,10 +108,10 @@ $(STAMP2): $(STAMP1) $(top_builddir)/config.status
 $(top_srcdir)/configure: $(top_srcdir)/configure.in
 	-cd $(top_srcdir); autoconf
 
-$(top_srcdir)/config.status: $(top_builddir)/configure
+$(top_builddir)/config.status: $(top_srcdir)/configure $(STAMP1)
 	-cd $(top_builddir); ./config.status --recheck
 
-Makefile: $(MAKEFILE_PARTS) $(top_builddir)/config.status $(STAMP2)
+Makefile: $(MAKEFILE_PARTS) $(STAMP2)
 	-cd $(top_builddir); CONFIG_HEADERS= ./config.status
 
 #------------------------------------------------------------------------------

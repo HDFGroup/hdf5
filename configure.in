@@ -737,15 +737,25 @@ AC_SUBST(ROOT) ROOT=`$pwd`
 dnl Some cleanup stuff
 rm -f conftest conftest.o conftest.c dummy.o
 
-dnl Build config.status, then touch the stamp files, then build all
-dnl the Makefiles.  The order is such that the first `make' does not
-dnl need to call config.status.
+dnl Build config.status, touch the stamp files, and build all the Makefiles.
+dnl The order is such that the first `make' does not need to update any
+dnl configuration information. See config/commence.in for the order in which
+dnl things need to be done.
+
+# First the stamp1 file for H5config.h.in
+mkdir ./config >/dev/null 2>&1
+touch ./config/stamp1
+
+# Then the config.status file (but not makefiles)
+saved_no_create=$no_create
 no_create=yes
 AC_OUTPUT(config/depend config/commence config/conclude \
           Makefile src/Makefile pablo/Makefile test/Makefile \
           testpar/Makefile tools/Makefile examples/Makefile)
-sleep 1
-mkdir ./config >/dev/null 2>&1
-touch ./config/stamp1 ./config/stamp2
-sleep 1
-${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+no_create=$saved_no_create
+
+# Then the stamp2 file for H5config.h
+touch ./config/stamp2
+
+# Finally the makefiles
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1

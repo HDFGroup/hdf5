@@ -49,7 +49,7 @@ CONVERT()
 	    	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
 		if test "testfiles/tloop.hdf" = "$h4file"; then
-			$H4DUMP dumpvg $h4file | head -50 > $actual
+			($H4DUMP dumpvg $h4file |head -50 >$actual) 2>/dev/null
 		else
 			$H4DUMP dumpvg $h4file > $actual
 		fi
@@ -104,7 +104,7 @@ CONVERT()
 	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
 	if test "testfiles/tloop.hdf" = "$h4file"; then
-		$H4DUMP dumpvg $h4file | head -50 > $actual
+		($H4DUMP dumpvg $h4file |head -50 >$actual) 2>/dev/null
 	else
 		$H4DUMP dumpvg $h4file > $actual
 	fi

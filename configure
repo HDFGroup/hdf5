@@ -4788,6 +4788,13 @@ fi
 
 rm -f conftest conftest.o conftest.c dummy.o
 
+
+# First the stamp1 file for H5config.h.in
+mkdir ./config >/dev/null 2>&1
+touch ./config/stamp1
+
+# Then the config.status file (but not makefiles)
+saved_no_create=$no_create
 no_create=yes
 trap '' 1 2 15
 cat > confcache <<\EOF
@@ -5177,8 +5184,10 @@ chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
-sleep 1
-mkdir ./config >/dev/null 2>&1
-touch ./config/stamp1 ./config/stamp2
-sleep 1
-${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+no_create=$saved_no_create
+
+# Then the stamp2 file for H5config.h
+touch ./config/stamp2
+
+# Finally the makefiles
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
