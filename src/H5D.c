@@ -1394,8 +1394,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         if (status>=0) goto succeed;
 #ifdef HAVE_PARALLEL
 	/* Supports only no conversion, type or space, for now. */
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		    "collective read failed");
+	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+		    "optimized parallel read failed");
 #endif
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
@@ -1746,8 +1746,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if (status>=0) goto succeed;
 #ifdef HAVE_PARALLEL
 	/* Supports only no conversion, type or space, for now. */
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		    "collective write failed");
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
+		    "optimized parallel write failed");
 #endif
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
