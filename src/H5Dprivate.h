@@ -164,7 +164,10 @@ typedef struct H5D_t H5D_t;
 /* Typedef for dataset storage information */
 typedef union H5D_storage_t {
     H5O_efl_t   efl;            /* External file list information for dataset */
-    hssize_t    *chunk_coords;  /* chunk's coordinates in file chunks */
+    struct {
+        hsize_t index;          /* "Index" of chunk in dataset (must be first for TBBT routines) */
+        hssize_t *offset;       /* Chunk's coordinates in elements */
+    } chunk;
 } H5D_storage_t;
 
 /* Typedef for cached dataset transfer property list information */

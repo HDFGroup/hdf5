@@ -237,7 +237,7 @@ H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
 
         case H5D_CHUNKED:
             assert(store);
-            if((ret_value=H5F_istore_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store->chunk_coords,
+            if((ret_value=H5F_istore_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
                     dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                     mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                     buf))<0)
@@ -346,7 +346,7 @@ H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
 
         case H5D_CHUNKED:
             assert(store);
-            if((ret_value=H5F_istore_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store->chunk_coords,
+            if((ret_value=H5F_istore_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
                     dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                     mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                     buf))<0)

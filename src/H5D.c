@@ -199,7 +199,7 @@ H5D_init_interface(void)
     H5P_genplist_t *def_dcpl;               /* Default Dataset Creation Property list */
     size_t          nprops;                 /* Number of properties */
     herr_t          ret_value                = SUCCEED;   /* Return value */
-           
+
     FUNC_ENTER_NOAPI_NOINIT(H5D_init_interface)
 
     /* Initialize the atom group for the dataset IDs */
@@ -2048,7 +2048,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     assert (H5I_GENPROP_LST==H5I_get_type(dxpl_id));
 
     /* Check if the filters in the DCPL can be applied to this dataset */
-    if (H5Z_can_apply(dcpl_id,type_id)<0)
+    if(H5Z_can_apply(dcpl_id,type_id)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
 
     /* Get the dataset's datatype */
@@ -2056,15 +2056,15 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
 
     /* Check if the datatype is "sensible" for use in a dataset */
-    if (H5T_is_sensible(type)!=TRUE)
+    if(H5T_is_sensible(type)!=TRUE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible")
 
     /* Check if the datatype is/contains a VL-type */
-    if (H5T_detect_class(type, H5T_VLEN))
+    if(H5T_detect_class(type, H5T_VLEN))
         has_vl_type=TRUE;
 
     /* Initialize the dataset object */
-    if (NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
+    if(NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make the "set local" filter callbacks for this dataset */
@@ -2072,7 +2072,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
 
     /* What file is the dataset being added to? */
-    if (NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
+    if(NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point")
 
     /* Copy datatype for dataset */
@@ -2080,7 +2080,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype")
 
     /* Mark any datatypes as being on disk now */
-    if (H5T_set_loc(new_dset->type, file, H5T_LOC_DISK)<0)
+    if(H5T_set_loc(new_dset->type, file, H5T_LOC_DISK)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Copy dataspace for dataset */
@@ -2216,7 +2216,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                  * Chunked storage allows any type of data space extension, so we
                  * don't even bother checking.
                  */
-                if(chunk_ndims != ndims)
+                if(chunk_ndims != (unsigned)ndims)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "dimensionality of chunks doesn't match the data space")
                 if (new_dset->efl.nused>0)
                     HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL, "external storage not supported with chunked layout")
@@ -2400,7 +2400,7 @@ H5D_open(H5G_entry_t *ent, hid_t dxpl_id)
 
         /* Clear any errors from H5FO_opened() */
         H5E_clear(NULL);
-        
+
         /* Open the dataset object */
         if ((dataset=H5D_open_oid(ent, dxpl_id)) ==NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
@@ -2801,6 +2801,11 @@ H5D_extend (H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 	/* Save the new dataspace in the file if necessary */
 	if (H5S_modify (&(dataset->ent), space, TRUE, dxpl_id)<0)
 	    HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
+
+        /* Update the index values for the cached chunks for this dataset */
+        if(H5D_CHUNKED == dataset->layout.type)
+            if(H5F_istore_update_cache(dataset->ent.file, dxpl_id, &dataset->layout, space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
         if(dataset->alloc_time==H5D_ALLOC_TIME_EARLY)
@@ -3208,7 +3213,6 @@ done:
 static hsize_t
 H5D_get_storage_size(const H5D_t *dset, hid_t dxpl_id)
 {
-    unsigned	u;              /* Index variable */
     hsize_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5D_get_storage_size, 0)
@@ -3218,8 +3222,7 @@ H5D_get_storage_size(const H5D_t *dset, hid_t dxpl_id)
             if(dset->layout.u.chunk.addr == HADDR_UNDEF)
                 ret_value=0;
             else
-                ret_value = H5F_istore_allocated(dset->ent.file, dxpl_id, dset->layout.u.chunk.ndims,
-                                             dset->layout.u.chunk.addr);
+                ret_value = H5F_istore_allocated(dset->ent.file, dxpl_id, &dset->layout);
             break;
 
         case H5D_CONTIGUOUS:
@@ -3419,7 +3422,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype")
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
-            
+
     ret_value=H5S_select_iterate(buf,type_id,space,op,operator_data);
 
 done:
@@ -3802,6 +3805,11 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         /* Save the new dataspace in the file if necessary */
         if(H5S_modify(&(dset->ent), space, TRUE, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
+
+        /* Update the index values for the cached chunks for this dataset */
+        if(H5D_CHUNKED == dset->layout.type)
+            if(H5F_istore_update_cache(dset->ent.file, dxpl_id, &dset->layout, space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->alloc_time==H5D_ALLOC_TIME_EARLY)

@@ -189,6 +189,7 @@ struct H5F_t {
 /* Forward declarations for prototype arguments */
 struct H5D_dxpl_cache_t;
 struct H5D_dcpl_cache_t;
+union H5D_storage_t;
 
 /* Private functions, not part of the publicly documented API */
 #ifdef NOT_YET
@@ -204,14 +205,14 @@ H5_DLL herr_t H5F_istore_dest (H5F_t *f, hid_t dxpl_id);
 H5_DLL ssize_t H5F_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id,
     const struct H5O_layout_t *layout, const struct H5D_dcpl_cache_t *dcpl_cache,
-    hssize_t chunk_coords[],
+    const union H5D_storage_t *store,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf);
 H5_DLL ssize_t H5F_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id,
     const struct H5O_layout_t *layout, const struct H5D_dcpl_cache_t *dcpl_cache,
-    hssize_t chunk_coords[],
+    const union H5D_storage_t *store,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);

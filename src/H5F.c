@@ -2148,7 +2148,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
-            
+
 done:
     if (ret_value<0 && new_file)
         if(H5F_close(new_file)<0)
@@ -2225,7 +2225,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Get an atom for the file */
     if ((ret_value = H5I_register(H5I_FILE, new_file))<0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-            
+
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
@@ -3333,7 +3333,7 @@ H5F_close(H5F_t *f)
 
     /* Invalidate file ID */
     f->file_id = -1;
-    
+
     /* Only flush at this point if the file will be closed */
     assert(closing);
     /* Dump debugging info */

@@ -1272,6 +1272,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 {
     hid_t		dataset;        /* Dataset ID */
     hid_t		dxpl;           /* Dataset xfer property list ID */
+    hid_t		write_dxpl;     /* Dataset xfer property list ID for writing */
     hid_t		sid;            /* Dataspace ID */
     const hsize_t	size[2] = {DSET_DIM1, DSET_DIM2};           /* Dataspace dimensions */
     const hssize_t	hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
@@ -1290,6 +1291,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     tconv_buf = malloc (1000);
     if (H5Pset_buffer (dxpl, (size_t)1000, tconv_buf, NULL)<0) goto error;
+    if ((write_dxpl = H5Pcopy (dxpl))<0) TEST_ERROR;
 
     if (if_fletcher32==DISABLE_FLETCHER32) {
         if(H5Pset_edc_check(dxpl, H5Z_DISABLE_EDC)<0)
@@ -1347,10 +1349,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 	}
     }
 
-    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
-	goto error;
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points)<0)
+	TEST_ERROR;
         
-    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
+    if((*dset_size=H5Dget_storage_size(dataset))==0) TEST_ERROR;
 
     PASSED();
 
@@ -1363,25 +1365,27 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     /* Read the dataset back */
     if(corrupted) {
         /* Default behavior is failure when data is corrupted. */
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) TEST_ERROR;
         if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-            goto error;
+            TEST_ERROR;
             
         /* Callback decides to fail when data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL)<0) TEST_ERROR;
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
     } else {
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-	   goto error;
+	   TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
         for (i=0; i<size[0]; i++) {
@@ -1414,31 +1418,33 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 	    points[i][j] = (int)HDrandom ();
 	}
     }
-    if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
-	goto error;
+    if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points)<0)
+	TEST_ERROR;
         
     if(corrupted) {
         /* Default behavior is failure when data is corrupted. */ 
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) TEST_ERROR;
         if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-            goto error;
+            TEST_ERROR;
             
         /* Callback decides to fail when data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL)<0) TEST_ERROR;
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
     } else {
         /* Read the dataset back and check it */
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-	   goto error;
+	   TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
         for (i=0; i<size[0]; i++) {
@@ -1454,7 +1460,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         }
     }
     
-    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
+    if((*dset_size=H5Dget_storage_size(dataset))==0) TEST_ERROR;
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -1465,30 +1471,32 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      */
     TESTING("    filters (re-open)");
     
-    if (H5Dclose (dataset)<0) goto error;
-    if ((dataset = H5Dopen (fid, name))<0) goto error;
+    if (H5Dclose (dataset)<0) TEST_ERROR;
+    if ((dataset = H5Dopen (fid, name))<0) TEST_ERROR;
     
     if(corrupted) {
         /* Default behavior is failure when data is corrupted. */ 
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) TEST_ERROR;
         if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-            goto error;
+            TEST_ERROR;
             
         /* Callback decides to fail when data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL)<0) TEST_ERROR;
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
     } else {
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-	   goto error;
+	   TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
         for (i=0; i<size[0]; i++) {
@@ -1521,31 +1529,34 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 	}
     }
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
-			    NULL)<0) goto error;
+			    NULL)<0) TEST_ERROR;
+    /* (Use the "read" DXPL because partial I/O on corrupted data test needs to ignore errors during writing) */
     if (H5Dwrite (dataset, H5T_NATIVE_INT, sid, sid, dxpl, points)<0)
-	goto error;
+	TEST_ERROR;
      
     if(corrupted) {
         /* Default behavior is failure when data is corrupted. */ 
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
 
         /* Callback decides to continue inspite data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) TEST_ERROR;
         if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-            goto error;
+            TEST_ERROR;
             
         /* Callback decides to fail when data is corrupted. */ 
-        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL)<0) TEST_ERROR;
+        /* (Use the "write" DXPL in order to make certain corruption is seen) */
         H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
         } H5E_END_TRY;
-        if(status>=0) goto error;
+        if(status>=0) TEST_ERROR;
     } else {
         if (H5Dread (dataset, H5T_NATIVE_INT, sid, sid, dxpl, check)<0)
-	   goto error;
+	   TEST_ERROR;
     
         /* Check that the values read are the same as the values written */
         for (i=0; i<hs_size[0]; i++) {
@@ -1687,7 +1698,7 @@ test_filters(hid_t file)
 
     if (H5Zregister (H5Z_CORRUPT)<0) goto error;
     if (H5Pset_filter (dc, H5Z_FILTER_CORRUPT, 0, 3, data_corrupt)<0) goto error;
-    if(test_filter_internal(file,DSET_FLETCHER32_NAME_3,dc,ENABLE_FLETCHER32,DATA_CORRUPTED,&fletcher32_size)<0) goto error;
+    if(test_filter_internal(file,DSET_FLETCHER32_NAME_3,dc,DISABLE_FLETCHER32,DATA_CORRUPTED,&fletcher32_size)<0) goto error;
     if(fletcher32_size<=null_size) {
         H5_FAILED();
         puts("    Size after checksumming is incorrect.");
@@ -1954,7 +1965,7 @@ test_missing_filter(hid_t file)
     /* Query the dataset's size on disk */
     if((dset_size=H5Dget_storage_size(dsid))==0) {
         H5_FAILED();
-        printf("    Line %d: Error querying dataset size\n",__LINE__);
+        printf("    Line %d: Error querying dataset size, dset_size=%lu\n",__LINE__,(unsigned long)dset_size);
         goto error;
     } /* end if */
 
@@ -3348,6 +3359,7 @@ test_filters_endianess(void)
     if (H5Dclose (dsid)<0) goto error;
     if (H5Sclose (sid)<0) goto error;
     if (H5Fclose (fid)<0) goto error;
+
    /*-------------------------------------------------------------------------
     * step 2: open a file written on a little-endian machine in step 1 
     *-------------------------------------------------------------------------
@@ -3371,6 +3383,7 @@ test_filters_endianess(void)
 
     /* close */
     if (H5Fclose(fid)<0) goto error;
+
    /*-------------------------------------------------------------------------
     * step 3: open a file written on a big-endian machine in step 1 
     *-------------------------------------------------------------------------
@@ -3432,25 +3445,26 @@ int
 main(void)
 {
     hid_t		file, grp, fapl;
+    int mdc_nelmts;
+    size_t rdcc_nelmts;
+    size_t rdcc_nbytes;
+    double rdcc_w0;
     int			nerrors=0;
     char		filename[1024];
 
     h5_reset();
     fapl = h5_fileaccess();
     
-#if 0
-    {
-	/* Turn off raw data cache */
-	int mdc_nelmts;
-	if (H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL)<0) goto error;
-	if (H5Pset_cache(fapl, mdc_nelmts, 0, 0, 0.0)<0) goto error;
-    }
-#endif
-    
     /* Set the random # seed */
     HDsrandom((unsigned long)HDtime(NULL));
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Turn off the chunk cache, so all the chunks are immediately written to disk */
+    if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0)<0) goto error;
+    rdcc_nbytes=0;
+    if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0)<0) goto error;
+
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
@@ -3460,6 +3474,7 @@ main(void)
     if (H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted")<0)
 	goto error;
     if (H5Gclose (grp)<0) goto error;
+
     nerrors += test_create(file)<0 	?1:0;
     nerrors += test_simple_io(fapl)<0	?1:0;
     nerrors += test_compact_io(fapl)<0  ?1:0;

@@ -447,7 +447,7 @@ H5_DLL herr_t H5F_istore_create(H5F_t *f, hid_t dxpl_id,
 H5_DLL herr_t H5F_istore_allocate (H5F_t *f, hid_t dxpl_id,
     const struct H5O_layout_t *layout, const hsize_t *space_dim,
     struct H5P_genplist_t *dc_plist, hbool_t full_overwrite);
-H5_DLL hsize_t H5F_istore_allocated(H5F_t *f, hid_t dxpl_id, unsigned ndims, haddr_t addr);
+H5_DLL hsize_t H5F_istore_allocated(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout);
 H5_DLL herr_t H5F_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
         haddr_t addr);
 H5_DLL herr_t H5F_istore_prune_by_extent( H5F_t *f,
@@ -459,6 +459,8 @@ H5_DLL herr_t H5F_istore_initialize_by_extent( H5F_t *f,
         const struct H5S_t *space );
 H5_DLL herr_t H5F_istore_delete(H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout);
+H5_DLL herr_t H5F_istore_update_cache(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
+        const struct H5S_t * space);
 
 /* Address-related functions */
 H5_DLL void H5F_addr_encode(const H5F_t *, uint8_t** /*in,out*/, haddr_t);
