@@ -487,6 +487,7 @@ AC_CHECK_SIZEOF(  int_fast64_t, 8)
 AC_CHECK_SIZEOF( uint_fast64_t, 8)
 
 AC_CHECK_SIZEOF(size_t, 4)
+AC_CHECK_SIZEOF(ssize_t, 4)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/
 EOF
