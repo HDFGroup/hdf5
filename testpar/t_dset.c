@@ -316,6 +316,25 @@ dataset_writeInd(char *filename)
 	    H5P_DEFAULT, data_array1);					    
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
+    /* setup dimensions again to write with zero rows for process 0 */
+    if (verbose)
+	printf("writeInd by some with zero row\n");
+    slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+    /* need to make mem_dataspace to match for process 0 */
+    if (MAINPROCESS){
+	ret=H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+	VRFY((ret >= 0), "H5Sset_hyperslab mem_dataspace succeeded");
+    }
+    MESG("writeInd by some with zero row");
+if ((mpi_rank/2)*2 != mpi_rank){
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);					    
+    VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
+}
+MPI_Barrier(MPI_COMM_WORLD);
+
     /* release dataspace ID */
     H5Sclose(file_dataspace);
 
@@ -578,7 +597,8 @@ dataset_writeAll(char *filename)
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
 
     /* setup dimensions again to writeAll with zero rows for process 0 */
-printf("writeAll by some with zero row\n");
+    if (verbose)
+	printf("writeAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -640,7 +660,8 @@ printf("writeAll by some with zero row\n");
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
     /* setup dimensions again to writeAll with zero columns for process 0 */
-printf("writeAll by some with zero col\n");
+    if (verbose)
+	printf("writeAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -794,7 +815,8 @@ dataset_readAll(char *filename)
     if (ret) nerrors++;
 
     /* setup dimensions again to readAll with zero columns for process 0 */
-printf("readAll by some with zero col\n");
+    if (verbose)
+	printf("readAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -856,7 +878,8 @@ printf("readAll by some with zero col\n");
     if (ret) nerrors++;
 
     /* setup dimensions again to readAll with zero rows for process 0 */
-printf("readAll by some with zero row\n");
+    if (verbose)
+	printf("readAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -1061,7 +1084,6 @@ extend_writeInd(char *filename)
     mem_dataspace = H5Screate_simple (RANK, block, NULL);
     VRFY((mem_dataspace >= 0), "");
 
-#ifndef DISABLE
     /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
     /* Temporary turn off auto error reporting */
     H5Eget_auto(&old_func, &old_client_data);
@@ -1081,10 +1103,6 @@ extend_writeInd(char *filename)
     /* restore auto error reporting */
     H5Eset_auto(old_func, old_client_data);
     H5Sclose(file_dataspace);
-#else
-    /* Skip test because H5Dwrite is not failing as expected */
-    printf("***Skip test of write-beyond-current-dim-size\n");
-#endif
 
     /* Extend dataset2 and try again.  Should succeed. */
     dims[0] = dim0;
