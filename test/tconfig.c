@@ -36,7 +36,6 @@
 
 /* local routine prototypes */
 void test_config_ctypes(void);
-void test_config_malloc(void);
 
 
 /*-------------------------------------------------------------------------
@@ -59,7 +58,6 @@ test_configure(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing configure definitions\n"));
     test_config_ctypes();
-    test_config_malloc();
 }
 
 
@@ -183,44 +181,4 @@ test_config_ctypes(void)
     vrfy_ctype(ssize_t, H5_SIZEOF_SSIZE_T);
 #endif
 
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	test_config_malloc
- *
- * Purpose:	test C language malloc function
- *
- * Return:	none (error is fed back via global variable num_errs)
- *
- * Programmer:	Albert Cheng
- *              April 13, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void 
-test_config_malloc(void)
-{
-    char	*pt;
-
-    /* verify H5_MALLOC_WORKS (malloc zero byte) macros */
-    pt = malloc(0);
-
-#ifdef H5_MALLOC_WORKS
-    if (pt==NULL){
-	print_func("Error verifying H5_MALLOC_WORKS: "
-	    "expected non-NULL, got NULL\n");
-	num_errs++;
-    }
-
-    free(pt);
-#else
-    if (pt!=NULL){
-	print_func("Error verifying H5_MALLOC_WORKS: "
-	    "expected NULL, got non-NULL\n");
-	num_errs++;
-    }
-#endif
 }

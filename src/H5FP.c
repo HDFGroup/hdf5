@@ -291,7 +291,7 @@ H5FP_read_metadata(char **mdata, int len, int from)
      * There is metadata associated with this request. Get it as a
      * string (requires another read).
      */
-    if ((*mdata = (char *)HDmalloc((size_t)len + 1)) == NULL)
+    if ((*mdata = (char *)H5MM_malloc((size_t)len + 1)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
 
     HDmemset(*mdata, 0, (size_t)len + 1);

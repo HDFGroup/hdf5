@@ -1562,30 +1562,6 @@ AC_DEFINE_UNQUOTED(PRINTF_LL_WIDTH, "$hdf5_cv_printf_ll",
                    [Width for printf() for type \`long long' or \`__int64', use \`ll'])
 
 dnl ----------------------------------------------------------------------
-dnl Check if malloc(0) returns valid pointer
-dnl
-AC_MSG_CHECKING([if malloc of zero bytes returns valid pointer])
-AC_CACHE_VAL(hdf5_cv_malloc_works,
-AC_TRY_RUN([
-#if STDC_HEADERS
-#include <stdlib.h>
-#endif
-
-int main(void)
-{
-    exit(malloc (0) ? 0 : 1);
-}
-], hdf5_cv_malloc_works=yes, hdf5_cv_malloc_works=no,))
-
-if test ${hdf5_cv_malloc_works} = "yes"; then
-  AC_DEFINE(MALLOC_WORKS, 1,
-            [Define if your system's \`malloc' function returns a valid pointer for 0-byte allocations.])
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
 dnl is supported on this system
 dnl

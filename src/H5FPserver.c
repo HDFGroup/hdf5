@@ -333,7 +333,7 @@ H5FP_new_object_lock(const unsigned char *oid, unsigned rank,
     FUNC_ENTER_NOINIT(H5FP_new_object_lock);
     assert(oid);
 
-    if ((ret_value = (H5FP_object_lock *)HDmalloc(sizeof(H5FP_object_lock))) == NULL)
+    if ((ret_value = (H5FP_object_lock *)H5MM_malloc(sizeof(H5FP_object_lock))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
     H5FP_COPY_OID(ret_value->oid, oid);
@@ -478,7 +478,7 @@ H5FP_new_file_mod_node(unsigned UNUSED rank, H5FD_mem_t mem_type,
 
     FUNC_ENTER_NOINIT(H5FP_new_file_mod_node);
 
-    if ((ret_value = (H5FP_mdata_mod *)HDmalloc(sizeof(H5FP_mdata_mod))) == NULL)
+    if ((ret_value = (H5FP_mdata_mod *)H5MM_malloc(sizeof(H5FP_mdata_mod))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
     ret_value->mem_type = mem_type;
@@ -597,7 +597,7 @@ H5FP_new_file_info_node(unsigned file_id)
 
     FUNC_ENTER_NOINIT(H5FP_new_file_info_node);
 
-    if ((ret_value = (H5FP_file_info *)HDmalloc(sizeof(H5FP_file_info))) == NULL)
+    if ((ret_value = (H5FP_file_info *)H5MM_malloc(sizeof(H5FP_file_info))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
     ret_value->file_id = file_id;
@@ -938,7 +938,7 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_lock_request);
 
-    if ((oids = (struct lock_group *)HDmalloc(list_size *
+    if ((oids = (struct lock_group *)H5MM_malloc(list_size *
                                               sizeof(struct lock_group))) == NULL) {
         exit_state = H5FP_STATUS_OOM;
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
@@ -1141,7 +1141,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request_t *req)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_release_lock_request);
 
-    if ((oids = (struct release_group *)HDmalloc(list_size *
+    if ((oids = (struct release_group *)H5MM_malloc(list_size *
                                                  sizeof(struct release_group))) == NULL) {
         exit_state = H5FP_STATUS_OOM;
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");

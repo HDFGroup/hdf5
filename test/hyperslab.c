@@ -24,7 +24,6 @@
 #include "h5test.h"
 #include "H5private.h"
 #include "H5Eprivate.h"
-#include "H5MMprivate.h"
 #include "H5Vprivate.h"
 
 #define TEST_SMALL	0x0001
@@ -130,7 +129,7 @@ print_ref(size_t nx, size_t ny, size_t nz)
 {
     uint8_t		   *array;
 
-    array = H5MM_calloc(nx*ny*nz*sizeof(uint8_t));
+    array = HDcalloc(nx*ny*nz,sizeof(uint8_t));
 
     printf("Reference array:\n");
     init_full(array, nx, ny, nz);
@@ -193,7 +192,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     fflush(stdout);
 
     /* Allocate array */
-    dst = H5MM_calloc(nx*ny*nz);
+    dst = HDcalloc(1,nx*ny*nz);
     init_full(dst, nx, ny, nz);
 
     for (i = 0; i < nx; i += di) {
@@ -287,11 +286,11 @@ test_fill(size_t nx, size_t ny, size_t nz,
 	}
     }
     puts(" PASSED");
-    H5MM_xfree(dst);
+    HDfree(dst);
     return SUCCEED;
 
   error:
-    H5MM_xfree(dst);
+    HDfree(dst);
     return FAIL;
 }
 
@@ -397,8 +396,8 @@ test_copy(int mode,
     /*
      * Allocate arrays
      */
-    src = H5MM_calloc(nx*ny*nz);
-    dst = H5MM_calloc(nx*ny*nz);
+    src = HDcalloc(1,nx*ny*nz);
+    dst = HDcalloc(1,nx*ny*nz);
     init_full(src, nx, ny, nz);
 
     for (i=0; i<nx; i+=di) {
@@ -574,18 +573,13 @@ test_copy(int mode,
 	}
     }
     puts(" PASSED");
-#if defined(WIN32) && defined(_HDF5USEDLL_)
     HDfree(src);
     HDfree(dst);
-#else
-	H5MM_xfree(src);
-	H5MM_xfree(dst);
-#endif
     return SUCCEED;
 
   error:
-    H5MM_xfree(src);
-    H5MM_xfree(dst);
+    HDfree(src);
+    HDfree(dst);
     return FAIL;
 }
 
@@ -628,15 +622,8 @@ test_multifill(size_t nx)
     fflush(stdout);
 
     /* Initialize the source and destination */
-#if !defined(WIN32) && !defined(_HDF5USEDLL_)
-    src = H5MM_malloc(nx * sizeof(*src));
-    dst = H5MM_malloc(nx * sizeof(*dst));
-#else
-/*
-	to match the HDfree I plan on using to free this memory */
-	src = malloc(nx * sizeof(*src));
-    dst = malloc(nx * sizeof(*dst));
-#endif
+    src = HDmalloc(nx * sizeof(*src));
+    dst = HDmalloc(nx * sizeof(*dst));
     for (i = 0; i < nx; i++) {
 	src[i].left = 1111111;
 	src[i].mid = 12345.6789;
@@ -701,21 +688,13 @@ test_multifill(size_t nx)
     }
 	
     puts(" PASSED");
-#if !defined(WIN32) && !defined(_HDF5USEDLL_)
-    H5MM_xfree(src);
-    H5MM_xfree(dst);
-#else
-/*
-	The above calls to H5MM_xfree crash on NT but using free does not. 
-*/
-  	HDfree(src);
-	HDfree(dst);
-#endif
+    HDfree(src);
+    HDfree(dst);
     return SUCCEED;
 
   error:
-    H5MM_xfree(src);
-    H5MM_xfree(dst);
+    HDfree(src);
+    HDfree(dst);
     return FAIL;
 }
 
@@ -751,9 +730,9 @@ test_endian(size_t nx)
     fflush(stdout);
 
     /* Initialize arrays */
-    src = H5MM_malloc(nx * 4);
+    src = HDmalloc(nx * 4);
     init_full(src, nx, 4, 1);
-    dst = H5MM_calloc(nx * 4);
+    dst = HDcalloc(nx , 4);
 
     /* Initialize strides */
     src_stride[0] = 0;
@@ -790,18 +769,13 @@ test_endian(size_t nx)
     }
 
     puts(" PASSED");
-#if defined(WIN32) && defined(_HDF5USEDLL_)
-	HDfree(src);
-	HDfree(dst);
-#else
-    H5MM_xfree(src);
-    H5MM_xfree(dst);
-#endif
+    HDfree(src);
+    HDfree(dst);
     return SUCCEED;
 
   error:
-    H5MM_xfree(src);
-    H5MM_xfree(dst);
+    HDfree(src);
+    HDfree(dst);
     return FAIL;
 }
 
@@ -838,13 +812,13 @@ test_transpose(size_t nx, size_t ny)
     fflush(stdout);
 
     /* Initialize */
-    src = H5MM_malloc(nx * ny * sizeof(*src));
+    src = HDmalloc(nx * ny * sizeof(*src));
     for (i = 0; i < nx; i++) {
 	for (j = 0; j < ny; j++) {
 	    src[i * ny + j] = (int)(i * ny + j);
 	}
     }
-    dst = H5MM_calloc(nx*ny*sizeof(*dst));
+    dst = HDcalloc(nx*ny,sizeof(*dst));
 
     /* Build stride info */
     size[0] = nx;
@@ -897,18 +871,13 @@ test_transpose(size_t nx, size_t ny)
     }
 
     puts(" PASSED");
-#if !defined(WIN32) && !defined(_HDF5USEDLL_)
-    H5MM_xfree(src);
-    H5MM_xfree(dst);
-#else
     HDfree(src);
     HDfree(dst);
-#endif
     return SUCCEED;
 
   error:
-    H5MM_xfree(src);
-    H5MM_xfree(dst);
+    HDfree(src);
+    HDfree(dst);
     return FAIL;
 }
 
@@ -950,10 +919,10 @@ test_sub_super(size_t nx, size_t ny)
     fflush(stdout);
 
     /* Initialize */
-    full = H5MM_malloc(4 * nx * ny);
+    full = HDmalloc(4 * nx * ny);
     init_full(full, 2 * nx, 2 * ny, 1);
-    half = H5MM_calloc(nx*ny);
-    twice = H5MM_calloc(4*nx*ny);
+    half = HDcalloc(1,nx*ny);
+    twice = HDcalloc(4,nx*ny);
 
     /* Setup */
     size[0] = nx;
@@ -1062,15 +1031,15 @@ test_sub_super(size_t nx, size_t ny)
     }
     puts(" PASSED");
 
-    H5MM_xfree(full);
-    H5MM_xfree(half);
-    H5MM_xfree(twice);
+    HDfree(full);
+    HDfree(half);
+    HDfree(twice);
     return SUCCEED;
 
   error:
-    H5MM_xfree(full);
-    H5MM_xfree(half);
-    H5MM_xfree(twice);
+    HDfree(full);
+    HDfree(half);
+    HDfree(twice);
     return FAIL;
 }
 
@@ -1104,7 +1073,7 @@ test_array_fill(size_t lo, size_t hi)
     TESTING(s);
 
     /* Initialize */
-    dst = H5MM_calloc(sizeof(int)*ARRAY_FILL_SIZE * hi);
+    dst = HDcalloc(sizeof(int),ARRAY_FILL_SIZE * hi);
 
     /* Setup */
     for(u=0; u<ARRAY_FILL_SIZE; u++)
@@ -1123,11 +1092,11 @@ test_array_fill(size_t lo, size_t hi)
     } /* end for */
     PASSED();
 
-    H5MM_xfree(dst);
+    HDfree(dst);
     return SUCCEED;
 
   error:
-    H5MM_xfree(dst);
+    HDfree(dst);
     return FAIL;
 }
 
@@ -1164,7 +1133,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     TESTING(s);
 
     /* Initialize */
-    a = H5MM_malloc(sizeof(hsize_t) * x * y *z);
+    a = HDmalloc(sizeof(hsize_t) * x * y *z);
     dims[0]=z;
     dims[1]=y;
     dims[2]=x;
@@ -1201,11 +1170,11 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
 
     PASSED();
 
-    H5MM_xfree(a);
+    HDfree(a);
     return SUCCEED;
 
   error:
-    H5MM_xfree(a);
+    HDfree(a);
     return FAIL;
 }
 
