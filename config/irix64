@@ -41,13 +41,13 @@ warn="-fullwarn"
 
 profile="-pg"
 
-debug="-g -DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5F_OPT_SEEK=0"
+debug="-g -DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0"
 
 production="-O -DNDEBUG"
 
 default_mode='$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2'
 
-RANLIB=true		# SGI needs not ranlib
+RANLIB=:		# SGI needs not ranlib
 
 # Don't set CFLAGS if the user already did.
 if test -z "$CFLAGS"; then

@@ -402,7 +402,7 @@ H5Dget_space (hid_t dataset_id)
  */
 herr_t
 H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
-	hid_t file_space_id, hid_t xfer_parms_id, void *buf /*out */ )
+	hid_t file_space_id, hid_t xfer_parms_id, void *buf/*out*/)
 {
     H5D_t		   *dataset = NULL;
     const H5T_t		   *mem_type = NULL;
@@ -967,10 +967,13 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     /*
      * Perform data type conversion.
      */
+    cdata->command = H5T_CONV_CONV;
+    cdata->ncalls++;
     if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, bkg_buf)<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
+    cdata->nelmts += nelmts;
 
     /*
      * Scatter the data into memory.
@@ -1104,10 +1107,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     /*
      * Perform data type conversion.
      */
+    cdata->command = H5T_CONV_CONV;
+    cdata->ncalls++;
     if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, bkg_buf)<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
+    cdata->nelmts += nelmts;
 
     /*
      * Scatter the data out to the file.

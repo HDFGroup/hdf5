@@ -272,6 +272,42 @@ H5T_init_interface(void)
 static void
 H5T_term_interface(void)
 {
+    int		i;
+    H5T_path_t	*path = NULL;
+    H5T_cdata_t	*pcdata = NULL;
+    H5T_conv_t	cfunc = NULL;
+    
+    /* Unregister all conversion functions */
+    for (i=0; i<H5T_npath_g; i++) {
+	path = H5T_path_g + i;
+
+	if (path->func) {
+	    path->cdata.command = H5T_CONV_FREE;
+	    if ((path->func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
+#ifdef H5T_DEBUG
+		fprintf (stderr, "HDF5-DIAG: conversion function failed "
+			 "to free private data\n");
+#endif
+		H5ECLEAR; /*ignore the error*/
+	    }
+	}
+    }
+
+    /* Clear conversion tables */
+    H5T_apath_g = 0;
+    H5T_npath_g = 0;
+    H5T_path_g = H5MM_xfree (H5T_path_g);
+
+    H5T_asoft_g = 0;
+    H5T_nsoft_g = 0;
+    H5T_soft_g = H5MM_xfree (H5T_soft_g);
+
+    /* Clear noop function */
+    if ((cfunc=H5T_find (NULL, NULL, &pcdata))) {
+	pcdata->command = H5T_CONV_FREE;
+	(cfunc)(FAIL, FAIL, pcdata, 0, NULL, NULL);
+    }
+
     H5A_destroy_group(H5_DATATYPE);
 }
 
@@ -1748,7 +1784,7 @@ H5Tget_nmembers(hid_t type_id)
  *
  *-------------------------------------------------------------------------
  */
-char		       *
+char *
 H5Tget_member_name(hid_t type_id, int membno)
 {
     H5T_t		   *dt = NULL;
@@ -2051,25 +2087,23 @@ H5Tregister_hard(hid_t src_id, hid_t dst_id, H5T_conv_t func)
     }
 
     /* Locate or create a new conversion path */
-    if (NULL == (path = H5T_path_find(src, dst, TRUE))) {
+    if (NULL == (path = H5T_path_find(src, dst, TRUE, func))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to locate/allocate conversion path");
     }
 
-    /* Initialize the hard function */
-    path->hard = func;
-
     /*
-     * Notify all soft functions to recalculate private data since some
+     * Notify all other functions to recalculate private data since some
      * functions might cache a list of conversion functions.  For instance,
      * the compound type converter caches a list of conversion functions for
      * the members, so adding a new function should cause the list to be
      * recalculated to use the new function.
      */
     for (i=0; i<H5T_npath_g; i++) {
-	H5T_path_g[i].cdata->recalc = TRUE;
+	if (path != H5T_path_g+i) {
+	    H5T_path_g[i].cdata.recalc = TRUE;
+	}
     }
-    
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -2097,7 +2131,7 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 {
     intn	i;
     hid_t	src_id, dst_id;
-    H5T_cdata_t	*cdata = NULL;
+    H5T_cdata_t	cdata;
 
     FUNC_ENTER(H5Tregister_soft, FAIL);
 
@@ -2126,8 +2160,11 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
     /* Replace soft functions of all appropriate paths */
     for (i=0; i<H5T_npath_g; i++) {
 	H5T_path_t *path = H5T_path_g + i;
-	if (!cdata) {
-	    cdata = H5MM_xcalloc (1, sizeof(H5T_cdata_t));
+	path->cdata.recalc = TRUE;
+
+	if (path->is_hard ||
+	    path->src->type!=src_cls || path->dst->type!=dst_cls) {
+	    continue;
 	}
 
 	/*
@@ -2135,9 +2172,6 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 	 * data type temporarily to an object id before we query the functions
 	 * capabilities.
 	 */
-	if (path->src->type != src_cls || path->dst->type != dst_cls) {
-	    continue;
-	}
 	if ((src_id = H5A_register(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
 	    (dst_id = H5A_register(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
@@ -2145,32 +2179,29 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 	}
 
 	HDmemset (&cdata, 0, sizeof cdata);
-	if ((func) (src_id, dst_id, cdata, H5T_CONV_INIT, NULL, NULL) >= 0) {
+	cdata.command = H5T_CONV_INIT;
+	if ((func) (src_id, dst_id, &cdata, 0, NULL, NULL) >= 0) {
 	    /*
 	     * Free resources used by the previous conversion function. We
 	     * don't really care if this fails since at worst we'll just leak
 	     * some memory.  Then initialize the path with new info.
 	     */
-	    if (path->soft) {
-		(path->soft)(src_id, dst_id, path->cdata, H5T_CONV_FREE,
-			     NULL, NULL);
-		H5ECLEAR;
+	    if (path->func) {
+		path->cdata.command = H5T_CONV_FREE;
+		if ((path->func)(src_id, dst_id, &(path->cdata),
+				 0, NULL, NULL)<0) {
+#ifdef H5T_DEBUG
+		    fprintf (stderr, "HDF5-DIAG: conversion function failed "
+			     "to free private data.\n");
+#endif
+		    H5ECLEAR;
+		}
 	    }
-	    path->soft = func;
-	    H5MM_xfree (path->cdata);
+	    path->func = func;
 	    path->cdata = cdata;
-	    cdata = NULL;
-
-	} else {
-	    /*
-	     * Notify soft function that it should recalculate its private
-	     * data at the next opportunity.  This is necessary because some
-	     * functions cache a list of conversion functions in their
-	     * private data area (see compound data type converters).
-	     */
-	    path->cdata->recalc = TRUE;
 	}
 
+	/* Release temporary atoms */
 	H5A_dec_ref(src_id);
 	H5A_dec_ref(dst_id);
 	H5ECLEAR;
@@ -2182,10 +2213,7 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 /*-------------------------------------------------------------------------
  * Function:	H5Tunregister
  *
- * Purpose:	Removes FUNC from all conversion paths.	 If FUNC is
- *		registered as the soft conversion function of a path then it
- *		is replaced with some other soft conversion function from the
- *		master soft list if one applies.
+ * Purpose:	Removes FUNC from all conversion paths.
  *
  * Return:	Success:	SUCCEED
  *
@@ -2211,6 +2239,7 @@ H5Tunregister(H5T_conv_t func)
     if (!func) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no conversion function");
     }
+
     /* Remove function from master soft list */
     for (i=H5T_nsoft_g-1; i>=0; --i) {
 	if (H5T_soft_g[i].func == func) {
@@ -2224,24 +2253,27 @@ H5Tunregister(H5T_conv_t func)
     for (i=0; i<H5T_npath_g; i++) {
 	path = H5T_path_g + i;
 
-	/* Reset hard function */
-	if (path->hard == func) {
-	    path->hard = NULL;
-	}
-	
-	/* Reset soft function */
-	if (path->soft == func) {
-	    path->soft = NULL;
+	if (path->func == func) {
+	    path->func = NULL;
+	    path->is_hard = FALSE;
 
 	    /*
-	     * Free old cdata entry.  The conversion function is responsible
-	     * for freeing the `priv' member and all it points to, but we'll
-	     * free the rest of cdata here.
+	     * Reset cdata.
 	     */
-	    (func)(FAIL, FAIL, path->cdata, H5T_CONV_FREE, NULL, NULL);
-	    H5ECLEAR;
-	    
-	    for (j=H5T_nsoft_g-1; j>=0 && !path->soft; --j) {
+	    path->cdata.command = H5T_CONV_FREE;
+	    if ((func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
+#ifdef H5T_DEBUG
+		fprintf (stderr, "HDF5-DIAG: conversion function failed to "
+			 "free private data.\n");
+#endif
+		H5ECLEAR;
+	    }
+	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
+
+	    /*
+	     * Choose a new function.
+	     */
+	    for (j=H5T_nsoft_g-1; j>=0 && !path->func; --j) {
 		
 		if (path->src->type != H5T_soft_g[j].src ||
 		    path->dst->type != H5T_soft_g[j].dst) {
@@ -2260,21 +2292,23 @@ H5Tunregister(H5T_conv_t func)
 				  "unable to register conv types for query");
 		}
 
-		HDmemset (path->cdata, 0, sizeof(H5T_cdata_t));
-		if ((H5T_soft_g[j].func)(src_id, dst_id, path->cdata, 0,
-					 NULL, NULL) >= 0) {
-		    path->soft = H5T_soft_g[j].func;
+		path->cdata.command = H5T_CONV_INIT;
+		if ((H5T_soft_g[j].func)(src_id, dst_id, &(path->cdata),
+					 0, NULL, NULL) >= 0) {
+		    path->func = H5T_soft_g[j].func;
+		} else {
+		    H5ECLEAR;
+		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 		}
 		H5A_dec_ref(src_id);
 		H5A_dec_ref(dst_id);
-		H5ECLEAR;
 	    }
 	} else {
 	    /*
 	     * If the soft function didn't change then make sure it
 	     * recalculates its private data at the next opportunity.
 	     */
-	    path->cdata->recalc = TRUE;
+	    path->cdata.recalc = TRUE;
 	}
     }
 
@@ -2732,12 +2766,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
     FUNC_ENTER(H5T_equal, 0);
 
-    /* check args */
-    assert(dt1);
-    assert(dt2);
-
     /* the easy case */
     if (dt1 == dt2) HGOTO_DONE(0);
+    assert(dt1);
+    assert(dt2);
 
     /* compare */
     if (dt1->type < dt2->type) HGOTO_DONE(-1);
@@ -2780,7 +2812,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    }
 	}
 
-#ifndef NDEBUG
+#ifdef H5T_DEBUG
 	/* I don't quite trust the code above yet :-)  --RPM */
 	for (i=0; i<dt1->u.compnd.nmembs-1; i++) {
 	    assert(HDstrcmp(dt1->u.compnd.memb[idx1[i]].name,
@@ -2978,11 +3010,6 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_cdata_t **pcdata)
 
     FUNC_ENTER(H5T_find, NULL);
 
-    /* Check args */
-    assert(src);
-    assert(dst);
-    assert (pcdata);
-
     /* No-op case */
     if (0 == H5T_cmp(src, dst)) {
 	*pcdata = &noop_cdata;
@@ -2991,17 +3018,13 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_cdata_t **pcdata)
     
 
     /* Find it */
-    if (NULL == (path = H5T_path_find(src, dst, TRUE))) {
+    if (NULL == (path = H5T_path_find(src, dst, TRUE, NULL))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 		      "unable to create conversion path");
     }
 
-    if (path->hard) {
-	ret_value = path->hard;
-	*pcdata = NULL;
-    } else if (path->soft) {
-	ret_value = path->soft;
-	*pcdata = path->cdata;
+    if ((ret_value=path->func)) {
+	*pcdata = &(path->cdata);
     } else {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
 		      "no conversion function for that path");
@@ -3015,7 +3038,8 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_cdata_t **pcdata)
  *
  * Purpose:	Finds the path which converts type SRC_ID to type DST_ID.  If
  *		the path isn't found and CREATE is non-zero then a new path
- *		is created.
+ *		is created.  If FUNC is non-null then it is registered as the
+ *		hard function for that path.
  *
  * Return:	Success:	Pointer to the path, valid until the path
  *				database is modified.
@@ -3030,7 +3054,8 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_cdata_t **pcdata)
  *-------------------------------------------------------------------------
  */
 H5T_path_t *
-H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create)
+H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
+	      H5T_conv_t func)
 {
     intn	lt = 0;			/*left edge (inclusive)		*/
     intn	rt = H5T_npath_g;	/*right edge (exclusive)	*/
@@ -3081,26 +3106,51 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create)
 	HDmemset(path, 0, sizeof(H5T_path_t));
 	path->src = H5T_copy(src);
 	path->dst = H5T_copy(dst);
-	path->cdata = H5MM_xcalloc (1, sizeof(H5T_cdata_t));
 
-	/* Locate soft function */
-	for (i=H5T_nsoft_g-1; i>=0 && !path->soft; --i) {
-	    if (src->type!=H5T_soft_g[i].src ||
-		dst->type!=H5T_soft_g[i].dst) {
-		continue;
-	    }
+	/* Associate a function with the path if possible */
+	if (func) {
+	    path->func = func;
+	    path->is_hard = TRUE;
+	    path->cdata.command = H5T_CONV_INIT;
 	    if ((src_id=H5A_register(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
 		(dst_id=H5A_register(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
 		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
 			      "unable to register conv types for query");
 	    }
-	    if ((H5T_soft_g[i].func) (src_id, dst_id, path->cdata,
-				      H5T_CONV_INIT, NULL, NULL) >= 0) {
-		path->soft = H5T_soft_g[i].func;
+	    if ((func)(src_id, dst_id, &(path->cdata), 0, NULL, NULL)<0) {
+#ifdef H5T_DEBUG
+		fprintf (stderr, "HDF5-DIAG: conversion function init "
+			 "failed\n");
+#endif
+		H5ECLEAR; /*ignore the failure*/
 	    }
 	    H5A_dec_ref(src_id);
 	    H5A_dec_ref(dst_id);
-	    H5ECLEAR;
+	} else {
+	    /* Locate a soft function */
+	    for (i=H5T_nsoft_g-1; i>=0 && !path->func; --i) {
+		if (src->type!=H5T_soft_g[i].src ||
+		    dst->type!=H5T_soft_g[i].dst) {
+		    continue;
+		}
+		if ((src_id=H5A_register(H5_DATATYPE,
+					 H5T_copy(path->src))) < 0 ||
+		    (dst_id=H5A_register(H5_DATATYPE,
+					 H5T_copy(path->dst))) < 0) {
+		    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
+				  "unable to register conv types for query");
+		}
+		path->cdata.command = H5T_CONV_INIT;
+		if ((H5T_soft_g[i].func) (src_id, dst_id, &(path->cdata),
+					  H5T_CONV_INIT, NULL, NULL) < 0) {
+		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
+		    H5ECLEAR; /*ignore the error*/
+		} else {
+		    path->func = H5T_soft_g[i].func;
+		}
+		H5A_dec_ref(src_id);
+		H5A_dec_ref(dst_id);
+	    }
 	}
     }
     FUNC_LEAVE(path);

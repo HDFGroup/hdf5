@@ -16,6 +16,13 @@
 #ifndef _H5Tpkg_H
 #define _H5Tpkg_H
 
+/*
+ * Define this to enable debugging.
+ */
+#ifdef NDEBUG
+#  undef H5T_DEBUG
+#endif
+
 #include <H5Tprivate.h>
 
 typedef struct H5T_atomic_t {
@@ -76,9 +83,9 @@ typedef struct H5T_member_t {
 typedef struct H5T_path_t {
     H5T_t       *src;                   /*source data type ID                */
     H5T_t       *dst;                   /*destination data type ID           */
-    H5T_conv_t  hard;                   /*hard conversion function or null   */
-    H5T_conv_t  soft;                   /*soft conversion function or null   */
-    H5T_cdata_t	*cdata;			/*extra conversion data		     */
+    H5T_conv_t	func;			/*data conversion function	     */
+    hbool_t	is_hard;		/*is it a hard function?	     */
+    H5T_cdata_t	cdata;			/*data for this function	     */
 } H5T_path_t;
 
 /* The master list of soft conversion functions */
@@ -90,7 +97,7 @@ typedef struct H5T_soft_t {
 
 /* Function prototypes for H5T package scope */
 H5T_path_t *H5T_path_find (const H5T_t *src, const H5T_t *dst, 
-                           hbool_t create);
+                           hbool_t create, H5T_conv_t func);
 
 /* Conversion functions */
 herr_t H5T_conv_noop (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,

@@ -23,9 +23,6 @@
 #define HOFFSET(S,M)    ((const char*)&S.M-(const char*)&S)
 #define HPOFFSET(P,M)   ((const char*)&(P->M)-(const char*)P)
 
-#define H5T_CONV_INIT	0
-#define H5T_CONV_FREE	1
-
 /* These are the various classes of data types */
 typedef enum H5T_class_t {
     H5T_NO_CLASS         = -1,  /*error                                      */
@@ -102,10 +99,20 @@ typedef enum H5T_bkg_t {
     H5T_BKG_YES		= 2	/*init bkg buf with data before conversion   */
 } H5T_bkg_t;
 
+/* Commands sent to conversion functions */
+typedef enum H5T_cmd_t {
+    H5T_CONV_INIT	= 0,	/*query and/or initialize private data	     */
+    H5T_CONV_CONV	= 1, 	/*convert data from source to dest data type */
+    H5T_CONV_FREE	= 2	/*function is being removed from path	     */
+} H5T_cmd_t;
+
 /* Type conversion client data */
 typedef struct H5T_cdata_t {
+    H5T_cmd_t		command;/*what should the conversion function do?    */
     H5T_bkg_t		need_bkg;/*is the background buffer needed?	     */
     hbool_t		recalc;	/*recalculate private data		     */
+    unsigned long	ncalls;	/*number of calls to conversion function     */
+    unsigned long	nelmts; /*total number of data points converted	     */
     void		*priv;	/*private data				     */
 } H5T_cdata_t;
 
