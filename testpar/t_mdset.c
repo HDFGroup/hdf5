@@ -40,17 +40,12 @@ void multiple_dset_write(char *filename, int ndatasets)
 
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
-    chunk_origin [0] = mpi_rank * (SIZE / mpi_size);
-    chunk_origin [1] = 0;
-    chunk_dims [0] = SIZE / mpi_size;
-    chunk_dims [1] = SIZE;
-
-    for (i = 0; i < DIM; i++)
-	file_dims [i] = SIZE;
-
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
     H5Pclose (plist);
+
+    /* decide the hyperslab according to process number. */
+    get_slab(chunk_origin, chunk_dims, count, file_dims);  
 
     memspace = H5Screate_simple (DIM, chunk_dims, NULL);
     filespace = H5Screate_simple (DIM, file_dims, NULL);
@@ -110,16 +105,11 @@ void compact_dataset(char *filename)
 
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
-    chunk_origin [0] = mpi_rank * (SIZE / mpi_size);
-    chunk_origin [1] = 0;
-    chunk_dims [0] = SIZE / mpi_size;
-    chunk_dims [1] = SIZE;
-
-    for (i = 0; i < DIM; i++)
-         file_dims [i] = SIZE;
-
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+
+    /* decide the hyperslab according to process number. */
+    get_slab(chunk_origin, chunk_dims, count, file_dims);  
 
     /* Define data space */
     memspace = H5Screate_simple (DIM, chunk_dims, NULL);
