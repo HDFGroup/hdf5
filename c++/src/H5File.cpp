@@ -171,6 +171,19 @@ FileAccPropList H5File::getAccessPlist() const
    }
 }
 
+// Retrieves the file size of the HDF5 file. This function 
+// is called after an existing file is opened in order
+// to learn the true size of the underlying file.
+//  (Raymond Lu)
+haddr_t H5File::getFileSize(void) const
+{
+   haddr_t ret_value = H5Fget_filesize(id);
+   if( ret_value < 0 )
+   {
+      throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
+   }
+}
+
 // Calls the C API H5Fclose to close this file.  Used by IdComponent::reset
 void H5File::p_close() const
 {
