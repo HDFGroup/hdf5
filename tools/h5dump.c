@@ -211,6 +211,91 @@ static void     print_enum(hid_t type);
 /* external functions */
 extern int      print_data(hid_t, hid_t, int);
 
+/* a structure for handling the order command-line parameters come in */
+struct handler_t {
+    void (*func)(hid_t, const char *);
+    const char *obj;
+};
+
+/*
+ * Command-line options: The user can specify short or long-named
+ * parameters. The long-named ones can be partially spelled. When
+ * adding more, make sure that they don't clash with each other.
+ */
+static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:";
+static struct long_options l_opts[] = {
+	{ "help", no_arg, 'h' },
+	{ "hel", no_arg, 'h' },
+	{ "boot-block", no_arg, 'B' },
+	{ "boot-bloc", no_arg, 'B' },
+	{ "boot-blo", no_arg, 'B' },
+	{ "boot-bl", no_arg, 'B' },
+	{ "boot-b", no_arg, 'B' },
+	{ "boot", no_arg, 'B' },
+	{ "boo", no_arg, 'B' },
+	{ "bo", no_arg, 'B' },
+	{ "header", no_arg, 'H' },
+	{ "heade", no_arg, 'H' },
+	{ "head", no_arg, 'H' },
+	{ "hea", no_arg, 'H' },
+	{ "he", no_arg, 'H' },
+	{ "object-ids", no_arg, 'i' },
+	{ "object-id", no_arg, 'i' },
+	{ "object-i", no_arg, 'i' },
+	{ "object", no_arg, 'i' },
+	{ "objec", no_arg, 'i' },
+	{ "obje", no_arg, 'i' },
+	{ "obj", no_arg, 'i' },
+	{ "ob", no_arg, 'i' },
+	{ "version", no_arg, 'V' },
+	{ "versio", no_arg, 'V' },
+	{ "versi", no_arg, 'V' },
+	{ "vers", no_arg, 'V' },
+	{ "ver", no_arg, 'V' },
+	{ "ve", no_arg, 'V' },
+	{ "attribute", require_arg, 'a' },
+	{ "attribut", require_arg, 'a' },
+	{ "attribu", require_arg, 'a' },
+	{ "attrib", require_arg, 'a' },
+	{ "attri", require_arg, 'a' },
+	{ "attr", require_arg, 'a' },
+	{ "att", require_arg, 'a' },
+	{ "at", require_arg, 'a' },
+	{ "dataset", require_arg, 'd' },
+	{ "datase", require_arg, 'd' },
+	{ "datas", require_arg, 'd' },
+	{ "group", require_arg, 'g' },
+	{ "grou", require_arg, 'g' },
+	{ "gro", require_arg, 'g' },
+	{ "gr", require_arg, 'g' },
+	{ "soft-link", require_arg, 'l' },
+	{ "soft-lin", require_arg, 'l' },
+	{ "soft-li", require_arg, 'l' },
+	{ "soft-l", require_arg, 'l' },
+	{ "soft", require_arg, 'l' },
+	{ "sof", require_arg, 'l' },
+	{ "so", require_arg, 'l' },
+	{ "datatype", require_arg, 't' },
+	{ "datatyp", require_arg, 't' },
+	{ "dataty", require_arg, 't' },
+	{ "datat", require_arg, 't' },
+	{ "width", require_arg, 'w' },
+	{ "widt", require_arg, 'w' },
+	{ "wid", require_arg, 'w' },
+	{ "wi", require_arg, 'w' },
+	{ "xml", no_arg, 'x' },
+	{ "xm", no_arg, 'x' },
+	{ "xml-dtd", require_arg, 'D' },
+	{ "xml-dt", require_arg, 'D' },
+	{ "xml-d", require_arg, 'D' },
+	{ "output", require_arg, 'o' },
+	{ "outpu", require_arg, 'o' },
+	{ "outp", require_arg, 'o' },
+	{ "out", require_arg, 'o' },
+	{ "ou", require_arg, 'o' },
+	{ NULL, 0, '\0' }
+};
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -1315,7 +1400,7 @@ dump_data(hid_t obj_id, int obj_data)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------
+ *-------------------------------------------------------------------------
  */
 static int
 set_output_file(const char *fname)
@@ -1331,12 +1416,40 @@ set_output_file(const char *fname)
     return -1;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    handle_attributes
+ *
+ * Purpose:     Handle the attributes from the command.
+ *
+ * Return:      void
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 9. January 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 handle_attributes(hid_t fid, const char *attr)
 {
     dump_selected_attr(fid, attr);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    handle_datasets
+ *
+ * Purpose:     Handle the datasets from the command.
+ *
+ * Return:      void
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 9. January 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 handle_datasets(hid_t fid, const char *dset)
 {
@@ -1384,6 +1497,20 @@ handle_datasets(hid_t fid, const char *dset)
     }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    handle_groups
+ *
+ * Purpose:     Handle the groups from the command.
+ *
+ * Return:      void
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 9. January 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 handle_groups(hid_t fid, const char *group)
 {
@@ -1408,6 +1535,20 @@ handle_groups(hid_t fid, const char *group)
     }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    handle_links
+ *
+ * Purpose:     Handle the links from the command.
+ *
+ * Return:      void
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 9. January 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 handle_links(hid_t fid, const char *link)
 {
@@ -1449,6 +1590,20 @@ handle_links(hid_t fid, const char *link)
     }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    handle_datatypes
+ *
+ * Purpose:     Handle the datatypes from the command.
+ *
+ * Return:      void
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 9. January 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 handle_datatypes(hid_t fid, const char *type)
 {
@@ -1502,90 +1657,6 @@ handle_datatypes(hid_t fid, const char *type)
     }
 }
 
-/*
- * Command-line options: The user can specify short or long-named
- * parameters. The long-named ones can be partially spelled. When
- * adding more, make sure that they don't clash with each other.
- */
-static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:";
-static struct long_options l_opts[] = {
-	{ "help", no_arg, 'h' },
-	{ "hel", no_arg, 'h' },
-	{ "boot-block", no_arg, 'B' },
-	{ "boot-bloc", no_arg, 'B' },
-	{ "boot-blo", no_arg, 'B' },
-	{ "boot-bl", no_arg, 'B' },
-	{ "boot-b", no_arg, 'B' },
-	{ "boot", no_arg, 'B' },
-	{ "boo", no_arg, 'B' },
-	{ "bo", no_arg, 'B' },
-	{ "header", no_arg, 'H' },
-	{ "heade", no_arg, 'H' },
-	{ "head", no_arg, 'H' },
-	{ "hea", no_arg, 'H' },
-	{ "he", no_arg, 'H' },
-	{ "object-ids", no_arg, 'i' },
-	{ "object-id", no_arg, 'i' },
-	{ "object-i", no_arg, 'i' },
-	{ "object", no_arg, 'i' },
-	{ "objec", no_arg, 'i' },
-	{ "obje", no_arg, 'i' },
-	{ "obj", no_arg, 'i' },
-	{ "ob", no_arg, 'i' },
-	{ "version", no_arg, 'V' },
-	{ "versio", no_arg, 'V' },
-	{ "versi", no_arg, 'V' },
-	{ "vers", no_arg, 'V' },
-	{ "ver", no_arg, 'V' },
-	{ "ve", no_arg, 'V' },
-	{ "attribute", require_arg, 'a' },
-	{ "attribut", require_arg, 'a' },
-	{ "attribu", require_arg, 'a' },
-	{ "attrib", require_arg, 'a' },
-	{ "attri", require_arg, 'a' },
-	{ "attr", require_arg, 'a' },
-	{ "att", require_arg, 'a' },
-	{ "at", require_arg, 'a' },
-	{ "dataset", require_arg, 'd' },
-	{ "datase", require_arg, 'd' },
-	{ "datas", require_arg, 'd' },
-	{ "group", require_arg, 'g' },
-	{ "grou", require_arg, 'g' },
-	{ "gro", require_arg, 'g' },
-	{ "gr", require_arg, 'g' },
-	{ "soft-link", require_arg, 'l' },
-	{ "soft-lin", require_arg, 'l' },
-	{ "soft-li", require_arg, 'l' },
-	{ "soft-l", require_arg, 'l' },
-	{ "soft", require_arg, 'l' },
-	{ "sof", require_arg, 'l' },
-	{ "so", require_arg, 'l' },
-	{ "datatype", require_arg, 't' },
-	{ "datatyp", require_arg, 't' },
-	{ "dataty", require_arg, 't' },
-	{ "datat", require_arg, 't' },
-	{ "width", require_arg, 'w' },
-	{ "widt", require_arg, 'w' },
-	{ "wid", require_arg, 'w' },
-	{ "wi", require_arg, 'w' },
-	{ "xml", no_arg, 'x' },
-	{ "xm", no_arg, 'x' },
-	{ "xml-dtd", require_arg, 'D' },
-	{ "xml-dt", require_arg, 'D' },
-	{ "xml-d", require_arg, 'D' },
-	{ "output", require_arg, 'o' },
-	{ "outpu", require_arg, 'o' },
-	{ "outp", require_arg, 'o' },
-	{ "out", require_arg, 'o' },
-	{ "ou", require_arg, 'o' },
-	{ NULL, 0, '\0' }
-};
-
-struct handler_t {
-    void (*func)(hid_t, const char *);
-    const char *obj;
-};
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1599,6 +1670,13 @@ struct handler_t {
  * Modifications:
  *        Albert Cheng, 2000/09/30
  *        Add the -o option--output file for datasets raw data
+ *
+ *        Bill Wendling
+ *        Wednesday, 10. January 2001
+ *        Modified the way command line parameters are interpreted. They go
+ *        through one function call now (get_option). Also, removed the
+ *        `strcpy(prefix, "")' code which is bad since prefix isn't
+ *        initialized at this point...
  *
  *-------------------------------------------------------------------------
  */
@@ -1765,10 +1843,10 @@ main(int argc, const char *argv[])
 
     /* find all shared objects */
     H5Giterate(fid, "/", NULL, find_objs, (void *)&info);
-    strcpy(prefix, "");
+    prefix = NULL;
 
     /* does there exist unamed committed data type */
-    for ( i = 0; i < type_table->nobjs; i++)
+    for (i = 0; i < type_table->nobjs; i++)
         if (type_table->objs[i].recorded == 0)
             unamedtype = 1;
 
