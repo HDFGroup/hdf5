@@ -188,6 +188,12 @@ CONVERT tcompound2.h5
 # tests for converting H5 objects from many different pathways.
 CONVERT tmany.h5
 
+# tests for converting H5 string objects.
+CONVERT tstr.h5
+
+# tests for converting more H5 string objects.
+CONVERT tstr2.h5
+
 #
 # The test for conversion are the same as above with the only difference
 # being that the HDF4 filenames are given explicitly.
@@ -205,14 +211,19 @@ CONVERT tloop.h5 tloop.hdf
 CONVERT tdset2.h5 tdset2.hdf
 CONVERT tcompound2.h5 tcompound2.hdf
 CONVERT tmany.h5 tmany.hdf
+CONVERT tstr.h5 tstr.hdf
+CONVERT tstr2.h5 tstr2.hdf
+
 #
 # Again, the test for conversion are the same as the first set of test.
 # Here, multiple conversion are done on HDF5 files at one time.
 #
+
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
 CONVERT -m tgroup.h5 tdset.h5 tattr.h5 tslink.h5 thlink.h5
 CONVERT -m tcompound.h5 tall.h5 tloop.h5
 CONVERT -m tdset2.h5 tcompound2.h5 tmany.h5
+CONVERT -m tstr.h5 tstr2.h5
 
 if test "0" = "$nerrors"; then
 	echo "All h5toh4 tests passed."
