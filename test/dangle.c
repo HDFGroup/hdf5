@@ -26,6 +26,8 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define MAX_DANGLE      1000
+
 #define DSETNAME        "Dataset"
 #define GROUPNAME       "Group"
 #define TYPENAME        "Type"
@@ -57,6 +59,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
     hid_t fapl; /* File access property list */
     hid_t dsid; /* Dataset ID */
     hid_t sid;  /* Dataspace ID */
+    unsigned u; /* Local index variable */
 
     TESTING("    dangling dataset IDs");
 
@@ -90,14 +93,14 @@ test_dangle_dataset(H5F_close_degree_t degree)
             TEST_ERROR;
     } H5E_END_TRY;
 
-    if((dsid = H5Dopen (fid, DSETNAME))<0)
-        TEST_ERROR;
-
-    if((dsid = H5Dopen (fid, DSETNAME))<0)
-        TEST_ERROR;
-
     if(H5Sclose(sid)<0)
         TEST_ERROR;
+
+    /* Leave open a _lot_ of objects */
+    for(u=0; u<MAX_DANGLE; u++) {
+        if((dsid = H5Dopen (fid, DSETNAME))<0)
+            TEST_ERROR;
+    } /* end for */
 
     if(degree==H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {
@@ -153,6 +156,7 @@ test_dangle_group(H5F_close_degree_t degree)
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t gid;  /* Group ID */
+    unsigned u; /* Local index variable */
 
     TESTING("    dangling group IDs");
 
@@ -183,8 +187,11 @@ test_dangle_group(H5F_close_degree_t degree)
             TEST_ERROR;
     } H5E_END_TRY;
 
-    if((gid = H5Gopen (fid, GROUPNAME))<0)
-        TEST_ERROR;
+    /* Leave open a _lot_ of objects */
+    for(u=0; u<MAX_DANGLE; u++) {
+        if((gid = H5Gopen (fid, GROUPNAME))<0)
+            TEST_ERROR;
+    } /* end for */
 
     if((gid = H5Gopen (fid, GROUPNAME))<0)
         TEST_ERROR;
@@ -243,6 +250,7 @@ test_dangle_datatype(H5F_close_degree_t degree)
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t tid;  /* Datatype ID */
+    unsigned u; /* Local index variable */
 
     TESTING("    dangling named datatype IDs");
 
@@ -280,11 +288,11 @@ test_dangle_datatype(H5F_close_degree_t degree)
     if(H5Tclose(tid)<0)
         TEST_ERROR;
 
-    if((tid = H5Topen (fid, TYPENAME))<0)
-        TEST_ERROR;
-
-    if((tid = H5Topen (fid, TYPENAME))<0)
-        TEST_ERROR;
+    /* Leave open a _lot_ of objects */
+    for(u=0; u<MAX_DANGLE; u++) {
+        if((tid = H5Topen (fid, TYPENAME))<0)
+            TEST_ERROR;
+    } /* end for */
 
     if(degree==H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {
@@ -342,6 +350,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
     hid_t dsid; /* Dataset ID */
     hid_t sid;  /* Dataspace ID */
     hid_t aid;  /* Attribute ID */
+    unsigned u; /* Local index variable */
 
     TESTING("    dangling attribute IDs");
 
@@ -382,16 +391,16 @@ test_dangle_attribute(H5F_close_degree_t degree)
             TEST_ERROR;
     } H5E_END_TRY;
 
-    if((aid = H5Aopen_name (dsid, ATTRNAME))<0)
+    if(H5Sclose(sid)<0)
         TEST_ERROR;
 
-    if((aid = H5Aopen_name (dsid, ATTRNAME))<0)
-        TEST_ERROR;
+    /* Leave open a _lot_ of objects */
+    for(u=0; u<MAX_DANGLE; u++) {
+        if((aid = H5Aopen_name (dsid, ATTRNAME))<0)
+            TEST_ERROR;
+    } /* end for */
 
     if(H5Dclose(dsid)<0)
-        TEST_ERROR;
-
-    if(H5Sclose(sid)<0)
         TEST_ERROR;
 
     if(degree==H5F_CLOSE_SEMI) {
