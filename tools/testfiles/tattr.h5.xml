@@ -17,7 +17,7 @@ Expected output for 'h5dump --xml tattr.h5'
       </hdf5:DataType>
       <hdf5:Data>
          <hdf5:DataFromFile>
-         97 116 116 114 105 98 117 116 101 32 111 102 32 114 111 111 116 32 103 
+         97 116 116 114 105 98 117 116 101 32 111 102 32 114 111 111 116 32 103
          114 111 117 112 0
          </hdf5:DataFromFile>
       </hdf5:Data>

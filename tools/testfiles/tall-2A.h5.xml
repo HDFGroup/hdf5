@@ -35,7 +35,7 @@ Expected output for 'h5dump --xml -A tall.h5'
       </hdf5:DataType>
       <hdf5:Data>
          <hdf5:DataFromFile>
-         0 1 
+         0 1
          2 3
          </hdf5:DataFromFile>
       </hdf5:Data>
@@ -75,7 +75,7 @@ Expected output for 'h5dump --xml -A tall.h5'
                </hdf5:DataType>
                <hdf5:Data>
                   <hdf5:DataFromFile>
-                  49 115 116 32 97 116 116 114 105 98 117 116 101 32 111 102 32 
+                  49 115 116 32 97 116 116 114 105 98 117 116 101 32 111 102 32
                   100 115 101 116 49 46 49 46 49 0
                   </hdf5:DataFromFile>
                </hdf5:Data>
@@ -93,7 +93,7 @@ Expected output for 'h5dump --xml -A tall.h5'
                </hdf5:DataType>
                <hdf5:Data>
                   <hdf5:DataFromFile>
-                  50 110 100 32 97 116 116 114 105 98 117 116 101 32 111 102 32 
+                  50 110 100 32 97 116 116 114 105 98 117 116 101 32 111 102 32
                   100 115 101 116 49 46 49 46 49 0
                   </hdf5:DataFromFile>
                </hdf5:Data>

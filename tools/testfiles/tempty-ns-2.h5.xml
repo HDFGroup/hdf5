@@ -30,7 +30,7 @@ Expected output for 'h5dump --xml --xml-ns=thing: tempty.h5'
 <!-- Note: format of VL data not specified -->
       <thing:Data>
          <thing:DataFromFile>
-                    
+                
          </thing:DataFromFile>
       </thing:Data>
    </thing:Dataset>
@@ -110,7 +110,7 @@ Expected output for 'h5dump --xml --xml-ns=thing: tempty.h5'
       </thing:DataType>
       <thing:Data>
          <thing:DataFromFile>
-          0 0 0 0   0 0 0 0   0 0 0 0   0 0 0 0 
+          0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0
          </thing:DataFromFile>
       </thing:Data>
    </thing:Dataset>

@@ -8,11 +8,7 @@ Expected output for 'h5dump --xml tvlstr.h5'
       <hdf5:Dataspace>
          <hdf5:ScalarDataspace />
       </hdf5:Dataspace>
-      <hdf5:DataType>
-         <hdf5:AtomicType>
-            <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
-         </hdf5:AtomicType>
-      </hdf5:DataType>
+      <hdf5:NamedDataTypePtr OBJ-XID="xid_1576-0" H5Path="/vl_string_type" />
       <hdf5:Data>
          <hdf5:DataFromFile>
          "This is the string for the attribute"

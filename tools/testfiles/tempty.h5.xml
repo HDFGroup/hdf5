@@ -30,7 +30,7 @@ Expected output for 'h5dump --xml tempty.h5'
 <!-- Note: format of VL data not specified -->
       <hdf5:Data>
          <hdf5:DataFromFile>
-                    
+                
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
@@ -110,7 +110,7 @@ Expected output for 'h5dump --xml tempty.h5'
       </hdf5:DataType>
       <hdf5:Data>
          <hdf5:DataFromFile>
-          0 0 0 0   0 0 0 0   0 0 0 0   0 0 0 0 
+          0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>

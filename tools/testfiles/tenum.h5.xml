@@ -64,7 +64,7 @@ Expected output for 'h5dump --xml tenum.h5'
       <hdf5:NamedDataTypePtr OBJ-XID="xid_744-0" H5Path="/enum normal" />
       <hdf5:Data>
          <hdf5:DataFromFile>
-         RED GREEN BLUE GREEN WHITE WHITE BLACK GREEN BLUE RED RED BLUE GREEN 
+         RED GREEN BLUE GREEN WHITE WHITE BLACK GREEN BLUE RED RED BLUE GREEN
          BLACK WHITE RED WHITE GREEN GREEN BLUE
          </hdf5:DataFromFile>
       </hdf5:Data>

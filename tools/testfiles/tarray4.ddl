@@ -7,8 +7,8 @@ GROUP "/" {
       DATATYPE  H5T_ARRAY { [4] H5T_COMPOUND {
          H5T_STD_I32LE "i";
          H5T_IEEE_F32LE "f";
-      } }  
-      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) } 
+      } }
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
          [ {
                0,
@@ -62,7 +62,7 @@ GROUP "/" {
                33,
                10.5
             } ]
-      } 
-   } 
-} 
-} 
+      }
+   }
+}
+}
