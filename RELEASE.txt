@@ -104,6 +104,9 @@ New Features
     * Verified correct operation of library on Solaris 2.8 in both 64-bit and
       32-bit compilation modes.  See INSTALL document for instructions on
       compiling the distribution with 64-bit support.
+    * Modified the Pablo build procedure to permit building of the instrumented
+      library to link either with the Trace libraries as before or with the
+      Pablo Performance Caputure Facility.
 
 Platforms Tested
 ================
