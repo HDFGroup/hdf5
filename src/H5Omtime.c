@@ -78,6 +78,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
     int	i;
     struct tm	tm;
     static int	ncalls=0;
+    void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_mtime_decode, NULL);
 
@@ -91,10 +92,8 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 
     /* decode */
     for (i=0; i<14; i++) {
-	if (!HDisdigit(p[i])) {
-	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-			  "badly formatted modification time message");
-	}
+	if (!HDisdigit(p[i]))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message");
     }
 
     /*
@@ -112,10 +111,8 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
     tm.tm_min = (p[10]-'0')*10 + (p[11]-'0');
     tm.tm_sec = (p[12]-'0')*10 + (p[13]-'0');
     tm.tm_isdst = -1; /*figure it out*/
-    if ((time_t)-1==(the_time=HDmktime(&tm))) {
-	HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-		      "badly formatted modification time message");
-    }
+    if ((time_t)-1==(the_time=HDmktime(&tm)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message");
 
 #if defined(H5_HAVE_TM_GMTOFF)
     /* FreeBSD, OSF 4.0 */
@@ -130,20 +127,16 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
     /* Irix5.3 */
     {
         struct timezone tz;
-        if (HDBSDgettimeofday(NULL, &tz)<0) {
-            HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-                          "unable to obtain local timezone information");
-        }
+        if (HDBSDgettimeofday(NULL, &tz)<0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to obtain local timezone information");
         the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
     }
 #elif defined(H5_HAVE_GETTIMEOFDAY) && defined(H5_HAVE_STRUCT_TIMEZONE)
     {
 	struct timezone tz;
 
-	if (HDgettimeofday(NULL, &tz) < 0) {
-	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-			  "unable to obtain local timezone information");
-	}
+	if (HDgettimeofday(NULL, &tz) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to obtain local timezone information");
 
 	the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
     }
@@ -169,18 +162,19 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
      */
 
     /* Irix64 */
-    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-		  "unable to obtain local timezone information");
+    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to obtain local timezone information");
 #endif
     
     /* The return value */
-    if (NULL==(mesg = H5FL_ALLOC(time_t,1))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (NULL==(mesg = H5FL_ALLOC(time_t,1)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     *mesg = the_time;
 
-    FUNC_LEAVE((void*)mesg);
+    /* Set return value */
+    ret_value=mesg;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -245,21 +239,25 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     time_t		*dest = (time_t *) _dest;
+    void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_mtime_copy, NULL);
 
     /* check args */
     assert(mesg);
-    if (!dest && NULL==(dest = H5FL_ALLOC(time_t,0))) {
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (!dest && NULL==(dest = H5FL_ALLOC(time_t,0)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     
     /* copy */
     *dest = *mesg;
 
-    FUNC_LEAVE((void *) dest);
+    /* Set return value */
+    ret_value=dest;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_mtime_size
@@ -355,7 +353,6 @@ H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 
     /* debug */
     tm = HDlocaltime(mesg);
-
     
     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,

@@ -77,7 +77,8 @@ H5FL_DEFINE_STATIC(H5O_stab_t);
 static void *
 H5O_stab_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
-    H5O_stab_t             *stab;
+    H5O_stab_t          *stab=NULL;
+    void                *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_stab_decode, NULL);
 
@@ -87,15 +88,23 @@ H5O_stab_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if (NULL==(stab = H5FL_ALLOC(H5O_stab_t,1))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (NULL==(stab = H5FL_ALLOC(H5O_stab_t,1)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     H5F_addr_decode(f, &p, &(stab->btree_addr));
     H5F_addr_decode(f, &p, &(stab->heap_addr));
 
-    FUNC_LEAVE(stab);
+    /* Set return value */
+    ret_value=stab;
+
+done:
+    if(ret_value==NULL) {
+        if(stab!=NULL)
+            H5FL_FREE(H5O_stab_t,stab);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_stab_encode
@@ -130,6 +139,7 @@ H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_stab_fast
@@ -153,7 +163,8 @@ H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 void *
 H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
 {
-    H5O_stab_t             *stab = NULL;
+    H5O_stab_t          *stab = NULL;
+    void                *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_stab_fast, NULL);
 
@@ -165,14 +176,19 @@ H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
         if (_mesg) {
 	    stab = (H5O_stab_t *) _mesg;
         } else if (NULL==(stab = H5FL_ALLOC(H5O_stab_t,1))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			   "memory allocation failed");
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	}
         stab->btree_addr = cache->stab.btree_addr;
         stab->heap_addr = cache->stab.heap_addr;
     }
-    FUNC_LEAVE(stab);
+
+    /* Set return value */
+    ret_value=stab;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_stab_copy
@@ -197,21 +213,25 @@ H5O_stab_copy(const void *_mesg, void *_dest)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     H5O_stab_t             *dest = (H5O_stab_t *) _dest;
+    void                *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_stab_copy, NULL);
 
     /* check args */
     assert(stab);
-    if (!dest && NULL==(dest = H5FL_ALLOC(H5O_stab_t,1))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (!dest && NULL==(dest = H5FL_ALLOC(H5O_stab_t,1)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     
     /* copy */
     *dest = *stab;
 
-    FUNC_LEAVE((void *) dest);
+    /* Set return value */
+    ret_value=dest;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_stab_size

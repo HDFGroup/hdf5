@@ -82,6 +82,7 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     H5O_layout_t           *mesg = NULL;
     int                    version;
     unsigned                   u;
+    void                   *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_layout_decode, NULL);
 
@@ -91,25 +92,18 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if (NULL==(mesg = H5FL_ALLOC(H5O_layout_t,1))) {
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (NULL==(mesg = H5FL_ALLOC(H5O_layout_t,1)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Version. 1 when space allocated; 2 when space allocation is delayed */
     version = *p++;
-    if (version!=H5O_LAYOUT_VERSION_1 && version!=H5O_LAYOUT_VERSION_2) {
-        HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
-		      "bad version number for layout message");
-    }
+    if (version!=H5O_LAYOUT_VERSION_1 && version!=H5O_LAYOUT_VERSION_2)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for layout message");
 
     /* Dimensionality */
     mesg->ndims = *p++;
-    if (mesg->ndims>H5O_LAYOUT_NDIMS) {
-        H5FL_FREE(H5O_layout_t,mesg);
-        HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
-		      "dimensionality is too large");
-    }
+    if (mesg->ndims>H5O_LAYOUT_NDIMS)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large");
 
     /* Layout class */
     mesg->type = *p++;
@@ -122,12 +116,20 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     H5F_addr_decode(f, &p, &(mesg->addr));
 
     /* Read the size */
-    for (u = 0; u < mesg->ndims; u++) {
+    for (u = 0; u < mesg->ndims; u++)
         UINT32DECODE(p, mesg->dim[u]);
-    }
 
-    FUNC_LEAVE(mesg);
+    /* Set return value */
+    ret_value=mesg;
+
+done:
+    if(ret_value==NULL) {
+        if(mesg)
+            H5FL_FREE(H5O_layout_t,mesg);
+    } /* end if */
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_encode
@@ -186,12 +188,12 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     H5F_addr_encode(f, &p, mesg->addr);
 
     /* dimension size */
-    for (u = 0; u < mesg->ndims; u++) {
+    for (u = 0; u < mesg->ndims; u++)
         UINT32ENCODE(p, mesg->dim[u]);
-    }
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_copy
@@ -215,21 +217,25 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     H5O_layout_t           *dest = (H5O_layout_t *) _dest;
+    void                   *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_layout_copy, NULL);
 
     /* check args */
     assert(mesg);
-    if (!dest && NULL==(dest=H5FL_ALLOC(H5O_layout_t,0))) {
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (!dest && NULL==(dest=H5FL_ALLOC(H5O_layout_t,0)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     
     /* copy */
     *dest = *mesg;
 
-    FUNC_LEAVE((void *) dest);
+    /* Set return value */
+    ret_value=dest;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_size
@@ -253,7 +259,7 @@ static size_t
 H5O_layout_size(H5F_t *f, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    size_t                  ret_value = 0;
+    size_t                  ret_value;
 
     FUNC_ENTER_NOAPI(H5O_layout_size, 0);
 

@@ -98,6 +98,7 @@ H5P_init(void)
     FUNC_LEAVE(SUCCEED);
 }
 
+
 /*--------------------------------------------------------------------------
 NAME
     H5P_xor_name -- Generate an xor'ed value for a string
@@ -129,6 +130,7 @@ H5P_xor_name(const char *s)
     FUNC_LEAVE(ret);
 }   /* end H5P_xor_name() */
 
+
 /*--------------------------------------------------------------------------
 NAME
     H5P_hash_name -- Generate a hash value for a string
@@ -150,6 +152,7 @@ H5P_hash_name(const char *s, unsigned hashsize)
     FUNC_LEAVE(H5P_xor_name(s)%hashsize);
 }   /* end H5P_hash_name() */
 
+
 /*--------------------------------------------------------------------------
 NAME
    H5P_init_interface -- Initialize interface-specific information
@@ -173,79 +176,81 @@ H5P_init_interface(void)
 
     /* Make certain IDs are initialized */
     if (ret_value < 0)
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize atom group");
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize atom group");
     
     /*
      * Initialize the Generic Property class & object groups.
      */
     if (H5I_init_group(H5I_GENPROP_CLS, H5I_GENPROPCLS_HASHSIZE, 0, (H5I_free_t)H5P_close_class) < 0)
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize atom group");
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize atom group");
     if (H5I_init_group(H5I_GENPROP_LST, H5I_GENPROPOBJ_HASHSIZE, 0, (H5I_free_t)H5P_close) < 0)
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize atom group");
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize atom group");
 
     /* Create root property list class */
 
     /* Allocate the root class */
     assert(H5P_CLS_NO_CLASS_g==(-1));
     if (NULL==(root_class = H5P_create_class (NULL,"none",H5P_NO_CLASS_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the root class */
     if ((H5P_CLS_NO_CLASS_g = H5I_register (H5I_GENPROP_CLS, root_class))<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Register the file creation and file access property classes */
 
     /* Allocate the file creation class */
     assert(H5P_CLS_FILE_CREATE_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"file create",H5P_FILE_CREATE_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the file creation class */
     if ((H5P_CLS_FILE_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the file access class */
     assert(H5P_CLS_FILE_ACCESS_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"file access",H5P_FILE_ACCESS_HASH_SIZE,1,H5F_acs_create,NULL,H5F_acs_copy,NULL,H5F_acs_close,NULL)))
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the file access class */
     if ((H5P_CLS_FILE_ACCESS_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Register the dataset creation and data xfer property classes */
 
     /* Allocate the dataset creation class */
     assert(H5P_CLS_DATASET_CREATE_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"dataset create",H5P_DATASET_CREATE_HASH_SIZE,1,NULL,NULL,H5D_crt_copy,NULL,H5D_crt_close,NULL)))
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the dataset creation class */
     if ((H5P_CLS_DATASET_CREATE_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the data xfer class */
     assert(H5P_CLS_DATASET_XFER_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"data xfer",H5P_DATASET_XFER_HASH_SIZE,1,H5D_xfer_create,NULL,H5D_xfer_copy,NULL,H5D_xfer_close,NULL)))
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the data xfer class */
     if ((H5P_CLS_DATASET_XFER_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the mount class */
     assert(H5P_CLS_MOUNT_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"file mount",H5P_MOUNT_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the mount class */
     if ((H5P_CLS_MOUNT_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5P_term_interface
@@ -605,7 +610,7 @@ H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
 	       int *stab/*out*/, int *shhdr/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Pget_version, FAIL);
     H5TRACE5("e","ixxxx",plist_id,boot,freelist,stab,shhdr);
@@ -621,23 +626,16 @@ H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
     /* Get values */
     if (boot)
         if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, boot) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                          "can't get boot version");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get boot version");
     if (freelist)
         if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, freelist) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                          "can't get free-space version");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space version");
     if (stab)
         if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, stab) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                          "can't get object directory version");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version");
     if (shhdr)
         if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, shhdr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                          "can't get shared-header version");
-
-    /* Set return value */
-    ret_value=SUCCEED;
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header version");
 
 done:
     FUNC_LEAVE(ret_value);
@@ -832,7 +830,7 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
 		  hsize_t *alignment/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_alignment, FAIL);
     H5TRACE3("e","ixx",fapl_id,threshold,alignment);
@@ -852,9 +850,6 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
     if (alignment)
         if(H5P_get(plist, H5F_ACS_ALIGN_NAME, alignment) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1003,7 +998,7 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
 {
     int btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_sym_k, FAIL);
     H5TRACE3("e","iIsIs",plist_id,ik,lk);
@@ -1027,9 +1022,6 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
     if (lk > 0)
         if(H5P_set(plist, H5F_CRT_SYM_LEAF_NAME, &lk) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for symbol table leaf nodes");
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1061,7 +1053,7 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
 {
     int btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_sym_k, FAIL);
     H5TRACE3("e","ixx",plist_id,ik,lk);
@@ -1083,9 +1075,6 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
     if (lk)
         if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, lk) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1127,7 +1116,7 @@ H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
 {
     int btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_sym_k, FAIL);
     H5TRACE3("e","iIsIu",plist_id,ik,lk);
@@ -1151,9 +1140,6 @@ H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
     if (lk > 0)
         if(H5P_set(plist, H5F_CRT_SYM_LEAF_NAME, &lk) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for symbol table leaf nodes");
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1185,7 +1171,7 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
 {
     int btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pget_sym_k, FAIL);
     H5TRACE3("e","ixx",plist_id,ik,lk);
@@ -1207,9 +1193,6 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
     if (lk)
         if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, lk) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1241,7 +1224,7 @@ H5Pset_istore_k(hid_t plist_id, int ik)
 {
     int btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_istore_k, FAIL);
     H5TRACE2("e","iIs",plist_id,ik);
@@ -1262,9 +1245,6 @@ H5Pset_istore_k(hid_t plist_id, int ik)
     btree_k[H5B_ISTORE_ID] = ik;
     if(H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree interanl nodes");
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1591,7 +1571,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     hsize_t		total, tmp;
     H5O_efl_t           efl;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_external, FAIL);
     H5TRACE4("e","isoh",plist_id,name,offset,size);
@@ -1644,9 +1624,6 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set external file list");
 
-    /* Set return value */
-    ret_value=SUCCEED;
-
 done:
     FUNC_LEAVE(ret_value);
 }
@@ -1678,7 +1655,7 @@ H5Pget_external_count(hid_t plist_id)
 {
     H5O_efl_t           efl;
     H5P_genplist_t *plist;      /* Property list pointer */
-    int ret_value=SUCCEED;      /* return value */
+    int ret_value;              /* return value */
 
     FUNC_ENTER_API(H5Pget_external_count, FAIL);
     H5TRACE1("Is","i",plist_id);
@@ -1695,7 +1672,7 @@ H5Pget_external_count(hid_t plist_id)
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
-    /* Return value */
+    /* Set return value */
     ret_value=efl.nused;
     
 done:
@@ -1962,7 +1939,7 @@ done:
 hid_t
 H5P_get_driver(H5P_genplist_t *plist)
 {
-    hid_t	ret_value=-1;
+    hid_t	ret_value=FAIL;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_get_driver, FAIL);
 
@@ -2017,16 +1994,17 @@ hid_t
 H5Pget_driver(hid_t plist_id)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    hid_t	ret_value=-1;
+    hid_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Pget_driver, FAIL);
     H5TRACE1("i","i",plist_id);
 
     if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     ret_value = H5P_get_driver(plist);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -2110,16 +2088,17 @@ void *
 H5Pget_driver_info(hid_t plist_id)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    void		*ret_value=NULL;
+    void	*ret_value;     /* Return value */
 
     FUNC_ENTER_API(H5Pget_driver_info, NULL);
 
     if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
 
     if((ret_value=H5P_get_driver_info(plist))==NULL)
-        HRETURN_ERROR(H5E_PLIST,H5E_CANTGET,NULL,"can't get driver info");
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTGET,NULL,"can't get driver info");
     
+done:
     FUNC_LEAVE(ret_value);
 } /* end H5Pget_driver_info() */
 
@@ -2462,7 +2441,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     size_t size;                /* Type conversion buffer size */
-    hsize_t ret_value=0;        /* Type conversion buffer size */
+    hsize_t ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Pget_buffer, 0);
     H5TRACE3("h","ixx",plist_id,tconv,bkg);
@@ -2572,7 +2551,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     size_t size;                /* Type conversion buffer size */
-    size_t ret_value=0;         /* Type conversion buffer size */
+    size_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(H5Pget_buffer, 0);
     H5TRACE3("z","ixx",plist_id,tconv,bkg);
@@ -3271,12 +3250,10 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 
 	/* Set the fill value */
         if (NULL==(fill.type=H5T_copy(type, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, 
-			"unable to copy data type");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
         fill.size = H5T_get_size(type);
         if (NULL==(fill.buf=H5MM_malloc(fill.size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, 
-			"memory allocation failed for fill value");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for fill value");
         HDmemcpy(fill.buf, value, fill.size);
     } else {
 	fill.type = fill.buf = NULL;
@@ -3323,7 +3300,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     void		*buf = NULL;		/*conversion buffer	*/
     void		*bkg = NULL;		/*conversion buffer	*/
     hid_t		src_id = -1;		/*source data type id	*/
-    herr_t		ret_value = FAIL;	/*return value		*/
+    herr_t              ret_value=SUCCEED;      /* Return value */
     H5P_genplist_t *plist;      /* Property list pointer */
     
     FUNC_ENTER_API(H5Pget_fill_value, FAIL);
@@ -3350,12 +3327,11 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
     if(fill.size == (size_t)-1)
-	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-		"fill value is undefined");
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "fill value is undefined");
 
     if(fill.size == 0) {
 	HDmemset(value, 0, H5T_get_size(type));
-   	HRETURN(SUCCEED);
+   	HGOTO_DONE(SUCCEED);
     } 	    
      /*
      * Can we convert between the source and destination data types?
@@ -3388,7 +3364,6 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
     if (buf!=value)
         HDmemcpy(value, buf, H5T_get_size(type));
-    ret_value = SUCCEED;
 
 done:
     if (buf!=value)
@@ -3481,7 +3456,7 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation proprety list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation proprety list");
 
     /* Get the plist structure */
     if(NULL == (plist = H5I_object(plist_id)))
@@ -3759,9 +3734,7 @@ H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref/*out*/)
 
     /* Get values */
     if (gc_ref)
-
         if(H5P_get(plist, H5F_ACS_GARBG_COLCT_REF_NAME, gc_ref) < 0)
-
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get garbage collect reference");
 
 done:
@@ -4508,7 +4481,7 @@ static H5P_genprop_t *
 H5P_dup_prop(H5P_genprop_t *oprop)
 {
     H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
-    H5P_genprop_t *ret_value=NULL;   /* Return value */
+    H5P_genprop_t *ret_value;        /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_dup_prop);
 
@@ -4601,7 +4574,7 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
     H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
 {
     H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
-    H5P_genprop_t *ret_value=NULL;   /* Return value */
+    H5P_genprop_t *ret_value;        /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_create_prop);
 
@@ -4691,7 +4664,6 @@ static herr_t
 H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop)
 {
     unsigned loc;                  /* Hash table location */
-    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_add_prop);
 
@@ -4706,10 +4678,7 @@ H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop)
     prop->next=hash[loc];
     hash[loc]=prop;
 
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5P_add_prop() */
 
 
@@ -4787,8 +4756,6 @@ H5P_find_prop(H5P_genprop_t *hash[], unsigned hashsize, const char *name)
 static herr_t
 H5P_free_prop(H5P_genprop_t *prop)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
     FUNC_ENTER_NOINIT(H5P_free_prop);
 
     assert(prop);
@@ -4803,10 +4770,7 @@ H5P_free_prop(H5P_genprop_t *prop)
     H5MM_xfree(prop->name);
     H5MM_xfree(prop);
 
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5P_free_prop() */
 
 
@@ -4835,7 +4799,6 @@ H5P_free_all_prop(H5P_genprop_t *hash[], unsigned hashsize, unsigned make_cb)
 {
     H5P_genprop_t *tprop, *next;/* Temporary pointer to properties */
     unsigned u;                    /* Local index variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_free_all_prop);
 
@@ -4860,10 +4823,7 @@ H5P_free_all_prop(H5P_genprop_t *hash[], unsigned hashsize, unsigned make_cb)
         } /* end while */
     } /* end for */
 
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5P_free_all_prop() */
 
 
@@ -4892,8 +4852,6 @@ done:
 static herr_t
 H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
     FUNC_ENTER_NOINIT(H5P_access_class);
 
     assert(pclass);
@@ -4943,10 +4901,7 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
         H5MM_xfree(pclass);
     } /* end if */
 
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5P_access_class() */
 
 
@@ -4992,7 +4947,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     )
 {
     H5P_genclass_t *pclass;         /* Property list class created */
-    H5P_genclass_t *ret_value=NULL;     /* return value */
+    H5P_genclass_t *ret_value;     /* return value */
 
     FUNC_ENTER_NOINIT(H5P_create_class);
 
@@ -5091,7 +5046,7 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
 {
     H5P_genclass_t	*par_class = NULL;  /* Pointer to the parent class */
     H5P_genclass_t	*pclass = NULL;     /* Property list class created */
-    hid_t	ret_value = FAIL;           /* Return value		   */
+    hid_t	ret_value;                  /* Return value		   */
 
     FUNC_ENTER_API(H5Pcreate_class, FAIL);
     H5TRACE9("i","isIuxxxxxx",parent,name,hashsize,cls_create,create_data,
@@ -5105,8 +5060,8 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
     if (hashsize==0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hashsize too small");
     if ((create_data!=NULL && cls_create==NULL)
-        || (copy_data!=NULL && cls_copy==NULL)
-        || (close_data!=NULL && cls_close==NULL))
+            || (copy_data!=NULL && cls_copy==NULL)
+            || (close_data!=NULL && cls_close==NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data specified, but no callback provided");
     
     /* Get the pointer to the parent class */
@@ -5160,10 +5115,10 @@ static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
 {
     H5P_genclass_t *tclass=NULL;        /* Temporary class pointer */
     H5P_genplist_t *plist=NULL;         /* New property list created */
-    H5P_genplist_t *ret_value=NULL;     /* return value */
+    H5P_genplist_t *ret_value;          /* return value */
     H5P_genprop_t *tmp;                 /* Temporary pointer to parent class properties */
     H5P_genprop_t *pcopy;               /* Copy of property to insert into class */
-    unsigned u;                            /* Local index variable */
+    unsigned u;                         /* Local index variable */
 
     FUNC_ENTER_NOINIT(H5P_create);
 
@@ -5287,8 +5242,8 @@ done:
 hid_t H5P_create_id(H5P_genclass_t *pclass)
 {
     H5P_genplist_t	*plist=NULL;    /* Property list created */
-    hid_t plist_id=FAIL;       /* Property list ID */
-    hid_t ret_value=FAIL;      /* return value */
+    hid_t plist_id=FAIL;        /* Property list ID */
+    hid_t ret_value;            /* return value */
 
     FUNC_ENTER_NOAPI(H5P_create_id, FAIL);
 
@@ -5353,7 +5308,7 @@ done:
 hid_t H5Pcreate(hid_t cls_id)
 {
     H5P_genclass_t	*pclass;   /* Property list class to modify */
-    hid_t ret_value=FAIL;      /* return value */
+    hid_t ret_value;               /* return value */
 
     FUNC_ENTER_API(H5Pcreate, FAIL);
 
@@ -5510,7 +5465,7 @@ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
     H5P_genprop_t *pcopy;      /* Property copy */
     unsigned u;                   /* Local index variable */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_register, FAIL);
 
@@ -5563,9 +5518,6 @@ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
 
     /* Increment property count for class */
     pclass->nprops++;
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     if(ret_value==FAIL) {
@@ -5720,7 +5672,7 @@ herr_t H5Pregister(hid_t cls_id, const char *name, size_t size, void *def_value,
     H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
 {
     H5P_genclass_t	*pclass;   /* Property list class to modify */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value;     /* return value */
 
     FUNC_ENTER_API(H5Pregister, FAIL);
 
@@ -5854,7 +5806,7 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     H5P_prp_close_func_t prp_close)
 {
     H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_insert);
 
@@ -5877,9 +5829,6 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     /* Increment property count for class */
     plist->nprops++;
 
-    /* Set return value */
-    ret_value=SUCCEED;
-
 done:
     if(ret_value==FAIL) {
         if(new_prop!=NULL) {
@@ -5892,6 +5841,7 @@ done:
             H5MM_xfree(new_prop);
         } /* end if */
     }  /* end if */
+
     FUNC_LEAVE (ret_value);
 }   /* H5P_insert() */
 
@@ -6007,7 +5957,7 @@ herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
     H5P_prp_close_func_t prp_close)
 {
     H5P_genplist_t	*plist;    /* Property list to modify */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Pinsert, FAIL);
 
@@ -6062,7 +6012,7 @@ done:
 herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_set, FAIL);
 
@@ -6100,9 +6050,6 @@ herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
     /* No 'set' callback, just copy value */
     else
         HDmemcpy(prop->value,value,prop->size);
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -6272,7 +6219,7 @@ htri_t H5Pexist(hid_t id, const char *name)
 {
     H5P_genplist_t	*plist;    /* Property list to query */
     H5P_genclass_t	*pclass;   /* Property class to query */
-    htri_t ret_value=FAIL;     /* return value */
+    htri_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Pexist, FAIL);
 
@@ -6423,7 +6370,7 @@ herr_t H5Pget_size(hid_t id, const char *name, size_t *size)
 {
     H5P_genclass_t	*pclass;   /* Property class to query */
     H5P_genplist_t	*plist;    /* Property list to query */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Pget_size, FAIL);
 
@@ -6482,7 +6429,7 @@ done:
 static H5P_genclass_t *
 H5P_get_class(H5P_genplist_t *plist)
 {
-    H5P_genclass_t *ret_value=NULL;      /* return value */
+    H5P_genclass_t *ret_value;      /* return value */
 
     FUNC_ENTER_NOINIT(H5P_get_class);
 
@@ -6570,8 +6517,6 @@ done:
 static herr_t
 H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
 {
-    herr_t ret_value=SUCCEED;      /* return value */
-
     FUNC_ENTER_NOINIT(H5P_get_nprops_plist);
 
     assert(plist);
@@ -6580,7 +6525,7 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
     /* Get property size */
     *nprops=plist->nprops;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5P_get_nprops_plist() */
 
 
@@ -6606,8 +6551,6 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
 --------------------------------------------------------------------------*/
 herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
 {
-    herr_t ret_value=SUCCEED;      /* return value */
-
     FUNC_ENTER_NOAPI(H5P_get_nprops_pclass, FAIL);
 
     assert(pclass);
@@ -6616,7 +6559,7 @@ herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
     /* Get property size */
     *nprops=pclass->nprops;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5P_get_nprops_pclass() */
 
 
@@ -7036,7 +6979,7 @@ done:
 static htri_t
 H5P_isa_class_real(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
 {
-    htri_t ret_value=FAIL;
+    htri_t ret_value;
 
     FUNC_ENTER_NOINIT(H5P_isa_class_real);
 
@@ -7091,7 +7034,7 @@ htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
     H5P_genclass_t	*pclass;        /* Property list class */
-    htri_t ret_value=FAIL;              /* return value */
+    htri_t ret_value;                   /* return value */
 
     FUNC_ENTER_NOAPI(H5P_isa_class, FAIL);
 
@@ -7135,7 +7078,7 @@ done:
 --------------------------------------------------------------------------*/
 htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id)
 {
-    htri_t ret_value=FAIL;              /* return value */
+    htri_t ret_value;                   /* return value */
 
     FUNC_ENTER_API(H5Pisa_class, FAIL);
 
@@ -7303,7 +7246,7 @@ static int
 H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    int ret_value=0;            /* Return value */
+    int ret_value;              /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_iterate_plist);
 
@@ -7377,7 +7320,7 @@ static int
 H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genclass_t *pclass;     /* Property list pointer */
-    int ret_value=0;            /* Return value */
+    int ret_value;              /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_iterate_pclass);
 
@@ -7451,7 +7394,7 @@ iteration, the function's behavior is undefined.
 int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     int fake_idx=0;         /* Index when user doesn't provide one */
-    int ret_value=FAIL;     /* return value */
+    int ret_value;          /* return value */
 
     FUNC_ENTER_API(H5Piterate, FAIL);
 
@@ -7726,7 +7669,7 @@ size_t H5P_peek_size_t(H5P_genplist_t *plist, const char *name)
 herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_get, FAIL);
 
@@ -7764,9 +7707,6 @@ herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value)
     /* No 'get' callback, just copy value */
     else
         HDmemcpy(value,prop->value,prop->size);
-
-    /* Set return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -7857,7 +7797,7 @@ H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
     unsigned loc;                  /* Hash table location */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_remove);
 
@@ -7912,9 +7852,6 @@ H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
     /* Decrement the number of properties in list */
     plist->nprops--;
 
-    /* Set return value */
-    ret_value=SUCCEED;
-
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_remove() */
@@ -7949,7 +7886,7 @@ done:
 herr_t H5Premove(hid_t plist_id, const char *name)
 {
     H5P_genplist_t	*plist;    /* Property list to modify */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Premove, FAIL);
 
@@ -8243,7 +8180,7 @@ H5P_unregister(H5P_genclass_t *pclass, const char *name)
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
     unsigned loc;                  /* Hash table location */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_unregister);
 
@@ -8290,9 +8227,6 @@ H5P_unregister(H5P_genclass_t *pclass, const char *name)
     /* Decrement the number of registered properties in class */
     pclass->nprops--;
 
-    /* Set return value */
-    ret_value=SUCCEED;
-
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_unregister() */
@@ -8322,7 +8256,7 @@ done:
 herr_t H5Punregister(hid_t pclass_id, const char *name)
 {
     H5P_genclass_t	*pclass;   /* Property list class to modify */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Punregister, FAIL);
 
@@ -8466,7 +8400,7 @@ done:
 --------------------------------------------------------------------------*/
 char *H5P_get_class_name(H5P_genclass_t *pclass)
 {
-    char *ret_value=NULL;      /* return value */
+    char *ret_value;      /* return value */
 
     FUNC_ENTER_NOAPI(H5P_get_class_name, NULL);
 
@@ -8502,7 +8436,7 @@ char *H5P_get_class_name(H5P_genclass_t *pclass)
 char *H5Pget_class_name(hid_t pclass_id)
 {
     H5P_genclass_t	*pclass;    /* Property class to query */
-    char *ret_value=NULL;       /* return value */
+    char *ret_value;       /* return value */
 
     FUNC_ENTER_API(H5Pget_class_name, NULL);
 
@@ -8541,7 +8475,7 @@ done:
 static H5P_genclass_t *
 H5P_get_class_parent(H5P_genclass_t *pclass)
 {
-    H5P_genclass_t *ret_value=NULL;      /* return value */
+    H5P_genclass_t *ret_value;      /* return value */
 
     FUNC_ENTER_NOINIT(H5P_get_class_parent);
 
@@ -8577,7 +8511,7 @@ hid_t H5Pget_class_parent(hid_t pclass_id)
 {
     H5P_genclass_t	*pclass;    /* Property class to query */
     H5P_genclass_t	*parent=NULL;   /* Parent's property class */
-    hid_t ret_value=FAIL;       /* return value */
+    hid_t ret_value;       /* return value */
 
     FUNC_ENTER_API(H5Pget_class_parent, FAIL);
 
@@ -8626,7 +8560,7 @@ static herr_t
 H5P_close_class(void *_pclass)
 {
     H5P_genclass_t *pclass=(H5P_genclass_t *)_pclass;
-    herr_t ret_value = FAIL;     /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_close_class);
 
@@ -8650,9 +8584,6 @@ H5P_close_class(void *_pclass)
         if (H5P_access_class(pclass, H5P_MOD_CHECK) < 0)
             HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,"Can't check class ref count");
     } /* end if */
-
-    /* Set return value */
-    ret_value = SUCCEED;
 
 done:
     FUNC_LEAVE (ret_value);

@@ -475,7 +475,7 @@ H5S_hyper_npoints (const H5S_t *space)
 static H5S_hyper_span_t *
 H5S_hyper_new_span (hssize_t low, hssize_t high, H5S_hyper_span_info_t *down, H5S_hyper_span_t *next)
 {
-    H5S_hyper_span_t *ret_value=NULL;
+    H5S_hyper_span_t *ret_value;
 
     FUNC_ENTER_NOINIT(H5S_hyper_new_span);
 
@@ -523,7 +523,7 @@ static herr_t
 H5S_hyper_span_precompute_helper (H5S_hyper_span_info_t *spans, size_t elmt_size)
 {
     H5S_hyper_span_t *span;     /* Hyperslab span */
-    herr_t ret_value=FAIL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_hyper_span_precompute);
 
@@ -554,9 +554,6 @@ H5S_hyper_span_precompute_helper (H5S_hyper_span_info_t *spans, size_t elmt_size
         } /* end while */
     } /* end if */
 
-    /* Success! */
-    ret_value=SUCCEED;
-
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_span_precompute_helper() */
@@ -584,7 +581,7 @@ done:
 static herr_t
 H5S_hyper_span_precompute (H5S_hyper_span_info_t *spans, size_t elmt_size)
 {
-    herr_t ret_value=FAIL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_hyper_span_precompute);
 
@@ -597,9 +594,6 @@ H5S_hyper_span_precompute (H5S_hyper_span_info_t *spans, size_t elmt_size)
     /* Reset the scratch pointers for the next routine which needs them */
     if(H5S_hyper_span_scratch(spans,NULL)==FAIL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't reset hyperslab scratch pointer");
-
-    /* Success! */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -627,7 +621,7 @@ static herr_t
 H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value)
 {
     H5S_hyper_span_t *span;     /* Hyperslab span */
-    herr_t ret_value=FAIL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_hyper_span_scratch);
 
@@ -651,9 +645,6 @@ H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value)
             span=span->next;
         } /* end while */
     } /* end if */
-
-    /* Success! */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -684,7 +675,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
     H5S_hyper_span_t *new_span;     /* Temporary hyperslab span */
     H5S_hyper_span_t *prev_span;    /* Previous hyperslab span */
     H5S_hyper_span_info_t *new_down;    /* New down span tree */
-    H5S_hyper_span_info_t *ret_value=NULL;
+    H5S_hyper_span_info_t *ret_value;
 
     FUNC_ENTER_NOINIT(H5S_hyper_copy_span_helper);
 
@@ -770,7 +761,7 @@ done:
 static H5S_hyper_span_info_t *
 H5S_hyper_copy_span (H5S_hyper_span_info_t *spans)
 {
-    H5S_hyper_span_info_t *ret_value=NULL;
+    H5S_hyper_span_info_t *ret_value;
 
     FUNC_ENTER_NOINIT(H5S_hyper_copy_span);
 
@@ -917,7 +908,7 @@ static herr_t
 H5S_hyper_free_span_info (H5S_hyper_span_info_t *span_info)
 {
     H5S_hyper_span_t *span, *next_span;
-    herr_t ret_value=SUCCEED;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_hyper_free_span_info);
 
@@ -1218,7 +1209,7 @@ static hssize_t
 H5S_hyper_span_nblocks (H5S_hyper_span_info_t *spans)
 {
     H5S_hyper_span_t *span;     /* Hyperslab span */
-    hssize_t ret_value=FAIL;
+    hssize_t ret_value;
 
     FUNC_ENTER_NOINIT(H5S_hyper_span_nblocks);
 
@@ -1241,9 +1232,6 @@ H5S_hyper_span_nblocks (H5S_hyper_span_info_t *spans)
         } /* end while */
     } /* end else */
 
-#ifdef LATER
-done:
-#endif /* LATER */
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_span_nblocks() */
 
@@ -1268,8 +1256,8 @@ done:
 static hssize_t
 H5S_get_select_hyper_nblocks(H5S_t *space)
 {
-    hssize_t ret_value=FAIL;        /* return value */
-    unsigned u;                    /* Counter */
+    hssize_t ret_value;         /* return value */
+    unsigned u;                 /* Counter */
 
     FUNC_ENTER_NOINIT(H5S_get_select_hyper_nblocks);
 
@@ -1309,19 +1297,20 @@ hssize_t
 H5Sget_select_hyper_nblocks(hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    hssize_t ret_value=FAIL;        /* return value */
+    hssize_t ret_value;             /* return value */
 
     FUNC_ENTER_API(H5Sget_select_hyper_nblocks, FAIL);
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(space->select.type!=H5S_SEL_HYPERSLABS)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
 
     ret_value = H5S_get_select_hyper_nblocks(space);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_hyper_nblocks() */
 
@@ -1348,9 +1337,9 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
 hssize_t
 H5S_hyper_serial_size (const H5S_t *space)
 {
-    unsigned u;                    /* Counter */
+    unsigned u;                 /* Counter */
     hssize_t block_count;       /* block counter for regular hyperslabs */
-    hssize_t ret_value=FAIL;    /* return value */
+    hssize_t ret_value;         /* return value */
 
     FUNC_ENTER_NOAPI(H5S_hyper_serial_size, FAIL);
 
@@ -1493,7 +1482,6 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
     int temp_dim;      /* Temporary rank holder */
     int ndims;         /* Rank of the dataspace */
     int done;          /* Whether we are done with the iteration */
-    herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER_NOAPI(H5S_hyper_serialize, FAIL);
 
@@ -1612,10 +1600,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
     /* Encode length */
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
     
-    /* Set success */
-    ret_value=SUCCEED;
-
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5S_hyper_serialize() */
 
 
@@ -1859,7 +1844,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
     int temp_dim;      /* Temporary rank holder */
     int ndims;         /* Rank of the dataspace */
     int done;          /* Whether we are done with the iteration */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_get_select_hyper_blocklist);
 
@@ -1991,18 +1976,18 @@ herr_t
 H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks, hsize_t *buf)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    herr_t ret_value=FAIL;        /* return value */
+    herr_t ret_value;        /* return value */
 
     FUNC_ENTER_API(H5Sget_select_hyper_blocklist, FAIL);
     H5TRACE4("e","ihh*h",spaceid,startblock,numblocks,buf);
 
     /* Check args */
     if(buf==NULL)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(space->select.type!=H5S_SEL_HYPERSLABS)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
 
     /* Go get the correct number of blocks */
     if(numblocks>0)
@@ -2010,6 +1995,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
     else
         ret_value=SUCCEED;      /* Successfully got 0 blocks... */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_hyper_blocklist() */
 
@@ -2046,7 +2032,7 @@ static herr_t
 H5S_hyper_bounds_helper (const H5S_hyper_span_info_t *spans, const hssize_t *offset, hsize_t rank, hsize_t *start, hsize_t *end)
 {
     H5S_hyper_span_t *curr;     /* Hyperslab information nodes */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_hyper_bounds_helper);
 
@@ -2432,7 +2418,7 @@ H5S_hyper_is_single(const H5S_t *space)
 htri_t
 H5S_hyper_is_regular(const H5S_t *space)
 {
-    htri_t ret_value=FAIL;  /* return value */
+    htri_t ret_value;  /* return value */
 
     FUNC_ENTER_NOAPI(H5S_hyper_is_regular, FAIL);
 
@@ -2527,8 +2513,6 @@ done:
 static herr_t
 H5S_hyper_recover_span (unsigned *recover, H5S_hyper_span_t **curr_span, H5S_hyper_span_t *next_span)
 {
-    herr_t ret_value=FAIL;
-
     FUNC_ENTER_NOINIT(H5S_hyper_recover_span);
 
     assert(recover);
@@ -2543,13 +2527,7 @@ H5S_hyper_recover_span (unsigned *recover, H5S_hyper_span_t **curr_span, H5S_hyp
     /* Set the current span to next span */
     *curr_span=next_span;
 
-    /* Success! */
-    ret_value=SUCCEED;
-
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5S_hyper_recover_span() */
 
 
@@ -2579,7 +2557,7 @@ static herr_t
 H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** span_tree, hssize_t low, hssize_t high, H5S_hyper_span_info_t *down, H5S_hyper_span_t *next)
 {
     H5S_hyper_span_t *new_span;
-    herr_t ret_value=FAIL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_hyper_append_span);
 
@@ -2647,9 +2625,6 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
         } /* end else */
     } /* end else */
 
-    /* Success! */
-    ret_value=SUCCEED;
-
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_append_span() */
@@ -2700,7 +2675,7 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
     H5S_hyper_span_info_t *down_a_and_b; /* Temporary pointer to a_and_b span tree of down spans for overlapping nodes */
     H5S_hyper_span_info_t *down_b_not_a; /* Temporary pointer to b_and_a span tree of down spans for overlapping nodes */
     unsigned recover_a, recover_b;         /* Flags to indicate when to recover temporary spans */
-    herr_t ret_value=FAIL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_hyper_clip_spans);
 
@@ -3154,9 +3129,6 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
         } /* end else */
     } /* end else */
 
-    /* Success! */
-    ret_value=SUCCEED;
-
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_clip_spans() */
@@ -3193,7 +3165,7 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
     H5S_hyper_span_t *span_b;           /* Pointer to current span 'b' working on */
     H5S_hyper_span_t *prev_span_merge;  /* Pointer to previous merged span */
     unsigned recover_a, recover_b;         /* Flags to indicate when to recover temporary spans */
-    H5S_hyper_span_info_t *ret_value=NULL;
+    H5S_hyper_span_info_t *ret_value;
 
     FUNC_ENTER_NOINIT(H5S_hyper_merge_spans_helper);
 
@@ -3465,7 +3437,7 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
         } /* end if */
     } /* end else */
 
-    /* Success!  */
+    /* Set return value */
     ret_value=merged_spans;
 
 done:
@@ -3498,8 +3470,6 @@ done:
 static herr_t
 H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans)
 {
-    herr_t ret_value=FAIL;
-
     FUNC_ENTER_NOINIT(H5S_hyper_merge_spans);
 
     /* Check args */
@@ -3526,13 +3496,7 @@ H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans)
         space->select.sel_info.hslab.span_lst=merged_spans;
     } /* end else */
 
-    /* Success!  */
-    ret_value=SUCCEED;
-
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5S_hyper_merge_spans() */
 
 
@@ -3557,7 +3521,7 @@ static hssize_t
 H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
 {
     H5S_hyper_span_t *span;     /* Hyperslab span */
-    hssize_t ret_value=FAIL;
+    hssize_t ret_value;
 
     FUNC_ENTER_NOINIT(H5S_hyper_spans_nelem);
 
@@ -3580,9 +3544,6 @@ H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
         } /* end while */
     } /* end else */
 
-#ifdef LATER
-done:
-#endif /* LATER */
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_spans_nelem() */
 
@@ -3622,7 +3583,7 @@ H5S_hyper_make_spans (unsigned rank, const hssize_t *start, const hsize_t *strid
     H5S_hyper_span_t *head;     /* Head of new hyperslab span list */
     int i;                     /* Counters */
     unsigned u;                    /* Counters */
-    H5S_hyper_span_info_t *ret_value=NULL;
+    H5S_hyper_span_info_t *ret_value;
 
     FUNC_ENTER_NOINIT(H5S_hyper_make_spans);
 
@@ -3728,7 +3689,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     H5S_hyper_span_info_t *b_not_a=NULL;    /* Span tree for hyperslab spans in new span tree and not in old span tree */
     hssize_t nelem;             /* Number of elements in hyperslab span tree */
     unsigned u;                    /* Counters */
-    herr_t ret_value=FAIL;    /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_generate_hyperslab);
 
@@ -3898,9 +3859,6 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     if(H5S_hyper_free_span_info(new_spans)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release temporary hyperslab spans");
 
-    /* Set return value */
-    ret_value=SUCCEED;
-
 done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_generate_hyperslab() */
@@ -3931,7 +3889,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     hsize_t *_block=NULL;       /* Block size array */
     unsigned u;                    /* Counters */
     H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
-    herr_t ret_value=FAIL;    /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_hyperslab, FAIL);
 
@@ -4139,8 +4097,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     space->select.is_single=H5S_hyper_is_single;
     space->select.is_regular=H5S_hyper_is_regular;
 
-    ret_value=SUCCEED;
-
 done:
     if(_stride!=NULL)
         H5FL_ARR_FREE(hsize_t,_stride);
@@ -4181,23 +4137,25 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
          const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Sselect_hyperslab, FAIL);
     H5TRACE6("e","iSs*Hs*h*h*h",space_id,op,start,stride,count,block);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(start==NULL || count==NULL)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
 
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     if (H5S_select_hyperslab(space, op, start, stride, count, block)<0)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 } /* end H5Sselect_hyperslab() */
 #else /* NEW_HYPERSLAB_API */ /* Works */
 
@@ -4223,7 +4181,7 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
     H5S_hyper_span_info_t *a_and_b=NULL;    /* Span tree for hyperslab spans in both old and new span trees */
     H5S_hyper_span_info_t *b_not_a=NULL;    /* Span tree for hyperslab spans in new span tree and not in old span tree */
     hssize_t nelem;             /* Number of elements in hyperslab span tree */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_operate_hyperslab);
 
@@ -4371,11 +4329,7 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
     space->select.is_contiguous=H5S_hyper_is_contiguous;
     space->select.is_single=H5S_hyper_is_single;
 
-    /* Set the return value */
-    ret_value=SUCCEED;
-
 done:
-
     FUNC_LEAVE (ret_value);
 }   /* end H5S_operate_hyperslab() */
 
@@ -4407,7 +4361,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     H5S_hyper_span_info_t *new_spans=NULL;   /* Span tree for new hyperslab */
     H5S_hyper_span_info_t *tmp_spans=NULL;   /* Temporary copy of selection */
     unsigned u;                 /* Counters */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_generate_hyperslab);
 
@@ -4447,9 +4401,6 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     if(H5S_operate_hyperslab(space,tmp_spans,op,new_spans)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
 
-    /* Set return value */
-    ret_value=SUCCEED;
-
 done:
     /* Free temporary data structures */
     if(tmp_spans!=NULL)
@@ -4486,7 +4437,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     hsize_t *_block=NULL;       /* Block size array */
     unsigned u;                    /* Counters */
     H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
-    herr_t ret_value=FAIL;    /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI (H5S_select_hyperslab, FAIL);
 
@@ -4677,8 +4628,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     else
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
-    ret_value=SUCCEED;
-
 done:
     if(_stride!=NULL)
         H5FL_ARR_FREE(hsize_t,_stride);
@@ -4719,23 +4668,25 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
          const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Sselect_hyperslab, FAIL);
     H5TRACE6("e","iSs*Hs*h*h*h",space_id,op,start,stride,count,block);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(start==NULL || count==NULL)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
 
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     if (H5S_select_hyperslab(space, op, start, stride, count, block)<0)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 } /* end H5Sselect_hyperslab() */
 
 
@@ -4774,7 +4725,7 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     H5S_t	*new_space = NULL;  /* New dataspace created */
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
 
     FUNC_ENTER_API(H5Scombine_hyperslab, FAIL);
     H5TRACE6("i","iSs*Hs*h*h*h",space_id,op,start,stride,count,block);
@@ -4826,7 +4777,7 @@ static H5S_t *
 H5S_combine_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
     H5S_t *new_space=NULL;    /* New dataspace generated */
-    H5S_t *ret_value=NULL;    /* return value */
+    H5S_t *ret_value;         /* return value */
 
     FUNC_ENTER_NOINIT(H5S_combine_select);
 
@@ -4843,7 +4794,7 @@ H5S_combine_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     if(H5S_operate_hyperslab(new_space,space1->select.sel_info.hslab.span_lst,op,space2->select.sel_info.hslab.span_lst)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, NULL, "can't clip hyperslab information");
 
-    /* Set the return value */
+    /* Set return value */
     ret_value=new_space;
 
 done:
@@ -4882,7 +4833,7 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     H5S_t	*space1;                /* First Dataspace */
     H5S_t	*space2;                /* Second Dataspace */
     H5S_t	*new_space = NULL;      /* New Dataspace */
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
 
     FUNC_ENTER_API(H5Scombine_select, FAIL);
     H5TRACE3("i","iSsi",space1_id,op,space2_id);
@@ -4937,7 +4888,7 @@ static herr_t
 H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
     H5S_hyper_span_info_t *tmp_spans=NULL;   /* Temporary copy of selection */
-    herr_t ret_value=FAIL;    /* return value */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_select_select);
 
@@ -4953,9 +4904,6 @@ H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     /* Combine tmp_spans (from space1) & spans from space2, with the result in space1 */
     if(H5S_operate_hyperslab(space1,tmp_spans,op,space2->select.sel_info.hslab.span_lst)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information");
-
-    /* Set the return value */
-    ret_value=SUCCEED;
 
 done:
     if(tmp_spans!=NULL)
@@ -4992,7 +4940,7 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
 {
     H5S_t	*space1;                /* First Dataspace */
     H5S_t	*space2;                /* Second Dataspace */
-    hid_t	ret_value = FAIL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Sselect_select, FAIL);
     H5TRACE3("e","iSsi",space1_id,op,space2_id);
@@ -5016,9 +4964,6 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     /* Go refine the first selection */
     if (H5S_select_select(space1, op, space2)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to modify hyperslab selection");
-
-    /* Set the return value */
-    ret_value=SUCCEED;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -5078,7 +5023,6 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
     int curr_dim;      /* Current dimension being operated on */
     int i;             /* Index variable */
-    herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_NOINIT (H5S_hyper_get_seq_list_gen);
 
@@ -5434,10 +5378,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
     /* Set the number of bytes used */
     *nbytes=(start_io_bytes_left-io_bytes_left);
 
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 } /* end H5S_hyper_get_seq_list_gen() */
 
 
@@ -5511,7 +5452,6 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 #ifndef NO_DUFFS_DEVICE
     size_t duffs_index; /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
-    herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_NOINIT (H5S_hyper_get_seq_list_opt);
 
@@ -5997,10 +5937,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     /* Set the number of bytes used */
     *nbytes=(start_io_left-io_left)*elmt_size;
 
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 } /* end H5S_hyper_get_seq_list_opt() */
 
 
@@ -6041,7 +5978,7 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
     size_t elem_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
     hsize_t *off, size_t *len)
 {
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t ret_value;      /* return value */
 
     FUNC_ENTER_NOAPI (H5S_hyper_get_seq_list, FAIL);
 

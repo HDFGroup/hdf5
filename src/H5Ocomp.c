@@ -71,7 +71,7 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
 		H5O_shared_t UNUSED *sh)
 {
     H5O_pline_t		*pline = NULL;
-    void		*ret_value = NULL;
+    void		*ret_value;
     unsigned		version;
     size_t		i, j, n, name_length;
 
@@ -81,34 +81,24 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert(p);
 
     /* Decode */
-    if (NULL==(pline = H5FL_ALLOC(H5O_pline_t,1))) {
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		     "memory allocation failed");
-    }
+    if (NULL==(pline = H5FL_ALLOC(H5O_pline_t,1)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     version = *p++;
-    if (version!=H5O_PLINE_VERSION) {
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
-		    "bad version number for filter pipeline message");
-    }
+    if (version!=H5O_PLINE_VERSION)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message");
     pline->nfilters = *p++;
-    if (pline->nfilters>32) {
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
-		    "filter pipeline message has too many filters");
-    }
+    if (pline->nfilters>32)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter pipeline message has too many filters");
     p += 6;	/*reserved*/
     pline->nalloc = pline->nfilters;
     pline->filter = H5MM_calloc(pline->nalloc*sizeof(pline->filter[0]));
-    if (NULL==pline->filter) {
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		    "memory allocation failed");
-    }
+    if (NULL==pline->filter)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     for (i=0; i<pline->nfilters; i++) {
 	UINT16DECODE(p, pline->filter[i].id);
 	UINT16DECODE(p, name_length);
-	if (name_length % 8) {
-	    HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
-			"filter name length is not a multiple of eight");
-	}
+	if (name_length % 8)
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter name length is not a multiple of eight");
 	UINT16DECODE(p, pline->filter[i].flags);
 	UINT16DECODE(p, pline->filter[i].cd_nelmts);
 	if (name_length) {
@@ -127,21 +117,19 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
 	     * Read the client data values and the padding
 	     */
 	    pline->filter[i].cd_values = H5MM_malloc(n*sizeof(unsigned));
-	    if (NULL==pline->filter[i].cd_values) {
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			    "memory allocation failed for client data");
-	    }
-	    for (j=0; j<pline->filter[i].cd_nelmts; j++) {
+	    if (NULL==pline->filter[i].cd_values)
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for client data");
+	    for (j=0; j<pline->filter[i].cd_nelmts; j++)
 		UINT32DECODE(p, pline->filter[i].cd_values[j]);
-	    }
-	    if (pline->filter[i].cd_nelmts % 2) {
+	    if (pline->filter[i].cd_nelmts % 2)
 		p += 4; /*padding*/
-	    }
 	}
     }
+
+    /* Set return value */
     ret_value = pline;
 
- done:
+done:
     if (NULL==ret_value && pline) {
         if (pline->filter) {
             for (i=0; i<pline->nfilters; i++) {
@@ -152,6 +140,7 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
         }
         H5FL_FREE(H5O_pline_t,pline);
     }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -200,9 +189,8 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 	 * as it was registered.
 	 */
 	if (NULL==(name=pline->filter[i].name) &&
-	    (cls=H5Z_find(pline->filter[i].id))) {
+                (cls=H5Z_find(pline->filter[i].id)))
 	    name = cls->name;
-	}
 	name_length = name ? HDstrlen(name)+1 : 0;
 
 	/* Encode the filter */
@@ -213,14 +201,13 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 	if (name_length>0) {
 	    HDmemcpy(p, name, name_length);
 	    p += name_length;
-	    while (name_length++ % 8) *p++ = 0;
+	    while (name_length++ % 8)
+                *p++ = 0;
 	}
-	for (j=0; j<pline->filter[i].cd_nelmts; j++) {
+	for (j=0; j<pline->filter[i].cd_nelmts; j++)
 	    UINT32ENCODE(p, pline->filter[i].cd_values[j]);
-	}
-	if (pline->filter[i].cd_nelmts % 2) {
+	if (pline->filter[i].cd_nelmts % 2)
 	    UINT32ENCODE(p, 0);
-	}
     }
 
     FUNC_LEAVE (SUCCEED);
@@ -255,19 +242,15 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
     
     FUNC_ENTER_NOAPI(H5O_pline_copy, NULL);
 
-    if (!dst && NULL==(dst = H5FL_ALLOC (H5O_pline_t,0))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (!dst && NULL==(dst = H5FL_ALLOC (H5O_pline_t,0)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     *dst = *src;
     dst->nalloc = dst->nfilters;
     if (dst->nalloc>0) {
 	dst->filter = H5MM_calloc(dst->nalloc * sizeof(dst->filter[0]));
-	if (NULL==dst->filter) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			"memory allocation failed");
-	}
+	if (NULL==dst->filter)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     } else {
 	dst->filter = NULL;
     }
@@ -280,17 +263,17 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
 	if (src->filter[i].cd_nelmts>0) {
 	    dst->filter[i].cd_values = H5MM_malloc(src->filter[i].cd_nelmts*
 						   sizeof(unsigned));
-	    if (NULL==dst->filter[i].cd_values) {
-		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			       "memory allocation failed");
-	    }
+	    if (NULL==dst->filter[i].cd_values)
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	    HDmemcpy (dst->filter[i].cd_values, src->filter[i].cd_values,
 		      src->filter[i].cd_nelmts * sizeof(unsigned));
 	}
     }
+
+    /* Set return value */
     ret_value = dst;
 
- done:
+done:
     if (!ret_value && dst) {
 	if (dst->filter) {
 	    for (i=0; i<dst->nfilters; i++) {
@@ -299,7 +282,8 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
 	    }
 	    H5MM_xfree(dst->filter);
 	}
-	if (!_dst) H5FL_FREE(H5O_pline_t,dst);
+	if (!_dst)
+            H5FL_FREE(H5O_pline_t,dst);
     }
 
     FUNC_LEAVE (ret_value);
@@ -340,9 +324,8 @@ H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
     for (i=0; i<pline->nfilters; i++) {
 	/* Get the name of the filter, same as done with H5O_pline_encode() */
 	if (NULL==(name=pline->filter[i].name) &&
-	    (cls=H5Z_find(pline->filter[i].id))) {
+                (cls=H5Z_find(pline->filter[i].id)))
 	    name = cls->name;
-	}
 	name_len = name ? HDstrlen(name)+1 : 0;
 	
 
@@ -353,7 +336,8 @@ H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
 		H5O_ALIGN(name_len);	/*length of the filter name	*/
 	
 	size += pline->filter[i].cd_nelmts * 4;
-	if (pline->filter[i].cd_nelmts % 2) size += 4;
+	if (pline->filter[i].cd_nelmts % 2)
+            size += 4;
     }
 
     FUNC_LEAVE (size);
@@ -384,6 +368,7 @@ H5O_pline_reset (void *mesg)
     FUNC_ENTER_NOAPI(H5O_pline_reset, FAIL);
 
     assert (pline);
+
     for (i=0; i<pline->nfilters; i++) {
         H5MM_xfree(pline->filter[i].name);
         H5MM_xfree(pline->filter[i].cd_values);

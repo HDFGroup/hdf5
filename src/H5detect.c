@@ -429,9 +429,10 @@ H5TN_term_interface(void)\n\
 herr_t\n\
 H5TN_init_interface(void)\n\
 {\n\
-   H5T_t	*dt = NULL;\n\
+    H5T_t	*dt = NULL;\n\
+    herr_t	ret_value = SUCCEED;\n\
 \n\
-   FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL);\n");
+    FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL);\n");
 
     for (i = 0; i < nd; i++) {
 
@@ -442,19 +443,17 @@ H5TN_init_interface(void)\n\
 
 	/* The part common to fixed and floating types */
 	printf("\
-   if (NULL==(dt = H5FL_ALLOC (H5T_t,1))) {\n\
-      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\n\
-		     \"memory allocation failed\");\n\
-   }\n\
-   dt->state = H5T_STATE_IMMUTABLE;\n\
-   dt->ent.header = HADDR_UNDEF;\n\
-   dt->type = H5T_%s;\n\
-   dt->size = %d;\n\
-   dt->u.atomic.order = H5T_ORDER_%s;\n\
-   dt->u.atomic.offset = %d;\n\
-   dt->u.atomic.prec = %d;\n\
-   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
-   dt->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
+    if (NULL==(dt = H5FL_ALLOC (H5T_t,1)))\n\
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\"memory allocation failed\");\n\
+    dt->state = H5T_STATE_IMMUTABLE;\n\
+    dt->ent.header = HADDR_UNDEF;\n\
+    dt->type = H5T_%s;\n\
+    dt->size = %d;\n\
+    dt->u.atomic.order = H5T_ORDER_%s;\n\
+    dt->u.atomic.offset = %d;\n\
+    dt->u.atomic.prec = %d;\n\
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
 	       d[i].msize ? "FLOAT" : "INTEGER",/*class			*/
 	       d[i].size,			/*size			*/
 	       d[i].perm[0] ? "BE" : "LE",	/*byte order		*/
@@ -464,19 +463,19 @@ H5TN_init_interface(void)\n\
 	if (0 == d[i].msize) {
 	    /* The part unique to fixed point types */
 	    printf("\
-   dt->u.atomic.u.i.sign = H5T_SGN_%s;\n",
+    dt->u.atomic.u.i.sign = H5T_SGN_%s;\n",
 		   d[i].sign ? "2" : "NONE");
 	} else {
 	    /* The part unique to floating point types */
 	    printf("\
-   dt->u.atomic.u.f.sign = %d;\n\
-   dt->u.atomic.u.f.epos = %d;\n\
-   dt->u.atomic.u.f.esize = %d;\n\
-   dt->u.atomic.u.f.ebias = 0x%08lx;\n\
-   dt->u.atomic.u.f.mpos = %d;\n\
-   dt->u.atomic.u.f.msize = %d;\n\
-   dt->u.atomic.u.f.norm = H5T_NORM_%s;\n\
-   dt->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
+    dt->u.atomic.u.f.sign = %d;\n\
+    dt->u.atomic.u.f.epos = %d;\n\
+    dt->u.atomic.u.f.esize = %d;\n\
+    dt->u.atomic.u.f.ebias = 0x%08lx;\n\
+    dt->u.atomic.u.f.mpos = %d;\n\
+    dt->u.atomic.u.f.msize = %d;\n\
+    dt->u.atomic.u.f.norm = H5T_NORM_%s;\n\
+    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
 		   d[i].sign,	/*sign location */
 		   d[i].epos,	/*exponent loc	*/
 		   d[i].esize,	/*exponent size */
@@ -488,17 +487,22 @@ H5TN_init_interface(void)\n\
 
 	/* Atomize the type */
 	printf("\
-   if ((H5T_NATIVE_%s_g = H5I_register (H5I_DATATYPE, dt))<0) {\n\
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,\n\
-		     \"can't initialize type system (atom registration \"\n\
-		     \"failure\");\n\
-   }\n",
+    if ((H5T_NATIVE_%s_g = H5I_register (H5I_DATATYPE, dt))<0)\n\
+        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,\"can't initialize type system (atom registration failure\");\n",
 	       d[i].varname);
-	printf("   H5T_NATIVE_%s_ALIGN_g = %lu;\n",
+	printf("    H5T_NATIVE_%s_ALIGN_g = %lu;\n",
 	       d[i].varname, (unsigned long)(d[i].align));
     }
 
-    printf("   FUNC_LEAVE (SUCCEED);\n}\n");
+    printf("\
+\n\
+done:\n\
+    if(ret_value<0) {\n\
+        if(dt!=NULL)\n\
+            H5FL_FREE(H5T_t,dt);\n\
+    }\n\
+\n\
+    FUNC_LEAVE (ret_value);\n}\n");
 }
 
 

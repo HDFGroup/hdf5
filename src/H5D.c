@@ -901,15 +901,20 @@ done:
 H5S_t *
 H5D_get_space(H5D_t *dset)
 {
-    H5S_t	*space = NULL;
+    H5S_t	*space;
+    H5S_t	*ret_value;     /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_get_space, NULL);
     assert(dset);
 
     if (NULL==(space=H5S_read(&(dset->ent))))
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to load space info from dataset header");
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to load space info from dataset header");
 
-    FUNC_LEAVE(space);
+    /* Set return value */
+    ret_value=space;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1823,14 +1828,14 @@ H5D_isa(H5G_entry_t *ent)
     if ((exists=H5O_exists(ent, H5O_DTYPE, 0))<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     } else if (!exists) {
-	HRETURN(FALSE);
+	HGOTO_DONE(FALSE);
     }
 
     /* Layout */
     if ((exists=H5O_exists(ent, H5O_LAYOUT, 0))<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     } else if (!exists) {
-	HRETURN(FALSE);
+	HGOTO_DONE(FALSE);
     }
     
 
@@ -2103,6 +2108,7 @@ herr_t
 H5D_close(H5D_t *dataset)
 {
     unsigned		    free_failed;
+    herr_t                  ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_close, FAIL);
 
@@ -2129,9 +2135,10 @@ H5D_close(H5D_t *dataset)
     H5FL_FREE(H5D_t,dataset);
 
     if (free_failed)
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free the type or creation property list, but the dataset was freed anyway.");
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free the type or creation property list, but the dataset was freed anyway.");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3297,18 +3304,20 @@ hsize_t
 H5Dget_storage_size(hid_t dset_id)
 {
     H5D_t	*dset=NULL;
-    hsize_t	size;
+    hsize_t	ret_value;      /* Return value */
     
     FUNC_ENTER_API(H5Dget_storage_size, 0);
     H5TRACE1("h","i",dset_id);
 
     /* Check args */
     if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset");
 
-    size = H5D_get_storage_size(dset);
+    /* Set return value */
+    ret_value = H5D_get_storage_size(dset);
 
-    FUNC_LEAVE(size);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3996,13 +4005,14 @@ herr_t
 H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
 {
     H5D_t	*dset=NULL;
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Ddebug, FAIL);
     H5TRACE2("e","iIu",dset_id,flags);
 
     /* Check args */
     if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Print B-tree information */
     if (H5D_CHUNKED==dset->layout.type) {
@@ -4011,6 +4021,7 @@ H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
 	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->layout.addr);
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 

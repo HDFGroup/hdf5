@@ -162,7 +162,7 @@ H5FL_reg_init(H5FL_reg_head_t *head)
 
     /* Allocate a new garbage collection node */
     if (NULL==(new_node = H5MM_malloc(sizeof(H5FL_reg_gc_node_t))))
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize the new garbage collection node */
     new_node->list=head;
@@ -178,6 +178,7 @@ H5FL_reg_init(H5FL_reg_head_t *head)
     if(head->size<sizeof(void *))
         head->size=sizeof(void *);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_reg_init() */
 
@@ -292,17 +293,17 @@ H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
     /* Otherwise allocate a node */
     else {
         if (NULL==(ret_value = H5FL_malloc(head->size)))
-            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Increment the number of blocks allocated in list */
         head->allocated++;
     } /* end else */
 
     /* Clear to zeros, if asked */
-    if(clear) {
+    if(clear)
         HDmemset(ret_value,0,head->size);
-    } /* end if */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_reg_alloc() */
 
@@ -500,7 +501,7 @@ static H5FL_blk_node_t *
 H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
 {
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the native list */
-    H5FL_blk_node_t *ret_value=NULL;
+    H5FL_blk_node_t *ret_value;
 
     FUNC_ENTER_NOINIT(H5FL_blk_find_list);
 
@@ -554,7 +555,7 @@ static H5FL_blk_node_t *
 H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
 {
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the list */
-    H5FL_blk_node_t *ret_value=NULL;
+    H5FL_blk_node_t *ret_value;
 
     FUNC_ENTER_NOINIT(H5FL_blk_create_list);
 
@@ -611,7 +612,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
 
     /* Allocate a new garbage collection node */
     if (NULL==(new_node = H5MM_malloc(sizeof(H5FL_blk_gc_node_t))))
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize the new garbage collection node */
     new_node->pq=head;
@@ -623,6 +624,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
     /* Indicate that the PQ is initialized */
     head->init=1;
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_blk_init() */
 
@@ -699,9 +701,8 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear)
     } /* end else */
 
     /* Clear the block to zeros, if requested */
-    if(clear) {
+    if(clear)
         HDmemset(ret_value,0,size);
-    } /* end if */
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1021,7 +1022,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
 
     /* Allocate a new garbage collection node */
     if (NULL==(new_node = H5MM_malloc(sizeof(H5FL_gc_arr_node_t))))
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Initialize the new garbage collection node */
     new_node->list=head;
@@ -1033,9 +1034,9 @@ H5FL_arr_init(H5FL_arr_head_t *head)
     /* Allocate room for the free lists, if the arrays have a maximum size */
     if(head->maxelem>0) {
         if (NULL==(head->u.list_arr = H5MM_calloc(head->maxelem*sizeof(H5FL_arr_node_t *))))
-            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         if (NULL==(head->onlist = H5MM_calloc(head->maxelem*sizeof(unsigned))))
-            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     } /* end if */
     else {
         head->u.queue.init=0;
@@ -1049,6 +1050,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
     /* Indicate that the free list is initialized */
     head->init=1;
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_arr_init() */
 
@@ -1074,12 +1076,13 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     H5FL_arr_node_t *temp;  /* Temp. ptr to the new free list node allocated */
     size_t mem_size;        /* Size of memory being freed */
     size_t free_nelem;      /* Number of elements in node being free'd */
+    void *ret_value=NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FL_arr_free, NULL);
 
     /* The H5MM_xfree code allows obj to null */
     if (!obj)
-        HRETURN (NULL);
+        HGOTO_DONE (NULL);
 
     /* Double check parameters */
     assert(head);
@@ -1125,11 +1128,11 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
     } /* end if */
     /* No maximum number of elements, use block routine */
-    else {
+    else
         H5FL_blk_free(&(head->u.queue),obj);
-    } /* end else */
 
-    FUNC_LEAVE(NULL);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5FL_arr_free() */
 
 
@@ -1194,7 +1197,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
         /* Otherwise allocate a node */
         else {
             if (NULL==(new_obj = H5FL_malloc(sizeof(H5FL_arr_node_t)+mem_size)))
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
             /* Increment the number of blocks allocated in list */
             head->allocated++;
@@ -1211,10 +1214,10 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
             HDmemset(ret_value,0,mem_size);
     } /* end if */
     /* No fixed number of elements, use PQ routine */
-    else {
+    else
         ret_value=H5FL_blk_alloc(&(head->u.queue),mem_size,clear);
-    } /* end else */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_arr_alloc() */
 
@@ -1272,9 +1275,8 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
                 ret_value=obj;
         } /* end if */
         /* No fixed number of elements, use block routine */
-        else {
+        else
             ret_value=H5FL_blk_realloc(&(head->u.queue),obj,head->size*new_elem);
-        } /* end else */
     } /* end else */
 
     FUNC_LEAVE (ret_value);
@@ -1344,9 +1346,8 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
 
     } /* end if */
     /* No maximum number of elements, use the block call to garbage collect */
-    else {
+    else
         H5FL_blk_gc_list(&(head->u.queue));
-    } /* end else */
 
     FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_arr_gc_list() */

@@ -77,12 +77,14 @@ DESCRIPTION
 static herr_t
 H5S_init_interface(void)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOINIT(H5S_init_interface);
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
 		       H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close)<0)
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface");
+	HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 #ifdef H5_HAVE_PARALLEL
     {
@@ -99,7 +101,8 @@ H5S_init_interface(void)
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -295,7 +298,7 @@ H5S_term_interface(void)
 H5S_t *
 H5S_create(H5S_class_t type)
 {
-    H5S_t *ret_value = NULL;
+    H5S_t *ret_value;
 
     FUNC_ENTER_NOAPI(H5S_create, NULL);
 
@@ -303,9 +306,10 @@ H5S_create(H5S_class_t type)
     if((ret_value = H5FL_ALLOC(H5S_t,1))!=NULL) {
         ret_value->extent.type = type;
         if(H5S_select_all(ret_value,0)<0)
-            HRETURN_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
     } /* end if */
 
+done:
     FUNC_LEAVE(ret_value);
 } /* end H5S_create() */
 
@@ -332,7 +336,7 @@ hid_t
 H5Screate(H5S_class_t type)
 {
     H5S_t *new_ds=NULL;         /* New dataspace structure */
-    hid_t ret_value = FAIL;     /* Return value */
+    hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Screate, FAIL);
     H5TRACE1("i","Sc",type);
@@ -465,19 +469,23 @@ H5S_close(H5S_t *ds)
 herr_t
 H5Sclose(hid_t space_id)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_API(H5Sclose, FAIL);
     H5TRACE1("e","i",space_id);
 
     /* Check args */
     if (NULL == H5I_object_verify(space_id,H5I_DATASPACE))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* When the reference count reaches zero the resources are freed */
     if (H5I_dec_ref(space_id) < 0)
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_release_simple
@@ -534,22 +542,28 @@ H5Scopy(hid_t space_id)
 {
     H5S_t	*src = NULL;
     H5S_t	*dst = NULL;
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
     
     FUNC_ENTER_API(H5Scopy, FAIL);
     H5TRACE1("i","i",space_id);
 
     /* Check args */
     if (NULL==(src=H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Copy */
     if (NULL==(dst=H5S_copy (src)))
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy data space");
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy data space");
 
     /* Atomize */
     if ((ret_value=H5I_register (H5I_DATASPACE, dst))<0)
-        HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom");
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom");
+
+done:
+    if(ret_value<0) {
+        if(dst!=NULL)
+            H5S_close(dst);
+    } /* end if */
 
     FUNC_LEAVE (ret_value);
 }
@@ -581,14 +595,15 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
 
     /* Check args */
     if (NULL==(src=H5I_object_verify(src_id, H5I_DATASPACE)))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if (NULL==(dst=H5I_object_verify(dst_id, H5I_DATASPACE)))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Copy */
     if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent");
 
+done:
     FUNC_LEAVE (ret_value);
 }
 
@@ -669,24 +684,29 @@ H5S_t *
 H5S_copy(const H5S_t *src)
 {
     H5S_t		   *dst = NULL;
+    H5S_t		   *ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_copy, NULL);
 
     if (NULL==(dst = H5FL_ALLOC(H5S_t,0)))
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the field in the struct */
     *dst = *src;
 
     /* Copy the source dataspace's extent */
     if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
 
     /* Copy the source dataspace's selection */
     if (H5S_select_copy(dst,src)<0)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy select");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy select");
 
-    FUNC_LEAVE(dst);
+    /* Set the return value */
+    ret_value=dst;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -710,7 +730,7 @@ H5S_copy(const H5S_t *src)
 hssize_t
 H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
-    hssize_t    ret_value = -1;
+    hssize_t    ret_value;
     unsigned		u;
 
     FUNC_ENTER_NOAPI(H5S_get_simple_extent_npoints, -1);
@@ -729,13 +749,14 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
             break;
 
         case H5S_COMPLEX:
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, -1, "complex data spaces are not supported yet");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
 
         default:
             assert("unknown data space class" && 0);
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, -1, "internal error (unknown data space class)");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown data space class)");
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -761,17 +782,18 @@ hssize_t
 H5Sget_simple_extent_npoints(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
-    hssize_t		    ret_value = -1;
+    hssize_t		    ret_value;
 
-    FUNC_ENTER_API(H5Sget_simple_extent_npoints, -1);
+    FUNC_ENTER_API(H5Sget_simple_extent_npoints, FAIL);
     H5TRACE1("Hs","i",space_id);
 
     /* Check args */
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     ret_value = H5S_get_simple_extent_npoints(ds);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -800,7 +822,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
 hsize_t
 H5S_get_npoints_max(const H5S_t *ds)
 {
-    hsize_t	    ret_value = 0;
+    hsize_t	    ret_value;
     unsigned	    u;
 
     FUNC_ENTER_NOAPI(H5S_get_npoints_max, 0);
@@ -831,13 +853,14 @@ H5S_get_npoints_max(const H5S_t *ds)
             break;
 
         case H5S_COMPLEX:
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "complex data spaces are not supported yet");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "complex data spaces are not supported yet");
 
         default:
             assert("unknown data space class" && 0);
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "internal error (unknown data space class)");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "internal error (unknown data space class)");
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -862,17 +885,18 @@ int
 H5Sget_simple_extent_ndims(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
-    int		   ret_value = 0;
+    int		   ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_ndims, FAIL);
     H5TRACE1("Is","i",space_id);
 
     /* Check args */
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     ret_value = H5S_get_simple_extent_ndims(ds);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -897,7 +921,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
 int
 H5S_get_simple_extent_ndims(const H5S_t *ds)
 {
-    int		    ret_value = FAIL;
+    int		    ret_value;
 
     FUNC_ENTER_NOAPI(H5S_get_simple_extent_ndims, FAIL);
 
@@ -914,15 +938,14 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
             break;
 
         case H5S_COMPLEX:
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                  "complex data spaces are not supported yet");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
 
         default:
             assert("unknown data space class" && 0);
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                  "internal error (unknown data space class)");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown data space class)");
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -954,17 +977,18 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
 			  hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
-    int		   ret_value = 0;
+    int		   ret_value;
 
     FUNC_ENTER_API(H5Sget_simple_extent_dims, FAIL);
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
     if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     ret_value = H5S_get_simple_extent_dims(ds, dims, maxdims);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -989,7 +1013,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
 int
 H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
-    int	ret_value = FAIL;
+    int	ret_value;
     int	i;
 
     FUNC_ENTER_NOAPI(H5S_get_simple_extent_dims, FAIL);
@@ -1017,13 +1041,14 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
             break;
 
         case H5S_COMPLEX:
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
 
         default:
             assert("unknown data space class" && 0);
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown data space class)");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown data space class)");
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1046,6 +1071,8 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 herr_t
 H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_modify, FAIL);
 
     assert(ent);
@@ -1055,18 +1082,19 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
         case H5S_SCALAR:
         case H5S_SIMPLE:
             if (H5O_modify(ent, H5O_SDSPACE, 0, 0, &(ds->extent.u.simple))<0)
-                HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
 
         case H5S_COMPLEX:
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not implemented yet");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not implemented yet");
 
         default:
             assert("unknown data space class" && 0);
             break;
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1092,7 +1120,7 @@ H5S_t *
 H5S_read(H5G_entry_t *ent)
 {
     H5S_t		   *ds = NULL;          /* Dataspace to return */
-    H5S_t		   *ret_value = NULL;   /* Return value */
+    H5S_t		   *ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_read, NULL);
 
@@ -1154,6 +1182,7 @@ int
 H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
 {
     unsigned    u;
+    int ret_value=0;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_cmp, 0);
 
@@ -1163,22 +1192,22 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
 
     /* compare */
     if (ds1->extent.type < ds2->extent.type)
-        HRETURN(-1);
+        HGOTO_DONE(-1);
     if (ds1->extent.type > ds2->extent.type)
-        HRETURN(1);
+        HGOTO_DONE(1);
 
     switch (ds1->extent.type) {
         case H5S_SIMPLE:
             if (ds1->extent.u.simple.rank < ds2->extent.u.simple.rank)
-                HRETURN(-1);
+                HGOTO_DONE(-1);
             if (ds1->extent.u.simple.rank > ds2->extent.u.simple.rank)
-                HRETURN(1);
+                HGOTO_DONE(1);
 
             for (u = 0; u < ds1->extent.u.simple.rank; u++) {
                 if (ds1->extent.u.simple.size[u] < ds2->extent.u.simple.size[u])
-                    HRETURN(-1);
+                    HGOTO_DONE(-1);
                 if (ds1->extent.u.simple.size[u] > ds2->extent.u.simple.size[u])
-                    HRETURN(1);
+                    HGOTO_DONE(1);
             }
 
             /* don't compare max dimensions */
@@ -1187,10 +1216,10 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
             for (u = 0; u < ds1->extent.u.simple.rank; u++) {
                 if ((ds1->extent.u.simple.perm ? ds1->extent.u.simple.perm[u] : u) <
                         (ds2->extent.u.simple.perm ? ds2->extent.u.simple.perm[u] : i))
-                    HRETURN(-1);
+                    HGOTO_DONE(-1);
                 if ((ds1->extent.u.simple.perm ? ds2->extent.u.simple.perm[u] : u) >
                         (ds2->extent.u.simple.perm ? ds2->extent.u.simple.perm[u] : i))
-                    HRETURN(1);
+                    HGOTO_DONE(1);
             }
 #endif
 
@@ -1200,7 +1229,8 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
             assert("not implemented yet" && 0);
     }
 
-    FUNC_LEAVE(0);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1221,7 +1251,7 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
 htri_t
 H5S_is_simple(const H5S_t *sdim)
 {
-    htri_t		    ret_value = FAIL;
+    htri_t		    ret_value;
 
     FUNC_ENTER_NOAPI(H5S_is_simple, FAIL);
 
@@ -1252,7 +1282,7 @@ htri_t
 H5Sis_simple(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
-    htri_t		    ret_value = FAIL;
+    htri_t		    ret_value;
 
     FUNC_ENTER_API(H5Sis_simple, FAIL);
     H5TRACE1("b","i",space_id);
@@ -1299,37 +1329,39 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
 {
     H5S_t	*space = NULL;	/* dataspace to modify */
     int	u;	/* local counting variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Sset_extent_simple, FAIL);
     H5TRACE4("e","iIs*[a1]h*[a1]h",space_id,rank,dims,max);
 
     /* Check args */
     if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (rank > 0 && dims == NULL)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
     if (rank<0 || rank>H5S_MAX_RANK)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
     if (dims) {
         for (u=0; u<rank; u++) {
             if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) && dims[u]==0)
-                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimension size");
+                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimension size");
         }
     }
     if (max!=NULL) {
         if(dims==NULL)
-            HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "maximum dimension specified, but no current dimensions specified");
+            HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "maximum dimension specified, but no current dimensions specified");
         for (u=0; u<rank; u++) {
             if (max[u]!=H5S_UNLIMITED && max[u]<dims[u])
-                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid maximum dimension size");
+                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid maximum dimension size");
         }
     }
 
     /* Do it */
     if (H5S_set_extent_simple(space, (unsigned)rank, dims, max)<0)
-	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set simple extent");
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set simple extent");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1352,6 +1384,8 @@ herr_t
 H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 		       const hsize_t *max)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_set_extent_simple, FAIL);
 
     /* Check args */
@@ -1364,7 +1398,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 
     /* Allocate space for the offset and set it to zeros */
     if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,rank,1)))
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->extent.type) {
@@ -1384,8 +1418,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
         /* Fall through to report error */
 
         default:
-            HRETURN_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                  "unknown data space class");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "unknown data space class");
     }
 
     if (rank == 0) {		/* scalar variable */
@@ -1405,7 +1438,9 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
             HDmemcpy(space->extent.u.simple.max, max, sizeof(hsize_t) * rank);
         } /* end if */
     }
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1442,11 +1477,13 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 H5S_conv_t *
 H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
 {
-    H5S_conv_t	*path;  /* Space conversion path */
+    H5S_conv_t	*path=NULL;  /* Space conversion path */
 #ifdef H5_HAVE_PARALLEL
     htri_t opt;         /* Flag whether a selection is optimizable */
 #endif /* H5_HAVE_PARALLEL */
     size_t	i;      /* Index variable */
+    H5S_conv_t *ret_value;   /* Return value */
+
     
     FUNC_ENTER_NOAPI(H5S_find, NULL);
 
@@ -1461,7 +1498,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
      * different number of data points.
      */
     if ((*mem_space->select.get_npoints)(mem_space) != (*file_space->select.get_npoints) (file_space))
-        HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL, "memory and file data spaces are different sizes");
+        HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL, "memory and file data spaces are different sizes");
 
     /*
      * Is this path already present in the data space conversion path table?
@@ -1477,7 +1514,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
              */
             opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
             if(opt==FAIL)
-                HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
             /* Check if we can use the optimized parallel I/O routines */
             if(opt==TRUE) {
@@ -1492,7 +1529,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
             } /* end else */
 #endif /* H5_HAVE_PARALLEL */
 
-            HRETURN(H5S_conv_g[i]);
+            HGOTO_DONE(H5S_conv_g[i]);
         }
     }
     
@@ -1500,7 +1537,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
      * The path wasn't found.  Create a new path.
      */
     if (NULL==(path = H5MM_calloc(sizeof(*path))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path");
 
     /* Initialize file & memory conversion functions */
     path->ftype = file_space->select.type;
@@ -1512,7 +1549,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
      */
     opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
     if(opt==FAIL)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {
@@ -1535,13 +1572,22 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
         H5S_conv_t **p = H5MM_realloc(H5S_conv_g, n*sizeof(H5S_conv_g[0]));
 
         if (NULL==p)
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path table");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path table");
         H5S_aconv_g = n;
         H5S_conv_g = p;
     } /* end if */
     H5S_conv_g[H5S_nconv_g++] = path;
 
-    FUNC_LEAVE(path);
+    /* Set the return value */
+    ret_value=path;
+
+done:
+    if(ret_value==NULL) {
+        if(path!=NULL)
+            H5MM_xfree(path);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1578,7 +1624,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
             if (space->extent.u.simple.max &&
                     H5S_UNLIMITED!=space->extent.u.simple.max[u] &&
                     space->extent.u.simple.max[u]<size[u])
-                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased");
+                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased");
             ret_value++;
         }
     }
@@ -1591,6 +1637,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
         }
     }
 
+done:
     FUNC_LEAVE (ret_value);
 }
 
@@ -1624,7 +1671,7 @@ hid_t
 H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
 		  const hsize_t maxdims[/*rank*/])
 {
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
     H5S_t	*space = NULL;
     int		i;
 
@@ -1693,7 +1740,7 @@ done:
 H5S_class_t
 H5S_get_simple_extent_type(const H5S_t *space)
 {
-    H5S_class_t	ret_value = H5S_NO_CLASS;
+    H5S_class_t	ret_value;
 
     FUNC_ENTER_NOAPI(H5S_get_simple_extent_type, H5S_NO_CLASS);
 
@@ -1726,18 +1773,19 @@ H5S_get_simple_extent_type(const H5S_t *space)
 H5S_class_t
 H5Sget_simple_extent_type(hid_t sid)
 {
-    H5S_class_t	ret_value = H5S_NO_CLASS;
-    H5S_t	*space = NULL;
+    H5S_class_t	ret_value;
+    H5S_t	*space;
 
     FUNC_ENTER_API(H5Sget_simple_extent_type, H5S_NO_CLASS);
     H5TRACE1("Sc","i",sid);
 
     /* Check arguments */
     if (NULL == (space = H5I_object_verify(sid, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
 
     ret_value=H5S_get_simple_extent_type(space);
     
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1760,21 +1808,23 @@ herr_t
 H5Sset_extent_none(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
+    herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Sset_extent_none, FAIL);
     H5TRACE1("e","i",space_id);
 
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     /* Clear the previous extent from the dataspace */
     if(H5S_extent_release(space)<0)
-        HRETURN_ERROR(H5E_RESOURCE, H5E_CANTDELETE, FAIL, "can't release previous dataspace");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTDELETE, FAIL, "can't release previous dataspace");
 
     space->extent.type=H5S_NO_CLASS;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5Sset_extent_none() */
 
 
@@ -1798,26 +1848,28 @@ herr_t
 H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
+    herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Soffset_simple, FAIL);
     H5TRACE2("e","i*Hs",space_id,offset);
 
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (offset == NULL)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
 
     /* Allocate space for new offset */
     if(space->select.offset==NULL) {
         if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,space->extent.u.simple.rank,0)))
-            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
 
     /* Copy the offset over */
     HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.u.simple.rank);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5Soffset_simple() */
 
 
@@ -1839,8 +1891,8 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 herr_t
 H5S_set_extent( H5S_t *space, const hsize_t *size )
 {
-    herr_t ret_value=SUCCEED;
     unsigned u;
+    herr_t ret_value=SUCCEED;
        
     FUNC_ENTER_NOAPI( H5S_set_extent, FAIL );
 
@@ -1856,12 +1908,13 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
         if ( space->extent.u.simple.max &&
                  H5S_UNLIMITED != space->extent.u.simple.max[u] &&
                  space->extent.u.simple.max[u]<size[u] )
-             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
+             HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
 
     /* Update dimensions with new values */
     for ( u = 0; u < space->extent.u.simple.rank; u++ )
         space->extent.u.simple.size[u] = size[u];
 
+done:
     FUNC_LEAVE( ret_value );
 }
 

@@ -152,30 +152,25 @@ H5Z_term_interface (void)
 herr_t
 H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t func)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5Zregister, FAIL);
     H5TRACE3("e","Zfsx",id,comment,func);
 
     /* Check args */
-    if (id<0 || id>H5Z_FILTER_MAX) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "invalid filter identification number");
-    }
-    if (id<256) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "unable to modify predefined filters");
-    }
-    if (!func) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "no function specified");
-    }
+    if (id<0 || id>H5Z_FILTER_MAX)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number");
+    if (id<256)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters");
+    if (!func)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no function specified");
 
     /* Do it */
-    if (H5Z_register (id, comment, func)<0) {
-	HRETURN_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL,
-		       "unable to register filter");
-    }
+    if (H5Z_register (id, comment, func)<0)
+	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -198,6 +193,7 @@ herr_t
 H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 {
     size_t		i;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5Z_register, FAIL);
 
@@ -212,10 +208,8 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 	    size_t n = MAX(32, 2*H5Z_table_alloc_g);
 	    H5Z_class_t *table = H5MM_realloc(H5Z_table_g,
 					      n*sizeof(H5Z_class_t));
-	    if (!table) {
-		HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			      "unable to extend filter table");
-	    }
+	    if (!table)
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend filter table");
 	    H5Z_table_g = table;
 	    H5Z_table_alloc_g = n;
 	}
@@ -233,7 +227,8 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 	H5Z_table_g[i].func = func;
     }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -256,6 +251,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
 	   size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t	idx, i;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5Z_append, FAIL);
 
@@ -268,20 +264,16 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
      * Check filter limit.  We do it here for early warnings although we may
      * decide to relax this restriction in the future.
      */
-    if (pline->nfilters>=32) {
-	HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
-		      "too many filters in pipeline");
-    }
+    if (pline->nfilters>=32)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "too many filters in pipeline");
 
     /* Allocate additional space in the pipeline if it's full */
     if (pline->nfilters>=pline->nalloc) {
 	H5O_pline_t x;
 	x.nalloc = MAX(32, 2*pline->nalloc);
 	x.filter = H5MM_realloc(pline->filter, x.nalloc*sizeof(x.filter[0]));
-	if (NULL==x.filter) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed for filter pipeline");
-	}
+	if (NULL==x.filter)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter pipeline");
 	pline->nalloc = x.nalloc;
 	pline->filter = x.filter;
     }
@@ -294,19 +286,17 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     pline->filter[idx].cd_nelmts = cd_nelmts;
     if (cd_nelmts>0) {
 	pline->filter[idx].cd_values = H5MM_malloc(cd_nelmts*sizeof(unsigned));
-	if (NULL==pline->filter[idx].cd_values) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed for filter");
-	}
-	for (i=0; i<cd_nelmts; i++) {
+	if (NULL==pline->filter[idx].cd_values)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter");
+	for (i=0; i<cd_nelmts; i++)
 	    pline->filter[idx].cd_values[i] = cd_values[i];
-	}
     } else {
        pline->filter[idx].cd_values = NULL;
     }
     pline->nfilters++;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -331,16 +321,17 @@ H5Z_class_t *
 H5Z_find(H5Z_filter_t id)
 {
     size_t	i;
+    H5Z_class_t     *ret_value=NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_find, NULL);
 
     for (i=0; i<H5Z_table_used_g; i++) {
-	if (H5Z_table_g[i].id == id) {
-	    HRETURN(H5Z_table_g+i);
-	}
+	if (H5Z_table_g[i].id == id)
+	    HGOTO_DONE(H5Z_table_g+i);
     }
 
-    FUNC_LEAVE(NULL);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -383,6 +374,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
 #ifdef H5Z_DEBUG
     H5_timer_t	timer;
 #endif
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5Z_pipeline, FAIL);
     
@@ -404,8 +396,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
 	    }
 	    if (NULL==(fclass=H5Z_find(pline->filter[idx].id))) {
 		failed |= (unsigned)1 << idx;
-		HRETURN_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
-			      "required filter is not registered");
+		HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter is not registered");
 	    }
 #ifdef H5Z_DEBUG
 	    H5_timer_begin(&timer);
@@ -421,8 +412,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
 #endif
 	    if (0==new_nbytes) {
 		failed |= (unsigned)1 << idx;
-		HRETURN_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
-			      "filter returned failure");
+		HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure");
 	    }
 	    *nbytes = new_nbytes;
 	}
@@ -438,8 +428,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
 		    H5E_clear();
 		    continue;
 		} else {
-		    HRETURN_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
-				  "required filter is not registered");
+		    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered");
 		}
 	    }
 #ifdef H5Z_DEBUG
@@ -457,8 +446,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
 	    if (0==new_nbytes) {
 		failed |= (unsigned)1 << idx;
 		if (0==(pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
-		    HRETURN_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
-				  "filter returned failure");
+		    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
 		} else {
 		    H5E_clear();
 		}
@@ -469,6 +457,8 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
     }
 
     *filter_mask = failed;
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 

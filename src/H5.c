@@ -71,6 +71,8 @@ static int          	interface_initialize_g = 0;
 herr_t 
 H5_init_library(void)
 {
+    herr_t ret_value=SUCCEED;
+
     FUNC_ENTER_NOAPI(H5_init_library, FAIL);
 
     /*
@@ -115,28 +117,21 @@ H5_init_library(void)
      * & dataset interfaces though, in order to provide them with the proper
      * property classes.
      */
-    if (H5P_init()<0) {
-        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                  "unable to initialize property list interface");
-    }
-    if (H5F_init()<0) {
-        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                  "unable to initialize file interface");
-    }
-    if (H5T_init()<0) {
-        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                  "unable to initialize datatype interface");
-    }
-    if (H5D_init()<0) {
-        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                  "unable to initialize dataset interface");
-    }
+    if (H5P_init()<0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface");
+    if (H5F_init()<0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize file interface");
+    if (H5T_init()<0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface");
+    if (H5D_init()<0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface");
 
     /* Debugging? */
     H5_debug_mask("-all");
     H5_debug_mask(HDgetenv("HDF5_DEBUG"));
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -252,16 +247,19 @@ done:
 herr_t 
 H5dont_atexit(void)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API_NOINIT(H5dont_atexit);
 
     H5_trace(FALSE, "H5dont_atexit", "");
 
     if (dont_atexit_g)
-        HRETURN(FAIL);
+        HGOTO_DONE(FAIL);
 
     dont_atexit_g = TRUE;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -495,6 +493,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
     char	lib_str[256];
     char	substr[] = H5_VERS_SUBRELEASE;
     static int	checked = 0;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API_NOINIT(H5check_version);
     
@@ -513,7 +512,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
     }
 
     if (checked)
-	HRETURN(SUCCEED);
+	HGOTO_DONE(SUCCEED);
     
     checked = 1;
     /*
@@ -539,7 +538,8 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
 		 H5_VERS_SUBRELEASE, H5_VERS_INFO);
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

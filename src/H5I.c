@@ -259,19 +259,24 @@ H5I_nmembers(H5I_type_t grp)
     H5I_id_info_t	*cur=NULL;
     int		n=0;
     unsigned		i;
+    int		ret_value;
 
     FUNC_ENTER_NOAPI(H5I_nmembers, FAIL);
 
     if (grp<=H5I_BADID || grp>=H5I_NGROUPS)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     if (NULL==(grp_ptr=H5I_id_group_list_g[grp]) || grp_ptr->count<=0)
-	HRETURN(0);
+	HGOTO_DONE(0);
 
     for (i=0; i<grp_ptr->hash_size; i++)
 	for (cur=grp_ptr->id_list[i]; cur; cur=cur->next)
 	    n++;
 
-    FUNC_LEAVE(n);
+    /* Set return value */
+    ret_value=n;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -874,14 +879,14 @@ H5I_dec_ref(hid_t id)
     H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
-    int		ret_value = FAIL;	/*return value		*/
+    int		ret_value;	/*return value		*/
 
     FUNC_ENTER_NOAPI(H5I_dec_ref, FAIL);
 
     /* Check arguments */
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     
     /* General lookup of the ID */
     if ((id_ptr=H5I_find_id(id))) {
@@ -907,6 +912,8 @@ H5I_dec_ref(hid_t id)
 	    ret_value = --(id_ptr->count);
 	}
     }
+
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -933,22 +940,27 @@ H5I_inc_ref(hid_t id)
     H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the ID		*/
+    int ret_value;                              /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_inc_ref, FAIL);
 
     /* Check arguments */
     if (id<0)
-	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
     grp_ptr = H5I_id_group_list_g[grp];
     if (!grp_ptr || grp_ptr->count<=0)
-	HRETURN_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
 
     /* General lookup of the ID */
     if (NULL==(id_ptr=H5I_find_id(id)))
-	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
     id_ptr->count++;
 
-    FUNC_LEAVE(id_ptr->count);
+    /* Set return value */
+    ret_value=id_ptr->count;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

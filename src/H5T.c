@@ -277,6 +277,7 @@ H5T_init_interface(void)
     H5T_t	*array=NULL;            /* Datatype structure for array objects */
     hsize_t     dim[1]={1};             /* Dimension info for array datatype */
     herr_t	status;
+    unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
     herr_t	ret_value=SUCCEED;
 
     FUNC_ENTER_NOINIT(H5T_init_interface);
@@ -339,10 +340,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 8;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT8_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     if (H5T_NATIVE_UINT8_g<0) {
         /* Base off of native datatype */
@@ -355,10 +354,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 8;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT8_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_LEAST8_g<0) {
         /* Base off of native datatype */
@@ -371,10 +368,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 8;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_LEAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_LEAST8_g<0) {
         /* Base off of native datatype */
@@ -387,10 +382,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 8;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_LEAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_FAST8_g<0) {
         /* Base off of native datatype */
@@ -403,10 +396,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 8;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_FAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_FAST8_g<0) {
         /* Base off of native datatype */
@@ -419,10 +410,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 8;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_FAST8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     
     /* int16 */
@@ -437,10 +426,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 16;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT16_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT16_g<0) {
         /* Base off of native datatype */
@@ -453,10 +440,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 16;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT16_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_LEAST16_g<0) {
         /* Base off of native datatype */
@@ -469,10 +454,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 16;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_LEAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_LEAST16_g<0) {
         /* Base off of native datatype */
@@ -485,10 +468,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 16;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_LEAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_FAST16_g<0) {
         /* Base off of native datatype */
@@ -501,10 +482,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 16;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_FAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_FAST16_g<0) {
         /* Base off of native datatype */
@@ -517,10 +496,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 16;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_FAST16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     
     /* int32 */
@@ -535,10 +512,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 32;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT32_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT32_g<0) {
         /* Base off of native datatype */
@@ -551,10 +526,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 32;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT32_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_LEAST32_g<0) {
         /* Base off of native datatype */
@@ -567,10 +540,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 32;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_LEAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_LEAST32_g<0) {
         /* Base off of native datatype */
@@ -583,10 +554,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 32;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_LEAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_FAST32_g<0) {
         /* Base off of native datatype */
@@ -599,10 +568,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 32;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_FAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_FAST32_g<0) {
         /* Base off of native datatype */
@@ -615,10 +582,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 32;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_FAST32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     
     /* int64 */
@@ -633,10 +598,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 64;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT64_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT64_g<0) {
         /* Base off of native datatype */
@@ -649,10 +612,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 64;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT64_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_LEAST64_g<0) {
         /* Base off of native datatype */
@@ -665,10 +626,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 64;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_LEAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_LEAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_LEAST64_g<0) {
         /* Base off of native datatype */
@@ -681,10 +640,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 64;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_LEAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_LEAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_INT_FAST64_g<0) {
         /* Base off of native datatype */
@@ -697,10 +654,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 64;
 
         /* Atomize result */
-        if ((H5T_NATIVE_INT_FAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_INT_FAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     if (H5T_NATIVE_UINT_FAST64_g<0) {
         /* Base off of native datatype */
@@ -713,10 +668,8 @@ H5T_init_interface(void)
 	dt->u.atomic.prec = 64;
 
         /* Atomize result */
-        if ((H5T_NATIVE_UINT_FAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_UINT_FAST64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     }
     
 
@@ -738,10 +691,8 @@ H5T_init_interface(void)
         dt->u.atomic.prec = 8;
 
         /* Atomize result */
-        if ((H5T_NATIVE_B8_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_B8_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 2-byte bit field */
@@ -757,10 +708,8 @@ H5T_init_interface(void)
         dt->u.atomic.prec = 16;
 
         /* Atomize result */
-        if ((H5T_NATIVE_B16_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_B16_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 4-byte bit field */
@@ -776,10 +725,8 @@ H5T_init_interface(void)
         dt->u.atomic.prec = 32;
 
         /* Atomize result */
-        if ((H5T_NATIVE_B32_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_B32_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 8-byte bit field */
@@ -795,29 +742,10 @@ H5T_init_interface(void)
         dt->u.atomic.prec = 64;
 
         /* Atomize result */
-        if ((H5T_NATIVE_B64_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_B64_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
-    /* Opaque data */
-    if(H5T_NATIVE_OPAQUE_g<0) {
-        if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-        /* Set information */
-        dt->state = H5T_STATE_IMMUTABLE;
-        dt->ent.header = HADDR_UNDEF;
-        dt->type = H5T_OPAQUE;
-        dt->size = 1;
-        dt->u.opaque.tag = H5MM_strdup("");
-
-        /* Atomize result */
-        if ((H5T_NATIVE_OPAQUE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
-    } /* end if */
-
     /* haddr_t */
     if(H5T_NATIVE_HADDR_g<0) {
         /* Base off of native datatype */
@@ -831,10 +759,8 @@ H5T_init_interface(void)
         dt->u.atomic.offset = 0;
 
         /* Atomize result */
-        if ((H5T_NATIVE_HADDR_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_HADDR_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
 
     /* hsize_t */
@@ -850,10 +776,8 @@ H5T_init_interface(void)
         dt->u.atomic.offset = 0;
 
         /* Atomize result */
-        if ((H5T_NATIVE_HSIZE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_HSIZE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* hssize_t */
@@ -869,10 +793,8 @@ H5T_init_interface(void)
         dt->u.atomic.offset = 0;
 
         /* Atomize result */
-        if ((H5T_NATIVE_HSSIZE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_HSSIZE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* herr_t */
@@ -888,10 +810,8 @@ H5T_init_interface(void)
         dt->u.atomic.offset = 0;
 
         /* Atomize result */
-        if ((H5T_NATIVE_HERR_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_HERR_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
 
     /* hbool_t */
@@ -907,10 +827,8 @@ H5T_init_interface(void)
         dt->u.atomic.offset = 0;
 
         /* Atomize result */
-        if ((H5T_NATIVE_HBOOL_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_NATIVE_HBOOL_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
 
     /*------------------------------------------------------------
@@ -942,10 +860,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
         /* Atomize result */
-        if ((H5T_IEEE_F32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_IEEE_F32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
 
     /* IEEE 4-byte big-endian float */
@@ -972,10 +888,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
         /* Atomize result */
-        if ((H5T_IEEE_F32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_IEEE_F32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
 
     /* IEEE 8-byte little-endian float */
@@ -1002,10 +916,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
         /* Atomize result */
-        if ((H5T_IEEE_F64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_IEEE_F64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
 
     /* IEEE 8-byte big-endian float */
@@ -1032,10 +944,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
         /* Atomize result */
-        if ((H5T_IEEE_F64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_IEEE_F64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
 
     /*------------------------------------------------------------
@@ -1061,10 +971,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 1-byte big-endian (endianness is irrelevant) signed integer */
@@ -1084,10 +992,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 2-byte little-endian signed integer */
@@ -1107,10 +1013,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 2-byte big-endian signed integer */
@@ -1130,10 +1034,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 4-byte little-endian signed integer */
@@ -1153,10 +1055,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 4-byte big-endian signed integer */
@@ -1176,10 +1076,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 8-byte little-endian signed integer */
@@ -1199,10 +1097,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 8-byte big-endian signed integer */
@@ -1222,10 +1118,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_2;
 
         /* Atomize result */
-        if ((H5T_STD_I64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_I64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 1-byte little-endian (endianness is irrelevant) unsigned integer */
@@ -1245,10 +1139,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register little-endian (order is irrelevant) 8-bit bitfield now also
@@ -1262,10 +1154,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B8LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 1-byte big-endian (endianness is irrelevant) unsigned integer */
@@ -1285,10 +1175,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register big-endian (order is irrelevant) 8-bit bitfield now also
@@ -1302,10 +1190,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B8BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 2-byte little-endian unsigned integer */
@@ -1325,10 +1211,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register little-endian 16-bit bitfield now also
@@ -1342,10 +1226,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B16LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 2-byte big-endian unsigned integer */
@@ -1365,10 +1247,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register big-endian 16-bit bitfield now also
@@ -1382,10 +1262,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B16BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 4-byte little-endian unsigned integer */
@@ -1405,10 +1283,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register little-endian 32-bit bitfield now also
@@ -1422,10 +1298,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register 4-byte little-endian UNIX time_t now also
@@ -1439,10 +1313,8 @@ H5T_init_interface(void)
         dt->type = H5T_TIME;
 
         /* Atomize result */
-        if ((H5T_UNIX_D32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_UNIX_D32LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 4-byte big-endian unsigned integer */
@@ -1462,10 +1334,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register big-endian 32-bit bitfield now also
@@ -1479,10 +1349,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register 4-byte big-endian UNIX time_t now also
@@ -1496,10 +1364,8 @@ H5T_init_interface(void)
         dt->type = H5T_TIME;
 
         /* Atomize result */
-        if ((H5T_UNIX_D32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_UNIX_D32BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 8-byte little-endian unsigned integer */
@@ -1519,10 +1385,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register little-endian 64-bit bitfield now also
@@ -1536,10 +1400,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register 8-byte little-endian UNIX time_t now also
@@ -1553,10 +1415,8 @@ H5T_init_interface(void)
         dt->type = H5T_TIME;
 
         /* Atomize result */
-        if ((H5T_UNIX_D64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_UNIX_D64LE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
     /* 8-byte big-endian unsigned integer */
@@ -1576,10 +1436,8 @@ H5T_init_interface(void)
         dt->u.atomic.u.i.sign = H5T_SGN_NONE;
 
         /* Atomize result */
-        if ((H5T_STD_U64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_U64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register big-endian 64-bit bitfield now also
@@ -1593,10 +1451,8 @@ H5T_init_interface(void)
         dt->type = H5T_BITFIELD;
 
         /* Atomize result */
-        if ((H5T_STD_B64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_STD_B64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
 
         /*
          * Register 8-byte big-endian UNIX time_t now also
@@ -1610,10 +1466,8 @@ H5T_init_interface(void)
         dt->type = H5T_TIME;
 
         /* Atomize result */
-        if ((H5T_UNIX_D64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
-            H5T_close(dt);
+        if ((H5T_UNIX_D64BE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
-        } /* end if */
     } /* end if */
     
 
@@ -1630,6 +1484,28 @@ H5T_init_interface(void)
      */
 
      /* Moved into the U32LE, U32BE, U64LE & U64BE sections */
+
+    /* Indicate that the types that are created from here down are allocated
+     * H5FL_ALLOC(), not copied with H5T_copy()
+     */
+     copied_dtype=0;
+
+    /* Opaque data */
+    if(H5T_NATIVE_OPAQUE_g<0) {
+        if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+        /* Set information */
+        dt->state = H5T_STATE_IMMUTABLE;
+        dt->ent.header = HADDR_UNDEF;
+        dt->type = H5T_OPAQUE;
+        dt->size = 1;
+        dt->u.opaque.tag = H5MM_strdup("");
+
+        /* Atomize result */
+        if ((H5T_NATIVE_OPAQUE_g = H5I_register(H5I_DATATYPE, dt)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
+    } /* end if */
 
     /*------------------------------------------------------------
      * The `C' architecture
@@ -1733,27 +1609,27 @@ H5T_init_interface(void)
      * ending with the most specific.
      */
     if (NULL == (fixedpt = H5I_object(H5T_NATIVE_INT_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (floatpt = H5I_object(H5T_NATIVE_FLOAT_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (string = H5I_object(H5T_C_S1_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (bitfield = H5I_object(H5T_STD_B8LE_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (compound = H5T_create(H5T_COMPOUND, 1)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (enum_type = H5T_create(H5T_ENUM, 1)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (vlen = H5T_vlen_create(native_int)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (array = H5T_array_create(native_int,1,dim,NULL)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL==(std_u32le=H5I_object(H5T_STD_U32LE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL==(std_i32le=H5I_object(H5T_STD_I32LE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL==(ieee_f64le=H5I_object(H5T_IEEE_F64LE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     status = 0;
 
     status |= H5T_register(H5T_PERS_SOFT, "i_i", fixedpt, fixedpt, H5T_conv_i_i);
@@ -1897,6 +1773,7 @@ H5T_init_interface(void)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)");
     
 done:
+    /* General cleanup */
     if (compound!=NULL)
         H5T_close(compound);
     if (enum_type!=NULL)
@@ -1905,6 +1782,18 @@ done:
         H5T_close(vlen);
     if (array!=NULL)
         H5T_close(array);
+
+    /* Error cleanup */
+    if(ret_value<0) {
+        if(dt!=NULL) {
+            /* Check if we should call H5T_close or H5FL_FREE */
+            if(copied_dtype)
+                H5T_close(dt);
+            else
+                H5FL_FREE(H5T_t,dt);
+        } /* end if */
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -1933,11 +1822,10 @@ H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void UNUSED *key)
     FUNC_ENTER_NOINIT(H5T_unlock_cb);
 
     assert (dt);
-    if (H5T_STATE_IMMUTABLE==dt->state) {
+    if (H5T_STATE_IMMUTABLE==dt->state)
 	dt->state = H5T_STATE_RDONLY;
-    }
 
-    FUNC_LEAVE (0);
+    FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -2135,23 +2023,24 @@ hid_t
 H5Tcreate(H5T_class_t type, size_t size)
 {
     H5T_t	*dt = NULL;
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tcreate, FAIL);
     H5TRACE2("i","Ttz",type,size);
 
     /* check args */
     if (size <= 0)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size");
 
     /* create the type */
     if (NULL == (dt = H5T_create(type, size)))
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create type");
 
     /* Make it an atom */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt)) < 0)
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -2177,31 +2066,30 @@ H5Topen(hid_t loc_id, const char *name)
 {
     H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
     
     FUNC_ENTER_API(H5Topen, FAIL);
     H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
 
     /* Open it */
-    if (NULL==(type=H5T_open (loc, name))) {
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL,
-		       "unable to open named data type");
-    }
+    if (NULL==(type=H5T_open (loc, name)))
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named data type");
 
     /* Register the type and return the ID */
-    if ((ret_value=H5I_register (H5I_DATATYPE, type))<0) {
-	H5T_close (type);
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-		       "unable to register named data type");
-    }
+    if ((ret_value=H5I_register (H5I_DATATYPE, type))<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named data type");
+
+done:
+    if(ret_value<0) {
+        if(type!=NULL)
+            H5T_close (type);
+    } /* end if */
 
     FUNC_LEAVE (ret_value);
 }
@@ -2227,27 +2115,25 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 {
     H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Tcommit, FAIL);
     H5TRACE3("e","isi",loc_id,name,type_id);
 
     /* Check arguments */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     if (NULL==(type=H5I_object_verify(type_id, H5I_DATATYPE)))
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Commit the type */
-    if (H5T_commit (loc, name, type)<0) {
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "unable to commit data type");
-    }
+    if (H5T_commit (loc, name, type)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit data type");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2271,15 +2157,20 @@ htri_t
 H5Tcommitted(hid_t type_id)
 {
     H5T_t	*type = NULL;
+    htri_t      ret_value;       /* Return value */
     
     FUNC_ENTER_API(H5Tcommitted, FAIL);
     H5TRACE1("b","i",type_id);
 
     /* Check arguments */
     if (NULL==(type=H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
-    FUNC_LEAVE (H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
+    /* Set return value */
+    ret_value= (H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
+
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2313,7 +2204,7 @@ H5Tcopy(hid_t type_id)
     H5T_t	*dt = NULL;
     H5T_t	*new_dt = NULL;
     H5D_t	*dset = NULL;
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tcopy, FAIL);
     H5TRACE1("i","i",type_id);
@@ -2322,31 +2213,35 @@ H5Tcopy(hid_t type_id)
         case H5I_DATATYPE:
             /* The argument is a data type handle */
             if (NULL==(dt=H5I_object (type_id)))
-                HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
             break;
 
         case H5I_DATASET:
             /* The argument is a dataset handle */
             if (NULL==(dset=H5I_object (type_id)))
-                HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
             if (NULL==(dt=H5D_typeof (dset)))
-                HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get the dataset data type");
+                HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get the dataset data type");
             break;
 
         default:
-            HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type or dataset");
+            HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type or dataset");
     } /* end switch */
 
     /* Copy */
     if (NULL == (new_dt = H5T_copy(dt, H5T_COPY_TRANSIENT)))
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy");
 
     /* Atomize result */
-    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt)) < 0) {
-	H5T_close(new_dt);
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
-    } /* end if */
+    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt)) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
     
+done:
+    if(ret_value<0) {
+        if(new_dt!=NULL)
+            H5T_close(new_dt);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 } /* end H5Tcopy() */
 
@@ -2369,23 +2264,23 @@ herr_t
 H5Tclose(hid_t type_id)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tclose, FAIL);
     H5TRACE1("e","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_IMMUTABLE==dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_IMMUTABLE==dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable data type");
 
     /* When the reference count reaches zero the resources are freed */
-    if (H5I_dec_ref(type_id) < 0) {
-	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
-    }
+    if (H5I_dec_ref(type_id) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2412,7 +2307,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
 {
     const H5T_t		*dt1 = NULL;
     const H5T_t		*dt2 = NULL;
-    htri_t		ret_value = FAIL;
+    htri_t		ret_value;
 
     FUNC_ENTER_API(H5Tequal, FAIL);
     H5TRACE2("b","ii",type1_id,type2_id);
@@ -2420,10 +2315,11 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     /* check args */
     if (NULL == (dt1 = H5I_object_verify(type1_id,H5I_DATATYPE)) ||
             NULL == (dt2 = H5I_object_verify(type2_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     ret_value = (0 == H5T_cmp(dt1, dt2)) ? TRUE : FALSE;
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -2456,23 +2352,22 @@ herr_t
 H5Tlock(hid_t type_id)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tlock, FAIL);
     H5TRACE1("e","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_NAMED==dt->state || H5T_STATE_OPEN==dt->state) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "unable to lock named data type");
-    }
-    if (H5T_lock (dt, TRUE)<0) {
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "unable to lock transient data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_NAMED==dt->state || H5T_STATE_OPEN==dt->state)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to lock named data type");
+
+    if (H5T_lock (dt, TRUE)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient data type");
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2497,15 +2392,20 @@ H5T_class_t
 H5Tget_class(hid_t type_id)
 {
     H5T_t	*dt = NULL;
+    H5T_class_t ret_value;       /* Return value */
 
     FUNC_ENTER_API(H5Tget_class, H5T_NO_CLASS);
     H5TRACE1("Tt","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
+
+    /* Set return value */
+    ret_value= H5T_get_class(dt);
     
-    FUNC_LEAVE(H5T_get_class(dt));
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2565,18 +2465,22 @@ htri_t
 H5Tdetect_class(hid_t type, H5T_class_t cls)
 {
     H5T_t	*dt = NULL;
+    htri_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Tdetect_class, FAIL);
     H5TRACE2("b","iTt",type,cls);
     
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type,H5I_DATATYPE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
-    if (!(cls>H5T_NO_CLASS && cls<H5T_NCLASSES)) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type class");
-    }
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
+    if (!(cls>H5T_NO_CLASS && cls<H5T_NCLASSES))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type class");
 
-    FUNC_LEAVE(H5T_detect_class(dt,cls));
+    /* Set return value */
+    ret_value=H5T_detect_class(dt,cls);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2599,6 +2503,7 @@ htri_t
 H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
 {
     int		i;
+    htri_t      ret_value=FALSE;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_detect_class, FAIL);
     
@@ -2607,7 +2512,7 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
 
     /* Check if this type is the correct type */
     if(dt->type==cls)
-        HRETURN(TRUE);
+        HGOTO_DONE(TRUE);
 
     /* check for types that might have the correct type as a component */
     switch(dt->type) {
@@ -2615,24 +2520,25 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
             for (i=0; i<dt->u.compnd.nmembs; i++) {
                 /* Check if this field's type is the correct type */
                 if(dt->u.compnd.memb[i].type->type==cls)
-                    HRETURN(TRUE);
+                    HGOTO_DONE(TRUE);
 
                 /* Recurse if it's VL, compound or array */
                 if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY)
-                    HRETURN(H5T_detect_class(dt->u.compnd.memb[i].type,cls));
+                    HGOTO_DONE(H5T_detect_class(dt->u.compnd.memb[i].type,cls));
             } /* end for */
             break;
 
         case H5T_ARRAY:
         case H5T_VLEN:
         case H5T_ENUM:
-            HRETURN(H5T_detect_class(dt->parent,cls));
+            HGOTO_DONE(H5T_detect_class(dt->parent,cls));
 
         default:
             break;
     } /* end if */
 
-    FUNC_LEAVE (FALSE);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2658,19 +2564,20 @@ size_t
 H5Tget_size(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    size_t	size;
+    size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_size, 0);
     H5TRACE1("z","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
     
     /* size */
-    size = H5T_get_size(dt);
+    ret_value = H5T_get_size(dt);
 
-    FUNC_LEAVE(size);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5Tget_size() */
 
 
@@ -2706,37 +2613,30 @@ herr_t
 H5Tset_size(hid_t type_id, size_t size)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_size, FAIL);
     H5TRACE2("e","iz",type_id,size);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (size <= 0 && size!=H5T_VARIABLE) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive");
-    }
-    if (size == H5T_VARIABLE && dt->type!=H5T_STRING) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
-    }
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not allowed after members are defined");
-    }
-    if (H5T_COMPOUND==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for this datatype");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (size <= 0 && size!=H5T_VARIABLE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive");
+    if (size == H5T_VARIABLE && dt->type!=H5T_STRING)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+    if (H5T_COMPOUND==dt->type || H5T_ARRAY==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
 
     /* Do the work */
-    if (H5T_set_size(dt, size)<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to set size for data type");
-    }
+    if (H5T_set_size(dt, size)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for data type");
 
+done:
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2763,27 +2663,26 @@ H5T_order_t
 H5Tget_order(hid_t type_id)
 {
     H5T_t		*dt = NULL;
-    H5T_order_t		order;
+    H5T_order_t		ret_value;
 
     FUNC_ENTER_API(H5Tget_order, H5T_ORDER_ERROR);
     H5TRACE1("To","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR, "not a data type");
 
     if (dt->parent)
         dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY ==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
-		      "operation not defined for specified data type");
-    }
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY ==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Order */
     assert(H5T_is_atomic(dt));
-    order = dt->u.atomic.order;
+    ret_value = dt->u.atomic.order;
 
-    FUNC_LEAVE(order);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2807,33 +2706,31 @@ herr_t
 H5Tset_order(hid_t type_id, H5T_order_t order)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_order, FAIL);
     H5TRACE2("e","iTo",type_id,order);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (order < 0 || order > H5T_ORDER_NONE) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order");
-    }
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not allowed after members are defined");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
-		      "operation not defined for specified data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (order < 0 || order > H5T_ORDER_NONE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order");
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Commit */
     assert(H5T_is_atomic(dt));
     dt->u.atomic.order = order;
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2863,25 +2760,25 @@ size_t
 H5Tget_precision(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    size_t	prec;
+    size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_precision, 0);
     H5TRACE1("z","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
-    if (dt->parent) dt = dt->parent;	/*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0,
-		      "operation not defined for specified data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
+    if (dt->parent)
+        dt = dt->parent;	/*defer to parent*/
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified data type");
     
     /* Precision */
     assert(H5T_is_atomic(dt));
-    prec = dt->u.atomic.prec;
+    ret_value = dt->u.atomic.prec;
 
-    FUNC_LEAVE(prec);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2918,32 +2815,27 @@ herr_t
 H5Tset_precision(hid_t type_id, size_t prec)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_precision, FAIL);
     H5TRACE2("e","iz",type_id,prec);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (prec <= 0) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "precision must be positive");
-    }
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not allowed after members are defined");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (prec <= 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive");
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
 
     /* Do the work */
-    if (H5T_set_precision(dt, prec)<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to set precision");
-    }
+    if (H5T_set_precision(dt, prec)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set precision");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2985,25 +2877,25 @@ int
 H5Tget_offset(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    int	offset;
+    int	ret_value;
 
     FUNC_ENTER_API(H5Tget_offset, -1);
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for specified data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
     
     /* Offset */
     assert(H5T_is_atomic(dt));
-    offset = (int)dt->u.atomic.offset;
+    ret_value = (int)dt->u.atomic.offset;
 
-    FUNC_LEAVE(offset);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3050,32 +2942,27 @@ herr_t
 H5Tset_offset(hid_t type_id, size_t offset)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_offset, FAIL);
     H5TRACE2("e","iz",type_id,offset);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (H5T_STRING == dt->type && offset != 0) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "offset must be zero for this type");
-    }
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not allowed after members are defined");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (H5T_STRING == dt->type && offset != 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset must be zero for this type");
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
 
     /* Do the real work */
-    if (H5T_set_offset(dt, offset)<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to set offset");
-    }
+    if (H5T_set_offset(dt, offset)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3101,25 +2988,28 @@ herr_t
 H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tget_pad, FAIL);
     H5TRACE3("e","ixx",type_id,lsb,msb);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for specified data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
     
     /* Get values */
     assert(H5T_is_atomic(dt));
-    if (lsb) *lsb = dt->u.atomic.lsb_pad;
-    if (msb) *msb = dt->u.atomic.msb_pad;
+    if (lsb)
+        *lsb = dt->u.atomic.lsb_pad;
+    if (msb)
+        *msb = dt->u.atomic.msb_pad;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3143,35 +3033,32 @@ herr_t
 H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 {
     H5T_t *dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_pad, FAIL);
     H5TRACE3("e","iTpTp",type_id,lsb,msb);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (lsb < 0 || lsb >= H5T_NPAD || msb < 0 || msb >= H5T_NPAD) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pad type");
-    }
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not allowed after members are defined");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for specified data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (lsb < 0 || lsb >= H5T_NPAD || msb < 0 || msb >= H5T_NPAD)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pad type");
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
 
     /* Commit */
     assert(H5T_is_atomic(dt));
     dt->u.atomic.lsb_pad = lsb;
     dt->u.atomic.msb_pad = msb;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3196,24 +3083,24 @@ H5T_sign_t
 H5Tget_sign(hid_t type_id)
 {
     H5T_t		*dt = NULL;
-    H5T_sign_t		sign;
+    H5T_sign_t		ret_value;
 
     FUNC_ENTER_API(H5Tget_sign, H5T_SGN_ERROR);
     H5TRACE1("Ts","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not an integer data type");
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_INTEGER!=dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not an integer data type");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_INTEGER!=dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for data type class");
     
     /* Sign */
-    sign = dt->u.atomic.u.i.sign;
+    ret_value = dt->u.atomic.u.i.sign;
 
-    FUNC_LEAVE(sign);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3237,32 +3124,30 @@ herr_t
 H5Tset_sign(hid_t type_id, H5T_sign_t sign)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_sign, FAIL);
     H5TRACE2("e","iTs",type_id,sign);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (sign < 0 || sign >= H5T_NSGN) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type");
-    }
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not allowed after members are defined");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_INTEGER!=dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (sign < 0 || sign >= H5T_NSGN)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type");
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_INTEGER!=dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */
     dt->u.atomic.u.i.sign = sign;
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3295,19 +3180,18 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
 	      size_t *mpos/*out*/, size_t *msize/*out*/)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tget_fields, FAIL);
     H5TRACE6("e","ixxxxx",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (dt->parent)
         dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Get values */
     if (spos) *spos = dt->u.atomic.u.f.sign;
@@ -3316,7 +3200,8 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     if (mpos) *mpos = dt->u.atomic.u.f.mpos;
     if (msize) *msize = dt->u.atomic.u.f.msize;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3347,48 +3232,35 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 	      size_t mpos, size_t msize)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_fields, FAIL);
     H5TRACE6("e","izzzzz",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
-    if (epos + esize > dt->u.atomic.prec) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "exponent bit field size/location is invalid");
-    }
-    if (mpos + msize > dt->u.atomic.prec) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "mantissa bit field size/location is invalid");
-    }
-    if (spos >= dt->u.atomic.prec) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "sign location is not valid");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+    if (epos + esize > dt->u.atomic.prec)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent bit field size/location is invalid");
+    if (mpos + msize > dt->u.atomic.prec)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mantissa bit field size/location is invalid");
+    if (spos >= dt->u.atomic.prec)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign location is not valid");
     
     /* Check for overlap */
-    if (spos >= epos && spos < epos + esize) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "sign bit appears within exponent field");
-    }
-    if (spos >= mpos && spos < mpos + msize) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "sign bit appears within mantissa field");
-    }
+    if (spos >= epos && spos < epos + esize)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within exponent field");
+    if (spos >= mpos && spos < mpos + msize)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within mantissa field");
     if ((mpos < epos && mpos + msize > epos) ||
-	(epos < mpos && epos + esize > mpos)) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "exponent and mantissa fields overlap");
-    }
+            (epos < mpos && epos + esize > mpos))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent and mantissa fields overlap");
     
     /* Commit */
     dt->u.atomic.u.f.sign = spos;
@@ -3397,7 +3269,8 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     dt->u.atomic.u.f.esize = esize;
     dt->u.atomic.u.f.msize = msize;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3422,24 +3295,24 @@ size_t
 H5Tget_ebias(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    size_t	ebias;
+    size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_ebias, 0);
     H5TRACE1("z","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for data type class");
     
     /* bias */
-    H5_ASSIGN_OVERFLOW(ebias,dt->u.atomic.u.f.ebias,uint64_t,size_t);
+    H5_ASSIGN_OVERFLOW(ret_value,dt->u.atomic.u.f.ebias,uint64_t,size_t);
 
-    FUNC_LEAVE(ebias);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3463,26 +3336,26 @@ herr_t
 H5Tset_ebias(hid_t type_id, size_t ebias)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_ebias, FAIL);
     H5TRACE2("e","iz",type_id,ebias);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
 
     /* Commit */
     dt->u.atomic.u.f.ebias = ebias;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3509,24 +3382,24 @@ H5T_norm_t
 H5Tget_norm(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    H5T_norm_t	norm;
+    H5T_norm_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_norm, H5T_NORM_ERROR);
     H5TRACE1("Tn","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a data type");
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a data type");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR, "operation not defined for data type class");
     
     /* norm */
-    norm = dt->u.atomic.u.f.norm;
+    ret_value = dt->u.atomic.u.f.norm;
 
-    FUNC_LEAVE(norm);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3551,28 +3424,28 @@ herr_t
 H5Tset_norm(hid_t type_id, H5T_norm_t norm)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_norm, FAIL);
     H5TRACE2("e","iTn",type_id,norm);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (norm < 0 || norm > H5T_NORM_NONE) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (norm < 0 || norm > H5T_NORM_NONE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */
     dt->u.atomic.u.f.norm = norm;
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3601,24 +3474,24 @@ H5T_pad_t
 H5Tget_inpad(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    H5T_pad_t	pad;
+    H5T_pad_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_inpad, H5T_PAD_ERROR);
     H5TRACE1("Tp","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a data type");
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_PAD_ERROR,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a data type");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_PAD_ERROR, "operation not defined for data type class");
     
     /* pad */
-    pad = dt->u.atomic.u.f.pad;
+    ret_value = dt->u.atomic.u.f.pad;
 
-    FUNC_LEAVE(pad);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3645,29 +3518,28 @@ herr_t
 H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_inpad, FAIL);
     H5TRACE2("e","iTp",type_id,pad);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (pad < 0 || pad >= H5T_NPAD) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "illegal internal pad type");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (pad < 0 || pad >= H5T_NPAD)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal internal pad type");
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
+    if (H5T_FLOAT != dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */
     dt->u.atomic.u.f.pad = pad;
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3695,33 +3567,30 @@ H5T_cset_t
 H5Tget_cset(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    H5T_cset_t	cset;
+    H5T_cset_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_cset, H5T_CSET_ERROR);
     H5TRACE1("Tc","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR, "not a data type");
     /* Don't see any reason for this.  Causes problem for variable-length
      *  string. -SLU (& QAK) */
     /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
-        dt->u.vlen.type))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_CSET_ERROR,
-		      "operation not defined for data type class");
-    }
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_CSET_ERROR, "operation not defined for data type class");
     
     /* result */
     if(H5T_STRING == dt->type)
-        cset = dt->u.atomic.u.s.cset;
+        ret_value = dt->u.atomic.u.s.cset;
     else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
-        cset = dt->u.vlen.cset;
+        ret_value = dt->u.vlen.cset;
     else
-        HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_CSET_ERROR,
-                      "can't get cset info");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_CSET_ERROR, "can't get cset info");
 
-    FUNC_LEAVE(cset);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3747,28 +3616,23 @@ herr_t
 H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_cset, FAIL);
     H5TRACE2("e","iTc",type_id,cset);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (cset < 0 || cset >= H5T_NCSET) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "illegal character set type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (cset < 0 || cset >= H5T_NCSET)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal character set type");
     /* Don't see any reason for this.  Causes problem for variable-length
      *  string. -SLU (& QAK) */
     /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
-        dt->u.vlen.type))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */
     if(H5T_STRING == dt->type)
@@ -3776,10 +3640,10 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
         dt->u.vlen.cset = cset;
     else
-        HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
-                      "can't set cset info");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "can't set cset info");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3808,33 +3672,30 @@ H5T_str_t
 H5Tget_strpad(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    H5T_str_t	strpad;
+    H5T_str_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_strpad, H5T_STR_ERROR);
     H5TRACE1("Tz","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a data type");
     /* Don't see any reason for this.  Causes problem for variable-length
      *  string. -SLU (& QAK) */
     /* if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
-        dt->u.vlen.type))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_STR_ERROR,
-		      "operation not defined for data type class");
-    }
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_STR_ERROR, "operation not defined for data type class");
     
     /* result */
     if(H5T_STRING == dt->type)
-        strpad = dt->u.atomic.u.s.pad;
+        ret_value = dt->u.atomic.u.s.pad;
     else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
-        strpad = dt->u.vlen.pad;
+        ret_value = dt->u.vlen.pad;
     else
-        HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR,
-                      "can't get strpad info");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR, "can't get strpad info");
 
-    FUNC_LEAVE(strpad);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3871,27 +3732,23 @@ herr_t
 H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_strpad, FAIL);
     H5TRACE2("e","iTz",type_id,strpad);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (strpad < 0 || strpad >= H5T_NSTR) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (strpad < 0 || strpad >= H5T_NSTR)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type");
     /* Don't see any reason for this.  Causes problem for variable-length
      *  string. -SLU (& QAK) */
     /* if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
-        dt->u.vlen.type))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */
     if(H5T_STRING == dt->type)
@@ -3899,10 +3756,10 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
         dt->u.vlen.pad = strpad;
     else
-        HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR,
-                      "can't set strpad info");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR, "can't set strpad info");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3930,24 +3787,23 @@ int
 H5Tget_nmembers(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    int	ret_value = FAIL;
+    int	ret_value;
 
     FUNC_ENTER_API(H5Tget_num_members, FAIL);
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
-    if (H5T_COMPOUND==dt->type) {
+    if (H5T_COMPOUND==dt->type)
 	ret_value = dt->u.compnd.nmembs;
-    } else if (H5T_ENUM==dt->type) {
+    else if (H5T_ENUM==dt->type)
 	ret_value = dt->u.enumer.nmembs;
-    } else {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "operation not supported for type class");
-    }
+    else
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class");
     
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -3977,37 +3833,32 @@ char *
 H5Tget_member_name(hid_t type_id, int membno)
 {
     H5T_t	*dt = NULL;
-    char	*ret_value = NULL;
+    char	*ret_value;
 
     FUNC_ENTER_API(H5Tget_member_name, NULL);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
     switch (dt->type) {
-    case H5T_COMPOUND:
-	if (membno<0 || membno>=dt->u.compnd.nmembs) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "invalid member number");
-	}
-	ret_value = H5MM_xstrdup(dt->u.compnd.memb[membno].name);
-	break;
+        case H5T_COMPOUND:
+            if (membno<0 || membno>=dt->u.compnd.nmembs)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
+            ret_value = H5MM_xstrdup(dt->u.compnd.memb[membno].name);
+            break;
 
-    case H5T_ENUM:
-	if (membno<0 || membno>=dt->u.enumer.nmembs) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "invalid member number");
-	}
-	ret_value = H5MM_xstrdup(dt->u.enumer.name[membno]);
-	break;
-	
-    default:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-		      "operation not supported for type class");
+        case H5T_ENUM:
+            if (membno<0 || membno>=dt->u.enumer.nmembs)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
+            ret_value = H5MM_xstrdup(dt->u.enumer.name[membno]);
+            break;
+            
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class");
     }
 
-    /* Value */
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -4034,7 +3885,7 @@ int
 H5Tget_member_index(hid_t type_id, const char *name)
 {
     H5T_t       *dt = NULL;
-    int         ret_value = FAIL;
+    int         ret_value=FAIL;
     int         nmembs, i;
 
     FUNC_ENTER_API(H5Tget_member_index, FAIL);
@@ -4043,27 +3894,26 @@ H5Tget_member_index(hid_t type_id, const char *name)
     /* Check arguments */
     assert(name);
     if(NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Locate member by name */
     switch (dt->type) {
-    case H5T_COMPOUND:
-        nmembs = dt->u.compnd.nmembs;
-        for(i=0; i<nmembs; i++) {
-            if(!HDstrcmp(dt->u.compnd.memb[i].name, name))
-                HGOTO_DONE(i);
-        }
-        break;  
-    case H5T_ENUM:
-        nmembs = dt->u.enumer.nmembs;
-        for(i=0; i<nmembs; i++) {
-            if(!HDstrcmp(dt->u.enumer.name[i], name))
-                HGOTO_DONE(i);
-        }
-        break;
-    default:
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                "operation not supported for this type");
+        case H5T_COMPOUND:
+            nmembs = dt->u.compnd.nmembs;
+            for(i=0; i<nmembs; i++) {
+                if(!HDstrcmp(dt->u.compnd.memb[i].name, name))
+                    HGOTO_DONE(i);
+            }
+            break;  
+        case H5T_ENUM:
+            nmembs = dt->u.enumer.nmembs;
+            for(i=0; i<nmembs; i++) {
+                if(!HDstrcmp(dt->u.enumer.name[i], name))
+                    HGOTO_DONE(i);
+            }
+            break;
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for this type");
     }
 
 done:
@@ -4095,23 +3945,22 @@ size_t
 H5Tget_member_offset(hid_t type_id, int membno)
 {
     H5T_t	*dt = NULL;
-    size_t	offset = 0;
+    size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_offset, 0);
     H5TRACE2("z","iIs",type_id,membno);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) ||
-            H5T_COMPOUND != dt->type)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound data type");
-    if (membno < 0 || membno >= dt->u.compnd.nmembs) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
-    }
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound data type");
+    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
 
     /* Value */
-    offset = dt->u.compnd.memb[membno].offset;
+    ret_value = dt->u.compnd.memb[membno].offset;
 
-    FUNC_LEAVE(offset);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4135,20 +3984,21 @@ H5T_class_t
 H5Tget_member_class(hid_t type_id, int membno)
 {
     H5T_t	*dt = NULL;
-    H5T_class_t	ret_value = H5T_NO_CLASS;
+    H5T_class_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_class, H5T_NO_CLASS);
     H5TRACE2("Tt","iIs",type_id,membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a compound data type");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a compound data type");
     if (membno < 0 || membno >= dt->u.compnd.nmembs)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number");
 
     /* Value */
     ret_value = dt->u.compnd.memb[membno].type->type;
 
+done:
     FUNC_LEAVE(ret_value);
 } /* end H5Tget_member_class() */
 
@@ -4181,31 +4031,30 @@ hid_t
 H5Tget_member_type(hid_t type_id, int membno)
 {
     H5T_t	*dt = NULL, *memb_dt = NULL;
-    hid_t	memb_type_id;
+    hid_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_type, FAIL);
     H5TRACE2("i","iIs",type_id,membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
-    if (membno < 0 || membno >= dt->u.compnd.nmembs) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
+    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
     
     /* Copy data type into an atom */
-    if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type,
-				    H5T_COPY_REOPEN))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to copy member data type");
-    }
-    if ((memb_type_id = H5I_register(H5I_DATATYPE, memb_dt)) < 0) {
-	H5T_close(memb_dt);
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-		      "unable register data type atom");
-    }
+    if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type, H5T_COPY_REOPEN)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy member data type");
+    if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt)) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register data type atom");
     
-    FUNC_LEAVE(memb_type_id);
+done:
+    if(ret_value<0) {
+        if(memb_dt!=NULL)
+            H5T_close(memb_dt);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4238,32 +4087,29 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
 {
     H5T_t	*parent = NULL;		/*the compound parent data type */
     H5T_t	*member = NULL;		/*the atomic member type	*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tinsert, FAIL);
     H5TRACE4("e","iszi",parent_id,name,offset,member_id);
 
     /* Check args */
     if (parent_id==member_id)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't insert compound datatype within itself");
-    if (NULL == (parent = H5I_object_verify(parent_id,H5I_DATATYPE)) ||
-            H5T_COMPOUND != parent->type)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
-    if (H5T_STATE_TRANSIENT!=parent->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parent type read-only");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't insert compound datatype within itself");
+    if (NULL == (parent = H5I_object_verify(parent_id,H5I_DATATYPE)) || H5T_COMPOUND != parent->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
+    if (H5T_STATE_TRANSIENT!=parent->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parent type read-only");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
     if (NULL == (member = H5I_object_verify(member_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Insert */
-    if (H5T_insert(parent, name, offset, member) < 0) {
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
-		      "unable to insert member");
-    }
+    if (H5T_insert(parent, name, offset, member) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "unable to insert member");
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4286,25 +4132,23 @@ herr_t
 H5Tpack(hid_t type_id)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tpack, FAIL);
     H5TRACE1("e","i",type_id);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) ||
-            H5T_COMPOUND != dt->type)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data type is read-only");
-    }
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data type is read-only");
 
     /* Pack */
-    if (H5T_pack(dt) < 0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to pack compound data type");
-    }
+    if (H5T_pack(dt) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack compound data type");
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4330,32 +4174,28 @@ H5Tenum_create(hid_t parent_id)
 {
     H5T_t	*parent = NULL;		/*base integer data type	*/
     H5T_t	*dt = NULL;		/*new enumeration data type	*/
-    hid_t	ret_value = FAIL;	/*return value			*/
+    hid_t	ret_value;	        /*return value			*/
     
     FUNC_ENTER_API(H5Tenum_create, FAIL);
     H5TRACE1("i","i",parent_id);
 
     /* Check args */
-    if (NULL==(parent=H5I_object_verify(parent_id,H5I_DATATYPE)) ||
-            H5T_INTEGER!=parent->type)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
+    if (NULL==(parent=H5I_object_verify(parent_id,H5I_DATATYPE)) || H5T_INTEGER!=parent->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
 
     /* Build new type */
-    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		      "memory allocation failed");
-    }
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     dt->type = H5T_ENUM;
     dt->parent = H5T_copy(parent, H5T_COPY_ALL);
     dt->size = dt->parent->size;
     dt->ent.header = HADDR_UNDEF;
 
     /* Atomize the type */
-    if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-		      "unable to register data type atom");
-    }
+    if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -4385,31 +4225,27 @@ herr_t
 H5Tenum_insert(hid_t type, const char *name, void *value)
 {
     H5T_t	*dt=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Tenum_insert, FAIL);
     H5TRACE3("e","isx",type,name,value);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_ENUM!=dt->type) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not an enumeration data type");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
-    }
-    if (!value) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value specified");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_ENUM!=dt->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an enumeration data type");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    if (!value)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value specified");
 
     /* Do work */
-    if (H5T_enum_insert(dt, name, value)<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to insert new enumeration member");
-    }
+    if (H5T_enum_insert(dt, name, value)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert new enumeration member");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4434,25 +4270,25 @@ hid_t
 H5Tget_super(hid_t type)
 {
     H5T_t	*dt=NULL, *super=NULL;
-    hid_t	ret_value=FAIL;
+    hid_t	ret_value;
     
     FUNC_ENTER_API(H5Tget_super, FAIL);
     H5TRACE1("i","i",type);
 
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (!dt->parent) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a derived data type");
-    }
-    if (NULL==(super=H5T_copy(dt->parent, H5T_COPY_ALL))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to copy parent data type");
-    }
-    if ((ret_value=H5I_register(H5I_DATATYPE, super))<0) {
-	H5T_close(super);
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-		      "unable to register parent data type");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (!dt->parent)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a derived data type");
+    if (NULL==(super=H5T_copy(dt->parent, H5T_COPY_ALL)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy parent data type");
+    if ((ret_value=H5I_register(H5I_DATATYPE, super))<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register parent data type");
+
+done:
+    if(ret_value<0) {
+        if(super!=NULL)
+            H5T_close(super);
+    } /* end if */
 
     FUNC_LEAVE(ret_value);
 }
@@ -4475,30 +4311,28 @@ H5Tget_super(hid_t type)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+herr_t
 H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
 {
     H5T_t	*dt=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Tget_member_value, FAIL);
     H5TRACE3("i","iIsx",type,membno,value);
 
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_ENUM!=dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "operation not defined for data type class");
-    }
-    if (membno<0 || membno>=dt->u.enumer.nmembs) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
-    }
-    if (!value) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null value buffer");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_ENUM!=dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+    if (membno<0 || membno>=dt->u.enumer.nmembs)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
+    if (!value)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null value buffer");
 
     HDmemcpy(value, dt->u.enumer.value + membno*dt->size, dt->size);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4528,28 +4362,26 @@ herr_t
 H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tenum_nameof, FAIL);
     H5TRACE4("e","ixxz",type,value,name,size);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_ENUM!=dt->type) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not an enumeration data type");
-    }
-    if (!value) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value supplied");
-    }
-    if (!name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name buffer supplied");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_ENUM!=dt->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an enumeration data type");
+    if (!value)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value supplied");
+    if (!name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name buffer supplied");
 
-    if (NULL==H5T_enum_nameof(dt, value, name, size)) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "nameof query failed");
-    }
-    FUNC_LEAVE(SUCCEED);
+    if (NULL==H5T_enum_nameof(dt, value, name, size))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "nameof query failed");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4576,29 +4408,26 @@ herr_t
 H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
 {
     H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tenum_valueof, FAIL);
     H5TRACE3("e","isx",type,name,value);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_ENUM!=dt->type) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not an enumeration data type");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
-    if (!value) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value buffer");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_ENUM!=dt->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an enumeration data type");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
+    if (!value)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value buffer");
 
-    if (H5T_enum_valueof(dt, name, value)<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "valueof query failed");
-    }
-    FUNC_LEAVE(SUCCEED);
+    if (H5T_enum_valueof(dt, name, value)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "valueof query failed");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
     
 
@@ -4623,7 +4452,7 @@ static H5T_t *
 H5T_vlen_create(H5T_t *base)
 {
     H5T_t	*dt = NULL;		/*new VL data type	*/
-    H5T_t	*ret_value = NULL;	/*return value			*/
+    H5T_t	*ret_value;	/*return value			*/
     
     FUNC_ENTER_NOINIT(H5T_vlen_create);
 
@@ -4632,7 +4461,7 @@ H5T_vlen_create(H5T_t *base)
 
     /* Build new type */
     if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     dt->ent.header = HADDR_UNDEF;
     dt->type = H5T_VLEN;
 
@@ -4648,11 +4477,12 @@ H5T_vlen_create(H5T_t *base)
 
     /* Set up VL information */
     if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
 
-    /* Set the return value */
+    /* Set return value */
     ret_value=dt;
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -4679,23 +4509,24 @@ H5Tvlen_create(hid_t base_id)
 {
     H5T_t	*base = NULL;		/*base data type	*/
     H5T_t	*dt = NULL;		/*new data type	*/
-    hid_t	ret_value = FAIL;	/*return value			*/
+    hid_t	ret_value;	        /*return value			*/
     
     FUNC_ENTER_API(H5Tvlen_create, FAIL);
     H5TRACE1("i","i",base_id);
 
     /* Check args */
     if (NULL==(base=H5I_object_verify(base_id,H5I_DATATYPE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
 
     /* Create up VL datatype */
     if ((dt=H5T_vlen_create(base))==NULL)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
     /* Atomize the type */
     if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -4718,27 +4549,27 @@ herr_t
 H5Tset_tag(hid_t type_id, const char *tag)
 {
     H5T_t	*dt=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_tag, FAIL);
     H5TRACE2("e","is",type_id,tag);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state) {
-	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    }
-    if (H5T_OPAQUE!=dt->type) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type");
-    }
-    if (!tag) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (H5T_STATE_TRANSIENT!=dt->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    if (H5T_OPAQUE!=dt->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type");
+    if (!tag)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag");
 
     /* Commit */
     H5MM_xfree(dt->u.opaque.tag);
     dt->u.opaque.tag = H5MM_strdup(tag);
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4761,23 +4592,24 @@ char *
 H5Tget_tag(hid_t type_id)
 {
     H5T_t	*dt=NULL;
-    char	*ret_value=NULL;
+    char	*ret_value;
 
     FUNC_ENTER_API(H5Tget_tag, NULL);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
     if (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_OPAQUE != dt->type)
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "operation not defined for data type class");
     
     /* result */
     if (NULL==(ret_value=H5MM_strdup(dt->u.opaque.tag)))
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -5000,6 +4832,7 @@ done:
     FUNC_LEAVE(ret_value);
 } /* end H5Tregister() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5T_unregister
  *
@@ -5084,6 +4917,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     FUNC_LEAVE(SUCCEED);
 }   /* end H5T_unregister() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Tunregister
  *
@@ -5108,24 +4942,25 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	      H5T_conv_t func)
 {
     H5T_t	*src=NULL, *dst=NULL;	/*data type descriptors		*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tunregister, FAIL);
     H5TRACE5("e","Tesiix",pers,name,src_id,dst_id,func);
 
     /* Check arguments */
     if (src_id>0 && (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE))))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src is not a data type");
-    if (dst_id>0 && (NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE)))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst is not a data type");
-    }
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src is not a data type");
+    if (dst_id>0 && (NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE))))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst is not a data type");
 
     if (H5T_unregister(pers,name,src,dst,func)<0)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL,
-                      "internal unregister function failed");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "internal unregister function failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Tfind
  *
@@ -5149,7 +4984,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 H5T_conv_t
 H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
 {
-    H5T_conv_t	ret_value = NULL;
+    H5T_conv_t	ret_value;
     H5T_t	*src = NULL, *dst = NULL;
     H5T_path_t	*path = NULL;
 
@@ -5159,20 +4994,21 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     /* Check args */
     if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
             NULL == (dst = H5I_object_verify(dst_id,H5I_DATATYPE)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
-    if (!pcdata) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,
-		       "no address to receive cdata pointer");
-    }
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+    if (!pcdata)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "no address to receive cdata pointer");
     
     /* Find it */
-    if (NULL==(path=H5T_path_find(src, dst, NULL, NULL))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
-		      "conversion function not found");
-    }
-    if (pcdata) *pcdata = &(path->cdata);
+    if (NULL==(path=H5T_path_find(src, dst, NULL, NULL)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "conversion function not found");
+
+    if (pcdata)
+        *pcdata = &(path->cdata);
+
+    /* Set return value */
     ret_value = path->func;
     
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -5210,6 +5046,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
 {
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
     H5T_t		*src=NULL, *dst=NULL;	/*unatomized types	*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Tconvert, FAIL);
     H5TRACE6("e","iihxxi",src_id,dst_id,nelmts,buf,background,plist_id);
@@ -5218,21 +5055,17 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
     if (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE)) ||
             NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE)) ||
             (H5P_DEFAULT!=plist_id && TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Find the conversion function */
-    if (NULL==(tpath=H5T_path_find(src, dst, NULL, NULL))) {
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "unable to convert between src and dst data types");
-    }
+    if (NULL==(tpath=H5T_path_find(src, dst, NULL, NULL)))
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types");
 
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, buf, background,
-                    plist_id)<0) {
-        HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "data type conversion failed");
-    }
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, buf, background, plist_id)<0)
+        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -5258,15 +5091,19 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
 H5T_overflow_t
 H5Tget_overflow(void)
 {
+    H5T_overflow_t      ret_value;       /* Return value */
+
     FUNC_ENTER_API(H5Tget_overflow, NULL);
     H5TRACE0("x","");
 
-    if (NULL==H5T_overflow_g) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNINITIALIZED, NULL,
-		      "no overflow handling function is registered");
-    }
+    if (NULL==H5T_overflow_g)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNINITIALIZED, NULL, "no overflow handling function is registered");
 
-    FUNC_LEAVE(H5T_overflow_g);
+    /* Set return value */
+    ret_value=H5T_overflow_g;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -5328,6 +5165,7 @@ H5T_create(H5T_class_t type, size_t size)
 {
     H5T_t	*dt = NULL;
     hid_t	subtype;
+    H5T_t	*ret_value;
 
     FUNC_ENTER_NOAPI(H5T_create, NULL);
 
@@ -5339,15 +5177,12 @@ H5T_create(H5T_class_t type, size_t size)
         case H5T_TIME:
         case H5T_STRING:
         case H5T_BITFIELD:
-            HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
-                      "type class is not appropriate - use H5Tcopy()");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "type class is not appropriate - use H5Tcopy()");
 
         case H5T_OPAQUE:
         case H5T_COMPOUND:
-            if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-                       "memory allocation failed");
-            }
+            if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->type = type;
             break;
 
@@ -5363,38 +5198,38 @@ H5T_create(H5T_class_t type, size_t size)
             } else if (sizeof(long_long)==size) {
                 subtype = H5T_NATIVE_LLONG_g;
             } else {
-                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-                      "no applicable native integer type");
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "no applicable native integer type");
             }
-            if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
-                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                      "memory allocation failed");
-            }
+            if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->type = type;
-            if (NULL==(dt->parent=H5T_copy(H5I_object(subtype),
-                                  H5T_COPY_ALL))) {
-                H5FL_FREE(H5T_t,dt);
-                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-                      "unable to copy base data type");
-            }
+            if (NULL==(dt->parent=H5T_copy(H5I_object(subtype), H5T_COPY_ALL)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy base data type");
         break;
 
         case H5T_VLEN:  /* Variable length datatype */
-            HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
-                  "base type required - use H5Tvlen_create()");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tvlen_create()");
 
         case H5T_ARRAY:  /* Array datatype */
-            HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
-                  "base type required - use H5Tarray_create()");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tarray_create()");
 
         default:
-            HRETURN_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL,
-                  "unknown data type class");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL, "unknown data type class");
     }
 
     dt->ent.header = HADDR_UNDEF;
     dt->size = size;
-    FUNC_LEAVE(dt);
+
+    /* Set return value */
+    ret_value=dt;
+
+done:
+    if(ret_value==NULL) {
+        if(dt!=NULL)
+            H5FL_FREE(H5T_t,dt);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -5420,16 +5255,16 @@ H5T_create(H5T_class_t type, size_t size)
 htri_t
 H5T_isa(H5G_entry_t *ent)
 {
-    htri_t	exists;
+    htri_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5T_isa, FAIL);
     assert(ent);
 
-    if ((exists=H5O_exists(ent, H5O_DTYPE, 0))<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to read object header");
-    }
-    FUNC_LEAVE(exists);
+    if ((ret_value=H5O_exists(ent, H5O_DTYPE, 0))<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -5453,8 +5288,9 @@ H5T_isa(H5G_entry_t *ent)
 H5T_t *
 H5T_open (H5G_entry_t *loc, const char *name)
 {
-    H5T_t	*dt = NULL;
+    H5T_t	*dt;
     H5G_entry_t	ent;
+    H5T_t	*ret_value;
     
     FUNC_ENTER_NOAPI(H5T_open, NULL);
 
@@ -5465,15 +5301,18 @@ H5T_open (H5G_entry_t *loc, const char *name)
      * Find the named data type object header and read the data type message
      * from it.
      */
-    if (H5G_find (loc, name, NULL, &ent/*out*/)<0) {
-	HRETURN_ERROR (H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
-    }
-    /* Open the datatype object */
-    if ((dt=H5T_open_oid(&ent)) ==NULL) {
-        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
-    }
+    if (H5G_find (loc, name, NULL, &ent/*out*/)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
 
-    FUNC_LEAVE (dt);
+    /* Open the datatype object */
+    if ((dt=H5T_open_oid(&ent)) ==NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
+
+    /* Set return value */
+    ret_value=dt;
+
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -5496,27 +5335,32 @@ H5T_open (H5G_entry_t *loc, const char *name)
 H5T_t *
 H5T_open_oid (H5G_entry_t *ent)
 {
-    H5T_t	*dt = NULL;
+    H5T_t	*dt=NULL;
+    H5T_t	*ret_value;
     
     FUNC_ENTER_NOAPI(H5T_open_oid, NULL);
 
     assert (ent);
 
-    if (H5O_open (ent)<0) {
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL,
-		       "unable to open named data type");
-    }
-    if (NULL==(dt=H5O_read (ent, H5O_DTYPE, 0, NULL))) {
-	H5O_close(ent);
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
-		       "unable to load type message from object header");
-    }
+    if (H5O_open (ent)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
+    if (NULL==(dt=H5O_read (ent, H5O_DTYPE, 0, NULL)))
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
 
     /* Mark the type as named and open */
     dt->state = H5T_STATE_OPEN;
     dt->ent = *ent;
 
-    FUNC_LEAVE (dt);
+    /* Set return value */
+    ret_value=dt;
+
+done:
+    if(ret_value==NULL) {
+        if(dt==NULL)
+            H5O_close(ent);
+    } /* end if */
+
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -5559,6 +5403,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     H5T_t	*new_dt=NULL, *tmp=NULL;
     int	i;
     char	*s;
+    H5T_t	*ret_value;
 
     FUNC_ENTER_NOAPI(H5T_copy, NULL);
 
@@ -5567,7 +5412,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Allocate space */
     if (NULL==(new_dt = H5FL_ALLOC(H5T_t,0)))
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy actual information */
     *new_dt = *old_dt;
@@ -5605,11 +5450,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * type.
              */
             if (H5F_addr_defined(new_dt->ent.header)) {
-                if (H5O_open (&(new_dt->ent))<0) {
-                    H5FL_FREE (H5T_t,new_dt);
-                    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL,
-                           "unable to reopen named data type");
-                }
+                if (H5O_open (&(new_dt->ent))<0)
+                    HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
                 new_dt->state = H5T_STATE_OPEN;
             }
             break;
@@ -5627,10 +5469,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              */
             new_dt->u.compnd.memb = H5MM_malloc(new_dt->u.compnd.nalloc *
                                 sizeof(H5T_cmemb_t));
-            if (NULL==new_dt->u.compnd.memb) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-                       "memory allocation failed");
-            }
+            if (NULL==new_dt->u.compnd.memb)
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
             HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
                  new_dt->u.compnd.nmembs * sizeof(H5T_cmemb_t));
@@ -5657,7 +5497,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
                     /* check if we couldn't find a match */
                     if(old_match<0)
-                        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "fields in datatype corrupted");
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "fields in datatype corrupted");
                 } /* end if */
                 else {
                     old_match=i;
@@ -5688,10 +5528,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                                 sizeof(char*));
             new_dt->u.enumer.value = H5MM_malloc(new_dt->u.enumer.nalloc *
                                  new_dt->size);
-            if (NULL==new_dt->u.enumer.value) {
-                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                      "memory allocation failed");
-            }
+            if (NULL==new_dt->u.enumer.value)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             HDmemcpy(new_dt->u.enumer.value, old_dt->u.enumer.value,
                  new_dt->u.enumer.nmembs * new_dt->size);
             for (i=0; i<new_dt->u.enumer.nmembs; i++) {
@@ -5703,9 +5541,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
         case H5T_VLEN:
             if(method==H5T_COPY_TRANSIENT || method==H5T_COPY_REOPEN) {
                 /* H5T_copy converts any VL type into a memory VL type */
-                if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0) {
-                    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
-                }
+                if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
             }
             break;
 
@@ -5724,8 +5561,17 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
         default:
             break;
     } /* end switch */
+
+    /* Set return value */
+    ret_value=new_dt;
     
-    FUNC_LEAVE(new_dt);
+done:
+    if(ret_value==NULL) {
+        if(new_dt!=NULL)
+            H5FL_FREE (H5T_t,new_dt);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -5747,8 +5593,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 herr_t
 H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
 {
-    herr_t	ret_value = FAIL;
     H5F_t	*file = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_commit, FAIL);
 
@@ -5761,47 +5607,34 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
      * normally fails on such types (try H5Tclose(H5T_NATIVE_INT)) but closing
      * a named type should always succeed.
      */
-    if (H5T_STATE_NAMED==type->state || H5T_STATE_OPEN==type->state) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "data type is already committed");
-    }
-    if (H5T_STATE_IMMUTABLE==type->state) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "data type is immutable");
-    }
+    if (H5T_STATE_NAMED==type->state || H5T_STATE_OPEN==type->state)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "data type is already committed");
+    if (H5T_STATE_IMMUTABLE==type->state)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "data type is immutable");
 
     /* Check for a "sensible" datatype to store on disk */
     if(H5T_is_sensible(type)!=TRUE)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible");
 
     /* Find the insertion file */
-    if (NULL==(file=H5G_insertion_file(loc, name))) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to find insertion point");
-    }
+    if (NULL==(file=H5G_insertion_file(loc, name)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to find insertion point");
 
     /*
      * Create the object header and open it for write access. Insert the data
      * type message and then give the object header a name.
      */
-    if (H5O_create (file, 64, &(type->ent))<0) {
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		     "unable to create data type object header");
-    }
-    if (H5O_modify (&(type->ent), H5O_DTYPE, 0, H5O_FLAG_CONSTANT, type)<0) {
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		     "unable to update type header message");
-    }
-    if (H5G_insert (loc, name, &(type->ent))<0) {
-	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		     "unable to name data type");
-    }
+    if (H5O_create (file, 64, &(type->ent))<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create data type object header");
+    if (H5O_modify (&(type->ent), H5O_DTYPE, 0, H5O_FLAG_CONSTANT, type)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message");
+    if (H5G_insert (loc, name, &(type->ent))<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name data type");
     type->state = H5T_STATE_OPEN;
-    ret_value = SUCCEED;
 
- done:
+done:
     if (ret_value<0) {
-	if (H5F_addr_defined(type->ent.header)) {
+	if ((type->state==H5T_STATE_TRANSIENT || type->state==H5T_STATE_RDONLY) && H5F_addr_defined(type->ent.header)) {
 	    H5O_close(&(type->ent));
 	    type->ent.header = HADDR_UNDEF;
 	}
@@ -5836,17 +5669,17 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
     assert (dt);
 
     switch (dt->state) {
-    case H5T_STATE_TRANSIENT:
-	dt->state = immutable ? H5T_STATE_IMMUTABLE : H5T_STATE_RDONLY;
-	break;
-    case H5T_STATE_RDONLY:
-	if (immutable) dt->state = H5T_STATE_IMMUTABLE;
-	break;
-    case H5T_STATE_IMMUTABLE:
-    case H5T_STATE_NAMED:
-    case H5T_STATE_OPEN:
-	/*void*/
-	break;
+        case H5T_STATE_TRANSIENT:
+            dt->state = immutable ? H5T_STATE_IMMUTABLE : H5T_STATE_RDONLY;
+            break;
+        case H5T_STATE_RDONLY:
+            if (immutable) dt->state = H5T_STATE_IMMUTABLE;
+            break;
+        case H5T_STATE_IMMUTABLE:
+        case H5T_STATE_NAMED:
+        case H5T_STATE_OPEN:
+            /*void*/
+            break;
     }
 
     FUNC_LEAVE (SUCCEED);
@@ -5877,6 +5710,7 @@ H5T_close(H5T_t *dt)
 {
     int	i;
     H5T_t	*parent = dt->parent;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_close, FAIL);
 
@@ -5887,20 +5721,16 @@ H5T_close(H5T_t *dt)
      */
     if (H5T_STATE_OPEN==dt->state) {
 	assert (H5F_addr_defined(dt->ent.header));
-	if (H5O_close(&(dt->ent))<0) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "unable to close data type object header");
-	}
+	if (H5O_close(&(dt->ent))<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header");
 	dt->state = H5T_STATE_NAMED;
     }
 
     /*
      * Don't free locked datatypes.
      */
-    if (H5T_STATE_IMMUTABLE==dt->state) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL,
-		      "unable to close immutable datatype");
-    }
+    if (H5T_STATE_IMMUTABLE==dt->state)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype");
 
     /* Close the datatype */
     switch (dt->type) {
@@ -5931,12 +5761,11 @@ H5T_close(H5T_t *dt)
     H5FL_FREE(H5T_t,dt);
 
     /* Close the parent */
-    if (parent && H5T_close(parent)<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to close parent data type");
-    }
+    if (parent && H5T_close(parent)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close parent data type");
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -5959,17 +5788,16 @@ H5T_close(H5T_t *dt)
 htri_t
 H5T_is_atomic(const H5T_t *dt)
 {
-    htri_t	ret_value = FAIL;
+    htri_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5T_is_atomic, FAIL);
 
     assert(dt);
 
-    if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type &&	H5T_VLEN!=dt->type && H5T_OPAQUE!=dt->type && H5T_ARRAY!=dt->type) {
+    if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type &&	H5T_VLEN!=dt->type && H5T_OPAQUE!=dt->type && H5T_ARRAY!=dt->type)
 	ret_value = TRUE;
-    } else {
+    else
 	ret_value = FALSE;
-    }
 
     FUNC_LEAVE(ret_value);
 }
@@ -6009,6 +5837,7 @@ herr_t
 H5T_set_size(H5T_t *dt, size_t size)
 {
     size_t	prec, offset;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_set_size, FAIL);
 
@@ -6018,10 +5847,8 @@ H5T_set_size(H5T_t *dt, size_t size)
     assert(H5T_ENUM!=dt->type || 0==dt->u.enumer.nmembs);
 
     if (dt->parent) {
-        if (H5T_set_size(dt->parent, size)<0) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                  "unable to set size for parent data type");
-        }
+        if (H5T_set_size(dt->parent, size)<0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for parent data type");
         dt->size = dt->parent->size;
     } else {
         if (H5T_is_atomic(dt)) {
@@ -6043,8 +5870,7 @@ H5T_set_size(H5T_t *dt, size_t size)
         switch (dt->type) {
             case H5T_COMPOUND:
             case H5T_ARRAY:
-                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                      "unable to set size of specified data type");
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size of specified data type");
 
             case H5T_INTEGER:
             case H5T_TIME:
@@ -6063,7 +5889,7 @@ H5T_set_size(H5T_t *dt, size_t size)
 
                     /* Get a copy of unsigned char type as the base/parent type */
                     if (NULL==(base=H5I_object(H5T_NATIVE_UCHAR)))
-                        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid base datatype");
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid base datatype");
                     dt->parent=H5T_copy(base,H5T_COPY_ALL);
 
                     /* change this datatype into a VL string */
@@ -6089,8 +5915,7 @@ H5T_set_size(H5T_t *dt, size_t size)
 
                     /* Set up VL information */
                     if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
-                        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, 
-					"invalid VL location");
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
                 } else {
                     prec = 8 * size;
@@ -6106,8 +5931,7 @@ H5T_set_size(H5T_t *dt, size_t size)
                 if (dt->u.atomic.u.f.sign >= prec ||
                         dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
                         dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec) {
-                    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                          "adjust sign, mantissa, and exponent fields first");
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first");
                 }
                 break;
 
@@ -6125,7 +5949,8 @@ H5T_set_size(H5T_t *dt, size_t size)
         }
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6193,6 +6018,7 @@ herr_t
 H5T_set_precision(H5T_t *dt, size_t prec)
 {
     size_t	offset, size;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_set_precision, FAIL);
 
@@ -6202,26 +6028,23 @@ H5T_set_precision(H5T_t *dt, size_t prec)
     assert(H5T_ENUM!=dt->type || 0==dt->u.enumer.nmembs);
 
     if (dt->parent) {
-	if (H5T_set_precision(dt->parent, prec)<0) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "unable to set precision for base type");
-	}
+	if (H5T_set_precision(dt->parent, prec)<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set precision for base type");
 	dt->size = dt->parent->size;
     } else {
 	if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "operation not defined for specified data type");
-
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
 	} else if (H5T_ENUM==dt->type) {
 	    /*nothing*/
-
 	} else if (H5T_is_atomic(dt)) {
 	    /* Adjust the offset and size */
 	    offset = dt->u.atomic.offset;
 	    size = dt->size;
-	    if (prec > 8*size) offset = 0;
+	    if (prec > 8*size)
+                offset = 0;
 	    else if (offset+prec > 8 * size) offset = 8 * size - prec;
-	    if (prec > 8*size) size = (prec+7) / 8;
+	    if (prec > 8*size)
+                size = (prec+7) / 8;
 
 	    /* Check that things are still kosher */
 	    switch (dt->type) {
@@ -6232,8 +6055,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 		break;
 
 	    case H5T_STRING:
-		HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
-			      "precision for this type is read-only");
+		HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only");
 
 	    case H5T_FLOAT:
 		/*
@@ -6244,9 +6066,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 		if (dt->u.atomic.u.f.sign >= prec ||
 		    dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
 		    dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec) {
-		    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-				  "adjust sign, mantissa, and exponent fields "
-				  "first");
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first");
 		}
 		break;
 
@@ -6263,7 +6083,8 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 	}
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6309,6 +6130,8 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 herr_t
 H5T_set_offset(H5T_t *dt, size_t offset)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5T_set_offset, FAIL);
 
     /* Check args */
@@ -6317,15 +6140,12 @@ H5T_set_offset(H5T_t *dt, size_t offset)
     assert(H5T_ENUM!=dt->type || 0==dt->u.enumer.nmembs);
 
     if (dt->parent) {
-	if (H5T_set_offset(dt->parent, offset)<0) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "unable to set offset for base type");
-	}
+	if (H5T_set_offset(dt->parent, offset)<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset for base type");
 	dt->size = dt->parent->size;
     } else {
 	if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "operation not defined for specified data type");
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
 	} else if (H5T_ENUM==dt->type) {
 	    /*nothing*/
 	} else {
@@ -6336,7 +6156,8 @@ H5T_set_offset(H5T_t *dt, size_t offset)
 	}
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6363,6 +6184,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
     int		idx, i;
     size_t		total_size;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_insert, FAIL);
 
@@ -6374,28 +6196,24 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Does NAME already exist in PARENT? */
     for (i=0; i<parent->u.compnd.nmembs; i++) {
-	if (!HDstrcmp(parent->u.compnd.memb[i].name, name)) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
-			  "member name is not unique");
-	}
+	if (!HDstrcmp(parent->u.compnd.memb[i].name, name))
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique");
     }
 
     /* Does the new member overlap any existing member ? */
     total_size=member->size;
     for (i=0; i<parent->u.compnd.nmembs; i++) {
 	if ((offset <= parent->u.compnd.memb[i].offset &&
-	     offset + total_size > parent->u.compnd.memb[i].offset) ||
-	    (parent->u.compnd.memb[i].offset <= offset &&
-	     parent->u.compnd.memb[i].offset +
-	     parent->u.compnd.memb[i].size > offset)) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
-			  "member overlaps with another member");
-	}
+                 offset + total_size > parent->u.compnd.memb[i].offset) ||
+                (parent->u.compnd.memb[i].offset <= offset &&
+                 parent->u.compnd.memb[i].offset +
+                 parent->u.compnd.memb[i].size > offset))
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member overlaps with another member");
     }
 
     /* Does the new member overlap the end of the compound type? */
     if(offset+total_size>parent->size)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member extends past end of compound type");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member extends past end of compound type");
 
     /* Increase member array if necessary */
     if (parent->u.compnd.nmembs >= parent->u.compnd.nalloc) {
@@ -6403,10 +6221,8 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
         H5T_cmemb_t *x = H5MM_realloc (parent->u.compnd.memb,
                            na * sizeof(H5T_cmemb_t));
 
-        if (!x) {
-            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                   "memory allocation failed");
-        }
+        if (!x)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         parent->u.compnd.nalloc = (int)na;
         parent->u.compnd.memb = x;
     }
@@ -6432,7 +6248,8 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     if(member->type==H5T_ARRAY)
         parent->u.compnd.has_array=TRUE;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6456,6 +6273,7 @@ H5T_pack(H5T_t *dt)
 {
     int		i;
     size_t	offset;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_pack, FAIL);
 
@@ -6466,10 +6284,8 @@ H5T_pack(H5T_t *dt)
 	
 	/* Recursively pack the members */
 	for (i=0; i<dt->u.compnd.nmembs; i++) {
-	    if (H5T_pack(dt->u.compnd.memb[i].type) < 0) {
-		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			      "unable to pack part of a compound data type");
-	    }
+	    if (H5T_pack(dt->u.compnd.memb[i].type) < 0)
+		HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack part of a compound data type");
 	}
 
 	/* Remove padding between members */
@@ -6483,7 +6299,8 @@ H5T_pack(H5T_t *dt)
 	dt->size = MAX(1, offset);
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6527,8 +6344,8 @@ H5T_sort_value(H5T_t *dt, int *map)
 	    for (i=nmembs-1, swapped=TRUE; i>0 && swapped; --i) {
 		for (j=0, swapped=FALSE; j<i; j++) {
 		    if (dt->u.compnd.memb[j].offset >
-			dt->u.compnd.memb[j+1].offset) {
-			H5T_cmemb_t tmp = dt->u.compnd.memb[j];
+                            dt->u.compnd.memb[j+1].offset) {
+                            H5T_cmemb_t tmp = dt->u.compnd.memb[j];
 			dt->u.compnd.memb[j] = dt->u.compnd.memb[j+1];
 			dt->u.compnd.memb[j+1] = tmp;
 			if (map) {
@@ -6691,10 +6508,8 @@ H5T_sort_name(H5T_t *dt, int *map)
 	    }
 #ifndef NDEBUG
 	    /* I never trust a sort :-) -RPM */
-	    for (i=0; i<nmembs-1; i++) {
-		assert(HDstrcmp(dt->u.enumer.name[i],
-				dt->u.enumer.name[i+1])<0);
-	    }
+	    for (i=0; i<nmembs-1; i++)
+		assert(HDstrcmp(dt->u.enumer.name[i], dt->u.enumer.name[i+1])<0);
 #endif
 	}
     }
@@ -6728,6 +6543,7 @@ H5T_enum_insert(H5T_t *dt, const char *name, void *value)
     int		i;
     char	**names=NULL;
     uint8_t	*values=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_enum_insert, FAIL);
 
@@ -6737,29 +6553,21 @@ H5T_enum_insert(H5T_t *dt, const char *name, void *value)
 
     /* The name and value had better not already exist */
     for (i=0; i<dt->u.enumer.nmembs; i++) {
-	if (!HDstrcmp(dt->u.enumer.name[i], name)) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "name redefinition");
-	}
-	if (!HDmemcmp(dt->u.enumer.value+i*dt->size, value, dt->size)) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "value redefinition");
-	}
+	if (!HDstrcmp(dt->u.enumer.name[i], name))
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "name redefinition");
+	if (!HDmemcmp(dt->u.enumer.value+i*dt->size, value, dt->size))
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "value redefinition");
     }
 
     /* Increase table sizes */
     if (dt->u.enumer.nmembs >= dt->u.enumer.nalloc) {
 	int n = MAX(32, 2*dt->u.enumer.nalloc);
-	if (NULL==(names=H5MM_realloc(dt->u.enumer.name, n*sizeof(char*)))) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed");
-	}
+	if (NULL==(names=H5MM_realloc(dt->u.enumer.name, n*sizeof(char*))))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 	dt->u.enumer.name = names;
 
-	if (NULL==(values=H5MM_realloc(dt->u.enumer.value, n*dt->size))) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed");
-	}
+	if (NULL==(values=H5MM_realloc(dt->u.enumer.value, n*dt->size)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 	dt->u.enumer.value = values;
 	dt->u.enumer.nalloc = n;
     }
@@ -6770,7 +6578,8 @@ H5T_enum_insert(H5T_t *dt, const char *name, void *value)
     dt->u.enumer.name[i] = H5MM_xstrdup(name);
     HDmemcpy(dt->u.enumer.value+i*dt->size, value, dt->size);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6804,6 +6613,7 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
 {
     int	lt, md, rt;		/*indices for binary search	*/
     int	cmp;			/*comparison result		*/
+    char *ret_value;            /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_enum_nameof, NULL);
 
@@ -6814,10 +6624,8 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
     if (name && size>0) *name = '\0';
 
     /* Sanity check */
-    if (dt->u.enumer.nmembs == 0) {
-        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
-                      "datatype has no members");
-    }
+    if (dt->u.enumer.nmembs == 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "datatype has no members");
 
     /* Do a binary search over the values to find the correct one */
     H5T_sort_value(dt, NULL);
@@ -6837,22 +6645,21 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
 	}
     }
     /* Value was not yet defined. This fixes bug # 774, 2002/06/05 EIP */
-    if (cmp!=0) {
-        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
-                      "value is currently not defined");
-    }
+    if (cmp!=0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "value is currently not defined");
 
     /* Save result name */
-    if (!name && NULL==(name=H5MM_malloc(HDstrlen(dt->u.enumer.name[md])+1))) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		      "memory allocation failed");
-    }
+    if (!name && NULL==(name=H5MM_malloc(HDstrlen(dt->u.enumer.name[md])+1)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDstrncpy(name, dt->u.enumer.name[md], size);
-    if (HDstrlen(dt->u.enumer.name[md])>=size) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_NOSPACE, NULL,
-		      "name has been truncated");
-    }
-    FUNC_LEAVE(name);
+    if (HDstrlen(dt->u.enumer.name[md])>=size)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, NULL, "name has been truncated");
+
+    /* Set return value */
+    ret_value=name;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6880,6 +6687,7 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
 {
     int	lt, md, rt;		/*indices for binary search	*/
     int	cmp;			/*comparison result		*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_enum_valueof, FAIL);
 
@@ -6889,10 +6697,8 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
     assert(value);
 
     /* Sanity check */
-    if (dt->u.enumer.nmembs == 0) {
-        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL,
-                      "datatype has no members");
-    }
+    if (dt->u.enumer.nmembs == 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "datatype has no members");
 
     /* Do a binary search over the names to find the correct one */
     H5T_sort_name(dt, NULL);
@@ -6912,13 +6718,13 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
 	}
     }
     /* Value was not yet defined. This fixes bug # 774, 2002/06/05 EIP */
-    if (cmp!=0) { 
-        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL,
-                      "string doesn't exist in the enumeration type");
-    }
+    if (cmp!=0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "string doesn't exist in the enumeration type");
 
     HDmemcpy(value, dt->u.enumer.value+md*dt->size, dt->size);
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6987,10 +6793,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
             /* Build an index for each type so the names are sorted */
             if (NULL==(idx1 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(int))) ||
-                NULL==(idx2 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(int)))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0,
-                       "memory allocation failed");
-            }
+                    NULL==(idx2 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(int))))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
             for (i=0; i<dt1->u.compnd.nmembs; i++)
                 idx1[i] = idx2[i] = i;
             for (i=dt1->u.compnd.nmembs-1, swapped=TRUE; swapped && i>=0; --i) {
@@ -7063,10 +6867,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
             /* Build an index for each type so the names are sorted */
             if (NULL==(idx1 = H5MM_malloc(dt1->u.enumer.nmembs * sizeof(int))) ||
-                NULL==(idx2 = H5MM_malloc(dt1->u.enumer.nmembs * sizeof(int)))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0,
-                       "memory allocation failed");
-            }
+                    NULL==(idx2 = H5MM_malloc(dt1->u.enumer.nmembs * sizeof(int))))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
             for (i=0; i<dt1->u.enumer.nmembs; i++)
                 idx1[i] = idx2[i] = i;
             for (i=dt1->u.enumer.nmembs-1, swapped=TRUE; swapped && i>=0; --i) {
@@ -7198,64 +7000,46 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
             switch (dt1->type) {
                 case H5T_INTEGER:
-                    if (dt1->u.atomic.u.i.sign < dt2->u.atomic.u.i.sign) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.i.sign > dt2->u.atomic.u.i.sign) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.i.sign < dt2->u.atomic.u.i.sign)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.i.sign > dt2->u.atomic.u.i.sign)
+                        HGOTO_DONE(1);
                     break;
 
                 case H5T_FLOAT:
-                    if (dt1->u.atomic.u.f.sign < dt2->u.atomic.u.f.sign) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.f.sign > dt2->u.atomic.u.f.sign) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.f.sign < dt2->u.atomic.u.f.sign)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.sign > dt2->u.atomic.u.f.sign)
+                        HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.f.epos < dt2->u.atomic.u.f.epos) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.f.epos > dt2->u.atomic.u.f.epos) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.f.epos < dt2->u.atomic.u.f.epos)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.epos > dt2->u.atomic.u.f.epos)
+                        HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.f.esize <
-                    dt2->u.atomic.u.f.esize) HGOTO_DONE(-1);
-                    if (dt1->u.atomic.u.f.esize >
-                    dt2->u.atomic.u.f.esize) HGOTO_DONE(1);
+                    if (dt1->u.atomic.u.f.esize < dt2->u.atomic.u.f.esize) HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.esize > dt2->u.atomic.u.f.esize) HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.f.ebias <
-                    dt2->u.atomic.u.f.ebias) HGOTO_DONE(-1);
-                    if (dt1->u.atomic.u.f.ebias >
-                    dt2->u.atomic.u.f.ebias) HGOTO_DONE(1);
+                    if (dt1->u.atomic.u.f.ebias < dt2->u.atomic.u.f.ebias) HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.ebias > dt2->u.atomic.u.f.ebias) HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.f.mpos < dt2->u.atomic.u.f.mpos) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.f.mpos > dt2->u.atomic.u.f.mpos) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.f.mpos < dt2->u.atomic.u.f.mpos)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.mpos > dt2->u.atomic.u.f.mpos)
+                        HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.f.msize <
-                    dt2->u.atomic.u.f.msize) HGOTO_DONE(-1);
-                    if (dt1->u.atomic.u.f.msize >
-                    dt2->u.atomic.u.f.msize) HGOTO_DONE(1);
+                    if (dt1->u.atomic.u.f.msize < dt2->u.atomic.u.f.msize) HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.msize > dt2->u.atomic.u.f.msize) HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.f.norm < dt2->u.atomic.u.f.norm) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.f.norm > dt2->u.atomic.u.f.norm) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.f.norm < dt2->u.atomic.u.f.norm)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.norm > dt2->u.atomic.u.f.norm)
+                        HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.f.pad < dt2->u.atomic.u.f.pad) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.f.pad > dt2->u.atomic.u.f.pad) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.f.pad < dt2->u.atomic.u.f.pad)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.f.pad > dt2->u.atomic.u.f.pad)
+                        HGOTO_DONE(1);
 
                     break;
 
@@ -7264,19 +7048,15 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                     break;
 
                 case H5T_STRING:
-                    if (dt1->u.atomic.u.s.cset < dt2->u.atomic.u.s.cset) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.s.cset > dt2->u.atomic.u.s.cset) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.s.cset < dt2->u.atomic.u.s.cset)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.s.cset > dt2->u.atomic.u.s.cset)
+                        HGOTO_DONE(1);
 
-                    if (dt1->u.atomic.u.s.pad < dt2->u.atomic.u.s.pad) {
-                    HGOTO_DONE(-1);
-                    }
-                    if (dt1->u.atomic.u.s.pad > dt2->u.atomic.u.s.pad) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.s.pad < dt2->u.atomic.u.s.pad)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.s.pad > dt2->u.atomic.u.s.pad)
+                        HGOTO_DONE(1);
 
                     break;
 
@@ -7285,12 +7065,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                     break;
 
                 case H5T_REFERENCE:
-                    if (dt1->u.atomic.u.r.rtype < dt2->u.atomic.u.r.rtype) {
-                    HGOTO_DONE(-1);
-                    }	    
-                    if (dt1->u.atomic.u.r.rtype > dt2->u.atomic.u.r.rtype) {
-                    HGOTO_DONE(1);
-                    }
+                    if (dt1->u.atomic.u.r.rtype < dt2->u.atomic.u.r.rtype)
+                        HGOTO_DONE(-1);
+                    if (dt1->u.atomic.u.r.rtype > dt2->u.atomic.u.r.rtype)
+                        HGOTO_DONE(1);
 
                     switch(dt1->u.atomic.u.r.rtype) {
                         case H5R_OBJECT:
@@ -7319,6 +7097,7 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5T_path_find
  *
@@ -7358,7 +7137,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     int old_npaths;             /* Previous number of paths in table */
     H5T_path_t	*table=NULL;		/*path existing in the table	*/
     H5T_path_t	*path=NULL;		/*new path			*/
-    H5T_path_t	*ret_value=NULL;	/*return value			*/
+    H5T_path_t	*ret_value;	/*return value			*/
     hid_t	src_id=-1, dst_id=-1;	/*src and dst type identifiers	*/
     int	i;			/*counter			*/
     int	nprint=0;		/*lines of output printed	*/
@@ -7371,16 +7150,11 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
      * Make sure the first entry in the table is the no-op conversion path.
      */
     if (0==H5T_g.npaths) {
-	if (NULL==(H5T_g.path=H5MM_malloc(128*sizeof(H5T_path_t*)))) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			"memory allocation failed for type conversion path "
-			"table");
-	}
+	if (NULL==(H5T_g.path=H5MM_malloc(128*sizeof(H5T_path_t*))))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for type conversion path table");
 	H5T_g.apaths = 128;
-	if (NULL==(H5T_g.path[0]=H5FL_ALLOC(H5T_path_t,1))) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			"memory allocation failed for no-op conversion path");
-	}
+	if (NULL==(H5T_g.path[0]=H5FL_ALLOC(H5T_path_t,1)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for no-op conversion path");
 	HDstrcpy(H5T_g.path[0]->name, "no-op");
 	H5T_g.path[0]->func = H5T_conv_noop;
 	H5T_g.path[0]->cdata.command = H5T_CONV_INIT;
@@ -7442,10 +7216,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
      * the path.
      */
     if (!table || func) {
-	if (NULL==(path=H5FL_ALLOC(H5T_path_t,1))) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			"memory allocation failed for type conversion path");
-	}
+	if (NULL==(path=H5FL_ALLOC(H5T_path_t,1)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for type conversion path");
 	if (name && *name) {
 	    HDstrncpy(path->name, name, H5T_NAMELEN);
 	    path->name[H5T_NAMELEN-1] = '\0';
@@ -7453,10 +7225,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    HDstrcpy(path->name, "NONAME");
 	}
 	if ((src && NULL==(path->src=H5T_copy(src, H5T_COPY_ALL))) ||
-	    (dst && NULL==(path->dst=H5T_copy(dst, H5T_COPY_ALL)))) {
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-			"unable to copy data type for conversion path");
-	}
+                (dst && NULL==(path->dst=H5T_copy(dst, H5T_COPY_ALL))))
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy data type for conversion path");
     } else {
 	path = table;
     }
@@ -7469,24 +7239,15 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	assert(path!=table);
 	assert(NULL==path->func);
 	if (path->src && (src_id=H5I_register(H5I_DATATYPE,
-					      H5T_copy(path->src,
-						       H5T_COPY_ALL)))<0) {
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-			"unable to register source conversion type for query");
-	}
+                  H5T_copy(path->src, H5T_COPY_ALL)))<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register source conversion type for query");
 	if (path->dst && (dst_id=H5I_register(H5I_DATATYPE,
-					      H5T_copy(path->dst,
-						       H5T_COPY_ALL)))<0) {
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-			"unable to register destination conversion type for "
-			"query");
-	}
+                  H5T_copy(path->dst, H5T_COPY_ALL)))<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register destination conversion type for query");
 	path->cdata.command = H5T_CONV_INIT;
 	if ((func)(src_id, dst_id, &(path->cdata), (hsize_t)0, 0, 0, NULL, NULL,
-                   H5P_DEFAULT)<0) {
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-			"unable to initialize conversion function");
-	}
+                   H5P_DEFAULT)<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function");
 	if (src_id>=0) H5I_dec_ref(src_id);
 	if (dst_id>=0) H5I_dec_ref(dst_id);
 	src_id = dst_id = -1;
@@ -7508,11 +7269,9 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	}
 	if ((src_id=H5I_register(H5I_DATATYPE,
 				 H5T_copy(path->src, H5T_COPY_ALL)))<0 ||
-	    (dst_id=H5I_register(H5I_DATATYPE,
-				 H5T_copy(path->dst, H5T_COPY_ALL)))<0) {
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-			"unable to register conversion types for query");
-	}
+                (dst_id=H5I_register(H5I_DATATYPE,
+				 H5T_copy(path->dst, H5T_COPY_ALL)))<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register conversion types for query");
 	path->cdata.command = H5T_CONV_INIT;
 	if ((H5T_g.soft[i].func) (src_id, dst_id, &(path->cdata),
                                   (hsize_t)0, 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
@@ -7527,10 +7286,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	H5I_dec_ref(dst_id);
 	src_id = dst_id = -1;
     }
-    if (!path->func) {
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-		    "no appropriate function for conversion path");
-    }
+    if (!path->func)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "no appropriate function for conversion path");
 
     /* Check if paths were inserted into the table through a recursive call
      * and re-compute the correct location for this path if so. - QAK, 1/26/02
@@ -7582,10 +7339,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
             size_t na = MAX(128, 2 * H5T_g.apaths);
             H5T_path_t **x = H5MM_realloc (H5T_g.path,
 					   na*sizeof(H5T_path_t*));
-            if (!x) {
-		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			     "memory allocation failed");
-            }
+            if (!x)
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             H5T_g.apaths = (int)na;
             H5T_g.path = x;
         }
@@ -7596,9 +7351,11 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	H5T_g.path[md] = path;
 	table = path;
     }
+
+    /* Set return value */
     ret_value = path;
 
- done:
+done:
     if (!ret_value && path && path!=table) {
 	if (path->src) H5T_close(path->src);
 	if (path->dst) H5T_close(path->dst);
@@ -7660,6 +7417,7 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, hsize_t nelmts,
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_convert, FAIL);
 
@@ -7668,10 +7426,8 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, hsize_t nelmts,
 #endif
     tpath->cdata.command = H5T_CONV_CONV;
     if ((tpath->func)(src_id, dst_id, &(tpath->cdata), nelmts, buf_stride,
-                      bkg_stride, buf, bkg, dset_xfer_plist)<0) {
-	HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
-		      "data type conversion failed");
-    }
+                      bkg_stride, buf, bkg, dset_xfer_plist)<0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed");
 #ifdef H5T_DEBUG
     if (H5DEBUG(T)) {
 	H5_timer_end(&(tpath->stats.timer), &timer);
@@ -7680,7 +7436,8 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, hsize_t nelmts,
     }
 #endif
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -7710,17 +7467,17 @@ H5T_entof (H5T_t *dt)
     assert (dt);
 
     switch (dt->state) {
-    case H5T_STATE_TRANSIENT:
-    case H5T_STATE_RDONLY:
-    case H5T_STATE_IMMUTABLE:
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
-		       "not a named data type");
-    case H5T_STATE_NAMED:
-    case H5T_STATE_OPEN:
-	ret_value = &(dt->ent);
-	break;
+        case H5T_STATE_TRANSIENT:
+        case H5T_STATE_RDONLY:
+        case H5T_STATE_IMMUTABLE:
+            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "not a named data type");
+        case H5T_STATE_NAMED:
+        case H5T_STATE_OPEN:
+            ret_value = &(dt->ent);
+            break;
     }
 
+done:
     FUNC_LEAVE (ret_value);
 }
 
@@ -7789,9 +7546,6 @@ H5T_get_ref_type(const H5T_t *dt)
     if(dt->type==H5T_REFERENCE)
         ret_value=dt->u.atomic.u.r.rtype;
 
-#ifdef LATER
-done:
-#endif /* LATER */
     FUNC_LEAVE(ret_value);
 }   /* end H5T_get_ref_type() */
 
@@ -7827,30 +7581,31 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
     H5T_t	*base = NULL;		/* base data type	*/
     H5T_t	*dt = NULL;		    /* new array data type	*/
     int    i;                  /* local index variable */
-    hid_t	ret_value = FAIL;	/* return value			*/
+    hid_t	ret_value;	/* return value			*/
     
     FUNC_ENTER_API(H5Tarray_create, FAIL);
     H5TRACE4("i","iIs*h*Is",base_id,ndims,dim,perm);
 
     /* Check args */
     if (ndims<1 || ndims>H5S_MAX_RANK)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality");
     if (ndims>0 && !dim)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
     for(i=0; i<ndims; i++)
         if(!(dim[i]>0))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "zero-sized dimension specified");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "zero-sized dimension specified");
     if (NULL==(base=H5I_object_verify(base_id,H5I_DATATYPE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
 
     /* Create the actual array datatype */
     if ((dt=H5T_array_create(base,ndims,dim,perm))==NULL)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create datatype");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create datatype");
 
     /* Atomize the type */
     if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Tarray_create */
 
@@ -7891,7 +7646,7 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
 
     /* Build new type */
     if (NULL==(ret_value = H5FL_ALLOC(H5T_t,1)))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     ret_value->ent.header = HADDR_UNDEF;
     ret_value->type = H5T_ARRAY;
@@ -7922,6 +7677,7 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     if(base->type==H5T_VLEN || base->force_conv==TRUE)
         ret_value->force_conv=TRUE;
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5T_array_create */
 
@@ -7945,20 +7701,21 @@ int
 H5Tget_array_ndims(hid_t type_id)
 {
     H5T_t	*dt = NULL;		    /* pointer to array data type	*/
-    int	ret_value = FAIL;	    /* return value			*/
+    int	ret_value;	    /* return value			*/
     
     FUNC_ENTER_API(H5Tget_array_ndims, FAIL);
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
     if(dt->type!=H5T_ARRAY)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
 
     /* Retrieve the number of dimensions */
     ret_value=dt->u.array.ndims;
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Tget_array_ndims */
 
@@ -7990,9 +7747,9 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
     if(dt->type!=H5T_ARRAY)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
 
     /* Retrieve the sizes of the dimensions */
     if(dims) 
@@ -8004,6 +7761,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
         for(i=0; i<dt->u.array.ndims; i++)
             perm[i]=dt->u.array.perm[i];
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Tget_array_dims */
 
@@ -8028,7 +7786,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 htri_t
 H5T_is_sensible(const H5T_t *dt)
 {
-    htri_t	ret_value = FAIL;
+    htri_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5T_is_sensible, FAIL);
 
@@ -8155,72 +7913,72 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     assert(stream);
 
     switch (dt->type) {
-    case H5T_INTEGER:
-	s1 = "int";
-	break;
-    case H5T_FLOAT:
-	s1 = "float";
-	break;
-    case H5T_TIME:
-	s1 = "time";
-	break;
-    case H5T_STRING:
-	s1 = "str";
-	break;
-    case H5T_BITFIELD:
-	s1 = "bits";
-	break;
-    case H5T_OPAQUE:
-	s1 = "opaque";
-	break;
-    case H5T_COMPOUND:
-	s1 = "struct";
-	break;
-    case H5T_ENUM:
-	s1 = "enum";
-	break;
-    default:
-	s1 = "";
-	break;
+        case H5T_INTEGER:
+            s1 = "int";
+            break;
+        case H5T_FLOAT:
+            s1 = "float";
+            break;
+        case H5T_TIME:
+            s1 = "time";
+            break;
+        case H5T_STRING:
+            s1 = "str";
+            break;
+        case H5T_BITFIELD:
+            s1 = "bits";
+            break;
+        case H5T_OPAQUE:
+            s1 = "opaque";
+            break;
+        case H5T_COMPOUND:
+            s1 = "struct";
+            break;
+        case H5T_ENUM:
+            s1 = "enum";
+            break;
+        default:
+            s1 = "";
+            break;
     }
 
     switch (dt->state) {
-    case H5T_STATE_TRANSIENT:
-	s2 = "[transient]";
-	break;
-    case H5T_STATE_RDONLY:
-	s2 = "[constant]";
-	break;
-    case H5T_STATE_IMMUTABLE:
-	s2 = "[predefined]";
-	break;
-    case H5T_STATE_NAMED:
-	s2 = "[named,closed]";
-	break;
-    case H5T_STATE_OPEN:
-	s2 = "[named,open]";
-	break;
+        case H5T_STATE_TRANSIENT:
+            s2 = "[transient]";
+            break;
+        case H5T_STATE_RDONLY:
+            s2 = "[constant]";
+            break;
+        case H5T_STATE_IMMUTABLE:
+            s2 = "[predefined]";
+            break;
+        case H5T_STATE_NAMED:
+            s2 = "[named,closed]";
+            break;
+        case H5T_STATE_OPEN:
+            s2 = "[named,open]";
+            break;
     }
 
     fprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->size));
 
     if (H5T_is_atomic(dt)) {
 	switch (dt->u.atomic.order) {
-	case H5T_ORDER_BE:
-	    s1 = "BE";
-	    break;
-	case H5T_ORDER_LE:
-	    s1 = "LE";
-	    break;
-	case H5T_ORDER_VAX:
-	    s1 = "VAX";
-	    break;
-	case H5T_ORDER_NONE:
-	    s1 = "NONE";
-	    break;
-	default:
-	    s1 = "order?";
-	    break;
+            case H5T_ORDER_BE:
+                s1 = "BE";
+                break;
+            case H5T_ORDER_LE:
+                s1 = "LE";
+                break;
+            case H5T_ORDER_VAX:
+                s1 = "VAX";
+                break;
+            case H5T_ORDER_NONE:
+                s1 = "NONE";
+                break;
+            default:
+                s1 = "order?";
+                break;
 	}
 	fprintf(stream, ", %s", s1);
 
@@ -8233,59 +7991,59 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 		    (unsigned long) (dt->u.atomic.prec));
 	}
 	switch (dt->type) {
-	case H5T_INTEGER:
-	    switch (dt->u.atomic.u.i.sign) {
-	    case H5T_SGN_NONE:
-		s1 = "unsigned";
-		break;
-	    case H5T_SGN_2:
-		s1 = NULL;
-		break;
-	    default:
-		s1 = "sign?";
-		break;
-	    }
-	    if (s1) fprintf(stream, ", %s", s1);
-	    break;
+            case H5T_INTEGER:
+                switch (dt->u.atomic.u.i.sign) {
+                    case H5T_SGN_NONE:
+                        s1 = "unsigned";
+                        break;
+                    case H5T_SGN_2:
+                        s1 = NULL;
+                        break;
+                    default:
+                        s1 = "sign?";
+                        break;
+                }
+                if (s1) fprintf(stream, ", %s", s1);
+                break;
 
-	case H5T_FLOAT:
-	    switch (dt->u.atomic.u.f.norm) {
-	    case H5T_NORM_IMPLIED:
-		s1 = "implied";
-		break;
-	    case H5T_NORM_MSBSET:
-		s1 = "msbset";
-		break;
-	    case H5T_NORM_NONE:
-		s1 = "no-norm";
-		break;
-	    default:
-		s1 = "norm?";
-		break;
-	    }
-	    fprintf(stream, ", sign=%lu+1",
-		    (unsigned long) (dt->u.atomic.u.f.sign));
-	    fprintf(stream, ", mant=%lu+%lu (%s)",
-		    (unsigned long) (dt->u.atomic.u.f.mpos),
-		    (unsigned long) (dt->u.atomic.u.f.msize), s1);
-	    fprintf(stream, ", exp=%lu+%lu",
-		    (unsigned long) (dt->u.atomic.u.f.epos),
-		    (unsigned long) (dt->u.atomic.u.f.esize));
-	    tmp = dt->u.atomic.u.f.ebias >> 32;
-	    if (tmp) {
-                size_t hi=(size_t)tmp;
-                size_t lo =(size_t)(dt->u.atomic.u.f.ebias & 0xffffffff);
-		fprintf(stream, " bias=0x%08lx%08lx",
-			(unsigned long)hi, (unsigned long)lo);
-	    } else {
-                size_t lo = (size_t)(dt->u.atomic.u.f.ebias & 0xffffffff);
-		fprintf(stream, " bias=0x%08lx", (unsigned long)lo);
-	    }
-	    break;
+            case H5T_FLOAT:
+                switch (dt->u.atomic.u.f.norm) {
+                    case H5T_NORM_IMPLIED:
+                        s1 = "implied";
+                        break;
+                    case H5T_NORM_MSBSET:
+                        s1 = "msbset";
+                        break;
+                    case H5T_NORM_NONE:
+                        s1 = "no-norm";
+                        break;
+                    default:
+                        s1 = "norm?";
+                        break;
+                }
+                fprintf(stream, ", sign=%lu+1",
+                        (unsigned long) (dt->u.atomic.u.f.sign));
+                fprintf(stream, ", mant=%lu+%lu (%s)",
+                        (unsigned long) (dt->u.atomic.u.f.mpos),
+                        (unsigned long) (dt->u.atomic.u.f.msize), s1);
+                fprintf(stream, ", exp=%lu+%lu",
+                        (unsigned long) (dt->u.atomic.u.f.epos),
+                        (unsigned long) (dt->u.atomic.u.f.esize));
+                tmp = dt->u.atomic.u.f.ebias >> 32;
+                if (tmp) {
+                    size_t hi=(size_t)tmp;
+                    size_t lo =(size_t)(dt->u.atomic.u.f.ebias & 0xffffffff);
+                    fprintf(stream, " bias=0x%08lx%08lx",
+                            (unsigned long)hi, (unsigned long)lo);
+                } else {
+                    size_t lo = (size_t)(dt->u.atomic.u.f.ebias & 0xffffffff);
+                    fprintf(stream, " bias=0x%08lx", (unsigned long)lo);
+                }
+                break;
 
-	default:
-	    /* No additional info */
-	    break;
+            default:
+                /* No additional info */
+                break;
 	}
 	
     } else if (H5T_COMPOUND==dt->type) {

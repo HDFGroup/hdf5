@@ -17,7 +17,7 @@
  *              Thursday, July 11, 2002
  *
  * Purpose:	This is a "combination" MPI-2 and posix I/O driver.
- *              It uses MPI for coodinating the actions of several processes
+ *              It uses MPI for coordinating the actions of several processes
  *              and posix I/O calls to do the actual I/O to the disk.
  *
  *              This driver was derived from the H5FDmpio.c driver and may
@@ -275,14 +275,14 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm)
 {
     H5FD_mpiposix_fapl_t	fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=FAIL;
+    herr_t ret_value;
     
     FUNC_ENTER_API(H5Pset_fapl_mpiposix, FAIL);
     H5TRACE2("e","iMc",fapl_id,comm);
 
     /* Check arguments */
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
 #ifdef LATER
 #warning "We need to verify that COMM contains sensible information."
 #endif
@@ -292,6 +292,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm)
 
     ret_value= H5P_set_driver(plist, H5FD_MPIPOSIX, &fa);
 
+done:
     FUNC_LEAVE(ret_value);
 } /* end H5Pset_fapl_mpiposix() */
 
@@ -324,22 +325,24 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/)
 {
     H5FD_mpiposix_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL);
     H5TRACE2("e","ix",fapl_id,comm);
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIPOSIX!=H5P_get_driver(plist))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5P_get_driver_info(plist)))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     /* Get MPI Communicator */
     if (comm)
         *comm = fa->comm;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5Pget_fapl_mpiposix() */
 
 
@@ -454,6 +457,7 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
 {
     H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
     H5FD_mpiposix_fapl_t *fa = NULL;
+    void      *ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_get, NULL);
 
@@ -461,12 +465,16 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
 
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_mpiposix_fapl_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* These should be copied. --QAK, 2002-07-11 */
     fa->comm = file->comm;
+    
+    /* Set return value */
+    ret_value=fa;
 
-    FUNC_LEAVE(fa);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5FD_mpiposix_fapl_get() */
 
 
@@ -523,7 +531,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Obtain a pointer to mpiposix-specific file access properties */
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     if (H5P_DEFAULT==fapl_id || H5FD_MPIPOSIX!=H5P_get_driver(plist)) {
 	_fa.comm = MPI_COMM_SELF; /*default*/
 	fa = &_fa;
@@ -659,6 +667,7 @@ static herr_t
 H5FD_mpiposix_close(H5FD_t *_file)
 {
     H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_close, FAIL);
 
@@ -667,11 +676,12 @@ H5FD_mpiposix_close(H5FD_t *_file)
 
     /* Close the unix file */
     if (HDclose(file->fd)<0)
-        HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
+        HGOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     H5MM_xfree(file);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5FD_mpiposix_close() */
 
 
@@ -702,20 +712,30 @@ H5FD_mpiposix_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_ENTER_NOAPI(H5FD_mpiposix_cmp, H5FD_VFD_DEFAULT);
 
 #ifdef WIN32
-    if (f1->fileindexhi < f2->fileindexhi) ret_value= -1;
-    if (f1->fileindexhi > f2->fileindexhi) ret_value= 1;
+    if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1);
+    if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1);
 
-    if (f1->fileindexlo < f2->fileindexlo) ret_value= -1;
-    if (f1->fileindexlo > f2->fileindexlo) ret_value= 1;
+    if (f1->fileindexlo < f2->fileindexlo) HGOTO_DONE(-1);
+    if (f1->fileindexlo > f2->fileindexlo) HGOTO_DONE(1);
 
 #else
-    if (f1->device < f2->device) ret_value= -1;
-    if (f1->device > f2->device) ret_value= 1;
+#ifdef H5_DEV_T_IS_SCALAR
+    if (f1->device < f2->device) HGOTO_DONE(-1);
+    if (f1->device > f2->device) HGOTO_DONE(1);
+#else /* H5_DEV_T_IS_SCALAR */
+    /* If dev_t isn't a scalar value on this system, just use memcmp to
+     * determine if the values are the same or not.  The actual return value
+     * shouldn't really matter...
+     */
+    if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))<0) HGOTO_DONE(-1);
+    if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))>0) HGOTO_DONE(1);
+#endif /* H5_DEV_T_IS_SCALAR */
 
-    if (f1->inode < f2->inode) ret_value= -1;
-    if (f1->inode > f2->inode) ret_value= 1;
+    if (f1->inode < f2->inode) HGOTO_DONE(-1);
+    if (f1->inode > f2->inode) HGOTO_DONE(1);
 #endif
 
+done:
     FUNC_LEAVE(ret_value);
 } /* end H5FD_mpiposix_cmp() */
 

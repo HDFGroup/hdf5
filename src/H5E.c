@@ -533,6 +533,7 @@ const char *
 H5Eget_major (H5E_major_t n)
 {
     unsigned	i;
+    const char *ret_value="Invalid major error number";
     
     /*
      * WARNING: Do not call the FUNC_ENTER() or FUNC_LEAVE() macros since
@@ -545,10 +546,11 @@ H5Eget_major (H5E_major_t n)
 
     for (i=0; i<NELMTS (H5E_major_mesg_g); i++) {
 	if (H5E_major_mesg_g[i].error_code==n)
-	    HRETURN(H5E_major_mesg_g[i].str);
+	    HGOTO_DONE(H5E_major_mesg_g[i].str);
     }
 
-    FUNC_LEAVE("Invalid major error number");
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -573,6 +575,7 @@ const char *
 H5Eget_minor (H5E_minor_t n)
 {
     unsigned	i;
+    const char *ret_value="Invalid minor error number";
     
     /*
      * WARNING: Do not call the FUNC_ENTER() or FUNC_LEAVE() macros since
@@ -585,10 +588,11 @@ H5Eget_minor (H5E_minor_t n)
 
     for (i=0; i<NELMTS (H5E_minor_mesg_g); i++) {
 	if (H5E_minor_mesg_g[i].error_code==n)
-	    HRETURN(H5E_minor_mesg_g[i].str);
+	    HGOTO_DONE(H5E_minor_mesg_g[i].str);
     }
 
-    FUNC_LEAVE("Invalid minor error number");
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

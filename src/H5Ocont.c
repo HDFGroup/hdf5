@@ -72,6 +72,7 @@ static void *
 H5O_cont_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_cont_t             *cont = NULL;
+    void                   *ret_value;
 
     FUNC_ENTER_NOAPI(H5O_cont_decode, NULL);
 
@@ -81,15 +82,18 @@ H5O_cont_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if (NULL==(cont = H5MM_calloc(sizeof(H5O_cont_t)))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (NULL==(cont = H5MM_calloc(sizeof(H5O_cont_t))))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     H5F_addr_decode(f, &p, &(cont->addr));
     H5F_DECODE_LENGTH(f, p, cont->size);
 
-    FUNC_LEAVE((void *) cont);
+    /* Set return value */
+    ret_value=cont;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_cont_encode
@@ -124,6 +128,7 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_cont_debug

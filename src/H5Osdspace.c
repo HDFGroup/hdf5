@@ -62,6 +62,7 @@ H5FL_EXTERN(H5S_simple_t);
 /* Declare external the free list for hsize_t arrays */
 H5FL_ARR_EXTERN(hsize_t);
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_sdspace_decode
@@ -92,7 +93,7 @@ static void *
 H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
-    void		*ret_value = NULL;
+    void		*ret_value;
     unsigned		u;		/* local counting variable */
     unsigned		flags, version;
     
@@ -106,54 +107,49 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     /* decode */
     if ((sdim = H5FL_ALLOC(H5S_simple_t,1)) != NULL) {
         version = *p++;
-        if (version!=H5O_SDSPACE_VERSION) {
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-                "wrong version number in data space message");
-        }
+        if (version!=H5O_SDSPACE_VERSION)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in data space message");
         sdim->rank = *p++;
-        if (sdim->rank>H5S_MAX_RANK) {
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-                "simple data space dimensionality is too large");
-        }
+        if (sdim->rank>H5S_MAX_RANK)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "simple data space dimensionality is too large");
         flags = *p++;
         p += 5; /*reserved*/
 
         if (sdim->rank > 0) {
-            if (NULL==(sdim->size=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-                     "memory allocation failed");
-            }
-            for (u = 0; u < sdim->rank; u++) {
+            if (NULL==(sdim->size=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+            for (u = 0; u < sdim->rank; u++)
                 H5F_DECODE_LENGTH (f, p, sdim->size[u]);
-            }
             if (flags & H5S_VALID_MAX) {
-                if (NULL==(sdim->max=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-                         "memory allocation failed");
-                }
-                for (u = 0; u < sdim->rank; u++) {
+                if (NULL==(sdim->max=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0)))
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                for (u = 0; u < sdim->rank; u++)
                     H5F_DECODE_LENGTH (f, p, sdim->max[u]);
-                }
             }
 #ifdef LATER
             if (flags & H5S_VALID_PERM) {
-                if (NULL==(sdim->perm=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-                     "memory allocation failed");
-                }
+                if (NULL==(sdim->perm=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0)))
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
                 for (u = 0; u < sdim->rank; u++)
                     UINT32DECODE(p, sdim->perm[u]);
             }
-#endif
+#endif /* LATER */
         }
     }
+
+    /* Set return value */
     ret_value = (void*)sdim;	/*success*/
     
-  done:
-    if (!ret_value) H5FL_FREE(H5S_simple_t,sdim);
+done:
+    if (!ret_value && sdim) {
+        H5S_release_simple(sdim);
+        H5FL_FREE(H5S_simple_t,sdim);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_sdspace_encode
@@ -225,9 +221,11 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
         }
 #endif
     }
+
     FUNC_LEAVE(SUCCEED);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_sdspace_copy
@@ -248,46 +246,44 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 {
     const H5S_simple_t	   *src = (const H5S_simple_t *) mesg;
     H5S_simple_t	   *dst = (H5S_simple_t *) dest;
+    void                   *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_sdspace_copy, NULL);
 
     /* check args */
     assert(src);
-    if (!dst && NULL==(dst = H5FL_ALLOC(H5S_simple_t,0))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (!dst && NULL==(dst = H5FL_ALLOC(H5S_simple_t,0)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* deep copy -- pointed-to values are copied also */
     HDmemcpy(dst, src, sizeof(H5S_simple_t));
     
     if (src->size) {
-	if (NULL==(dst->size = H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			   "memory allocation failed");
-	}
+	if (NULL==(dst->size = H5FL_ARR_ALLOC(hsize_t,src->rank,0)))
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	HDmemcpy (dst->size, src->size, src->rank*sizeof(src->size[0]));
     }
     if (src->max) {
-	if (NULL==(dst->max=H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			   "memory allocation failed");
-	}
+	if (NULL==(dst->max=H5FL_ARR_ALLOC(hsize_t,src->rank,0)))
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	HDmemcpy (dst->max, src->max, src->rank*sizeof(src->max[0]));
     }
 #ifdef LATER
     if (src->perm) {
-	if (NULL==(dst->perm=H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			   "memory allocation failed");
-	}
+	if (NULL==(dst->perm=H5FL_ARR_ALLOC(hsize_t,src->rank,0)))
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	HDmemcpy (dst->perm, src->perm, src->rank*sizeof(src->perm[0]));
     }
 #endif
 
-    FUNC_LEAVE((void *) dst);
+    /* Set return value */
+    ret_value=dst;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_sdspace_size
@@ -390,6 +386,7 @@ H5O_sdspace_free (void *mesg)
     FUNC_LEAVE (SUCCEED);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_sdspace_debug
@@ -429,9 +426,8 @@ H5O_sdspace_debug(H5F_t UNUSED *f, const void *mesg,
 	    (unsigned long) (sdim->rank));
     
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
-    for (u = 0; u < sdim->rank; u++) {
+    for (u = 0; u < sdim->rank; u++)
         HDfprintf (stream, "%s%Hu", u?", ":"", sdim->size[u]);
-    }
     HDfprintf (stream, "}\n");
     
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");

@@ -76,18 +76,19 @@ static unsigned long file_serial_no[2];
 static herr_t
 H5FD_init_interface(void)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOINIT(H5FD_init_interface);
 
     if (H5I_init_group(H5I_VFL, H5I_VFL_HASHSIZE, 0,
-		       (H5I_free_t)H5FD_free_cls)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "unable to initialize interface");
-    }
+		       (H5I_free_t)H5FD_free_cls)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* Reset the file serial numbers */
     HDmemset(file_serial_no,0,sizeof(file_serial_no));
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -184,60 +185,48 @@ H5FD_free_cls(H5FD_class_t *cls)
 hid_t
 H5FDregister(const H5FD_class_t *cls)
 {
-    hid_t		retval;
-    H5FD_class_t	*saved;
+    hid_t		ret_value;
+    H5FD_class_t	*saved=NULL;
     H5FD_mem_t		type;
 
     FUNC_ENTER_API(H5FDregister, FAIL);
     H5TRACE1("i","x",cls);
 
     /* Check arguments */
-    if (!cls) {
-	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
-		      "null class pointer is disallowed");
-    }
+    if (!cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed");
 
-    if (!cls->open || !cls->close) {
-	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
-		      "`open' and/or `close' methods are not defined");
-    }
+    if (!cls->open || !cls->close)
+	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`open' and/or `close' methods are not defined");
 
-    if (!cls->get_eoa || !cls->set_eoa) {
-	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
-		      "`get_eoa' and/or `set_eoa' methods are not defined");
-    }
+    if (!cls->get_eoa || !cls->set_eoa)
+	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`get_eoa' and/or `set_eoa' methods are not defined");
 
-    if (!cls->get_eof) {
-	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
-		      "`get_eof' method is not defined");
-    }
-    if (!cls->read || !cls->write) {
-	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
-		      "`read' and/or `write' method is not defined");
-    }
+    if (!cls->get_eof)
+	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`get_eof' method is not defined");
+    if (!cls->read || !cls->write)
+	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`read' and/or `write' method is not defined");
     for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type)) {
 	if (cls->fl_map[type]<H5FD_MEM_NOLIST ||
-	    cls->fl_map[type]>=H5FD_MEM_NTYPES) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-			  "invalid free-list mapping");
-	}
+                cls->fl_map[type]>=H5FD_MEM_NTYPES)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid free-list mapping");
     }
 
     /* Copy the class structure so the caller can reuse or free it */
-    if (NULL==(saved=H5MM_malloc(sizeof(H5FD_class_t)))) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		      "memory allocation failed for file driver class struct");
-    }
+    if (NULL==(saved=H5MM_malloc(sizeof(H5FD_class_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for file driver class struct");
     *saved = *cls;
 
     /* Create the new class ID */
-    if ((retval=H5I_register(H5I_VFL, saved))<0) {
-        H5MM_xfree(saved);
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		      "unable to register file driver ID");
-    }
+    if ((ret_value=H5I_register(H5I_VFL, saved))<0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register file driver ID");
 
-    FUNC_LEAVE(retval);
+done:
+    if(ret_value<0)
+        if(saved)
+            H5MM_xfree(saved);
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -263,18 +252,21 @@ H5FDregister(const H5FD_class_t *cls)
 herr_t
 H5FDunregister(hid_t driver_id)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5FDunregister, FAIL);
     H5TRACE1("e","i",driver_id);
 
     /* Check arguments */
     if (NULL==H5I_object_verify(driver_id,H5I_VFL))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver");
 
     /* The H5FD_class_t struct will be freed by this function */
     if (H5I_dec_ref(driver_id)<0)
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to unregister file driver");
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to unregister file driver");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -319,21 +311,22 @@ H5FD_get_class(hid_t id)
     } else {
         /* Get the plist structure */
         if(NULL == (plist = H5I_object(id)))
-            HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
         if (TRUE==H5P_isa_class(id,H5P_FILE_ACCESS)) {
             if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-                HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
             ret_value = H5FD_get_class(driver_id);
         } else if (TRUE==H5P_isa_class(id,H5P_DATASET_XFER)) {
             if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
-                HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
             ret_value = H5FD_get_class(driver_id);
         } else {
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id, file access property list or data transfer property list");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id, file access property list or data transfer property list");
         }
     } /* end if */
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -364,9 +357,9 @@ H5FD_sb_size(H5FD_t *file)
     FUNC_ENTER_NOAPI(H5FD_sb_size, 0);
 
     assert(file && file->cls);
-    if (file->cls->sb_size) {
+
+    if (file->cls->sb_size)
 	ret_value = (file->cls->sb_size)(file);
-    }
 
     FUNC_LEAVE(ret_value);
 }
@@ -396,16 +389,17 @@ H5FD_sb_size(H5FD_t *file)
 herr_t
 H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_sb_encode, FAIL);
 
     assert(file && file->cls);
     if (file->cls->sb_encode &&
-	(file->cls->sb_encode)(file, name/*out*/, buf/*out*/)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "driver sb_encode request failed");
-    }
+            (file->cls->sb_encode)(file, name/*out*/, buf/*out*/)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_encode request failed");
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -428,16 +422,17 @@ H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
 herr_t
 H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_sb_decode, FAIL);
 
     assert(file && file->cls);
     if (file->cls->sb_decode &&
-	(file->cls->sb_decode)(file, name, buf)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "driver sb_decode request failed");
-    }
+            (file->cls->sb_decode)(file, name, buf)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_decode request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -476,9 +471,8 @@ H5FD_fapl_get(H5FD_t *file)
 
     assert(file);
 
-    if (file->cls->fapl_get) {
+    if (file->cls->fapl_get)
 	ret_value = (file->cls->fapl_get)(file);
-    }
 
     FUNC_LEAVE(ret_value);
 }
@@ -509,14 +503,15 @@ H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
 {
     void		*new_fapl = NULL;
     H5FD_class_t	*driver=NULL;
+    void        *ret_value;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5FD_fapl_copy, NULL);
 
     /* Check args */
     if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
     if (!old_fapl)
-        HRETURN(NULL); /*but no error*/
+        HGOTO_DONE(NULL); /*but no error*/
 
     /* Allow the driver to copy or do it ourselves */
     if (driver->fapl_copy) {
@@ -524,12 +519,14 @@ H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
     } else if (driver->fapl_size>0) {
 	new_fapl = H5MM_malloc(driver->fapl_size);
 	HDmemcpy(new_fapl, old_fapl, driver->fapl_size);
-    } else {
-	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL,
-		      "no way to copy driver file access property list");
-    }
+    } else
+	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "no way to copy driver file access property list");
 
-    FUNC_LEAVE(new_fapl);
+    /* Set return value */
+    ret_value=new_fapl;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -553,24 +550,24 @@ herr_t
 H5FD_fapl_free(hid_t driver_id, void *fapl)
 {
     H5FD_class_t	*driver=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_fapl_free, FAIL);
 
     /* Check args */
     if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
     
     /* Allow driver to free or do it ourselves */
     if (fapl && driver->fapl_free) {
-	if ((driver->fapl_free)(fapl)<0) {
-	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-			  "driver fapl_free request failed");
-	}
+	if ((driver->fapl_free)(fapl)<0)
+	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed");
     } else {
 	H5MM_xfree(fapl);
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -599,14 +596,15 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl)
 {
     void		*new_dxpl = NULL;
     H5FD_class_t	*driver=NULL;
+    void *ret_value;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5FD_dxpl_copy, NULL);
 
     /* Check args */
     if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
     if (!old_dxpl)
-        HRETURN(NULL); /*but no error*/
+        HGOTO_DONE(NULL); /*but no error*/
 
     /* Allow the driver to copy or do it ourselves */
     if (driver->dxpl_copy) {
@@ -614,12 +612,14 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl)
     } else if (driver->dxpl_size>0) {
 	new_dxpl = H5MM_malloc(driver->dxpl_size);
 	HDmemcpy(new_dxpl, old_dxpl, driver->dxpl_size);
-    } else {
-	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL,
-		      "no way to copy driver file access property list");
-    }
+    } else
+	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "no way to copy driver file access property list");
 
-    FUNC_LEAVE(new_dxpl);
+    /* Set return value */
+    ret_value=new_dxpl;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -643,24 +643,24 @@ herr_t
 H5FD_dxpl_free(hid_t driver_id, void *dxpl)
 {
     H5FD_class_t	*driver=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_dxpl_free, FAIL);
 
     /* Check args */
     if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
     
     /* Allow driver to free or do it ourselves */
     if (dxpl && driver->dxpl_free) {
-	if ((driver->dxpl_free)(dxpl)<0) {
-	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-			  "driver dxpl_free request failed");
-	}
+	if ((driver->dxpl_free)(dxpl)<0)
+	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver dxpl_free request failed");
     } else {
 	H5MM_xfree(dxpl);
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -726,11 +726,10 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     FUNC_ENTER_API(H5FDopen, NULL);
 
-    if (NULL==(ret_value=H5FD_open(name, flags, fapl_id, maxaddr))) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL,
-		      "unable to open file");
-    }
+    if (NULL==(ret_value=H5FD_open(name, flags, fapl_id, maxaddr)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to open file");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -765,6 +764,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     hsize_t             meta_block_size=0;    
     hsize_t             sdata_block_size=0;    
     H5P_genplist_t *plist;      /* Property list pointer */
+    H5FD_t		*ret_value;
     
     FUNC_ENTER_NOAPI(H5FD_open, NULL);
 
@@ -772,25 +772,25 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list"); 
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list"); 
  
     if (0==maxaddr)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range");
 
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
 
     /* Get driver info */
     if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
-	HRETURN_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
+	HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
     if (NULL==driver->open)
-	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method");
+	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method");
     
     /* Dispatch to file driver */
     if (HADDR_UNDEF==maxaddr)
         maxaddr = driver->maxaddr;
     if (NULL==(file=(driver->open)(name, flags, fapl_id, maxaddr)))
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed");
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed");
 
     /*
      * Fill in public fields. We must increment the reference count on the
@@ -802,30 +802,35 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->maxaddr = maxaddr;
     HDmemset(file->fl, 0, sizeof(file->fl));
     if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(meta_block_size)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get meta data block size");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get meta data block size");
     file->def_meta_block_size = meta_block_size;
     if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(sdata_block_size)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'small data' block size");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'small data' block size");
     file->def_sdata_block_size = sdata_block_size;
     file->accum_loc = HADDR_UNDEF;
     if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(file->threshold)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold");
     if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(file->alignment)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");    
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");    
 
     /* Retrieve the VFL driver feature flags */
     if (H5FD_query(file, &(file->feature_flags))<0)
-        HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
 
     /* Increment the global serial number & assign it to this H5FD_t object */
     if(++file_serial_no[0]==0) {
         /* (Just error out if we wrap both numbers around for now...) */
         if(++file_serial_no[1]==0)
-            HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number");
     } /* end if */
     HDmemcpy(file->fileno,file_serial_no,sizeof(file_serial_no));
 
-    FUNC_LEAVE(file);
+    /* Set return value */
+    ret_value=file;
+
+done:
+    /* Can't cleanup 'file' information, since we don't know what type it is */
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -852,18 +857,19 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 herr_t
 H5FDclose(H5FD_t *file)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5FDclose, FAIL);
     H5TRACE1("e","x",file);
 
-    if (!file || !file->cls) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
-    }
+    if (!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
 
-    if (H5FD_close(file)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to close file");
-    }
+    if (H5FD_close(file)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to close file");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -896,6 +902,7 @@ H5FD_close(H5FD_t *file)
     unsigned		nblocks=0;
     hsize_t		nbytes=0;
 #endif
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5FD_close, FAIL);
 
@@ -944,10 +951,11 @@ H5FD_close(H5FD_t *file)
      * close the file then the file will be in an unusable state.
      */
     assert(driver->close);
-    if ((driver->close)(file)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed");
-    }
-    FUNC_LEAVE(SUCCEED);
+    if ((driver->close)(file)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -984,6 +992,7 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
     H5TRACE2("Is","xx",f1,f2);
     
     ret_value = H5FD_cmp(f1, f2);
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -1011,21 +1020,29 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
     FUNC_ENTER_NOAPI(H5FD_cmp, -1); /*return value is arbitrary*/
 
-    if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HRETURN(0);
-    if (!f1 || !f1->cls) HRETURN(-1);
-    if (!f2 || !f2->cls) HRETURN(1);
-    if (f1->cls < f2->cls) HRETURN(-1);
-    if (f1->cls > f2->cls) HRETURN(1);
+    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
+        HGOTO_DONE(0);
+    if (!f1 || !f1->cls)
+        HGOTO_DONE(-1);
+    if (!f2 || !f2->cls)
+        HGOTO_DONE(1);
+    if (f1->cls < f2->cls)
+        HGOTO_DONE(-1);
+    if (f1->cls > f2->cls)
+        HGOTO_DONE(1);
 
     /* Files are same driver; no cmp callback */
     if (!f1->cls->cmp) {
-	if (f1<f2) HRETURN(-1);
-	if (f1>f2) HRETURN(1);
-	HRETURN(0);
+	if (f1<f2)
+            HGOTO_DONE(-1);
+	if (f1>f2)
+            HGOTO_DONE(1);
+	HGOTO_DONE(0);
     }
 
     ret_value = (f1->cls->cmp)(f1, f2);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1149,25 +1166,18 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     H5TRACE3("a","xMth",file,type,size);
 
     /* Check args */
-    if (!file || !file->cls) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
-		      "invalid file pointer");
-    }
-    if (type<0 || type>=H5FD_MEM_NTYPES) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
-		      "invalid request type");
-    }
-    if (size<=0) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
-		      "zero-size request");
-    }
+    if (!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer");
+    if (type<0 || type>=H5FD_MEM_NTYPES)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid request type");
+    if (size<=0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "zero-size request");
 
     /* Do the real work */
-    if (HADDR_UNDEF==(ret_value=H5FD_alloc(file, type, size))) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
-		      "unable to allocate file memory");
-    }
+    if (HADDR_UNDEF==(ret_value=H5FD_alloc(file, type, size)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file memory");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1457,7 +1467,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                         /* Return the unused portion of the metadata block to a free list */
                         if(file->eoma!=0)
                             if(H5FD_free(file,H5FD_MEM_DEFAULT,file->eoma,file->cur_meta_block_size)<0)
-                                HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free metadata block");
+                                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free metadata block");
 
                         /* Point the metadata block at the newly allocated block */
                         file->eoma=new_meta;
@@ -1526,7 +1536,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                         /* Return the unused portion of the "small data" block to a free list */
                         if(file->eosda!=0)
                             if(H5FD_free(file,H5FD_MEM_DRAW,file->eosda,file->cur_sdata_block_size)<0)
-                                HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free 'small data' block");
+                                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free 'small data' block");
 
                         /* Point the "small data" block at the newly allocated block */
                         file->eosda=new_data;
@@ -1593,10 +1603,8 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
      */
     if (file->cls->alloc) {
         ret_value = (file->cls->alloc)(file, type, size);
-        if (HADDR_UNDEF==ret_value) {
-            HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
-                  "driver allocation request failed");
-        }
+        if (HADDR_UNDEF==ret_value)
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver allocation request failed");
     } else {
 	hsize_t	wasted;
         haddr_t oldeoa=0;
@@ -1615,28 +1623,20 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 	    wasted = file->alignment - wasted;	/* actual waste */
 	    oldeoa = eoa;			/* save it for later freeing */
 	    /* advance eoa to the next alignment by allocating the wasted */
-	    if (H5F_addr_overflow(eoa, wasted) || eoa+wasted>file->maxaddr) {
-		HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
-		      "file allocation request failed");
-	    }
+	    if (H5F_addr_overflow(eoa, wasted) || eoa+wasted>file->maxaddr)
+		HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed");
 	    eoa += wasted;
-	    if ((file->cls->set_eoa)(file, eoa)<0) {
-		HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
-		      "file allocation request failed");
-	    }
+	    if ((file->cls->set_eoa)(file, eoa)<0)
+		HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed");
 	}
 
 	/* allocate the aligned memory */
-        if (H5F_addr_overflow(eoa, size) || eoa+size>file->maxaddr) {
-            HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
-                  "file allocation request failed");
-        }
+        if (H5F_addr_overflow(eoa, size) || eoa+size>file->maxaddr)
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed");
         ret_value = eoa;
         eoa += size;
-        if ((file->cls->set_eoa)(file, eoa)<0) {
-            HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
-                  "file allocation request failed");
-        }
+        if ((file->cls->set_eoa)(file, eoa)<0)
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed");
 
 	/* Free the wasted memory */
 	if (wasted)
@@ -1651,6 +1651,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 #endif
     }
 
+done:
     FUNC_LEAVE(ret_value);
 } /* end H5FD_real_alloc() */
 
@@ -1680,24 +1681,23 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 herr_t
 H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5FDfree, FAIL);
     H5TRACE4("e","xMtah",file,type,addr,size);
     
     /* Check args */
-    if (!file || !file->cls) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
-    }
-    if (type<0 || type>=H5FD_MEM_NTYPES) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request type");
-    }
+    if (!file || !file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    if (type<0 || type>=H5FD_MEM_NTYPES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request type");
 
     /* Do the real work */
-    if (H5FD_free(file, type, addr, size)<0) {
-        HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "file deallocation request failed");
-    }
+    if (H5FD_free(file, type, addr, size)<0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file deallocation request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1721,6 +1721,7 @@ herr_t
 H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 {
     H5FD_mem_t		mapped_type;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5FD_free, FAIL);
 
@@ -1728,13 +1729,12 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     assert(file && file->cls);
     assert(type>=0 && type<H5FD_MEM_NTYPES);
     if (!H5F_addr_defined(addr) || addr>file->maxaddr ||
-            H5F_addr_overflow(addr, size) || addr+size>file->maxaddr) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid region");
-    }
+            H5F_addr_overflow(addr, size) || addr+size>file->maxaddr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid region");
 
     /* Allow 0-sized free's to occur without penalty */
     if(0==size)
-        HRETURN(SUCCEED);
+        HGOTO_DONE(SUCCEED);
 
     /* Map request type to free list */
     if (H5FD_MEM_DEFAULT==file->cls->fl_map[type]) {
@@ -1757,15 +1757,14 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
         file->fl[mapped_type] = cur;
 	file->maxsize = MAX(file->maxsize, size);
     } else if (file->cls->free) {
-        if ((file->cls->free)(file, type, addr, size)<0) {
-            HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-                  "driver free request failed");
-        }
+        if ((file->cls->free)(file, type, addr, size)<0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed");
     } else {
         /* leak memory */
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1796,12 +1795,10 @@ H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
     FUNC_ENTER_API(H5FDrealloc, HADDR_UNDEF);
     H5TRACE5("a","xMtahh",file,type,old_addr,old_size,new_size);
 
-    if (HADDR_UNDEF==(ret_value=H5FD_realloc(file, type, old_addr, old_size,
-					     new_size))) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
-		      "file reallocation request failed");
-    }
+    if (HADDR_UNDEF==(ret_value=H5FD_realloc(file, type, old_addr, old_size, new_size)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file reallocation request failed");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1830,6 +1827,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
     haddr_t	new_addr=old_addr;
     uint8_t	_buf[8192];
     uint8_t	*buf=_buf;
+    haddr_t      ret_value;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5FD_realloc, HADDR_UNDEF);
 
@@ -1839,10 +1837,8 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
     } else if (0==old_size) {
         /* allocate memory */
         assert(!H5F_addr_defined(old_addr));
-        if (HADDR_UNDEF==(new_addr=H5FDalloc(file, type, new_size))) {
-            HRETURN_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF,
-                  "file allocation failed");
-        }
+        if (HADDR_UNDEF==(new_addr=H5FDalloc(file, type, new_size)))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed");
     } else if (0==new_size) {
         /* free memory */
         assert(H5F_addr_defined(old_addr));
@@ -1860,22 +1856,18 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
          * to move pieces of the realloced data through a fixed size buffer, etc.
          * -QAK, 6/20/01
          */
-        if (HADDR_UNDEF==(new_addr=H5FDalloc(file, type, new_size))) {
-            HRETURN_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF,
-                  "file allocation failed");
-        }
+        if (HADDR_UNDEF==(new_addr=H5FDalloc(file, type, new_size)))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed");
         H5_CHECK_OVERFLOW(old_size,hsize_t,size_t);
         if (old_size>sizeof(_buf) && NULL==(buf=H5MM_malloc((size_t)old_size))) {
             H5FDfree(file, type, new_addr, new_size);
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF,
-                  "memory allocation failed");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed");
         }
         if (H5FDread(file, type, H5P_DEFAULT, old_addr, (size_t)old_size, buf)<0 ||
                 H5FDwrite(file, type, H5P_DEFAULT, new_addr, (size_t)old_size, buf)<0) {
             H5FDfree(file, type, new_addr, new_size);
             H5MM_xfree(buf);
-            HRETURN_ERROR(H5E_FILE, H5E_READERROR, HADDR_UNDEF,
-                  "unable to move file block");
+            HGOTO_ERROR(H5E_FILE, H5E_READERROR, HADDR_UNDEF, "unable to move file block");
         }
         
         if (buf!=_buf)
@@ -1883,7 +1875,11 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
         H5FDfree(file, type, old_addr, old_size);
     }
 
-    FUNC_LEAVE(new_addr);
+    /* Set return value */
+    ret_value=new_addr;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1907,24 +1903,21 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
 haddr_t
 H5FDget_eoa(H5FD_t *file)
 {
-    haddr_t	addr;
+    haddr_t	ret_value;
 
     FUNC_ENTER_API(H5FDget_eoa, HADDR_UNDEF);
     H5TRACE1("a","x",file);
 
     /* Check args */
-    if (!file || !file->cls) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
-		      "invalid file pointer");
-    }
+    if (!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer");
 
     /* The real work */
-    if (HADDR_UNDEF==(addr=H5FD_get_eoa(file))) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
-		      "file get eoa request failed");
-    }
+    if (HADDR_UNDEF==(ret_value=H5FD_get_eoa(file)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed");
 
-    FUNC_LEAVE(addr);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1947,18 +1940,17 @@ H5FDget_eoa(H5FD_t *file)
 haddr_t
 H5FD_get_eoa(H5FD_t *file)
 {
-    haddr_t	addr;
+    haddr_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5FD_get_eoa, HADDR_UNDEF);
     assert(file && file->cls);
     
     /* Dispatch to driver */
-    if (HADDR_UNDEF==(addr=(file->cls->get_eoa)(file))) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
-		      "driver get_eoa request failed");
-    }
+    if (HADDR_UNDEF==(ret_value=(file->cls->get_eoa)(file)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed");
 
-    FUNC_LEAVE(addr);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1992,25 +1984,23 @@ H5FD_get_eoa(H5FD_t *file)
 herr_t
 H5FDset_eoa(H5FD_t *file, haddr_t addr)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5FDset_eoa, FAIL);
     H5TRACE2("e","xa",file,addr);
 
     /* Check args */
-    if (!file || !file->cls) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
-    }
-    if (!H5F_addr_defined(addr) || addr>file->maxaddr) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "invalid end-of-address value");
-    }
+    if (!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+    if (!H5F_addr_defined(addr) || addr>file->maxaddr)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value");
 
     /* The real work */
-    if (H5FD_set_eoa(file, addr)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "file set eoa request failed");
-    }
+    if (H5FD_set_eoa(file, addr)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file set eoa request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2033,18 +2023,19 @@ H5FDset_eoa(H5FD_t *file, haddr_t addr)
 herr_t
 H5FD_set_eoa(H5FD_t *file, haddr_t addr)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_set_eoa, FAIL);
 
     assert(file && file->cls);
     assert(H5F_addr_defined(addr) && addr<=file->maxaddr);
     
     /* Dispatch to driver */
-    if ((file->cls->set_eoa)(file, addr)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "driver set_eoa request failed");
-    }
+    if ((file->cls->set_eoa)(file, addr)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2077,24 +2068,21 @@ H5FD_set_eoa(H5FD_t *file, haddr_t addr)
 haddr_t
 H5FDget_eof(H5FD_t *file)
 {
-    haddr_t	addr;
+    haddr_t	ret_value;
     
     FUNC_ENTER_API(H5FDget_eof, HADDR_UNDEF);
     H5TRACE1("a","x",file);
 
     /* Check arguments */
-    if (!file || !file->cls) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF,
-		      "invalid file pointer");
-    }
+    if (!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer");
 
     /* The real work */
-    if (HADDR_UNDEF==(addr=H5FD_get_eof(file))) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
-		      "file get eof request failed");
-    }
+    if (HADDR_UNDEF==(ret_value=H5FD_get_eof(file)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eof request failed");
 
-    FUNC_LEAVE(addr);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2117,7 +2105,7 @@ H5FDget_eof(H5FD_t *file)
 haddr_t
 H5FD_get_eof(H5FD_t *file)
 {
-    haddr_t	addr=HADDR_UNDEF;
+    haddr_t	ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_get_eof, HADDR_UNDEF);
 
@@ -2125,15 +2113,14 @@ H5FD_get_eof(H5FD_t *file)
     
     /* Dispatch to driver */
     if (file->cls->get_eof) {
-	if (HADDR_UNDEF==(addr=(file->cls->get_eof)(file))) {
-	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
-			  "driver get_eof request failed");
-	}
+	if (HADDR_UNDEF==(ret_value=(file->cls->get_eof)(file)))
+	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eof request failed");
     } else {
-	addr = file->maxaddr;
+	ret_value = file->maxaddr;
     }
 
-    FUNC_LEAVE(addr);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2162,26 +2149,30 @@ herr_t
 H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	 void *buf/*out*/)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5FDread, FAIL);
     H5TRACE6("e","xMtiazx",file,type,dxpl_id,addr,size,buf);
 
     /* Check args */
     if (!file || !file->cls)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
     if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
             TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer");
 
     /* Do the real work */
     if (H5FD_read(file, type, dxpl_id, addr, size, buf)<0)
-	HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed");
+	HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2209,6 +2200,8 @@ herr_t
 H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	  void *buf/*out*/)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_read, FAIL);
 
     assert(file && file->cls);
@@ -2220,7 +2213,8 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     /* Do not return early for Parallel mode since the I/O could be a */
     /* collective transfer. */
     /* The no-op case */
-    if (0==size) HRETURN(SUCCEED);
+    if (0==size)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     /* Check if this information is in the metadata accumulator */
@@ -2244,7 +2238,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 
                 /* Dispatch to driver */
                 if ((file->cls->read)(file, type, dxpl_id, addr, amount_read, read_buf)<0)
-                    HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
                 /* Adjust the buffer, address & size */
                 read_buf+=amount_read;
@@ -2279,7 +2273,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
             if(size>0 && addr>=(file->accum_loc+file->accum_size)) {
                 /* Dispatch to driver */
                 if ((file->cls->read)(file, type, dxpl_id, addr, size, read_buf)<0)
-                    HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
                 /* Adjust the buffer, address & size */
                 read_buf+=size;
@@ -2300,7 +2294,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
                 /* Flush current contents, if dirty */
                 if(file->accum_dirty) {
                     if ((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
-                        HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
+                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
 
                     /* Reset accumulator dirty flag */
                     file->accum_dirty=FALSE;
@@ -2311,7 +2305,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
                 if(size>file->accum_buf_size) {
                     /* Grow the metadata accumulator buffer */
                     if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
-                        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                     /* Note the new buffer size */
                     file->accum_buf_size=size;
@@ -2324,7 +2318,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 
                         /* Shrink the accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
-                            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         file->accum_buf_size=new_size;
@@ -2338,7 +2332,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 
                 /* Read into accumulator */
                 if ((file->cls->read)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
-                    HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
                 /* Copy into buffer */
                 HDmemcpy(buf,file->meta_accum,size);
@@ -2346,17 +2340,18 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
             else {
                 /* Dispatch to driver */
                 if ((file->cls->read)(file, type, dxpl_id, addr, size, buf)<0)
-                    HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
             } /* end else */
         } /* end else */
     } /* end if */
     else {
         /* Dispatch to driver */
         if ((file->cls->read)(file, type, dxpl_id, addr, size, buf)<0)
-            HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
     } /* end else */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2383,26 +2378,29 @@ herr_t
 H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	  const void *buf)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5FDwrite, FAIL);
     H5TRACE6("e","xMtiazx",file,type,dxpl_id,addr,size,buf);
 
     /* Check args */
     if (!file || !file->cls)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
     if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
             TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer");
 
     /* The real work */
     if (H5FD_write(file, type, dxpl_id, addr, size, buf)<0)
-	HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
+	HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2432,6 +2430,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
 {
     size_t new_size;    /* New size of the accumulator buffer */
     size_t old_offset;  /* Offset of old data within the accumulator buffer */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_write, FAIL);
 
@@ -2444,7 +2443,8 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     /* Do not return early for Parallel mode since the I/O could be a */
     /* collective transfer. */
     /* The no-op case */
-    if (0==size) HRETURN(SUCCEED);
+    if (0==size)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     /* Check for accumulating metadata */
@@ -2462,7 +2462,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                     if((size+file->accum_size)>file->accum_buf_size) {
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size+file->accum_size))==NULL)
-                            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         file->accum_buf_size=size+file->accum_size;
@@ -2487,7 +2487,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                     if((size+file->accum_size)>file->accum_buf_size) {
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size+file->accum_size))==NULL)
-                            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         file->accum_buf_size=size+file->accum_size;
@@ -2519,7 +2519,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                     if(new_size>file->accum_buf_size) {
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
-                            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         file->accum_buf_size=new_size;
@@ -2550,7 +2550,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                     if(new_size>file->accum_buf_size) {
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
-                            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         file->accum_buf_size=new_size;
@@ -2575,7 +2575,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                 /* Write out the existing metadata accumulator, with dispatch to driver */
                 if(file->accum_dirty) {
                     if ((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
-                        HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
+                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
                     /* Reset accumulator dirty flag */
                     file->accum_dirty=FALSE;
                 } /* end if */
@@ -2585,7 +2585,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                 if(size>file->accum_buf_size) {
                     /* Grow the metadata accumulator buffer */
                     if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
-                        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                     /* Note the new buffer size */
                     file->accum_buf_size=size;
@@ -2598,7 +2598,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
 
                         /* Shrink the accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,tmp_size))==NULL)
-                            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
                         file->accum_buf_size=tmp_size;
@@ -2620,7 +2620,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
             if(size>file->accum_buf_size) {
                 /* Reallocate the metadata accumulator buffer */
                 if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
-                    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                 /* Note the new buffer size */
                 file->accum_buf_size=size;
@@ -2638,10 +2638,11 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     else {
         /* Dispatch to driver */
         if ((file->cls->write)(file, type, dxpl_id, addr, size, buf)<0)
-            HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
     } /* end else */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2667,21 +2668,21 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
 herr_t
 H5FDflush(H5FD_t *file, unsigned closing)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5FDflush, FAIL);
     H5TRACE2("e","xIu",file,closing);
 
     /* Check args */
-    if (!file || !file->cls) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
-    }
+    if (!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
 
     /* Do the real work */
-    if (H5FD_flush(file,closing)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "file flush request failed");
-    }
+    if (H5FD_flush(file,closing)<0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file flush request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2706,6 +2707,8 @@ H5FDflush(H5FD_t *file, unsigned closing)
 herr_t
 H5FD_flush(H5FD_t *file, unsigned closing)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_flush, FAIL);
 
     assert(file && file->cls);
@@ -2715,16 +2718,17 @@ H5FD_flush(H5FD_t *file, unsigned closing)
         /* Flush the metadata contents */
         /* Not certain if the type and dxpl should be the way they are... -QAK */
         if ((file->cls->write)(file, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT, file->accum_loc, file->accum_size, file->meta_accum)<0)
-            HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver write request failed");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver write request failed");
 
         /* Reset the dirty flag */
         file->accum_dirty=FALSE;
     } /* end if */
 
     if (file->cls->flush && (file->cls->flush)(file,closing)<0)
-        HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

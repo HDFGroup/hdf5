@@ -51,6 +51,18 @@
 }
 
 /*
+ * HDONE_ERROR macro, used to facilitate error reporting between a
+ * FUNC_ENTER() and a FUNC_LEAVE() within a function body, but _AFTER_ the
+ * "done:" label.  The arguments are
+ * the major error number, the minor error number, a return value, and a
+ * description of the error.
+ */
+#define HDONE_ERROR(maj, min, ret_val, str) {				      \
+   HCOMMON_ERROR (maj, min, str);					      \
+   ret_value = ret_val;                                                       \
+}
+
+/*
  * HRETURN macro, used to facilitate returning from a function between a
  * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The argument is
  * the return value.
@@ -127,6 +139,10 @@ extern	int	H5E_mpi_error_str_len;
 #define	HMPI_ERROR(mpierr){						      \
     MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);      \
     HERROR(H5E_INTERNAL, H5E_MPIERRSTR, H5E_mpi_error_str);                   \
+}
+#define	HMPI_DONE_ERROR(retcode, str, mpierr){				      \
+    HMPI_ERROR(mpierr);							      \
+    HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);			      \
 }
 #define	HMPI_GOTO_ERROR(retcode, str, mpierr){				      \
     HMPI_ERROR(mpierr);							      \

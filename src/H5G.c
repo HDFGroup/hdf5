@@ -72,8 +72,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5G_PACKAGE     /*suppress error message about including H5Gpkg.h */
+#define H5F_PACKAGE     /*suppress error about including H5Fpkg	  */
 
 
 /* Packages needed by this file... */
@@ -142,28 +142,29 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
 {
     H5G_entry_t		   *loc = NULL;
     H5G_t		   *grp = NULL;
-    hid_t		    ret_value = FAIL;
+    hid_t		    ret_value;
 
     FUNC_ENTER_API(H5Gcreate, FAIL);
     H5TRACE3("i","isz",loc_id,name,size_hint);
 
     /* Check arguments */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
-    }
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
     
     /* Create the group */
-    if (NULL == (grp = H5G_create(loc, name, size_hint))) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
-    }
-    if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0) {
-	H5G_close(grp);
-	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		      "unable to register group");
-    }
+    if (NULL == (grp = H5G_create(loc, name, size_hint)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
+    if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
+
+done:
+    if(ret_value<0) {
+        if(grp!=NULL)
+            H5G_close(grp);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -198,23 +199,24 @@ H5Gopen(hid_t loc_id, const char *name)
     H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
-    if (NULL==(loc=H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
+    if (NULL==(loc=H5G_loc(loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     
     /* Open the group */
-    if (NULL == (grp = H5G_open(loc, name))) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-    }
+    if (NULL == (grp = H5G_open(loc, name)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
     /* Register an atom for the group */
-    if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0) {
-	H5G_close(grp);
-	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		      "unable to register group");
-    }
+    if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
+
+done:
+    if(ret_value<0) {
+        if(grp!=NULL)
+            H5G_close(grp);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -237,22 +239,24 @@ H5Gopen(hid_t loc_id, const char *name)
 herr_t
 H5Gclose(hid_t group_id)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_API(H5Gclose, FAIL);
     H5TRACE1("e","i",group_id);
 
     /* Check args */
-    if (H5I_GROUP != H5I_get_type(group_id) ||
-	NULL == H5I_object(group_id)) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
-    }
+    if (NULL == H5I_object_verify(group_id,H5I_GROUP))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+
     /*
      * Decrement the counter on the group atom.	 It will be freed if the count
      * reaches zero.
      */
-    if (H5I_dec_ref(group_id) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
-    }
-    FUNC_LEAVE(SUCCEED);
+    if (H5I_dec_ref(group_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -289,35 +293,31 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 {
     int			_idx = 0;
     H5G_bt_ud2_t	udata;
-    herr_t		ret_value = FAIL;
     H5G_entry_t		*loc = NULL;
+    herr_t		ret_value;
     
     FUNC_ENTER_API(H5Giterate, FAIL);
     H5TRACE5("e","is*Isxx",loc_id,name,idx,op,op_data);
 
     /* Check args */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
-    }
-    if (!idx) idx = &_idx;
-    if (!op) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
-    }
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    if (!idx)
+        idx = &_idx;
+    if (!op)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
     /*
      * Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
      */
-    if (NULL==(udata.group = H5G_open (loc, name))) {
-	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group");
-    }
+    if (NULL==(udata.group = H5G_open (loc, name)))
+	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group");
     if ((udata.group_id=H5I_register (H5I_GROUP, udata.group))<0) {
 	H5G_close(udata.group);
-	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-		       "unable to register group");
+	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to register group");
     }
     
     /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
@@ -330,14 +330,15 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (H5G_fileof(udata.group), H5B_SNODE,
-              H5G_node_iterate, udata.group->ent.cache.stab.btree_addr, &udata))<0) {
+              H5G_node_iterate, udata.group->ent.cache.stab.btree_addr, &udata))<0)
         HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
-    }
 
     /* Set the index we stopped at */
     *idx=udata.final_ent;
 
     H5I_dec_ref (udata.group_id); /*also closes udata.group*/
+
+done:
     FUNC_LEAVE (ret_value);
 }
 
@@ -369,46 +370,36 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 {
     H5G_entry_t		*src_loc=NULL;
     H5G_entry_t		*dst_loc=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Gmove2, FAIL);
     H5TRACE4("e","isis",src_loc_id,src_name,dst_loc_id,dst_name);
 
-    if (src_loc_id != H5G_SAME_LOC && NULL==(src_loc=H5G_loc(src_loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (dst_loc_id != H5G_SAME_LOC && NULL==(dst_loc=H5G_loc(dst_loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!src_name || !*src_name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "no current name specified");
-    }
-    if (!dst_name || !*dst_name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "no new name specified");
-    }
+    if (src_loc_id != H5G_SAME_LOC && NULL==(src_loc=H5G_loc(src_loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (dst_loc_id != H5G_SAME_LOC && NULL==(dst_loc=H5G_loc(dst_loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!src_name || !*src_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified");
+    if (!dst_name || !*dst_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified");
 
     if(src_loc_id == H5G_SAME_LOC && dst_loc_id == H5G_SAME_LOC) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
-            "source and destination should not be both H5G_SAME_LOC");
-    }
-    else if(src_loc_id == H5G_SAME_LOC) {
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not be both H5G_SAME_LOC");
+    } else if(src_loc_id == H5G_SAME_LOC) {
 	src_loc = dst_loc;
     }
     else if(dst_loc_id == H5G_SAME_LOC) {
 	dst_loc = src_loc;
     }
-    else if(src_loc->file != dst_loc->file) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-            "source and destination should be in the same file.");
-    }
+    else if(src_loc->file != dst_loc->file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.");
 	
-    if (H5G_move(src_loc, src_name, dst_loc, dst_name)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to change object name");
-    }
+    if (H5G_move(src_loc, src_name, dst_loc, dst_name)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to change object name");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -445,32 +436,25 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 {
     H5G_entry_t	*cur_loc = NULL;
     H5G_entry_t *new_loc = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Glink2, FAIL);
     H5TRACE5("e","isGlis",cur_loc_id,cur_name,type,new_loc_id,new_name);
 
     /* Check arguments */
-    if (cur_loc_id != H5G_SAME_LOC && NULL==(cur_loc=H5G_loc(cur_loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (new_loc_id != H5G_SAME_LOC && NULL==(new_loc=H5G_loc(new_loc_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (type!=H5G_LINK_HARD && type!=H5G_LINK_SOFT) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unrecognized link type");
-    }
-    if (!cur_name || !*cur_name) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "no current name specified");
-    }
-    if (!new_name || !*new_name) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "no new name specified");
-    }
+    if (cur_loc_id != H5G_SAME_LOC && NULL==(cur_loc=H5G_loc(cur_loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (new_loc_id != H5G_SAME_LOC && NULL==(new_loc=H5G_loc(new_loc_id)))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (type!=H5G_LINK_HARD && type!=H5G_LINK_SOFT)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unrecognized link type");
+    if (!cur_name || !*cur_name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified");
+    if (!new_name || !*new_name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified");
 
     if(cur_loc_id == H5G_SAME_LOC && new_loc_id == H5G_SAME_LOC) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
-		"source and destination should not be both H5G_SAME_LOC");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not be both H5G_SAME_LOC");
     }
     else if(cur_loc_id == H5G_SAME_LOC) {
         cur_loc = new_loc;
@@ -478,17 +462,14 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     else if(new_loc_id == H5G_SAME_LOC) {
    	new_loc = cur_loc;
     }
-    else if(cur_loc->file != new_loc->file) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-            "source and destination should be in the same file.");
-    }
+    else if(cur_loc->file != new_loc->file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.");
 
-    if (H5G_link(cur_loc, cur_name, new_loc, new_name, type, H5G_TARGET_NORMAL)
-	<0) {
-	HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL, "unable to create link");
-    }
+    if (H5G_link(cur_loc, cur_name, new_loc, new_name, type, H5G_TARGET_NORMAL) <0)
+	HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL, "unable to create link");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -515,24 +496,23 @@ herr_t
 H5Gunlink(hid_t loc_id, const char *name)
 {
     H5G_entry_t	*loc = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Gunlink, FAIL);
     H5TRACE2("e","is",loc_id,name);
 
     /* Check arguments */
-    if (NULL==(loc=H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
+    if (NULL==(loc=H5G_loc(loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
 
     /* Unlink */
-    if (H5G_unlink(loc, name)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink object");
-    }
+    if (H5G_unlink(loc, name)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink object");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -558,24 +538,23 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
 	       H5G_stat_t *statbuf/*out*/)
 {
     H5G_entry_t	*loc = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Gget_objinfo, FAIL);
     H5TRACE4("e","isbx",loc_id,name,follow_link,statbuf);
 
     /* Check arguments */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
-    }
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
     /* Get info */
-    if (H5G_get_objinfo (loc, name, follow_link, statbuf)<0) {
-	HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object");
-    }
+    if (H5G_get_objinfo (loc, name, follow_link, statbuf)<0)
+	HGOTO_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -601,25 +580,23 @@ herr_t
 H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 {
     H5G_entry_t	*loc = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Gget_linkval, FAIL);
     H5TRACE4("e","iszx",loc_id,name,size,buf);
 
     /* Check arguments */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
-    }
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
     /* Get the link value */
-    if (H5G_linkval (loc, name, size, buf)<0) {
-	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-		       "unable to get link value");
-    }
+    if (H5G_linkval (loc, name, size, buf)<0)
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -644,23 +621,21 @@ herr_t
 H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 {
     H5G_entry_t	*loc = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Gset_comment, FAIL);
     H5TRACE3("e","iss",loc_id,name,comment);
 
-    if (NULL==(loc=H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
-    }
+    if (NULL==(loc=H5G_loc(loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
-    if (H5G_set_comment(loc, name, comment)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to set comment value");
-    }
+    if (H5G_set_comment(loc, name, comment)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -691,27 +666,23 @@ int
 H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5G_entry_t	*loc = NULL;
-    int	retval = FAIL;
+    int	ret_value;
     
     FUNC_ENTER_API(H5Gget_comment, FAIL);
     H5TRACE4("Is","iszs",loc_id,name,bufsize,buf);
 
-    if (NULL==(loc=H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
-    }
-    if (bufsize>0 && !buf) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified");
-    }
+    if (NULL==(loc=H5G_loc(loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    if (bufsize>0 && !buf)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified");
 
-    if ((retval=H5G_get_comment(loc, name, bufsize, buf))<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to get comment value");
-    }
+    if ((ret_value=H5G_get_comment(loc, name, bufsize, buf))<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get comment value");
 
-    FUNC_LEAVE(retval);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 /*
@@ -739,14 +710,14 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 static herr_t
 H5G_init_interface(void)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOINIT(H5G_init_interface);
 
     /* Initialize the atom group for the group IDs */
     if (H5I_init_group(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
-		       (H5I_free_t)H5G_close) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to initialize interface");
-    }
+		       (H5I_free_t)H5G_close) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /*
      * Initialize the type info table.  Begin with the most general types and
@@ -757,7 +728,8 @@ H5G_init_interface(void)
     H5G_register_type(H5G_GROUP,   H5G_isa,  "group");
     H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -792,9 +764,8 @@ H5G_term_interface(void)
 	    H5I_clear_group(H5I_GROUP, FALSE);
 	} else {
 	    /* Empty the object type table */
-	    for (i=0; i<H5G_ntypes_g; i++) {
+	    for (i=0; i<H5G_ntypes_g; i++)
 		H5MM_xfree(H5G_type_g[i].desc);
-	    }
 	    H5G_ntypes_g = H5G_atypes_g = 0;
 	    H5G_type_g = H5MM_xfree(H5G_type_g);
     
@@ -840,7 +811,7 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
 {
     char	*desc = NULL;
     size_t	i;
-    herr_t	ret_value = FAIL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_register_type, FAIL);
 
@@ -849,10 +820,8 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
     assert(_desc);
 
     /* Copy the description */
-    if (NULL==(desc=H5MM_strdup(_desc))) {
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		    "memory allocation failed for object type description");
-    }
+    if (NULL==(desc=H5MM_strdup(_desc)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for object type description");
 
     /*
      * If the type is already registered then just update its entry without
@@ -872,10 +841,8 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
 	size_t n = MAX(32, 2*H5G_atypes_g);
 	H5G_typeinfo_t *x = H5MM_realloc(H5G_type_g,
 					 n*sizeof(H5G_typeinfo_t));
-	if (!x) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			"memory allocation failed for objec type table");
-	}
+	if (!x)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for objec type table");
 	H5G_atypes_g = n;
 	H5G_type_g = x;
     }
@@ -886,10 +853,9 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
     H5G_type_g[H5G_ntypes_g].desc = desc; /*already copied*/
     H5G_ntypes_g++;
 
-    ret_value = SUCCEED;
-
- done:
-    if (ret_value<0) H5MM_xfree(desc);
+done:
+    if (ret_value<0)
+        H5MM_xfree(desc);
     FUNC_LEAVE(ret_value);
 }
 
@@ -924,8 +890,10 @@ H5G_component(const char *name, size_t *size_p)
 
     assert(name);
 
-    while ('/' == *name) name++;
-    if (size_p) *size_p = HDstrcspn(name, "/");
+    while ('/' == *name)
+        name++;
+    if (size_p)
+        *size_p = HDstrcspn(name, "/");
 
     FUNC_LEAVE(name);
 }
@@ -962,13 +930,16 @@ H5G_basename(const char *name, size_t *size_p)
 
     /* Find the end of the base name */
     i = HDstrlen(name);
-    while (i>0 && '/'==name[i-1]) --i;
+    while (i>0 && '/'==name[i-1])
+        --i;
 
     /* Skip backward over base name */
-    while (i>0 && '/'!=name[i-1]) --i;
+    while (i>0 && '/'!=name[i-1])
+        --i;
 
     /* Watch out for root special case */
-    if ('/'==name[i] && size_p) *size_p = 1;
+    if ('/'==name[i] && size_p)
+        *size_p = 1;
 
     FUNC_LEAVE(name+i);
 }
@@ -1066,6 +1037,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     size_t		nchars;		/*component name length		*/
     int			_nlinks = H5G_NLINKS;
     const char		*s = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOINIT(H5G_namei);
 
@@ -1079,10 +1051,9 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
      * root of the file; for relative names it starts at CWG.
      */
     if (!name || !*name) {
-	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "no name given");
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "no name given");
     } else if (!loc_ent) {
-	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-		       "no current working group");
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "no current working group");
     } else if ('/' == *name) {
 	*obj_ent = H5G_rootof(loc_ent->file)->ent;
     } else {
@@ -1104,8 +1075,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
             H5G_comp_g = H5MM_realloc(H5G_comp_g, H5G_comp_alloc_g);
             if (!H5G_comp_g) {
                 H5G_comp_alloc_g = 0;
-                HRETURN_ERROR(H5E_SYM, H5E_NOSPACE, FAIL,
-                              "unable to allocate component buffer");
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "unable to allocate component buffer");
             }
         }
 	HDmemcpy(H5G_comp_g, name, nchars);
@@ -1131,7 +1101,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	     * Component was not found in the current symbol table, possibly
 	     * because GRP_ENT isn't a symbol table.
 	     */
-	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
+	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
 	}
 
 	/*
@@ -1142,14 +1112,10 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	if (H5G_CACHED_SLINK==obj_ent->type &&
 	    (0==(target & H5G_TARGET_SLINK) ||
 	     ((s=H5G_component(name+nchars, NULL)) && *s))) {
-	    if ((*nlinks)-- <= 0) {
-		HRETURN_ERROR (H5E_SYM, H5E_SLINK, FAIL,
-			       "too many symbolic links");
-	    }
-	    if (H5G_traverse_slink (grp_ent, obj_ent, nlinks)<0) {
-		HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-			       "symbolic link traversal failed");
-	    }
+	    if ((*nlinks)-- <= 0)
+		HGOTO_ERROR (H5E_SYM, H5E_SLINK, FAIL, "too many symbolic links");
+	    if (H5G_traverse_slink (grp_ent, obj_ent, nlinks)<0)
+		HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "symbolic link traversal failed");
 	}
 
 	/*
@@ -1165,9 +1131,11 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	/* next component */
 	name += nchars;
     }
-    if (rest) *rest = name; /*final null */
+    if (rest)
+        *rest = name; /*final null */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1199,31 +1167,23 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     H5O_stab_t		stab_mesg;		/*info about local heap	*/
     const char		*clv = NULL;		/*cached link value	*/
     char		*linkval = NULL;	/*the copied link value	*/
-    herr_t		ret_value = FAIL;	/*return value		*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
 
     /* Get the link value */
-    if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab_mesg)) {
-	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-		     "unable to determine local heap address");
-    }
+    if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab_mesg))
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address");
     if (NULL==(clv=H5HL_peek (grp_ent->file, stab_mesg.heap_addr,
-			      obj_ent->cache.slink.lval_offset))) {
-	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-		     "unable to read symbolic link value");
-    }
+			      obj_ent->cache.slink.lval_offset)))
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbolic link value");
     linkval = H5MM_xstrdup (clv);
 
     /* Traverse the link */
-    if (H5G_namei (grp_ent, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL,
-		   nlinks)) {
-	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-		     "unable to follow symbolic link");
-    }
-    ret_value = SUCCEED;
+    if (H5G_namei (grp_ent, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, nlinks))
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link");
 
- done:
+done:
     H5MM_xfree (linkval);
     FUNC_LEAVE (ret_value);
 }
@@ -1254,12 +1214,14 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
 {
     H5G_entry_t	new_root;		/*new root object		*/
     H5O_stab_t	stab;			/*symbol table message		*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_mkroot, FAIL);
 
     /* check args */
     assert(f);
-    if (f->shared->root_grp) HRETURN(SUCCEED);
+    if (f->shared->root_grp)
+        HGOTO_DONE(SUCCEED);
 
     /*
      * If there is no root object then create one. The root group always has
@@ -1267,26 +1229,19 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
      */
     if (!ent) {
 	ent = &new_root;
-	if (H5G_stab_create (f, 256, ent/*out*/)<0) {
-	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-			   "unable to create root group");
-	}
-	if (1 != H5O_link (ent, 1)) {
-	    HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL,
-			   "internal error (wrong link count)");
-	}
+	if (H5G_stab_create (f, 256, ent/*out*/)<0)
+	    HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create root group");
+	if (1 != H5O_link (ent, 1))
+	    HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL, "internal error (wrong link count)");
     } else {
 	/*
 	 * Open the root object as a group.
 	 */
-	if (H5O_open (ent)<0) {
-	    HRETURN_ERROR (H5E_SYM, H5E_CANTOPENOBJ, FAIL,
-			   "unable to open root group");
-	}
+	if (H5O_open (ent)<0)
+	    HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open root group");
 	if (NULL==H5O_read (ent, H5O_STAB, 0, &stab)) {
 	    H5O_close(ent);
-	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-			   "root object is not a group");
+	    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "root object is not a group");
 	}
 	H5O_reset (H5O_STAB, &stab);
     }
@@ -1296,16 +1251,15 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
      * don't count the root group as an open object.  The root group will
      * never be closed.
      */
-    if (NULL==(f->shared->root_grp = H5FL_ALLOC (H5G_t,1))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		       "memory allocation failed");
-    }
+    if (NULL==(f->shared->root_grp = H5FL_ALLOC (H5G_t,1)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     f->shared->root_grp->ent = *ent;
     f->shared->root_grp->nref = 1;
     assert (1==f->nopen_objs);
     f->nopen_objs = 0;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1339,6 +1293,7 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     char	_comp[1024];		/*name component		*/
     size_t	nchars;			/*number of characters in compon*/
     H5G_t	*grp = NULL;		/*new group			*/
+    H5G_t	*ret_value;		/* Return value */
 
     FUNC_ENTER_NOAPI(H5G_create, NULL);
 
@@ -1347,10 +1302,8 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     assert(name && *name);
 
     /* lookup name */
-    if (0 == H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL,
-		       NULL)) {
-	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
-    }
+    if (0 == H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL, NULL))
+	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
     H5E_clear(); /*it's OK that we didn't find it */
     assert(H5F_addr_defined(grp_ent.header));
 
@@ -1360,9 +1313,9 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     if (rest[nchars]) {
 	const char *t = H5G_component(rest+nchars, NULL);
 	if (t && *t) {
-	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "missing component");
+	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "missing component");
 	} else if (nchars+1 > sizeof _comp) {
-	    HRETURN_ERROR(H5E_SYM, H5E_COMPLEN, NULL, "component is too long");
+	    HGOTO_ERROR(H5E_SYM, H5E_COMPLEN, NULL, "component is too long");
 	} else {
 	    /* null terminate */
 	    HDmemcpy(_comp, rest, nchars);
@@ -1372,26 +1325,30 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     }
     
     /* create an open group */
-    if (NULL==(grp = H5FL_ALLOC(H5G_t,1))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-    if (H5G_stab_create(grp_ent.file, size_hint, &(grp->ent)/*out*/) < 0) {
-	grp = H5FL_FREE(H5G_t,grp);
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
-    }
+    if (NULL==(grp = H5FL_ALLOC(H5G_t,1)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if (H5G_stab_create(grp_ent.file, size_hint, &(grp->ent)/*out*/) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
     
     /* insert child name into parent */
-    if (1!=H5O_link(&(grp->ent), 1)) {
-	HRETURN_ERROR(H5E_SYM, H5E_LINK, NULL, "link inc failure");
-    }
+    if (1!=H5O_link(&(grp->ent), 1))
+	HGOTO_ERROR(H5E_SYM, H5E_LINK, NULL, "link inc failure");
     if (H5G_stab_insert(&grp_ent, rest, &(grp->ent)) < 0) {
 	H5O_close(&(grp->ent));
-	grp = H5FL_FREE(H5G_t,grp);
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't insert");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't insert");
     }
     grp->nref = 1;
-    FUNC_LEAVE(grp);
+
+    /* Set return value */
+    ret_value=grp;
+
+done:
+    if(ret_value==NULL) {
+        if(grp!=NULL)
+            H5FL_FREE(H5G_t,grp);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1417,17 +1374,17 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
 htri_t
 H5G_isa(H5G_entry_t *ent)
 {
-    htri_t	exists;
+    htri_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5G_isa, FAIL);
 
     assert(ent);
 
-    if ((exists=H5O_exists(ent, H5O_STAB, 0))<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to read object header");
-    }
-    FUNC_LEAVE(exists);
+    if ((ret_value=H5O_exists(ent, H5O_STAB, 0))<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
     
 
@@ -1463,19 +1420,20 @@ H5G_open(H5G_entry_t *loc, const char *name)
     assert(name && *name);
 
     /* Open the object, making sure it's a group */
-    if (H5G_find(loc, name, NULL, &ent/*out*/) < 0) {
+    if (H5G_find(loc, name, NULL, &ent/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found");
-    }
+
     /* Open the group object */
-    if ((grp=H5G_open_oid(&ent)) ==NULL) {
+    if ((grp=H5G_open_oid(&ent)) ==NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "not found");
-    }
+
+    /* Set return value */
     ret_value = grp;
 
 done:
-    if (!ret_value && grp) {
+    if (!ret_value && grp)
         H5FL_FREE(H5G_t,grp);
-    }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -1510,29 +1468,28 @@ H5G_open_oid(H5G_entry_t *ent)
     assert(ent);
 
     /* Open the object, making sure it's a group */
-    if (NULL==(grp = H5FL_ALLOC(H5G_t,1))) {
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		     "memory allocation failed");
-    }
+    if (NULL==(grp = H5FL_ALLOC(H5G_t,1)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy over the symbol table information if it's provided */
     HDmemcpy(&(grp->ent),ent,sizeof(H5G_entry_t));
 
     /* Grab the object header */
-    if (H5O_open(&(grp->ent)) < 0) {
+    if (H5O_open(&(grp->ent)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
-    }
     if (NULL==H5O_read (&(grp->ent), H5O_STAB, 0, &mesg)) {
         H5O_close(&(grp->ent));
         HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group");
     }
     grp->nref = 1;
+
+    /* Set return value */
     ret_value = grp;
 
- done:
-    if (!ret_value && grp) {
+done:
+    if (!ret_value && grp)
         H5FL_FREE(H5G_t,grp);
-    }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -1584,6 +1541,8 @@ H5G_reopen(H5G_t *grp)
 herr_t
 H5G_close(H5G_t *grp)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_close, FAIL);
 
     /* Check args */
@@ -1592,16 +1551,16 @@ H5G_close(H5G_t *grp)
 
     if (1 == grp->nref) {
 	assert (grp!=H5G_rootof(H5G_fileof(grp)));
-	if (H5O_close(&(grp->ent)) < 0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
-	}
+	if (H5O_close(&(grp->ent)) < 0)
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
 	grp->nref = 0;
 	H5FL_FREE (H5G_t,grp);
     } else {
 	--grp->nref;
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1629,7 +1588,8 @@ H5G_t *
 H5G_rootof(H5F_t *f)
 {
     FUNC_ENTER_NOAPI(H5G_rootof, NULL);
-    while (f->mtab.parent) f = f->mtab.parent;
+    while (f->mtab.parent)
+        f = f->mtab.parent;
     FUNC_LEAVE(f->shared->root_grp);
 }
 
@@ -1657,6 +1617,7 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     H5G_entry_t	grp;		/*entry for group to contain obj */
     size_t	nchars;		/*number of characters in name	*/
     char	_comp[1024];	/*name component		*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_insert, FAIL);
 
@@ -1668,9 +1629,8 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     /*
      * Look up the name -- it shouldn't exist yet.
      */
-    if (H5G_namei(loc, name, &rest, &grp, NULL, H5G_TARGET_NORMAL, NULL)>=0) {
-	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
-    }
+    if (H5G_namei(loc, name, &rest, &grp, NULL, H5G_TARGET_NORMAL, NULL)>=0)
+	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
     H5E_clear(); /*it's OK that we didn't find it */
     rest = H5G_component(rest, &nchars);
 
@@ -1680,9 +1640,9 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
      */
     if (rest[nchars]) {
 	if (H5G_component(rest + nchars, NULL)) {
-	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
+	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
 	} else if (nchars + 1 > sizeof _comp) {
-	    HRETURN_ERROR(H5E_SYM, H5E_COMPLEN, FAIL, "component is too long");
+	    HGOTO_ERROR(H5E_SYM, H5E_COMPLEN, FAIL, "component is too long");
 	} else {
 	    /* null terminate */
 	    HDmemcpy(_comp, rest, nchars);
@@ -1694,15 +1654,15 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     /*
      * Insert the object into a symbol table.
      */
-    if (H5O_link(ent, 1) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_LINK, FAIL,
-		      "unable to increment hard link count");
-    }
+    if (H5O_link(ent, 1) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count");
     if (H5G_stab_insert(&grp, rest, ent) < 0) {
 	H5O_link(ent, -1);
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to insert name");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to insert name");
     }
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1737,17 +1697,19 @@ herr_t
 H5G_find(H5G_entry_t *loc, const char *name,
 	 H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_find, FAIL);
 
     /* check args */
     assert (loc);
     assert (name && *name);
 
-    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL,
-		  NULL)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
-    }
-    FUNC_LEAVE(SUCCEED);
+    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, NULL)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1826,7 +1788,7 @@ H5G_entry_t *
 H5G_loc (hid_t loc_id)
 {
     H5F_t	*f;
-    H5G_entry_t	*ret_value = NULL;
+    H5G_entry_t	*ret_value;
     H5G_t	*group=NULL;
     H5T_t	*dt=NULL;
     H5D_t	*dset=NULL;
@@ -1835,78 +1797,60 @@ H5G_loc (hid_t loc_id)
     FUNC_ENTER_NOAPI(H5G_loc, NULL);
 
     switch (H5I_get_type(loc_id)) {
-    case H5I_FILE:
-	if (NULL==(f=H5I_object (loc_id))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid file ID");
-	}
-	if (NULL==(ret_value=H5G_entof(H5G_rootof(f)))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "unable to get symbol table entry for root group");
-	}
-	break;
+        case H5I_FILE:
+            if (NULL==(f=H5I_object (loc_id)))
+                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid file ID");
+            if (NULL==(ret_value=H5G_entof(H5G_rootof(f))))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry for root group");
+            break;
 
-    case H5I_GENPROP_CLS:
-    case H5I_GENPROP_LST:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-		      "unable to get symbol table entry of property list");
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of property list");
 
-    case H5I_GROUP:
-	if (NULL==(group=H5I_object (loc_id))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid group ID");
-	}
-	if (NULL==(ret_value=H5G_entof(group))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "unable to get symbol table entry of group");
-	}
-	break;
+        case H5I_GROUP:
+            if (NULL==(group=H5I_object (loc_id)))
+                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid group ID");
+            if (NULL==(ret_value=H5G_entof(group)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of group");
+            break;
 
-    case H5I_DATATYPE:
-	if (NULL==(dt=H5I_object(loc_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid type ID");
-	}
-	if (NULL==(ret_value=H5T_entof(dt))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "unable to get symbol table entry of data type");
-	}
-	break;
+        case H5I_DATATYPE:
+            if (NULL==(dt=H5I_object(loc_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid type ID");
+            if (NULL==(ret_value=H5T_entof(dt)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of data type");
+            break;
 
-    case H5I_DATASPACE:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-		      "unable to get symbol table entry of data space");
+        case H5I_DATASPACE:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of data space");
 
-    case H5I_DATASET:
-	if (NULL==(dset=H5I_object(loc_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid data ID");
-	}
-	if (NULL==(ret_value=H5D_entof(dset))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "unable to get symbol table entry of dataset");
-	}
-	break;
+        case H5I_DATASET:
+            if (NULL==(dset=H5I_object(loc_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid data ID");
+            if (NULL==(ret_value=H5D_entof(dset)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of dataset");
+            break;
 
-    case H5I_ATTR:
-	if (NULL==(attr=H5I_object(loc_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "invalid attribute ID");
-	}
-	if (NULL==(ret_value=H5A_entof(attr))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "unable to get symbol table entry of attribute");
-	}
-	break;
-	    
-    case H5I_TEMPBUF:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-		      "unable to get symbol table entry of buffer");
-    
-    case H5I_NGROUPS:
-    case H5I_BADID:
-    case H5I_FILE_CLOSING:
-    case H5I_REFERENCE:
-    case H5I_VFL:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
+        case H5I_ATTR:
+            if (NULL==(attr=H5I_object(loc_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid attribute ID");
+            if (NULL==(ret_value=H5A_entof(attr)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of attribute");
+            break;
+                
+        case H5I_TEMPBUF:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of buffer");
+        
+        case H5I_NGROUPS:
+        case H5I_BADID:
+        case H5I_FILE_CLOSING:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 
+done:
     FUNC_LEAVE (ret_value);
 }
 
@@ -1937,6 +1881,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
     char		_comp[1024];	/*name component		*/
     size_t		nchars;		/*characters in component	*/
     size_t		offset;		/*offset to sym-link value	*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_link, FAIL);
 
@@ -1947,94 +1892,78 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
     assert (new_name && *new_name);
 
     switch (type) {
-    case H5G_LINK_SOFT:
-	/*
-	 * Lookup the the new_name so we can get the group which will contain
-	 * the new entry.  The entry shouldn't exist yet.
-	 */
-	if (H5G_namei (new_loc, new_name, &rest, &grp_ent, NULL, 
-			H5G_TARGET_NORMAL, NULL)>=0) {
-	    HRETURN_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
-	}
-	H5E_clear (); /*it's okay that we didn't find it*/
-	rest = H5G_component (rest, &nchars);
+        case H5G_LINK_SOFT:
+            /*
+             * Lookup the the new_name so we can get the group which will contain
+             * the new entry.  The entry shouldn't exist yet.
+             */
+            if (H5G_namei (new_loc, new_name, &rest, &grp_ent, NULL, 
+                            H5G_TARGET_NORMAL, NULL)>=0)
+                HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
+            H5E_clear (); /*it's okay that we didn't find it*/
+            rest = H5G_component (rest, &nchars);
 
-	/*
-	 * There should be one component left.  Make sure it's null
-	 * terminated and that `rest' points to it.
-	 */
-	if (rest[nchars]) {
-	    if (H5G_component (rest+nchars, NULL)) {
-		HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-			       "component not found");
-	    } else if (nchars+1 > sizeof _comp) {
-		HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, FAIL,
-			       "name component is too long");
-	    } else {
-		HDmemcpy (_comp, rest, nchars);
-		_comp[nchars] = '\0';
-		rest = _comp;
-	    }
-	}
+            /*
+             * There should be one component left.  Make sure it's null
+             * terminated and that `rest' points to it.
+             */
+            if (rest[nchars]) {
+                if (H5G_component (rest+nchars, NULL)) {
+                    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
+                } else if (nchars+1 > sizeof _comp) {
+                    HGOTO_ERROR (H5E_SYM, H5E_COMPLEN, FAIL, "name component is too long");
+                } else {
+                    HDmemcpy (_comp, rest, nchars);
+                    _comp[nchars] = '\0';
+                    rest = _comp;
+                }
+            }
 
-	/*
-	 * Add the link-value to the local heap for the symbol table which
-	 * will contain the link.
-	 */
-	if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg)) {
-	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-			   "unable to determine local heap address");
-	}
-	if ((size_t)(-1)==(offset=H5HL_insert (grp_ent.file,
-					       stab_mesg.heap_addr,
-					       HDstrlen(cur_name)+1,
-					       cur_name))) {
-	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-			   "unable to write link value to local heap");
-	}
-	H5O_reset (H5O_STAB, &stab_mesg);
+            /*
+             * Add the link-value to the local heap for the symbol table which
+             * will contain the link.
+             */
+            if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg))
+                HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine local heap address");
+            if ((size_t)(-1)==(offset=H5HL_insert (grp_ent.file,
+                   stab_mesg.heap_addr, HDstrlen(cur_name)+1, cur_name)))
+                HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap");
+            H5O_reset (H5O_STAB, &stab_mesg);
 
-	/*
-	 * Create a symbol table entry for the link.  The object header is
-	 * undefined and the cache contains the link-value offset.
-	 */
-	HDmemset (&cur_obj, 0, sizeof cur_obj);
-	cur_obj.header = HADDR_UNDEF;
-	cur_obj.file = grp_ent.file;
-	cur_obj.type = H5G_CACHED_SLINK;
-	cur_obj.cache.slink.lval_offset = offset;
+            /*
+             * Create a symbol table entry for the link.  The object header is
+             * undefined and the cache contains the link-value offset.
+             */
+            HDmemset (&cur_obj, 0, sizeof cur_obj);
+            cur_obj.header = HADDR_UNDEF;
+            cur_obj.file = grp_ent.file;
+            cur_obj.type = H5G_CACHED_SLINK;
+            cur_obj.cache.slink.lval_offset = offset;
 
-	/*
-	 * Insert the link head in the symbol table.  This shouldn't ever
-	 * fail because we've already checked that the link head doesn't
-	 * exist and the file is writable (because the local heap is
-	 * writable).  But if it does, the only side effect is that the local
-	 * heap has some extra garbage in it.
-	 */
-	if (H5G_stab_insert (&grp_ent, rest, &cur_obj)<0) {
-	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-			   "unable to create new name/link for object");
-	}
-	break;
+            /*
+             * Insert the link head in the symbol table.  This shouldn't ever
+             * fail because we've already checked that the link head doesn't
+             * exist and the file is writable (because the local heap is
+             * writable).  But if it does, the only side effect is that the local
+             * heap has some extra garbage in it.
+             */
+            if (H5G_stab_insert (&grp_ent, rest, &cur_obj)<0)
+                HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
+            break;
 
-    case H5G_LINK_HARD:
-	if (H5G_namei(cur_loc, cur_name, NULL, NULL, &cur_obj, namei_flags,
-		      NULL)<0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
-			  "source object not found");
-	}
-	if (H5G_insert (new_loc, new_name, &cur_obj)<0) {
-	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-			   "unable to create new name/link for object");
-	}
-	break;
+        case H5G_LINK_HARD:
+            if (H5G_namei(cur_loc, cur_name, NULL, NULL, &cur_obj, namei_flags, NULL)<0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found");
+            if (H5G_insert (new_loc, new_name, &cur_obj)<0)
+                HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
+            break;
 
-    default:
-	HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, FAIL,
-		       "unrecognized link type");
+        default:
+            HGOTO_ERROR (H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type");
     }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2059,23 +1988,23 @@ H5G_get_type(H5G_entry_t *ent)
 {
     htri_t	isa;
     size_t	i;
+    int         ret_value=H5G_UNKNOWN;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_get_type, H5G_UNKNOWN);
 
     for (i=H5G_ntypes_g; i>0; --i) {
 	if ((isa=(H5G_type_g[i-1].isa)(ent))<0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN,
-			  "unable to determine object type");
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
 	} else if (isa) {
-	    HRETURN(H5G_type_g[i-1].type);
+	    HGOTO_DONE(H5G_type_g[i-1].type);
 	}
     }
 
-    if (0==i) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN,
-		      "unable to determine object type");
-    }
-    FUNC_LEAVE(H5G_UNKNOWN);
+    if (0==i)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2104,6 +2033,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
     H5O_stab_t		stab_mesg;
     H5G_entry_t		grp_ent, obj_ent;
     const char		*s = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_get_objinfo, FAIL);
 
@@ -2113,9 +2043,8 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
     /* Find the object's symbol table entry */
     if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
-		   (unsigned)(follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK), NULL)<0) {
-	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
-    }
+		   (unsigned)(follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK), NULL)<0)
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
 
     /*
      * Initialize the stat buf.  Symbolic links aren't normal objects and
@@ -2127,10 +2056,8 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    /* Named object is a symbolic link */
 	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg) ||
 		NULL==(s=H5HL_peek (grp_ent.file, stab_mesg.heap_addr, 
-				    obj_ent.cache.slink.lval_offset))) {
-		HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-			       "unable to read symbolic link value");
-	    }
+				    obj_ent.cache.slink.lval_offset)))
+		HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value");
 	    statbuf->linklen = HDstrlen(s)+1; /*count the null terminator*/
 	    statbuf->objno[0] = statbuf->objno[1] = 0;
 	    statbuf->nlink = 0;
@@ -2158,10 +2085,11 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
         /* Common code to retrieve the file's fileno */
         if(H5F_get_fileno(obj_ent.file,statbuf->fileno)<0)
-            HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
+            HGOTO_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
     }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2191,6 +2119,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
     const char		*s = NULL;
     H5G_entry_t		grp_ent, obj_ent;
     H5O_stab_t		stab_mesg;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_linkval, FAIL);
 
@@ -2199,35 +2128,27 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
      * entry for the group in which the link head appears.
      */
     if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
-		   H5G_TARGET_SLINK, NULL)<0) {
-	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-		       "symbolic link was not found");
-    }
-    if (H5G_CACHED_SLINK!=obj_ent.type) {
-	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-		       "object is not a symbolic link");
-    }
+		   H5G_TARGET_SLINK, NULL)<0)
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "symbolic link was not found");
+    if (H5G_CACHED_SLINK!=obj_ent.type)
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "object is not a symbolic link");
 
     /*
      * Get the address of the local heap for the link value and a pointer
      * into that local heap.
      */
-    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg)) {
-	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-		       "unable to determine local heap address");
-    }
+    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg))
+	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine local heap address");
     if (NULL==(s=H5HL_peek (grp_ent.file, stab_mesg.heap_addr,
-			    obj_ent.cache.slink.lval_offset))) {
-	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-		       "unable to read symbolic link value");
-    }
+			    obj_ent.cache.slink.lval_offset)))
+	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value");
     
     /* Copy to output buffer */
-    if (size>0 && buf) {
+    if (size>0 && buf)
 	HDstrncpy (buf, s, size);
-    }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2250,14 +2171,14 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
 {
     H5G_entry_t	obj_ent;
     H5O_name_t	comment;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_set_comment, FAIL);
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
-		  NULL)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
-    }
+		  NULL)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Remove the previous comment message if any */
     if (H5O_remove(&obj_ent, H5O_NAME, 0)<0) H5E_clear();
@@ -2265,14 +2186,13 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
     /* Add the new message */
     if (buf && *buf) {
 	comment.s = H5MM_xstrdup(buf);
-	if (H5O_modify(&obj_ent, H5O_NAME, H5O_NEW_MESG, 0, &comment)<0) {
-	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
-			  "unable to set comment object header message");
-	}
+	if (H5O_modify(&obj_ent, H5O_NAME, H5O_NEW_MESG, 0, &comment)<0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
 	H5O_reset(H5O_NAME, &comment);
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2299,28 +2219,29 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
 {
     H5O_name_t	comment;
     H5G_entry_t	obj_ent;
-    int	retval = FAIL;
+    int	ret_value;
     
     FUNC_ENTER_NOAPI(H5G_get_comment, FAIL);
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
-		  NULL)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
-    }
+		  NULL)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Get the message */
     comment.s = NULL;
     if (NULL==H5O_read(&obj_ent, H5O_NAME, 0, &comment)) {
-	if (buf && bufsize>0) buf[0] = '\0';
-	retval = 0;
+	if (buf && bufsize>0)
+            buf[0] = '\0';
+	ret_value = 0;
     } else {
 	HDstrncpy(buf, comment.s, bufsize);
-	retval = (int)HDstrlen(comment.s);
+	ret_value = (int)HDstrlen(comment.s);
 	H5O_reset(H5O_NAME, &comment);
     }
 
-    FUNC_LEAVE(retval);
+done:
+    FUNC_LEAVE(ret_value);
 }
     
 
@@ -2344,6 +2265,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
     H5G_entry_t		grp_ent, obj_ent;
     size_t		len;
     const char		*base=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_unlink, FAIL);
     assert(loc);
@@ -2351,25 +2273,19 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
 
     /* Get the entry for the group that contains the object to be unlinked */
     if (H5G_namei(loc, name, NULL, &grp_ent, &obj_ent,
-		  H5G_TARGET_SLINK|H5G_TARGET_MOUNT, NULL)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
-    }
-    if (!H5F_addr_defined(grp_ent.header)) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
-		      "no containing group specified");
-    }
-    if (NULL==(base=H5G_basename(name, &len)) || '/'==*base) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
-		      "problems obtaining object base name");
-    }
+		  H5G_TARGET_SLINK|H5G_TARGET_MOUNT, NULL)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
+    if (!H5F_addr_defined(grp_ent.header))
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no containing group specified");
+    if (NULL==(base=H5G_basename(name, &len)) || '/'==*base)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "problems obtaining object base name");
     
     /* Remove the name from the symbol table */
-    if (H5G_stab_remove(&grp_ent, base)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to unlink name from symbol table");
-    }
+    if (H5G_stab_remove(&grp_ent, base)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink name from symbol table");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2397,6 +2313,7 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
     H5G_stat_t		sb;
     char		*linkval=NULL;
     size_t		lv_size=32;
+    herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_move, FAIL);
     assert(src_loc);
@@ -2404,31 +2321,23 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
     assert(src_name && *src_name);
     assert(dst_name && *dst_name);
 
-    if (H5G_get_objinfo(src_loc, src_name, FALSE, &sb)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
-    }
+    if (H5G_get_objinfo(src_loc, src_name, FALSE, &sb)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     if (H5G_LINK==sb.type) {
 	/*
 	 * When renaming a symbolic link we rename the link but don't change
 	 * the value of the link.
 	 */
 	do {
-	    if (NULL==(linkval=H5MM_realloc(linkval, 2*lv_size))) {
-		HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			      "unable to allocate space for symbolic link "
-			      "value");
-	    }
+	    if (NULL==(linkval=H5MM_realloc(linkval, 2*lv_size)))
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for symbolic link value");
 	    linkval[lv_size-1] = '\0';
-	    if (H5G_linkval(src_loc, src_name, lv_size, linkval)<0) {
-		HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-			      "unable to read symbolic link value");
-	    }
+	    if (H5G_linkval(src_loc, src_name, lv_size, linkval)<0)
+		HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value");
 	} while (linkval[lv_size-1]);
 	if (H5G_link(src_loc, linkval, dst_loc, dst_name, H5G_LINK_SOFT,
-		     H5G_TARGET_NORMAL)<0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-			  "unable to rename symbolic link");
-	}
+		     H5G_TARGET_NORMAL)<0)
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to rename symbolic link");
 	H5MM_xfree(linkval);
 	
     } else {
@@ -2436,19 +2345,16 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
 	 * Rename the object.
 	 */
 	if (H5G_link(src_loc, src_name, dst_loc, dst_name, H5G_LINK_HARD,
-		     H5G_TARGET_MOUNT)<0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-			  "unable to register new name for object");
-	}
+		     H5G_TARGET_MOUNT)<0)
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to register new name for object");
     }
 
     /* Remove the old name */
-    if (H5G_unlink(src_loc, src_name)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to deregister old object name");
-    }
+    if (H5G_unlink(src_loc, src_name)<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to deregister old object name");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2476,6 +2382,7 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name)
     const char	*rest;
     H5G_entry_t	grp_ent;
     size_t	size;
+    H5F_t      *ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_insertion_file, NULL);
     assert(loc);
@@ -2485,20 +2392,20 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name)
      * Look up the name to get the containing group and to make sure the name
      * doesn't already exist.
      */
-    if (H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL,
-		  NULL)>=0) {
-	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
-    }
+    if (H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL, NULL)>=0)
+	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
     H5E_clear();
 
     /* Make sure only the last component wasn't resolved */
     rest = H5G_component(rest, &size);
     assert(*rest && size>0);
     rest = H5G_component(rest+size, NULL);
-    if (*rest) {
-	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, NULL,
-		      "insertion point not found");
-    }
+    if (*rest)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "insertion point not found");
 
-    FUNC_LEAVE(grp_ent.file);
+    /* Set return value */
+    ret_value=grp_ent.file;
+
+done:
+    FUNC_LEAVE(ret_value);
 }

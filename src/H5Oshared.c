@@ -68,8 +68,9 @@ static int interface_initialize_g = 0;
 static void *
 H5O_shared_decode (H5F_t *f, const uint8_t *buf, H5O_shared_t UNUSED *sh)
 {
-    H5O_shared_t	*mesg;
+    H5O_shared_t	*mesg=NULL;
     unsigned		flags, version;
+    void                *ret_value;     /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_shared_decode, NULL);
 
@@ -79,17 +80,13 @@ H5O_shared_decode (H5F_t *f, const uint8_t *buf, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* Decode */
-    if (NULL==(mesg = H5MM_calloc (sizeof *mesg))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (NULL==(mesg = H5MM_calloc (sizeof *mesg)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Version */
     version = *buf++;
-    if (version!=H5O_SHARED_VERSION) {
-	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
-		      "bad version number for shared object message");
-    }
+    if (version!=H5O_SHARED_VERSION)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for shared object message");
 
     /* Flags */
     flags = *buf++;
@@ -106,7 +103,16 @@ H5O_shared_decode (H5F_t *f, const uint8_t *buf, H5O_shared_t UNUSED *sh)
 	H5G_ent_decode (f, &buf, &(mesg->u.ent));
     }
 
-    FUNC_LEAVE (mesg);
+    /* Set return value */
+    ret_value=mesg;
+
+done:
+    if(ret_value==NULL) {
+        if(mesg!=NULL)
+            H5MM_xfree(mesg);
+    } /* end if */
+
+    FUNC_LEAVE (ret_value);
 }
 
 

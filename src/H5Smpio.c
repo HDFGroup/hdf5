@@ -114,6 +114,8 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_
 {
     hsize_t	total_bytes;
     unsigned		u;
+    int         mpi_code;               /* MPI return code */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_mpio_all_type);
 
@@ -129,10 +131,10 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_
     if(prefer_derived_types) {
         /* fill in the return values */
         H5_CHECK_OVERFLOW(total_bytes, hsize_t, int);
-        if (MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type ))
-            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI contiguous type");
-        if(MPI_Type_commit(new_type))
-            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't commit MPI contiguous type");
+        if (MPI_SUCCESS != (mpi_code=MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type )))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code);
+        if(MPI_SUCCESS != (mpi_code=MPI_Type_commit(new_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
         *count = 1;
         *extra_offset = 0;
         *use_view = 1;
@@ -147,10 +149,11 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_
         *is_derived_type = 0;
     } /* end else */
 
+done:
 #ifdef H5Smpi_DEBUG
     HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
 #endif
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -204,7 +207,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
         hsize_t count;
     } d[H5S_MAX_RANK];
 
-    int			i, err, new_rank, num_to_collapse;
+    int			i, new_rank, num_to_collapse;
     herr_t		ret_value = SUCCEED;
     int			offset[H5S_MAX_RANK];
     int			max_xtent[H5S_MAX_RANK];
@@ -213,6 +216,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
     int			block_length[2];
     MPI_Datatype	inner_type, outer_type, old_type[2];
     MPI_Aint            extent_len, displacement[2];
+    int                 mpi_code;               /* MPI return code */
 
     FUNC_ENTER_NOINIT(H5S_mpio_hyper_type);
 
@@ -344,9 +348,8 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
     for (i=new_rank-1; i>=0; --i)
         HDfprintf(stdout, "d[%d].xtent=%Hu \n", i, d[i].xtent);
 #endif
-    err = MPI_Type_contiguous( (int)elmt_size, MPI_BYTE, &inner_type );
-    if (err)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI contiguous type");
+    if (MPI_SUCCESS != (mpi_code= MPI_Type_contiguous( (int)elmt_size, MPI_BYTE, &inner_type )))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code);
 
 /*******************************************************
 *  Construct the type by walking the hyperslab dims
@@ -365,18 +368,19 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
        /****************************************
        *  Build vector in current dimension:
        ****************************************/
-        err = MPI_Type_vector ( (int)(d[i].count),        /* count */
+        mpi_code = MPI_Type_vector ( (int)(d[i].count),        /* count */
                   (int)(d[i].block),        /* blocklength */
 				  (int)(d[i].strid),   	    /* stride */
 				  inner_type,	            /* old type */
 				  &outer_type );            /* new type */
 
         MPI_Type_free( &inner_type );
-        if (err)
-            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI vector type");
+        if (mpi_code!=MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "couldn't create MPI vector type", mpi_code);
 
         displacement[1] = (MPI_Aint)elmt_size * max_xtent[i];
-        err = MPI_Type_extent(outer_type, &extent_len);
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_extent(outer_type, &extent_len)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_extent failed", mpi_code);
 
        /*************************************************
        *  Restructure this datatype ("outer_type")
@@ -391,7 +395,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
 #endif
 
 #ifdef H5_HAVE_MPI2  /*  have MPI-2  */
-            err = MPI_Type_create_resized
+            mpi_code = MPI_Type_create_resized
                                   ( outer_type,        /* old type  */
                                     0,                 /* blocklengths */
                                     displacement[1],   /* displacements */
@@ -408,7 +412,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
             HDfprintf(stdout, "hyper_type: i=%d Extending struct type\n"
                 "***displacements: 0, %d\n", i, displacement[1]);
 #endif
-            err = MPI_Type_struct ( 2,               /* count */
+            mpi_code = MPI_Type_struct ( 2,               /* count */
                                     block_length,    /* blocklengths */
                                     displacement,    /* displacements */
                                     old_type,        /* old types */
@@ -416,8 +420,8 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
 #endif
   
             MPI_Type_free (&outer_type);
-    	    if (err)
-      	        HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't resize MPI vector type");
+    	    if (mpi_code!=MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "couldn't resize MPI vector type", mpi_code);
         }
         else {
             inner_type = outer_type;
@@ -451,26 +455,24 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
                      block_length[0], displacement[0]);
 #endif
 
-        err = MPI_Type_struct( 1,                  /* count */
-                     block_length,       /* blocklengths */
-  		             displacement,       /* displacements */
-  		             old_type,	         /* old type */
-  		             new_type );         /* new type */
   
-        if (err)
-             HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI struct type");
+        if (MPI_SUCCESS != (mpi_code= MPI_Type_struct( 1,                  /* count */
+                     block_length,       /* blocklengths */
+                     displacement,       /* displacements */
+                     old_type,	         /* old type */
+                     new_type ))         /* new type */
+                )
+            HMPI_GOTO_ERROR(FAIL, "couldn't create MPI struct type", mpi_code);
 
-        err=MPI_Type_free (&old_type[0]);
-        if (err)
-            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't resize MPI vector type");
+        if (MPI_SUCCESS != (mpi_code= MPI_Type_free (&old_type[0])))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     }
     else {
         *new_type = inner_type;
     }
 
-    err = MPI_Type_commit( new_type );
-    if (err)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't commit MPI vector type");
+    if (MPI_SUCCESS != (mpi_code= MPI_Type_commit( new_type )))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
 
     /* fill in the remaining return values */
     *count = 1;			/* only have to move one of these suckers! */
@@ -537,6 +539,8 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, size_t elmt_size, hbool_t prefer
     hssize_t    offset[H5O_LAYOUT_NDIMS];       /* Offset in selection */
     int   	ndims;          /* Number of dimensions of dataset */
     int         i;              /* Local index */
+    int         mpi_code;               /* MPI return code */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_mpio_hyper_contig_type);
 
@@ -571,10 +575,10 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, size_t elmt_size, hbool_t prefer
     if(prefer_derived_types) {
         /* fill in the return values */
         H5_CHECK_OVERFLOW(total_bytes, hsize_t, int);
-        if (MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type ))
-            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI contiguous type");
-        if(MPI_Type_commit(new_type))
-            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't commit MPI contiguous type");
+        if (MPI_SUCCESS != (mpi_code=MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type )))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code);
+        if(MPI_SUCCESS != (mpi_code=MPI_Type_commit(new_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
         *count = 1;
         *extra_offset = byte_offset;
         *use_view = 1;
@@ -589,10 +593,11 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, size_t elmt_size, hbool_t prefer
         *is_derived_type = 0;
     } /* end else */
 
+done:
 #ifdef H5Smpi_DEBUG
     HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
 #endif
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 } /* end H5S_mpio_hyper_contig_type() */
 
 
@@ -652,10 +657,9 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derive
             switch(space->select.type) {
                 case H5S_SEL_NONE:
                 case H5S_SEL_ALL:
-                    err = H5S_mpio_all_type( space, elmt_size, prefer_derived_types,
-                        /* out: */ new_type, count, extra_offset, use_view, is_derived_type );
-                    if (err<0)
-                        HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+                    if ( H5S_mpio_all_type( space, elmt_size, prefer_derived_types,
+                        /* out: */ new_type, count, extra_offset, use_view, is_derived_type ) <0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
                     break;
 
                 case H5S_SEL_POINTS:
@@ -673,7 +677,7 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derive
                             /* out: */ new_type, count, extra_offset, use_view, is_derived_type );
                     } /* end else */
                     if (err<0)
-                        HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
                     break;
 
                 default:
@@ -692,6 +696,7 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derive
             break;
     }
 
+done:
     FUNC_LEAVE (ret_value);
 }
 
@@ -761,7 +766,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
     hbool_t	 plist_is_setup=0;      /* Whether the dxpl has been customized */
     hbool_t	 prefer_derived_types=0;/* Whether to prefer MPI derived types or not */
     uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
-    int		 err;                   /* Error detection value */
+    int         mpi_code;               /* MPI return code */
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOINIT(H5S_mpio_spaces_xfer);
@@ -782,25 +787,23 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
     prefer_derived_types= H5S_mpi_prefer_derived_types_g;
 
     /* create the MPI buffer type */
-    err = H5S_mpio_space_type( mem_space, elmt_size, prefer_derived_types,
+    if (H5S_mpio_space_type( mem_space, elmt_size, prefer_derived_types,
 			       /* out: */
 			       &mpi_buf_type,
 			       &mpi_buf_count,
 			       &mpi_buf_offset,
 			       &mbt_use_view,
-			       &mbt_is_derived );
-    if (MPI_SUCCESS != err)
+			       &mbt_is_derived )<0)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI buf type");
 
     /* create the MPI file type */
-    err = H5S_mpio_space_type( file_space, elmt_size, prefer_derived_types,
+    if ( H5S_mpio_space_type( file_space, elmt_size, prefer_derived_types,
 			       /* out: */
 			       &mpi_file_type,
 			       &mpi_file_count,
 			       &mpi_file_offset,
 			       &mft_use_view,
-			       &mft_is_derived );
-    if (MPI_SUCCESS != err)
+			       &mft_is_derived )<0)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
 
     /* Use the absolute base address of the dataset (or chunk, eventually) as
@@ -825,12 +828,10 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
 
     /* transfer the data */
     if (do_write) {
-    	err = H5FD_write(f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, mpi_buf_count, buf);
-    	if (err<0)
+    	if (H5FD_write(f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, mpi_buf_count, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
     } else {
-    	err = H5FD_read (f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, mpi_buf_count, buf);
-    	if (err<0)
+    	if ( H5FD_read (f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, mpi_buf_count, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
     }
 
@@ -838,19 +839,17 @@ done:
     /* Reset the dxpl settings */
     if(plist_is_setup) {
         if(H5FD_mpio_teardown(dxpl_id)<0)
-    	    HRETURN_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to reset dxpl values");
+    	    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to reset dxpl values");
     } /* end if */
 
     /* free the MPI buf and file types */
     if (mbt_is_derived) {
-	err = MPI_Type_free( &mpi_buf_type );
-	if (MPI_SUCCESS != err)
-    	    HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL, "unable to free MPI file type");
+	if (MPI_SUCCESS != (mpi_code= MPI_Type_free( &mpi_buf_type )))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     }
     if (mft_is_derived) {
-	err = MPI_Type_free( &mpi_file_type );
-	if (MPI_SUCCESS != err)
-    	    HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL, "unable to free MPI file type");
+	if (MPI_SUCCESS != (mpi_code= MPI_Type_free( &mpi_file_type )))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     }
 
     FUNC_LEAVE (ret_value);
@@ -883,7 +882,7 @@ H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
                     const H5S_t *file_space, const H5S_t *mem_space,
                     hid_t dxpl_id, void *buf/*out*/)
 {
-    herr_t ret_value = FAIL;
+    herr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5S_mpio_spaces_read, FAIL);
 
@@ -921,7 +920,7 @@ H5S_mpio_spaces_write(H5F_t *f, const H5O_layout_t *layout,
 		    const H5S_t *file_space, const H5S_t *mem_space,
 		    hid_t dxpl_id, const void *buf)
 {
-    herr_t ret_value = FAIL;
+    herr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5S_mpio_spaces_write, FAIL);
 

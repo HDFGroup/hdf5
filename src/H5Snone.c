@@ -155,14 +155,12 @@ H5S_none_release (H5S_t * UNUSED space)
 hsize_t
 H5S_none_npoints (const H5S_t *space)
 {
-    hsize_t ret_value=0;
-
     FUNC_ENTER_NOAPI(H5S_none_npoints, 0);
 
     /* Check args */
     assert (space);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (0);
 }   /* H5S_none_npoints() */
 
 
@@ -257,8 +255,6 @@ H5S_none_serial_size (const H5S_t *space)
 herr_t
 H5S_none_serialize (const H5S_t *space, uint8_t *buf)
 {
-    herr_t ret_value=FAIL;  /* return value */
-
     FUNC_ENTER_NOAPI(H5S_none_serialize, FAIL);
 
     assert(space);
@@ -269,11 +265,9 @@ H5S_none_serialize (const H5S_t *space, uint8_t *buf)
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the additional information length */
 
-    /* Set success */
-    ret_value=SUCCEED;
-
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 }   /* H5S_none_serialize() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -297,7 +291,7 @@ H5S_none_serialize (const H5S_t *space, uint8_t *buf)
 herr_t
 H5S_none_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 {
-    herr_t ret_value=FAIL;  /* return value */
+    herr_t ret_value;  /* return value */
 
     FUNC_ENTER_NOAPI(H5S_none_deserialize, FAIL);
 
@@ -512,18 +506,19 @@ done:
 herr_t H5Sselect_none (hid_t spaceid)
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    herr_t ret_value=FAIL;  /* return value */
+    herr_t ret_value;  /* return value */
 
     FUNC_ENTER_API(H5Sselect_none, FAIL);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Change to "none" selection */
     if((ret_value=H5S_select_none(space))<0)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sselect_none() */
 
@@ -565,8 +560,6 @@ H5S_none_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t 
     size_t elem_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
     hsize_t *off, size_t *len)
 {
-    herr_t ret_value=SUCCEED;   /* return value */
-
     FUNC_ENTER_NOAPI (H5S_none_get_seq_list, FAIL);
 
     /* Check args */
@@ -586,5 +579,5 @@ H5S_none_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t 
     /* The don't use any bytes, either */
     *nbytes=0;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE (SUCCEED);
 } /* end H5S_all_get_seq_list() */

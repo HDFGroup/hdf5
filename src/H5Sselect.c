@@ -76,7 +76,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 
     /* Copy offset information */
     if (NULL==(dst->select.offset = H5FL_ARR_ALLOC(hssize_t,src->extent.u.simple.rank,1)))
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     if(src->select.offset!=NULL)
         HDmemcpy(dst->select.offset,src->select.offset,(src->extent.u.simple.rank*sizeof(hssize_t)));
 
@@ -117,6 +117,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
             break;
     } /* end switch */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_copy() */
 
@@ -142,17 +143,18 @@ hssize_t
 H5Sget_select_npoints(hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    hssize_t ret_value=FAIL;        /* return value */
+    hssize_t ret_value;         /* return value */
 
     FUNC_ENTER_API(H5Sget_select_npoints, 0);
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
 
     ret_value = (*space->select.get_npoints)(space);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_npoints() */
 
@@ -181,17 +183,18 @@ htri_t
 H5Sselect_valid(hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    htri_t ret_value=FAIL;     /* return value */
+    htri_t ret_value;     /* return value */
 
     FUNC_ENTER_API(H5Sselect_valid, 0);
     H5TRACE1("b","i",spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
 
     ret_value = (*space->select.is_valid)(space);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sselect_valid() */
 
@@ -287,19 +290,20 @@ herr_t
 H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    herr_t ret_value=FAIL;        /* return value */
+    herr_t ret_value;        /* return value */
 
     FUNC_ENTER_API(H5Sget_select_bounds, FAIL);
     H5TRACE3("e","i*h*h",spaceid,start,end);
 
     /* Check args */
     if(start==NULL || end==NULL)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     ret_value = (*space->select.bounds)(space,start,end);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_bounds() */
 
@@ -491,15 +495,20 @@ H5S_sel_type
 H5Sget_select_type(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
+    H5S_sel_type        ret_value;       /* Return value */
 
     FUNC_ENTER_API(H5Sget_select_type, H5S_SEL_ERROR);
     H5TRACE1("St","i",space_id);
 
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5S_SEL_ERROR, "not a data space");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5S_SEL_ERROR, "not a data space");
 
-    FUNC_LEAVE(space->select.type);
+    /* Set return value */
+    ret_value=space->select.type;
+
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5Sget_select_type() */
 
 

@@ -63,6 +63,8 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         const H5S_t *file_space, size_t elmt_size,
         size_t seq_len, hsize_t file_offset, void *buf/*out*/)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5F_seq_read, FAIL);
 
     /* Check args */
@@ -71,9 +73,10 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(buf);
 
     if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
-        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* H5F_seq_read() */
 
 
@@ -104,6 +107,8 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         const H5S_t *file_space, size_t elmt_size,
         size_t seq_len, hsize_t file_offset, const void *buf)
 {
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5F_seq_write, FAIL);
 
     /* Check args */
@@ -112,9 +117,10 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(buf);
 
     if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
-        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* H5F_seq_write() */
 
 
@@ -594,10 +600,8 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }
 
     /* Collective MPIO access is unsupported for non-contiguous datasets */
-    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
-        HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
-           "collective access on non-contiguous datasets not supported yet");
-    }
+    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
+        HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif /* H5_HAVE_PARALLEL */
 
     /* Get necessary properties from property list */

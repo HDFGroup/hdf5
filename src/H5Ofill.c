@@ -96,7 +96,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
 {
     H5O_fill_new_t	*mesg=NULL;
     int			version;
-    void		*ret_value = NULL;
+    void		*ret_value;
     
     FUNC_ENTER_NOAPI(H5O_fill_new_decode, NULL);
 
@@ -104,17 +104,13 @@ H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert(p);
     assert(!sh);
 
-    if (NULL==(mesg=H5MM_calloc(sizeof(H5O_fill_new_t)))) {
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		    "memory allocation failed for fill value message");
-    }
+    if (NULL==(mesg=H5MM_calloc(sizeof(H5O_fill_new_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message");
  
     /* Version */
     version = *p++;
-    if( version != H5O_FILL_VERSION) {
-        HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
-                      "bad version number for fill value message");
-    }
+    if( version != H5O_FILL_VERSION)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for fill value message");
     
     /* Space allocation time */
     mesg->space_time = (H5D_space_time_t)*p++;
@@ -129,21 +125,21 @@ H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
     UINT32DECODE(p, mesg->size);
     if (mesg->size>0) {
         H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
-	if (NULL==(mesg->buf=H5MM_malloc((size_t)mesg->size))) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			"memory allocation failed for fill value");
-	}
+	if (NULL==(mesg->buf=H5MM_malloc((size_t)mesg->size)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
 	HDmemcpy(mesg->buf, p, (size_t)mesg->size);
     }
     
+    /* Set return value */
     ret_value = (void*)mesg;
     
- done:
+done:
     if (!ret_value && mesg) {
         if(mesg->buf)
             H5MM_xfree(mesg->buf);
 	H5MM_xfree(mesg);
     }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -169,7 +165,7 @@ H5O_fill_decode(H5F_t UNUSED *f, const uint8_t *p,
                 H5O_shared_t UNUSED *sh)
 {
     H5O_fill_t  *mesg=NULL;
-    void        *ret_value = NULL;
+    void        *ret_value;
     
     FUNC_ENTER_NOAPI(H5O_fill_decode, NULL);
 
@@ -177,27 +173,25 @@ H5O_fill_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert(p);
     assert(!sh);
 
-    if (NULL==(mesg=H5MM_calloc(sizeof(H5O_fill_t)))) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for fill value message");
-    }
+    if (NULL==(mesg=H5MM_calloc(sizeof(H5O_fill_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message");
     UINT32DECODE(p, mesg->size);
     if (mesg->size>0) {
-        if (NULL==(mesg->buf=H5MM_malloc(mesg->size))) {
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                        "memory allocation failed for fill value");
-        }
+        if (NULL==(mesg->buf=H5MM_malloc(mesg->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
         HDmemcpy(mesg->buf, p, mesg->size);
     }
     
+    /* Set return value */
     ret_value = (void*)mesg;
     
- done:
+done:
     if (!ret_value && mesg) {
         if(mesg->buf)
             H5MM_xfree(mesg->buf);
         H5MM_xfree(mesg);
     }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -307,29 +301,25 @@ H5O_fill_new_copy(const void *_mesg, void *_dest)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     H5O_fill_new_t		*dest = (H5O_fill_new_t *)_dest;
-    void		*ret_value = NULL;
+    void		*ret_value;
 
     FUNC_ENTER_NOAPI(H5O_fill_new_copy, NULL);
 
     assert(mesg);
 
-    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_new_t)))) {
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		    "memory allocation failed for fill message");
-    }
+    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_new_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message");
+
     /* Copy data type of fill value */
     if (mesg->type &&
-	NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT))) {
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-		    "unable to copy fill value data type");
-    }
+            NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type");
+
     /* Copy fill value and its size */
     if (mesg->buf) {
         H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
-	if (NULL==(dest->buf=H5MM_malloc((size_t)mesg->size))) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			"memory allocation failed for fill value");
-	}
+	if (NULL==(dest->buf=H5MM_malloc((size_t)mesg->size)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
 	dest->size = mesg->size;
 	HDmemcpy(dest->buf, mesg->buf, (size_t)mesg->size);
     }
@@ -339,6 +329,7 @@ H5O_fill_new_copy(const void *_mesg, void *_dest)
     dest->fill_time    = mesg->fill_time;
     dest->fill_defined = mesg->fill_defined;
 
+    /* Set return value */
     ret_value = dest;
 
 done:
@@ -350,6 +341,7 @@ done:
 	if (!_dest)
             H5MM_xfree(dest);
     }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -376,29 +368,25 @@ H5O_fill_copy(const void *_mesg, void *_dest)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
     H5O_fill_t          *dest = (H5O_fill_t *)_dest;
-    void                *ret_value = NULL;
+    void                *ret_value;
 
     FUNC_ENTER_NOAPI(H5O_fill_copy, NULL);
 
     assert(mesg);
 
-    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_t)))) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for fill message");
-    }
+    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message");
     if (mesg->type &&
-        NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT))) {
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
-                    "unable to copy fill value data type");
-    }
+            NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type");
     if (mesg->buf) {
-        if (NULL==(dest->buf=H5MM_malloc(mesg->size))) {
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                        "memory allocation failed for fill value");
-        }
+        if (NULL==(dest->buf=H5MM_malloc(mesg->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
         dest->size = mesg->size;
         HDmemcpy(dest->buf, mesg->buf, mesg->size);
     }
+
+    /* Set return value */
     ret_value = dest;
 
 done:
@@ -410,6 +398,7 @@ done:
         if (!_dest)
             H5MM_xfree(dest);
     }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -438,7 +427,7 @@ static size_t
 H5O_fill_new_size(H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
-    size_t			ret_value = 0;
+    size_t			ret_value;
  
     FUNC_ENTER_NOAPI(H5O_fill_new_size, 0);
 
@@ -451,6 +440,7 @@ H5O_fill_new_size(H5F_t UNUSED *f, const void *_mesg)
 		1 + 		/* Fill value defined    */
 		4 +		/* Fill value size	 */
 		(mesg->size>0 ? mesg->size : 0);	/* Size of fill value	 */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -522,6 +512,7 @@ H5O_fill_new_reset(void *_mesg)
     mesg->space_time   = (H5D_space_time_t)0;
     mesg->fill_time    = (H5D_fill_time_t)0;
     mesg->fill_defined = (H5D_fill_value_t)0; 
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -669,7 +660,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
     void		*buf=NULL, *bkg=NULL;	/*conversion buffers	*/
     hid_t		src_id=-1, dst_id=-1;	/*data type identifiers	*/
-    herr_t		ret_value=FAIL;		/*return value		*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_fill_convert, FAIL);
 
@@ -678,9 +669,10 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
 
     /* No-op cases */
     if (!fill->buf || !fill->type || 0==H5T_cmp(fill->type, dset_type)) {
-	if (fill->type) H5T_close(fill->type);
+	if (fill->type)
+            H5T_close(fill->type);
 	fill->type = NULL;
-	HRETURN(SUCCEED);
+	HGOTO_DONE(SUCCEED);
     }
 
     /*
@@ -692,11 +684,9 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
     }
     if ((src_id = H5I_register(H5I_DATATYPE,
 			       H5T_copy(fill->type, H5T_COPY_TRANSIENT)))<0 ||
-	(dst_id = H5I_register(H5I_DATATYPE,
-			       H5T_copy(dset_type, H5T_COPY_TRANSIENT)))<0) {
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		    "unable to copy/register data type");
-    }
+            (dst_id = H5I_register(H5I_DATATYPE,
+			       H5T_copy(dset_type, H5T_COPY_TRANSIENT)))<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register data type");
 
     /*
      * Data type conversions are always done in place, so we need a buffer
@@ -705,10 +695,8 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
     if (H5T_get_size(fill->type)>=H5T_get_size(dset_type)) {
 	buf = fill->buf;
     } else {
-	if (NULL==(buf=H5MM_malloc(H5T_get_size(dset_type)))) {
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			"memory allocation failed for type conversion");
-	}
+	if (NULL==(buf=H5MM_malloc(H5T_get_size(dset_type))))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 	HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
     }
     if (tpath->cdata.need_bkg && NULL==(bkg=H5MM_malloc(H5T_get_size(dset_type))))
@@ -726,12 +714,16 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
     H5T_close(fill->type);
     fill->type = NULL;
     H5_ASSIGN_OVERFLOW(fill->size,H5T_get_size(dset_type),size_t,ssize_t);
-    ret_value = SUCCEED;
 
- done:
-    if (src_id>=0) H5I_dec_ref(src_id);
-    if (dst_id>=0) H5I_dec_ref(dst_id);
-    if (buf!=fill->buf) H5MM_xfree(buf);
-    if (bkg) H5MM_xfree(bkg);
+done:
+    if (src_id>=0)
+        H5I_dec_ref(src_id);
+    if (dst_id>=0)
+        H5I_dec_ref(dst_id);
+    if (buf!=fill->buf)
+        H5MM_xfree(buf);
+    if (bkg)
+        H5MM_xfree(bkg);
+
     FUNC_LEAVE(ret_value);
 }

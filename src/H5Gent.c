@@ -42,16 +42,22 @@ static int          	interface_initialize_g = 0;
 H5G_cache_t            *
 H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type)
 {
+    H5G_cache_t *ret_value;     /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_ent_cache, NULL);
 
-    if (!ent) {
-        HRETURN_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "no entry");
-    }
+    if (!ent)
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "no entry");
     if (cache_type)
         *cache_type = ent->type;
 
-    FUNC_LEAVE(&(ent->cache));
+    /* Set return value */
+    ret_value=&(ent->cache);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_modified
@@ -78,11 +84,13 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 
     assert(ent);
 
-    if (H5G_NO_CHANGE != ent->type) ent->type = cache_type;
+    if (H5G_NO_CHANGE != ent->type)
+        ent->type = cache_type;
     ent->dirty = TRUE;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_decode_vec
@@ -110,6 +118,7 @@ herr_t
 H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, int n)
 {
     int                    i;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_decode_vec, FAIL);
 
@@ -121,13 +130,14 @@ H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, int n)
 
     /* decode entries */
     for (i = 0; i < n; i++) {
-        if (H5G_ent_decode(f, pp, ent + i) < 0) {
-            HRETURN_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode");
-        }
+        if (H5G_ent_decode(f, pp, ent + i) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode");
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_decode
@@ -222,6 +232,7 @@ herr_t
 H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, int n)
 {
     int                    i;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_encode_vec, FAIL);
 
@@ -233,13 +244,14 @@ H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, int n)
 
     /* encode entries */
     for (i = 0; i < n; i++) {
-        if (H5G_ent_encode(f, pp, ent + i) < 0) {
-            HRETURN_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode");
-        }
+        if (H5G_ent_encode(f, pp, ent + i) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode");
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_encode
@@ -286,21 +298,21 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
         /* encode scratch-pad */
         switch (ent->type) {
-        case H5G_NOTHING_CACHED:
-            break;
+            case H5G_NOTHING_CACHED:
+                break;
 
-        case H5G_CACHED_STAB:
-            assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
-            H5F_addr_encode(f, pp, ent->cache.stab.btree_addr);
-            H5F_addr_encode(f, pp, ent->cache.stab.heap_addr);
-            break;
+            case H5G_CACHED_STAB:
+                assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+                H5F_addr_encode(f, pp, ent->cache.stab.btree_addr);
+                H5F_addr_encode(f, pp, ent->cache.stab.heap_addr);
+                break;
 
-	case H5G_CACHED_SLINK:
-	    UINT32ENCODE (*pp, ent->cache.slink.lval_offset);
-	    break;
+            case H5G_CACHED_SLINK:
+                UINT32ENCODE (*pp, ent->cache.slink.lval_offset);
+                break;
 
-        default:
-            HDabort();
+            default:
+                HDabort();
         }
     } else {
         H5F_ENCODE_LENGTH(f, *pp, 0);

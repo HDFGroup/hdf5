@@ -343,24 +343,28 @@ H5V_hyper_eq(int n,
 {
     hsize_t	nelmts1 = 1, nelmts2 = 1;
     int	i;
+    htri_t      ret_value=TRUE;         /* Return value */
 
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5V_hyper_eq);
 
-    if (n <= 0) HRETURN(TRUE);
+    if (n <= 0) HGOTO_DONE(TRUE);
 
     for (i=0; i<n; i++) {
 	if ((offset1 ? offset1[i] : 0) != (offset2 ? offset2[i] : 0)) {
-	    HRETURN(FALSE);
+	    HGOTO_DONE(FALSE);
 	}
 	if ((size1 ? size1[i] : 0) != (size2 ? size2[i] : 0)) {
-	    HRETURN(FALSE);
+	    HGOTO_DONE(FALSE);
 	}
-	if (0 == (nelmts1 *= (size1 ? size1[i] : 0))) HRETURN(FALSE);
-	if (0 == (nelmts2 *= (size2 ? size2[i] : 0))) HRETURN(FALSE);
+	if (0 == (nelmts1 *= (size1 ? size1[i] : 0))) HGOTO_DONE(FALSE);
+	if (0 == (nelmts2 *= (size2 ? size2[i] : 0))) HGOTO_DONE(FALSE);
     }
-    FUNC_LEAVE(TRUE);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5V_hyper_disjointp
@@ -386,29 +390,33 @@ H5V_hyper_disjointp(unsigned n,
 		    const hssize_t *offset2, const hsize_t *size2)
 {
     unsigned	u;
+    htri_t      ret_value=FALSE;        /* Return value */
 
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5V_hyper_disjointp);
 
-    if (!n || !size1 || !size2)	HRETURN(TRUE);
+    if (!n || !size1 || !size2)	HGOTO_DONE(TRUE);
 
     for (u=0; u<n; u++) {
         assert (size1[u]<HSSIZET_MAX);
         assert (size2[u]<HSSIZET_MAX);
 
         if (0==size1[u] || 0==size2[u])
-            HRETURN(TRUE);
+            HGOTO_DONE(TRUE);
         if (((offset1?offset1[u]:0) < (offset2?offset2[u]:0) &&
              ((offset1?offset1[u]:0) + (hssize_t)size1[u] <=
               (offset2?offset2[u]:0))) ||
             ((offset2?offset2[u]:0) < (offset1?offset1[u]:0) &&
              ((offset2?offset2[u]:0) + (hssize_t)size2[u] <=
               (offset1?offset1[u]:0)))) {
-            HRETURN(TRUE);
+            HGOTO_DONE(TRUE);
         }
     }
-    FUNC_LEAVE(FALSE);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5V_hyper_fill
@@ -783,9 +791,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
     } else {
         H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
         HDmemcpy (dst, src, (size_t)elmt_size);
-        HRETURN (SUCCEED);
     }
-
 
     FUNC_LEAVE(SUCCEED);
 }

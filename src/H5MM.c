@@ -50,11 +50,14 @@ static int interface_initialize_g = 0;
 void *
 H5MM_realloc(void *mem, size_t size)
 {
+    void *ret_value;
+
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5MM_realloc);
 
     if (!mem) {
-	if (0 == size) HRETURN(NULL);
+	if (0 == size)
+            HGOTO_DONE(NULL);
 	mem = H5MM_malloc(size);
 
     } else if (0 == size) {
@@ -65,7 +68,11 @@ H5MM_realloc(void *mem, size_t size)
 	assert(mem);
     }
 
-    FUNC_LEAVE(mem);
+    /* Set return value */
+    ret_value=mem;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -91,17 +98,19 @@ H5MM_realloc(void *mem, size_t size)
 char *
 H5MM_xstrdup(const char *s)
 {
-    char	*mem;
+    char	*ret_value;
 
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5MM_xstrdup);
 
-    if (!s) HRETURN(NULL);
-    mem = H5MM_malloc(HDstrlen(s) + 1);
-    assert (mem);
-    HDstrcpy(mem, s);
+    if (!s)
+        HGOTO_DONE(NULL);
+    ret_value = H5MM_malloc(HDstrlen(s) + 1);
+    assert (ret_value);
+    HDstrcpy(ret_value, s);
 
-    FUNC_LEAVE(mem);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -127,21 +136,18 @@ H5MM_xstrdup(const char *s)
 char *
 H5MM_strdup(const char *s)
 {
-    char	*mem;
+    char	*ret_value;
 
     FUNC_ENTER_NOAPI(H5MM_strdup, NULL);
 
-    if (!s) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,
-		       "null string");
-    }
-    if (NULL==(mem = H5MM_malloc(HDstrlen(s) + 1))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-    HDstrcpy(mem, s);
+    if (!s)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "null string");
+    if (NULL==(ret_value = H5MM_malloc(HDstrlen(s) + 1)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    HDstrcpy(ret_value, s);
 
-    FUNC_LEAVE (mem);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -172,7 +178,8 @@ H5MM_xfree(void *mem)
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5MM_xfree);
 
-    if (mem) HDfree(mem);
+    if (mem)
+        HDfree(mem);
 
     FUNC_LEAVE(NULL);
 }

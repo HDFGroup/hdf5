@@ -122,10 +122,11 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
                 break;
 
             default:
-                HRETURN_ERROR (H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location");
+                HGOTO_ERROR (H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location");
         } /* end switch */
     } /* end if */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_set_loc() */
 
@@ -144,19 +145,17 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
  *
  *-------------------------------------------------------------------------
  */
-hssize_t H5T_vlen_seq_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
+hssize_t
+H5T_vlen_seq_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
-    hssize_t	ret_value = FAIL;	/*return value			*/
 
     FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_getlen, FAIL);
 
     /* check parameters */
     assert(vl);
 
-    ret_value=(hssize_t)vl->len;
-
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE ((hssize_t)vl->len);
 }   /* end H5T_vlen_seq_mem_getlen() */
 
 
@@ -174,7 +173,8 @@ hssize_t H5T_vlen_seq_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
+herr_t
+H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
 
@@ -204,13 +204,15 @@ herr_t H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
+herr_t
+H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     size_t len;
     H5P_genplist_t *plist;      /* Property list */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_write, FAIL);
 
@@ -229,19 +231,19 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
 
         /* Get the allocation function & info */
         if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
         if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
         if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
         if(alloc_func!=NULL) {
             if(NULL==(vl->p=(alloc_func)(len,alloc_info)))
-                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end if */
         else {  /* Default to system malloc */
             if(NULL==(vl->p=H5MM_malloc(len)))
-                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end else */
 
         /* Copy the data into the newly allocated buffer */
@@ -254,7 +256,8 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     /* Set the sequence length */
     H5_ASSIGN_OVERFLOW(vl->len,seq_len,hsize_t,size_t);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_seq_mem_write() */
 
 
@@ -272,19 +275,17 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
  *
  *-------------------------------------------------------------------------
  */
-hssize_t H5T_vlen_str_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
+hssize_t
+H5T_vlen_str_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
 {
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
-    hssize_t	ret_value = FAIL;	/*return value			*/
 
     FUNC_ENTER_NOAPI(H5T_vlen_str_mem_getlen, FAIL);
 
     /* check parameters */
     assert(s);
 
-    ret_value=(hssize_t)HDstrlen(s);
-
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE ( (hssize_t)HDstrlen(s));
 }   /* end H5T_vlen_str_mem_getlen() */
 
 
@@ -302,7 +303,8 @@ hssize_t H5T_vlen_str_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
+herr_t
+H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
 {
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
 
@@ -332,13 +334,15 @@ herr_t H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
+herr_t
+H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
     char **s=(char **)vl_addr;   /* Pointer to the user's hvl_t information */
     size_t len;
     H5P_genplist_t *plist;      /* Property list */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_str_mem_write, FAIL);
 
@@ -354,26 +358,27 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
 
     /* Get the allocation function & info */
     if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
     if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     if(alloc_func!=NULL) {
         if(NULL==(*s=(alloc_func)((size_t)((seq_len+1)*base_size),alloc_info)))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
       } /* end if */
     else {  /* Default to system malloc */
         if(NULL==(*s=H5MM_malloc((size_t)((seq_len+1)*base_size))))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
       } /* end else */
 
     H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
     HDmemcpy(*s,buf,len);
     (*s)[len]='\0';
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_str_mem_write() */
 
 
@@ -391,10 +396,11 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
  *
  *-------------------------------------------------------------------------
  */
-hssize_t H5T_vlen_disk_getlen(H5F_t UNUSED *f, void *vl_addr)
+hssize_t
+H5T_vlen_disk_getlen(H5F_t UNUSED *f, void *vl_addr)
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the disk VL information */
-    hssize_t	ret_value = FAIL;	/*return value			*/
+    hssize_t	ret_value;	        /*return value			*/
 
     FUNC_ENTER_NOAPI(H5T_vlen_disk_getlen, FAIL);
 
@@ -421,11 +427,13 @@ hssize_t H5T_vlen_disk_getlen(H5F_t UNUSED *f, void *vl_addr)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
+herr_t
+H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;
     uint32_t seq_len;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_disk_read, FAIL);
 
@@ -445,10 +453,11 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
 
         /* Read the VL information from disk */
         if(H5HG_read(f,&hobjid,buf)==NULL)
-            HRETURN_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read VL information");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read VL information");
     } /* end if */
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_disk_read() */
 
 
@@ -470,7 +479,8 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, void *bg_addr, hsize_t seq_len, hsize_t base_size)
+herr_t
+H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, void *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     uint8_t *vl=(uint8_t *)vl_addr; /*Pointer to the user's hvl_t information*/
     uint8_t *bg=(uint8_t *)bg_addr; /*Pointer to the old data hvl_t          */
@@ -478,6 +488,7 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
     H5HG_t bg_hobjid;
     size_t len;
     hsize_t bg_seq_len=0;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_disk_write, FAIL);
 
@@ -499,8 +510,7 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
             INT32DECODE(bg, bg_hobjid.idx);
             /* Free heap object */
             if(H5HG_remove(f, &bg_hobjid)<0)
-                HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL,
-                        "Unable to remove heap object");
+                HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object");
          } /* end if */
     } /* end if */
 
@@ -513,7 +523,7 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
         /* Write the VL information to disk (allocates space also) */
         H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
         if(H5HG_insert(f,len,buf,&hobjid)<0)
-            HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information");
     } /* end if */
     else
         HDmemset(&hobjid,0,sizeof(H5HG_t));
@@ -522,7 +532,8 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
     H5F_addr_encode(f,&vl,hobjid.addr);
     INT32ENCODE(vl,hobjid.idx);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_disk_write() */
 
 
@@ -668,7 +679,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
     void *free_info=NULL;       /* Vlen free information */
     H5T_t	*dt = NULL;
     H5P_genplist_t *plist;      /* Property list */
-    herr_t ret_value = FAIL;
+    herr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5T_vlen_reclaim, FAIL);
 
@@ -677,7 +688,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
@@ -685,18 +696,16 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
 
     /* Get the free func & information */
     if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(plist,H5D_XFER_VLEN_FREE_NAME,&free_func)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
     if (H5P_get(plist,H5D_XFER_VLEN_FREE_INFO_NAME,&free_info)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     /* Pull the free function and free info pointer out of the op_data and call the recurse datatype free function */
     ret_value=H5T_vlen_reclaim_recurse(elem,dt,free_func,free_info);
 
-#ifdef LATER
 done:
-#endif /* LATER */
     FUNC_LEAVE(ret_value);
 }   /* end H5T_vlen_reclaim() */
 

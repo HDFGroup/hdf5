@@ -95,6 +95,7 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     H5S_simple_t	*simple;	/*simple dimensionality information  */
     size_t		name_len;   	/*attribute name length */
     int		        version;	/*message version number*/
+    H5A_t		*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_attr_decode, NULL);
 
@@ -103,12 +104,12 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert(p);
 
     if (NULL==(attr = H5MM_calloc(sizeof(H5A_t))))
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Version number */
     version = *p++;
     if (version!=H5O_ATTR_VERSION)
-	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for attribute message");
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for attribute message");
 
     /* Reserved */
     p++;
@@ -123,18 +124,18 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     
     /* Decode and store the name */
     if (NULL==(attr->name=H5MM_malloc(name_len)))
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDmemcpy(attr->name,p,name_len);
     p += H5O_ALIGN(name_len);    /* advance the memory pointer */
 
     /* decode the attribute datatype */
     if((attr->dt=(H5O_DTYPE->decode)(f,p,NULL))==NULL)
-        HRETURN_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype");
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype");
     p += H5O_ALIGN(attr->dt_size);
 
     /* decode the attribute dataspace */
     if (NULL==(attr->ds = H5FL_ALLOC(H5S_t,1)))
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if((simple=(H5O_SDSPACE->decode)(f,p,NULL))!=NULL) {
         attr->ds->extent.type = H5S_SIMPLE;
         HDmemcpy(&(attr->ds->extent.u.simple),simple, sizeof(H5S_simple_t));
@@ -144,7 +145,7 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     }
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->ds,0)<0)
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
     p += H5O_ALIGN(attr->ds_size);
 
     /* Compute the size of the data */
@@ -152,7 +153,7 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 
     /* Go get the data */
     if (NULL==(attr->data = H5MM_malloc(attr->data_size)))
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDmemcpy(attr->data,p,attr->data_size);
 
     /* Indicate that the fill values aren't to be written out */
@@ -165,9 +166,14 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     }
 #endif 
 
-    FUNC_LEAVE(attr);
+    /* Set return value */
+    ret_value=attr;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_attr_encode
@@ -196,6 +202,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
     const H5A_t    *attr = (const H5A_t *) mesg;
     size_t          name_len;   /* Attribute name length */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_attr_encode, FAIL);
 
@@ -229,27 +236,25 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     p += H5O_ALIGN(name_len);
 
     /* encode the attribute datatype */
-    if((H5O_DTYPE->encode)(f,p,attr->dt)<0) {
-        HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
-                      "can't encode attribute datatype");
-    }
+    if((H5O_DTYPE->encode)(f,p,attr->dt)<0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype");
     HDmemset(p+attr->dt_size, 0, H5O_ALIGN(attr->dt_size)-attr->dt_size);
     p += H5O_ALIGN(attr->dt_size);
 
     /* encode the attribute dataspace */
-    if((H5O_SDSPACE->encode)(f,p,&(attr->ds->extent.u.simple))<0) {
-        HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
-                      "can't encode attribute dataspace");
-    }
+    if((H5O_SDSPACE->encode)(f,p,&(attr->ds->extent.u.simple))<0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace");
     HDmemset(p+attr->ds_size, 0, H5O_ALIGN(attr->ds_size)-attr->ds_size);
     p += H5O_ALIGN(attr->ds_size);
     
     /* Store attribute data */
     HDmemcpy(p,attr->data,attr->data_size);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_attr_copy
@@ -270,6 +275,7 @@ H5O_attr_copy(const void *_src, void *_dst)
 {
     const H5A_t            *src = (const H5A_t *) _src;
     H5A_t                  *dst = NULL;
+    void                   *ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_attr_copy, NULL);
 
@@ -277,18 +283,23 @@ H5O_attr_copy(const void *_src, void *_dst)
     assert(src);
 
     /* copy */
-    if (NULL == (dst = H5A_copy(src))) {
-        HRETURN_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute");
-    }
+    if (NULL == (dst = H5A_copy(src)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute");
     /* was result already allocated? */
     if (_dst) {
         *((H5A_t *) _dst) = *dst;
         H5MM_xfree(dst);
         dst = (H5A_t *) _dst;
     }
-    FUNC_LEAVE((void *) dst);
+
+    /* Set return value */
+    ret_value=dst;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_attr_size
@@ -355,21 +366,23 @@ H5O_attr_reset(void *_mesg)
 {
     H5A_t                  *attr = (H5A_t *) _mesg;
     H5A_t                  *tmp = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_attr_reset, FAIL);
 
     if (attr) {
-        if (NULL==(tmp = H5MM_malloc(sizeof(H5A_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
+        if (NULL==(tmp = H5MM_malloc(sizeof(H5A_t))))
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         HDmemcpy(tmp,attr,sizeof(H5A_t));
         H5A_close(tmp);
         HDmemset(attr, 0, sizeof(H5A_t));
     }
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_attr_debug
