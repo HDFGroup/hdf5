@@ -363,7 +363,7 @@ File name: ./testfiles/tmany.hdf
 
 Vdata: 0
    tag = 1962; reference = 5;
-   number of records = 6; interlace = 0;
+   number of records = 6; interlace = FULL_INTERLACE (0);
    fields = [a_array, b_array, c_array];
    record size (in bytes) = 320;
    name = dset1; class = HDF5;
@@ -392,7 +392,7 @@ Loc.     Data
 
 Vdata: 1
    tag = 1962; reference = 6;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 10;
    name = attr1; class = Attr0.0;
@@ -404,7 +404,7 @@ Loc.     Data
 
 Vdata: 2
    tag = 1962; reference = 7;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 16;
    name = attr2; class = Attr0.0;
@@ -416,7 +416,7 @@ Loc.     Data
 
 Vdata: 3
    tag = 1962; reference = 8;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 80;
    name = attr3; class = Attr0.0;
@@ -428,7 +428,7 @@ Loc.     Data
 
 Vdata: 4
    tag = 1962; reference = 19;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim0; class = DimVal0.1;
@@ -440,7 +440,7 @@ Loc.     Data
 
 Vdata: 5
    tag = 1962; reference = 21;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim1; class = DimVal0.1;
@@ -452,7 +452,7 @@ Loc.     Data
 
 Vdata: 6
    tag = 1962; reference = 23;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim2; class = DimVal0.1;
@@ -464,7 +464,7 @@ Loc.     Data
 
 Vdata: 7
    tag = 1962; reference = 25;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim3; class = DimVal0.1;

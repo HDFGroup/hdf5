@@ -22,7 +22,7 @@ Entries:-
 	name = string3; class = HDF5;
 	total number of attributes = 0.
      #2 (Vdata)
-	tag = 1962; reference = 7; 
+	tag = 1962; reference = 5; 
 	number of records = 3; interlace = 0;
 	fields = [string];
 	record size (in bytes) = 168;
@@ -41,7 +41,7 @@ File name: ./testfiles/tstr.hdf
 
 Vdata: 0
    tag = 1962; reference = 3;
-   number of records = 20; interlace = 0;
+   number of records = 20; interlace = FULL_INTERLACE (0);
    fields = [string];
    record size (in bytes) = 11;
    name = string2; class = HDF5;
@@ -63,7 +63,7 @@ Loc.     Data
 
 Vdata: 1
    tag = 1962; reference = 4;
-   number of records = 27; interlace = 0;
+   number of records = 27; interlace = FULL_INTERLACE (0);
    fields = [string];
    record size (in bytes) = 8;
    name = string3; class = HDF5;
@@ -87,8 +87,8 @@ Loc.     Data
 26       97 98 99 100 54 0 0 0  ; 
 
 Vdata: 2
-   tag = 1962; reference = 7;
-   number of records = 3; interlace = 0;
+   tag = 1962; reference = 5;
+   number of records = 3; interlace = FULL_INTERLACE (0);
    fields = [string];
    record size (in bytes) = 168;
    name = string4; class = HDF5;

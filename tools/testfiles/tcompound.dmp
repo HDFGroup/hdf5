@@ -20,7 +20,7 @@ Entries:-
 	name = group1; class = HDF5
    number of attributes = 0 
      #2 (Vgroup)
-	tag = 1965;reference = 10;
+	tag = 1965;reference = 7;
 	number of entries = 1;
 	name = group2; class = HDF5
    number of attributes = 0 
@@ -40,7 +40,7 @@ Entries:-
 	name = dset2; class = HDF5;
 	total number of attributes = 0.
      #1 (Vdata)
-	tag = 1962; reference = 7; 
+	tag = 1962; reference = 6; 
 	number of records = 5; interlace = 0;
 	fields = [int, float];
 	record size (in bytes) = 8;
@@ -49,13 +49,13 @@ Entries:-
 
 
 Vgroup:2
-     tag = 1965; reference = 10;
+     tag = 1965; reference = 7;
      name = group2; class = HDF5;
      number of entries = 1;
    number of attributes = 0 
 Entries:-
      #0 (Vdata)
-	tag = 1962; reference = 11; 
+	tag = 1962; reference = 8; 
 	number of records = 5; interlace = 0;
 	fields = [int, float];
 	record size (in bytes) = 8;
@@ -80,7 +80,7 @@ File name: ./testfiles/tcompound.hdf
 
 Vdata: 0
    tag = 1962; reference = 3;
-   number of records = 5; interlace = 0;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [a_name, b_name, c_name];
    record size (in bytes) = 16;
    name = dset1; class = HDF5;
@@ -97,7 +97,7 @@ Loc.     Data
 
 Vdata: 1
    tag = 1962; reference = 5;
-   number of records = 5; interlace = 0;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [int_name, float_name];
    record size (in bytes) = 8;
    name = dset2; class = HDF5;
@@ -111,8 +111,8 @@ Loc.     Data
 3        3  3.300000  ; 4  4.400000  ; 
 
 Vdata: 2
-   tag = 1962; reference = 7;
-   number of records = 5; interlace = 0;
+   tag = 1962; reference = 6;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [int, float];
    record size (in bytes) = 8;
    name = dset4; class = HDF5;
@@ -126,8 +126,8 @@ Loc.     Data
 3        3  3.000000  ; 4  4.000000  ; 
 
 Vdata: 3
-   tag = 1962; reference = 11;
-   number of records = 5; interlace = 0;
+   tag = 1962; reference = 8;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [int, float];
    record size (in bytes) = 8;
    name = dset5; class = HDF5;

@@ -441,7 +441,7 @@ File name: ./testfiles/tall.hdf
 
 Vdata: 0
    tag = 1962; reference = 3;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 10;
    name = attr1; class = Attr0.0;
@@ -453,7 +453,7 @@ Loc.     Data
 
 Vdata: 1
    tag = 1962; reference = 4;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 16;
    name = attr2; class = Attr0.0;
@@ -465,7 +465,7 @@ Loc.     Data
 
 Vdata: 2
    tag = 1962; reference = 18;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim0; class = DimVal0.1;
@@ -477,7 +477,7 @@ Loc.     Data
 
 Vdata: 3
    tag = 1962; reference = 20;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim1; class = DimVal0.1;
@@ -489,7 +489,7 @@ Loc.     Data
 
 Vdata: 4
    tag = 1962; reference = 22;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim2; class = DimVal0.1;
@@ -501,7 +501,7 @@ Loc.     Data
 
 Vdata: 5
    tag = 1962; reference = 24;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim3; class = DimVal0.1;
@@ -513,7 +513,7 @@ Loc.     Data
 
 Vdata: 6
    tag = 1962; reference = 26;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim4; class = DimVal0.1;
@@ -525,7 +525,7 @@ Loc.     Data
 
 Vdata: 7
    tag = 1962; reference = 28;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim5; class = DimVal0.1;
@@ -537,7 +537,7 @@ Loc.     Data
 
 Vdata: 8
    tag = 1962; reference = 30;
-   number of records = 27; interlace = 0;
+   number of records = 27; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 1;
    name = attr1; class = Attr0.0;
@@ -555,7 +555,7 @@ Loc.     Data
 
 Vdata: 9
    tag = 1962; reference = 31;
-   number of records = 27; interlace = 0;
+   number of records = 27; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 1;
    name = attr2; class = Attr0.0;
