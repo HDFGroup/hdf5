@@ -18,16 +18,11 @@
 #include <H5private.h>
 #include <h5dump.h>
 
-/*
-	taken from h5dumputil.c
-*/
+/* taken from h5dumputil.c */
 
 int indent = 0;
 int compound_data=0;
 int nCols = 80;
-
-
-				  
 
 int print_data(hid_t oid, hid_t _p_type, int obj_data);
 
@@ -1064,8 +1059,8 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
 		     h5dump_context_t *ctx, hsize_t elmtno, int secnum)
 {
     h5dump_str_t	prefix;
-    int                 i, templength = 0;
-    int                 indentlevel = 0;
+    size_t templength = 0;
+    int i, indentlevel = 0;
 	
     memset(&prefix, 0, sizeof(h5dump_str_t));
     if (!ctx->need_prefix) return;
@@ -1111,10 +1106,7 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
 		templength += h5dump_str_len(&prefix);
 	}	
 
-
-
     ctx->cur_column = ctx->prev_prefix_len = templength;
-
     ctx->cur_elmt = 0;
     ctx->need_prefix = 0;
 
