@@ -179,6 +179,8 @@ New Features
       are made.
     * Improved performance of single, contiguous hyperslabs when reading or
       writing.
+    * Improved performance of non-contiguous hyperslabs (built up with
+      several hyperslab selection calls).
 
 Platforms Tested
 ================
