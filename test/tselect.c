@@ -127,7 +127,7 @@ test_select_hyper_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, h
 ** 
 ****************************************************************/
 static void 
-test_select_hyper(void)
+test_select_hyper(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -194,7 +194,7 @@ test_select_hyper(void)
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
 
     /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close memory dataspace */
@@ -214,7 +214,7 @@ test_select_hyper(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Read selection from disk */
-    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check that the values match with a dataset iterator */
@@ -279,7 +279,7 @@ test_select_point_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, h
 ** 
 ****************************************************************/
 static void 
-test_select_point(void)
+test_select_point(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -434,7 +434,7 @@ test_select_point(void)
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
 
     /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close memory dataspace */
@@ -494,7 +494,7 @@ test_select_point(void)
     VERIFY(ret, 20, "H5Sget_select_npoints");
 
     /* Read selection from disk */
-    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check that the values match with a dataset iterator */
@@ -563,7 +563,89 @@ test_select_none_iter1(void UNUSED *_elem,hid_t UNUSED type_id, hsize_t UNUSED n
 ** 
 ****************************************************************/
 static void 
-test_select_all(void)
+test_select_all(hid_t xfer_plist)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hsize_t		dims1[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
+    hssize_t	        start[SPACE4_RANK];     /* Starting location of hyperslab */
+    hsize_t		stride[SPACE4_RANK];    /* Stride of hyperslab */
+    hsize_t		count[SPACE4_RANK];     /* Element count of hyperslab */
+    hsize_t		block[SPACE4_RANK];     /* Block size of hyperslab */
+    uint8_t    *wbuf,       /* buffer to write to disk */
+               *rbuf,       /* buffer read from disk */
+               *tbuf;       /* temporary buffer pointer */
+    intn        i,j,k;      /* Counters */
+    herr_t		ret;		/* Generic return value		*/
+    H5S_class_t ext_type;   /* Extent type */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing 'All' Selection Functions\n"));
+
+    /* Allocate write & read buffers */
+    wbuf=malloc(sizeof(uint8_t)*SPACE4_DIM1*SPACE4_DIM2*SPACE4_DIM3);
+    rbuf=calloc(sizeof(uint8_t),SPACE4_DIM1*SPACE4_DIM2*SPACE4_DIM3);
+
+    /* Initialize write buffer */
+    for(i=0, tbuf=wbuf; i<SPACE4_DIM1; i++)
+        for(j=0; j<SPACE4_DIM2; j++)
+            for(k=0; k<SPACE4_DIM2; k++)
+                *tbuf++=(uint8_t)(((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k;
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE4_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Verify extent type */
+    ext_type = H5Sget_simple_extent_type(sid1);
+    VERIFY(ext_type, H5S_SIMPLE, "H5Sget_simple_extent_type");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_INT,sid1,H5P_DEFAULT);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,H5S_ALL,H5S_ALL,xfer_plist,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,H5S_ALL,H5S_ALL,xfer_plist,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check that the values match with a dataset iterator */
+    tbuf=wbuf;
+    ret = H5Diterate(rbuf,H5T_NATIVE_UCHAR,sid1,test_select_all_iter1,&tbuf);
+    CHECK(ret, FAIL, "H5Diterate");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
+}   /* test_select_all() */
+
+/****************************************************************
+**
+**  test_select_all_hyper(): Test basic H5S (dataspace) selection code.
+**      Tests "all" and hyperslab selections.
+** 
+****************************************************************/
+static void 
+test_select_all_hyper(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -626,7 +708,7 @@ test_select_all(void)
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
 
     /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close memory dataspace */
@@ -650,7 +732,7 @@ test_select_all(void)
     CHECK(ret, FAIL, "H5Sselect_all");
 
     /* Read selection from disk (should fail with no selection defined) */
-    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     VERIFY(ret, FAIL, "H5Dread");
 
     /* Select entire 15x26 extent for disk dataset */
@@ -658,7 +740,7 @@ test_select_all(void)
     CHECK(ret, FAIL, "H5Sselect_all");
 
     /* Read selection from disk (should work now) */
-    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check that the values match with a dataset iterator */
@@ -691,7 +773,7 @@ test_select_all(void)
     /* Free memory buffers */
     free(wbuf);
     free(rbuf);
-}   /* test_select_all() */
+}   /* test_select_all_hyper() */
 
 /****************************************************************
 **
@@ -3085,10 +3167,25 @@ test_select(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Selections\n"));
 
+    /* Create a dataset transfer property list */
+    plist_id=H5Pcreate(H5P_DATASET_XFER);
+    CHECK(plist_id, FAIL, "H5Pcreate");
+
+    /* test I/O with a very small buffer for reads */
+    ret=H5Pset_buffer(plist_id,(hsize_t)128,NULL,NULL);
+    CHECK(ret, FAIL, "H5Pset_buffer");
+
     /* These next tests use the same file */
-    test_select_hyper();        /* Test basic H5S hyperslab selection code */
-    test_select_point();        /* Test basic H5S element selection code, also tests appending to existing element selections */
-    test_select_all();          /* Test basic all & none selection code */
+    test_select_hyper(H5P_DEFAULT);     /* Test basic H5S hyperslab selection code */
+    test_select_hyper(plist_id);        /* Test basic H5S hyperslab selection code */
+    test_select_point(H5P_DEFAULT);     /* Test basic H5S element selection code, also tests appending to existing element selections */
+    test_select_point(plist_id);        /* Test basic H5S element selection code, also tests appending to existing element selections */
+    test_select_all(H5P_DEFAULT);       /* Test basic all & none selection code */
+    test_select_all(plist_id);          /* Test basic all & none selection code */
+    test_select_all_hyper(H5P_DEFAULT);       /* Test basic all & none selection code */
+    test_select_all_hyper(plist_id);          /* Test basic all & none selection code */
+
+    /* These next tests use the same file */
     test_select_combo();        /* Test combined hyperslab & element selection code */
     test_select_hyper_stride(); /* Test strided hyperslab selection code */
     test_select_hyper_contig(); /* Test contiguous hyperslab selection code */
@@ -3103,14 +3200,7 @@ test_select(void)
     /* test the random hyperslab I/O with the default property list for reading */
     test_select_hyper_union_random_5d(H5P_DEFAULT);  /* Test hyperslab union code for random 5-D hyperslabs */
 
-    /* Create a dataset transfer property list */
-    plist_id=H5Pcreate(H5P_DATASET_XFER);
-    CHECK(plist_id, FAIL, "H5Pcreate");
-
-    /* test random hyperslab I/O with a much smaller buffer for reads */
-    ret=H5Pset_buffer(plist_id,(hsize_t)128,NULL,NULL);
-    CHECK(ret, FAIL, "H5Pset_buffer");
-
+    /* test random hyperslab I/O with a small buffer for reads */
     test_select_hyper_union_random_5d(plist_id);  /* Test hyperslab union code for random 5-D hyperslabs */
 
     /* Create a dataset transfer property list */
@@ -3134,9 +3224,11 @@ test_select(void)
     /* Test reading in a large hyperslab with a chunked dataset a small amount at a time */
     test_select_hyper_chunk(fapl,plist_id);
 
+    /* Close file access property list */
     ret=H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
+    /* Close dataset transfer property list */
     ret=H5Pclose(plist_id);
     CHECK(ret, FAIL, "H5Pclose");
 
