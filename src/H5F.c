@@ -511,6 +511,7 @@ H5F_term_interface(void)
  *
  *----------------------------------------------------------------------------
  */
+/* ARGSUSED */
 herr_t 
 H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
 {
@@ -546,7 +547,7 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /*lint !e715 !e818 Make lint ignore copy_data parameter */
+}
 
 
 /*--------------------------------------------------------------------------
@@ -567,6 +568,7 @@ done:
  *
  *---------------------------------------------------------------------------
  */ 
+/* ARGSUSED */
 herr_t 
 H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
 {
@@ -602,7 +604,7 @@ H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /*lint !e715 !e818 Make lint ignore close_data parameter */
+}
 
 
 /*--------------------------------------------------------------------------
@@ -621,6 +623,7 @@ done:
  *
  *--------------------------------------------------------------------------
  */	
+/* ARGSUSED */
 herr_t 
 H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
 {
@@ -655,7 +658,7 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /*lint !e715 !e818 Make lint ignore copy_data parameter */
+}
 
 #ifdef NOT_YET
 
@@ -1302,6 +1305,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static int
 H5F_equal(void *_haystack, hid_t UNUSED id, void *_needle)
 {
@@ -1314,7 +1318,7 @@ H5F_equal(void *_haystack, hid_t UNUSED id, void *_needle)
     retval = (0==H5FD_cmp(haystack->shared->lf, needle));
 
     FUNC_LEAVE_NOAPI(retval)
-} /*lint !e715 !e818 Make lint ignore id parameter */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1429,7 +1433,7 @@ done:
     /* Close the file */
     if (file)
         if(H5FD_close(file)<0 && ret_value>=0)
-            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
+            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     FUNC_LEAVE_API(ret_value)
 }
@@ -3422,7 +3426,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 done:
     if (mounted)
         if(H5G_close(mounted)<0 && ret_value>=0)
-	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close group");
+	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close group")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -3709,7 +3713,7 @@ H5Freopen(hid_t file_id)
 done:
     if (ret_value<0 && new_file)
 	if(H5F_close(new_file)<0)
-	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file");
+	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
     FUNC_LEAVE_API(ret_value)
 }
 

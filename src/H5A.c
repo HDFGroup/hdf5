@@ -151,6 +151,7 @@ H5A_term_interface(void)
  *	The LOC_ID can also be a committed data type.
  *	
 --------------------------------------------------------------------------*/
+/* ARGSUSED */
 hid_t
 H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t UNUSED plist_id)
@@ -181,7 +182,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Acreate() */ /*lint !e715 */
+} /* H5Acreate() */
 
 
 /*-------------------------------------------------------------------------

@@ -157,6 +157,6 @@ H5_DLL herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
 H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
-H5_DLL herr_t H5D_flush(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id);
 
 #endif

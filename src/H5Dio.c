@@ -917,6 +917,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t 
 H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
     const H5S_t *mem_space, const H5S_t *file_space, H5T_path_t *tpath,
@@ -1154,7 +1155,7 @@ done:
         H5FL_BLK_FREE(type_conv,bkg_buf);
         
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_contig_read() */ /*lint !e715 !e818 Make lint ignore type_id, coords and elem parameters */
+} /* end H5D_contig_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -1173,6 +1174,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist,
@@ -1408,7 +1410,7 @@ done:
         H5FL_BLK_FREE(type_conv,bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_contig_write() */ /*lint !e715 !e818 Make lint ignore type_id, coords and elem parameters */
+} /* end H5D_contig_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -1427,6 +1429,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5D_chunk_read(hsize_t
 #ifdef NDEBUG
@@ -1720,7 +1723,7 @@ done:
 #endif
 	xfer_mode = H5FD_MPIO_COLLECTIVE;
         if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode");
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
     } /* end if */
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -1746,10 +1749,10 @@ done:
 
     /* Release chunk mapping information */
     if(H5D_destroy_chunk_map(&fm) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release chunk mapping");
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release chunk mapping")
       
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_chunk_read() */ /*lint !e715 !e818 Make lint ignore type_id, coords and elem parameters */
+} /* H5D_chunk_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -1768,6 +1771,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5D_chunk_write(hsize_t
 #ifdef NDEBUG
@@ -2104,7 +2108,7 @@ done:
 #endif
 	xfer_mode = H5FD_MPIO_COLLECTIVE;
         if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode");
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
     } /* end if */
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -2130,10 +2134,10 @@ done:
  
     /* Release chunk mapping information */
     if(H5D_destroy_chunk_map(&fm) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release chunk mapping");
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release chunk mapping")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_chunk_write() */ /*lint !e715 !e818 Make lint ignore type_id, coords and elem parameters */
+} /* H5D_chunk_write() */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -2482,20 +2486,20 @@ done:
     if(ret_value<0) {
         if(tmp_mspace && !fm->mchunk_tmpl) {
             if(H5S_close(tmp_mspace)<0)
-                HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
         } /* end if */
 
         if (H5D_destroy_chunk_map(fm)<0)
-            HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping");
+            HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 
     if(equiv_mspace) {
         if(H5S_close(equiv_mspace)<0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
     } /* end if */
     if(iter_init) {
         if (H5S_select_iter_release(&(fm->mem_iter))<0)
-            HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
+            HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
     }
     if(f_tid!=(-1)) {
         if(H5I_dec_ref(f_tid)<0)
@@ -2772,7 +2776,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
 done:
     if(tmp_fspace)
         if(H5S_close(tmp_fspace)<0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file dataspace copy");
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file dataspace copy")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_create_chunk_file_map_hyper() */
 
@@ -3062,6 +3066,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t 
 H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_t *coords, void *_fm)
 {
@@ -3132,4 +3137,4 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_mem_cb() */ /*lint !e715 !e818 Make lint ignore type_id, coords and elem parameters */
+} /* end H5D_chunk_mem_cb() */

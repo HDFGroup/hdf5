@@ -137,6 +137,7 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static size_t
 H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[], 
                      size_t nbytes, size_t *buf_size, void **buf)
@@ -204,6 +205,6 @@ done:
     if(outbuf)
         H5MM_xfree(outbuf);
     FUNC_LEAVE_NOAPI(ret_value)
-} /*lint !e715 Make lint ignore cd_nelmts and cd_values parameters */
+}
 #endif /* H5_HAVE_FILTER_FLETCHER32 */
 

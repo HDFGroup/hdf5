@@ -446,6 +446,7 @@ H5D_term_interface(void)
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 herr_t
 H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
 {
@@ -499,7 +500,7 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /*lint !e715 !e818 Make lint ignore copy_data parameter */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -520,6 +521,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 herr_t
 H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
 {
@@ -555,7 +557,7 @@ H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_crt_close() */ /*lint !e715 !e818 Make lint ignore close_data parameter */
+} /* end H5D_crt_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -580,6 +582,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 herr_t
 H5D_xfer_create(hid_t dxpl_id, void UNUSED *create_data)
 {
@@ -617,7 +620,7 @@ H5D_xfer_create(hid_t dxpl_id, void UNUSED *create_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_xfer_create() */ /*lint !e715 !e818 Make lint ignore create_data parameter */
+} /* end H5D_xfer_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -638,6 +641,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 herr_t
 H5D_xfer_copy(hid_t new_plist_id, hid_t UNUSED old_plist_id, 
                 void *copy_data)
@@ -651,7 +655,7 @@ H5D_xfer_copy(hid_t new_plist_id, hid_t UNUSED old_plist_id,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /*lint !e715 !e818 Make lint ignore old_plist_id parameter */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -674,6 +678,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 herr_t
 H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
 {
@@ -701,7 +706,7 @@ H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_xfer_close() */ /*lint !e715 !e818 Make lint ignore close_data parameter */
+} /* end H5D_xfer_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -787,7 +792,7 @@ done:
     if(ret_value<0) {
         if(new_dset!=NULL) {
             if(H5D_close(new_dset)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
         } /* end if */
     } /* end if */
 
@@ -937,7 +942,7 @@ done:
     if(ret_value<0) {
         if(space!=NULL) {
             if(H5S_close(space)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
         } /* end if */
     } /* end if */
 
@@ -1106,7 +1111,7 @@ done:
     if(ret_value<0) {
         if(copied_type!=NULL) {
             if(H5T_close (copied_type)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
         } /* end if */
     } /* end if */
 
@@ -1533,7 +1538,7 @@ done:
     /* Release pointer to object header itself */
     if(ent!=NULL && oh!=NULL)
         if(H5O_unprotect(ent,oh, dxpl_id)<0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header");
+            HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1921,23 +1926,23 @@ done:
     if (!ret_value && new_dset) {
         if (new_dset->space) {
             if(H5S_close(new_dset->space)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
         } /* end if */
         if (new_dset->type) {
             if(H5T_close(new_dset->type)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
         } /* end if */
         if (H5F_addr_defined(new_dset->ent.header)) {
             if(H5O_close(&(new_dset->ent))<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header")
             if(file) {
                 if(H5O_delete(file, dxpl_id,new_dset->ent.header)<0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header");
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header")
             } /* end if */
         } /* end if */
         if(new_dset->dcpl_id!=0) {
             if(H5I_dec_ref(new_dset->dcpl_id)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list");
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
         } /* end if */
         new_dset->ent.file = NULL;
         H5FL_FREE(H5D_t,new_dset);
@@ -2291,15 +2296,15 @@ done:
     if (ret_value==NULL && dataset) {
         if (H5F_addr_defined(dataset->ent.header)) {
             if(H5O_close(&(dataset->ent))<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header")
         } /* end if */
         if (dataset->space) {
             if(H5S_close(dataset->space)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
         } /* end if */
         if (dataset->type) {
             if(H5T_close(dataset->type)<0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype");
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
         } /* end if */
         dataset->ent.file = NULL;
         H5FL_FREE(H5D_t,dataset);
@@ -3174,6 +3179,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t *point, void *op_data)
 {
@@ -3204,7 +3210,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* end H5D_vlen_get_buf_size() */ /*lint !e715 !e818 Make lint ignore unused parameters */
+}   /* end H5D_vlen_get_buf_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -3298,11 +3304,11 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
 done:
     if(vlen_bufsize.fspace_id>0) {
         if(H5I_dec_ref(vlen_bufsize.fspace_id)<0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
     } /* end if */
     if(vlen_bufsize.mspace_id>0) {
         if(H5I_dec_ref(vlen_bufsize.mspace_id)<0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
     } /* end if */
     if(vlen_bufsize.fl_tbuf!=NULL)
         H5FL_BLK_FREE(vlen_fl_buf,vlen_bufsize.fl_tbuf);
@@ -3310,7 +3316,7 @@ done:
         H5FL_BLK_FREE(vlen_vl_buf,vlen_bufsize.vl_tbuf);
     if(vlen_bufsize.xfer_pid>0) {
         if(H5I_dec_ref(vlen_bufsize.xfer_pid)<0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement ref count on property list");
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement ref count on property list")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -3486,7 +3492,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_flush(H5F_t *f, hid_t dxpl_id)
+H5D_flush(const H5F_t *f, hid_t dxpl_id)
 {
     int         num_dsets;      /* Number of datasets in file   */
     hid_t       *id_list=NULL;  /* list of dataset IDs          */

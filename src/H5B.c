@@ -521,6 +521,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
 {
@@ -541,7 +542,7 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
     H5FL_FREE(H5B_t,bt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B_dest() */ /*lint !e715 !e818 */
+} /* end H5B_dest() */
 
 
 /*-------------------------------------------------------------------------
@@ -669,7 +670,7 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
 
 done:
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0 && ret_value>=0)
-	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release node");
+	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -829,7 +830,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
 
 done:
     if (new_bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_addr_p, new_bt, FALSE) < 0 && ret_value>=0)
-        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node");
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1485,7 +1486,7 @@ done:
 	herr_t e1 = (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0);
 	herr_t e2 = (twin && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_node_p, twin, FALSE)<0);
 	if (e1 || e2)  /*use vars to prevent short-circuit of side effects */
-	    HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node(s)");
+	    HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node(s)")
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1858,7 +1859,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
     
 done:
     if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE)<0 && ret_value>=0)
-	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node");
+	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

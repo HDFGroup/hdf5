@@ -749,6 +749,7 @@ H5close(void)
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 int
 HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
 {
@@ -759,7 +760,7 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
     n = HDvsprintf(buf, fmt, ap);
     va_end(ap);
     return n;
-}       /*lint !e715 */
+}
 #endif /* H5_HAVE_SNPRINTF */
 
 
@@ -788,11 +789,12 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 int
 HDvsnprintf(char *buf, size_t UNUSED size, const char *fmt, va_list ap)
 {
     return HDvsprintf(buf, fmt, ap);
-}       /*lint !e715 */
+}
 #endif /* H5_HAVE_VSNPRINTF */
 
 

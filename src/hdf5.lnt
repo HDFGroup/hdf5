@@ -77,6 +77,7 @@
         H5Dio.c
         H5E.c
         H5F.c
+        H5FD.c
 
         H5V.c
         H5Z.c

@@ -67,6 +67,7 @@ const H5Z_class_t H5Z_SHUFFLE[1] = {{
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
@@ -95,7 +96,7 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_set_local_shuffle() */ /*lint !e715 Make lint ignore space_id parameter */
+} /* end H5Z_set_local_shuffle() */
 
 
 /*-------------------------------------------------------------------------
