@@ -195,40 +195,17 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
             break;
 
         case H5T_STRING:
-            {
-                size_t align;
-                size_t pointer_size;
+            if((ret_value=H5T_copy(dtype, H5T_COPY_TRANSIENT))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
 
-                if(H5T_is_variable_str(dtype)) {
-                    if(NULL==(dt=H5I_object(H5T_C_S1)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
-                    if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
-                    if(H5T_set_size(ret_value, H5T_VARIABLE)<0)
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot set size");
-
-                    /* Update size, offset and compound alignment for parent. */
-                    align = H5T_POINTER_COMP_ALIGN_g; 
-                    pointer_size = sizeof(char*);
-                    
-                    if(H5T_cmp_offset(comp_size, offset, pointer_size, 1, align, struct_align)<0)
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
-
-                } else { 
-                    if(NULL==(dt=H5I_object(H5T_C_S1)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
-                    if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
-                    if(H5T_set_size(ret_value, size)<0)
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot set size");
-
-                    /* Update size, offset and compound alignment for parent. */
-                    align = H5T_NATIVE_SCHAR_COMP_ALIGN_g; 
-                    
-                    if(H5T_cmp_offset(comp_size, offset, sizeof(char), size, align, struct_align)<0)
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
-
-                }
+            if(H5T_is_variable_str(dtype)) {
+                /* Update size, offset and compound alignment for parent. */
+                if(H5T_cmp_offset(comp_size, offset, sizeof(char *), 1, H5T_POINTER_COMP_ALIGN_g, struct_align)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
+            } else { 
+                /* Update size, offset and compound alignment for parent. */
+                if(H5T_cmp_offset(comp_size, offset, sizeof(char), size, H5T_NATIVE_SCHAR_COMP_ALIGN_g, struct_align)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
             }
             break;
 
@@ -304,10 +281,8 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 }
                
                 /* The alignment for whole compound type */
-                if(children_st_align && children_size % children_st_align) {
-                    memb_offset[nmemb-1] += children_size % children_st_align;
-                    children_size += children_size % children_st_align;
-                }
+                if(children_st_align && children_size % children_st_align)
+                    children_size += children_st_align-(children_size % children_st_align);
 
                 /* Construct new compound type based on native type */   
                 if((new_type=H5T_create(H5T_COMPOUND, children_size))==NULL)
