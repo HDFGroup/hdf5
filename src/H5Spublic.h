@@ -54,8 +54,9 @@ int H5Sget_dims (hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
 hbool_t H5Sis_simple (hid_t space_id);
 herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
 hsize_t H5Sselect_npoints (hid_t spaceid);
-herr_t H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op, hssize_t *start,
-    hssize_t *_stride, hssize_t *count, hssize_t *_block);
+herr_t H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
+    const hssize_t *start, const hsize_t *_stride, const hsize_t *count,
+    const hsize_t *_block);
 
 #ifdef __cplusplus
 }

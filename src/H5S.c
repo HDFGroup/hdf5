@@ -425,41 +425,6 @@ H5S_t * H5S_copy(const H5S_t *src)
 
     FUNC_LEAVE(dst);
 }
-
-/*-------------------------------------------------------------------------
- * Function:	H5Sextent_npoints
- *
- * Purpose:	Determines how many data points a dataset extent has.
- *
- * Return:	Success:	Number of data points in the dataset.
- *
- *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *		Tuesday, December  9, 1997
- *
- * Modifications:
- *  Changed Name - QAK 7/7/98
- *
- *-------------------------------------------------------------------------
- */
-hsize_t
-H5Sextent_npoints (hid_t space_id)
-{
-    H5S_t		   *ds = NULL;
-    hsize_t		    ret_value = 0;
-
-    FUNC_ENTER(H5Sextent_npoints, 0);
-    H5TRACE1("h","i",space_id);
-
-    /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
-    }
-    ret_value = H5S_extent_npoints(ds);
-
-    FUNC_LEAVE(ret_value);
-}
 
 
 /*-------------------------------------------------------------------------
@@ -510,6 +475,42 @@ H5S_extent_npoints(const H5S_t *ds)
             HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0,
                   "internal error (unknown data space class)");
     }
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Sextent_npoints
+ *
+ * Purpose:	Determines how many data points a dataset extent has.
+ *
+ * Return:	Success:	Number of data points in the dataset.
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *		Tuesday, December  9, 1997
+ *
+ * Modifications:
+ *  Changed Name - QAK 7/7/98
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5Sextent_npoints (hid_t space_id)
+{
+    H5S_t		   *ds = NULL;
+    hsize_t		    ret_value = 0;
+
+    FUNC_ENTER(H5Sextent_npoints, 0);
+    H5TRACE1("h","i",space_id);
+
+    /* Check args */
+    if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
+    }
+    ret_value = H5S_extent_npoints(ds);
 
     FUNC_LEAVE(ret_value);
 }

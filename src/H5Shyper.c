@@ -1155,9 +1155,9 @@ static intn H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t cou
     Add a block to hyperslab selection
  USAGE
     herr_t H5S_hyper_add(space, start, size)
-        H5S_t *space;       IN: Pointer to dataspace
-        hssize_t *start;    IN: Offset of block
-        hssize_t *size;     IN: Size of block
+        H5S_t *space;       	  IN: Pointer to dataspace
+        const hssize_t *start;    IN: Offset of block
+        const hsize_t *size;      IN: Size of block
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -1168,7 +1168,7 @@ static intn H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t cou
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_add (H5S_t *space, hssize_t *start, hssize_t *size)
+H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
 {
     H5S_hyper_node_t *slab;     /* New hyperslab node to insert */
     H5S_hyper_bound_t *tmp;     /* Temporary pointer to an hyperslab bound array */

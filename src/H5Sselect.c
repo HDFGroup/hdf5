@@ -159,10 +159,10 @@ H5S_select_release (H5S_t *space)
     herr_t H5Sselect_hyperslab(dsid, op, start, stride, count, block)
         hid_t dsid;             IN: Dataspace ID of selection to modify
         H5S_seloper_t op;       IN: Operation to perform on current selection
-        hssize_t *start;        IN: Offset of start of hyperslab
-        hssize_t *stride;       IN: Hyperslab stride
-        hssize_t *count;        IN: Number of blocks included in hyperslab
-        hssize_t *block;        IN: Size of block in hyperslab
+        const hssize_t *start;        IN: Offset of start of hyperslab
+        const hssize_t *stride;       IN: Hyperslab stride
+        const hssize_t *count;        IN: Number of blocks included in hyperslab
+        const hssize_t *block;        IN: Size of block in hyperslab
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -177,11 +177,13 @@ H5S_select_release (H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op, hssize_t *start,
-    hssize_t *_stride, hssize_t *count, hssize_t *_block)
+herr_t
+H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
+    const hssize_t *start, const hsize_t *_stride, const hsize_t *count,
+    const hsize_t *_block)
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    hssize_t *stride,       /* Stride array */
+    hsize_t *stride,  /* Stride array */
         *block;             /* Block size array */
     uintn contig;           /* whether selection is contiguous or not */
     int i;                  /* Counters */
@@ -211,7 +213,7 @@ herr_t H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op, hssize_t *start,
                 "can't allocate stride vector");
         H5V_array_fill(stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
     } else {
-        stride=_stride;
+        stride=(hsize_t *)_stride;
     } /* end else */
 
     /* Fill in the correct block values */
@@ -223,7 +225,7 @@ herr_t H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op, hssize_t *start,
                 "can't allocate stride vector");
         H5V_array_fill(block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
     } else {
-        block=_block;
+        block=(hsize_t *)_block;
     } /* end else */
 
 /* Check for overlapping blocks (remove when real block-merging algorithm is in place) */

@@ -326,7 +326,7 @@ size_t H5S_hyper_mgath (const void *_buf, size_t elmt_size,
 herr_t H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 		const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		size_t nelmts, void *_buf/*out*/);
-herr_t H5S_hyper_add (H5S_t *space, hssize_t *start, hssize_t *size);
+herr_t H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size);
 herr_t H5S_hyper_release (H5S_t *space);
 hsize_t H5S_hyper_npoints (const H5S_t *space);
 
