@@ -40,8 +40,7 @@
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
  * is defined. This allows applications to still have the H5FD_MPIO
- * "constants" in their source code (it also makes this file strictly ANSI
- * compliant when H5_HAVE_PARALLEL isn't defined)
+ * "constants" in their source code.
  */
 static hid_t H5FD_MPIO_g = 0;
 
@@ -1323,6 +1322,10 @@ done:
  *		to HADDR_UNDEF which is the error return value of this
  *		function.
  *
+ *              Keeping the EOF updated (during write calls) is expensive
+ *              because any process may extend the physical end of the
+ *              file. -QAK
+ *
  * Return:	Success:	The end-of-address marker.
  *
  *		Failure:	HADDR_UNDEF
@@ -1563,7 +1566,9 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 
     /* How many bytes were actually read? */
     /* [This works because the "basic elements" we use for all our MPI derived
-     *  types are MPI_BYTE - QAK]
+     *  types are MPI_BYTE.  We should be using the 'buf_type' for the MPI
+     *  datatype in this call though... (We aren't because using it causes
+     *  the LANL "qsc" machine to dump core - 12/19/03) - QAK]
      */
     if (MPI_SUCCESS != (mpi_code=MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
@@ -1879,7 +1884,9 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     /* How many bytes were actually written? */
     /* [This works because the "basic elements" we use for all our MPI derived
-     *  types are MPI_BYTE - QAK]
+     *  types are MPI_BYTE.  We should be using the 'buf_type' for the MPI
+     *  datatype in this call though... (We aren't because using it causes
+     *  the LANL "qsc" machine to dump core - 12/19/03) - QAK]
      */
     if (MPI_SUCCESS != (mpi_code=MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
@@ -1903,7 +1910,7 @@ done:
     /* if only p<round> writes, need to broadcast the ret_value to other processes */
     if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
 	if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
-	    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+	    HMPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
     } /* end if */
 #endif /* OLD_METADATA_WRITE */
 
@@ -1912,6 +1919,7 @@ done:
     	fprintf(stdout, "proc %d: Leaving H5FD_mpio_write with ret_value=%d\n",
 	    file->mpi_rank, ret_value );
 #endif
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

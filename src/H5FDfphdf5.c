@@ -1160,14 +1160,11 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
                  haddr_t addr, size_t size, void *buf)
 {
     H5FD_fphdf5_t      *file = (H5FD_fphdf5_t*)_file;
-    MPI_Offset          mpi_off;
     MPI_Status          status;
-    int                 mrc;
-    MPI_Datatype        buf_type;
-    int                 size_i;
-    int                 bytes_read;
-    int                 n;
-    unsigned            use_view_this_time = 0;
+    MPI_Offset          mpi_off;
+    int                 size_i;             /* Integer copy of 'size' to read */
+    int                 bytes_read;         /* Number of bytes read in */
+    int                 mrc;                /* MPI return code */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_read, FAIL)
@@ -1189,14 +1186,18 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr_t to MPI offset")
 
     size_i = (int)size;
-
     if ((hsize_t)size_i != size)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size_t to int")
 
-    /* Only look for MPI views for raw data transfers */
-    if (mem_type == H5FD_MEM_DRAW) {
+    /* Only do real MPI stuff for raw data transfers */
+    if(mem_type==H5FD_MEM_DRAW) {
         H5P_genplist_t     *plist;
-        H5FD_mpio_xfer_t    xfer_mode;  /* I/O tranfer mode */
+        H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+        MPI_Datatype buf_type;  /* MPI datatype for I/O operation */
+        int n;
+        int type_size;          /* MPI datatype used for I/O's size */
+        int io_size;            /* Actual number of bytes requested */
+        unsigned use_view_this_time = 0;        /* Flag to indicate we are using an MPI view */
 
         /* Obtain the data transfer properties */
         if ((plist = H5I_object(dxpl_id)) == NULL)
@@ -1239,6 +1240,13 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
             if ((mrc = MPI_File_read_at_all(file->f, mpi_off, buf, size_i,
                                             buf_type, &status)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mrc)
+
+            /*
+             * Reset the file view when we used MPI derived types
+             */
+            if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
+                                         H5FD_mpio_native,  file->info)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
         } else {
             /*
              * Prepare for a simple xfer of a contiguous block of bytes. The
@@ -1252,21 +1260,33 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mrc)
         }
 
-        /*
-         * MPI_Get_count incorrectly returns negative count; fake a complete
-         * read.
+        /* How many bytes were actually read? */
+        /* [This works because the "basic elements" we use for all our MPI derived
+         *  types are MPI_BYTE.  We should be using the 'buf_type' for the MPI
+         *  datatype in this call though... (We aren't because using it causes
+         *  the LANL "qsc" machine to dump core - 12/19/03) - QAK]
          */
-        bytes_read = size_i;
+        if (MPI_SUCCESS != (mrc=MPI_Get_elements(&status, MPI_BYTE, &bytes_read)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mrc)
+
+        /* Get the type's size */
+        if (MPI_SUCCESS != (mrc=MPI_Type_size(buf_type,&type_size)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mrc)
+
+        /* Compute the actual number of bytes requested */
+        io_size=type_size*size_i;
+
+        /* Check for read failure */
+        if (bytes_read<0 || bytes_read>io_size)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
 
         /*
-         * Reset the file view when we used MPI derived types
+         * This gives us zeroes beyond end of physical MPI file.
          */
-        if (use_view_this_time)
-            if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
-                                         H5FD_mpio_native,  file->info)) != MPI_SUCCESS)
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
-
-    } else {
+        if ((n=(io_size-bytes_read)) > 0)
+            HDmemset((char*)buf+bytes_read, 0, (size_t)n);
+    } /* end if */
+    else {
         /*
          * This is metadata - we want to try to read it from the SAP
          * first.
@@ -1276,7 +1296,7 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
 
         if (H5FP_request_read_metadata(_file, file->file_id, dxpl_id, mem_type,
                                        addr, size, (uint8_t**)&buf,
-                                       &bytes_read, &req_id, &sap_status) != SUCCEED) {
+                                       &req_id, &sap_status) != SUCCEED) {
             /* FIXME: The read failed, for some reason */
 HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
         }
@@ -1296,27 +1316,6 @@ HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
 HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
         }
     } /* end else */
-
-    /* Check for read failure */
-    if (bytes_read < 0 || bytes_read > size_i)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
-
-    /*
-     * This gives us zeroes beyond end of physical MPI file. What about
-     * reading past logical end of HDF5 file???
-     */
-    n = size_i - bytes_read;
-
-    if (n > 0) {
-        if (use_view_this_time)
-            /*
-             * INCOMPLETE rky 1998-09-18
-             * Haven't implemented reading zeros beyond EOF. What to do???
-             */
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "eof file read failed")
-
-        memset((char*)buf + bytes_read, 0, (size_t)n);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1440,6 +1439,8 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
     MPI_Offset          mpi_off;
     int                 mrc;
     int                 bytes_written;
+    int                 type_size;      /* MPI datatype used for I/O's size */
+    int                 io_size;        /* Actual number of bytes requested */
     unsigned            use_view_this_time = 0;
     herr_t              ret_value = SUCCEED;
 
@@ -1504,28 +1505,38 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
         if ((mrc = MPI_File_write_at_all(file->f, mpi_off, (void*)buf,
                                          size, buf_type, &status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mrc)
-    } else {
+
+        /* Reset the file view when we used MPI derived types */
+        if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
+                                     H5FD_mpio_native, file->info)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
+    } /* end if */
+    else {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if ((mrc = MPI_File_write_at(file->f, mpi_off, (void*)buf,
                                      size, buf_type, &status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mrc)
     }
 
-    /* Reset the file view when we used MPI derived types */
-    if (use_view_this_time)
-        if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
-                                     H5FD_mpio_native, file->info)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
-
-    /*
-     * MPI_Get_count incorrectly returns negative count; fake a complete
-     * write (use size for both parameters).
+    /* How many bytes were actually written? */
+    /* [This works because the "basic elements" we use for all our MPI derived
+     *  types are MPI_BYTE.  We should be using the 'buf_type' for the MPI
+     *  datatype in this call though... (We aren't because using it causes
+     *  the LANL "qsc" machine to dump core - 12/19/03) - QAK]
      */
-    bytes_written = size;
+    if (MPI_SUCCESS != (mrc=MPI_Get_elements(&status, MPI_BYTE, &bytes_written)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mrc)
+
+    /* Get the type's size */
+    if (MPI_SUCCESS != (mrc=MPI_Type_size(buf_type,&type_size)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mrc)
+
+    /* Compute the actual number of bytes requested */
+    io_size=type_size*size;
 
     /* Check for write failure */
-    if (bytes_written < 0 || bytes_written > size)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file write failed")
+    if (bytes_written!=io_size)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
     /* Forget the EOF value (see H5FD_fphdf5_get_eof()) */
     file->eof = HADDR_UNDEF;

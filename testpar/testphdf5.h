@@ -187,6 +187,7 @@ void extend_readInd(char *filename);
 void extend_readAll(char *filename);
 void compact_dataset(char *filename);
 void big_dataset(const char *filename);
+void short_dataset(const char *filename);
 int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[],
                  hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 

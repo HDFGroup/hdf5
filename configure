@@ -32326,7 +32326,6 @@ fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   fi
 
-
                MPE=yes
 
 # Check whether --with-mpe or --without-mpe was given.

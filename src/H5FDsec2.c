@@ -682,7 +682,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         if (0==nbytes) {
             /* end of file but not end of format address space */
             HDmemset(buf, 0, size);
-            size = 0;
+            break;
         }
         assert(nbytes>=0);
         assert((size_t)nbytes<=size);

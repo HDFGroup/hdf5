@@ -286,7 +286,7 @@ done:
 herr_t
 H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
                            H5FD_mem_t UNUSED mem_type, haddr_t addr,
-                           size_t size, uint8_t **buf, int *bytes_read,
+                           size_t size, uint8_t **buf,
                            unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_request_t req;
@@ -300,7 +300,6 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
     /* check args */
     assert(file);
     assert(buf);
-    assert(bytes_read);
     assert(req_id);
     assert(status);
 
@@ -352,7 +351,6 @@ HDfprintf(stderr, "Buffer not big enough to hold metadata!!!!\n");
 assert(0);
         }
 
-        *bytes_read = size;
         break;
     case H5FP_STATUS_DUMPING:
         /*
