@@ -14,14 +14,22 @@
 
 #include "hdf5.h"
 #include "h5test.h"
+#include "h5repack.h"
+#include "h5diff.h"
+#include "test_h5repack_add.h"
 
-#define FILENAME "h5repacktst.h5"
+
 
 
 /*-------------------------------------------------------------------------
  * Function:	test
  *
- * Purpose:	test h5repack
+ * Purpose:	
+ *
+ * 1) compress/chunk FILENAME with some compression/chunking options
+ * 2) use the h5diff utility to compare the input and output file; 
+ *     it returns RET==0 if the objects have the same data
+ * 3) use API functions to verify the compression/chunking input on the otput file
  *
  * Return:	Success:	zero
  *		Failure:	1
@@ -36,33 +44,33 @@
 static int
 test()
 {
- hid_t fid;  /* File ID */
- hid_t fapl; /* File access property list */
- hid_t dsid; /* Dataset ID */
- hid_t sid;  /* Dataspace ID */
- 
- TESTING("    h5repack");
- 
- if((fid = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+ packoptions_t options;
+ options_t     diff_options;
+ memset(&diff_options, 0, sizeof (options_t));
+
+
+ TESTING("    deflate filter");
+
+ if (h5repack_init (&options, 0)<0)
   TEST_ERROR;
- 
- if((sid = H5Screate (H5S_SCALAR))<0)
+ if (h5repack_addcomp("dset2:GZIP 9",&options)<0)
   TEST_ERROR;
- 
- if((dsid = H5Dcreate (fid, "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT))<0)
+ if (h5repack_addchunk("dset2:5x4",&options)<0)
   TEST_ERROR;
- 
- if(H5Dclose(dsid)<0)
+ if (h5repack(FILENAME,FILENAME_OUT,&options)<0)
   TEST_ERROR;
- 
- if(H5Fclose(fid)<0)
+ if (h5repack_end (&options)<0)
+  TEST_ERROR;
+ if (h5diff(FILENAME,FILENAME,NULL,NULL,diff_options) == 1)
   TEST_ERROR;
  
  PASSED();                                                 
- return 0;                                                 
+ return 0; 
+
  
 error:                                                       
  return 1;
+
 }
 
 
@@ -85,16 +93,17 @@ error:
 int main (void)
 {
  int		nerrors=0;
- 
+
  /* run tests  */
  puts("Testing h5repack:");
+ nerrors += make_dsets();
  nerrors += test();
 
 
  /* check for errors */
  if (nerrors)
   goto error;
- puts("All h5repack passed.");
+ puts("All h5repack tests passed.");
  
  return 0;
  
@@ -105,3 +114,4 @@ error:
 
  return 0;
 }
+

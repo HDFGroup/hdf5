@@ -21,9 +21,11 @@ srcdir=@srcdir@
 ## Add include directory to the C preprocessor flags, add -lh5tools and
 ## -lhdf5 to the list of libraries.
 ## Add also the test include directory for #defines
+## Add include for H5DIFF
 CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
          -I$(top_srcdir)/test  \
-         -I$(top_srcdir)/tools/lib @CPPFLAGS@
+         -I$(top_srcdir)/tools/lib @CPPFLAGS@  \
+	 -I$(top_srcdir)/tools/h5diff
 
 ## Test programs and scripts.
 ##
@@ -49,8 +51,10 @@ MOSTLYCLEAN=*.h5
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5repack.c h5repacktst.c
+PROG_SRC=h5repack.c h5repack_list.c h5repack_main.c h5repack_opttable.c h5repack_parse.c ../h5diff/h5trav.c ../h5diff/h5trav_table.c test_h5repack_add.c test_h5repack_main.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
+OBJS=h5repack.lo h5repack_list.lo h5repack_main.lo h5repack_opttable.lo h5repack_parse.lo ../h5diff/h5trav.lo ../h5diff/h5trav_table.lo	
+TEST_OBJS=../h5diff/h5diff.lo ../h5diff/h5diff_array.lo ../h5diff/h5diff_dset.lo ../h5diff/h5diff_util.lo  h5repack.lo h5repack_list.lo h5repack_opttable.lo h5repack_parse.lo ../h5diff/h5trav.lo ../h5diff/h5trav_table.lo test_h5repack_add.lo test_h5repack_main.lo
 
 PRIVATE_HDR=
 
@@ -68,11 +72,11 @@ check test _test: $(PROGS)
 ##
 $(PROGS): $(LIBHDF5)
 
-h5repack: h5repack.lo 
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repack.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5repack: $(OBJS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(OBJS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5repacktst: h5repacktst.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repacktst.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5repacktst: $(TEST_OBJS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 
 @CONCLUDE@
