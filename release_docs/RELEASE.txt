@@ -85,6 +85,10 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug where an object's header could get corrupted in certain
+        obscure situations where many objects were created in the
+        file.  QAK - 2002/05/31
+        was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where read/write intent in file IDs created with H5Freopen
         was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where selection offsets were not being used when iterating
