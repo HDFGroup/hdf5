@@ -2253,6 +2253,11 @@ hid_t H5ToolsFopen(char* fname, char* drivername){
 	driver_t driver[NDRIVERS];
 
 	/*taken from h5ls*/
+    /*
+     * Build a list of file access property lists which we should try when
+     * opening the file.  Eventually we'd like some way for the user to
+     * augment/replace this list interactively.
+     */
 	driver[ndrivers].name = "sec2";
     driver[ndrivers].fapl = H5P_DEFAULT;
     ndrivers++;
