@@ -89,10 +89,8 @@ herr_t H5Pset_preserve (hid_t plist_id, hbool_t status);
 int H5Pget_preserve (hid_t plist_id);
 
 #ifdef HAVE_PARALLEL
-herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info,
-		   unsigned access_mode);
-herr_t H5Pget_mpi (hid_t tid, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/,
-		   unsigned *access_mode/*out*/);
+herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info);
+herr_t H5Pget_mpi (hid_t tid, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/);
 herr_t H5Pset_xfer (hid_t tid, H5D_transfer_t data_xfer_mode);
 herr_t H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode/*out*/);
 #endif

@@ -1186,7 +1186,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		    dataset->ent.file->shared->access_parms.u.mpio.access_mode);
 #endif
 		access_mode_saved = dataset->ent.file->shared->access_parms.u.mpio.access_mode;
-		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5ACC_COLLECTIVE;
+		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5D_XFER_COLLECTIVE;
 		status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
 					     &(dataset->create_parms->efl),
 					     H5T_get_size (dataset->type), file_space,
@@ -1471,7 +1471,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		    dataset->ent.file->shared->access_parms.u.mpio.access_mode);
 #endif
 		access_mode_saved = dataset->ent.file->shared->access_parms.u.mpio.access_mode;
-		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5ACC_COLLECTIVE;
+		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5D_XFER_COLLECTIVE;
 		status = (sconv_func->write)(dataset->ent.file, &(dataset->layout),
 					     &(dataset->create_parms->efl),
 					     H5T_get_size (dataset->type), file_space,

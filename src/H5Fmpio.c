@@ -47,7 +47,7 @@
 #include <H5private.h>
 #include <H5private.h>
 #include <H5Eprivate.h>
-#include <H5Fprivate.h>
+#include <H5Dprivate.h>
 #include <H5MMprivate.h>
 
 #include <sys/types.h>
@@ -242,8 +242,8 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 #endif
 
     switch (access_parms->u.mpio.access_mode){
-    case H5ACC_INDEPENDENT:
-    case H5ACC_COLLECTIVE:
+    case H5D_XFER_INDEPENDENT:
+    case H5D_XFER_COLLECTIVE:
 	/*void*/
 	break;
 	
@@ -420,12 +420,12 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 
     /* Read the data.  */
     switch (access_parms->u.mpio.access_mode){
-    case H5ACC_INDEPENDENT:
+    case H5D_XFER_INDEPENDENT:
 	mpierr = MPI_File_read_at     ( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;
 	
-    case H5ACC_COLLECTIVE:
+    case H5D_XFER_COLLECTIVE:
 	mpierr = MPI_File_read_at_all ( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;
@@ -536,12 +536,12 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 
     /* Write the data.  */
     switch (access_parms->u.mpio.access_mode){
-    case H5ACC_INDEPENDENT:
+    case H5D_XFER_INDEPENDENT:
 	mpierr = MPI_File_write_at    ( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;
 	
-    case H5ACC_COLLECTIVE:
+    case H5D_XFER_COLLECTIVE:
 	mpierr = MPI_File_write_at_all( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;

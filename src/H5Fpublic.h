@@ -61,12 +61,6 @@ typedef enum H5F_driver_t {
 /* Unlimited file size for H5Pset_external() */
 #define H5F_UNLIMITED	((hsize_t)(-1L))
 
-/* Parallel styles passed to H5Pset_mpi() */
-#ifdef HAVE_PARALLEL
-#  define H5ACC_INDEPENDENT 0x0010	/*MPI independent access	*/
-#  define H5ACC_COLLECTIVE  0x0011	/*MPI collective access		*/
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -150,7 +150,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 
 #ifdef HAVE_PARALLEL
     is_collective = (f->shared->access_parms.driver==H5F_LOW_MPIO
-	&& f->shared->access_parms.u.mpio.access_mode==H5ACC_COLLECTIVE);
+	&& f->shared->access_parms.u.mpio.access_mode==H5D_XFER_COLLECTIVE);
     if (is_collective){
 #ifdef AKC
     printf("%s: collective read requested\n", FUNC);
@@ -212,16 +212,16 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	     * Need to be changed LATER to combine all reads into one
 	     * collective MPIO call.
 	     */
-	    long max, min, temp;
+	    unsigned long max, min, temp;
 
 	    temp = nelmts;
 	    assert(temp==nelmts);	/* verify no overflow */
-	    MPI_Allreduce(&temp, &max, 1, MPI_LONG, MPI_MAX,
+	    MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
 		f->shared->access_parms.u.mpio.comm);
-	    MPI_Allreduce(&temp, &min, 1, MPI_LONG, MPI_MIN,
+	    MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
 		f->shared->access_parms.u.mpio.comm);
 #ifdef AKC
-printf("nelmnts=%ld, min=%ld, max=%ld\n", temp, min, max);
+printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
 	    if (max != min)
 		HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
@@ -350,7 +350,7 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 
 #ifdef HAVE_PARALLEL
     is_collective = (f->shared->access_parms.driver==H5F_LOW_MPIO
-	&& f->shared->access_parms.u.mpio.access_mode==H5ACC_COLLECTIVE);
+	&& f->shared->access_parms.u.mpio.access_mode==H5D_XFER_COLLECTIVE);
     if (is_collective){
 #ifdef AKC
     printf("%s: collective write requested\n", FUNC);
@@ -412,16 +412,16 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	     * Need to be changed LATER to combine all writes into one
 	     * collective MPIO call.
 	     */
-	    long max, min, temp;
+	    unsigned long max, min, temp;
 
 	    temp = nelmts;
 	    assert(temp==nelmts);	/* verify no overflow */
-	    MPI_Allreduce(&temp, &max, 1, MPI_LONG, MPI_MAX,
+	    MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
 		f->shared->access_parms.u.mpio.comm);
-	    MPI_Allreduce(&temp, &min, 1, MPI_LONG, MPI_MIN,
+	    MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
 		f->shared->access_parms.u.mpio.comm);
 #ifdef AKC
-printf("nelmnts=%ld, min=%ld, max=%ld\n", temp, min, max);
+printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
 	    if (max != min)
 		HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,

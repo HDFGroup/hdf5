@@ -1902,10 +1902,15 @@ H5Pget_preserve (hid_t plist_id)
  *	mpi-related stuff is in the `u.mpi' member.  The `access_mode' will
  *	contain only mpi-related flags defined in H5Fpublic.h.
  *
+ *	Albert Cheng, Apr 16, 1998
+ *	Removed the access_mode argument.  The access_mode is changed
+ *	to be controlled by data transfer property list during data
+ *	read/write calls.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
+H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
 {
     H5F_access_t	   *tmpl = NULL;
     MPI_Comm		    lcomm;
@@ -1920,43 +1925,15 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
 		      "not a file access template");
     }
     
-    switch (access_mode){
-    case H5ACC_INDEPENDENT:
-    case H5ACC_COLLECTIVE:
-	/* okay */
-	break;
-
-    default:
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "invalid mpio access mode");
-    }
-
 #ifdef LATER
     /*
      * Need to verify comm and info contain sensible information.
      */
 #endif
 
-
-    /*
-     * Everything looks good.  Now go ahead and modify the access template.
-     */
     tmpl->driver = H5F_LOW_MPIO;
-    tmpl->u.mpio.access_mode = access_mode;
-
-    /*
-     * Store a duplicate copy of comm so that user may freely modify comm
-     * after this call.
-     */
-    if ((mrc = MPI_Comm_dup(comm, &lcomm)) != MPI_SUCCESS) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "failure to duplicate communicator");
-    }
+    tmpl->u.mpio.access_mode = H5D_XFER_INDEPENDENT;
     tmpl->u.mpio.comm = comm;
-    
-#ifdef LATER
-    /* Need to duplicate info too but don't know a quick way to do it now */
-#endif
     tmpl->u.mpio.info = info;
 
     FUNC_LEAVE(SUCCEED);
@@ -1982,10 +1959,15 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
  *
  * Modifications:
  *
+ *	Albert Cheng, Apr 16, 1998
+ *	Removed the access_mode argument.  The access_mode is changed
+ *	to be controlled by data transfer property list during data
+ *	read/write calls.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, unsigned *access_mode)
+H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info)
 {
     H5F_access_t	*tmpl = NULL;
 
@@ -2001,11 +1983,8 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, unsigned *access_mode)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the mpi driver is not set");
     }
-
-#ifndef LATER
-    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
-		   "not implemented yet");
-#endif
+    *comm = tmpl->u.mpio.comm;
+    *info = tmpl->u.mpio.info;
 
     FUNC_LEAVE (SUCCEED);
 }

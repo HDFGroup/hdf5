@@ -149,8 +149,8 @@ H5F_init_interface(void)
 #elif (H5F_LOW_DFLT == H5F_LOW_CORE)
     H5F_access_dflt.u.core.increment = 10*1024;
 #elif (H5F_LOW_DFLT == H5F_LOW_MPIO)
-    H5F_access_dflt.u.mpio.access_mode = 0;
-    H5F_access_dflt.u.mpio.comm = MPI_COMM_NULL;
+    H5F_access_dflt.u.mpio.access_mode = H5D_XFER_INDEPENDENT;
+    H5F_access_dflt.u.mpio.comm = MPI_COMM_SELF;
     H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
 #elif (H5F_LOW_DFLT == H5F_LOW_SPLIT)
     /* Nothing to initialize */
