@@ -1,13 +1,13 @@
 HDF5 version 1.4.3-snap12 currently under development
-Please refer to the INSTALL file for installation instructions.
+Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
 This release is almost fully functional for the entire API defined in the
-documentation, see the RELEASE.txt file in this directory for information
+documentation.  See the release_docs/RELEASE.txt file for information
 specific to this release of the library.  The INSTALL file contains
 instructions on compiling and installing the library.  The INSTALL_parallel
 file contains instructions on installing the parallel version of the
-library.
+library.  The INSTALL* files can be found in the release_docs/ directory.
 
 Documentation for this release is in the html directory.  Start with the
 "index.html" in that dictectory.
