@@ -24,7 +24,7 @@
 
      INTEGER, PARAMETER :: RANK = 2 ! Dataset rank
 
-     INTEGER, PARAMETER :: NUMP = 2 ! Number of points selected
+     INTEGER(SIZE_T), PARAMETER :: NUMP = 2 ! Number of points selected
 
      INTEGER(HID_T) :: file1_id       ! File1 identifier 
      INTEGER(HID_T) :: file2_id       ! File2 identifier 
