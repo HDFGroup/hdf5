@@ -174,7 +174,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     if (0==elmt_size) goto empty;
 
     /* make a local copy of the dimension info so we can transform them */
-    assert(rank<=32);	/* within array bounds */
+    assert(rank<=H5S_MAX_RANK);	/* within array bounds */
     for ( i=0; i<rank; ++i) {
 	d[i].start = diminfo[i].start;
 	d[i].strid = diminfo[i].stride;
