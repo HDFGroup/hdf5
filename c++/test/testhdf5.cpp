@@ -53,7 +53,13 @@ int             Verbosity;
 
 // Use C version of the header file testhdf5.h instead of re-coding it
 #include "testhdf5.h"
+
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
 #include <iostream>
+#endif
+
 #include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE

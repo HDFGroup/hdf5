@@ -25,7 +25,12 @@
 
  ***************************************************************************/
 
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
 #include <iostream>
+#endif
+
 #include "H5Cpp.h"
 #include "testhdf5.h"
 
