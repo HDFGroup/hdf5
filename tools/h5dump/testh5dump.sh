@@ -40,18 +40,19 @@ TESTING() {
 TOOLTEST() {
    expect="$srcdir/../testfiles/$1"
    actual="../testfiles/`basename $1 .ddl`.out"
+   actual_err="../testfiles/`basename $1 .ddl`.err"
    shift
 
    # Run test.
    TESTING $DUMPER $@
-
    (
       echo "#############################"
       echo "Expected output for '$DUMPER $@'" 
       echo "#############################"
       cd $srcdir/../testfiles
       $RUNSERIAL $DUMPER_BIN "$@"
-   ) >$actual 2>&1
+   ) >$actual 2>$actual_err
+   cat $actual_err >> $actual
     
    if $CMP $expect $actual; then
       echo " PASSED"
@@ -64,7 +65,7 @@ TOOLTEST() {
 
    # Clean up output file
    if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual
+      rm -f $actual $actual_err
    fi
 }
 
