@@ -82,7 +82,7 @@ struct attr4_struct {
 #define ATTR5_RANK	0
 float attr_data5=-5.123;        /* Test data for 5th attribute */
 
-int attr_op1(hid_t loc_id, const char *name, void *op_data);
+herr_t attr_op1(hid_t loc_id, const char *name, void *op_data);
 
 /****************************************************************
 **
@@ -1016,10 +1016,10 @@ test_attr_mult_read(void)
 **  attr_op1(): Attribute operator
 ** 
 ****************************************************************/
-int attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
+herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
 {
     int *count=(int *)op_data;
-    int ret=0;
+    herr_t ret=0;
 
     switch(*count) {
         case 0:
