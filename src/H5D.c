@@ -2806,7 +2806,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
     if(H5P_get(dc_plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
 
     /* Allocate data space and initialize it if it hasn't been. */
     if(nelmts > 0 && dataset->layout.type!=H5D_COMPACT &&
@@ -3102,7 +3102,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
     if (NULL == (plist = H5I_object(dataset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
     if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
 
     /*
      * NOTE: Restrictions on extensions were checked when the dataset was
@@ -3270,7 +3270,7 @@ H5D_alloc_storage (H5F_t *f, H5D_t *dset/*in,out*/, H5D_alloc_time_t alloc_time)
         if(H5P_get(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time");
         if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
 
         /* Get a pointer to the dataset's layout information */
         layout=&(dset->layout);
@@ -3307,7 +3307,7 @@ H5D_alloc_storage (H5F_t *f, H5D_t *dset/*in,out*/, H5D_alloc_time_t alloc_time)
                     /* Reserve space in layout header message for the entire array. */
                     assert(layout->size>0);
                     if (NULL==(layout->buf=H5MM_malloc(layout->size)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset");
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset");
                     layout->dirty = TRUE;
 
                     /* Indicate that we allocated space */
@@ -4129,7 +4129,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
         if(NULL == (plist = H5I_object(dset->dcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset creation property list");
         if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
 
      /*-------------------------------------------------------------------------
       * Modify the dataset storage
