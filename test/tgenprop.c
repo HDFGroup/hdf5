@@ -1307,7 +1307,7 @@ test_genprop_class_addprop(void)
 
     /* Check existence of an original property */
     ret = H5Pexist(cid,H5D_CRT_DATA_PIPELINE_NAME);
-    VERIFY(ret, 1, "H5Pexist");
+    VERIFY(ret, 0, "H5Pexist");
 
     /* Insert first property into class (with no callbacks) */
     ret = H5Pregister(cid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);

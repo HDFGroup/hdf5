@@ -4759,31 +4759,6 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     if(par_class!=NULL) {
         if(H5P_access_class(par_class,H5P_MOD_INC_CLS)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment parent class ref count");
-
-        /* Copy parent class's properties into this new class */
-        if(par_class->nprops>0) {
-            /* Walk through the hash table */
-            for(u=0; u<par_class->hashsize; u++) {
-                tmp=par_class->props[u];
-
-                /* Walk through the list of properties at each hash location */
-                while(tmp!=NULL) {
-                    /* Make a copy of the class's property */
-                    if((pcopy=H5P_dup_prop(tmp))==NULL)
-                        HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
-
-                    /* Insert the initialized property into the property list */
-                    if(H5P_add_prop(pclass->props,pclass->hashsize,pcopy)<0)
-                        HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
-
-                    /* Increment property count for class */
-                    pclass->nprops++;
-
-                    /* Go to next registered property in class */
-                    tmp=tmp->next;
-                } /* end while */
-            } /* end for */
-        } /* end if */
     } /* end if */
 
     /* Set return value */
@@ -4946,7 +4921,7 @@ static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
                 /* Walk through the list of properties at each hash location */
                 while(tmp!=NULL) {
                     /* Check for property already existing in list */
-                    if(H5P_find_prop(plist->props,tclass->hashsize,tmp->name)==NULL) {
+                    if(H5P_find_prop(plist->props,pclass->hashsize,tmp->name)==NULL) {
                         /* Make a copy of the class's property */
                         if((pcopy=H5P_dup_prop(tmp))==NULL)
                             HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
@@ -4973,7 +4948,7 @@ static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
                         } /* end if */
 
                         /* Insert the initialized property into the property list */
-                        if(H5P_add_prop(plist->props,tclass->hashsize,pcopy)<0)
+                        if(H5P_add_prop(plist->props,pclass->hashsize,pcopy)<0)
                             HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
 
                         /* Increment the number of properties in list */
