@@ -171,6 +171,8 @@ Documentation
 New Features
 ============
 
+    * Added internal "small data" aggregation, which can reduce the number of
+      actual I/O calls made, improving performance.  QAK - 2002/06/05
     * Improved internal metadata aggregation, which can reduce the number of
       actual I/O calls made, improving performance.  Additionally, this can
       reduce the size of files produced.  QAK - 2002/06/04

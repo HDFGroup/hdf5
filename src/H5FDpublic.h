@@ -100,6 +100,12 @@ typedef enum H5FD_mem_t {
      *  http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz
      */
 #define H5FD_FEAT_DATA_SIEVE            0x00000004
+    /*
+     * Defining the H5FD_FEAT_AGGREGATE_SMALLDATA for a VFL driver means that
+     * the library will attempt to allocate a larger block for "small" raw data
+     * and then sub-allocate "small" raw data requests from that larger block.
+     */
+#define H5FD_FEAT_AGGREGATE_SMALLDATA   0x00000008
 	
 
 /* Forward declaration */
@@ -163,6 +169,11 @@ struct H5FD_t {
     hsize_t 			def_meta_block_size;  /* Metadata allocation block size (if aggregating metadata) */
     hsize_t 			cur_meta_block_size;  /* Current size of metadata allocation region left */
     haddr_t 			eoma;       /*End of metadata allocated region*/
+
+    /* "Small data" aggregation fields */
+    hsize_t def_sdata_block_size;   /* "Small data" allocation block size (if aggregating "small data") */
+    hsize_t cur_sdata_block_size;   /* Current size of "small data" allocation region left */
+    haddr_t eosda;              /* End of "small data" allocated region */
 
     /* Metadata accumulator fields */
     unsigned char 		*meta_accum; /*Buffer to hold the accumulated metadata */

@@ -193,8 +193,9 @@ H5F_init_interface(void)
     double          rdcc_w0             = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;
     hsize_t         threshold           = H5F_ACS_ALIGN_THRHD_DEF;
     hsize_t         alignment           = H5F_ACS_ALIGN_DEF;
-    size_t          meta_block_size     = H5F_ACS_META_BLOCK_SIZE_DEF;
+    hsize_t         meta_block_size     = H5F_ACS_META_BLOCK_SIZE_DEF;
     size_t          sieve_buf_size      = H5F_ACS_SIEVE_BUF_SIZE_DEF;
+    hsize_t         sdata_block_size    = H5F_ACS_SDATA_BLOCK_SIZE_DEF;
     unsigned        gc_ref              = H5F_ACS_GARBG_COLCT_REF_DEF;
     hid_t           driver_id           = H5F_ACS_FILE_DRV_ID_DEF;
     void            *driver_info        = H5F_ACS_FILE_DRV_INFO_DEF;
@@ -356,6 +357,10 @@ H5F_init_interface(void)
 
         /* Register the maximum sieve buffer size */
         if(H5P_register(acs_pclass,H5F_ACS_SIEVE_BUF_SIZE_NAME,H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
+
+        /* Register the minimum "small data" allocation block size */
+        if(H5P_register(acs_pclass,H5F_ACS_SDATA_BLOCK_SIZE_NAME,H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &sdata_block_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
         /* Register the garbage collection reference */
@@ -850,6 +855,8 @@ H5Fget_access_plist(hid_t file_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data cache size");
     if(H5P_set(new_plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't sieve buffer size");
+    if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->lf->def_sdata_block_size)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size");
 
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID");

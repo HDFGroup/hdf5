@@ -3987,7 +3987,6 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_meta_block_size
@@ -4019,14 +4018,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_meta_block_size(hid_t plist_id, hsize_t _size)
+H5Pset_meta_block_size(hid_t plist_id, hsize_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    size_t size=(size_t)_size;  /* Work around parameter size difference */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_meta_block_size, FAIL);
-    H5TRACE2("e","ih",plist_id,_size);
+    H5TRACE2("e","ih",plist_id,size);
 
     /* Check args */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
@@ -4066,112 +4064,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_meta_block_size(hid_t plist_id, hsize_t *_size/*out*/)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    size_t size;  /* Work around parameter size difference */
-    herr_t ret_value=SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(H5Pget_meta_block_size, FAIL);
-    H5TRACE2("e","ix",plist_id,_size);
-
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* Get values */
-    if (_size) {
-        if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get meta data block size");
-        *_size=size;
-    } /* end if */
-
-done:
-    FUNC_LEAVE(ret_value);
-}
-#else /* H5_WANT_H5_V1_4_COMPAT */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_meta_block_size
- *
- * Purpose:	Sets the minimum size of metadata block allocations when
- *      the H5FD_FEAT_AGGREGATE_METADATA is set by a VFL driver.
- *      Each "raw" metadata block is allocated to be this size and then
- *      specific pieces of metadata (object headers, local heaps, B-trees, etc)
- *      are sub-allocated from this block.
- *      
- *		The default value is set to 2048 (bytes), indicating that metadata
- *      will be attempted to be bunched together in (at least) 2K blocks in
- *      the file.  Setting the value to 0 with this API function will
- *      turn off the metadata aggregation, even if the VFL driver attempts to
- *      use that strategy.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, August 25, 2000
- *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
- *		list. 
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_meta_block_size(hid_t plist_id, size_t size)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(H5Pset_meta_block_size, FAIL);
-    H5TRACE2("e","iz",plist_id,size);
-
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* Set values */
-    if(H5P_set(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data block size");
-
-done:
-    FUNC_LEAVE(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_meta_block_size
- *
- * Purpose:	Returns the current settings for the metadata block allocation
- *      property from a file access property list.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Friday, August 29, 2000
- *
- * Modifications:
- *
- *		Raymond Lu 
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
- *		list.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_meta_block_size(hid_t plist_id, size_t *size/*out*/)
+H5Pget_meta_block_size(hid_t plist_id, hsize_t *size/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
@@ -4188,14 +4081,14 @@ H5Pget_meta_block_size(hid_t plist_id, size_t *size/*out*/)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
-    if (size)
+    if (size) {
         if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get meta data block size");
+    } /* end if */
 
 done:
     FUNC_LEAVE(ret_value);
 }
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
 
@@ -4498,6 +4391,101 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
 done:
     FUNC_LEAVE(ret_value);
 } /* end H5Pget_hyper_vector_size() */
+
+#ifdef LATER
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_small_data_block_size
+ *
+ * Purpose:	Sets the minimum size of "small" raw data block allocations
+ *      when the H5FD_FEAT_AGGREGATE_SMALLDATA is set by a VFL driver.
+ *      Each "small" raw data block is allocated to be this size and then
+ *      pieces of raw data which are small enough to fit are sub-allocated from
+ *      this block.
+ *      
+ *	The default value is set to 2048 (bytes), indicating that raw data
+ *      smaller than this value will be attempted to be bunched together in (at
+ *      least) 2K blocks in the file.  Setting the value to 0 with this API
+ *      function will turn off the "small" raw data aggregation, even if the
+ *      VFL driver attempts to use that strategy.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, June 5, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_small_data_block_size(hid_t plist_id, hsize_t size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pset_small_data_block_size, FAIL);
+    H5TRACE2("e","ih",plist_id,size);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' block size");
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5Pset_small_data_block_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_small_data_block_size
+ *
+ * Purpose:	Returns the current settings for the "small" raw data block
+ *      allocation property from a file access property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, June 5, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pget_small_data_block_size, FAIL);
+    H5TRACE2("e","ix",plist_id,size);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get values */
+    if (size) {
+        if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'small data' block size");
+    } /* end if */
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5Pget_small_data_block_size() */
+#endif /* LATER */
 
 
 /*--------------------------------------------------------------------------

@@ -907,6 +907,7 @@ H5FD_stream_query(const H5FD_t * UNUSED _f,
         *flags = 0;
         /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_DATA_SIEVE;
+        *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     }
 
     FUNC_LEAVE (SUCCEED);

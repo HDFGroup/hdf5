@@ -253,66 +253,72 @@ __DLL__ size_t H5F_sizeof_size(const H5F_t *f);
 
 /* ========= File Access properties ============ */
 /* Definitions for size of meta data cache(elements) */
-#define H5F_ACS_META_CACHE_SIZE_NAME           "mdc_nelmts"
-#define H5F_ACS_META_CACHE_SIZE_SIZE           sizeof(int)
-#define H5F_ACS_META_CACHE_SIZE_DEF            H5AC_NSLOTS
+#define H5F_ACS_META_CACHE_SIZE_NAME            "mdc_nelmts"
+#define H5F_ACS_META_CACHE_SIZE_SIZE            sizeof(int)
+#define H5F_ACS_META_CACHE_SIZE_DEF             H5AC_NSLOTS
 
 /* Definitions for size of raw data chunk cache(elements) */
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME      "rdcc_nelmts"
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE      sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF       521
+#define H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME       "rdcc_nelmts"
+#define H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE       sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF        521
 
 /* Definition for size of raw data chunk cache(bytes) */
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME      "rdcc_nbytes"
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE      sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF       1024*1024
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME       "rdcc_nbytes"
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF        1024*1024
 
 /* Definition for preemption read chunks first */
-#define H5F_ACS_PREEMPT_READ_CHUNKS_NAME       "rdcc_w0"
-#define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE       sizeof(double)
-#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF        0.75  
+#define H5F_ACS_PREEMPT_READ_CHUNKS_NAME        "rdcc_w0"
+#define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE        sizeof(double)
+#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF         0.75  
 
 /* Definition for threshold for alignment */
-#define H5F_ACS_ALIGN_THRHD_NAME               "threshold"
-#define H5F_ACS_ALIGN_THRHD_SIZE               sizeof(hsize_t)
-#define H5F_ACS_ALIGN_THRHD_DEF                1
+#define H5F_ACS_ALIGN_THRHD_NAME                "threshold"
+#define H5F_ACS_ALIGN_THRHD_SIZE                sizeof(hsize_t)
+#define H5F_ACS_ALIGN_THRHD_DEF                 1
 
 /* Definition for alignment */
-#define H5F_ACS_ALIGN_NAME                     "align"
-#define H5F_ACS_ALIGN_SIZE                     sizeof(hsize_t)
-#define H5F_ACS_ALIGN_DEF                      1
+#define H5F_ACS_ALIGN_NAME                      "align"
+#define H5F_ACS_ALIGN_SIZE                      sizeof(hsize_t)
+#define H5F_ACS_ALIGN_DEF                       1
 
-/* Definition for minimum metadata allocation block size(when
+/* Definition for minimum metadata allocation block size (when
    aggregating metadata allocations. */
-#define H5F_ACS_META_BLOCK_SIZE_NAME           "meta_block_size"
-#define H5F_ACS_META_BLOCK_SIZE_SIZE           sizeof(size_t)
-#define H5F_ACS_META_BLOCK_SIZE_DEF            2048
+#define H5F_ACS_META_BLOCK_SIZE_NAME            "meta_block_size"
+#define H5F_ACS_META_BLOCK_SIZE_SIZE            sizeof(hsize_t)
+#define H5F_ACS_META_BLOCK_SIZE_DEF             2048
 
 /* Definition for maximum sieve buffer size (when data sieving 
    is allowed by file driver */
-#define H5F_ACS_SIEVE_BUF_SIZE_NAME         "sieve_buf_size"
-#define H5F_ACS_SIEVE_BUF_SIZE_SIZE         sizeof(size_t)
-#define H5F_ACS_SIEVE_BUF_SIZE_DEF          64*1024
+#define H5F_ACS_SIEVE_BUF_SIZE_NAME             "sieve_buf_size"
+#define H5F_ACS_SIEVE_BUF_SIZE_SIZE             sizeof(size_t)
+#define H5F_ACS_SIEVE_BUF_SIZE_DEF              64*1024
+
+/* Definition for minimum "small data" allocation block size (when
+   aggregating "small" raw data allocations. */
+#define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size"
+#define H5F_ACS_SDATA_BLOCK_SIZE_SIZE           sizeof(hsize_t)
+#define H5F_ACS_SDATA_BLOCK_SIZE_DEF            2048
 
 /* Definition for garbage-collect references */
-#define H5F_ACS_GARBG_COLCT_REF_NAME           "gc_ref"
-#define H5F_ACS_GARBG_COLCT_REF_SIZE           sizeof(unsigned)
-#define H5F_ACS_GARBG_COLCT_REF_DEF            0
+#define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"
+#define H5F_ACS_GARBG_COLCT_REF_SIZE            sizeof(unsigned)
+#define H5F_ACS_GARBG_COLCT_REF_DEF             0
 
 /* Definition for file driver ID */
-#define H5F_ACS_FILE_DRV_ID_NAME               "driver_id"
-#define H5F_ACS_FILE_DRV_ID_SIZE               sizeof(hid_t)
-#define H5F_ACS_FILE_DRV_ID_DEF                H5FD_SEC2
+#define H5F_ACS_FILE_DRV_ID_NAME                "driver_id"
+#define H5F_ACS_FILE_DRV_ID_SIZE                sizeof(hid_t)
+#define H5F_ACS_FILE_DRV_ID_DEF                 H5FD_SEC2
 
 /* Definition for file driver info */
-#define H5F_ACS_FILE_DRV_INFO_NAME             "driver_info"
-#define H5F_ACS_FILE_DRV_INFO_SIZE             sizeof(void*)
-#define H5F_ACS_FILE_DRV_INFO_DEF              NULL
+#define H5F_ACS_FILE_DRV_INFO_NAME              "driver_info"
+#define H5F_ACS_FILE_DRV_INFO_SIZE              sizeof(void*)
+#define H5F_ACS_FILE_DRV_INFO_DEF               NULL
 
 /* Definition for file close degree */
-#define H5F_CLOSE_DEGREE_NAME		       "close_degree"
-#define H5F_CLOSE_DEGREE_SIZE		       sizeof(H5F_close_degree_t)
-#define H5F_CLOSE_DEGREE_DEF		       H5F_CLOSE_DEFAULT
+#define H5F_CLOSE_DEGREE_NAME		        "close_degree"
+#define H5F_CLOSE_DEGREE_SIZE		        sizeof(H5F_close_degree_t)
+#define H5F_CLOSE_DEGREE_DEF		        H5F_CLOSE_DEFAULT
 
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
