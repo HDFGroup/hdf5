@@ -1194,9 +1194,9 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
 	   unsigned flags, const void *mesg)
 {
     H5O_t		*oh = NULL;
-    int		sequence;
+    int		        sequence;
     unsigned		idx;
-    int		ret_value = FAIL;
+    int		        ret_value = FAIL;
     size_t		size = 0;
     H5O_shared_t	sh_mesg = {0,{{0,0}}};
 
@@ -1310,7 +1310,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     ret_value = sequence;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh) < 0 && ret_value!=NULL)
+    if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh) < 0 && ret_value!=FAIL)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
     
     FUNC_LEAVE(ret_value);
