@@ -242,6 +242,8 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetEdcCheck">H5Pset_edc_check</a>
     <li><a href="#Property-GetEdcCheck">H5Pget_edc_check</a>
     <li><a href="#Property-SetFilterCallback">H5Pset_filter_callback</a>
+    <li><a href="#Property-SetDataTransform">H5Pset_data_transform</a>
+    <li><a href="#Property-GetDataTransform">H5Pget_data_transform</a>
     <li><a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>
     <li><a href="#Property-GetHyperVectorSize">H5Pget_hyper_vector_size</a>
     <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
@@ -285,7 +287,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-Copy">H5Pcopy</a>
     <li><a href="#Property-Close">H5Pclose</a>
   </ul>
-	
+
   <i>Generic Properties</i> 
   <ul>
     <li><a href="#Property-CreateClass">H5Pcreate_class</a> 
@@ -379,11 +381,11 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
   </ul>
 
-	<br><br>
+    <br><br>
 &nbsp;&nbsp;&nbsp;|| <i>Indicates functions<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available only in the<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
-	<br><br><br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br>
 &nbsp;&nbsp;&nbsp;<i>(Function listing<br>
 &nbsp;&nbsp;&nbsp;continues on next page.)</i></pre>
 </td>
@@ -484,7 +486,7 @@ See further notes in the description of each function.
 <table border="0">
   <tr>
     <td valign="top">
-	<ul>
+    <ul>
       <li><a href="#Property-AllFiltersAvail">H5Pall_filters_avail</a>
       <li><a href="#Property-Close">H5Pclose</a>
       <li><a href="#Property-CloseClass">H5Pclose_class</a>
@@ -525,13 +527,13 @@ See further notes in the description of each function.
       <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
       <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
       <li><a href="#Property-GetFillTime">H5Pget_fill_time</a>
-	</ul>
+    </ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
-	<ul>      
+    <ul>      
       <li><a href="#Property-GetFillValue">H5Pget_fill_value</a>
       <li><a href="#Property-GetFilter">H5Pget_filter</a>
       <li><a href="#Property-GetFilterById">H5Pget_filter_by_id</a>
@@ -572,13 +574,13 @@ See further notes in the description of each function.
       <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
       <li><a href="#Property-SetEdcCheck">H5Pset_edc_check</a>
       <li><a href="#Property-SetExternal">H5Pset_external</a>
-	</ul>
+    </ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
-	<ul>
+    <ul>
       <li><a href="#Property-SetFamilyOffset">H5Pset_family_offset</a>
       <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
       <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
@@ -614,7 +616,7 @@ See further notes in the description of each function.
       <li><a href="#Property-SetUserblock">H5Pset_userblock</a>
       <li><a href="#Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
       <li><a href="#Property-Unregister">H5Punregister</a>
-	</ul>
+    </ul>
       <br><br>
       ||&nbsp;&nbsp;<i>Available only in the parallel HDF5 library.</i>
     </td>
@@ -2303,6 +2305,69 @@ END SUBROUTINE h5pget_class_parent_f
 		
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_data_transform" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDataTransform">H5Pget_data_transform</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>ssize_t</em> <code>H5Pget_data_transform</code>
+                     (<em>hid_t</em> <code>plist_id</code>,
+                     <em>char</em> *<code>expression</code>,
+                     <em>size_t</em> <code>size</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves a data transform expression.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_data_transform</code> retrieves the data 
+        transform expression previously set in the dataset transfer 
+        property list plist_id by <code>H5Pset_data_transform</code>.
+        <p><code>H5Pget_data_transform</code> can be used to both 
+        retrieve the transform expression and to query its size.
+        <p>
+        If <code>expression</code> is non-NULL, up to <code>size</code> 
+        bytes of the data transform expression are written to the buffer.  
+        If <code>expression</code> is NULL, <code>size</code> is ignored 
+        and the function does not write anything to the buffer.  
+        The function always returns the size of the data transform expression.
+        <p>
+        If <code>0</code> is returned for the size of the expression, 
+        no data transform expression exists for the property list.
+        <p>
+        If an error occurs, the buffer pointed to by <code>expression</code>
+        is unchanged and the function returns a negative value.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the property list or class</td></tr>
+        <tr>
+            <td valign="top"><em>char</em>&nbsp;*<code>expression&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to memory where the transform 
+                             expression will be copied</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>size</code></td>
+            <td valign="top">IN: Number of bytes of the transform expression 
+                             to copy to</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Success: size of the transform expression.
+    <dd>Failure: a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+    <pre>
+SUBROUTINE
+    </pre>
+-->
+
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -6153,6 +6218,69 @@ END SUBROUTINE h5pset_chunk_f
 </dl>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_data_transform" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetDataTransform">H5Pset_data_transform</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_data_transform</code>
+                     (<em>hid_t</em> <code>plist_id</code>,
+                     <em>const char</em> *<code>expression</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets a data transform expression.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_data_transform</code> sets the data transform to 
+        be used for reading and writing data. 
+        This function operates on the dataset transfer property lists 
+        plist_id.
+        <p>
+        The expression parameter is a string containing an algebraic 
+        expression, such as <code>(5/9.0)*(x-32)</code> 
+        or <code>x*(x-5)</code>.
+        When a dataset is read or written with this property list, 
+        the transform expression is applied with the <code>x</code> 
+        being replaced by the values in the dataset.  
+        When reading data, the values in the file are not changed 
+        and the transformed data is returned to the user.  
+        <p>
+        Data transforms can only be applied to integer or floating-point 
+        datasets.  Order of operations is obeyed and the only supported 
+        operations are +, -, *, and /. Parentheses can be nested arbitrarily 
+        and can be used to change precedence.
+        <p>
+        When writing data back to the dataset, the transformed data is 
+        written to the file and there is no way to recover the original 
+        values to which the transform was applied.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the property list or class</td></tr>
+        <tr>
+            <td valign="top"><em>const&nbsp;char</em>&nbsp;*<code>expression&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Pointer to the null-terminated data transform expression
+        </td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_deflate" -->
 <hr>
 <dl>
@@ -9534,220 +9662,6 @@ END SUBROUTINE h5punregister_f
 </dl>
 
 
-<!--
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetCompression">H5Pset_compression</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_compression</code>(<em>hid_t</em> <code>plist</code>,
-        <em>H5Z_method_t</em> <code>method</code>,
-        <em>unsigned int</em> <code>flags</code>,
-        <em>size_t</em> <code>cd_size</code>,
-        <em>const void</em> <code>*client_data</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets compression method.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_compression</code> sets the compression method 
-        in a dataset creation property list.  This is a catch-all 
-        function for defining compression methods
-	and is intended to be called from a wrapper such as
-	<code>H5Pset_deflate</code>. The dataset creation property
-	list <em>plist</em> is adjusted to use the specified
-	compression method.  The <em>flags</em> is an 8-bit vector
-	which is stored in the file as part of the compression message
-	and passed to the compress and uncompress functions.  The
-	<em>client_data</em> is a byte array of length
-	<em>cd_size</em> which is copied to the file and passed to the
-	compress and uncompress methods.
-        <p>
-        The FLAGS, CD_SIZE, and CLIENT_DATA are copied to the
-        property list and eventually to the file and passed to the
-        compression functions.
-        <p>
-        See <a href="Datasets.html"><cite>The Dataset Interface (H5D)</cite></a> 
-        in the <cite>HDF5 User's Guide</cite> for further information 
-        regarding data compression.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset creation property list.
-        <dt><em>H5Z_method_t</em> <code>method</code>
-            <dd>IN: Compression method, an integer from 16 to 225.
-        <dt><em>unsigned int</em> <code>flags</code>
-            <dd>IN: Compression flags.
-        <dt><em>size_t</em> <code>cd_size</code>
-            <dd>IN: Size of the byte array <code>client_data</code>.
-        <dt><em>const void</em> <code>*client_data</code>
-            <dd>IN: Client data byte array passed to the compression method.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-</dl>
-
--->
-
-
-<!--
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetCompression">H5Pget_compression</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>H5Z_method_t</em> <code>H5Pget_compression</code>(<em>hid_t</em> <code>plist</code>,
-        <em>unsigned int</em> <code>*flags</code>,
-        <em>size_t</em> <code>*cd_size</code>,
-        <em>void</em> <code>*client_data</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Gets compression method.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pget_compression</code> gets the compression method 
-        information from a dataset creation property list.  
-        The <code>client_data</code> buffer is initially 
-        <code>cd_size</code> bytes.  On return, <code>client_data</code>
-        will be initialized with at most that many bytes, and 
-        <code>cd_size</code> will contain the actual size of the 
-        client data, which might be larger than its original value.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset creation property list.
-        <dt><em>unsigned int</em> <code>*flags</code>
-            <dd>OUT: Compression flags.
-        <dt><em>size_t</em> <code>*cd_size</code>
-            <dd>IN/OUT: Size of the <code>client_data</code> array.
-        <dt><em>void</em> <code>*client_data</code>
-            <dd>OUT: Byte array for the client data.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns compression method if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-</dl>
-
--->
-
-
-<!--
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetDeflate">H5Pget_deflate</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>int</em> <code>H5Pget_deflate</code>(<em>hid_t</em> <code>plist</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Returns the deflate compression level from a dataset creation
-        property list.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pget_deflate</code> returns the deflate compression level 
-        from a dataset creation property list that uses that method.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset creation property list.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns compression level, a value between 0 and 9, if successful.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-</dl>
-
--->
-
-
-<!--  ***** TEMPLATE *****
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SGetFaplxxx">H5Psget_fapl_xxx</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>xxx</em> <code>H5Psget_fapl_xxx</code>(
-                     <em>xxx</em> <code>xxx</code>,
-                     <em>xxx</em> <code>xxx</code>,
-                     <em>xxx</em> <code>xxx</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>
-  <dt><strong>Description:</strong>
-    <dd><code>H5Psget_fapl_xxx</code>
-        
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>xxx</em> <code>xxx</code>
-            <dd>IN: 
-            <dd>OUT: 
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful.
-        Otherwise returns a negative value.
--->
-<!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-<!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-<!--
-</dl>
--->
-<!--    ***** TEMPLATE *****
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-xxx">xxx</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>xxx</em> <code>xxx</code>(
-                     <em>xxx</em> <code>xxx</code>,
-                     <em>xxx</em> <code>xxx</code>,
-                     <em>xxx</em> <code>xxx</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>
-  <dt><strong>Description:</strong>
-    <dd><code>xxx</code>
-        
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>xxx</em> <code>xxx</code>
-            <dd>IN: 
-            <dd>OUT: 
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns xxx if successful.
-        Otherwise returns xxx.
--->
-<!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-<!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-<!--
-</dl>
--->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -9789,7 +9703,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 7 October 2004");
+document.writeln("Last modified: 19 November 2004");
 -->
 </SCRIPT>
  
