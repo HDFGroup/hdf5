@@ -881,7 +881,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
         UINT16ENCODE(p, 0); /*id*/
         UINT16ENCODE(p, 0); /*nrefs*/
         UINT32ENCODE(p, 0); /*reserved*/
-        H5F_ENCODE_LENGTH (f, p, need);
+        H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
     }
     HDmemset (heap->obj+hobj->idx, 0, sizeof(H5HG_obj_t));
     heap->dirty = 1;
