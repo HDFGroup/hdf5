@@ -50,7 +50,7 @@ static H5AC_t          *current_cache_g = NULL;         /*for sorting */
  *              pass an invalid value then H5AC_NSLOTS is used.  You can
  *              turn off caching by using 1 for the SIZE_HINT value.
  *
- * Return:      Success:        SUCCEED
+ * Return:      Success:        Number of slots actually used.
  *
  *              Failure:        FAIL
  *
@@ -62,7 +62,7 @@ static H5AC_t          *current_cache_g = NULL;         /*for sorting */
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+intn
 H5AC_create(H5F_t *f, intn size_hint)
 {
     H5AC_t                 *cache = NULL;
@@ -70,14 +70,13 @@ H5AC_create(H5F_t *f, intn size_hint)
 
     assert(f);
     assert(NULL == f->shared->cache);
-    if (size_hint < 1)
-        size_hint = H5AC_NSLOTS;
+    if (size_hint < 1) size_hint = H5AC_NSLOTS;
 
     f->shared->cache = cache = H5MM_xcalloc(1, sizeof(H5AC_t));
     cache->nslots = size_hint;
     cache->slot = H5MM_xcalloc((intn)(cache->nslots), sizeof(H5AC_slot_t));
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(size_hint);
 }
 
 /*-------------------------------------------------------------------------
@@ -838,7 +837,7 @@ H5AC_debug(H5F_t *f)
 
     FUNC_ENTER(H5AC_debug, FAIL);
 
-    fprintf(stderr, "H5AC: cache statistics for file %s\n", f->name);
+    fprintf(stderr, "H5AC: meta data cache statistics for file %s\n", f->name);
     fprintf(stderr, "   %-18s %8s %8s %8s %8s+%-8s\n",
             "Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
     fprintf(stderr, "   %-18s %8s %8s %8s %8s-%-8s\n",
@@ -866,10 +865,12 @@ H5AC_debug(H5F_t *f)
             sprintf(s, "unknown id %d", i);
         }
 
-        if (cache->diagnostics[i].nhits) {
+        if (cache->diagnostics[i].nhits>0 ||
+	    cache->diagnostics[i].nmisses>0) {
             miss_rate = 100.0 * cache->diagnostics[i].nmisses /
-                cache->diagnostics[i].nhits;
-        } else {
+			(cache->diagnostics[i].nhits+
+			 cache->diagnostics[i].nmisses);
+	} else {
             miss_rate = 0.0;
         }
 

@@ -91,7 +91,8 @@ test_1 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap1.h5", H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
+    f = H5F_open ("gheap1.h5",
+		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
 	FAILED ("unable to create file");
@@ -133,8 +134,8 @@ test_1 (void)
 	}
     }
     
-    H5F_close (f);
     puts (" PASSED");
+    H5F_close (f);
     return retval;
 }
 
@@ -173,7 +174,8 @@ test_2 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap2.h5", H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
+    f = H5F_open ("gheap2.h5",
+		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
 	FAILED ("unable to create file");
@@ -210,8 +212,8 @@ test_2 (void)
 	}
     }
     
-    H5F_close (f);
     puts (" PASSED");
+    H5F_close (f);
     return retval;
 }
 
@@ -249,7 +251,8 @@ test_3 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap3.h5", H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
+    f = H5F_open ("gheap3.h5",
+		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
 	FAILED ("unable to create file");
@@ -277,8 +280,8 @@ test_3 (void)
 	}
     }
     
-    H5F_close (f);
     puts (" PASSED");
+    H5F_close (f);
     return retval;
 }
 
@@ -317,7 +320,8 @@ test_4 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap4.h5", H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
+    f = H5F_open ("gheap4.h5",
+		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
 	FAILED ("unable to create file");
@@ -352,8 +356,8 @@ test_4 (void)
 	}
     }
 
-    H5F_close (f);
     puts (" PASSED");
+    H5F_close (f);
     return retval;
 }
     

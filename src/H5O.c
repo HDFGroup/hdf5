@@ -667,6 +667,76 @@ H5O_reset(const H5O_class_t *type, void *native)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_free
+ *
+ * Purpose:	Similar to H5O_reset() except it also frees the message
+ *		pointer.
+ *
+ * Return:	Success:	NULL
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5O_free (const H5O_class_t *type, void *mesg)
+{
+    FUNC_ENTER (H5O_free, NULL);
+    
+    if (mesg) {
+	H5O_reset (type, mesg);
+	H5MM_xfree (mesg);
+    }
+
+    FUNC_LEAVE (NULL);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_copy
+ *
+ * Purpose:	Copies a message.  If MESG is is the null pointer then a null
+ *		pointer is returned with no error.
+ *
+ * Return:	Success:	Ptr to the new message
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5O_copy (const H5O_class_t *type, const void *mesg)
+{
+    void	*ret_value = NULL;
+    
+    FUNC_ENTER (H5O_copy, NULL);
+
+    assert (type);
+    assert (type->copy);
+
+    if (mesg) {
+	if (NULL==(ret_value=(type->copy)(mesg, NULL))) {
+	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, NULL,
+			   "unable to copy object header message");
+	}
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_link
  *
  * Purpose:	Adjust the link count for an object header by adding
@@ -1209,9 +1279,7 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 	    /* change message type to nil and zero it */
 	    oh->mesg[i].type = H5O_NULL;
 	    HDmemset(oh->mesg[i].raw, 0, oh->mesg[i].raw_size);
-	    H5O_reset(type, oh->mesg[i].native);
-	    oh->mesg[i].native = H5MM_xfree(oh->mesg[i].native);
-
+	    oh->mesg[i].native = H5O_free (type, oh->mesg[i].native);
 	    oh->mesg[i].dirty = TRUE;
 	    oh->dirty = TRUE;
 	}
@@ -1850,8 +1918,7 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		(oh->mesg[i].type->debug)(f, mesg, stream, indent+3,
 					  MAX (0, fwidth-3));
 	    }
-	    H5O_reset (oh->mesg[i].type, mesg);
-	    H5MM_xfree (mesg);
+	    H5O_free (oh->mesg[i].type, mesg);
 	    H5MM_xfree (p);
 	}
     }

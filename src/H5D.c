@@ -1252,8 +1252,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				    mem_space, buf/*out*/);
 	if (status>=0) goto succeed;
 #ifdef H5D_DEBUG
-	fprintf (stderr, "H5D: input pipe optimization failed "
-		 "(falling through)\n");
+	fprintf (stderr, "H5D: data space conversion could not be optimized "
+		 "for this case (using general method instead)\n");
 #endif
 	H5E_clear ();
     }
@@ -1547,8 +1547,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				     mem_space, buf);
 	if (status>=0) goto succeed;
 #ifdef H5D_DEBUG
-	fprintf (stderr, "H5D: output pipe optimization failed "
-		 "(falling through)\n");
+	fprintf (stderr, "H5D: data space conversion could not be optimized "
+		 "for this case (using general method instead)\n");
 #endif
 	H5E_clear ();
     }

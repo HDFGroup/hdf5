@@ -131,7 +131,7 @@ main (void)
     hsize_t 		h_sample[2];	/*hyperslab sampling		*/
 
     /* Create the file */
-    file = H5Fcreate ("cmpd_dset.h5", H5F_ACC_TRUNC,
+    file = H5Fcreate ("cmpd_dset.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 

@@ -2,8 +2,17 @@
  * Copyright (C) 1997 NCSA
  *		      All rights reserved.
  *
- * Programmer: Robb Matzke <matzke@llnl.gov>
- *	       Wednesday, October  8, 1997
+ * Programmer: 	Robb Matzke <matzke@llnl.gov>
+ *	       	Wednesday, October  8, 1997
+ *
+ * Purpose:	Indexed (chunked) I/O functions.  The logical
+ *		multi-dimensional data space is regularly partitioned into
+ *		same-sized "chunks", the first of which is aligned with the
+ *		logical origin.  The chunks are given a multi-dimensional
+ *		index which is used as a lookup key in a B-tree that maps
+ *		chunk index to disk address.  Each chunk can be compressed
+ *		independently and the chunks may move around in the file as
+ *		their storage requirements change.
  */
 #include <H5private.h>
 #include <H5Dprivate.h>
@@ -14,13 +23,25 @@
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
 
-
 /* Interface initialization */
 #define PABLO_MASK	H5F_istore_mask
 static hbool_t		interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
-/* PRIVATE PROTOTYPES */
+/* Raw data chunks are cached.  Each entry in the cache is: */
+typedef struct H5F_rdcc_ent_t {
+    hbool_t	locked;		/*entry is locked in cache		*/
+    hbool_t	dirty;		/*needs to be written to disk?		*/
+    H5O_layout_t *layout;	/*the layout message			*/
+    H5O_compress_t *comp;	/*compression message			*/
+    hssize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
+    size_t	chunk_size;	/*size of a chunk			*/
+    size_t	rd_count;	/*bytes remaining to be read		*/
+    size_t	wr_count;	/*bytes remaining to be written		*/
+    uint8	*chunk;		/*the uncompressed chunk data		*/
+} H5F_rdcc_ent_t;
+
+/* Private prototypes */
 static size_t H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5F_istore_new_node(H5F_t *f, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key, haddr_t *);
@@ -546,7 +567,6 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 	 * Already exists.  If the new size is not the same as the old size
 	 * then we should reallocate storage.
 	 */
-#if 1
 	if (lt_key->nbytes != udata->key.nbytes) {
 	    if (H5MF_realloc (f, H5MF_RAW, lt_key->nbytes, addr,
 			      udata->key.nbytes, new_node/*out*/)<0) {
@@ -561,13 +581,6 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 	    udata->addr = *addr;
 	    ret_value = H5B_INS_NOOP;
 	}
-#else
-	assert (lt_key->nbytes == udata->key.nbytes);
-	assert (!H5F_addr_defined (&(udata->addr)) ||
-		H5F_addr_eq (&(udata->addr), addr));
-	udata->addr = *addr;
-	ret_value = H5B_INS_NOOP;
-#endif
 
     } else if (H5V_hyper_disjointp(udata->mesg.ndims,
 				   lt_key->offset, udata->mesg.dim,
@@ -606,6 +619,596 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_istore_init
+ *
+ * Purpose:	Initialize the raw data chunk cache for a file.  This is
+ *		called when the file handle is initialized.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, May 18, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_init (H5F_t *f)
+{
+    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
+    
+    FUNC_ENTER (H5F_istore_init, FAIL);
+
+    HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
+    if (f->shared->access_parms->rdcc_nbytes>0) {
+	rdcc->nslots = 25; /*some initial number of slots*/
+	rdcc->slot = H5MM_xcalloc (rdcc->nslots, sizeof(H5F_rdcc_ent_t));
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_flush_entry
+ *
+ * Purpose:	Writes a chunk to disk.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent)
+{
+    void	*c_buf = NULL;		/*temp compression buffer	*/
+    void	*out_ptr = NULL;	/*ptr to output buffer		*/
+    size_t	nbytes;			/*size of output buffer		*/
+    herr_t	ret_value = FAIL;	/*return value			*/
+    H5F_istore_ud1_t udata;		/*pass through B-tree		*/
+    intn	i;
+    
+    FUNC_ENTER (H5F_istore_flush_entry, FAIL);
+    assert (ent);
+    assert (!ent->locked);
+    if (!ent->dirty) HRETURN (SUCCEED);
+
+    /* Should the chunk be compressed before writing it to disk? */
+    if (ent->comp && H5Z_NONE!=ent->comp->method) {
+	c_buf = H5MM_xmalloc (ent->chunk_size);
+	nbytes = H5Z_compress (ent->comp, ent->chunk_size, ent->chunk, c_buf);
+	if (nbytes && nbytes<ent->chunk_size) {
+	    out_ptr = c_buf;
+	} else {
+	    out_ptr = ent->chunk;
+	    nbytes = ent->chunk_size;
+	}
+    } else {
+	out_ptr = ent->chunk;
+	nbytes = ent->chunk_size;
+    }
+    
+    /*
+     * Create the chunk it if it doesn't exist, or reallocate the chunk if its
+     * size changed.  Then write the data into the file.
+     */
+    udata.mesg = *(ent->layout);
+    H5F_addr_undef(&(udata.addr));
+    udata.key.nbytes = nbytes;
+    for (i=0; i<ent->layout->ndims; i++) {
+	udata.key.offset[i] = ent->offset[i];
+    }
+    
+    if (H5B_insert(f, H5B_ISTORE, &(ent->layout->addr), &udata)<0) {
+	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+		     "unable to allocate chunk");
+    }
+    if (H5F_block_write (f, &(udata.addr), nbytes, out_ptr)<0) {
+	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+		     "unable to write raw data to file");
+    }
+
+    /* Mark cache entry as clean */
+    ent->dirty = FALSE;
+    f->shared->rdcc.nflushes++;
+    ret_value = SUCCEED;
+
+ done:
+    H5MM_xfree (c_buf);
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_flush
+ *
+ * Purpose:	Writes all dirty chunks to disk but does not remove them from
+ *		the cache.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_flush (H5F_t *f)
+{
+    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
+    intn	i, nerrors=0;
+    
+    FUNC_ENTER (H5F_istore_flush, FAIL);
+
+    for (i=0; i<rdcc->nused; i++) {
+	if (H5F_istore_flush_entry (f, rdcc->slot+i)<0) {
+	    nerrors++;
+	}
+    }
+    if (nerrors) {
+	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
+		       "unable to flush one or more raw data chunks");
+    }
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_preempt
+ *
+ * Purpose:	Preempts the specified entry from the cache, flushing it to
+ *		disk if necessary.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_istore_preempt (H5F_t *f, intn idx)
+{
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
+    H5F_rdcc_ent_t	*ent = rdcc->slot + idx;
+    
+    FUNC_ENTER (H5F_istore_preempt, FAIL);
+    assert (idx>=0 && idx<rdcc->nused);
+    assert (!ent->locked);
+
+    if (ent->dirty) H5F_istore_flush_entry (f, ent);
+    H5O_free (H5O_LAYOUT, ent->layout);
+    H5O_free (H5O_COMPRESS, ent->comp);
+    H5MM_xfree (ent->chunk);
+    rdcc->nused -= 1;
+    rdcc->nbytes -= ent->chunk_size;
+    HDmemmove (rdcc->slot+idx, rdcc->slot+idx+1,
+	       (rdcc->nused-idx) * sizeof(H5F_rdcc_ent_t));
+    
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_dest
+ *
+ * Purpose:	Destroy the entire chunk cache by flushing dirty entries,
+ *		preempting all entries, and freeing the cache itself.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_dest (H5F_t *f)
+{
+    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
+    intn	i, nerrors=0;
+    
+    FUNC_ENTER (H5F_istore_dest, FAIL);
+
+    for (i=rdcc->nused-1; i>=0; --i) {
+	if (H5F_istore_flush_entry (f, rdcc->slot+i)<0) {
+	    nerrors++;
+	}
+	if (H5F_istore_preempt (f, i)<0) {
+	    nerrors++;
+	}
+    }
+    if (nerrors) {
+	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
+		       "unable to flush one or more raw data chunks");
+    }
+
+    H5MM_xfree (rdcc->slot);
+    HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_prune
+ *
+ * Purpose:	Prune the cache by preempting some things until the cache has
+ *		room for something which is SIZE bytes.  Only unlocked
+ *		entries are considered for preemption.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_istore_prune (H5F_t *f, size_t size)
+{
+    intn		i, meth0, meth1, nerrors=0;
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
+    H5F_rdcc_ent_t	*ent0, *ent1;
+    double		w0 = f->shared->access_parms->rdcc_w0;
+    size_t		total = f->shared->access_parms->rdcc_nbytes;
+
+    FUNC_ENTER (H5F_istore_prune, FAIL);
+
+    /*
+     * We have two pointers that slide down the cache beginning at the least
+     * recently used entry.  The distance between the pointers represents the
+     * relative weight.  A weight of 50% for the first pointer means that the
+     * second pointer is half the cache length behind the first pointer.
+     */
+    meth0 = rdcc->nused;
+    meth1 = rdcc->nused * (1.0+w0);
+    for (i=MAX(meth0, meth1)-1;
+	 rdcc->nbytes+size>total && i>=0;
+	 --i, --meth0, --meth1) {
+
+	ent0 = rdcc->slot+meth0; /*might be a bad pointer!*/
+	ent1 = rdcc->slot+meth1; /*might be a bad pointer!*/
+	
+	if (meth0>=0 && meth0<rdcc->nused && !ent0->locked &&
+	    (0==ent0->rd_count || ent0->chunk_size==ent0->rd_count) &&
+	    (0==ent0->wr_count || ent0->chunk_size==ent0->wr_count)) {
+	    /*
+	     * Method 0: Preempt entries that have a zero rd_count.  If the
+	     * application is accessing a dataset with a set of
+	     * non-overlapping partial I/O requests then chunks with a zero
+	     * rd_count will probably not be accessed in the near future.
+	     */
+	    if (H5F_istore_preempt (f, meth0)<0) nerrors++;
+	    
+	} else if (meth1>=0 && meth1<rdcc->nused && !ent1->locked) {
+	    /*
+	     * Method 1: Discard the least recently used members from the
+	     * cache.  This is a catch-all.
+	     */
+	    if (H5F_istore_preempt (f, meth1)<0) nerrors++;
+	}
+    }
+    if (nerrors) {
+	HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
+		       "unable to preempt one or more raw data cache entry");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_lock
+ *
+ * Purpose:	Return a pointer to an uncompressed chunk.  The pointer
+ *		points directly into the chunk cache and should not be freed
+ *		by the caller but will be valid until it is unlocked.  The
+ *		input value IDX_HINT is used to speed up cache lookups and
+ *		it's output value should be given to H5F_rdcc_unlock().
+ *
+ *		If RELAX is non-zero and the chunk isn't in the cache then
+ *		don't try to read it from the file, but just allocate an
+ *		uninitialized buffer to hold the result.  This is indented
+ *		for output functions that are about to overwrite the entire
+ *		chunk.
+ *
+ * Return:	Success:	Ptr to an uncompressed chunk.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
+		 const H5O_compress_t *comp, const hssize_t offset[],
+		 hbool_t relax, intn *idx_hint/*in,out*/)
+{
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
+    H5F_rdcc_ent_t	*ent = NULL;
+    intn		i, j, found = -1;
+    H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
+    size_t		chunk_size;		/*size of a chunk	*/
+    herr_t		status;			/*func return status	*/
+    void		*chunk=NULL;		/*the uncompressed chunk*/
+    void		*temp=NULL;		/*temporary chunk buffer*/
+    void		*ret_value=NULL;	/*return value		*/
+    
+    FUNC_ENTER (H5F_istore_lock, NULL);
+
+    /* First use the hint */
+    if (idx_hint && *idx_hint>=0 && *idx_hint<rdcc->nused) {
+	ent = rdcc->slot + *idx_hint;
+	if (layout->ndims==ent->layout->ndims) {
+	    for (i=0, found=*idx_hint; found>=0 && i<ent->layout->ndims; i++) {
+		if (offset[i]!=ent->offset[i]) found = -1;
+	    }
+	}
+    }
+
+    /* Then look at all the entries */
+    for (i=0; found<0 && i<rdcc->nused; i++) {
+	ent = rdcc->slot + i;
+	if (layout->ndims==ent->layout->ndims) {
+	    for (j=0, found=i; found>=0 && j<ent->layout->ndims; j++) {
+		if (offset[j]!=ent->offset[j]) found = -1;
+	    }
+	}
+    }
+
+
+    if (found>=0) {
+	/*
+	 * Already in the cache.  Count a hit.
+	 */
+	rdcc->nhits++;
+	
+    } else if (found<0 && relax) {
+	/*
+	 * Not in the cache, but we're about to overwrite the whole thing
+	 * anyway, so just allocate a buffer for it but don't initialize that
+	 * buffer with the file contents. Count this as a hit instead of a
+	 * miss because we saved ourselves lots of work.
+	 */
+	rdcc->nhits++;
+	for (i=0, chunk_size=1; i<layout->ndims; i++) {
+	    chunk_size *= layout->dim[i];
+	}
+	chunk = H5MM_xmalloc (chunk_size);
+	
+    } else {
+	/*
+	 * Not in the cache.  Read it from the file and count this as a miss
+	 * if it's in the file or an init if it isn't.
+	 */
+	for (i=0, chunk_size=1; i<layout->ndims; i++) {
+	    udata.key.offset[i] = offset[i];
+	    chunk_size *= layout->dim[i];
+	}
+	udata.mesg = *layout;
+	H5F_addr_undef (&(udata.addr));
+	status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
+	chunk = H5MM_xmalloc (chunk_size);
+	if (status>=0 && H5F_addr_defined (&(udata.addr))) {
+	    /*
+	     * The chunk exists on disk but might be compressed.  Instead of
+	     * allocating the exact size for the compressed chunk we allocate
+	     * the entire chunk size -- it reduces strain on the malloc()
+	     * subsystem.
+	     */
+	    if (H5F_block_read (f, &(udata.addr), udata.key.nbytes, chunk)<0) {
+		HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
+			     "unable to read raw data chunk");
+	    }
+	    if (udata.key.nbytes<chunk_size) {
+		temp = H5MM_xmalloc (chunk_size);
+		if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
+						chunk, chunk_size, temp)) {
+		    HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
+				 "unable to uncompress raw data chunk"); 
+		}
+		H5MM_xfree (chunk);
+		chunk = temp;
+		temp = NULL;
+	    }
+	    rdcc->nmisses++;
+	} else {
+	    /*
+	     * The chunk doesn't exist in the file.  Assume all zeros.
+	     */
+	    HDmemset (chunk, 0, chunk_size);
+	    rdcc->ninits++;
+	}
+    }
+
+    if (found<0 && chunk_size<=f->shared->access_parms->rdcc_nbytes) {
+	/*
+	 * Add the chunk to the beginning of the cache after pruning the cache
+	 * to make room.
+	 */
+	if (H5F_istore_prune (f, chunk_size)<0) {
+	    H5E_clear ();
+	}
+	if (rdcc->nused>=rdcc->nslots) {
+	    rdcc->nslots = MAX (25, 2*rdcc->nslots);
+	    rdcc->slot = H5MM_xrealloc (rdcc->slot,
+					(rdcc->nslots*
+					 sizeof(H5F_rdcc_ent_t)));
+	}
+	HDmemmove (rdcc->slot+1, rdcc->slot,
+		   rdcc->nused*sizeof(H5F_rdcc_ent_t));
+	rdcc->nused++;
+	rdcc->nbytes += chunk_size;
+	ent = rdcc->slot;
+	ent->locked = 0;
+	ent->dirty = FALSE;
+	ent->chunk_size = chunk_size;
+	ent->layout = H5O_copy (H5O_LAYOUT, layout);
+	ent->comp = H5O_copy (H5O_COMPRESS, comp);
+	for (i=0; i<layout->ndims; i++) {
+	    ent->offset[i] = offset[i];
+	}
+	ent->rd_count = chunk_size;
+	ent->wr_count = chunk_size;
+	ent->chunk = chunk;
+	found = 0;
+	    
+    } else if (found<0) {
+	/*
+	 * The chunk is larger than the entire cache so we don't cache it.
+	 * This is the reason all those arguments have to be repeated for the
+	 * unlock function.
+	 */
+	ent = NULL;
+	found = -999;
+	
+    } else if (found>0) {
+	/*
+	 * The chunk is not at the beginning of the cache; move it forward by
+	 * one slot.  This is how we implement the LRU preemption algorithm.
+	 */
+	H5F_rdcc_ent_t x = rdcc->slot[found];
+	rdcc->slot[found] = rdcc->slot[found-1];
+	rdcc->slot[found-1] = x;
+	ent = rdcc->slot + --found;
+    }
+
+    /* Lock the chunk into the cache */
+    if (ent) {
+	assert (!ent->locked);
+	ent->locked = TRUE;
+	if (idx_hint) *idx_hint = found;
+	chunk = ent->chunk;
+    }
+
+    ret_value = chunk;
+ done:
+    if (!ret_value) H5MM_xfree (chunk);
+    H5MM_xfree (temp);
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_unlock
+ *
+ * Purpose:	Unlocks a previously locked chunk. The LAYOUT, COMP, and
+ *		OFFSET arguments should be the same as for H5F_rdcc_lock().
+ *		The DIRTY argument should be set to non-zero if the chunk has
+ *		been modified since it was locked. The IDX_HINT argument is
+ *		the returned index hint from the lock operation and BUF is
+ *		the return value from the lock.
+ *
+ *		The NACCESSED argument should be the number of bytes accessed
+ *		for reading or writing (depending on the value of DIRTY).
+ *		It's only purpose is to provide additional information to the
+ *		preemption policy.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
+		   const H5O_compress_t *comp, hbool_t dirty,
+		   const hssize_t offset[], intn *idx_hint,
+		   uint8 *chunk, size_t naccessed)
+{
+    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
+    H5F_rdcc_ent_t	*ent = NULL;
+    intn		i, found = -1;
+    
+    FUNC_ENTER (H5F_istore_unlock, FAIL);
+
+    /* First look at the hint */
+    if (idx_hint && *idx_hint>=0 && *idx_hint<rdcc->nused) {
+	if (rdcc->slot[*idx_hint].chunk==chunk) found = *idx_hint;
+    }
+
+    /* Then look at all the entries */
+    for (i=0; found<0 && i<rdcc->nused; i++) {
+	if (rdcc->slot[i].chunk==chunk) found = i;
+    }
+
+    if (found<0) {
+	/*
+	 * It's not in the cache, probably because it's too big.  If it's
+	 * dirty then flush it to disk.  In any case, free the chunk.
+	 * Note: we have to copy the layout and compression messages so we
+	 *	 don't discard the `const' qualifier.
+	 */
+	if (dirty) {
+	    H5F_rdcc_ent_t x;
+	    HDmemset (&x, 0, sizeof x);
+	    x.dirty = TRUE;
+	    x.layout = H5O_copy (H5O_LAYOUT, layout);
+	    x.comp = H5O_copy (H5O_COMPRESS, comp);
+	    for (i=0; i<layout->ndims; i++) {
+		x.offset[i] = offset[i];
+	    }
+	    x.chunk = chunk;
+	    H5F_istore_flush_entry (f, &x);
+	    H5O_free (H5O_LAYOUT, x.layout);
+	    H5O_free (H5O_COMPRESS, x.comp);
+	}
+	H5MM_xfree (chunk);
+    } else {
+	/*
+	 * It's in the cache so unlock it.
+	 */
+	ent = rdcc->slot + found;
+	assert (ent->locked);
+	if (dirty) {
+	    ent->dirty = TRUE;
+	    ent->wr_count -= MIN (ent->wr_count, naccessed);
+	} else {
+	    ent->rd_count -= MIN (ent->rd_count, naccessed);
+	}
+	ent->locked = FALSE;
+    }
+    
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_istore_read
  *
  * Purpose:	Reads a multi-dimensional buffer from (part of) an indexed raw
@@ -629,18 +1232,17 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 {
     hssize_t		offset_m[H5O_LAYOUT_NDIMS];
     hsize_t		size_m[H5O_LAYOUT_NDIMS];
-    intn		i, carry;
     hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
     hsize_t		idx_min[H5O_LAYOUT_NDIMS];
     hsize_t		idx_max[H5O_LAYOUT_NDIMS];
     hsize_t		sub_size[H5O_LAYOUT_NDIMS];
     hssize_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
     hssize_t		sub_offset_m[H5O_LAYOUT_NDIMS];
-    size_t		chunk_size;
-    uint8		*chunk=NULL, *compressed=NULL;
-    H5F_istore_ud1_t	udata;
-    herr_t		status;
-    herr_t		ret_value = FAIL;
+    hssize_t		chunk_offset[H5O_LAYOUT_NDIMS];
+    intn		i, carry;
+    size_t		naccessed;		/*bytes accessed in chnk*/
+    uint8		*chunk=NULL;		/*ptr to a chunk buffer	*/
+    intn		idx_hint=0;		/*cache index hint	*/
 
     FUNC_ENTER(H5F_istore_read, FAIL);
 
@@ -672,61 +1274,10 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
     }
 #endif
 
-    /* Determine the chunk size and allocate buffers */
-    for (i=0, chunk_size=1; i<layout->ndims; i++) {
-	chunk_size *= layout->dim[i];
-    }
-    chunk = H5MM_xmalloc(chunk_size);
-    if (comp && H5Z_NONE!=comp->method) {
-	compressed = H5MM_xmalloc (chunk_size);
-    }
-    
     /*
-     * As a special case if the source is aligned on a chunk boundary and is
-     * the same size as a chunk, and the destination is the same size as a
-     * chunk, then instead of reading into a temporary buffer and then into
-     * the destination, we read directly into the destination.
-     */
-    for (i=0; i<layout->ndims; i++) {
-	if (offset_f[i] % layout->dim[i]) break; /*src not aligned*/
-	if (size[i]!=layout->dim[i]) break; /*src not a chunk*/
-	if (size_m[i]!=layout->dim[i]) break; /*dst not a chunk*/
-	udata.key.offset[i] = offset_f[i];
-    }
-    if (i==layout->ndims) {
-	udata.mesg = *layout;
-	H5F_addr_undef (&(udata.addr));
-	status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
-	if (status>=0 && H5F_addr_defined (&(udata.addr))) {
-	    if (compressed && udata.key.nbytes<chunk_size) {
-		if (H5F_block_read (f, &(udata.addr), udata.key.nbytes,
-				    compressed)<0) {
-		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
-				 "unable to read raw storage chunk");
-		}
-		if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
-						compressed, chunk_size, buf)) {
-		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
-				 "unable to uncompress raw storage chunk");
-		}
-	    } else {
-		assert (udata.key.nbytes==chunk_size);
-		if (H5F_block_read (f, &(udata.addr), chunk_size, buf)<0) {
-		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
-				 "unable to read raw storage chunk");
-		}
-	    }
-	} else {
-	    HDmemset (buf, 0, chunk_size);
-	}
-	HGOTO_DONE (SUCCEED);
-    }
-
-    /*
-     * This is the general case.  We set up multi-dimensional counters
-     * (idx_min, idx_max, and idx_cur) and loop through the chunks compressing
-     * or copying each chunk into a temporary buffer, and then copying it to
-     * it's destination.
+     * Set up multi-dimensional counters (idx_min, idx_max, and idx_cur) and
+     * loop through the chunks copying each to its final destination in the
+     * application buffer.
      */
     for (i=0; i<layout->ndims; i++) {
 	idx_min[i] = offset_f[i] / layout->dim[i];
@@ -734,59 +1285,42 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 	idx_cur[i] = idx_min[i];
     }
 
-    /* Initialize non-changing part of udata */
-    udata.mesg = *layout;
-
     /* Loop over all chunks */
     while (1) {
-
-	for (i=0; i<layout->ndims; i++) {
+	for (i=0, naccessed=1; i<layout->ndims; i++) {
 	    /* The location and size of the chunk being accessed */
 	    assert (layout->dim[i] < MAX_HSSIZET);
-	    udata.key.offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
+	    chunk_offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
 
 	    /* The offset and size wrt the chunk */
-	    offset_wrt_chunk[i] = MAX(offset_f[i], udata.key.offset[i]) -
-				  udata.key.offset[i];
+	    offset_wrt_chunk[i] = MAX(offset_f[i], chunk_offset[i]) -
+				  chunk_offset[i];
 	    sub_size[i] = MIN((idx_cur[i]+1)*layout->dim[i],
 			      offset_f[i]+size[i]) -
-			  (udata.key.offset[i] + offset_wrt_chunk[i]);
+			  (chunk_offset[i] + offset_wrt_chunk[i]);
+	    naccessed *= sub_size[i];
 	    
 	    /* Offset into mem buffer */
-	    sub_offset_m[i] = udata.key.offset[i] + offset_wrt_chunk[i] +
+	    sub_offset_m[i] = chunk_offset[i] + offset_wrt_chunk[i] +
 			      offset_m[i] - offset_f[i];
 	}
 
-	/* Read chunk */
-	H5F_addr_undef(&(udata.addr));
-	status = H5B_find(f, H5B_ISTORE, &(layout->addr), &udata);
-	if (status>=0 && H5F_addr_defined(&(udata.addr))) {
-	    if (compressed && udata.key.nbytes<chunk_size) {
-		if (H5F_block_read (f, &(udata.addr), udata.key.nbytes,
-				    compressed)<0) {
-		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
-				 "unable to read raw storage chunk");
-		}
-		if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
-						compressed, chunk_size,
-						chunk)) {
-		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
-				 "unable to uncompress data");
-		}
-	    } else {
-		assert (udata.key.nbytes == chunk_size);
-		if (H5F_block_read(f, &(udata.addr), chunk_size, chunk) < 0) {
-		    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
-				"unable to read raw storage chunk");
-		}
-	    }
-	} else {
-	    HDmemset(chunk, 0, chunk_size);
+	/*
+	 * Lock the chunk, transfer data to the application, then unlock the
+	 * chunk.
+	 */
+	if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
+					  FALSE, &idx_hint))) {
+	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+			   "unable to read raw data chunk");
 	}
-	
-	/* Transfer data from the chunk buffer to the application */
 	H5V_hyper_copy(layout->ndims, sub_size, size_m, sub_offset_m,
-		       (void *)buf, layout->dim, offset_wrt_chunk, chunk);
+		       (void*)buf, layout->dim, offset_wrt_chunk, chunk);
+	if (H5F_istore_unlock (f, layout, comp, FALSE, chunk_offset, &idx_hint,
+			       chunk, naccessed)<0) {
+	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+			   "unable to unlock raw data chunk");
+	}
 
 	/* Increment indices */
 	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
@@ -795,12 +1329,7 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 	}
 	if (carry) break;
     }
-    ret_value = SUCCEED;
-
-  done:
-    H5MM_xfree(chunk);
-    H5MM_xfree (compressed);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -833,12 +1362,12 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
     hsize_t		idx_min[H5O_LAYOUT_NDIMS];
     hsize_t		idx_max[H5O_LAYOUT_NDIMS];
     hsize_t		sub_size[H5O_LAYOUT_NDIMS];
+    hssize_t		chunk_offset[H5O_LAYOUT_NDIMS];
     hssize_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
     hssize_t		sub_offset_m[H5O_LAYOUT_NDIMS];
-    hsize_t		chunk_size, nbytes;
-    uint8		*chunk=NULL, *compressed=NULL, *outbuf;
-    H5F_istore_ud1_t	udata;
-    herr_t		ret_value = FAIL;
+    uint8		*chunk=NULL;
+    intn		idx_hint=0;
+    size_t		chunk_size, naccessed;
     
     FUNC_ENTER(H5F_istore_write, FAIL);
 
@@ -855,9 +1384,10 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
      * For now the source must not be a hyperslab.  It must be an entire
      * memory buffer.
      */
-    for (i=0; i<layout->ndims; i++) {
+    for (i=0, chunk_size=1; i<layout->ndims; i++) {
 	offset_m[i] = 0;
 	size_m[i] = size[i];
+	chunk_size *= layout->dim[i];
     }
 
 #ifndef NDEBUG
@@ -871,10 +1401,9 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 #endif
 
     /*
-     * This is the general case.  We set up multi-dimensional counters
-     * (idx_min, idx_max, and idx_cur) and loop through the chunks copying
-     * each chunk into a temporary buffer, compressing or decompressing, and
-     * then copying it to it's destination.
+     * Set up multi-dimensional counters (idx_min, idx_max, and idx_cur) and
+     * loop through the chunks copying each chunk from the application to the
+     * chunk cache.
      */
     for (i=0; i<layout->ndims; i++) {
 	idx_min[i] = offset_f[i] / layout->dim[i];
@@ -882,102 +1411,46 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 	idx_cur[i] = idx_min[i];
     }
 
-    /* Allocate buffers */
-    for (i=0, chunk_size=1; i<layout->ndims; i++) {
-	chunk_size *= layout->dim[i];
-    }
-    chunk = H5MM_xmalloc(chunk_size);
-    if (comp && H5Z_NONE!=comp->method) {
-	compressed = H5MM_xmalloc (chunk_size);
-    }
-
-    /* Initialize non-changing part of udata */
-    udata.mesg = *layout;
 
     /* Loop over all chunks */
     while (1) {
-
-	for (i=0; i<layout->ndims; i++) {
+	
+	for (i=0, naccessed=1; i<layout->ndims; i++) {
 	    /* The location and size of the chunk being accessed */
 	    assert (layout->dim[i] < MAX_HSSIZET);
-	    udata.key.offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
+	    chunk_offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
 
 	    /* The offset and size wrt the chunk */
-	    offset_wrt_chunk[i] = MAX(offset_f[i], udata.key.offset[i]) -
-				  udata.key.offset[i];
+	    offset_wrt_chunk[i] = MAX(offset_f[i], chunk_offset[i]) -
+				  chunk_offset[i];
 	    sub_size[i] = MIN((idx_cur[i]+1)*layout->dim[i],
 			      offset_f[i]+size[i]) -
-			  (udata.key.offset[i] + offset_wrt_chunk[i]);
+			  (chunk_offset[i] + offset_wrt_chunk[i]);
+	    naccessed *= sub_size[i];
 	    
 	    /* Offset into mem buffer */
-	    sub_offset_m[i] = udata.key.offset[i] + offset_wrt_chunk[i] +
+	    sub_offset_m[i] = chunk_offset[i] + offset_wrt_chunk[i] +
 			      offset_m[i] - offset_f[i];
 	}
-	
-	/*
-	 * If we are writing a partial chunk then load the chunk from disk
-	 * and uncompress it if it exists.
-	 */
-	if (!H5V_vector_zerop_s(layout->ndims, offset_wrt_chunk) ||
-	    !H5V_vector_eq_u(layout->ndims, sub_size, layout->dim)) {
-	    if (H5B_find (f, H5B_ISTORE, &(layout->addr), &udata)>=0 &&
-		H5F_addr_defined (&(udata.addr))) {
 
-		if (compressed && udata.key.nbytes<chunk_size) {
-		    if (H5F_block_read(f, &(udata.addr), udata.key.nbytes,
-				       compressed)<0) {
-			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
-				    "unable to read raw storage chunk");
-		    }
-		    if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
-						    compressed, chunk_size,
-						    chunk)) {
-			HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
-				     "unable to uncompress data");
-		    }
-		} else {
-		    assert (chunk_size==udata.key.nbytes);
-		    if (H5F_block_read(f, &(udata.addr), udata.key.nbytes,
-				       chunk)<0) {
-			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
-				    "unable to read raw storage chunk");
-		    }
-		}
-	    } else {
-		HDmemset(chunk, 0, chunk_size);
-	    }
+	/*
+	 * Lock the chunk, copy from application to chunk, then unlock the
+	 * chunk.
+	 */
+	if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
+					  naccessed==chunk_size, &idx_hint))) {
+	    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			   "unable to read raw data chunk");
 	}
-	
-	/* Transfer data to the chunk */
 	H5V_hyper_copy(layout->ndims, sub_size,
 		       layout->dim, offset_wrt_chunk, chunk,
 		       size_m, sub_offset_m, buf);
-
-	/* Compress the chunk */
-	if (compressed &&
-	    (nbytes=H5Z_compress (comp, chunk_size, chunk, compressed)) &&
-	    nbytes<chunk_size) {
-	    outbuf = compressed;
-	} else {
-	    outbuf = chunk;
-	    nbytes = chunk_size;
+	if (H5F_istore_unlock (f, layout, comp, TRUE, chunk_offset, &idx_hint,
+			       chunk, naccessed)<0) {
+	    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			   "uanble to unlock raw data chunk");
 	}
 	
-	/*
-	 * Create the chunk it if it doesn't exist, or reallocate the chunk
-	 * if its size changed.  Then write the data into the file.
-	 */
-	H5F_addr_undef(&(udata.addr));
-	udata.key.nbytes = nbytes;
-	if (H5B_insert(f, H5B_ISTORE, &(layout->addr), &udata)<0) {
-	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-			 "unable to allocate chunk");
-	}
-	if (H5F_block_write(f, &(udata.addr), nbytes, outbuf) < 0) {
-	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-			"unable to write raw storage chunk");
-	}
-
 	/* Increment indices */
 	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
 	    if (++idx_cur[i]>=idx_max[i]) idx_cur[i] = idx_min[i];
@@ -985,12 +1458,8 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 	}
 	if (carry) break;
     }
-    ret_value = SUCCEED;
 
-  done:
-    H5MM_xfree(chunk);
-    H5MM_xfree (compressed);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -1042,6 +1511,61 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
     }
     
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_stats
+ *
+ * Purpose:	Print raw data cache statistics to the stderr stream.  If
+ *		HEADERS is non-zero then print table column headers,
+ *		otherwise assume that the H5AC layer has already printed them.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_stats (H5F_t *f, hbool_t headers)
+{
+    H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
+    double	miss_rate;
+    char	ascii[32];
+    
+    FUNC_ENTER (H5F_istore_stats, FAIL);
+
+    if (headers) {
+	fprintf(stderr, "H5F: raw data cache statistics for file %s\n",
+		f->name);
+	fprintf(stderr, "   %-18s %8s %8s %8s %8s+%-8s\n",
+		"Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
+	fprintf(stderr, "   %-18s %8s %8s %8s %8s-%-8s\n",
+		"-----", "----", "------", "--------", "-----", "-------");
+    }
+
+    if (rdcc->nhits>0 || rdcc->nmisses>0) {
+	miss_rate = 100.0 * rdcc->nmisses /
+			(rdcc->nhits + rdcc->nmisses);
+    } else {
+	miss_rate = 0.0;
+    }
+    if (miss_rate > 100) {
+	sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
+    } else {
+	sprintf(ascii, "%7.2f%%", miss_rate);
+    }
+    
+    fprintf(stderr, "   %-18s %8u %8u %7s %8d+%-9ld\n",
+	    "raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
+	    rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
+    FUNC_LEAVE (SUCCEED);
 }
 
 

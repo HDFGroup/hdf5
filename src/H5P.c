@@ -59,7 +59,7 @@ H5P_init_interface(void)
     FUNC_ENTER(H5P_init_interface, FAIL);
 
     /*
-     * Make sure the file creation and file access default templates are
+     * Make sure the file creation and file access default property lists are
      * initialized since this might be done at run-time instead of compile
      * time.
      */
@@ -71,9 +71,9 @@ H5P_init_interface(void)
     assert(H5P_NCLASSES <= H5_TEMPLATE_MAX - H5_TEMPLATE_0);
 
     /*
-     * Initialize the mappings between template classes and atom groups. We
-     * keep the two separate because template classes are publicly visible but
-     * atom groups aren't.
+     * Initialize the mappings between property list classes and atom
+     * groups. We keep the two separate because property list classes are
+     * publicly visible but atom groups aren't.
      */
     for (i = 0; i < H5P_NCLASSES; i++) {
 	status = H5I_init_group((H5I_group_t)(H5_TEMPLATE_0 +i),
@@ -127,20 +127,23 @@ H5P_term_interface(void)
  NAME
     H5Pcreate
  PURPOSE
-    Returns a copy of the default template for some class of templates.
+    Returns a copy of the default property list for some class of property
+ *  lists.
  USAGE
     herr_t H5Pcreate (type)
-	H5P_class_t type;	IN: Template class whose default is desired.
+	H5P_class_t type;	IN: Property list class whose default is
+ *				    desired.
  RETURNS
-    Template ID or FAIL
+    Property list ID or FAIL
  
  ERRORS
-    ARGS      BADVALUE	    Unknown template class. 
-    ATOM      CANTINIT	    Can't register template. 
+    ARGS      BADVALUE	    Unknown property list class. 
+    ATOM      CANTINIT	    Can't register property list. 
     INTERNAL  UNSUPPORTED   Not implemented yet. 
 
  DESCRIPTION
-    Returns a copy of the default template for some class of templates.
+    Returns a copy of the default property list for some class of property
+ *  lists.
 --------------------------------------------------------------------------*/
 hid_t
 H5Pcreate(H5P_class_t type)
@@ -150,7 +153,7 @@ H5Pcreate(H5P_class_t type)
 
     FUNC_ENTER(H5Pcreate, FAIL);
 
-    /* Allocate a new template and initialize it with default values */
+    /* Allocate a new property list and initialize it with default values */
     switch (type) {
     case H5P_FILE_CREATE:
 	tmpl = H5MM_xmalloc(sizeof(H5F_create_t));
@@ -174,13 +177,13 @@ H5Pcreate(H5P_class_t type)
 
     default:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "unknown template class");
+		      "unknown property list class");
     }
 
-    /* Atomize the new template */
+    /* Atomize the new property list */
     if ((ret_value = H5P_create(type, tmpl)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
-		      "can't register template");
+		      "unable to register property list");
     }
     FUNC_LEAVE(ret_value);
 }
@@ -188,11 +191,12 @@ H5Pcreate(H5P_class_t type)
 /*-------------------------------------------------------------------------
  * Function:	H5P_create
  *
- * Purpose:	Given a pointer to some template struct, atomize the template
- *		and return its ID. The template memory is not copied, so the
- *		caller should not free it; it will be freed by H5P_release().
+ * Purpose:	Given a pointer to some property list struct, atomize the
+ *		property list and return its ID. The property list memory is
+ *		not copied, so the caller should not free it; it will be
+ *		freed by H5P_release().
  *
- * Return:	Success:	A new template ID.
+ * Return:	Success:	A new property list ID.
  *
  *		Failure:	FAIL
  *
@@ -214,10 +218,10 @@ H5P_create(H5P_class_t type, void *tmpl)
     assert(type >= 0 && type < H5P_NCLASSES);
     assert(tmpl);
 
-    /* Atomize the new template */
+    /* Atomize the new property list */
     if ((ret_value=H5I_register((H5I_group_t)(H5_TEMPLATE_0+type), tmpl)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
-		      "can't register template");
+		      "unable to register property list");
     }
     
     FUNC_LEAVE(ret_value);
@@ -227,14 +231,14 @@ H5P_create(H5P_class_t type, void *tmpl)
  NAME
     H5Pclose
  PURPOSE
-    Release access to a template object.
+    Release access to a property list object.
  USAGE
     herr_t H5Pclose(oid)
-	hid_t oid;	 IN: Template object to release access to
+	hid_t oid;	 IN: property list object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
-	This function releases access to a template object
+	This function releases access to a property list object
 --------------------------------------------------------------------------*/
 herr_t
 H5Pclose(hid_t tid)
@@ -265,8 +269,8 @@ H5Pclose(hid_t tid)
 /*-------------------------------------------------------------------------
  * Function:	H5P_close
  *
- * Purpose:	Closes a template and frees the memory associated with the
- *		template.
+ * Purpose:	Closes a property list and frees the memory associated with
+ *		the property list.
  *
  * Return:	Success:	SUCCEED
  *
@@ -290,7 +294,7 @@ H5P_close (H5P_class_t type, void *tmpl)
     /* Check args */
     if (!tmpl) HRETURN (SUCCEED);
 
-    /* Some templates may need to do special things */
+    /* Some property lists may need to do special things */
     switch (type) {
     case H5P_FILE_ACCESS:
 	switch (fa_list->driver) {
@@ -340,7 +344,7 @@ H5P_close (H5P_class_t type, void *tmpl)
 		       "unknown property list class");
     }
 
-    /* Free the template struct and return */
+    /* Free the property list struct and return */
     H5MM_xfree(tmpl);
     FUNC_LEAVE(SUCCEED);
 }
@@ -349,9 +353,9 @@ H5P_close (H5P_class_t type, void *tmpl)
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_class
  *
- * Purpose:	Returns the class identifier for a template.
+ * Purpose:	Returns the class identifier for a property list.
  *
- * Return:	Success:	A template class
+ * Return:	Success:	A property list class
  *
  *		Failure:	H5P_NO_CLASS (-1)
  *
@@ -375,7 +379,8 @@ H5Pget_class(hid_t tid)
 	group >= H5_TEMPLATE_MAX ||
 #endif
 	group < H5_TEMPLATE_0) {
-	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS, "not a template");
+	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS,
+		      "not a property list");
     }
     ret_value = (H5P_class_t)(group - H5_TEMPLATE_0);
     FUNC_LEAVE(ret_value);
@@ -419,7 +424,7 @@ H5Pget_version(hid_t tid, int *boot/*out*/, int *freelist/*out*/,
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     /* Get values */
     if (boot) *boot = tmpl->bootblock_ver;
@@ -433,7 +438,8 @@ H5Pget_version(hid_t tid, int *boot/*out*/, int *freelist/*out*/,
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_userblock
  *
- * Purpose:	Sets the userblock size field of a file creation template.
+ * Purpose:	Sets the userblock size field of a file creation property
+ *		list.
  *
  * Return:	Success:	SUCCEED
  *
@@ -458,7 +464,7 @@ H5Pset_userblock(hid_t tid, hsize_t size)
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     for (i=8; i<8*sizeof(hsize_t); i++) {
 	hsize_t p2 = 8==i ? 0 : ((hsize_t)1<<i);
@@ -477,7 +483,8 @@ H5Pset_userblock(hid_t tid, hsize_t size)
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_userblock
  *
- * Purpose:	Queries the size of a user block in a file creation template.
+ * Purpose:	Queries the size of a user block in a file creation property
+ *		list.
  *
  * Return:	Success:	SUCCEED, size returned through SIZE argument.
  *
@@ -501,7 +508,7 @@ H5Pget_userblock(hid_t tid, hsize_t *size)
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     /* Get value */
     if (size) *size = tmpl->userblock_size;
@@ -512,9 +519,9 @@ H5Pget_userblock(hid_t tid, hsize_t *size)
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_sizes
  *
- * Purpose:	Sets file size-of addresses and sizes.	TEMPLATE
- *		should be a file creation template.  A value of zero causes
- *		the property to not change.
+ * Purpose:	Sets file size-of addresses and sizes.	TID should be a file
+ *		creation property list.  A value of zero causes the property
+ *		to not change.
  *
  * Return:	Success:	SUCCEED
  *
@@ -538,7 +545,7 @@ H5Pset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     if (sizeof_addr) {
 	if (sizeof_addr != 2 && sizeof_addr != 4 &&
@@ -567,8 +574,8 @@ H5Pset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
  * Function:	H5Pget_sizes
  *
  * Purpose:	Returns the size of address and size quantities stored in a
- *		file according to a file creation template.  Either (or even
- *		both) SIZEOF_ADDR and SIZEOF_SIZE may be null pointers.
+ *		file according to a file creation property list.  Either (or
+ *		even both) SIZEOF_ADDR and SIZEOF_SIZE may be null pointers.
  *
  * Return:	Success:	SUCCEED, sizes returned through arguments.
  *
@@ -593,7 +600,7 @@ H5Pget_sizes(hid_t tid,
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     /* Get values */
     if (sizeof_addr)
@@ -644,7 +651,7 @@ H5Pset_sym_k(hid_t tid, int ik, int lk)
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     /* Set values */
     if (ik > 0) {
@@ -686,7 +693,7 @@ H5Pget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     /* Get values */
     if (ik)
@@ -726,7 +733,7 @@ H5Pset_istore_k(hid_t tid, int ik)
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     if (ik <= 0) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -767,7 +774,7 @@ H5Pget_istore_k(hid_t tid, int *ik /*out */ )
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation template");
+		      "not a file creation property list");
     }
     /* Get value */
     if (ik)
@@ -803,7 +810,7 @@ H5Pset_layout(hid_t tid, H5D_layout_t layout)
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation template");
+		      "not a dataset creation property list");
     }
     if (layout < 0 || layout >= H5D_NLAYOUTS) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
@@ -818,7 +825,7 @@ H5Pset_layout(hid_t tid, H5D_layout_t layout)
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_layout
  *
- * Purpose:	Retrieves layout type of a dataset creation template.
+ * Purpose:	Retrieves layout type of a dataset creation property list.
  *
  * Return:	Success:	The layout type
  *
@@ -842,7 +849,7 @@ H5Pget_layout(hid_t tid)
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
-		      "not a dataset creation template");
+		      "not a dataset creation property list");
     }
     FUNC_LEAVE(tmpl->layout);
 }
@@ -880,7 +887,7 @@ H5Pset_chunk(hid_t tid, int ndims, const hsize_t dim[])
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation template");
+		      "not a dataset creation property list");
     }
     if (ndims <= 0) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
@@ -1200,7 +1207,7 @@ H5Pset_stdio (hid_t tid)
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
 
     /* Set driver */
@@ -1280,7 +1287,7 @@ H5Pset_sec2 (hid_t tid)
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
 
     /* Set driver */
@@ -1364,7 +1371,7 @@ H5Pset_core (hid_t tid, size_t increment)
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
     if (increment<1) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1458,19 +1465,19 @@ H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
     if (H5P_DEFAULT!=meta_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(meta_tid) ||
 	 NULL == (meta_tmpl = H5I_object(meta_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
     if (H5P_DEFAULT!=raw_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(raw_tid) ||
 	 NULL == (raw_tmpl = H5I_object(raw_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
 
     /* Set driver */
@@ -1603,7 +1610,7 @@ H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
     if (memb_size && memb_size<1024) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
@@ -1613,7 +1620,7 @@ H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
 	(H5P_FILE_ACCESS != H5Pget_class(memb_tid) ||
 	 NULL == (tmpl = H5I_object(memb_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
 
     /* Set driver */
@@ -1677,6 +1684,106 @@ H5Pget_family (hid_t tid, hsize_t *memb_size/*out*/, hid_t *memb_tid/*out*/)
 					  tmpl->u.fam.memb_access));
     }
 	
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_cache
+ *
+ * Purpose:	Set the number of objects in the meta data cache and the
+ *		total number of bytes in the raw data chunk cache.
+ *
+ * 		The RDCC_W0 value should be between 0 and 1 inclusive and
+ *		indicates how much chunks that have been fully read are
+ *		favored for preemption.  A value of zero means fully read
+ *		chunks are treated no differently than other chunks (the
+ *		preemption is strictly LRU) while a value of one means fully
+ *		read chunks are always preempted before other chunks.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, May 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_cache (hid_t tid, int mdc_nelmts, size_t rdcc_nbytes,
+	      double rdcc_w0)
+{
+    H5F_access_t	*fapl = NULL;
+    
+    FUNC_ENTER (H5Pset_cache, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS!=H5Pget_class (tid) ||
+	NULL==(fapl=H5I_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (mdc_nelmts<0) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "meta data cache size must be non-negative");
+    }
+    if (rdcc_w0<0.0 || rdcc_w0>1.0) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "raw data cache w0 value must be between 0.0 and 1.0 "
+		       "inclusive");
+    }
+
+    /* Set sizes */
+    fapl->mdc_nelmts = mdc_nelmts;
+    fapl->rdcc_nbytes = rdcc_nbytes;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_cache
+ *
+ * Purpose:	Retrieves the maximum possible number of elements in the meta
+ *		data cache and the maximum possible number of bytes in the
+ *		raw data chunk cache.  Any (or all) arguments may be null
+ *		pointers in which case the corresponding datum is not
+ *		returned.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, May 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_cache (hid_t tid, int *mdc_nelmts, size_t *rdcc_nbytes,
+	      double *rdcc_w0)
+{
+    H5F_access_t	*fapl = NULL;
+    
+    FUNC_ENTER (H5Pget_cache, FAIL);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS!=H5Pget_class (tid) ||
+	NULL==(fapl=H5I_object (tid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+
+    /* Get sizes */
+    if (mdc_nelmts) *mdc_nelmts = fapl->mdc_nelmts;
+    if (rdcc_nbytes) *rdcc_nbytes = fapl->rdcc_nbytes;
+    if (rdcc_w0) *rdcc_w0 = fapl->rdcc_w0;
+
     FUNC_LEAVE (SUCCEED);
 }
 
@@ -1889,7 +1996,7 @@ H5Pset_compression (hid_t plist_id, H5Z_method_t method, unsigned int flags,
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset creation property list");
     }
-    if (method<0 || method>H5Z_MAXVAL) {
+    if (method<0 || method>H5Z_USERDEF_MAX) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "invalid compression method");
     }
@@ -2054,27 +2161,28 @@ H5Pget_deflate (hid_t plist_id)
  * Signature:	herr_t H5Pset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info)
  *
  * Purpose:	Store the access mode for MPIO call and the user supplied
- *		communicator and info in the access template which can then
- *		be used to open file.  This function is available only in the
- *		parallel HDF5 library and is not a collective function.
+ *		communicator and info in the access property list which can
+ *		then be used to open file.  This function is available only
+ *		in the parallel HDF5 library and is not a collective
+ *		function.
  *
  * Parameters:
  *		hid_t tid 
- *		    ID of template to modify 
+ *		    ID of property list to modify 
  *		MPI_Comm comm 
  *		    MPI communicator to be used for file open as defined in
  *		    MPI_FILE_OPEN of MPI-2.  This function  does not make a
  *		    duplicated communicator. Any modification to comm after
  *		    this function call returns may have undetermined effect
- *		    to the access template.  Users should call this function
- *		    again to setup the template.
+ *		    to the access property list.  Users should call this
+ *		    function again to setup the property list.
  *		MPI_Info info 
  *		    MPI info object to be used for file open as defined in
  *		    MPI_FILE_OPEN of MPI-2.  This function  does not make a
  *		    duplicated info. Any modification to info after
  *		    this function call returns may have undetermined effect
- *		    to the access template.  Users should call this function
- *		    again to setup the template.
+ *		    to the access property list.  Users should call this
+ *		    function again to setup the property list.
  *	     
  * Return:	Success:	SUCCEED
  *
@@ -2086,11 +2194,11 @@ H5Pget_deflate (hid_t plist_id)
  * Modifications:
  *
  *	Robb Matzke, 18 Feb 1998
- *	Check all arguments before the template is updated so we don't leave
- *	the template in a bad state if something goes wrong.  Also, the
- *	template data type changed to allow more generality so all the
- *	mpi-related stuff is in the `u.mpi' member.  The `access_mode' will
- *	contain only mpi-related flags defined in H5Fpublic.h.
+ *	Check all arguments before the property list is updated so we don't
+ *	leave the property list in a bad state if something goes wrong.  Also,
+ *	the property list data type changed to allow more generality so all
+ *	the mpi-related stuff is in the `u.mpi' member.  The `access_mode'
+ *	will contain only mpi-related flags defined in H5Fpublic.h.
  *
  *	Albert Cheng, Apr 16, 1998
  *	Removed the access_mode argument.  The access_mode is changed
@@ -2112,7 +2220,7 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access template");
+		      "not a file access property list");
     }
     
 #ifdef LATER
@@ -2286,24 +2394,24 @@ H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode)
  NAME
     H5Pcopy
  PURPOSE
-    Copy a template
+    Copy a property list
  USAGE
     hid_t H5P_copy(tid)
-	hid_t tid;	  IN: Template object to copy
+	hid_t tid;	  IN: property list object to copy
  RETURNS
-    Returns template ID (atom) on success, FAIL on failure
+    Returns property list ID (atom) on success, FAIL on failure
 
  ERRORS
-    ARGS      BADRANGE	    Unknown template class. 
-    ATOM      BADATOM	    Can't unatomize template. 
-    ATOM      CANTREGISTER  Register the atom for the new template. 
+    ARGS      BADRANGE	    Unknown property list class. 
+    ATOM      BADATOM	    Can't unatomize property list. 
+    ATOM      CANTREGISTER  Register the atom for the new property list. 
     INTERNAL  UNSUPPORTED   Dataset transfer properties are not implemented
 			    yet. 
     INTERNAL  UNSUPPORTED   File access properties are not implemented yet. 
 
  DESCRIPTION
-    This function creates a new copy of a template with all the same parameter
-    settings.
+ * This function creates a new copy of a property list with all the same
+ * parameter settings.
 --------------------------------------------------------------------------*/
 hid_t
 H5Pcopy(hid_t tid)
@@ -2321,19 +2429,19 @@ H5Pcopy(hid_t tid)
 	(type = H5Pget_class(tid)) < 0 ||
 	(group = H5I_group(tid)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
-		      "can't unatomize template");
+		      "unable to unatomize property list");
     }
 
     /* Copy it */
     if (NULL==(new_tmpl=H5P_copy (type, tmpl))) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		       "unable to copy template");
+		       "unable to copy property list");
     }
 
-    /* Register the atom for the new template */
+    /* Register the atom for the new property list */
     if ((ret_value = H5I_register(group, new_tmpl)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		      "unable to atomize template pointer");
+		      "unable to atomize property list pointer");
     }
     FUNC_LEAVE(ret_value);
 }
@@ -2341,10 +2449,10 @@ H5Pcopy(hid_t tid)
 /*-------------------------------------------------------------------------
  * Function:	H5P_copy
  *
- * Purpose:	Creates a new template and initializes it with some other
- *		template.
+ * Purpose:	Creates a new property list and initializes it with some
+ *		other property list.
  *
- * Return:	Success:	Ptr to new template
+ * Return:	Success:	Ptr to new property list
  *
  *		Failure:	NULL
  *
@@ -2368,7 +2476,7 @@ H5P_copy (H5P_class_t type, const void *src)
     
     FUNC_ENTER (H5P_copy, NULL);
     
-    /* How big is the template */
+    /* How big is the property list */
     switch (type) {
     case H5P_FILE_CREATE:
 	size = sizeof(H5F_create_t);
@@ -2388,10 +2496,10 @@ H5P_copy (H5P_class_t type, const void *src)
 
     default:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
-		      "unknown template class");
+		      "unknown property list class");
     }
 
-    /* Create the new template */
+    /* Create the new property list */
     dst = H5MM_xmalloc(size);
     HDmemcpy(dst, src, size);
 
@@ -2446,7 +2554,7 @@ H5P_copy (H5P_class_t type, const void *src)
 
     default:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
-		      "unknown template class");
+		      "unknown property list class");
     }
 
     FUNC_LEAVE (dst);

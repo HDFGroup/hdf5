@@ -54,7 +54,8 @@ main (void)
     assert (mem_space>=0);
 
     /* Create the file */
-    file = H5Fcreate ("extend.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate ("extend.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 
     /* Create the dataset which is originally NX by NY */

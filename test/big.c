@@ -68,7 +68,7 @@ writer (int wrt_n)
      */
     plist = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT);
-    file = H5Fcreate (FNAME, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+    file = H5Fcreate (FNAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT, plist);
     H5Pclose (plist);
 
     /* Create simple data spaces according to the size specified above. */
@@ -133,7 +133,7 @@ reader (const char *script_name)
     /* Open HDF5 file */
     plist = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT);
-    file = H5Fopen (FNAME, H5F_ACC_RDONLY, plist);
+    file = H5Fopen (FNAME, H5F_ACC_RDONLY|H5F_ACC_DEBUG, plist);
     H5Pclose (plist);
 
     /* Open the dataset */

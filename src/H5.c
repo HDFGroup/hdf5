@@ -535,7 +535,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    }
 
 	    /* Type modifier */
-	    if (strchr ("Hhlq", *s)) {
+	    if (strchr ("ZHhlq", *s)) {
 		switch (*s) {
 		case 'H':
 		    if (sizeof(hsize_t)==sizeof(long)) {
@@ -544,6 +544,16 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 			strcpy (modifier, PRINTF_LL_WIDTH);
 		    }
 		    break;
+		case 'Z':
+		    if (sizeof(size_t)==sizeof(long)) {
+			strcpy (modifier, "l");
+		    } else if (sizeof(size_t)==sizeof(long long)) {
+			strcpy (modifier, PRINTF_LL_WIDTH);
+		    } else if (sizeof(size_t)==sizeof(int)) {
+			modifier[0] = '\0';
+		    }
+		    break;
+		    
 		default:
 		    modifier[0] = *s;
 		    modifier[1] = '\0';

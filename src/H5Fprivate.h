@@ -238,6 +238,9 @@ typedef struct H5F_create_t {
  * File-access property list.
  */
 typedef struct H5F_access_t {
+    intn	mdc_nelmts;	/* Size of meta data cache (nelmts)	*/
+    size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
+    double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     H5F_driver_t driver;	/* Low level file driver		*/
     union {
 
@@ -386,6 +389,18 @@ extern const H5F_low_class_t H5F_LOW_SPLIT_g[];	/* Split meta/raw data	*/
 extern const H5F_low_class_t H5F_LOW_MPIO_g[];	/* MPI-IO		*/
 #endif
 
+/* The raw data chunk cache */
+typedef struct H5F_rdcc_t {
+    uintn		ninits;	/* Number of chunk creations		*/
+    uintn		nhits;	/* Number of cache hits			*/
+    uintn		nmisses;/* Number of cache misses		*/
+    uintn		nflushes;/* Number of cache flushes		*/
+    size_t		nbytes;	/* Current cached raw data in bytes	*/
+    intn		nslots;	/* Number of chunk slots allocated	*/
+    intn		nused;	/* Number of chunk slots in use		*/
+    struct H5F_rdcc_ent_t *slot; /* Chunk slots, each points to a chunk	*/
+} H5F_rdcc_t;
+
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen().
@@ -406,6 +421,7 @@ typedef struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     intn	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
+    H5F_rdcc_t	rdcc;		/* Raw data chunk cache			*/
 } H5F_file_t;
 
 /*
@@ -494,6 +510,10 @@ herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 		      const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on indexed storage */
+herr_t H5F_istore_init (H5F_t *f);
+herr_t H5F_istore_flush (H5F_t *f);
+herr_t H5F_istore_dest (H5F_t *f);
+herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
 herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_istore_read(H5F_t *f, const struct H5O_layout_t *layout,
 		       const struct H5O_compress_t *comp,

@@ -131,7 +131,8 @@ test_1 (void)
      * debugging to be emitted before we start playing games with what the
      * output looks like.
      */
-    file = H5Fcreate ("extern_1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate ("extern_1.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
     grp = H5Gcreate (file, "emit-diagnostics", 8);
     H5Gclose (grp);
@@ -520,7 +521,8 @@ test_2 (void)
      * debugging to be emitted before we start playing games with what the
      * output looks like.
      */
-    file = H5Fcreate ("extern_2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate ("extern_2.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
     grp = H5Gcreate (file, "emit-diagnostics", 8);
     H5Gclose (grp);
@@ -658,7 +660,8 @@ test_3 (void)
     /*
      * Create another file
      */
-    file = H5Fcreate ("extern_3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate ("extern_3.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 
     /* Create the external file list */

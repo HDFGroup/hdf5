@@ -13,24 +13,25 @@
  * 15 are defined by the library.  Methods 16-255 are user-defined.
  */
 typedef int H5Z_method_t;
-#define H5Z_NONE	0	/*no compression, must be zero	     */
-#define H5Z_DEFLATE	1	/*deflation like gzip		     */
-#define H5Z_RES_2	2	/*reserved for internal use	     */
-#define H5Z_RES_3	3	/*reserved for internal use	     */
-#define H5Z_RES_4	4	/*reserved for internal use	     */
-#define H5Z_RES_5	5	/*reserved for internal use	     */
-#define H5Z_RES_6	6	/*reserved for internal use	     */
-#define H5Z_RES_7	7	/*reserved for internal use	     */
-#define H5Z_RES_8	8	/*reserved for internal use	     */
-#define H5Z_RES_9	9	/*reserved for internal use	     */
-#define H5Z_RES_10	10	/*reserved for internal use	     */
-#define H5Z_RES_11	11	/*reserved for internal use	     */
-#define H5Z_RES_12	12	/*reserved for internal use	     */
-#define H5Z_RES_13	13	/*reserved for internal use	     */
-#define H5Z_RES_14	14	/*reserved for internal use	     */
-#define H5Z_RES_15	15	/*reserved for internal use	     */
+#define H5Z_NONE	0	/*no compression, must be zero	    	*/
+#define H5Z_DEFLATE	1	/*deflation like gzip		     	*/
+#define H5Z_RES_2	2	/*reserved for internal use	     	*/
+#define H5Z_RES_3	3	/*reserved for internal use	     	*/
+#define H5Z_RES_4	4	/*reserved for internal use	     	*/
+#define H5Z_RES_5	5	/*reserved for internal use	     	*/
+#define H5Z_RES_6	6	/*reserved for internal use	     	*/
+#define H5Z_RES_7	7	/*reserved for internal use	     	*/
+#define H5Z_RES_8	8	/*reserved for internal use	     	*/
+#define H5Z_RES_9	9	/*reserved for internal use	     	*/
+#define H5Z_RES_10	10	/*reserved for internal use	     	*/
+#define H5Z_RES_11	11	/*reserved for internal use	     	*/
+#define H5Z_RES_12	12	/*reserved for internal use	     	*/
+#define H5Z_RES_13	13	/*reserved for internal use	     	*/
+#define H5Z_RES_14	14	/*reserved for internal use	     	*/
+#define H5Z_RES_15	15	/*reserved for internal use	     	*/
 /* user-defined 16-255 */
-#define H5Z_MAXVAL	255	/*maximum compression method ID	     */
+#define H5Z_USERDEF_MIN	16	/*first user-defined method		*/
+#define H5Z_USERDEF_MAX	255	/*last user-defined method		*/
 
 /*
  * A compression function takes some configuration data which comes from the

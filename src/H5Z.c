@@ -50,7 +50,7 @@ typedef struct H5Z_class_t {
     } uncomp;
 #endif
 } H5Z_class_t;
-static H5Z_class_t	H5Z_g[H5Z_MAXVAL+1];
+static H5Z_class_t	H5Z_g[H5Z_USERDEF_MAX+1];
 
 /* Compression and uncompression methods */
 static size_t H5Z_zlib_c (unsigned int flags, size_t __unused__ cd_size,
@@ -114,21 +114,21 @@ H5Z_term_interface (void)
     int		i, nprint=0;
     char	name[16];
 
-    for (i=0; i<=H5Z_MAXVAL; i++) {
+    for (i=0; i<=H5Z_USERDEF_MAX; i++) {
 	if (H5Z_g[i].comp.nbytes || H5Z_g[i].uncomp.nbytes) {
 	    if (0==nprint++) {
 		HDfprintf (stderr, "H5Z: compression statistics accumulated "
 			   "over life of library:\n");
-		HDfprintf (stderr, "   %-10s   %8s %8s %8s %8s %8s %8s %9s\n",
+		HDfprintf (stderr, "   %-10s   %10s %7s %7s %8s %8s %8s %9s\n",
 			   "Method", "Total", "Overrun", "Errors", "User",
 			   "System", "Elapsed", "Bandwidth");
-		HDfprintf (stderr, "   %-10s   %8s %8s %8s %8s %8s %8s %9s\n",
+		HDfprintf (stderr, "   %-10s   %10s %7s %7s %8s %8s %8s %9s\n",
 			   "------", "-----", "-------", "------", "----",
 			   "------", "-------", "---------");
 	    }
 	    sprintf (name, "%s-c", H5Z_g[i].name);
 	    HDfprintf (stderr,
-		       "   %-12s %8Hd %8Hd %8Hd %8.2f %8.2f %8.2f ",
+		       "   %-12s %10Hd %7Hd %7Hd %8.2f %8.2f %8.2f ",
 		       name,
 		       H5Z_g[i].comp.nbytes,
 		       H5Z_g[i].comp.over,
@@ -145,7 +145,7 @@ H5Z_term_interface (void)
 	    
 	    sprintf (name, "%s-u", H5Z_g[i].name);
 	    HDfprintf (stderr,
-		       "   %-12s %8Hd %8Hd %8Hd %8.2f %8.2f %8.2f ",
+		       "   %-12s %10Hd %7Hd %7Hd %8.2f %8.2f %8.2f ",
 		       name,
 		       H5Z_g[i].uncomp.nbytes,
 		       H5Z_g[i].uncomp.over,
@@ -198,7 +198,7 @@ H5Zregister (H5Z_method_t method, const char *name, H5Z_func_t cfunc,
     FUNC_ENTER (H5Zregister, FAIL);
 
     /* Check args */
-    if (method<0 || method>H5Z_MAXVAL) {
+    if (method<0 || method>H5Z_USERDEF_MAX) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "invalid data compression method number");
     }
@@ -381,7 +381,7 @@ H5Z_register (H5Z_method_t method, const char *name, H5Z_func_t cfunc,
 {
     FUNC_ENTER (H5Z_register, FAIL);
 
-    assert (method>=0 && method<=H5Z_MAXVAL);
+    assert (method>=0 && method<=H5Z_USERDEF_MAX);
     H5MM_xfree (H5Z_g[method].name);
     H5Z_g[method].name = H5MM_xstrdup (name);
     H5Z_g[method].compress = cfunc;

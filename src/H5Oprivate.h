@@ -247,6 +247,8 @@ intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		 uintn flags, const void *mesg);
 herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
+void *H5O_free (const H5O_class_t *type, void *mesg);
+void *H5O_copy (const H5O_class_t *type, const void *mesg);
 herr_t H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
 		  H5HG_t *hobj/*out*/);
 herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,

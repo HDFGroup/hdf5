@@ -97,7 +97,8 @@ static intn interface_initialize_g = FALSE;
 static void H5F_term_interface(void);
 
 /* PRIVATE PROTOTYPES */
-static H5F_t *H5F_new(H5F_file_t *shared);
+static H5F_t *H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl,
+		      const H5F_access_t *fapl);
 static herr_t H5F_dest(H5F_t *f);
 static herr_t H5F_flush(H5F_t *f, hbool_t invalidate);
 static herr_t H5F_locate_signature(H5F_low_t *f_handle,
@@ -141,6 +142,9 @@ H5F_init_interface(void)
     }
 
     /* Initialize the default file access property list */
+    H5F_access_dflt.mdc_nelmts = H5AC_NSLOTS;
+    H5F_access_dflt.rdcc_nbytes = 1024*1024; /*1MB*/
+    H5F_access_dflt.rdcc_w0 = 0.75; /*preempt fully read chunks*/
     H5F_access_dflt.driver = H5F_LOW_DFLT;
 #if (H5F_LOW_DFLT == H5F_LOW_SEC2)
     /* Nothing to initialize */
@@ -468,7 +472,8 @@ H5Fis_hdf5(const char *filename)
  *		H5Fopen and H5Fcreate functions then fill in various
  *		fields.	 If SHARED is a non-null pointer then the shared info
  *		to which it points has the reference count incremented.
- *		Otherwise a new, empty shared info struct is created.
+ *		Otherwise a new, empty shared info struct is created and
+ *		initialized with the specified file access property list.
  *
  * Errors:
  *
@@ -485,9 +490,11 @@ H5Fis_hdf5(const char *filename)
  *-------------------------------------------------------------------------
  */
 static H5F_t *
-H5F_new(H5F_file_t *shared)
+H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
 {
-    H5F_t		   *f = NULL;
+    H5F_t		*f = NULL;
+    intn		n;
+    
     FUNC_ENTER(H5F_new, NULL);
 
     f = H5MM_xcalloc(1, sizeof(H5F_t));
@@ -500,13 +507,39 @@ H5F_new(H5F_file_t *shared)
 	H5F_addr_undef(&(f->shared->freespace_addr));
 	H5F_addr_undef(&(f->shared->hdf5_eof));
 
-	/* Create a main cache */
-	H5AC_create(f, H5AC_NSLOTS);
+	/*
+	 * Deep-copy the file creation and file access property lists into
+	 * the new file handle.  We do this early because some values might
+	 * need to change as the file is being opened.
+	 */
+	if (NULL==(f->shared->create_parms=H5P_copy(H5P_FILE_CREATE, fcpl))) {
+	    HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, NULL,
+			   "unable to copy file creation property list");
+	}
+	if (NULL==(f->shared->access_parms=H5P_copy(H5P_FILE_ACCESS, fapl))) {
+	    HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, NULL,
+			   "unable to copy file access property list");
+	}
+
+	/*
+	 * Create a meta data cache with the specified number of elements.
+	 * The cache might be created with a different number of elements and
+	 * the access property list should be updated to reflect that.
+	 */
+	if ((n=H5AC_create(f, f->shared->access_parms->mdc_nelmts))<0) {
+	    HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, NULL,
+			   "unable to create meta data cache");
+	}
+	f->shared->access_parms->mdc_nelmts = n;
+	
+	/* Create the chunk cache */
+	H5F_istore_init (f);
     }
     f->shared->nrefs++;
 
     FUNC_LEAVE(f);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_dest
@@ -544,6 +577,10 @@ H5F_dest(H5F_t *f)
 	    H5MM_xfree (f->shared->root_grp);
 	    f->shared->root_grp=NULL;
 	    if (H5AC_dest(f)) {
+		HERROR (H5E_FILE, H5E_CANTINIT, "problems closing file");
+		ret_value = FAIL; /*but keep going*/
+	    }
+	    if (H5F_istore_dest (f)<0) {
 		HERROR (H5E_FILE, H5E_CANTINIT, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
@@ -735,7 +772,7 @@ H5F_open(const char *name, uintn flags,
 		old->shared->flags |= H5F_ACC_RDWR;
 		fd = NULL;	/*so we don't close it during error */
 	    }
-	    f = H5F_new(old->shared);
+	    f = H5F_new(old->shared, NULL, NULL);
 
 	} else if (flags & H5F_ACC_TRUNC) {
 	    /* Truncate existing file */
@@ -749,7 +786,7 @@ H5F_open(const char *name, uintn flags,
 		HRETURN_ERROR(H5E_FILE, H5E_CANTCREATE, NULL,
 			      "can't truncate file");
 	    }
-	    f = H5F_new(NULL);
+	    f = H5F_new(NULL, create_parms, access_parms);
 	    f->shared->key = search;
 	    f->shared->flags = flags;
 	    f->shared->lf = fd;
@@ -762,7 +799,7 @@ H5F_open(const char *name, uintn flags,
 		HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			      "cannot open existing file");
 	    }
-	    f = H5F_new(NULL);
+	    f = H5F_new(NULL, create_parms, access_parms);
 	    f->shared->key = search;
 	    f->shared->flags = flags;
 	    f->shared->lf = fd;
@@ -794,7 +831,7 @@ H5F_open(const char *name, uintn flags,
 	    HRETURN_ERROR(H5E_FILE, H5E_CANTCREATE, NULL,
 			  "can't create file");
 	}
-	f = H5F_new(NULL);
+	f = H5F_new(NULL, create_parms, access_parms);
 	f->shared->key = search;
 	f->shared->flags = flags;
 	f->shared->lf = fd;
@@ -816,13 +853,10 @@ H5F_open(const char *name, uintn flags,
     f->name = H5MM_xstrdup(name);
 
     /*
-     * Update the file creation parameters and file access parameters with
-     * default values if this is the first time this file is opened.  Some of
-     * the properties may need to be updated.
+     * Some of the properties may need to be updated. We would like to
+     * eventually get rid of this step by not having redundant data!
      */
     if (1 == f->shared->nrefs) {
-	f->shared->create_parms = H5P_copy (H5P_FILE_CREATE, create_parms);
-	f->shared->access_parms = H5P_copy (H5P_FILE_ACCESS, access_parms);
 	if (H5F_LOW_FAMILY==f->shared->access_parms->driver) {
 	    haddr_t x = f->shared->lf->u.fam.memb_size;
 	    f->shared->access_parms->u.fam.memb_size = x;
@@ -1255,12 +1289,20 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
      * once for read-only and once for read-write, and then calling
      * H5F_flush() with the read-only handle, still causes data to be flushed.
      */
-    if (0 == (H5F_ACC_RDWR & f->shared->flags))
+    if (0 == (H5F_ACC_RDWR & f->shared->flags)) {
 	HRETURN(SUCCEED);
+    }
 
-    /* flush (and invalidate) the entire cache */
+    /* flush the entire raw data cache */
+    if (H5F_istore_flush (f)<0) {
+	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+		      "unable to flush raw data cache");
+    }
+    
+    /* flush (and invalidate) the entire meta data cache */
     if (H5AC_flush(f, NULL, 0, invalidate) < 0) {
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
+	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+		      "unable to flush meta data cache");
     }
 
     /* encode the file boot block */
@@ -1371,7 +1413,10 @@ H5F_close(H5F_t *f)
 	}
 
 	/* Dump debugging info */
-	if (f->intent & H5F_ACC_DEBUG) H5AC_debug(f);
+	if (f->intent & H5F_ACC_DEBUG) {
+	    H5AC_debug(f);
+	    H5F_istore_stats (f, FALSE);
+	}
 
 	/* Close files and release resources */
 	H5F_low_close(f->shared->lf, f->shared->access_parms);

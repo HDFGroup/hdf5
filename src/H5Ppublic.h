@@ -96,6 +96,10 @@ H5Z_method_t H5Pget_compression (hid_t plist_id, unsigned int *flags/*out*/,
 				 void *client_data/*out*/);
 herr_t H5Pset_deflate (hid_t plist_id, int level);
 int H5Pget_deflate (hid_t plist_id);
+herr_t H5Pset_cache (hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
+		     double rdcc_w0);
+herr_t H5Pget_cache (hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nbytes,
+		     double *rdcc_w0);
 
 #ifdef HAVE_PARALLEL
 herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info);
