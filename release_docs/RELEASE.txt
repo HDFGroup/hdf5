@@ -109,6 +109,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed problem with fletcher32 filter when converting data of different
+	    endianess. PVN 2004/03/10
         - Fixed problem with H5Tget_native_type() not handling opaque fields
             correctly.  QAK - 2004/01/31
         - Fixed several errors in B-tree deletion code which could cause a
