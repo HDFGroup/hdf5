@@ -10299,15 +10299,31 @@ cat >> src/H5config.h <<EOF
 EOF
 
 PRINT() {
-   SPACES="                                 "
-   msg="$SPACES $1:  "
-   msg_len="`echo \"$msg\" | wc -c | sed -e 's/ //g'`" 
-   let "begin_msg=$msg_len-33"
-   echo "$msg" | cut -c$begin_msg- | tr -d '\012'
+  SPACES="                                  "
+  msg="$SPACES $1:  "
+  msg_len="`echo \"$msg\" | wc -c | sed -e 's/ //g'`" 
+  let "begin_msg=$msg_len-34"
+  echo "$msg" | cut -c$begin_msg- | tr -d '\012'
+}
+
+IF_YES_NO() {
+  if test "$1" = "yes"; then
+    echo "Yes"
+  else
+    echo "No"
+  fi
+}
+
+IF_ENABLED_DISABLED() {
+  if test "$1" = "yes"; then
+    echo "Enabled"
+  else
+    echo "Disabled"
+  fi
 }
 
 echo ""
-echo "Configuation Options:"
+echo "Compiling Options:"
 
 PRINT "Compilation Mode"
 case "X-$enable_production" in
@@ -10332,18 +10348,40 @@ case "$HSIZET" in
 esac
 
 PRINT "HDF5 v1.4 Compatibility"
-if test "$HDF5_V1_4_COMPAT" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
+IF_YES_NO "$HDF5_V1_4_COMPAT"
 
-PRINT "Linux LFS"
-if test "$LINUX_LFS" = "yes"; then
-  echo "Enabled"
-else
-  echo "Disabled"
-fi
+PRINT "Shared Libraries"
+IF_YES_NO "$enable_shared"
+
+PRINT "Static Libraries"
+IF_YES_NO "$enable_static"
+
+PRINT "Statically Linked Executables"
+IF_YES_NO "$STATIC_EXEC"
+
+PRINT "Stream VFD"
+IF_ENABLED_DISABLED "$STREAM_VFD"
+
+echo ""
+echo "Features:"
+
+PRINT "C++"
+IF_YES_NO "$HDF_CXX"
+
+PRINT "Fortran"
+IF_YES_NO "$HDF_FORTRAN"
+
+PRINT "GASS"
+IF_YES_NO "$GASS"
+
+PRINT "GridStorage"
+IF_YES_NO "$GRIDSTORAGE"
+
+PRINT "HDF4"
+IF_YES_NO "$HAVE_HDF4"
+
+PRINT "Linux Large File Support (LFS)"
+IF_ENABLED_DISABLED "$LINUX_LFS"
 
 PRINT "Parallel HDF5"
 if test "$PARALLEL" != "no"; then
@@ -10352,33 +10390,11 @@ else
   echo "No"
 fi
 
-PRINT "Shared Libraries"
-if test "$enable_shared" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
+PRINT "SRB"
+IF_YES_NO "$SRB"
 
-PRINT "Static Libraries"
-if test "$enable_static" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "Statically Linked Executables"
-if test "$STATIC_EXEC" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "Stream VFD"
-if test "$STREAM_VFD" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
+PRINT "Threadsafety"
+IF_ENABLED_DISABLED "$THREADSAFE"
 
 PRINT "Tracing"
 if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
@@ -10387,71 +10403,5 @@ else
   echo "No"
 fi
 
-PRINT "Threadsafety"
-if test "$THREADSAFE" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-echo ""
-echo "Library Wrappers:"
-
-PRINT "Fortran"
-if test "$HDF_FORTRAN" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "C++"
-if test "$HDF_CXX" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-echo ""
-echo "Libraries/Modules:"
-
-PRINT "HDF4"
-if test "$HAVE_HDF4" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "GASS"
-if test "$GASS" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "GridStorage"
-if test -n "$GRIDSTORAGE"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "PThreads"
-if test -n "$PTHREAD"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "SRB"
-if test -n "$SRB"; then
-  echo "Yes"
-else
-  echo "No"
-fi
-
-PRINT "Zlib"
-if test "$HAVE_ZLIB" = "yes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
+PRINT "Zlib-compression"
+IF_YES_NO "$HAVE_ZLIB"
