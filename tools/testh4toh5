@@ -214,6 +214,48 @@ $RM $OUTDIR/*.hdf $OUTDIR/*.tmp
 
 $RM $OUTDIR/*.tmp
 CONVERT vg.hdf vg.h5
+CONVERT anfile.hdf anfile.h5
+CONVERT anno_obj.hdf anno_obj.h5
+CONVERT image_attr.hdf image_attr.h5
+#CONVERT image_maxsize.hdf image_maxsize.h5
+CONVERT image_pal.hdf image_pal.h5
+CONVERT image_uint16.hdf image_uint16.h5
+CONVERT image_uint161.hdf image_uint161.h5
+CONVERT image_uint32.hdf image_uint32.h5
+CONVERT image_uint321.hdf image_uint321.h5
+CONVERT image_uint8.hdf image_uint8.h5
+CONVERT image_uint81.hdf image_uint81.h5
+CONVERT sds_dimsca_data.hdf sds_dimsca_data.h5
+CONVERT sds_dimscaunl_data.hdf sds_dimscaunl_data.h5
+#CONVERT sds_maxdim.hdf sds_maxdim.h5
+#CONVERT sds_maxdimsizedata.hdf sds_maxdimsizedata.h5
+CONVERT sds_typattr.hdf sds_typattr.h5
+CONVERT sds_typchar8.hdf sds_typchar8.h5
+CONVERT sds_typchunk_comp.hdf sds_typchunk_comp.h5
+CONVERT sds_typfloat32.hdf sds_typfloat32.h5
+CONVERT sds_typfloat64.hdf sds_typfloat64.h5
+CONVERT sds_typnfloat32.hdf sds_typnfloat32.h5
+CONVERT sds_typnfloat64.hdf sds_typnfloat64.h5
+CONVERT sds_typint16.hdf sds_typint16.h5
+CONVERT sds_typint32.hdf sds_typint32.h5
+CONVERT sds_typint8.hdf sds_typint8.h5
+CONVERT sds_typlint16.hdf sds_typlint16.h5
+CONVERT sds_typlint32.hdf sds_typlint32.h5
+CONVERT sds_typlint8.hdf sds_typlint8.h5
+CONVERT sds_typluint16.hdf sds_typluint16.h5
+CONVERT sds_typluint32.hdf sds_typluint32.h5
+CONVERT sds_typluint8.hdf sds_typluint8.h5
+CONVERT sds_typuint16.hdf sds_typuint16.h5
+CONVERT sds_typuint32.hdf sds_typuint32.h5
+CONVERT sds_typuint8.hdf sds_typuint8.h5
+CONVERT vdata_attrtest.hdf vdata_attrtest.h5
+CONVERT vdata_typtest.hdf vdata_typtest.h5
+CONVERT vg_attrtest.hdf vg_attrtest.h5
+CONVERT vg_hl.hdf vg_hl.h5
+CONVERT vg_loop.hdf vg_loop.h5
+CONVERT vg_nameclash.hdf vg_nameclash.h5
+CONVERT vg_nameclash2.hdf vg_nameclash2.h5
+CONVERT vg_simple.hdf vg_simple.h5
 
 #
 # Again, the test for conversion are the same as the first set of test.
