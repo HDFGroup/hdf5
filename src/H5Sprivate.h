@@ -88,6 +88,18 @@ typedef struct H5S_tconv_t {
 		    const struct H5O_efl_t *efl, size_t elmt_size,
 		    const H5S_t *file_space, const H5S_number_t *numbering,
 		    size_t start, size_t nelmts, const void *tconv_buf);
+
+    /* Read from file to application w/o intermediate scratch buffer */
+    herr_t (*read)(H5F_t *f, const struct H5O_layout_t *layout,
+		   const struct H5O_efl_t *efl, size_t elmt_size,
+		   const H5S_t *file_space, const H5S_t *mem_space,
+		   void *buf/*out*/);
+
+    /* Write directly from app buffer to file */
+    herr_t (*write)(H5F_t *f, const struct H5O_layout_t *layout,
+		    const struct H5O_efl_t *efl, size_t elmt_size,
+		    const H5S_t *file_space, const H5S_t *mem_space,
+		    const void *buf);
 } H5S_conv_t;
 
 H5S_t *H5S_copy (const H5S_t *src);
@@ -125,4 +137,12 @@ herr_t H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		       const struct H5O_efl_t *efl, size_t elmt_size,
 		       const H5S_t *file_space, const H5S_number_t *numbering,
 		       size_t start, size_t nelmts, const void *tconv_buf);
+herr_t H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
+		      const struct H5O_efl_t *efl, size_t elmt_size,
+		      const H5S_t *file_space, const H5S_t *mem_space,
+		      void *buf/*out*/);
+herr_t H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
+		       const struct H5O_efl_t *efl, size_t elmt_size,
+		       const H5S_t *file_space, const H5S_t *mem_space,
+		       const void *buf);
 #endif

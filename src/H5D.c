@@ -31,6 +31,12 @@ static char		RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK	H5D_mask
 
 /*
+ * Define this to be zero or one depending on whether the I/O pipeline should
+ * be optimized.
+ */
+#define H5D_OPTIMIZE_PIPE 1
+
+/*
  * A dataset is the following struct.
  */
 struct H5D_t {
@@ -807,7 +813,7 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
     }
 
     /* Create (open for write access) an object header */
-    if (H5O_create(f, 0, &(new_dset->ent)) < 0) {
+    if (H5O_create(f, 80, &(new_dset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to create dataset object header");
     }
@@ -1090,6 +1096,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5S_number_t	numbering;		/*element numbering info*/
     H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL;
+    herr_t		status;
 
     FUNC_ENTER(H5D_read, FAIL);
 
@@ -1140,10 +1147,36 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * Compute the size of the request and allocate scratch buffers.
      */
     nelmts = H5S_get_npoints(mem_space);
+
+    /*
+     * If there is no type conversion then try reading directly into the
+     * application's buffer.
+     */
+    if (H5D_OPTIMIZE_PIPE &&
+	H5T_conv_noop==tconv_func &&
+	NULL!=sconv_func->read) {
+#ifndef NDEBUG
+	fprintf (stderr, "HDF5-DIAG: Trying I/O pipe optimization...\n");
+#endif
+	status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
+				    &(dataset->create_parms->efl),
+				    H5T_get_size (dataset->type), file_space,
+				    mem_space, buf/*out*/);
+	if (status>=0) goto succeed;
+#ifndef NDEBUG
+	fprintf (stderr, "HDF5-DIAG: I/O pipe optimization failed\n");
+#endif
+	H5E_clear ();
+    }
+    
+	
+    /*
+     * This is the general case.
+     */
 #ifndef LATER
     /*
      * Note: this prototype version allocates a buffer large enough to
-     *	     satisfy the entire request; strip mining is not implemented.
+     *	 satisfy the entire request; strip mining is not implemented.
      */
     {
 	size_t src_size = nelmts * H5T_get_size(dataset->type);
@@ -1152,7 +1185,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if (cdata->need_bkg) bkg_buf = H5MM_xmalloc (dst_size);
     }
 #endif
-
     /*
      * Gather the data from disk into the data type conversion buffer. Also
      * gather data from application to background buffer (this step is not
@@ -1192,9 +1224,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 			    &numbering, 0, nelmts, buf/*out*/)<0) {
 	HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "scatter failed");
     }
+
+    
+ succeed:
     ret_value = SUCCEED;
     
-  done:
+ done:
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
     tconv_buf = H5MM_xfree(tconv_buf);
@@ -1233,7 +1268,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_conv_t	*sconv_func = NULL;	/*space conversion funcs*/
     H5S_number_t	numbering;		/*element numbering info*/
     H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
-    herr_t		ret_value = FAIL;
+    herr_t		ret_value = FAIL, status;
 
     FUNC_ENTER(H5D_write, FAIL);
 
@@ -1284,6 +1319,32 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * Compute the size of the request and allocate scratch buffers.
      */
     nelmts = H5S_get_npoints(mem_space);
+
+    /*
+     * If there is no type conversion then try writing directly from
+     * application buffer to file.
+     */
+    if (H5D_OPTIMIZE_PIPE &&
+	H5T_conv_noop==tconv_func &&
+	NULL!=sconv_func->write) {
+#ifndef NDEBUG
+	fprintf (stderr, "HDF5-DIAG: Trying I/O pipe optimization...\n");
+#endif
+	status = (sconv_func->write)(dataset->ent.file, &(dataset->layout),
+				     &(dataset->create_parms->efl),
+				     H5T_get_size (dataset->type), file_space,
+				     mem_space, buf);
+	if (status>=0) goto succeed;
+#ifndef NDEBUG
+	fprintf (stderr, "HDF5-DIAG: I/O pipe optimization failed\n");
+#endif
+	H5E_clear ();
+    }
+
+
+    /*
+     * This is the general case.
+     */
 #ifndef LATER
     /*
      * Note: This prototype version allocates a buffer large enough to
@@ -1296,8 +1357,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if (cdata->need_bkg) bkg_buf = H5MM_xmalloc (dst_size);
     }
 #endif
-
-
     /*
      * Gather data from application buffer into the data type conversion
      * buffer. Also gather data from the file into the background buffer
@@ -1338,9 +1397,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 			    &numbering, 0, nelmts, tconv_buf)<0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
     }
+
+ succeed:
     ret_value = SUCCEED;
     
-  done:
+ done:
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
     tconv_buf = H5MM_xfree(tconv_buf);

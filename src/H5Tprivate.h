@@ -41,4 +41,11 @@ herr_t H5T_sort_by_offset (H5T_t *dt);
 herr_t H5T_pack (H5T_t *dt);
 herr_t H5T_debug (H5T_t *dt, FILE * stream);
 H5T_conv_t H5T_find (const H5T_t *src, const H5T_t *dst, H5T_cdata_t **pcdata);
+
+/*
+ * This conversion function is here so we can determine whether a conversion
+ * is a no-op or not.  The other conversion functions can go in H5Tpkg.h
+ */
+herr_t H5T_conv_noop (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void *bkg);
 #endif

@@ -100,8 +100,6 @@ H5T_path_t *H5T_path_find (const H5T_t *src, const H5T_t *dst,
                            hbool_t create, H5T_conv_t func);
 
 /* Conversion functions */
-herr_t H5T_conv_noop (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void *bkg);
 herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,

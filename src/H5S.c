@@ -538,6 +538,7 @@ H5S_get_npoints_max(const H5S_t *ds)
 
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Sget_ndims
@@ -1310,6 +1311,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
 	_conv.mscat = H5S_simp_mscat;
 	_conv.mgath = H5S_simp_mgath;
 	_conv.fscat = H5S_simp_fscat;
+	_conv.read = H5S_simp_read;
+	_conv.write = H5S_simp_write;
 	conv = &_conv;
     }
     

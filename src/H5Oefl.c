@@ -373,7 +373,7 @@ H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 	      uint8 *buf)
 {
     int		i, fd=-1;
-    size_t	to_read, cur, skip;
+    size_t	to_read, cur, skip=0;
     ssize_t	n;
     herr_t	ret_value = FAIL;
     
@@ -458,7 +458,7 @@ H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 	       const uint8 *buf)
 {
     int		i, fd=-1;
-    size_t	to_write, cur, skip;
+    size_t	to_write, cur, skip=0;
     herr_t	ret_value = FAIL;
     
     FUNC_ENTER (H5O_efl_write, FAIL);

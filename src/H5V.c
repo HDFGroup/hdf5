@@ -502,22 +502,29 @@ H5V_stride_copy(intn n, size_t elmt_size, const size_t *size,
 
     FUNC_ENTER(H5V_stride_copy, FAIL);
 
-    H5V_vector_cpy(n, idx, size);
-    nelmts = H5V_vector_reduce_product(n, size);
-    for (i = 0; i < nelmts; i++) {
 
-	/* Copy an element */
-	HDmemcpy(dst, src, elmt_size);
+    if (n) {
+	H5V_vector_cpy(n, idx, size);
+	nelmts = H5V_vector_reduce_product(n, size);
+	for (i = 0; i < nelmts; i++) {
 
-	/* Decrement indices and advance pointers */
-	for (j = n - 1, carry = TRUE; j >= 0 && carry; --j) {
-	    src += src_stride[j];
-	    dst += dst_stride[j];
+	    /* Copy an element */
+	    HDmemcpy(dst, src, elmt_size);
 
-	    if (--idx[j]) carry = FALSE;
-	    else idx[j] = size[j];
+	    /* Decrement indices and advance pointers */
+	    for (j = n - 1, carry = TRUE; j >= 0 && carry; --j) {
+		src += src_stride[j];
+		dst += dst_stride[j];
+
+		if (--idx[j]) carry = FALSE;
+		else idx[j] = size[j];
+	    }
 	}
+    } else {
+	HDmemcpy (dst, src, elmt_size);
+	HRETURN (SUCCEED);
     }
+
 
     FUNC_LEAVE(SUCCEED);
 }

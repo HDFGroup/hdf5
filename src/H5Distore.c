@@ -835,7 +835,9 @@ herr_t
 H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
 {
     H5F_istore_ud1_t        udata;
+#ifndef NDEBUG
     int                     i;
+#endif
 
     FUNC_ENTER(H5F_istore_create, FAIL);
 

@@ -471,3 +471,218 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_LEAVE (SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_simp_read
+ *
+ * Purpose:	Reads a dataset from file F directly into application memory
+ *		BUF performing data space conversion in a single step from
+ *		FILE_SPACE to MEM_SPACE. The dataset is stored in the file
+ *		according to the LAYOUT and EFL (external file list) and data
+ *		point in the file is ELMT_SIZE bytes.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, March 12, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
+	       const struct H5O_efl_t *efl, size_t elmt_size,
+	       const H5S_t *file_space, const H5S_t *mem_space,
+	       void *buf/*out*/)
+{
+    size_t	hslab_size[H5O_LAYOUT_NDIMS];
+    size_t	file_offset[H5O_LAYOUT_NDIMS];
+    size_t	mem_size[H5O_LAYOUT_NDIMS];
+    size_t	mem_offset[H5O_LAYOUT_NDIMS];
+    int		i;
+
+    FUNC_ENTER (H5S_simp_read, FAIL);
+
+#ifndef NDEBUG
+    assert (file_space->type==mem_space->type);
+    assert (file_space->u.simple.rank==mem_space->u.simple.rank);
+    for (i=0; i<file_space->u.simple.rank; i++) {
+	if (file_space->hslab_def && mem_space->hslab_def) {
+	    assert (1==file_space->h.stride[i]);
+	    assert (1==mem_space->h.stride[i]);
+	    assert (file_space->h.count[i]==mem_space->h.count[i]);
+	} else if (file_space->hslab_def) {
+	    assert (1==file_space->h.stride[i]);
+	    assert (file_space->h.count[i]==mem_space->u.simple.size[i]);
+	} else if (mem_space->hslab_def) {
+	    assert (1==mem_space->h.stride[i]);
+	    assert (file_space->u.simple.size[i]==mem_space->h.count[i]);
+	} else {
+	    assert (file_space->u.simple.size[i]==
+		    mem_space->u.simple.size[i]);
+	}
+    }
+#endif
+	
+
+    /*
+     * Calculate size of hyperslab and offset of hyperslab into file and
+     * memory.
+     */
+    if (file_space->hslab_def) {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    hslab_size[i] = file_space->h.count[i];
+	}
+    } else {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    hslab_size[i] = file_space->u.simple.size[i];
+	}
+    }
+    for (i=0; i<mem_space->u.simple.rank; i++) {
+	mem_size[i] = mem_space->u.simple.size[i];
+    }
+    if (file_space->hslab_def) {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    file_offset[i] = file_space->h.start[i];
+	}
+    } else {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    file_offset[i] = 0;
+	}
+    }
+    if (mem_space->hslab_def) {
+	for (i=0; i<mem_space->u.simple.rank; i++) {
+	    mem_offset[i] = mem_space->h.start[i];
+	}
+    } else {
+	for (i=0; i<mem_space->u.simple.rank; i++) {
+	    mem_offset[i] = 0;
+	}
+    }
+    hslab_size[file_space->u.simple.rank] = elmt_size;
+    mem_size[file_space->u.simple.rank] = elmt_size;
+    file_offset[file_space->u.simple.rank] = 0;
+    mem_offset[file_space->u.simple.rank] = 0;
+    
+    /* Read the hyperslab */
+    if (H5F_arr_read (f, layout, efl, hslab_size,
+		      mem_size, mem_offset, file_offset, buf)<0) {
+	HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "unable to read dataset");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_simp_write
+ *
+ * Purpose:	Write a dataset from application memory BUF directly into
+ *		file F performing data space conversion in a single step from
+ *		MEM_SPACE to FILE_SPACE. The dataset is stored in the file
+ *		according to the LAYOUT and EFL (external file list) and data
+ *		point in the file is ELMT_SIZE bytes.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, March 12, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
+		const struct H5O_efl_t *efl, size_t elmt_size,
+		const H5S_t *file_space, const H5S_t *mem_space,
+		const void *buf)
+{
+    size_t	hslab_size[H5O_LAYOUT_NDIMS];
+    size_t	file_offset[H5O_LAYOUT_NDIMS];
+    size_t	mem_size[H5O_LAYOUT_NDIMS];
+    size_t	mem_offset[H5O_LAYOUT_NDIMS];
+    int		i;
+
+    FUNC_ENTER (H5S_simp_write, FAIL);
+
+#ifndef NDEBUG
+    assert (file_space->type==mem_space->type);
+    assert (file_space->u.simple.rank==mem_space->u.simple.rank);
+    for (i=0; i<file_space->u.simple.rank; i++) {
+	if (file_space->hslab_def && mem_space->hslab_def) {
+	    assert (1==file_space->h.stride[i]);
+	    assert (1==mem_space->h.stride[i]);
+	    assert (file_space->h.count[i]==mem_space->h.count[i]);
+	} else if (file_space->hslab_def) {
+	    assert (1==file_space->h.stride[i]);
+	    assert (file_space->h.count[i]==mem_space->u.simple.size[i]);
+	} else if (mem_space->hslab_def) {
+	    assert (1==mem_space->h.stride[i]);
+	    assert (file_space->u.simple.size[i]==mem_space->h.count[i]);
+	} else {
+	    assert (file_space->u.simple.size[i]==
+		    mem_space->u.simple.size[i]);
+	}
+    }
+#endif
+	
+
+    /*
+     * Calculate size of hyperslab and offset of hyperslab into file and
+     * memory.
+     */
+    if (file_space->hslab_def) {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    hslab_size[i] = file_space->h.count[i];
+	}
+    } else {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    hslab_size[i] = file_space->u.simple.size[i];
+	}
+    }
+    for (i=0; i<mem_space->u.simple.rank; i++) {
+	mem_size[i] = mem_space->u.simple.size[i];
+    }
+    if (file_space->hslab_def) {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    file_offset[i] = file_space->h.start[i];
+	}
+    } else {
+	for (i=0; i<file_space->u.simple.rank; i++) {
+	    file_offset[i] = 0;
+	}
+    }
+    if (mem_space->hslab_def) {
+	for (i=0; i<mem_space->u.simple.rank; i++) {
+	    mem_offset[i] = mem_space->h.start[i];
+	}
+    } else {
+	for (i=0; i<mem_space->u.simple.rank; i++) {
+	    mem_offset[i] = 0;
+	}
+    }
+    hslab_size[file_space->u.simple.rank] = elmt_size;
+    mem_size[file_space->u.simple.rank] = elmt_size;
+    file_offset[file_space->u.simple.rank] = 0;
+    mem_offset[file_space->u.simple.rank] = 0;
+    
+    /* Write the hyperslab */
+    if (H5F_arr_write (f, layout, efl, hslab_size,
+		       mem_size, mem_offset, file_offset, buf)<0) {
+	HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+		       "unable to write dataset");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+	
+    
