@@ -53,13 +53,19 @@ TOOLTEST() {
    shift
 
    # Run test.
+   # Tflops interprets "$@" as "" when no parameter is given (e.g., the
+   # case of missing file name).  Changed it to use $@ till Tflops fixes it.
    TESTING $DUMPER $@
    (
       echo "#############################"
       echo "Expected output for '$DUMPER $@'" 
       echo "#############################"
       cd $srcdir/../testfiles
-      $RUNSERIAL $DUMPER_BIN "$@"
+      if [ "`uname -s`" = "TFLOPS O/S" ]; then
+        $RUNSERIAL $DUMPER_BIN $@
+      else
+        $RUNSERIAL $DUMPER_BIN "$@"
+      fi
    ) >$actual 2>$actual_err
    cat $actual_err >> $actual
     
