@@ -413,12 +413,16 @@ run_test(iotype iot, parameters parms)
     int             comm_size;
     long            raw_size;
     minmax          total_mm;
+    minmax         *write_mpi_mm_table;
     minmax         *write_mm_table;
     minmax         *write_gross_mm_table;
+    minmax         *read_mpi_mm_table;
     minmax         *read_mm_table;
     minmax         *read_gross_mm_table;
+    minmax          write_mpi_mm = {0.0, 0.0, 0.0, 0};
     minmax          write_mm = {0.0, 0.0, 0.0, 0};
     minmax          write_gross_mm = {0.0, 0.0, 0.0, 0};
+    minmax          read_mpi_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_gross_mm = {0.0, 0.0, 0.0, 0};
 
@@ -441,12 +445,19 @@ run_test(iotype iot, parameters parms)
 
     MPI_Comm_size(pio_comm_g, &comm_size);
 
+    write_mpi_mm_table = malloc(parms.num_iters * sizeof(minmax));
     write_mm_table = malloc(parms.num_iters * sizeof(minmax));
     write_gross_mm_table = malloc(parms.num_iters * sizeof(minmax));
+    read_mpi_mm_table = malloc(parms.num_iters * sizeof(minmax));
     read_mm_table = malloc(parms.num_iters * sizeof(minmax));
     read_gross_mm_table = malloc(parms.num_iters * sizeof(minmax));
 
     for (i = 0; i < parms.num_iters; ++i) {
+        write_mpi_mm_table[i].min = 0.0;
+        write_mpi_mm_table[i].max = 0.0;
+        write_mpi_mm_table[i].sum = 0.0;
+        write_mpi_mm_table[i].num = 0;
+
         write_mm_table[i].min = 0.0;
         write_mm_table[i].max = 0.0;
         write_mm_table[i].sum = 0.0;
@@ -456,6 +467,11 @@ run_test(iotype iot, parameters parms)
         write_gross_mm_table[i].max = 0.0;
         write_gross_mm_table[i].sum = 0.0;
         write_gross_mm_table[i].num = 0;
+
+        read_mpi_mm_table[i].min = 0.0;
+        read_mpi_mm_table[i].max = 0.0;
+        read_mpi_mm_table[i].sum = 0.0;
+        read_mpi_mm_table[i].num = 0;
 
         read_mm_table[i].min = 0.0;
         read_mm_table[i].max = 0.0;
@@ -475,6 +491,12 @@ run_test(iotype iot, parameters parms)
         MPI_Barrier(pio_comm_g);
         res = do_pio(parms);
 
+        /* gather all of the "mpi write" times */
+        t = get_time(res.timers, HDF5_MPI_WRITE);
+	get_minmax(&write_mpi_mm, t);
+
+        write_mpi_mm_table[i] = write_mpi_mm;
+
         /* gather all of the "write" times */
         t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
 	get_minmax(&write_mm, t);
@@ -486,6 +508,12 @@ run_test(iotype iot, parameters parms)
 	get_minmax(&write_gross_mm, t);
 
         write_gross_mm_table[i] = write_gross_mm;
+
+        /* gather all of the "mpi read" times */
+        t = get_time(res.timers, HDF5_MPI_READ);
+	get_minmax(&read_mpi_mm, t);
+
+        read_mpi_mm_table[i] = read_mpi_mm;
 
         /* gather all of the "read" times */
         t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
@@ -499,6 +527,14 @@ run_test(iotype iot, parameters parms)
 
         read_gross_mm_table[i] = read_gross_mm;
         pio_time_destroy(res.timers);
+    }
+
+    /* show mpi write statics */
+    if (pio_debug_level >= 3) {
+        /* output all of the times for all iterations */
+        print_indent(3);
+        output_report("MPI Write details:\n");
+        output_all_info(write_mpi_mm_table, parms.num_iters, 4);
     }
 
     /* accumulate and output the max, min, and average "write" times */
@@ -543,6 +579,14 @@ run_test(iotype iot, parameters parms)
     output_report("Average Throughput: %.2f MB/s\n",
                   total_mm.sum / total_mm.num);
 
+    /* show mpi read statics */
+    if (pio_debug_level >= 3) {
+        /* output all of the times for all iterations */
+        print_indent(3);
+        output_report("MPI Read details:\n");
+        output_all_info(read_mpi_mm_table, parms.num_iters, 4);
+    }
+
     /* accumulate and output the max, min, and average "read" times */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -586,6 +630,8 @@ run_test(iotype iot, parameters parms)
                   total_mm.sum / total_mm.num);
 
     /* clean up our mess */
+    free(write_mpi_mm_table);
+    free(read_mpi_mm_table);
     free(write_mm_table);
     free(read_mm_table);
     free(write_gross_mm_table);
