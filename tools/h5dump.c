@@ -1,8 +1,8 @@
 #include "h5dump.h"
 #include <stdio.h>
 #include "H5private.h"
+#include "H5tools.h"
 
-int indent = 0;
 static int display_data = 1;
 static int status = 0;
 static int unamedtype = 0;  /* shared data type with no name */
@@ -65,23 +65,6 @@ h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
 }
 
 
-/*-------------------------------------------------------------------------
- * Function:    indentation
- *
- * Purpose:     Print spaces for indentation
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-----------------------------------------------------------------------*/
-void indentation(int x) {
-
-  while (x>0) { printf(" "); x--; }
-
-}
 
 
 /*-------------------------------------------------------------------------
@@ -199,10 +182,10 @@ H5G_stat_t statbuf;
         str_pad = H5Tget_strpad(type) ;
         cset = H5Tget_cset(type);
 
-        indentation (indent+col);
+        indentation (indent+COL);
         printf("%s %s %d;\n", BEGIN, STRSIZE, size);
   
-        indentation (indent+col);
+        indentation (indent+COL);
         printf("  %s ", STRPAD);
         if (str_pad == H5T_STR_NULLTERM )
 
@@ -219,7 +202,7 @@ H5G_stat_t statbuf;
         else
             printf("H5T_STR_ERROR;\n");
 
-        indentation (indent+col);
+        indentation (indent+COL);
         printf("  %s ", CSET);
         if (cset == H5T_CSET_ASCII)
             printf("H5T_CSET_ASCII;\n");
@@ -231,7 +214,7 @@ H5G_stat_t statbuf;
         H5Tset_size(str_type, size);
         H5Tset_strpad(str_type, str_pad);
 
-        indentation (indent+col);
+        indentation (indent+COL);
         printf("  %s ", CTYPE);
         if (H5Tequal(type,str_type)) {
             printf("H5T_C_S1;\n");
@@ -251,7 +234,7 @@ H5G_stat_t statbuf;
           }
           H5Tclose(str_type);
         }
-        indentation (indent+col);
+        indentation (indent+COL);
         printf("%s", END);
 
         break;
@@ -291,7 +274,7 @@ H5G_stat_t statbuf;
 
             i = search_obj (type_table, statbuf.objno);
 
-            indentation (indent+col);
+            indentation (indent+COL);
             if (i >= 0) {
                 if (!type_table.objs[i].recorded) /* unamed data type */
                     printf("\"#%lu:%lu\"\n", type_table.objs[i].objno[0],
@@ -316,7 +299,7 @@ H5G_stat_t statbuf;
                  ndims = H5Tget_member_dims(type, i, dims, perm);
 
                  if (H5Tget_class(mtype) != H5T_STRING)
-                     indentation (indent+col);
+                     indentation (indent+COL);
 
                  print_datatype(mtype);
 
@@ -380,7 +363,7 @@ dump_bb(void) {
 static void
 dump_datatype (hid_t type) {
 
-    indent += col;
+    indent += COL;
     indentation (indent);
     if (H5Tget_class(type) == H5T_COMPOUND) {
         printf ("%s %s\n", DATATYPE, BEGIN);
@@ -398,7 +381,7 @@ dump_datatype (hid_t type) {
         print_datatype(type);
         printf (" %s\n", END);
     }
-    indent -= col;
+    indent -= COL;
 }
 
 
@@ -423,7 +406,7 @@ dump_dataspace (hid_t space)
     int ndims = H5Sget_simple_extent_dims(space, size, maxsize);
     int i;
 
-    indentation (indent+col);
+    indentation (indent+COL);
 
     printf("%s ", DATASPACE);
 
@@ -493,7 +476,7 @@ hid_t  attr_id, type, space;
         end_obj();
 
     } else {
-        indentation (indent+col);
+        indentation (indent+COL);
         printf("h5dump error: unable to open attribute.\n");
         indentation (indent);
         end_obj();
@@ -548,7 +531,7 @@ H5G_stat_t statbuf;
     switch (statbuf.type) {
     case H5G_GROUP:
          if ((oid = H5Gopen (loc_id, obj_name))<0) {
-             indentation (col);
+             indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
              end_obj();
              status = 1;
@@ -557,7 +540,7 @@ H5G_stat_t statbuf;
          break;
     case H5G_DATASET:
          if ((oid = H5Dopen (loc_id, obj_name))<0) {
-             indentation (col);
+             indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
              end_obj();
              status = 1;
@@ -566,7 +549,7 @@ H5G_stat_t statbuf;
          break;
     case H5G_TYPE:
          if ((oid =  H5Topen(loc_id, obj_name)) < 0 ) {
-             indentation (col);
+             indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
              end_obj();
              status = 1;
@@ -574,7 +557,7 @@ H5G_stat_t statbuf;
          } 
          break;
     default:
-         indentation (col);
+         indentation (COL);
          fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
          end_obj();
          status = 1;
@@ -594,7 +577,7 @@ H5G_stat_t statbuf;
         end_obj();
 
     } else {
-        indentation (col);
+        indentation (COL);
         printf("h5dump error: unable to open attribute.\n");
         end_obj();
         status = 1;
@@ -666,7 +649,7 @@ int i;
         buf = malloc (statbuf.linklen*sizeof(char));
 
         begin_obj(SOFTLINK, name);
-        indentation (indent+col);
+        indentation (indent+COL);
         if (H5Gget_linkval (group, name, statbuf.linklen, buf)>=0) 
             printf ("LINKTARGET \"%s\"\n", buf);
         else {
@@ -703,7 +686,7 @@ int i;
                  if (i < 0) {
                      indentation (indent);
                      begin_obj(DATASET, name);
-                     indentation (indent+col);
+                     indentation (indent+COL);
                      printf("h5dump error: internal error\n");
                      indentation (indent);
                      end_obj();
@@ -712,7 +695,7 @@ int i;
                  } else if (dset_table.objs[i].displayed) {
                      indentation (indent);
                      begin_obj(DATASET, name);
-                     indentation (indent+col);
+                     indentation (indent+COL);
                      printf("%s \"%s\"\n", HARDLINK, dset_table.objs[i].objname);
                      indentation (indent);
                      end_obj();
@@ -789,7 +772,7 @@ size_t dims[H5DUMP_MAX_RANK];
 
          ndims = H5Tget_member_dims(type, i, dims, perm);
 
-         indentation (indent+col);
+         indentation (indent+COL);
 
          print_datatype(mtype);
 
@@ -835,7 +818,7 @@ int i;
 
     indentation (indent);
     begin_obj(GROUPNAME, name);
-    indent += col;
+    indent += COL;
 
     if (!strcmp(name,"/") && unamedtype) { /* dump unamed type in root group */
         for (i = 0; i < type_table.nobjs; i++)
@@ -881,7 +864,7 @@ int i;
 
     }
 
-    indent -= col;
+    indent -= COL;
     indentation (indent);
     end_obj();
     
@@ -923,24 +906,24 @@ hid_t  type, space;
          dump_data(did, DATASET_DATA);
          break;
     case H5T_TIME:
-         indent += col;
+         indent += COL;
          indentation (indent);
-         indent -= col;
+         indent -= COL;
          printf("DATA{ not yet implemented.}\n");
          break;
     case H5T_STRING:
          dump_data(did, DATASET_DATA);
          break;
     case H5T_BITFIELD:
-         indent += col;
+         indent += COL;
          indentation (indent);
-         indent -= col;
+         indent -= COL;
          printf("DATA{ not yet implemented.}\n");
          break;
     case H5T_OPAQUE:
-         indent += col;
+         indent += COL;
          indentation (indent);
-         indent -= col;
+         indent -= COL;
          printf("DATA{ not yet implemented.}\n");
          break;
     case H5T_COMPOUND:
@@ -949,9 +932,9 @@ hid_t  type, space;
     default: break;
     }
 
-    indent += col;
+    indent += COL;
     H5Aiterate (did, NULL, dump_attr, NULL);
-    indent -= col;
+    indent -= COL;
 
     H5Tclose(type);
     H5Sclose(space);
@@ -1232,20 +1215,20 @@ int i;
 static void
 dump_data (hid_t obj_id, int obj_data) {
 
-    indent += col;
+    indent += COL;
     indentation (indent);
     printf("%s %s\n", DATA, BEGIN);
 
     /* Print all the values. */
     if (print_data(obj_id, -1, obj_data) < 0) {
-        indentation(indent+col);
+        indentation(indent+COL);
         printf("Unable to print data.\n");
         status = 1;
     }
 
     indentation(indent);
     printf("%s\n", END);
-    indent -= col;
+    indent -= COL;
 }
 
 
@@ -1425,7 +1408,7 @@ H5Eset_auto (NULL, NULL);
 
                      if ((dsetid = H5Dopen (fid, argv[curr_arg]))<0) {
                          begin_obj (DATASET, argv[curr_arg]); 
-                         indentation (col);
+                         indentation (COL);
                          fprintf (stdout, "h5dump error: unable to open %s\n", 
                                   argv[curr_arg]);
                          end_obj();
@@ -1437,7 +1420,7 @@ H5Eset_auto (NULL, NULL);
                              if (index >= 0) {
                                  if (dset_table.objs[index].displayed) {
                                      begin_obj(DATASET, argv[curr_arg]);
-                                     indentation (indent+col);
+                                     indentation (indent+COL);
                                      printf("%s \"%s\"\n", HARDLINK,
                                                            dset_table.objs[index].objname);
                                      indentation (indent);
@@ -1464,7 +1447,7 @@ H5Eset_auto (NULL, NULL);
                      curr_arg++) {
                      if ((gid = H5Gopen (fid, argv[curr_arg])) < 0) {
                          begin_obj (GROUPNAME, argv[curr_arg]); 
-                         indentation (col);
+                         indentation (COL);
                          fprintf (stdout, "h5dump error: unable to open %s\n", 
                                   argv[curr_arg]);
                          end_obj();
@@ -1486,7 +1469,7 @@ H5Eset_auto (NULL, NULL);
 
                      if (H5Gget_objinfo(fid, argv[curr_arg], FALSE, &statbuf) < 0) {
                          begin_obj(SOFTLINK, argv[curr_arg]);
-                         indentation (col);
+                         indentation (COL);
                          fprintf(stdout, "h5dump error: unable to get obj info from %s\n", argv[curr_arg]);
                          end_obj();
                          status = 1;
@@ -1495,7 +1478,7 @@ H5Eset_auto (NULL, NULL);
 
                          buf = malloc(statbuf.linklen*sizeof(char));
                          begin_obj(SOFTLINK, argv[curr_arg]);
-                         indentation (col);
+                         indentation (COL);
                          if (H5Gget_linkval (fid, argv[curr_arg], statbuf.linklen, buf)>=0) 
                              printf ("LINKTARGET \"%s\"\n", buf);
                          else {
@@ -1507,7 +1490,7 @@ H5Eset_auto (NULL, NULL);
 
                      } else {
                          begin_obj(SOFTLINK, argv[curr_arg]);
-                         indentation (col);
+                         indentation (COL);
                          fprintf(stdout, "h5dump error: %s is not a link\n", argv[curr_arg]);
                          end_obj();
                          status = 1;
@@ -1541,7 +1524,7 @@ H5Eset_auto (NULL, NULL);
                          }
                          if (index ==  type_table.nobjs) {  /* unknown type */
                               begin_obj (DATATYPE, argv[curr_arg]); 
-                              indentation (col);
+                              indentation (COL);
                               fprintf (stdout, "h5dump error: unable to open %s\n", 
                                        argv[curr_arg]);
                               end_obj();

@@ -1098,7 +1098,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.line_pre = "            %s \"";
 	    info.line_suf = "\"";
 	}
-	if ((p_type=h5dump_fixtype(type))>=0) {
+	if ((p_type=h5dump_fixtype(type,FALSE))>=0) {
 	    need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
 	    buf = malloc(need);
 	    assert(buf);
@@ -1246,7 +1246,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 #else
 	    utilization = (used*100.0)/total;
 #endif
-	    if (total) printf(", %1.2f%% utilization", utilization);
+	    printf(", %1.2f%% utilization", utilization/*(used*100.0)/total*/);
 	}
 	putchar('\n');
 	

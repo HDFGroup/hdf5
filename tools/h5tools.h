@@ -223,9 +223,18 @@ typedef struct h5dump_t {
 } h5dump_t;
 
 
-hid_t h5dump_fixtype(hid_t f_type);
+hid_t h5dump_fixtype(hid_t f_type,hbool_t strDUAction);
 int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type);
 int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
 	       void *mem);
+
+/*
+	taken from h5dump.h
+  */
+#define DATASET_DATA	1
+#define NCOLS 80
+#define COL 3
+extern int indent;
+extern void indentation(int);
 
 #endif
