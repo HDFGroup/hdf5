@@ -1,0 +1,50 @@
+
+FOR THE ASCI RED MACHINE:
+
+The setup process for building the HDF5 library for the ASCI Red machine
+is done by a coordination of events from sasn100 and janus.  Special 
+effort must be made to move the compiled and linked testers to disks 
+local to the processors for execution.  This special effort is shown
+here at steps 8) and steps 9).
+
+The total required steps are something similar to:
+FROM SASN100,
+
+1) uncompress hdf5-1.0.0a.tar.Z
+
+2) tar xvf hdf5-1.0.0a.tar
+
+3) cd ./hdf5
+
+4) ./configure tflop
+
+
+FROM JANUS, 
+
+5) cd ./hdf5
+
+6) make H5Tinit.c
+
+
+FROM SASN100,
+
+7) make >&! comp.out &
+
+
+When everything is finished compiling and linking,
+FROM JANUS, 
+
+8) cp -r ../hdf5 /scratch
+
+9) cd /scratch/hdf5/test
+
+10) make test >&! test.out
+
+
+Once satisfied with the test results, as long as you 
+have the correct permission,
+FROM SASN100,
+
+11) make install
+
+
