@@ -2450,7 +2450,7 @@ test_derived_flt(void)
         H5_FAILED();
         printf("Can't set fields\n");
         goto error;
-    }   
+    }  
     if(H5Tset_offset(tid1, 3)<0) {
         H5_FAILED();
         printf("Can't set offset\n");
@@ -2466,6 +2466,7 @@ test_derived_flt(void)
         printf("Can't set size\n");
         goto error;
     }
+
     if(H5Tset_ebias(tid1, 511)<0) {
         H5_FAILED();
         printf("Can't set exponent bias\n");
@@ -2873,23 +2874,27 @@ test_derived_integer(void)
      * 
      *          0       1       2
      *    SIIIIIII IIIIIIII IIIIIIII
+     *
+     * There's no specific order for these functions to define the attributes 
+     * of a new integer type, H5Tset_precision, H5Tset_offset, H5Tset_size, 
+     * H5Tset_order, H5Tset_pad, H5Tset_sign.
      *--------------------------------------------------------------------------*/
-    if(H5Tset_precision(tid1,24)<0) {
-        H5_FAILED();
-        printf("Can't set precision\n");
-        goto error; 
-    }
-
     if(H5Tset_offset(tid1,0)<0) {
         H5_FAILED();
         printf("Can't set offset\n");
         goto error; 
     }
-    
+
     if(H5Tset_size(tid1, 3)<0) {
         H5_FAILED();
         printf("Can't set size\n");
         goto error;
+    }
+
+    if(H5Tset_precision(tid1,24)<0) {
+        H5_FAILED();
+        printf("Can't set precision\n");
+        goto error; 
     }
 
     if(H5Tset_order(tid1, H5T_ORDER_BE)<0) {
@@ -6119,11 +6124,17 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
              * most significant bit of mantissa is always 1 unless the floating number
              * has special value.  This step tries to compensate this case by turning
              * on the most significant bit of mantissa if the mantissa bits aren't 
-             * all 0s. */   
+             * all 0s.  It also tries to decrease exponent by one if the exponent 
+             * happens to be set all 1s(NaN).  
+             */   
             if(endian==H5T_ORDER_LE && src_type==FLT_LDOUBLE && src_size==12) { 
                 if(j%12==7) {
                     buf[j] |= 0x80;
                     saved[j] |= 0x80;
+                }
+                if(j%12==9 && (buf[j]==0xff || buf[j]==0x7f) && buf[j-1]==0xff) {
+                    buf[j] -= 1;
+                    saved[j] -= 1;
                 }
             }
         }
@@ -7839,7 +7850,7 @@ main(void)
     
     /* Test software integer-float conversion functions */
     nerrors += run_int_float_conv("sw");
-    
+
     reset_hdf5();
     
     if (nerrors) {
