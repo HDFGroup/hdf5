@@ -462,6 +462,8 @@ H5FD_mpio_communicator(H5FD_t *_file)
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
     FUNC_ENTER(H5FD_mpio_communicator, NULL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE(file->comm);
 }
@@ -494,6 +496,8 @@ H5FD_mpio_setup(H5FD_t *_file, MPI_Datatype btype, MPI_Datatype ftype,
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
     FUNC_ENTER(H5FD_mpio_setup, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     file->btype = btype;
     file->ftype = ftype;
@@ -534,13 +538,16 @@ herr_t
 H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    MPI_Comm comm = file->comm;
+    MPI_Comm comm;
     char msgbuf[1];
     int myid;
     MPI_Status rcvstat;
 
     FUNC_ENTER(H5FD_mpio_wait_for_left_neighbor, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
+    comm = file->comm;
     if (MPI_SUCCESS!= MPI_Comm_rank(comm, &myid))
         HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
 
@@ -584,12 +591,15 @@ herr_t
 H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    MPI_Comm comm = file->comm;
+    MPI_Comm comm;
     char msgbuf[1];
     int myid, numprocs;
 
     FUNC_ENTER(H5FD_mpio_signal_right_neighbor, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
+    comm = file->comm;
     if (MPI_SUCCESS!= MPI_Comm_size( comm, &numprocs ))
         HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_size failed");
     if (MPI_SUCCESS!= MPI_Comm_rank( comm, &myid )) 
@@ -627,6 +637,8 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
     H5FD_mpio_fapl_t	*fa = NULL;
 
     FUNC_ENTER(H5FD_mpio_fapl_get, NULL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_mpio_fapl_t))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -846,6 +858,8 @@ H5FD_mpio_close(H5FD_t *_file)
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Entering H5FD_mpio_close\n");
 #endif
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     /* MPI_File_close sets argument to MPI_FILE_NULL */
     if (MPI_SUCCESS != MPI_File_close(&(file->f)/*in,out*/))
@@ -881,12 +895,14 @@ H5FD_mpio_close(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_query(const H5FD_t *_f, unsigned long *flags /* out */)
+H5FD_mpio_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    const H5FD_mpio_t	*f = (const H5FD_mpio_t*)_f;
+    const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_query, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -921,6 +937,8 @@ H5FD_mpio_get_eoa(H5FD_t *_file)
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
     FUNC_ENTER(H5FD_mpio_get_eoa, HADDR_UNDEF);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE(file->eoa);
 }
@@ -950,6 +968,8 @@ H5FD_mpio_set_eoa(H5FD_t *_file, haddr_t addr)
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
     FUNC_ENTER(H5FD_mpio_set_eoa, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     file->eoa = addr;
 
@@ -988,6 +1008,8 @@ H5FD_mpio_get_eof(H5FD_t *_file)
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
     FUNC_ENTER(H5FD_mpio_get_eof, HADDR_UNDEF);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE(file->eof);
 }
@@ -1059,6 +1081,8 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Entering H5FD_mpio_read\n" );
 #endif
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
@@ -1297,6 +1321,8 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Entering H5FD_mpio_write\n" );
 #endif
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off)<0)
@@ -1469,6 +1495,8 @@ H5FD_mpio_flush(H5FD_t *_file)
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Entering H5FD_mpio_flush\n" );
 #endif
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
 
     if (MPI_SUCCESS != MPI_File_sync(file->f))
         HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_sync failed");

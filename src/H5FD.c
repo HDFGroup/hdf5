@@ -904,7 +904,6 @@ H5FD_close(H5FD_t *file)
     /* Prepare to close file by clearing all public fields */
     driver = file->cls;
     H5I_dec_ref(file->driver_id);
-    HDmemset(file, 0, sizeof(H5FD_t));
 
     /*
      * Dispatch to the driver for actual close. If the driver fails to
@@ -914,6 +913,7 @@ H5FD_close(H5FD_t *file)
     if ((driver->close)(file)<0) {
 	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed");
     }
+    HDmemset(file, 0, sizeof(H5FD_t));
 
     FUNC_LEAVE(SUCCEED);
 }
