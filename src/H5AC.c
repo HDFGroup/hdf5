@@ -173,7 +173,7 @@ H5AC_dest (hdf5_file_t *f)
  */
 void *
 H5AC_find_f (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
-	     const void *udata)
+	     void *udata)
 {
    unsigned	idx;
    herr_t	status;
@@ -298,9 +298,11 @@ H5AC_compare (const void *_a, const void *_b)
  * Function:	H5AC_flush
  *
  * Purpose:	Flushes (and destroys if DESTROY is non-zero) the specified
- *		entry from the cache.  If the entry type is CACHE_FREE then
- *		all types of entries are flushed.  If the ADDR is zero then
- *		all entries of the specified type are flushed.
+ *		entry from the cache.  If the entry TYPE is CACHE_FREE and
+ *		ADDR is zero then all types of entries are flushed. If TYPE
+ *		is CACHE_FREE and ADDR is non-zero, then whatever is cached
+ *		at ADDR is flushed.  Otherwise the thing at ADDR is flushed
+ *		if it is the correct type.
  *
  * 		If there are protected objects they will not be flushed.
  *		However, an attempt will be made to flush all non-protected
@@ -334,7 +336,7 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
    assert (f->cache);
    i = H5AC_HASH (f, addr);
 
-   if (!type || 0==addr) {
+   if (0==addr) {
 
 #ifdef SORT_BY_ADDR
       /*
@@ -360,8 +362,7 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 	 slot = f->cache->slot + i;
 	 if (NULL==slot->type) continue;
 #endif
-	 if ((!type || type==slot->type) &&
-	     (0==addr || addr==slot->addr)) {
+	 if (!type || type==slot->type) {
 	    flush = slot->type->flush;
 	    status = (flush)(f, destroy, slot->addr, slot->thing);
 	    if (status<0) {
@@ -373,7 +374,8 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
       }
       map = H5MM_xfree (map);
 
-   } else if (f->cache->slot[i].type==type && f->cache->slot[i].addr==addr) {
+   } else if ((!type || f->cache->slot[i].type==type) &&
+	      f->cache->slot[i].addr==addr) {
       /*
        * Flush just this entry.
        */
@@ -583,7 +585,7 @@ H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
  */
 void *
 H5AC_protect (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
-	      const void *udata)
+	      void *udata)
 {
    int		idx;
    void		*thing = NULL;

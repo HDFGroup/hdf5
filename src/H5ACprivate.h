@@ -39,7 +39,7 @@
  *		by the LOAD method if the DEST argument is non-zero.
  */
 typedef struct H5AC_class_t {
-   void		*(*load)(hdf5_file_t*, haddr_t addr, const void *udata);
+   void		*(*load)(hdf5_file_t*, haddr_t addr, void *udata);
    herr_t	(*flush)(hdf5_file_t*, hbool_t dest, haddr_t addr,
 			 void *thing);
 } H5AC_class_t;
@@ -79,9 +79,9 @@ typedef struct H5AC_t {
  */
 herr_t H5AC_dest (hdf5_file_t *f);
 void *H5AC_find_f (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
-		   const void *udata);
+		   void *udata);
 void * H5AC_protect (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
-		     const void *udata);
+		     void *udata);
 herr_t H5AC_unprotect (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 		       void *thing);
 herr_t H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,

@@ -45,7 +45,7 @@ typedef struct H5H_t {
 } H5H_t;
 
 /* PRIVATE PROTOTYPES */
-static H5H_t *H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata);
+static H5H_t *H5H_load (hdf5_file_t *f, haddr_t addr, void *udata);
 static herr_t H5H_flush (hdf5_file_t *f, hbool_t dest, haddr_t addr,
 			 H5H_t *heap);
 
@@ -53,7 +53,7 @@ static herr_t H5H_flush (hdf5_file_t *f, hbool_t dest, haddr_t addr,
  * H5H inherits cache-like properties from H5AC
  */
 static const H5AC_class_t H5AC_HEAP[1] = {{
-   (void*(*)(hdf5_file_t*,haddr_t,const void*))H5H_load,
+   (void*(*)(hdf5_file_t*,haddr_t,void*))H5H_load,
    (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5H_flush,
 }};
 
@@ -162,12 +162,13 @@ H5H_new (hdf5_file_t *f, H5H_type_t heap_type, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5H_t *
-H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
+H5H_load (hdf5_file_t *f, haddr_t addr, void *udata)
 {
    uint8	hdr[20], *p;
    H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *tail=NULL;
    haddr_t	free_block=H5H_FREE_NULL;
+   H5H_t	*ret_value=NULL;
 
    FUNC_ENTER (H5H_load, NULL, NULL);
 
@@ -184,7 +185,9 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
    heap = H5MM_xcalloc (1, sizeof(H5H_t));
 
    /* magic number */
-   if (HDmemcmp (hdr, H5H_MAGIC, H5H_SIZEOF_MAGIC)) goto error;
+   if (HDmemcmp (hdr, H5H_MAGIC, H5H_SIZEOF_MAGIC)) {
+      HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
+   }
    p += H5H_SIZEOF_MAGIC;
 
    /* heap data size */
@@ -194,7 +197,7 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
    /* free list head */
    H5F_decode_offset (f, p, free_block);
    if (-1!=free_block && (free_block<0 || free_block>=heap->disk_alloc)) {
-      goto error;
+      HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
    }
 
    /* data */
@@ -203,12 +206,14 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
    if (heap->disk_alloc &&
        H5F_block_read (f, heap->addr, heap->disk_alloc,
 		       heap->chunk + H5H_SIZEOF_HDR(f))<0) {
-      goto error;
+      HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
    }
 
    /* free list */
    while (H5H_FREE_NULL!=free_block) {
-      if (free_block<0 || free_block>=heap->disk_alloc) goto error;
+      if (free_block<0 || free_block>=heap->disk_alloc) {
+	 HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
+      }
       fl = H5MM_xmalloc (sizeof (H5H_free_t));
       fl->offset = free_block;
       fl->prev = tail;
@@ -221,14 +226,15 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
       H5F_decode_offset (f, p, free_block);
       H5F_decode_length (f, p, fl->size);
 
-      if (fl->offset + fl->size > heap->disk_alloc) goto error;
+      if (fl->offset + fl->size > heap->disk_alloc) {
+	 HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
+      }
    }
 
-   FUNC_LEAVE (heap);
+   ret_value = heap;
 
-
-error:
-   if (heap) {
+ done:
+   if (!ret_value && heap) {
       heap->chunk = H5MM_xfree (heap->chunk);
       H5MM_xfree (heap);
       for (fl=heap->freelist; fl; fl=tail) {
@@ -236,7 +242,8 @@ error:
 	 H5MM_xfree (fl);
       }
    }
-   HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
+
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -462,9 +469,10 @@ H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
 /*-------------------------------------------------------------------------
  * Function:	H5H_remove_free
  *
- * Purpose:	Removes free list element FL from the specified heap.
+ * Purpose:	Removes free list element FL from the specified heap and
+ *		frees it.
  *
- * Return:	void
+ * Return:	NULL
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -474,13 +482,14 @@ H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
  *
  *-------------------------------------------------------------------------
  */
-static void
+static H5H_free_t *
 H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
 {
    if (fl->prev) fl->prev->next = fl->next;
    if (fl->next) fl->next->prev = fl->prev;
 
    if (!fl->prev) heap->freelist = fl->next;
+   return H5MM_xfree (fl);
 }
 
 
@@ -545,7 +554,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	 break;
       } else if (fl->size==need) {
 	 offset = fl->offset;
-	 H5H_remove_free (heap, fl);
+	 fl = H5H_remove_free (heap, fl);
 	 break;
       } else if (!max_fl || max_fl->offset < fl->offset) {
 	 max_fl = fl;
@@ -582,7 +591,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	       }
 	    }
 #endif
-	    H5H_remove_free (heap, max_fl);
+	    max_fl = H5H_remove_free (heap, max_fl);
 	 }
 	 
       } else {
@@ -762,7 +771,7 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
 	    if (fl2->offset + fl2->size == fl->offset) {
 	       fl->offset = fl2->offset;
 	       fl->size += fl2->size;
-	       H5H_remove_free (heap, fl2);
+	       fl2 = H5H_remove_free (heap, fl2);
 	       HRETURN (SUCCEED);
 	    }
 	 }
@@ -774,7 +783,7 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
 	 while (fl2) {
 	    if (fl->offset + fl->size == fl2->offset) {
 	       fl->size += fl2->size;
-	       H5H_remove_free (heap, fl2);
+	       fl2 = H5H_remove_free (heap, fl2);
 	       HRETURN (SUCCEED);
 	    }
 	 }

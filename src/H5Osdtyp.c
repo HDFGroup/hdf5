@@ -50,16 +50,17 @@ static herr_t H5O_sim_dtype_debug (hdf5_file_t *f, const void *_mesg,
 
 /* This message derives from H5O */
 const H5O_class_t H5O_SIM_DTYPE[1] = {{
-   H5O_SIM_DTYPE_ID,		    /* message id number */
-   "sim_dtype",				    /* message name for debugging */
-   sizeof (H5O_sim_dtype_t),	/* native message size */
+   H5O_SIM_DTYPE_ID,		    	/* message id number */
+   "sim_dtype",				/* message name for debugging */
+   sizeof (H5O_sim_dtype_t),		/* native message size */
+   H5G_CACHED_SDATA, 			/* symtab entry `type' field */
    H5O_sim_dtype_decode,		/* decode message */
    H5O_sim_dtype_encode,		/* encode message */
    H5O_sim_dtype_fast,			/* get message from stab entry */
    H5O_sim_dtype_cache,			/* put message into stab entry */
    H5O_sim_dtype_copy,			/* copy the native value */
    H5O_sim_dtype_size,			/* size of symbol table entry */
-   NULL,				        /* default reset method */
+   NULL,				/* default reset method */
    H5O_sim_dtype_debug,			/* debug the message */
 }};
 

@@ -65,6 +65,7 @@ test_1 (void)
    CHECK (f, NULL, "H5Aatom_object");
 
    /* create the object */
+   memset (&ent, 0, sizeof(ent));
    ent.header = H5O_new (f, 0, 64);
    CHECK_I (ent.header, "H5O_new");
    ent.type = H5G_NOTHING_CACHED;
@@ -152,7 +153,7 @@ test_1 (void)
    CHECK_PTR (status_ptr, "H5O_read");
    CHECK_PTR (name_mesg.s, "H5O_read");
    VERIFY (strcmp(name_mesg.s, "foo"), 0, "H5O_read");
-
+   if (status_ptr) H5O_reset (H5O_NAME, &name_mesg); /*free message data*/
 
 
    /*

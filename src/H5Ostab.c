@@ -38,6 +38,7 @@ const H5O_class_t H5O_STAB[1] = {{
    H5O_STAB_ID,				/*message id number		*/
    "stab",				/*message name for debugging	*/
    sizeof (H5O_stab_t),			/*native message size		*/
+   H5G_CACHED_STAB, 			/*symtab entry `type' field	*/
    H5O_stab_decode,			/*decode message		*/
    H5O_stab_encode,			/*encode message		*/
    H5O_stab_fast,			/*get message from stab entry	*/

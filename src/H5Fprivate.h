@@ -185,10 +185,22 @@ typedef MPFILE *hdf_file_t;
    *(p) = (uint8)(((uint64)(i) >>  8) & 0xff); (p)++;			      \
    *(p) = (uint8)(((uint64)(i) >> 16) & 0xff); (p)++;			      \
    *(p) = (uint8)(((uint64)(i) >> 24) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint64)(i) >> 32) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint64)(i) >> 40) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint64)(i) >> 48) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint64)(i) >> 56) & 0xff); (p)++;			      \
+   if (sizeof(int64)>4) {						      \
+      *(p) = (uint8)(((uint64)(i) >> 32) & 0xff); (p)++;		      \
+      *(p) = (uint8)(((uint64)(i) >> 40) & 0xff); (p)++;		      \
+      *(p) = (uint8)(((uint64)(i) >> 48) & 0xff); (p)++;		      \
+      *(p) = (uint8)(((uint64)(i) >> 56) & 0xff); (p)++;		      \
+   } else if ((i)<0) {							      \
+      *(p)++ = 0xff;							      \
+      *(p)++ = 0xff;							      \
+      *(p)++ = 0xff;							      \
+      *(p)++ = 0xff;							      \
+   } else {								      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+   }									      \
 }
 
 #  define UINT64ENCODE(p, i) {						      \
@@ -196,10 +208,17 @@ typedef MPFILE *hdf_file_t;
    *(p) = (uint8)(((i) >>  8) & 0xff); (p)++;				      \
    *(p) = (uint8)(((i) >> 16) & 0xff); (p)++;				      \
    *(p) = (uint8)(((i) >> 24) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 32) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 40) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 48) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 56) & 0xff); (p)++;				      \
+   if (sizeof(uint64)>4) {						      \
+      *(p) = (uint8)(((i) >> 32) & 0xff); (p)++;			      \
+      *(p) = (uint8)(((i) >> 40) & 0xff); (p)++;			      \
+      *(p) = (uint8)(((i) >> 48) & 0xff); (p)++;			      \
+      *(p) = (uint8)(((i) >> 56) & 0xff); (p)++;			      \
+   } else {								      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+   }									      \
 }
 
 #  define INT16DECODE(p, i) {						      \
@@ -231,10 +250,14 @@ typedef MPFILE *hdf_file_t;
    (i) |= ((int64)(*(p) & 0xff) <<  8); (p)++;				      \
    (i) |= ((int64)(*(p) & 0xff) << 16); (p)++;				      \
    (i) |= ((int64)(*(p) & 0xff) << 24); (p)++;				      \
-   (i) |= ((int64)(*(p) & 0xff) << 32); (p)++;				      \
-   (i) |= ((int64)(*(p) & 0xff) << 40); (p)++;				      \
-   (i) |= ((int64)(*(p) & 0xff) << 48); (p)++;				      \
-   (i) |= ((int64)(*(p) & 0xff) << 56); (p)++;				      \
+   if (sizeof(int64)>4) {						      \
+      (i) |= ((int64)(*(p) & 0xff) << 32); (p)++;			      \
+      (i) |= ((int64)(*(p) & 0xff) << 40); (p)++;			      \
+      (i) |= ((int64)(*(p) & 0xff) << 48); (p)++;			      \
+      (i) |= ((int64)(*(p) & 0xff) << 56); (p)++;			      \
+   } else {								      \
+      (p) += 4;								      \
+   }									      \
 }
 
 #  define UINT64DECODE(p, i) {						      \
@@ -242,10 +265,14 @@ typedef MPFILE *hdf_file_t;
    (i) |= ((uint64)(*(p) & 0xff) <<  8); (p)++;				      \
    (i) |= ((uint64)(*(p) & 0xff) << 16); (p)++;				      \
    (i) |= ((uint64)(*(p) & 0xff) << 24); (p)++;				      \
-   (i) |= ((uint64)(*(p) & 0xff) << 32); (p)++;				      \
-   (i) |= ((uint64)(*(p) & 0xff) << 40); (p)++;				      \
-   (i) |= ((uint64)(*(p) & 0xff) << 48); (p)++;				      \
-   (i) |= ((uint64)(*(p) & 0xff) << 56); (p)++;				      \
+   if (sizeof(uint64)>4) {						      \
+      (i) |= ((uint64)(*(p) & 0xff) << 32); (p)++;			      \
+      (i) |= ((uint64)(*(p) & 0xff) << 40); (p)++;			      \
+      (i) |= ((uint64)(*(p) & 0xff) << 48); (p)++;			      \
+      (i) |= ((uint64)(*(p) & 0xff) << 56); (p)++;			      \
+   } else {								      \
+      (p) += 4;								      \
+   }									      \
 }
 
 #else
@@ -254,8 +281,29 @@ typedef MPFILE *hdf_file_t;
 #  define UINT16ENCODE(p, i) { *((uint16 *)(p)) = (uint16)(i); (p)+=2; }
 #  define INT32ENCODE(p, i)  { *((int32 *)(p)) = (int32)(i); (p)+=4; }
 #  define UINT32ENCODE(p, i) { *((uint32 *)(p)) = (uint32)(i); (p)+=4; }
-#  define INT64ENCODE(p, i)  { *((int64 *)(p)) = (int64)(i); (p)+=8; }
-#  define UINT64ENCODE(p, i) { *((uint64 *)(p)) = (uint64)(i); (p)+=8; }
+
+#  define INT64ENCODE(p, i)  {						      \
+   *((int64 *)(p)) = (int64)(i);					      \
+   (p) += sizeof(int64);						      \
+   if (4==sizeof(int64)) {						      \
+      *(p)++ = (i)<0?0xff:0x00;						      \
+      *(p)++ = (i)<0?0xff:0x00;						      \
+      *(p)++ = (i)<0?0xff:0x00;						      \
+      *(p)++ = (i)<0?0xff:0x00;						      \
+   }									      \
+}
+
+#  define UINT64ENCODE(p, i) {						      \
+   *((uint64 *)(p)) = (uint64)(i);					      \
+   (p) += sizeof(uint64);						      \
+   if (4==sizeof(uint64)) {						      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+      *(p)++ = 0x00;							      \
+   }									      \
+}
+
 #  define INT16DECODE(p, i)  { (i) = (int16)(*(const int16 *)(p)); (p)+=2; }
 #  define UINT16DECODE(p, i) { (i) = (uint16)(*(const uint16 *)(p)); (p)+=2; }
 #  define INT32DECODE(p, i)  { (i) = (int32)(*(const int32 *)(p)); (p)+=4; }

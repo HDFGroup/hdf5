@@ -18,21 +18,25 @@
  * 	Robb Matzke, 5 Aug 1997
  *	Added calls to H5E.
  *
+ * 	Robb Matzke, 18 Sep 1997
+ *	Added shadow entries.
+ *
  *-------------------------------------------------------------------------
  */
+#define H5G_PACKAGE	/*suppress error message about including H5Gpkg.h*/
 
 /* Packages needed by this file... */
 #include <H5private.h>			/*library			*/
 #include <H5ACprivate.h>		/*cache				*/
 #include <H5Bprivate.h>			/*B-link trees			*/
 #include <H5Eprivate.h>			/*error handling		*/
-#include <H5Gprivate.h>			/*me				*/
+#include <H5Gpkg.h>			/*me				*/
 #include <H5Hprivate.h>			/*heap				*/
 #include <H5MFprivate.h>		/*file memory management	*/
 #include <H5MMprivate.h>		/*core memory management	*/
+#include <H5Oprivate.h>			/*header messages		*/
 
 #define PABLO_MASK	H5G_node_mask
-
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_decode_key (hdf5_file_t *f, uint8 *raw, void *_key);
@@ -42,8 +46,7 @@ static haddr_t H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata,
 			     void *_rt_key);
 static herr_t H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr,
 			      H5G_node_t *sym);
-static H5G_node_t *H5G_node_load (hdf5_file_t *f, haddr_t addr,
-				  const void *_data);
+static H5G_node_t *H5G_node_load (hdf5_file_t *f, haddr_t addr, void *_data);
 static intn H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata,
 			  void *_rt_key);
 static herr_t H5G_node_found (hdf5_file_t *f, haddr_t addr,
@@ -58,12 +61,12 @@ static size_t H5G_node_sizeof_rkey (hdf5_file_t *f);
 
 /* H5G inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_SNODE[1] = {{
-      (void*(*)(hdf5_file_t*,haddr_t,const void*))H5G_node_load,
+      (void*(*)(hdf5_file_t*,haddr_t,void*))H5G_node_load,
       (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5G_node_flush,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
-const H5B_class_t H5B_SNODE[1] = {{
+H5B_class_t H5B_SNODE[1] = {{
    H5B_SNODE_ID,				/*id			*/
    sizeof (H5G_node_key_t),			/*sizeof_nkey		*/
    H5G_node_sizeof_rkey,			/*get_sizeof_rkey	*/
@@ -265,7 +268,10 @@ H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_flush
  *
- * Purpose:	Flush a symbol table node to disk.
+ * Purpose:	Flush a symbol table node to disk.  If any entries have dirty
+ *		shadows, the shadow value is copied into the entry before the
+ *		entry is flushed.  The association between shadows and
+ *		entries is broken.
  *
  * Return:	Success:	SUCCEED
  *
@@ -285,6 +291,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
    uint8	*buf=NULL, *p=NULL;
    size_t	size;
    herr_t	status;
+   int		i;
 
    FUNC_ENTER (H5G_node_flush, NULL, FAIL);
 
@@ -295,6 +302,19 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
    assert (addr>=0);
    assert (sym);
 
+   /*
+    * Synchronize all entries with their corresponding shadow if they have
+    * one.
+    */
+   for (i=0; i<sym->nsyms; i++) {
+      if (H5G_shadow_sync (sym->entry+i)<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL);
+      }
+   }
+
+   /*
+    * Write the symbol node to disk.
+    */
    if (sym->dirty) {
       size = H5G_node_size (f);
       buf = p = H5MM_xmalloc (size);
@@ -321,7 +341,15 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
       if (status<0) HRETURN_ERROR (H5E_SYM, H5E_WRITEERROR, FAIL);
    }
 
+   /*
+    * Destroy the symbol node?  This might happen if the node is being
+    * preempted from the cache.  We should also dissociate the shadow
+    * from the entry.
+    */
    if (destroy) {
+      for (i=0; i<sym->nsyms; i++) {
+	 H5G_shadow_dissociate (sym->entry+i);
+      }
       sym->entry = H5MM_xfree (sym->entry);
       H5MM_xfree (sym);
    }
@@ -333,7 +361,8 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_load
  *
- * Purpose:	Loads a symbol table from the file.
+ * Purpose:	Loads a symbol table from the file and associates shadows
+ *		with their entries.
  *
  * Return:	Success:	Ptr to the new table.
  *
@@ -348,11 +377,13 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
+H5G_node_load (hdf5_file_t *f, haddr_t addr, void *_udata)
 {
    H5G_node_t	*sym = NULL;
    size_t	size = 0;
    uint8	*buf = NULL, *p = NULL;
+   H5G_entry_t	*self = NULL;
+   H5G_node_t	*ret_value = NULL; /*for error handling*/
 
    FUNC_ENTER (H5G_node_load, NULL, NULL);
 
@@ -361,7 +392,8 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
     */
    assert (f);
    assert (addr>=0);
-   assert (NULL==_udata);
+   assert (_udata);
+   self = (H5G_entry_t*)_udata;
 
    /*
     * Initialize variables.
@@ -372,17 +404,19 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
    sym->entry = H5MM_xcalloc (2*H5G_NODE_K(f), sizeof(H5G_entry_t));
    
    if (H5F_block_read (f, addr, size, buf)<0) {
-      H5MM_xfree (sym->entry);
-      H5MM_xfree (sym);
-      HRETURN_ERROR (H5E_SYM, H5E_READERROR, NULL);
+      HGOTO_ERROR (H5E_SYM, H5E_READERROR, NULL);
    }
 
    /* magic */
-   if (HDmemcmp (p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) goto error;
+   if (HDmemcmp (p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+   }
    p += 4;
 
    /* version */
-   if (H5G_NODE_VERS!=*p++) goto error;
+   if (H5G_NODE_VERS!=*p++) {
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+   }
 
    /* reserved */
    p++;
@@ -391,15 +425,28 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
    UINT16DECODE (p, sym->nsyms);
 
    /* entries */
-   if (H5G_decode_vec (f, &p, sym->entry, sym->nsyms)<0) goto error;
+   if (H5G_decode_vec (f, &p, sym->entry, sym->nsyms)<0) {
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+   }
+   buf = H5MM_xfree (buf);
 
-   H5MM_xfree (buf);
-   FUNC_LEAVE (sym);
+   /* shadows */
+   if (H5G_shadow_assoc_node (f, sym, self)<0) {
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+   }
+   
+   ret_value = sym;
+   
 
-error:
-   H5MM_xfree (buf);
-   H5MM_xfree (sym);
-   HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+ done:
+   if (!ret_value) {
+      buf = H5MM_xfree (buf);
+      if (sym) {
+	 sym->entry = H5MM_xfree (sym->entry);
+	 sym = H5MM_xfree (sym);
+      }
+   }
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -433,7 +480,7 @@ error:
 static intn
 H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
 {
-   H5G_node_ud1_t	*udata = (H5G_node_ud1_t *)_udata;
+   H5G_bt_ud1_t		*udata = (H5G_bt_ud1_t *)_udata;
    H5G_node_key_t	*lt_key = (H5G_node_key_t *)_lt_key;
    H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
    const char		*s;
@@ -488,7 +535,8 @@ static herr_t
 H5G_node_found (hdf5_file_t *f, haddr_t addr, const void *_lt_key,
 		void *_udata, const void *_rt_key)
 {
-   H5G_node_ud1_t	*udata = (H5G_node_ud1_t *)_udata;
+   H5G_bt_ud1_t		*bt_udata = (H5G_bt_ud1_t *)_udata;
+   H5G_ac_ud1_t		ac_udata;
    H5G_node_t		*sn = NULL;
    intn			lt=0, idx=0, rt, cmp=1;
    const char		*s;
@@ -501,12 +549,15 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, const void *_lt_key,
     */
    assert (f);
    assert (addr>=0);
-   assert (udata);
+   assert (bt_udata);
+
+   ac_udata.dir_addr = bt_udata->dir_addr;
+   ac_udata.heap_addr = bt_udata->heap_addr;
 
    /*
     * Load the symbol table node for exclusive access.
     */
-   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, NULL))) {
+   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata))) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
    }
 
@@ -516,10 +567,11 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, const void *_lt_key,
    rt = sn->nsyms;
    while (lt<rt && cmp) {
       idx = (lt + rt) / 2;
-      if (NULL==(s=H5H_peek (f, udata->heap_addr, sn->entry[idx].name_off))) {
+      if (NULL==(s=H5H_peek (f, bt_udata->heap_addr,
+			     sn->entry[idx].name_off))) {
 	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
       }
-      cmp = HDstrcmp (udata->name, s);
+      cmp = HDstrcmp (bt_udata->name, s);
       
       if (cmp<0) {
 	 rt = idx;
@@ -529,20 +581,18 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, const void *_lt_key,
    }
    if (cmp) HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
 
-   switch (udata->operation) {
+   switch (bt_udata->operation) {
    case H5G_OPER_FIND:
       /*
-       * The caller is querying the symbol entry.
+       * The caller is querying the symbol entry.  Return just a pointer to
+       * the entry.  The pointer is valid until the next call to H5AC.
        */
-      udata->entry = sn->entry[idx];
+      H5G_shadow_sync (sn->entry+idx);
+      bt_udata->entry_ptr = sn->entry+idx;
       break;
 
-   case H5G_OPER_MODIFY:
-      /*
-       * The caller is modifying the symbol entry. 
-       */
-      sn->entry[idx] = udata->entry;
-      sn->dirty += 1;
+   default:
+      HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL);
       break;
    }
    ret_value = SUCCEED;
@@ -589,6 +639,10 @@ done:
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Sep 1997
+ *	If the shadow pointer is non-null then the shadow is updated to point
+ *	to the new entry.
+ *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -599,14 +653,17 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
 {
    H5G_node_key_t	*md_key = (H5G_node_key_t *)_md_key;
    H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
-   H5G_node_ud1_t 	*udata = (H5G_node_ud1_t *)_udata;
-   
+   H5G_bt_ud1_t 	*bt_udata = (H5G_bt_ud1_t *)_udata;
+
+   H5G_ac_ud1_t		ac_udata;
    H5G_node_t		*sn=NULL, *snrt=NULL;
    haddr_t		new_node=0, offset;
    const char		*s;
    intn			idx=-1, cmp=1;
    intn			lt=0, rt;		/*binary search cntrs	*/
+   intn			i;
    haddr_t		ret_value = FAIL;
+   H5G_shadow_t		*shadow = NULL;
 
    FUNC_ENTER (H5G_node_insert, NULL, FAIL);
 
@@ -618,7 +675,8 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    assert (anchor);
    assert (md_key);
    assert (rt_key);
-   assert (udata);
+   assert (bt_udata);
+   bt_udata->entry_ptr = NULL;
 
    /*
     * Symbol tables are always split so the new symbol table node is
@@ -631,7 +689,9 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    /*
     * Load the symbol node.
     */
-   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, NULL))) {
+   ac_udata.dir_addr = bt_udata->dir_addr;
+   ac_udata.heap_addr = bt_udata->heap_addr;
+   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata))) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
    }
 
@@ -641,10 +701,11 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    rt = sn->nsyms;
    while (lt<rt) {
       idx = (lt + rt) / 2;
-      if (NULL==(s=H5H_peek (f, udata->heap_addr, sn->entry[idx].name_off))) {
+      if (NULL==(s=H5H_peek (f, bt_udata->heap_addr,
+			     sn->entry[idx].name_off))) {
 	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
       }
-      if (0==(cmp=HDstrcmp (udata->name, s))) {
+      if (0==(cmp=HDstrcmp (bt_udata->name, s))) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL); /*already present*/
       }
       if (cmp<0) {
@@ -660,9 +721,9 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
     * heap address changed and update the symbol table object header
     * with the new heap address.
     */
-   offset = H5H_insert (f, udata->heap_addr, HDstrlen(udata->name)+1,
-			udata->name);
-   udata->entry.name_off = offset;
+   offset = H5H_insert (f, bt_udata->heap_addr, HDstrlen(bt_udata->name)+1,
+			bt_udata->name);
+   bt_udata->entry.name_off = offset;
    if (offset<0) HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
 
    if (sn->nsyms>=2*H5G_NODE_K(f)) {
@@ -676,7 +737,7 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       if ((new_node = H5G_node_new (f, NULL, NULL, NULL))<0) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       }
-      if (NULL==(snrt=H5AC_find (f, H5AC_SNODE, new_node, NULL))) {
+      if (NULL==(snrt=H5AC_find (f, H5AC_SNODE, new_node, &ac_udata))) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
       }
       HDmemcpy (snrt->entry, sn->entry + H5G_NODE_K(f),
@@ -684,6 +745,13 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       snrt->nsyms = H5G_NODE_K(f);
       snrt->dirty += 1;
 
+      /* Right shadows */
+      for (i=0; i<H5G_NODE_K(f); i++) {
+	 if ((shadow = snrt->entry[i].shadow)) {
+	    shadow->main = snrt->entry + i;
+	 }
+      }
+	    
       /* The left node */
       HDmemset (sn->entry + H5G_NODE_K(f), 0,
 		H5G_NODE_K(f) * sizeof(H5G_entry_t));
@@ -692,19 +760,46 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
 
       /* Insert the new entry */
       if (idx<=H5G_NODE_K(f)) {
+	 
+	 /* Adjust shadows */
+	 for (i=idx; i<sn->nsyms; i++) {
+	    if (sn->entry[i].shadow) {
+	       sn->entry[i].shadow->main = sn->entry + i + 1;
+	    }
+	 }
+	 if (bt_udata->entry.shadow) {
+	    bt_udata->entry.shadow->main = sn->entry + idx;
+	 }
+
+	 /* Move entries */
 	 HDmemmove (sn->entry + idx + 1,
 		    sn->entry + idx,
 		    (H5G_NODE_K(f)-idx) * sizeof(H5G_entry_t));
-	 sn->entry[idx] = udata->entry;
+	 sn->entry[idx] = bt_udata->entry;
 	 sn->entry[idx].name_off = offset;
+	 sn->entry[idx].dirty = TRUE;
 	 sn->nsyms += 1;
+	 
       } else {
 	 idx -= H5G_NODE_K (f);
+
+	 /* Adjust shadows */
+	 for (i=idx; i<snrt->nsyms; i++) {
+	    if (snrt->entry[i].shadow) {
+	       snrt->entry[i].shadow->main = snrt->entry + i + 1;
+	    }
+	 }
+	 if (bt_udata->entry.shadow) {
+	    bt_udata->entry.shadow->main = snrt->entry + idx;
+	 }
+
+	 /* Move entries */
 	 HDmemmove (snrt->entry + idx + 1,
 		    snrt->entry + idx,
 		    (H5G_NODE_K(f)-idx) * sizeof (H5G_entry_t));
-	 snrt->entry[idx] = udata->entry;
+	 snrt->entry[idx] = bt_udata->entry;
 	 snrt->entry[idx].name_off = offset;
+	 snrt->entry[idx].dirty = TRUE;
 	 snrt->nsyms += 1;
 
 	 if (idx+1 == sn->nsyms) {
@@ -721,12 +816,21 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
        * Add the new symbol to the node.
        */
       sn->dirty += 1;
+      for (i=idx; i<sn->nsyms; i++) {
+	 if (sn->entry[i].shadow) {
+	    sn->entry[i].shadow->main = sn->entry + i + 1;
+	 }
+      }
+      if (bt_udata->entry.shadow) {
+	 bt_udata->entry.shadow->main = sn->entry + idx;
+      }
       HDmemmove (sn->entry+idx+1, sn->entry+idx,
 		 (sn->nsyms-idx) * sizeof (H5G_entry_t));
       sn->nsyms += 1;
-      sn->entry[idx] = udata->entry;
+      sn->entry[idx] = bt_udata->entry;
       sn->entry[idx].name_off = offset;
-
+      sn->entry[idx].dirty = TRUE;
+      
       if (idx+1==sn->nsyms) {
 	 rt_key->offset = offset;
 	 *rt_key_changed = TRUE;
@@ -765,12 +869,13 @@ done:
 static herr_t
 H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
 {
-   H5G_node_list_t	*udata = (H5G_node_list_t *)_udata;
+   H5G_bt_ud2_t		*bt_udata = (H5G_bt_ud2_t *)_udata;
    H5G_node_t		*sn = NULL;
    intn			i;
    const char		*s;
    herr_t		ret_value = FAIL;
-
+   H5G_ac_ud1_t		ac_udata;
+   
    FUNC_ENTER (H5G_node_list, NULL, FAIL);
 
    /*
@@ -778,9 +883,11 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
     */
    assert (f);
    assert (addr>=0);
-   assert (udata);
+   assert (bt_udata);
 
-   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, NULL))) {
+   ac_udata.dir_addr = bt_udata->dir_addr;
+   ac_udata.heap_addr = bt_udata->heap_addr;
+   if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata))) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
    }
 
@@ -789,32 +896,34 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
     * keep track of how many names we've seen and don't bother doing
     * anything else.
     */
-   if (udata->nsyms >= udata->maxentries) {
-      udata->nsyms += sn->nsyms;
+   if (bt_udata->nsyms >= bt_udata->maxentries) {
+      bt_udata->nsyms += sn->nsyms;
       HGOTO_DONE (SUCCEED);
    }
 
    /*
     * Save the symbol table entries.
     */
-   if (udata->entry) {
-      for (i=0; i<sn->nsyms && udata->nsyms+i<udata->maxentries; i++) {
-	 udata->entry[udata->nsyms+i] = sn->entry[i];
+   if (bt_udata->entry) {
+      for (i=0; i<sn->nsyms && bt_udata->nsyms+i<bt_udata->maxentries; i++) {
+	 H5G_shadow_sync (sn->entry+i);
+	 bt_udata->entry[bt_udata->nsyms+i] = sn->entry[i];
       }
    }
-   if (udata->name) {
-      for (i=0; i<sn->nsyms && udata->nsyms+i<udata->maxentries; i++) {
-	 if (NULL==(s=H5H_peek (f, udata->heap_addr, sn->entry[i].name_off))) {
+   if (bt_udata->name) {
+      for (i=0; i<sn->nsyms && bt_udata->nsyms+i<bt_udata->maxentries; i++) {
+	 if (NULL==(s=H5H_peek (f, bt_udata->heap_addr,
+				sn->entry[i].name_off))) {
 	    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
 	 }
-	 udata->name[udata->nsyms+i] = H5MM_xstrdup (s);
+	 bt_udata->name[bt_udata->nsyms+i] = H5MM_xstrdup (s);
       }
    }
 
    /*
     * Update the number of symbols.
     */
-   udata->nsyms += sn->nsyms;
+   bt_udata->nsyms += sn->nsyms;
    ret_value = SUCCEED;
 
 done:
@@ -847,10 +956,11 @@ herr_t
 H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 		intn fwidth, haddr_t heap)
 {
-   int		i;
+   int		i, acc;
    H5G_node_t	*sn = NULL;
    herr_t	status;
    const char	*s;
+   H5G_ac_ud1_t	ac_udata;
 
    FUNC_ENTER (H5G_node_debug, NULL, FAIL);
 
@@ -862,6 +972,18 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
    assert (stream);
    assert (indent>=0);
    assert (fwidth>=0);
+
+   /*
+    * We have absolutely no idea where the object header for the symbol table
+    * to which this node belongs is located.  In fact, if the file is corrupt,
+    * there may not even be an object header for that symbol table.  So we
+    * supply `-1' as the directory address which causes no open objects to be
+    * associated with the node.  For that reason, we flush this node from the
+    * cache when we're done so if some later caller knows the header address
+    * they'll be able to access the open objects.
+    */
+   ac_udata.dir_addr = -1;
+   ac_udata.heap_addr = heap;
 
    /*
     * If we couldn't load the symbol table node, then try loading the
@@ -882,6 +1004,12 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
    fprintf (stream, "%*s%-*s %d of %d\n", indent, "", fwidth,
 	    "Number of Symbols:",
 	    sn->nsyms, 2*H5G_NODE_K(f));
+   for (i=acc=0; i<sn->nsyms; i++) {
+      if (sn->entry[i].shadow) acc++;
+   }
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Shadows:", acc);
+   
 
    indent += 3;
    fwidth = MAX (0, fwidth-3);
@@ -893,8 +1021,12 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 		  s);
       }
       H5G_debug (f, sn->entry+i, stream, indent, fwidth);
+      fprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
+	       "Shadow:",
+	       sn->entry[i].shadow ? "Yes":"No");
    }
 
+   H5AC_flush (f, H5AC_SNODE, addr, TRUE); /*see note above*/
    FUNC_LEAVE (SUCCEED);
 }
    

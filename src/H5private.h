@@ -101,6 +101,7 @@
  * File offsets.
  */
 typedef off_t		haddr_t;
+#define NO_ADDR		(-1)
 
 /*
  * Some compilers have problems declaring auto variables that point
@@ -402,7 +403,7 @@ typedef off_t		haddr_t;
 extern hbool_t library_initialize_g; /*good thing C's lazy about extern!*/
 extern hbool_t thread_initialize_g; /*don't decl interface_initialize_g */
 
-#define FUNC_ENTER(func_name,interface_init_func,err)			      \
+#define FUNC_ENTER(func_name,interface_init_func,err) {		      	      \
    CONSTR (FUNC, #func_name);						      \
    PABLO_SAVE (ID_ ## func_name);					      \
 									      \
@@ -428,8 +429,8 @@ extern hbool_t thread_initialize_g; /*don't decl interface_initialize_g */
 	  ((herr_t(*)(void))interface_init_func)()<0) {			      \
 	 HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err);			      \
       }									      \
-   }
-
+   }									      \
+   {
 
 
 /*-------------------------------------------------------------------------
@@ -447,7 +448,7 @@ extern hbool_t thread_initialize_g; /*don't decl interface_initialize_g */
  *
  *-------------------------------------------------------------------------
  */
-#define FUNC_LEAVE(return_value) HRETURN(return_value)
+#define FUNC_LEAVE(return_value) HRETURN(return_value)}}
 
 /*
  * The FUNC_ENTER() and FUNC_LEAVE() macros make calls to Pablo functions

@@ -27,7 +27,7 @@
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr,
 			 H5O_t *oh);
-static H5O_t *H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data);
+static H5O_t *H5O_load (hdf5_file_t *f, haddr_t addr, void *_data);
 static intn H5O_find_in_ohdr (hdf5_file_t *f, haddr_t addr,
 			      const H5O_class_t **type_p, intn sequence);
 static intn H5O_alloc (hdf5_file_t *f, H5O_t *oh, const H5O_class_t *type,
@@ -37,7 +37,7 @@ static intn H5O_alloc_new_chunk (hdf5_file_t *f, H5O_t *oh, size_t size);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
-   (void*(*)(hdf5_file_t*,haddr_t,const void*))H5O_load,
+   (void*(*)(hdf5_file_t*,haddr_t,void*))H5O_load,
    (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5O_flush,
 }};
 
@@ -166,7 +166,7 @@ H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
+H5O_load (hdf5_file_t *f, haddr_t addr, void *_data)
 {
    H5O_t	*oh = NULL;
    H5O_t	*ret_value = (void*)1; /*kludge for HGOTO_ERROR*/
@@ -509,8 +509,9 @@ H5O_link (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent, intn adjust)
 
    /* check args */
    assert (f);
-   assert (addr>=0);
-
+   assert (addr>0 || (ent && ent->header>0));
+   if (addr<=0) addr = ent->header;
+   
    /* get header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
@@ -528,9 +529,11 @@ H5O_link (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent, intn adjust)
       }
    } else {
       oh->nlink += adjust;
-      if (oh->nlink>1 && ent) ent->type = H5G_NOTHING_CACHED;
+      if (oh->nlink>1 && ent && H5G_NOTHING_CACHED!=ent->type) {
+	 ent->dirty = TRUE;
+	 ent->type = H5G_NOTHING_CACHED;
+      }
    }
-	 
 
    oh->dirty = TRUE;
    FUNC_LEAVE (oh->nlink);
@@ -570,7 +573,10 @@ H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
    /* check args */
    assert (f);
-   assert (addr>=0);
+   if (addr<=0 && (!ent || ent->header<=0)) {
+      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
+   }
+   if (addr<=0) addr = ent->header;
    assert (sequence>=0);
 
    /* can we get it from the symbol table? */
@@ -584,6 +590,10 @@ H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
    }
+
+#ifdef LATER
+   /* should we cache it in ENT? */
+#endif
 
    /* copy the message to the user-supplied buffer */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
@@ -692,7 +702,7 @@ H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
 
    /* check args */
    assert (f);
-   assert (addr>=0);
+   assert (addr>0);
 
    if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
@@ -709,17 +719,20 @@ H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
  * Function:	H5O_modify
  *
  * Purpose:	Modifies an existing message or creates a new message.
- *		The object header is at file address ADDR of file F.  An
+ *		The object header is at file address ADDR of file F (but if
+ *		ENT is present then its `header' field is used instead).  An
  *		optional symbol table entry ENT can be supplied in which
  *		case the cache fields in that symbol table are updated if
- *		appropriate.  If the symbol table entry changes then the
- *		optional ENT_MODIFIED arg will point to a non-zero value,
- *		otherwise ENT_MODIFIED isn't changed.
+ *		appropriate.
  *
  * 		The OVERWRITE argument is either a sequence number of a
  *		message to overwrite (usually zero) or the constant
  *		H5O_NEW_MESSAGE (-1) to indicate that a new message is to
- *		be created.
+ *		be created.  If the message to overwrite doesn't exist then
+ *		it is created (but only if it can be inserted so its sequence
+ *		number is OVERWRITE; that is, you can create a message with
+ *		the sequence number 5 if there is no message with sequence
+ *		number 4).
  *
  * Return:	Success:	The sequence number of the message that
  *				was modified or created.
@@ -736,8 +749,7 @@ H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
  */
 intn
 H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
-	    hbool_t *ent_modified, const H5O_class_t *type,
-	    intn overwrite, const void *mesg)
+	    const H5O_class_t *type, intn overwrite, const void *mesg)
 {
    H5O_t	*oh = NULL;
    intn		idx, sequence;
@@ -747,10 +759,11 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
    /* check args */
    assert (f);
-   assert (addr>=0);
+   assert (addr>0 || (ent && ent->header>0));
    assert (type);
    assert (mesg);
-
+   if (addr<=0) addr = ent->header;
+   
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
    }
@@ -764,7 +777,13 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    /* Was the right message found? */
    if (overwrite>=0 &&
        (idx>=oh->nmesgs || sequence!=overwrite)) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL); /*message not found*/
+
+      /* But can we insert a new one with this sequence number? */
+      if (overwrite==sequence+1) {
+	 overwrite = -1;
+      } else {
+	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL); /*message not found*/
+      }
    }
 
    /* Allocate space for the new message */
@@ -787,7 +806,7 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    /* Copy into the symbol table entry */
    if (oh->nlink<=1 && ent && type->cache) {
       hbool_t modified = (type->cache)(ent, mesg);
-      if (modified && ent_modified) *ent_modified = modified;
+      if (ent && !ent->dirty) ent->dirty = modified;
    }
 
    FUNC_LEAVE (sequence);
@@ -826,7 +845,7 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
  */
 herr_t
 H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
-	    hbool_t *ent_modified, const H5O_class_t *type, intn sequence)
+	    const H5O_class_t *type, intn sequence)
 {
    H5O_t	*oh = NULL;
    intn		i, seq;
@@ -835,8 +854,9 @@ H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
    /* check args */
    assert (f);
-   assert (addr>=0);
+   assert (addr>0 || (ent && ent->header>0));
    assert (type);
+   if (addr<=0) addr = ent->header;
 
    /* load the object header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
@@ -848,9 +868,9 @@ H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
       if (seq++ == sequence || H5O_ALL==sequence) {
 
 	 /* clear symbol table entry cache */
-	 if (ent && type->cache && H5G_NOTHING_CACHED!=ent->type) {
+	 if (ent && type->cache && type->cache_type==ent->type) {
 	    ent->type = H5G_NOTHING_CACHED;
-	    if (ent_modified) *ent_modified = TRUE;
+	    ent->dirty = TRUE;
 	 }
 
 	 /* change message type to nil and zero it */
@@ -922,9 +942,14 @@ H5O_alloc_extend_chunk (H5O_t *oh, intn chunkno, size_t size)
 	 oh->mesg[idx].raw_size += delta;
 
 	 old_addr = oh->chunk[chunkno].image;
-	 oh->chunk[chunkno].size += delta;
+
+	 /* Be careful not to indroduce garbage */
 	 oh->chunk[chunkno].image = H5MM_xrealloc (old_addr,
-						   oh->chunk[chunkno].size);
+						   (oh->chunk[chunkno].size +
+						    delta));
+	 HDmemset (oh->chunk[chunkno].image + oh->chunk[chunkno].size,
+		   0, delta);
+	 oh->chunk[chunkno].size += delta;
 
 	 /* adjust raw addresses for messages of this chunk */
 	 if (old_addr != oh->chunk[chunkno].image) {
@@ -1071,7 +1096,7 @@ H5O_alloc_new_chunk (hdf5_file_t *f, H5O_t *oh, size_t size)
    oh->chunk[chunkno].dirty = TRUE;
    oh->chunk[chunkno].addr = H5O_NO_ADDR;
    oh->chunk[chunkno].size = size;
-   oh->chunk[chunkno].image = p = H5MM_xmalloc (size);
+   oh->chunk[chunkno].image = p = H5MM_xcalloc (1, size);
 
    /*
     * Make sure we have enough space for all possible new messages

@@ -22,6 +22,6 @@ PRIVATE_HDR=testhdf5.h
 
 # How to build the programs...
 testhdf5: $(PROG_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(PROG_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(PROG_OBJ) ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@

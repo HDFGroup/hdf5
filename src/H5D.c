@@ -45,6 +45,18 @@ static char RcsId[] = "@(#)$Revision$";
 
 #define PABLO_MASK	H5D_mask
 
+/*
+ * A dataset is the following struct.
+ */
+typedef struct H5D_t {
+   hdf5_file_t	*file; 		/* File store for this object		   */
+   H5G_entry_t	*ent; 		/* Cached object header stuff		   */
+   h5_datatype_t *type; 	/* Datatype of this dataset		   */
+   H5P_dim_t	*dim; 		/* Dimensionality of this dataset	   */
+   haddr_t	data_addr; 	/* Data storage address			   */
+   hbool_t	dirty;		/* Header messages not updated yet	   */
+} H5D_t;
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
@@ -110,15 +122,16 @@ void H5D_term_interface (void)
  RETURNS
     Returns ID (atom) on success, FAIL on failure
  DESCRIPTION
-    This function actually creates the dataset object, but it cannot be
-    accessed by name until it is stored in the file.
+    This function actually creates a dataset object in a file (of course,
+    output might not happen for some time).
 --------------------------------------------------------------------------*/
 hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
 {
     H5D_t *new_dset;        /* new dataset object to create */
     hatom_t ret_value = SUCCEED;
-    hdf5_file_t *file = NULL; 
-
+    hdf5_file_t *file = NULL;
+    H5G_entry_t	tmp_ent;
+    
     FUNC_ENTER(H5D_create, H5D_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
@@ -135,14 +148,37 @@ hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
     
     /* Initialize the dataset object */
     new_dset->file = file;
-    new_dset->name = H5MM_xstrdup (name);
-    new_dset->cwd = file->root_sym;
-    new_dset->ent.header = -1;		/* Not on disk yet */
-    new_dset->ent.type = H5G_NOTHING_CACHED;
     new_dset->type=NULL;		/* No type yet */
     new_dset->dim=NULL;			/* No dimensions yet */
     new_dset->data_addr = -1;		/* No data yet */
-    new_dset->modified=BTRUE;       	/* Yep, we're new */
+    new_dset->dirty = FALSE;		/* There are no messages yet */
+
+    /* Create the (empty) object header in the file */
+    memset (&tmp_ent, 0, sizeof(tmp_ent));
+    if ((tmp_ent.header = H5O_new (file, 0, H5D_MINHDR_SIZE))<0) {
+       HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
+    }
+
+    /*
+     * Link the (empty) object header into the symbol table so others can
+     * access it.  At least that way no one will try to create another one of
+     * these things with the same name.  We also hold the object open while
+     * H5D has a handle, preventing others from moving or deleting it from
+     * under us.
+     */
+#ifdef LATER
+    /* We should use the real CWD instead of always the root object! */
+#else
+    H5G_shadow_sync (file->root_sym);
+    if (H5G_insert (file, file->root_sym, NULL, name, &tmp_ent)<0) {
+       /* Something by that name already exists, or some other failure */
+       HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL);
+    }
+    if (NULL==(new_dset->ent = H5G_open (file, file->root_sym, name))) {
+       /* Can't open the header we just created -- should never happen */
+       HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+    }
+#endif
 
     /* Register the new datatype and get an ID for it */
     if((ret_value=H5Aregister_atom(H5_DATASET, (const VOIDP)new_dset))<0)
@@ -197,39 +233,44 @@ hatom_t H5D_find_name(hatom_t grp_id, hobjtype_t type, const char *name)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
 
     /* Initialize file, directory, name fields */
-    dset->modified = FALSE;
     dset->file = file;
-    dset->name = H5MM_xstrdup (name);
-/* WARNING! WARNING! WARNING! */
-/* The following line explicitly uses the root symbol as the
-   current working directory.  This should be changed to something more
-   appropriate and is only hacked in here to get the prototype working. -QAK
-*/
-/* WARNING! WARNING! WARNING! */
-    dset->cwd = file->root_sym;
-
-    /* Get the dataset's symbol table entry */
-    if (H5G_find (dset->file, dset->cwd, NULL, dset->name, &(dset->ent))<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL);
+    dset->dirty = FALSE;
+    
+#ifdef LATER
+    /* We should really use the real CWD instead of the root object! */
+#else
+    /*
+     *                     WARNING! WARNING! WARNING!
+     * The following line explicitly uses the root symbol as the current
+     * working directory.  This should be changed to something more
+     * appropriate and is only hacked in here to get the prototype working.
+     * -QAK
+     *                     WARNING! WARNING! WARNING!
+     */
+    H5G_shadow_sync (file->root_sym);
+    if (NULL==(dset->ent=H5G_open (file, file->root_sym, name))) {
+       HGOTO_ERROR (H5E_DATASET, H5E_NOTFOUND, FAIL);
+    }
+#endif
 
     /* Get the dataset's type (currently only atomic types) */
     if((dset->type=HDcalloc(1,sizeof(h5_datatype_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-    if (NULL==H5O_read (dset->file, dset->ent.header, &(dset->ent),
-				    H5O_SIM_DTYPE, 0, dset->type))
+    if (NULL==H5O_read (dset->file, NO_ADDR, dset->ent, H5O_SIM_DTYPE, 0,
+			dset->type))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
     
     /* Get the dataset's dimensionality (currently only simple dataspaces) */
     if((dset->dim=HDcalloc(1,sizeof(H5P_dim_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     dset->dim->type=H5P_TYPE_SIMPLE;    /* for now... */
-    if (NULL==(dset->dim->s=H5O_read (dset->file, dset->ent.header,
-				      &(dset->ent), H5O_SIM_DIM, 0, NULL)))
+    if (NULL==(dset->dim->s=H5O_read (dset->file, NO_ADDR, dset->ent,
+				      H5O_SIM_DIM, 0, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
 
     /* Get the dataset's data offset (currently only standard storage) */
-    if (NULL==H5O_read (dset->file, dset->ent.header ,&(dset->ent),
-			H5O_STD_STORE, 0, &store))
+    if (NULL==H5O_read (dset->file, NO_ADDR, dset->ent, H5O_STD_STORE, 0,
+			&store))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
     dset->data_addr=store.off;
 
@@ -241,7 +282,6 @@ done:
   if(ret_value == FAIL)   
     { /* Error condition cleanup */
        if (dset) {
-	  dset->name = H5MM_xfree (dset->name);
 #ifdef LATER
 	  /* We might need to free the `type' and `dim' fields also... */
 #endif
@@ -290,9 +330,10 @@ herr_t H5Dset_info(hatom_t oid, hatom_t tid, hatom_t did)
     if(dataset->type || dataset->dim)
         HGOTO_ERROR(H5E_FUNC, H5E_ALREADYINIT, FAIL);
 
+    /* Update the dataset in memory */
     dataset->type=H5Aatom_object(tid);
     dataset->dim=H5Aatom_object(did);
-    dataset->modified=BTRUE;       /* indicate the values have changed */
+    dataset->dirty = TRUE;
 
 done:
   if(ret_value == FAIL)   
@@ -499,7 +540,7 @@ herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
     if(dataset->data_addr<0) {
         if((dataset->data_addr=H5MF_alloc(dataset->file,towrite))<0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-	dataset->modified = TRUE;
+	dataset->dirty = TRUE;
     }
 
     /* Check memory to disk datatype conversions, etc. */
@@ -551,9 +592,6 @@ herr_t H5D_flush(hatom_t oid)
 {
     H5D_t 	*dataset;         /* dataset object to release */
     herr_t	ret_value = SUCCEED;
-    intn	mesg_sequence = 0;	/*message sequence number	*/
-    hbool_t	new_dataset;		/*is this a new dataset on disk?*/
-    hbool_t	entry_changed = FALSE;  /*did symbol table entry change?*/
 
     FUNC_ENTER(H5D_flush, H5D_init_interface, FAIL);
 
@@ -564,37 +602,15 @@ herr_t H5D_flush(hatom_t oid)
     if((dataset=H5Aatom_object(oid))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
     
-    if (dataset->modified) {
-       /*
-        * A new dataset is one which doesn't exist on disk yet.
-        */
-       new_dataset = (dataset->ent.header < 0);
-       
-       
-       /*
-        * If the dataset is new then create an object header for it.  Set the
-        * message sequence numbers to H5O_NEW_MESSAGE so we create new
-        * messages instead of trying to modify existing messages.
-        */
-        if (new_dataset) {
-	   dataset->ent.type = H5G_NOTHING_CACHED;
-	   if ((dataset->ent.header = H5O_new (dataset->file, 0,
-					       H5D_MINHDR_SIZE))<0) {
-	      /* Can't create header. */
-	      HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-	   }
-	   mesg_sequence = H5O_NEW_MESG;
-	}
-
+    if (dataset->dirty) {
 
 	/*
-	 * Create or update messages for this dataset.  Begin with the
+	 * Modify/create messages for this dataset.  Begin with the
 	 * type information.
 	 */
 	if (H5T_is_atomic (dataset->type)) {
-	   if (H5O_modify (dataset->file, dataset->ent.header,
-			   &(dataset->ent), &entry_changed, H5O_SIM_DTYPE,
-			   mesg_sequence, dataset->type)<0) {
+	   if (H5O_modify (dataset->file, NO_ADDR, dataset->ent,
+			   H5O_SIM_DTYPE, 0, dataset->type)<0) {
 	      /* Can't create/update type message */
 	      HGOTO_ERROR (H5E_INTERNAL, H5E_CANTCREATE, FAIL);
 	   }
@@ -604,12 +620,11 @@ herr_t H5D_flush(hatom_t oid)
 	}
 
 	/*
-	 * Write the dimensionality information.
+	 * Modify/create the dimensionality information.
 	 */
 	if (H5P_is_simple (dataset->dim)) {
-	   if (H5O_modify (dataset->file, dataset->ent.header,
-			   &(dataset->ent), &entry_changed, H5O_SIM_DIM,
-			   mesg_sequence, dataset->dim->s)<0) {
+	   if (H5O_modify (dataset->file, NO_ADDR, dataset->ent,
+			   H5O_SIM_DIM, 0, dataset->dim->s)<0) {
 	      /* Can't create/update dimensionality message */
 	      HGOTO_ERROR (H5E_INTERNAL, H5E_CANTCREATE, FAIL);
 	   }
@@ -619,7 +634,7 @@ herr_t H5D_flush(hatom_t oid)
 	}
 
 	/*
-	 * Write the dataset's storage information.
+	 * Modify/create the dataset's storage information.
 	 */
 	if (dataset->data_addr>=0) {
 	   H5O_std_store_t store;  /* standard storage info */
@@ -627,41 +642,21 @@ herr_t H5D_flush(hatom_t oid)
 	   store.len = H5T_size (dataset->type, BTRUE) *
 	               H5P_nelem (dataset->dim);
 	   store.off = dataset->data_addr;
-	   if (H5O_modify (dataset->file, dataset->ent.header,
-			   &(dataset->ent), &entry_changed, H5O_STD_STORE,
-			   mesg_sequence, &store)<0) {
+	   if (H5O_modify (dataset->file, NO_ADDR, dataset->ent,
+			   H5O_STD_STORE, 0, &store)<0) {
 	      /* Can't create/modify storage information */
 	      HGOTO_ERROR (H5E_INTERNAL, H5E_CANTCREATE, FAIL);
 	   }
 	}
 
-	/*
-	 * If this is a new dataset then we must give it a name so others can
-	 * access it.
-	 */
-	if (new_dataset) {
-	   assert (dataset->name);
-	   if (H5G_insert (dataset->file, dataset->cwd, NULL,
-			   dataset->name, &(dataset->ent))<0) {
-	      /* Can't name dataset */
-	      HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-	   }
-	} else if (entry_changed) {
-	   if (H5G_modify (dataset->file, dataset->cwd,  NULL,
-			   dataset->name, &(dataset->ent))<0) {
-	      /* Can't update symbol table entry */
-	      HGOTO_ERROR (H5E_SYM,  H5E_CANTINIT,  FAIL);
-	   }
-	}
-
-#ifdef ROBB
-       /* Flush dataset header to disk */
-       if (H5O_flush (dataset->file, FALSE, dataset->ent.header, NULL)<0) {
+#if 1
+	/* Flush dataset header to disk -- just for debugging */
+	if (H5AC_flush (dataset->file, NULL, dataset->ent->header, FALSE)<0) {
           HRETURN_ERROR (H5E_OHDR, H5E_CANTFLUSH, FAIL);
        }
-#endif /* ROBB */
-
-	dataset->modified = FALSE;	/*it's clean now*/
+#endif
+       
+	dataset->dirty = FALSE;	/*it's clean now*/
     }
        
 done:
@@ -703,13 +698,16 @@ herr_t H5D_release(hatom_t oid)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
     /* Check if we have information to flush to the file... */
-    if(dataset->modified && H5D_flush(oid)<0) {
+    if(dataset->dirty && H5D_flush(oid)<0) {
        /* Can't flush dataset */
        HGOTO_ERROR (H5E_OHDR, H5E_CANTFLUSH, FAIL);
     }
+
+    /* Close the dataset object */
+    H5G_close (dataset->file, dataset->ent);
+    dataset->ent = NULL;
     
     /* release the memory used for the dataset */
-    dataset->name = H5MM_xfree (dataset->name);
     H5MM_xfree (dataset);
 
     /* Delete the dataset from the atom group */

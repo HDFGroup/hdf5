@@ -91,13 +91,13 @@ typedef struct H5B_t {
  * Library prototypes.
  */
 herr_t H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
-		  intn fwidth, const H5B_class_t *type);
+		  intn fwidth, H5B_class_t *type);
 haddr_t H5B_new (hdf5_file_t *f, const H5B_class_t *type);
-herr_t H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+herr_t H5B_find (hdf5_file_t *f, H5B_class_t *type, haddr_t addr,
 		 void *udata);
-haddr_t H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+haddr_t H5B_insert (hdf5_file_t *f, H5B_class_t *type, haddr_t addr,
 		    void *udata);
-herr_t H5B_list (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+herr_t H5B_list (hdf5_file_t *f, H5B_class_t *type, haddr_t addr,
 		 void *udata);
 
 

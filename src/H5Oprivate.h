@@ -47,6 +47,7 @@ typedef struct H5O_class_t {
    intn		id;			/*message type ID on disk	*/
    const char	*name;			/*message name for debugging	*/
    size_t	native_size;		/*size of native message	*/
+   H5G_type_t	cache_type;		/*type field in symbol table	*/
    void		*(*decode)(hdf5_file_t*,size_t,const uint8*);
    herr_t	(*encode)(hdf5_file_t*,size_t,uint8*,const void*);
    void		*(*fast)(const H5G_entry_t*, void*); /*get from stab ent*/
@@ -163,11 +164,9 @@ void *H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 const void *H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
 		      intn sequence);
 intn H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
-		 hbool_t *ent_modified, const H5O_class_t *type,
-		 intn overwrite, const void *mesg);
+		 const H5O_class_t *type, intn overwrite, const void *mesg);
 herr_t H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
-		   hbool_t *ent_modified, const H5O_class_t *type,
-		   intn sequence);
+		   const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 herr_t H5O_debug (hdf5_file_t *f, haddr_t addr, FILE *stream,
 		  intn indent, intn fwidth);

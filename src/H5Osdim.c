@@ -53,6 +53,7 @@ const H5O_class_t H5O_SIM_DIM[1] = {{
    H5O_SIM_DIM_ID,          /* message id number */
    "sim_dim",               /* message name for debugging */
    sizeof (H5O_sim_dim_t),  /* native message size */
+   H5G_CACHED_SDATA,	    /* symtab entry `type' field */
    H5O_sim_dim_decode,      /* decode message */
    H5O_sim_dim_encode,      /* encode message */
    H5O_sim_dim_fast,        /* get message from stab entry */

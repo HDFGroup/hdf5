@@ -28,21 +28,6 @@
 #include <H5Pprivate.h>	/* for the H5P_sdim_t type */
 #include <H5Oprivate.h> /* Object Headers */
 
-/*
- * A dataset is the following struct.  It can exist in memory without
- * existing in a file.
- */
-typedef struct H5D_t {
-   hdf5_file_t	*file; 		/* File store for this object		   */
-   char		*name;		/* Name of dataset, relative or absolute   */
-   H5G_entry_t	*cwd;		/* Directory for relative name lookup	   */
-   H5G_entry_t	ent; 		/* Cached object header stuff		   */
-   h5_datatype_t *type; 	/* Datatype of this dataset		   */
-   H5P_dim_t	*dim; 		/* Dimensionality of this dataset	   */
-   haddr_t	data_addr; 	/* Data storage address			   */
-   hbool_t	modified; 	/* Is memory out of data wrt file?	   */
-} H5D_t;
-   
 #define H5D_RESERVED_ATOMS  0
 
 /* Set the minimum object header size to create objects with */

@@ -399,8 +399,7 @@ H5F_new (void)
    H5AC_new (f, H5AC_NSLOTS);
 
    /* Create a root symbol slot */
-   f->root_sym = H5MM_xcalloc (1, sizeof (H5G_entry_t));
-   f->root_sym->type = H5G_NOTHING_CACHED;
+   f->root_sym = H5G_new_entry ();
    
    return f;
 }
@@ -688,7 +687,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     /* Check if the file already exists */
     f_handle=H5F_OPEN(filename,flags);
     if(H5F_OPENERR(f_handle))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPEN, FAIL);/*file doesn't exist*/
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL);/*file doesn't exist*/
 
     /* Create the file node */
     if (NULL==(new_file=H5F_new()))

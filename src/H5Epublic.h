@@ -64,7 +64,7 @@ typedef enum
       H5E_FILEEXISTS,          /* File already exists */
       H5E_FILEOPEN,            /* File already open */
       H5E_CANTCREATE,          /* Can't create file */
-      H5E_CANTOPEN,            /* Can't open file */
+      H5E_CANTOPENFILE,        /* Can't open file */
       H5E_NOTHDF5,             /* Not an HDF5 format file */
       H5E_BADFILE,             /* Bad file ID accessed */
 
@@ -85,7 +85,8 @@ typedef enum
       H5E_CANTFLUSH,	       /* Can't flush object from cache */
       H5E_CANTLOAD,	       /* Can't load object into cache */
       H5E_PROTECT,	       /* Protected object error */
-
+      H5E_NOTCACHED,	       /* Object not currently cached */
+      
     /* B-tree related errors */
       H5E_NOTFOUND,	       /* Object not found */
       H5E_EXISTS,	       /* Object already exists */
@@ -102,6 +103,7 @@ typedef enum
       H5E_BADMESG,	       /* Unrecognized message */
 
     /* Directory related errors */
+      H5E_CANTOPENOBJ,	       /* Can't open object */
       H5E_COMPLEN,	       /* Name component is too long */
       H5E_LINK		       /* Link count failure */
   }

@@ -51,6 +51,7 @@ const H5O_class_t H5O_STD_STORE[1] = {{
    H5O_STD_STORE_ID,        /* message id number */
    "std_store",             /* message name for debugging */
    sizeof (H5O_std_store_t),/* native message size */
+   H5G_NOTHING_CACHED, 	    /* symtab entry `type' field */
    H5O_std_store_decode,    /* decode message */
    H5O_std_store_encode,    /* encode message */
    NULL,                    /* get message from stab entry */

@@ -107,7 +107,7 @@ static void test_h5d_basic_write(void)
     CHECK(ret,FAIL,"H5Tset_type");
     
     did1=H5Mcreate(fid1,H5_DATASET,DATA1_NAME);
-    CHECK(sid1,FAIL,"H5Mcreate");
+    CHECK(did1,FAIL,"H5Mcreate");
 
     ret=H5Dset_info(did1,tid1,sid1);
     CHECK(ret,FAIL,"H5Dset_info");
