@@ -99,7 +99,7 @@ FROM SASN100,
 When everything is finished compiling and linking,
 FROM JANUS, 
 
-9) cp -r ../hdf5 /scratch
+9) cp -rp ../hdf5 /scratch
 
 10) cd /scratch/hdf5/test
 
