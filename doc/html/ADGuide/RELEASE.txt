@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-snap4 released on Sun Jan 23 18:03:43 CST 2005
+HDF5 version 1.6.4-snap5 released on Sun Jan 30 18:23:26 CST 2005
 ================================================================================
 
 
@@ -434,6 +434,12 @@ Known Problems
   If -ieee is not used, the converted double values are mostly 0.0 but
   occasionally as 1**-308.  This has been reported to the system staff.
   All other tests have passed.
+
+* The C++ library's tests fails when compiling with PGI C++ compiler.  The
+  workaround until the problem is correctly handled is to use the
+  flag "--instantiate=local" prior to the configure and build steps, as:
+        setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
+        setenv CXX "pgCC -tlocal" for others
 
 * On at least one system, (SDSC DataStar), the scheduler (in this case
   LoadLeveler) sends job status updates to standard error when you run
