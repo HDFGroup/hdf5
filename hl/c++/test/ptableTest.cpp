@@ -1,12 +1,14 @@
 #include "ptableTest.h"
 
+#define TEST_FILE "packettest.h5"
+
 /* Main test function */
 int main(void)
 {
     herr_t err;
 
     /* Create new HDF5 file */
-    fileID = H5Fcreate("test.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fileID = H5Fcreate(TEST_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if(fileID <0)
         fprintf(stderr, "Couldn't open file.\n");
     else {
@@ -29,6 +31,9 @@ int main(void)
         err = H5Fclose(fileID);
         if( err < 0 )
             fprintf(stderr, "Failed to close file.\n");
+
+        /* Delete the file */
+        remove(TEST_FILE);
     }
 }
 
