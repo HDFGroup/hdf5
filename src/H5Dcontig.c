@@ -46,7 +46,8 @@ herr_t
 H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxpl_id,
 	       void *buf/*out*/)
 {
-    haddr_t	eoa;		        /*end of file address		*/
+    haddr_t abs_eoa;		        /* Absolute end of file address		*/
+    haddr_t rel_eoa;		        /* Relative end of file address		*/
    
     FUNC_ENTER(H5F_contig_read, FAIL);
 
@@ -119,11 +120,16 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
                     f->shared->sieve_loc=addr;
 
                     /* Make certain we don't read off the end of the file */
-                    if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
+                    if (HADDR_UNDEF==(abs_eoa=H5FD_get_eoa(f->shared->lf))) {
                         HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                             "unable to determine file size");
                     }
-                    f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
+
+                    /* Adjust absolute EOA address to relative EOA address */
+                    rel_eoa=abs_eoa-f->shared->base_addr;
+
+                    /* Compute the size of the sieve buffer */
+                    f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
 
                     /* Read the new sieve buffer */
                     if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
@@ -161,11 +167,16 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
                 f->shared->sieve_loc=addr;
 
                 /* Make certain we don't read off the end of the file */
-                if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
+                if (HADDR_UNDEF==(abs_eoa=H5FD_get_eoa(f->shared->lf))) {
                     HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                         "unable to determine file size");
                 }
-                f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
+
+                /* Adjust absolute EOA address to relative EOA address */
+                rel_eoa=abs_eoa-f->shared->base_addr;
+
+                /* Compute the size of the sieve buffer */
+                f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
 
                 /* Read the new sieve buffer */
                 if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
@@ -213,9 +224,10 @@ herr_t
 H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
         hid_t dxpl_id, const void *buf)
 {
-    haddr_t	eoa;		        /*end of file address		*/
+    haddr_t abs_eoa;		        /* Absolute end of file address		*/
+    haddr_t rel_eoa;		        /* Relative end of file address		*/
 
-    FUNC_ENTER(H5F_block_write, FAIL);
+    FUNC_ENTER(H5F_contig_write, FAIL);
 
     assert (f);
     assert (size<SIZET_MAX);
@@ -293,11 +305,16 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                     f->shared->sieve_loc=addr;
 
                     /* Make certain we don't read off the end of the file */
-                    if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
+                    if (HADDR_UNDEF==(abs_eoa=H5FD_get_eoa(f->shared->lf))) {
                         HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                             "unable to determine file size");
                     }
-                    f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
+
+                    /* Adjust absolute EOA address to relative EOA address */
+                    rel_eoa=abs_eoa-f->shared->base_addr;
+
+                    /* Compute the size of the sieve buffer */
+                    f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
 
                     /* Read the new sieve buffer */
                     if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
@@ -336,11 +353,16 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                 f->shared->sieve_loc=addr;
 
                 /* Make certain we don't read off the end of the file */
-                if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
+                if (HADDR_UNDEF==(abs_eoa=H5FD_get_eoa(f->shared->lf))) {
                     HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                         "unable to determine file size");
                 }
-                f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
+
+                /* Adjust absolute EOA address to relative EOA address */
+                rel_eoa=abs_eoa-f->shared->base_addr;
+
+                /* Compute the size of the sieve buffer */
+                f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
 
                 /* Read the new sieve buffer */
                 if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
