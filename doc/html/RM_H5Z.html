@@ -137,44 +137,145 @@ facilitate moving easily between them.</i>
 <dl>
 <dt><strong>Name:</strong> <a name="Compression-Register">H5Zregister</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Zregister</code>(<em>H5Z_filter_t</em> <code>filter</code>,
-        <em>const char *</em><code>comment</code>,
-        <em>H5Z_func_t</em> <code>function</code>
+    <dd><em>herr_t</em> <code>H5Zregister</code>(<em>const H5Z_class_t</em> <code>filter_class</code>)
     )
 <dt><strong>Purpose:</strong>
-    <dd> Registers new filter.
+    <dd>Registers new filter.
 <dt><strong>Description:</strong>
     <dd><code>H5Zregister</code> registers a new filter with the
-         HDF5 library.  
-	 <p>
-	 Making a new filter available to an application is a two-step
-	 process.  The first step is to <span class="termEmphasis">define</span> 
-	 the new filter <code>function</code> as described below.
-	 This step can be skipped only when the filter is predifined, as is 
-	 the case with the Fletcher32 checksum and shuffle filters that
-	 are distributed with the HDF5 Library.
-	 This call to <code>H5Zregister</code>, 
-	 <span class="termEmphasis">registering</span> the filter with the 
-	 library, is the second step.  
-	 <p>
-	 The new filter is specified by the filter identifier 
-	 <code>filter</code>.  
-         <p>
-         <code>comment</code> is used for debugging and may be 
-	 the null pointer. 
-         <p>
-         <code>function</code> is a user-defined function 
-	 which performs the action of the filter.
-         <p>
-         The statistics associated with a filter are not reset
-         by this function; they accumulate over the life of the library.
+      HDF5 library.  
+      <p>
+      Making a new filter available to an application is a two-step 
+      process.  The first step is to <span class="termEmphasis">define</span> 
+      the three filter callback filter functions described below:
+      <code>can_applyr_func</code>, <code>set_local_func</code>, and
+      <code>filter_func</code>.
+      This step can be skipped only when the filter is predefined, as is 
+      the case with the Fletcher32 checksum and shuffle filters that
+      are distributed with the HDF5 Library.
+      This call to <code>H5Zregister</code>, 
+      <span class="termEmphasis">registering</span> the filter with the
+      library, is the second step.  
+      <p>
+      <code>H5Zregister</code> accepts a single parameter, 
+      the <code>filter_class</code> data structure, 
+      which is defined as follows:
+      <pre>
+   &nbsp;   typedef struct H5Z_class_t {
+   &nbsp;       H5Z_filter_t filter_id;
+   &nbsp;       const char  *comment;
+   &nbsp;       H5Z_can_apply_func_t can_apply_func;
+   &nbsp;       H5Z_set_local_func_t set_local_func;
+   &nbsp;       H5Z_func_t filter_func;            
+   &nbsp;   } H5Z_class_t;
+      </pre>
+        
+      <p>
+      <code>filter_id</code> is the identifier for the new filter. 
+      <p>
+      <code>comment</code> is used for debugging and may be 
+      the null pointer. 
+      <p>
+      <code>can_apply_func</code>, described in detail below, 
+      is a user-defined callback function which determines whether 
+      the combination of the dataset creation property list setting, 
+      the datatype, and the dataspace represent a valid combination 
+      to apply this filter to.
+      <p>
+      <code>set_local_func</code>, described in detail below, 
+      is a user-defined callback function which sets any parameters that 
+      are specific to this dataset, based on the combination of the 
+      dataset creation property list values, the datatype, and the 
+      dataspace.
+      <p>
+      <code>filter_func</code>, described in detail below, 
+      is a user-defined callback function which performs the action 
+      of the filter.
+      <p>
+      The statistics associated with a filter are not reset
+      by this function; they accumulate over the life of the library.
 
-    <p><strong>New filters.</strong>   Before a filter can be 
-         linked into an application with <code>H5Zregister</code>, 
-         the filter must be defined as described in the HDF5 Library 
-	 header file <code>H5Zpublic.h</code>:
+      <p>
+      <strong>The callback functions</strong> 
+      <br>
+      Before <code>H5Zregister</code> can link a filter into an 
+      application, three callback functions must be defined 
+      as described in the HDF5 Library header file <code>H5Zpublic.h</code>.
 
-    <dir>
+      <p>
+      <u>The <i>can apply</i> callback function</u> is defined as follows:<br>
+      <dir>
+          <em>typedef herr_t</em> (*<code>H5Z_can_apply_func_t</code>)
+          (<em>hid_t</em> <code>dcpl_id</code>,
+          <em>hid_t</em> <code>type_id</code>,
+          <em>hid_t</em> <code>space_id</code>)
+      </dir>
+      <p>
+      Before a dataset is created, the <i>can apply</i> callbacks for 
+      any filters used in the dataset creation property list are called
+      with the dataset's dataset creation property list, <code>dcpl_id</code>,
+      the dataset's datatype, <code>type_id</code>, and
+      a dataspace describing a chunk, <code>space_id</code>,
+      (for chunked dataset storage).
+      <p>
+      This callback must determine whether the combination of the 
+      dataset creation property list settings, the datatype, and the 
+      dataspace represent a valid combination to which to apply this filter.  
+      For example, an invalid combination may involve 
+      the filter not operating correctly on certain datatypes,
+      on certain datatype sizes, or on certain sizes of the chunk dataspace.
+      <p>
+      This callback can be the <code>NULL</code> pointer, in which case 
+      the library will assume that the filter can be applied to a dataset with 
+      any combination of dataset creation property list values, datatypes, 
+      and dataspaces.
+      <p>
+      The <i>can apply</i> callback function must return 
+      a positive value for a valid combination, 
+      zero for an invalid combination, and 
+      a negative value for an error.
+
+      <p>
+      <u>The <i>set local</i> callback function</u> is defined as follows:<br>
+      <dir>
+          <em>typedef herr_t</em> (*<code>H5Z_set_local_func_t</code>)
+          (<em>hid_t</em> <code>dcpl_id</code>,
+          <em>hid_t</em> <code>type_id</code>,
+          <em>hid_t</em> <code>space_id</code>)
+      </dir>
+      <p>
+      After the <i>can apply</i> callbacks are checked for a new dataset, 
+      the <i>set local</i> callback functions for any filters used in the 
+      dataset creation property list are called.  
+      These callbacks receive 
+      <code>dcpl_id</code>, the dataset's private copy of the dataset
+      creation property list passed in to <code>H5Dcreate</code> 
+      (i.e. not the actual property list passed in to <code>H5Dcreate</code>);
+      <code>type_id</code>, the datatype identifier passed in to 
+      <code>H5Dcreate</code>, 
+      which is not copied and should not be modified; and 
+      <code>space_id</code>, a dataspace describing the chunk 
+      (for chunked dataset storage), which should also not be modified.
+      <p>
+      The <i>set local</i> callback must set any parameters that are  
+      specific to this dataset, based on the combination of the 
+      dataset creation property list values, the datatype, and the dataspace.  
+      For example, some filters perform different actions based on 
+      different datatypes, datatype sizes, numbers of dimensions, 
+      or dataspace sizes.
+      <p>
+      The <i>set local</i> callback may be the <code>NULL</code> pointer, 
+      in which case, the library will assume that there are 
+      no dataset-specific settings for this filter.
+      <p>
+      The <i>set local</i> callback function must return 
+      a non-negative value on success and 
+      a negative value for an error.
+
+      <p>
+      <u>The <i>filter operation</i> callback function</u>, 
+      defining the filter's operation on the data, is defined as follows:
+      <dir>
           <em>typedef size_t</em> (*<code>H5Z_func_t</code>)
           (<em>unsigned int</em> <code>flags</code>,
           <em>size_t</em> <code>cd_nelmts</code>,
@@ -182,34 +283,42 @@ facilitate moving easily between them.</i>
           <em>size_t</em> <code>nbytes</code>,
           <em>size_t *</em><code>buf_size</code>,
           <em>void **</em><code>buf</code>)
-    </dir>
+      </dir>
 
-    <p>The parameters <code>flags</code>, <code>cd_nelmts</code>, 
+      <p>
+      The parameters <code>flags</code>, <code>cd_nelmts</code>, 
       and <code>cd_values</code> are the same as for the function
-      The additional flag <code>H5Z_FLAG_REVERSE</code> is set when 
+      <a href="RM_H5P.html#Property-SetFilter"><code>H5Pset_filter</code></a>.
+      The one exception is that an additional flag, 
+      <code>H5Z_FLAG_REVERSE</code>, is set when 
       the filter is called as part of the input pipeline. 
+      <p>
       The parameter <code>*buf</code> points to the input buffer 
       which has a size of <code>*buf_size</code> bytes,
       <code>nbytes</code> of which are valid data. 
-    <p>The filter should perform the transformation in place if
-      possible and return the number of valid bytes or zero for
-      failure.  If the transformation cannot be done in place, 
+      <p>
+      The filter should perform the transformation in place if
+      possible.  If the transformation cannot be done in place, 
       then the filter should allocate a new buffer with
       <code>malloc()</code> and assign it to <code>*buf</code>,
       assigning the allocated size of that buffer to
       <code>*buf_size</code>. 
       The old buffer should be freed by calling <code>free()</code>.
-
+      <p>
+      If successful, the <i>filter operation</i> callback function 
+      returns the number of valid bytes of data contained in <code>*buf</code>.
+      In the case of failure, the return value is <code>0</code> (zero)
+      and all pointer arguments are left unchanged.
+<dt><strong>Note:</strong>
+    <dd>The <code>H5Zregister</code> interface is substantially revised 
+      from the HDF5 Release 1.4.x series.  
+      The <code>H5Z_class_t</code> struct and 
+      the <i>set local</i> and <i>can apply</i> callback functions
+      first appeared in HDF5 Release 1.6.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>H5Z_filter_t</em> <code>method</code>
-            <dd>IN: Filter identifier.
-        <dt><em>const char *</em><code>comment</code>
-            <dd>IN: String associated with the filter;  
-                used for debugging purposes only.
-		May be the null pointer.
-        <dt><em>H5Z_func_t</em> <code>function</code>
-            <dd>IN: Filter function.
+        <dt><em>const H5Z_class_t</em> <code>filter_class</code>
+            <dd>IN: Struct containing filter-definition information.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -334,7 +443,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem --> 
 
-Last modified:  8 April 2003
+Last modified:  6 May 2003
  
 </body>
 </html>
