@@ -1435,11 +1435,7 @@ main(int argc, char *argv[])
     if (test_chunk) {
 	nerrors += test_create(fapl, FILENAME[0], H5D_CHUNKED);
 	nerrors += test_rdwr  (fapl, FILENAME[2], H5D_CHUNKED);
-#ifdef QAK
 	nerrors += test_extend(fapl, FILENAME[4], H5D_CHUNKED);
-#else /* QAK */
-HDfprintf(stderr,"Uncomment tests!\n");
-#endif /* QAK */
     }
 
     /* Contiguous storage layout tests */

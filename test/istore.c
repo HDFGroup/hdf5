@@ -464,6 +464,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     sprintf(s, "Testing istore sparse: %s", dims);
     TESTING(s);
     buf = H5MM_malloc(nx * ny * nz);
+    HDmemset(buf, 128, nx * ny * nz);
 
     /* Set dimensions of dataset */
     for (u=0; u<(size_t)ndims; u++)
@@ -492,8 +493,6 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
 	offset[1] = HDrandom() % (TEST_SPARSE_SIZE-ny);
 	offset[2] = HDrandom() % (TEST_SPARSE_SIZE-nz);
 
-	HDmemset(buf, (signed)(128+ctr), nx * ny * nz);
-
         /* Select region in file dataspace */
         if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL)<0) TEST_ERROR;
 
@@ -516,7 +515,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
 	}
 	total += nx * ny * nz;
 #if 0
-	printf("ctr: ctr=%d, total=%lu\n", ctr, (unsigned long) total);
+	HDfprintf(stderr,"ctr: ctr=%Zu, total=%Zu\n", ctr, total);
 #endif
 
 	/* We don't test reading yet.... */
@@ -567,9 +566,9 @@ main(int argc, char *argv[])
     unsigned            u;              /* Local index variable */
     char		filename[1024];
 
-    /* Parse arguments or assume all tests (`small', `medium' and `large') */
+    /* Parse arguments or assume these tests (`small', `medium' ) */
     if (1 == argc) {
-	size_of_test = TEST_SMALL | TEST_MEDIUM | TEST_LARGE;
+	size_of_test = TEST_SMALL | TEST_MEDIUM;
     } else {
 	int			i;
 	for (i = 1, size_of_test = 0; i < argc; i++) {
@@ -657,7 +656,6 @@ main(int argc, char *argv[])
 	status = test_extend(file, "extend", 10, 400, 10);
 	nerrors += status < 0 ? 1 : 0;
     }
-#ifdef QAK
     if (size_of_test & TEST_SMALL) {
 	status = test_sparse(file, "sparse", 100, 5, 0, 0);
 	nerrors += status < 0 ? 1 : 0;
@@ -678,9 +676,6 @@ main(int argc, char *argv[])
 	status = test_sparse(file, "sparse", 800, 50, 50, 50);
 	nerrors += status < 0 ? 1 : 0;
     }
-#else /* QAK */
-HDfprintf(stderr,"Uncomment tests!\n");
-#endif /* QAK */
 
     /* Close the test file and exit */
     H5Pclose(fcpl);
