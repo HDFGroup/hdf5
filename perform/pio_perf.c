@@ -1304,6 +1304,8 @@ parse_command_line(int argc, char *argv[])
 	cl_opts->max_xfer_size = cl_opts->num_bpp;
     if (cl_opts->min_xfer_size > cl_opts->max_xfer_size)
 	cl_opts->min_xfer_size = cl_opts->max_xfer_size;
+    if (cl_opts->min_num_procs > cl_opts->max_num_procs)
+	cl_opts->min_num_procs = cl_opts->max_num_procs;
 
     return cl_opts;
 }
