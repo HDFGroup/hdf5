@@ -1125,6 +1125,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
     int				use_types_this_time, used_types_last_time;
+    herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_read, FAIL);
 
@@ -1137,10 +1138,10 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
-        HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
     if ((hsize_t)size_i != size)
-        HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i");
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'r'])
@@ -1169,7 +1170,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         buf_type = file->btype;
         file_type = file->ftype;
         if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
-            HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     } else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes. The
@@ -1189,7 +1190,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
             use_types_this_time) { 	/* almost certainly a different ftype */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native",  file->info))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
     }
     
     /*
@@ -1204,14 +1205,14 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
     if (H5FD_MPIO_INDEPENDENT==dx->xfer_mode) {
         if (MPI_SUCCESS!= MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_read_at failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_read_at failed");
     } else {
 #ifdef H5FDmpio_DEBUG
 	if (H5FD_mpio_Debug[(int)'t'])
 	    fprintf(stdout, "H5FD_mpio_read: using MPIO collective mode\n");
 #endif
         if (MPI_SUCCESS!= MPI_File_read_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat ))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_read_at_all failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_read_at_all failed");
     }
 
     /* KLUDGE, Robb Matzke, 2000-12-29
@@ -1234,7 +1235,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     else {
         /* How many bytes were actually read? */
         if (MPI_SUCCESS != MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
     } /* end else */
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'c'])
@@ -1252,7 +1253,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 
     /* Check for read failure */
     if (bytes_read<0 || bytes_read>size_i)
-        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
     /*
      * This gives us zeroes beyond end of physical MPI file.  What about
@@ -1264,7 +1265,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
              * INCOMPLETE rky 1998-09-18
              * Haven't implemented reading zeros beyond EOF. What to do???
              */
-            HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "eof file read failed");
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "eof file read failed");
         } else {
             memset((char*)buf+bytes_read, 0, (size_t)n);
         }
@@ -1275,12 +1276,13 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     file->eof = HADDR_UNDEF;
 #endif
 
+done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Leaving H5FD_mpio_read\n" );
 #endif
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1409,12 +1411,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off)<0)
-        HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
-        HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
     if ((hsize_t)size_i != size)
-        HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i");
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'w'])
@@ -1549,27 +1551,31 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
     file->eof = HADDR_UNDEF;
     
 done:
-    /* if only p<round> writes, need to broadcast the ret_value to other processes */
-    if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
-	if (MPI_SUCCESS !=
-	    MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, file->mpi_round, file->comm))
-          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Bcast failed");
+    /* Guard against getting into metadate broadcast in failure cases */
+    if(ret_value!=FAIL) {
+        /* if only p<round> writes, need to broadcast the ret_value to other processes */
+        if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
+            if (MPI_SUCCESS !=
+                MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, file->mpi_round, file->comm))
+              HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Bcast failed");
 
-        /* Round-robin rotate to the next process */
-        file->mpi_round = (++file->mpi_round)%file->mpi_size;
+            /* Round-robin rotate to the next process */
+            file->mpi_round = (++file->mpi_round)%file->mpi_size;
 #ifdef QAK
-{
-    int max,min;
+    {
+        int max,min;
 
-    MPI_Allreduce(&file->mpi_round, &max, 1, MPI_INT, MPI_MAX, file->comm);
-    MPI_Allreduce(&file->mpi_round, &min, 1, MPI_INT, MPI_MIN, file->comm);
-    if(max!=file->mpi_round)
-        printf("%s: rank=%d, round=%d, max=%d\n",FUNC,file->mpi_rank,file->mpi_round,max);
-    if(min!=file->mpi_round)
-        printf("%s: rank=%d, round=%d, min=%d\n",FUNC,file->mpi_rank,file->mpi_round,min);
-}
-#endif /* QAK */
+        MPI_Allreduce(&file->mpi_round, &max, 1, MPI_INT, MPI_MAX, file->comm);
+        MPI_Allreduce(&file->mpi_round, &min, 1, MPI_INT, MPI_MIN, file->comm);
+        if(max!=file->mpi_round)
+            printf("%s: rank=%d, round=%d, max=%d\n",FUNC,file->mpi_rank,file->mpi_round,max);
+        if(min!=file->mpi_round)
+            printf("%s: rank=%d, round=%d, min=%d\n",FUNC,file->mpi_rank,file->mpi_round,min);
     }
+#endif /* QAK */
+        } /* end if */
+    } /* end if */
+
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "proc %d: Leaving H5FD_mpio_write with ret_value=%d\n",
