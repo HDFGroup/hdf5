@@ -201,6 +201,8 @@ Library
 Configuration
 -------------
 
+    * When using gcc 3.x, we use -std=gnu99 instead of -ansi for compiling.
+      QAK - 2003/04/11
     * IA64 platform has its own configure setting and use Intel Compilers as
       the default compilers (were gcc and pgf90 before.)  This also eliminated
       the segmentation fault in the fortran test.  The missing reference of
