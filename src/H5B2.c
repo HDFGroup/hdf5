@@ -48,7 +48,7 @@
 #define H5B2_NUM_LEAF_REC(n,r)          (((n)-H5B2_OVERHEAD_SIZE)/(r))
 
 /* Uncomment this macro to enable extra sanity checking */
-#define H5B2_DEBUG
+/* #define H5B2_DEBUG */
 
 
 /* Local typedefs */
@@ -1859,8 +1859,6 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         left_addr = internal->node_ptrs[idx].addr;
         right_addr = internal->node_ptrs[idx+1].addr;
 
-HDfprintf(stderr,"%s: Merging 2 internal nodes in B-tree, untested!\n",FUNC);
-HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
         /* Lock left & right B-tree child nodes */
         if (NULL == (left_internal = H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
@@ -2029,8 +2027,6 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         middle_addr = internal->node_ptrs[idx].addr;
         right_addr = internal->node_ptrs[idx+1].addr;
 
-HDfprintf(stderr,"%s: Merging 2 internal nodes in B-tree, untested!\n",FUNC);
-HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
         /* Lock B-tree child nodes */
         if (NULL == (left_internal = H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx-1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
@@ -2119,7 +2115,7 @@ HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
             unsigned u;         /* Local index variable */
 
             /* Copy node pointers from middle node into left node */
-            HDmemcpy(&(left_node_ptrs[0]),&(middle_node_ptrs[0]),sizeof(H5B2_node_ptr_t)*middle_nrec_move);
+            HDmemcpy(&(left_node_ptrs[*left_nrec+1]),&(middle_node_ptrs[0]),sizeof(H5B2_node_ptr_t)*middle_nrec_move);
 
             /* Count the number of records being moved into the left node */
             for(u=0; u<middle_nrec_move; u++)
@@ -3445,7 +3441,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     } /* end if */
     /* Merge or redistribute child node pointers, if necessary */
     else {
-        int         cmp;        /* Comparison value of records */
+        int         cmp=0;      /* Comparison value of records */
         unsigned retries;       /* Number of times to attempt redistribution */
 
         /* Locate node pointer for child */
@@ -3515,10 +3511,8 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         } /* end while */
 
         /* Handle deleting a record from an internal node */
-        if(cmp==0) {
-            HDassert(swap_loc==NULL);
+        if(!swap_loc && cmp==0)
             swap_loc = H5B2_INT_NREC(internal,shared,idx-1);
-        } /* end if */
 
         /* Swap record to delete with record from leaf, if we are the last internal node */
         if(swap_loc && depth==1)
