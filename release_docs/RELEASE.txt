@@ -357,7 +357,6 @@ Known Problems
           wl="-Wl,"
 
      * To build Fortran Library using Intel compilers one has to 
-          
           x modify source code in the fortran/src directory to remove !DEC and !MS
             compiler's directives 
           x build fails in fortran/test and then in frotran/examples directory;
@@ -367,8 +366,7 @@ Known Problems
                     work.pc
                     ../src/work.pc 
 
-          x on IA64 systems one has to use "-cl,work.pcl" Fortran compiler flag
-            to build in the fortran/test and fortran/examples directories;
-            modify Makefiles in those directories, or do 
+     * To build Fortran Library on IA64 use
+                   setenv CC "ecc -DIA64"
                    setenv F9X "efc -cl,work.pcl"
-            before running configure.
+            before running configure and see steps described above.
