@@ -273,6 +273,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	    ${MAKE} && \
 	    ${MAKE} check && \
 	    ${MAKE} install install-doc && \
+	    (cd examples; ${MAKE} check ) && \
 	    ${MAKE} uninstall uninstall-doc); then
 	    :
 	else
