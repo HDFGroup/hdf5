@@ -103,6 +103,7 @@ Tools
     * Merged the tools with the 1.2.2 branch.  Required adding new macros, VERSION12
       and VERSION13, used in conditional compilation.  Updated the Windows project files
       for the tools.            
+    * h5dump displays opaque and bitfield data correctly.
 
 Documentation
 -------------
