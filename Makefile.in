@@ -98,20 +98,14 @@ install:
 	@$(LT) --mode=finish $(libdir)
 
 install-examples:
-	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
-	  if test $$d != "dummy"; then					      \
+	@@SETX@; for d in examples @HDF5_INTERFACES@; do		      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
-	  fi;								      \
 	done
-	(cd examples && $(MAKE) $@) || exit 1;
 
 uninstall-examples:
-	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
-	  if test $$d != "dummy"; then					      \
+	@@SETX@; for d in examples @HDF5_INTERFACES@; do		      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
-	  fi;								      \
 	done
-	(cd examples && $(MAKE) $@) || exit 1;
 
 install-doc:
 	@$(MAKE) install-examples
@@ -124,11 +118,8 @@ uninstall-doc:
 ## Check if installation is correct by checking if examples can be built.
 ## This requires a proper "make install" has been done.
 check-install:
-	(cd examples && $(MAKE) check) || exit 1
-	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
-	  if test $$d != "dummy"; then					      \
+	@@SETX@; for d in examples @HDF5_INTERFACES@; do		      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
-	  fi;								      \
 	done
 
 ## Number format detection
