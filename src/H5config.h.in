@@ -89,8 +89,11 @@
 /* Define if the stream virtual file driver should be compiled */
 #undef HAVE_STREAM
 
-/* Define if you have the <netinet/tcp.h> header file.  */
+/* Define if <netinet/tcp.h> header file is available */
 #undef HAVE_NETINET_TCP_H
+
+/* Define if struct socklen_t is known */
+#undef HAVE_STRUCT_SOCKLEN_T
 
 /* The number of bytes in a __int64.  */
 #undef SIZEOF___INT64
@@ -305,6 +308,9 @@
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
 
+/* Define if you have the <sys/socket.h> header file.  */
+#undef HAVE_SYS_SOCKET_H
+
 /* Define if you have the <sys/stat.h> header file.  */
 #undef HAVE_SYS_STAT_H
 
@@ -316,6 +322,9 @@
 
 /* Define if you have the <sys/timeb.h> header file.  */
 #undef HAVE_SYS_TIMEB_H
+
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
