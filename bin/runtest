@@ -1,5 +1,4 @@
 #! /bin/sh
-# $Id$
 # run the hdf5/bin/snapshot
 # Usage:
 #	runtest		run the test for the local host
@@ -40,8 +39,7 @@ SRCDIR="srcdir"
 SNAPCMD="$SRCDIR test clean"
 # Default Standard snaptest command options
 STANDARD_OPT=""
-ENABLE_PARALLEL="op-configure --enable-parallel"
-#SNAPCMD="$SRCDIR op-configure --enable-stream-vfd op-configure --enable-static-exec test clean"
+ENABLE_PARALLEL="--enable-parallel"
 
 #***************
 # Various hosts
@@ -288,41 +286,43 @@ RUNSNAPTEST()
     PRINT "*** starting $TEST_TYPE tests in $HOSTNAME ***"
     PRINT "Uname -a: `uname -a`"
 
-    # parse the test type and set options accordingly
+    # Parse the test type and set options accordingly.
+    # See comments of SNAPTEST_CONFIG_PARSE().
     while [ $# -gt 0 ]; do
 	case $1 in
 	    -n32) # want -n32 option
 		SRCDIRNAME=${SRCDIRNAME}-n32
 		CC="cc -n32"
 		export CC
-		shift
 		;;
 	    parallel) # want parallel test
 		SNAPCMD_OPT="$SNAPCMD_OPT $ENABLE_PARALLEL"
 		SRCDIRNAME=${SRCDIRNAME}-pp
-		shift
 		;;
 	    standard) # standard test
-		shift
+		;;
+	    --*)
+		# option for configure
+		SNAPCMD_OPT="$SNAPCMD_OPT $1"
 		;;
 	    op-configure)
 		# option for configure
 		SNAPCMD_OPT="$SNAPCMD_OPT $1 $2"
-		shift; shift
+		shift
 		;;
 	    setenv)
 		# set environment variable
 		shift
 		eval $1="$2"
 		export $1
-		shift; shift
+		shift
 		;;
 	    *) # unknown test
 		PRINT "$0: unknown type of test ($1)"
 		retcode=1
-		shift
 		;;
 	esac
+	shift
     done
     [ $retcode -ne 0 ] && errcode=$retcode && return $retcode
 
@@ -366,14 +366,25 @@ RUNSNAPTEST()
 # Taking configuration from input.
 # This should be invoke with configure file as stdin.
 # Syntax of the configure file:
-# All lines started with the # are comment lines and are ignored.
-# standard ...  # what the standard configure options are.
-# type of tests for individual host.
-# <host>: <test>        Do <test> for <host> 
-# all: <test>           Do <test> for all hosts. 
-# <weekday>/...		Use this configure if the <weekday> matches.
-#			<weekday> can be {Mon,Tue,Wed,Thu,Fri,Sat,Sun}
-# If no <host>: input for a <host>, the standard test is assumed.
+#    All lines started with the # are comment lines and are ignored.
+#    Blank lines are ignored too.
+#    Each config line starts with a "Scope" followed by test types.
+#
+# Scope can be:
+#    standard ...          # what the standard test types are.
+#    <host>: <test>        Do <test> for <host> 
+#    all: <test>           Do <test> for all hosts. 
+#    <weekday>/...         Use this scope if the <weekday> matches.
+#                          <weekday> can be {Mon,Tue,Wed,Thu,Fri,Sat,Sun}
+#    If no <host>: input for a <host>, the standard test is used.
+#
+# Test types:
+#    standard		tests defined in standard scope.
+#    -n32		-n32 mode.  Apply to 64/32 bit OS such as IRIX64.
+#    parallel		parallel mode.
+#    op-configure <option>	configure option
+#    --*		configure option
+#    setenv <name> <value>	set environment variable <name> to <value>
 SNAPTEST_CONFIG_PARSE()
 {
     while read x y ; do
@@ -384,8 +395,8 @@ SNAPTEST_CONFIG_PARSE()
 	    x=`echo $x | cut -f2 -d/`
 	fi
 	case "$x" in
-	    '#'*)
-		# comment.  Continue.
+	    '' | '#'*)
+		# blank or comment lines.  Continue.
 	    	;;
 	    ???/*)
 		# Ignore any entry not of this weekday.
