@@ -18,7 +18,8 @@ class Attribute : public AbstractDs {
 	virtual DataSpace getSpace() const;
 
 	// Gets the name of this attribute.
-	string getName( size_t buf_size ) const;
+	ssize_t getName( size_t buf_size, string& attr_name ) const;
+	string getName( size_t buf_size ) const; // returns name, not its length
 
 	// do not inherit iterateAttrs from H5Object
 	int iterateAttrs() { return 0; }
