@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <H5private.h>
-
+#include <h5dump.h>
 
 /*
 	taken from h5dumputil.c
@@ -186,7 +186,6 @@ h5dump_str_append(h5dump_str_t *str/*in,out*/, const char *fmt, ...)
 	    str->len += nchars;
 	    break;
 	}
-	
 	/* Try again with twice as much space */
 	str->nalloc *= 2;
 	str->s = realloc(str->s, str->nalloc);
@@ -447,112 +446,6 @@ h5dump_escape(char *s/*in,out*/, size_t size, int escape_spaces)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_is_zero
- *
- * Purpose:	Determines if memory is initialized to all zero bytes.
- *
- * Return:	TRUE if all bytes are zero; FALSE otherwise
- *
- * Programmer:	Robb Matzke
- *              Monday, June  7, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-h5dump_is_zero(const void *_mem, size_t size)
-{
-    const unsigned char *mem = (const unsigned char*)_mem;
-    while (size-- > 0) {
-	if (mem[size]) return FALSE;
-    }
-    return TRUE;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	h5dump_region
- *
- * Purpose:	Prints information about a dataspace region by appending
- *		the information to the specified string.
- *
- * Return:	Success:	0
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Monday, June  7, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static int
-h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/)
-{
-    hssize_t	nblocks, npoints, i;
-    hsize_t	*ptdata;
-    int		j;
-    int		ndims = H5Sget_simple_extent_ndims(region);
-
-    /*
-     * These two functions fail if the region does not have blocks or points,
-     * respectively. They do not currently know how to translate from one to
-     * the other.
-     */
-    H5E_BEGIN_TRY {
-	nblocks = H5Sget_select_hyper_nblocks(region);
-	npoints = H5Sget_select_elem_npoints(region);
-    } H5E_END_TRY;
-    h5dump_str_append(str, "{");
-
-    /* Print block information */
-    if (nblocks>0) {
-	ptdata = malloc(nblocks*ndims*2*sizeof(ptdata[0]));
-	H5Sget_select_hyper_blocklist(region, 0, nblocks, ptdata);
-	for (i=0; i<nblocks; i++) {
-	    h5dump_str_append(str, "%sBlk%lu: ",
-			      i?","OPTIONAL_LINE_BREAK" ":"",
-			      (unsigned long)i);
-
-	    /* Start coordinates and opposite corner */
-	    for (j=0; j<ndims; j++) {
-		h5dump_str_append(str, "%s%lu", j?",":"(",
-				  (unsigned long)(ptdata[i*2*ndims+j]));
-	    }
-	    for (j=0; j<ndims; j++) {
-		h5dump_str_append(str, "%s%lu", j?",":")-(",
-				  (unsigned long)(ptdata[i*2*ndims+j+ndims]));
-	    }
-	    h5dump_str_append(str, ")");
-	}
-	free(ptdata);
-    }
-
-    /* Print point information */
-    if (npoints>0) {
-	ptdata = malloc(npoints*ndims*sizeof(ptdata[0]));
-	H5Sget_select_elem_pointlist(region, 0, npoints, ptdata);
-	for (i=0; i<npoints; i++) {
-	    h5dump_str_append(str, "%sPt%lu: ",
-			      i?","OPTIONAL_LINE_BREAK" ":"",
-			      (unsigned long)i);
-	    for (j=0; j<ndims; j++) {
-		h5dump_str_append(str, "%s%lu", j?",":"(",
-				  (unsigned long)(ptdata[i*ndims+j]));
-	    }
-	    h5dump_str_append(str, ")");
-	}
-	free(ptdata);
-    }
-    
-    h5dump_str_append(str, "}");
-    return 0;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	h5dump_sprint
  *
  * Purpose:	Renders the value pointed to by VP of type TYPE into variable
@@ -584,11 +477,10 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 {
     size_t	i, n, offset, size, dims[H5S_MAX_RANK], nelmts, start;
     char	*name, quote='\0';
-    hid_t	memb, obj, region;
-    int		nmembs, j, k, ndims, otype;
+    hid_t	memb;
+    int		nmembs, j, k, ndims;
     static char	fmt_llong[8], fmt_ullong[8];
     H5T_str_t 	pad;
-    H5G_stat_t	sb;
     int		repeat_threshold; /*-1 means any amount of repeat allowed*/
 
     if ((programtype == UNKNOWN) || (programtype == H5LS)) {
@@ -854,61 +746,35 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
 	/*
 	 * Dataset region reference -- show the type and OID of the referenced
-	 * object, but we are unable to show the region yet because there
-	 * isn't enough support in the data space layer.  - rpm 19990604
+	 *object, but we are unable to show the region yet because there isn't
+	 *enough support in the data space layer.  - rpm 19990604
 	 */
-	if (h5dump_is_zero(vp, H5Tget_size(type))) {
-	    h5dump_str_append(str, "NULL");
-	} else {
-	    obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
-	    region = H5Rget_region(container, H5R_DATASET_REGION, vp);
-	    H5Gget_objinfo(obj, ".", FALSE, &sb);
-	    h5dump_str_append(str, "DSET-%lu:%lu:%lu:%lu-",
-			      sb.fileno[1], sb.fileno[0],
-			      sb.objno[1], sb.objno[0]);
-	    h5dump_region(region, str);
-	    H5Sclose(region);
+	int otype = H5Rget_object_type(container, vp);
+	hid_t obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
+	switch (otype) {
+	case H5G_GROUP:
+	    h5dump_str_append(str, "GRP-");
+	    H5Gclose(obj);
+	    break;
+	case H5G_DATASET:
+	    h5dump_str_append(str, "DSET-");
 	    H5Dclose(obj);
+	    break;
+	case H5G_TYPE:
+	    h5dump_str_append(str, "TYPE-");
+	    H5Tclose(obj);
+	    break;
+	default:
+	    h5dump_str_append(str, "%u-", otype);
+	    /* unable to close `obj' since we don't know the type */
+	    break;
 	}
-	
-    } else if (H5Tequal(type, H5T_STD_REF_OBJ)) {
-	/*
-	 * Object references -- show the type and OID of the referenced
-	 * object.
-	 */
-	if (h5dump_is_zero(vp, H5Tget_size(type))) {
-	    h5dump_str_append(str, "NULL");
-	} else {
-	    otype = H5Rget_object_type(container, vp);
-	    obj = H5Rdereference(container, H5R_OBJECT, vp);
-	    H5Gget_objinfo(obj, ".", FALSE, &sb);
+	    
 
-	    /* Print object type and close object */
-	    switch (otype) {
-	    case H5G_GROUP:
-		h5dump_str_append(str, "GRP");
-		H5Gclose(obj);
-		break;
-	    case H5G_DATASET:
-		h5dump_str_append(str, "DSET");
-		H5Dclose(obj);
-		break;
-	    case H5G_TYPE:
-		h5dump_str_append(str, "TYPE");
-		H5Tclose(obj);
-		break;
-	    default:
-		h5dump_str_append(str, "%u-", otype);
-		/* unable to close `obj' since we don't know the type */
-		break;
-	    }
+	/* OID */
 
-	    /* Print OID */
-	    h5dump_str_append(str, "-%lu:%lu:%lu:%lu",
-			      sb.fileno[1], sb.fileno[0],
-			      sb.objno[1], sb.objno[0]);
-	}
-	
+	/* SPACE */
+	    
     } else {
 	/* All other types get printed as hexadecimal */
 	h5dump_str_append(str, "0x");
@@ -1919,7 +1785,7 @@ static void display_string
                      printf("%s\"", out_buf);
                      strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
-                     printf("%s\" CONCATENATOR\n", out_buf);
+                     printf("%s\" %s\n", out_buf,CONCATENATOR);
                      first_row = 0;
                      out_buf[0] = '\0';
                  } else {
@@ -1928,7 +1794,7 @@ static void display_string
 					 memset(out_buf, '\0', nCols); 
 					 temp = copy_atomic_char(out_buf,tempstr.s,tempstr.len,x);
                      out_buf[x] = '\0';
-					 printf("%s\" CONCATENATOR\n", out_buf);
+					 printf("%s\" %s\n", out_buf, CONCATENATOR);
 					 x = temp;
                  }
              }
@@ -1944,7 +1810,7 @@ static void display_string
                   indentation(indent+COL);
                   strncpy(out_buf, tempstr.s+x+j*y, y);
                   out_buf[y] = '\0';
-                  printf("\"%s\" CONCATENATOR\n", out_buf);
+                  printf("\"%s\" %s\n", out_buf, CONCATENATOR);
              }
 
              if ((elmtno+i+1) == p_nelmts) { /* last element */
@@ -1952,7 +1818,7 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" CONCATENATOR\n", out_buf);
+                     printf("\"%s\" %s\n", out_buf, CONCATENATOR);
                      indentation(indent+COL);
                      printf("\"%s\"", tempstr.s+x+m*y);
                      if (compound_data) {
@@ -1981,7 +1847,7 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" CONCATENATOR\n", out_buf);
+                     printf("\"%s\" %s\n", out_buf, CONCATENATOR);
                      indentation(indent+COL);
                      printf("\"%s\",\n", tempstr.s+x+m*y);
                   } else {
@@ -1997,7 +1863,7 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" CONCATENATOR\n", out_buf);
+                     printf("\"%s\" %s\n", out_buf, CONCATENATOR);
                      strcpy(out_buf, "\"");
                      strcat(out_buf, tempstr.s+x+m*y);
                      strcat(out_buf, "\",");
