@@ -24,6 +24,14 @@ while ($_ = shift @ARGV) {
         $srcdir =~ s/\./\\\./g;
     } elsif (/^--top_srcdir=([^ \t\n]*)/) {
         $top_srcdir = $1;
+
+        # Trim off the path name if we're interested in the previous path.
+        if ($top_srcdir =~ /\/fortran\/\.\.$/) {
+            $top_srcdir =~ s/\/fortran\/\.\.$//;
+        } elsif ($top_srcdir =~ /\/c\+\+\/\.\.$/) {
+            $top_srcdir =~ s/\/c\+\+\/\.\.$//;
+        }
+
         $top_srcdir =~ s/\./\\\./g;
     } elsif (/^--top_builddir=([^ \t\n]*)/) {
         $top_builddir = $1;
