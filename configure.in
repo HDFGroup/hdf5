@@ -624,14 +624,16 @@ AC_ARG_WITH(hdf4,
 case "$withval" in
   yes)
     failed="no"
-    AC_CHECK_LIB(z, compress,
-                 AC_CHECK_LIB(jpeg, jpeg_start_compress,
-                              AC_CHECK_LIB(df, Hstartaccess,
-                                           AC_CHECK_LIB(mfhdf, SDstart,,
-                                                        failed="yes"),
-                                           failed="yes"),
-                              failed="yes"),
-                 failed="yes")
+    AC_CHECK_LIB(z, compress,, failed="yes")
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(df, Hstartaccess,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(mfhdf, SDstart,, failed="yes")
+    fi
 
     if test "$failed" = "yes"; then
       unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
@@ -662,22 +664,24 @@ case "$withval" in
       CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
     fi
 
-    failed=no
+    failed="no"
     AC_CHECK_HEADERS(mfhdf.h,, failed="yes")
 
     if test -n "$hdf4_lib"; then
       LDFLAGS="$LDFLAGS -L$hdf4_lib"
     fi
 
-    if test "$failed" != "yes"; then
-      AC_CHECK_LIB(z, compress,
-                   AC_CHECK_LIB(jpeg, jpeg_start_compress,
-                                AC_CHECK_LIB(df, Hstartaccess,
-                                             AC_CHECK_LIB(mfhdf, SDstart,,
-                                                          failed="yes"),
-                                             failed="yes"),
-                                failed="yes"),
-                   failed="yes")
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(z, compress,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(df, Hstartaccess,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(mfhdf, SDstart,, failed="yes")
     fi
 
     if test "$failed" = "yes"; then
