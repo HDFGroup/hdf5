@@ -788,6 +788,7 @@ H5F_dest(H5F_t *f)
 	 */
 	--f->nrefs;
     }
+
     
     FUNC_LEAVE(ret_value);
 }
@@ -1815,8 +1816,13 @@ H5F_close(H5F_t *f)
 			  "unable to flush cache");
 	}
     }
+#ifdef WIN32
+	/*free up the memory for path*/
 
-    /*
+	free(f->shared->key.path);
+#endif
+	
+	/*
      * Destroy the H5F_t struct and decrement the reference count for the
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
