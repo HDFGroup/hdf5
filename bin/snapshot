@@ -35,9 +35,9 @@ cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
 if [ -d ${COMPARE}/previous ]; then
     if (diff -r -I H5_VERS_RELEASE -I " released on " \
 	    ${COMPARE}/previous ${COMPARE}/current >/dev/null); then
-	update=yes
+	update=no
     else
-        update=no
+        update=yes
     fi
 else
     update=yes
