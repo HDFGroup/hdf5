@@ -12,18 +12,21 @@
 	</font>
 	<a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd"><font size=-1 face=courier>HDF5-File.dtd</font></a>
 
+
 <h2>
 The XML DTD for HDF5:&nbsp; Design Notes</h2>
-April 28, 2000
+June 12, 2000
+<br>Feedback to:&nbsp; <a href="mailto:hdfdev@ncsa.uiuc.edu">hdfdev@ncsa.uiuc.edu</a>
 <h3>
 <b>1.&nbsp; Introduction</b></h3>
-The XML "Document Type Definition" (DTD) [17] for HDF5 is a markup language
-to describe the contents of an HDF5 file.[<a href="#R1">1</a>]&nbsp; This
-DTD specifies a standard for using XML to describe the structure and contents
-of a <i>single</i> HDF5 file.&nbsp; The DTD can be used in a variety of
-ways, by standard software and by application specific software that builds
-on standard XML features.&nbsp; The DTD will enable descriptions of HDF5
-files to be used with and translated to other similar XML markup languages.
+The XML "Document Type Definition" (DTD) [<a href="#R17">17</a>] for HDF5
+is a markup language to describe the contents of an HDF5 file.[<a href="#R1">1</a>]&nbsp;
+This DTD specifies a standard for using XML to describe the structure and
+contents of a <i>single</i> HDF5 file.&nbsp; The DTD can be used in a variety
+of ways, by standard software and by application specific software that
+builds on standard XML features.&nbsp; The DTD will enable descriptions
+of HDF5 files to be used with and translated to other similar XML markup
+languages.
 <p>This document discusses some of the key features of the HDF5 DTD, and
 some of the design decisions that were considered during its development.
 <p>The HDF5 data model is somewhat complex, with a great deal of flexibility
@@ -311,7 +314,8 @@ makes no sense according to the rules of HDF5, and those rules must be
 enforced by the applications that create and use the XML description.
 <p><b>3.3&nbsp; The Data Values</b>
 <p>While representing metadata with XML was fairly straightforward, it
-was less obvious what should be done with the data values.&nbsp; For different
+was
+less obvious what should be done with the data values.&nbsp; For different
 purposes, it may be better to:
 <ul>
 <li>
@@ -362,6 +366,12 @@ specified.
 file for the first release.&nbsp; The initial version of the DTD has a
 limited <tt>&lt;Data> </tt>element, which does not support all the desired
 features.&nbsp; This will be revised in a future release.
+<p>We were not able to create a satisfactory markup for data in the HDF5
+file for the first release. The initial version of the DTD has a limited
+<tt>&lt;Data></tt>
+element, which does not support all the desired features. Details of this
+limited <tt>&lt;Data></tt> element can be found in [<a href="#R18">18</a>].&nbsp;
+This will be revised in a future release.
 <p><b>3.4&nbsp; File Format Details</b>
 <p>The DTD must be able to support applications that need to fully describe
 the details of a specific HDF5 file.&nbsp; For example, in order to verify
@@ -437,17 +447,20 @@ These elements are only partly defined in the first release of the DTD.
 Definition Language (ODL) Specification and Usage", <a href="http://pds.jpl.nasa.gov/stdref/chap12.htm">http://pds.jpl.nasa.gov/stdref/chap12.htm</a></li>
 
 <li>
-<a NAME="R14"></a>SAX 1.0:&nbsp; The Simple API for XML, 
-<a href="http://www.megginson.com/sAX/index.html">http://www.megginson.com/sAX/index.html</a></li>
+<a NAME="R14"></a>SAX 1.0:&nbsp; The Simple API for XML, <a href="http://www.megginson.com/sAX/index.html">http://www.megginson.com/sAX/index.html</a></li>
 
 <li>
-<a NAME="R15"></a> Document Object Model (DOM), <a href="http://www.w3.org/DOM/">http://www.w3.org/DOM/</a></li>
+<a NAME="R15"></a>Document Object Model (DOM), <a href="http://www.w3.org/DOM/">http://www.w3.org/DOM/</a></li>
 
 <li>
-<a NAME="R16"></a> OpenGIS, <a href="http://opengis.org/">http://opengis.org/</a></li>
+<a NAME="R16"></a>OpenGIS, <a href="http://opengis.org/">http://opengis.org/</a></li>
 
 <li>
 <a NAME="R17"></a>XML, <a href="http://www.w3.org/XML">http://www.w3.org/XML</a></li>
+
+<li>
+<a NAME="R18"></a>Mike Folk, "Proposal for representing simple data in
+HDFXML DTD", <a href="XML_data_spec_Rev_3.pdf">http://hdf.ncsa.uiuc.edu/HDF5/XML/XML_data_spec_Rev_3.pdf</a></li>
 </ol>
 
 </body>
