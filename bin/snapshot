@@ -58,6 +58,16 @@ while [ $# -gt 0 ] ; do
 	    #use srcdir option for test
 	    srcdir="yes"
 	    ;;
+	srcdirname)
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "srcdirname <dir> missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    SRCDIRNAME="$1"
+	    ;;
 	release)
 	    cmdrel="release"
 	    cmd=""
@@ -86,6 +96,16 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    ARCHIVES="$1"
 	    ;;
+	op-configure)
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "op-configure option missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    OP_CONFIGURE="$OP_CONFIGURE $1"
+	    ;;
 	*)
 	    echo "Unkown option $1"
 	    errcode=1
@@ -98,7 +118,7 @@ done
 
 if [ "$cmd" = help ]; then
     set -
-    echo "Usage: $0 [all] [checkout] [test] [srcdir] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path> ]"
+    echo "Usage: $0 [all] [checkout] [test] [srcdir] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path>] [dir <dir>] [op-configure <option>]"
     echo "    all:      Run all commands (checkout, test & release)"
     echo "              [Default is all]"
     echo "    checkout: Run cvs checkout"
@@ -107,27 +127,34 @@ if [ "$cmd" = help ]; then
     echo "    srcdir:   Use srcdir option (does not imply other commands)"
     echo '              "snapshot srcdir" is equivalent to "snapshot srcdir all"'
     echo '              "snapshot srcdir checkout" is equivalent to "snapshot checkout"'
+    echo "    srcdirname <dir>:"
+    echo "              Use <dir> as the srcdir testing directory if srcdir is choosen."
+    echo "              If <dir> starts with '-', it is append to the default name"
+    echo '              E.g., "snapshot srcdir srcdirname -xx" uses hostname-xx'
+    echo "              [Default is hostname]"
     echo "    help:     Print this message"
     echo "    hdf4 <hdf4lib_path>:"
     echo "              Use <hdf4lib_path> as the HDF4LIB locations"
     echo "              [Default is $HDF4LIB_default]"
-    echo "    archive <arch_path>: "
+    echo "    archive <arch_path>:"
     echo "              Use <arch_path> as the release ARCHIVE area"
-    echo "              [<arch_path> default as $ARCHIVES_default]"
+    echo "              [Default is $ARCHIVES_default]"
+    echo "    op-configure <option>:"
+    echo "              Pass <option> to the configure command"
     exit $errcode
 fi
 
 # Setup the proper configure option (--with-hdf4) to use hdf4 library
 # provide HDF4LIB is non-empty.
 HDF4LIB=${HDF4LIB:+"--with-hdf4="$HDF4LIB}
-CONFIGURE="./configure $HDF4LIB"
+CONFIGURE="./configure $HDF4LIB $OP_CONFIGURE"
 
 # Execute the requests
 snapshot=yes
 
-COMPARE=${HOME}/hdf5-snapshots
-CURRENT=${COMPARE}/current
-PREVIOUS=${COMPARE}/previous
+BASEDIR=${HOME}/hdf5-snapshots
+CURRENT=${BASEDIR}/current
+PREVIOUS=${BASEDIR}/previous
 
 #=============================
 # Run CVS checkout
@@ -136,7 +163,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # Create a working directory.  Hopefully one is left over from last
     # time that still has the contents of the previous release.  But if
     # not, just create one and assume that a snapshot is necessary.
-    test -d ${COMPARE} || mkdir -p ${COMPARE} || exit 1
+    test -d ${BASEDIR} || mkdir -p ${BASEDIR} || exit 1
 
     # Check out the current version from CVS
     cvs -Q co -d ${CURRENT} hdf5 || exit 1
@@ -152,7 +179,15 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	TESTDIR=${CURRENT}
     else
 	#create TESTDIR if not exist yet
-	TESTDIR=${COMPARE}/TestDir/`hostname`
+	case "$SRCDIRNAME" in
+	"")
+	    SRCDIRNAME=`hostname`
+	    ;;
+	-*)
+	    SRCDIRNAME="`hostname`$SRCDIRNAME"
+	    ;;
+	esac
+	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
 	test -d ${TESTDIR} || mkdir ${TESTDIR}
     fi
     # Make sure current version exists and is clean
