@@ -1,0 +1,239 @@
+<html>
+
+<head>
+<TITLE>DDL for HDF5</TITLE>
+</head>
+
+<body>
+
+<B> DDL in BNF  </B> <br>
+
+<P>
+The following describes the data description language for HDF5 file. 
+The description is in Backus-Naur Form.  A quick explanation
+of the some symbols used.
+
+<PRE>
+	::=               defined as
+	&lt;tname&gt;           a token with the name tname
+	&lt;a&gt; | &lt;b&gt;         one of &lt;a&gt; or &lt;b&gt;
+	&lt;a&gt;<FONT SIZE=1.7>opt</FONT>             zero or one occurrence of &lt;a&gt;
+	&lt;a&gt;*              zero or more occurrence of &lt;a&gt;
+	&lt;a&gt;+              one or more occurrence of &lt;a&gt;
+        TBD               To Be Decided
+
+
+&lt;file&gt; ::= hdf5 "&lt;file_name&gt;" { &lt;file_boot_block&gt;<FONT SIZE=1.7>opt</FONT> &lt;root_group&gt; }
+
+&lt;file_name&gt; ::= &lt;identifier&gt;
+
+&lt;file_boot_block&gt; ::= boot_block { &lt;boot_block_content&gt; }
+
+&lt;boot_block_content&gt; ::= TBD
+
+&lt;root_group&gt; ::= group "/" { &lt;group_attribute&gt;* &lt;group_member&gt;* }  
+// Attributes and members can be in any order.
+
+&lt;group_attribute&gt; ::= &lt;attribute&gt; 
+
+&lt;attribute&gt; ::= attribute "attr_name" { &lt;datatype&gt;    
+                                        &lt;dataspace&gt;   
+                                        &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
+// &lt;datatype&gt;, &lt;dataspace&gt; and &lt;data&gt; can be in any order 
+// as long as &lt;data&gt; comes the last.
+
+&lt;attr_name&gt; ::=  &lt;identifier&gt;
+
+&lt;datatype&gt; ::= datatype "&lt;datatype_name&gt;" ; |          // shared data type
+               datatype { &lt;scalar_datatype&gt; } ; |         
+               datatype { &lt;dt_definition&gt;+ } ;       
+
+&lt;datatype_name&gt; ::= &lt;identifier&gt;
+
+&lt;scalar_datatype&gt; ::=  int8 | uint8 | ...     // data types supported by HDF5
+
+&lt;dt_definition&gt; ::= "&lt;datatype_name&gt;" &lt;field_name&gt; ; | &lt;scalar_datatype&gt; &lt;field_name&gt; ;
+
+&lt;field_name&gt; ::= one or more field names separated by ","
+
+&lt;dataspace&gt; ::= dataspace "&lt;dataspace_name&gt;" ; |
+                dataspace {array &lt;current_dims&gt; &lt;max_dims&gt;} ; | 
+                dataspace {other &lt;ds_definition&gt;+ } ;         
+
+&lt;dataspace_name&gt; ::= &lt;identifier&gt;
+
+&lt;current_dims&gt; ::= a list of integers represented of the form ( , , .. , )
+
+&lt;max_dims&gt; ::=  a list of integers or H5S_UNLIMITED represented of the form ( , , .. , )
+
+&lt;ds_definition&gt; ::= TBD
+
+&lt;data&gt; ::= data {TBD} ;
+
+&lt;group_member&gt; ::= &lt;named_datatype&gt; | &lt;named_dataspace&gt; | &lt;group&gt; | &lt;dataset&gt; | &lt;link&gt;
+
+&lt;named_datatype&gt; ::= datatype "&lt;datatype_name&gt;" { &lt;scalar_datatype&gt; } |
+                     datatype "&lt;datatype_name&gt;" { &lt;dt_definition&gt;+ }
+
+&lt;named_dataspace&gt; ::= dataspace "&lt;dataspace_name&gt;" {array &lt;current_dims&gt; &lt;max_dims&gt; } |
+                     dataspace "&lt;dataspace_name&gt;" { other &lt;ds_definition&gt;+ }
+
+&lt;group&gt; ::= group "&lt;group_name&gt;" { &lt;group_attribute&gt;* &lt;group_member&gt;* }  
+// Attributes and members can be in any order.
+
+&lt;group_name&gt; ::= &lt;identifier&gt;
+
+&lt;dataset&gt; ::= dataset "&lt;dataset_name&gt;" { &lt;datatype&gt;  
+                                         &lt;dataspace&gt; 
+                                         &lt;storagelayout&gt;<FONT SIZE=1.7>opt</FONT>
+                                         &lt;compression&gt;<FONT SIZE=1.7>opt</FONT>
+                                         &lt;dataset_attribute&gt;*
+                                         &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
+// Any order is ok as long as &lt;data&gt; and &lt;dataset_attribute&gt; are 
+// after &lt;datatype&gt; and &lt;dataspace&gt;.
+
+&lt;dataset_name&gt; ::= &lt;identifier&gt;
+
+&lt;storagelayout&gt; :: = storagelayout &lt;contiguous_layout&gt; ; |  
+                     storagelayout &lt;chunked_layout&gt; ; | 
+                     storagelayout &lt;compact_layout&gt; ; | 
+                     storagelayout &lt;external_layout&gt; ;
+
+&lt;contiguous_layout&gt; ::= {contiguous}    // default
+
+&lt;chunked_layout&gt; ::=  {chunked &lt;dims&gt; }
+
+&lt;dims&gt; ::=  a list of integers represented of the form ( , , .. , )
+
+&lt;compact_layout&gt; ::= TBD            // not implemented yet
+
+&lt;external_layout&gt; ::= {external &lt;external_file&gt;+ }
+
+&lt;external_file&gt; ::= (&lt;file_name&gt; &lt;offset&gt; &lt;size&gt;) 
+
+&lt;offset&gt; ::= an integer
+
+&lt;size&gt; ::= an integer
+
+&lt;compression&gt; :: = compression { TBD } ; //algorithm name and properties?
+
+&lt;dataset_attribute&gt; ::= &lt;attribute&gt; ;
+
+&lt;link&gt; ::= &lt;hardlink&gt; | &lt;softlink&gt;
+
+&lt;hardlink&gt; ::= hardlink "&lt;hardlink_name&gt;" { linktarget "&lt;target&gt;"; }
+
+&lt;hardlink_name&gt; ::= &lt;identifier&gt;
+
+&lt;target&gt; ::= &lt;identifier&gt;
+
+&lt;softlink&gt; ::= softlink "&lt;softlink_name&gt;" { linktarget "&lt;target&gt;"; }
+
+&lt;softlink_name&gt; ::= &lt;identifier&gt;
+
+&lt;identifier&gt; ::= string   
+// character "/" should be used with care. 
+// &lt;dataset_name&gt; cannot contain "/", for example.
+
+</PRE>
+<HR>
+<B> An example of HDF5 File in DDL </B>
+<PRE>
+
+Consider an HDF5 file, example.h5, with the following structure:
+
+                             /
+
+                     /       |       \
+                 group1     group3  dataset3
+                 /   \       |          ^
+           group2  dataset2  hardlink --|
+             /  \        ^
+      dataset1 softlink  |
+                  |------|
+
+
+hdf5 "example" { 
+
+group "/" {
+
+   datatype "shared_datatype1" {                    // named data type
+            char name[20], address[40];
+            int32 id; 
+   }
+ 
+   datatype "shared_datatype2" {
+            "shared_datatype1" rec[100];
+            float32 total;
+   }
+
+   dataspace "shared_dataspace1" { array (1000) (1000)}         // named data space
+
+
+
+   attribute "group_attribute1" {                   //group attribute
+             datatype {int32};
+             dataspace "shared_dataspace1";
+   } 
+
+   attribute "group_attribute2" {
+             datatype {int32};
+             dataspace {array (3,5) (3,5)} ;
+             data {(0,0,0,0,0) (1,1,1,1,1) (2,2,2,2,2)};
+   } 
+
+
+   group "group1" {
+
+         attribute "group1_attribute" {
+                   datatype {char};
+                   dataspace {array (100) (200)};
+                   data {("attribute_of_group_1")};
+         }
+
+         group "group2" {
+
+               datatype "shared_datatype3" {
+                         int8 z;
+                         int32 x; 
+               }
+
+               dataset "dataset1" {
+                        dataspace "shared_dataspace1";
+                        datatype "shared_datatype3";
+                        attribute "dataset1_attr" {
+                                   datatype {char};
+                                   dataspace {array (10) (10)};
+                                   data {("data1")};
+                        };
+               }
+ 
+ 
+               softlink "sl" {
+                        linktarget "/group1/dataset2";
+               } 
+         }
+
+         dataset "dataset2" {
+               datatype {int8};
+               dataspace {array (2,5) (unlimited, 5)};
+               data {(0,0,0,0,0) (0,0,0,0,0)};
+         }
+   }
+   
+   group "group3" {
+         hardlink "hl" {
+                  linktarget "/dataset3" ;
+         }
+   }
+      
+   
+   dataset "dataset3" {
+           datatype { float32 };
+           dataspace {array (1000,1000) (1000,1000) };
+           storagelayout {chunked (250,1000)};
+   }
+ 
+} // root group
+
+}
