@@ -23,8 +23,7 @@ srcdir=@srcdir@
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
 ## Test script for error_test and err_compat
-# Disabled until find a good way to compare the outputs.
-#TEST_SCRIPTS=$(srcdir)/testerror.sh
+TEST_SCRIPTS=$(srcdir)/testerror.sh
 
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.
