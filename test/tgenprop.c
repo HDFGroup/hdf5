@@ -43,6 +43,8 @@ static void
 test_genprop_basic_class(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
+    hid_t		cid2;		/* Generic Property class ID */
+    hid_t		cid3;		/* Generic Property class ID */
     char       *name;       /* Name of class */
     herr_t		ret;		/* Generic return value	*/
 
@@ -62,6 +64,22 @@ test_genprop_basic_class(void)
     } /* end if */
     free(name);
 
+    /* Check class parent */
+    cid2 = H5Pget_class_parent(cid1);
+    CHECK_I(cid2, "H5Pget_class_parent");
+
+    /* Verify class parent correct */
+    ret = H5Pequal(cid2,H5P_NO_CLASS_NEW);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Make certain false postives aren't being returned */
+    ret = H5Pequal(cid2,H5P_FILE_CREATE_NEW);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Close parent class */
+    ret = H5Pclose_class(cid2);
+    CHECK_I(ret, "H5Pclose_class");
+
     /* Close class */
     ret = H5Pclose_class(cid1);
     CHECK_I(ret, "H5Pclose_class");
@@ -78,6 +96,30 @@ test_genprop_basic_class(void)
         printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
     } /* end if */
     free(name);
+
+    /* Check class parent */
+    cid2 = H5Pget_class_parent(cid1);
+    CHECK_I(cid2, "H5Pget_class_parent");
+
+    /* Verify class parent correct */
+    ret = H5Pequal(cid2,H5P_FILE_CREATE_NEW);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Check class parent's parent */
+    cid3 = H5Pget_class_parent(cid2);
+    CHECK_I(cid3, "H5Pget_class_parent");
+
+    /* Verify class parent's parent correct */
+    ret = H5Pequal(cid3,H5P_NO_CLASS_NEW);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Close parent class's parent */
+    ret = H5Pclose_class(cid3);
+    CHECK_I(ret, "H5Pclose_class");
+
+    /* Close parent class */
+    ret = H5Pclose_class(cid2);
+    CHECK_I(ret, "H5Pclose_class");
 
     /* Close class */
     ret = H5Pclose_class(cid1);
