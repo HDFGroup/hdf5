@@ -6976,9 +6976,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_float
+ * Function:	H5T_conv_schar_float
  *
- * Purpose:	Convert native char to native float using hardware.
+ * Purpose:	Convert native signed char to native float using hardware.
  *		This is a fast special case.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -6991,16 +6991,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T_conv_schar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
     herr_t      ret_value=SUCCEED;      /* Return value         */
     
-    FUNC_ENTER_NOAPI(H5T_conv_char_float, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_schar_float, FAIL);
 
-    H5T_CONV_xF(SCHAR, FLOAT, char, float, -, -);
+    H5T_CONV_xF(SCHAR, FLOAT, signed char, float, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7008,9 +7008,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_double
+ * Function:	H5T_conv_schar_double
  *
- * Purpose:	Convert native char to native double using hardware.
+ * Purpose:	Convert native signed char to native double using hardware.
  *		This is a fast special case.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -7023,16 +7023,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T_conv_schar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
     herr_t      ret_value=SUCCEED;      /* Return value         */
     
-    FUNC_ENTER_NOAPI(H5T_conv_char_double, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_schar_double, FAIL);
 
-    H5T_CONV_xF(SCHAR, DOUBLE, char, double, -, -);
+    H5T_CONV_xF(SCHAR, DOUBLE, signed char, double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7619,9 +7619,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_char
+ * Function:	H5T_conv_float_schar
  *
- * Purpose:	Convert native float to native char using 
+ * Purpose:	Convert native float to native signed char using 
  *              hardware.  This is a fast special case.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -7634,16 +7634,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_char (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T_conv_float_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
     herr_t      ret_value=SUCCEED;      /* Return value         */
     
-    FUNC_ENTER_NOAPI(H5T_conv_float_char, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_float_schar, FAIL);
 
-    H5T_CONV_Fx(FLOAT, SCHAR, float, char, CHAR_MIN, CHAR_MAX);
+    H5T_CONV_Fx(FLOAT, SCHAR, float, signed char, SCHAR_MIN, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7683,9 +7683,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_char
+ * Function:	H5T_conv_double_schar
  *
- * Purpose:	Convert native float to native char using 
+ * Purpose:	Convert native float to native signed char using 
  *              hardware.  This is a fast special case.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -7698,16 +7698,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_char (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T_conv_double_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
     herr_t      ret_value=SUCCEED;      /* Return value         */
     
-    FUNC_ENTER_NOAPI(H5T_conv_double_char, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_double_schar, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, SCHAR, double, char, CHAR_MIN, CHAR_MAX);
+    H5T_CONV_Fx(DOUBLE, SCHAR, double, signed char, SCHAR_MIN, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -82,7 +82,7 @@ typedef struct complex_t {
 #define ENDIAN(Z,I)	(H5T_ORDER_BE==endian?(I):(Z)-((I)+1))
 
 typedef enum dtype_t {
-    INT_CHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
+    INT_SCHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
     INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, FLT_FLOAT, FLT_DOUBLE, 
     FLT_LDOUBLE, OTHER
 } dtype_t;
@@ -3784,7 +3784,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_SCHAR)) {
 	src_type_name = "signed char";
-	src_type = INT_CHAR;
+	src_type = INT_SCHAR;
     } else if (H5Tequal(src, H5T_NATIVE_UCHAR)) {
 	src_type_name = "unsigned char";
 	src_type = INT_UCHAR;
@@ -3819,7 +3819,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     
     if (H5Tequal(dst, H5T_NATIVE_SCHAR)) {
 	dst_type_name = "signed char";
-	dst_type = INT_CHAR;
+	dst_type = INT_SCHAR;
     } else if (H5Tequal(dst, H5T_NATIVE_UCHAR)) {
 	dst_type_name = "unsigned char";
 	dst_type = INT_UCHAR;
@@ -3904,10 +3904,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
 	/* Check the results from the library against hardware */
 	for (j=0; j<nelmts; j++) {
-	    if (INT_CHAR==dst_type) {
+	    if (INT_SCHAR==dst_type) {
 		hw = (unsigned char*)&hw_char;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_char = (char)(*((char*)aligned));
 		    break;
@@ -3953,7 +3953,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_UCHAR==dst_type) {
 		hw = (unsigned char*)&hw_uchar;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_uchar = (unsigned char)(*((char*)aligned));
 		    break;
@@ -3999,7 +3999,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_SHORT==dst_type) {
 		hw = (unsigned char*)&hw_short;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_short = (short)(*((char*)aligned));
 		    break;
@@ -4046,7 +4046,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_USHORT==dst_type) {
 		hw = (unsigned char*)&hw_ushort;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_ushort = (unsigned short)(*((char*)aligned));
 		    break;
@@ -4092,7 +4092,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_INT==dst_type) {
 		hw = (unsigned char*)&hw_int;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_int = (int)(*((char*)aligned));
 		    break;
@@ -4138,7 +4138,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_UINT==dst_type) {
 		hw = (unsigned char*)&hw_uint;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_uint = (unsigned int)(*((char*)aligned));
 		    break;
@@ -4184,7 +4184,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_LONG==dst_type) {
 		hw = (unsigned char*)&hw_long;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_long = (long int)(*((char*)aligned));
 		    break;
@@ -4230,7 +4230,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_ULONG==dst_type) {
 		hw = (unsigned char*)&hw_ulong;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_ulong = (unsigned long)(*((char*)aligned));
 		    break;
@@ -4276,7 +4276,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_LLONG==dst_type) {
 		hw = (unsigned char*)&hw_llong;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_llong = (long_long)(*((char*)aligned));
 		    break;
@@ -4322,7 +4322,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    } else if (INT_ULLONG==dst_type) {
 		hw = (unsigned char*)&hw_ullong;
 		switch (src_type) {
-		case INT_CHAR:
+		case INT_SCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
 		    hw_ullong = (unsigned long_long)(*((char*)aligned));
 		    break;
@@ -4496,7 +4496,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
 	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
 	    switch (src_type) {
-                case INT_CHAR:
+                case INT_SCHAR:
                     HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
                     printf(" %29d\n", (int)*((char*)aligned));
                     break;
@@ -4545,7 +4545,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
 	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
 	    switch (dst_type) {
-                case INT_CHAR:
+                case INT_SCHAR:
                     HDmemcpy(aligned, buf+j*sizeof(char), sizeof(char));
                     printf(" %29d\n", (int)*((char*)aligned));
                     break;
@@ -4594,7 +4594,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		printf(" %02x", hw[ENDIAN(dst_size, k)]);
 	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
 	    switch (dst_type) {
-                case INT_CHAR:
+                case INT_SCHAR:
                     printf(" %29d\n", (int)*((signed char*)hw));
                     break;
                 case INT_UCHAR:
@@ -4768,7 +4768,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     float		hw_float;
     double	        hw_double;
     long double		hw_ldouble;
-    signed char		hw_char;
+    signed char		hw_schar;
     unsigned char	hw_uchar;
     short		hw_short;
     unsigned short	hw_ushort;
@@ -4782,7 +4782,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     /* What is the name of the source type */
     if (H5Tequal(src, H5T_NATIVE_SCHAR)) {
 	src_type_name = "signed char";
-	src_type = INT_CHAR;
+	src_type = INT_SCHAR;
     } else if (H5Tequal(src, H5T_NATIVE_UCHAR)) {
 	src_type_name = "unsigned char";
 	src_type = INT_UCHAR;
@@ -4829,7 +4829,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     /* What is the name of the destination type */
     if (H5Tequal(dst, H5T_NATIVE_SCHAR)) {
 	dst_type_name = "signed char";
-	dst_type = INT_CHAR;
+	dst_type = INT_SCHAR;
     } else if (H5Tequal(dst, H5T_NATIVE_UCHAR)) {
 	dst_type_name = "unsigned char";
 	dst_type = INT_UCHAR;
@@ -4883,7 +4883,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	goto error;
     }
 
-    if ((INT_CHAR==src_type || INT_UCHAR==src_type || INT_SHORT==src_type ||
+    if ((INT_SCHAR==src_type || INT_UCHAR==src_type || INT_SHORT==src_type ||
         INT_USHORT==src_type || INT_INT==src_type || INT_UINT==src_type ||
         INT_LONG==src_type || INT_ULONG==src_type || INT_LLONG==src_type ||
         INT_ULLONG==src_type) && 
@@ -4897,7 +4897,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     }
 
     if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
-        && (INT_CHAR!=dst_type && INT_UCHAR!=dst_type && INT_SHORT!=dst_type
+        && (INT_SCHAR!=dst_type && INT_UCHAR!=dst_type && INT_SHORT!=dst_type
         && INT_USHORT!=dst_type && INT_INT!=dst_type && INT_UINT!=dst_type
         && INT_LONG!=dst_type && INT_ULONG!=dst_type && INT_LLONG!=dst_type 
         && INT_ULLONG!=dst_type)) {
@@ -4974,16 +4974,16 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 
 	/* Check the results from the library against hardware */
 	for (j=0; j<nelmts; j++) {
-             if(FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
+            if(FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
                 if(my_isnan(src_type, saved+j*src_size))
                     continue;
 
 	    if (FLT_FLOAT==dst_type) {
 		hw = (unsigned char*)&hw_float;
 		switch (src_type) {
-		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
-		    hw_float = (float)(*((char*)aligned));
+		case INT_SCHAR:
+		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
+		    hw_float = (float)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -5029,9 +5029,9 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	    } else if (FLT_DOUBLE==dst_type) {
 		hw = (unsigned char*)&hw_double;
 		switch (src_type) {
-		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
-		    hw_double = (double)(*((char*)aligned));
+		case INT_SCHAR:
+		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
+		    hw_double = (double)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -5077,9 +5077,9 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	    } else if (FLT_LDOUBLE==dst_type) {
 		hw = (unsigned char*)&hw_ldouble;
 		switch (src_type) {
-		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
-		    hw_ldouble = (long double)(*((char*)aligned));
+		case INT_SCHAR:
+		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
+		    hw_ldouble = (long double)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -5122,20 +5122,20 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		default:
 		    break;
 		}
-	    } else if (INT_CHAR==dst_type) {
-		hw = (unsigned char*)&hw_char;
+	    } else if (INT_SCHAR==dst_type) {
+		hw = (unsigned char*)&hw_schar;
 		switch (src_type) {
 		case FLT_FLOAT:
 		    HDmemcpy(aligned, saved+j*sizeof(float), sizeof(float));
-		    hw_char = (char)(*((float*)aligned));
+		    hw_schar = (signed char)(*((float*)aligned));
 		    break;
 		case FLT_DOUBLE:
 		    HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
-		    hw_char = (char)(*((double*)aligned));
+		    hw_schar = (signed char)(*((double*)aligned));
 		    break;
 		case FLT_LDOUBLE:
 		    HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
-		    hw_char = (char)(*((long double*)aligned));
+		    hw_schar = (signed char)(*((long double*)aligned));
 		    break;
 		default:
 		    break;
@@ -5336,7 +5336,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
              * desired value was set.
 	     */
             if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
-                    && (INT_CHAR==dst_type || INT_SHORT==dst_type || INT_INT==dst_type 
+                    && (INT_SCHAR==dst_type || INT_SHORT==dst_type || INT_INT==dst_type 
                     || INT_LONG==dst_type || INT_LLONG==dst_type)) {
                 if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
                         overflows(src_bits, src_type, src_size, dst_nbits-1)) {
@@ -5457,9 +5457,9 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
 	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
 	    switch (src_type) {
-                case INT_CHAR:
-                    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
-                    printf(" %29d\n", (int)*((char*)aligned));
+                case INT_SCHAR:
+                    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
+                    printf(" %29d\n", (int)*((signed char*)aligned));
                     break;
                 case INT_UCHAR:
                     HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -5518,9 +5518,9 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
 	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
 	    switch (dst_type) {
-                case INT_CHAR:
-                    HDmemcpy(aligned, buf+j*sizeof(char), sizeof(char));
-                    printf(" %29d\n", (int)*((char*)aligned));
+                case INT_SCHAR:
+                    HDmemcpy(aligned, buf+j*sizeof(signed char), sizeof(signed char));
+                    printf(" %29d\n", (int)*((signed char*)aligned));
                     break;
                 case INT_UCHAR:
                     HDmemcpy(aligned, buf+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -5579,8 +5579,8 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		printf(" %02x", hw[ENDIAN(dst_size, k)]);
 	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
 	    switch (dst_type) {
-                case INT_CHAR:
-                    printf(" %29d\n", (int)*((char*)hw));
+                case INT_SCHAR:
+                    printf(" %29d\n", (int)*((signed char*)hw));
                     break;
                 case INT_UCHAR:
                     printf(" %29u\n", (unsigned)*((unsigned char*)hw));
@@ -6476,8 +6476,8 @@ run_int_float_conv(const char *name)
 {
     int		nerrors = 0;
 
-    nerrors += test_conv_int_float(name, H5T_NATIVE_CHAR, H5T_NATIVE_FLOAT);
-    nerrors += test_conv_int_float(name, H5T_NATIVE_CHAR, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_SCHAR, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_SCHAR, H5T_NATIVE_DOUBLE);
 
     nerrors += test_conv_int_float(name, H5T_NATIVE_UCHAR, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_UCHAR, H5T_NATIVE_DOUBLE);
@@ -6551,8 +6551,8 @@ run_float_int_conv(const char *name)
 {
     int		nerrors = 0;
 
-    nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_CHAR);
-    nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
     
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_UCHAR);

@@ -1098,8 +1098,8 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_HARD, "uchar_schar", native_uchar, native_schar, H5T_conv_uchar_schar, H5AC_dxpl_id);
 
     /* From char to floats */
-    status |= H5T_register(H5T_PERS_HARD, "char_flt", native_schar, native_float, H5T_conv_char_float, H5AC_dxpl_id);
-    status |= H5T_register(H5T_PERS_HARD, "char_dbl", native_schar, native_double, H5T_conv_char_double, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "schar_flt", native_schar, native_float, H5T_conv_schar_float, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "schar_dbl", native_schar, native_double, H5T_conv_schar_double, H5AC_dxpl_id);
 
     /* From unsigned char to floats */
     status |= H5T_register(H5T_PERS_HARD, "uchar_flt", native_uchar, native_float, H5T_conv_uchar_float, H5AC_dxpl_id);
@@ -1140,8 +1140,8 @@ H5T_init_interface(void)
 #endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 
     /* From floats to char */
-    status |= H5T_register(H5T_PERS_HARD, "flt_char", native_float, native_schar, H5T_conv_float_char, H5AC_dxpl_id);
-    status |= H5T_register(H5T_PERS_HARD, "dbl_char", native_double, native_schar, H5T_conv_double_char, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "flt_schar", native_float, native_schar, H5T_conv_float_schar, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_HARD, "dbl_schar", native_double, native_schar, H5T_conv_double_schar, H5AC_dxpl_id);
 
     /* From floats to unsigned char */
     status |= H5T_register(H5T_PERS_HARD, "flt_uchar", native_float, native_uchar, H5T_conv_float_uchar, H5AC_dxpl_id);
