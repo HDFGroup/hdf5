@@ -435,7 +435,6 @@ int main(int argc, char **argv)
 	      "collective to independent chunk io",PARATESTFILE);
     }
 
-#ifdef KYANG 
     AddTest("ccontw",coll_irregular_cont_write,NULL,
             "collective irregular contiguous write",PARATESTFILE);
     AddTest("ccontr",coll_irregular_cont_read,NULL,
@@ -451,7 +450,6 @@ int main(int argc, char **argv)
 
     AddTest("ccchunkr",coll_irregular_complex_chunk_read,NULL,
             "collective irregular complex chunk read",PARATESTFILE);
-#endif
 
     AddTest("null", null_dataset, NULL, 
 	    "null dataset test", PARATESTFILE);
