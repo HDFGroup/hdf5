@@ -2900,7 +2900,7 @@ int test_vgall() {
   int32   sds_ref;
   int32   fill_value;
   int32   array_data[TYP_DIMSIZE][TYP_DIMSIZE][TYP_DIMSIZE];
-  int32   dimo_sca[TYP_DIMSIZE];
+  int32   dim_sca0[TYP_DIMSIZE],dim_sca1[TYP_DIMSIZE];
   int32   dim_sizes[TYP_RANK];
   int32   start[TYP_RANK],edges[TYP_RANK],stride[TYP_RANK];
   float64 cal;
@@ -2937,6 +2937,7 @@ int test_vgall() {
 
   char dim_name0[] ="dim0";
   char dim_name1[] ="dim1";
+  char dim_name2[] ="dim2";
   char dim_label[] ="dim.label";
   char dim_unit[] ="dim.unit";
   char dim_format[] ="dim.format";
@@ -2963,8 +2964,10 @@ int test_vgall() {
     }
   }
 
-  for (i=0;i<TYP_DIMSIZE;i++) 
-    dimo_sca[i]= 2*i;
+  for (i=0;i<TYP_DIMSIZE;i++) {
+    dim_sca0[i]= 2*i;
+    dim_sca1[i]= i;
+  }
 
   for (i=0;i<TYP_RANK;i++){
     stride[i]=1;
@@ -3468,30 +3471,48 @@ int test_vgall() {
       printf("sds set dim id failed. \n");
       return FAIL;
     }
-    if (i==0) {
+
+
+ switch(i) {
+
+    case 0:
       istat = SDsetdimname(dim_id,dim_name0);
       if(istat == FAIL) {
-	printf("sds set dim.name failed. \n");
-	return FAIL;
+        printf("sds set dim.name failed. \n");
+        return FAIL;
       }
-      istat= SDsetdimscale(dim_id,dim_sizes[0],DFNT_INT32,(VOIDP)dimo_sca);
+      istat =SDsetdimscale(dim_id,dim_sizes[0],DFNT_INT32,(VOIDP)dim_sca0);
       if(istat == FAIL) {
-	printf("sds set dim. scale failed. \n");
-	return FAIL;
+         printf("sds set dim. scale failed. \n");
+         return FAIL;
       }
-    }
-    else {
+      break;
+    case 1:
       istat = SDsetdimname(dim_id,dim_name1);
       if(istat == FAIL) {
-	printf("sds set dim.name failed. \n");
-	return FAIL;
+        printf("sds set dim.name failed. \n");
+        return FAIL;
       }
-      istat = SDsetdimscale(dim_id,dim_sizes[1],DFNT_INT32,(VOIDP)dimo_sca);
+      istat = SDsetdimscale(dim_id,dim_sizes[1],DFNT_INT32,(VOIDP)dim_sca1);
       if(istat == FAIL) {
-	printf("sds set dim. scale failed. \n");
-	return FAIL;
+        printf("sds set dim. scale failed. \n");
+        return FAIL;
       }
-    }
+      break;
+    case 2:
+      istat = SDsetdimname(dim_id,dim_name2);
+      if(istat == FAIL) {
+        printf("sds set dim.name failed. \n");
+        return FAIL;
+      }
+      istat = SDsetdimscale(dim_id,dim_sizes[2],DFNT_INT32,(VOIDP)dim_sca0);
+      if(istat == FAIL) {
+        printf("sds set dim. scale failed. \n");
+        return FAIL;
+      }
+      break;
+ }
+  
  
     istat=SDsetdimstrs(dim_id,dim_label,dim_unit,dim_format);
     if(istat == FAIL) {
