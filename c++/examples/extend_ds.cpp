@@ -72,10 +72,15 @@ int main (void)
       cparms.setChunk( RANK, chunk_dims );
 
       /*
+       * Set fill value for the dataset
+       */
+      int fill_val = 0;
+      cparms.setFillValue( PredType::NATIVE_INT, &fill_val);
+
+      /*
        * Create a new dataset within the file using cparms
        * creation properties.
        */
-
       DataSet dataset = file.createDataSet( DATASET_NAME, PredType::NATIVE_INT, mspace1, cparms);
 
       /*
