@@ -211,7 +211,6 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     size_t		sizeof_rkey;
     size_t		size=0;
     size_t		total_native_keysize;
-    unsigned		u;
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B_create, FAIL)
@@ -250,21 +249,6 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
             NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
             NULL==(bt->nkey=H5FL_SEQ_MALLOC(voidp,(size_t)(2*H5F_KVALUE(f,type)+1))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree root node")
-
-    /*
-     * Initialize each entry's raw child and key pointers to point into the
-     * `page' buffer.  Each native key pointer should be null until the key is
-     * translated to native format.
-     */
-    for (u = 0; u < 2 * H5F_KVALUE(f, type); u++) {
-	bt->nkey[u] = NULL;
-	bt->child[u] = HADDR_UNDEF;
-    }
-
-    /*
-     * The last possible key...
-     */
-    bt->nkey[2 * H5F_KVALUE(f, type)] = NULL;
 
     /*
      * Cache the new B-tree node.
@@ -389,12 +373,6 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
         bt->nkey[bt->nchildren]=native;
     } /* end if */
-
-    /* Reset remainder of native keys and child addresses */
-    for (u++ ; u < 2 * H5F_KVALUE(f, type); u++) {
-        bt->child[u] = HADDR_UNDEF;
-        bt->nkey[u] = NULL;
-    }
 
     /* Set return value */
     ret_value = bt;
@@ -855,15 +833,15 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
 	     old_bt->native + nleft * type->sizeof_nkey,
 	     (nright+1) * type->sizeof_nkey);
 
-    for (u=0; u<=nright; u++) {
+    for (u=0; u<nright; u++) {
 	/* key */
-	if (old_bt->nkey[nleft+u])
-	    new_bt->nkey[u] = new_bt->native + u * type->sizeof_nkey;
+        new_bt->nkey[u] = new_bt->native + u * type->sizeof_nkey;
 
 	/* child */
-	if (u < nright)
-	    new_bt->child[u] = old_bt->child[nleft+u];
+        new_bt->child[u] = old_bt->child[nleft+u];
     }
+    /* Final key */
+    new_bt->nkey[u] = new_bt->native + u * type->sizeof_nkey;
     new_bt->nchildren = nright;
 
     /*
@@ -972,7 +950,6 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 
     if (!lt_key_changed) {
         assert(bt->nkey[0]);
-
 	HDmemcpy(lt_key, bt->nkey[0], type->sizeof_nkey);
     }
 
@@ -987,7 +964,6 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 
     if (!rt_key_changed) {
         assert(bt->nkey[bt->nchildren]);
-
 	HDmemcpy(rt_key, bt->nkey[bt->nchildren], type->sizeof_nkey);
     }
     
@@ -1125,13 +1101,8 @@ H5B_insert_child(const H5F_t *f, const H5B_class_t *type, H5B_t *bt,
 		  bt->native + idx * type->sizeof_nkey,
 		  ((bt->nchildren - idx) + 1) * type->sizeof_nkey);
 
-	for (u=bt->nchildren; u>=idx; --u) {
-	    if (bt->nkey[u]) {
-		bt->nkey[u+1] = bt->native + (u+1) * type->sizeof_nkey;
-	    } else {
-		bt->nkey[u+1] = NULL;
-	    }
-	}
+	for (u=bt->nchildren; u>=idx; --u)
+            bt->nkey[u+1] = bt->native + (u+1) * type->sizeof_nkey;
 	bt->nkey[idx] = bt->native + idx * type->sizeof_nkey;
 	HDmemcpy(bt->nkey[idx], md_key, type->sizeof_nkey);
 
@@ -1143,13 +1114,8 @@ H5B_insert_child(const H5F_t *f, const H5B_class_t *type, H5B_t *bt,
 		  bt->native + (idx+1) * type->sizeof_nkey,
 		  (bt->nchildren - idx) * type->sizeof_nkey);
 
-	for (u = bt->nchildren; u > idx; --u) {
-	    if (bt->nkey[u]) {
-		bt->nkey[u+1] = bt->native + (u+1) * type->sizeof_nkey;
-	    } else {
-		bt->nkey[u+1] = NULL;
-	    }
-	}
+	for (u = bt->nchildren; u > idx; --u)
+            bt->nkey[u+1] = bt->native + (u+1) * type->sizeof_nkey;
 	bt->nkey[idx+1] = bt->native + (idx+1) * type->sizeof_nkey;
 	HDmemcpy(bt->nkey[idx+1], md_key, type->sizeof_nkey);
     }
@@ -1273,10 +1239,8 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	bt->nkey[0] = bt->native;
 	bt->nkey[1] = bt->native + type->sizeof_nkey;
 	if ((type->new_node)(f, dxpl_id, H5B_INS_FIRST, bt->nkey[0], udata,
-			     bt->nkey[1], bt->child + 0/*out*/) < 0) {
-	    bt->nkey[0] = bt->nkey[1] = NULL;
+			     bt->nkey[1], bt->child + 0/*out*/) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, H5B_INS_ERROR, "unable to create leaf node")
-	}
 	bt->nchildren = 1;
 	bt->cache_info.dirty = TRUE;
 	idx = 0;
@@ -1508,6 +1472,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
     unsigned		u;              /* Local index variable */
     unsigned            level;
     haddr_t             left_child;
+    size_t		total_native_keysize;	/*size of native keys	     */
     herr_t		ret_value;
     
     FUNC_ENTER_NOAPI(H5B_iterate, FAIL)
@@ -1525,6 +1490,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
 
     level = bt->level;
+    total_native_keysize=bt->total_native_keysize;
     left_child = bt->child[0];
 
     if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0)
@@ -1542,7 +1508,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	 * pointer from leaf to leaf until we've processed all leaves.
 	 */
 	if (NULL==(child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
-                NULL==(key=H5MM_malloc((2*H5F_KVALUE(f, type)+1)*type->sizeof_nkey)))
+                NULL==(key=H5FL_BLK_MALLOC(native_block,total_native_keysize)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
 	for (cur_addr=addr, ret_value=0; H5F_addr_defined(cur_addr) && !ret_value; cur_addr=next_addr) {
@@ -1582,7 +1548,7 @@ done:
     if(child!=NULL)
         H5FL_SEQ_FREE(haddr_t,child);
     if(key!=NULL)
-        H5MM_xfree(key);
+        H5FL_BLK_FREE(native_block,key);
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -1809,13 +1775,8 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	HDmemmove(bt->child,
 		  bt->child+1,
 		  bt->nchildren * sizeof(haddr_t));
-	for (u=0; u<=bt->nchildren; u++) {
-	    if (bt->nkey[u+1]) {
-		bt->nkey[u] = bt->native + u*type->sizeof_nkey;
-	    } else {
-		bt->nkey[u] = NULL;
-	    }
-	}
+	for (u=0; u<=bt->nchildren; u++)
+            bt->nkey[u] = bt->native + u*type->sizeof_nkey;
 	assert(bt->nkey[0]);
 	HDmemcpy(lt_key, bt->nkey[0], type->sizeof_nkey);
 	*lt_key_changed = TRUE;
@@ -1874,13 +1835,8 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	HDmemmove(bt->child+idx,
 		  bt->child+idx+1,
 		  (bt->nchildren-idx) * sizeof(haddr_t));
-	for (u=idx; u<=bt->nchildren; u++) {
-	    if (bt->nkey[u+1]) {
-		bt->nkey[u] = bt->native + u*type->sizeof_nkey;
-	    } else {
-		bt->nkey[u] = NULL;
-	    }
-	}
+	for (u=idx; u<=bt->nchildren; u++)
+            bt->nkey[u] = bt->native + u*type->sizeof_nkey;
 	ret_value = H5B_INS_NOOP;
 	
     } else {
@@ -2141,15 +2097,10 @@ H5B_copy(const H5F_t *f, const H5B_t *old_bt)
     HDmemcpy(new_node->child,old_bt->child,(size_t)(sizeof(haddr_t)*nkeys));
 
     /*
-     * Translate the keys from pointers into the old 'native' buffer into
-     *  pointers into the new 'native' buffer.
+     * Set up native key pointers in new node.
      */
     for (u = 0; u < (nkeys+1); u++)
-        if (old_bt->nkey[u]) {
-            new_node->nkey[u] = new_node->native + u*new_node->type->sizeof_nkey;
-        } else {
-            new_node->nkey[u] = NULL;
-        }
+        new_node->nkey[u] = new_node->native + u*new_node->type->sizeof_nkey;
 
     /* Increment the ref-count on the raw page */
     H5RC_INC(new_node->rc_page);
