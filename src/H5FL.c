@@ -1144,13 +1144,15 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
     FUNC_ENTER (H5FL_arr_free, NULL);
 
-    /* Double check parameters */
-    assert(head);
-    assert(obj);
-
 #ifdef NO_ARR_FREE_LISTS
     H5MM_xfree(obj);
 #else /* NO_ARR_FREE_LISTS */
+    /* The H5MM_xfree code allows obj to null */
+    if (!obj) return (NULL);
+
+    /* Double check parameters */
+    assert(head);
+
     /* Make certain that the free list is initialized */
     assert(head->init);
 

@@ -594,7 +594,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 		      "transfer size overflows size_t");
     }
     if (do_write) {
-    	err = H5FD_write(f->shared->lf, dxpl_id, addr, mpi_count, buf);
+    	err = H5FD_write(f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, mpi_count, buf);
     	if (err) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
 	}

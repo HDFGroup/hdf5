@@ -1055,7 +1055,9 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"unable to open file");
 	}
-	file = H5F_new(NULL, fcpl_id, fapl_id);
+	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id)))
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			"unable to create new file object");
 	file->shared->flags = flags;
 	file->shared->lf = lf;
     } else {
@@ -1063,7 +1065,9 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	 * This file is not yet open by the library and our tentative opening
 	 * above is good enough.
 	 */
-	file = H5F_new(NULL, fcpl_id, fapl_id);
+	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id)))
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			"unable to create new file object");
 	file->shared->flags = flags;
 	file->shared->lf = lf;
     }
