@@ -37,8 +37,9 @@ check test _test: tests
 	      echo "============================";			      \
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
+	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	      srcdir=$(srcdir)						      \
-		 $(RUNTEST) /bin/sh $$test $(TEST_FLAGS) ||		      \
+		 /bin/sh $$test $(TEST_FLAGS) ||		              \
 		 exit 1;						      \
 	      echo "";							      \
 	   fi;								      \
