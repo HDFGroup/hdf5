@@ -494,7 +494,7 @@ H5S_all_release (H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5S_all_npoints (H5S_t *space)
+H5S_all_npoints (const H5S_t *space)
 {
     intn i;     /* Counters */
     hsize_t ret_value;

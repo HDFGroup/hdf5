@@ -444,7 +444,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5S_hyper_npoints (H5S_t *space)
+H5S_hyper_npoints (const H5S_t *space)
 {
     FUNC_ENTER (H5S_hyper_npoints, 0);
 

@@ -356,7 +356,7 @@ hsize_t H5Sselect_npoints (hid_t spaceid)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hsize_t H5S_select_npoints (H5S_t *space)
+hsize_t H5S_select_npoints (const H5S_t *space)
 {
     herr_t ret_value=FAIL;  /* return value */
 

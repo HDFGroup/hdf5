@@ -30,8 +30,8 @@ typedef struct {
     H5S_sel_iter_t *iter;
 	size_t nelmts;
     H5D_transfer_t xfer_mode;
-    void *_buf;
-    void *tconv_buf;
+    const void *src;
+    void *dst;
     H5S_hyper_bound_t **lo_bounds;
     H5S_hyper_bound_t **hi_bounds;
 } H5S_hyper_fhyper_info_t;
@@ -153,7 +153,7 @@ printf("%s: check 1.1, bound_count=%d\n",FUNC,bound_count);
             /* Check if we've allocated the array yet */
             if(num_reg==0) {
                 /* Allocate array */
-                ret_value=H5MM_malloc(sizeof(H5S_hyper_node_t));
+                ret_value=H5MM_malloc(sizeof(H5S_hyper_region_t));
 
                 /* Initialize with first region */
                 ret_value[0].start=lo_bounds[0][i].bound;
@@ -167,7 +167,7 @@ printf("%s: check 1.1, bound_count=%d\n",FUNC,bound_count);
                     ret_value[curr_reg].end=MAX(hi_bounds[0][i].bound,ret_value[curr_reg].end);
                 else {  /* no overlap with previous region, add new region */
                     /* Enlarge array */
-                    ret_value=H5MM_realloc(ret_value,sizeof(H5S_hyper_node_t)*(num_reg+1));
+                    ret_value=H5MM_realloc(ret_value,sizeof(H5S_hyper_region_t)*(num_reg+1));
 
                     /* Initialize with new region */
                     ret_value[num_reg].start=lo_bounds[0][i].bound;
@@ -318,7 +318,7 @@ printf("%s: check 2.1, i=%d\n",FUNC,(int)i);
                 if (H5F_arr_read (fhyper_info->f, fhyper_info->layout,
                         fhyper_info->comp, fhyper_info->efl, hsize, hsize, zero,
                         file_offset, fhyper_info->xfer_mode,
-                        fhyper_info->_buf/*out*/)<0) {
+                        fhyper_info->dst/*out*/)<0) {
                     HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
                 }
 #ifdef QAK
@@ -326,7 +326,7 @@ printf("%s: check 2.2\n",FUNC);
 #endif /* QAK */
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->_buf=((uint8 *)fhyper_info->_buf)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
+                fhyper_info->dst=((uint8 *)fhyper_info->dst)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
                 num_read+=(regions[i].end-regions[i].start)+1;
@@ -439,7 +439,8 @@ printf("%s: check 1.0\n", FUNC);
     fhyper_info.iter=file_iter;
     fhyper_info.nelmts=nelmts;
     fhyper_info.xfer_mode=xfer_mode;
-    fhyper_info._buf=_buf;
+    fhyper_info.src=NULL;
+    fhyper_info.dst=_buf;
     fhyper_info.lo_bounds=lo_bounds;
     fhyper_info.hi_bounds=hi_bounds;
 
@@ -530,12 +531,12 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                 if (H5F_arr_write (fhyper_info->f, fhyper_info->layout,
                         fhyper_info->comp, fhyper_info->efl, hsize, hsize, zero,
                         file_offset, fhyper_info->xfer_mode,
-                        fhyper_info->_buf)<0) {
+                        fhyper_info->src)<0) {
                     HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
                 }
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->_buf=((uint8 *)fhyper_info->_buf)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
+                fhyper_info->src=((uint8 *)fhyper_info->src)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
                 num_written+=(regions[i].end-regions[i].start)+1;
@@ -639,7 +640,8 @@ printf("%s: check 1.0\n", FUNC);
     fhyper_info.iter=file_iter;
     fhyper_info.nelmts=nelmts;
     fhyper_info.xfer_mode=xfer_mode;
-    fhyper_info._buf=_buf;
+    fhyper_info.src=_buf;
+    fhyper_info.dst=NULL;
     fhyper_info.lo_bounds=lo_bounds;
     fhyper_info.hi_bounds=hi_bounds;
 
@@ -674,7 +676,7 @@ printf("%s: check 1.0\n", FUNC);
 static size_t
 H5S_hyper_mread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 {
-    hssize_t	mem_size[H5O_LAYOUT_NDIMS];	/*size of memory buffer*/
+    hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*size of memory buffer*/
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in memory*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
@@ -713,7 +715,7 @@ for(i=0; i<num_regions; i++)
             /* Set up hyperslab I/O parameters which apply to all regions */
 
             /* Set up the size of the memory space */
-            HDmemcpy(mem_size,fhyper_info->space->extent.u.simple.size,fhyper_info->space->extent.u.simple.rank*sizeof(hssize_t));
+            HDmemcpy(mem_size,fhyper_info->space->extent.u.simple.size,fhyper_info->space->extent.u.simple.rank*sizeof(hsize_t));
             mem_size[fhyper_info->space->extent.u.simple.rank]=fhyper_info->elmt_size;
 
             /* Copy the location of the region in the file */
@@ -740,13 +742,13 @@ printf("%s: check 2.1, i=%d\n",FUNC,(int)i);
                  * Gather from memory.
                  */
                 if (H5V_hyper_copy (fhyper_info->space->extent.u.simple.rank+1,
-                        hsize, hsize, zero, fhyper_info->tconv_buf,
-                        mem_size, mem_offset, fhyper_info->_buf)<0) {
+                        hsize, hsize, zero, fhyper_info->dst,
+                        mem_size, mem_offset, fhyper_info->src)<0) {
                     HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "unable to gather data from memory");
                 }
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->tconv_buf=((uint8 *)fhyper_info->tconv_buf)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
+                fhyper_info->dst=((uint8 *)fhyper_info->dst)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
                 num_read+=(regions[i].end-regions[i].start)+1;
@@ -863,8 +865,8 @@ printf("%s: check 3.2, lo[%d][%d]=%d, hi[%d][%d]=%d\n",FUNC,i,j,(int)lo_bounds[i
     fhyper_info.space=mem_space;
     fhyper_info.iter=mem_iter;
     fhyper_info.nelmts=nelmts;
-    fhyper_info._buf=_buf;
-    fhyper_info.tconv_buf=_tconv_buf;
+    fhyper_info.src=_buf;
+    fhyper_info.dst=_tconv_buf;
     fhyper_info.lo_bounds=lo_bounds;
     fhyper_info.hi_bounds=hi_bounds;
 
@@ -905,7 +907,7 @@ printf("%s: check 5.0\n",FUNC);
 static size_t
 H5S_hyper_mwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 {
-    hssize_t	mem_size[H5O_LAYOUT_NDIMS];	/*size of memory buffer*/
+    hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*size of memory buffer*/
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
@@ -942,7 +944,7 @@ for(i=0; i<num_regions; i++)
             /* Set up hyperslab I/O parameters which apply to all regions */
 
             /* Set up the size of the memory space */
-            HDmemcpy(mem_size,fhyper_info->space->extent.u.simple.size,fhyper_info->space->extent.u.simple.rank*sizeof(hssize_t));
+            HDmemcpy(mem_size,fhyper_info->space->extent.u.simple.size,fhyper_info->space->extent.u.simple.rank*sizeof(hsize_t));
             mem_size[fhyper_info->space->extent.u.simple.rank]=fhyper_info->elmt_size;
 
             /* Copy the location of the region in the file */
@@ -969,13 +971,13 @@ printf("%s: check 3.0\n",FUNC);
                  * Gather from memory.
                  */
                 if (H5V_hyper_copy (fhyper_info->space->extent.u.simple.rank+1,
-                        hsize, mem_size, mem_offset, fhyper_info->_buf,
-                        hsize, zero, fhyper_info->tconv_buf)<0) {
+                        hsize, mem_size, mem_offset, fhyper_info->dst,
+                        hsize, zero, fhyper_info->src)<0) {
                     HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "unable to gather data from memory");
                 }
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->tconv_buf=((uint8 *)fhyper_info->tconv_buf)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
+                fhyper_info->src=((uint8 *)fhyper_info->src)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
                 num_read+=(regions[i].end-regions[i].start)+1;
@@ -1066,8 +1068,8 @@ H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
     fhyper_info.space=mem_space;
     fhyper_info.iter=mem_iter;
     fhyper_info.nelmts=nelmts;
-    fhyper_info._buf=_buf;
-    fhyper_info.tconv_buf=_tconv_buf;
+    fhyper_info.src=_tconv_buf;
+    fhyper_info.dst=_buf;
     fhyper_info.lo_bounds=lo_bounds;
     fhyper_info.hi_bounds=hi_bounds;
 
@@ -1384,7 +1386,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5S_point_npoints (H5S_t *space)
+H5S_point_npoints (const H5S_t *space)
 {
     FUNC_ENTER (H5S_point_npoints, 0);
 

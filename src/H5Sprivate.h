@@ -221,7 +221,7 @@ herr_t H5S_release_simple(H5S_simple_t *simple);
 herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 herr_t H5S_select_copy (H5S_t *dst, const H5S_t *src);
 herr_t H5S_select_release (H5S_t *space);
-hsize_t H5S_select_npoints (H5S_t *space);
+hsize_t H5S_select_npoints (const H5S_t *space);
 intn H5S_extend (H5S_t *space, const hsize_t *size);
 
 /* Conversion functions for simple data spaces */
@@ -279,7 +279,7 @@ herr_t H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 		const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		size_t nelmts, void *_buf/*out*/);
 herr_t H5S_point_release (H5S_t *space);
-hsize_t H5S_point_npoints (H5S_t *space);
+hsize_t H5S_point_npoints (const H5S_t *space);
 
 /* "All" select functions */
 herr_t H5S_all_init (const struct H5O_layout_t *layout,
@@ -303,7 +303,7 @@ herr_t H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
 		const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		size_t nelmts, void *_buf/*out*/);
 herr_t H5S_all_release (H5S_t *space);
-hsize_t H5S_all_npoints (H5S_t *space);
+hsize_t H5S_all_npoints (const H5S_t *space);
 
 /* Hyperslab selection functions */
 herr_t H5S_hyper_init (const struct H5O_layout_t *layout,
@@ -328,6 +328,6 @@ herr_t H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 		size_t nelmts, void *_buf/*out*/);
 herr_t H5S_hyper_add (H5S_t *space, hssize_t *start, hssize_t *size);
 herr_t H5S_hyper_release (H5S_t *space);
-hsize_t H5S_hyper_npoints (H5S_t *space);
+hsize_t H5S_hyper_npoints (const H5S_t *space);
 
 #endif

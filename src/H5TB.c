@@ -200,7 +200,7 @@ hid_t H5TBget_buf(hsize_t size, hbool_t resize)
             if(curr!=NULL) {
                 void * old_ptr=curr->buf;
 
-                if((curr->buf = H5MM_xrealloc(curr->buf, size))==NULL) {
+                if((curr->buf = H5MM_realloc(curr->buf, size))==NULL) {
                     curr->buf=old_ptr;  /* restore pointer if no memory available */
                     HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "unable to allocate space for temporary buffer");
@@ -213,12 +213,12 @@ hid_t H5TBget_buf(hsize_t size, hbool_t resize)
     /* No blocks in the list are acceptable */
     /* (either too small or not able to be resized) */
     if(curr==NULL) {
-        if((new=H5MM_xcalloc(1,sizeof(H5TB_t)))==NULL)
+        if((new=H5MM_calloc(sizeof(H5TB_t)))==NULL)
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                   "unable to allocate space for temporary buffer struct");
         new->inuse=TRUE;
         new->size=size;
-        if((new->buf=H5MM_xmalloc(size))==NULL) {
+        if((new->buf=H5MM_malloc(size))==NULL) {
             H5MM_xfree(new);    /* free structure */
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                   "unable to allocate space for temporary buffer");
@@ -349,7 +349,7 @@ herr_t H5TBresize_ptr(hid_t tbid, hsize_t size)
     old_ptr=tbuf->buf;
 
     /* Try to resize buffer to new size */
-    if((tbuf->buf = H5MM_xrealloc(tbuf->buf, size))==NULL) {
+    if((tbuf->buf = H5MM_realloc(tbuf->buf, size))==NULL) {
         tbuf->buf=old_ptr;  /* restore pointer if no memory available */
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
               "unable to allocate space for temporary buffer");
