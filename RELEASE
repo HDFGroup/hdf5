@@ -62,6 +62,9 @@ Bug fixes since HDF5-1.2.1
      herr_t, to align them with the dataset and group iterator functions.
    * Changed H5Screate_simple and H5Sset_extent_simple to not allow dimensions
      of size 0 with out the same dimension being unlimited.
+   * QAK - 4/19/00 - Improved metadata hashing & caching algorithms to avoid
+     many hash flushes and also remove some redundant I/O when moving metadata
+     blocks in the file.
 
 
 Known Problems:
