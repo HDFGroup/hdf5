@@ -108,7 +108,7 @@ distclean:
 	-$(RM) config/commence config/conclude
 	-$(RM) config/stamp1 config/stamp2 config/depend?
 	-$(RM) config.cache config.log config.status
-	-$(RM) src/H5config.h src/H5pubconf.h
+	-$(RM) src/H5config_fortran.h
 	-$(RM) libtool Makefile
 
 maintainer-clean:
@@ -117,6 +117,6 @@ maintainer-clean:
 	@@SETX@; for d in $(SUBDIRS) examples; do			      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
-	-$(RM) config.cache config.log config.status src/H5config.h
-	-$(RM) configure src/H5config.h.in
+	-$(RM) config.cache config.log config.status src/H5config_fortran.h
+	-$(RM) configure src/H5config_fortran.h.in
 
