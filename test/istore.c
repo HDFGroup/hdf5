@@ -297,7 +297,7 @@ test_extend(H5F_t *f, const char *prefix,
 	memset(buf, (signed)(128+ctr), (size_t)nelmts);
 
 	/* Write to disk */
-	if (H5F_arr_write(f, &H5D_xfer_dflt, &layout, NULL, NULL, NULL, size,
+	if (H5F_arr_write(f, &H5F_xfer_dflt, &layout, NULL, NULL, NULL, size,
 			  size, zero, offset, buf)<0) {
 	    FAILED();
 	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
@@ -306,7 +306,7 @@ test_extend(H5F_t *f, const char *prefix,
 
 	/* Read from disk */
 	memset(check, 0xff, (size_t)nelmts);
-	if (H5F_arr_read(f, &H5D_xfer_dflt, &layout, NULL, NULL, NULL, size,
+	if (H5F_arr_read(f, &H5F_xfer_dflt, &layout, NULL, NULL, NULL, size,
 			 size, zero, offset, check)<0) {
 	    FAILED();
 	    printf("    Read failed: ctr=%lu\n", (unsigned long)ctr);
@@ -337,7 +337,7 @@ test_extend(H5F_t *f, const char *prefix,
 
     /* Now read the entire array back out and check it */
     memset(buf, 0xff, nx * ny * nz);
-    if (H5F_arr_read(f, &H5D_xfer_dflt, &layout, NULL, NULL, NULL, whole_size,
+    if (H5F_arr_read(f, &H5F_xfer_dflt, &layout, NULL, NULL, NULL, whole_size,
 		     whole_size, zero, zero, buf)<0) {
 	FAILED();
 	puts("    Read failed for whole array.");
@@ -450,7 +450,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 	memset(buf, (signed)(128+ctr), nx * ny * nz);
 
 	/* write to disk */
-	if (H5F_arr_write(f, &H5D_xfer_dflt, &layout, NULL, NULL, NULL, size,
+	if (H5F_arr_write(f, &H5F_xfer_dflt, &layout, NULL, NULL, NULL, size,
 			  size, zero, offset, buf)<0) {
 	    FAILED();
 	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);

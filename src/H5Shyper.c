@@ -32,7 +32,7 @@ typedef struct {
     const H5S_t *space;
     H5S_sel_iter_t *iter;
 	size_t nelmts;
-    const H5D_xfer_t *xfer_parms;
+    const H5F_xfer_t *xfer_parms;
     const void *src;
     void *dst;
     H5S_hyper_bound_t **lo_bounds;
@@ -60,14 +60,14 @@ static size_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5D_xfer_t *xfer_parms, void *buf/*out*/);
+			       const H5F_xfer_t *xfer_parms, void *buf/*out*/);
 static herr_t H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
 			       const struct H5O_fill_t *fill,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5D_xfer_t *xfer_parms, const void *buf);
+			       const H5F_xfer_t *xfer_parms, const void *buf);
 static size_t H5S_hyper_mgath (const void *_buf, size_t elmt_size,
 			       const H5S_t *mem_space,
 			       H5S_sel_iter_t *mem_iter, size_t nelmts,
@@ -809,7 +809,7 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_fill_t *fill,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		 size_t nelmts, const H5D_xfer_t *xfer_parms,
+		 size_t nelmts, const H5F_xfer_t *xfer_parms,
 		 void *_buf/*out*/)
 {
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
@@ -1070,7 +1070,7 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_fill_t *fill,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		 size_t nelmts, const H5D_xfer_t *xfer_parms,
+		 size_t nelmts, const H5F_xfer_t *xfer_parms,
 		 const void *_buf)
 {
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */

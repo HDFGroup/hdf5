@@ -12,9 +12,6 @@ if test "X-" =  "X-$CC"; then
     CC_BASENAME=gcc
 fi
 
-# Architecture-specific flags
-ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
-
 # Omit frame pointer for optimized code?
 NOFP=${NOFP:=-fomit-frame-pointer}
 

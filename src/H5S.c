@@ -1462,7 +1462,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
      * We can't do conversion if the source and destination select a
      * different number of data points.
      */
-    if (H5S_get_select_npoints (mem_space) != H5S_get_select_npoints (file_space)) {
+    if (H5S_get_select_npoints(mem_space) !=
+	H5S_get_select_npoints (file_space)) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL,
 		       "memory and file data spaces are different sizes");
     }
@@ -1489,7 +1490,27 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
     }
 
     /*
-     * Extend the table.
+     * Create a new path.
+     */
+    if (NULL==(path = H5MM_calloc(sizeof(*path)))) {
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "memory allocation failed for data space conversion "
+		      "path");
+    }
+    path->f = H5S_fconv_g[file_space->select.type];
+    path->m = H5S_mconv_g[mem_space->select.type];
+
+    /*
+     * Initialize direct read/write functions
+     */
+    if (H5S_SEL_ALL==file_space->select.type &&
+	H5S_SEL_ALL==mem_space->select.type) {
+	path->read = H5S_all_read;
+	path->write = H5S_all_write;
+    }
+    
+    /*
+     * Add the new path to the table.
      */
     if (H5S_nconv_g>=H5S_aconv_g) {
 	size_t n = MAX(10, 2*H5S_aconv_g);
@@ -1502,17 +1523,6 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
 	H5S_aconv_g = n;
 	H5S_conv_g = p;
     }
-
-    /*
-     * Create a new path and add it to the table.
-     */
-    if (NULL==(path = H5MM_calloc(sizeof(*path)))) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		      "memory allocation failed for data space conversion "
-		      "path");
-    }
-    path->f = H5S_fconv_g[file_space->select.type];
-    path->m = H5S_mconv_g[mem_space->select.type];
     H5S_conv_g[H5S_nconv_g++] = path;
 
     FUNC_LEAVE(path);

@@ -28,14 +28,14 @@ static size_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
-			     const H5D_xfer_t *xfer_parms, void *buf/*out*/);
+			     const H5F_xfer_t *xfer_parms, void *buf/*out*/);
 static herr_t H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_fill_t *fill,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
-			     const H5D_xfer_t *xfer_parms, const void *buf);
+			     const H5F_xfer_t *xfer_parms, const void *buf);
 static size_t H5S_all_mgath (const void *_buf, size_t elmt_size,
 			     const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 			     size_t nelmts, void *_tconv_buf/*out*/);
@@ -172,7 +172,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 	       size_t elmt_size, const H5S_t *file_space,
 	       H5S_sel_iter_t *file_iter, size_t nelmts,
-	       const H5D_xfer_t *xfer_parms, void *_buf/*out*/)
+	       const H5F_xfer_t *xfer_parms, void *_buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -260,7 +260,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline, const struct H5O_fill_t *fill,
 	       const struct H5O_efl_t *efl, size_t elmt_size,
 	       const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-	       size_t nelmts, const H5D_xfer_t *xfer_parms, const void *_buf)
+	       size_t nelmts, const H5F_xfer_t *xfer_parms, const void *_buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -499,7 +499,144 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
     mem_iter->all.offset+=nelmts;
     
     FUNC_LEAVE (SUCCEED);
-}   /* H5S_all_mscat() */
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_all_read
+ *
+ * Purpose:	Reads directly from file into application memory if possible.
+ *
+ * Return:	Success:	Non-negative. If data was read directly then
+ *				MUST_CONVERT is set to zero, otherwise
+ *				MUST_CONVERT is set to non-zero.
+ *
+ *		Failure:	Negative. Return value of MUST_CONVERT is
+ *				undefined.
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 22, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
+	     const H5O_efl_t *efl, size_t elmt_size, const H5S_t *file_space,
+	     const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
+	     void *buf/*out*/, hbool_t *must_convert/*out*/)
+{
+    hsize_t	size[H5S_MAX_RANK];
+    hssize_t	offset[H5S_MAX_RANK];
+    int		i;
+
+    FUNC_ENTER(H5S_all_read, FAIL);
+    *must_convert = TRUE;
+
+    /* Check whether we can handle this */
+    if (H5S_SIMPLE!=mem_space->extent.type) goto fall_through;
+    if (H5S_SIMPLE!=file_space->extent.type) goto fall_through;
+    if (mem_space->extent.u.simple.rank!=
+	file_space->extent.u.simple.rank) goto fall_through;
+
+    /* Get information about memory and file */
+    for (i=0; i<mem_space->extent.u.simple.rank; i++) {
+	if (mem_space->extent.u.simple.max &&
+	    mem_space->extent.u.simple.size[i]!=
+	    mem_space->extent.u.simple.max[i]) goto fall_through;
+	if (file_space->extent.u.simple.max &&
+	    file_space->extent.u.simple.size[i]!=
+	    file_space->extent.u.simple.max[i]) goto fall_through;
+	if (mem_space->extent.u.simple.size[i]!=
+	    file_space->extent.u.simple.size[i]) goto fall_through;
+	size[i] = mem_space->extent.u.simple.size[i];
+	offset[i] = 0;
+    }
+    size[i] = elmt_size;
+    offset[i] = 0;
+
+    /* Read data from the file */
+    if (H5F_arr_read(f, xfer_parms, layout, pline, NULL, efl, size,
+		     size, offset, offset, buf/*out*/)<0) {
+	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, FAIL,
+		      "unable to write data to the file");
+    }
+    *must_convert = FALSE;
+
+ fall_through:
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_all_write
+ *
+ * Purpose:	Writes data directly to the file if possible.
+ *
+ * Return:	Success:	Non-negative. If data was written directly
+ *				then MUST_CONVERT is set to zero, otherwise
+ *				MUST_CONVERT is set to non-zero.
+ *
+ *		Failure:	Negative. Return value of MUST_CONVERT is
+ *				undefined.
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 21, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
+	      const H5O_pline_t *pline, const H5O_efl_t *efl,
+	      size_t elmt_size, const H5S_t *file_space,
+	      const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
+	      const void *buf, hbool_t *must_convert/*out*/)
+{
+    hsize_t	size[H5S_MAX_RANK];
+    hssize_t	offset[H5S_MAX_RANK];
+    int		i;
+    
+    FUNC_ENTER(H5S_all_write, FAIL);
+    *must_convert = TRUE;
+
+    /* Check whether we can handle this */
+    if (H5S_SIMPLE!=mem_space->extent.type) goto fall_through;
+    if (H5S_SIMPLE!=file_space->extent.type) goto fall_through;
+    if (mem_space->extent.u.simple.rank!=
+	file_space->extent.u.simple.rank) goto fall_through;
+
+    /* Get information about memory and file */
+    for (i=0; i<mem_space->extent.u.simple.rank; i++) {
+	if (mem_space->extent.u.simple.max &&
+	    mem_space->extent.u.simple.size[i]!=
+	    mem_space->extent.u.simple.max[i]) goto fall_through;
+	if (file_space->extent.u.simple.max &&
+	    file_space->extent.u.simple.size[i]!=
+	    file_space->extent.u.simple.max[i]) goto fall_through;
+	if (mem_space->extent.u.simple.size[i]!=
+	    file_space->extent.u.simple.size[i]) goto fall_through;
+	size[i] = mem_space->extent.u.simple.size[i];
+	offset[i] = 0;
+    }
+    size[i] = elmt_size;
+    offset[i] = 0;
+
+    /* Write data to the file */
+    if (H5F_arr_write(f, xfer_parms, layout, pline, NULL, efl, size,
+		      size, offset, offset, buf)<0) {
+	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, FAIL,
+		      "unable to write data to the file");
+    }
+    *must_convert = FALSE;
+
+
+ fall_through:
+    FUNC_LEAVE(SUCCEED);
+}
+
 
 /*--------------------------------------------------------------------------
  NAME

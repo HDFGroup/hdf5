@@ -182,11 +182,11 @@ H5Pcreate(H5P_class_t type)
 	break;
 
     case H5P_DATASET_XFER:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5D_xfer_t)))) {
+	if (NULL==(plist = H5MM_malloc(sizeof(H5F_xfer_t)))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	HDmemcpy(plist, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
+	HDmemcpy(plist, &H5F_xfer_dflt, sizeof(H5F_xfer_t));
 	break;
 
     case H5P_MOUNT:
@@ -1979,7 +1979,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 herr_t
 H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_buffer, FAIL);
     H5TRACE4("e","izxx",plist_id,size,tconv,bkg);
@@ -2023,7 +2023,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 size_t
 H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_buffer, 0);
     H5TRACE3("z","ixx",plist_id,tconv,bkg);
@@ -2069,7 +2069,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 herr_t
 H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_hyper_cache, FAIL);
     H5TRACE3("e","iIuIu",plist_id,cache,limit);
@@ -2107,7 +2107,7 @@ herr_t
 H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 		   unsigned *limit/*out*/)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_hyper_cache, 0);
     H5TRACE3("e","ixx",plist_id,cache,limit);
@@ -2148,7 +2148,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 herr_t
 H5Pset_preserve(hid_t plist_id, hbool_t status)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_preserve, FAIL);
     H5TRACE2("e","ib",plist_id,status);
@@ -2186,7 +2186,7 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
 int
 H5Pget_preserve(hid_t plist_id)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_preserve, FAIL);
     H5TRACE1("Is","i",plist_id);
@@ -2497,7 +2497,7 @@ herr_t
 H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
 		    double *right/*out*/)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pget_btree_ratios, FAIL);
     H5TRACE4("e","ixxx",plist_id,left,middle,right);
@@ -2544,7 +2544,7 @@ herr_t
 H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
 		    double right)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pget_btree_ratios, FAIL);
     H5TRACE4("e","iddd",plist_id,left,middle,right);
@@ -2903,7 +2903,7 @@ H5Pget_mpi(hid_t plist_id, MPI_Comm *comm, MPI_Info *info)
 herr_t
 H5Pset_xfer(hid_t plist_id, H5D_transfer_t data_xfer_mode)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pset_xfer, FAIL);
     H5TRACE2("e","iDt",plist_id,data_xfer_mode);
@@ -2951,7 +2951,7 @@ H5Pset_xfer(hid_t plist_id, H5D_transfer_t data_xfer_mode)
 herr_t
 H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
 {
-    H5D_xfer_t		*plist = NULL;
+    H5F_xfer_t		*plist = NULL;
 
     FUNC_ENTER (H5Pget_xfer, FAIL);
     H5TRACE2("e","i*Dt",plist_id,data_xfer_mode);
@@ -3151,7 +3151,7 @@ H5P_copy (H5P_class_t type, const void *src)
 	break;
 
     case H5P_DATASET_XFER:
-	size = sizeof(H5D_xfer_t);
+	size = sizeof(H5F_xfer_t);
 	break;
 
     case H5P_MOUNT:

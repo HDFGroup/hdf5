@@ -59,6 +59,13 @@ EOF
 	;;
 esac
 
+# Architecture-specific flags
+case "$host_cpu" in
+    i686)
+	ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
+	;;
+esac
+
 # Compiler flags
 case "$cc_vendor-$cc_version" in
     gcc-2.7*)

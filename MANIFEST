@@ -81,7 +81,6 @@
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
 ./doc/html/ddl.html
-./doc/html/DDL.html              	_DO_NOT_DISTRIBUTE_
 ./doc/html/Debugging.html
 ./doc/html/Environment.html
 ./doc/html/Errors.html
@@ -196,14 +195,17 @@
 ./examples/h5_select.c
 ./examples/h5_attribute.c
 
-./pablo/HDF5record_RT.h
-./pablo/HDFentries.txt
+./pablo/HDFIOTrace.h
+./pablo/HDFTrace.h
+./pablo/HDFmpioProtos.h
+./pablo/HDFrecord_RT.h
 ./pablo/Makefile.in
-./pablo/PabloHDF5.c
 ./pablo/PabloHDF_RT.c
 ./pablo/PabloHDF_SDDF.c
 ./pablo/ProcIDs.h
+./pablo/PabloSedscr
 ./pablo/ProcTrace.h
+./pablo/ProcTrace.inc
 
 ./src/.distdep
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_

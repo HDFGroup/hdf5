@@ -87,8 +87,11 @@ typedef struct H5B_class_t {
     /* remove existing data */
     H5B_ins_t	(*remove)(H5F_t*, const haddr_t*, void*, hbool_t*,
 			  void*, void*, hbool_t*);
-    
-    herr_t	(*list)(H5F_t*, const haddr_t*, void*); /*walk leaf nodes*/
+
+    /* iterate through the leaf nodes */
+    herr_t	(*list)(H5F_t*, void*, const haddr_t*, void*, void*);
+
+    /* encode, decode, debug key values */
     herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*debug_key)(FILE*, intn, intn, const void*, const void*);

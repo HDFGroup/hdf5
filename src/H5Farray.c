@@ -113,7 +113,7 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_arr_read (H5F_t *f, const H5D_xfer_t *xfer,
+H5F_arr_read (H5F_t *f, const H5F_xfer_t *xfer,
 	      const struct H5O_layout_t *layout,
 	      const struct H5O_pline_t *pline, const H5O_fill_t *fill,
 	      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
@@ -330,12 +330,12 @@ H5F_arr_read (H5F_t *f, const H5D_xfer_t *xfer,
  *
  * 		Sep 28, 1998	Robb Matzke
  *		Added `xfer' argument, removed `xfer_mode' argument since it
- *		is a member of H5D_xfer_t.
+ *		is a member of H5F_xfer_t.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_arr_write (H5F_t *f, const H5D_xfer_t *xfer,
+H5F_arr_write (H5F_t *f, const H5F_xfer_t *xfer,
 	       const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline,
 	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,

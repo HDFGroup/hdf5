@@ -66,28 +66,6 @@ const H5D_create_t	H5D_create_dflt = {
     {0, 0, NULL} 		/* No filters in pipeline		*/
 };
 
-/* Default dataset transfer property list */
-const H5D_xfer_t	H5D_xfer_dflt = {
-    1024*1024,			/* Temporary buffer size		*/
-    NULL,			/* Type conversion buffer or NULL	*/
-    NULL, 			/* Background buffer or NULL		*/
-    H5T_BKG_NO,			/* Type of background buffer needed	*/
-    {0.1, 0.5, 0.9},		/* B-tree node splitting ratios		*/
-#ifndef HAVE_PARALLEL
-    1,				/* Cache the hyperslab blocks by default*/
-#else
-    0,				/*
-				 * Don't cache the hyperslab blocks by
-				 * default (for parallel)
-				 */
-#endif /* HAVE_PARALLEL */
-    0,              		/*
-				 * Default to no upper limit on hyperslab
-				 * block size to cache
-				 */
-    H5D_XFER_DFLT,      	/* Independent data transfer      	*/
-};
-
 /* Interface initialization? */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
@@ -604,7 +582,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
-    const H5D_xfer_t	   *xfer_parms = NULL;
+    const H5F_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dread, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
@@ -643,7 +621,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	}
     }
     if (H5P_DEFAULT == plist_id) {
-	xfer_parms = &H5D_xfer_dflt;
+	xfer_parms = &H5F_xfer_dflt;
     } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
 	       NULL == (xfer_parms = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
@@ -703,7 +681,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
-    const H5D_xfer_t	   *xfer_parms = NULL;
+    const H5F_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dwrite, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
@@ -742,7 +720,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	}
     }
     if (H5P_DEFAULT == plist_id) {
-	xfer_parms = &H5D_xfer_dflt;
+	xfer_parms = &H5F_xfer_dflt;
     } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
 	       NULL == (xfer_parms = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
@@ -784,9 +762,9 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
     H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type (dset_id) ||
-	NULL==(dset=H5I_object (dset_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (H5I_DATASET!=H5I_get_type(dset_id) ||
+	NULL==(dset=H5I_object(dset_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
     if (!size) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified");
@@ -846,7 +824,7 @@ H5D_new(const H5D_create_t *create_parms)
 
 done:
     FUNC_LEAVE(ret_value);
-}   /* end H5D_new() */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1211,7 +1189,7 @@ H5D_open(H5G_entry_t *loc, const char *name)
 
 done:
     FUNC_LEAVE(ret_value);
-}   /* end H5D_open() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_open_oid
@@ -1364,7 +1342,7 @@ done:
         H5MM_xfree(dataset);
     }
     FUNC_LEAVE(ret_value);
-}   /* end H5D_open_oid() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_close
@@ -1451,7 +1429,7 @@ H5D_close(H5D_t *dataset)
  */
 herr_t
 H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-	 const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
+	 const H5S_t *file_space, const H5F_xfer_t *xfer_parms,
 	 void *buf/*out*/)
 {
     hssize_t    	nelmts;			/*number of elements	*/
@@ -1570,8 +1548,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 			       &(dataset->create_parms->pline),
 			       &(dataset->create_parms->efl),
 			       H5T_get_size (dataset->type), file_space,
-			       mem_space, xfer_parms->xfer_mode,
-			       buf/*out*/, &must_convert );
+			       mem_space, xfer_parms, buf/*out*/,
+			       &must_convert);
         if (status<0) {
 	    /* Supports only no conversion, type or space, for now. */
 	    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
@@ -1655,7 +1633,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
     
     /* Start strip mining... */
-    for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
+    assert(nelmts==(hssize_t)(size_t)nelmts); /*check for overflow*/
+    for (smine_start=0;
+	 smine_start<(size_t)nelmts;
+	 smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
         smine_nelmts = (sconv->f->avail)(file_space,&file_iter,
 					 MIN(request_nelmts,
@@ -1803,7 +1784,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  */
 herr_t
 H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-	  const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
+	  const H5S_t *file_space, const H5F_xfer_t *xfer_parms,
 	  const void *buf)
 {
     hssize_t		nelmts;			/*total number of elmts	*/
@@ -1934,8 +1915,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				&(dataset->create_parms->pline),
 				&(dataset->create_parms->efl),
 				H5T_get_size (dataset->type), file_space,
-				mem_space, xfer_parms->xfer_mode, buf,
-				&must_convert /*out*/ );
+				mem_space, xfer_parms, buf,
+				&must_convert/*out*/);
         if (status<0) {
 	    /* Supports only no conversion, type or space, for now. */
 	    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
@@ -2020,7 +2001,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
 
     /* Start strip mining... */
-    for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
+    assert(nelmts==(hssize_t)(size_t)nelmts); /*check for overflow*/
+    for (smine_start=0;
+	 smine_start<(size_t)nelmts;
+	 smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
         smine_nelmts = (sconv->f->avail)(file_space,&file_iter,
 					 MIN(request_nelmts,
@@ -2422,7 +2406,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	    ndims++;
 
 	    if (H5F_istore_allocate(dset->ent.file, &(dset->layout),
-				    dim, H5D_xfer_dflt.split_ratios,
+				    dim, H5F_xfer_dflt.split_ratios,
 				    &(dset->create_parms->pline),
 				    &(dset->create_parms->fill))<0) {
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -2441,3 +2425,80 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     FUNC_LEAVE(ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dget_storage_size
+ *
+ * Purpose:	Returns the amount of storage that is required for the
+ *		dataset. For chunked datasets this is the number of allocated
+ *		chunks times the chunk size.
+ *
+ * Return:	Success:	The amount of storage space allocated for the
+ *				dataset, not counting meta data. The return
+ *				value may be zero if no data has been stored.
+ *
+ *		Failure:	Zero
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 21, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5Dget_storage_size(hid_t dset_id)
+{
+    H5D_t	*dset=NULL;
+    hsize_t	size;
+    
+    FUNC_ENTER(H5Dget_storage_size, 0);
+    H5TRACE1("h","i",dset_id);
+
+    /* Check args */
+    if (H5I_DATASET!=H5I_get_type(dset_id) ||
+	NULL==(dset=H5I_object(dset_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    }
+
+    size = H5D_get_storage_size(dset);
+    FUNC_LEAVE(size);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_get_storage_size
+ *
+ * Purpose:	Determines how much space has been reserved to store the raw
+ *		data of a dataset.
+ *
+ * Return:	Success:	Number of bytes reserved to hold raw data.
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 21, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5D_get_storage_size(H5D_t *dset)
+{
+    hsize_t	size;
+    int		i;
+    
+    FUNC_ENTER(H5D_get_storage_size, 0);
+
+    if (H5D_CHUNKED==dset->layout.type) {
+	size = H5F_istore_allocated(dset->ent.file, dset->layout.ndims,
+				    &(dset->layout.addr));
+    } else {
+	for (i=0, size=1; i<dset->layout.ndims; i++) {
+	    size *= dset->layout.dim[i];
+	}
+    }
+	
+    FUNC_LEAVE(size);
+}

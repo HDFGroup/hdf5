@@ -1482,6 +1482,8 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
  *		Jun 23 1997
  *
  * Modifications:
+ * 		Robb Matzke, 1999-04-21
+ *		The key values are passed to the function which is called.
  *
  *-------------------------------------------------------------------------
  */
@@ -1493,6 +1495,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     haddr_t		next_addr;
     const haddr_t	*cur_addr = NULL;
     haddr_t		*child = NULL;
+    uint8_t		*key = NULL;
     intn		i, nchildren;
     herr_t		ret_value = FAIL;
 
@@ -1507,7 +1510,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     assert(addr && H5F_addr_defined(addr));
     assert(udata);
 
-    if (NULL == (bt = H5AC_find(f, H5AC_BT, addr, type, udata))) {
+    if (NULL == (bt=H5AC_find(f, H5AC_BT, addr, type, udata))) {
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
 		    "unable to load B-tree node");
     }
@@ -1524,7 +1527,8 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	 * We've reached the left-most leaf.  Now follow the right-sibling
 	 * pointer from leaf to leaf until we've processed all leaves.
 	 */
-	if (NULL==(child = H5MM_malloc (2*H5B_K(f,type)*sizeof(haddr_t)))) {
+	if (NULL==(child=H5MM_malloc(2*H5B_K(f,type)*sizeof(haddr_t))) ||
+	    NULL==(key=H5MM_malloc((2*H5B_K(f, type)+1)*type->sizeof_nkey))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			 "memory allocation failed");
 	}
@@ -1533,14 +1537,20 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	     cur_addr=&next_addr) {
 
 	    /*
-	     * Save all the child addresses since we can't leave the B-tree
-	     * node protected during an application callback.
+	     * Save all the child addresses and native keys since we can't
+	     * leave the B-tree node protected during an application
+	     * callback.
 	     */
 	    if (NULL==(bt=H5AC_find (f, H5AC_BT, cur_addr, type, udata))) {
 		HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node");
 	    }
 	    for (i=0; i<bt->nchildren; i++) {
 		child[i] = bt->child[i];
+	    }
+	    for (i=0; i<bt->nchildren+1; i++) {
+		H5B_decode_key(f, bt, i);
+		memcpy(key+i*type->sizeof_nkey, bt->key[i].nkey,
+		       type->sizeof_nkey);
 	    }
 	    next_addr = bt->right;
 	    nchildren = bt->nchildren;
@@ -1551,10 +1561,13 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	     * application  callback.
 	     */
 	    for (i=0, ret_value=0; i<nchildren && !ret_value; i++) {
-		ret_value = (type->list)(f, child+i, udata);
+		ret_value = (type->list)(f, key+i*type->sizeof_nkey,
+					 child+i, key+(i+1)*type->sizeof_nkey,
+					 udata);
 	    }
 	}
-	H5MM_xfree (child);
+	H5MM_xfree(child);
+	H5MM_xfree(key);
     }
 
   done:

@@ -29,7 +29,7 @@ static size_t H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5D_xfer_t *xfer_parms,
+			       const H5F_xfer_t *xfer_parms,
 			       void *buf/*out*/);
 static herr_t H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
@@ -37,7 +37,7 @@ static herr_t H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const H5D_xfer_t *xfer_parms,
+			       const H5F_xfer_t *xfer_parms,
 			       const void *buf);
 static size_t H5S_point_mgath (const void *_buf, size_t elmt_size,
 			       const H5S_t *mem_space,
@@ -270,7 +270,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 		 size_t elmt_size, const H5S_t *file_space,
 		 H5S_sel_iter_t *file_iter, size_t nelmts,
-		 const H5D_xfer_t *xfer_parms, void *_buf/*out*/)
+		 const H5F_xfer_t *xfer_parms, void *_buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -377,7 +377,7 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 		 size_t elmt_size, const H5S_t *file_space,
 		 H5S_sel_iter_t *file_iter, size_t nelmts,
-		 const H5D_xfer_t *xfer_parms, const void *_buf)
+		 const H5F_xfer_t *xfer_parms, const void *_buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/

@@ -50,21 +50,8 @@ typedef struct H5D_create_t {
     H5O_pline_t		pline;		/*data filter pipeline		     */
 } H5D_create_t;
 
-/* Dataset transfer property list */
-typedef struct H5D_xfer_t {
-    size_t		buf_size;	/*max temp buffer size		     */
-    void		*tconv_buf;	/*type conversion buffer or null     */
-    void		*bkg_buf;	/*background buffer or null	     */
-    H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
-    double		split_ratios[3];/*B-tree node splitting ratios	     */
-    uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
-    uintn       	block_limit;    /*largest hyperslab block to cache   */
-    H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
-} H5D_xfer_t;
-
 typedef struct H5D_t H5D_t;
 __DLLVAR__ const H5D_create_t H5D_create_dflt;
-__DLLVAR__ const H5D_xfer_t H5D_xfer_dflt;
 
 /* Functions defined in H5D.c */
 __DLL__ H5D_t *H5D_create(H5G_entry_t *loc, const char *name,
@@ -75,15 +62,16 @@ __DLL__ herr_t H5D_close(H5D_t *dataset);
 __DLL__ htri_t H5D_isa(H5G_entry_t *ent);
 __DLL__ herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
 			const H5S_t *mem_space, const H5S_t *file_space,
-			const H5D_xfer_t *xfer_parms, void *buf/*out*/);
+			const H5F_xfer_t *xfer_parms, void *buf/*out*/);
 __DLL__ herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
 			 const H5S_t *mem_space, const H5S_t *file_space,
-			 const H5D_xfer_t *xfer_parms, const void *buf);
+			 const H5F_xfer_t *xfer_parms, const void *buf);
 __DLL__ herr_t H5D_extend(H5D_t *dataset, const hsize_t *size);
 __DLL__ H5G_entry_t *H5D_entof(H5D_t *dataset);
 __DLL__ H5T_t *H5D_typeof(H5D_t *dset);
 __DLL__ H5S_t *H5D_get_space(H5D_t *dset);
 __DLL__ H5D_t * H5D_open_oid(H5G_entry_t *ent);
 __DLL__ H5F_t * H5D_get_file(const H5D_t *dset);
+__DLL__ hsize_t H5D_get_storage_size(H5D_t *dset);
 
 #endif

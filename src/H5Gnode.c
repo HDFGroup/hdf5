@@ -61,7 +61,8 @@ static H5B_ins_t H5G_node_insert(H5F_t *f, const haddr_t *addr,
 static H5B_ins_t H5G_node_remove(H5F_t *f, const haddr_t *addr, void *lt_key,
 				 hbool_t *lt_key_changed, void *udata,
 				 void *rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_iterate(H5F_t *f, const haddr_t *addr, void *_udata);
+static herr_t H5G_node_iterate(H5F_t *f, void *_lt_key, const haddr_t *addr,
+			       void *_rt_key, void *_udata);
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 
 /* H5G inherits cache-like properties from H5AC */
@@ -1034,7 +1035,8 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
+H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, const haddr_t *addr,
+		  void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_ud2_t	*bt_udata = (H5G_bt_ud2_t *)_udata;
     H5G_node_t		*sn = NULL;

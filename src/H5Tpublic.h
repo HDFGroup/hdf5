@@ -126,13 +126,6 @@ typedef enum H5T_pad_t {
     H5T_NPAD             = 3    /*THIS MUST BE LAST                          */
 } H5T_pad_t;
 
-/* How is the `bkg' buffer used by the conversion function? */
-typedef enum H5T_bkg_t {
-    H5T_BKG_NO		= 0, 	/*background buffer is not needed, send NULL */
-    H5T_BKG_TEMP	= 1, 	/*bkg buffer used as temp storage only	     */
-    H5T_BKG_YES		= 2	/*init bkg buf with data before conversion   */
-} H5T_bkg_t;
-
 /* Commands sent to conversion functions */
 typedef enum H5T_cmd_t {
     H5T_CONV_INIT	= 0,	/*query and/or initialize private data	     */

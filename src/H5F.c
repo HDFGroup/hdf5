@@ -65,6 +65,28 @@ const H5F_create_t	H5F_create_dflt = {
  */
 H5F_access_t H5F_access_dflt;
 
+/* Default data transfer property list */
+const H5F_xfer_t	H5F_xfer_dflt = {
+    1024*1024,			/* Temporary buffer size		*/
+    NULL,			/* Type conversion buffer or NULL	*/
+    NULL, 			/* Background buffer or NULL		*/
+    H5T_BKG_NO,			/* Type of background buffer needed	*/
+    {0.1, 0.5, 0.9},		/* B-tree node splitting ratios		*/
+#ifndef HAVE_PARALLEL
+    1,				/* Cache the hyperslab blocks by default*/
+#else
+    0,				/*
+				 * Don't cache the hyperslab blocks by
+				 * default (for parallel)
+				 */
+#endif /* HAVE_PARALLEL */
+    0,              		/*
+				 * Default to no upper limit on hyperslab
+				 * block size to cache
+				 */
+    H5D_XFER_DFLT,      	/* Independent data transfer      	*/
+};
+
 /*
  * Define the default mount property list.
  */

@@ -50,13 +50,12 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
 		     hsize_t *count,
 		     hbool_t *is_derived_type );
 static herr_t
-H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
+H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_pline_t UNUSED *pline,
                      const struct H5O_efl_t UNUSED *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     const H5D_transfer_t xfer_mode, void *buf /*out*/,
-		     hbool_t *must_convert /*out*/,
-		     const hbool_t do_write );
+                     const H5F_xfer_t *xfer_parms, void *buf/*out*/,
+		     hbool_t *must_convert/*out*/, const hbool_t do_write);
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_mpio_all_type
@@ -448,7 +447,7 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_pline_t UNUSED *pline,
                      const struct H5O_efl_t UNUSED *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     const H5D_transfer_t xfer_mode, void *buf /*out*/,
+                     const H5F_xfer_t *xfer_parms, void *buf /*out*/,
 		     hbool_t *must_convert /*out*/,
 		     const hbool_t do_write )
 {
@@ -526,13 +525,13 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     	HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"transfer size overflows size_t");
     if (do_write) {
     	err = H5F_low_write( f->shared->lf, f->shared->access_parms,
-			     xfer_mode, &addr, mpi_count, buf );
+			     xfer_parms->xfer_mode, &addr, mpi_count, buf );
     	if (err) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
 	}
     } else {
     	err = H5F_low_read ( f->shared->lf, f->shared->access_parms,
-			     xfer_mode, &addr, mpi_count, buf );
+			     xfer_parms->xfer_mode, &addr, mpi_count, buf );
     	if (err) {
 	    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
 	}
@@ -577,16 +576,16 @@ H5S_mpio_spaces_read (H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_pline_t *pline,
                      const struct H5O_efl_t *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     const H5D_transfer_t xfer_mode, void *buf /*out*/,
-		     hbool_t *must_convert /*out*/ )
+                     const H5F_xfer_t *xfer_parms, void *buf/*out*/,
+		     hbool_t *must_convert/*out*/)
 {
     herr_t ret_value = FAIL;
 
     FUNC_ENTER (H5S_mpio_spaces_read, FAIL);
 
-    ret_value = H5S_mpio_spaces_xfer( f, layout, pline, efl, elmt_size,
-			file_space, mem_space, xfer_mode, (void*)buf,
-			must_convert /*out*/, 0 /*read*/ );
+    ret_value = H5S_mpio_spaces_xfer(f, layout, pline, efl, elmt_size,
+				     file_space, mem_space, xfer_parms,
+				     buf, must_convert/*out*/, 0/*read*/);
 
     FUNC_LEAVE (ret_value);
 } /* H5S_mpio_spaces_read() */
@@ -612,16 +611,17 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_pline_t *pline,
                      const struct H5O_efl_t *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     const H5D_transfer_t xfer_mode, const void *buf,
-		     hbool_t *must_convert /*out*/ )
+                     const H5F_xfer_t *xfer_parms, const void *buf,
+		     hbool_t *must_convert/*out*/)
 {
     herr_t ret_value = FAIL;
 
     FUNC_ENTER (H5S_mpio_spaces_write, FAIL);
 
-    ret_value = H5S_mpio_spaces_xfer( f, layout, pline, efl, elmt_size,
-			file_space, mem_space, xfer_mode, (void*)buf,
-			must_convert /*out*/, 1 /*write*/ );
+    ret_value = H5S_mpio_spaces_xfer(f, layout, pline, efl, elmt_size,
+				     file_space, mem_space, xfer_parms,
+				     (void*)buf, must_convert/*out*/,
+				     1/*write*/);
 
     FUNC_LEAVE (ret_value);
 } /* H5S_mpio_spaces_write() */

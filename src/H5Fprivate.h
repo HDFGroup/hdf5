@@ -512,6 +512,18 @@ typedef struct H5F_t {
     H5F_mtab_t		mtab;		/* File mount table		*/
 } H5F_t;
 
+/* Dataset transfer property list */
+typedef struct H5F_xfer_t {
+    size_t		buf_size;	/*max temp buffer size		     */
+    void		*tconv_buf;	/*type conversion buffer or null     */
+    void		*bkg_buf;	/*background buffer or null	     */
+    H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
+    double		split_ratios[3];/*B-tree node splitting ratios	     */
+    uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
+    uintn       	block_limit;    /*largest hyperslab block to cache   */
+    H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
+} H5F_xfer_t;
+
 #ifdef NOT_YET
 #define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_ADDR(f)==4 ? UINT32ENCODE(p,o) \
     : H5F_SIZEOF_ADDR(f)==8 ? UINT64ENCODE(p,o) \
@@ -556,13 +568,14 @@ typedef struct H5F_t {
 struct H5O_layout_t;
 struct H5O_efl_t;
 struct H5O_pline_t;
-struct H5D_xfer_t;
+struct H5F_xfer_t;
 struct H5O_fill_t;
 struct H5G_entry_t;
 
 /* library variables */
 __DLLVAR__ const H5F_create_t H5F_create_dflt;
 __DLLVAR__ H5F_access_t H5F_access_dflt;
+__DLLVAR__ const H5F_xfer_t H5F_xfer_dflt;
 __DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
 
 #ifdef HAVE_PARALLEL
@@ -588,7 +601,7 @@ __DLL__ herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 /* Functions that operate on array storage */
 __DLL__ herr_t H5F_arr_create(H5F_t *f,
 			      struct H5O_layout_t *layout /*in,out*/);
-__DLL__ herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_arr_read (H5F_t *f, const struct H5F_xfer_t *xfer,
 			     const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_fill_t *fill,
@@ -597,7 +610,7 @@ __DLL__ herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
 			     const hsize_t mem_size[],
 			     const hssize_t mem_offset[],
 			     const hssize_t file_offset[], void *_buf/*out*/);
-__DLL__ herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_arr_write (H5F_t *f, const struct H5F_xfer_t *xfer,
 			      const struct H5O_layout_t *layout,
 			      const struct H5O_pline_t *pline,
 			      const struct H5O_fill_t *fill,
@@ -611,16 +624,17 @@ __DLL__ herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
 __DLL__ herr_t H5F_istore_init (H5F_t *f);
 __DLL__ herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
 __DLL__ herr_t H5F_istore_dest (H5F_t *f);
+__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, int ndims, haddr_t *addr);
 __DLL__ herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
 __DLL__ herr_t H5F_istore_create(H5F_t *f,
 				 struct H5O_layout_t *layout/*in,out*/);
-__DLL__ herr_t H5F_istore_read(H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_istore_read(H5F_t *f, const struct H5F_xfer_t *xfer,
 			       const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
 			       const struct H5O_fill_t *fill,
 			       const hssize_t offset[], const hsize_t size[],
 			       void *buf/*out*/);
-__DLL__ herr_t H5F_istore_write(H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_istore_write(H5F_t *f, const struct H5F_xfer_t *xfer,
 				const struct H5O_layout_t *layout,
 				const struct H5O_pline_t *pline,
 				const struct H5O_fill_t *fill,

@@ -78,6 +78,13 @@ typedef enum H5F_scope_t {
 /* Unlimited file size for H5Pset_external() */
 #define H5F_UNLIMITED	((hsize_t)(-1L))
 
+/* How is the `bkg' buffer used by the conversion function? */
+typedef enum H5T_bkg_t {
+    H5T_BKG_NO		= 0, 	/*background buffer is not needed, send NULL */
+    H5T_BKG_TEMP	= 1, 	/*bkg buffer used as temp storage only	     */
+    H5T_BKG_YES		= 2	/*init bkg buf with data before conversion   */
+} H5T_bkg_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

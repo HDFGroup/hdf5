@@ -108,6 +108,9 @@ static H5B_ins_t H5F_istore_insert(H5F_t *f, const haddr_t *addr,
 				   void *_md_key, void *_udata,
 				   void *_rt_key, hbool_t *rt_key_changed,
 				   haddr_t *new_node/*out*/);
+static herr_t H5F_istore_iterate (H5F_t *f, void *left_key,
+				  const haddr_t *addr, void *right_key,
+				  void *_udata);
 static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
 static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
@@ -143,6 +146,7 @@ typedef struct H5F_istore_ud1_t {
     H5F_istore_key_t	key;			/*key values		*/
     haddr_t		addr;			/*file address of chunk */
     H5O_layout_t	mesg;			/*layout message	*/
+    hsize_t		total_storage;		/*output from iterator	*/
 } H5F_istore_ud1_t;
 
 /* inherits B-tree like properties from H5B */
@@ -158,7 +162,7 @@ H5B_class_t H5B_ISTORE[1] = {{
     FALSE,					/*follow min branch?	*/
     FALSE,					/*follow max branch?	*/
     NULL,					/*remove		*/
-    NULL,					/*list			*/
+    H5F_istore_iterate,				/*iterator		*/
     H5F_istore_decode_key,			/*decode		*/
     H5F_istore_encode_key,			/*encode		*/
     H5F_istore_debug_key,			/*debug			*/
@@ -714,6 +718,36 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
     }
 
     FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_iterate
+ *
+ * Purpose:	Simply counts the number of chunks for a dataset.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 21, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key,
+		    const haddr_t UNUSED *addr,
+		    void UNUSED *_rt_key, void *_udata)
+{
+    H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
+    H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
+
+    FUNC_ENTER(H5F_istore_iterate, FAIL);
+    bt_udata->total_storage += lt_key->nbytes;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -1513,7 +1547,7 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
+H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 		const H5O_pline_t *pline, const H5O_fill_t *fill,
 		const hssize_t offset_f[], const hsize_t size[], void *buf)
 {
@@ -1601,7 +1635,7 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	 if (f->shared->access_parms->driver==H5F_LOW_MPIO){
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
-	    H5D_xfer_t		tmp_xfer = *xfer;
+	    H5F_xfer_t		tmp_xfer = *xfer;
 	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 				"unable to locate raw data chunk");
@@ -1683,7 +1717,7 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
+H5F_istore_write(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
 		 const H5O_pline_t *pline, const H5O_fill_t *fill,
 		 const hssize_t offset_f[], const hsize_t size[],
 		 const void *buf)
@@ -1776,7 +1810,7 @@ H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	 if (f->shared->access_parms->driver==H5F_LOW_MPIO){
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
-	    H5D_xfer_t		tmp_xfer = *xfer;
+	    H5F_xfer_t		tmp_xfer = *xfer;
 	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 				"unable to locate raw data chunk");
@@ -1891,6 +1925,40 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
     }
     
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_allocated
+ *
+ * Purpose:	Return the number of bytes allocated in the file for storage
+ *		of raw data under the specified B-tree (ADDR is the address
+ *		of the B-tree).
+ *
+ * Return:	Success:	Number of bytes stored in all chunks.
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 21, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5F_istore_allocated(H5F_t *f, int ndims, haddr_t *addr)
+{
+    H5F_istore_ud1_t	udata;
+
+    FUNC_ENTER(H5F_istore_nchunks, 0);
+    udata.mesg.ndims = ndims;
+    udata.total_storage = 0;
+    if (H5B_iterate(f, H5B_ISTORE, addr, &udata)<0) {
+	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, 0,
+		      "unable to iterate over chunk B-tree");
+    }
+    FUNC_LEAVE(udata.total_storage);
 }
 
 

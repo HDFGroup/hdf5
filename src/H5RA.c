@@ -738,7 +738,7 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		    "memory allocation failed for meta data");
     }
     if (H5D_read(ra->meta, H5RA_meta_type_g, mm_space, mf_space,
-		 &H5D_xfer_dflt, meta)<0) {
+		 &H5F_xfer_dflt, meta)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read meta data");
     }
@@ -779,7 +779,7 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to set meta data selection");
     }
-    if (H5D_write(ra->raw, type, rm_space, rf_space, &H5D_xfer_dflt,
+    if (H5D_write(ra->raw, type, rm_space, rf_space, &H5F_xfer_dflt,
 		  raw_buf)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_WRITEERROR, FAIL,
 		    "unable to write raw data");
@@ -809,7 +809,7 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		    "unable to set meta data selection");
     }
     if (H5D_write(ra->meta, H5RA_meta_type_g, mm_space, mf_space,
-		  &H5D_xfer_dflt, meta)<0) {
+		  &H5F_xfer_dflt, meta)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_WRITEERROR, FAIL,
 		    "unable to write meta data");
     }
@@ -926,7 +926,7 @@ H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta, hsize_t nelmts,
 	    HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			"unable to set overflow selection");
 	}
-	if (H5D_write(ra->over, type, om_space, of_space, &H5D_xfer_dflt,
+	if (H5D_write(ra->over, type, om_space, of_space, &H5F_xfer_dflt,
 		      buf)<0) {
 	    HGOTO_ERROR(H5E_RAGGED, H5E_WRITEERROR, FAIL,
 			"unable to write to overflow dataset");
@@ -1103,7 +1103,7 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "memory allocation failed for raw dataset");
     }
-    if (H5D_read(ra->raw, type, rm_space, rf_space, &H5D_xfer_dflt,
+    if (H5D_read(ra->raw, type, rm_space, rf_space, &H5F_xfer_dflt,
 		 raw_buf)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read raw dataset");
@@ -1134,7 +1134,7 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		    "unable to set meta data selection");
     }
     if (H5D_read(ra->meta, H5RA_meta_type_g, mm_space, mf_space,
-		 &H5D_xfer_dflt, meta)<0) {
+		 &H5F_xfer_dflt, meta)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read meta data");
     }
@@ -1182,7 +1182,7 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			    "unable to set overflow selection");
 	    }
-	    if (H5D_read(ra->over, type, om_space, of_space, &H5D_xfer_dflt,
+	    if (H5D_read(ra->over, type, om_space, of_space, &H5F_xfer_dflt,
 			 buf_out[i])<0) {
 		HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			    "unable to read overflow dataset");

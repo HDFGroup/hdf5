@@ -1187,7 +1187,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     char		s[64];		/*temporary string buffer	*/
     off_t		f_offset;	/*offset in external file	*/
     hsize_t		f_size;		/*bytes used in external file	*/
-    hsize_t		total;		/*total size or offset		*/
+    hsize_t		total, used;	/*total size or offset		*/
     hsize_t		chsize[64];	/*chunk size in elements	*/
     int			ndims;		/*dimensionality		*/
     int			n, max_len;	/*max extern file name length	*/
@@ -1210,6 +1210,18 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 	    printf("} %lu bytes\n", (unsigned long)total);
 	}
 
+	/* Print total raw storage size */
+	used = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
+	total = H5Dget_storage_size(dset);
+	printf("    %-10s ", "Storage:");
+	printf("%lu logical byte%s, %lu allocated byte%s",
+	       (unsigned long)used, 1==used?"":"s",
+	       (unsigned long)total, 1==total?"":"s");
+	if (total>0) {
+	    printf(", %1.2f%% utilization", (used*100.0)/total);
+	}
+	putchar('\n');
+	
 	/* Print information about external strorage */
 	if ((nf = H5Pget_external_count(dcpl))>0) {
 	    for (i=0, max_len=0; i<nf; i++) {
