@@ -34,7 +34,8 @@ TESTING()
 # $2 and on -- argument for the h5ls tool
 TOOLTEST()
 {
-    actual="testfiles/$1"
+    actual="testfiles/`basename $1 .ls`.out"
+    expect=$srcdir/testfiles/$1
     shift
 
     # Run test.
@@ -48,9 +49,7 @@ TOOLTEST()
     ) >$actual 2>& 1
     
     exitcode=$?
-    if [ $exitcode -eq 0 ]; then
-	echo " PASSED"
-    else
+    if [ $exitcode -ne 0 ]; then
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
 	if [ yes = "$verbose" ]; then
@@ -60,6 +59,17 @@ TOOLTEST()
 	    echo "***end of test output***"
 	    echo ""
 	fi
+    elif [ ! -f $expect ]; then
+	# Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+	echo "    Expected result differs from actual result"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
@@ -78,41 +88,41 @@ TOOLTEST()
 
 # Toss in a bunch of tests.  Not sure if they are the right kinds.
 # test the help syntax
-TOOLTEST help.ls -h
-TOOLTEST help.ls -help
-TOOLTEST help.ls -?
+TOOLTEST help-1.ls -w80 -h
+TOOLTEST help-2.ls -w80 -help
+TOOLTEST help-3.ls -w80 -?
 
 # test simple command
-TOOLTEST tall-1.ls tall.h5
-TOOLTEST tall-2.ls -r -d tall.h5
-TOOLTEST tgroup.ls tgroup.h5
+TOOLTEST tall-1.ls -w80 tall.h5
+TOOLTEST tall-2.ls -w80 -r -d tall.h5
+TOOLTEST tgroup.ls -w80 tgroup.h5
 
 # test for displaying groups
-TOOLTEST tgroup-1.ls  -r -g tgroup.h5
+TOOLTEST tgroup-1.ls -w80 -r -g tgroup.h5
 
 # test for displaying simple space datasets
-TOOLTEST tdset-1.ls -r -d tdset.h5
+TOOLTEST tdset-1.ls -w80 -r -d tdset.h5
 
 # test for displaying soft links
-TOOLTEST tslink-1.ls -r tslink.h5
+TOOLTEST tslink-1.ls -w80 -r tslink.h5
 
 # tests for hard links
-TOOLTEST thlink-1.ls thlink.h5
+TOOLTEST thlink-1.ls -w80 thlink.h5
 
 # tests for compound data types
-TOOLTEST tcomp-1.ls -r -d tcompound.h5
+TOOLTEST tcomp-1.ls -w80 -r -d tcompound.h5
 
 #test for the nested compound type
-TOOLTEST tnestcomp-1.ls -r -d tnestedcomp.h5
+TOOLTEST tnestcomp-1.ls -w80 -r -d tnestedcomp.h5
 
 # test for loop detection
-TOOLTEST tloop-1.ls -r -d tloop.h5
+TOOLTEST tloop-1.ls -w80 -r -d tloop.h5
 
 # test for string 
-TOOLTEST tstr-1.ls -r -d tstr.h5
+TOOLTEST tstr-1.ls -w80 -r -d tstr.h5
 
 # test test file created from lib SAF team
-TOOLTEST tsaf.ls -r -d tsaf.h5
+TOOLTEST tsaf.ls -w80 -r -d tsaf.h5
 
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."
