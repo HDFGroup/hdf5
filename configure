@@ -33538,6 +33538,28 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+echo "$as_me:$LINENO: checking if accurately converting between long double and integers works" >&5
+echo $ECHO_N "checking if accurately converting between long double and integers works... $ECHO_C" >&6
+if test "${hdf5_cv_sw_ldouble_to_int_works+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  hdf5_cv_sw_ldouble_to_int_works=yes
+fi
+
+
+if test ${hdf5_cv_sw_ldouble_to_int_works} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define SW_LDOUBLE_TO_INT_WORKS 1
+_ACEOF
+
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 echo "$as_me:$LINENO: checking if accurately converting unsigned long long to floating-point values works" >&5
 echo $ECHO_N "checking if accurately converting unsigned long long to floating-point values works... $ECHO_C" >&6
 
@@ -33748,18 +33770,20 @@ else
     {
         float  f = 9701917572145405952.00f;
         double d1 = 9701917572145405952.00L;
-        double d2 = 2e40L;
+        long double d2 = 9701917572145405952.00L;
+        double d3 = 2e40L;
         unsigned long long l1 = (unsigned long long)f;
         unsigned long long l2 = (unsigned long long)d1;
-        unsigned long long l3;
-        unsigned long long l4 = 0x7fffffffffffffffLLU;
+        unsigned long long l3 = (unsigned long long)d2;
+        unsigned long long l4;
+        unsigned long long l5 = 0x7fffffffffffffffLLU;
         int           ret = 0;
 
-        if(l1 <= l4 || l2 <= l4)
+        if(l1 <= l5 || l2 <= l5 || l3 <= l5)
             ret = 1;
 
-        l3 = (unsigned long long)d2;
-        if(l3 <= l4)
+        l4 = (unsigned long long)d3;
+        if(l4 <= l5)
             ret = 1;
 
 done:

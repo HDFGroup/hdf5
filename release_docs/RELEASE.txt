@@ -36,6 +36,8 @@ New Features
 
     Configuration:
     --------------
+        - Started to support software conversion between long double and 
+          integers.  Hardware conversion will come very soon.  SLU - 2005/1/6
 	- Intel v8.0 compiler would infinite loop when compiling some test
 	  code with -O3 option.  Changed enable-production default compiler
 	  option to -O2. AKC - 2004/12/06

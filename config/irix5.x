@@ -48,3 +48,22 @@ case "X-$CC_BASENAME" in
     PROFILE_CPPFLAGS=
     ;;
 esac
+
+# Hard set flag to indicate that the 'unsigned long long' to floating-point
+# value conversion are broken by the compilers (as of 4/27/04 - QAK)
+hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_works='no'}
+
+# Set flag to avoid conversion between 'long double' and integers because of 
+# SGI's compiler problems.  For both IRIX64 6.5 and IRIX 6.5, the compilers
+# have the following problems,
+#       long double -> signed char : incorrect rounding
+#       long double -> unsigned char : incorrect rounding
+#       long double -> short : incorrect rounding
+#       long double -> unsigned short : incorrect rounding
+#       long double -> long or long long: incorrect value
+#       long double -> unsigned long or long long : incorrect value
+#
+#       long or long long -> long double : correct value but incorrect bit pattern
+#       unsigned long or long long -> long double : correct value but incorrect bit pattern
+# (1/5/05 - SLU)
+hdf5_cv_sw_ldouble_to_int_works=${hdf5_cv_sw_ldouble_to_int_works='no'}

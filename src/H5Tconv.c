@@ -8914,10 +8914,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * the source exponent bias.
                  */
                 if (0==expo || H5T_NORM_NONE==src.u.f.norm) {
-                    bitno = H5T_bit_find(s, src.u.f.mpos, src.u.f.msize,
-                                         H5T_BIT_MSB, TRUE);
-                    assert(bitno>=0);
-                    expo -= (src.u.f.ebias-1) + (src.u.f.msize-bitno);
+                    expo -= (src.u.f.ebias-1);
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     expo -= src.u.f.ebias;
                 } else {
@@ -8948,7 +8945,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * Shift mantissa part by exponent minus mantissa size(right shift), 
                  * or by mantissa size minus exponent(left shift).  Example: Sequence
                  * 10...010111, expo=20, expo-msize=-3.  Right-shift the sequence, we get 
-                 * 00010...01.  The last three ones were dropped.
+                 * 00010...10.  The last three bits were dropped.
                  */
                 H5T_bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), 0, buf_size*8);
 
@@ -8959,17 +8956,10 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (expo < src.u.f.msize && cb_struct.func)
                     truncated = TRUE;
 
-                /* Convert to integer representation if negative. 
-                 * equivalent to ~(value - 1).
-                 */
-                if(sign) {
-                    H5T_bit_dec(int_buf, 0, 8*buf_size);
-                    H5T_bit_neg(int_buf, 0, 8*buf_size);
-                }
-                
                 /*
                  * What is the bit position for the most significant bit(MSB) of S
-                 * which is set?
+                 * which is set?  This is checked before converted to negative 
+                 * integer.
                  */
                 sfirst = H5T_bit_find(int_buf, 0, 8*buf_size, H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
@@ -9041,9 +9031,13 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
                             
-                            if(except_ret == H5T_CONV_UNHANDLED) { 
-                                /*copy source value into it if case is ignored by user handler*/    
-                                H5T_bit_copy (d, dst.offset, int_buf, 0, first+1);
+                            if(except_ret == H5T_CONV_UNHANDLED) { /*If this case ignored by user handler*/ 
+                                /*Convert to integer representation.  Equivalent to ~(value - 1).*/
+                                H5T_bit_dec(int_buf, 0, 8*buf_size);
+                                H5T_bit_neg(int_buf, 0, 8*buf_size);
+
+                                /*copy source value into destiny*/    
+                                H5T_bit_copy (d, dst.offset, int_buf, 0, dst.prec-1);
                                 H5T_bit_set (d, (dst.offset + dst.prec-1), 1, TRUE);
                             } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
@@ -9055,7 +9049,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                              * the sign bit because 0x80...00 is the biggest negative value.
                              */
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9072,7 +9067,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if (first >= dst.prec-1) {
                             /*overflow*/
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/ 
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9086,7 +9082,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 reverse = FALSE;
                         } else if(first < dst.prec-1) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9396,11 +9393,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 /*
                  * Calculate the true destination exponent by adjusting according to
-                 * the destination exponent bias.
+                 * the destination exponent bias.  Implied and non-implied normalization
+                 * should be the same.
                  */
-                if (H5T_NORM_NONE==src.u.f.norm) {
-                    expo = first + 1 + dst.u.f.ebias;
-                } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                if (H5T_NORM_NONE==dst.u.f.norm || H5T_NORM_IMPLIED==dst.u.f.norm) {
                     expo = first + dst.u.f.ebias;
                 } else {
                     assert("normalization method not implemented yet" && 0);
@@ -9408,10 +9404,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 
                 /* Handle mantissa part here */
-                if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                if (H5T_NORM_IMPLIED==dst.u.f.norm) {
                     /* Imply first bit */
                     H5T_bit_set(int_buf, first, 1, 0);
-       		} else if (H5T_NORM_NONE==src.u.f.norm) {
+       		} else if (H5T_NORM_NONE==dst.u.f.norm) {
 		    first++;
 		}
 
@@ -9461,13 +9457,13 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 			 * last f, we get 0x100...000.  Treat this special case here.
 			 */  
                     	if(H5T_bit_get_d(int_buf, dst.u.f.msize, 1)) {
-                	    if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                	    if (H5T_NORM_IMPLIED==dst.u.f.norm) {
 			        /* The bit at this 1's position was impled already, so this 
 			         * number should be 0x200...000.  We need to increment the 
 			         * exponent in this case.  
 			         */ 
 			    	expo++;
-       			    } else if (H5T_NORM_NONE==src.u.f.norm) {
+       			    } else if (H5T_NORM_NONE==dst.u.f.norm) {
 				/* Right shift 1 bit to let the carried 1 fit in the mantissa,
 				 * and increment exponent by 1.
 				 */
@@ -9479,7 +9475,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 } else {
                     /* The bit sequence can fit mantissa part.  Left shift to fit in from high-order of
 		     * bit position. */
-                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), 0, buf_size*8);
+                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), 0, dst.u.f.msize);
                 } 
                     
 

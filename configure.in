@@ -2500,6 +2500,23 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl -----------------------------------------------------------------------
+dnl Set flag to indicate that the machine can handle conversion between 
+dnl long double and integers.  (This flag should be set "yes" for all 
+dnl machines except all SGIs, where some conversions are incorrect and its
+dnl cache value is set "no" in its config/irix6.x file.) 
+dnl
+AC_MSG_CHECKING([if accurately converting between long double and integers works])
+AC_CACHE_VAL([hdf5_cv_sw_ldouble_to_int_works], [hdf5_cv_sw_ldouble_to_int_works=yes])
+
+if test ${hdf5_cv_sw_ldouble_to_int_works} = "yes"; then
+  AC_DEFINE([SW_LDOUBLE_TO_INT_WORKS], [1],
+            [Define if your system can accurately convert between long double and integer values.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
 dnl 'unsigned (long) long' values to 'float' and 'double' values.
@@ -2623,7 +2640,7 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
-dnl 'float' or 'double' to 'unsigned (long) long' values.
+dnl 'float', 'double' or 'long double' to 'unsigned (long) long' values.
 dnl (This flag should be set for all machines, except for HP-UX machines
 dnl where the maximal number for unsigned long long is 0x7fffffffffffffff
 dnl during conversion.
@@ -2636,18 +2653,20 @@ AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
     {
         float  f = 9701917572145405952.00f;
         double d1 = 9701917572145405952.00L;
-        double d2 = 2e40L;
+        long double d2 = 9701917572145405952.00L;
+        double d3 = 2e40L;
         unsigned long long l1 = (unsigned long long)f;
         unsigned long long l2 = (unsigned long long)d1;
-        unsigned long long l3;
-        unsigned long long l4 = 0x7fffffffffffffffLLU;
+        unsigned long long l3 = (unsigned long long)d2;
+        unsigned long long l4;
+        unsigned long long l5 = 0x7fffffffffffffffLLU;
         int           ret = 0;
 
-        if(l1 <= l4 || l2 <= l4) 
+        if(l1 <= l5 || l2 <= l5 || l3 <= l5) 
             ret = 1;
 
-        l3 = (unsigned long long)d2;
-        if(l3 <= l4)
+        l4 = (unsigned long long)d3;
+        if(l4 <= l5)
             ret = 1;
 
 done:
