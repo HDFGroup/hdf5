@@ -26,6 +26,10 @@ const char *FILENAME[] = {
     NULL
 };
 
+int	ipoints2[100][200], icheck2[100][200];
+short	spoints2[100][200], scheck2[100][200];
+int	ipoints3[100][200][5], icheck3[100][200][5];
+
 #define DSET_ATOMIC_NAME_1	"atomic_type_1"
 #define DSET_ATOMIC_NAME_2	"atomic_type_2"
 #define DSET_ATOMIC_NAME_3	"atomic_type_3"
@@ -72,14 +76,13 @@ test_atomic_dtype(hid_t file)
     hid_t               dtype, native_type;
     int			i, j, n;
     hsize_t		dims[2];
-    int	                points[100][200], check[100][200];
     
     TESTING("atomic datatype");
 
     /* Initialize the dataset */
     for (i = n = 0; i < 100; i++) {
 	for (j = 0; j < 200; j++) {
-	    points[i][j] = n++;
+	    ipoints2[i][j] = n++;
 	}
     }
 
@@ -94,7 +97,7 @@ test_atomic_dtype(hid_t file)
 			     H5P_DEFAULT))<0) TEST_ERROR;
 
     /* Write the data to the dataset */
-    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0)
 	TEST_ERROR;
 
     /* Close dataset */
@@ -117,13 +120,13 @@ test_atomic_dtype(hid_t file)
         TEST_ERROR;
 
     /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, icheck2)<0)
 	TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < 100; i++) {
 	for (j = 0; j < 200; j++) {
-	    if (points[i][j] != check[i][j]) {
+	    if (ipoints2[i][j] != icheck2[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %d,%d\n", i, j);
@@ -719,7 +722,6 @@ test_enum_dtype(hid_t file)
     hid_t               tid, tid_m, dtype, native_type;
     int			i, j, n;
     hsize_t		dims[2];
-    short               points[100][200], check[100][200];
     short               colors[8];
     const char          *mname[] = { "RED",
                                      "GREEN",
@@ -735,7 +737,7 @@ test_enum_dtype(hid_t file)
     /* Initialize the dataset */
     for (i = 0; i < 100; i++) {
         for (j=0, n=0; j < 200; j++, n++)
-	    points[i][j] = (i*10+j*100+n)%8;
+	    spoints2[i][j] = (i*10+j*100+n)%8;
     }
 
     /* Create the data space */
@@ -748,6 +750,7 @@ test_enum_dtype(hid_t file)
 
     for (i = 0; i < 8; i++) {
         colors[i] = i;
+
         if(H5Tenum_insert(tid, mname[i], &(colors[i]))<0) TEST_ERROR;
     }
      
@@ -764,7 +767,7 @@ test_enum_dtype(hid_t file)
     }
      
     /* Write the data to the dataset */
-    if (H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+    if (H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, spoints2)<0)
 	TEST_ERROR;
 
     /* Close dataset */
@@ -788,13 +791,13 @@ test_enum_dtype(hid_t file)
         TEST_ERROR;
         
     /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, scheck2)<0)
 	TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < 100; i++) {
 	for (j = 0; j < 200; j++) {
-	    if (points[i][j] != check[i][j]) {
+	    if (spoints2[i][j] != scheck2[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %d,%d\n", i, j);
@@ -982,7 +985,6 @@ test_array_dtype2(hid_t file)
     hid_t               dtype, native_type, tid, tid_m;
     int			i, j, k, n;
     hsize_t		space_dims[2], array_dims[1]={5};
-    int	                points[100][200][5], check[100][200][5];
 
     TESTING("array of atomic datatype");
 
@@ -990,7 +992,7 @@ test_array_dtype2(hid_t file)
     for(i = n = 0;i < 100; i++)
 	for(j = 0; j < 200; j++)
             for(k = 0; k < 5; k++) 
-                points[i][j][k] = n++;
+                ipoints3[i][j][k] = n++;
 
     /* Create the data space */
     space_dims[0] = 100;
@@ -1008,7 +1010,7 @@ test_array_dtype2(hid_t file)
     if((tid_m=H5Tarray_create(H5T_NATIVE_INT, 1, array_dims, NULL))<0) TEST_ERROR;
     
     /* Write the data to the dataset */
-    if (H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+    if (H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints3)<0)
 	TEST_ERROR;
 
     /* Close dataset */
@@ -1032,14 +1034,14 @@ test_array_dtype2(hid_t file)
     if(!H5Tequal(tid_m, native_type)) TEST_ERROR;
 
     /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, icheck3)<0)
 	TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < 100; i++) {
 	for (j = 0; j < 200; j++) {
             for (k = 0; k < 5; k++) {
-                if(check[i][j][k] != points[i][j][k]) {
+                if(icheck3[i][j][k] != ipoints3[i][j][k]) {
                     H5_FAILED();
                     printf("    Read different values than written.\n");
                     printf("    At index %d,%d\n", i, j);
@@ -1059,10 +1061,6 @@ test_array_dtype2(hid_t file)
     return 0;
 
 error:
-    if(points!=NULL)
-        free(points);
-    if(check!=NULL)
-        free(check);
     return 1;
 }
 
