@@ -1245,7 +1245,6 @@ nh5tpack_c(hid_t_f * type_id)
   return ret_value;
 } 
 
-}
 /*----------------------------------------------------------------------------
  * Name:        h5tarray_create_c
  * Purpose:     Call H5Tarray_create to create array datatype
