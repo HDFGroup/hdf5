@@ -332,6 +332,9 @@ AC_CHECK_SIZEOF(float, 4)
 AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF(long double, 8)
 
+dnl Checkpoint the cache
+AC_CACHE_SAVE
+
 dnl Posix.1g types (C9x)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h>
@@ -397,6 +400,9 @@ case $HSIZET in
         AC_DEFINE(HAVE_LARGE_HSIZET)
 	;;
 esac
+
+dnl Checkpoint the cache
+AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
 dnl Is HDF4 present?  If so then we can compile the h5toh4 converter. We
@@ -692,6 +698,9 @@ AC_CHECK_LIB(pdb,PD_open)
 AC_CHECK_LIB(silo,lite_PD_open)
 AC_CHECK_HEADERS(pdb.h,PDB2HDF=pdb2hdf)
 
+dnl Checkpoint the cache
+AC_CACHE_SAVE
+
 dnl ----------------------------------------------------------------------
 dnl Is the Pthreads library present?  It has a header file `pthread.h' and
 dnl a library `-lpthread' and their locations might be specified with the
@@ -961,6 +970,9 @@ else
    TRACE_API=no
    CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
 fi
+
+dnl Checkpoint the cache
+AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
 dnl The following variables are used to distinguish between building a
