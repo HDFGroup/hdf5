@@ -560,10 +560,6 @@ usage(const char *prog)
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
-    fprintf(stdout, "     -L                   Do not print soft links\n");
-    fprintf(stdout, "     -G                   Do not print groups\n");
-    fprintf(stdout, "     -T                   Do not print named datatypes\n");
-    fprintf(stdout, "     -E                   Do not print datasets\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
     fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
     fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");

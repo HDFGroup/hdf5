@@ -74,6 +74,7 @@
 #define FILE46  "tfcontents1.h5"
 #define FILE47  "tfcontents2.h5"
 #define FILE48  "tfvalues.h5"
+#define FILE49  "tstr3.h5"
 
 
 /*-------------------------------------------------------------------------
@@ -4444,44 +4445,25 @@ make_external(hid_t fid)
  * Function: gent_filters
  *
  * Purpose: make several datasets with filters, external dataset
- *  fill value
  *
  *-------------------------------------------------------------------------
  */
 static void gent_filters(void)
 {
- typedef enum 
- {
-  E_RED,
-  E_GREEN
- } e_t;
-
  hid_t    fid;  /* file id */
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
- hid_t    sid1; /* dataspace ID */
  hid_t    tid;  /* datatype ID */
- hid_t    did;  /* dataset ID */
- hid_t    gid;  /* group ID */
 #if defined (H5_HAVE_FILTER_SZIP)
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=4;
 #endif
- hsize_t  dims1[RANK]={DIM1,DIM2};
- hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ hsize_t  dims1[RANK]      = {DIM1,DIM2};
+ hsize_t  dims3[3]         = {2,2,100};
+ hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
  int      buf1[DIM1][DIM2];
- hsize_t  dims2[1]={2};
- hvl_t    buf2[2];
- hsize_t  dims3[1]={1};
- char     buf3[]={"quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"};
- hsize_t  dims4[1]={6};
- char     buf4[6]={"abcdef"};
- hobj_ref_t buf5[1]; 
- hsize_t  dims5[1]={1};
- int      i, j, k, n, ret, val;
- int      fillval = -99;
- int      buf6[2][2][100];
- hsize_t  dims6[3]={2,2,100};
+ int      buf3[2][2][100];
+ int      i, j, k, n, ret;
 
  for (i=n=0; i<DIM1; i++){
   for (j=0; j<DIM2; j++){
@@ -4491,7 +4473,7 @@ static void gent_filters(void)
  for (i=n=0; i<2; i++){
   for (j=0; j<2; j++){
    for (k=0; k<100; k++){
-    buf6[i][j][k]=n++;
+    buf3[i][j][k]=n++;
    }
   }
  }
@@ -4505,10 +4487,6 @@ static void gent_filters(void)
 
  /* create a dataset creation property list; the same DCPL is used for all dsets */
  dcpl = H5Pcreate(H5P_DATASET_CREATE);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
-
 
 /*-------------------------------------------------------------------------
  * create a compact and contiguous storage layout dataset
@@ -4734,110 +4712,15 @@ static void gent_filters(void)
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
- * enum type with nonprintable characters in the name
- *-------------------------------------------------------------------------
- */
- tid = H5Tcreate(H5T_ENUM, sizeof(e_t));
- H5Tenum_insert(tid, "RED 3 \\n",   (val = 0, &val));
- write_dset(fid,2,dims1,"enum",tid,0);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * vlen 
- *-------------------------------------------------------------------------
- */
-
- buf2[0].len = 1;
- buf2[0].p = malloc( 1 * sizeof(int));
- ((int *)buf2[0].p)[0]=1;
- buf2[1].len = 2;
- buf2[1].p = malloc( 2 * sizeof(int));
- ((int *)buf2[1].p)[0]=2;
- ((int *)buf2[1].p)[1]=3;
-
- sid1=H5Screate_simple(1,dims2,NULL);
- tid=H5Tvlen_create(H5T_NATIVE_INT);
- did=H5Dcreate(fid,"vlen",tid,sid1,H5P_DEFAULT);
- ret=H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf2);
- assert(ret>=0);
- ret=H5Tcommit(fid,"myvlen",tid);
- assert(ret>=0);
- ret=H5Dvlen_reclaim(tid,sid1,H5P_DEFAULT,buf2);
- assert(ret>=0);
- ret=H5Dclose(did);
- assert(ret>=0);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * bitfield
- *-------------------------------------------------------------------------
- */
- tid = H5Tcopy(H5T_STD_B8LE);
- write_dset(fid,1,dims3,"bitfield",tid,buf3);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * string with escaped characters
- *-------------------------------------------------------------------------
- */
-
- tid=H5Tcopy(H5T_C_S1);
- ret=H5Tset_size(tid, sizeof(buf3));
- assert(ret>=0);
- write_dset(fid,1,dims3,"string",tid,buf3);
- assert(ret>=0);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * char array
- *-------------------------------------------------------------------------
- */
- write_dset(fid,1,dims4,"char",H5T_NATIVE_CHAR,buf4);
-
-/*-------------------------------------------------------------------------
- * links
- *-------------------------------------------------------------------------
- */
- ret=H5Glink (fid, H5G_LINK_SOFT, "all", "slink to all");
- assert(ret>=0);
-
- ret=H5Glink (fid, H5G_LINK_HARD, "all", "hlink to all");
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * a group 
- *-------------------------------------------------------------------------
- */
- gid  = H5Gcreate(fid,"g1",0);
- write_dset(gid,1,dims4,"mydset",H5T_NATIVE_CHAR,buf4);
- ret  = H5Gclose(gid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * reference
- *-------------------------------------------------------------------------
- */
- ret=H5Rcreate(&buf5[0],fid,"g1/mydset",H5R_OBJECT,-1);
- assert(ret>=0);
- write_dset(fid,1,dims5,"reference",H5T_STD_REF_OBJ,buf5);
-
-/*-------------------------------------------------------------------------
  * a large 3D dataset
  *-------------------------------------------------------------------------
  */
- write_dset(fid,3,dims6,"3d",H5T_NATIVE_INT,buf6);
+ write_dset(fid,3,dims3,"3d",H5T_NATIVE_INT,buf3);
  
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
- ret=H5Sclose(sid1);
- assert(ret>=0);
-
  ret=H5Sclose(sid);
  assert(ret>=0);
  
@@ -5034,7 +4917,6 @@ static void gent_fvalues(void)
  hvl_t      fillval3;                       /* vlen fill value */
  hsize_t    dimarray[1]={3};                /* array dimension */
  int        buf4[2][3]= {{1,2,3},{4,5,6}};  /* array */
- int        fillval4[1][3]= {{1,2,3}};      /* array fill value */
  int        ret;
 
  /* create a file */
@@ -5162,6 +5044,115 @@ static void gent_fvalues(void)
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: gent_string
+ *
+ * Purpose: make several datasets for the string with escape/not escape test
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_string(void)
+{
+  /* compound datatype */
+ typedef struct c_t 
+ {
+  int    a;
+  char   str[255];
+ } c_t;
+
+ hid_t    fid;      /* file id */
+ hid_t    sid;      /* dataspace ID */
+ hid_t    tid;      /* datatype ID */
+ hid_t    str_tid;  /* datatype ID */
+ hid_t    did;      /* dataset ID */
+ char     buf1[]={"quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"};
+ char    *buf2[SPACE1_DIM1]= {
+        "Four score and seven\n years ago our forefathers brought forth on this continent a new nation,",
+        "conceived in liberty\n and dedicated to the proposition that all men are created equal.",
+        "Now we are engaged\n in a great civil war,",
+        "testing whether that\n nation or any nation so conceived and so dedicated can long endure."
+        };  
+ c_t      buf3 = {24, "Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
+ char     buf4[] = {"Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
+ hsize_t  dims1[]  = {1};
+ hsize_t		dims2[]  = {SPACE1_DIM1};
+ hsize_t		dims4[1];
+ int      ret;
+
+ dims4[0] = sizeof(buf4);
+
+ /* create a file */
+ fid  = H5Fcreate(FILE49, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+
+/*-------------------------------------------------------------------------
+ * str1
+ *-------------------------------------------------------------------------
+ */
+
+ tid=H5Tcopy(H5T_C_S1);
+ ret=H5Tset_size(tid, sizeof(buf1));
+ assert(ret>=0);
+ write_dset(fid,1,dims1,"str1",tid,buf1);
+ assert(ret>=0);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * str2
+ *-------------------------------------------------------------------------
+ */
+ sid = H5Screate_simple(SPACE1_RANK, dims2, NULL);
+ tid = H5Tcopy (H5T_C_S1);
+ ret = H5Tset_size (tid,H5T_VARIABLE);
+ assert(ret>=0);
+ did = H5Dcreate(fid,"str2",tid,sid,H5P_DEFAULT);
+ ret = H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf2);
+ assert(ret>=0);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+ ret=H5Dclose(did);
+ assert(ret>=0);
+ ret=H5Sclose(sid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * str3
+ *-------------------------------------------------------------------------
+ */
+ sid = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+ tid = H5Tcreate (H5T_COMPOUND, sizeof(c_t));
+ str_tid = H5Tcopy( H5T_C_S1 );
+ H5Tset_size( str_tid, 255 );
+ H5Tinsert(tid, "a", HOFFSET(c_t, a), H5T_NATIVE_INT);
+ H5Tinsert(tid, "str", HOFFSET(c_t, str), str_tid );
+ ret=make_dset(fid,"str3",sid,tid,H5P_DEFAULT,&buf3);
+ assert(ret>=0);
+ ret = H5Tclose(tid);
+ assert(ret>=0);
+ ret = H5Tclose(str_tid);
+ assert(ret>=0);
+ ret=H5Sclose(sid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * str4
+ *-------------------------------------------------------------------------
+ */
+ sid = H5Screate_simple(SPACE1_RANK, dims4, NULL);
+ ret=make_dset(fid,"str4",sid,H5T_NATIVE_CHAR,H5P_DEFAULT,buf4);
+ ret=H5Sclose(sid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -5232,6 +5223,7 @@ int main(void)
     gent_filters();
     gent_fvalues();
     gent_fcontents();
+    gent_string();
 
     return 0;
 }

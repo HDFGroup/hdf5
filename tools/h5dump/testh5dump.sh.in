@@ -240,8 +240,10 @@ TOOLTEST tfill.ddl -p tfvalues.h5
 TOOLTEST treference.ddl  tattr2.h5
 
 # escape/not escape non printable characters
-TOOLTEST tstringe.ddl -e -d string  tfilters.h5
-TOOLTEST tstring.ddl -d string  tfilters.h5
+TOOLTEST tstringe.ddl -e tstr3.h5
+TOOLTEST tstring.ddl tstr3.h5
+# char data as ASCII with non escape
+TOOLTEST tstring2.ddl -r -d str4 tstr3.h5
 
 # array indices print/not print, large dataset
 TOOLTEST tindicesyes.ddl -d compact  tfilters.h5
