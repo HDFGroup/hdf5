@@ -38,26 +38,29 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 // constructors taking a string or a char*
 void H5File::getFile( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist )
 {
-   // These bits only set for creation, so if any of them are set,
-   // create the file.
-   if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG ))
-   {
-      hid_t create_plist_id = create_plist.getId();
-      hid_t access_plist_id = access_plist.getId();
-      id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
-   }
-   // Open the file if none of the bits above are set.
-   else
-   {
-      // use create_plist for access plist because of the default argument
-      hid_t access_plist_id = create_plist.getId();
-      id = H5Fopen( name, flags, access_plist_id );
-   }
-
-   if( id <= 0 )  // throw an exception when open/create fail
-   {
-      throw FileIException( "H5File constructor" );
-   }
+    // These bits only set for creation, so if any of them are set,
+    // create the file.
+    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG ))
+    {
+	hid_t create_plist_id = create_plist.getId();
+	hid_t access_plist_id = access_plist.getId();
+	id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
+	if( id <= 0 )  // throw an exception when open/create fail
+	{
+	    throw FileIException("H5File constructor", "H5Fcreate failed");
+	}
+    }
+    // Open the file if none of the bits above are set.
+    else
+    {
+	// use create_plist for access plist because of the default argument
+	hid_t access_plist_id = create_plist.getId();
+	id = H5Fopen( name, flags, access_plist_id );
+	if( id <= 0 )  // throw an exception when open/create fail
+	{
+	    throw FileIException("H5File constructor", "H5Fopen failed");
+	}
+    }
 }
 
 // Copy constructor: makes a copy of the original H5File object.
@@ -79,7 +82,7 @@ bool H5File::isHdf5(const char* name )
       return false;
    else // Raise exception when H5Fis_hdf5 returns a negative value 
    {
-      throw FileIException( "H5File::isHdf5" );
+      throw FileIException("H5File::isHdf5", "H5Fis_hdf5 returned negative value");
    }
 }
 
@@ -95,14 +98,18 @@ void H5File::reopen()
 {
    // reset the identifier of this H5File - send 'this' in so that
    // H5Fclose can be called appropriately
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw FileIException("H5File::reopen", close_error.getDetailMsg());
+    }
 
    // call C routine to reopen the file - Note: not sure about this
    // does id need to be closed later?  which id to be the parameter?
    id = H5Freopen( id );
    if( id <= 0 ) // Raise exception when H5Freopen returns a neg value
    {
-      throw FileIException( "H5File::reopen" );
+      throw FileIException("H5File::reopen", "H5Freopen failed");
    }
 }
 
@@ -120,7 +127,7 @@ FileCreatPropList H5File::getCreatePlist() const
    }
    else
    {
-      throw FileIException( "H5File::getCreatePlist" );
+      throw FileIException("H5File::getCreatePlist", "H5Fget_create_plist failed");
    }
 }
 
@@ -138,7 +145,7 @@ FileAccPropList H5File::getAccessPlist() const
    }
    else // Raise an exception
    {
-      throw FileIException( "H5File::getAccessPlist" );
+      throw FileIException("H5File::getAccessPlist", "H5Fget_access_plist failed");
    }
 }
 
@@ -148,14 +155,19 @@ void H5File::p_close() const
    herr_t ret_value = H5Fclose( id );
    if( ret_value < 0 )
    {
-      throw FileIException( "H5File::p_close" );
+      throw FileIException(NULL, "H5Fclose failed");
    }
 }
 
-// Throw file exception
-void H5File::throwException() const
+// Throw file exception; used in CommonFG implementation so that proper
+// exception can be thrown for file or group.  The func_name is a member
+// function of CommonFG and "H5File::" will be inserted to indicate the
+// function called is an implementation of H5File
+void H5File::throwException(const string& func_name, const string& msg) const
 {
-   throw FileIException();
+   string full_name = func_name;
+   full_name.insert(0, "H5File::"); 
+   throw FileIException(full_name, msg);
 }
 
 // The destructor of this instance calls IdComponent::reset to
@@ -166,7 +178,11 @@ void H5File::throwException() const
 H5File::~H5File() 
 {  
    // The HDF5 file id will be closed properly
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw FileIException("H5File::~H5File", close_error.getDetailMsg());
+    }
 }  
 
 #ifndef H5_NO_NAMESPACE

@@ -25,7 +25,7 @@ void FileAccPropList::setStdio() const
    herr_t ret_value = H5Pset_stdio( id );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setStdio", "H5Pset_stdio failed");
    }
 }
 
@@ -43,7 +43,7 @@ H5F_driver_t FileAccPropList::getDriver() const
    H5F_driver_t driver = H5Pget_driver( id );
    if( driver == H5F_LOW_ERROR )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::getDriver", "H5Pget_driver failed");
    }
    return( driver );
 }
@@ -53,7 +53,7 @@ void FileAccPropList::setSec2() const
    herr_t ret_value = H5Pset_sec2( id );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setSec2", "H5Pset_sec2 failed");
    }
 }
 
@@ -71,7 +71,7 @@ void FileAccPropList::setCore( size_t increment ) const
    herr_t ret_value = H5Pset_core( id, increment );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setCore", "H5Pset_core failed");
    }
 }
 
@@ -89,7 +89,7 @@ void FileAccPropList::setFamily( hsize_t memb_size, const FileAccPropList& memb_
    herr_t ret_value = H5Pset_family( id, memb_size, memb_plist.getId() );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setFamily", "H5Pset_family failed");
    }
 }
 
@@ -121,7 +121,7 @@ void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& ra
    herr_t ret_value = H5Pset_split( id, meta_ext, meta_pid, raw_ext, raw_pid );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setSplit", "H5Pset_split failed");
    }
 }
 
@@ -139,7 +139,7 @@ void FileAccPropList::getSplit( size_t meta_ext_size, string& meta_ext, FileAccP
 		&meta_plist_id, raw_ext_size, raw_ext_C, &raw_plist_id );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::getSplit", "H5Pget_split failed");
    }
    meta_plist.setId( meta_plist_id );
    raw_plist.setId( raw_plist_id );
@@ -155,7 +155,7 @@ void FileAccPropList::setAlignment( hsize_t threshold, hsize_t alignment ) const
    herr_t ret_value = H5Pset_alignment( id, threshold, alignment );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setAlignment", "H5Pset_alignment failed");
    }
 }
 
@@ -164,7 +164,7 @@ void FileAccPropList::getAlignment( hsize_t& threshold, hsize_t& alignment ) con
    herr_t ret_value = H5Pget_alignment( id, &threshold, &alignment );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::getAlignment", "H5Pget_alignment failed");
    }
 }
 
@@ -175,7 +175,7 @@ void FileAccPropList::setMpi( MPI_Comm comm, MPI_Info info ) const
    herr_t ret_value = H5Pset_mpi( id, comm, info );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setMpi", "H5Pset_mpi failed");
    }
 }
 
@@ -194,7 +194,7 @@ void FileAccPropList::setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nby
    herr_t ret_value = H5Pset_cache( id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0 );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setCache", "H5Pset_cache failed");
    }
 }
 
@@ -203,7 +203,7 @@ void FileAccPropList::getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_
    herr_t ret_value = H5Pget_cache( id, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0 );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::getCache", "H5Pget_cache failed");
    }
 }
 
@@ -212,7 +212,7 @@ void FileAccPropList::setGcReferences( unsigned gc_ref ) const
    herr_t ret_value = H5Pset_gc_references( id, gc_ref );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::setGcReferences", "H5Pset_gc_references failed");
    }
 }
 
@@ -224,7 +224,7 @@ unsigned FileAccPropList::getGcReferences() const
    herr_t ret_value = H5Pget_gc_references( id, &gc_ref );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileAccPropList::getGcReferences", "H5Pget_gc_references failed");
    }
    return( gc_ref );
 }

@@ -102,7 +102,7 @@ class CommonFG {
 	StrType openStrType( const char* name ) const;
 
 	// for H5File and Group to throw appropriate exception
-	virtual void throwException() const = 0;
+	virtual void throwException(const string& func_name, const string& msg) const = 0;
 
 	CommonFG();
 	virtual ~CommonFG();

@@ -1,4 +1,3 @@
-// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _H5Exception_H
 #define _H5Exception_H
 
@@ -11,16 +10,16 @@ using namespace std;
 
 class Exception {
    public:
-	// Creates an exception with no message
+	// Default constructor
 	Exception();
 
-	// Creates an exception with a detailed message
-	Exception( const string& message );
-
-	Exception( const char* message);
+	// Creates an exception with a function name where the failure occurs
+	// and an optional detailed message
+	Exception( const string& func_name, const string& message = NULL);
+	Exception( const char* func_name, const char* message = NULL);
 
 	// copy constructor
-	Exception( const Exception& orig );
+	Exception( const Exception& orig);
 
 	// Returns the character string that describes an error specified by
 	// a major error number.
@@ -31,18 +30,20 @@ class Exception {
 	string getMinorString( H5E_minor_t minor_num ) const;
 
 	// Returns the detailed message set at the time the exception is thrown
-	string getDetailMesg() const;
-	const char* getCDetailMesg() const;	// C string of detailed message
+	string getDetailMsg() const;
+	const char* getCDetailMsg() const;	// C string of detailed message
+	string getFuncName() const;	// function name as a string object
+	const char* getCFuncName() const;	// function name as a char string 
 
 	// Turns on the automatic error printing.
-	static void setAutoPrint( H5E_auto_t func, void* client_data );
+	static void setAutoPrint( H5E_auto_t func, void* client_data);
 
 	// Turns off the automatic error printing.
 	static void dontPrint();
 
 	// Retrieves the current settings for the automatic error stack 
 	// traversal function and its data.
-	static void getAutoPrint( H5E_auto_t& func, void** client_data );
+	static void getAutoPrint( H5E_auto_t& func, void** client_data);
 
 	// Clears the error stack for the current thread.
 	static void clearErrorStack();
@@ -50,12 +51,12 @@ class Exception {
 	// Walks the error stack for the current thread, calling the 
 	// specified function.
 	static void walkErrorStack( H5E_direction_t direction, 
-				H5E_walk_t func, void* client_data );
+				H5E_walk_t func, void* client_data);
 
 	// Default error stack traversal callback function that prints 
 	// error messages to the specified output stream.
 	static void walkDefErrorStack( int n, H5E_error_t& err_desc,
-				void* client_data );
+				void* client_data);
 
 	// Prints the error stack in a default manner.
 	virtual void printError( FILE* stream = NULL ) const;
@@ -65,75 +66,86 @@ class Exception {
 
    private:
 	string detailMessage;
+	string funcName;
 };
 
 class FileIException : public Exception {
    public:
 	FileIException();
-	FileIException( string message );
+	FileIException( const string& func_name, const string& message = NULL);
+	FileIException( const char* func_name, const char* message = NULL);
 	virtual ~FileIException();
 };
 
 class GroupIException : public Exception {
    public:
 	GroupIException();
-	GroupIException( string message );
+	GroupIException( const string& func_name, const string& message=NULL);
+	GroupIException( const char* func_name, const char* message = NULL);
 	virtual ~GroupIException();
 };
 
 class DataSpaceIException : public Exception {
    public:
 	DataSpaceIException();
-	DataSpaceIException( string message );
+	DataSpaceIException(const string& func_name, const string& message=NULL);
+	DataSpaceIException(const char* func_name, const char* message = NULL);
 	virtual ~DataSpaceIException();
 };
 
 class DataTypeIException : public Exception {
    public:
 	DataTypeIException();
-	DataTypeIException( string message );
+	DataTypeIException(const string& func_name, const string& message = NULL);
+	DataTypeIException(const char* func_name, const char* message = NULL);
 	virtual ~DataTypeIException();
 };
 
 class PropListIException : public Exception {
    public:
 	PropListIException();
-	PropListIException( string message );
+	PropListIException(const string& func_name, const string& message=NULL);
+	PropListIException(const char* func_name, const char* message = NULL);
 	virtual ~PropListIException();
 };
 
 class DataSetIException : public Exception {
    public:
 	DataSetIException();
-	DataSetIException( string message );
+	DataSetIException(const string& func_name, const string& message=NULL);
+	DataSetIException(const char* func_name, const char* message = NULL);
 	virtual ~DataSetIException();
 };
 
 class AttributeIException : public Exception {
    public:
 	AttributeIException();
-	AttributeIException( string message );
+	AttributeIException(const string& func_name, const string& message=NULL);
+	AttributeIException(const char* func_name, const char* message = NULL);
 	virtual ~AttributeIException();
 };
 
 class ReferenceException : public Exception {
    public:
 	ReferenceException();
-	ReferenceException( string message );
+	ReferenceException(const string& func_name, const string& message=NULL);
+	ReferenceException(const char* func_name, const char* message = NULL);
 	virtual ~ReferenceException();
 };
 
 class LibraryIException : public Exception {
    public:
 	LibraryIException();
-	LibraryIException( string message );
+	LibraryIException(const string& func_name, const string& message=NULL);
+	LibraryIException(const char* func_name, const char* message = NULL);
 	virtual ~LibraryIException();
 };
 
 class IdComponentException : public Exception {
    public:
 	IdComponentException();
-	IdComponentException( string message );
+	IdComponentException(const string& func_name, const string& message=NULL);
+	IdComponentException(const char* func_name, const char* message = NULL);
 	virtual ~IdComponentException();
 };
 

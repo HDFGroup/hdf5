@@ -35,7 +35,7 @@ IntType::IntType( const PredType& pred_type ) : AtomType()
 // Creates a integer datatype using an existing id
 IntType::IntType( const hid_t existing_id ) : AtomType( existing_id ) {}
 
-// Gets the integer datatype of the specified dataset - will reimplement
+// Gets the integer datatype of the specified dataset - will reimplement -BMR
 IntType::IntType( const DataSet& dataset ) : AtomType()
 {  
    // Calls C function H5Dget_type to get the id of the datatype
@@ -43,7 +43,7 @@ IntType::IntType( const DataSet& dataset ) : AtomType()
 
    if( id <= 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("IntType constructor", "H5Dget_type failed");
    }
 }  
 
@@ -54,7 +54,8 @@ H5T_sign_t IntType::getSign() const
    // Returns a valid sign type if successful
    if( type_sign == H5T_SGN_ERROR )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("IntType::getSign", 
+		"H5Tget_sign failed - returned H5T_SGN_ERROR for the sign type");
    }
    return( type_sign );
 }
@@ -66,7 +67,7 @@ void IntType::setSign( H5T_sign_t sign ) const
    herr_t ret_value = H5Tset_sign( id, sign );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("IntType::setSign", "H5Tset_sign failed");
    }
 }
 

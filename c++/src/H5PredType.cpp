@@ -171,7 +171,7 @@ const PredType PredType::NATIVE_UINT_FAST64( H5T_NATIVE_UINT_FAST64 );
 // throw an DataTypeIException if invoked.
 void PredType::commit( H5Object& loc, const char* name )
 {
-   throw DataTypeIException( "Attempting to commit a predefined datatype.  This operation is invalid" );
+   throw DataTypeIException("PredType::commit", "Attempting to commit a predefined datatype.  This operation is invalid" );
 }  
 
 void PredType::commit( H5Object& loc, const string& name )
@@ -181,7 +181,7 @@ void PredType::commit( H5Object& loc, const string& name )
 
 bool PredType::committed()
 {
-   throw DataTypeIException( "Error: Attempting to check for commit status on a predefined datatype." );
+   throw DataTypeIException("PredType::committed", "Error: Attempting to check for commit status on a predefined datatype." );
    return (-1);
 }  
 

@@ -38,7 +38,7 @@ DataSpace DataSet::getSpace() const
    // If the dataspace id is invalid, throw an exception
    if( dataspace_id <= 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::getSpace", "H5Dget_space failed");
    }
    //create dataspace object using the existing id then return the object
    DataSpace data_space( dataspace_id );
@@ -55,7 +55,7 @@ hid_t DataSet::p_getType() const
       return( type_id );
    else
    {
-      throw DataSetIException();
+      throw DataSetIException(NULL, "H5Dget_type failed");
    }
 }
 
@@ -65,7 +65,7 @@ DSetCreatPropList DataSet::getCreatePlist() const
    hid_t create_plist_id = H5Dget_create_plist( id );
    if( create_plist_id <= 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::getCreatePlist", "H5Dget_create_plist failed");
    }
    // create and return the DSetCreatPropList object 
    DSetCreatPropList create_plist( create_plist_id );
@@ -77,47 +77,46 @@ hsize_t DataSet::getStorageSize() const
 {
    hsize_t storage_size = H5Dget_storage_size( id );
 
-   if( storage_size > 0 )
+   if( storage_size > 0 )  // checking with Quincey for failure value - BMR
       return( storage_size );
    else
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::getStorageSize", "H5Dget_storage_size failed");
    }
 }
 
 // Returns the number of bytes required to store VL data.
 hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
 {
-   //herr_t ret_value;
    // Obtain identifiers for C API
    //hid_t type_id = type.getId();
    //hid_t space_id = space.getId();
    //hsize_t size;
 
-   throw DataSetIException( "getVlenBufSize: Currently not implemented yet.");
-   //ret_value = H5Dget_vlen_buf_size( id, type_id, space_id, &size );
+   //herr_t ret_value = H5Dget_vlen_buf_size( id, type_id, space_id, &size );
    //if( ret_value >= 0 )
    //   return( size );
    //else
    //{
       //throw DataSetIException();
    //}
+   throw DataSetIException( "DataSet::getVlenBufSize", 
+		"Currently not implemented yet.");
    return (0);
 }
 
 // Reclaims VL datatype memory buffers. 
 void DataSet::vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf ) const
 {
-   herr_t ret_value;
    // Obtain identifiers for C API
    hid_t type_id = type.getId();
    hid_t space_id = space.getId();
    hid_t xfer_plist_id = xfer_plist.getId();
 
-   ret_value = H5Dvlen_reclaim( type_id, space_id, xfer_plist_id, buf );
+   herr_t ret_value = H5Dvlen_reclaim( type_id, space_id, xfer_plist_id, buf );
    if( ret_value < 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
    }
 }
 
@@ -134,7 +133,7 @@ void DataSet::read( void* buf, const DataType& mem_type, const DataSpace& mem_sp
    herr_t ret_value = H5Dread( id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf );
    if( ret_value < 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::read", "H5Dread failed");
    }
 }
 
@@ -152,7 +151,7 @@ void DataSet::write( const void* buf, const DataType& mem_type, const DataSpace&
    herr_t ret_value = H5Dwrite( id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf );
    if( ret_value < 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::write", "H5Dwrite failed");
    }
 }
 
@@ -167,7 +166,7 @@ int DataSet::iterateElems( void* buf, const DataType& type, const DataSpace& spa
       return( ret_value );
    else  // raise exception when H5Diterate returns a negative value
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::iterateElems", "H5Diterate failed");
    }
 }
 
@@ -177,7 +176,7 @@ void DataSet::extend( const hsize_t* size ) const
    herr_t ret_value = H5Dextend( id, size );
    if( ret_value < 0 )  // raise exception when H5Dextend returns a neg value
    {
-      throw DataSetIException();
+      throw DataSetIException("DataSet::extend", "H5Dextend failed");
    }
 }
 
@@ -188,7 +187,7 @@ void DataSet::p_close() const
    herr_t ret_value = H5Dclose( id );
    if( ret_value < 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException(NULL, "H5Dclose failed");
    }
 }
 
@@ -200,7 +199,11 @@ void DataSet::p_close() const
 DataSet::~DataSet()
 {
    // The dataset id will be closed properly 
-   resetIdComponent( this );
+    try {
+	resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+	throw DataSetIException("DataSet::~DataSet", close_error.getDetailMsg());
+    }
 }
 
 #ifndef H5_NO_NAMESPACE

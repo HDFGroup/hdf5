@@ -23,7 +23,8 @@ class H5File : public IdComponent, public CommonFG {
 	virtual hid_t getLocId() const;
 
 	// Throw file exception
-	virtual void throwException() const;
+	virtual void throwException(const string& func_name, const string& msg) const;
+
 
 	// Determines if a file, specified by its name, is in HDF5 format
 	static bool isHdf5(const string& name );

@@ -29,7 +29,7 @@ void Attribute::write( const DataType& mem_type, void *buf ) const
    herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
    if( ret_value < 0 )
    {
-      throw AttributeIException();
+      throw AttributeIException("Attribute::write", "H5Awrite failed");
    }
 }
 
@@ -39,7 +39,7 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
    herr_t ret_value = H5Aread( id, mem_type.getId(), buf );
    if( ret_value < 0 )
    {
-      throw AttributeIException();
+      throw AttributeIException("Attribute::read", "H5Aread  failed");
    }
 }
 
@@ -57,7 +57,7 @@ DataSpace Attribute::getSpace() const
    }
    else
    {
-      throw AttributeIException();
+      throw AttributeIException("Attribute::getSpace", "H5Aget_space failed");
    }
 }
 
@@ -72,7 +72,7 @@ hid_t Attribute::p_getType() const
       return( type_id );
    else
    {
-      throw AttributeIException();
+      throw AttributeIException(NULL, "H5Aget_type failed");
    }
 }
 
@@ -87,7 +87,7 @@ string Attribute::getName( size_t buf_size ) const
    // If H5Aget_name returns a negative value, raise an exception,
    if( name_size < 0 )
    {
-      throw AttributeIException();
+      throw AttributeIException("Attribute::getName", "H5Aget_name failed");
    }
    // otherwise, create the string to hold the attribute name and return it
    string name = string( name_C );
@@ -102,7 +102,7 @@ void Attribute::p_close() const
    herr_t ret_value = H5Aclose( id );
    if( ret_value < 0 )
    {
-      throw AttributeIException();
+      throw AttributeIException(NULL, "H5Aclose failed");
    }
 }
 
@@ -114,7 +114,11 @@ void Attribute::p_close() const
 Attribute::~Attribute()
 {
    // The attribute id will be closed properly
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw AttributeIException("Attribute::~Attribute", close_error.getDetailMsg());
+    }
 }
 
 #ifndef H5_NO_NAMESPACE

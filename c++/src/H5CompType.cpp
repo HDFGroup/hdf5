@@ -11,6 +11,7 @@
 #include "H5DxferProp.h"
 #include "H5DataSpace.h"
 #include "H5DataSet.h"
+#include "H5private.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -37,7 +38,7 @@ CompType::CompType( const DataSet& dataset ) : DataType()
    // If the datatype id is invalid, throw exception
    if( id <= 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("CompType constructor", "H5Dget_type failed");
    }
 }
 
@@ -47,7 +48,8 @@ int CompType::getNmembers() const
    int num_members = H5Tget_nmembers( id );
    if( num_members < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("CompType::getNmembers", 
+		"H5Tget_nmembers returns negative number of members");
    }
    return( num_members );
 }
@@ -55,13 +57,15 @@ int CompType::getNmembers() const
 // Retrieves the name of a member of this compound datatype. 
 string CompType::getMemberName( int member_num ) const
 {
-   char* member_name_C = H5Tget_member_name( id, member_num );
-   if( member_name_C == NULL )  // should this be returned also???
-   {
-      throw DataTypeIException();
-   }
-   string member_name = string( member_name_C );
-   return( member_name );
+    char* member_name_C = H5Tget_member_name( id, member_num );
+    if( member_name_C == NULL )  // NULL means failure
+    {
+	throw DataTypeIException("CompType::getMemberName", 
+		"H5Tget_member_name returns NULL for member name");
+    }
+    string member_name = string(member_name_C); // convert C string to string 
+    HDfree(member_name_C); // free the C string 
+    return( member_name ); // return the member name string
 }
 
 // Retrieves the offset of a member of a compound datatype. 
@@ -71,7 +75,8 @@ size_t CompType::getMemberOffset( int member_num ) const
    // Q. said: for now, 0 is not a failure
    //if( offset == 0 )
    //{
-      //throw DataTypeIException();
+      //throw DataTypeIException("CompType::getMemberOffset",
+		//"H5Tget_member_offset failed");
    //}
    return( offset );
 }
@@ -80,7 +85,8 @@ size_t CompType::getMemberOffset( int member_num ) const
 int CompType::getMemberDims( int member_num, size_t* dims, int* perm ) const
 {
    throw DataTypeIException( "Error: getMemberDims is no longer supported." );
-   return (-1);
+   return (-1); // unreachable statement; but without it, the compiler 
+		// will complain
 }
 
 // Gets the type class of the specified member.
@@ -90,29 +96,35 @@ H5T_class_t CompType::getMemberClass( int member_num ) const
    hid_t member_type_id = H5Tget_member_type( id, member_num );
    if( member_type_id <= 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("CompType::getMemberClass", 
+		"H5Tget_member_type failed");
    }
 
    // then get its class
    H5T_class_t member_class = H5Tget_class( member_type_id );
    if( member_class == H5T_NO_CLASS )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("CompType::getMemberClass", 
+		"H5Tget_class returns H5T_NO_CLASS");
    }
    return( member_class );
 }
 
 // This private member function calls the C API to get the identifier 
-// of the specified member.  It is used by the getMemberXxxType
-// below for the sub-types.
+// of the specified member.  It provides the id to construct appropriate
+// sub-types in the functions getMemberXxxType below, where Xxx indicates
+// the sub-types.
 hid_t CompType::p_getMemberType( int member_num ) const
 {
+   // get the id of the specified member first
    hid_t member_type_id = H5Tget_member_type( id, member_num );
    if( member_type_id > 0 )
       return( member_type_id );
    else
    {
-      throw DataTypeIException();
+	// p_getMemberType is private, use caller's function name for api
+      throw DataTypeIException("CompType::getMemberDataType", 
+		"H5Tget_member_type failed");
    }
 }
 
@@ -155,6 +167,7 @@ StrType CompType::getMemberStrType( int member_num ) const
 
 /* old style of getMemberType - using overloads; new style above 
    returns the appropriate datatypes but has different named functions.
+   In the old style, a datatype must be passed into the function.
 // Returns the datatype of the specified member in this compound datatype. 
 // Several overloading of getMemberType are for different datatypes
 void CompType::getMemberType( int member_num, EnumType& enumtype ) const
@@ -197,7 +210,7 @@ void CompType::insertMember( const string name, size_t offset, const DataType& n
    herr_t ret_value = H5Tinsert( id, name_C, offset, new_member_id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("CompType::insertMember", "H5Tinsert failed");
    }
 }
 
@@ -208,7 +221,7 @@ void CompType::pack() const
    herr_t ret_value = H5Tpack( id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("CompType::pack", "H5Tpack failed");
    }
 }
 
