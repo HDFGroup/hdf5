@@ -41,6 +41,9 @@
 #define SPACE2_DIM1	10
 #define SPACE2_DIM2	10
 
+/* String for testing attributes */
+static const char *string_att = "This is the string for the attribute";
+
 void *test_vlstr_alloc_custom(size_t size, void *info);
 void test_vlstr_free_custom(void *mem, void *info);
 
@@ -223,6 +226,123 @@ test_vlstrings_basic(void)
 
 /****************************************************************
 **
+**  test_write_vl_string_attribute(): Test basic VL string code.
+**      Tests writing VL strings as attributes
+** 
+****************************************************************/
+static void test_write_vl_string_attribute(void)
+{
+    hid_t file, root, dataspace, att;
+    hid_t type;
+    herr_t ret;
+    char *string_att_check;
+
+    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create a datatype to refer to. */
+    type = H5Tcopy (H5T_C_S1);
+    CHECK(type, FAIL, "H5Tcopy");
+
+    ret = H5Tset_size (type, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    root = H5Gopen(file, "/");
+    CHECK(root, FAIL, "H5Gopen");
+
+    dataspace = H5Screate(H5S_SCALAR);
+    CHECK(dataspace, FAIL, "H5Screate");
+
+    att = H5Acreate(root, "test_scalar", type, dataspace, H5P_DEFAULT);
+    CHECK(att, FAIL, "H5Acreate");
+
+    ret = H5Awrite(att, type, &string_att);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    ret = H5Aread(att, type, &string_att_check);
+    CHECK(ret, FAIL, "H5Aread");
+
+    if(HDstrcmp(string_att_check,string_att)!=0) {
+        num_errs++;
+        printf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
+    } /* end if */
+
+    free(string_att_check);
+
+    ret = H5Aclose(att);
+    CHECK(ret, FAIL, "HAclose");
+
+    ret = H5Gclose(root);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Sclose(dataspace);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    return;
+}
+
+/****************************************************************
+**
+**  test_read_vl_string_attribute(): Test basic VL string code.
+**      Tests reading VL strings from attributes
+** 
+****************************************************************/
+static void test_read_vl_string_attribute(void)
+{
+    hid_t file, root, att;
+    hid_t type;
+    herr_t ret;
+    char *string_att_check;
+
+    file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
+
+    /* Create a datatype to refer to. */
+    type = H5Tcopy (H5T_C_S1);
+    CHECK(type, FAIL, "H5Tcopy");
+
+    ret = H5Tset_size (type, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    root = H5Gopen(file, "/");
+    CHECK(root, FAIL, "H5Gopen");
+
+    att = H5Aopen_name(root, "test_scalar");
+    CHECK(att, FAIL, "H5Aopen_name");
+
+    ret = H5Aread(att, type, &string_att_check);
+    CHECK(ret, FAIL, "H5Aread");
+
+    if(HDstrcmp(string_att_check,string_att)!=0) {
+        num_errs++;
+        printf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
+    } /* end if */
+
+    free(string_att_check);
+
+    ret = H5Aclose(att);
+    CHECK(ret, FAIL, "HAclose");
+
+    ret = H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Gclose(root);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    return;
+}
+
+/****************************************************************
+**
 **  test_vlstrings(): Main VL string testing routine.
 ** 
 ****************************************************************/
@@ -234,6 +354,10 @@ test_vlstrings(void)
 
     /* These next tests use the same file */
     test_vlstrings_basic();       /* Test basic VL string datatype */
+
+    /* Test using VL strings in attributes */
+    test_write_vl_string_attribute();
+    test_read_vl_string_attribute();
 }   /* test_vlstrings() */
 
 
