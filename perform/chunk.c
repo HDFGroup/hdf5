@@ -75,6 +75,21 @@
 static size_t	nio_g;
 static hid_t	fapl_g = -1;
 
+/* Local function prototypes */
+static size_t
+counter (unsigned UNUSED flags, size_t cd_nelmts,
+	 const unsigned *cd_values, size_t nbytes,
+	 size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_COUNTER[1] = {{
+    FILTER_COUNTER,		/* Filter id number		*/
+    "counter",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    counter,			/* The actual filter function	*/
+}};
+
 
 /*-------------------------------------------------------------------------
  * Function:	counter
@@ -137,7 +152,7 @@ create_dataset (void)
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
     size[0] = size[1] = CH_SIZE;
     H5Pset_chunk (dcpl, 2, size);
-    H5Zregister (FILTER_COUNTER, "counter", counter);
+    H5Zregister (H5Z_COUNTER);
     H5Pset_filter (dcpl, FILTER_COUNTER, 0, 0, NULL);
         
     /* The dataset */
