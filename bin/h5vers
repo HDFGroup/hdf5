@@ -292,9 +292,9 @@ sub gen_configure {
   $conf =~ /^(.*?)\/?configure.in$/;
 
   if ($1) {
-    system("cd $1 && autoconf && rm -rf autom4te.cache");
+    system("cd $1 && bin/reconfigure && rm -rf autom4te.cache");
   } else {
-    system("autoconf && rm -rf autom4te.cache");
+    system("bin/reconfigure && rm -rf autom4te.cache");
   }
 }
 
