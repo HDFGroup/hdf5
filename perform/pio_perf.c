@@ -229,7 +229,6 @@ static void get_minmax(minmax *mm, double val);
 static minmax accumulate_minmax_stuff(minmax *mm, long raw_size, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
-static void output_report(FILE *output, const char *fmt, ...);
 static void print_indent(register FILE *output, register int indent);
 static void usage(const char *prog);
 
@@ -472,7 +471,7 @@ run_test(FILE *output, iotype iot, parameters parms)
         double t;
 
         MPI_Barrier(pio_comm_g);
-        res = do_pio(parms);
+        res = do_pio(output, parms);
 
         /* gather all of the "write" times */
         t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
@@ -500,7 +499,7 @@ run_test(FILE *output, iotype iot, parameters parms)
     }
 
     /* accumulate and output the max, min, and average "write" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Write details:\n");
@@ -521,7 +520,7 @@ run_test(FILE *output, iotype iot, parameters parms)
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross write" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Write Open-Close details:\n");
@@ -542,7 +541,7 @@ run_test(FILE *output, iotype iot, parameters parms)
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "read" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Read details:\n");
@@ -563,7 +562,7 @@ run_test(FILE *output, iotype iot, parameters parms)
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross read" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Read Open-Close details:\n");
@@ -755,7 +754,7 @@ destroy_comm_world(void)
  * Programmer:  Bill Wendling, 19. December 2001
  * Modifications:
  */
-static void
+void
 output_report(FILE *output, const char *fmt, ...)
 {
     int myrank;
@@ -779,7 +778,7 @@ output_report(FILE *output, const char *fmt, ...)
  * Programmer:  Bill Wendling, 29. October 2001
  * Modifications:
  */
-static void
+void
 print_indent(register FILE *output, register int indent)
 {
     int myrank;
@@ -834,8 +833,8 @@ parse_command_line(int argc, char *argv[])
         case 'D':
             pio_debug_level = strtol(opt_arg, NULL, 10);
 
-            if (pio_debug_level > 3)
-                pio_debug_level = 3;
+            if (pio_debug_level > 4)
+                pio_debug_level = 4;
             else if (pio_debug_level < 0)
                 pio_debug_level = 0;
 
@@ -959,13 +958,13 @@ usage(const char *prog)
         fprintf(stdout, "     -D N, --debug=N             Indicate the debugging level [default:0]\n");
         fprintf(stdout, "     -f S, --file-size=S         Size of a single file [default: 64M]\n");
         fprintf(stdout, "     -F N, --num-files=N         Number of files [default: 1]\n");
-        fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test only\n");
+        fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test\n");
         fprintf(stdout, "     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
-        fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test only\n");
+        fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test\n");
         fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
         fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: all MPI_COMM_WORLD processes ]\n");
         fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-        fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test only\n");
+        fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
         fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
         fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
         fprintf(stdout, "\n");
@@ -985,6 +984,7 @@ usage(const char *prog)
         fprintf(stdout, "    1 - Minimal\n");
         fprintf(stdout, "    2 - Not quite everything\n");
         fprintf(stdout, "    3 - Everything\n");
+        fprintf(stdout, "    4 - Everything and the kitchen sink\n");
         fprintf(stdout, "\n");
         fflush(stdout);
     }
