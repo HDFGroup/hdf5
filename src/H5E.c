@@ -109,6 +109,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_WRITEERROR, 	"Write failed"},
     {H5E_CLOSEERROR, 	"Close failed"},
     {H5E_OVERFLOW, 	"Address overflowed"},
+    {H5E_FCNTL,         "File control (fcntl) failed"},
 
     /* Function entry/exit interface errors */
     {H5E_CANTINIT, 	"Unable to initialize object"},
