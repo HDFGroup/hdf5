@@ -48,7 +48,7 @@ Group CommonFG::createGroup( const char* name, size_t size_hint ) const
    hid_t group_id = H5Gcreate( getLocId(), name, size_hint );
 
    // If the creation of the group failed, throw an exception
-   if( group_id > 0 )
+   if( group_id <= 0 )
    {
       throwException("createGroup", "H5Gcreate failed");
    }
@@ -97,7 +97,9 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
 
    // If the creation of the dataset failed, throw an exception 
    if( dataset_id <= 0 )
+   {
       throwException("createDataSet", "H5Dcreate failed");
+   }
 
    // No failure, create and return the DataSet object
    DataSet dataset( dataset_id );
