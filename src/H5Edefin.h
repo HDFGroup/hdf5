@@ -163,6 +163,7 @@ hid_t H5E_CANTENCODE_g     = FAIL;      /* Unable to encode value */
 hid_t H5E_CANTDECODE_g     = FAIL;      /* Unable to decode value */
 hid_t H5E_CANTSPLIT_g      = FAIL;      /* Unable to split node */
 hid_t H5E_CANTREDISTRIBUTE_g = FAIL;      /* Unable to redistribute records */
+hid_t H5E_CANTSWAP_g       = FAIL;      /* Unable to swap records */
 hid_t H5E_CANTINSERT_g     = FAIL;      /* Unable to insert object */
 hid_t H5E_CANTLIST_g       = FAIL;      /* Unable to list node */
 

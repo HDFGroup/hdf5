@@ -605,6 +605,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to redistribute records"))==NUL
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTREDISTRIBUTE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTSWAP_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to swap records"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTSWAP_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_CANTINSERT_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to insert object"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")

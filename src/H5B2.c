@@ -77,6 +77,8 @@ static herr_t H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
 static herr_t H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_node_ptr_t *curr_node_ptr, H5AC_info_t *parent_cache_info,
     H5B2_internal_t *internal, unsigned idx);
+static herr_t H5B2_swap_child(H5F_t *f, hid_t dxpl_id, unsigned depth,
+    H5B2_internal_t *internal, unsigned idx);
 static herr_t H5B2_insert_internal(H5F_t *f, hid_t dxpl_id,
     H5RC_t *bt2_shared, unsigned depth, H5AC_info_t *parent_cache_info,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
@@ -2200,6 +2202,109 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5B2_swap_child
+ *
+ * Purpose:	Swap a record in a node with a record in a child node
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  4 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2_swap_child(H5F_t *f, hid_t dxpl_id, unsigned depth,
+    H5B2_internal_t *internal, unsigned idx)
+{
+    const H5AC_class_t *child_class;    /* Pointer to child node's class info */
+    haddr_t child_addr;                 /* Address of child node */
+    void *child;                        /* Pointer to child node */
+    unsigned *child_nrec;               /* Pointer to child # of records */
+    uint8_t *child_native;              /* Pointer to child's native records */
+    H5B2_shared_t *shared;              /* B-tree's shared info */
+    herr_t ret_value=SUCCEED;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_swap_child)
+
+    HDassert(f);
+    HDassert(internal);
+
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(internal->shared);
+    HDassert(shared);
+
+    /* Check for the kind of B-tree node to swap */
+    if(depth>1) {
+        H5B2_internal_t *child_internal;        /* Pointer to internal node */
+
+        /* Setup information for unlocking child node */
+        child_class = H5AC_BT2_INT;
+        child_addr = child_internal->node_ptrs[idx].addr;
+
+HDfprintf(stderr,"%s: Swapping with internal node in B-tree, untested!\n",FUNC);
+HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
+        /* Lock B-tree child nodes */
+        if (NULL == (child_internal = H5AC_protect(f, dxpl_id, child_class, child_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+
+        /* More setup for accessing child node information */
+        child = child_internal;
+        child_nrec = &(child_internal->nrec);
+        child_native = child_internal->int_native;
+
+        /* Mark child node as dirty now */
+        child_internal->cache_info.is_dirty = TRUE;
+    } /* end if */
+    else {
+        H5B2_leaf_t *child_leaf;        /* Pointer to leaf node */
+
+        /* Setup information for unlocking child nodes */
+        child_class = H5AC_BT2_LEAF;
+        child_addr = internal->node_ptrs[idx].addr;
+
+        /* Lock B-tree child node */
+        if (NULL == (child_leaf = H5AC_protect(f, dxpl_id, child_class, child_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
+
+        /* More setup for accessing child node information */
+        child = child_leaf;
+        child_nrec = &(child_leaf->nrec);
+        child_native = child_leaf->leaf_native;
+
+        /* Mark child node as dirty now */
+        child_leaf->cache_info.is_dirty = TRUE;
+    } /* end else */
+
+    /* Swap records (use disk page as temporary buffer) */
+    HDmemcpy(shared->page, H5B2_NAT_NREC(child_native,shared,0), shared->type->nrec_size);
+    HDmemcpy(H5B2_NAT_NREC(child_native,shared,0), H5B2_INT_NREC(internal,shared,idx-1), shared->type->nrec_size);
+    HDmemcpy(H5B2_INT_NREC(internal,shared,idx-1), shared->page, shared->type->nrec_size);
+
+    /* Mark parent as dirty */
+    internal->cache_info.is_dirty = TRUE;
+
+#ifdef H5B2_DEBUG
+    H5B2_assert_internal((hsize_t)0,shared,internal);
+    if(depth>1)
+        H5B2_assert_internal(internal->node_ptrs[idx].all_nrec,shared,child);
+    else
+        H5B2_assert_leaf(shared,child);
+#endif /* H5B2_DEBUG */
+
+    /* Unlock child node */
+    if (H5AC_unprotect(f, dxpl_id, child_class, child_addr, child, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5B2_swap_child */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2_insert_leaf
  *
  * Purpose:	Adds a new record to a B-tree leaf node.
@@ -3304,8 +3409,12 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
         /* Handle deleting a record from an internal node */
         if(cmp==0) {
-HDfprintf(stderr,"%s: Deleting record in internal node of non-trival B-tree!\n",FUNC);
-HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "Can't delete record in B-tree")
+            /* Increment the index to work with */
+            idx++;
+
+            /* Swap record to delete with record from child */
+            if(H5B2_swap_child(f,dxpl_id,depth,internal,idx) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree")
         } /* end if */
 
 
