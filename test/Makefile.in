@@ -13,8 +13,9 @@ LIBS=libh5test.a ../src/libhdf5.a @LIBS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-TEST_PROGS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset   \
-      extend external links unlink big mtime fillval mount flush1 flush2
+TEST_PROGS=testhdf5 lheap ohdr stab gheap hyperslab istore bittests dtypes   \
+      dsets cmpd_dset extend external links unlink big mtime fillval mount   \
+      flush1 flush2
 TIMINGS=iopipe chunk ragged overhead
 
 # The libh5test.a library provides common support code for the tests.
@@ -22,27 +23,31 @@ LIB=libh5test.a
 LIB_SRC=h5test.c
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
-# Temporary files
+# Temporary files.  These files are the ones created by setting the
+# HDF5_NOCLEANUP environment variable and running `make test' without
+# specifying a file prefix or low-level driver.  Changing the file
+# prefix or low-level driver with environment variables will influence 
+# the temporary file name in ways that the makefile is not aware of.
 MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
-	    tfile3.h5 th5s1.h5 theap.h5 tohdr.h5 tstab1.h5 tstab2.h5         \
-	    extern_1.h5 extern_2.h5 extern_3.h5 extern_1.raw extern_1b.raw   \
-	    extern_2.raw extern_2b.raw extern_3.raw extern_3b.raw            \
-	    extern_4.raw extern_4b.raw iopipe.raw iopipe.h5 gheap0.h5        \
+	    tfile3.h5 th5s1.h5 lheap.h5 ohdr.h5 stab1.h5 stab2.h5            \
+	    extern_1.h5 extern_2.h5 extern_3.h5 extern_1a.raw extern_1b.raw  \
+	    extern_2a.raw extern_2b.raw extern_3a.raw extern_3b.raw          \
+	    extern_4a.raw extern_4b.raw iopipe.raw iopipe.h5 gheap0.h5       \
 	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 links.h5 chunk.h5        \
 	    big.data big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5   \
-            tattr.h5 tselect.h5 mtime.h5 ragged.h5 grptime.h5 unlink.h5      \
-	    overhead.h5 fillval_[0-9].h5 mount_[0-9].h5 trefer.h5 flush.h5
+            tattr.h5 tselect.h5 mtime.h5 ragged.h5 unlink.h5 overhead.h5     \
+            fillval_[0-9].h5 fillval.raw mount_[0-9].h5 trefer.h5 flush.h5
 CLEAN=$(TIMINGS)
 
 # Source and object files for programs...  The TEST_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
-TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c trefer.c         \
-    tselect.c tstab.c th5s.c dtypes.c hyperslab.c istore.c dsets.c           \
-    cmpd_dset.c extend.c external.c iopipe.c gheap.c big.c links.c chunk.c   \
-    bittests.c mtime.c ragged.c unlink.c overhead.c fillval.c mount.c        \
-    flush1.c flush2.c
+TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c      \
+         external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
+         iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
+	 ragged.c space_overflow.c stab.c tattr.c testhdf5.c tfile.c th5s.c  \
+	 tmeta.c trefer.c tselect.c unlink.c
 TEST_OBJ=$(TEST_SRC:.c=.o)
 
 # Private header files (not to be installed)...
@@ -60,9 +65,18 @@ timings _timings: $(TIMINGS)
 
 # How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): libh5test.a ../src/libhdf5.a
-TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o trefer.o tselect.o tstab.o th5s.o
+TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o tmeta.o trefer.o tselect.o th5s.o
 testhdf5: $(TESTHDF5_OBJ)
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LDFLAGS) $(LIBS)
+
+lheap: lheap.o
+	$(CC) $(CFLAGS) -o $@ lheap.o $(LDFLAGS) $(LIBS)
+
+ohdr: ohdr.o
+	$(CC) $(CFLAGS) -o $@ ohdr.o $(LDFLAGS) $(LIBS)
+
+stab: stab.o
+	$(CC) $(CFLAGS) -o $@ stab.o $(LDFLAGS) $(LIBS)
 
 gheap: gheap.o
 	$(CC) $(CFLAGS) -o $@ gheap.o $(LDFLAGS) $(LIBS)
@@ -93,9 +107,6 @@ external: external.o
 
 iopipe: iopipe.o
 	$(CC) $(CFLAGS) -o $@ iopipe.o $(LDFLAGS) $(LIBS)
-
-grptime: grptime.o
-	$(CC) $(CFLAGS) -o $@ grptime.o $(LDFLAGS) $(LIBS)
 
 big: big.o
 	$(CC) $(CFLAGS) -o $@ big.o $(LDFLAGS) $(LIBS)

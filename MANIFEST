@@ -322,24 +322,24 @@
 ./test/hyperslab.c
 ./test/iopipe.c
 ./test/istore.c
+./test/lheap.c
 ./test/links.c
 ./test/mount.c
 ./test/mtime.c
 ./test/overhead.c
 ./test/ragged.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
+./test/stab.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/tattr.c
 ./test/tfile.c
 ./test/th5s.c
 ./test/th5s.h5
-./test/theap.c
 ./test/tmeta.c
 ./test/tohdr.c
 ./test/trefer.c
 ./test/tselect.c
-./test/tstab.c
 ./test/unlink.c
 
 ./testpar/Makefile.in

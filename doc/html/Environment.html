@@ -1,66 +1,102 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
-<head>
-<title>HDF5 Library Environment Variables and Configuration Parameters</title>
-</head>
+  <head>
+    <title>HDF5 Library Environment Variables
+      and Configuration Parameters</title>
+  </head>
 
-<body>
+  <body>
 
-<h1>HDF5 Library Environment Variables and Configuration Parameters</h1>
+    <h1>HDF5 Library Environment Variables and Configuration Parameters</h1>
 
-<h2>1. Environment Variables</h2>
+    <h2>1. Environment Variables</h2>
 
-The HDF5 library uses UNIX environment variables to control
-or adjust certain library features at runtime.  The variables and 
-their defined effects are as follows:
+    The HDF5 library uses UNIX environment variables to control
+    or adjust certain library features at runtime.  The variables and 
+    their defined effects are as follows:
 
-<dir>
-<dl>
-    <dt><tt>HDF5_DEBUG</tt>
-        <dd>Defines a list of debugging switches documented in the
-            <a href="Debugging.html">Debugging</a> section of the
-            <cite>HDF5 User's Guide</cite>.
+    <center>
+      <table width="90%">
+	<tr>
+	  <th>Variable</th>
+	  <th>Description</th>
+	</tr>
 
-    <dt><tt>HDF5_NOCLEANUP</tt>
-        <dd>When set to a non-empty value, the programs in the test
-            directory do not remove temporary HDF5 data files.
-            The default is for each test to remove the files before exit.
+	<tr valign=top>
+	  <td><code>HDF5_DEBUG</code></td>
+	  <td>Defines a list of debugging switches documented in the
+	    <a href="Debugging.html">Debugging</a> section of the
+	    <cite>HDF5 User's Guide</cite>.</td>
+	</tr>
 
-    <dt><tt>HDF5_MPI_OPT_TYPES</tt> 
-            &nbsp;&nbsp;(for parallel beta version only)
-        <dd>When set to <code>1</code>, PHDF5 will use the MPI optimized 
-            code to perform parallel read/write accesses to datasets.
-            Currently, this optimization fails when accessing extendable
-            datasets.  The default is not to use the optimized code.
+	<tr valign=top>
+	  <td><code>HDF5_NOCLEANUP</code></td>
+	  <td>If set then programs in the test directories do not
+	    remove temporary files. The default is for each test to
+	    remove the files before exit if the test succeeds but to
+	    leave the files if the test fails.</td>
+	</tr>
 
-    <dt><tt>HDF5_MPI_1_METAWRITE</tt> 
-            &nbsp;&nbsp;(for parallel beta version only)
-        <dd>When set to <code>1</code>, PHDF5 will write the metadata 
-            via process 0 of each opened parallel HDF5 file.  This should 
-            improve I/O throughput.  The default is not to use this 
-            optimization.
+	<tr valign=top>
+	  <td><code>HDF5_PREFIX</code></td>
+	  <td>The value of this variable is prepended to all temporary 
+	    file names created by the test programs and separated from 
+	    the base name of the file by a slash. The default is no
+	    prefix.</td>
+	</tr>
 
-</dl>
-</dir>
+	<tr valign=top>
+	  <td><ode>HDF5_DRIVER</code></td>
+	  <td>This variable should hold the name of a low-level HDF5
+	    file driver such as <code>sec2</code>, <code>stdio</code>, 
+	    <code>core</code>, <code>split</code>, or
+	    <code>family</code>. The family driver also takes an
+	    optional real-valued family member size in MB which
+	    defaults to 1. If this variable is not set or empty then
+	    the library-defined default file driver is used (which can 
+	    be set at configuration time with the H5F_LOW_DFLT cpp
+	    constant, usually <code>sec2</code>).</td>
+	</tr>
 
-<h2>2. Configuration Parameters</h2>
+	<tr valign=top>
+	  <td><code>HDF5_MPI_OPT_TYPES</code></td>
+	  <td>When set to <code>1</code>, parallel HDF5 will use the
+	    MPI-optimized code to perform parallel read/write accesses
+	    to datasets. Currently, this optimization fails when
+	    accessing extendable datasets.  The default is not to use
+	    the optimized code.</td>
+	</tr>
 
-The HDF5 configuration script accepts a list of parameters to control
-configuration features when creating the Makefiles for the library.  
-The command
-<br>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;configure --help </code>
-<br>
-will display the current list of parameters and their effects.
+	<tr valign=top>
+	  <td><code>HDF5_MPI_1_METAWRITE</code></td>
+	  <td>When set to <code>1</code>, parallel HDF5 will write the
+	  metadata via process 0 of each opened parallel HDF5 file.
+	  This should improve I/O throughput.  The default is not to
+	  use this optimization.</td>
+	</tr>
 
-<hr>
+      </table>
+    </center>
 
-<address>
-<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
-</address>
 
-Last modified: 9 September 1998
+    <h2>2. Configuration Parameters</h2>
 
-</body>
+    The HDF5 configuration script accepts a list of parameters to control
+    configuration features when creating the Makefiles for the library.  
+    The command
+    <br>
+    <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;configure --help </code>
+    <br>
+    will display the current list of parameters and their effects.
+
+    <hr>
+
+    <address>
+      <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+    </address>
+
+    Last modified: 9 September 1998
+
+  </body>
 </html>
 

@@ -1826,8 +1826,8 @@ H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
     if (memb_plist_id) {
 	assert (plist->u.fam.memb_access);
 	*memb_plist_id = H5P_create (H5P_FILE_ACCESS,
-				H5P_copy (H5P_FILE_ACCESS,
-					  plist->u.fam.memb_access));
+				     H5P_copy (H5P_FILE_ACCESS,
+					       plist->u.fam.memb_access));
     }
 	
     FUNC_LEAVE (SUCCEED);
@@ -3008,6 +3008,7 @@ H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_gc_references, FAIL);
+    H5TRACE2("e","iIu",fapl_id,gc_ref);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) || NULL == (fapl = H5I_object (fapl_id))) {
@@ -3042,6 +3043,7 @@ H5Pget_gc_reference(hid_t fapl_id, unsigned *gc_ref/*out*/)
     H5F_access_t	*fapl = NULL;
 
     FUNC_ENTER (H5Pget_alignment, FAIL);
+    H5TRACE2("e","ix",fapl_id,gc_ref);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) || NULL == (fapl = H5I_object (fapl_id))) {

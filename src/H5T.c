@@ -1088,8 +1088,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("uchar_llong", H5T_NATIVE_UCHAR, H5T_NATIVE_LLONG,
-			 H5T_conv_uchar_llong)<0) {
+    if (H5Tregister_hard("uchar_ullong", H5T_NATIVE_UCHAR, H5T_NATIVE_ULLONG,
+			 H5T_conv_uchar_ullong)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }

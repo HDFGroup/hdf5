@@ -92,11 +92,13 @@ Step 2. Configure.
       with `--with-zlib=INCDIR,LIBDIR' for the include file and/or
       library. To prevent detection of zlib use `--without-zlib'.
 
-    * The HDF5-to-HDF4 conversion tool requires the HDF4 library and
-      header files which are auto-detected by configure.  If they are
-      in a non-standard place then absolute path names can be specified
-      with `--with-hdf4=INCDIR,LIBDIR' for the include file and/or
-      library. To prevent detection of hdf4 use `--without-hdf4'.
+    * The HDF5-to-HDF4 conversion tool requires the HDF4 library and header
+      files which are auto-detected by configure.  If they are in a
+      non-standard place then absolute path names can be specified with
+      `--with-hdf4=INCDIR,LIBDIR' for the include file and/or library. To
+      prevent detection of hdf4 use `--without-hdf4'. Beware of the GNU zlib
+      that comes with hdf4 -- it's too old to use with hdf5 (hdf4 tools can be 
+      linked with the newer versions of zlib).
 
     * Old versions of gcc (<2.8.0) may experience register allocation
       problems on some architectures.  If this happens then the

@@ -40,7 +40,6 @@ main (void)
 {
     hid_t			file, dataset, mem_space, file_space, cparms;
     hid_t			fapl;
-    herr_t			status;
     int				i, j, k, m;
     static int			buf1[NY][NX], buf2[NX/2][NY/2];
     static const hsize_t	dims[2] = {NX, NY};

@@ -824,10 +824,7 @@ main (void)
 
     if (H5Fclose(file)<0) goto error;
     puts("All external storage tests passed.");
-    h5_cleanup(fapl);
-
-    /* cleanup external files */
-    if (!getenv("HDF5_NOCLEANUP")) {
+    if (h5_cleanup(fapl)) {
 	remove("extern_1a.raw");
 	remove("extern_1b.raw");
 	remove("extern_2a.raw");

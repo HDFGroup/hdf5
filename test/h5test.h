@@ -54,8 +54,7 @@ extern const char *FILENAME[];
 extern "C" {
 #endif
 
-void h5_cleanup(hid_t fapl);
-void h5_cleanup(hid_t fapl);
+int h5_cleanup(hid_t fapl);
 herr_t h5_errors(void __unused__ *client_data);
 char *h5_fixname(const char *basename, hid_t fapl, char *fullname,
 		 size_t size);

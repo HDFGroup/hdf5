@@ -66,7 +66,7 @@ h5_errors(void __unused__ *client_data)
  *		`extern const char *FILENAMES[]' -- these are only the base
  * 		names.  The file access property list is also closed.
  *
- * Return:	none
+ * Return:	Non-zero if cleanup actions were performed; zero otherwise.
  *
  * Programmer:	Albert Cheng
  *              May 28, 1998
@@ -75,12 +75,13 @@ h5_errors(void __unused__ *client_data)
  *
  *-------------------------------------------------------------------------
  */
-void
+int
 h5_cleanup(hid_t fapl)
 {
     char	filename[1024];
     char	temp[2048];
     int		i, j;
+    int		retval=0;
 
     if (!getenv("HDF5_NOCLEANUP")) {
 	for (i=0; FILENAME[i]; i++) {
@@ -113,8 +114,10 @@ h5_cleanup(hid_t fapl)
 		break;
 	    }
 	}
+	retval=1;
     }
     H5Pclose(fapl);
+    return retval;
 }
 
 
@@ -135,10 +138,27 @@ h5_cleanup(hid_t fapl)
 void
 h5_reset(void)
 {
+    char	filename[1024];
+    
     fflush(stdout);
     fflush(stderr);
     H5close();
-    H5Eset_auto (h5_errors, NULL);}
+    H5Eset_auto (h5_errors, NULL);
+
+    /*
+     * Cause the library to emit some diagnostics early so they don't
+     * interfere with other formatted output.
+     */
+    sprintf(filename, "/tmp/h5emit-%05d.h5", getpid());
+    H5E_BEGIN_TRY {
+	hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
+			       H5P_DEFAULT);
+	hid_t grp = H5Gcreate(file, "emit", 0);
+	H5Gclose(grp);
+	H5Fclose(file);
+	unlink(filename);
+    } H5E_END_TRY;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -304,6 +324,8 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_char_uint);
     H5Tunregister(H5T_conv_char_long);
     H5Tunregister(H5T_conv_char_ulong);
+    H5Tunregister(H5T_conv_char_llong);
+    H5Tunregister(H5T_conv_char_ullong);
 
     H5Tunregister(H5T_conv_uchar_char);
     H5Tunregister(H5T_conv_uchar_short);
@@ -312,6 +334,8 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_uchar_uint);
     H5Tunregister(H5T_conv_uchar_long);
     H5Tunregister(H5T_conv_uchar_ulong);
+    H5Tunregister(H5T_conv_uchar_llong);
+    H5Tunregister(H5T_conv_uchar_ullong);
 
     H5Tunregister(H5T_conv_short_char);
     H5Tunregister(H5T_conv_short_uchar);
@@ -320,6 +344,8 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_short_uint);
     H5Tunregister(H5T_conv_short_long);
     H5Tunregister(H5T_conv_short_ulong);
+    H5Tunregister(H5T_conv_short_llong);
+    H5Tunregister(H5T_conv_short_ullong);
 
     H5Tunregister(H5T_conv_ushort_char);
     H5Tunregister(H5T_conv_ushort_uchar);
@@ -328,6 +354,8 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_ushort_uint);
     H5Tunregister(H5T_conv_ushort_long);
     H5Tunregister(H5T_conv_ushort_ulong);
+    H5Tunregister(H5T_conv_ushort_llong);
+    H5Tunregister(H5T_conv_ushort_ullong);
 
     H5Tunregister(H5T_conv_int_char);
     H5Tunregister(H5T_conv_int_uchar);
@@ -336,6 +364,8 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_int_uint);
     H5Tunregister(H5T_conv_int_long);
     H5Tunregister(H5T_conv_int_ulong);
+    H5Tunregister(H5T_conv_int_llong);
+    H5Tunregister(H5T_conv_int_ullong);
 
     H5Tunregister(H5T_conv_uint_char);
     H5Tunregister(H5T_conv_uint_uchar);
@@ -344,6 +374,8 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_uint_int);
     H5Tunregister(H5T_conv_uint_long);
     H5Tunregister(H5T_conv_uint_ulong);
+    H5Tunregister(H5T_conv_uint_llong);
+    H5Tunregister(H5T_conv_uint_ullong);
 
     H5Tunregister(H5T_conv_long_char);
     H5Tunregister(H5T_conv_long_uchar);
@@ -352,6 +384,8 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_long_int);
     H5Tunregister(H5T_conv_long_uint);
     H5Tunregister(H5T_conv_long_ulong);
+    H5Tunregister(H5T_conv_long_llong);
+    H5Tunregister(H5T_conv_long_ullong);
 
     H5Tunregister(H5T_conv_ulong_char);
     H5Tunregister(H5T_conv_ulong_uchar);
@@ -360,6 +394,28 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_ulong_int);
     H5Tunregister(H5T_conv_ulong_uint);
     H5Tunregister(H5T_conv_ulong_long);
+    H5Tunregister(H5T_conv_ulong_llong);
+    H5Tunregister(H5T_conv_ulong_ullong);
+
+    H5Tunregister(H5T_conv_llong_char);
+    H5Tunregister(H5T_conv_llong_uchar);
+    H5Tunregister(H5T_conv_llong_short);
+    H5Tunregister(H5T_conv_llong_ushort);
+    H5Tunregister(H5T_conv_llong_int);
+    H5Tunregister(H5T_conv_llong_uint);
+    H5Tunregister(H5T_conv_llong_long);
+    H5Tunregister(H5T_conv_llong_ulong);
+    H5Tunregister(H5T_conv_llong_ullong);
+
+    H5Tunregister(H5T_conv_ullong_char);
+    H5Tunregister(H5T_conv_ullong_uchar);
+    H5Tunregister(H5T_conv_ullong_short);
+    H5Tunregister(H5T_conv_ullong_ushort);
+    H5Tunregister(H5T_conv_ullong_int);
+    H5Tunregister(H5T_conv_ullong_uint);
+    H5Tunregister(H5T_conv_ullong_long);
+    H5Tunregister(H5T_conv_ullong_ulong);
+    H5Tunregister(H5T_conv_ullong_llong);
 
     H5Tunregister(H5T_conv_float_double);
     H5Tunregister(H5T_conv_double_float);

@@ -5,60 +5,50 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Wednesday, April  8, 1998
  */
+#include <h5test.h>
 
-/* See H5private.h for how to include headers */
-#undef NDEBUG
-#include <hdf5.h>
-#include <H5private.h> /*needed for HDfprintf() and long_long*/
+const char *FILENAME[] = {
+    "big",
+    NULL
+};
 
-#define FNAME		"big%05d.h5"
 #define DNAME		"big.data"
+
 #define WRT_N		50
 #define WRT_SIZE	4*1024
 #define FAMILY_SIZE	1024*1024*1024
 
-#if SIZEOF_LONG_LONG > SIZEOF_LONG
-#define GB8LL		((unsigned long_long)8*1024*1024*1024)
-#elif SIZEOF___INT64 > SIZEOF_LONG
-#define GB8LL		((unsigned __int64)8*1024*1024*1024)
-#elif SIZEOF_LONG >= 8
-#define GB8LL		((unsigned long)8*1024*1024*1024)
+#if SIZEOF_LONG_LONG >= 8
+#   define GB8LL	((unsigned long_long)8*1024*1024*1024)
 #else
-#define GB8LL		((unsigned long)0)	/* cannot do the test */
+#   define GB8LL	((unsigned long_long)0)	/*cannot do the test*/
 #endif
-
-static hsize_t
-randll (hsize_t limit)
-{
-    hsize_t	acc = rand ();
-    acc *= rand ();
-
-    return acc % limit;
-}
 
 
 /*-------------------------------------------------------------------------
- * Function:	display_error_cb
+ * Function:	randll
  *
- * Purpose:	Displays the error stack after printing "*FAILED*".
+ * Purpose:	Create a random long_long value.
  *
- * Return:	Success:	0
+ * Return:	Success:	Random value
  *
- *		Failure:	-1
+ *		Failure:	never fails
  *
  * Programmer:	Robb Matzke
- *		Wednesday, March  4, 1998
+ *              Tuesday, November 24, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-display_error_cb (void __unused__ *client_data)
+static hsize_t
+randll(hsize_t limit)
 {
-    puts ("*FAILED*");
-    H5Eprint (stdout);
-    return 0;
+    
+    hsize_t	acc = rand ();
+    acc *= rand ();
+
+    return acc % limit;
 }
 
 
@@ -118,23 +108,23 @@ is_sparse(void)
  *-------------------------------------------------------------------------
  */
 static int
-enough_room(void)
+enough_room(hid_t fapl)
 {
     int		ret_value=0;
     int		fd[68];
     size_t	i, size = (size_t)1 << 30;
-    char	name[32];
-
-    /* verify if this machine supports 8GB sizes */
-    if (GB8LL==0)
-	goto done;
+    char	filename[1024], name[1024];
 
     /* Initialize file descriptors */
     for (i=0; i<NELMTS(fd); i++) fd[i] = -1;
 
+    /* Get file name template */
+    assert(H5F_LOW_FAMILY==H5Pget_driver(fapl));
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
     /* Create files */
     for (i=0; i<NELMTS(fd); i++) {
-	sprintf(name, FNAME, i);
+	HDsnprintf(name, sizeof name, filename, i);
 	if ((fd[i]=open(name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
 	    goto done;
 	}
@@ -149,7 +139,7 @@ enough_room(void)
 
  done:
     for (i=0; i<NELMTS(fd) && fd[i]>=0; i++) {
-	sprintf(name, FNAME, i);
+	HDsnprintf(name, sizeof name, filename, i);
 	close(fd[i]);
 	unlink(name);
     }
@@ -177,29 +167,27 @@ enough_room(void)
  *-------------------------------------------------------------------------
  */
 static int
-writer (int wrt_n)
+writer (hid_t fapl, int wrt_n)
 {
     hsize_t	size1[4] = {8, 1024, 1024, 1024};
     hsize_t	size2[1] = {GB8LL};
     hssize_t	hs_start[1];
     hsize_t	hs_size[1];
-    hid_t	plist, file, space1, space2, mem_space, d1, d2;
+    hid_t	file=-1, space1=-1, space2=-1, mem_space=-1, d1=-1, d2=-1;
     int		*buf = malloc (sizeof(int) * WRT_SIZE);
     int		i, j;
     FILE	*out = fopen(DNAME, "w");
+    char	filename[1024];
 
-    printf("%-70s", "Writing large dataset");
-    fflush(stdout);
+    TESTING("large dataset write");
     
     /*
      * We might be on a machine that has 32-bit files, so create an HDF5 file
      * which is a family of files.  Each member of the family will be 1GB
      */
-    if ((plist = H5Pcreate (H5P_FILE_ACCESS))<0) goto error;
-    if (H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
-    file = H5Fcreate (FNAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT, plist);
-    if (file<0) goto error;
-    if (H5Pclose (plist)<0) goto error;
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT,
+			fapl))<0) goto error;
 
     /* Create simple data spaces according to the size specified above. */
     if ((space1 = H5Screate_simple (4, size1, size1))<0 ||
@@ -237,10 +225,20 @@ writer (int wrt_n)
     if (H5Fclose (file)<0) goto error;
     free (buf);
     fclose(out);
-    puts(" PASSED");
+    PASSED();
     return 0;
 
  error:
+    H5E_BEGIN_TRY {
+	H5Dclose(d1);
+	H5Dclose(d2);
+	H5Sclose(space1);
+	H5Sclose(space2);
+	H5Sclose(mem_space);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    if (buf) free(buf);
+    if (out) fclose(out);
     return 1;
 }
 
@@ -262,26 +260,25 @@ writer (int wrt_n)
  *-------------------------------------------------------------------------
  */
 static int
-reader (void)
+reader (hid_t fapl)
 {
-    FILE	*script;
-    hid_t	plist, file, mspace, fspace, d2;
+    FILE	*script = NULL;
+    hid_t	file=-1, mspace=-1, fspace=-1, d2=-1;
     char	ln[128], *s;
     hssize_t	hs_offset[1];
     hsize_t	hs_size[1] = {WRT_SIZE};
     int		*buf = malloc (sizeof(int) * WRT_SIZE);
     int		i, j, zero, wrong, nerrors=0;
+    char	filename[1024];
 
     /* Open script file */
     script = fopen (DNAME, "r");
 
     /* Open HDF5 file */
-    if ((plist = H5Pcreate (H5P_FILE_ACCESS))<0) goto error;
-    if (H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
-    if ((file = H5Fopen (FNAME, H5F_ACC_RDONLY|H5F_ACC_DEBUG, plist))<0) {
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_DEBUG, fapl))<0) {
 	goto error;
     }
-    if (H5Pclose (plist)<0) goto error;
 
     /* Open the dataset */
     if ((d2 = H5Dopen (file, "d2"))<0) goto error;
@@ -310,14 +307,14 @@ reader (void)
 	    else if (buf[j]!=i+1) wrong++;
 	}
 	if (zero) {
-	    puts("*FAILED*");
-	    printf("   %d zero%s\n", zero, 1==zero?"":"s");
+	    FAILED();
+	    printf("    %d zero%s\n", zero, 1==zero?"":"s");
 	} else if (wrong) {
-	    puts("--SKIP--");
-	    puts("   Possible overlap with another region.");
+	    SKIPPED();
+	    puts("    Possible overlap with another region.");
 	    nerrors++;
 	} else {
-	    puts(" PASSED");
+	    PASSED();
 	}
     }
 
@@ -330,37 +327,15 @@ reader (void)
     return nerrors;
 
  error:
+    H5E_BEGIN_TRY {
+	H5Dclose(d2);
+	H5Sclose(mspace);
+	H5Sclose(fspace);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    if (buf) free(buf);
+    if (script) fclose(script);
     return 1;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	cleanup
- *
- * Purpose:	Removes test files
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Thursday, June  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-cleanup (void)
-{
-    int		i;
-    char	buf[256];
-    
-    if (!getenv ("HDF5_NOCLEANUP")) {
-	for (i=0; i<512; i++) {
-	    sprintf(buf, FNAME, i);
-	    remove(buf);
-	}
-	remove(DNAME);
-    }
 }
 
 
@@ -383,18 +358,41 @@ cleanup (void)
 int
 main (void)
 {
-    int		nerrors = 0;
+    hid_t	fapl=-1;
+    hsize_t	family_size;
     
+    /* Reset library */
+    h5_reset();
+    fapl = h5_fileaccess();
+
+    /* The file driver must be the family driver */
+    if (H5F_LOW_FAMILY!=H5Pget_driver(fapl)) {
+	printf("Changing file drivers to the family driver, %lu bytes each\n",
+	       (unsigned long)FAMILY_SIZE);
+	if (H5Pset_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
+    } else if (H5Pget_family(fapl, &family_size, NULL)<0) {
+	goto error;
+    } else if (family_size!=FAMILY_SIZE) {
+	printf("Changing family member size from %lu to %lu\n",
+	       (unsigned long)family_size, (unsigned long)FAMILY_SIZE);
+	if (H5Pset_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
+    }
+
     /*
      * We shouldn't run this test if the file system doesn't support holes
      * because we would generate multi-gigabyte files.
      */
     puts("Checking if file system is adequate for this test...");
+    if (sizeof(long_long)<8 || 0==GB8LL) {
+	puts("Test skipped because sizeof(long_long) is too small. This");
+	puts("hardware apparently doesn't support 64-bit integer types.");
+	exit(0);
+    }
     if (!is_sparse()) {
 	puts("Test skipped because file system does not support holes.");
 	exit(0);
     }
-    if (!enough_room()) {
+    if (!enough_room(fapl)) {
 	puts("Test skipped because of quota (file size or num open files).");
 	exit(0);
     }
@@ -403,13 +401,15 @@ main (void)
 	puts("--disable-hsizet flag in order to work around a compiler bug.");
 	exit(0);
     }
-
     
-    /* Set the error handler */
-    H5Eset_auto (display_error_cb, NULL);
+    /* Do the test */
+    if (writer(fapl, WRT_N)) goto error;
+    if (reader(fapl)) goto error;
+    puts("All big tests passed.");
+    if (h5_cleanup(fapl)) remove(DNAME);
+    return 0;
 
-    if ((nerrors=writer(WRT_N))>0) exit(nerrors);
-    nerrors = reader();
-    cleanup();
-    return nerrors;
+ error:
+    puts("*** TEST FAILED ***");
+    return 1;
 }

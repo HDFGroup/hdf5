@@ -164,9 +164,6 @@ main(int argc, char *argv[])
     /* Tests are generally arranged from least to most complexity... */
     InitTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code");
     InitTest("file", test_file, cleanup_file, "Low-Level File I/O");
-    InitTest("heap", test_heap, cleanup_heap, "Object and Name Heaps");
-    InitTest("ohdr", test_ohdr, cleanup_ohdr, "Object Headers");
-    InitTest("stab", test_stab, cleanup_stab, "Symbol Tables");
     InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");
     InitTest("select", test_select, cleanup_select,  "Selections");
