@@ -1890,7 +1890,7 @@ H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void UNUSED *key)
 int
 H5T_term_interface(void)
 {
-    int	i, nprint=0, n=0;
+    int	i, j, nprint=0, n=0;
     H5T_path_t	*path = NULL;
 
     FUNC_ENTER_NOINIT(H5T_term_interface);
@@ -1900,7 +1900,6 @@ H5T_term_interface(void)
 	for (i=0; i<H5T_g.npaths; i++) {
 	    path = H5T_g.path[i];
 	    assert (path);
-
 	    if (path->func) {
 		H5T_print_stats(path, &nprint/*in,out*/);
 		path->cdata.command = H5T_CONV_FREE;
@@ -1917,6 +1916,7 @@ H5T_term_interface(void)
 		    H5E_clear(); /*ignore the error*/
 		}
 	    }
+
 	    H5T_close (path->src);
 	    H5T_close (path->dst);
             H5FL_FREE(H5T_path_t,path);

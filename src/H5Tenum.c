@@ -61,7 +61,7 @@ H5T_init_enum_interface(void)
 {
     FUNC_ENTER_NOINIT(H5T_init_enum_interface);
 
-    FUNC_LEAVE_NOAPI(H5T_init_interface());
+    FUNC_LEAVE_NOAPI(H5T_init());
 } /* H5T_init_enum_interface() */
 
 
