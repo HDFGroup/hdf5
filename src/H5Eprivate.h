@@ -41,10 +41,22 @@ typedef struct H5E_msg_t {
     H5E_cls_t   *cls;
 } H5E_msg_t;
 
+/* Printing information */
+typedef struct H5E_print_t {
+    FILE        *stream;
+    H5E_cls_t   *cls;
+} H5E_print_t;
+
+/*H5_DLLVAR herr_t (*H5E_auto_g_new)(hid_t estack, void *client_data);
+H5_DLLVAR void *H5E_auto_data_g_new;
+*/
+
 /* An error stack */
 typedef struct H5E_t_new {
     int	nused;			        /*num slots currently used in stack  */
     H5E_error_t_new slot[H5E_NSLOTS];	/*array of error records	     */
+    H5E_auto_t  func;
+    void *auto_data;
 } H5E_t_new;
 
 #ifdef TMP
@@ -303,6 +315,8 @@ H5_DLL herr_t  H5E_clear_new(H5E_t_new *estack);
 H5_DLL herr_t  H5E_print_new(H5E_t_new *estack, FILE *stream);
 H5_DLL herr_t  H5E_walk_new (H5E_t_new *estack, H5E_direction_t direction, H5E_walk_t_new func, 
                              void *client_data);
+H5_DLL herr_t  H5E_get_auto_new(H5E_t_new *estack, H5E_auto_t *func, void **client_data);
+H5_DLL herr_t  H5E_set_auto_new(H5E_t_new *estack, H5E_auto_t func, void *client_data);
 
 #endif /* NEW_ERR */
 

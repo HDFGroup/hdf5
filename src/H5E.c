@@ -222,16 +222,16 @@ hid_t H5E_ERR_CLS_g			= FAIL;
  */
 H5E_t_new *H5E_get_stack_new(void);
 #define H5E_get_my_stack_new()  H5E_get_stack_new()
-#else
+#else /* H5_HAVE_THREADSAFE */
 /*
  * The error stack.  Eventually we'll have some sort of global table so each
  * thread has it's own stack.  The stacks will be created on demand when the
  * thread first calls H5E_push().  */
 H5E_t_new		H5E_stack_g_new[1];
-#define H5E_get_my_stack_new()	(H5E_stack_g_new+0)
-#endif
+#define H5E_get_my_stack_new() (H5E_stack_g_new+0)
+#endif /* H5_HAVE_THREADSAFE */
 
-#endif
+#endif /* NEW_ERR */
 
 #ifdef H5_HAVE_THREADSAFE
 /*
@@ -276,7 +276,6 @@ static herr_t H5E_init_interface (void);
 #ifndef NEW_ERR
 static int H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5E_walk_cb_new(int n, H5E_error_t_new *err_desc, void *client_data);
-static htri_t H5E_same_class(H5E_cls_t *cls);
 #endif /* NEW_ERR */
 static herr_t H5E_walk_cb (int n, H5E_error_t *err_desc, void *client_data);
 
@@ -352,6 +351,9 @@ H5E_init_interface(void)
     /* Initialize the atom group for the error stacks */
     H5I_init_group(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
                     (H5I_free_t)H5E_close_stack);
+
+    H5E_stack_g_new[0].func = &(H5Eprint_new);
+    H5E_stack_g_new[0].auto_data = stderr;
 
     /* From the old function; take out later */
     H5E_auto_data_g = stderr;
@@ -885,7 +887,9 @@ H5E_get_stack_new(void)
     estack = pthread_getspecific(H5TS_errstk_key_g);
     if (!estack) {
         /* no associated value with current thread - create one */
-        estack = (H5E_t_new *)H5MM_malloc(sizeof(H5E_t_new));
+        estack = (H5E_t_new *)H5MM_calloc(sizeof(H5E_t_new));
+        estack->func = &(H5Eprint_new);
+        estack->auto_data = stderr;
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
 
@@ -1199,7 +1203,7 @@ H5Eget_num(hid_t error_stack_id)
     	estack = H5E_get_my_stack_new();
     else
         estack = H5I_object_verify(error_stack_id, H5I_ERROR_STACK);
-
+    
     /* Add HGOTO_ERROR later */
     ret_value=H5E_get_num(estack);
 
@@ -1536,28 +1540,17 @@ H5E_clear_new(H5E_t_new *estack)
     FUNC_ENTER_NOAPI(H5E_clear_new, FAIL);
 
     /* Empty the error stack */ 
-fprintf(stderr, "%s: %d\n", FUNC, __LINE__);
     if (estack) {
-fprintf(stderr, "%s: %d  nused=%d\n", FUNC, __LINE__, estack->nused);
         for(i=0; i<estack->nused; i++) {
-fprintf(stderr, "%s: %d\n", FUNC, __LINE__);
             error = &(estack->slot[i]);
-fprintf(stderr, "%s: %d error=%p, func_name=%p, func_name=%s\n", FUNC, __LINE__, error, 
-        error->func_name, error->func_name);
             if(error->func_name)
                 H5MM_xfree((void*)error->func_name);
-fprintf(stderr, "%s: %d\n  file_name=%p", FUNC, __LINE__, error->file_name);
             if(error->file_name)
                 H5MM_xfree((void*)error->file_name);
-fprintf(stderr, "%s: %d  desc=%p\n", FUNC, __LINE__, error->desc);
             if(error->desc)
                 H5MM_xfree((void*)error->desc);
-fprintf(stderr, "%s: %d\n", FUNC, __LINE__);
         }
-fprintf(stderr, "%s: %d\n", FUNC, __LINE__);
         HDmemset(estack->slot, 0, sizeof(H5E_error_t_new)*estack->nused);
-fprintf(stderr, "%s: %d\n", FUNC, __LINE__);
-        estack->nused = 0;
     }
 
 done:
@@ -1643,17 +1636,40 @@ done:
 herr_t
 H5E_print_new(H5E_t_new *estack, FILE *stream)
 {
-    /*herr_t	ret_value = FAIL;*/
     herr_t	ret_value = SUCCEED;
-    
+    H5E_print_t *eprint = NULL;
+    H5E_cls_t   origin_cls={"Unknown class", "Unknown library", "Unknown library version"};
+
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL);
     /*NO TRACE*/
-    
-    if (!stream) stream = stderr;
 
-    ret_value = H5E_walk_new (estack, H5E_WALK_DOWNWARD, H5E_walk_cb_new, (void*)stream);
+    eprint = H5MM_calloc(sizeof(H5E_print_t));
     
+    if (!stream) 
+        eprint->stream = stderr;
+    else
+        eprint->stream = stream;
+
+    eprint->cls = H5MM_calloc(sizeof(H5E_cls_t));
+    
+    eprint->cls->cls_name = HDstrdup(origin_cls.cls_name);
+    eprint->cls->lib_name = HDstrdup(origin_cls.lib_name);
+    eprint->cls->lib_vers = HDstrdup(origin_cls.lib_vers);
+    
+    ret_value = H5E_walk_new (estack, H5E_WALK_DOWNWARD, H5E_walk_cb_new, (void*)eprint);
+    
+    /* Free memory. */
+    if(eprint && eprint->cls) {
+        if(eprint->cls->cls_name) H5MM_free(eprint->cls->cls_name);
+        if(eprint->cls->lib_name) H5MM_free(eprint->cls->lib_name);
+        if(eprint->cls->lib_vers) H5MM_free(eprint->cls->lib_vers);
+    }
+    if(eprint) {
+        if(eprint->cls) H5MM_free(eprint->cls);
+        H5MM_free(eprint);
+    }
+   
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -1800,7 +1816,8 @@ done:
 static herr_t
 H5E_walk_cb_new(int n, H5E_error_t_new *err_desc, void *client_data)
 {
-    FILE		*stream  = (FILE *)client_data;
+    H5E_print_t         *eprint  = (H5E_print_t *)client_data;
+    FILE		*stream  = NULL;
     H5E_cls_t           *cls_ptr = NULL;
     H5E_msg_t           *maj_ptr = NULL;
     H5E_msg_t           *min_ptr = NULL;
@@ -1814,8 +1831,9 @@ H5E_walk_cb_new(int n, H5E_error_t_new *err_desc, void *client_data)
 
     /* Check arguments */
     assert (err_desc);
-    if (!client_data) client_data = stderr;
-
+    if (!client_data) stream = stderr;
+    else stream = eprint->stream;
+    
     /* Get descriptions for the major and minor error numbers */
     /* Need to check for errors */
     maj_ptr = H5I_object_verify(err_desc->maj_id, H5I_ERROR_MSG);
@@ -1831,7 +1849,16 @@ H5E_walk_cb_new(int n, H5E_error_t_new *err_desc, void *client_data)
     cls_str = maj_ptr->cls->cls_name;
     
     /* Print error message */
-    if(!H5E_same_class(cls_ptr)) {
+    if(HDstrcmp(cls_ptr->lib_name, eprint->cls->lib_name)) {
+        /* store the new class information, free the old one. */
+        if(eprint->cls->cls_name) H5MM_free(eprint->cls->cls_name);
+        if(eprint->cls->lib_name) H5MM_free(eprint->cls->lib_name);
+        if(eprint->cls->lib_vers) H5MM_free(eprint->cls->lib_vers);
+
+        if(cls_ptr->cls_name) eprint->cls->cls_name = HDstrdup(cls_ptr->cls_name);
+        if(cls_ptr->lib_name) eprint->cls->lib_name = HDstrdup(cls_ptr->lib_name);
+        if(cls_ptr->lib_vers) eprint->cls->lib_vers = HDstrdup(cls_ptr->lib_vers);
+
         fprintf (stream, "%s-DIAG: Error detected in %s ", cls_ptr->lib_name, cls_ptr->lib_vers);
         
         /* try show the process or thread id in multiple processes cases*/
@@ -1866,39 +1893,168 @@ H5E_walk_cb_new(int n, H5E_error_t_new *err_desc, void *client_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_same_class
+ * Function:	H5Eget_auto_new
  *
- * Purpose:     Compare the error class name with the one in record.	
+ * Purpose:	Returns the current settings for the automatic error stack
+ *		traversal function and its data for specific error stack.  
+ *		Either (or both) arguments may be null in which case the 
+ *		value is not returned.
  *
- * Return:      Non-zero value when true/zero when false 	
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		Friday, December 12, 1997
+ *              Saturday, February 28, 1998
+ *
+ * Modifications:
+ *              Raymond Lu
+ *              July 18, 2003
+ *              Added error stack in the parameters.  It returns the 
+ *              traversal function and data for that error stack.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eget_auto_new(hid_t estack_id, H5E_auto_t *func, void **client_data)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+    H5E_t_new *estack_ptr = NULL;
+    
+    FUNC_ENTER_API(H5Eget_auto_new, FAIL);
+    H5TRACE3("e","i*x*x",estack_id,func,client_data);
+    
+    if(estack_id == H5E_DEFAULT)
+    	estack_ptr = H5E_get_my_stack_new();
+    else
+        estack_ptr = H5I_object_verify(estack_id, H5I_ERROR_STACK);
+
+    ret_value = H5E_get_auto_new(estack_ptr, func, client_data);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_auto_new
+ *
+ * Purpose:	Private function to return the current settings for the 
+ *              automatic error stack traversal function and its data 
+ *              for specific error stack. Either (or both) arguments may 
+ *              be null in which case the value is not returned.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              July 18, 2003
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5E_same_class(H5E_cls_t *cls)
+herr_t
+H5E_get_auto_new(H5E_t_new *estack, H5E_auto_t *func, void **client_data)
 {
-    htri_t      ret_value = FALSE;
-    static H5E_cls_t    origin_cls={"Unknown class", "Unknown library", "Unknown library version"}; 
-    
-    FUNC_ENTER_NOINIT(H5E_same_class);
-    /*NO TRACE*/
+    herr_t ret_value=SUCCEED;   /* Return value */
 
-    /* Check arguments */
-    assert (cls);
+    FUNC_ENTER_NOAPI(H5E_get_auto_new, FAIL);
 
-    if(strcmp(cls->lib_name, origin_cls.lib_name)) {
-        origin_cls.cls_name = HDstrdup(cls->cls_name);
-        origin_cls.lib_name = HDstrdup(cls->lib_name);
-        origin_cls.lib_vers = HDstrdup(cls->lib_vers);
-        ret_value = FALSE;
-    } else
-        ret_value = TRUE;
+    assert (estack);
+        
+    if(func) *func = estack->func;
+    if(client_data) *client_data = estack->auto_data;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eset_auto_new
+ *
+ * Purpose:	Turns on or off automatic printing of errors for certain 
+ *              error stack.  When turned on (non-null FUNC pointer) any 
+ *              API function which returns an error indication will first
+ *              call FUNC passing it CLIENT_DATA as an argument.
+ *
+ *		The default values before this function is called are
+ *		H5Eprint() with client data being the standard error stream,
+ *		stderr.
+ *
+ *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
+ *		direction.
+ *		
+ * See Also:	H5Ewalk()
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, February 27, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eset_auto_new(hid_t estack_id, H5E_auto_t func, void *client_data)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+    H5E_t_new   *estack_ptr = NULL;
     
+    FUNC_ENTER_API(H5Eset_auto_new, FAIL);
+    H5TRACE3("e","ixx",estack_id,func,client_data);
+
+    if(estack_id == H5E_DEFAULT)
+    	estack_ptr = H5E_get_my_stack_new();
+    else
+        estack_ptr = H5I_object_verify(estack_id, H5I_ERROR_STACK);
+    
+    ret_value = H5E_set_auto_new(estack_ptr, func, client_data);   
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_set_auto_new
+ *
+ * Purpose:	Private function to turn on or off automatic printing of 
+ *              errors for certain error stack.  When turned on (non-null 
+ *              FUNC pointer) any API function which returns an error 
+ *              indication will first call FUNC passing it CLIENT_DATA 
+ *              as an argument.
+ *
+ *		The default values before this function is called are
+ *		H5Eprint() with client data being the standard error stream,
+ *		stderr.
+ *
+ *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
+ *		direction.
+ *		
+ * See Also:	H5Ewalk()
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, February 27, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_set_auto_new(H5E_t_new *estack, H5E_auto_t func, void *client_data)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_set_auto_new, FAIL);
+
+    assert(estack);
+
+    estack->func = &func;
+    estack->auto_data = client_data;
+
+done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
