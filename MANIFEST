@@ -44,7 +44,6 @@
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/trace
-./bin/versinc				_DO_NOT_DISTRIBUTE_
 
 ./config/BlankForm
 ./config/alphaev67-linux-gnu
