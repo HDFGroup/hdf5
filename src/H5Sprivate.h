@@ -209,6 +209,7 @@ __DLL__ herr_t H5S_extent_release(H5S_t *space);
 __DLL__ herr_t H5S_select_release(H5S_t *space);
 __DLL__ hssize_t H5S_get_select_npoints(const H5S_t *space);
 __DLL__ int H5S_extend(H5S_t *space, const hsize_t *size);
+__DLL__ int H5S_set_extend(H5S_t *space, const hsize_t *size);
 __DLL__ htri_t H5S_select_valid(const H5S_t *space);
 __DLL__ herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
