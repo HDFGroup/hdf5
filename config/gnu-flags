@@ -12,40 +12,40 @@
 #   cc_version:   Version number: 2.91.60, 2.7.2.1
 #
 if test X = "X$cc_flags_set"; then
-  cc_version="`$CC $CFLAGS -v 2>&1 |grep 'gcc version' |\
-          sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
-  cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
-  cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
-  if test X = "X$cc_vendor" -a X != "X$cc_version"; then
-    cc_vendor=gcc
-  fi
-  if test "-" != "$cc_vendor-$cc_version"; then
-    echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
-  fi
+    cc_version="`$CC $CFLAGS -v 2>&1 |grep 'gcc version' |\
+	        sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
+    cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
+    cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
+    if test X = "X$cc_vendor" -a X != "X$cc_version"; then
+	cc_vendor=gcc
+    fi
+    if test "-" != "$cc_vendor-$cc_version"; then
+	echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
+    fi
 
-  # Some version numbers
-  cc_vers_major=`echo $cc_version | cut -f1 -d.`
-  cc_vers_minor=`echo $cc_version | cut -f2 -d.`
-  cc_vers_patch=`echo $cc_version | cut -f3 -d.`
-  test -n "$cc_vers_major" || cc_vers_major=0
-  test -n "$cc_vers_minor" || cc_vers_minor=0
-  test -n "$cc_vers_patch" || cc_vers_patch=0
-  cc_vers_all=`expr $cc_vers_major '*' 1000000 + $cc_vers_minor '*' 1000 + $cc_vers_patch`
+    # Some version numbers
+    cc_vers_major=`echo $cc_version | cut -f1 -d.`
+    cc_vers_minor=`echo $cc_version | cut -f2 -d.`
+    cc_vers_patch=`echo $cc_version | cut -f3 -d.`
+    test -n "$cc_vers_major" || cc_vers_major=0
+    test -n "$cc_vers_minor" || cc_vers_minor=0
+    test -n "$cc_vers_patch" || cc_vers_patch=0
+    cc_vers_all=`expr $cc_vers_major '*' 1000000 + $cc_vers_minor '*' 1000 + $cc_vers_patch`
 fi
 
 # GCC compilers before gcc-2.8.1 have problems with `long long'.
 if test gcc = "$cc_vendor" -a "$cc_vers_all" -lt 2008001; then
-  cat <<EOF
-  **
-  ** This compiler may be unable to properly compile the long long
-  ** data type used extensively by hdf5, although specifying
-  ** --disable-hsizet for configure may work around those bugs.
-  ** There may be other code generation problems also, especially
-  ** when optimizations are enabled.  Please upgrade to at least GNU
-  ** gcc version 2.8.1 before reporting bugs to the HDF5 team.
-  **
+    cat <<EOF
+    **
+    ** This compiler may be unable to properly compile the long long
+    ** data type used extensively by hdf5, although specifying
+    ** --disable-hsizet for configure may work around those bugs.
+    ** There may be other code generation problems also, especially
+    ** when optimizations are enabled.  Please upgrade to at least GNU
+    ** gcc version 2.8.1 before reporting bugs to the HDF5 team.
+    **
 EOF
-  sleep 5
+    sleep 5
 
 # GCC v2.96 (shipped with RH7.x) has problems with `float'-> `double' conversions.
 elif test gcc = "$cc_vendor" -a "$cc_vers_all" -eq 2096000; then
@@ -63,70 +63,66 @@ EOF
 # Current EGCS compilers have problems with `long long' and register
 # allocation when optimizations are turned on for x86 systems.
 elif test egcs = "$cc_vendor" -a "$cc_vers_all" -le 2091066; then
-  if test "$HSIZET" != "large"; then
-    cat <<EOF
-  **
-  ** This compiler may have problems allocating registers when
-  ** optimizations are enabled on some platforms. Specifying
-  ** --disable-hsizet usually avoids the bug.
-  **
+    if test "$HSIZET" != "large"; then
+       cat <<EOF
+    **
+    ** This compiler may have problems allocating registers when
+    ** optimizations are enabled on some platforms. Specifying
+    ** --disable-hsizet usually avoids the bug.
+    **
 EOF
-    sleep 5
-  fi
+       sleep 5
+    fi
 
 # All current versions of PGCC have problems also.
 elif test pgcc = "$cc_vendor" -a "$cc_vers_all" -le 2091066; then	    
-  cat <<EOF
-  **
-  ** This compiler may have problems allocating registers for long
-  ** long data types when optimizations are enabled. There may be
-  ** other code generation problems as well. We know of no version
-  ** of pgcc which is capable of compiling HDF5 in production mode.
-  ** Please use gcc-2.8 or egcs-1.1.1 before reporting bugs.
-  **
+    cat <<EOF
+    **
+    ** This compiler may have problems allocating registers for long
+    ** long data types when optimizations are enabled. There may be
+    ** other code generation problems as well. We know of no version
+    ** of pgcc which is capable of compiling HDF5 in production mode.
+    ** Please use gcc-2.8 or egcs-1.1.1 before reporting bugs.
+    **
 EOF
-  sleep 5
+    sleep 5
 
 fi
 
+arch=
 # Architecture-specific flags
 case "$host_os-$host_cpu" in
-  # FreeBSD sets the information from "uname -m" to the general machine
-  # architecture, not the specific CPU for the machine, so even our
-  # Pentium II Xeon server is set to "i386".  Once we know we are on a FreeBSD
-  # machine, use the "sysctl" command to get the CPU hardware model.
-  freebsd*-i386)
-    host_cpu_model=`sysctl -n hw.model`
-    case "$host_cpu_model" in
-      # Hmm.. this might not catch Celerons, but it won't hurt them either...
-      *Pro*|*II*|*III*|*IV*|*Athlon*)
-         ARCH=${ARCH:="-march=i686"}
-         ;;
-    esac
-    ;;
+    # FreeBSD sets the information from "uname -m" to the general machine
+    # architecture, not the specific CPU for the machine, so even our
+    # Pentium II Xeon server is set to "i386".  Once we know we are on a FreeBSD
+    # machine, use the "sysctl" command to get the CPU hardware model.
+    freebsd*-i386)
+        host_cpu_model=`sysctl -n hw.model`
+        case "$host_cpu_model" in
+            # Hmm.. this might not catch Celerons, but it won't hurt them either...
+            *Pro*|*II*|*III*|*IV*|*Athlon*)
+                arch="-march=i686"
+            ;;
+        esac
+        ;;
 
-  *-i686)
-    ARCH=${ARCH:="-march=i686"}
-    ;;
+    *-i686)
+        arch="-march=i686"
+        ;;
 esac
 
 # Host-specific flags
 case "`hostname`" in
-  sleipnir.ncsa.uiuc.edu)
-#    case "$cc_vendor-$cc_version" in
-#      gcc-3*)
-#        ARCH="`echo $ARCH | sed -e 's/i686/athlon-mp/g'`"
-#        ;;
-#    esac
-    ARCH="$ARCH -pipe"
-    ;;
+    sleipnir.ncsa.uiuc.edu)
+        arch="$arch -pipe"
+        ;;
 esac
 
 # Common GCC flags for various situations
 case "$cc_vendor-$cc_version" in
   gcc*|egcs*|pgcc*)
     # General
-    CFLAGS="$CFLAGS $ARCH -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
+    CFLAGS="$CFLAGS $arch -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
 
     # Production
     case "$cc_vendor-$cc_version" in
