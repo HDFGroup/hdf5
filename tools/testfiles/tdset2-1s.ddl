@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -d /dset1[;3 2;4 4;1 4] tdset2.h5'
+Expected output for 'h5dump -d /dset1[;3,2;4,4;1,4] tdset2.h5'
 #############################
 HDF5 "tdset2.h5" {
 DATASET "/dset1" {
