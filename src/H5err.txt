@@ -72,6 +72,7 @@ MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
 MAJOR, H5E_ERROR, Error API
 MAJOR, H5E_SLIST, Skip Lists
+MAJOR, H5E_BLKTRK, Block tracker
 
 # Sections (for grouping minor errors)
 SECTION, ARGS, Argument errors

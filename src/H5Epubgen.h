@@ -44,6 +44,7 @@
 #define H5E_ATOM             (H5OPEN H5E_ATOM_g)
 #define H5E_ATTR             (H5OPEN H5E_ATTR_g)
 #define H5E_IO               (H5OPEN H5E_IO_g)
+#define H5E_BLKTRK           (H5OPEN H5E_BLKTRK_g)
 #define H5E_SLIST            (H5OPEN H5E_SLIST_g)
 #define H5E_EFL              (H5OPEN H5E_EFL_g)
 #define H5E_TST              (H5OPEN H5E_TST_g)
@@ -72,6 +73,7 @@ H5_DLLVAR hid_t H5E_TBBT_g;          /* Threaded, Balanced, Binary Trees */
 H5_DLLVAR hid_t H5E_ATOM_g;          /* Object atom */
 H5_DLLVAR hid_t H5E_ATTR_g;          /* Attribute */
 H5_DLLVAR hid_t H5E_IO_g;            /* Low-level I/O */
+H5_DLLVAR hid_t H5E_BLKTRK_g;        /* Block tracker */
 H5_DLLVAR hid_t H5E_SLIST_g;         /* Skip Lists */
 H5_DLLVAR hid_t H5E_EFL_g;           /* External file list */
 H5_DLLVAR hid_t H5E_TST_g;           /* Ternary Search Trees */

@@ -41,6 +41,7 @@ hid_t H5E_TBBT_g           = FAIL;      /* Threaded, Balanced, Binary Trees */
 hid_t H5E_ATOM_g           = FAIL;      /* Object atom */
 hid_t H5E_ATTR_g           = FAIL;      /* Attribute */
 hid_t H5E_IO_g             = FAIL;      /* Low-level I/O */
+hid_t H5E_BLKTRK_g         = FAIL;      /* Block tracker */
 hid_t H5E_SLIST_g          = FAIL;      /* Skip Lists */
 hid_t H5E_EFL_g            = FAIL;      /* External file list */
 hid_t H5E_TST_g            = FAIL;      /* Ternary Search Trees */

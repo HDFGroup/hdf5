@@ -43,6 +43,11 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_NTYPES				/*must be last*/
 } H5FD_mem_t;
 
+/* Map "block tracker" header blocks to 'ohdr' type file memory, since its
+ * a fair amount of work to add a new kind of file memory, they are similar
+ * enough to object headers and probably too minor to deserve their own type. -QAK */
+#define H5FD_MEM_BLKTRK H5FD_MEM_OHDR
+
 /*
  * A free-list map which maps all types of allocation requests to a single
  * free list.  This is useful for drivers that don't really care about

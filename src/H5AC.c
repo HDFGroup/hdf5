@@ -346,7 +346,8 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "object headers",
     "v2 B-tree headers",
     "v2 B-tree internal nodes",
-    "v2 B-tree leaf nodes"
+    "v2 B-tree leaf nodes",
+    "block tracker nodes"
 };
 
 herr_t

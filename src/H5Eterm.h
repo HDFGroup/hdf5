@@ -42,6 +42,7 @@ H5E_TBBT_g=
 H5E_ATOM_g=    
 H5E_ATTR_g=    
 H5E_IO_g=    
+H5E_BLKTRK_g=    
 H5E_SLIST_g=    
 H5E_EFL_g=    
 H5E_TST_g=    

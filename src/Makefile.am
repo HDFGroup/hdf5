@@ -37,7 +37,7 @@ DISTCLEAN=libhdf5.settings
 
 # library sources
 libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
-        H5B2test.c H5C.c \
+        H5B2test.c H5BT.c H5BTbtree2.c H5BTcache.c H5BTdbg.c H5C.c \
         H5D.c \
         H5Dcontig.c \
         H5Dcompact.c \
@@ -63,7 +63,7 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
 
 # Public headers
 include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
-        H5Cpublic.h H5Dpublic.h  \
+        H5BTpublic.h H5Cpublic.h H5Dpublic.h  \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDfamily.h          \
         H5FDfphdf5.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h H5FDsrb.h H5FDstdio.h H5FDstream.h H5FPpublic.h             \
@@ -74,6 +74,7 @@ include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
 # Private headers
 #noinst_HEADERS =H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h  \
 #        H5B2private.h \
+#        H5BTprivate.h \
 #        H5Dprivate.h H5Eprivate.h H5Fprivate.h H5FDprivate.h H5FLprivate.h    \
 #        H5FOprivate.h H5FSprivate.h H5Gprivate.h H5Gpkg.h                     \
 #        H5HGprivate.h H5HLprivate.h H5HPprivate.h H5Iprivate.h H5MFprivate.h  \

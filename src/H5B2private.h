@@ -52,7 +52,7 @@
 /* B-tree IDs for various internal things. */
 typedef enum H5B2_subid_t {
     H5B2_TEST_ID	 = 0,	/* B-tree is for testing (do not use for actual data) */
-    H5B2_GRP_NAME_ID,		/* B-tree is for group links, ordered by name	*/
+    H5B2_BLK_TRK_ID,		/* B-tree is for block tracker records */
     H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)   */
 } H5B2_subid_t;
 
