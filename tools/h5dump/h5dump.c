@@ -5036,7 +5036,7 @@ xml_print_refs(hid_t did, int source)
     ssiz = H5Sget_simple_extent_npoints(space);
 
     for (i = 0; i < ssiz; i++) {
-	path = lookup_ref_path(*refbuf);
+	path = lookup_ref_path(refbuf);
 	indentation(indent + COL);
 
 	if (!path) {
