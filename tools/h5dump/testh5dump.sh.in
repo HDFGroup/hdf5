@@ -214,7 +214,7 @@ TOOLTEST tnofilename.ddl
 # rev. 2004
 
 # tests for super block
-TOOLTEST tboot1.ddl -H -B -d compact tfcontents1.h5
+TOOLTEST tboot1.ddl -H -B -d dset tfcontents1.h5
 TOOLTEST tboot2.ddl -B tfcontents2.h5
 
 # test -p with a non existing dataset

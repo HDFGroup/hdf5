@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -H -B -d compact tfcontents1.h5'
+Expected output for 'h5dump -H -B -d dset tfcontents1.h5'
 #############################
 HDF5 "tfcontents1.h5" {
 SUPER_BLOCK {
@@ -17,7 +17,8 @@ SUPER_BLOCK {
 USER_BLOCK {
    USERBLOCK_SIZE 0
 }
-DATASET "compact" {
-   }
+DATASET "dset" {
+   DATATYPE  H5T_STD_I32LE
+   DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
 }
-h5dump error: unable to open dataset "compact"
+}
