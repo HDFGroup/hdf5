@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-snap0 released on Sun Nov 28 22:50:16 CST 2004
+HDF5 version 1.6.4-snap1 released on Sun Dec 19 17:50:01 CST 2004
 ================================================================================
 
 
@@ -81,6 +81,11 @@ Bug Fixes since HDF5-1.6.3 release
 
     Configuration
     -------------
+	- IRIX64 MIPSpro compiler of 7.4.x supports C99 features.  Default
+	  to use the 'c99' compiler if available. AKC - 2004/12/13
+	- Intel v8.0 compiler would infinite loop when compiling some test
+	  code with -O3 option.  Changed enable-production default compiler
+	  option to -O2. AKC - 2004/12/06
 	- Long double is assumed to be a supported C data type.  It is a
 	  stanadard C89 type. AKC - 2004/10/22
 
@@ -324,6 +329,22 @@ Footnotes:  (1) Using mpich 1.2.4
 
 Known Problems
 ==============
+* Newer SGI MIPSpro compilers (version 7.4.x) support C99 features but it
+  has a "guard" statement in stdint.h that will #error and skip the rest
+  of the header file if C99 option is not used explicitely.  Hardset
+  $CC to c99 will resolve the problem. AKC - 2004/12/13
+* On IBM AIX systems, parallel HDF5 mode will fail some tests with error
+  messages like "INFO: 0031-XXX ...".  This is from the command poe.
+  Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
+  and run the tests again.
+  The tests may fail with messages like "The socket name is already
+  in use".  HDF5 does not use sockets (except for stream-VFD).  This is
+  due to problems of the poe command trying to set up the debug socket.
+  Check if there are many old /tmp/s.pedb.* staying around.  These are
+  sockets used by the poe command and left behind due to failed commands.
+  Ask your system administrator to clean them out.  Lastly, request IBM
+  to provide a mean to run poe without the debug socket.
+
 * h5fc and h5c++ compilation scripts have a bug: object files (*.o) cannot be
   created when source code is compiled using h5fc or h5c++. We will provide
   a fix. Please check ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/ 
