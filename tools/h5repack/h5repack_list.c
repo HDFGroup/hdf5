@@ -200,7 +200,10 @@ int copy_file(char* fnamein,
  *-------------------------------------------------------------------------
  */
  
-  do_copy_file(fidin,fidout,nobjects,info,options);
+ if(do_copy_file(fidin,fidout,nobjects,info,options)<0) {
+  printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein, fnameout);
+  return -1;
+ }
 
 /*-------------------------------------------------------------------------
  * free
@@ -361,7 +364,7 @@ int do_copy_file(hid_t fidin,
     nelmts*=dims[j];
    if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
     goto error;
-   if ((msize=H5Tget_size(mtype_id))<0)
+   if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
    buf=(void *) HDmalloc((unsigned)(nelmts*msize));
    if ( buf==NULL){
@@ -540,19 +543,20 @@ int copy_attr(hid_t loc_in,
  int        rank;         /* rank of dataset */
  hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
 	char       name[255];
-	int        n, i, j;
+	int        n, j;
+ unsigned u;
 
  if ((n = H5Aget_num_attrs(loc_in))<0) 
   goto error;
  
- for ( i = 0; i < n; i++)
+ for ( u = 0; u < (unsigned)n; u++)
  {
 /*-------------------------------------------------------------------------
  * open
  *-------------------------------------------------------------------------
  */
   /* open attribute */
-  if ((attr_id = H5Aopen_idx(loc_in, i))<0) 
+  if ((attr_id = H5Aopen_idx(loc_in, u))<0) 
    goto error;
   
   /* get name */
@@ -580,7 +584,7 @@ int copy_attr(hid_t loc_in,
     nelmts*=dims[j];
    if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
     goto error;
-   if ((msize=H5Tget_size(mtype_id))<0)
+   if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
    buf=(void *) HDmalloc((unsigned)(nelmts*msize));
    if ( buf==NULL){
@@ -616,7 +620,7 @@ int copy_attr(hid_t loc_in,
   if (H5Aclose(attr_out)<0) goto error;
   if (buf)
    free(buf);
- } /* i */
+ } /* u */
 	
  	return 0;
 
