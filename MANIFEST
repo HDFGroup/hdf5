@@ -365,9 +365,7 @@
 ./test/unlink.c
 
 ./testpar/Makefile.in
-./testpar/Makefile.ascired
 ./testpar/Makefile.ibmsp
-./testpar/Makefile.irix64
 ./testpar/README
 ./testpar/t_dset.c
 ./testpar/t_file.c
