@@ -5,54 +5,7 @@ Expected output for 'h5dump --xml tobjref.h5'
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
 <HDF5-File>
 <RootGroup OBJ-XID="root">
-   <Dataset Name="Dataset3" OBJ-XID="/Dataset3" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <ReferenceType>
-               <ObjectReferenceType />
-            </ReferenceType>
-         </AtomicType>
-      </DataType>
-   <Data>
-   <DataFromFile>
-      "/Group1/Dataset1"
-      "/Group1/Dataset2"
-      "/Group1"
-      "/Group1/Datatype1"
-   </DataFromFile>
-   </Data>
-   </Dataset>
    <Group Name="Group1" OBJ-XID="/Group1" Parents="/" >
-      <NamedDataType Name="Datatype1" OBJ-XID="/Group1/Datatype1" Parents="/Group1">
-         <CompoundType>
-            <Field FieldName="a">
-               <DataType> 
-                  <AtomicType>
-                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="b">
-               <DataType> 
-                  <AtomicType>
-                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-            <Field FieldName="c">
-               <DataType> 
-                  <AtomicType>
-                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-                  </AtomicType>
-               </DataType>
-            </Field>
-         </CompoundType>
-      </NamedDataType>
       <Dataset Name="Dataset1" OBJ-XID="/Group1/Dataset1" Parents="/Group1">
          <Dataspace>
             <SimpleDataspace Ndims="1">
@@ -87,6 +40,53 @@ Expected output for 'h5dump --xml tobjref.h5'
             </DataFromFile>
          </Data>
       </Dataset>
+      <NamedDataType Name="Datatype1" OBJ-XID="/Group1/Datatype1" Parents="/Group1">
+         <CompoundType>
+            <Field FieldName="a">
+               <DataType> 
+                  <AtomicType>
+                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+            <Field FieldName="b">
+               <DataType> 
+                  <AtomicType>
+                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+            <Field FieldName="c">
+               <DataType> 
+                  <AtomicType>
+                     <FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+         </CompoundType>
+      </NamedDataType>
    </Group>
+   <Dataset Name="Dataset3" OBJ-XID="/Dataset3" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="4" MaxDimSize="4"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <AtomicType>
+            <ReferenceType>
+               <ObjectReferenceType />
+            </ReferenceType>
+         </AtomicType>
+      </DataType>
+   <Data>
+   <DataFromFile>
+      "/Group1/Dataset1"
+      "/Group1/Dataset2"
+      "/Group1"
+      "/Group1/Datatype1"
+   </DataFromFile>
+   </Data>
+   </Dataset>
 </RootGroup>
 </HDF5-File>

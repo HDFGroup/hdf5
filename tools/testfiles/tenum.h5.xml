@@ -5,6 +5,20 @@ Expected output for 'h5dump --xml tenum.h5'
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
 <HDF5-File>
 <RootGroup OBJ-XID="root">
+   <Dataset Name="table" OBJ-XID="/table" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="20" MaxDimSize="20"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <NamedDataTypePtr OBJ-XID="/enum normal"/>
+      <Data>
+         <DataFromFile>
+         RED GREEN BLUE GREEN WHITE WHITE BLACK GREEN BLUE RED RED BLUE GREEN 
+         BLACK WHITE RED WHITE GREEN GREEN BLUE
+         </DataFromFile>
+      </Data>
+   </Dataset>
    <NamedDataType Name="enum normal" OBJ-XID="/enum normal" Parents="root">
          <AtomicType>
             <EnumType Nelems="5">
@@ -41,19 +55,5 @@ Expected output for 'h5dump --xml tenum.h5'
             </EnumType>
          </AtomicType>
    </NamedDataType>
-   <Dataset Name="table" OBJ-XID="/table" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="20" MaxDimSize="20"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <NamedDataTypePtr OBJ-XID="/enum normal"/>
-      <Data>
-         <DataFromFile>
-         RED GREEN BLUE GREEN WHITE WHITE BLACK GREEN BLUE RED RED BLUE GREEN 
-         BLACK WHITE RED WHITE GREEN GREEN BLUE
-         </DataFromFile>
-      </Data>
-   </Dataset>
 </RootGroup>
 </HDF5-File>
