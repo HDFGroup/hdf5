@@ -1100,7 +1100,25 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
 	 /* Make sure this vdata is not an attribute of other hdf4 objects.*/
 
 	 if(!VSisattr(vdata_id)) {
+           
+            h4toh5_ZeroMemory(vdata_class,VGNAMELENMAX);
+	   istat = VSgetclass(vdata_id,vdata_class);
+	   if(istat == FAIL) {
+	     printf("error in getting vdata class name.\n");
+	     free(ref_vdata_array);
+	     VSdetach(vdata_id);
+	     return FAIL;
+	   }
+                 
+ 
+	   if(!strncmp(vdata_class,_HDF_CHK_TBL_CLASS,strlen(_HDF_CHK_TBL_CLASS))){
+            
+             VSdetach(vdata_id);     
+	     continue;
+	   }
+
 	   vdata_ref = VSQueryref(vdata_id);
+
 	   if(vdata_ref == FAIL) {
 	     printf("error in getting vdata reference number.\n");
 	     free(ref_vdata_array);
@@ -1116,17 +1134,10 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
 	     return FAIL;
 	   }
 	   
-           h4toh5_ZeroMemory(vdata_class,VGNAMELENMAX);
-	   istat = VSgetclass(vdata_id,vdata_class);
-	   if(istat == FAIL) {
-	     printf("error in getting vdata class name.\n");
-	     free(ref_vdata_array);
-	     VSdetach(vdata_id);
-	     return FAIL;
-	   }
 	
 	    h4toh5_ZeroMemory(vdata_name,VGNAMELENMAX);
 	   istat = VSQueryname(vdata_id,vdata_name);
+
 	   if(istat == FAIL) {
 	     printf("error in getting vdata name. \n");
 	     free(ref_vdata_array);

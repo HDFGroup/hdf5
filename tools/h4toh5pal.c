@@ -56,9 +56,10 @@ int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
   size_t  h4memsize;
   size_t  h4size;
  
-  char    palette_label[MAX_NC_NAME];
-  char    palette_class[MAX_NC_NAME];
-  char    palette_type[MAX_NC_NAME];
+  char    palette_label[MAX_PAL_NAME];
+  char    palette_class[MAX_PAL_NAME];
+  char    palette_type[MAX_PAL_NAME];
+  char    palette_colormodel[MAX_PAL_NAME];
 
   hid_t   h5memtype;
   hid_t   h5type;
@@ -143,7 +144,7 @@ int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
   strcpy(palette_label,PALABEL);
   strcpy(palette_class,PALETTE);
   strcpy(palette_type,PAL_TYPE);
-
+  strcpy(palette_colormodel,RGB);
   /* convert palette annotation into attribute of palette dataset.
      Since there are no routines to find the exact tag of palette object,
      we will check three possible object tags of palette objects, that is:
@@ -180,6 +181,12 @@ int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
     return FAIL;
   }
 
+  if(h4_transpredattrs(h5dset,PAL_COLORMODEL,palette_colormodel)==FAIL){
+    printf("unable to transfer palette type to HDF4 PALETTE TYPE.\n");
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    return FAIL;
+  }
   if(h4_transnumattr(h5dset,HDF4_REF_NUM,pal_ref)==FAIL) {
     printf("unable to transfer palette reference number to HDF4 REF. NUM.\n");
     H5Sclose(h5d_sid);
