@@ -1082,11 +1082,22 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 		    "unable to update modification time message");
     }
     
+#ifdef QAK
+printf("%s: check 0.5\n",FUNC);
+#endif /* QAK */
+    /* Give the dataset a name */
+    if (H5G_insert(loc, name, &(new_dset->ent)) < 0) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
+    }
+
     /*
      * Initialize storage.  We assume that external storage is already
      * initialized by the caller, or at least will be before I/O is
      * performed.
      */
+#ifdef QAK
+printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
     if (0==efl->nused) {
 	if (H5F_arr_create(f, &(new_dset->layout)) < 0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
@@ -1096,6 +1107,9 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	new_dset->layout.addr = HADDR_UNDEF;
     }
 
+#ifdef QAK
+printf("%s: check 2.0\n",FUNC);
+#endif /* QAK */
     /* Update layout message */
     if (H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, H5O_FLAG_CONSTANT,
 		    &(new_dset->layout)) < 0) {
@@ -1103,6 +1117,9 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 		     "unable to update layout message");
     }
 
+#ifdef QAK
+printf("%s: check 3.0\n",FUNC);
+#endif /* QAK */
     /* Update external storage message */
     if (efl->nused>0) {
 	size_t heap_size = H5HL_ALIGN (1);
@@ -1132,17 +1149,18 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	}
     }
 
+#ifdef QAK
+printf("%s: check 4.0\n",FUNC);
+#endif /* QAK */
     /* Initialize the raw data */
     if (H5D_init_storage(new_dset, space)<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to initialize storage");
     }
     
-    /* Give the dataset a name */
-    if (H5G_insert(loc, name, &(new_dset->ent)) < 0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
-    }
-
+#ifdef QAK
+printf("%s: check 6.0\n",FUNC);
+#endif /* QAK */
     /* Success */
     ret_value = new_dset;
 
