@@ -13,7 +13,7 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 PROGS=testhdf5
 
 # Source and object files for programs...
-PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c
+PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5t.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 # Private header files (not to be installed)...

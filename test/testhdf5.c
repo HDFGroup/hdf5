@@ -157,6 +157,7 @@ int main(int argc, char *argv[])
     InitTest("heap", test_heap, "Object and Name Heaps");
     InitTest("ohdr", test_ohdr, "Object Headers");
     InitTest("stab", test_stab, "Symbol Tables");
+    InitTest("h5t", test_h5t, "Datatypes");
 
     Verbosity = 4;  /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);
@@ -292,9 +293,9 @@ int main(int argc, char *argv[])
       {
           MESSAGE(2, ("\nCleaning Up...\n\n"));
 #if !(defined DOS386 | defined WIN386)
-          system("rm -f *.hdf *.tmp");
+          system("rm -f *.h5 *.tmp");
 #else   /* OLD_WAY */
-          remove("*.hdf");
+          remove("*.h5");
           remove("*.tmp");
 #endif  /* OLD_WAY */
       }     /* end if */
