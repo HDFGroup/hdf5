@@ -37,6 +37,7 @@
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot
+./bin/snapshot_version			_DO_NOT_DISTRIBUTE_
 ./bin/trace
 
 ./config/BlankForm
