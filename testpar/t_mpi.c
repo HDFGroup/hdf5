@@ -23,6 +23,14 @@ int	nerrors = 0;
 int	verbose = 0;
 hid_t	fapl;				/* file access property list */
 
+/* protocols */
+static void test_mpio_overlap_writes(char *filename);
+static void test_mpio_offset(void);
+static void test_mpio_gb_file(char *filename);
+static void test_mpio_gb_file(char *filename);
+static int parse_options(int argc, char **argv);
+static void usage(void);
+
 #define MPIO_TEST_WRITE_SIZE 1024*1024     /* 1 MB */
 
 void
@@ -418,6 +426,8 @@ main(int argc, char **argv)
 	printf("MPI functionality tests\n");
 	printf("===================================\n");
     }
+    h5_show_hostname();
+
     fapl = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
