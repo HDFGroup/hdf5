@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:	 tmisc
@@ -212,6 +210,12 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC18_FILE             "tmisc18.h5"
 #define MISC18_DSET1_NAME       "Dataset1"
 #define MISC18_DSET2_NAME       "Dataset2"
+
+/* Definitions for misc. test #19 */
+#define MISC19_FILE             "tmisc19.h5"
+#define MISC19_DSET_NAME        "Dataset"
+#define MISC19_ATTR_NAME        "Attribute"
+#define MISC19_GROUP_NAME       "Group"
 
 /****************************************************************
 **
@@ -2649,7 +2653,7 @@ test_misc16(void)
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
     const char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE] = 
-                        {"1234567", "1234567\0", "12345678", NULL};
+                        {"1234567", "1234567\0", "12345678", {NULL}};
     char rdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid;       /* Dataspace ID			*/
@@ -2730,7 +2734,7 @@ test_misc17(void)
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
     const char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2] = 
-                        {"1234567", "1234567\0", "12345678", NULL};
+                        {"1234567", "1234567\0", "12345678", {NULL}};
     char rdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid;       /* Dataspace ID			*/
@@ -2903,6 +2907,331 @@ test_misc18(void)
 
 /****************************************************************
 **
+**  test_misc19(): Test incrementing & decrementing ref count on IDs
+**
+****************************************************************/
+static void
+test_misc19(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t sid;          /* 'Space ID */
+    hid_t did;          /* Dataset ID */
+    hid_t tid;          /* 'Type ID */
+    hid_t aid;          /* Attribute ID */
+    hid_t plid;         /* Property List ID */
+    hid_t pcid;         /* Property Class ID */
+    hid_t gid;          /* Group ID */
+    int rc;             /* Reference count */
+    herr_t ret;         /* Generic return value */
+
+/* Check H5I operations on files */
+
+    /* Create the file */
+    fid = H5Fcreate(MISC19_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(fid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(fid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the file normally */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(fid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the file by decrementing the reference count */
+    rc = H5Idec_ref(fid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the file again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Fclose(fid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fclose");
+
+/* Check H5I operations on property lists */
+
+    /* Create the property list */
+    plid = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(plid, FAIL, "H5Pcreate");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(plid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(plid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the property list normally */
+    ret = H5Pclose(plid);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(plid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the property list by decrementing the reference count */
+    rc = H5Idec_ref(plid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the property list again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Pclose(plid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Pclose");
+
+/* Check H5I operations on property classes */
+
+    /* Create a property class */
+    pcid = H5Pcreate_class(H5P_DATASET_CREATE,"foo",NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK(pcid, FAIL, "H5Pcreate_class");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(pcid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(pcid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the property class normally */
+    ret = H5Pclose_class(pcid);
+    CHECK(ret, FAIL, "H5Pclose_class");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(pcid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the property class by decrementing the reference count */
+    rc = H5Idec_ref(pcid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the property class again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Pclose_class(pcid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Pclose_class");
+
+/* Check H5I operations on datatypes */
+
+    /* Create a datatype */
+    tid = H5Tcreate(H5T_OPAQUE,16);
+    CHECK(tid, FAIL, "H5Tcreate");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(tid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(tid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the datatype normally */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(tid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the datatype by decrementing the reference count */
+    rc = H5Idec_ref(tid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the datatype again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Tclose(tid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Tclose");
+
+/* Check H5I operations on dataspaces */
+
+    /* Create a dataspace */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(sid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(sid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the dataspace normally */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(sid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the dataspace by decrementing the reference count */
+    rc = H5Idec_ref(sid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the dataspace again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Sclose(sid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sclose");
+
+/* Check H5I operations on datasets */
+
+    /* Create a file */
+    fid = H5Fcreate(MISC19_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create a dataspace */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset */
+    did = H5Dcreate(fid,MISC19_DSET_NAME,H5T_NATIVE_INT,sid,H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(did);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(did);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the dataset normally */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(did);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the dataset by decrementing the reference count */
+    rc = H5Idec_ref(did);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the dataset again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Dclose(did);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+/* Check H5I operations on attributes */
+
+    /* Create a file */
+    fid = H5Fcreate(MISC19_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Open the root group */
+    gid = H5Gopen(fid,"/");
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Create a dataspace */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create an attribute */
+    aid = H5Acreate(gid,MISC19_ATTR_NAME,H5T_NATIVE_INT,sid,H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(aid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(aid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the dataset normally */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(aid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the attribute by decrementing the reference count */
+    rc = H5Idec_ref(aid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the attribute again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Aclose(aid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Aclose");
+
+    /* Close the root group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+/* Check H5I operations on groups */
+
+    /* Create a file */
+    fid = H5Fcreate(MISC19_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create a group */
+    gid = H5Gcreate(fid,MISC19_GROUP_NAME,0);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(gid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Inc the reference count */
+    rc = H5Iinc_ref(gid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Close the group normally */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(gid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Close the group by decrementing the reference count */
+    rc = H5Idec_ref(gid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try closing the group again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Gclose(gid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Gclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_misc19() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -2930,6 +3259,8 @@ test_misc(void)
     test_misc16();      /* Test array of fixed-length string */
     test_misc17();      /* Test array of ASCII character */
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
+    test_misc19();      /* Test incrementing & decrementing ref count on IDs */
+
 } /* test_misc() */
 
 
@@ -2971,4 +3302,5 @@ cleanup_misc(void)
     HDremove(MISC16_FILE);
     HDremove(MISC17_FILE);
     HDremove(MISC18_FILE);
+    HDremove(MISC19_FILE);
 }
