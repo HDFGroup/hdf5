@@ -33,7 +33,6 @@ typedef enum iotype_ {
 
 typedef struct parameters_ {
     iotype	io_type;        /* The type of IO test to perform       */
-    off_t	num_elmts;      /* Number of elements per proc per dset */
     int		num_procs;      /* Maximum number of processes to use   */
     long	num_files;      /* Number of files to create            */
     long	num_dsets;      /* Number of datasets to create         */
