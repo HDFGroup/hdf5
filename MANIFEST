@@ -478,12 +478,7 @@
 ./examples/h5_reference.c
 ./examples/ph5example.c
 ./examples/run_examples.sh
-./examples/image/image_demo.c
-./examples/image/pal_rgb.h
-./examples/image/image_demo.h5
-./examples/image/jet2.txt
-./examples/image/image24_interleave_pixel.txt
-./examples/image/image24_interleave_plane.txt
+
 
 #------------------------------------------------------------------------------
 #
@@ -879,12 +874,6 @@
 ./src/H5detect.c
 ./src/H5private.h
 ./src/H5public.h
-./src/H5IMimage.h
-./src/H5IMimage.c
-./src/H5IMpalette.h
-./src/H5IMpalette.c
-./src/H5lite.h
-./src/H5lite.c
 ./src/Makefile.in
 ./src/hdf5.h
 ./src/libhdf5.settings.in
