@@ -27,12 +27,16 @@ TIMESTAMP()
 
 EXIT_BANNER()
 {
-TIMESTAMP "Exit $0 with status=$?"
+TIMESTAMP "Exit $PROGNAME with status=$?"
 }
 
 # MAIN
+# SGI /bin/sh replaces $0 as function name if used in a function.
+# Set the name here to avoid that ambiguity and better style too.
+PROGNAME=$0
+
 echo "====================================="
-echo "$0 $*"
+echo "$PROGNAME $*"
 echo "====================================="
 TIMESTAMP MAIN
 uname -a
@@ -164,7 +168,7 @@ done
 if [ "$cmd" = help ]; then
     set -
     cat <<EOF
-Usage: $0 [all] [checkout] [diff] [test] [srcdir] [release] [help]
+Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
           [zlib <zlib_path>] [archive <arch_path>] [dir <dir>]
 	  [op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
