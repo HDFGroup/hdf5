@@ -162,6 +162,8 @@ Documentation
 New Features
 ============
 
+    * Allow the metadata writes to be shared among all processes, easing the
+      burden on process 0.
     * New functions H5Glink2 and H5Gmove2 were added to allow link and move to
       be in different locations in the same file.  The old functions H5Glink 
       and H5Gmove remain valid.  SLU - 2002/04/26 
