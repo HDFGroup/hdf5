@@ -751,7 +751,105 @@ test_compound_4(void)
  error:
     return 1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_5
+ *
+ * Purpose:	Many versions of HDF5 have a bug in the optimized compound
+ *              datatype conversion function, H5T_conv_struct_opt(), which
+ *              is triggered when the top-level type contains a struct
+ *              which must undergo a conversion.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June 17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_5(void)
+{
+    typedef struct {
+        char    name[16];
+        short   tdim;
+        short   coll_ids[4];
+    } src_type_t;
+
+    typedef struct {
+        char    name[16];
+        short   tdim;
+        int     coll_ids[4];
+    } dst_type_t;
+
+    hsize_t     dims[1] = {4};
+    hid_t       src_type, dst_type, short_array, int_array, string;
+    src_type_t  src[2] = {{"one", 102, {104, 105, 106, 107}},
+                          {"two", 202, {204, 205, 206, 207}}};
     
+    dst_type_t  *dst;
+    void        *buf = calloc(2, sizeof(dst_type_t));
+    void        *bkg = calloc(2, sizeof(dst_type_t));
+
+#if 1
+    TESTING("optimized struct converter");
+#else
+    /* Turn off optimized compound conversion function to work around
+     * the problem. */
+    TESTING("optimized struct converter bug workaround");
+    H5Tunregister(H5T_PERS_DONTCARE, "struct(opt)", -1, -1, NULL);
+#endif
+
+    /* Build datatypes */
+    short_array = H5Tcreate(H5T_COMPOUND, 4*sizeof(short));
+    H5Tinsert_array(short_array, "_", 0, 1, dims, NULL, H5T_NATIVE_SHORT);
+
+    int_array   = H5Tcreate(H5T_COMPOUND, 4*sizeof(int));
+    H5Tinsert_array(int_array, "_", 0, 1, dims, NULL, H5T_NATIVE_INT);
+
+    string = H5Tcopy(H5T_C_S1);
+    H5Tset_size(string, 16);
+
+    src_type = H5Tcreate(H5T_COMPOUND, sizeof(src_type_t));
+    H5Tinsert(src_type, "name",     HOFFSET(src_type_t, name),             string          );
+    H5Tinsert(src_type, "tdim",     HOFFSET(src_type_t, tdim),             H5T_NATIVE_SHORT);
+    H5Tinsert(src_type, "coll_ids", HOFFSET(src_type_t, coll_ids),         short_array     );
+
+    dst_type = H5Tcreate(H5T_COMPOUND, sizeof(dst_type_t));
+    H5Tinsert(dst_type, "name",     HOFFSET(dst_type_t, name),             string          );
+    H5Tinsert(dst_type, "tdim",     HOFFSET(dst_type_t, tdim),             H5T_NATIVE_SHORT);
+    H5Tinsert(dst_type, "coll_ids", HOFFSET(dst_type_t, coll_ids),         int_array       );
+
+    /* Convert data */
+    memcpy(buf, src, sizeof(src));
+    H5Tconvert(src_type, dst_type, 2, buf, bkg, H5P_DEFAULT);
+    dst = (dst_type_t*)buf;
+
+    /* Cleanup */
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+    H5Tclose(string);
+    H5Tclose(short_array);
+    H5Tclose(int_array);
+    
+    /* Check results */
+    if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) ||
+        src[1].tdim!=dst[1].tdim ||
+        src[1].coll_ids[0]!=dst[1].coll_ids[0] ||
+        src[1].coll_ids[1]!=dst[1].coll_ids[1] ||
+        src[1].coll_ids[2]!=dst[1].coll_ids[2] ||
+        src[1].coll_ids[3]!=dst[1].coll_ids[3]) {
+        FAILED();
+        return 1;
+    }
+    PASSED();
+    return 0;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1587,8 +1685,9 @@ test_conv_bitfield(void)
  */
 static herr_t
 convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
-	       size_t UNUSED nelmts, size_t UNUSED stride, void UNUSED *_buf,
-	       void UNUSED *bkg, hid_t dset_xfer_plid)
+	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
+               size_t UNUSED bkg_stride, void UNUSED *_buf,
+	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid)
 {
     if (H5T_CONV_CONV==cdata->command) num_opaque_conversions_g++;
     return 0;
@@ -3576,6 +3675,7 @@ main(void)
     nerrors += test_compound_2();
     nerrors += test_compound_3();
     nerrors += test_compound_4();
+    nerrors += test_compound_5();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_bitfield();

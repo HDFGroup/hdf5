@@ -158,8 +158,9 @@ typedef struct {
 
 /* All data type conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-			      size_t nelmts, size_t stride, void *buf,
-			      void *bkg, hid_t dset_xfer_plist);
+			      size_t nelmts, size_t buf_stride,
+                              size_t bkg_stride, void *buf, void *bkg,
+                              hid_t dset_xfer_plist);
 
 /*
  * If an error occurs during a data type conversion then the function

@@ -97,8 +97,8 @@ __DLL__ H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
 __DLL__ herr_t H5T_sort_value(H5T_t *dt, int *map);
 __DLL__ herr_t H5T_sort_name(H5T_t *dt, int *map);
 __DLL__ herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
-			   size_t nelmts, size_t stride, void *buf, void *bkg,
-               hid_t dset_xfer_plist);
+			   size_t nelmts, size_t buf_stride, size_t bkg_stride,
+                           void *buf, void *bkg, hid_t dset_xfer_plist);
 __DLL__ herr_t H5T_set_size(H5T_t *dt, size_t size);
 __DLL__ herr_t H5T_set_precision(H5T_t *dt, size_t prec);
 __DLL__ herr_t H5T_set_offset(H5T_t *dt, size_t offset);
