@@ -55,7 +55,11 @@
 #define EXPECTED_ERROR_DEPTH	8
 #define WRITE_NUMBER		37
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
+static herr_t error_callback(void *);
+#else /*H5_WANT_H5_V1_6_COMPAT*/
 static herr_t error_callback(hid_t, void *);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 static herr_t walk_error_callback(unsigned, H5E_error_t *, void *);
 static void *tts_error_thread(void *);
 
@@ -160,11 +164,19 @@ void *tts_error_thread(void UNUSED *arg)
     void *old_error_client_data;
     int value;
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    /* preserve previous error stack handler */
+    H5Eget_auto(&old_error_cb, &old_error_client_data);
+
+    /* set each thread's error stack handler */
+    H5Eset_auto(error_callback, NULL);
+#else /*H5_WANT_H5_V1_6_COMPAT*/
     /* preserve previous error stack handler */
     H5Eget_auto(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
 
     /* set each thread's error stack handler */
     H5Eset_auto(H5E_DEFAULT, error_callback, NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
@@ -186,10 +198,25 @@ void *tts_error_thread(void UNUSED *arg)
     H5Sclose(dataspace);
 
     /* turn our error stack handler off */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    H5Eset_auto(old_error_cb, old_error_client_data);
+#else /*H5_WANT_H5_V1_6_COMPAT*/
     H5Eset_auto(H5E_DEFAULT, old_error_cb, old_error_client_data);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     return NULL;
 }
+
+#ifdef H5_WANT_H5_V1_6_COMPAT
+static
+herr_t error_callback(void *client_data)
+{
+    pthread_mutex_lock(&error_mutex);
+    error_count++;
+    pthread_mutex_unlock(&error_mutex);
+    return H5Ewalk(H5E_WALK_DOWNWARD, walk_error_callback, client_data);
+}
+#else /*H5_WANT_H5_V1_6_COMPAT*/
 
 static
 herr_t error_callback(hid_t estack, void *client_data)
@@ -199,6 +226,7 @@ herr_t error_callback(hid_t estack, void *client_data)
     pthread_mutex_unlock(&error_mutex);
     return H5Ewalk(estack, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 static
 herr_t walk_error_callback(unsigned n, H5E_error_t *err_desc, void UNUSED *client_data)
@@ -206,8 +234,8 @@ herr_t walk_error_callback(unsigned n, H5E_error_t *err_desc, void UNUSED *clien
     hid_t maj_num, min_num;
 
     if (err_desc) {
-        maj_num = err_desc->maj_id;
-        min_num = err_desc->min_id;
+        maj_num = err_desc->maj_num;
+        min_num = err_desc->min_num;
         
         if (n < EXPECTED_ERROR_DEPTH && maj_num == expected[n].maj_num &&
                 min_num == expected[n].min_num)

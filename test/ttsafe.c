@@ -199,7 +199,11 @@ int main(int argc, char *argv[])
 	 * automatic error reporting wouldn't do much good since it's
 	 * triggered at the API layer.
 	 */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	H5Eset_auto (NULL, NULL);
+#else /*H5_WANT_H5_V1_6_COMPAT*/
 	H5Eset_auto (H5E_DEFAULT, NULL, NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 	/* Tests are generally arranged from least to most complexity... */
 	InitTest("dcreate", tts_dcreate, cleanup_dcreate,
