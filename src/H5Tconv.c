@@ -653,6 +653,9 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 /* Swap two elements (I & J) of an array using a temporary variable */
 #define H5_SWAP_BYTES(ARRAY,I,J) {uint8_t _tmp; _tmp=ARRAY[I]; ARRAY[I]=ARRAY[J]; ARRAY[J]=_tmp;}
 
+/* Minimum size of variable-length conversion buffer */
+#define H5T_VLEN_MIN_CONF_BUF_SIZE      4096
+
 static herr_t H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order);
 
 
@@ -2425,6 +2428,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     H5T_vlen_alloc_info_t vl_alloc_info;/* VL allocation information         */
     H5T_path_t	*tpath;			/* Type conversion path		     */
+    hbool_t     noop_conv=FALSE;        /* Flag to indicate a noop conversion */
     hid_t   	tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
     H5T_t	*src = NULL;		/*source data type		     */
     H5T_t	*dst = NULL;		/*destination data type		     */
@@ -2511,13 +2515,14 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->parent, H5T_COPY_ALL)))<0 ||
                         (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->parent, H5T_COPY_ALL)))<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
-            }
+            } else
+                noop_conv=TRUE;
 
             /* Check if we need a temporary buffer for this conversion */
             if(tpath->cdata.need_bkg || H5T_detect_class(dst->parent,H5T_VLEN)) {
                 /* Set up initial background buffer */
                 tmp_buf_size=MAX(src_base_size,dst_base_size);
-                if ((tmp_buf=H5FL_BLK_CALLOC(vlen_seq,tmp_buf_size))==NULL)
+                if ((tmp_buf=H5FL_BLK_MALLOC(vlen_seq,tmp_buf_size))==NULL)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
             } /* end if */
     
@@ -2581,8 +2586,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                         /* Check if conversion buffer is large enough, resize if
                          * necessary */      
-                        if(conv_buf_size<MAX(src_size,dst_size)) {
-                            conv_buf_size=MAX(src_size,dst_size);
+                        if(conv_buf_size<MAX3(src_size,dst_size,H5T_VLEN_MIN_CONF_BUF_SIZE)) {
+                            conv_buf_size=MAX3(src_size,dst_size,H5T_VLEN_MIN_CONF_BUF_SIZE);
                             if((conv_buf=H5FL_BLK_REALLOC(vlen_seq,conv_buf, conv_buf_size))==NULL)
                                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
                         } /* end if */
@@ -2591,66 +2596,70 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                         if((*(src->u.vlen.read))(src->u.vlen.f,dxpl_id,s,conv_buf,src_size)<0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data");
 
-                        /* Check if temporary buffer is large enough, resize if necessary */
-                        /* (Chain off the conversion buffer size) */
-                        if(tmp_buf && tmp_buf_size<conv_buf_size) {
-                            /* Set up initial background buffer */
-                            tmp_buf_size=conv_buf_size;
-                            if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,tmp_buf_size))==NULL)
-                                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
-                        } /* end if */
-
-                        /* If we are writing and there is a nested VL type, read 
-                         * the sequence into the background buffer */
-                        if(nested) {
-                            uint8_t *tmp=b;
-                            UINT32DECODE(tmp, bg_seq_len);
-
-                            if(bg_seq_len>0) {
-                                H5_CHECK_OVERFLOW( bg_seq_len*MAX(src_base_size,dst_base_size) ,hsize_t,size_t);
-                                if(tmp_buf_size<(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size))) {
-                                    tmp_buf_size=(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size));
-                                    if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf, tmp_buf_size))==NULL)
-                                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
-                                }
-                                H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp, &(bg_hobjid.addr));
-                                INT32DECODE(tmp, bg_hobjid.idx);
-                                if(H5HG_read(dst->u.vlen.f,dxpl_id,&bg_hobjid,tmp_buf)==NULL)
-                                    HGOTO_ERROR (H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL sequence into background buffer");
+                        if(!noop_conv) {
+                            /* Check if temporary buffer is large enough, resize if necessary */
+                            /* (Chain off the conversion buffer size) */
+                            if(tmp_buf && tmp_buf_size<conv_buf_size) {
+                                /* Set up initial background buffer */
+                                tmp_buf_size=conv_buf_size;
+                                if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,tmp_buf_size))==NULL)
+                                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
                             } /* end if */
 
-                            /* If the sequence gets shorter, pad out the original sequence with zeros */
-                            H5_CHECK_OVERFLOW(bg_seq_len,hsize_t,hssize_t);
-                            if((hssize_t)bg_seq_len<seq_len) {
-                                H5_CHECK_OVERFLOW((seq_len-bg_seq_len),hsize_t,size_t);
-                                HDmemset((uint8_t *)tmp_buf+dst_base_size*bg_seq_len,0,(size_t)(seq_len-bg_seq_len)*dst_base_size);
-                            } /* end if */
-                        } /* end if */
+                            /* If we are writing and there is a nested VL type, read 
+                             * the sequence into the background buffer */
+                            if(nested) {
+                                uint8_t *tmp=b;
+                                UINT32DECODE(tmp, bg_seq_len);
 
-                        /* Convert VL sequence */
-                        H5_CHECK_OVERFLOW(seq_len,hssize_t,hsize_t);
-                        if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, 0, conv_buf, tmp_buf, dxpl_id)<0)
-                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
+                                if(bg_seq_len>0) {
+                                    H5_CHECK_OVERFLOW( bg_seq_len*MAX(src_base_size,dst_base_size) ,hsize_t,size_t);
+                                    if(tmp_buf_size<(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size))) {
+                                        tmp_buf_size=(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size));
+                                        if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf, tmp_buf_size))==NULL)
+                                            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+                                    }
+                                    H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp, &(bg_hobjid.addr));
+                                    INT32DECODE(tmp, bg_hobjid.idx);
+                                    if(H5HG_read(dst->u.vlen.f,dxpl_id,&bg_hobjid,tmp_buf)==NULL)
+                                        HGOTO_ERROR (H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL sequence into background buffer");
+                                } /* end if */
+
+                                /* If the sequence gets shorter, pad out the original sequence with zeros */
+                                H5_CHECK_OVERFLOW(bg_seq_len,hsize_t,hssize_t);
+                                if((hssize_t)bg_seq_len<seq_len) {
+                                    H5_CHECK_OVERFLOW((seq_len-bg_seq_len),hsize_t,size_t);
+                                    HDmemset((uint8_t *)tmp_buf+dst_base_size*bg_seq_len,0,(size_t)(seq_len-bg_seq_len)*dst_base_size);
+                                } /* end if */
+                            } /* end if */
+
+                            /* Convert VL sequence */
+                            H5_CHECK_OVERFLOW(seq_len,hssize_t,hsize_t);
+                            if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, 0, conv_buf, tmp_buf, dxpl_id)<0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
+                        } /* end if */
 
                         /* Write sequence to destination location */
                         if((*(dst->u.vlen.write))(dst->u.vlen.f,dxpl_id,&vl_alloc_info,d,conv_buf, b, (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
 
-                        /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorter than the old data elements.*/
-                        H5_CHECK_OVERFLOW(bg_seq_len,hsize_t,hssize_t);
-                        if(nested && seq_len<(hssize_t)bg_seq_len) {
-                            uint8_t *tmp_p=tmp_buf;
-                            tmp_p += seq_len*dst_base_size;
-                            for(i=0; i<(bg_seq_len-seq_len); i++) {
-                                UINT32DECODE(tmp_p, parent_seq_len);
-                                if(parent_seq_len>0) {
-                                    H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp_p, &(parent_hobjid.addr));
-                                    INT32DECODE(tmp_p, parent_hobjid.idx);
-                                    if(H5HG_remove(dst->u.vlen.f, dxpl_id,&parent_hobjid)<0)
-                                        HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object");
+                        if(!noop_conv) {
+                            /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorter than the old data elements.*/
+                            H5_CHECK_OVERFLOW(bg_seq_len,hsize_t,hssize_t);
+                            if(nested && seq_len<(hssize_t)bg_seq_len) {
+                                uint8_t *tmp_p=tmp_buf;
+                                tmp_p += seq_len*dst_base_size;
+                                for(i=0; i<(bg_seq_len-seq_len); i++) {
+                                    UINT32DECODE(tmp_p, parent_seq_len);
+                                    if(parent_seq_len>0) {
+                                        H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp_p, &(parent_hobjid.addr));
+                                        INT32DECODE(tmp_p, parent_hobjid.idx);
+                                        if(H5HG_remove(dst->u.vlen.f, dxpl_id,&parent_hobjid)<0)
+                                            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object");
+                                    }
                                 }
-                            }
-                        }
+                            } /* end if */
+                        } /* end if */
                     } /* end else */
 
                     /* Advance pointers */
