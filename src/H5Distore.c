@@ -63,6 +63,10 @@ static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
 				    void *_key);
 static herr_t H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
 				    const void *key, const void *udata);
+#ifdef HAVE_PARALLEL
+static herr_t H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
+				const hssize_t offset[], void *_udata/*out*/);
+#endif
 
 /*
  * B-tree key.	A key contains the minimum logical N-dimensional address and
@@ -1753,10 +1757,11 @@ H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
-		 const hssize_t offset[], H5F_istore_ud1_t *udata/*out*/)
+		 const hssize_t offset[], void *_udata/*out*/)
 {
+    H5F_istore_ud1_t	*udata = _udata;
     intn		i;
     herr_t		status;			/*func return status	*/
     
@@ -1807,11 +1812,9 @@ H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_allocate (H5D_t *dataset, H5F_t *f, const H5O_layout_t *layout,
-		const H5S_t *space, const H5O_compress_t *comp)
+H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
+		const hsize_t *space_dim, const H5O_compress_t *comp)
 {
-    hsize_t		space_dim[H5O_LAYOUT_NDIMS];
-    intn		space_ndims;
 
     intn		i, carry;
     hssize_t		chunk_offset[H5O_LAYOUT_NDIMS];
@@ -1826,25 +1829,12 @@ H5F_istore_allocate (H5D_t *dataset, H5F_t *f, const H5O_layout_t *layout,
 #endif
 
     /* Check args */
-    assert(dataset);
-    assert(layout);
     assert(f);
-    assert(space);
-
-    if (layout->type != H5D_CHUNKED)
-	HRETURN(SUCCEED);		/*nothing to do or should we FAIL? */
-
+    assert(space_dim);
+    assert(comp);
+    assert(layout && H5D_CHUNKED==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
     assert(H5F_addr_defined(&(layout->addr)));
-
-    /* get current dims of dataset */
-    if ((space_ndims=H5S_get_dims(space, space_dim, NULL)) <= 0 ||
-	space_ndims+1 != layout->ndims){
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		    "unable to allocate chunk storage");
-    }
-    /* copy the element size over */
-    space_dim[space_ndims] = layout->dim[space_ndims];
 
     /*
      * Setup indice to go through all chunks. (Future improvement

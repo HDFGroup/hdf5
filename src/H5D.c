@@ -88,6 +88,9 @@ static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT H5D_init_interface
 static herr_t H5D_init_interface(void);
 static void H5D_term_interface(void);
+#ifdef HAVE_PARALLEL
+static herr_t H5D_allocate (H5D_t *dataset);
+#endif
 
 
 /*--------------------------------------------------------------------------
@@ -944,11 +947,9 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
      * If the dataset uses chunk storage and is accessed via
      * parallel I/O, allocate file space for all chunks now.
      */
-    if (/*new_dset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&*/
+    if (new_dset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
 	new_dset->layout.type == H5D_CHUNKED){
-	if (H5F_istore_allocate(new_dset, new_dset->ent.file,
-		&(new_dset->layout), space,
-		&(new_dset->create_parms->compress))==FAIL){
+	if (H5D_allocate(new_dset)==FAIL){
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		"fail in file space allocation for chunks");
 	}
@@ -1100,11 +1101,9 @@ H5D_open(H5G_t *loc, const char *name)
      * If the dataset uses chunk storage and is accessed via
      * parallel I/O, allocate file space for all chunks now.
      */
-    if (/*dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&*/
+    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
 	dataset->layout.type == H5D_CHUNKED){
-	if (H5F_istore_allocate(dataset, dataset->ent.file,
-		&(dataset->layout), space,
-		&(dataset->create_parms->compress))==FAIL){
+	if (H5D_allocate(dataset)==FAIL){
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		"fail in file space allocation for chunks");
 	}
@@ -1906,9 +1905,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
      */
     if (/*dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&*/
 	dataset->layout.type == H5D_CHUNKED){
-	if (H5F_istore_allocate(dataset, dataset->ent.file,
-		&(dataset->layout), space,
-		&(dataset->create_parms->compress))==FAIL){
+	if (H5D_allocate(dataset)==FAIL){
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		"fail in file space allocation for chunks");
 	}
@@ -1972,3 +1969,83 @@ H5D_typeof (H5D_t *dset)
     FUNC_LEAVE (dset->type);
 }
 
+
+#ifdef HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	H5D_allocate
+ *
+ * Purpose:	Allocate file space for the data storage of the dataset.
+ *		Return SUCCEED if all needed allocation succeed, otherwise
+ *		FAIL.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Note:	Current implementation allocates chunked dataset only.
+ *
+ * Programmer:	Albert Cheng
+ *		July 9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_allocate (H5D_t *dataset)
+{
+    H5S_t	*space = NULL;
+    herr_t	ret_value = SUCCEED;
+    hsize_t		space_dim[H5O_LAYOUT_NDIMS];
+    intn		space_ndims;
+    H5O_layout_t	*layout;
+    
+    FUNC_ENTER(H5D_allocate, FAIL);
+#ifdef AKC
+printf("Enter %s:\n", FUNC);
+#endif
+
+    /* Check args */
+    assert(dataset);
+    assert(&(dataset->layout));
+    layout = &(dataset->layout);
+    assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+    assert(H5F_addr_defined(&(layout->addr)));
+
+
+    switch (layout->type) {
+    case H5D_CONTIGUOUS:
+	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
+
+    case H5D_CHUNKED:
+	if (NULL==(space=H5S_read (&(dataset->ent)))) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+			 "unable to read data space info from dataset header");
+	}
+	/* get current dims of dataset */
+	if ((space_ndims=H5S_get_dims(space, space_dim, NULL)) <= 0 ||
+	    space_ndims+1 != layout->ndims){
+	    HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			"unable to allocate chunk storage");
+	}
+	/* copy the element size over */
+	space_dim[space_ndims] = layout->dim[space_ndims];
+
+	if (H5F_istore_allocate(dataset->ent.file,
+		(layout), space_dim,
+		&(dataset->create_parms->compress))==FAIL){
+		HRETURN(FAIL);
+	}
+	break;
+
+    default:
+	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
+    }
+
+  done:
+    if (space)
+	H5S_close(space);
+
+    FUNC_LEAVE(ret_value);
+}
+#endif
