@@ -484,12 +484,12 @@ Platforms Tested
      (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
                                   WorkShop Compilers 5.0 98/10/25 
                                   FORTRAN 90 2.0 Patch 107356-04 
-    SunOS 5.8/32                  Sun WorkShop 6 update 2 C 5.3
+    SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.8/64                  Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
-                                  Sun WorkShop 6 update 2 C++ 5.3
+    SunOS 5.9 32,64               Sun C 5.6 2004/07/15
+     (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
+                                  Sun C++ 5.6 2004/07/15
     TFLOPS r1.0.4 v4.3.3 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
     IA-32 Linux 2.4.9             gcc 2.96
