@@ -184,9 +184,10 @@ typedef enum H5T_state_t {
     H5T_STATE_OPEN			/*named constant, open object header */
 } H5T_state_t;
 
-struct H5T_t {
+    /* This struct is shared between all occurances of an open named type */
+typedef struct H5T_shared_t {
+    hsize_t         fo_count; /* number of references to this file object */
     H5T_state_t		state;	/*current state of the type		     */
-    H5G_entry_t		ent;	/*the type is a named type		     */
     H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
@@ -200,6 +201,11 @@ struct H5T_t {
         H5T_opaque_t	opaque; /* an opaque datatype              */
         H5T_array_t	array;  /* an array datatype                */
     } u;
+} H5T_shared_t;
+
+struct H5T_t {
+    H5G_entry_t     ent;    /* entry information if the type is a named type */
+    H5T_shared_t   *shared; /* all other information */
 };
 
 /* A compound datatype member */

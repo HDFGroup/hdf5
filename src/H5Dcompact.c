@@ -73,7 +73,7 @@ H5D_compact_readvv(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5D_t *dset,
     assert(dset);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,dset->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
+    if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
 done:   
@@ -117,10 +117,10 @@ H5D_compact_writevv(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5D_t *dset,
     assert(dset);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(dset->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
+    if((ret_value=H5V_memcpyvv(dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
-    dset->layout.u.compact.dirty = TRUE;
+    dset->shared->layout.u.compact.dirty = TRUE;
 
 done:   
     FUNC_LEAVE_NOAPI(ret_value);

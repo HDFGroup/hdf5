@@ -86,16 +86,16 @@ H5Tget_cset(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR, "not a data type");
-    while (dt->parent && !H5T_IS_STRING(dt))
-        dt = dt->parent;  /*defer to parent*/
-    if (!H5T_IS_STRING(dt))
+    while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
+        dt = dt->shared->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_CSET_ERROR, "operation not defined for data type class");
     
     /* result */
-    if(H5T_STRING == dt->type)
-        ret_value = dt->u.atomic.u.s.cset;
-    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
-        ret_value = dt->u.vlen.cset;
+    if(H5T_STRING == dt->shared->type)
+        ret_value = dt->shared->u.atomic.u.s.cset;
+    else if(H5T_VLEN == dt->shared->type && H5T_VLEN_STRING == dt->shared->u.vlen.type)
+        ret_value = dt->shared->u.vlen.cset;
     else
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_CSET_ERROR, "can't get cset info");
 
@@ -134,20 +134,20 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (cset < 0 || cset >= H5T_NCSET)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal character set type");
-    while (dt->parent && !H5T_IS_STRING(dt))
-        dt = dt->parent;  /*defer to parent*/
-    if (!H5T_IS_STRING(dt))
+    while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
+        dt = dt->shared->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */
-    if(H5T_STRING == dt->type)
-        dt->u.atomic.u.s.cset = cset;
-    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
-        dt->u.vlen.cset = cset;
+    if(H5T_STRING == dt->shared->type)
+        dt->shared->u.atomic.u.s.cset = cset;
+    else if(H5T_VLEN == dt->shared->type && H5T_VLEN_STRING == dt->shared->u.vlen.type)
+        dt->shared->u.vlen.cset = cset;
     else
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "can't set cset info");
 

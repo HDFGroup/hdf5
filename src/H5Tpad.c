@@ -84,17 +84,17 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    while (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
+    while (dt->shared->parent)
+        dt = dt->shared->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->shared->type || H5T_OPAQUE==dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
     
     /* Get values */
     assert(H5T_is_atomic(dt));
     if (lsb)
-        *lsb = dt->u.atomic.lsb_pad;
+        *lsb = dt->shared->u.atomic.lsb_pad;
     if (msb)
-        *msb = dt->u.atomic.msb_pad;
+        *msb = dt->shared->u.atomic.msb_pad;
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -129,21 +129,21 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (lsb < 0 || lsb >= H5T_NPAD || msb < 0 || msb >= H5T_NPAD)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pad type");
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+    if (H5T_ENUM==dt->shared->type && dt->shared->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
-    while (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
+    while (dt->shared->parent)
+        dt = dt->shared->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->shared->type || H5T_OPAQUE==dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
 
     /* Commit */
     assert(H5T_is_atomic(dt));
-    dt->u.atomic.lsb_pad = lsb;
-    dt->u.atomic.msb_pad = msb;
+    dt->shared->u.atomic.lsb_pad = lsb;
+    dt->shared->u.atomic.msb_pad = msb;
 
 done:
     FUNC_LEAVE_API(ret_value);

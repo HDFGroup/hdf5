@@ -74,10 +74,13 @@ typedef struct H5D_rdcdc_t {
 } H5D_rdcdc_t;
 
 /*
- * A dataset is the following struct.
+ * A dataset is made of two layers, an H5D_t struct that is unique to
+ * each instance of an opened datset, and a shared struct that is only
+ * created once for a given dataset.  Thus, if a dataset is opened twice,
+ * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */
-struct H5D_t {
-    H5G_entry_t         ent;            /* cached object header stuff   */
+typedef struct H5D_shared_t {
+    size_t              fo_count;       /* reference count */
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* datatype of this dataset     */
     H5S_t              *space;          /* dataspace of this dataset    */
@@ -101,6 +104,11 @@ struct H5D_t {
                                          */
         H5D_rdcc_t      chunk;          /* Information about chunked data */
     }cache;
+} H5D_shared_t;
+
+struct H5D_t {
+    H5G_entry_t         ent;            /* cached object header stuff   */
+    H5D_shared_t        *shared;        /* cached information from file */
 };
 
 /* Enumerated type for allocating dataset's storage */

@@ -114,6 +114,7 @@ typedef struct H5G_entry_t {
 } H5G_entry_t;
 
 typedef struct H5G_t H5G_t;
+typedef struct H5G_shared_t H5G_shared_t;
 
 /* Type of operation being performed for call to H5G_replace_name() */
 typedef enum {
@@ -139,8 +140,8 @@ H5_DLL H5G_entry_t *H5G_loc(hid_t loc_id);
 H5_DLL herr_t H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_entry);
 H5_DLL H5G_entry_t *H5G_entof(H5G_t *grp);
 H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
-H5_DLL H5G_t *H5G_open(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
-H5_DLL H5G_t *H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL herr_t H5G_free(H5G_t *grp);
+H5_DLL H5G_t *H5G_open(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL int H5G_get_type(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_get_objinfo(H5G_entry_t *loc, const char *name,

@@ -748,7 +748,13 @@ static const char* MapIdToName(hid_t refobj_id,
 {
  hid_t id;
  hid_t fid;
+ H5G_stat_t refstat;    /* Stat for the refobj id */
+ H5G_stat_t objstat;    /* Stat for objects in the file */
  int   i;
+
+ /* obtain information to identify the referenced object uniquely */
+ if(H5Gget_objinfo(refobj_id, ".", 0, &refstat) <0)
+  return NULL;
 
  /* obtains the file ID given an object ID.  This ID must be closed */
  if ((fid = H5Iget_file_id(refobj_id))<0)
@@ -773,9 +779,12 @@ static const char* MapIdToName(hid_t refobj_id,
    
    if ((id = H5Dopen(fid,travt->objs[i].name))<0)
     return NULL;
+   if(H5Gget_objinfo(id, ".", 0, &objstat) <0)
+    return NULL;
    if (H5Dclose(id)<0)
     return NULL;
-   if (id==refobj_id)
+   if (refstat.fileno[0]==objstat.fileno[0] && refstat.fileno[1]==objstat.fileno[1]
+        && refstat.objno[0]==objstat.objno[0] && refstat.objno[1]==objstat.objno[1])
    {
     H5Fclose(fid);
     return travt->objs[i].name;

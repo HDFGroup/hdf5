@@ -184,7 +184,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 if((sign =  H5T_get_sign(dtype))==H5T_SGN_ERROR)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid signess");
 
-                prec =  dtype->u.atomic.prec;
+                prec =  dtype->shared->u.atomic.prec;
  
                 if((ret_value = H5T_get_native_integer(prec, sign, direction, struct_align, offset, comp_size))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve integer type");

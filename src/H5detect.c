@@ -513,6 +513,7 @@ static int interface_initialize_g = 0;\n\
 \n\
 /* Declare external the free list for H5T_t's */\n\
 H5FL_EXTERN(H5T_t);\n\
+H5FL_EXTERN(H5T_shared_t);\n\
 \n\
 \n");
 
@@ -548,15 +549,20 @@ H5TN_init_interface(void)\n\
 	printf("\
     if (NULL==(dt = H5FL_CALLOC (H5T_t)))\n\
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\"memory allocation failed\");\n\
-    dt->state = H5T_STATE_IMMUTABLE;\n\
+    if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))\n\
+    { \
+        H5FL_FREE(H5T_t, dt);\
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, \"memory allocation failed\");\n\
+    } \
+    dt->shared->state = H5T_STATE_IMMUTABLE;\n\
     dt->ent.header = HADDR_UNDEF;\n\
-    dt->type = H5T_%s;\n\
-    dt->size = %d;\n\
-    dt->u.atomic.order = H5T_ORDER_%s;\n\
-    dt->u.atomic.offset = %d;\n\
-    dt->u.atomic.prec = %d;\n\
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
+    dt->shared->type = H5T_%s;\n\
+    dt->shared->size = %d;\n\
+    dt->shared->u.atomic.order = H5T_ORDER_%s;\n\
+    dt->shared->u.atomic.offset = %d;\n\
+    dt->shared->u.atomic.prec = %d;\n\
+    dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
+    dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
 	       d[i].msize ? "FLOAT" : "INTEGER",/*class			*/
 	       d[i].size,			/*size			*/
 	       d[i].perm[0] ? "BE" : "LE",	/*byte order		*/
@@ -566,19 +572,19 @@ H5TN_init_interface(void)\n\
 	if (0 == d[i].msize) {
 	    /* The part unique to fixed point types */
 	    printf("\
-    dt->u.atomic.u.i.sign = H5T_SGN_%s;\n",
+    dt->shared->u.atomic.u.i.sign = H5T_SGN_%s;\n",
 		   d[i].sign ? "2" : "NONE");
 	} else {
 	    /* The part unique to floating point types */
 	    printf("\
-    dt->u.atomic.u.f.sign = %d;\n\
-    dt->u.atomic.u.f.epos = %d;\n\
-    dt->u.atomic.u.f.esize = %d;\n\
-    dt->u.atomic.u.f.ebias = 0x%08lx;\n\
-    dt->u.atomic.u.f.mpos = %d;\n\
-    dt->u.atomic.u.f.msize = %d;\n\
-    dt->u.atomic.u.f.norm = H5T_NORM_%s;\n\
-    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
+    dt->shared->u.atomic.u.f.sign = %d;\n\
+    dt->shared->u.atomic.u.f.epos = %d;\n\
+    dt->shared->u.atomic.u.f.esize = %d;\n\
+    dt->shared->u.atomic.u.f.ebias = 0x%08lx;\n\
+    dt->shared->u.atomic.u.f.mpos = %d;\n\
+    dt->shared->u.atomic.u.f.msize = %d;\n\
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_%s;\n\
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
 		   d[i].sign,	/*sign location */
 		   d[i].epos,	/*exponent loc	*/
 		   d[i].esize,	/*exponent size */

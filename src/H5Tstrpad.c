@@ -87,16 +87,16 @@ H5Tget_strpad(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a data type");
-    while (dt->parent && !H5T_IS_STRING(dt))
-        dt = dt->parent;  /*defer to parent*/
-    if (!H5T_IS_STRING(dt))
+    while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
+        dt = dt->shared->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_STR_ERROR, "operation not defined for data type class");
     
     /* result */
-    if(H5T_STRING == dt->type)
-        ret_value = dt->u.atomic.u.s.pad;
-    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
-        ret_value = dt->u.vlen.pad;
+    if(H5T_STRING == dt->shared->type)
+        ret_value = dt->shared->u.atomic.u.s.pad;
+    else if(H5T_VLEN == dt->shared->type && H5T_VLEN_STRING == dt->shared->u.vlen.type)
+        ret_value = dt->shared->u.vlen.pad;
     else
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR, "can't get strpad info");
 
@@ -146,20 +146,20 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (strpad < 0 || strpad >= H5T_NSTR)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type");
-    while (dt->parent && !H5T_IS_STRING(dt))
-        dt = dt->parent;  /*defer to parent*/
-    if (!H5T_IS_STRING(dt))
+    while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
+        dt = dt->shared->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */
-    if(H5T_STRING == dt->type)
-        dt->u.atomic.u.s.pad = strpad;
-    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
-        dt->u.vlen.pad = strpad;
+    if(H5T_STRING == dt->shared->type)
+        dt->shared->u.atomic.u.s.pad = strpad;
+    else if(H5T_VLEN == dt->shared->type && H5T_VLEN_STRING == dt->shared->u.vlen.type)
+        dt->shared->u.vlen.pad = strpad;
     else
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR, "can't set strpad info");
 

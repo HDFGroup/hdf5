@@ -718,7 +718,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
     FUNC_ENTER_API(H5Pget_filter, H5Z_FILTER_ERROR);
     H5TRACE7("Zf","iIsx*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
              name);
-    
+
     /* Check args */
     if (cd_nelmts || cd_values) {
         if (cd_nelmts && *cd_nelmts>256)

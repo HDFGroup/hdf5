@@ -111,7 +111,7 @@ H5D_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
     assert(mem_offset_arr);
     assert(buf);
 
-    switch (dset->layout.type) {
+    switch (dset->shared->layout.type) {
         case H5D_CONTIGUOUS:
             /* Read directly from file if the dataset is in an external file */
             if (store && store->efl.nused>0) {
@@ -128,7 +128,7 @@ H5D_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
             } else {
                 /* Pass along the vector of sequences to read */
                 if((ret_value=H5D_contig_readvv(f, dxpl_id, dset,
-                        dset->layout.u.contig.addr, dset->layout.u.contig.size,
+                        dset->shared->layout.u.contig.addr, dset->shared->layout.u.contig.size,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                         buf))<0)
@@ -219,7 +219,7 @@ H5D_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     assert(mem_offset_arr);
     assert(buf);
 
-    switch (dset->layout.type) {
+    switch (dset->shared->layout.type) {
         case H5D_CONTIGUOUS:
             /* Write directly to file if the dataset is in an external file */
             if (store && store->efl.nused>0) {
@@ -236,7 +236,7 @@ H5D_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
             } else {
                 /* Pass along the vector of sequences to write */
                 if ((ret_value=H5D_contig_writevv(f, dxpl_id, dset,
-                        dset->layout.u.contig.addr, dset->layout.u.contig.size,
+                        dset->shared->layout.u.contig.addr, dset->shared->layout.u.contig.size,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                         buf))<0)

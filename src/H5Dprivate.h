@@ -201,7 +201,8 @@ typedef struct H5D_dcpl_cache_t {
 
 /* Library-private functions defined in H5D package */
 H5_DLL herr_t H5D_init(void);
-H5_DLL hid_t H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL H5D_t *H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL herr_t H5D_close(H5D_t *dataset);
 H5_DLL htri_t H5D_isa(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL H5G_entry_t *H5D_entof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);

@@ -661,7 +661,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
     if (!file_space)
-        file_space = dataset->space;
+        file_space = dataset->shared->space;
     if (!mem_space)
         mem_space = file_space;
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space))<0)
@@ -702,26 +702,26 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * fill time is NEVER, there is no way to tell whether part of data
      * has been overwritten.  So just proceed in reading.     
      */ 
-    if(nelmts > 0 && dataset->efl.nused==0 &&
-            ((dataset->layout.type==H5D_CONTIGUOUS && !H5F_addr_defined(dataset->layout.u.contig.addr))
-                || (dataset->layout.type==H5D_CHUNKED && !H5F_addr_defined(dataset->layout.u.chunk.addr)))) {
+    if(nelmts > 0 && dataset->shared->efl.nused==0 &&
+            ((dataset->shared->layout.type==H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+                || (dataset->shared->layout.type==H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))) {
         H5D_fill_value_t fill_status;   /* Whether/How the fill value is defined */
 
         /* Retrieve dataset's fill-value properties */
-        if(H5P_is_fill_value_defined(&dataset->dcpl_cache.fill, &fill_status)<0)
+        if(H5P_is_fill_value_defined(&dataset->shared->dcpl_cache.fill, &fill_status)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined")
 
         /* Should be impossible, but check anyway... */
         if(fill_status == H5D_FILL_VALUE_UNDEFINED &&
-                (dataset->dcpl_cache.fill_time == H5D_FILL_TIME_ALLOC || dataset->dcpl_cache.fill_time == H5D_FILL_TIME_IFSET))
+                (dataset->shared->dcpl_cache.fill_time == H5D_FILL_TIME_ALLOC || dataset->shared->dcpl_cache.fill_time == H5D_FILL_TIME_IFSET))
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "read failed: dataset doesn't exist, no data can be read")
 
         /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
-        if(dataset->dcpl_cache.fill_time == H5D_FILL_TIME_NEVER)
+        if(dataset->shared->dcpl_cache.fill_time == H5D_FILL_TIME_NEVER)
             HGOTO_DONE(SUCCEED)
 
         /* Go fill the user's selection with the dataset's fill value */
-        if(H5D_fill(dataset->dcpl_cache.fill.buf,dataset->type,buf,mem_type,mem_space,dxpl_id)<0)
+        if(H5D_fill(dataset->shared->dcpl_cache.fill.buf,dataset->shared->type,buf,mem_type,mem_space,dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
         else
             HGOTO_DONE(SUCCEED)
@@ -735,11 +735,11 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
-    if (NULL==(tpath=H5T_path_find(dataset->type, mem_type, NULL, NULL, dxpl_id)))
+    if (NULL==(tpath=H5T_path_find(dataset->shared->type, mem_type, NULL, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
 
     /* Set the storage flags for the space conversion check */
-    switch(dataset->layout.type) {
+    switch(dataset->shared->layout.type) {
         case H5D_COMPACT:
             sconv_flags |= H5S_CONV_STORAGE_COMPACT;
             break;
@@ -757,7 +757,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->layout)))
+    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->shared->layout)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space")
 
 #ifdef H5_HAVE_PARALLEL
@@ -767,7 +767,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
           a more general collective chunk IO algorithm is applied.
     */
 
-    if(dataset->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
+    if(dataset->shared->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
         check_prop = H5Pexist(dxpl_id,H5D_XFER_COLL_CHUNK_NAME);
         if(check_prop < 0) 
             HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to check property list");
@@ -790,14 +790,14 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Determine correct I/O routine to invoke */
-    if(dataset->layout.type!=H5D_CHUNKED) {
+    if(dataset->shared->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, dataset->type_id, mem_type_id, buf)<0)
+                dxpl_cache, dxpl_id, dataset->shared->type_id, mem_type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
     else {
         if(H5D_chunk_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, dataset->type_id, mem_type_id, buf)<0)
+                dxpl_cache, dxpl_id, dataset->shared->type_id, mem_type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end else */
 
@@ -888,12 +888,12 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
     /* All filters in the DCPL must have encoding enabled. */
-    if(! dataset->checked_filters)
+    if(! dataset->shared->checked_filters)
     {
-        if(H5Z_can_apply(dataset->dcpl_id, dataset->type_id) <0)
+        if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) <0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
 
-        dataset->checked_filters = TRUE;
+        dataset->shared->checked_filters = TRUE;
     }
 
     /* If MPI based VFD is used, no VL datatype support yet. */
@@ -921,7 +921,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     if (!file_space)
-        file_space = dataset->space;
+        file_space = dataset->shared->space;
     if (!mem_space)                                                                                                                      
         mem_space = file_space;                                                                                                         
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space))<0)
@@ -953,9 +953,9 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* <none needed currently> */
 
     /* Allocate data space and initialize it if it hasn't been. */
-    if(nelmts > 0 && dataset->efl.nused==0 && 
-            ((dataset->layout.type==H5D_CONTIGUOUS && !H5F_addr_defined(dataset->layout.u.contig.addr))
-                || (dataset->layout.type==H5D_CHUNKED && !H5F_addr_defined(dataset->layout.u.chunk.addr)))) {
+    if(nelmts > 0 && dataset->shared->efl.nused==0 && 
+            ((dataset->shared->layout.type==H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+                || (dataset->shared->layout.type==H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))) {
         hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
         hbool_t full_overwrite; /* Whether we are over-writing all the elements */
 
@@ -964,7 +964,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
 
         /* Always allow fill values to be written if the dataset has a VL datatype */
-        if(H5T_detect_class(dataset->type, H5T_VLEN))
+        if(H5T_detect_class(dataset->shared->type, H5T_VLEN))
             full_overwrite=FALSE;
         else
             full_overwrite=(hsize_t)file_nelmts==nelmts ? TRUE : FALSE;
@@ -982,11 +982,11 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
-    if (NULL==(tpath=H5T_path_find(mem_type, dataset->type, NULL, NULL, dxpl_id)))
+    if (NULL==(tpath=H5T_path_find(mem_type, dataset->shared->type, NULL, NULL, dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
 
     /* Set the storage flags for the space conversion check */
-    switch(dataset->layout.type) {
+    switch(dataset->shared->layout.type) {
         case H5D_COMPACT:
             sconv_flags |= H5S_CONV_STORAGE_COMPACT;
             break;
@@ -1004,7 +1004,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->layout)))
+    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->shared->layout)))
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space")
         
 #ifdef H5_HAVE_PARALLEL
@@ -1014,7 +1014,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
           a more general collective chunk IO algorithm is applied.
     */
 
-     if(dataset->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
+     if(dataset->shared->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
          
        check_prop = H5Pexist(dxpl_id,H5D_XFER_COLL_CHUNK_NAME);
        if(check_prop < 0) 
@@ -1037,14 +1037,14 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Determine correct I/O routine to invoke */
-    if(dataset->layout.type!=H5D_CHUNKED) {
+    if(dataset->shared->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, mem_type_id, dataset->type_id, buf)<0)
+                dxpl_cache, dxpl_id, mem_type_id, dataset->shared->type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
     else {
         if(H5D_chunk_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, mem_type_id, dataset->type_id, buf)<0)
+                dxpl_cache, dxpl_id, mem_type_id, dataset->shared->type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end else */
 
@@ -1130,19 +1130,19 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
 	H5_timer_begin(&timer);
 #endif
   	/* Sanity check dataset, then read it */
-        assert(((dataset->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->layout.u.contig.addr))
-                || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
-                || dataset->efl.nused>0 || 0 == nelmts
-                || dataset->layout.type==H5D_COMPACT);
+        assert(((dataset->shared->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+                || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
+                || dataset->shared->efl.nused>0 || 0 == nelmts
+                || dataset->shared->layout.type==H5D_COMPACT);
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
         status = (sconv->read)(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->efl),
-            (size_t)nelmts, H5T_get_size(dataset->type), 
+            dataset, (H5D_storage_t *)&(dataset->shared->efl),
+            (size_t)nelmts, H5T_get_size(dataset->shared->type), 
             file_space, mem_space,
             buf/*out*/);
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->type);
+        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
         sconv->stats[1].read_ncalls++;
 #endif
 
@@ -1161,7 +1161,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
         HGOTO_DONE(SUCCEED)
 
     /* Compute element sizes and other parameters */
-    src_type_size = H5T_get_size(dataset->type);
+    src_type_size = H5T_get_size(dataset->shared->type);
     dst_type_size = H5T_get_size(mem_type);
     max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
@@ -1238,12 +1238,12 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
 	H5_timer_begin(&timer);
 #endif
 	/* Sanity check that space is allocated, then read data from it */ 
-        assert(((dataset->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->layout.u.contig.addr))
-                || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
-            || dataset->efl.nused>0 || 
-             dataset->layout.type==H5D_COMPACT);
+        assert(((dataset->shared->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+                || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
+            || dataset->shared->efl.nused>0 || 
+             dataset->shared->layout.type==H5D_COMPACT);
         n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->efl),
+            dataset, (H5D_storage_t *)&(dataset->shared->efl),
             file_space, &file_iter, smine_nelmts,
             tconv_buf/*out*/);
 
@@ -1375,8 +1375,8 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 #endif
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
         status = (sconv->write)(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->efl),
-            (size_t)nelmts, H5T_get_size(dataset->type),
+            dataset, (H5D_storage_t *)&(dataset->shared->efl),
+            (size_t)nelmts, H5T_get_size(dataset->shared->type),
             file_space, mem_space,
             buf);
 #ifdef H5S_DEBUG
@@ -1401,7 +1401,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(mem_type);
-    dst_type_size = H5T_get_size(dataset->type);
+    dst_type_size = H5T_get_size(dataset->shared->type);
     max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
@@ -1440,7 +1440,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if(H5T_detect_class(dataset->type, H5T_VLEN)) {
+    if(H5T_detect_class(dataset->shared->type, H5T_VLEN)) {
 	/* Old data is retrieved into background buffer for VL datatype.  The 
 	 * data is used later for freeing heap objects. */
         need_bkg = H5T_BKG_YES;
@@ -1495,7 +1495,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
             H5_timer_begin(&timer);
 #endif
             n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
-                dataset, (H5D_storage_t *)&(dataset->efl),
+                dataset, (H5D_storage_t *)&(dataset->shared->efl),
                 file_space, &bkg_iter, smine_nelmts,
                 bkg_buf/*out*/); 
 
@@ -1521,7 +1521,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
         H5_timer_begin(&timer);
 #endif
 	status = H5S_select_fscat(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->efl),
+            dataset, (H5D_storage_t *)&(dataset->shared->efl),
             file_space, &file_iter, smine_nelmts,
             tconv_buf);
 #ifdef H5S_DEBUG
@@ -1620,10 +1620,10 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
 	H5_timer_begin(&timer);
 #endif
   	/* Sanity check dataset, then read it */
-        assert(((dataset->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->layout.u.contig.addr))
-                || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
-                || dataset->efl.nused>0 || 0 == nelmts
-                || dataset->layout.type==H5D_COMPACT);
+        assert(((dataset->shared->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+                || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
+                || dataset->shared->efl.nused>0 || 0 == nelmts
+                || dataset->shared->layout.type==H5D_COMPACT);
 
         /* Get first node in chunk tree */
         chunk_node=H5TB_first(fm.fsel->root);
@@ -1642,7 +1642,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
             /* Perform the actual read operation */
             status = (sconv->read)(dataset->ent.file, dxpl_cache, dxpl_id,
                 dataset, &store,
-                chunk_info->chunk_points, H5T_get_size(dataset->type),
+                chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
         
@@ -1656,7 +1656,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
         
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->type);
+        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
         sconv->stats[1].read_ncalls++;
 #endif
 
@@ -1671,7 +1671,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
         HGOTO_DONE(SUCCEED)
 
     /* Compute element sizes and other parameters */
-    src_type_size = H5T_get_size(dataset->type);
+    src_type_size = H5T_get_size(dataset->shared->type);
     dst_type_size = H5T_get_size(mem_type);
     max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
@@ -1763,9 +1763,9 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
             H5_timer_begin(&timer);
 #endif
             /* Sanity check that space is allocated, then read data from it */ 
-            assert(((dataset->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->layout.u.contig.addr))
-                    || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
-                || dataset->efl.nused>0 || dataset->layout.type==H5D_COMPACT);
+            assert(((dataset->shared->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+                    || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
+                || dataset->shared->efl.nused>0 || dataset->shared->layout.type==H5D_COMPACT);
             n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
                 dataset, &store,
                 chunk_info->fspace, &file_iter, smine_nelmts,
@@ -1973,7 +1973,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
             /* Perform the actual write operation */
             status = (sconv->write)(dataset->ent.file, dxpl_cache, dxpl_id,
                 dataset, &store,
-                chunk_info->chunk_points, H5T_get_size(dataset->type),
+                chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
         
@@ -2019,7 +2019,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
      
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(mem_type);
-    dst_type_size = H5T_get_size(dataset->type);
+    dst_type_size = H5T_get_size(dataset->shared->type);
     max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
@@ -2047,7 +2047,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if(H5T_detect_class(dataset->type, H5T_VLEN)) {
+    if(H5T_detect_class(dataset->shared->type, H5T_VLEN)) {
 	/* Old data is retrieved into background buffer for VL datatype.  The 
 	 * data is used later for freeing heap objects. */
         need_bkg = H5T_BKG_YES;
@@ -2360,7 +2360,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
 #endif /* QAK */
 
     /* Get layout for dataset */
-    fm->layout = &(dataset->layout);
+    fm->layout = &(dataset->shared->layout);
     
     /* Check if the memory space is scalar & make equivalent memory space */
     if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space))<0)
@@ -2369,16 +2369,16 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         hsize_t dims[H5O_LAYOUT_NDIMS];    /* Temporary dimension information */
 
         /* Set up "equivalent" n-dimensional dataspace with size '1' in each dimension */
-        for(u=0; u<dataset->layout.u.chunk.ndims-1; u++)
+        for(u=0; u<dataset->shared->layout.u.chunk.ndims-1; u++)
             dims[u]=1;
-        if((equiv_mspace = H5S_create_simple(dataset->layout.u.chunk.ndims-1,dims,NULL))==NULL)
+        if((equiv_mspace = H5S_create_simple(dataset->shared->layout.u.chunk.ndims-1,dims,NULL))==NULL)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create equivalent dataspace for scalar space")
 
         /* Indicate that this space needs to be released */
         equiv_mspace_init=1;
 
         /* Set the number of dimensions for the memory dataspace */
-        fm->m_ndims=dataset->layout.u.chunk.ndims-1;
+        fm->m_ndims=dataset->shared->layout.u.chunk.ndims-1;
     } /* end else */
     else {
         equiv_mspace=(H5S_t *)mem_space; /* Casting away 'const' OK... */
@@ -2388,7 +2388,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     } /* end else */
  
     /* Get dim number and dimensionality for each dataspace */
-    fm->f_ndims=f_ndims=dataset->layout.u.chunk.ndims-1;
+    fm->f_ndims=f_ndims=dataset->shared->layout.u.chunk.ndims-1;
 
     if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
@@ -2399,7 +2399,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         fm->chunk_dim[u]=fm->layout->u.chunk.dim[u];
 
         /* Round up to the next integer # of chunks, to accomodate partial chunks */
-        fm->chunks[u] = ((fm->f_dims[u]+dataset->layout.u.chunk.dim[u])-1) / dataset->layout.u.chunk.dim[u];
+        fm->chunks[u] = ((fm->f_dims[u]+dataset->shared->layout.u.chunk.dim[u])-1) / dataset->shared->layout.u.chunk.dim[u];
     } /* end for */
         
     /* Compute the "down" size of 'chunks' information */
@@ -2428,7 +2428,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     /* Check if file selection is a point selection */
     if(fsel_type==H5S_SEL_POINTS) {
         /* Create temporary datatypes for selection iteration */
-        if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
+        if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL)))<0)
             HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
         
         /* Spaces aren't the same shape, iterate over the memory selection directly */
@@ -2508,7 +2508,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
 
         /* Create temporary datatypes for selection iteration */
         if(f_tid<0) {
-            if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
+            if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL)))<0)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
         } /* end if */
         

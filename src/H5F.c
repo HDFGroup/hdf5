@@ -1161,7 +1161,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     	if( (!olist->shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
                 || (!olist->shared && olist->obj_type!=H5I_DATATYPE) 
-                || (ent && ent->file->shared == olist->shared) ) {
+                || (ent && ent->file && ent->file->shared == olist->shared) ) {
             /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
             	olist->obj_id_list[olist->list_index] = obj_id;
@@ -1595,7 +1595,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
                 } /* end if */
 
                 /* Free the memory for the root group */
-                H5FL_FREE(H5G_t,f->shared->root_grp);
+                H5G_free(f->shared->root_grp);
                 f->shared->root_grp=NULL;
             }
 	    if (H5AC_dest(f, dxpl_id)) {
@@ -3093,6 +3093,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     unsigned	lt, rt, md;		/*binary search indices		*/
     int		cmp;			/*binary search comparison value*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
+    H5G_entry_t  mp_open_ent;     /* entry of moint point to be opened */
     H5RS_str_t  *name_r;                /* Ref-counted version of name */
     herr_t	ret_value = SUCCEED;	/*return value			*/
     
@@ -3108,9 +3109,11 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
      * that the mount wouldn't introduce a cycle in the mount tree.
      */
     if (child->mtab.parent)
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
-    if (NULL==(mount_point=H5G_open(loc, name, dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
+    if (H5G_find(loc, name, NULL, &mp_open_ent/*out*/, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
+    if (NULL==(mount_point=H5G_open(&mp_open_ent, dxpl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
 
     parent = H5G_fileof(mount_point);
     mp_ent = H5G_entof(mount_point);
@@ -3214,6 +3217,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     H5F_t	*child = NULL;		/*mounted file			*/
     H5F_t	*parent = NULL;		/*file where mounted		*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
+    H5G_entry_t mnt_open_ent;       /* entry used to open mount point*/
     herr_t	ret_value = FAIL;	/*return value			*/
     unsigned	i;			/*coutners			*/
     unsigned	lt, rt, md=0;	        /*binary search indices		*/
@@ -3229,8 +3233,10 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
      * If we get the root group and the file has a parent in the mount tree,
      * then we must have found the mount point.
      */
-    if (NULL==(mounted=H5G_open(loc, name, dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
+    if (H5G_find(loc, name, NULL, &mnt_open_ent/*out*/, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
+    if (NULL==(mounted=H5G_open(&mnt_open_ent, dxpl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
     child = H5G_fileof(mounted);
     mnt_ent = H5G_entof(mounted);
     ent = H5G_entof(child->shared->root_grp);

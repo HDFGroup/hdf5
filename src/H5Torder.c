@@ -84,14 +84,14 @@ H5Tget_order(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR, "not a data type");
-    while (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
+    while (dt->shared->parent)
+        dt = dt->shared->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->shared->type || H5T_OPAQUE==dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Order */
     assert(H5T_is_atomic(dt));
-    ret_value = dt->u.atomic.order;
+    ret_value = dt->shared->u.atomic.order;
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -126,20 +126,20 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (order < 0 || order > H5T_ORDER_NONE)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order");
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+    if (H5T_ENUM==dt->shared->type && dt->shared->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
-    while (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
+    while (dt->shared->parent)
+        dt = dt->shared->parent; /*defer to parent*/
+    if (H5T_COMPOUND==dt->shared->type || H5T_OPAQUE==dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Commit */
     assert(H5T_is_atomic(dt));
-    dt->u.atomic.order = order;
+    dt->shared->u.atomic.order = order;
 
 done:
     FUNC_LEAVE_API(ret_value);
