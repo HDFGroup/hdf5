@@ -5944,13 +5944,19 @@ END SUBROUTINE h5pset_edc_check_f
   <dt><strong>Purpose:</strong>
     <dd>Adds an external file to the list of external files.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_external</code> adds an external file to the 
-        list of external files. 
+    <dd>The first call to <code>H5Pset_external</code> sets the 
+        <i>external storage</i> property in the property list,
+        thus designating that the dataset will be stored in 
+        one or more non-HDF5 file(s) external to the HDF5 file.
+        This call also adds the file <code>name</code> as the 
+        first file in the list of external files.
+        Subsequent calls to the function add the named file as
+        the next file in the list.
         <p>
-        If a dataset is split across multiple files then the files
+        If a dataset is split across multiple files, then the files
         should be defined in order. The total size of the dataset is
-        the sum of the <code>size</code> arguments for all the external files.  If
-        the total size is larger than the size of a dataset then the
+        the sum of the <code>size</code> arguments for all the external files.
+        If the total size is larger than the size of a dataset then the
         dataset can be extended (provided the data space also allows
         the extending).
         <p>
@@ -5959,6 +5965,14 @@ END SUBROUTINE h5pset_edc_check_f
         If  <code>size</code> is set to <code>H5F_UNLIMITED</code>, the 
         external file can be of unlimited size and no more files can be added to
         the external files list.
+        <p>
+        All of the external files for a given dataset must be 
+        specified with <code>H5Pset_external</code> 
+        <i>before</i> <code>H5Dcreate</code> is called to create 
+        the dataset. 
+        If one these files does not exist on the system when 
+        <code>H5Dwrite</code> is called to write data to it, 
+        the library will create the file.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -9194,7 +9208,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 24 June 2004");
+document.writeln("Last modified: 2 July 2004");
 -->
 </SCRIPT>
  
