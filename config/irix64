@@ -12,6 +12,7 @@
 
 # Use SGI supplied C compiler
 CC="cc"
+RANLIB=:
 
 # What must *always* be present for things to compile correctly?
 # Always turn off these warnings:
