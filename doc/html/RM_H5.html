@@ -284,9 +284,12 @@ END SUBROUTINE h5check_version_f
     <dd><code>H5close</code> flushes all data to disk, 
         closes all file identifiers, and cleans up all memory used by
         the library.  This function is generally called when the 
-        application calls <code>exit</code>, but may be called earlier 
+        application calls <code>exit()</code>, but may be called earlier 
         in event of an emergency shutdown or out of desire to free all 
         resources used by the HDF5 library.
+        <p>
+        <code>h5close_f</code> and <code>h5open_f</code> are 
+        required calls in Fortran90 applications.	
 <dt><strong>Parameters:</strong>
     <dl>
         <dt>None.
@@ -467,10 +470,23 @@ END SUBROUTINE h5get_libversion_f
 <dt><strong>Purpose:</strong>
     <dd>Initializes the HDF5 library.
 <dt><strong>Description:</strong>
-    <dd><code>H5open</code> initialize the library.  This function is 
-        normally called automatically, but if you find that an 
-        HDF5 library function is failing inexplicably, try calling 
-        this function first.
+    <dd><code>H5open</code> initialize the library.  
+        <p>
+        When the HDF5 Library is employed in a C application,
+        this function is normally called automatically, but if you 
+        find that an HDF5 library function is failing inexplicably, 
+        try calling this function first.
+        If you wish to elimnate this possibility, it is safe to 
+        routinely call <code>H5open</code> before an application 
+        starts working with the library as there are no damaging 
+        side-effects in calling it more than once.
+        <p>
+        When the HDF5 Library is employed in a Fortran90 application,
+        <code>h5open_f</code> initializes global variables 
+        (e.g. predefined types) and performs other tasks required to
+        initialize the library.
+        <code>h5open_f</code> and <code>h5close_f</code> are therefore
+        required calls in Fortran90 applications.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt>None.
@@ -615,7 +631,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 10 October 2003");
+document.writeln("Last modified: 20 October 2003");
 -->
 </SCRIPT>
 
