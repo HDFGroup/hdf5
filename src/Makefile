@@ -28,7 +28,7 @@ CFLAGS = -c $(MACHINE) $(DEFS)
 INCL = hdf5.h
 
 OBJ =	H5.o H5E.o H5A.o H5F.o H5C.o H5M.o H5AC.o H5B.o H5MM.o H5MF.o H5T.o \
-    H5Gnode.o H5H.o H5G.o H5P.o
+    H5Gnode.o H5H.o H5G.o H5P.o H5D.o
 
 $(TARGET): $(OBJ) 
 	$(AR) $(ARFLAGS) $(TARGET) $(OBJ)
@@ -90,3 +90,6 @@ H5G.o: H5G.c $(INCL) H5Gprivate.h H5Gproto.h
 
 H5P.o: H5P.c $(INCL) H5Pprivate.h H5Pproto.h
 	$(CC) $(CFLAGS) H5P.c
+
+H5D.o: H5D.c $(INCL) H5Dprivate.h H5Dproto.h
+	$(CC) $(CFLAGS) H5D.c

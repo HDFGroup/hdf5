@@ -49,34 +49,50 @@ meta_func_t meta_func_arr[]={
     {   /* Template object meta-functions (defined in H5C.c) */
         H5_TEMPLATE,            /* File-Creation Template Type ID */
         H5C_create,             /* File-Creation Template Create */
-        NULL,
+        NULL,                   /* File-Creation Template Access */
         H5C_copy,               /* File-Creation Template Copy */
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+        NULL,                   /* File-Creation Template FindName */
+        NULL,                   /* File-Creation Template NameLen */
+        NULL,                   /* File-Creation Template GetName */
+        NULL,                   /* File-Creation Template SetName */
+        NULL,                   /* File-Creation Template Search */
+        NULL,                   /* File-Creation Template Index */
+        NULL,                   /* File-Creation Template Flush */
+        NULL,                   /* File-Creation Template Delete */
+        NULL,                   /* File-Creation Template GetParent */
         H5C_release             /* File-Creation Template Release */
     },
     {   /* Datatype object meta-functions (defined in H5T.c) */
         H5_DATATYPE,            /* Datatype Type ID */
-        H5T_create,             /* Datatype object functions */
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        H5T_release
+        H5T_create,             /* Datatype Create */
+        NULL,                   /* Datatype Access */
+        NULL,                   /* Dataspace Copy */
+        NULL,                   /* Datatype FindName */
+        NULL,                   /* Datatype NameLen */
+        NULL,                   /* Datatype GetName */
+        NULL,                   /* Datatype SetName */
+        NULL,                   /* Datatype Search */
+        NULL,                   /* Datatype Index */
+        NULL,                   /* Datatype Flush */
+        NULL,                   /* Datatype Delete */
+        NULL,                   /* Datatype GetParent */
+        H5T_release             /* Datatype Release */
+    },
+    {   /* Dimensionality object meta-functions (defined in H5P.c) */
+        H5_DATASPACE,           /* Dimensionality Type ID */
+        H5P_create,             /* Dimensionality Create */
+        NULL,                   /* Dimensionality Access */
+        NULL,                   /* Dimensionality Copy */
+        NULL,                   /* Dimensionality FindName */
+        NULL,                   /* Dimensionality NameLen */
+        NULL,                   /* Dimensionality GetName */
+        NULL,                   /* Dimensionality SetName */
+        NULL,                   /* Dimensionality Search */
+        NULL,                   /* Dimensionality Index */
+        NULL,                   /* Dimensionality Flush */
+        NULL,                   /* Dimensionality Delete */
+        NULL,                   /* Dimensionality GetParent */
+        H5P_release             /* Dimensionality Release */
     }
   };
 

@@ -49,6 +49,7 @@
 #define HDF5_TEMPID_HASHSIZE    64
 #define HDF5_DATATYPEID_HASHSIZE    64
 #define HDF5_DATASPACEID_HASHSIZE   64
+#define HDF5_DATASETID_HASHSIZE   64
 
 /* Default file-creation template values */
 #define HDF5_USERBLOCK_DEFAULT  0       /* Default to 0-byte sized user blocks */

@@ -26,6 +26,7 @@ H5_FILE,                        /* Group ID for File objects */
 H5_TEMPLATE,                    /* Group ID for Template objects */
 H5_DATATYPE,                    /* Group ID for Datatype objects */
 H5_DATASPACE,                   /* Group ID for Dataspace objects */
+H5_DATASET,                     /* Group ID for Dataset objects */
 MAXGROUP                    /* Highest group in group_t (Invalid as true group) */
 } group_t;
 
