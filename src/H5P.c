@@ -1617,6 +1617,7 @@ herr_t
 H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
     int			    i;
+    hsize_t real_dims[H5O_LAYOUT_NDIMS]; /* Full-sized array to hold chunk dims */
     H5D_layout_t           layout;
 
     FUNC_ENTER(H5Pset_chunk, FAIL);
@@ -1639,11 +1640,14 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "no chunk dimensions specified");
     }
+    /* Initialize chunk dims to 0s */
+    HDmemset(real_dims,0,H5O_LAYOUT_NDIMS*sizeof(hsize_t));
     for (i=0; i<ndims; i++) {
         if (dim[i] <= 0) {
             HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
                   "all chunk dimensions must be positive");
         }
+        real_dims[i]=dim[i]; /* Store user's chunk dimensions */
     }
 
     layout = H5D_CHUNKED;
@@ -1652,7 +1656,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     if(H5P_set(plist_id, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, 
                       "can't set chunk dimensionanlity");
-    if(H5P_set(plist_id, H5D_CRT_CHUNK_SIZE_NAME, dim) < 0)
+    if(H5P_set(plist_id, H5D_CRT_CHUNK_SIZE_NAME, real_dims) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk size");
 
     FUNC_LEAVE(SUCCEED);
@@ -6823,8 +6827,13 @@ static herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name
     
     /* Remove property from property list */
     /* Check if the property being removed is at the head of the list for a hash location */
-    if(prop==plist->props[loc])
+    if(prop==plist->props[loc]) {
+        /* Jump over the property we are deleting */
         plist->props[loc]=prop->next;
+
+        /* Free the property, ignoring return value, nothing we can do */
+        H5P_free_prop(prop);
+    } /* end if */
     else {
         /* Set up initial pointers */
         prev=tprop=plist->props[loc];
