@@ -1518,12 +1518,23 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
 
-        /* Set the file driver to the MPI-I/O driver */
-        hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);     
-        if (hrc < 0) {
-            fprintf(stderr, "HDF5 Property List Set failed\n");
-            GOTOERROR(FAIL);
-        }
+        /* Use the appropriate VFL driver */
+        if(param->h5_use_mpi_posix) {
+            /* Set the file driver to the MPI-posix driver */
+            hrc = H5Pset_fapl_mpiposix(acc_tpl, pio_comm_g);     
+            if (hrc < 0) {
+                fprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            }
+        } /* end if */
+        else {
+            /* Set the file driver to the MPI-I/O driver */
+            hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);     
+            if (hrc < 0) {
+                fprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            }
+        } /* end else */
 
         /* Set the alignment of objects in HDF5 file */
         hrc = H5Pset_alignment(acc_tpl, param->h5_thresh, param->h5_align);
