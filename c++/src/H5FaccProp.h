@@ -29,75 +29,93 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	FileAccPropList();
 
 	// Copy constructor: creates a copy of a FileAccPropList object
-	FileAccPropList( const FileAccPropList& orig );
+	FileAccPropList( const FileAccPropList& original );
 
-	// Sets the low level file driver to use the functions 
-	// declared in the stdio.h
-	// void setStdio() const;
+	// Modifies this property list to use the H5FD_STDIO driver
+	void setStdio() const;
 
-	// Determines whether the file access property list is set to the 
-	// stdio driver.
-	// bool getStdio() const;
+	// Set file driver for this property list
+	void setDriver(hid_t new_driver_id, const void *new_driver_info) const;
+
+	// Returns a low-level file driver identifier.
+	hid_t getDriver() const;
+
+	// Sets offset for family driver.
+	void setFamilyOffset(hsize_t offset) const;
+
+	// Gets offset for family driver.
+	hsize_t getFamilyOffset() const;
+
+	// Modifies this file access property list to use the sec2 driver.
+	void setSec2() const;
+
+	// Modifies this file access property list to use the H5FD_CORE
+	// driver.
+	void setCore (size_t increment, hbool_t backing_store) const;
+
+	// Queries H5FD_CORE driver properties.
+	void getCore (size_t& increment, hbool_t& backing_store) const;
+
+	// Sets this file access properties list to the family driver.
+	void setFamily( hsize_t memb_size, const FileAccPropList& memb_plist ) const;
+
+	// Returns information about the family file access property list.
+	void getFamily(hsize_t& memb_size, FileAccPropList& memb_plist) const;
+	FileAccPropList getFamily(hsize_t& memb_size) const;
+
+	// Emulates the old split file driver,
+	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 
+	     const char* meta_ext = ".meta", const char* raw_ext = ".raw" ) const;
+	void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 
+	     const string& meta_ext, const string& raw_ext ) const;
+
+	// Modifies this file access property list to use the Stream driver.
+	void setStream(H5FD_stream_fapl_t &fapl) const;
+
+	// Retrieves the streaming I/O driver settings
+	H5FD_stream_fapl_t getStream() const;
+
+	// Sets the maximum size of the data sieve buffer.
+	void setSieveBufSize(size_t bufsize) const;
+
+	// Returns the current settings for the data sieve buffer size
+	// property
+	size_t getSieveBufSize() const;
+
+	// Sets the minimum size of metadata block allocations.
+	void setMetaBlockSize(hsize_t &block_size) const;
+
+	// Returns the current metadata block size setting.
+	hsize_t getMetaBlockSize() const;
+
+	// Modifies this file access property list to use the logging driver.
+	void setLog(const char *logfile, unsigned flags, size_t buf_size) const;
+	void setLog(const string& logfile, unsigned flags, size_t buf_size) const;
 
 	// Sets alignment properties of this file access property list
 	void setAlignment( hsize_t threshold = 1, hsize_t alignment = 1 ) const;
 
 	// Retrieves the current settings for alignment properties from
-	// this file access property list.
+	// this property list.
 	void getAlignment( hsize_t& threshold, hsize_t& alignment ) const;
 
-	/* MPI stuff not working in serial mode
-	//void setMpi( MPI_Comm comm, MPI_Info info ) const;
-	//void getMpi( MPI_Comm& comm, MPI_Info& info ) const;
-	*/
+	// Sets data type for multi driver.
+	void setMultiType(H5FD_mem_t dtype) const;
 
-	// Returns a low-level file driver identifier.
-	// H5F_driver_t getDriver() const;
-
-	// Sets the low-level file driver to use the declared functions.
-	// void setSec2() const;
-
-	// Determines whether this file access property list is set to the 
-	// sec2 driver.
-	// bool getSec2() const;
-
-	// Sets the low-level file driver to use malloc() and free().
-	// void setCore( size_t increment ) const;
-
-	// Determines whether this file access property list is set to the 
-	// core driver and retrieves the increment.
-	// bool getCore( size_t& increment ) const;
-
-	// Sets this file access properties list to the family driver.
-	// void setFamily( hsize_t memb_size, const FileAccPropList& memb_plist ) const;
-
-	// Determines whether this file access property list is set to the 
-	// family driver and retrieves the member's file access property list.
-	// bool getFamily( hsize_t& memb_size, FileAccPropList& memb_plist ) const;
+	// Returns the data type property for MULTI driver.
+	H5FD_mem_t getMultiType() const;
 
 	// Sets the meta data cache and raw data chunk cache parameters.
 	void setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const;
 
-	// Retrieves maximum sizes of data caches and the preemption 
-	// policy value.
+	// Queries the meta data cache and raw data chunk cache parameters.
 	void getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
 
-	// Sets the low-level driver to split meta data from raw data.
-	// void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 
-	     // const char* meta_ext = ".meta", const char* raw_ext = ".raw" ) const;
+	// Sets the degree for the file close behavior.
+	void setFcloseDegree(H5F_close_degree_t degree);
 
-	// void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 
-	     // const string& meta_ext, const string& raw_ext ) const;
-
-	// Determines whether this file access property list is set to the 
-	// split driver and retrieves the meta-data and raw-data property lists.
-	// void getSplit( size_t meta_ext_size, string& meta_ext, FileAccPropList& 
-	     // meta_plist, size_t raw_ext_size, string& raw_ext, FileAccPropList& 
-	     // raw_plist ) const;
-
-	// Proposal: 2 separate functions
-	//FileAccPropList getMetaPlist( size_t meta_ext_size, char* meta_ext );
-	//FileAccPropList getRawPlist( size_t raw_ext_size, char* raw_ext );
+	// Returns the degree for the file close behavior.
+	H5F_close_degree_t getFcloseDegree();
 
 	// Sets garbage collecting references flag.
 	void setGcReferences( unsigned gc_ref = 0 ) const;

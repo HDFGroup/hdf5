@@ -48,12 +48,6 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Gets B-tree split ratios for a dataset transfer property list
 	void getBtreeRatios( double& left, double& middle, double& right ) const;
 
-        // Sets an exception handling callback for datatype conversion
-        void setTypeConvCB( H5T_conv_except_func_t op, void *user_data) const;
-        
-        // Gets the exception handling callback for datatype conversion
-        void getTypeConvCB( H5T_conv_except_func_t *op, void **user_data) const;
-        
 	// Sets the memory manager for variable-length datatype 
 	// allocation in H5Dread and H5Dvlen_reclaim
 	void setVlenMemManager( H5MM_allocate_t alloc, void* alloc_info, 
@@ -68,11 +62,31 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	void getVlenMemManager( H5MM_allocate_t& alloc, void** alloc_info, 
 				H5MM_free_t& free, void** free_info ) const;
 
-	// Sets the transfer mode - parallel mode, not currently supported
-	//void setXfer( H5D_transfer_t data_xfer_mode = H5D_XFER_INDEPENDENT ) const;
+	// Sets the data transfer property list for the multi-file driver.
+	void setMulti(const hid_t *memb_dxpl);
 
-	// Gets the transfer mode - parallel mode, not currently supported
-	//H5D_transfer_t getXfer() const;
+	// Returns multi-file data transfer property list information.
+	void getMulti(hid_t *memb_dxpl);
+
+	// Sets the size of a contiguous block reserved for small data.
+	void setSmallDataBlockSize(hsize_t size);
+
+	// Returns the current small data block size setting.
+	hsize_t getSmallDataBlockSize();
+
+	// Sets number of I/O vectors to be read/written in hyperslab I/O.
+	void setHyperVectorSize(size_t vector_size);
+
+	// Returns the number of I/O vectors to be read/written in
+	// hyperslab I/O.
+	size_t getHyperVectorSize();
+
+	// Enables or disables error-detecting for a dataset reading
+	// process.
+	void setEDCCheck(H5Z_EDC_t check);
+
+	// Determines whether error-detection is enabled for dataset reads.
+	H5Z_EDC_t getEDCCheck();
 
 	// Creates a copy of an existing dataset memory and transfer 
 	// property list using the property list id

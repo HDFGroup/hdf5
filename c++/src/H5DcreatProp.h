@@ -54,17 +54,48 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	// Retrieves a dataset fill value
 	void getFillValue( const DataType& fvalue_type, void* value ) const;
 
+	// Checks if fill value has been defined for this property
+	H5D_fill_value_t isFillValueDefined();
+
 	// Adds a filter to the filter pipeline
 	void setFilter( H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;
 
 	// Remove one or all filters from the filter pipeline
-	void removeFilter( H5Z_filter_t filter) const;
+	void removeFilter( H5Z_filter_t filter_id) const;
 
 	// Returns the number of filters in the pipeline 
 	int getNfilters() const;
 
 	// Returns information about a filter in a pipeline
 	H5Z_filter_t getFilter( int filter_number, unsigned int& flags, size_t& cd_nelmts, unsigned int* cd_values, size_t namelen, char name[] ) const;
+
+	// Returns information about a filter in a pipeline given the filter id
+	void getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, size_t namelen, char name[]) const;
+
+	// Modifies the specified filter
+	void modifyFilter( H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;
+
+	// Queries whether all the filters set in this property list are 
+	// available currently.
+	bool allFiltersAvail();
+
+	// Sets method of the shuffle filter
+	void setShuffle();
+
+	// Get space allocation time for this property
+	H5D_alloc_time_t getAllocTime();
+
+	// Gets fill value writing time
+	H5D_fill_time_t getFillTime();
+
+	// Set space allocation time for dataset during creation
+	void setAllocTime(H5D_alloc_time_t alloc_time);
+
+	// Sets fill value writing time for dataset
+	void setFillTime(H5D_fill_time_t fill_time);
+
+	// Sets Fletcher32 checksum of EDC for this property list
+	void setFletcher32();
 
 	// Adds an external file to the list of external files
 	void setExternal( const char* name, off_t offset, hsize_t size ) const;
