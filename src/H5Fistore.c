@@ -126,11 +126,8 @@ static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
 static herr_t H5F_istore_debug_key(FILE *stream, int indent, int fwidth,
 				   const void *key, const void *udata);
-#ifdef H5_HAVE_PARALLEL
-static herr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
-				  const hssize_t offset[],
-				  void *_udata/*out*/);
-#endif
+static haddr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
+				  const hssize_t offset[]);
 
 /*
  * B-tree key.	A key contains the minimum logical N-dimensional address and
@@ -1718,6 +1715,8 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     hsize_t		naccessed;		/*bytes accessed in chnk*/
     uint8_t		*chunk=NULL;		/*ptr to a chunk buffer	*/
     unsigned		idx_hint=0;		/*cache index hint	*/
+    hsize_t		chunk_size;     /* Bytes in chunk */
+    haddr_t	        chunk_addr;     /* Chunk address on disk */
 
     FUNC_ENTER(H5F_istore_read, FAIL);
 
@@ -1734,10 +1733,11 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
      * For now, a hyperslab of the file must be read into an array in
      * memory.We do not yet support reading into a hyperslab of memory.
      */
-    for (u=0; u<layout->ndims; u++) {
+    for (u=0, chunk_size=1; u<layout->ndims; u++) {
         offset_m[u] = 0;
         size_m[u] = size[u];
-    }
+        chunk_size *= layout->dim[u];
+    } /* end for */
     
 #ifndef NDEBUG
     for (u=0; u<layout->ndims; u++) {
@@ -1779,20 +1779,35 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             sub_offset_m[u] = chunk_offset[u] + offset_wrt_chunk[u] +
                       offset_m[u] - offset_f[u];
         }
+
+        /* Get the address of this chunk on disk */
+        chunk_addr=H5F_istore_get_addr(f, layout, chunk_offset);
+
+        /*
+         * If the chunk is too large to load into the cache and it has no
+         * filters in the pipeline (i.e. not compressed) and if the address
+         * for the chunk has been defined, then don't load the chunk into the
+         * cache, just read the data from it directly.
+         */
+        if ((chunk_size>f->shared->rdcc_nbytes && pline->nfilters==0 &&
+                chunk_addr!=HADDR_UNDEF)
+
 #ifdef H5_HAVE_PARALLEL
         /*
          * If MPIO is used, must bypass the chunk-cache scheme because other
          * MPI processes could be writing to other elements in the same chunk.
          * Do a direct write-through of only the elements requested.
          */
-        if (IS_H5FD_MPIO(f)) {
-            H5F_istore_ud1_t	udata;
+            || IS_H5FD_MPIO(f)
+#endif /* H5_HAVE_PARALLEL */
+            ) {
             H5O_layout_t	l;	/* temporary layout */
 
-            if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                    "unable to locate raw data chunk");
-            };
+#ifdef H5_HAVE_PARALLEL
+            /* Additional sanity checks when operating in parallel */
+            if (chunk_addr==HADDR_UNDEF || pline->nfilters>0)
+                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
+#endif /* H5_HAVE_PARALLEL */
             
             /*
              * use default transfer mode as we do not support collective
@@ -1803,22 +1818,12 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             l.ndims = layout->ndims;
             for (u=l.ndims; u-- > 0; /*void*/)
                 l.dim[u] = layout->dim[u];
-            l.addr = udata.addr;
+            l.addr = chunk_addr;
             if (H5F_arr_read(f, H5P_DATASET_XFER_DEFAULT, &l, pline, fill, NULL/*no efl*/,
-                     sub_size, size_m, sub_offset_m, offset_wrt_chunk, buf)<0) {
-                HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
-                     "unable to read raw data from file");
-            }
-        } else {
-#endif
-
-#ifdef AKC
-            printf("Locking chunk( ");
-            for (u=0; u<layout->ndims; u++){
-                printf("%ld ", chunk_offset[u]);
-            }
-            printf(")\n");
-#endif
+                     sub_size, size_m, sub_offset_m, offset_wrt_chunk, buf)<0)
+                HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "unable to read raw data from file");
+        } /* end if */
+        else {
             /*
              * Lock the chunk, transfer data to the application, then unlock
              * the chunk.
@@ -1837,9 +1842,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                       "unable to unlock raw data chunk");
             }
-#ifdef H5_HAVE_PARALLEL
-        }
-#endif
+        } /* end else */
 
         /* Increment indices */
         for (i=(int)(layout->ndims-1), carry=1; i>=0 && carry; --i) {
@@ -1892,6 +1895,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     uint8_t		*chunk=NULL;
     unsigned		idx_hint=0;
     hsize_t		chunk_size, naccessed;
+    haddr_t	        chunk_addr;     /* Chunk address on disk */
     
     FUNC_ENTER(H5F_istore_write, FAIL);
 
@@ -1912,7 +1916,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         offset_m[u] = 0;
         size_m[u] = size[u];
         chunk_size *= layout->dim[u];
-    }
+    } /* end for */
 
 #ifndef NDEBUG
     for (u=0; u<layout->ndims; u++) {
@@ -1956,20 +1960,34 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                       offset_m[u] - offset_f[u];
         }
 
+        /* Get the address of this chunk on disk */
+        chunk_addr=H5F_istore_get_addr(f, layout, chunk_offset);
+
+        /*
+         * If the chunk is too large to load into the cache and it has no
+         * filters in the pipeline (i.e. not compressed) and if the address
+         * for the chunk has been defined, then don't load the chunk into the
+         * cache, just write the data to it directly.
+         */
+        if ((chunk_size>f->shared->rdcc_nbytes && pline->nfilters==0 &&
+                chunk_addr!=HADDR_UNDEF)
+
 #ifdef H5_HAVE_PARALLEL
         /*
          * If MPIO is used, must bypass the chunk-cache scheme because other
          * MPI processes could be writing to other elements in the same chunk.
          * Do a direct write-through of only the elements requested.
          */
-        if (IS_H5FD_MPIO(f)) {
-            H5F_istore_ud1_t	udata;
+            || IS_H5FD_MPIO(f)
+#endif /* H5_HAVE_PARALLEL */
+            ) {
             H5O_layout_t	l;	/* temporary layout */
 
-            if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                    "unable to locate raw data chunk");
-            };
+#ifdef H5_HAVE_PARALLEL
+            /* Additional sanity check when operating in parallel */
+            if (chunk_addr==HADDR_UNDEF || pline->nfilters>0)
+                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
+#endif /* H5_HAVE_PARALLEL */
             
             /*
              * use default transfer mode as we do not support collective
@@ -1980,45 +1998,26 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             l.ndims = layout->ndims;
             for (u=l.ndims; u-- > 0; /*void*/)
                 l.dim[u] = layout->dim[u];
-            l.addr = udata.addr;
+            l.addr = chunk_addr;
             if (H5F_arr_write(f, H5P_DATASET_XFER_DEFAULT, &l, pline, fill, NULL/*no efl*/,
-                     sub_size, size_m, sub_offset_m, offset_wrt_chunk, buf)<0) {
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                       "unable to write raw data to file");
-            }
-        } else {
-#endif
-
-#ifdef AKC
-            printf("Locking chunk( ");
-            for (u=0; u<layout->ndims; u++){
-                printf("%ld ", chunk_offset[u]);
-            }
-            printf(")\n");
-#endif
+                     sub_size, size_m, sub_offset_m, offset_wrt_chunk, buf)<0)
+                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
+        } /* end if */
+        else {
             /*
              * Lock the chunk, copy from application to chunk, then unlock the
              * chunk.
              */
             if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, pline, fill,
-                             chunk_offset,
-                             (hbool_t)(naccessed==chunk_size),
-                             &idx_hint))) {
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                       "unable to read raw data chunk");
-            }
+                     chunk_offset, (hbool_t)(naccessed==chunk_size), &idx_hint)))
+                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
             H5V_hyper_copy(layout->ndims, sub_size,
                layout->dim, offset_wrt_chunk, chunk, size_m, sub_offset_m, buf);
             H5_CHECK_OVERFLOW(naccessed,hsize_t,size_t);
             if (H5F_istore_unlock(f, dxpl_id, layout, pline, TRUE,
-                      chunk_offset, &idx_hint, chunk,
-                      (size_t)naccessed)<0) {
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                       "uanble to unlock raw data chunk");
-            }
-#ifdef H5_HAVE_PARALLEL
-        }
-#endif
+                      chunk_offset, &idx_hint, chunk, (size_t)naccessed)<0)
+                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "uanble to unlock raw data chunk");
+        } /* end else */
         
         /* Increment indices */
         for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
@@ -2262,38 +2261,43 @@ H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
  *              June 27, 1998
  *
  * Modifications:
+ *              Modified to return the address instead of returning it through
+ *              a parameter - QAK, 1/30/02
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_PARALLEL
-static herr_t
+static haddr_t
 H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
-		    const hssize_t offset[], void *_udata/*out*/)
+		    const hssize_t offset[])
 {
-    H5F_istore_ud1_t	*udata = _udata;
-    int		i;
-    herr_t		status;			/*func return status	*/
+    H5F_istore_ud1_t	udata;                  /* Information about a chunk */
+    unsigned	u;
+    haddr_t	ret_value=HADDR_UNDEF;		/* Return value */
     
-    FUNC_ENTER (H5F_istore_get_addr, FAIL);
+    FUNC_ENTER (H5F_istore_get_addr, HADDR_UNDEF);
 
     assert(f);
     assert(layout && (layout->ndims > 0));
     assert(offset);
-    assert(udata);
 
-    for (i=0; i<layout->ndims; i++) {
-	udata->key.offset[i] = offset[i];
-    }
-    udata->mesg = *layout;
-    udata->addr = HADDR_UNDEF;
-    status = H5B_find (f, H5B_ISTORE, layout->addr, udata);
-    H5E_clear ();
-    if (status>=0 && H5F_addr_defined(udata->addr))
-	HRETURN(SUCCEED);
+    /* Initialize the information about the chunk we are looking for */
+    for (u=0; u<layout->ndims; u++)
+	udata.key.offset[u] = offset[u];
+    udata.mesg = *layout;
+    udata.addr = HADDR_UNDEF;
 
-    FUNC_LEAVE (FAIL);
-}
-#endif /* H5_HAVE_PARALLEL */
+    /* Go get the chunk information */
+    if (H5B_find (f, H5B_ISTORE, layout->addr, &udata)<0) {
+        H5E_clear();
+	HGOTO_ERROR(H5E_BTREE,H5E_NOTFOUND,HADDR_UNDEF,"Can't locate chunk info");
+    } /* end if */
+
+    /* Success!  Set the return value */
+    ret_value=udata.addr;
+
+done:
+    FUNC_LEAVE (ret_value);
+} /* H5F_istore_get_addr() */
 
 
 /*-------------------------------------------------------------------------
