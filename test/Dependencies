@@ -2724,8 +2724,8 @@ dangle.lo: \
    $(top_srcdir)/src/H5Oprivate.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
-errors.lo: \
-   $(top_srcdir)/test/errors.c \
+error_test.lo: \
+   $(top_srcdir)/test/error_test.c \
    $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \

@@ -112,7 +112,12 @@ static herr_t
 h5_errors(hid_t err_stack, void UNUSED *client_data)
 {
     H5_FAILED();
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    H5Eprint (stdout);
+#else
     H5Eprint (err_stack, stdout);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
+
     return 0;
 }
 
@@ -214,7 +219,11 @@ h5_reset(void)
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    H5Eset_auto (h5_errors, NULL);
+#else
     H5Eset_auto (H5E_DEFAULT, h5_errors, NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /*
      * Cause the library to emit some diagnostics early so they don't

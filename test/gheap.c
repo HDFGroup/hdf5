@@ -89,7 +89,11 @@ test_1 (hid_t fapl)
     for (i=0; i<1024; i++) {
 	size = i+1;
 	memset (out, 'A'+i%26, size);
-	H5Eclear (H5E_DEFAULT);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	H5Eclear();
+#else
+	H5Eclear(H5E_DEFAULT);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	status = H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj+i);
 	if (status<0) {
 	    H5_FAILED();
@@ -108,7 +112,11 @@ test_1 (hid_t fapl)
     for (i=0; i<1024; i++) {
 	size = i+1;
 	memset (out, 'A'+i%26, size);
-	H5Eclear (H5E_DEFAULT);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	H5Eclear();
+#else
+	H5Eclear(H5E_DEFAULT);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	if (NULL==H5HG_read (f, H5P_DATASET_XFER_DEFAULT, obj+i, in)) {
 	    H5_FAILED();
 	    puts("    Unable to read object");
@@ -181,7 +189,11 @@ test_2 (hid_t fapl)
     for (i=0; i<1024; i++) {
 	size = 1024-i;
 	memset (out, 'A'+i%26, size);
-	H5Eclear (H5E_DEFAULT);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	H5Eclear();
+#else
+	H5Eclear(H5E_DEFAULT);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	if (H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj+i)<0) {
 	    H5_FAILED();
 	    puts("    Unable to insert object into global heap");
@@ -195,7 +207,11 @@ test_2 (hid_t fapl)
     for (i=0; i<1024; i++) {
 	size = 1024-i;
 	memset (out, 'A'+i%26, size);
-	H5Eclear (H5E_DEFAULT);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	H5Eclear();
+#else
+	H5Eclear(H5E_DEFAULT);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	if (NULL==H5HG_read (f, H5P_DATASET_XFER_DEFAULT, obj+i, in)) {
 	    H5_FAILED();
 	    puts("    Unable to read object");
@@ -266,7 +282,11 @@ test_3 (hid_t fapl)
     for (i=0; i<1024; i++) {
 	size = i%30+100;
 	memset (out, 'A'+i%26, size);
-	H5Eclear (H5E_DEFAULT);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	H5Eclear();
+#else
+	H5Eclear(H5E_DEFAULT);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	status = H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj+i);
 	if (status<0) {
 	    H5_FAILED();
@@ -345,7 +365,11 @@ test_4 (hid_t fapl)
 	/* Insert */
 	size = i%30+100;
 	memset (out, 'A'+i%26, size);
-	H5Eclear (H5E_DEFAULT);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	H5Eclear();
+#else
+	H5Eclear(H5E_DEFAULT);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	status = H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj+i);
 	if (status<0) {
 	    H5_FAILED();
@@ -359,7 +383,11 @@ test_4 (hid_t fapl)
 	 * remove B, insert D, E, F; remove E; etc.
 	 */ 
 	if (1==i%3) {
-	    H5Eclear (H5E_DEFAULT);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+	    H5Eclear();
+#else
+	    H5Eclear(H5E_DEFAULT);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	    status = H5HG_remove (f, H5P_DATASET_XFER_DEFAULT, obj+i-1);
 	    if (status<0) {
 		H5_FAILED();

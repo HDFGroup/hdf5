@@ -1239,7 +1239,7 @@ test_compound_7(void)
     /* Increase compound type size and try inserting field again */
     if(H5Tset_size(tid2, sizeof(struct s2))<0) {
         H5_FAILED();
-        printf("Incorrect size for struct 2\n");
+        printf("Can't increase size for compound type\n");
         goto error;
     } /* end if */
 

@@ -18,8 +18,15 @@
  *
  * Purpose:	Tests the H5Tget_native_type function.
  */
-
 #include "h5test.h"
+
+#ifdef H5_WANT_H5_V1_6_COMPAT
+int main(void)
+{
+    printf("Test skipped because backward compatbility with v1.6 is configured in\n"); 
+    return 0;
+}
+#else
 
 const char *FILENAME[] = {
     "errors",
@@ -344,10 +351,10 @@ custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_data)
     if(H5Eget_class_name(err_desc->cls_id, cls, MSG_SIZE)<0)
         TEST_ERROR;
 
-    if(H5Eget_msg(err_desc->maj_id, NULL, maj, MSG_SIZE)<0)
+    if(H5Eget_msg(err_desc->maj_num, NULL, maj, MSG_SIZE)<0)
         TEST_ERROR;
         
-    if(H5Eget_msg(err_desc->min_id, NULL, min, MSG_SIZE)<0)
+    if(H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE)<0)
         TEST_ERROR;
 
     fprintf (stream, "%*serror #%03d: %s in %s(): line %u\n",
@@ -479,3 +486,4 @@ main(void)
     printf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */

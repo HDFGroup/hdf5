@@ -36,11 +36,16 @@ typedef enum H5E_type_t {
     H5E_MINOR
 } H5E_type_t;
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
+typedef hid_t   H5E_major_t;
+typedef hid_t   H5E_minor_t;
+#endif /* H5_WANT_H5_V1_6_COMPAT */
+
 /* Information about an error; element of error stack */
 typedef struct H5E_error_t {
     hid_t       cls_id;         /*class ID                           */
-    hid_t       maj_id;		/*major error ID		     */
-    hid_t       min_id;		/*minor error number		     */
+    hid_t       maj_num;	/*major error ID		     */
+    hid_t       min_num;	/*minor error number		     */
     const char	*func_name;   	/*function in which error occurred   */
     const char	*file_name;	/*file in which error occurred       */
     unsigned	line;		/*line in file where error occurs    */
@@ -77,38 +82,68 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * Warning: don't break, return, or longjmp() from the body of the loop or
  *	    the error reporting won't be properly restored!
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
 #define H5E_BEGIN_TRY {							      \
     H5E_auto_t H5E_saved_efunc;						      \
     void *H5E_saved_edata;						      \
-    (void)H5Eget_auto(H5E_DEFAULT, &H5E_saved_efunc, &H5E_saved_edata);			      \
+    (void)H5Eget_auto(&H5E_saved_efunc, &H5E_saved_edata);	              \
+    (void)H5Eset_auto(NULL, NULL);
+
+#define H5E_END_TRY							      \
+    (void)H5Eset_auto (H5E_saved_efunc, H5E_saved_edata);	              \
+}
+#else /* H5_WANT_H5_V1_6_COMPAT */
+#define H5E_BEGIN_TRY {							      \
+    H5E_auto_t H5E_saved_efunc;						      \
+    void *H5E_saved_edata;						      \
+    (void)H5Eget_auto(H5E_DEFAULT, &H5E_saved_efunc, &H5E_saved_edata);	      \
     (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
 #define H5E_END_TRY							      \
-    (void)H5Eset_auto (H5E_DEFAULT, H5E_saved_efunc, H5E_saved_edata);			      \
+    (void)H5Eset_auto (H5E_DEFAULT, H5E_saved_efunc, H5E_saved_edata);	      \
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /*
  * Public API Convenience Macros for Error reporting - Documented
  */
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+#define H5Epush_sim(func,cls,maj,min,str) H5Epush(__FILE__,func,__LINE__,maj,min,str)
+#else
 #define H5Epush_sim(func,cls,maj,min,str) H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,cls,maj,min,str)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /*
  * Public API Convenience Macros for Error reporting - Undocumented
  */
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And return after pushing error onto stack */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+#define H5Epush_ret(func,cls,maj,min,str,ret) {         \
+    H5Epush(__FILE__,func,__LINE__,maj,min,str);    \
+    return(ret);                                    \
+}
+#else
 #define H5Epush_ret(func,cls,maj,min,str,ret) {         \
     H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,cls,maj,min,str);    \
     return(ret);                                    \
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
 /*  And goto a label after pushing error onto stack */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+#define H5Epush_goto(func,cls,maj,min,str,label) {      \
+    H5Epush(__FILE__,func,__LINE__,maj,min,str);    \
+    goto label;                                   \
+}
+#else
 #define H5Epush_goto(func,cls,maj,min,str,label) {      \
     H5Epush(H5E_DEFAULT,__FILE__,func,__LINE__,cls,maj,min,str);    \
     goto label;                                   \
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /* Error stack traversal direction */
 typedef enum H5E_direction_t {
@@ -133,19 +168,31 @@ H5_DLL hid_t  H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg);
 H5_DLL hid_t  H5Eget_current_stack(void);
 H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
 H5_DLL ssize_t H5Eget_class_name(hid_t class_id, char *name, size_t size);
-H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size);
 H5_DLL int     H5Eget_num(hid_t error_stack_id);
 H5_DLL herr_t  H5Eset_current_stack(hid_t err_stack_id);
-H5_DLL herr_t  H5Epush(hid_t err_stack, const char *file, const char *func, unsigned line, 
-                           hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg, ...);
 H5_DLL herr_t  H5Epop(hid_t err_stack, size_t count);
-H5_DLL herr_t  H5Eclear(hid_t err_stack);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+H5_DLL herr_t H5Epush(const char *file, const char *func, unsigned line, 
+                        H5E_major_t maj, H5E_minor_t min, const char *str);
+H5_DLL herr_t  H5Eprint(FILE *stream);
+H5_DLL herr_t  H5Ewalk(H5E_direction_t direction, H5E_walk_t func, 
+                            void *client_data);
+H5_DLL herr_t  H5Eget_auto(H5E_auto_t *func, void **client_data);
+H5_DLL herr_t  H5Eset_auto(H5E_auto_t func, void *client_data);
+H5_DLL herr_t  H5Eclear(void);
+H5_DLL const char * H5Eget_major(H5E_major_t maj);
+H5_DLL const char * H5Eget_minor(H5E_minor_t min);
+#else
+H5_DLL herr_t  H5Epush(hid_t err_stack, const char *file, const char *func, unsigned line, 
+                        hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg, ...);
 H5_DLL herr_t  H5Eprint(hid_t err_stack, FILE *stream);
 H5_DLL herr_t  H5Ewalk(hid_t err_stack, H5E_direction_t direction, H5E_walk_t func, 
                             void *client_data);
 H5_DLL herr_t  H5Eget_auto(hid_t estack_id, H5E_auto_t *func, void **client_data);
 H5_DLL herr_t  H5Eset_auto(hid_t estack_id, H5E_auto_t func, void *client_data);
-
+H5_DLL herr_t  H5Eclear(hid_t err_stack);
+H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 #ifdef __cplusplus
 }
 #endif
