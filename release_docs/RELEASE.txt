@@ -72,6 +72,8 @@ Bug Fixes since HDF5-1.4.2 Release
       fail.  Now adds that hyperslab as the first hyperlab in the selection.
     * Fixed a bug in the 'big' test where quota limits weren't being detected
       properly if they caused close() to fail.
+    * Fixed a bug in internal B-tree code where a B-tree was not being copied
+      correctly.
 
 
 Documentation
