@@ -42,7 +42,7 @@ hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
 ac_cv_header_stdc=${ac_cv_header_stdc='yes'}
 ac_cv_header_sys_ioctl_h=${ac_cv_header_sys_ioctl_h=yes}
-RUNPARALLEL="MP_PROCS=2 poe"
+RUNPARALLEL=${RUNPARALLEL="MP_PROCS=3 poe"}
 
 # cache the sizeof of "standard C types" so that configure can run faster.
 ac_cv_sizeof_char=${ac_cv_sizeof_char=1}
