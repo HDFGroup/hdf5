@@ -70,6 +70,8 @@ This section contains a brief explanation of the symbols used in the DDL.
     &lt;a&gt;<FONT SIZE=1.7>opt</FONT>                    zero or one occurrence of &lt;a&gt;
     &lt;a&gt;*                     zero or more occurrence of &lt;a&gt;
     &lt;a&gt;+                     one or more occurrence of &lt;a&gt;
+    [0-9]                    an element in the range between 0 and 9
+    `['                      the token within the quotes (used for special characters)
     TBD                      To Be Decided
 </pre>
 
@@ -86,30 +88,36 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;super_block_content&gt; ::= TBD
 
 &lt;root_group&gt; ::= GROUP "/" { &lt;unamed_datatype&gt;* &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
-            &lt;group_attribute&gt;* &lt;group_member&gt;* }  
+                 &lt;group_attribute&gt;* &lt;group_member&gt;* }  
 
-&lt;datatype&gt; ::= &lt;atomic_type&gt | &lt;compound_type&gt | &lt;variable_length_type&gt |
-            &lt;array_type&gt
+&lt;datatype&gt; ::= &lt;atomic_type&gt; | &lt;compound_type&gt; | &lt;variable_length_type&gt; | &lt;array_type&gt;
 
 &lt;unamed_datatype&gt; ::= DATATYPE &lt;unamed_type_name&gt; { &lt;datatype&gt; }
 
 &lt;unamed_type_name&gt; ::= the assigned name for unamed type is in the form of 
-           #oid1:oid2, where oid1 and oid2 are the object ids of the type
+                       #oid1:oid2, where oid1 and oid2 are the object ids
+                       of the type
 
-&lt;atomic_type&gt; ::= &lt;integer&gt; | &lt;float&gt; | &lt;time&gt; | &lt;string&gt; | &lt;bitfield&gt; |
-               &lt;opaque&gt; | &lt;reference&gt; | &lt;enum&gt;
+&lt;atomic_type&gt; ::= &lt;integer&gt;  | &lt;float&gt;  | &lt;time&gt;      | &lt;string&gt; |
+                  &lt;bitfield&gt; | &lt;opaque&gt; | &lt;reference&gt; | &lt;enum&gt;
 
-&lt;integer&gt; ::=  H5T_STD_I8BE | H5T_STD_I8LE | H5T_STD_I16BE |
-           H5T_STD_I16LE | H5T_STD_I32BE | H5T_STD_I32LE | H5T_STD_I64BE |
-           H5T_STD_I64LE | H5T_STD_U8BE | H5T_STD_U8LE | H5T_STD_U16BE |
-           H5T_STD_U16LE | H5T_STD_U32BE | H5T_STD_U32LE | H5T_STD_U64BE |
-           H5T_STD_U64LE | H5T_NATIVE_CHAR | H5T_NATIVE_UCHAR |
-           H5T_NATIVE_SHORT | H5T_NATIVE_USHORT | H5T_NATIVE_INT |
-           H5T_NATIVE_UINT | H5T_NATIVE_LONG | H5T_NATIVE_ULONG |
-           H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
+&lt;integer&gt; ::=  H5T_STD_I8BE     | H5T_STD_I8LE      |
+               H5T_STD_I16BE    | H5T_STD_I16LE     |
+               H5T_STD_I32BE    | H5T_STD_I32LE     |
+               H5T_STD_I64BE    | H5T_STD_I64LE     |
+               H5T_STD_U8BE     | H5T_STD_U8LE      |
+               H5T_STD_U16BE    | H5T_STD_U16LE     |
+               H5T_STD_U32BE    | H5T_STD_U32LE     |
+               H5T_STD_U64BE    | H5T_STD_U64LE     |
+               H5T_NATIVE_CHAR  | H5T_NATIVE_UCHAR  |
+               H5T_NATIVE_SHORT | H5T_NATIVE_USHORT |
+               H5T_NATIVE_INT   | H5T_NATIVE_UINT   |
+               H5T_NATIVE_LONG  | H5T_NATIVE_ULONG  |
+               H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
 
-&lt;float&gt; ::= H5T_IEEE_F32BE | H5T_IEEE_F32LE | H5T_IEEE_F64BE |
-            H5T_IEEE_F64LE | H5T_NATIVE_FLOAT |  H5T_NATIVE_DOUBLE |
+&lt;float&gt; ::= H5T_IEEE_F32BE   | H5T_IEEE_F32LE     |
+            H5T_IEEE_F64BE   | H5T_IEEE_F64LE     |
+            H5T_NATIVE_FLOAT |  H5T_NATIVE_DOUBLE |
             H5T_NATIVE_LDOUBLE
 
 &lt;time&gt; ::= TBD
@@ -119,7 +127,7 @@ This section contains a brief explanation of the symbols used in the DDL.
                CSET &lt;cset&gt; ;
                CTYPE &lt;ctype&gt; ; }  
 
-&lt;strsize&gt; ::= an integer
+&lt;strsize&gt; ::= &lt;int_value&gt;
 
 &lt;strpad&gt; ::= H5T_STR_NULLTERM | H5T_STR_NULLPAD | H5T_STR_SPACEPAD
 
@@ -141,12 +149,13 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;field_name&gt; ::= &lt;identifier&gt;
 
-&lt;variable_length_type&gt; ::= H5T_VLEN { &lt;datatype&gt }
+&lt;variable_length_type&gt; ::= H5T_VLEN { &lt;datatype&gt; }
 
 &lt;array_type&gt; ::= H5T_ARRAY { &lt;dim_sizes&gt; &lt;datatype&gt; }
 
-&lt;dim_sizes&gt; ::= [dimsize1][dimsize2]...
-// where dimsize1, dimsize2 are integers
+&lt;dim_sizes&gt; ::= `['&lt;dimsize&gt;`]' | `['&lt;dimsize&gt;`]'&lt;dim_sizes&gt;
+
+&lt;dimsize&gt; ::= &lt;int_value&gt;
 
 &lt;attribute&gt; ::= ATTRIBUTE &lt;attr_name&gt; { &lt;dataset_type&gt;    
                                         &lt;dataset_space&gt;
@@ -166,13 +175,13 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;enum_symbol&gt; ::= &lt;identifier&gt;
 
-&lt;enum_val&gt; ::= an integer;
+&lt;enum_val&gt; ::= &lt;int_value&gt;
 
 &lt;path_name&gt; ::= &lt;path_part&gt;+
 
 &lt;path_part&gt; ::= /&lt;identifier&gt;
 
-&lt;dataspace&gt; ::= &lt;scalar_space&gt | &lt;simple_space&gt | &lt;complex_space&gt
+&lt;dataspace&gt; ::= &lt;scalar_space&gt; | &lt;simple_space&gt; | &lt;complex_space&gt;
 
 &lt;scalar_space&gt; ::= SCALAR
 
@@ -182,27 +191,26 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;dataset_space&gt; ::= DATASPACE &lt;path_name&gt; | &lt;dataspace&gt;
 
-&lt;current_dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ), where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer, <i>k</i> = 1,2,...
+&lt;current_dims&gt; ::= &lt;dims&gt;
 
 &lt;max_dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ) where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer or H5S_UNLIMITED
 
 &lt;complex_space_definition&gt; ::= TBD
 
-&lt;data&gt; ::= DATA { &lt;scalar_space_data&gt; | &lt;simple_space_data&gt; |
-              &lt;complex_space_data&gt; }
+&lt;data&gt; ::= DATA { &lt;scalar_space_data&gt; | &lt;simple_space_data&gt; | &lt;complex_space_data&gt; }
                   
 &lt;scalar_space_data&gt; ::= &lt;any_element&gt;
 
 &lt;any_element&gt; ::= &lt;atomic_element&gt; | &lt;compound_element&gt; | 
-        &lt;variable_length_element&gt; | &lt;array_element&gt;
+                  &lt;variable_length_element&gt; | &lt;array_element&gt;
 
 &lt;any_data_seq&gt; ::= &lt;any_element&gt; | &lt;any_element&gt;, &lt;any_data_seq&gt;
 
-&lt;atomic_element&gt; :: = &lt;integer_data&gt; | &lt;float_data&gt; | &lt;time_data&gt; |
-                &lt;string_data&gt; | &lt;bitfield_data&gt; | &lt;opaque_data&gt; |
-                &lt;enum_data&gt; | &lt;reference_data&gt;
+&lt;atomic_element&gt; :: = &lt;integer_data&gt; | &lt;float_data&gt;    | &lt;time_data&gt;   |
+                      &lt;string_data&gt;  | &lt;bitfield_data&gt; | &lt;opaque_data&gt; |
+                      &lt;enum_data&gt;    | &lt;reference_data&gt;
 
-&lt;integer_data&gt; ::= an integer
+&lt;integer_data&gt; ::= &lt;int_value&gt;
 
 &lt;float_data&gt; ::= a floating point number
 
@@ -227,32 +235,34 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;object_id&gt; ::= OBJECTID { &lt;object_num&gt; }
 
-&lt;object_num&gt; ::= an integer:an integer | an integer
+&lt;object_num&gt; ::= &lt;int_value&gt;:&lt;int_value&gt; | &lt;int_value&gt;
 
 &lt;data_region_data&gt; ::= H5T_STD_REF_DSETREG &lt;object_num&gt;
         { &lt;data_region_data_info&gt;, &lt;data_region_data_info&gt;, ...}
 
 &lt;data_region_data_info&gt; ::= &lt;region_info&gt; | &lt;point_info&gt;
 
-&lt;region_info&gt; ::= (&lt;lower_bound&gt;:&lt;upper_bound&gt;,
-        &lt;lower_bound&gt;:&lt;upper_bound&gt;, ...)
+&lt;region_info&gt; ::= (&lt;region_vals&gt;)
 
-&lt;lower_bound&gt; ::= an integer
+&lt;region_vals&gt; ::= &lt;lower_bound&gt;:&lt;upper_bound&gt; | &lt;lower_bound&gt;:&lt;upper_bound&gt;, &lt;region_vals&gt;
 
-&lt;upper_bound&gt; ::= an integer
+&lt;lower_bound&gt; ::= &lt;int_value&gt;
 
-&lt;point_info&gt; ::= (an integer, an integer, ...)
+&lt;upper_bound&gt; ::= &lt;int_value&gt;
+
+&lt;point_info&gt; ::= (&lt;point_vals&gt;)
+
+&lt;point_vals&gt; ::= &lt;int_value&gt; | &lt;int_value&gt;, &lt;point_vals&gt;
 
 &lt;compound_element&gt; ::= { &lt;any_data_seq&gt; }
 
-&lt;atomic_simple_data&gt; :: = &lt;atomic_element&gt;, &lt;atomic_simple_data&gt; |
-        &lt;atomic_element&gt;
+&lt;atomic_simple_data&gt; :: = &lt;atomic_element&gt;, &lt;atomic_simple_data&gt; | &lt;atomic_element&gt;
 
 &lt;simple_space_data&gt; :: = &lt;any_data_seq&gt;
 
 &lt;variable_length_element&gt; ::= ( &lt;any_data_seq&gt; )
 
-&lt;array_element&gt; ::= [ &lt;any_data_seq&gt; ]
+&lt;array_element&gt; ::= `[' &lt;any_data_seq&gt; `]'
 
 &lt;complex_space_data&gt; ::= TBD
 
@@ -273,28 +283,30 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;group_attribute&gt; ::= &lt;attribute&gt; 
 
 &lt;group_member&gt; ::= &lt;named_datatype&gt; | &lt;named_dataspace&gt; | &lt;group&gt; |
-        &lt;dataset&gt; | &lt;softlink&gt;
+                   &lt;dataset&gt; | &lt;softlink&gt;
 
 &lt;dataset&gt; ::= DATASET &lt;dataset_name&gt; { &lt;hardlink&gt; | &lt;dataset_info&gt; }
 
 &lt;dataset_info&gt; ::= &lt;dataset_type&gt;  &lt;dataset_space&gt; &lt;storagelayout&gt;<FONT SIZE=1.7>opt</FONT>
-               &lt;compression&gt;<FONT SIZE=1.7>opt</FONT> &lt;dataset_attribute&gt;* &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
-               &lt;data&gt;<FONT SIZE=1.7>opt</FONT>
+                   &lt;compression&gt;<FONT SIZE=1.7>opt</FONT> &lt;dataset_attribute&gt;* &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
+                   &lt;data&gt;<FONT SIZE=1.7>opt</FONT>
 // Tokens above can be in any order as long as &lt;data&gt; is 
 // after &lt;dataset_type&gt; and &lt;dataset_space&gt;.
 
 &lt;dataset_name&gt; ::= &lt;identifier&gt;
 
 &lt;storagelayout&gt; :: = STORAGELAYOUT &lt;contiguous_layout&gt;  |  
-                     STORAGELAYOUT &lt;chunked_layout&gt;  | 
-                     STORAGELAYOUT &lt;compact_layout&gt;  | 
+                     STORAGELAYOUT &lt;chunked_layout&gt;     |
+                     STORAGELAYOUT &lt;compact_layout&gt;     |
                      STORAGELAYOUT &lt;external_layout&gt; 
 
 &lt;contiguous_layout&gt; ::= {CONTIGUOUS}    // default
 
 &lt;chunked_layout&gt; ::=  {CHUNKED &lt;dims&gt; }
 
-&lt;dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ), <i>i<FONT SIZE=1.0>k</i></FONT> is an integer, <i>k</i> = 1,2,... 
+&lt;dims&gt; ::= (&lt;dims_values&gt;)
+
+&lt;dims_values&gt; ::= &lt;int_value&gt; | &lt;int_value&gt;, &lt;dims_values&gt;
 
 &lt;compact_layout&gt; ::= TBD           
 
@@ -302,9 +314,9 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;external_file&gt; ::= (&lt;file_name&gt; &lt;offset&gt; &lt;size&gt;) 
 
-&lt;offset&gt; ::= an integer
+&lt;offset&gt; ::= &lt;int_value&gt;
 
-&lt;size&gt; ::= an integer
+&lt;size&gt; ::= &lt;int_value&gt;
 
 &lt;compression&gt; :: = COMPRESSION { TBD }  
 
@@ -316,16 +328,18 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;target&gt; ::= &lt;identifier&gt;
 
-&lt;identifier&gt; ::= string   
+&lt;identifier&gt; ::= a string
 // character '/' should be used with care. 
 
+&lt;int_value&gt; ::= 0 | [1-9][0-9]*
+
 </PRE>
-</dir>
+</DIR>
 
 
-<h2>4. An Example of an HDF5 File in DDL</h2>
+<H2>4. An Example of an HDF5 File in DDL</H2>
 
-<dir>
+<DIR>
 <PRE>
 HDF5 "example.h5" {
 GROUP "/" {
