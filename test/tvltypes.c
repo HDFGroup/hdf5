@@ -28,7 +28,7 @@ static char		RcsId[] = "$Revision$";
 
 #include <hdf5.h>
 
-#define FILE   "tvltypes.h5"
+#define FILENAME   "tvltypes.h5"
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -133,7 +133,7 @@ test_vltypes_vlen_atomic(void)
     } /* end for */
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -263,7 +263,7 @@ test_vltypes_vlen_compound(void)
     } /* end for */
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -413,7 +413,7 @@ test_vltypes_compound_vlen_atomic(void)
     } /* end for */
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -568,7 +568,7 @@ test_vltypes_vlen_vlen_atomic(void)
     } /* end for */
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -612,7 +612,7 @@ test_vltypes_vlen_vlen_atomic(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Create file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Create dataspace for datasets */
@@ -751,6 +751,6 @@ test_vltypes(void)
 void
 cleanup_vltypes(void)
 {
-    remove(FILE);
+    remove(FILENAME);
 }
 
