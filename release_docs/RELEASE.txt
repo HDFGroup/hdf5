@@ -192,6 +192,26 @@ Tools
 
 Documentation
 -------------
+  o Library
+  =========
+    o General
+    --------- 
+      * API tracing has been improved. Nested API calls don't screw up the
+        output format; function call and return event times can be logged;
+        total time spent in each function can be logged.  The following
+        HDF5_DEBUG environment variable words affect tracing:
+	    trace   -- turn on/off basic tracing
+	    ttimes  -- turn on tracing and report event times and
+                       time spent in each API function.
+            ttop    -- turn on tracing but display only top-level
+                       API calls.
+
+ 
+    o APIs
+    ------
+ 
+    o Performance
+    -------------
 
 
 New Features
