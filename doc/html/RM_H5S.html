@@ -53,7 +53,7 @@ elements of a dataset.
     <li><a href="#Dataspace-ExtentDims">H5Sget_simple_extent_dims</a>
     <li><a href="#Dataspace-ExtentNdims">H5Sget_simple_extent_ndims</a>
     <li><a href="#Dataspace-ExtentNpoints">H5Sget_simple_extent_npoints</a>
-    <li><a href="#Dataspace-GetSpaceType">H5Sget_space_type</a>
+    <li><a href="#Dataspace-ExtentType">H5Sget_simple_extent_type</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
@@ -403,13 +403,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Dataspace-GetSpaceType">H5Sget_space_type</a>
+<dt><strong>Name:</strong> <a name="Dataspace-ExtentType">H5Sget_simple_extent_type</a>
 <dt><strong>Signature:</strong>
-    <dd><em>H5S_class_t</em> <code>H5Sget_space_type</code>(<em>hid_t</em> <code>space_id</code>)
+    <dd><em>H5S_class_t</em> <code>H5Sget_simple_extent_type</code>(<em>hid_t</em> <code>space_id</code>)
 <dt><strong>Purpose:</strong>
     <dd>Determine the current class of a dataspace.
 <dt><strong>Description:</strong>
-    <dd><code>H5Sget_space_type</code> queries a dataspace to determine the 
+    <dd><code>H5Sget_simple_extent_type</code> queries a dataspace to determine the 
         current class of a dataspace.  
         <p>
         The function returns a class name, one of the following: 
@@ -423,7 +423,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace class name if successful; 
-        otherwise FAIL (-1).
+        otherwise H5S_NO_CLASS (-1).
 </dl>
 
 

@@ -39,17 +39,14 @@ of objects on disk.
 <ul>
     <li><a href="#Group-Create">H5Gcreate</a>
     <li><a href="#Group-Open">H5Gopen</a>
-    <li><a href="#Group-Set">H5Gset</a>
     <li><a href="#Group-Close">H5Gclose</a>
-    <li><a href="#Group-Push">H5Gpush</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Group-Pop">H5Gpop</a>
     <li><a href="#Group-Link">H5Glink</a>
-    <li><a href="#Group-Unlink">H5Gunlink</a>  (NYI)
+    <li><a href="#Group-Unlink">H5Gunlink</a>  
     <li><a href="#Group-Iterate">H5Giterate</a>
-    <li><a href="#Group-Move">H5Gmove</a> (NYI)
+    <li><a href="#Group-Move">H5Gmove</a> 
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
@@ -58,8 +55,6 @@ of objects on disk.
     <li><a href="#Group-SetComment">H5Gset_comment</a>
     <li><a href="#Group-GetComment">H5Gget_comment</a>
 </ul>
-</td></tr><tr><td colspan=5 align=right>
-<font size=-2>(NYI = Not yet implemented)</font>
 </td></tr>
 </table>
 
@@ -76,29 +71,16 @@ non-empty file is the root object.  The root object always has a
 positive in-degree because it is pointed to by the file boot block.
 
 <p>
-Every file identifier returned by <code>H5Fcreate</code> or
-<code>H5Fopen</code> maintains an independent current working group
-stack, the top item of which is the current working group.  The 
-stack can be manipulated with <code>H5Gset</code>, <code>H5Gpush</code>, 
-and <code>H5Gpop</code>.  The root object is the current working group 
-if the stack is empty.  
-
-<p>
 An object name consists of one or more components separated from
 one another by slashes. An absolute name begins with a slash and the
 object is located by looking for the first component in the root
 object, then looking for the second component in the first object, etc.,
 until the entire name is traversed.  A relative name does not begin 
-with a slash and the traversal begins with the current working group.
+with a slash and the traversal begins at the location specified by the 
+calling function.
 
 <p>
-The library does not maintain the full absolute name of its current
-working group because (1) cycles in the graph can make the name length
-unbounded and (2) a group does not necessarily have a unique name.  A
-more Unix-like hierarchical naming scheme can be implemented on top of
-the directed graph scheme by creating a ".." entry in each group that
-points to its single predecessor; a <code>getcwd</code> function would 
-then be trivial.
+
 
 <hr>
 <dl>
@@ -182,118 +164,6 @@ then be trivial.
 
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-Set">H5Gset</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Gset</code> (<em>hid_t</em> <code>loc_id</code>, 
-        <em>const char *</em><code>name</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the current working group within a file.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Gset</code> sets the group with the specified name 
-        to be the current working group for the file which contains it.
-	  This function sets the current working group by modifying the
-	  top element of the current working group stack or, if the
-	  stack is empty, by pushing a new element onto the stack.
-        The initial current working group is the root group.
-        <p>
-        <code>loc_id</code> can be a file identifier or a group identifier.
-        <p>
-	  <code>name</code> is an absolute or relative name and is resolved as follows.  Each file identifier 
-        has a current working group, initially the root group of the 
-        file.  Relative names do not begin with a slash and are relative 
-        to the specified group or to the current working group.  
-        Absolute names begin with a slash and are relative to the file's 
-        root group.  For instance, the name <code>/Foo/Bar/Baz</code> is 
-        resolved by first looking up <code>Foo</code> in the root group; 
-        the name <code>Foo/Bar/Baz</code> is resolved by first looking  
-        up the name <code>Foo</code> in the current working group.
-        <p>
-	  Each file identifier maintains its own notion of the current 
-        working group.  If <code>loc_id</code> is a group identifier, the 
-	  file identifier is derived from the group identifier. 
-        <p>
-        If a single file is opened with multiple calls to <code>H5Fopen()</code>, 
-        which would return multiple file identifiers, then each 
-        identifier's current working group can be set independently 
-        of the other file identifiers for that file.
-  <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>The file or group identifier.
-      <dt><em>const char *</em><code>name</code>
-        <dd>The name of the new current working group.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Group-Push">H5Gpush</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Gpush</code> (<em>hid_t</em> <code>loc_id</code>, 
-	  <em>const char *</em><code>name</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the current working group by pushing a
-        new element onto the current working group stack.
-  <dt><strong>Description:</strong>
-    <dd>Each file identifier maintains a stack of groups, the top group 
-        of which is the current working group.  The stack initially 
-        contains only the root group.  <code>H5Gpush</code> pushes a new group 
-        onto the stack, thus setting a new current working group. 
-  <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier.
-	<dt><em>const char *</em><code>name</code>
-        <dd>The name of the new current working group.  The name may be
-            an absolute or relative name.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Group-Pop">H5Gpop</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Gpop</code> (<em>hid_t</em> <code>loc_id</code>)
-  <dt><strong>Purpose:</strong>
-    <dd>Removes the top, or latest, entry from the working group stack, 
-        setting the current working group to the previous value.  
-  <dt><strong>Description:</strong>
-    <dd><code>H5Gpop</code> restores the previous current working group by
-        popping an element from the current working group stack.  
-        An empty stack implies that the current working group is the root
-        object. Attempting to pop an empty stack results in failure.
-        <p>
-        Each file identfier maintains its own notion of the current
-        working group.  That is, if a single file is opened with
-        multiple calls to <code>H5Fopen()</code>, which returns multiple file
-        handles, then each identfier's current working group can be
-        set independently of the other file identfiers for that file.
-        <p>
-        If <code>loc_id</code> is a group identifier, it is used only to determine the
-        file identifier for the stack from which to pop the top entry.
-  <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-	  <dd>The file, group, dataset, or datatype identifier.
-      </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
-</dl>
-
-
-<hr>
-<dl>
   <dt><strong>Name:</strong> <a name="Group-Close">H5Gclose</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Gclose</code>(<em>hid_t </em><code>group_id</code>)
@@ -367,8 +237,6 @@ then be trivial.
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-Unlink">H5Gunlink</a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <strong>(Not implemented in this release.)</strong>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Gunlink</code>(<em>hid_t</em> <code>loc_id</code>,
         <em>const char *</em><code>name</code>
@@ -473,8 +341,6 @@ then be trivial.
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-Move">H5Gmove</a>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <strong>(Not implemented in this release.)</strong>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Gmove</code>(<em>hid_t</em> <code>loc_id</code>,
         <em>const char</em> <code>*src</code>,
