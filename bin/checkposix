@@ -1,0 +1,61 @@
+#!/usr/local/bin/perl -w
+require 5.003;
+
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#		     All rights reserved.
+#
+# Robb Matzke, matzke@llnl.gov
+# 30 Aug 1997
+#
+# Purpose: Given the names of C source files this script will print the
+#	   file name, line number, and function name of any function that
+#	   doesn't begin with the letter `h' or `H' as stipulated by the
+#	   HDF5 programming style guide.
+#
+#	   Emacs users can run this script as the compile command and
+#	   use `next-error' (usually bound to M-`) to find each name
+#	   violation.
+
+while (<>) {
+
+   # Get rid of comments by removing the inside part.
+   s|/\*.*?\*/||g;
+   if ($in_comment) {
+      if (/\*\//) {
+         s|.*?\*/||;
+         $in_comment = 0;
+      } else {
+         $_="\n";
+      }
+   } elsif (m|/\*|) {
+      s|/\*.*||;
+      $in_comment = 1;
+   }
+
+   # Get rid of string constants if they begin and end on this line.
+   s/([\'\"])([^\1]|\\\1)*?\1/$1$1/g;
+
+
+   # Now find all function calls on this line
+   while (($name)=/\b([a-gi-z_A-GI-Z]\w*)\s*\(/) {
+      $_ = $';
+      
+      # Ignore C statements that look sort of like function
+      # calls.
+      next if $name =~ /^(if|for|return|sizeof|switch|while)$/;
+
+      # These are really HDF5 functions/macros even though they don't
+      # start with `h' or `H'.
+      next if $name =~ /^FUNC_(ENTER|LEAVE)$/;
+      next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)$/;
+      next if $name =~ /^(MIN|MAX3?|NELMTS|BOUND|CONSTR)$/;
+
+      # These functions/macros are exempt.
+      next if $name =~ /^(assert|main|[fs]?printf)$/;
+
+      print "$ARGV:$.: $name\n";
+   }
+
+} continue {
+   close ARGV if eof;
+}
