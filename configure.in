@@ -160,10 +160,6 @@ fi
 dnl Run configure in the subdirectories if specified
 AC_CONFIG_SUBDIRS(${config_dirs})
 
-AC_PROG_MAKE_SET
-AC_PROG_INSTALL
-AM_PROG_LIBTOOL
-
 dnl ----------------------------------------------------------------------
 dnl If we should build only static executables
 dnl
@@ -181,10 +177,22 @@ else
 fi
 AC_SUBST(LT_STATIC_EXEC)
 
-if test "X$AR" = "X"; then
+dnl ----------------------------------------------------------------------
+dnl Check which archiving tool to use. This needs to be done before
+dnl the AM_PROG_LIBTOOL macro.
+dnl
+if test -z "$AR"; then
    AC_CHECK_PROGS(AR,ar xar,:,$PATH)
 fi
 AC_SUBST(AR)
+
+dnl Export the AR macro so that it will be placed in the libtool file
+dnl correctly.
+export AR
+
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AM_PROG_LIBTOOL
 
 AC_MSG_CHECKING(make)
 AC_SUBST_FILE(DEPEND)
