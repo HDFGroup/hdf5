@@ -193,7 +193,7 @@ H5O_name_size(H5F_t *f, const void *_mesg)
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     size_t                  size;
 
-    FUNC_ENTER(H5O_name_size, FAIL);
+    FUNC_ENTER(H5O_name_size, 0);
 
     /* check args */
     assert(f);

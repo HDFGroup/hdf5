@@ -22,9 +22,9 @@
 #include <H5private.h>
 #include <H5Fprivate.h>         /*for the H5F_t type                         */
 #include <H5Gprivate.h>         /*symbol tables                              */
-#include <H5Tprivate.h>         /*for the H5T_t type                         */
-#include <H5Sprivate.h>         /*for the H5S_t type                         */
 #include <H5Oprivate.h>         /*object Headers                             */
+#include <H5Sprivate.h>         /*for the H5S_t type                         */
+#include <H5Tprivate.h>         /*for the H5T_t type                         */
 
 /*
  * Feature: Define H5D_DEBUG on the compiler command line if you want to
@@ -51,8 +51,9 @@ typedef struct H5D_create_t {
 /* Dataset transfer property list */
 typedef struct H5D_xfer_t {
     size_t		buf_size;	/*max temp buffer size		     */
-    void		*tconv;		/*type conversion buffer or null     */
-    void		*bkg;		/*background buffer or null	     */
+    void		*tconv_buf;	/*type conversion buffer or null     */
+    void		*bkg_buf;	/*background buffer or null	     */
+    H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
 } H5D_xfer_t;
 
 typedef struct H5D_t H5D_t;

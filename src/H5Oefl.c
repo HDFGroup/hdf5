@@ -233,7 +233,7 @@ H5O_efl_copy(const void *_mesg, void *_dest)
  *
  * Return:	Success:	Message data size in bytes.
  *
- *		Failure:	FAIL
+ *		Failure:	0
  *
  * Programmer:	Robb Matzke
  *		Tuesday, November 25, 1997
@@ -246,9 +246,9 @@ static size_t
 H5O_efl_size(H5F_t *f, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
-    size_t		ret_value = FAIL;
+    size_t		ret_value = 0;
 
-    FUNC_ENTER(H5O_efl_size, FAIL);
+    FUNC_ENTER(H5O_efl_size, 0);
 
     /* check args */
     assert(f);

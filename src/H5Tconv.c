@@ -297,15 +297,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	}
     }
 
-#ifndef LATER
-    /*
-     * Always use an initialized background buffer.  Actually, we usually
-     * won't need it initialized but we'll almost always need a buffer to
-     * move the members around.
-     */
-    cdata->need_bkg = H5T_BKG_YES;
-#endif
-
+    cdata->need_bkg = H5T_BKG_TEMP;
     cdata->recalc = FALSE;
     FUNC_LEAVE (SUCCEED);
 }

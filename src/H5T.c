@@ -303,7 +303,7 @@ H5T_term_interface(void)
     H5T_soft_g = H5MM_xfree (H5T_soft_g);
 
     /* Clear noop function */
-    if ((cfunc=H5T_find (NULL, NULL, &pcdata))) {
+    if ((cfunc=H5T_find (NULL, NULL, H5T_BKG_NO, &pcdata))) {
 	pcdata->command = H5T_CONV_FREE;
 	(cfunc)(FAIL, FAIL, pcdata, 0, NULL, NULL);
     }
@@ -2383,7 +2383,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     
     /* Find it */
     *pcdata = NULL;
-    if (NULL == (ret_value = H5T_find(src, dst, pcdata))) {
+    if (NULL == (ret_value = H5T_find(src, dst, H5T_BKG_NO, pcdata))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
 		      "conversion function not found");
     }
@@ -3019,7 +3019,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 /*-------------------------------------------------------------------------
  * Function:	H5T_find
  *
- * Purpose:	Finds a conversion function for the specified path.
+ * Purpose:	Finds a conversion function for the specified path.  If the
+ *		source and destination types are the same and NEED_BKG is not
+ *		H5T_BKG_YES then a pointer to the H5T_conv_noop() function is
+ *		returned.
  *
  * Return:	Success:	A pointer to an appropriate conversion
  *				function.  The PCDATA argument is initialized
@@ -3036,7 +3039,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
  *-------------------------------------------------------------------------
  */
 H5T_conv_t
-H5T_find(const H5T_t *src, const H5T_t *dst, H5T_cdata_t **pcdata)
+H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
+	 H5T_cdata_t **pcdata/*out*/)
 {
     H5T_path_t		*path = NULL;
     H5T_conv_t		ret_value = NULL;
@@ -3045,7 +3049,7 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_cdata_t **pcdata)
     FUNC_ENTER(H5T_find, NULL);
 
     /* No-op case */
-    if (0 == H5T_cmp(src, dst)) {
+    if (need_bkg<H5T_BKG_YES && 0==H5T_cmp(src, dst)) {
 	*pcdata = &noop_cdata;
 	HRETURN(H5T_conv_noop);
     }

@@ -5,6 +5,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, January 23, 1998
  */
+#undef NDEBUG
 #include <assert.h>
 #include <hdf5.h>
 #include <stdio.h>
@@ -121,7 +122,7 @@ main (void)
 
     /* Other variables */
     int			i, j, ndims;
-    hid_t		file, dataset, space;
+    hid_t		file, dataset, space, PRESERVE;
     herr_t		status;
     static size_t	dim[] = {NX, NY};
     int 		f_offset[2];	/*offset of hyperslab in file	*/
@@ -137,7 +138,11 @@ main (void)
     space = H5Screate_simple (2, dim, NULL);
     assert (space>=0);
 
-    
+    /* Create xfer properties to preserve initialized data */
+    PRESERVE = H5Pcreate (H5P_DATASET_XFER);
+    assert (PRESERVE>=0);
+    status = H5Pset_preserve (PRESERVE, 1);
+    assert (status>=0);
 
     /*
      *######################################################################
@@ -291,7 +296,7 @@ STEP  5: Read members into a superset which is partially initialized.\n");
     assert (s5_tid>=0);
 	
     /* Read the data */
-    status = H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s5);
+    status = H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, PRESERVE, s5);
     assert (status>=0);
 
     /* Check that the data was read properly */
@@ -329,7 +334,7 @@ STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
     }
 
     /* Write the data to file */
-    status = H5Dwrite (dataset, s4_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s4);
+    status = H5Dwrite (dataset, s4_tid, H5S_ALL, H5S_ALL, PRESERVE, s4);
     assert (status>=0);
     
     /* Read the data back */
@@ -474,7 +479,7 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
     memset (s5, 0xFF, NX*NY*sizeof(s5_t));
     
     /* Read the hyperslab */
-    status = H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, H5P_DEFAULT, s5);
+    status = H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, PRESERVE, s5);
     assert (status>=0);
 
     /* Compare */
@@ -525,7 +530,7 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     memset (s11, 0xff, h_size[0]*h_size[1]*sizeof(s4_t));
     
     /* Write to disk */
-    status = H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s11);
+    status = H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11);
     assert (status>=0);
 
     /* Read the whole thing */

@@ -224,7 +224,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
         H5F_t *f;         IN: pointer to the HDF5 file struct
         const void *mesg;       IN: Pointer to the source simple dimensionality struct
  RETURNS
-    Size of message on success, FAIL on failure
+    Size of message on success, zero on failure
  DESCRIPTION
         This function returns the size of the raw simple dimensionality message on
     success.  (Not counting the message type or size fields, only the data
@@ -236,7 +236,7 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
     size_t                  ret_value = 8;      /* all dimensionality messages are at least 8 bytes long (rank and flags) */
 
-    FUNC_ENTER(H5O_sim_dtype_size, FAIL);
+    FUNC_ENTER(H5O_sim_dtype_size, 0);
 
     ret_value += sdim->rank * 4;        /* add in the dimension sizes */
     ret_value += sdim->max ? sdim->rank * 4 : 0;       /* add in the space for the maximum dimensions, if they are present */

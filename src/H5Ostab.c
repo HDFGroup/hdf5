@@ -208,7 +208,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
  *
  * Return:      Success:        Message data size in bytes without alignment.
  *
- *              Failure:        FAIL
+ *              Failure:        zero
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -221,7 +221,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
 static size_t
 H5O_stab_size(H5F_t *f, const void *_mesg)
 {
-    FUNC_ENTER(H5O_stab_size, FAIL);
+    FUNC_ENTER(H5O_stab_size, 0);
     FUNC_LEAVE(2 * H5F_SIZEOF_ADDR(f));
 }
 

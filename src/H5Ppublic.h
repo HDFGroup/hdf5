@@ -85,6 +85,8 @@ herr_t H5Pset_family (hid_t tid, hid_t memb_tid);
 herr_t H5Pget_family (hid_t tid, hid_t *memb_tid/*out*/);
 herr_t H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg);
 size_t H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/);
+herr_t H5Pset_preserve (hid_t plist_id, hbool_t status);
+int H5Pget_preserve (hid_t plist_id);
 
 #ifdef HAVE_PARALLEL
 herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info,

@@ -66,6 +66,7 @@ const H5D_xfer_t	H5D_xfer_dflt = {
     1024*1024,			/* Temporary buffer size		*/
     NULL,			/* Type conversion buffer or NULL	*/
     NULL, 			/* Background buffer or NULL		*/
+    H5T_BKG_NO,			/* Type of background buffer needed	*/
 };
 
 /* Interface initialization? */
@@ -1104,8 +1105,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		src_type_size;		/*size of source type	*/
     size_t		dst_type_size;		/*size of destination type*/
     size_t		target_size;		/*desired buffer size	*/
-    size_t		buffer_size;		/*actual buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
+    H5T_bkg_t		need_bkg;		/*type of background buf*/
 
     FUNC_ENTER(H5D_read, FAIL);
 
@@ -1121,9 +1122,13 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
-     * type conversion is necessary then register data type atoms.
+     * type conversion is necessary then register data type atoms. Data type
+     * conversion is necessary if the user has set the `need_bkg' to a high
+     * enough value in xfer_parms since turning off data type conversion also
+     * turns off background preservation.
      */
-    if (NULL == (tconv_func = H5T_find(dataset->type, mem_type, &cdata))) {
+    if (NULL == (tconv_func = H5T_find(dataset->type, mem_type,
+				       xfer_parms->need_bkg, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
@@ -1185,7 +1190,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	smine_nelmts = request_nelmts;
 	HDmemset (&numbering, 0, sizeof numbering);
     }
-    buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
 
     /*
      * Get a temporary buffer for type conversion unless the app has already
@@ -1194,28 +1198,36 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (NULL==(tconv_buf=xfer_parms->tconv)) {
+    if (cdata->need_bkg) {
+	need_bkg = MAX (cdata->need_bkg, xfer_parms->need_bkg);
+    } else {
+	need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
+    }
+    if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
 	tconv_buf = H5MM_xmalloc (target_size);
     }
-    if (cdata->need_bkg && NULL==(bkg_buf=xfer_parms->bkg)) {
+    if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
 	bkg_buf = H5MM_xmalloc (smine_nelmts * dst_type_size);
     }
 
 #ifdef H5D_DEBUG
-    /* Strip mine diagnostics.... */
-    if (smine_nelmts<nelmts) {
-	fprintf (stderr, "HDF5-DIAG: strip mine");
-	if (smine_nelmts!=request_nelmts) {
-	    fprintf (stderr, " got %lu of %lu",
-		     (unsigned long)smine_nelmts,
-		     (unsigned long)request_nelmts);
+    {
+	/* Strip mine diagnostics.... */
+	size_t buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
+	if (smine_nelmts<nelmts) {
+	    fprintf (stderr, "HDF5-DIAG: strip mine");
+	    if (smine_nelmts!=request_nelmts) {
+		fprintf (stderr, " got %lu of %lu",
+			 (unsigned long)smine_nelmts,
+			 (unsigned long)request_nelmts);
+	    }
+	    if (buffer_size!=target_size) {
+		fprintf (stderr, " (%1.1f%% of buffer)",
+			 100.0*buffer_size/target_size);
+	    }
+	    fprintf (stderr, " %1.1f iterations\n",
+		     (double)nelmts/smine_nelmts);
 	}
-	if (buffer_size!=target_size) {
-	    fprintf (stderr, " (%1.1f%% of buffer)",
-		     100.0*buffer_size/target_size);
-	}
-	fprintf (stderr, " %1.1f iterations\n",
-		 (double)nelmts/smine_nelmts);
     }
 #endif
 
@@ -1235,7 +1247,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				tconv_buf/*out*/)!=smine_nelmts) {
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
 	}
-	if (H5T_BKG_YES==cdata->need_bkg) {
+	if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
+	    (!H5D_OPTIMIZE_PIPE && need_bkg)) {
 	    if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
 				    &numbering, smine_start, smine_nelmts,
 				    bkg_buf/*out*/)!=smine_nelmts) {
@@ -1271,10 +1284,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  done:
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv) {
+    if (tconv_buf && NULL==xfer_parms->tconv_buf) {
 	H5MM_xfree(tconv_buf);
     }
-    if (bkg_buf && NULL==xfer_parms->bkg) {
+    if (bkg_buf && NULL==xfer_parms->bkg_buf) {
 	H5MM_xfree (bkg_buf);
     }
     FUNC_LEAVE(ret_value);
@@ -1317,8 +1330,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		src_type_size;		/*size of source type	*/
     size_t		dst_type_size;		/*size of destination type*/
     size_t		target_size;		/*desired buffer size	*/
-    size_t		buffer_size;		/*actual buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
+    H5T_bkg_t		need_bkg;		/*type of background buf*/
 
     FUNC_ENTER(H5D_write, FAIL);
 
@@ -1334,9 +1347,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
-     * type conversion is necessary then register data type atoms.
+     * type conversion is necessary then register data type atoms. Data type
+     * conversion is necessary if the user has set the `need_bkg' to a high
+     * enough value in xfer_parms since turning off data type conversion also
+     * turns off background preservation.
      */
-    if (NULL == (tconv_func = H5T_find(mem_type, dataset->type, &cdata))) {
+    if (NULL == (tconv_func = H5T_find(mem_type, dataset->type,
+				       xfer_parms->need_bkg, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
@@ -1398,7 +1415,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	smine_nelmts = request_nelmts;
 	HDmemset (&numbering, 0, sizeof numbering);
     }
-    buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
 
     /*
      * Get a temporary buffer for type conversion unless the app has already
@@ -1407,28 +1423,36 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (NULL==(tconv_buf=xfer_parms->tconv)) {
+    if (cdata->need_bkg) {
+	need_bkg = MAX (cdata->need_bkg, xfer_parms->need_bkg);
+    } else {
+	need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
+    }
+    if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
 	tconv_buf = H5MM_xmalloc (target_size);
     }
-    if (cdata->need_bkg && NULL==(bkg_buf=xfer_parms->bkg)) {
+    if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
 	bkg_buf = H5MM_xmalloc (smine_nelmts * dst_type_size);
     }
 
 #ifdef H5D_DEBUG
-    /* Strip mine diagnostics.... */
-    if (smine_nelmts<nelmts) {
-	fprintf (stderr, "HDF5-DIAG: strip mine");
-	if (smine_nelmts!=request_nelmts) {
-	    fprintf (stderr, " got %lu of %lu",
-		     (unsigned long)smine_nelmts,
-		     (unsigned long)request_nelmts);
+    {
+	/* Strip mine diagnostics.... */
+	size_t buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
+	if (smine_nelmts<nelmts) {
+	    fprintf (stderr, "HDF5-DIAG: strip mine");
+	    if (smine_nelmts!=request_nelmts) {
+		fprintf (stderr, " got %lu of %lu",
+			 (unsigned long)smine_nelmts,
+			 (unsigned long)request_nelmts);
+	    }
+	    if (buffer_size!=target_size) {
+		fprintf (stderr, " (%1.1f%% of buffer)",
+			 100.0*buffer_size/target_size);
+	    }
+	    fprintf (stderr, " %1.1f iterations\n",
+		     (double)nelmts/smine_nelmts);
 	}
-	if (buffer_size!=target_size) {
-	    fprintf (stderr, " (%1.1f%% of buffer)",
-		     100.0*buffer_size/target_size);
-	}
-	fprintf (stderr, " %1.1f iterations\n",
-		 (double)nelmts/smine_nelmts);
     }
 #endif
 
@@ -1446,7 +1470,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				tconv_buf/*out*/)!=smine_nelmts) {
 	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
 	}
-	if (H5T_BKG_YES==cdata->need_bkg) {
+	if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
+	    (!H5D_OPTIMIZE_PIPE && need_bkg)) {
 	    if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
 				    &(dataset->create_parms->efl),
 				    H5T_get_size (dataset->type), file_space,
@@ -1487,10 +1512,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  done:
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv) {
+    if (tconv_buf && NULL==xfer_parms->tconv_buf) {
 	H5MM_xfree(tconv_buf);
     }
-    if (bkg_buf && NULL==xfer_parms->bkg) {
+    if (bkg_buf && NULL==xfer_parms->bkg_buf) {
 	H5MM_xfree (bkg_buf);
     }
     FUNC_LEAVE(ret_value);

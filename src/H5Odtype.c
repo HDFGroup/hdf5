@@ -174,6 +174,7 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
             dt->u.compnd.memb[i].perm[1] = (perm_word >> 8) & 0xff;
             dt->u.compnd.memb[i].perm[2] = (perm_word >> 16) & 0xff;
             dt->u.compnd.memb[i].perm[3] = (perm_word >> 24) & 0xff;
+	    dt->u.compnd.memb[i].type = H5MM_xcalloc (1, sizeof(H5T_t));
             if (H5O_dtype_decode_helper(pp, dt->u.compnd.memb[i].type) < 0 ||
                 H5T_COMPOUND == dt->u.compnd.memb[i].type->type) {
                 for (j = 0; j <= i; j++)
@@ -548,7 +549,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
         H5F_t *f;         IN: pointer to the HDF5 file struct
         const void *mesg;     IN: Pointer to the source simple datatype struct
  RETURNS
-    Size of message on success, FAIL on failure
+    Size of message on success, 0 on failure
  DESCRIPTION
         This function returns the size of the raw simple datatype message on
     success.  (Not counting the message type or size fields, only the data
@@ -561,7 +562,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     size_t                  ret_value = 8;
     const H5T_t            *dt = (const H5T_t *) mesg;
 
-    FUNC_ENTER(H5O_dtype_size, FAIL);
+    FUNC_ENTER(H5O_dtype_size, 0);
 
     assert(mesg);
 
@@ -728,7 +729,7 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE * stream,
                 }
                 fprintf(stream, "}\n");
             }
-            H5O_dtype_debug(f, &(dt->u.compnd.memb[i].type), stream,
+            H5O_dtype_debug(f, dt->u.compnd.memb[i].type, stream,
                             indent + 3, MAX(0, fwidth - 3));
         }
     } else {

@@ -1727,8 +1727,8 @@ H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg)
 
     /* Update property list */
     plist->buf_size = size;
-    plist->tconv = tconv;
-    plist->bkg = bkg;
+    plist->tconv_buf = tconv;
+    plist->bkg_buf = bkg;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1765,11 +1765,87 @@ H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     }
 
     /* Return values */
-    if (tconv) *tconv = plist->tconv;
-    if (bkg) *bkg = plist->bkg;
+    if (tconv) *tconv = plist->tconv_buf;
+    if (bkg) *bkg = plist->bkg_buf;
 
     FUNC_LEAVE (plist->buf_size);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_preserve
+ *
+ * Purpose:	When reading or writing compound data types and the
+ *		destination is partially initialized and the read/write is
+ *		intended to initialize the other members, one must set this
+ *		property to TRUE.  Otherwise the I/O pipeline treats the
+ *		destination datapoints as completely uninitialized.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, March 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_preserve (hid_t plist_id, hbool_t status)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_preserve, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
+	NULL == (plist = H5A_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset transfer property list");
+    }
+
+    /* Update property list */
+    plist->need_bkg = status ? H5T_BKG_YES : H5T_BKG_NO;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_preserve
+ *
+ * Purpose:	The inverse of H5Pset_preserve()
+ *
+ * Return:	Success:	TRUE or FALSE
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, March 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Pget_preserve (hid_t plist_id)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_preserve, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
+	NULL == (plist = H5A_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset transfer property list");
+    }
+
+    FUNC_LEAVE (plist->need_bkg?TRUE:FALSE);
+}
+    
 
 
 /*-------------------------------------------------------------------------
