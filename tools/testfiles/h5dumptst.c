@@ -8,7 +8,8 @@
 #define FILE3 "tattr.h5"
 #define FILE4 "tslink.h5"
 #define FILE5 "thlink.h5"
-#define FILE6 "tall.h5"
+#define FILE6 "tcompound.h5"
+#define FILE7 "tall.h5"
 
 static void test_group(void) {
 hid_t fid, group;
@@ -62,9 +63,6 @@ double dset2[30][10];
 int i, j;
 
   fid = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-  /* dset2 - compound dt, array ds */
-  /* dset3 - named compound dt, array ds */
-  /* dset4 - shared dt, array ds */
 
   /* dset1 */
   dims[0] = 10; dims[1] = 20;
@@ -83,7 +81,7 @@ int i, j;
   dataset = H5Dcreate(fid, "/dset2", H5T_IEEE_F64BE, space, H5P_DEFAULT);
   for (i = 0; i < 30; i++)
        for (j = 0; j < 10; j++)
-            dset2[i][j] = j*1.1 + i;
+            dset2[i][j] = j;
   H5Dwrite(dataset, H5T_IEEE_F64BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -92,10 +90,6 @@ int i, j;
   H5Fclose(fid);
 }
 
-/*
-static void test_nameddt() {
-}
-*/
 
 static void test_attribute(void) {
 hid_t fid, root, space, attr;
@@ -118,11 +112,12 @@ double d[10];
   H5Sclose(space);
   H5Aclose(attr);
 
+
   /* attribute 2 */
-  dims[0] = 20;
+  dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
   attr = H5Acreate (root, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
-  for (i = 0; i < 20; i++) data[i] = i+1;
+  for (i = 0; i < 10; i++) data[i] = i+1;
   H5Awrite(attr, H5T_STD_I32BE, data);
   H5Sclose(space);
   H5Aclose(attr);
@@ -131,7 +126,7 @@ double d[10];
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
   attr = H5Acreate (root, "attr3", H5T_IEEE_F64BE, space, H5P_DEFAULT);
-  for (i = 0; i < 10; i++) d[i] = 0.0001 * i+ 0.0001;
+  for (i = 0; i < 10; i++) d[i] = 0.1 * i;
   H5Awrite(attr, H5T_IEEE_F64BE, d);
   H5Sclose(space);
   H5Aclose(attr);
@@ -149,7 +144,7 @@ herr_t status;
 
   root = H5Gopen (fid, "/");
 
-  status = H5Glink (root, H5G_LINK_SOFT, "../../somevalue", "slink1");
+  status = H5Glink (root, H5G_LINK_SOFT, "somevalue", "slink1");
 
   status = H5Glink (root, H5G_LINK_SOFT, "linkvalue", "slink2");
 
@@ -199,6 +194,143 @@ int i, dset[5];
 }
 
 /*
+               /
+     /     |       \     \
+   dset1  group1  type1 type2
+           |
+          dset2
+
+*/
+static void test_compound_dt(void) {       /* test compound data type */
+hid_t fid, group, dataset, space, type;
+typedef struct {
+  int a;
+  float b;
+  double c;
+} dset1_t;
+dset1_t dset1[5];
+
+typedef struct {
+  int a;
+  float b;
+} dset2_t;
+dset2_t dset2[5];
+
+typedef struct {
+  int a[4];
+  float b[5][6];
+} dset3_t;
+
+typedef struct {
+  int a;
+  float b;
+} dset4_t;
+dset4_t dset4[5];
+
+typedef struct {
+  int a;
+  float b;
+} dset5_t;
+dset5_t dset5[5];
+
+int i, ndims;
+const int perm[2];
+size_t dim[2];
+
+hsize_t sdim = 5;
+
+  for (i = 0; i < (int)sdim; i++) {
+       dset1[i].a = i; 
+       dset1[i].b = i*i;
+       dset1[i].c = 1./(i+1);
+       
+       dset2[i].a = i;
+       dset2[i].b = i+ i*0.1;
+
+       dset4[i].a = i;
+       dset4[i].b = i*1.0;
+
+       dset5[i].a = i;
+       dset5[i].b = i*1.0;
+  }
+
+  fid = H5Fcreate(FILE6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  space = H5Screate_simple(1, &sdim, NULL);
+
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
+  
+  H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_IEEE_F64BE);
+
+  dataset = H5Dcreate(fid, "/dset1", type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+
+  H5Tclose(type);
+  H5Dclose(dataset);
+
+  /* shared data type 1 */
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
+  H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_IEEE_F32BE);
+  H5Tcommit(fid, "type1", type);
+
+  group = H5Gcreate (fid, "/group1", 0);
+
+  dataset = H5Dcreate(group, "dset2", type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+
+  H5Tclose(type);
+  H5Dclose(dataset);
+
+
+  /* shared data type 2 */
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
+  ndims = 1; dim[0] = 4;
+  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, perm, H5T_STD_I32BE);
+  ndims = 2; dim[0] = 5; dim[1] = 6;
+  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, perm, H5T_STD_I32BE);
+  H5Tcommit(fid, "type2", type);
+  H5Tclose(type);
+
+  /* shared data type 3 */
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
+  H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_IEEE_F32BE);
+  H5Tcommit(group, "type3", type);
+
+  dataset = H5Dcreate(group, "dset4", type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
+
+  H5Tclose(type);
+  H5Dclose(dataset);
+  H5Gclose(group);
+
+
+  /* unamed data type */
+  group = H5Gcreate (fid, "/group2", 0);
+
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+  H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_IEEE_F32BE);
+  H5Tcommit(group, "type4", type);
+  dataset = H5Dcreate(group, "dset5", type, space, H5P_DEFAULT);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
+
+  H5Gunlink(group,"type4");
+
+  H5Tclose(type);
+  H5Dclose(dataset);
+  H5Sclose(space);
+  H5Gclose(group);
+
+  H5Fclose(fid);
+
+}
+
+
+/*
 
 /	: g1  g2  attr1  attr2
 g1	: g1.1  g1.2
@@ -217,7 +349,7 @@ char buf[60];
 int i, j;
 float dset2_1[10], dset2_2[3][5];
 
-  fid = H5Fcreate(FILE6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  fid = H5Fcreate(FILE7, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   /* create groups */
   group = H5Gcreate (fid, "/g1", 0);
@@ -301,7 +433,7 @@ float dset2_1[10], dset2_2[3][5];
 
   /* soft link */
   group = H5Gopen (fid, "/g1/g1.2/g1.2.1");
-  H5Glink (group, H5G_LINK_SOFT, "../somevalue/.", "slink");
+  H5Glink (group, H5G_LINK_SOFT, "somevalue", "slink");
   H5Gclose(group);
 
   group = H5Gopen (fid, "/g2");
@@ -341,9 +473,8 @@ test_attribute();
 test_softlink();
 test_dataset();
 test_hardlink();
+test_compound_dt();
 test_all();
 return 0;
 
 }
-
-
