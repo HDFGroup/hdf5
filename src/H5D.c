@@ -1838,8 +1838,12 @@ done:
             H5S_close(new_dset->space);
         if (new_dset->type)
             H5T_close(new_dset->type);
-        if (H5F_addr_defined(new_dset->ent.header))
-            H5O_close(&(new_dset->ent));
+        if (H5F_addr_defined(new_dset->ent.header)) {
+            if(H5O_close(&(new_dset->ent))<0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header");
+            if(H5O_delete(file, dxpl_id,new_dset->ent.header)<0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header");
+        } /* end if */
         if(new_dset->dcpl_id!=0)
             H5I_dec_ref(new_dset->dcpl_id);
         new_dset->ent.file = NULL;
@@ -3341,11 +3345,11 @@ done:
 herr_t
 H5D_flush(H5F_t *f, hid_t dxpl_id)
 {
-    unsigned            num_dsets;      /* Number of datasets in file   */
-    hid_t               *id_list=NULL;  /* list of dataset IDs          */
-    H5D_t               *dataset=NULL;  /* Dataset pointer              */
-    herr_t              ret_value = SUCCEED;        /* Return value     */
-    unsigned		j;              /* Index variable */
+    int         num_dsets;      /* Number of datasets in file   */
+    hid_t       *id_list=NULL;  /* list of dataset IDs          */
+    H5D_t       *dataset=NULL;  /* Dataset pointer              */
+    herr_t      ret_value = SUCCEED;        /* Return value     */
+    int		j;              /* Index variable */
 
     FUNC_ENTER_NOAPI(H5D_flush, FAIL);
 
@@ -3353,21 +3357,20 @@ H5D_flush(H5F_t *f, hid_t dxpl_id)
     assert(f);
 
     /* Update layout message for compact dataset */
-    if(H5F_get_obj_count(f, H5F_OBJ_DATASET, &num_dsets)<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset number");
-    if(num_dsets>0) {
-        if(NULL==(id_list=H5MM_malloc(num_dsets*sizeof(hid_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate memory for ID list");
-        if(H5F_get_obj_ids(f, H5F_OBJ_DATASET, id_list)<0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset ID list");
-        for(j=0; j<num_dsets; j++) {
-            if(NULL==(dataset=H5I_object_verify(id_list[j], H5I_DATASET)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset object");
-            if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty)
-                if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), dxpl_id)<0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message");
-            dataset->layout.dirty = FALSE;
-        }
+    if((num_dsets=H5F_get_obj_count(f, H5F_OBJ_DATASET))<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset count");
+
+    if(NULL==(id_list=H5MM_malloc(num_dsets*sizeof(hid_t))))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate memory for ID list");
+    if(H5F_get_obj_ids(f, H5F_OBJ_DATASET, -1, id_list)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset ID list");
+    for(j=0; j<num_dsets; j++) {
+        if(NULL==(dataset=H5I_object_verify(id_list[j], H5I_DATASET)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset object");
+        if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty)
+            if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), dxpl_id)<0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message");
+        dataset->layout.dirty = FALSE;
     }
 
 done:
