@@ -29,7 +29,7 @@
 /* Number of datasets for group iteration test */
 #define NDATASETS 50
 
-/* Number of attributes for group iteration test */
+/* Number of attributes for attribute iteration test */
 #define NATTR 50
 
 /* Number of groups for second group iteration test */
@@ -45,7 +45,7 @@
 
 typedef enum {
     RET_ZERO,
-    RET_ONE,
+    RET_TWO,
     RET_CHANGE
 } iter_enum;
 
@@ -89,8 +89,8 @@ herr_t giter_cb(hid_t UNUSED group, const char *name, void *op_data)
         case RET_ZERO:
             return(0);
 
-        case RET_ONE:
-            return(1);
+        case RET_TWO:
+            return(2);
 
         case RET_CHANGE:
             count++;
@@ -129,6 +129,12 @@ static void test_iter_group(void)
     /* Create the test file with the datasets */
     file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fcreate");
+
+    /* Test iterating over empty group */
+    info.command=RET_ZERO;
+    idx=0;
+    ret=H5Giterate(file,"/",&idx,giter_cb,&info);
+    VERIFY(ret, SUCCEED, "H5Giterate");
 
     datatype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(datatype, FAIL, "H5Tcopy");
@@ -179,7 +185,7 @@ static void test_iter_group(void)
     file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
-    /* These twp functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      */
     {
@@ -207,19 +213,44 @@ static void test_iter_group(void)
         CHECK(ret, FAIL, "H5Gclose");
     }
 
+    /* Test invalid indices for starting iteration */
+    info.command=RET_ZERO;
+    idx=-1;
+    H5E_BEGIN_TRY {
+        ret=H5Giterate(file,"/",&idx,giter_cb,&info);
+    } H5E_END_TRY;   
+    VERIFY(ret, FAIL, "H5Giterate");
+
+    /* Test skipping exactly as many entries as in the group */
+    idx=NDATASETS+2;
+    H5E_BEGIN_TRY {
+        ret=H5Giterate(file,"/",&idx,giter_cb,&info);
+    } H5E_END_TRY;   
+    VERIFY(ret, FAIL, "H5Giterate");
+
+    /* Test skipping more entries than are in the group */
+    idx=NDATASETS+3;
+    H5E_BEGIN_TRY {
+        ret=H5Giterate(file,"/",&idx,giter_cb,&info);
+    } H5E_END_TRY;   
+    VERIFY(ret, FAIL, "H5Giterate");
+
     /* Test all objects in group, when callback always returns 0 */
     info.command=RET_ZERO;
     idx=0;
-    while(H5Giterate(file,"/",&idx,giter_cb,&info)>0) {
+    if((ret=H5Giterate(file,"/",&idx,giter_cb,&info))>0) {
         printf("Group iteration function didn't return zero correctly!\n");
         num_errs++;
     }
 
     /* Test all objects in group, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
-    info.command=RET_ONE;
+    info.command=RET_TWO;
     idx=i=0;
-    while(H5Giterate(file,"/",&idx,giter_cb,&info)>0) {
+    while((ret=H5Giterate(file,"/",&idx,giter_cb,&info))>0) {
+        /* Verify return value from iterator gets propagated correctly */
+        VERIFY(ret,2,"H5Giterate");
+
         /* Increment the number of times "1" is returned */
         i++;
 
@@ -227,17 +258,44 @@ static void test_iter_group(void)
         VERIFY(idx,i,"H5Giterate");
 
         /* Verify that the correct name is retrieved */
-        if(strcmp(info.name,dnames[idx-1])!=0) {
-            printf("Group iteration function didn't return one correctly!\n");
-            num_errs++;
+        if(idx<=NDATASETS) {
+            if(strcmp(info.name,dnames[idx-1])!=0) {
+                printf("Group iteration function didn't return one correctly for dataset #%d!\n",idx);
+                num_errs++;
+            } /* end if */
         } /* end if */
+        else if(idx==(NDATASETS+1)) {
+            if(strcmp(info.name,"dtype")!=0) {
+                printf("Group iteration function didn't return one correctly for group!\n");
+                num_errs++;
+            } /* end if */
+        } /* end if */
+        else if(idx==(NDATASETS+2)) {
+            if(strcmp(info.name,"grp")!=0) {
+                printf("Group iteration function didn't return one correctly for group!\n");
+                num_errs++;
+            } /* end if */
+        } /* end if */
+        else {
+            printf("Group iteration function walked too far!\n");
+            num_errs++;
+        } /* end else */
     }
+    VERIFY(ret,-1,"H5Giterate");
+
+    if(i!=(NDATASETS+2)) {
+        printf("Group iteration function didn't perform multiple iterations correctly!\n");
+        num_errs++;
+    } /* end if */
 
     /* Test all objects in group, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
     info.command=RET_CHANGE;
     idx=i=0;
-    while(H5Giterate(file,"/",&idx,giter_cb,&info)>0) {
+    while((ret=H5Giterate(file,"/",&idx,giter_cb,&info))>=0) {
+        /* Verify return value from iterator gets propagated correctly */
+        VERIFY(ret,1,"H5Giterate");
+
         /* Increment the number of times "1" is returned */
         i++;
 
@@ -245,11 +303,35 @@ static void test_iter_group(void)
         VERIFY(idx,i+10,"H5Giterate");
 
         /* Verify that the correct name is retrieved */
-        if(strcmp(info.name,dnames[idx-1])!=0) {
-            printf("Group iteration function didn't return changing correctly!\n");
-            num_errs++;
+        if(idx<=NDATASETS) {
+            if(strcmp(info.name,dnames[idx-1])!=0) {
+                printf("Group iteration function didn't return one correctly for dataset #%d!\n",idx);
+                num_errs++;
+            } /* end if */
         } /* end if */
+        else if(idx==(NDATASETS+1)) {
+            if(strcmp(info.name,"dtype")!=0) {
+                printf("Group iteration function didn't return one correctly for group!\n");
+                num_errs++;
+            } /* end if */
+        } /* end if */
+        else if(idx==(NDATASETS+2)) {
+            if(strcmp(info.name,"grp")!=0) {
+                printf("Group iteration function didn't return one correctly for group!\n");
+                num_errs++;
+            } /* end if */
+        } /* end if */
+        else {
+            printf("Group iteration function walked too far!\n");
+            num_errs++;
+        } /* end else */
     }
+    VERIFY(ret,-1,"H5Giterate");
+
+    if(i!=42 || idx!=52) {
+        printf("Group iteration function didn't perform multiple iterations correctly!\n");
+        num_errs++;
+    } /* end if */
 
     ret=H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
@@ -276,8 +358,8 @@ herr_t aiter_cb(hid_t UNUSED group, const char *name, void *op_data)
         case RET_ZERO:
             return(0);
 
-        case RET_ONE:
-            return(1);
+        case RET_TWO:
+            return(2);
 
         case RET_CHANGE:
             count++;
@@ -324,7 +406,7 @@ static void test_iter_attr(void)
     dataset = H5Dcreate(file, "Dataset", datatype, filespace, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
     
-    for(i=0; i< NDATASETS; i++) {
+    for(i=0; i< NATTR; i++) {
         sprintf(name,"Attribute %d",i);
         attribute = H5Acreate(dataset, name, datatype, filespace, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate");
@@ -357,19 +439,39 @@ static void test_iter_attr(void)
     dataset=H5Dopen(file, "Dataset");
     CHECK(dataset, FAIL, "H5Dopen");
 
+    /* Test invalid indices for starting iteration */
+    info.command=RET_ZERO;
+
+    /* Test skipping exactly as many attributes as there are */
+    idx=NATTR;
+    H5E_BEGIN_TRY {
+        ret=H5Aiterate(dataset,&idx,aiter_cb,&info);
+    } H5E_END_TRY;   
+    VERIFY(ret, FAIL, "H5Aiterate");
+
+    /* Test skipping more attributes than there are */
+    idx=NATTR+1;
+    H5E_BEGIN_TRY {
+        ret=H5Aiterate(dataset,&idx,aiter_cb,&info);
+    } H5E_END_TRY;   
+    VERIFY(ret, FAIL, "H5Aiterate");
+
     /* Test all attributes on dataset, when callback always returns 0 */
     info.command=RET_ZERO;
     idx=0;
-    while(H5Aiterate(dataset,&idx,aiter_cb,&info)>0) {
+    if((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0) {
         printf("Attribute iteration function didn't return zero correctly!\n");
         num_errs++;
     }
 
     /* Test all attributes on dataset, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
-    info.command=RET_ONE;
+    info.command=RET_TWO;
     idx=i=0;
-    while(H5Aiterate(dataset,&idx,aiter_cb,&info)>0) {
+    while((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0) {
+        /* Verify return value from iterator gets propagated correctly */
+        VERIFY(ret,2,"H5Aiterate");
+
         /* Increment the number of times "1" is returned */
         i++;
 
@@ -382,12 +484,21 @@ static void test_iter_attr(void)
             num_errs++;
         } /* end if */
     }
+    VERIFY(ret,-1,"H5Aiterate");
+    if(i!=50 || idx!=50) {
+        printf("Group iteration function didn't perform multiple iterations correctly!\n");
+        num_errs++;
+    } /* end if */
+
 
     /* Test all attributes on dataset, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
     info.command=RET_CHANGE;
     idx=i=0;
-    while(H5Aiterate(dataset,&idx,aiter_cb,&info)>0) {
+    while((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0) {
+        /* Verify return value from iterator gets propagated correctly */
+        VERIFY(ret,1,"H5Aiterate");
+
         /* Increment the number of times "1" is returned */
         i++;
 
@@ -400,6 +511,11 @@ static void test_iter_attr(void)
             num_errs++;
         } /* end if */
     }
+    VERIFY(ret,-1,"H5Aiterate");
+    if(i!=40 || idx!=50) {
+        printf("Group iteration function didn't perform multiple iterations correctly!\n");
+        num_errs++;
+    } /* end if */
 
     ret=H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
