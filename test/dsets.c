@@ -2923,14 +2923,21 @@ file)
     }
 
     /* Create new dataset */
-    /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
+    /* (Should succeed; according to the new algorithm, scanline should be reset
+        to 2*128 satisfying 'maximum blocks per scanline' condition) */
     H5E_BEGIN_TRY {
         dsid = H5Dcreate(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, dcpl);
     } H5E_END_TRY;
-    if (dsid >=0) {
+    if (dsid <=0) {
         H5_FAILED();
-        printf("    Line %d: Shouldn't have created dataset!\n",__LINE__);
-        H5Dclose(dsid);
+        printf("    Line %d: Should have created dataset!\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset */
+    if(H5Dclose(dsid)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n",__LINE__);
         goto error;
     } /* end if */
 
