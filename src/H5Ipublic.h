@@ -47,6 +47,9 @@ typedef enum {
 /* Type of atoms to return to users */
 typedef int hid_t;
 
+/* An invalid object ID. This is also negative for error return. */
+#define H5I_INVALID_HID         (-1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
