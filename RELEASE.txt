@@ -380,6 +380,7 @@ Bug Fixes since HDF5-1.4.0 Release
      slower I/O than necessary.
    * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
      causing errors during I/O
+   * Implemented XML support in h5dump.
 
 
 Documentation
