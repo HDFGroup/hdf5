@@ -104,6 +104,11 @@ typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
+#if defined H5_ABSOFT
+#define DF_CAPFNAMES
+#define FNAME(x) x
+#endif /*H5_ABSOFT*/
+
 #define _fcdtocp(desc) (desc)
 
 #endif /*LINUX*/
