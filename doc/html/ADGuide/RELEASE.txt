@@ -1,4 +1,4 @@
-HDF5 version 1.6.3-snap2 released on Sun Aug  1 20:59:31 CDT 2004
+HDF5 version 1.6.3-snap3 released on Sun Aug  8 21:00:41 CDT 2004
 ================================================================================
 
 
@@ -82,6 +82,12 @@ New Features
 
     C++ API:
     --------
+	- Added wrappers for array and variable length datatypes APIs
+	- Added wrappers for newly added APIs from H5T, H5F, and H5I
+	- Added many wrappers that were missing from the H5P API
+	- Added the ability to reference HDF5 objects to these classes:
+	  DataSet, DataType, Group, and H5File (wrappers for H5R APIs)
+	BMR 2004/08/04
 
 
 Support for new platforms, languages and compilers.
@@ -102,6 +108,12 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Fixed error which could cause a core dump when a type conversion
+          routine was registered after a compound datatype had been
+          converted and then an equivalment compound datatype was converted
+          again.  QAK - 2004/08/07
+        - Fixed memory overwrite when encoding "multi" file driver information
+          for file's superblock.  QAK - 2004/08/05
         - Fixed obscure bug where a filter which failed during chunk allocation
           could allow library to write uncompressed data to disk but think
           the data was compressed.  QAK - 2004/07/29
@@ -175,6 +187,9 @@ Bug Fixes since HDF5-1.6.2 release
 	  by value.  In addition, the default value of the data member
 	  H5::Exception::detailMessage is changed from 0/NULL to 
 	  DEFAULT_MSG ("No detailed information provided".)
+	- Prototype for DSetCreatPropList::setLayout is changed: 1st parameter
+          is removed because it was there only by mistake.
+	BMR 2004/08/04
 
 Documentation
 =============
