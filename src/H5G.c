@@ -954,7 +954,7 @@ H5G_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface);
 
     /* Initialize the atom group for the group IDs */
-    if (H5I_init_group(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
+    if (H5I_register_type(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
 		       (H5I_free_t)H5G_close) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
@@ -1000,7 +1000,7 @@ H5G_term_interface(void)
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_GROUP))) {
-	    H5I_clear_group(H5I_GROUP, FALSE);
+	    H5I_clear_type(H5I_GROUP, FALSE);
 	} else {
 	    /* Empty the object type table */
 	    for (i=0; i<H5G_ntypes_g; i++)
@@ -1009,7 +1009,7 @@ H5G_term_interface(void)
 	    H5G_type_g = H5MM_xfree(H5G_type_g);
     
 	    /* Destroy the group object id group */
-	    H5I_destroy_group(H5I_GROUP);
+	    H5I_dec_type_ref(H5I_GROUP);
 
             /* Free the global component buffer */
             H5G_comp_g = H5MM_xfree(H5G_comp_g);
@@ -2277,7 +2277,7 @@ H5G_loc (hid_t loc_id)
         case H5I_REFERENCE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of reference");
 
-        case H5I_NGROUPS:
+        case H5I_NTYPES:
         case H5I_BADID:
         case H5I_FILE_CLOSING:
         case H5I_VFL:

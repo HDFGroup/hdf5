@@ -68,7 +68,7 @@ H5A_init_interface(void)
     /*
      * Create attribute group.
      */
-    if (H5I_init_group(H5I_ATTR, H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close)<0)
+    if (H5I_register_type(H5I_ATTR, H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
     
 done:
@@ -101,9 +101,9 @@ H5A_term_interface(void)
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_ATTR))) {
-	    H5I_clear_group(H5I_ATTR, FALSE);
+	    H5I_clear_type(H5I_ATTR, FALSE);
 	} else {
-	    H5I_destroy_group(H5I_ATTR);
+	    H5I_dec_type_ref(H5I_ATTR);
 	    interface_initialize_g = 0;
 	    n = 1;
 	}

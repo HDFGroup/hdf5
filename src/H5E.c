@@ -145,15 +145,15 @@ H5E_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5E_init_interface)
 
     /* Initialize the atom group for the error class IDs */
-    if(H5I_init_group(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
                     (H5I_free_t)H5E_unregister_class)<0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the major error IDs */
-    if(H5I_init_group(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS, 
                     (H5I_free_t)H5E_close_msg)<0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
     /* Initialize the atom group for the error stacks */
-    if(H5I_init_group(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
                     (H5I_free_t)H5E_close_stack)<0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
@@ -213,11 +213,11 @@ H5E_term_interface(void)
         if(n>0) {
             /* Clear any outstanding error stacks */
             if (nstk>0)
-	        H5I_clear_group(H5I_ERROR_STACK, FALSE);
+	        H5I_clear_type(H5I_ERROR_STACK, FALSE);
         
             /* Clear all the error classes */
 	    if (ncls>0) {
-	        H5I_clear_group(H5I_ERROR_CLASS, FALSE);
+	        H5I_clear_type(H5I_ERROR_CLASS, FALSE);
                 
                 /* Reset the HDF5 error class, if its been closed */
                 if(H5I_nmembers(H5I_ERROR_CLASS)==0)
@@ -226,7 +226,7 @@ H5E_term_interface(void)
             
             /* Clear all the error messages */
 	    if (nmsg>0) {
-	        H5I_clear_group(H5I_ERROR_MSG, FALSE);
+	        H5I_clear_type(H5I_ERROR_MSG, FALSE);
                 
                 /* Reset the HDF5 error messages, if they've been closed */
                 if(H5I_nmembers(H5I_ERROR_MSG)==0) {
@@ -237,9 +237,9 @@ H5E_term_interface(void)
 
 	} else {
 	    /* Destroy the error class, message, and stack id groups */
-	    H5I_destroy_group(H5I_ERROR_STACK);
-	    H5I_destroy_group(H5I_ERROR_CLASS);
-	    H5I_destroy_group(H5I_ERROR_MSG);
+	    H5I_dec_type_ref(H5I_ERROR_STACK);
+	    H5I_dec_type_ref(H5I_ERROR_CLASS);
+	    H5I_dec_type_ref(H5I_ERROR_MSG);
 
 	    /* Mark closed */
 	    interface_initialize_g = 0;

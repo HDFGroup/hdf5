@@ -124,7 +124,7 @@ H5FD_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_init_interface)
 
-    if (H5I_init_group(H5I_VFL, H5I_VFL_HASHSIZE, 0, (H5I_free_t)H5FD_free_cls)<0)
+    if (H5I_register_type(H5I_VFL, H5I_VFL_HASHSIZE, 0, (H5I_free_t)H5FD_free_cls)<0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */
@@ -164,7 +164,7 @@ H5FD_term_interface(void)
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
-	    H5I_clear_group(H5I_VFL, FALSE);
+	    H5I_clear_type(H5I_VFL, FALSE);
 
             /* Reset the VFL drivers, if they've been closed */
             if(H5I_nmembers(H5I_VFL)==0) {
@@ -192,7 +192,7 @@ H5FD_term_interface(void)
 #endif
             } /* end if */
 	} else {
-	    H5I_destroy_group(H5I_VFL);
+	    H5I_dec_type_ref(H5I_VFL);
 	    interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}

@@ -202,7 +202,7 @@ H5D_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5D_init_interface)
 
     /* Initialize the atom group for the dataset IDs */
-    if (H5I_init_group(H5I_DATASET, H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, (H5I_free_t)H5D_close)<0)
+    if (H5I_register_type(H5I_DATASET, H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, (H5I_free_t)H5D_close)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* =========Dataset Transfer Property Class Initialization========= */    
@@ -442,9 +442,9 @@ H5D_term_interface(void)
              *
              * QAK - 5/13/03
              */
-	    H5I_clear_group(H5I_DATASET, TRUE);
+	    H5I_clear_type(H5I_DATASET, TRUE);
 	} else {
-	    H5I_destroy_group(H5I_DATASET);
+	    H5I_dec_type_ref(H5I_DATASET);
 	    interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}

@@ -27,7 +27,10 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-/* Default sizes of the hash-tables for various atom groups */
+/* Macro to determine if a H5I_type_t is a "library type" */
+#define H5I_IS_LIB_TYPE( type ) (type > 0 && type < H5I_NTYPES)
+
+/* Default sizes of the hash-tables for various atom types */
 #define H5I_ERRSTACK_HASHSIZE		64
 #define H5I_FILEID_HASHSIZE		64
 #define H5I_TEMPID_HASHSIZE		64
@@ -45,30 +48,21 @@
 #define H5I_ERRMSG_HASHSIZE		64
 #define H5I_ERRSTK_HASHSIZE		64
 
-/*
- * Function for freeing objects. This function will be called with an object
- * ID group number (object type) and a pointer to the object. The function
- * should free the object and return non-negative to indicate that the object
- * can be removed from the ID group. If the function returns negative
- * (failure) then the object will remain in the ID group.
- */
-typedef herr_t (*H5I_free_t)(void*);
-
-/* Type of the function to compare objects & keys */
-typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
-
 /* Private Functions in H5I.c */
-H5_DLL int H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
-			    H5I_free_t func);
-H5_DLL int H5I_nmembers(H5I_type_t grp);
-H5_DLL herr_t H5I_clear_group(H5I_type_t grp, hbool_t force);
-H5_DLL herr_t H5I_destroy_group(H5I_type_t grp);
-H5_DLL hid_t H5I_register(H5I_type_t grp, void *object);
+H5_DLL H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func);
+H5_DLL int H5I_nmembers(H5I_type_t type);
+H5_DLL herr_t H5I_clear_type(H5I_type_t type, hbool_t force);
+H5_DLL int H5I_destroy_type(H5I_type_t type);
+H5_DLL hid_t H5I_register(H5I_type_t type, void *object);
 H5_DLL void *H5I_object(hid_t id);
 H5_DLL void *H5I_object_verify(hid_t id, H5I_type_t id_type);
 H5_DLL H5I_type_t H5I_get_type(hid_t id);
 H5_DLL void *H5I_remove(hid_t id);
-H5_DLL void *H5I_search(H5I_type_t grp, H5I_search_func_t func, void *key);
+H5_DLL void *H5I_remove_verify(hid_t id, H5I_type_t id_type);
+H5_DLL void *H5I_search(H5I_type_t type, H5I_search_func_t func, void *key);
 H5_DLL int H5I_inc_ref(hid_t id);
 H5_DLL int H5I_dec_ref(hid_t id);
+H5_DLL int H5I_inc_type_ref(H5I_type_t type);
+H5_DLL herr_t H5I_dec_type_ref(H5I_type_t type);
+H5_DLL int H5I_get_type_ref(H5I_type_t type);
 #endif

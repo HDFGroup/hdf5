@@ -216,9 +216,9 @@ H5P_init_interface(void)
     /*
      * Initialize the Generic Property class & object groups.
      */
-    if (H5I_init_group(H5I_GENPROP_CLS, H5I_GENPROPCLS_HASHSIZE, 0, (H5I_free_t)H5P_close_class) < 0)
+    if (H5I_register_type(H5I_GENPROP_CLS, H5I_GENPROPCLS_HASHSIZE, 0, (H5I_free_t)H5P_close_class) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group");
-    if (H5I_init_group(H5I_GENPROP_LST, H5I_GENPROPOBJ_HASHSIZE, 0, (H5I_free_t)H5P_close) < 0)
+    if (H5I_register_type(H5I_GENPROP_LST, H5I_GENPROPOBJ_HASHSIZE, 0, (H5I_free_t)H5P_close) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
     /* Create root property list class */
@@ -324,7 +324,7 @@ H5P_term_interface(void)
         if (n) {
             /* Clear the lists */
             if(nlist>0) {
-                H5I_clear_group(H5I_GENPROP_LST, FALSE);
+                H5I_clear_type(H5I_GENPROP_LST, FALSE);
 
                 /* Reset the default property lists, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_LST)==0) {
@@ -339,7 +339,7 @@ H5P_term_interface(void)
 
             /* Only attempt to close the classes after all the lists are closed */
             if(nlist==0 && nclass>0) {
-                H5I_clear_group(H5I_GENPROP_CLS, FALSE);
+                H5I_clear_type(H5I_GENPROP_CLS, FALSE);
 
                 /* Reset the default property lists, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_CLS)==0) {
@@ -352,9 +352,9 @@ H5P_term_interface(void)
                 } /* end if */
             } /* end if */
         } else {
-            H5I_destroy_group(H5I_GENPROP_LST);
+            H5I_dec_type_ref(H5I_GENPROP_LST);
             n++; /*H5I*/
-            H5I_destroy_group(H5I_GENPROP_CLS);
+            H5I_dec_type_ref(H5I_GENPROP_CLS);
             n++; /*H5I*/
 
             interface_initialize_g = 0;

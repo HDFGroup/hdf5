@@ -232,8 +232,8 @@ H5F_init_interface(void)
      * which are pending completion because there are object headers still
      * open within the file.
      */
-    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0 ||
-            H5I_init_group(H5I_FILE_CLOSING, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0)
+    if (H5I_register_type(H5I_FILE, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0 ||
+            H5I_register_type(H5I_FILE_CLOSING, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0)
         HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
    
     /* ========== File Creation Property Class Initialization ============*/ 
@@ -463,10 +463,10 @@ H5F_term_interface(void)
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_FILE))) {
-            H5I_clear_group(H5I_FILE, FALSE);
+            H5I_clear_type(H5I_FILE, FALSE);
 	} else if (0==(n=H5I_nmembers(H5I_FILE_CLOSING))) {
-	    H5I_destroy_group(H5I_FILE);
-	    H5I_destroy_group(H5I_FILE_CLOSING);
+	    H5I_dec_type_ref(H5I_FILE);
+	    H5I_dec_type_ref(H5I_FILE_CLOSING);
 	    interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}

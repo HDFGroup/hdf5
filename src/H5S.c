@@ -85,7 +85,7 @@ H5S_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5S_init_interface);
 
     /* Initialize the atom group for the file IDs */
-    if (H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
+    if (H5I_register_type(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
 		       H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close)<0)
 	HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
@@ -136,7 +136,7 @@ H5S_term_interface(void)
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASPACE))) {
-	    H5I_clear_group(H5I_DATASPACE, FALSE);
+	    H5I_clear_type(H5I_DATASPACE, FALSE);
 	} else {
 #ifdef H5S_DEBUG
 	    /*
@@ -256,7 +256,7 @@ H5S_term_interface(void)
 #endif
 
 	    /* Free data types */
-	    H5I_destroy_group(H5I_DATASPACE);
+	    H5I_dec_type_ref(H5I_DATASPACE);
 
 	    /* Clear/free conversion table */
 	    for (i=0; i<H5S_nconv_g; i++)

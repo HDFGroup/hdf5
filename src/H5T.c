@@ -693,7 +693,7 @@ H5T_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5T_init_interface);
 
     /* Initialize the atom group for the file IDs */
-    if (H5I_init_group(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
+    if (H5I_register_type(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* Make certain there aren't too many classes of datatypes defined */
@@ -1301,7 +1301,7 @@ H5T_term_interface(void)
 
 	/* Unlock all datatypes, then free them */
 	H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
-	H5I_destroy_group(H5I_DATATYPE);
+	H5I_dec_type_ref(H5I_DATATYPE);
 
         /* Reset all the datatype IDs */
         H5T_IEEE_F32BE_g			= FAIL;

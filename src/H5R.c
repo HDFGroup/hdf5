@@ -60,7 +60,7 @@ H5R_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5R_init_interface);
 
     /* Initialize the atom group for the file IDs */
-    if (H5I_init_group(H5I_REFERENCE, H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS,
+    if (H5I_register_type(H5I_REFERENCE, H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS,
 		       (H5I_free_t)NULL)<0)
 	HGOTO_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
@@ -95,9 +95,9 @@ H5R_term_interface(void)
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
-	    H5I_clear_group(H5I_REFERENCE, FALSE);
+	    H5I_clear_type(H5I_REFERENCE, FALSE);
 	} else {
-	    H5I_destroy_group(H5I_REFERENCE);
+	    H5I_dec_type_ref(H5I_REFERENCE);
 	    interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}

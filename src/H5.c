@@ -2090,7 +2090,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		} else if (obj<0) {
 		    fprintf (out, "FAIL");
 		} else {
-		    switch (H5I_GRP(obj)) { /* Use internal H5I macro instead of function call */
+		    switch (H5I_TYPE(obj)) { /* Use internal H5I macro instead of function call */
                         case H5I_BADID:
                             fprintf (out, "%ld (error)", (long)obj);
                             break;
@@ -2335,8 +2335,8 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    case H5I_ERROR_STACK:
 			fprintf (out, "H5I_ERROR_STACK");
 			break;
-		    case H5I_NGROUPS:
-			fprintf (out, "H5I_NGROUPS");
+		    case H5I_NTYPES:
+			fprintf (out, "H5I_NTYPES");
 			break;
 		    default:
 			fprintf (out, "%ld", (long)id_type);
