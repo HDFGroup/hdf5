@@ -240,8 +240,8 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC21_SPACE_RANK       2
 #define MISC21_SPACE_DIM0       7639
 #define MISC21_SPACE_DIM1       6308
-#define MISC21_CHUNK_DIM0       1024
-#define MISC21_CHUNK_DIM1       1024
+#define MISC21_CHUNK_DIM0       2048
+#define MISC21_CHUNK_DIM1       2048
 
 /****************************************************************
 **
@@ -3493,6 +3493,7 @@ test_misc20(void)
 **                      don't exactly match the dataspace.
 **
 ****************************************************************/
+#ifdef H5_HAVE_FILTER_SZIP
 static void
 test_misc21(void)
 {
@@ -3520,7 +3521,7 @@ test_misc21(void)
     /* Set custom DCPL properties */
     ret = H5Pset_chunk (dcpl, MISC21_SPACE_RANK, chunk_size);
     CHECK(ret, FAIL, "H5Pset_chunk");
-    ret = H5Pset_deflate (dcpl, 6); 
+    ret = H5Pset_szip (dcpl, H5_SZIP_NN_OPTION_MASK, 8); 
     CHECK(ret, FAIL, "H5Pset_deflate");
     ret = H5Pset_alloc_time (dcpl, H5D_ALLOC_TIME_LATE); 
     CHECK(ret, FAIL, "H5Pset_alloc_time");
@@ -3549,6 +3550,7 @@ test_misc21(void)
 
     HDfree(buf);
 } /* end test_misc21() */
+#endif /* H5_HAVE_FILTER_SZIP */
     
 /****************************************************************
 **
@@ -3581,9 +3583,9 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
-#ifdef H5_HAVE_FILTER_DEFLATE
+#ifdef H5_HAVE_FILTER_SZIP
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
-#endif /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_SZIP */
 
 } /* test_misc() */
 
