@@ -1962,6 +1962,12 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if(NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /*
+     * Set the dataset's checked_filters flag to enable writing.
+     * Make sure that H5Z_can_apply is called at the beginning of this function!
+     */
+    new_dset->checked_filters = TRUE;
+
     /* Make the "set local" filter callbacks for this dataset */
     if(H5Z_set_local(new_dset->dcpl_id,type_id)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
@@ -2718,6 +2724,9 @@ done:
  *              Changed the way to retrieve property for generic property 
  *              list.
  *
+ *              Nat Furrer and James Laird
+ *              June 17, 2004
+ *              Added check for filter encode capability
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2725,6 +2734,8 @@ H5D_extend (H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 {
     int	changed;                        /* Flag to indicate that the dataspace was successfully extended */
     H5S_t	*space = NULL;          /* Dataset's dataspace */
+    H5D_fill_value_t fill_status;
+    H5D_fill_time_t  fill_time;
     herr_t	ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_extend, FAIL)
@@ -2738,6 +2749,48 @@ H5D_extend (H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
      *	     created.  All extensions are allowed here since none should be
      *	     able to muck things up.
      */
+
+    if(! dataset->checked_filters)
+    {
+        /* Check if the filters in the DCPL will need to encode, and if so, can they?
+         * Filters need encoding if fill value is defined and a fill policy is set that requires
+         * writing on an extend.
+         */
+        if(H5P_is_fill_value_defined(&(dataset->fill), &fill_status) < 0)
+        {
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Couldn't retrieve fill value from dataset.");
+        }
+
+        if(fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED)
+        {
+            if( H5Pget_fill_time(dataset->dcpl_id, &fill_time) < 0)
+            {
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Couldn't retrieve fill time from dataset.");
+            }
+
+            if(fill_time == H5D_FILL_TIME_ALLOC ||
+                    (fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED) )
+            {
+                /* Filters must have encoding enabled. Ensure that all filters can be applied */
+                hid_t type_id;
+
+                type_id = H5I_register(H5I_DATATYPE, dataset->type);
+                if(type_id < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data type")
+
+                if(H5Z_can_apply(dataset->dcpl_id, type_id) <0)
+                {
+                    H5I_remove(type_id);
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
+                }
+
+                if(H5I_remove(type_id) == NULL)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to release data type id")
+
+                dataset->checked_filters = TRUE;
+            }
+        }
+    }
 
     /* Increase the size of the data space */
     space=dataset->space;

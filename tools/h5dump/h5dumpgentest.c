@@ -4548,7 +4548,7 @@ static void gent_filters(void)
  * SZIP
  *-------------------------------------------------------------------------
  */
-#if defined (H5_HAVE_FILTER_SZIP)
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
  /* remove the filters from the dcpl */
  ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
  assert(ret>=0);
@@ -4628,7 +4628,7 @@ static void gent_filters(void)
  assert(ret>=0);
 #endif
 
-#if defined (H5_HAVE_FILTER_SZIP)
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
  szip_options_mask=H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
  /* set szip data */
  ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);

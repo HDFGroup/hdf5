@@ -496,6 +496,9 @@
    PTHREAD_SCOPE_SYSTEM) call. */
 #undef SYSTEM_SCOPE_THREADS
 
+/* Define if szip encoder is present */
+#undef SZIP_CAN_ENCODE
+
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 

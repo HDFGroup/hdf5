@@ -327,5 +327,6 @@ done:
         H5MM_xfree(outbuf);
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
 #endif /* H5_HAVE_FILTER_SZIP */
 

@@ -203,7 +203,7 @@ int main (void)
 
   TESTING("    removing szip filter");
 
-#ifdef H5_HAVE_FILTER_SZIP
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset_szip:NONE",&pack_options)<0)
@@ -217,7 +217,7 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -330,13 +330,13 @@ int main (void)
 
  TESTING("    adding szip filter");
 
-#ifdef H5_HAVE_FILTER_SZIP
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
 
 /*-------------------------------------------------------------------------
  * test an individual object option
  *-------------------------------------------------------------------------
  */
-
+ 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset2:SZIP=8",&pack_options)<0)
@@ -352,7 +352,7 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -364,8 +364,7 @@ int main (void)
  */
 TESTING("    adding szip filter to all");
 
-#ifdef H5_HAVE_FILTER_SZIP
-
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("SZIP=8",&pack_options)<0)
@@ -379,7 +378,7 @@ TESTING("    adding szip filter to all");
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -522,8 +521,10 @@ TESTING("    addding shuffle filter to all");
 #endif
  if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
   TEST_ERROR;
+#if defined (H5_SZIP_CAN_ENCODE) || !defined (H5_HAVE_FILTER_SZIP)
  if (h5repack_addfilter("dset1:SZIP=8",&pack_options)<0)
   TEST_ERROR;
+#endif
  if (h5repack_addfilter("dset1:GZIP=1",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
@@ -542,7 +543,7 @@ TESTING("    addding shuffle filter to all");
  * filter conversion from deflate to szip
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_FILTER_DEFLATE
+#if (defined (H5_SZIP_CAN_ENCODE) || !defined (H5_HAVE_FILTER_SZIP)) && defined(H5_HAVE_FILTER_DEFLATE)
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset_gzip:SZIP=8",&pack_options)<0)
@@ -555,7 +556,7 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -565,7 +566,7 @@ TESTING("    addding shuffle filter to all");
  * filter conversion from szip to deflate
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_FILTER_SZIP
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
@@ -578,7 +579,7 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif
@@ -588,7 +589,7 @@ TESTING("    addding shuffle filter to all");
  * filter conversion from szip to deflate
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_FILTER_SZIP
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset_all:GZIP=1",&pack_options)<0)
@@ -601,7 +602,7 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- PASSED();  
+ PASSED();
 #else
  SKIPPED();
 #endif

@@ -67,3 +67,29 @@ nh5zfilter_avail_c ( int_f *filter , int_f *flag )
   if ( status < 0  ) ret_value = -1;
   return ret_value;
 }
+
+/*----------------------------------------------------------------------------
+ * Name:        h5zget_filter_info_c
+ * Purpose:     Call H5Zget_filter_info to find if filter has its encoder
+ *              and/or its decoder available
+ * Inputs:      filter - filter identifier
+ * Outputs:     flag - status flag
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Nat Furrer and James Laird
+ *              Wednesday, June 16, 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5zget_filter_info_c ( int_f *filter , int_f *flag )
+{
+  int ret_value = 0;
+  H5Z_filter_t c_filter;
+  unsigned int c_flag;
+
+  c_filter = (H5Z_filter_t)*filter;
+  ret_value = H5Zget_filter_info(c_filter, &c_flag);
+  *flag = (int_f)c_flag;
+
+  return ret_value;
+}

@@ -1003,6 +1003,10 @@ done:
  *
  * Modifications:
  *
+ *          Nat Furrer and James Laird
+ *          June 17, 2004
+ *          Now ensures that SZIP encoding is enabled
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1017,6 +1021,9 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     H5TRACE3("e","iIuIu",plist_id,options_mask,pixels_per_block);
     
     /* Check arguments */
+#if !defined( H5_SZIP_CAN_ENCODE) && defined(H5_HAVE_FILTER_SZIP)
+    HGOTO_ERROR (H5E_PLINE, H5E_NOENCODER, FAIL, "Szip filter present but encoding disabled");
+#endif
     if ((pixels_per_block%2)==1)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even");
     if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
@@ -1642,3 +1649,4 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
 done:
     FUNC_LEAVE_API(ret_value);
 }
+

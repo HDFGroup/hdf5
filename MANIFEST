@@ -1557,7 +1557,7 @@
 ./tools/h5repack/testh5repack_layout.c
 ./tools/h5repack/h5repack_filters.c
 ./tools/h5repack/h5repack_main.c
-./tools/h5repack/h5repack.sh
+./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/testh5repack_attr.c
 ./tools/h5repack/testh5repack_main.c
 ./tools/h5repack/h5repack.h

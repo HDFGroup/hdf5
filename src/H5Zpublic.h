@@ -66,6 +66,10 @@ typedef enum H5Z_EDC_t {
     H5Z_NO_EDC          = 2     /* must be the last */
 } H5Z_EDC_t;    
 
+/* Bit flags for H5Zget_filter_info */
+#define H5Z_FILTER_CONFIG_ENCODE_ENABLED (0x0001)
+#define H5Z_FILTER_CONFIG_DECODE_ENABLED (0x0002)
+
 /* Return values for filter callback function */
 typedef enum H5Z_cb_return_t {
     H5Z_CB_ERROR  = -1,
@@ -172,7 +176,7 @@ H5_DLL herr_t H5Zregister(const H5Z_class_t *cls);
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
 H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
-
+H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 
 #ifdef __cplusplus
 }

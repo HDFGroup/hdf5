@@ -187,7 +187,8 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_NOFILTER,      "Requested filter is not available"},
     {H5E_CALLBACK,      "Callback failed"},
     {H5E_CANAPPLY,      "Error from filter \"can apply\" callback"},
-    {H5E_SETLOCAL,      "Error from filter \"set local\" callback"}
+    {H5E_SETLOCAL,      "Error from filter \"set local\" callback"},
+    {H5E_NOENCODER,     "Filter present, but encoder not enabled"}
 
 };
 

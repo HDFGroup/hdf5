@@ -76,11 +76,14 @@ int make_filters(hid_t loc_id)
  * SZIP
  *-------------------------------------------------------------------------
  */
+ /* Make sure encoding is enabled */
+#if defined (H5_SZIP_CAN_ENCODE) || !defined (H5_HAVE_FILTER_SZIP)
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
  if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
   goto out;
+#endif
 
 /*-------------------------------------------------------------------------
  * GZIP
@@ -128,6 +131,8 @@ int make_filters(hid_t loc_id)
  * shuffle + SZIP
  *-------------------------------------------------------------------------
  */
+ /* Make sure SZIP has the encoder */
+#if defined (H5_SZIP_CAN_ENCODE) || !defined (H5_HAVE_FILTER_SZIP)
  /* remove the filters from the dcpl */
  if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
   goto out;
@@ -139,6 +144,7 @@ int make_filters(hid_t loc_id)
   goto out;
  if (make_dset(loc_id,"dset_all",sid,dcpl,buf)<0)
   goto out;
+#endif
 
 
 /*-------------------------------------------------------------------------

@@ -390,6 +390,7 @@
 #define color_H5Zregister "red"
 #define color_H5Zfilter_avail "red"
 #define color_H5Zunregister "red"
+#define color_H5Zget_filter_info "red"
 
 #else
 #define MPE_LOG_VARS(func_name) /* void */   

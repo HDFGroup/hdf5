@@ -137,7 +137,36 @@
           INTEGER :: filter_flag = -1
           INTEGER(SIZE_T) :: cd_nelemnts = 4
           INTEGER(SIZE_T) :: filter_name_len = 4
-          INTEGER, DIMENSION(4) :: cd_values 
+          INTEGER, DIMENSION(4) :: cd_values
+          INTEGER :: config_flag = 0 
+
+          !
+          ! Make sure that Szip has an encoder available
+          !
+          CALL h5zget_filter_info_f(H5Z_FILTER_SZIP_F, config_flag, error)
+              CALL check("h5zget_filter_info", error, total_error)
+          if ( IAND(config_flag,  H5Z_FILTER_ENCODE_ENABLED_F) .EQ. 0 ) then
+              szip_flag = .FALSE.
+              total_error = -1
+              return
+          endif
+          CALL h5zfilter_avail_f(H5Z_FILTER_SZIP_F, flag, error)
+              CALL check("h5zfilter_avail", error, total_error)
+
+          !
+          ! Make sure h5zget_filter_info_f returns the right flag
+          !
+          if( flag ) then
+              if ( config_flag .NE. IOR( H5Z_FILTER_ENCODE_ENABLED_F, H5Z_FILTER_DECODE_ENABLED_F) ) then
+                  error = -1
+                  CALL check("h5zget_filter_info config_flag", error, total_error)
+              endif
+          else
+              if ( config_flag .NE. 0 ) then
+                  error = -1
+                  CALL check("h5zget_filter_info config_flag", error, total_error)
+              endif
+          endif    
 
           options_mask = H5_SZIP_NN_OM_F + H5_SZIP_CHIP_OM_F
           pix_per_block = 32

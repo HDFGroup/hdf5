@@ -1245,14 +1245,16 @@ H5_DLL int_f nh5dont_atexit_c(void);
 #ifdef DF_CAPFNAMES
 #  define nh5zunregister_c    FNAME(H5ZUNREGISTER_C)
 #  define nh5zfilter_avail_c  FNAME(H5ZFILTER_AVAIL_C)
+#  define nh5zget_filter_info_c  FNAME(H5ZGET_FILTER_INFO_C)
 #else
 #  define nh5zunregister_c    FNAME(h5zunregister_c)
 #  define nh5zfilter_avail_c  FNAME(h5zfilter_avail_c)
+#  define nh5zget_filter_info_c  FNAME(h5zget_filter_info_c)
 #endif
 #endif
 H5_DLL int_f nh5zunregister_c (int_f *filter);
 H5_DLL int_f nh5zfilter_avail_c ( int_f *filter , int_f *flag );
-
+H5_DLL int_f nh5zget_filter_info_c (int_f *filter, int_f *flag );
 
 
 #endif /* _H5f90proto_H */

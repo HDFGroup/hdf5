@@ -574,8 +574,15 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                             case H5Z_PRELUDE_CAN_APPLY:
                                 /* Check if there is a "can apply" callback */
                                 if(fclass->can_apply) {
+                                    herr_t status;
+#ifndef H5_SZIP_CAN_ENCODE
+                                    /* If this is the Szip filter, make sure it can encode */
+                                    if (dcpl_pline.filter[u].id == H5Z_FILTER_SZIP)
+                                        HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled");
+#endif
+
                                     /* Make callback to filter's "can apply" function */
-                                    herr_t status=(fclass->can_apply)(dcpl_id, type_id, space_id);
+                                    status=(fclass->can_apply)(dcpl_id, type_id, space_id);
 
                                     /* Check return value */
                                     if(status<=0) {
@@ -1210,3 +1217,47 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } 
+
+/*-------------------------------------------------------------------------
+ * Function: H5Zget_filter_info
+ *
+ * Purpose: Gets information about a pipeline data filter and stores it
+ *          in filter_config_flags.
+ *
+ * Return: zero on success / negative on failure
+ *
+ * Programmer: James Laird and Nat Furrer
+ *              Monday, June 7, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(H5Zget_filter_info, FAIL)
+
+    if (filter_config_flags != NULL)
+    {
+        if (filter == H5Z_FILTER_SZIP)
+        {
+            *filter_config_flags = 0;
+#ifdef H5_SZIP_CAN_ENCODE
+            *filter_config_flags |= H5Z_FILTER_CONFIG_ENCODE_ENABLED;
+#endif
+            *filter_config_flags |= H5Z_FILTER_CONFIG_DECODE_ENABLED;
+        }
+        else
+            *filter_config_flags = H5Z_FILTER_CONFIG_DECODE_ENABLED | H5Z_FILTER_CONFIG_ENCODE_ENABLED;
+   
+        /* Make sure the filter exists */ 
+        if (H5Z_find(filter) == NULL)
+            *filter_config_flags = 0;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
