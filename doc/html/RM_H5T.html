@@ -112,11 +112,15 @@ of a dataset.
     <li><a href="#Datatype-EnumNameOf">H5Tenum_nameof</a>
     <li><a href="#Datatype-EnumValueOf">H5Tenum_valueof</a>
     <li><a href="#Datatype-GetMemberValue">H5Tget_member_value</a>
+    <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
+    <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
+    <li><a href="#Datatype-GetMemberIndex">H5Tget_member_index</a>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
     <li><a href="#Datatype-GetMemberClass">H5Tget_member_class</a>
     <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
+    <li><a href="#Datatype-GetMemberIndex">H5Tget_member_index</a>
     <li><a href="#Datatype-GetMemberOffset">H5Tget_member_offset</a>
     <li><a href="#Datatype-GetMemberType">H5Tget_member_type</a>
     <li><a href="#Datatype-Insert">H5Tinsert</a>
@@ -216,6 +220,7 @@ facilitate moving easily between them.</i>
     <li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>
 <!--<li><a href="#Datatype-GetMemberClass">H5Tget_member_class_f</a>        -->
     <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
+<!--<li><a href="#Datatype-GetMemberIndex">h5tget_member_index_f</a>      -->
     <li><a href="#Datatype-GetMemberOffset">h5tget_member_offset_f</a>
 <!--<li><a href="#Datatype-GetMemberDims">h5tget_member_dims_f</a>          -->
     <li><a href="#Datatype-GetMemberType">h5tget_member_type_f</a>
@@ -229,6 +234,9 @@ facilitate moving easily between them.</i>
     <li><a href="#Datatype-EnumNameOf">h5tenum_nameof_f</a>
     <li><a href="#Datatype-EnumValueOf">h5tenum_valueof_f</a>
     <li><a href="#Datatype-GetMemberValue">h5tget_member_value_f</a>
+    <li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>
+    <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
+<!--<li><a href="#Datatype-GetMemberIndex">h5tget_member_index_f</a>      -->
     <p>
     <i>Opaque Datatypes</i>
     <li><a href="#Datatype-SetTag">h5tset_tag_f</a>
@@ -559,9 +567,9 @@ H5Tget_overflow ()
         <em>size_t</em><code>size</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Creates a new dataype.
+    <dd>Creates a new datatype.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tcreate</code> creates a new dataype of the specified 
+    <dd><code>H5Tcreate</code> creates a new datatype of the specified 
         class with the specified number of bytes.  
         <p>
         The following datatype classes are supported with this function:
@@ -602,9 +610,9 @@ H5Tget_overflow ()
     <dd><em>hid_t </em><code>H5Tvlen_create</code>(<em>hid_t </em><code>base_type_id</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Creates a new variable-length dataype.
+    <dd>Creates a new variable-length datatype.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tvlen_create</code> creates a new variable-length (VL) dataype.
+    <dd><code>H5Tvlen_create</code> creates a new variable-length (VL) datatype.
         <p>
         The base datatype will be the datatype that the sequence is composed of,
         characters for character strings, vertex coordinates for polygon lists, etc.
@@ -777,7 +785,7 @@ H5Tget_overflow ()
 <dt><strong>Description:</strong>
     <dd><code>H5Tlock</code> locks the datatype specified by the 
         <code>type_id</code> identifier, making it read-only and 
-        non-destrucible.  This is normally done by the library for 
+        non-destructible.  This is normally done by the library for 
         predefined datatypes so the application does not 
         inadvertently change or delete a predefined type.  
         Once a datatype is locked it can never be unlocked.
@@ -1102,11 +1110,11 @@ H5Tget_overflow ()
     <dd>Retrieves the bit offset of the first significant bit.
 <dt><strong>Description:</strong>
     <dd><code>H5Tget_offset</code> retrieves the bit offset of the first significant bit.
-        The signficant bits of an atomic datum can be offset from the beginning
+        The significant bits of an atomic datum can be offset from the beginning
         of the memory for that datum by an amount of padding. The `offset'
         property specifies the number of bits of padding that appear to the
         "right of" the value.  That is, if we have a 32-bit datum with 16-bits
-        of precision having the value 0x1122 then it will be layed out in
+        of precision having the value 0x1122 then it will be laid out in
         memory as (from small byte address toward larger byte addresses):
         <br>
         <br>
@@ -1177,11 +1185,11 @@ H5Tget_overflow ()
     <dd>Sets the bit offset of the first significant bit.
 <dt><strong>Description:</strong>
     <dd><code>H5Tset_offset</code> sets the bit offset of the first significant bit.  The
-        signficant bits of an atomic datum can be offset from the beginning of
+        significant bits of an atomic datum can be offset from the beginning of
         the memory for that datum by an amount of padding. The `offset'
         property specifies the number of bits of padding that appear to the
         "right of" the value.  That is, if we have a 32-bit datum with 16-bits
-        of precision having the value 0x1122 then it will be layed out in
+        of precision having the value 0x1122 then it will be laid out in
         memory as (from small byte address toward larger byte addresses):
         <br>
         <br>
@@ -1380,9 +1388,9 @@ zero.
         <em>H5T_sign_t</em> <code>sign</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Sets the sign proprety for an integer type.
+    <dd>Sets the sign property for an integer type.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tset_sign</code> sets the sign proprety for an integer type.
+    <dd><code>H5Tset_sign</code> sets the sign property for an integer type.
         <ul> <dl>
             <dt>H5T_SGN_NONE (<code>0</code>)
                <dd>Unsigned integer type.
@@ -1892,16 +1900,18 @@ zero.
     <dd><em>int </em><code>H5Tget_nmembers</code>(<em>hid_t </em><code>type_id</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Retrieves the number of fields in a compound datatype.
+    <dd>Retrieves the number of elements in a compound or enumeration datatype.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tget_nmembers</code> retrieves the number of fields a compound datatype has.
+    <dd><code>H5Tget_nmembers</code> retrieves 
+        the number of fields in a compound datatype or 
+        the number of members of an enumeration datatype.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
             <dd>Identifier of datatype to query.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns number of members datatype has if successful;
+    <dd>Returns the number of elements if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_nmembers_f" 
@@ -1957,27 +1967,77 @@ zero.
         <em>int</em> <code>field_idx</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Retrieves the name of a field of a compound datatype.
+    <dd>Retrieves the name of a compound or enumeration datatype member.
 <dt><strong>Description:</strong>
     <dd><code>H5Tget_member_name</code> retrieves the name of a field 
-        of a compound datatype.  Fields are stored in no particular 
-        order, with indexes 0 through N-1, where N is the value returned 
-        by <code>H5Tget_nmembers()</code>.  The name of the field is 
+        of a compound datatype or an element of an enumeration datatype.  
+        <p>
+        The index of the target field or element is specified in
+        <code>field_idx</code>.
+        Compound datatype fields and enumeration datatype elements 
+        are stored in no particular order
+        with index values of 0 through <em>N</em>-1, where <em>N</em> 
+        is the value returned by <code>H5Tget_nmembers</code>.  
+        <p>
+        A buffer to receive the name of the field is 
         allocated with <code>malloc()</code> and the caller is responsible 
-        for freeing the memory used by the name.
+        for freeing the memory used.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
             <dd>Identifier of datatype to query.
         <dt><em>int</em> <code>field_idx</code>
-            <dd>Field index (0-based) of the field name to retrieve.
+            <dd>Zero-based index of the field or element whose name
+                is to be retrieved.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a valid pointer if successful;
-        otherwise NULL.
+    <dd>Returns a valid pointer to a string allocated with 
+        <code>malloc()</code> if successful; 
+        otherwise returns NULL.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_name_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberIndex">H5Tget_member_index</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Tget_member_index</code>(<em>hid_t </em><code>type_id</code>,
+        <em>const char *</em> <code>field_name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the index of a compound or enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_index</code> retrieves the index of a field 
+        of a compound datatype or an element of an enumeration datatype.  
+        <p>
+        The name of the target field or element is specified in
+        <code>field_name</code>.
+        <p>
+        Fields are stored in no particular order 
+        with index values of 0 through <em>N</em>-1, where <em>N</em> is 
+        the value returned by <code>H5Tget_nmembers</code>.  
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Identifier of datatype to query.
+        <dt><em>const char *</em> <code>field_name</code>
+            <dd>Name of the field or member whose index is to be retrieved.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid field or member index if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_index_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -2472,13 +2532,14 @@ zero.
     <dd>Tags an opaque datatype.
 <dt><strong>Description:</strong>
     <dd><code>H5Tset_tag</code> tags an opaque datatype <code>type_id</code>
-        with a unique ASCII identifier <code>tag</code>.
+        with a descriptive ASCII identifier,<code> tag</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
             <dd>IN: Datatype identifier for the opaque datatype to be tagged.
         <dt><em>const char</em> *<code>tag</code>
-            <dd>IN: Unique ASCII string with which the opaque datatype is to be tagged.
+            <dd>IN: Descriptive ASCII string with which the 
+                opaque datatype is to be tagged.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2728,7 +2789,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  2 August 2001
+Last modified:  1 May 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
