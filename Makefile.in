@@ -96,7 +96,6 @@ distclean:
 	-$(RM) config.cache config.log config.status
 	-$(RM) src/H5config.h src/H5pubconf.h
 	-$(RM) libtool Makefile
-	-$(CP) Makefile.dist Makefile
 
 maintainer-clean:
 	@echo "This target is intended for maintainers to use;"

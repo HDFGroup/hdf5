@@ -94,7 +94,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-globus=INC,LIB   Use the GLOBUS Library [default=no]"
 ac_help="$ac_help
-  --with-dpss=INC,LIB     Use the Globus DPSS driver [default=no]"
+  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]"
 ac_help="$ac_help
   --with-pthread=INC,LIB  Use the Pthreads library"
 ac_help="$ac_help
@@ -4670,8 +4670,8 @@ if test "${with_ssl+set}" = set; then
   :
 fi
 
-if test "X-" != "X-$with_ssl_libpath"; then
-    LDFLAGS="$LDFLAGS -L$with_ssl_libpath"
+if test "X-" != "X-$with_ssl"; then
+    LDFLAGS="$LDFLAGS -L$with_ssl"
 fi
 
 echo $ac_n "checking for main in -lcrypto""... $ac_c" 1>&6
@@ -7134,13 +7134,13 @@ EOF
 fi
 
 
-DPSS=yes
+GRIDSTORAGE=yes
 
-TESTDPSS='$(srcdir)/testdpss'
+TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
 
-# Check whether --with-dpss or --without-dpss was given.
-if test "${with_dpss+set}" = set; then
-  withval="$with_dpss"
+# Check whether --with-gridstorage or --without-gridstorage was given.
+if test "${with_gridstorage+set}" = set; then
+  withval="$with_gridstorage"
   :
 else
   withval=no
@@ -7185,7 +7185,7 @@ EOF
  
 else
   echo "$ac_t""no" 1>&6
-unset DPSS TESTDPSS
+unset GRIDSTORAGE TESTGRIDSTORAGE
 fi
 done
 
@@ -7230,7 +7230,7 @@ EOF
 
 else
   echo "$ac_t""no" 1>&6
-unset DPSS TESTDPSS
+unset GRIDSTORAGE TESTGRIDSTORAGE
 fi
 
 	echo $ac_n "checking for grid_storage_open in -lgrid_storage_file""... $ac_c" 1>&6
@@ -7278,21 +7278,21 @@ EOF
 
 else
   echo "$ac_t""no" 1>&6
-unset DPSS TESTDPSS
+unset GRIDSTORAGE TESTGRIDSTORAGE
 fi
 
 	;;
     no)
-	echo $ac_n "checking for DPSS""... $ac_c" 1>&6
-echo "configure:7288: checking for DPSS" >&5
+	echo $ac_n "checking for GRIDSTORAGE""... $ac_c" 1>&6
+echo "configure:7288: checking for GRIDSTORAGE" >&5
 	echo "$ac_t""suppressed" 1>&6
-	unset DPSS TESTDPSS
+	unset GRIDSTORAGE TESTGRIDSTORAGE
 	;;
     *)
-	dpss_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$dpss_inc"; then
+	gridstorage_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$gridstorage_inc"; then
 	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$dpss_inc"
+	    CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
 	    for ac_hdr in grid_storage_file.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
@@ -7331,7 +7331,7 @@ EOF
 else
   echo "$ac_t""no" 1>&6
 CPPFLAGS="$saved_CPPFLAGS"
-	        unset DPSS TESTDPSS
+	        unset GRIDSTORAGE TESTGRIDSTORAGE
             
 fi
 done
@@ -7379,10 +7379,10 @@ done
 
 	fi
 	
-	dpss_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$dpss_lib"; then
+	gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$gridstorage_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$dpss_lib"
+	    LDFLAGS="$LDFLAGS -L$gridstorage_lib"
             echo $ac_n "checking for main in -lgrid_storage_client""... $ac_c" 1>&6
 echo "configure:7388: checking for main in -lgrid_storage_client" >&5
 ac_lib_var=`echo grid_storage_client'_'main | sed 'y%./+-%__p_%'`
@@ -7424,7 +7424,7 @@ EOF
 
 else
   echo "$ac_t""no" 1>&6
-unset DPSS TESTDPSS
+unset GRIDSTORAGE TESTGRIDSTORAGE
 fi
 
             echo $ac_n "checking for grid_storage_open in -lgrid_storage_file""... $ac_c" 1>&6
@@ -7472,7 +7472,7 @@ EOF
 
 else
   echo "$ac_t""no" 1>&6
-unset DPSS TESTDPSS
+unset GRIDSTORAGE TESTGRIDSTORAGE
 fi
 
 	else
@@ -7517,7 +7517,7 @@ EOF
 
 else
   echo "$ac_t""no" 1>&6
-unset DPSS TESTDPSS
+unset GRIDSTORAGE TESTGRIDSTORAGE
 fi
 
             echo $ac_n "checking for grid_storage_open in -lgrid_storage_file""... $ac_c" 1>&6
@@ -7565,15 +7565,15 @@ EOF
 
 else
   echo "$ac_t""no" 1>&6
-unset DPSS TESTDPSS
+unset GRIDSTORAGE TESTGRIDSTORAGE
 fi
 
 	fi
 	;;
 esac
-if test "X-" != "X-$DPSS"; then
+if test "X-" != "X-$GRIDSTORAGE"; then
     cat >> confdefs.h <<\EOF
-#define HAVE_DPSS 1
+#define HAVE_GRIDSTORAGE 1
 EOF
 
 fi
@@ -9548,8 +9548,8 @@ s%@GASS@%$GASS%g
 s%@TESTGASS@%$TESTGASS%g
 s%@GLOBUS@%$GLOBUS%g
 s%@TESTGLOBUS@%$TESTGLOBUS%g
-s%@DPSS@%$DPSS%g
-s%@TESTDPSS@%$TESTDPSS%g
+s%@GRIDSTORAGE@%$GRIDSTORAGE%g
+s%@TESTGRIDSTORAGE@%$TESTGRIDSTORAGE%g
 s%@PDB2HDF@%$PDB2HDF%g
 s%@DEBUG_PKG@%$DEBUG_PKG%g
 s%@TRACE_API@%$TRACE_API%g

@@ -496,14 +496,14 @@ case $withval in
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Is SSL library present?  It is needed by the DPSS driver.
+dnl Is SSL library present?  It is needed by the Grid Storage driver.
 dnl
 AC_SUBST(SSL)
 SSL=yes
 
 AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB ],,)
-if test "X-" != "X-$with_ssl_libpath"; then
-    LDFLAGS="$LDFLAGS -L$with_ssl_libpath"
+if test "X-" != "X-$with_ssl"; then
+    LDFLAGS="$LDFLAGS -L$with_ssl"
 fi
 
 AC_CHECK_LIB(crypto,main,,unset SSL)
@@ -574,7 +574,7 @@ if test "X-" != "X-$GASS"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Is GLOBUS Library present?  It is needed by the DPSS driver.
+dnl Is GLOBUS Library present?  It is needed by the Grid Storage driver.
 dnl
 AC_SUBST(GLOBUS)
 GLOBUS=yes
@@ -645,54 +645,54 @@ if test "X-" != "X-$GLOBUS"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Is DPSS present?  If so then we can compile in the DPSS driver.
+dnl Is Grid Storage present?  If so then we can compile in the Grid Storage driver.
 dnl
-AC_SUBST(DPSS)
-DPSS=yes
-AC_SUBST(TESTDPSS)
-TESTDPSS='$(srcdir)/testdpss'
+AC_SUBST(GRIDSTORAGE)
+GRIDSTORAGE=yes
+AC_SUBST(TESTGRIDSTORAGE)
+TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
 
-AC_ARG_WITH(dpss,
-	[  --with-dpss=INC,LIB     Use the Globus DPSS driver [default=no]],
+AC_ARG_WITH(gridstorage,
+	[  --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]],
 	,withval=no)
 case $withval in
     yes)
-	AC_CHECK_HEADERS(grid_storage_file.h,,unset DPSS TESTDPSS)
-	AC_CHECK_LIB(grid_storage_client,main,,unset DPSS TESTDPSS)
-	AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset DPSS TESTDPSS)
+	AC_CHECK_HEADERS(grid_storage_file.h,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+	AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+	AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset GRIDSTORAGE TESTGRIDSTORAGE)
 	;;
     no)
-	AC_MSG_CHECKING(for DPSS)
+	AC_MSG_CHECKING(for GRIDSTORAGE)
 	AC_MSG_RESULT(suppressed)
-	unset DPSS TESTDPSS
+	unset GRIDSTORAGE TESTGRIDSTORAGE
 	;;
     *)
-	dpss_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$dpss_inc"; then
+	gridstorage_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$gridstorage_inc"; then
 	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$dpss_inc"
+	    CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
 	    AC_CHECK_HEADERS(grid_storage_file.h,,
 	        CPPFLAGS="$saved_CPPFLAGS"
-	        unset DPSS TESTDPSS
+	        unset GRIDSTORAGE TESTGRIDSTORAGE
             )
 	else
 	    AC_CHECK_HEADERS(grid_storage_file.h)
 	fi
 	
-	dpss_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$dpss_lib"; then
+	gridstorage_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$gridstorage_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$dpss_lib"
-            AC_CHECK_LIB(grid_storage_client,main,,unset DPSS TESTDPSS)
-            AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset DPSS TESTDPSS)
+	    LDFLAGS="$LDFLAGS -L$gridstorage_lib"
+            AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+            AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset GRIDSTORAGE TESTGRIDSTORAGE)
 	else
-            AC_CHECK_LIB(grid_storage_client,main,,unset DPSS TESTDPSS)
-            AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset DPSS TESTDPSS)
+            AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
+            AC_CHECK_LIB(grid_storage_file,grid_storage_open,,unset GRIDSTORAGE TESTGRIDSTORAGE)
 	fi
 	;;
 esac
-if test "X-" != "X-$DPSS"; then
-    AC_DEFINE(HAVE_DPSS)
+if test "X-" != "X-$GRIDSTORAGE"; then
+    AC_DEFINE(HAVE_GRIDSTORAGE)
 fi
 
 dnl ----------------------------------------------------------------------

@@ -32,10 +32,10 @@
 static hid_t H5FD_DPSS_g = 0;
 
 
-/* compile this only if HDF5 was configured to use the DPSS I/O driver */
-#ifdef H5_HAVE_DPSS
+/* compile this only if HDF5 was configured to use the Grid Storage I/O driver */
+#ifdef H5_HAVE_GRIDSTORAGE
 
-/* include the DPSS Storage Client header */
+/* include the Storage Client header */
 #include <grid_storage_file.h>
 
 /*
@@ -110,7 +110,7 @@ typedef struct H5FD_dpss_t {
             }                                                                 \
         }
 
-/* DPSS driver function prototypes */
+/* Grid Storage driver function prototypes */
 static H5FD_t *H5FD_dpss_open (const char *name, unsigned flags,
                                hid_t UNUSED fapl_id, haddr_t maxaddr);
 static herr_t H5FD_dpss_close (H5FD_t *_file);
@@ -122,7 +122,7 @@ static herr_t H5FD_dpss_read (H5FD_t *_file, hid_t fapl_id, haddr_t addr,
 static herr_t H5FD_dpss_write (H5FD_t *_file, hid_t UNUSED fapl_id,haddr_t addr,
                                hsize_t size, const void *buf);
 
-/* The DPSS I/O driver information */
+/* The Grid Storage I/O driver information */
 static const H5FD_class_t H5FD_dpss_g = {
     "dpss",                                        /* name           */
     MAXADDR,                                       /* maxaddr        */

@@ -13,14 +13,14 @@
 #include <H5public.h>          /* typedef for herr_t */
 #include <H5Ipublic.h>         /* typedef for hid_t  */
 
-#ifdef H5_HAVE_DPSS 
+#ifdef H5_HAVE_GRIDSTORAGE 
 #define H5FD_DPSS              (H5FD_dpss_init())
 #else
 #define H5FD_DPSS              (-1)
 #endif   
 
 /* Function prototypes */
-#ifdef H5_HAVE_DPSS
+#ifdef H5_HAVE_GRIDSTORAGE
 
 hid_t H5FD_dpss_init(void);
 herr_t H5Pset_fapl_dpss (hid_t fapl_id);

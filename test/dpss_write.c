@@ -17,7 +17,7 @@
 */
 #include <h5test.h>
 
-#ifndef H5_HAVE_DPSS
+#ifndef H5_HAVE_GRIDSTORAGE
 int main(void)
 {
     printf("Test skipped because DPSS driver not available\n");

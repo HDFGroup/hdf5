@@ -80,8 +80,8 @@
 /* Define if we have Globus support */
 #undef HAVE_GLOBUS
 
-/* Define if we have DPSS support */
-#undef HAVE_DPSS
+/* Define if we have Globus Grid Storage support */
+#undef HAVE_GRIDSTORAGE
 
 /* The number of bytes in a __int64.  */
 #undef SIZEOF___INT64
