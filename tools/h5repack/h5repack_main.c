@@ -15,24 +15,22 @@
 #include <stdlib.h>
 #include "h5repack.h"
 
-
-
 static void usage(void);
 
-
 /*
+h5repack main program
+
 Examples of use:
 -v -i file1.h5 -o file2.h5 -f "dataset:GZIP 6" -l "dataset:CHUNK 2x2"
 -v -i file1.h5 -o file2.h5 -f "GZIP 6" 
 */
-
 
 int main(int argc, char **argv)
 {
  char          *infile  = NULL;
  char          *outfile = NULL;
  pack_opt_t    options;            /*the global options */
- int           i;
+ int           i, ret;
 
  /* initialize options  */
  h5repack_init (&options,0);
@@ -87,19 +85,16 @@ int main(int argc, char **argv)
   usage();
  
  /* pack it */
- h5repack(infile,outfile,&options);
-
-#if defined(H5_REPACK_DEBUG)
- if (h5repack_verify(outfile,&options)<=0)
- printf("Warning: Output file does not have some of the requested filters\n");
-#endif
+ ret=h5repack(infile,outfile,&options);
 
  /* free tables */
  h5repack_end(&options);
 
- return 0;
+ if (ret==-1)
+  return 1;
+ else
+  return 0;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: usage

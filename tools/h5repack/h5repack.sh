@@ -64,7 +64,13 @@ TOOLTEST()
         $RUNSERIAL $H5REPACK_BIN "$@"
       fi
    ) 
-echo " PASSED"
+   RET=$?
+   if [ $RET != 0 ] ; then
+    echo "*FAILED*"
+   else
+    echo " PASSED"
+   fi
+		  
 }
 
 # Call the h5diff tool
@@ -80,7 +86,14 @@ DIFFTEST()
 	$RUNSERIAL $H5DIFF_BIN "$@"
 	fi
       )
-  echo " PASSED"
+   RET=$?
+#   echo $RET
+   if [ $RET != 0 ] ; then
+    echo "*FAILED*"
+   else
+    echo " PASSED"
+   fi
+				    
 }
 										
 

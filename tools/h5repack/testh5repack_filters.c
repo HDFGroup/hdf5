@@ -142,21 +142,6 @@ int make_filters(hid_t loc_id)
   goto out;
 
 /*-------------------------------------------------------------------------
- * checksum
- *-------------------------------------------------------------------------
- */
-#if 0
- /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
-  goto out;
- /* set the checksum filter */
- if (H5Pset_fletcher32(dcpl)<0) 
-  goto out;
- if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
-  goto out;
-#endif
-
-/*-------------------------------------------------------------------------
  * shuffle + SZIP
  *-------------------------------------------------------------------------
  */
