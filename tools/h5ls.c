@@ -18,11 +18,15 @@
 /*
  * File drivers
  */
+#if defined VERSION13
 #include <H5FDsec2.h>
 #include <H5FDmulti.h>
 #include <H5FDfamily.h>
-#define NDRIVERS	10
+#elif defined VERSION12
+#include <H5Fpublic.h>
+#endif
 
+#define NDRIVERS	10
 /*
  * If defined then include the file name as part of the object name when
  * printing full object names. Otherwise leave the file name off.
@@ -1912,11 +1916,12 @@ main (int argc, char *argv[])
     static char	root_name[] = "/";
 
     int		ndrivers=0;
+
     struct {
 	const char	*name;
 	hid_t		fapl;
     } driver[NDRIVERS];
-	
+
 
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
@@ -2081,7 +2086,7 @@ main (int argc, char *argv[])
     driver[ndrivers].name = "sec2";
     driver[ndrivers].fapl = H5P_DEFAULT;
     ndrivers++;
-    
+#if defined VERSION13   
     driver[ndrivers].name = "family";
     driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
@@ -2096,7 +2101,7 @@ main (int argc, char *argv[])
     driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
     ndrivers++;
-    
+#endif
     /*
      * Each remaining argument is an hdf5 file followed by an optional slash
      * and object name.

@@ -10,7 +10,13 @@
 
 /* See H5private.h for how to include system headers */
 #include <hdf5.h>
+#include <h5tools.c>
 #ifdef H5_STDC_HEADERS
+#   include <fcntl.h>
+#   include <string.h>
+#   include <stdlib.h>
+#   include <stdio.h>
+#elif defined STDC_HEADERS
 #   include <fcntl.h>
 #   include <string.h>
 #   include <stdlib.h>
@@ -20,10 +26,19 @@
 #ifdef H5_HAVE_UNISTD_H
 #   include <sys/types.h>
 #   include <unistd.h>
+#elif defined HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
 #endif
 
+#if defined VERSION12
+#ifdef HAVE_SYS_STAT_H
+#   include <sys/stat.h>
+#endif
+#elif defined VERSION13
 #ifdef H5_HAVE_SYS_STAT_H
 #   include <sys/stat.h>
+#endif
 #endif
 
 

@@ -12,7 +12,13 @@
 
 #include <hdf5.h>
 #include <stdio.h>
-
+#if H5_VERS_MAJOR == 1
+#if H5_VERS_MINOR == 2
+#define VERSION12
+#elif H5_VERS_MINOR == 3
+#define VERSION13
+#endif
+#endif 
 #define ESCAPE_HTML	1
 
 
