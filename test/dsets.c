@@ -113,6 +113,9 @@ const char *FILENAME[] = {
 #define NOENCODER_SZIP_DATASET "noencoder_szip_dset.h5"
 #define NOENCODER_SZIP_SHUFF_FLETCH_DATASET "noencoder_szip_shuffle_fletcher_dset.h5"
 
+/* Names for zero-dim test */
+#define ZERODIM_DATASET "zerodim"
+
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
@@ -3599,6 +3602,53 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_zero_dims
+ *
+ * Purpose: Tests read/writes to zero-sized extendible datasets
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: Quincey Koziol
+ *              Tuesday, July 27, 2004
+ *
+ * Modifications:
+ *             
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_zero_dims(hid_t file)
+{
+    hid_t       s=-1, d=-1, dcpl=-1;
+    hsize_t     dsize=0, dmax=H5S_UNLIMITED, csize=5;
+    
+    TESTING("I/O on datasets with zero-sized dims");
+
+    if((s = H5Screate_simple(1, &dsize, &dmax))<0) TEST_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
+    if(H5Pset_chunk(dcpl, 1, &csize)<0) TEST_ERROR;
+    if((d = H5Dcreate(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, dcpl))<0) TEST_ERROR;
+
+    if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911)<0) TEST_ERROR;
+
+    if(H5Pclose(dcpl)<0) TEST_ERROR;
+    if(H5Sclose(s)<0) TEST_ERROR;
+    if(H5Dclose(d)<0) TEST_ERROR;
+ 
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(d);
+        H5Sclose(s);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_zero_dims() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -3667,6 +3717,7 @@ main(void)
     nerrors += test_can_apply_szip(file)<0	?1:0; 
     nerrors += test_compare_dcpl(file)<0	?1:0; 
     nerrors += test_filters_endianess()<0	?1:0;
+    nerrors += test_zero_dims(file)<0	?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;

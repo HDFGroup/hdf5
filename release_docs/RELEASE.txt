@@ -101,6 +101,9 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Fixed bug where I/O to an extendible chunked dataset with zero-sized
+          dimensions would cause library to fail an assertion.
+          QAK - 2004/07/27
         - Fixed bug where chunked datasets which have filters defined,
           allocation time set to "late" and whose chunks don't align with
           the dataspace bounds could have incorrect data stored when
