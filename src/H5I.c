@@ -1527,3 +1527,4 @@ H5I_get_file_id(hid_t obj_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
