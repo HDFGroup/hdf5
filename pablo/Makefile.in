@@ -19,11 +19,14 @@ TRACE=$(PERL) $(top_srcdir)/bin/trace
 ## PABLO_MPIO_FLAGS.
 ###############################################################################
 PARALLEL_PABLO=@PARALLEL_PABLO@
-PABLO_MPIO_FLAGS=${PARALLEL_PABLO:yes=-DH5_HAVE_PARALLEL -DH5_HAVE_MPIOTRACE}
-PABLO_FLAGS=-I$(top_srcdir)/src -DH5_HAVE_PABLO $(PABLO_MPIO_FLAGS)
 
-CPPFLAGS=-I. -I$(top_srcdir)/src -DH5_DEBUG_API -DNDEBUG $(PABLO_FLAGS)  \
-         -D$(PABLO_BLD)_BUILD @CPPFLAGS@
+PABLO_MPIO_FLAGS=${PARALLEL_PABLO:yes=-DH5_HAVE_PARALLEL -DH5_HAVE_MPIOTRACE}
+PABLO_INC=-I$(top_srcdir)/src -I$(top_srcdir)/pablo -I$(top_builddir)/src -I.
+PABLO_DEFS=-DH5_HAVE_PABLO -DH5_DEBUG_API -DNDEBUG -D$(PABLO_BLD)_BUILD
+
+PABLO_FLAGS=$(PABLO_DEFS) $(PABLO_MPIO_FLAGS) $(PABLO_INC)
+
+CPPFLAGS=$(PABLO_FLAGS) @CPPFLAGS@
 
 ## This is our main target:
 LIB=libhdf5-inst.a
