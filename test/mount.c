@@ -274,8 +274,7 @@ test_hide(hid_t fapl)
      * other names.  This is a rather stupid test but demonstrates a point.
      */
     if (H5Gget_objinfo(file1, "/file1", TRUE, &sb2)<0) goto error;
-    if (sb1.fileno[0]!=sb2.fileno[0] || sb1.fileno[1]!=sb2.fileno[1] ||
-	sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
+    if (sb1.fileno!=sb2.fileno || sb1.objno!=sb2.objno) {
 	H5_FAILED();
 	puts("    Hard link failed for hidden object.");
 	goto error;
@@ -342,8 +341,7 @@ test_assoc(hid_t fapl)
      * of file2.
      */
     if (H5Gget_objinfo(file1, "/mnt1", TRUE, &sb2)<0) goto error;
-    if (sb1.fileno[0]!=sb2.fileno[0] || sb1.fileno[1]!=sb2.fileno[1] ||
-	sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
+    if (sb1.fileno!=sb2.fileno || sb1.objno!=sb2.objno) {
 	H5_FAILED();
 	puts("    Association failed.");
 	goto error;

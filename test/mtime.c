@@ -97,8 +97,7 @@ main(void)
     if (H5Fclose(file)<0) return 1;
 
     /* Compare times from the two ways of calling H5Gget_objinfo() */
-    if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1] ||
-	sb1.mtime!=sb2.mtime) {
+    if (sb1.objno!=sb2.objno || sb1.mtime!=sb2.mtime) {
 	H5_FAILED();
 	puts("    Calling H5Gget_objinfo() with the dataset ID returned");
 	puts("    different values than calling it with a file and dataset");

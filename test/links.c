@@ -264,7 +264,7 @@ cklinks(hid_t fapl)
 	puts("    Unexpected object type should have been a dataset");
 	goto error;
     }
-    if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
+    if (sb1.objno!=sb2.objno) {
 	H5_FAILED();
 	puts("    Hard link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
@@ -278,7 +278,7 @@ cklinks(hid_t fapl)
 	puts("    Unexpected object type should have been a dataset");
 	goto error;
     }
-    if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
+    if (sb1.objno!=sb2.objno) {
 	H5_FAILED();
 	puts("    Soft link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
@@ -398,10 +398,7 @@ ck_new_links(hid_t fapl)
 	puts("    Unexpected object type, should have been a dataset");
 	goto error;
     }
-    if( sb_dset.objno[0]!=sb_hard1.objno[0] || 
-        sb_dset.objno[1]!=sb_hard1.objno[1] ||
-        sb_dset.objno[0]!=sb_hard2.objno[0] ||
-        sb_dset.objno[1]!=sb_hard2.objno[1] ) {
+    if( sb_dset.objno!=sb_hard1.objno || sb_dset.objno!=sb_hard2.objno ) {
 	H5_FAILED();
 	puts("    Hard link test failed.  Link seems not to point to the ");
 	puts("    expected file location.");
@@ -419,10 +416,7 @@ ck_new_links(hid_t fapl)
         goto error;
     }
 
-    if( sb_dset.objno[0]!=sb_soft1.objno[0] ||
-        sb_dset.objno[1]!=sb_soft1.objno[1] ||
-        sb_dset.objno[0]!=sb_soft2.objno[0] ||
-        sb_dset.objno[1]!=sb_soft2.objno[1] ) {
+    if( sb_dset.objno!=sb_soft1.objno || sb_dset.objno!=sb_soft2.objno ) {
         H5_FAILED();
         puts("    Soft link test failed.  Link seems not to point to the ");
         puts("    expected file location.");

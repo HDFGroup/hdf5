@@ -515,15 +515,14 @@ test_misc4(void)
     CHECK(ret, FAIL, "H5Gget_objinfo");
 
     /* Verify that the fileno values are the same for groups from file1 */
-    VERIFY(stat1.fileno[0],stat2.fileno[0],"H5Gget_objinfo");
-    VERIFY(stat1.fileno[1],stat2.fileno[1],"H5Gget_objinfo");
+    VERIFY(stat1.fileno,stat2.fileno,"H5Gget_objinfo");
 
     /* Verify that the fileno values are not the same between file1 & file2 */
-    if(stat1.fileno[0]==stat3.fileno[0] && stat1.fileno[1]==stat3.fileno[1]) {
+    if(stat1.fileno==stat3.fileno) {
         num_errs++;
         printf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
     } /* end if */
-    if(stat2.fileno[0]==stat3.fileno[0] && stat2.fileno[1]==stat3.fileno[1]) {
+    if(stat2.fileno==stat3.fileno) {
         num_errs++;
         printf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
     } /* end if */
