@@ -406,12 +406,13 @@ hsize_t dset3_dim[2];
   type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
   ndims = 1; dim[0] = 4;
   H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_STD_I32BE);
+  H5Tinsert_array(type2, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_NATIVE_INT); 
   ndims = 2; dim[0] = 5; dim[1] = 6;
   H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_IEEE_F32BE);
+
+  H5Tinsert_array(type2, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_NATIVE_FLOAT); 
   H5Tcommit(fid, "type2", type);
-  H5Tinsert_array(type2, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_NATIVE_INT);
-  H5Tinsert_array(type2, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_NATIVE_FLOAT);
-  
+
 
   dset3_dim[0] = 3;  dset3_dim[1] = 6;
   space3 = H5Screate_simple(2, dset3_dim, NULL);
@@ -637,7 +638,7 @@ hsize_t sdim, maxdim;
   H5Gunlink(group,"type4");
 
   H5Tclose(type);
-  H5Tclose(type);
+  H5Tclose(type2);
   H5Dclose(dataset);
   H5Sclose(space);
   H5Gclose(group);
@@ -1107,16 +1108,16 @@ size_t mdims[2];
   /* compound data */
   space = H5Screate_simple(2, dims5, NULL);
   f_type = H5Tcreate (H5T_COMPOUND, sizeof(compound_t));
+  f_type2 = H5Tcreate (H5T_COMPOUND, sizeof(compound_t));
   mdims[0] = 8; mdims[1] = 10;
   H5Tinsert_array(f_type, "int_array", HOFFSET(compound_t, a), 2, mdims,
                   NULL, H5T_STD_I32BE);
+  H5Tinsert_array(f_type2, "int_array", HOFFSET(compound_t, a), 2, mdims,
+                  NULL, H5T_NATIVE_INT);
   str_type = mkstr(32, H5T_STR_SPACEPAD);
   mdims[0] = 3; mdims[1] = 4;
   H5Tinsert_array(f_type, "string", HOFFSET(compound_t, s), 2, mdims, 
                   NULL, str_type);
-
-  H5Tinsert_array(f_type2, "int_array", HOFFSET(compound_t, a), 2, mdims,
-                  NULL, H5T_NATIVE_INT);
   H5Tinsert_array(f_type2, "string", HOFFSET(compound_t, s), 2, mdims, 
                   NULL, str_type);
 
