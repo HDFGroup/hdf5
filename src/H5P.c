@@ -1159,7 +1159,7 @@ H5Pset_external (hid_t plist_id, const char *name, off_t offset, hsize_t size)
     
     /* Add to the list */
     if (plist->efl.nused>=plist->efl.nalloc) {
-	size_t na = plist->efl.nalloc + H5O_EFL_ALLOC;
+	intn na = plist->efl.nalloc + H5O_EFL_ALLOC;
 	H5O_efl_entry_t *x = H5MM_realloc (plist->efl.slot,
 					   na*sizeof(H5O_efl_entry_t));
 	if (!x) {
@@ -1882,6 +1882,7 @@ H5Pset_cache (hid_t tid, int mdc_nelmts, size_t rdcc_nbytes,
     /* Set sizes */
     fapl->mdc_nelmts = mdc_nelmts;
     fapl->rdcc_nbytes = rdcc_nbytes;
+    fapl->rdcc_w0 = rdcc_w0;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1891,10 +1892,10 @@ H5Pset_cache (hid_t tid, int mdc_nelmts, size_t rdcc_nbytes,
  * Function:	H5Pget_cache
  *
  * Purpose:	Retrieves the maximum possible number of elements in the meta
- *		data cache and the maximum possible number of bytes in the
- *		raw data chunk cache.  Any (or all) arguments may be null
- *		pointers in which case the corresponding datum is not
- *		returned.
+ *		data cache and the maximum possible number of bytes and the
+ *		RDCC_W0 value in the raw data chunk cache.  Any (or all)
+ *		arguments may be null pointers in which case the corresponding
+ *		datum is not returned.
  *
  * Return:	Success:	SUCCEED
  *
