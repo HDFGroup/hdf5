@@ -153,7 +153,7 @@ static const H5FD_stream_fapl_t default_fapl =
 static void   *H5FD_stream_fapl_get (H5FD_t *_stream);
 static H5FD_t *H5FD_stream_open (const char *name, unsigned flags,
                                  hid_t fapl_id, haddr_t maxaddr);
-static herr_t  H5FD_stream_flush (H5FD_t *_stream, unsigned closing);
+static herr_t  H5FD_stream_flush (H5FD_t *_stream, hid_t dxpl_id, unsigned closing);
 static herr_t  H5FD_stream_close (H5FD_t *_stream);
 static herr_t H5FD_stream_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_stream_get_eoa (H5FD_t *_stream);
@@ -693,7 +693,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
+H5FD_stream_flush (H5FD_t *_stream, hid_t dxpl_id, unsigned UNUSED closing)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
   size_t size;
@@ -771,10 +771,6 @@ H5FD_stream_close (H5FD_t *_stream)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
   FUNC_ENTER_NOAPI(H5FD_stream_close, FAIL);
-
-  /* Flush */
-  if (H5FD_stream_flush (_stream,TRUE) != SUCCEED)
-    HGOTO_ERROR (H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file");
 
   /* Release resources */
   if (! H5FD_STREAM_ERROR_CHECK (stream->socket) && stream->internal_socket)
