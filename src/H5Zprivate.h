@@ -23,6 +23,9 @@
 #include "H5Fprivate.h"
 #include "H5Ppublic.h"
 
+#ifdef H5_HAVE_SZLIB_H
+#include "szlib.h"
+#endif
 /*
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
@@ -59,6 +62,10 @@ H5_DLL H5Z_class_t *H5Z_find(H5Z_filter_t id);
 
 /* Filter routines */
 H5_DLL size_t H5Z_filter_deflate(unsigned flags, size_t cd_nelmts,
+			  const unsigned cd_values[], size_t nbytes,
+			  size_t *buf_size, void **buf);
+
+H5_DLL size_t H5Z_filter_szip(unsigned flags, size_t cd_nelmts,
 			  const unsigned cd_values[], size_t nbytes,
 			  size_t *buf_size, void **buf);
 

@@ -749,6 +749,56 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_szip
+ *
+ * Purpose:	Sets the compression method for a permanent or transient
+ *		filter pipeline (depending on whether PLIST_ID is a dataset
+ *		creation or transfer property list) to H5Z_FILTER_SZIP
+ *		Szip is a special compression package that is said to be good
+ *              for scientific data.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *              Raymond Lu
+ *              Tuesday, October 2, 2001
+ *              Changed the way to check parameter and set property for 
+ *              generic property list. 
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_szip(hid_t plist_id, const unsigned cd_values[])
+{
+    H5O_pline_t         pline;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(H5Pset_szip, FAIL);
+/*    H5TRACE2("e","i*Iu",plist_id,cd_values);
+    H5TRACE2("e","i*Iu",plist_id,cd_values);
+*/ 
+    
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Add the filter */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if(H5Z_append(&pline, H5Z_FILTER_SZIP, H5Z_FLAG_OPTIONAL, 4, cd_values)<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add szip filter to pipeline");
+    if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_shuffle
