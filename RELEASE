@@ -222,6 +222,8 @@ Platforms Tested:
 ================
 
   AIX 4.3.2 (IBM SP)
+  Cray T3E 2.0.4.61
+  Cray J90 10.0.0.6
   FreeBSD 3.2
   HP-UX B.10.20
   IRIX 6.5
@@ -229,8 +231,7 @@ Platforms Tested:
   Linux 2.2.10
   OSF1 4.0
   Solaris 2.6 & 2.7
-  TFLOPS O/S 1.0.4
-  T3E (unicos 2.0.4.61)
+  TFLOPS 2.7.1
   Windows NT / NT Alpha 4.0
   Windows 98
 

@@ -405,6 +405,12 @@
 	exist prior to `make install', but its subdirectories are
 	created automatically.
 
+        If `make install' fails because the install command at your
+        site somehow fails, you may use the install-sh that comes
+        with the source.  You need to run ./configure again.
+            $ INSTALL="$PWD/bin/install-sh -c" ./configure ...
+            $ make install
+
 	The library can be used without installing it by pointing the
 	compiler at the `src' directory for both include files and
 	libraries.  However, the minimum which must be installed to

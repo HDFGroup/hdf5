@@ -48,14 +48,19 @@ applicable, are systems that HDF5 1.2.0 was tested on.
                                 
   AIX 4.3.2 (IBM SP)            3.6.6
 
+  Cray J90 10.0.0.6             cc 6.3.0.0
+
+  Cray T3E 2.0.4.61             cc 6.2.1.0 
+                                mpt.1.3
+
   FreeBSD 3.2                   gcc 2.95.1
 
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32
                                 gcc 2.8.1
 
-  IRIX 6.5                      MIPSpro Compilers: Version 7.30 
+  IRIX 6.5                      MIPSpro cc 7.30 
 
-  IRIX64 6.5 (64 & n32)         cc 7.30 
+  IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
   			        mpt.1.3 (SGI MPI 3.2.0.0)
 
   Linux 2.2.10                  egcs-2.91.66               configured with
@@ -71,11 +76,8 @@ applicable, are systems that HDF5 1.2.0 was tested on.
   SunOS 5.7                     cc WorkShop Compilers 5.0
                                 gcc 2.8.1
  
-  TFLOPS O/S 1.0.4              cicc (pgcc Rel 1.7-6i)
+  TFLOPS 2.7.1                  cicc (pgcc Rel 3.0-4i)
   			        mpich-1.1.2 with local changes
-
-  Unicos 2.0.4.61 (T3E)         cc 6.2.1.0 
-                                mpt.1.3
 
   Windows NT4.0 intel           MSVC++ 5.0 and 6.0
 
@@ -89,10 +91,6 @@ B. Known Problems
 
 * NT alpha 4.0
   Dumper utiliy h5dump fails if linked with DLL.
-
-* AIX 4.3.2
-  Dumper utiliy h5dump fails.
-  Installation fails. What we will do about that???????????????????????
 
 * SunOS 5.6 with C WorkShop Compilers 4.2
   Hyperslab selections will fail if library is compiled using optimization
