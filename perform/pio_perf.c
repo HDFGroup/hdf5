@@ -211,7 +211,7 @@ static long parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
 static void run_test_loop(FILE *output, struct options *options);
 static int run_test(FILE *output, iotype iot, parameters parms);
-static void get_minmax(minmax *mm);
+static void get_minmax(minmax *mm, double val);
 static minmax accumulate_minmax_stuff(minmax *mm, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
@@ -449,37 +449,25 @@ run_test(FILE *output, iotype iot, parameters parms)
 
         /* gather all of the "write" times */
         t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
-        MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
-
-        for (j = 0; j < comm_size; ++j)
-            get_minmax(&write_mm);
+	get_minmax(&write_mm, t);
 
         write_mm_table[i] = write_mm;
 
         /* gather all of the "write" times from open to close */
         t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
-        MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
-
-        for (j = 0; j < comm_size; ++j)
-            get_minmax(&write_gross_mm);
+	get_minmax(&write_gross_mm, t);
 
         write_gross_mm_table[i] = write_gross_mm;
 
         /* gather all of the "read" times */
         t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
-        MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
-
-        for (j = 0; j < comm_size; ++j)
-            get_minmax(&read_mm);
+	get_minmax(&read_mm, t);
 
         read_mm_table[i] = read_mm;
 
         /* gather all of the "read" times from open to close */
         t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
-        MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
-
-        for (j = 0; j < comm_size; ++j)
-            get_minmax(&read_gross_mm);
+	get_minmax(&read_gross_mm, t);
 
         read_gross_mm_table[i] = read_gross_mm;
     }
@@ -564,35 +552,26 @@ run_test(FILE *output, iotype iot, parameters parms)
 
 /*
  * Function:    get_minmax_stuff
- * Purpose:     Each process sends its MINMAX information to the 0 process.
- *              If we're the 0 process, we gather that information.
+ * Purpose:     Gather all the min, max and total of val.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 21. December 2001
  * Modifications:
+ *    Use MPI_Allreduce to do it. -akc, 2002/01/11
  */
 static void
-get_minmax(minmax *mm)
+get_minmax(minmax *mm, double val)
 {
-    int myrank;
+    double sum;
+    int myrank, nproc;
 
     MPI_Comm_rank(pio_comm_g, &myrank);
+    MPI_Comm_size(pio_comm_g, &nproc);
 
-    if (myrank == 0) {
-        MPI_Status status = {0};
-        double t;
-
-        MPI_Recv((void *)&t, 1, MPI_DOUBLE, MPI_ANY_SOURCE,
-                 MPI_ANY_TAG, pio_comm_g, &status);
-
-        ++mm->num;
-        mm->sum += t;
-
-        if (t > mm->max)
-            mm->max = t;
-
-        if (t < mm->min || mm->min <= 0.0)
-            mm->min = t;
-    }
+    MPI_Allreduce(&val, &(mm->max), 1, MPI_DOUBLE, MPI_MAX, pio_comm_g);
+    MPI_Allreduce(&val, &(mm->min), 1, MPI_DOUBLE, MPI_MIN, pio_comm_g);
+    MPI_Allreduce(&val, &sum, 1, MPI_DOUBLE, MPI_SUM, pio_comm_g);
+    mm->sum += sum;
+    mm->num += nproc;
 }
 
 /*
