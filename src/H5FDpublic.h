@@ -130,24 +130,24 @@ extern "C" {
 #endif
 
 /* Function prototypes */
-hid_t H5FDregister(const H5FD_class_t *cls);
-herr_t H5FDunregister(hid_t driver_id);
-H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id,
+__DLL__ hid_t H5FDregister(const H5FD_class_t *cls);
+__DLL__ herr_t H5FDunregister(hid_t driver_id);
+__DLL__ H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr);
-herr_t H5FDclose(H5FD_t *file);
-int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);
-haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size);
-herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size);
-haddr_t H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
+__DLL__ herr_t H5FDclose(H5FD_t *file);
+__DLL__ int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);
+__DLL__ haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size);
+__DLL__ herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size);
+__DLL__ haddr_t H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
 		    hsize_t old_size, hsize_t new_size);
-haddr_t H5FDget_eoa(H5FD_t *file);
-herr_t H5FDset_eoa(H5FD_t *file, haddr_t eof);
-haddr_t H5FDget_eof(H5FD_t *file);
-herr_t H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+__DLL__ haddr_t H5FDget_eoa(H5FD_t *file);
+__DLL__ herr_t H5FDset_eoa(H5FD_t *file, haddr_t eof);
+__DLL__ haddr_t H5FDget_eof(H5FD_t *file);
+__DLL__ herr_t H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		void *buf/*out*/);
-herr_t H5FDwrite(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+__DLL__ herr_t H5FDwrite(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		 const void *buf);
-herr_t H5FDflush(H5FD_t *file);
+__DLL__ herr_t H5FDflush(H5FD_t *file);
 
 #ifdef __cplusplus
 }

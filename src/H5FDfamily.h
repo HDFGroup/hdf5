@@ -14,10 +14,10 @@
 
 #define H5FD_FAMILY	(H5FD_family_init())
 
-hid_t H5FD_family_init(void);
-herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size,
+__DLL__ hid_t H5FD_family_init(void);
+__DLL__ herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size,
 			  hid_t memb_fapl_id);
-herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
+__DLL__ herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
 			  hid_t *memb_fapl_id/*out*/);
 
 #endif
