@@ -425,6 +425,8 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
                 continue;
 #endif
             if (!type || type == (*info)->type) {
+                H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
+
                 flush = (*info)->type->flush;
                 status = (flush)(f, destroy, (*info)->addr, (*info));
                 if (status < 0) {
@@ -432,7 +434,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
                     HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                                   "unable to flush cache");
                 }
-                cache->diagnostics[(*info)->type->id].nflushes++;
+                cache->diagnostics[type_id].nflushes++;
                 if (destroy)
                     (*info)= NULL;
             }
