@@ -1291,7 +1291,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 {
     H5G_entry_t		*ent = NULL;	/*symtab ent of object to attribute */
     H5A_t          	found_attr;
-    herr_t	        ret_value = FAIL;
+    herr_t	        ret_value = 0;
     int		idx;
 
     FUNC_ENTER_API(H5Aiterate, FAIL);

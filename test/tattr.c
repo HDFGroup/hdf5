@@ -35,6 +35,10 @@
 #define SPACE1_DIM2	15
 #define SPACE1_DIM3	13
 
+/* Dataset Information */
+#define DSET1_NAME "Dataset1"
+#define DSET2_NAME "Dataset2"
+
 /* Group Information */
 #define GROUP1_NAME "/Group1"
 
@@ -120,7 +124,7 @@ test_attr_basic_write(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(fid1,DSET1_NAME,H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Create dataspace for attribute */
@@ -330,7 +334,7 @@ test_attr_basic_read(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
+    dataset=H5Dopen(fid1,DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
@@ -425,7 +429,8 @@ test_attr_compound_write(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(fid1,DSET1_NAME,H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Close dataset's dataspace */
     ret = H5Sclose(sid1);
@@ -518,7 +523,8 @@ test_attr_compound_read(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
+    dataset=H5Dopen(fid1,DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
     ret=H5Aget_num_attrs(dataset);
@@ -664,7 +670,8 @@ test_attr_scalar_write(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(fid1,DSET1_NAME,H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Create dataspace for attribute */
     sid2 = H5Screate_simple(ATTR5_RANK, NULL, NULL);
@@ -722,7 +729,7 @@ test_attr_scalar_read(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
+    dataset=H5Dopen(fid1,DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
@@ -781,7 +788,8 @@ test_attr_mult_write(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(fid1,DSET1_NAME,H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Close dataset's dataspace */
     ret = H5Sclose(sid1);
@@ -903,7 +911,8 @@ test_attr_mult_read(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
+    dataset=H5Dopen(fid1,DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
     ret=H5Aget_num_attrs(dataset);
@@ -1169,6 +1178,7 @@ test_attr_iterate(void)
 {
     hid_t   file;		/* HDF5 File ID 		*/
     hid_t   dataset;	/* Dataset ID			*/
+    hid_t   sid;	/* Dataspace ID			*/
     unsigned start;     /* Starting attribute to look up */
     int     count;      /* operator data for the iterator */
     herr_t  ret;		/* Generic return value		*/
@@ -1180,14 +1190,41 @@ test_attr_iterate(void)
     file = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
-    /* Open the dataset */
-    dataset=H5Dopen(file,"Dataset1");
+    /* Create a dataspace */
+    sid=H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a new dataset */
+    dataset=H5Dcreate(file,DSET2_NAME,H5T_NATIVE_INT,sid,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Verify the correct number of attributes */
+    ret=H5Aget_num_attrs(dataset);
+    VERIFY(ret, 0, "H5Aget_num_attrs");
+
+    /* Iterate over attributes on dataset */
+    start=0;
+    count=0;
+    ret = H5Aiterate(dataset,&start,attr_op1,&count);
+    VERIFY(ret, 0, "H5Aiterate");
+
+    /* Close dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Open existing dataset w/attributes */
+    dataset=H5Dopen(file,DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
     ret=H5Aget_num_attrs(dataset);
     VERIFY(ret, 3, "H5Aget_num_attrs");
 
-    /* Close dataset */
+    /* Iterate over attributes on dataset */
     start=0;
     count=0;
     ret = H5Aiterate(dataset,&start,attr_op1,&count);
@@ -1225,7 +1262,8 @@ test_attr_delete(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
+    dataset=H5Dopen(fid1,DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
     ret=H5Aget_num_attrs(dataset);
