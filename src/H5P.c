@@ -4867,7 +4867,7 @@ static herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size
      */
     if(pclass->plists>0 || pclass->classes>0) {
         if((new_class=H5P_create_class(pclass->parent,pclass->name,pclass->hashsize,
-                (unsigned)pclass->internal,pclass->create_func,pclass->create_data,
+                pclass->internal,pclass->create_func,pclass->create_data,
                 pclass->close_func,pclass->close_data))==NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy class");
 

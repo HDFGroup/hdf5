@@ -275,7 +275,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 #ifdef H5_WANT_H5_V1_2_COMPAT
     H5F_driver_t    driver;
 #else
-    hid_t           driver;
+    hid_t           driver=(-1);
 #endif /* H5_WANT_H5_V1_2_COMPAT */
     
     if (!base_name || !fullname || size < 1)

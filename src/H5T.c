@@ -2219,7 +2219,7 @@ H5Tget_precision(hid_t type_id)
     }
     if (dt->parent) dt = dt->parent;	/*defer to parent*/
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0,
 		      "operation not defined for specified data type");
     }
     
@@ -3432,7 +3432,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     int		ret_value = FAIL;
     int		nmembs, i;
 
-    FUNC_ENTER(H5Tget_member_index, NULL);
+    FUNC_ENTER(H5Tget_member_index, FAIL);
     H5TRACE2("Is","is",type_id,name);
 
     /* Check arguments */

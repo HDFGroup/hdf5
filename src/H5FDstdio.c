@@ -16,12 +16,14 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "hdf5.h"
+
+#ifdef H5_HAVE_STDIO_H
+#include <stdio.h>
+#endif
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-
-#include "hdf5.h"
 
 #ifdef WIN32
 #include <windows.h>
