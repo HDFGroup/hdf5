@@ -13,19 +13,12 @@
 
 /*
 
-Example 1
 dset1 dset2 h5diff_test1.h5 h5diff_test2.h5
-Example 2
-dset1 dset2 -v h5diff_test1.h5 h5diff_test2.h5
-Example 3
--v h5diff_test1.h5 h5diff_test2.h5
-Example 4
--v -r h5diff_test1.h5 h5diff_test2.h5
-Example 5
+dset1 dset2 -l h5diff_test1.h5 h5diff_test2.h5
+h5diff_test1.h5 h5diff_test2.h5
+-r h5diff_test1.h5 h5diff_test2.h5
 dset1 dset2 -n 2 h5diff_test1.h5 h5diff_test2.h5
-Example 6
-dset3 dset4 -m 0.01 h5diff_test1.h5 h5diff_test2.h5
-Example 7
+dset3 dset4 -d 0.01 h5diff_test1.h5 h5diff_test2.h5
 dset5 dset6 -p 0.05 h5diff_test1.h5 h5diff_test2.h5
 
 */
@@ -58,7 +51,9 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
                   const char *obj2_name, options_t options );
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
                  hsize_t *dims, options_t options );
-void print_pos( hsize_t curr_pos, hsize_t *acc, hsize_t *pos, int rank );
+void print_pos( int curr_pos, int *acc, int *pos, int rank );
+void print_class( H5T_class_t tclass, char *sclass );
+
 
 const char *file1_name = NULL;
 const char *file2_name = NULL;
@@ -99,8 +94,7 @@ void usage( const char *progname )
   FILE2_NAME        File name of the second HDF5 file\n"
 
  fprintf(stderr,
-  "%s [OBJ1_NAME] [OBJ2_NAME] [-h] [-l] [-r] [-d] [-n count] [-d delta] [-p relativet] FILE1_NAME FILE2_NAME\n%s",
-  progname,
+  "h5diff [OBJ1_NAME] [OBJ2_NAME] [-h] [-l] [-r] [-d] [-n count] [-d delta] [-p relativet] FILE1_NAME FILE2_NAME\n%s",
   USAGE);
  fprintf(stderr,"\n");
  fprintf(stderr,"Items in [ ] are optional \n");
@@ -357,7 +351,7 @@ int main(int argc, const char *argv[])
     (info1[i].name[result+len]=='/' || 
 				info1[i].name[result+len]=='\0') )
    {
-    printf( "%s found in file %s\n\n", info1[i].name, file1_name);
+    printf( "%s found in file 1 <%s>\n\n", info1[i].name, file1_name);
 				
 				obj1_found = 1;
 				
@@ -393,7 +387,7 @@ int main(int argc, const char *argv[])
 								
 							case H5G_GROUP:
 								
-								printf( "%s found in file %s\n", info2[j].name, file2_name ); 
+								printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
 								
 								break;
 								
@@ -404,7 +398,7 @@ int main(int argc, const char *argv[])
 								
 							case H5G_DATASET:
 
-								printf( "%s found in file %s\n", info2[j].name, file2_name ); 
+								printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
 								if ( options.r_==1 ) break;
 								/* compare with the absolute name */
 								diff_dataset(file1_id,file2_id,info1[i].name,info2[j].name,options);
@@ -418,7 +412,7 @@ int main(int argc, const char *argv[])
 								
 							case H5G_TYPE:
 								
-								printf( "%s found in file %s\n", info2[j].name, file2_name ); 
+								printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
 								
 								break;
 								
@@ -430,14 +424,14 @@ int main(int argc, const char *argv[])
     } /* j */
 				
 				if ( obj2_found == 0 )
-					printf( "%s was not found in file %s\n\n", obj2_name, file2_name);
+					printf( "%s was not found in file 2 <%s>\n\n", obj2_name, file2_name);
     
    }
    
   } /* i */
 		
 		if ( obj1_found == 0 )
-			printf( "%s was not found in file %s\n\n", obj1_name, file1_name);
+			printf( "%s was not found in file 1 <%s>\n\n", obj1_name, file1_name);
 		
 		
  }
@@ -457,8 +451,9 @@ int main(int argc, const char *argv[])
    obj1_name = info1[i].name;
    len = strlen(obj1_name);
 
-			printf( "%s found in file %s\n\n", info1[i].name, file1_name);
+			printf( "%s found in file 1 <%s>\n\n", info1[i].name, file1_name);
    
+			obj2_found = 0;
    for ( j = 0; j < nobjects2; j++)
    {
     /* find an object in file2 with same name as in file 1 */
@@ -467,7 +462,7 @@ int main(int argc, const char *argv[])
     result = pdest - info2[j].name;
 				
 				obj2_name = info2[j].name;
-    
+				    
     /* found at position result */
     if( pdest != NULL && 
      /* check if it is not a substring */
@@ -478,6 +473,7 @@ int main(int argc, const char *argv[])
      info1[i].type == info2[j].type )
     {
      
+					obj2_found = 1;
      switch ( info1[i].type )
      {
       
@@ -488,7 +484,7 @@ int main(int argc, const char *argv[])
       
      case H5G_GROUP:
       
-						printf( "%s found in file %s\n", info2[j].name, file2_name ); 
+						printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
       
       break;
       
@@ -499,7 +495,7 @@ int main(int argc, const char *argv[])
       
      case H5G_DATASET:
 						
-						printf( "%s found in file %s\n", info2[j].name, file2_name ); 
+						printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
       if ( options.r_==1 ) break;
       /* compare with the absolute name */
       diff_dataset(file1_id,file2_id,info1[i].name,info2[j].name,options);
@@ -513,18 +509,16 @@ int main(int argc, const char *argv[])
       
      case H5G_TYPE:
 						
-						printf( "%s found in file %s\n", info2[j].name, file2_name ); 
+						printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
       
       break;
      } /* switch */
     } /* if */
+	  } /* j */
 				
-				else /* not found */
-				{
-     printf( "%s is in file %s, but not in file %s\n\n", obj1_name, file1_name, file2_name);
-				}
-    
-   } /* j */
+			if ( obj2_found == 0 )
+    printf( "%s is in file 1 <%s>, but not in file 2 <%s>\n\n", obj1_name, file1_name, file2_name);
+
   } /* i */
   
  }
@@ -580,6 +574,12 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  hsize_t dims1[32], dims2[32];
  int     i;
  herr_t  status;
+	H5T_class_t tclass1;
+	H5T_class_t tclass2;
+	char    sclass1[20];
+	char    sclass2[20];
+	int     nfound;
+
 
 /*-------------------------------------------------------------------------
  * open the handles
@@ -601,7 +601,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  if ( (type2_id = H5Dget_type(dset2_id)) < 0 )
   goto out;
 
- /* Get the dataspace handle */
+	 /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )
   return -1;
 
@@ -627,20 +627,94 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
 
 
 /*-------------------------------------------------------------------------
- * compare
+ * check for the same class datatype
+ *-------------------------------------------------------------------------
+ */
+
+	if ((tclass1=H5Tget_class(type1_id))<0) 
+		goto out;
+
+	if ((tclass2=H5Tget_class(type2_id))<0) 
+		goto out;
+
+	if ( tclass1 != tclass2 )
+ {
+		print_class( tclass1, sclass1 );
+		print_class( tclass2, sclass2 );
+		printf( "<%s> is of class %s and <%s> is of class %s\n\n", 
+			obj1_name, sclass1, obj2_name, sclass2 );
+	 goto out;
+ }
+
+
+/*-------------------------------------------------------------------------
+ * check for non supported datatypes
+ *-------------------------------------------------------------------------
+ */
+
+
+	switch (tclass1) 
+	{
+	case H5T_TIME:
+		printf( "H5T_TIME comparison is not supported\n");			
+		goto out;
+	case H5T_STRING:
+		printf( "H5T_STRING comparison is not supported\n");			
+		goto out;
+	case H5T_BITFIELD:
+		printf( "H5T_BITFIELD comparison is not supported\n");				
+		goto out;
+	case H5T_OPAQUE:
+		printf( "H5T_OPAQUE comparison is not supported\n");				
+		goto out;
+	case H5T_COMPOUND:
+		printf( "H5T_COMPOUND comparison is not supported\n");						
+		goto out;
+	case H5T_REFERENCE:
+		printf( "H5T_REFERENCE comparison is not supported\n");			
+		goto out;
+	case H5T_ENUM:
+		printf( "H5T_ENUM comparison is not supported\n");	
+	goto out;
+	case H5T_VLEN:
+		printf( "H5T_VLEN comparison is not supported\n");	
+		goto out;
+	case H5T_ARRAY:
+		printf( "H5T_ARRAY comparison is not supported\n");	
+		goto out;
+	}
+
+	
+
+
+/*-------------------------------------------------------------------------
+ * check for the same rank
  *-------------------------------------------------------------------------
  */
  
  if ( rank1 != rank2 )
  {
+		printf( "<%s> is of rank %d and <%s> is of rank %d\n\n", 
+			obj1_name, rank1, obj2_name, rank2 );
   goto out;
  }
 
-#if 0
- printf("Dataset Names: %s and %s .... Comparing\n", obj1_name, obj2_name);
- printf("position \t%s \t%s \tdifference\n", obj1_name, obj2_name);
-	printf("------------------------------------------------------------\n");
-#endif
+
+/*-------------------------------------------------------------------------
+ * check for the same dimensionality
+ *-------------------------------------------------------------------------
+ */
+
+	for (i = 0; i < rank1; i++) 
+ {
+  if ( dims1[i] != dims2[i] )
+		{
+   printf( "<%s> has different dimensions than <%s>\n\n", 
+			 obj1_name, obj2_name );
+   goto out;
+		}
+ }
+
 
  tot_cnt1 = 1;
  for (i = 0; i < rank1; i++) 
@@ -657,7 +731,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  buf1 = (void *) malloc((unsigned) (tot_cnt1*H5Tget_size(type1_id)));
  buf2 = (void *) malloc((unsigned) (tot_cnt2*H5Tget_size(type2_id)));
 
-
  if ( H5Dread(dset1_id,type1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf1) < 0 )
   goto out;
 
@@ -669,8 +742,8 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  else
   tot_cnt = tot_cnt1; 
 
- if ( array_diff(buf1,buf2,tot_cnt,type1_id,rank1,dims1,options) == 0 )
-  printf("No differences found\n" );
+ nfound = array_diff(buf1,buf2,tot_cnt,type1_id,rank1,dims1,options);
+ printf("%d differences found\n", nfound );
 
 
  free((char *) buf1);
@@ -726,12 +799,12 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  int    *i4ptr1, *i4ptr2;
  float  *fptr1, *fptr2;
  double *dptr1, *dptr2;
- int    found = 0;
+ int    nfound = 0; /* number of differences found */
 
  /* accumulator and matrix position */
- hsize_t acc[32];
- hsize_t pos[32];
- int i;
+ int    acc[32];
+ int    pos[32];
+ int    i;
 
  H5T_class_t type_class;
  size_t      type_size;
@@ -739,7 +812,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  acc[rank-1]=1;
  for(i=(rank-2); i>=0; i--)
  {
-  acc[i]=acc[i+1]*dims[i+1];
+  acc[i]=acc[i+1]*(int)dims[i+1];
  }
 
  /* Get the class. */
@@ -771,43 +844,46 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
   
     for ( i = 0; i < tot_cnt; i++)
     {
-     if ( options.n_ && i>options.n_number_count-1)
-      return found;
-
-      /* delta but not percentage */
+					/* delta but not percentage */
      if ( options.d_ && !options.p_ )
      {
-      if ( fabs(*i1ptr1 - *i1ptr2) > options.d_delta )
+      if ( abs(*i1ptr1 - *i1ptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+					  nfound++;
+							if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
       
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( 1 - *i1ptr1 / *i1ptr2  > options.p_relative  )
+      if ( abs(1 - *i1ptr1 / *i1ptr2)  > options.p_relative  )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+					  nfound++;
+							if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( 1 - *i1ptr1 / *i1ptr2  > options.p_relative &&
+      if ( abs(1 - *i1ptr1 / *i1ptr2)  > options.p_relative &&
            fabs(*i1ptr1 - *i1ptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+					  nfound++;
+							if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
      
@@ -817,8 +893,10 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      {
       print_pos( i, acc, pos, rank );
 						printf("\t");
-      printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
-					 found=1;
+      printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+					 nfound++;
+						if ( options.n_ && nfound>options.n_number_count-1)
+       return nfound;
      }                                               
      i1ptr1++;  i1ptr2++;
     }
@@ -839,43 +917,46 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
   
     for ( i = 0; i < tot_cnt; i++)
     {
-     if ( options.n_ && i>options.n_number_count-1)
-      return found;
-
-      /* delta but not percentage */
+     /* delta but not percentage */
      if ( options.d_ && !options.p_ )
      {
-      if ( fabs(*i2ptr1 - *i2ptr2) > options.d_delta )
+      if ( abs(*i2ptr1 - *i2ptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
+					  nfound++;
+						 if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
       
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( 1 - *i2ptr1 / *i2ptr2  > options.p_relative  )
+      if ( abs(1 - *i2ptr1 / *i2ptr2)  > options.p_relative  )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
+					  nfound++;
+					 	if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( 1 - *i2ptr1 / *i2ptr2  > options.p_relative &&
-           fabs(*i2ptr1 - *i2ptr2) > options.d_delta )
+      if ( abs(1 - *i2ptr1 / *i2ptr2) > options.p_relative &&
+           abs(*i2ptr1 - *i2ptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
+					  nfound++;
+					 	if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
      
@@ -886,7 +967,9 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
       print_pos( i, acc, pos, rank );
 						printf("\t");
       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
-					 found=1;
+					 nfound++;
+						if ( options.n_ && nfound>options.n_number_count-1)
+       return nfound;
      }                                               
      i2ptr1++;  i2ptr2++;
     }
@@ -908,43 +991,46 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
   
     for ( i = 0; i < tot_cnt; i++)
     {
-     if ( options.n_ && i>options.n_number_count-1)
-      return found;
-
-      /* delta but not percentage */
+     /* delta but not percentage */
      if ( options.d_ && !options.p_ )
      {
-      if ( fabs(*i4ptr1 - *i4ptr2) > options.d_delta )
+      if ( abs(*i4ptr1 - *i4ptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
       
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( 1 - *i4ptr1 / *i4ptr2  > options.p_relative  )
+      if ( abs(1 - *i4ptr1 / *i4ptr2) > options.p_relative  )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( 1 - *i4ptr1 / *i4ptr2  > options.p_relative &&
-           fabs(*i4ptr1 - *i4ptr2) > options.d_delta )
+      if ( abs(1 - *i4ptr1 / *i4ptr2) > options.p_relative &&
+           abs(*i4ptr1 - *i4ptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
-					  found=1;
+       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
      
@@ -954,8 +1040,10 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      {
       print_pos( i, acc, pos, rank );
 						printf("\t");
-      printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
-					 found=1;
+      printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+						nfound++;
+					 if ( options.n_ && nfound>options.n_number_count-1)
+       return nfound;
      }                                               
      i4ptr1++;  i4ptr2++;
     }
@@ -1000,43 +1088,46 @@ position   dset5      dset6     difference
   
     for ( i = 0; i < tot_cnt; i++)
     {
-     if ( options.n_ && i>options.n_number_count-1)
-      return found;
-
-      /* delta but not percentage */
+     /* delta but not percentage */
      if ( options.d_ && !options.p_ )
      {
       if ( fabs(*fptr1 - *fptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
-					  found=1;
+       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
       
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( 1 - *fptr1 / *fptr2  > options.p_relative  )
+      if ( fabs(1 - *fptr1 / *fptr2)  > options.p_relative  )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
-					  found=1;
+       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( 1 - *fptr1 / *fptr2  > options.p_relative &&
+      if ( fabs(1 - *fptr1 / *fptr2)  > options.p_relative &&
            fabs(*fptr1 - *fptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
-					  found=1;
+       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
      
@@ -1046,8 +1137,10 @@ position   dset5      dset6     difference
      {
       print_pos( i, acc, pos, rank );
 						printf("\t");
-      printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
-					 found=1;
+      printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+						nfound++;
+					 if ( options.n_ && nfound>options.n_number_count-1)
+       return nfound;
      }                                               
      fptr1++;  fptr2++;
     }
@@ -1062,23 +1155,22 @@ position   dset5      dset6     difference
     dptr1 = (double *) buf1;
     dptr2 = (double *) buf2;
 
-					printf("position \t%s  \t \t%s  \t \tdifference\n", obj1_name, obj2_name);
+				printf("position \t%s  \t \t%s  \t \tdifference\n", obj1_name, obj2_name);
 	   printf("------------------------------------------------------------\n");
   
     for ( i = 0; i < tot_cnt; i++)
     {
-     if ( options.n_ && i>options.n_number_count-1)
-      return found;
-
-      /* delta but not percentage */
+     /* delta but not percentage */
      if ( options.d_ && !options.p_ )
      {
       if ( fabs(*dptr1 - *dptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
-					  found=1;
+       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
       
@@ -1089,21 +1181,25 @@ position   dset5      dset6     difference
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
-					  found=1;
+       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( 1 - *dptr1 / *dptr2  > options.p_relative &&
+      if ( fabs(1 - *dptr1 / *dptr2)  > options.p_relative &&
            fabs(*dptr1 - *dptr2) > options.d_delta )
       {
        print_pos( i, acc, pos, rank );
 							printf("\t");
-       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
-					  found=1;
+       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+							nfound++;
+					  if ( options.n_ && nfound>options.n_number_count-1)
+        return nfound;
       }
      }
      
@@ -1113,8 +1209,10 @@ position   dset5      dset6     difference
      {
       print_pos( i, acc, pos, rank );
 						printf("\t");
-      printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
-					 found=1;
+      printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+						nfound++;
+					 if ( options.n_ && nfound>options.n_number_count-1)
+       return nfound;
      }                                               
      dptr1++;  dptr2++;
     }
@@ -1132,14 +1230,14 @@ position   dset5      dset6     difference
  } /*switch*/
    
  
-  return found;
+  return nfound;
 }
 
 
 /*-------------------------------------------------------------------------
  * Function: print_pos
  *
- * Purpose: conver an array index position to matrix notation
+ * Purpose: convert an array index position to matrix notation
  *
  * Return: pos matrix array
  *
@@ -1156,7 +1254,7 @@ position   dset5      dset6     difference
 
 
 
-void print_pos( hsize_t curr_pos, hsize_t *acc, hsize_t *pos, int rank )
+void print_pos( int curr_pos, int *acc, int *pos, int rank )
 {
  int i;
 
@@ -1180,6 +1278,65 @@ void print_pos( hsize_t curr_pos, hsize_t *acc, hsize_t *pos, int rank )
 
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_class
+ *
+ * Purpose: 
+ *
+ * Return: 
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: February 24, 2003
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void print_class( H5T_class_t tclass, char *sclass )
+{
+	switch (tclass) 
+	{
+	case H5T_TIME:
+		strcpy(sclass,"H5T_TIME");
+		break;
+	case H5T_INTEGER:
+		strcpy(sclass,"H5T_INTEGER");
+		break;
+	case H5T_FLOAT:
+		strcpy(sclass,"H5T_FLOAT");
+		break;
+	case H5T_STRING:
+		strcpy(sclass,"H5T_STRING");
+		break;
+	case H5T_BITFIELD:
+		strcpy(sclass,"H5T_BITFIELD");
+		break;
+	case H5T_OPAQUE:
+		strcpy(sclass,"H5T_OPAQUE");
+		break;
+	case H5T_COMPOUND:
+		strcpy(sclass,"H5T_COMPOUND");
+		break;
+	case H5T_REFERENCE:
+		strcpy(sclass,"H5T_REFERENCE");
+		break;
+	case H5T_ENUM:
+		strcpy(sclass,"H5T_ENUM");
+		break;
+	case H5T_VLEN:
+		strcpy(sclass,"H5T_VLEN");
+		break;
+	case H5T_ARRAY:
+		strcpy(sclass,"H5T_ARRAY");
+		break;
+	}
+}
 
 /*-------------------------------------------------------------------------
  * do some test files 
@@ -1317,10 +1474,10 @@ int do_test_files()
  group_id = H5Gcreate(file2_id, "g1", 0);
 
  /* Create a dataset "g1/dset1" */
- dataset_id = H5Dcreate(group_id,"dset1",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+ dataset_id = H5Dcreate(group_id,"dset1",H5T_NATIVE_FLOAT,space_id,H5P_DEFAULT);
   
  /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data2);
+ status = H5Dwrite(dataset_id,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data2);
 
  /* Close */
  status = H5Dclose(dataset_id);
