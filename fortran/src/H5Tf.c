@@ -1359,6 +1359,7 @@ nh5tinsert_array_c(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* off
   c_ndims = *ndims;
   status = H5Tinsert_array(c_parent_id, c_name, c_offset,c_ndims, c_dims, c_perm, c_member_id);
 
+  HDfree(c_name);
   if(status < 0) return ret_value;
   ret_value = 0;
 
@@ -1422,7 +1423,7 @@ nh5tinsert_array_c2(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* of
   c_member_id = *member_id;
   c_ndims = *ndims;
   status = H5Tinsert_array(c_parent_id, c_name, c_offset, c_ndims, c_dims, NULL, c_member_id);
-
+  HDfree(c_name);
   if(status < 0) return ret_value;
   ret_value = 0;
 
