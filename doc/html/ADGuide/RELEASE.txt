@@ -33,26 +33,42 @@ CONTENTS
 Bug Fixes since HDF5-1.4.0
 ==========================
 
-    Library
-    -------
-        * Fixed bug with contiguous hyperslabs not being detected, causing
-            slower I/O than necessary.
-        * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
-            causing errors during I/O
+Library
+-------
+   * Fixed bug with contiguous hyperslabs not being detected, causing
+     slower I/O than necessary.
+   * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
+     causing errors during I/O
+   * The RCSID string in H5public.h was causing the C++ compiling problem
+     because when it was included multiple times, C++ did not like multiple
+     definitions of the same static variable.  All occurance of RCSID
+     definition are removed since we have not used it consistently before.
 
-    Configuration
-    -------------
+Configuration
+-------------
+    * Changed the default value of $NPROCS from 2 to 3 since 3 processes
+      have a much bigger chance catching parallel errors than just 2.
 
 
-    Tools
-    -----
 
-    Documentation
-    -------------
+Tools
+-----
+
+Documentation
+-------------
 
 
 New Features
 ============
+
+    * C++ API:
+	- Added two new member functions: Exception::getFuncName() and
+	  Exception::getCFuncName() to provide the name of the member
+	  function, where an exception is thrown.
+	- IdComponent::operator= becomes a virtual function because DataType,
+	  DataSpace, and PropList provide their own implementation.  The new
+	  operator= functions invoke H5Tcopy, H5Scopy, and H5Pcopy to make a
+	  copy of a datatype, dataspace, and property list, respectively.
 
 
 Platforms Tested
@@ -63,7 +79,7 @@ Platforms Tested
                                 Cray Fortran Version 3.4.0.2
   Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
-  FreeBSD 4.2                   gcc 2.95.2
+  FreeBSD 4.3                   gcc 2.95.2
                                 g++ 2.95.2
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
   HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
@@ -170,3 +186,9 @@ Known Problems
   incorrectly described.)  For more information, please see:
 
      http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
+
+* The test_compression in ./c++/test/dsets.cpp failed on Linux.  A size
+  value that is passed to a memcpy mysteriously becomes very large resulting 
+  in a Segnmentation Fault.  This specific test is disabled until we can 
+  figure out the problem and come up with a solution.
+  
