@@ -63,6 +63,10 @@ Bug Fixes since HDF5-1.4.1 Release
     * H5 <-> GIF convertor has been added. This is available under
       tools/gifconv. The convertor supports the ability to create animated
       gifs as well.
+    * Removed limitation that the data transfer buffer size needed to be
+      set for datasets whose dimensions were too large for the 'all' selection
+      code to handle.  Any size dimensioned datasets should be handled
+      correctly now.
 
 Documentation
 =============
