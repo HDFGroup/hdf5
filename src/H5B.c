@@ -1759,7 +1759,7 @@ H5B_remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
 	}
     } else if (type->remove) {
 	/*
-	 * We're at a leave node but the leave node points to an object that
+	 * We're at a leaf node but the leaf node points to an object that
 	 * has a removal method.  Pass the removal request to the pointed-to
 	 * object and let it decide how to progress.
 	 */
