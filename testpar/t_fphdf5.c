@@ -21,6 +21,7 @@
  *      Bill Wendling (wendling@ncsa.uiuc.edu)
  *      20. February 2003
  */
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,9 +36,10 @@
  *===-----------------------------------------------------------------------===
  */
 static hid_t create_group(hid_t loc, const char *name, size_t size_hint);
-static hid_t create_dset(hid_t loc, const char *name, hsize_t *dims, int ndims);
+static hid_t create_dset(hid_t loc, const char *name, int ndims, ...);
+static void access_dset(hid_t loc, const char *dset_name, ...);
 static void write_data(hid_t loc, const char *name, const void *buf);
-static void create_file(const char *filename, int sap_rank);
+static void create_file(const char *filename);
 
 /*===-----------------------------------------------------------------------===
  *                                Filenames
@@ -57,16 +59,17 @@ static char filenames[2][PATH_MAX]; /* "Fixed" filenames                     */
 static MPI_Comm SAP_Comm = MPI_COMM_NULL;           /* COMM for FPHDF5       */
 static MPI_Comm SAP_Barrier_Comm = MPI_COMM_NULL;   /* COMM used in barriers */
 
-static int      nerrors = 0;        /* Number of errors encountered          */
 static hid_t    fapl = -1;          /* FPHDF5 file access property list      */
-static int      verbose = 0;        /* Verbose output?                       */
+
+int             nerrors;            /* Errors count                          */
+int             verbose;            /* Verbose, default is no                */
 
 /*-------------------------------------------------------------------------
  * Function:	create_group
  * Purpose:	Helper function that creates a group at the given
  *              location with the given name and size_hint.
  * Return:	Success:    The handle to the new group
- *              Failure:    <0
+ *              Failure:    Aborts
  * Programmer:	Bill Wendling
  *              29. October 2003
  * Modifications:
@@ -92,16 +95,27 @@ static hid_t create_group(hid_t loc, const char *name, size_t size_hint)
  * Purpose:	Helper function that creates a dataset at the given
  *              location with the given name and dimensions
  * Return:	Success:    The handle to the new dataset
- *              Failure:    <0
+ *              Failure:    Aborts
  * Programmer:	Bill Wendling
  *              29. October 2003
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static hid_t create_dset(hid_t loc, const char *name, hsize_t *dims, int ndims)
+static hid_t create_dset(hid_t loc, const char *name, int ndims, ...)
 {
-    int     mpi_rank, mrc;
+    va_list ap;
+    hsize_t dims[3];
+    int     i, mpi_rank, mrc;
     hid_t   dset, sid;
+
+    VRFY((ndims >= 1 && ndims <= 3), "create_dset");
+
+    va_start(ap, ndims);
+
+    for (i = 0; i < ndims; ++i)
+        dims[i] = va_arg(ap, int);
+
+    va_end(ap);
 
     mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
     VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
@@ -119,9 +133,52 @@ static hid_t create_dset(hid_t loc, const char *name, hsize_t *dims, int ndims)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	access_dset
+ * Purpose:	Quickly check that we can access this dataset.
+ * Return:	Nothing, but aborts if an error occurs.
+ * Programmer:	Bill Wendling
+ *              03. November 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static void access_dset(hid_t loc, const char *dset_name, ...)
+{
+    va_list ap;
+    int     mpi_rank, mrc;
+    hid_t   dataset;
+
+    mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
+    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
+
+    /* Open the dataset */
+    dataset = H5Dopen(loc, dset_name);
+    VRFY((dataset >= 0), "H5Dopen");
+    printf("%d: Opened dataset \"%s\"\n", mpi_rank, dset_name);
+
+    /* Close the dataset */
+    VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+
+    /* Print out a nice message */
+    printf("%d: Accessed dataset \"/", mpi_rank);
+    va_start(ap, dset_name);
+
+    for (;;) {
+        const char *str = va_arg(ap, char *);
+
+        if (!str)
+            break;
+
+        printf("%s/", str);
+    }
+
+    va_end(ap);
+    printf("%s\"\n", dset_name);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	write_data
  * Purpose:	Helper function that writes data to a dataset.
- * Return:	Nothing
+ * Return:	Nothing, but aborts if an error occurs.
  * Programmer:	Bill Wendling
  *              29. October 2003
  * Modifications:
@@ -162,10 +219,10 @@ static void write_data(hid_t loc, const char *name, const void *buf)
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static void create_file(const char *filename, int sap_rank)
+static void create_file(const char *filename)
 {
     int     mpi_rank, mrc;
-    hid_t   fid = -1, dataset = -1;
+    hid_t   fid = -1, dataset = -1, group = -1;
 
     /* Datasets to create */
     const char dset_3x5[]       = "Dataset 3x5";
@@ -197,48 +254,51 @@ static void create_file(const char *filename, int sap_rank)
      */
     if (mpi_rank == 0) {
         /* Create a dataset in the file */
-        hid_t   group;
-        hsize_t dims[3];
+        group = create_group(fid, group_dsets, 4);
 
-        group = create_group(fid, group_dsets, 9);
-
-        /*===---------------------------------------------------------------===
-         * Create 3x5 dataset
-         *===---------------------------------------------------------------===
-         */
-        dims[0] = 3;
-        dims[1] = 5;
-
-        dataset = create_dset(group, dset_3x5, dims, 2);
+        /* Create 3x5 dataset */
+        dataset = create_dset(group, dset_3x5, 2, 3, 5);
         VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 
-        /*===---------------------------------------------------------------===
-         * Create 3x5x7 dataset
-         *===---------------------------------------------------------------===
-         */
-        dims[0] = 3;
-        dims[1] = 5;
-        dims[2] = 7;
+        /* Create 3x5x7 dataset */
+        dataset = create_dset(group, dset_3x5x7, 3, 3, 5, 7);
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 
-        dataset = create_dset(group, dset_3x5x7, dims, 3);
+        /* Create 2x4x8 dataset */
+        dataset = create_dset(group, dset_2x4x8, 3, 2, 4, 8);
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+
+        /* Create 5x7x11 dataset */
+        dataset = create_dset(group, dset_5x7x11, 3, 5, 7, 11);
         VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
         VRFY((H5Gclose(group) >= 0), "H5Gclose");
     } 
 
-    printf("%d: MPI barrier 1.0\n", mpi_rank);
-    MPI_Barrier(SAP_Barrier_Comm);
+    SYNC(SAP_Barrier_Comm);
+
+    /*===-------------------------------------------------------------------===
+     * Check that we can access all of the datasets created above
+     *===-------------------------------------------------------------------===
+     */
+    VRFY((group = H5Gopen(fid, group_dsets)), "H5Gopen");
+    access_dset(group, dset_3x5, group_dsets, NULL);
+    access_dset(group, dset_3x5x7, group_dsets, NULL);
+    access_dset(group, dset_2x4x8, group_dsets, NULL);
+    access_dset(group, dset_5x7x11, group_dsets, NULL);
+    VRFY((H5Gclose(group) >= 0), "H5Gclose");
+
+    SYNC(SAP_Barrier_Comm);
 
     /*===-------------------------------------------------------------------===
      * Access datasets
      *===-------------------------------------------------------------------===
      */
     if (mpi_rank == 2) {
-        hid_t   xfer, group;
         int     i, j, k;
         int     rdata[3][5];
         int     sdata[3][5][7];
 
-        group = H5Gopen(fid, group_dsets);
+        VRFY(((group = H5Gopen(fid, group_dsets)) >= 0), "H5Gopen");
 
         /*===---------------------------------------------------------------===
          * Open 3x5 dataset and write values to it.
@@ -263,101 +323,62 @@ static void create_file(const char *filename, int sap_rank)
         VRFY((H5Gclose(group) >= 0), "H5Gclose");
     }
 
-    printf("%d: MPI barrier 2.0\n", mpi_rank);
-    MPI_Barrier(SAP_Barrier_Comm);
+    SYNC(SAP_Barrier_Comm);
 
     /*===-------------------------------------------------------------------===
      * Create a group
      *===-------------------------------------------------------------------===
      */
     if (mpi_rank == 2) {
-        /*===---------------------------------------------------------------===
-         * Create group "/group_1"
-         *===---------------------------------------------------------------===
-         */
-        hid_t group = create_group(fid, group_1, 37);
+        /* Create group "/group_1" */
+        group = create_group(fid, group_1, 37);
         VRFY((H5Gclose(group) >= 0), "H5Gclose");
     }
 
-    printf("%d: MPI barrier 3.0\n", mpi_rank);
-    MPI_Barrier(SAP_Barrier_Comm);
+    SYNC(SAP_Barrier_Comm);
 
     /*===-------------------------------------------------------------------===
      * Create another group
      *===-------------------------------------------------------------------===
      */
     if (mpi_rank == 0) {
-        /*===---------------------------------------------------------------===
-         * Create group "/group_2"
-         *===---------------------------------------------------------------===
-         */
-        hid_t group = create_group(fid, group_2, 37);
+        /* Create group "/group_2" */
+        group = create_group(fid, group_2, 37);
         VRFY((H5Gclose(group) >= 0), "H5Gclose");
     }
 
-    printf("%d: MPI barrier 4.0\n", mpi_rank);
-    MPI_Barrier(SAP_Barrier_Comm);
+    SYNC(SAP_Barrier_Comm);
 
     /*===-------------------------------------------------------------------===
      * Access groups and co-create datasets in them
      *===-------------------------------------------------------------------===
      */
     if (mpi_rank == 0) {
-        hid_t group;
-        hsize_t dims[3];
-
-        /*===---------------------------------------------------------------===
-         * Access group "/group_1"
-         *===---------------------------------------------------------------===
-         */
+        /* Access group "/group_1" */
         printf("%d: Opening group \"%s\"\n", mpi_rank, group_1);
 
-        group = H5Gopen(fid, group_1);
-        VRFY((group >= 0), "H5Gopen");
+        VRFY(((group = H5Gopen(fid, group_1)) >= 0), "H5Gopen");
         printf("%d: Opened group \"%s\"\n", mpi_rank, group_1);
 
-        /*===---------------------------------------------------------------===
-         * Create dataset "/group_1/dset-2x4x8"
-         *===---------------------------------------------------------------===
-         */
-        dims[0] = 2;
-        dims[1] = 4;
-        dims[2] = 8;
-
-        dataset = create_dset(group, dset_2x4x8, dims, 3);
+        /* Create dataset "/group_1/dset-2x4x8" */
+        dataset = create_dset(group, dset_2x4x8, 3, 2, 4, 8);
         VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
         VRFY((H5Gclose(group) >= 0), "H5Gclose");
-    } else {
-        hid_t group;
-        hsize_t dims[3];
-
-        /*===---------------------------------------------------------------===
-         * Access group "/group_2"
-         *===---------------------------------------------------------------===
-         */
+    } else if (mpi_rank == 2) {
+        /* Access group "/group_2" */
         printf("%d: Opening group \"%s\"\n", mpi_rank, group_2);
 
-        group = H5Gopen(fid, group_2);
-        VRFY((group >= 0), "H5Gopen");
+        VRFY(((group = H5Gopen(fid, group_2)) >= 0), "H5Gopen");
         printf("%d: Opened group \"%s\"\n", mpi_rank, group_2);
 
-        /*===---------------------------------------------------------------===
-         * Create dataset "/group_2/dset-5x7x11"
-         *===---------------------------------------------------------------===
-         */
-        dims[0] = 5;
-        dims[1] = 7;
-        dims[2] = 11;
-
-        dataset = create_dset(group, dset_5x7x11, dims, 3);
+        /* Create dataset "/group_2/dset-5x7x11" */
+        dataset = create_dset(group, dset_5x7x11, 3, 5, 7, 11);
         VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
         VRFY((H5Gclose(group) >= 0), "H5Gclose");
     }
 
-    printf("%d: MPI barrier 5.0\n", mpi_rank);
-    MPI_Barrier(SAP_Barrier_Comm);
+    SYNC(SAP_Barrier_Comm);
 
-done:
     if (fid > -1) {
         VRFY((H5Fclose(fid) >= 0), "H5Fclose");
         printf("%d: Closed file\n", mpi_rank);
@@ -369,7 +390,6 @@ int main(int argc, char *argv[])
     int     mrc;
     int     mpi_rank;
     int     sap_rank = 1;
-    int     ret = EXIT_SUCCESS;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -392,7 +412,7 @@ int main(int argc, char *argv[])
          * Setup the file access property list that's used to create the
          * file.
          */
-        int i;
+        unsigned i;
 
         fapl = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl >= 0), "H5Pcreate");
@@ -410,7 +430,7 @@ int main(int argc, char *argv[])
                 goto fail;
             }
 
-            create_file(filenames[i], sap_rank);
+            create_file(filenames[i]);
         }
 
         if (fapl > -1)
