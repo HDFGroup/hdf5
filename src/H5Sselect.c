@@ -304,7 +304,8 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
                 /* Step through all the blocks to add */
                 /* (reuse the count in ACC above) */
-                for(i=0; i<(int)acc; i++) {
+                /* Adding the blocks in reverse order reduces the time spent moving memory around in H5S_hyper_add() */
+                for(i=(int)acc-1; i>=0; i--) {
                     /* Build the location of the block */
                     for(j=0; j<space->extent.u.simple.rank; j++)
                         slab[j]=start[j]+((i/slice[j])%count[j])*stride[j];
