@@ -36,6 +36,7 @@ static int          display_all = TRUE;
 static int          display_bb = FALSE;
 static int          display_oid = FALSE;
 static int          display_data = TRUE;
+static int          display_char = FALSE;   /*print 1-byte numbers as ASCII? */
 static int          usingdasho = FALSE;
 
 /**
@@ -399,9 +400,9 @@ struct handler_t {
  */
 #if 0
     /* binary: not implemented yet */
-static const char *s_opts = "hbBHiVa:d:f:g:l:t:w:xD:o:s:S:c:k:";
+static const char *s_opts = "hbBHirVa:c:d:f:g:k:l:t:w:xD:o:s:S:";
 #else
-static const char *s_opts = "hBHiVa:d:f:g:l:t:w:xD:o:s:S:c:k:";
+static const char *s_opts = "hBHirVa:c:d:f:g:k:l:t:w:xD:o:s:S:";
 #endif  /* 0 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -493,8 +494,8 @@ static struct long_options l_opts[] = {
     { "sta", require_arg, 's' },
     { "stride", require_arg, 'S' },
     { "strid", require_arg, 'S' },
-    { "stri", require_arg, 'S' },
-    { "str", require_arg, 'S' },
+    { "string", no_arg, 'r' },
+    { "strin", no_arg, 'r' },
     { "width", require_arg, 'w' },
     { "widt", require_arg, 'w' },
     { "wid", require_arg, 'w' },
@@ -607,6 +608,7 @@ usage(const char *prog)
     fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
+    fprintf(stdout, "     -r, --string         Print 1-bytes integer datasets as ASCII\n");
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
@@ -1853,16 +1855,17 @@ dump_subsetting_header(struct subset_t *sset, int dims)
 static void
 dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
 {
-    h5dump_t               *outputformat = &dataformat;
-    int                     status = -1;
-    void                   *buf;
-    hid_t                   space, type, p_type;
-    int                     ndims, i;
-    hsize_t                 size[64], nelmts = 1, alloc_size;
-    int                     depth;
-    int                     stdindent = COL;	/* should be 3 */
+    h5dump_t   *outputformat = &dataformat;
+    int         status = -1;
+    void       *buf;
+    hid_t       space, type, p_type;
+    int         ndims, i;
+    hsize_t     size[64], nelmts = 1, alloc_size;
+    int         depth;
+    int         stdindent = COL;	/* should be 3 */
 
     outputformat->line_ncols = nCols;
+
     indent += COL;
 
     /*
@@ -1889,7 +1892,39 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
 
     /* Print all the values. */
     if (obj_data == DATASET_DATA) {
+        hid_t       f_type = H5Dget_type(obj_id);
+        char        string_prefix[64];
+        h5dump_t    string_dataformat;
+
+        if (display_char && H5Tget_size(f_type) == 1 && H5Tget_class(f_type) == H5T_INTEGER) {
+            /*
+             * Print 1-byte integer data as an ASCII character string
+             * instead of integers if the `-r' or `--string' command-line
+             * option was given.
+             *
+             * We don't want to modify the global dataformat, so make a
+             * copy of it instead.
+             */
+            string_dataformat = *outputformat;
+            string_dataformat.idx_fmt = " ";
+            string_dataformat.line_multi_new = 1;
+            string_dataformat.line_1st = "        %s\"";
+            string_dataformat.line_pre = "        %s";
+            string_dataformat.line_cont = "        %s";
+            string_dataformat.str_repeat = 8;
+            string_dataformat.ascii = TRUE;
+            string_dataformat.elmt_suf1 = "";
+            string_dataformat.elmt_suf2 = "";
+            string_dataformat.line_indent = "";
+            strcpy(string_prefix, string_dataformat.line_pre);
+            strcat(string_prefix, "\"");
+            string_dataformat.line_pre = string_prefix;
+            string_dataformat.line_suf = "\"";
+            outputformat = &string_dataformat;
+        }
+
 	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
+        H5Tclose(f_type);
     } else {
         /* need to call h5tools_dump_mem for the attribute data */    
         type = H5Aget_type(obj_id);
@@ -2460,6 +2495,9 @@ parse_start:
             display_oid = TRUE;
             last_was_dset = FALSE;
             break;
+        case 'r':
+            display_char = TRUE;
+            break;
         case 'V':
             print_version(progname);
             exit(EXIT_SUCCESS);
@@ -2739,6 +2777,10 @@ main(int argc, const char *argv[])
 	} else if (display_oid == 1) {
             error_msg(progname, "option \"%s\" not available for XML\n",
 		      "--object-ids");
+	    exit(EXIT_FAILURE);
+        } else if (display_char == TRUE) {
+            error_msg(progname, "option \"%s\" not available for XML\n",
+		      "--string");
 	    exit(EXIT_FAILURE);
 	} else if (usingdasho) {
             error_msg(progname, "option \"%s\" not available for XML\n",

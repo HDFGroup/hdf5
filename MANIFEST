@@ -1207,6 +1207,8 @@
 ./tools/testfiles/tattr.h5
 ./tools/testfiles/tbitfields-1.ddl
 ./tools/testfiles/tbitfields.h5
+./tools/testfiles/tchar.h5
+./tools/testfiles/tchar1.ddl
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
 ./tools/testfiles/tcomp-3.ddl

@@ -64,6 +64,7 @@
 #define FILE36  "tmulti"
 #define FILE37  "tlarge_objname.h5"
 #define FILE38  "tvlstr.h5"
+#define FILE39  "tchar.h5"
 
 #define LENSTR		50
 #define LENSTR2		11
@@ -2891,6 +2892,38 @@ static void gent_vlstr(void)
     H5Fclose(fid1);
 }
 
+static void gent_char(void)
+{
+    const char *wdata =
+        "Four score and seven years ago our forefathers brought "
+        "forth on this continent a new nation, conceived in "
+        "liberty and dedicated to the proposition that all "
+        "men are created equal. Now we are engaged in a great "
+        "civil war, testing whether that nation or any nation "
+        "so conceived and so dedicated can long endure.";
+    hid_t       fid1;               /* HDF5 File IDs    */
+    hid_t       dataset;            /* Dataset ID       */
+    hid_t       sid1;               /* Dataspace ID     */
+    hsize_t     dims1[1];
+
+    dims1[0] = strlen(wdata);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE39, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    sid1 = H5Screate_simple(1, dims1, NULL);
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid1, "Dataset1", H5T_NATIVE_CHAR, sid1, H5P_DEFAULT);
+
+    /* Write some characters to it. */
+    H5Dwrite(dataset, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+
+    /* Close */
+    H5Dclose(dataset);
+    H5Sclose(sid1);
+    H5Fclose(fid1);
+}
+
 int main(void)
 {
     gent_group();
@@ -2942,6 +2975,7 @@ int main(void)
 
     gent_large_objname();
     gent_vlstr();
+    gent_char();
 
     return 0;
 }
