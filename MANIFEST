@@ -89,9 +89,6 @@
 ./src/H5B.c
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
-./src/H5C.c
-./src/H5Cprivate.h
-./src/H5Cpublic.h
 ./src/H5D.c
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
@@ -143,7 +140,10 @@
 ./src/H5P.c
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h
-./src/H5Psimp.c
+./src/H5S.c
+./src/H5Sprivate.h
+./src/H5Spublic.h
+./src/H5Ssimp.c
 ./src/H5T.c
 ./src/H5Tconv.c
 ./src/H5Tpkg.h
@@ -169,7 +169,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/tfile.c
-./test/th5p.c
+./test/th5s.c
 ./test/theap.c
 ./test/tmeta.c
 ./test/tohdr.c

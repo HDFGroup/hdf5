@@ -32,6 +32,8 @@ Step 2. Configure makefiles.
 
 	$ ./configure
 
+      Note: you may need to say `sh configure'.
+
     * By default libraries, include files, programs, and documentation
       are installed under /usr/local/lib, /usr/local/include,
       /usr/local/bin, and /usr/local/man.  However, if you want them
