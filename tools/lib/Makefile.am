@@ -38,7 +38,9 @@ LIBADD=$(LIBHDF5)
 TEST_PROG=talign
 check_PROGRAMS=$(TEST_PROG)
 
-LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+# Name libh5tools.la so that dependencies work out. Automake knows how
+# to build 'libh5tools.la', but not '../../tools/lib/libh5tools.la'.
+LDADD=libh5tools.la $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am
 

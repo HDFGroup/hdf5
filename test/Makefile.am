@@ -54,7 +54,7 @@ libh5test_la_LIBADD=$(LIBHDF5)
 libh5test_la_LDFLAGS=-static
 
 # Use libhd5test.la to compile all of the tests
-LDADD=${LIBHDF5} libh5test.la
+LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \

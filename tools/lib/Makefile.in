@@ -220,7 +220,9 @@ LIBADD = $(LIBHDF5)
 TEST_PROG = talign
 check_PROGRAMS = $(TEST_PROG)
 
-LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+# Name libh5tools.la so that dependencies work out. Automake knows how
+# to build 'libh5tools.la', but not '../../tools/lib/libh5tools.la'.
+LDADD = libh5tools.la $(LIBHDF5)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -250,8 +252,7 @@ check_PROGRAMS = talign$(EXEEXT)
 talign_SOURCES = talign.c
 talign_OBJECTS = talign.$(OBJEXT)
 talign_LDADD = $(LDADD)
-talign_DEPENDENCIES = $(top_builddir)/tools/lib/libh5tools.la \
-	$(top_builddir)/src/libhdf5.la
+talign_DEPENDENCIES = libh5tools.la $(top_builddir)/src/libhdf5.la
 talign_LDFLAGS =
 
 DEFS = @DEFS@
@@ -290,7 +291,7 @@ all: all-am
 .SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  tools/lib/Makefile
+	  $(AUTOMAKE) --foreign  tools/lib/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 

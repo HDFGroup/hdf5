@@ -13,8 +13,6 @@ include $(top_srcdir)/config/commence.am
 # Add include directories to C preprocessor flags
 AM_CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdir)/hl/src
 
-##LIBHDF5_HL=$(top_builddir)/hl/src/libhdf5_hl.la
-
 # The tests depend on the hdf5 and hdf5_hl libraries
 LDADD=$(LIBH5_HL) $(LIBHDF5)
 

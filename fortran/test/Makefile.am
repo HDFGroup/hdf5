@@ -36,8 +36,6 @@ libh5test_fortran_la_SOURCES=fortranlib_test.f90 tH5F.f90 tH5D.f90 \
 
 libh5test_fortran_la_LDFLAGS=-static
 
-##noinst_HEADERS=H5f90proto.h
-
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
 fortranlib_test_FFLAGS=$(AM_FFLAGS)
@@ -53,7 +51,7 @@ fflush2_SOURCES=fflush2.f90
 # The fortran test library depends on the main fortran library.
 # The tests depend on both fortran libraries and both main libraries.
 LIBADD=$(LIBH5TEST) $(LIBHDF5) $(LIBH5F)
-LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
+LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Temporary files
 MOSTLYCLEANFILES=*.h5 *.tmp

@@ -234,7 +234,7 @@ fflush2_SOURCES = fflush2.f90
 # The fortran test library depends on the main fortran library.
 # The tests depend on both fortran libraries and both main libraries.
 LIBADD = $(LIBH5TEST) $(LIBHDF5) $(LIBH5F)
-LDADD = $(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
+LDADD = libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Temporary files
 MOSTLYCLEANFILES = *.h5 *.tmp
@@ -267,7 +267,7 @@ check_PROGRAMS = fortranlib_test$(EXEEXT) fflush1$(EXEEXT) \
 am_fflush1_OBJECTS = fflush1.$(OBJEXT)
 fflush1_OBJECTS = $(am_fflush1_OBJECTS)
 fflush1_LDADD = $(LDADD)
-fflush1_DEPENDENCIES = $(top_builddir)/fortran/test/libh5test_fortran.la \
+fflush1_DEPENDENCIES = libh5test_fortran.la \
 	$(top_builddir)/test/libh5test.la \
 	$(top_builddir)/fortran/src/libhdf5_fortran.la \
 	$(top_builddir)/src/libhdf5.la
@@ -275,7 +275,7 @@ fflush1_LDFLAGS =
 am_fflush2_OBJECTS = fflush2.$(OBJEXT)
 fflush2_OBJECTS = $(am_fflush2_OBJECTS)
 fflush2_LDADD = $(LDADD)
-fflush2_DEPENDENCIES = $(top_builddir)/fortran/test/libh5test_fortran.la \
+fflush2_DEPENDENCIES = libh5test_fortran.la \
 	$(top_builddir)/test/libh5test.la \
 	$(top_builddir)/fortran/src/libhdf5_fortran.la \
 	$(top_builddir)/src/libhdf5.la
@@ -292,8 +292,7 @@ am_fortranlib_test_OBJECTS = fortranlib_test-fortranlib_test.$(OBJEXT) \
 	fortranlib_test-t.$(OBJEXT)
 fortranlib_test_OBJECTS = $(am_fortranlib_test_OBJECTS)
 fortranlib_test_LDADD = $(LDADD)
-fortranlib_test_DEPENDENCIES = \
-	$(top_builddir)/fortran/test/libh5test_fortran.la \
+fortranlib_test_DEPENDENCIES = libh5test_fortran.la \
 	$(top_builddir)/test/libh5test.la \
 	$(top_builddir)/fortran/src/libhdf5_fortran.la \
 	$(top_builddir)/src/libhdf5.la
@@ -331,7 +330,7 @@ all: all-am
 .SUFFIXES: .c .f90 .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  fortran/test/Makefile
+	  $(AUTOMAKE) --foreign  fortran/test/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 libLTLIBRARIES_INSTALL = $(INSTALL)
