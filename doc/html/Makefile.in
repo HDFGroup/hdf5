@@ -1,10 +1,17 @@
 # HDF5 Library Makefile(.in)
 #
-# Copyright (C) 1997,2001
-#                    National Center for Supercomputing Applications.
-#                    All rights reserved.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
 #
-# 
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+#
 top_srcdir=@top_srcdir@
 top_builddir=../..
 srcdir=@srcdir@
@@ -19,7 +26,7 @@ DOCDIR=$(docdir)/hdf5
 PUB_DOCS=ADGuide.html Attributes.html Big.html Caching.html Chunk_f1.gif  \
          Chunk_f2.gif Chunk_f3.gif Chunk_f4.gif Chunk_f5.gif Chunk_f6.gif \
          Chunking.html Coding.html Copyright.html Datasets.html           \
-         Dataspaces.html Datatypes.html DatatypesEnum.html Debugging.html \
+         Dataspaces.html Datatypes.html Debugging.html                    \
          EnumMap.gif Environment.html Errors.html FF-IH_FileGroup.gif     \
          FF-IH_FileObject.gif Files.html Filters.html Glossary.html       \
          Groups.html H5.api_map.html H5.format.html H5.intro.html         \
