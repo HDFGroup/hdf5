@@ -104,8 +104,8 @@
 ./doc/html/H5.intro.html
 ./doc/html/H5.sample_code.html
 ./doc/html/H5.user.html
-./doc/html/H5.user.PrintGen.html
-./doc/html/H5.user.PrintTpg.html
+./doc/html/H5.user.PrintGen.html        _DO_NOT_DISTRIBUTE_
+./doc/html/H5.user.PrintTpg.html        _DO_NOT_DISTRIBUTE_
 ./doc/html/IH_map1.gif
 ./doc/html/IH_map2.gif
 ./doc/html/IH_map3.gif
@@ -124,6 +124,10 @@
 ./doc/html/Palettes.html
 ./doc/html/Performance.html
 ./doc/html/Properties.html
+
+./doc/html/PSandPDF/index.html
+./doc/html/PSandPDF/process.txt         _DO_NOT_DISTRIBUTE_
+
 ./doc/html/Ragged.html
 ./doc/html/References.html
 ./doc/html/RM_H5.html
