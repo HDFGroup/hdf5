@@ -129,7 +129,7 @@ static void test_h5d_basic_write(void)
     ret=H5Dset_info(did1,tid1,sid1);
     CHECK(ret,FAIL,"H5Dset_info");
 
-    ret=H5Dwrite(did1,H5P_SCALAR,data1);
+    ret=H5Dwrite(did1,H5P_ALL,data1);
     CHECK(ret,FAIL,"H5Dwrite");
     
     ret=H5Mrelease(did1);
@@ -157,7 +157,7 @@ static void test_h5d_basic_write(void)
     ret=H5Dset_info(did2,tid2,sid2);
     CHECK(ret,FAIL,"H5Dset_info");
 
-    ret=H5Dwrite(did2,H5P_SCALAR,data2);
+    ret=H5Dwrite(did2,H5P_ALL,data2);
     CHECK(ret,FAIL,"H5Dwrite");
     
     ret=H5Mrelease(did2);
@@ -226,7 +226,7 @@ static void test_h5d_basic_read(void)
     
     buf_size=H5Tsize(tid1,BTRUE)*n;
     buf=HDmalloc(buf_size);
-    ret=H5Dread(did1,H5P_SCALAR,buf);
+    ret=H5Dread(did1,H5P_ALL,buf);
     CHECK(ret,FAIL,"H5Dread");
     VERIFY(HDmemcmp(buf,data1,buf_size),0,"H5Dread");
     HDfree(buf);
