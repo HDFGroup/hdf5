@@ -246,6 +246,105 @@ test_vlstrings_basic(void)
 
 /****************************************************************
 **
+**  test_vlstrings_special(): Test VL string code for special 
+**      string cases, nil and zero-sized.
+** 
+****************************************************************/
+static void
+test_vlstrings_special(void)
+{
+    const char *wdata[SPACE1_DIM1] = {"one", "two", "", "four"};
+    const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
+    char *rdata[SPACE1_DIM1];   /* Information read in */
+    hid_t dataspace, dataset2;
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1;       /* Dataspace ID			*/
+    hid_t		tid1;       /* Datatype ID			*/
+    hid_t       xfer_pid;   /* Dataset transfer property list ID */
+    hsize_t		dims1[] = {SPACE1_DIM1};
+    hsize_t     size;       /* Number of bytes which will be used */
+    unsigned       i;          /* counting variable */
+    int         str_used;   /* String data in memory */
+    int         mem_used=0; /* Memory used during allocation */
+    herr_t		ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Special VL Strings\n"));
+
+    /* Create file */
+    fid1 = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a datatype to refer to */
+    tid1 = H5Tcopy (H5T_C_S1);
+    CHECK(tid1, FAIL, "H5Tcopy");
+
+    ret = H5Tset_size (tid1,H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset3",tid1,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write dataset to disk */
+    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read dataset from disk */
+    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        if(strlen(wdata[i])!=strlen(rdata[i])) {
+            num_errs++;
+            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            continue;
+        } /* end if */
+        if( strcmp(wdata[i],rdata[i]) != 0 ) {
+            num_errs++;
+            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            continue;
+        } /* end if */
+    } /* end for */
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create another dataset to test nil strings */
+    dataset=H5Dcreate(fid1,"Dataset4",tid1,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Try to write nil strings to disk.  Should fail. */
+    H5E_BEGIN_TRY {
+        H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata2);
+    } H5E_END_TRY;
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+
+/****************************************************************
+**
 **  test_vlstring_type(): Test VL string type.
 **      Tests if VL string is treated as string. 
 **
@@ -508,6 +607,7 @@ test_vlstrings(void)
     /* These next tests use the same file */
     /* Test basic VL string datatype */
     test_vlstrings_basic();
+    test_vlstrings_special();
     test_vlstring_type();         
 
     /* Test using VL strings in attributes */
