@@ -21,7 +21,6 @@
 
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
 #define H5G_SIZE_HINT   1024            /*default root grp size hint         */
-#define H5G_NODE_K(F) ((unsigned)((F)->shared->fcpl->sym_leaf_k))
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 
 #define H5G_DEFAULT_ROOT_SIZE  32
@@ -138,4 +137,7 @@ __DLL__ herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
 				  H5G_entry_t *ent, int n);
 __DLL__ herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, int n);
+
+__DLL__ unsigned H5G_node_k(H5F_t *f);
+
 #endif

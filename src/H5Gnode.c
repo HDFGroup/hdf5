@@ -219,7 +219,7 @@ static size_t
 H5G_node_size(H5F_t *f)
 {
     return H5G_NODE_SIZEOF_HDR(f) +
-	(2 * H5G_NODE_K(f)) * H5G_SIZEOF_ENTRY(f);
+	(2 * H5G_node_k(f)) * H5G_SIZEOF_ENTRY(f);
 }
 
 
@@ -272,7 +272,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
 		      "unable to allocate file space");
     }
     sym->dirty = TRUE;
-    sym->entry = H5FL_ARR_ALLOC(H5G_entry_t,(2*H5G_NODE_K(f)),1);
+    sym->entry = H5FL_ARR_ALLOC(H5G_entry_t,(2*H5G_node_k(f)),1);
     if (NULL==sym->entry) {
 	H5FL_FREE(H5G_node_t,sym);
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -439,7 +439,7 @@ H5G_node_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
 		     "memory allocation failed for symbol table node");
     p=buf;
     if (NULL==(sym = H5FL_ALLOC(H5G_node_t,1)) ||
-	NULL==(sym->entry=H5FL_ARR_ALLOC(H5G_entry_t,(2*H5G_NODE_K(f)),1))) {
+	NULL==(sym->entry=H5FL_ARR_ALLOC(H5G_entry_t,(2*H5G_node_k(f)),1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -805,7 +805,7 @@ H5G_node_insert(H5F_t *f, haddr_t addr, void UNUSED *_lt_key,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR,
 		    "unable to insert symbol name into heap");
     }
-    if ((size_t)(sn->nsyms) >= 2*H5G_NODE_K(f)) {
+    if ((size_t)(sn->nsyms) >= 2*H5G_node_k(f)) {
 	/*
 	 * The node is full.  Split it into a left and right
 	 * node and return the address of the new right node (the
@@ -823,29 +823,29 @@ H5G_node_insert(H5F_t *f, haddr_t addr, void UNUSED *_lt_key,
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
 			"unable to split symbol table node");
 	}
-	HDmemcpy(snrt->entry, sn->entry + H5G_NODE_K(f),
-		 H5G_NODE_K(f) * sizeof(H5G_entry_t));
-	snrt->nsyms = H5G_NODE_K(f);
+	HDmemcpy(snrt->entry, sn->entry + H5G_node_k(f),
+		 H5G_node_k(f) * sizeof(H5G_entry_t));
+	snrt->nsyms = H5G_node_k(f);
 	snrt->dirty = TRUE;
 
 	/* The left node */
-	HDmemset(sn->entry + H5G_NODE_K(f), 0,
-		 H5G_NODE_K(f) * sizeof(H5G_entry_t));
-	sn->nsyms = H5G_NODE_K(f);
+	HDmemset(sn->entry + H5G_node_k(f), 0,
+		 H5G_node_k(f) * sizeof(H5G_entry_t));
+	sn->nsyms = H5G_node_k(f);
 	sn->dirty = TRUE;
 
 	/* The middle key */
 	md_key->offset = sn->entry[sn->nsyms - 1].name_off;
 
 	/* Where to insert the new entry? */
-	if (idx <= (int)H5G_NODE_K(f)) {
+	if (idx <= (int)H5G_node_k(f)) {
 	    insert_into = sn;
-	    if (idx == (int)H5G_NODE_K(f))
+	    if (idx == (int)H5G_node_k(f))
 		md_key->offset = offset;
 	} else {
-	    idx -= H5G_NODE_K(f);
+	    idx -= H5G_node_k(f);
 	    insert_into = snrt;
-	    if (idx == (int)H5G_NODE_K (f)) {
+	    if (idx == (int)H5G_node_k (f)) {
 		rt_key->offset = offset;
 		*rt_key_changed = TRUE;
 	    }
@@ -1194,7 +1194,7 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
 	    "Size of Node (in bytes):", (unsigned)H5G_node_size(f));
     fprintf(stream, "%*s%-*s %d of %d\n", indent, "", fwidth,
 	    "Number of Symbols:",
-	    sn->nsyms, 2 * H5G_NODE_K(f));
+	    sn->nsyms, 2 * H5G_node_k(f));
 
     indent += 3;
     fwidth = MAX(0, fwidth - 3);
@@ -1213,3 +1213,15 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
     FUNC_LEAVE(SUCCEED);
 }
 
+unsigned H5G_node_k(H5F_t *f)
+{
+    int sym_leaf_k;
+
+    FUNC_ENTER(H5G_node_k, FAIL);
+
+    if(H5P_get(f->shared->fcpl_id, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                      "can't get rank for symbol table leaf node"); 
+    
+    FUNC_LEAVE(sym_leaf_k);
+}

@@ -93,7 +93,6 @@ typedef struct H5P_genplist_tag {
 typedef struct {
     /* Union of all the different kinds of property lists */
     union {
-        H5F_create_t fcreate;   /* File creation properties */
         H5F_access_t faccess;   /* File access properties */
         H5F_mprop_t mount;      /* Mounting properties */
     } u;

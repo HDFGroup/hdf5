@@ -405,12 +405,12 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
     /* Set the fill value, external file list, and data pipeline property 
      * for the new property list */
     if(H5P_set(new_plist_id, H5D_CRT_FILL_VALUE_NAME, &dst_fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set fill value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value");
     if(H5P_set(new_plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &dst_efl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, 
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
                     "can't set external file list");
     if(H5P_set(new_plist_id, H5D_CRT_DATA_PIPELINE_NAME, &dst_pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set pipeline");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
     FUNC_LEAVE(ret_value);    
@@ -988,7 +988,7 @@ H5Dget_create_plist(hid_t dset_id)
     }
 
     /* Get the fill value property */
-    if(H5Pget(ret_value, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
+    if(H5P_get(ret_value, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
     /* Copy the dataset type into the fill value message */
     if(copied_fill.type==NULL)
@@ -998,7 +998,7 @@ H5Dget_create_plist(hid_t dset_id)
     }
     /* Set back the fill value property to property list */
     if(H5P_set(ret_value, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
-        HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, 
+        HRETURN_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, 
                       "unable to set property list fill value");
 
     FUNC_LEAVE (ret_value);
@@ -1523,7 +1523,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to update fill value header message");        
     if(H5P_set(new_dset->dcpl_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't set fill value");  
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set fill value");  
 
     /* Update the type and space header messages */
     if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0,
@@ -1816,7 +1816,7 @@ H5D_open_oid(H5G_entry_t *ent)
         HDmemset(&fill, 0, sizeof(fill));
     }
     if(H5P_set(dataset->dcpl_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't set fill value");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
 
     /* Get the optional filters message */
     HDmemset(&pline,0,sizeof(H5O_pline_t));
@@ -1825,7 +1825,7 @@ H5D_open_oid(H5G_entry_t *ent)
         HDmemset(&pline, 0, sizeof(pline));
     }
     if(H5P_set(dataset->dcpl_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't set pipeline");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set pipeline");
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
@@ -1886,7 +1886,7 @@ H5D_open_oid(H5G_entry_t *ent)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, 
                   "storage address is undefined and no external file list");
         if(H5P_set(dataset->dcpl_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, 
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, 
                         "can't set external file list");
     }
     /*

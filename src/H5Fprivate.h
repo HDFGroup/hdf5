@@ -212,13 +212,9 @@ typedef struct H5F_t H5F_t;
 #define H5F_addr_pow2(N)	((haddr_t)1<<(N))
 
 /* size of size_t and off_t as they exist on disk */
-#ifdef H5F_PACKAGE
-#define H5F_SIZEOF_ADDR(F)	((F)->shared->fcpl->sizeof_addr)
-#define H5F_SIZEOF_SIZE(F)	((F)->shared->fcpl->sizeof_size)
-#else /* H5F_PACKAGE */
-#define H5F_SIZEOF_ADDR(F)	(H5F_sizeof_addr(F))
-#define H5F_SIZEOF_SIZE(F)	(H5F_sizeof_size(F))
-#endif /* H5F_PACKAGE */
+#define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
+#define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
+
 __DLL__ size_t H5F_sizeof_addr(H5F_t *f);
 __DLL__ size_t H5F_sizeof_size(H5F_t *f);
 
@@ -254,20 +250,44 @@ __DLL__ size_t H5F_sizeof_size(H5F_t *f);
    case 2: UINT16DECODE(p,l); break;					      \
 }
 
-/*
- * File-creation property list.
- */
-typedef struct H5F_create_t {
-    hsize_t	userblock_size;	/* Size of the file user block in bytes */
-    int	sym_leaf_k;	/* 1/2 rank for symbol table leaf nodes */
-    int	btree_k[8];	/* 1/2 rank for btree internal nodes	*/
-    size_t	sizeof_addr;	/* Number of bytes in an address	*/
-    size_t	sizeof_size;	/* Number of bytes for obj sizes	*/
-    int	bootblock_ver;	/* Version # of the bootblock		*/
-    int	freespace_ver;	/* Version # of the free-space information*/
-    int	objectdir_ver;	/* Version # of the object directory format*/
-    int	sharedheader_ver;/* Version # of the shared header format */
-} H5F_create_t;
+/* ========= File Creation properties ============ */
+/* Definitions for the size of the file user block in bytes */
+#define H5F_CRT_USER_BLOCK_NAME      "block_size"
+#define H5F_CRT_USER_BLOCK_SIZE      sizeof(hsize_t)
+#define H5F_CRT_USER_BLOCK_DEF       0
+/* Definitions for the 1/2 rank for symbol table leaf nodes */
+#define H5F_CRT_SYM_LEAF_NAME        "symbol_leaf"
+#define H5F_CRT_SYM_LEAF_SIZE        sizeof(int)
+#define H5F_CRT_SYM_LEAF_DEF         4
+/* Definitions for the 1/2 rank for btree internal nodes    */
+#define H5F_CRT_BTREE_RANK_NAME      "btree_rank"
+#define H5F_CRT_BTREE_RANK_SIZE      sizeof(int[8])
+#define H5F_CRT_BTREE_RANK_DEF       {16,32,0}
+/* Definitions for byte number in an address                */
+#define H5F_CRT_ADDR_BYTE_NUM_NAME   "addr_byte_num"
+#define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(size_t)
+#define H5F_CRT_ADDR_BYTE_NUM_DEF    sizeof(haddr_t)
+/* Definitions for byte number for object size              */
+#define H5F_CRT_OBJ_BYTE_NUM_NAME     "obj_byte_num"
+#define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(size_t)
+#define H5F_CRT_OBJ_BYTE_NUM_DEF      sizeof(hsize_t)
+/* Definitions for version number of the bootblock          */
+#define H5F_CRT_BOOT_VERS_NAME        "boot_version"
+#define H5F_CRT_BOOT_VERS_SIZE        sizeof(int)
+#define H5F_CRT_BOOT_VERS_DEF         HDF5_BOOTBLOCK_VERSION
+/* Definitions for free-space version number                */
+#define H5F_CRT_FREESPACE_VERS_NAME   "free_space_version"
+#define H5F_CRT_FREESPACE_VERS_SIZE   sizeof(int)
+#define H5F_CRT_FREESPACE_VERS_DEF    HDF5_FREESPACE_VERSION
+/* Definitions for object directory version number          */
+#define H5F_CRT_OBJ_DIR_VERS_NAME     "obj_dir_version"
+#define H5F_CRT_OBJ_DIR_VERS_SIZE     sizeof(int)
+#define H5F_CRT_OBJ_DIR_VERS_DEF      HDF5_OBJECTDIR_VERSION
+/* Definitions for shared-header format version             */
+#define H5F_CRT_SHARE_HEAD_VERS_NAME  "share_head_version"  
+#define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(int)
+#define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
+
 
 /*
  * File-access property list.
@@ -292,7 +312,6 @@ typedef struct H5F_mprop_t {
 } H5F_mprop_t;
 
 /* library variables */
-__DLLVAR__ const H5F_create_t H5F_create_dflt;
 __DLLVAR__ H5F_access_t H5F_access_dflt;
 __DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
 

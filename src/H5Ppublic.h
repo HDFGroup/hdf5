@@ -39,9 +39,8 @@ typedef long off_t;
 /* Property list classes */
 typedef enum H5P_class_t_old {
     H5P_NO_CLASS_OLD     = -1,  /*error return value                 */
-    H5P_FILE_CREATE_OLD  = 0,   /*file creation properties           */
-    H5P_FILE_ACCESS_OLD  = 1,   /*file access properties             */
-    H5P_MOUNT_OLD        = 2,   /*file mounting properties           */
+    H5P_FILE_ACCESS_OLD  = 0,   /*file access properties             */
+    H5P_MOUNT_OLD        = 1,   /*file mounting properties           */
     H5P_NCLASSES_OLD            /*this must be last!                 */
 } H5P_class_t_old;
 
@@ -56,7 +55,6 @@ typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
 /*      - merge/delete H5Pcopy and H5Pcopy_new */
 /*      - merge/delete H5Pclose and H5Pclose_list */
 __DLLVAR__ hid_t H5P_NO_CLASS;
-__DLLVAR__ hid_t H5P_FILE_CREATE;
 __DLLVAR__ hid_t H5P_FILE_ACCESS;
 __DLLVAR__ hid_t H5P_MOUNT;
 
@@ -94,7 +92,7 @@ extern "C" {
  */
 #define H5P_NO_CLASS_NEW   	(H5open(), H5P_CLS_NO_CLASS_g)
 #define H5P_NO_CLASS_HASH_SIZE   1  /* 1, not 0, otherwise allocations get weird */
-#define H5P_FILE_CREATE_NEW	(H5open(), H5P_CLS_FILE_CREATE_g)
+#define H5P_FILE_CREATE (H5open(), H5P_CLS_FILE_CREATE_g)
 #define H5P_FILE_CREATE_HASH_SIZE   17
 #define H5P_FILE_ACCESS_NEW (H5open(), H5P_CLS_FILE_ACCESS_g)
 #define H5P_FILE_ACCESS_HASH_SIZE   17

@@ -1974,9 +1974,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
                         /* property lists are converted to generic property */
                         /* lists -QAK */
 			switch (H5P_get_class(id_type)) {
-                            case H5P_FILE_CREATE_OLD:
-                                fprintf(out, "H5P_FILE_CREATE");
-                                break;
                             case H5P_FILE_ACCESS_OLD:
                                 fprintf(out, "H5P_FILE_ACCESS");
                                 break;
@@ -2139,9 +2136,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		switch (plist_class) {
                     case H5P_NO_CLASS_OLD:
                         fprintf (out, "H5P_NO_CLASS");
-                        break;
-                    case H5P_FILE_CREATE_OLD:
-                        fprintf (out, "H5P_FILE_CREATE");
                         break;
                     case H5P_FILE_ACCESS_OLD:
                         fprintf (out, "H5P_FILE_ACCESS");

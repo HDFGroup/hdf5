@@ -40,9 +40,6 @@
     4 +				/*type, level, num entries		  */  \
     2*H5F_SIZEOF_ADDR(F))	/*left and right sibling addresses	  */
      
-#define H5B_K(F,TYPE)		/*K value given file and Btree subclass   */  \
-   ((F)->shared->fcpl->btree_k[(TYPE)->id])
-
 typedef enum H5B_ins_t {
     H5B_INS_ERROR	 = -1,	/*error return value			     */
     H5B_INS_NOOP	 = 0,	/*insert made no changes		     */
@@ -139,4 +136,6 @@ __DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 			  void *udata);
 __DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr,
 			    void *udata);
+__DLL__ int    H5B_Kvalue(H5F_t *f, const H5B_class_t *type);
+
 #endif

@@ -38,7 +38,6 @@ static herr_t		H5P_init_interface(void);
 /* These go away as each old-style property list is converted to a generic */
 /* property list -QAK */
 hid_t H5P_NO_CLASS=(hid_t)H5P_NO_CLASS_OLD;
-hid_t H5P_FILE_CREATE=(hid_t)H5P_FILE_CREATE_OLD;
 hid_t H5P_FILE_ACCESS=(hid_t)H5P_FILE_ACCESS_OLD;
 hid_t H5P_MOUNT=(hid_t)H5P_MOUNT_OLD;
 
@@ -344,15 +343,11 @@ H5Pcreate(hid_t type)
     else {
         /* Set the type of the property list to create for older property lists */
         old_type=(H5P_class_t_old)type;
-assert( old_type==H5P_FILE_CREATE_OLD ||
-        old_type==H5P_FILE_ACCESS_OLD ||
-        old_type==H5P_MOUNT_OLD);
+        assert( old_type==H5P_FILE_ACCESS_OLD ||
+		old_type==H5P_MOUNT_OLD);
 
         /* Allocate a new property list and initialize it with default values */
         switch (old_type) {
-            case H5P_FILE_CREATE_OLD:
-                src = &H5F_create_dflt;
-                break;
             case H5P_FILE_ACCESS_OLD:
                 src = &H5F_access_dflt;
                 break;
@@ -509,9 +504,6 @@ H5P_close(void *_plist)
                 fa_list->driver_info = NULL;
                 fa_list->driver_id = -1;
             }
-            break;
-        
-        case H5P_FILE_CREATE_OLD:
             break;
         
         case H5P_MOUNT_OLD:
@@ -941,10 +933,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
     
     /* How big is the property list */
     switch (type) {
-        case H5P_FILE_CREATE_OLD:
-            size = sizeof(H5F_create_t);
-            break;
-
         case H5P_FILE_ACCESS_OLD:
             size = sizeof(H5F_access_t);
             break;
@@ -972,9 +960,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
 
     /* Deep-copy pointers */
     switch (type) {
-        case H5P_FILE_CREATE_OLD:
-            break;
-        
         case H5P_FILE_ACCESS_OLD:
             fa_dst = (H5F_access_t*)dst;
 
@@ -1022,34 +1007,41 @@ H5P_copy (H5P_class_t_old type, const void *src)
  *
  * Modifications:
  *
+ * 		Raymond Lu, Oct 14, 2001
+ * 		Change to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
 	       int *stab/*out*/, int *shhdr/*out*/)
 {
-    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pget_version, FAIL);
     H5TRACE5("e","ixxxx",plist_id,boot,freelist,stab,shhdr);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Get values */
     if (boot)
-        *boot = plist->bootblock_ver;
+        if(H5P_get(plist_id, H5F_CRT_BOOT_VERS_NAME, boot) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                          "can't get boot version");
     if (freelist)
-        *freelist = plist->freespace_ver;
+        if(H5P_get(plist_id, H5F_CRT_FREESPACE_VERS_NAME, freelist) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                          "can't get free-space version");
     if (stab)
-        *stab = plist->objectdir_ver;
+        if(H5P_get(plist_id, H5F_CRT_OBJ_DIR_VERS_NAME, stab) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                          "can't get object directory version");
     if (shhdr)
-        *shhdr = plist->sharedheader_ver;
-
+        if(H5P_get(plist_id, H5F_CRT_SHARE_HEAD_VERS_NAME, shhdr) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                          "can't get shared-header version");
+  
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -1066,23 +1058,23 @@ H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
  *
  * Modifications:
  *
+ *		Raymond Lu, Oct 14, 2001
+ * 		Changed to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_userblock(hid_t plist_id, hsize_t size)
 {
     unsigned		    i;
-    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_userblock, FAIL);
     H5TRACE2("e","ih",plist_id,size);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
     for (i=8; i<8*sizeof(hsize_t); i++) {
         hsize_t p2 = 8==i ? 0 : ((hsize_t)1<<i);
         if (size == p2)
@@ -1095,7 +1087,8 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
     }
 
     /* Set value */
-    plist->userblock_size = size;
+    if(H5P_set(plist_id, H5F_CRT_USER_BLOCK_NAME, &size) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1115,26 +1108,26 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
  *
  * Modifications:
  *
+ *		Raymond Lu, Oct 14, 2001
+ *		Changed to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_userblock(hid_t plist_id, hsize_t *size)
 {
-    H5F_create_t	*plist = NULL;
 
     FUNC_ENTER(H5Pget_userblock, FAIL);
     H5TRACE2("e","i*h",plist_id,size);
 
     /* Check args */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Get value */
     if (size)
-        *size = plist->userblock_size;
+        if(H5P_get(plist_id, H5F_CRT_USER_BLOCK_NAME, size) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,"can't get user block");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1254,17 +1247,14 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
 herr_t
 H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
 {
-    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_sizes, FAIL);
     H5TRACE3("e","izz",plist_id,sizeof_addr,sizeof_size);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
     if (sizeof_addr) {
         if (sizeof_addr != 2 && sizeof_addr != 4 &&
                 sizeof_addr != 8 && sizeof_addr != 16) {
@@ -1282,9 +1272,13 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
 
     /* Set value */
     if (sizeof_addr)
-        plist->sizeof_addr = sizeof_addr;
+        if(H5P_set(plist_id, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                          "can't set byte number for an address");
     if (sizeof_size)
-        plist->sizeof_size = sizeof_size;
+        if(H5P_set(plist_id, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                          "can't set byte number for object ");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1311,23 +1305,22 @@ herr_t
 H5Pget_sizes(hid_t plist_id,
 	     size_t *sizeof_addr /*out */ , size_t *sizeof_size /*out */ )
 {
-    H5F_create_t	   *plist = NULL;
-
     FUNC_ENTER(H5Pget_sizes, FAIL);
     H5TRACE3("e","ixx",plist_id,sizeof_addr,sizeof_size);
 
     /* Check args */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Get values */
     if (sizeof_addr)
-        *sizeof_addr = plist->sizeof_addr;
+        if(H5P_get(plist_id, H5F_CRT_ADDR_BYTE_NUM_NAME, sizeof_addr) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                          "can't get byte number for an address");
     if (sizeof_size)
-        *sizeof_size = plist->sizeof_size;
+        if(H5P_get(plist_id, H5F_CRT_OBJ_BYTE_NUM_NAME, sizeof_size) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                          "can't get byte number for object ");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1357,28 +1350,38 @@ H5Pget_sizes(hid_t plist_id,
  *
  * Modifications:
  *
+ *		Raymond Lu, Oct 14, 2001
+ *         	Changed to the new generic property list. 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_sym_k(hid_t plist_id, int ik, int lk)
 {
-    H5F_create_t	   *plist = NULL;
+    int                    btree_k[8]={0};
 
     FUNC_ENTER(H5Pset_sym_k, FAIL);
     H5TRACE3("e","iIsIs",plist_id,ik,lk);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
+   
     /* Set values */
-    if (ik > 0)
-        plist->btree_k[H5B_SNODE_ID] = ik;
+    if (ik > 0) {
+        if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                          "can't get rank for btree interanl nodes");
+        btree_k[H5B_SNODE_ID] = ik;
+        if(H5P_set(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                          "can't set rank for btree nodes");
+    }
     if (lk > 0)
-        plist->sym_leaf_k = lk;
+        if(H5P_set(plist_id, H5F_CRT_SYM_LEAF_NAME, &lk) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                          "can't set rank for symbol table leaf nodes");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1399,27 +1402,34 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Changed to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
 {
-    H5F_create_t	   *plist = NULL;
+    int                    btree_k[8];
 
     FUNC_ENTER(H5Pget_sym_k, FAIL);
     H5TRACE3("e","ixx",plist_id,ik,lk);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
     /* Get values */
-    if (ik)
-        *ik = plist->btree_k[H5B_SNODE_ID];
+    if (ik) {
+        if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                          "can't get rank for btree nodes");
+        *ik = btree_k[H5B_SNODE_ID];
+    }
     if (lk)
-        *lk = plist->sym_leaf_k;
+        if(H5P_get(plist_id, H5F_CRT_SYM_LEAF_NAME, lk) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                          "can't get rank for symbol table leaf nodes");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1439,29 +1449,36 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
  *
  * Modifications:
  *
+ *		Raymond Lu, Oct 14, 2001
+ *		Changed to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_istore_k(hid_t plist_id, int ik)
 {
-    H5F_create_t	   *plist = NULL;
+    int                    btree_k[8]={0};
 
     FUNC_ENTER(H5Pset_istore_k, FAIL);
     H5TRACE2("e","iIs",plist_id,ik);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
     if (ik <= 0) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "istore IK value must be positive");
     }
 
     /* Set value */
-    plist->btree_k[H5B_ISTORE_ID] = ik;
+    if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                      "can't get rank for btree interanl nodes");
+    btree_k[H5B_ISTORE_ID] = ik;
+    if(H5P_set(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                          "can't set rank for btree interanl nodes");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1482,26 +1499,30 @@ H5Pset_istore_k(hid_t plist_id, int ik)
  *
  * Modifications:
  *
+ *		Raymond Lu, Oct 14, 2001
+ *		Changed to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
 {
-    H5F_create_t	   *plist = NULL;
+    int                    btree_k[8]={0};
 
     FUNC_ENTER(H5Pget_istore_k, FAIL);
     H5TRACE2("e","ix",plist_id,ik);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
-            NULL == (plist = H5I_object(plist_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file creation property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Get value */
-    if (ik)
-        *ik = plist->btree_k[H5B_ISTORE_ID];
+    if (ik) {
+        if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                          "can't get rank for btree interanl nodes");
+        *ik = btree_k[H5B_ISTORE_ID];
+    }
 
     FUNC_LEAVE(SUCCEED);
 }
