@@ -385,6 +385,7 @@ obj_list_t* parse_layout(const char *str,
     pack->layout=H5D_CHUNKED;
    else {
     printf("Parse layout error: Not a valid layout in <%s>\n",str);
+    exit(1);
    }
   }
   else

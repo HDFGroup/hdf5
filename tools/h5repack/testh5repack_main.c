@@ -29,7 +29,7 @@
  * Return: Success: zero
  *  Failure: non-zero
  *
- * Programmer:  <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
  *             January, 6, 2004
  *
  *-------------------------------------------------------------------------
@@ -178,7 +178,7 @@ int main (void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("GZIP=9",&pack_options)<0)
+ if (h5repack_addfilter("GZIP=1",&pack_options)<0)
   TEST_ERROR;
  if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;

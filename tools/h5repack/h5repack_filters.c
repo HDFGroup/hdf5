@@ -206,6 +206,8 @@ int apply_filters(const char* name,    /* object name from traverse list */
  */
   case H5Z_FILTER_SZIP:
    szip_pixels_per_block=obj->filter[i].cd_values[0];
+
+#if defined (CHECK_SZIP)
    /* check szip parameters */
    if (check_szip(type_id,
     obj->chunk.rank,
@@ -214,17 +216,24 @@ int apply_filters(const char* name,    /* object name from traverse list */
     &szip_pixels_per_block,
     options)==1)
    {
+#endif
+
     /* set up for szip data */
     if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
      return -1;
     if (H5Pset_szip(dcpl_id, szip_options_mask, szip_pixels_per_block)<0) 
      return -1;
+
+#if defined (CHECK_SZIP)
    }
    else
    {
     if (options->verbose)
      printf("Warning: SZIP filter cannot be applied to <%s>\n",name);
    }
+#endif
+
+
    break;
 
 /*-------------------------------------------------------------------------

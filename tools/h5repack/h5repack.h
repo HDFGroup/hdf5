@@ -21,6 +21,9 @@
 #include "h5diff.h"
 #include "h5tools.h"
 
+#define CHECK_SZIP
+
+
 #define H5FOPENERROR "unable to open file"
 
 #define PFORMAT  "%-7s %-7s %-7s\n" /*chunk info, compression info, name*/

@@ -77,7 +77,6 @@ int check_objects(const char* fname,
  
  if (options->verbose)
  {
-  printf("\n");
   printf("Opening file <%s>. Searching for objects to modify...\n",fname);
  }
  
@@ -90,8 +89,8 @@ int check_objects(const char* fname,
   /* the input object names are present in the file and are valid */
   if (h5trav_getindext(name,travt)<0)
   {
-   printf("\nError: Could not find <%s> in file <%s>. Exiting...\n",
-    name,fname);
+   printf("%sError: Could not find <%s> in file <%s>. Exiting...\n",
+    (options->verbose?"\n":""),name,fname);
    goto out;
   }
   if (options->verbose)
