@@ -34,12 +34,12 @@ static intn		interface_initialize_g = 0;
     Default limits on how much memory can accumulate on each free list before
     it is garbage collected.
  */
-#define H5FL_REG_GLB_MEM_LIM (10*1024*1024) /* Default to 10MB total on all regular free lists */
-#define H5FL_REG_LST_MEM_LIM (512*1024)     /* Default to 512KB on each regular free list */
-#define H5FL_ARR_GLB_MEM_LIM (10*1024*1024) /* Default to 10MB total on all array free lists */
-#define H5FL_ARR_LST_MEM_LIM (2*1024*1024)  /* Default to 2MB on each array free list */
-#define H5FL_BLK_GLB_MEM_LIM (10*1024*1024) /* Default to 10MB total on all block free lists */
-#define H5FL_BLK_LST_MEM_LIM (2*1024*1024)  /* Default to 2MB on each block free list */
+static size_t H5FL_reg_glb_mem_lim=UINT_MAX;  /* Default to no limit on all regular free lists */
+static size_t H5FL_reg_lst_mem_lim=UINT_MAX;  /* Default to no limit on each regular free list */
+static size_t H5FL_arr_glb_mem_lim=UINT_MAX;  /* Default to no limit on all array free lists */
+static size_t H5FL_arr_lst_mem_lim=UINT_MAX;  /* Default to no limit on each array free list */
+static size_t H5FL_blk_glb_mem_lim=UINT_MAX;  /* Default to no limit on all block free lists */
+static size_t H5FL_blk_lst_mem_lim=UINT_MAX;  /* Default to no limit on each block free list */
 
 /* A garbage collection node for regular free lists */
 typedef struct H5FL_reg_gc_node_t {
@@ -245,11 +245,11 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if(head->list_mem>H5FL_REG_LST_MEM_LIM)
+    if(head->list_mem>H5FL_reg_lst_mem_lim)
         H5FL_reg_gc_list(head);
 
     /* Then check the global amount memory on regular free lists */
-    if(H5FL_reg_gc_head.mem_freed>H5FL_REG_GLB_MEM_LIM)
+    if(H5FL_reg_gc_head.mem_freed>H5FL_reg_glb_mem_lim)
         H5FL_reg_gc();
 
 #endif /* NO_REG_FREE_LISTS */
@@ -812,7 +812,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if(head->list_mem>H5FL_BLK_LST_MEM_LIM) {
+    if(head->list_mem>H5FL_blk_lst_mem_lim) {
 #ifdef QAK
 printf("%s: temp->size=%u, head->name=%s, head->list_mem=%u, H5FL_blk_gc_head.mem_freed=%u, garbage collecting list\n",FUNC,(unsigned)temp->size,head->name,(unsigned)head->list_mem,(unsigned)H5FL_blk_gc_head.mem_freed);
 #endif /* QAK */
@@ -820,7 +820,7 @@ printf("%s: temp->size=%u, head->name=%s, head->list_mem=%u, H5FL_blk_gc_head.me
     } /* end if */
 
     /* Then check the global amount memory on block free lists */
-    if(H5FL_blk_gc_head.mem_freed>H5FL_BLK_GLB_MEM_LIM) {
+    if(H5FL_blk_gc_head.mem_freed>H5FL_blk_glb_mem_lim) {
 #ifdef QAK
 printf("%s: head->name=%s, garbage collecting all block lists\n",FUNC,head->name);
 #endif /* QAK */
@@ -1180,11 +1180,11 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
         /* Check for exceeding free list memory use limits */
         /* First check this particular list */
-        if(head->list_mem>H5FL_ARR_LST_MEM_LIM)
+        if(head->list_mem>H5FL_arr_lst_mem_lim)
             H5FL_arr_gc_list(head);
 
         /* Then check the global amount memory on array free lists */
-        if(H5FL_arr_gc_head.mem_freed>H5FL_ARR_GLB_MEM_LIM)
+        if(H5FL_arr_gc_head.mem_freed>H5FL_arr_glb_mem_lim)
             H5FL_arr_gc();
 
     } /* end if */
@@ -1596,6 +1596,61 @@ H5FL_garbage_coll(void)
 #endif
     return(SUCCEED);
 }   /* end H5FL_garbage_coll() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FL_set_free_list_limits
+ *
+ * Purpose:	Sets limits on the different kinds of free lists.  Setting a value
+ *      of -1 for a limit means no limit of that type.  These limits are global
+ *      for the entire library.  Each "global" limit only applies to free lists
+ *      of that type, so if an application sets a limit of 1 MB on each of the
+ *      global lists, up to 3 MB of total storage might be allocated (1MB on
+ *      each of regular, array and block type lists).
+ *
+ * Parameters:
+ *  int reg_global_lim;  IN: The limit on all "regular" free list memory used
+ *  int reg_list_lim;    IN: The limit on memory used in each "regular" free list
+ *  int arr_global_lim;  IN: The limit on all "array" free list memory used
+ *  int arr_list_lim;    IN: The limit on memory used in each "array" free list
+ *  int blk_global_lim;  IN: The limit on all "block" free list memory used
+ *  int blk_list_lim;    IN: The limit on memory used in each "block" free list
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 2, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
+    int arr_list_lim, int blk_global_lim, int blk_list_lim)
+{
+    herr_t                  ret_value = SUCCEED;
+
+    FUNC_ENTER(H5FL_set_free_list_limits, FAIL);
+
+    /* Set the limit variables */
+    /* limit on all regular free lists */
+    H5FL_reg_glb_mem_lim=(reg_global_lim==-1 ? UINT_MAX : (size_t)reg_global_lim);
+    /* limit on each regular free list */
+    H5FL_reg_lst_mem_lim=(reg_list_lim==-1 ? UINT_MAX : (size_t)reg_list_lim);
+    /* limit on all array free lists */
+    H5FL_arr_glb_mem_lim=(arr_global_lim==-1 ? UINT_MAX : (size_t)arr_global_lim);
+    /* limit on each array free list */
+    H5FL_arr_lst_mem_lim=(arr_list_lim==-1 ? UINT_MAX : (size_t)arr_list_lim);
+    /* limit on all block free lists */
+    H5FL_blk_glb_mem_lim=(blk_global_lim==-1 ? UINT_MAX : (size_t)blk_global_lim);
+    /* limit on each block free list */
+    H5FL_blk_lst_mem_lim=(blk_list_lim==-1 ? UINT_MAX : (size_t)blk_list_lim);
+
+    FUNC_LEAVE(ret_value);
+}   /* end H5FL_set_free_list_limits() */
 
 
 /*--------------------------------------------------------------------------

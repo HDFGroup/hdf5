@@ -145,6 +145,9 @@ __DLL__ herr_t H5open(void);
 __DLL__ herr_t H5close(void);
 __DLL__ herr_t H5dont_atexit(void);
 __DLL__ herr_t H5garbage_collect(void);
+__DLL__ herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
+                int arr_global_lim, int arr_list_lim, int blk_global_lim,
+                int blk_list_lim);
 __DLL__ herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
 __DLL__ herr_t H5check_version(unsigned majnum, unsigned minnum,

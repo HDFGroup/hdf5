@@ -180,6 +180,8 @@ __DLL__ void * H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear);
 __DLL__ void * H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
 __DLL__ void * H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, uintn new_elem);
 __DLL__ herr_t H5FL_garbage_coll(void);
+__DLL__ herr_t H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim,
+    int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim);
 __DLL__ intn   H5FL_term_interface(void);
 
 #endif

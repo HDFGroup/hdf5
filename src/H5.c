@@ -310,6 +310,50 @@ H5garbage_collect(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5set_free_list_limits
+ *
+ * Purpose:	Sets limits on the different kinds of free lists.  Setting a value
+ *      of -1 for a limit means no limit of that type.  These limits are global
+ *      for the entire library.  Each "global" limit only applies to free lists
+ *      of that type, so if an application sets a limit of 1 MB on each of the
+ *      global lists, up to 3 MB of total storage might be allocated (1MB on
+ *      each of regular, array and block type lists).
+ *
+ * Parameters:
+ *  int reg_global_lim;  IN: The limit on all "regular" free list memory used
+ *  int reg_list_lim;    IN: The limit on memory used in each "regular" free list
+ *  int arr_global_lim;  IN: The limit on all "array" free list memory used
+ *  int arr_list_lim;    IN: The limit on memory used in each "array" free list
+ *  int blk_global_lim;  IN: The limit on all "block" free list memory used
+ *  int blk_list_lim;    IN: The limit on memory used in each "block" free list
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 2, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
+    int arr_list_lim, int blk_global_lim, int blk_list_lim)
+{
+    herr_t                  ret_value = SUCCEED;
+
+    FUNC_ENTER(H5set_free_list_limits, FAIL);
+
+    /* Call the free list function to actually set the limits */
+    H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim);
+
+    FUNC_LEAVE(ret_value);
+}   /* end H5set_free_list_limits() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5_debug_mask
  *
  * Purpose:	Set runtime debugging flags according to the string S.  The
