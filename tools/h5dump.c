@@ -52,7 +52,7 @@ usage(void)
 fprintf(stderr, 
 "\nUsage of HDF5 Dumper:\n\n  \
 h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
-       [-l <names>] [-t <names>] <file>\n\n\
+       [-l <names>] [-t <names>] [-w <number>] <file>\n\n\
   -h            Print information on this command.\n\
   -bb           Display the conent of the boot block. The default is not to display.\n\
   -header       Display header only; no data is displayed.\n\
@@ -61,8 +61,10 @@ h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
   -g <names>    Display the specified group(s) and all the members.\n\
   -l <names>    Displays the value(s) of the specified soft link(s).\n\
   -t <names>    Display the specified named data type(s).\n\
+  -w <number>   Display the information with the specified maximum number of columns.\n\
   \n\
-  <names> is one or more appropriate object names.\n\n");
+  <names> is one or more appropriate object names.\n\
+  <number> is an integer greater than 1.\n\n");
 }
 
 
@@ -590,7 +592,7 @@ H5G_stat_t statbuf;
         if (display_data) dump_data(attr_id, ATTRIBUTE_DATA);
         H5Tclose(type);
         H5Sclose(space);
-	H5Aclose (attr_id);
+		H5Aclose (attr_id);
         end_obj();
 
     } else {
@@ -1278,7 +1280,7 @@ main(int argc, char *argv[]) {
 hid_t fid, gid, dsetid, typeid;
 hid_t plist=H5P_DEFAULT;
 const char *fname = NULL;
-int i, index, curr_arg, display_bb=0, display_all=1;
+int i, index, curr_arg, display_bb=0, display_all=1, newwidth= 0;
 int nopts=0, *opts;
 char *buf, name[128], name1[128];
 H5G_stat_t statbuf;
@@ -1320,6 +1322,13 @@ H5Eset_auto (NULL, NULL);
 
                  display_data=0;
 
+			 else if (!strcmp(argv[curr_arg],"-w")){
+				 /*
+				 this way we know which arg was the -w
+				 we know it won't be 0 since curr_arg starts at 1
+				 */
+				 newwidth = curr_arg;
+			 }
              else if (strcmp(argv[curr_arg],"-a") &&
                       strcmp(argv[curr_arg],"-d") &&
                       strcmp(argv[curr_arg],"-g") &&
@@ -1364,7 +1373,7 @@ H5Eset_auto (NULL, NULL);
         if (argc - opts[nopts-1] == 2) {
             if (strcmp(argv[opts[i]], "-bb") &&
                 strcmp(argv[opts[i]], "-header") ) {
-                fprintf (stderr, "h5dump error: no <file> or no <names> after option %s\n", argv[opts[i]]);
+                fprintf (stderr, "h5dump error: no <file> or no <names> or no <number> after option %s\n", argv[opts[i]]);
                 usage();
                 free(opts);
                 exit(1);
@@ -1407,8 +1416,13 @@ H5Eset_auto (NULL, NULL);
     /* start to dump */
     begin_obj("HDF5", fname);
 
+	
     if (display_bb) dump_bb();
- 
+	
+	if (newwidth) {
+		sscanf(argv[newwidth + 1], "%d", &nCols);
+	}
+
     if (display_all) {
 
         if ((gid = H5Gopen (fid, "/")) < 0 ) {
@@ -1573,7 +1587,7 @@ H5Eset_auto (NULL, NULL);
                          if (H5Tclose(typeid) < 0) status = 1;
                      }
                 }
-           }
+           } 
       }
 
     end_obj();
