@@ -51,12 +51,6 @@ typedef struct H5T_conv_hw_t {
     hsize_t	d_aligned;		/*number destination elements aligned*/
 } H5T_conv_hw_t;
 
-typedef enum dtype_t {
-    INT_CHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
-    INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, FLT_FLOAT, FLT_DOUBLE, 
-    FLT_LDOUBLE, OTHER
-} dtype_t;
-
 /* Interface initialization */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
@@ -135,12 +129,12 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  *		least as large as the destination.  Overflows can occur when
  *		the destination is narrower than the source.
  *
- * xF:          integers to float-point values where the desination is
+ * xF:          Integers to float-point values where the desination is
  *              at least as wide as the source.  This case cannot generate 
  *              overflows.
  *
- * Fx:          float-point values to integer where the source is
- *              at least as wide as the destination.  Overflow can occure 
+ * Fx:          Float-point values to integer where the source is
+ *              at least as wide as the destination.  Overflow can occur 
  *              when the source magnitude is too large for the destination.
  *              
  * The macros take a subset of these arguments in the order listed here:
@@ -7128,7 +7122,7 @@ H5T_conv_long_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_long_double, FAIL);
 
-    H5T_CONV_xF(LLONG, DOUBLE, long, double, -, -);
+    H5T_CONV_xF(LONG, DOUBLE, long, double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7865,7 +7859,7 @@ H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_float_llong, FAIL);
 
-    H5T_CONV_Fx(FLOAT, LLONG, float, long_long, (-LLONG_MAX-1LL), LLONG_MAX);
+    H5T_CONV_Fx(FLOAT, LLONG, float, long_long, LLONG_MIN, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7929,7 +7923,7 @@ H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_double_llong, FAIL);
 
-    H5T_CONV_Fx(DOUBLE, LLONG, double, long_long, (-LLONG_MAX-1LL), LLONG_MAX);
+    H5T_CONV_Fx(DOUBLE, LLONG, double, long_long, LLONG_MIN, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
