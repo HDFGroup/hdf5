@@ -131,6 +131,9 @@
 #ifdef H5_HAVE_SYS_PROC_H
 #   include <sys/proc.h>
 #endif
+#ifdef H5_HAVE_IO_H
+#   include <io.h>
+#endif
 
 #ifdef WIN32
 
