@@ -2049,13 +2049,13 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 #ifdef QAK
 	{
 	    int i;
-	    int *b;
+	    float *b;
 
 	    /* if(qak_debug) { */
-		b=tconv_buf;
 		printf("\ntconv_buf:");
-		for (i=0; i<smine_nelmts; i++,b++) {
-		    printf("(%d)%d ",i,(int)*b);
+		b=(float*)(tconv_buf+sizeof(float)*(32770-8));
+		for (i=(32770-8); i<32770; i++,b++) {
+		    printf("(%d)%f ",i,(float)*b);
 		}
 		printf("\n");
 	    /* } */
@@ -2097,6 +2097,21 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 
 #ifdef QAK
 	printf("%s: check 8.0\n",FUNC);
+#ifdef QAK
+	{
+	    int i;
+	    double *b;
+
+	    /* if(qak_debug) { */
+		printf("\ntconv_buf:");
+		b=(double*)(tconv_buf+sizeof(double)*(32770-8));
+		for (i=(32770-8); i<32770; i++,b++) {
+		    printf("(%d)%f ",i,(double)*b);
+		}
+		printf("\n");
+	    /* } */
+	}
+#endif /* QAK */
 #endif
 	
         /*

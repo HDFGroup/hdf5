@@ -340,7 +340,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             }
 
                             /* Increment the buffer offset */
-                            buf=(unsigned char *)buf+partial_size;
+                            buf=(unsigned char *)buf+(partial_size*elmt_size);
 
                             /* Decrement the length of the sequence to read */
                             seq_len-=partial_size;
@@ -400,7 +400,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                         }
 
                         /* Increment the buffer offset */
-                        buf=(unsigned char *)buf+full_size;
+                        buf=(unsigned char *)buf+(full_size*elmt_size);
 
                         /* Decrement the sequence length left */
                         seq_len-=full_size;
@@ -447,7 +447,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                                 }
 
                                 /* Increment the buffer offset */
-                                buf=(unsigned char *)buf+partial_size;
+                                buf=(unsigned char *)buf+(partial_size*elmt_size);
 
                                 /* Decrement the length of the sequence to read */
                                 seq_len-=partial_size;
@@ -723,7 +723,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             }
 
                             /* Increment the buffer offset */
-                            buf=(const unsigned char *)buf+partial_size;
+                            buf=(const unsigned char *)buf+(partial_size*elmt_size);
 
                             /* Decrement the length of the sequence to read */
                             seq_len-=partial_size;
@@ -783,7 +783,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                         }
 
                         /* Increment the buffer offset */
-                        buf=(const unsigned char *)buf+full_size;
+                        buf=(const unsigned char *)buf+(full_size*elmt_size);
 
                         /* Decrement the sequence length left */
                         seq_len-=full_size;
@@ -830,7 +830,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                                 }
 
                                 /* Increment the buffer offset */
-                                buf=(const unsigned char *)buf+partial_size;
+                                buf=(const unsigned char *)buf+(partial_size*elmt_size);
 
                                 /* Decrement the length of the sequence to read */
                                 seq_len-=partial_size;
