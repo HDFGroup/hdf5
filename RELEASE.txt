@@ -43,7 +43,11 @@ New Features
      complete list of features.
    * Improved configure to detect if MPIO routines are available when
      parallel mode is requested.
-   * Added Thread-Safe support. Phase I implemented.
+   * Added Thread-Safe support. Phase I implemented. See:
+
+        http://hdf.ncsa.uiuc.edu/HDF5/papers/mthdf/MTHDFpaper.htm
+
+     for more details.
    * Added data sieve buffering to raw data I/O path. This is enabled
      for all VFL drivers except the mpio & core drivers. Setting the
      sieve buffer size is controlled with the new API function,
@@ -72,6 +76,7 @@ h4toh5 Utility
     The h4toh5 utility is a new utility that converts an HDF4 file to an 
     HDF5 file.  For details, see the document, "Mapping HDF4 Objects to 
     HDF5 Objects":
+
        http://hdf.ncsa.uiuc.edu/HDF5/papers/H4-H5MappingGuidelines.pdf
 
     Known Bugs:
@@ -162,6 +167,7 @@ F90 Support
          h5close_types.
 
        * The following subroutines are no longer available: 
+
              h5pset_xfer_f
              h5pget_xfer_f
              h5pset_mpi_f
@@ -176,6 +182,7 @@ F90 Support
              h5pget_family_f
              
        * The following functions have been added:
+
              h5pset_fapl_mpio_f
              h5pget_fapl_mpio_f
              h5pset_dxpl_mpio_f
@@ -347,14 +354,14 @@ Bug Fixes since HDF5-1.4.0-beta2
     * Fixed a bug in the conversion from a little endian double to a big endian float
       in some special cases.
     * Corrected configuration error which was not including compression support
-        correctly.
+      correctly.
     * Cleaned up lots of warnings.
     * Changed a few h5dump command line switches and added long versions of
-        the switches.
+      the switches.
     * Changed parameters for H5Tconvert, H5Pset_bufer and H5Pget_buffer from
-        size_t to hsize_t
+      size_t to hsize_t
     * Fixed fairly obscure bug in hyperslab I/O which could (in rare cases)
-        not copy all the data during a transfer.
+      not copy all the data during a transfer.
     * Removed ragged array code from library.
     * F90 library and module files are installed properly now on all supported platforms.
 
@@ -425,9 +432,9 @@ Known Problems
   and testing hdf5 applications. We will continue investigating this.
 
 * h5toh4 converter fails two cases(tstr.h5 and tmany.h5) for release dll version on
-  windows 2000 and NT.
-  The reason is possibly due to windows NT DLL convention on freeing memory. It seems   
-  that memory cannot be free across library or DLL. It is still under investigated.
+  windows 2000 and NT. The reason is possibly due to windows NT DLL
+  convention on freeing memory. It seems that memory cannot be free
+  across library or DLL. It is still under investigated.
 
 * The Stream VFD was not tested yet under Windows.
   It is not supported in the TFLOPS machine.
@@ -460,8 +467,11 @@ Known Problems
 
 * The h4toh5 utility produces images that do not correctly conform
   to the HDF5 Image and Palette Specification. 
+
       http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+
   Several required HDF5 attributes are omitted, and the dataspace 
   is reversed (i.e., the ht. and width of the image dataset is 
   incorrectly described.)  For more information, please see:
+
      http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
