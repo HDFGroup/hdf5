@@ -117,9 +117,9 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ha:A:B:cD:f:P:p:X:x:nd:F:i:o:stT:w";
+static const char *s_opts = "ha:A:cD:f:P:p:X:x:nd:F:i:Io:stT:w";
 #else
-static const char *s_opts = "ha:A:bB:cD:f:P:p:X:x:nd:F:i:o:stT:w";
+static const char *s_opts = "ha:A:bcD:f:P:p:X:x:nd:F:i:Io:stT:w";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -139,15 +139,6 @@ static struct long_options l_opts[] = {
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif  /* 0 */
-    { "block-size", require_arg, 'B' },
-    { "block-siz", require_arg, 'B' },
-    { "block-si", require_arg, 'B' },
-    { "block-s", require_arg, 'B' },
-    { "block-", require_arg, 'B' },
-    { "block", require_arg, 'B' },
-    { "bloc", require_arg, 'B' },
-    { "blo", require_arg, 'B' },
-    { "bl", require_arg, 'B' },
     { "chunk", no_arg, 'c' },
     { "chun", no_arg, 'c' },
     { "chu", no_arg, 'c' },
@@ -163,6 +154,16 @@ static struct long_options l_opts[] = {
     { "file", require_arg, 'f' },
     { "fil", require_arg, 'f' },
     { "fi", require_arg, 'f' },
+    { "interleaved", require_arg, 'I' },
+    { "interleave", require_arg, 'I' },
+    { "interleav", require_arg, 'I' },
+    { "interlea", require_arg, 'I' },
+    { "interle", require_arg, 'I' },
+    { "interl", require_arg, 'I' },
+    { "inter", require_arg, 'I' },
+    { "inte", require_arg, 'I' },
+    { "int", require_arg, 'I' },
+    { "in", require_arg, 'I' },
     { "max-num-processes", require_arg, 'P' },
     { "max-num-processe", require_arg, 'P' },
     { "max-num-process", require_arg, 'P' },
@@ -258,7 +259,7 @@ struct options {
     int min_num_procs;          /* minimum number of processes to use   */
     size_t max_xfer_size;       /* maximum transfer buffer size         */
     size_t min_xfer_size;       /* minimum transfer buffer size         */
-    size_t block_size;          /* interleaved block size               */
+    unsigned interleaved;       /* Interleaved vs. contiguous blocks    */
     int print_times;       	/* print times as well as throughputs   */
     int print_raw;         	/* print raw data throughput info       */
     off_t h5_alignment;         /* alignment in HDF5 file               */
@@ -399,7 +400,7 @@ run_test_loop(struct options *opts)
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
-    parms.block_size = opts->block_size;
+    parms.interleaved = opts->interleaved;
     parms.h5_align = opts->h5_alignment;
     parms.h5_thresh = opts->h5_threshold;
     parms.h5_use_chunks = opts->h5_use_chunks;
@@ -1000,8 +1001,11 @@ report_parameters(struct options *opts)
     recover_size_and_print((long_long)opts->min_xfer_size, ":");
     recover_size_and_print((long_long)opts->max_xfer_size, "\n");
 
-    HDfprintf(output, "rank %d: Interleaved block size=", rank);
-    recover_size_and_print((long_long)opts->block_size, "\n");
+    HDfprintf(output, "rank %d: Block Pattern in Dataset:", rank);
+    if(opts->interleaved)
+        HDfprintf(output, "Interleaved");
+    else
+        HDfprintf(output, "Contiguous");
 
     {
         char *prefix = getenv("HDF5_PARAPREFIX");
@@ -1043,7 +1047,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
-    cl_opts->block_size = 0;        /* no interleaved I/O */
+    cl_opts->interleaved = 0;       /* Default to contiguous blocks in dataset */
     cl_opts->print_times = FALSE;   /* Printing times is off by default */
     cl_opts->print_raw = FALSE;     /* Printing raw data throughput is off by default */
     cl_opts->h5_alignment = 1;      /* No alignment for HDF5 objects by default */
@@ -1097,9 +1101,6 @@ parse_command_line(int argc, char *argv[])
             /* the future "binary" option */
             break;
 #endif  /* 0 */
-        case 'B':
-            cl_opts->block_size = parse_size_directive(opt_arg);
-            break;
         case 'c':
             /* Turn on chunked HDF5 dataset creation */
             cl_opts->h5_use_chunks = TRUE;
@@ -1173,6 +1174,9 @@ parse_command_line(int argc, char *argv[])
             break;
         case 'i':
             cl_opts->num_iters = atoi(opt_arg);
+            break;
+        case 'I':
+            cl_opts->interleaved = 1;
             break;
         case 'n':       /* Turn off writing fill values */
 #ifdef H5_HAVE_NOFILL
@@ -1293,9 +1297,6 @@ usage(const char *prog)
 #if 0
         printf("     -b, --binary                The elusive binary option\n");
 #endif  /* 0 */
-        printf("     -B S, --block-size=S        Interleaved block size\n");
-        printf("                                 [not implemented yet]\n");
-        printf("                                 [default: 0 no interleaved IO]\n");
         printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
         printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
         printf("     -D DL, --debug=DL           Indicate the debugging level\n");
@@ -1303,18 +1304,20 @@ usage(const char *prog)
         printf("     -f S, --file-size=S         Size of a single file [default: 64M]\n");
         printf("     -F N, --num-files=N         Number of files [default: 1]\n");
         printf("     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
+        printf("     -I --interleaved            Interleaved block I/O (see below for example)\n");
+        printf("                                 [default: Contiguous block I/O]\n");
         printf("     -n, --no-fill               Don't write fill values to HDF5 dataset\n");
         printf("                                 (Supported in HDF5 library v1.5 only)\n");
         printf("                                 [default: off (i.e. write fill values)]\n");
         printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
+        printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
         printf("                                 [default: all MPI_COMM_WORLD processes ]\n");
-        printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         printf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
         printf("                                 [default: 1]\n");
         printf("     -w, --write-only            Perform write tests not the read tests\n");
-        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
         printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
+        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
         printf("\n");
         printf("  F  - is a filename.\n");
         printf("  N  - is an integer >=0.\n");
@@ -1331,6 +1334,13 @@ usage(const char *prog)
         printf("          posix - POSIX\n");
         printf("\n");
         printf("      Example: --api=mpiio,phdf5\n");
+        printf("\n");
+        printf("  Interleaved vs. Contiguous blocks:\n");
+        printf("      For example, with a 4 process run,\n");
+        printf("          Contiguous blocks are written to the file like so:\n");
+        printf("              1111222233334444\n");
+        printf("          Interleaved blocks are written to the file like so:\n");
+        printf("              1234123412341234\n");
         printf("\n");
         printf("  DL - is a list of debugging flags. Valid values are:\n");
         printf("          1 - Minimal\n");
