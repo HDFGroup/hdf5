@@ -1053,6 +1053,7 @@
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
+./test/gen_nullspace.c			_DO_NOT_DISTRIBUTE_
 ./test/set_extent.c
 ./test/srb_append.c
 ./test/srb_read.c
@@ -1078,6 +1079,7 @@
 ./test/tmisc.c
 ./test/tmtimen.h5
 ./test/tmtimeo.h5
+./test/tnullfile.h5
 ./test/ttime.c
 ./test/trefer.c
 ./test/trefstr.c
