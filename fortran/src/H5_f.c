@@ -268,7 +268,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5s_flags[1] = H5S_SIMPLE; 
       h5s_flags[2] = H5S_SELECT_SET;
       h5s_flags[3] = H5S_SELECT_OR;
-      h5s_flags[4] = H5S_UNLIMITED;
+      h5s_flags[4] = (int_f)H5S_UNLIMITED;
       h5s_flags[5] = H5S_ALL;
 
 /*

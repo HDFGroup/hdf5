@@ -9,8 +9,8 @@
 #include "H5Git.h"
 #define FALSE 0
 
-herr_t count_elems(hid_t loc_id, const char *name, void *opdata);
-herr_t obj_info(hid_t loc_id, const char *name, void *opdata);
+static herr_t count_elems(hid_t loc_id, const char *name, void *opdata);
+static herr_t obj_info(hid_t loc_id, const char *name, void *opdata);
 
 typedef struct retval {
 	char * name;
