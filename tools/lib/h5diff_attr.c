@@ -52,7 +52,7 @@ int diff_attr(hid_t      loc1_id,
  hid_t      ftype2_id=-1;    /* file data type ID */ 
  hid_t      mtype1_id=-1;    /* memory data type ID */
  hid_t      mtype2_id=-1;    /* memory data type ID */
-	size_t     msize1;       /* memory size of memory type */
+ size_t     msize1;       /* memory size of memory type */
  size_t     msize2;       /* memory size of memory type */
  void       *buf1=NULL;   /* data buffer */
  void       *buf2=NULL;   /* data buffer */
@@ -61,9 +61,11 @@ int diff_attr(hid_t      loc1_id,
  int        rank2;        /* rank of dataset */
  hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
-	char       name1[255];
+ char       name1[255];
  char       name2[255];
-	int        n1, n2, i, j, nfound;
+ int        n1, n2, i, j, nfound;
+ H5S_class_t    space_type1, space_type2;
+ H5T_class_t    tclass1, tclass2;
  int        ret=0;
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0) 
@@ -109,96 +111,119 @@ int diff_attr(hid_t      loc1_id,
    continue;
   }
   
-		/* get the file datatype  */
-		if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
-			goto error;
+  /* get the file datatype  */
+  if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
+        goto error;
   if ((ftype2_id = H5Aget_type( attr2_id )) < 0 )
-			goto error;
+	goto error;
 		
-		/* get the dataspace handle  */
-		if ((space1_id = H5Aget_space( attr1_id )) < 0 )
-			goto error;
+  /* get the dataspace handle  */
+  if ((space1_id = H5Aget_space( attr1_id )) < 0 )
+        goto error;
   if ((space2_id = H5Aget_space( attr2_id )) < 0 )
-			goto error;
+	goto error;
 		
-		/* get dimensions  */
-		if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
-			goto error;
-  if ( (rank2 = H5Sget_simple_extent_dims(space2_id, dims2, NULL)) < 0 )
-			goto error;
+  space_type1 = H5Sget_simple_extent_type(space1_id);
+  space_type2 = H5Sget_simple_extent_type(space2_id);
 
+  /* get dimensions  */
+  if(space_type1 == H5S_NULL && space_type2 == H5S_NULL) {
+        if(options->verbose) {
+            printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+            sprintf(name1,"%s of <%s>",name1,path1);
+            sprintf(name2,"%s of <%s>",name2,path2);
+            printf( "type         %s  %s  difference\n",name1,name2);
 
-/*-------------------------------------------------------------------------
- * check for comparable TYPE and SPACE
- *-------------------------------------------------------------------------
- */
+            if ( !(H5Tequal(ftype1_id, ftype2_id)) && options->verbose) {
+                    printf("\t\t"); 
+                    print_type(ftype1_id);
+                    printf("\t\t"); 
+                    print_type(ftype2_id);
+                    printf("\n");
+            }
+            
+            printf("1 differences found\n");
+        }
+  } else {
+        if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
+            goto error;
 
- if (diff_can_type(ftype1_id, 
-  ftype2_id, 
-  rank1, 
-  rank2,
-  dims1, 
-  dims2,
-  NULL, 
-  NULL,
-  name1, 
-  name2, 
-  options)!=1)
-  goto error;
-	
-/*-------------------------------------------------------------------------
- * read to memory
- *-------------------------------------------------------------------------
- */
- nelmts1=1;
- for (j=0; j<rank1; j++) 
-  nelmts1*=dims1[j];
- if ((mtype1_id=H5Tget_native_type(ftype1_id,H5T_DIR_DEFAULT))<0)
-  goto error;
- if ((mtype2_id=H5Tget_native_type(ftype2_id,H5T_DIR_DEFAULT))<0)
-  goto error;
- if ((msize1=H5Tget_size(mtype1_id))==0)
-  goto error;
- if ((msize2=H5Tget_size(mtype2_id))==0)
-  goto error;
- 
- assert(msize1==msize2);
- 
- buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
- buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
- if ( buf1==NULL || buf2==NULL){
-  printf( "cannot read into memory\n" );
-  goto error;
- }
- if (H5Aread(attr1_id,mtype1_id,buf1)<0)
-  goto error;
- if (H5Aread(attr2_id,mtype2_id,buf2)<0)
-  goto error;
+        if ( (rank2 = H5Sget_simple_extent_dims(space2_id, dims2, NULL)) < 0 )
+            goto error;
 
-   
-/*-------------------------------------------------------------------------
- * array compare
- *-------------------------------------------------------------------------
- */
+        /*-------------------------------------------------------------------------
+         * check for comparable TYPE and SPACE
+         *-------------------------------------------------------------------------
+         */
+         if (diff_can_type(ftype1_id, 
+          ftype2_id, 
+          rank1, 
+          rank2,
+          dims1, 
+          dims2,
+          NULL, 
+          NULL,
+          name1, 
+          name2, 
+          options)!=1)
+          goto error;
+                
+        /*-------------------------------------------------------------------------
+         * read to memory
+         *-------------------------------------------------------------------------
+         */
+         nelmts1=1;
+         for (j=0; j<rank1; j++) 
+          nelmts1*=dims1[j];
+         if ((mtype1_id=H5Tget_native_type(ftype1_id,H5T_DIR_DEFAULT))<0)
+          goto error;
+         if ((mtype2_id=H5Tget_native_type(ftype2_id,H5T_DIR_DEFAULT))<0)
+          goto error;
+         if ((msize1=H5Tget_size(mtype1_id))==0)
+          goto error;
+         if ((msize2=H5Tget_size(mtype2_id))==0)
+          goto error;
+         
+         assert(msize1==msize2);
+         
+         buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
+         buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
+         if ( buf1==NULL || buf2==NULL){
+          printf( "cannot read into memory\n" );
+          goto error;
+         }
+         if (H5Aread(attr1_id,mtype1_id,buf1)<0)
+          goto error;
+         if (H5Aread(attr2_id,mtype2_id,buf2)<0)
+          goto error;
+           
+        /*-------------------------------------------------------------------------
+         * array compare
+         *-------------------------------------------------------------------------
+         */
 
- if (options->verbose)
-  printf( "Attribute:   <%s> and <%s>\n",name1,name2);
- sprintf(name1,"%s of <%s>",name1,path1);
- sprintf(name2,"%s of <%s>",name2,path2);
- nfound = diff_array(buf1, 
-                     buf2,
-                     nelmts1,
-                     rank1,
-                     dims1,
-                     options,
-                     name1,
-                     name2,
-                     mtype1_id,
-                     attr1_id,
-                     attr2_id);
- if (options->verbose && nfound)
-  printf("%d differences found\n", nfound );
-
+         if (options->verbose)
+          printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+         sprintf(name1,"%s of <%s>",name1,path1);
+         sprintf(name2,"%s of <%s>",name2,path2);
+         nfound = diff_array(buf1, 
+                             buf2,
+                             nelmts1,
+                             rank1,
+                             dims1,
+                             options,
+                             name1,
+                             name2,
+                             mtype1_id,
+                             attr1_id,
+                             attr2_id);
+          
+         if (options->verbose && nfound)
+          printf("%d differences found\n", nfound );
+         
+         if (mtype1_id && H5Tclose(mtype1_id)<0) goto error;
+         if (mtype2_id && H5Tclose(mtype2_id)<0) goto error;
+  }
 
 /*-------------------------------------------------------------------------
  * close
@@ -207,8 +232,6 @@ int diff_attr(hid_t      loc1_id,
 
  if (H5Tclose(ftype1_id)<0) goto error;
  if (H5Tclose(ftype2_id)<0) goto error;
- if (H5Tclose(mtype1_id)<0) goto error;
- if (H5Tclose(mtype2_id)<0) goto error;
  if (H5Sclose(space1_id)<0) goto error;
  if (H5Sclose(space2_id)<0) goto error;
  if (H5Aclose(attr1_id)<0) goto error;
@@ -225,11 +248,11 @@ error:
  H5E_BEGIN_TRY {
   H5Tclose(ftype1_id);
   H5Tclose(ftype2_id);
-		H5Tclose(mtype1_id);
+  H5Tclose(mtype1_id);
   H5Tclose(mtype2_id);
-		H5Sclose(space1_id);
+  H5Sclose(space1_id);
   H5Sclose(space2_id);
-		H5Aclose(attr1_id);
+  H5Aclose(attr1_id);
   H5Aclose(attr2_id);
   if (buf1)
    HDfree(buf1);

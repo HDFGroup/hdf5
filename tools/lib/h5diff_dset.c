@@ -147,21 +147,69 @@ int diff_datasetid( hid_t dset1_id,
  const char   *name2=NULL;
  hsize_t      storage_size1;
  hsize_t      storage_size2;
+ H5S_class_t  space_type1, space_type2;
  int          i;
 
-  /* Get the dataspace handle */
+ if (obj1_name)
+  name1=diff_basename(obj1_name);
+ if (obj2_name)
+  name2=diff_basename(obj2_name);
+
+/*-------------------------------------------------------------------------
+ * Get the file data type 
+ *-------------------------------------------------------------------------
+ */
+
+ /* Get the data type */
+ if ( (f_type1 = H5Dget_type(dset1_id)) < 0 )
+  goto out;
+
+ /* Get the data type */
+ if ( (f_type2 = H5Dget_type(dset2_id)) < 0 )
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * Get the file data space 
+ *-------------------------------------------------------------------------
+ */
+
+ /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )
   goto out;
 
+ if ( (space2_id = H5Dget_space(dset2_id)) < 0 )
+  goto out;
+
+ /* Get space type */ 
+ space_type1 = H5Sget_simple_extent_type(space1_id);
+ space_type2 = H5Sget_simple_extent_type(space2_id);
+
+ /* get dimensions  */
+ if(space_type1 == H5S_NULL && space_type2 == H5S_NULL) {
+        if(options->verbose) {
+            /*printf( "Dataset:   <%s> and <%s>\n",name1,name2);*/
+            /*sprintf(name1,"%s of <%s>",name1,path1);
+            sprintf(name2,"%s of <%s>",name2,path2);*/
+            printf( "type         %s  %s  difference\n",name1,name2);
+
+            if ( !(H5Tequal(f_type1, f_type2)) && options->verbose) {
+                    printf("\t"); 
+                    print_type(f_type1);
+                    printf("\t\t"); 
+                    print_type(f_type2);
+                    printf("\n");
+            }
+            
+            printf("1 differences found\n");
+            nfound = 1;
+        }
+        goto out;
+ }
+    
  /* Get rank */
  if ( (rank1 = H5Sget_simple_extent_ndims(space1_id)) < 0 )
   goto out;
 
- /* Get the dataspace handle */
- if ( (space2_id = H5Dget_space(dset2_id)) < 0 )
-  goto out;
-
- /* Get rank */
  if ( (rank2 = H5Sget_simple_extent_ndims(space2_id)) < 0 )
   goto out;
 
@@ -169,7 +217,6 @@ int diff_datasetid( hid_t dset1_id,
  if ( H5Sget_simple_extent_dims(space1_id,dims1,maxdim1) < 0 )
   goto out;
 
- /* Get dimensions */
  if ( H5Sget_simple_extent_dims(space2_id,dims2,maxdim2) < 0 )
   goto out;
 
@@ -340,10 +387,6 @@ int diff_datasetid( hid_t dset1_id,
  * array compare
  *-------------------------------------------------------------------------
  */
- if (obj1_name)
-  name1=diff_basename(obj1_name);
- if (obj2_name)
-  name2=diff_basename(obj2_name);
  nfound = diff_array(buf1, 
                      buf2,
                      nelmts1,
