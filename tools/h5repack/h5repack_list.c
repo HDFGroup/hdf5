@@ -51,7 +51,7 @@ int check_objects(const char* fname,
  
  /* Open the files */
  if ((fid=H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
-  printf("h5repack: <%s>: No such file or directory\n", fname );
+  printf("h5repack: <%s>: %s\n", fname, H5FOPENERROR );
   exit(1);
  }
  /* enable error reporting */

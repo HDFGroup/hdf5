@@ -51,7 +51,7 @@ int copy_objects(const char* fnamein,
  
  /* Open the files */
  if ((fidin=H5Fopen(fnamein,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
-  printf("h5repack: <%s>: No such file or directory\n", fnamein );
+  printf("h5repack: <%s>: %s\n", fnamein, H5FOPENERROR );
   exit(1);
  }
  if ((fidout=H5Fcreate(fnameout,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0 ){

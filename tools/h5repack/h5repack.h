@@ -23,6 +23,7 @@
 #define H5_REPACK_DEBUG
 #endif
 
+#define H5FOPENERROR "unable to open file"
 
 #define PFORMAT  "%-7s %-7s %-7s\n" /*chunk info, compression info, name*/
 #define PFORMAT1 "%-7s %-7s %-7s"     /*chunk info, compression info, name*/
