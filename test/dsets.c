@@ -3726,7 +3726,7 @@ test_scaleoffset_int_2(hid_t file)
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
 
     /* Set fill value */
-    fillval = 18446744073709551615;
+    fillval = 10000;
     if (H5Pset_fill_value(dc, H5T_NATIVE_INT, &fillval)<0) goto error;
 
     /* Set up to use scaleoffset filter, let library calculate minbits */
