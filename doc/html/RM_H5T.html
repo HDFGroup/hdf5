@@ -63,11 +63,16 @@ of a dataset.
     <li><a href="#Datatype-Lock">H5Tlock</a>
     <li><a href="#Datatype-GetClass">H5Tget_class</a>
     <li><a href="#Datatype-GetSize">H5Tget_size</a>
+    <li><a href="#Datatype-GetSuper">H5Tget_super</a>
     <li><a href="#Datatype-Close">H5Tclose</a>
 <p>
-<i>Variable-length Datatypes</i>
-    <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
-<p>
+<i>Conversion Functions</i>
+    <li><a href="#Datatype-Convert">H5Tconvert</a>
+    <li><a href="#Datatype-Find">H5Tfind</a>
+    <li><a href="#Datatype-SetOverflow">H5Tset_overflow</a>
+    <li><a href="#Datatype-GetOverflow">H5Tget_overflow</a>
+    <li><a href="#Datatype-Register">H5Tregister</a>
+    <li><a href="#Datatype-Unregister">H5Tunregister</a>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <i>Atomic Datatype Properties</i>
   <table><tr><td valign=top>
@@ -95,10 +100,12 @@ of a dataset.
     <li><a href="#Datatype-SetCset">H5Tset_cset</a>
     <li><a href="#Datatype-GetStrpad">H5Tget_strpad</a>
     <li><a href="#Datatype-SetStrpad">H5Tset_strpad</a>
-  <p>
   </td></tr></table>
+<p>
+<i>Variable-length Datatypes</i>
+    <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<i>Properties of Compound Types</i>
+<i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
     <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
     <li><a href="#Datatype-GetMemberOffset">H5Tget_member_offset</a>
@@ -108,14 +115,16 @@ of a dataset.
     <li><a href="#Datatype-Pack">H5Tpack</a>
     <li><a href="#Datatype-InsertArray">H5Tinsert_array</a>
 <p>
-<i>Conversion Functions</i>
-    <li><a href="#Datatype-Convert">H5Tconvert</a>
-    <li><a href="#Datatype-Find">H5Tfind</a>
-    <li><a href="#Datatype-SetOverflow">H5Tset_overflow</a>
-    <li><a href="#Datatype-GetOverflow">H5Tget_overflow</a>
-    <li><a href="#Datatype-RegisterHard">H5Tregister_hard</a>
-    <li><a href="#Datatype-RegisterSoft">H5Tregister_soft</a>
-    <li><a href="#Datatype-Unregister">H5Tunregister</a>
+<i>Enumeration Datatypes</i>
+    <li><a href="#Datatype-EnumCreate">H5Tenum_create</a>
+    <li><a href="#Datatype-EnumInsert">H5Tenum_insert</a>
+    <li><a href="#Datatype-EnumNameOf">H5Tenum_nameof</a>
+    <li><a href="#Datatype-EnumValueOf">H5Tenum_valueof</a>
+    <li><a href="#Datatype-GetMemberValue">H5Tget_member_value</a>
+<p>
+<i>Opaque Datatypes</i>
+    <li><a href="#Datatype-SetTag">H5Tset_tag</a>
+    <li><a href="#Datatype-GetTag">H5Tget_tag</a>
 </td></tr>
 </table>
 
@@ -710,6 +719,30 @@ H5Tget_overflow ()
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetSuper">H5Tget_super</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_super</code>(<em>hid_t</em> <code>type</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the base datatype from which a datatype is derived.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_super</code> returns the base datatype from which the 
+        datatype <code>type</code> is derived.  
+        <P>
+        In the case of an enumeration type, the return value is an integer type.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>Datatype identifier for the derived datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype identifier for the base datatype if successful;
         otherwise returns a negative value.
 </dl>
 
@@ -1658,87 +1691,64 @@ zero.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Datatype-RegisterHard">H5Tregister_hard</a>
+<dt><strong>Name:</strong> <a name="Datatype-Register">H5Tregister</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Tregister_hard</code>(<em>const char
-        *</em> <code>name</code>, <em>hid_t </em><code>src_id</code>,
+    <dd><em>herr_t</em> <code>H5Tregister</code>(<em>H5T_pers_t</em> <code>pers</code>, 
+        <em>const char *</em> <code>name</code>, 
+        <em>hid_t </em><code>src_id</code>,
         <em>hid_t</em> <code>dst_id</code>,
         <em>H5T_conv_t</em> <code>func</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Registers a hard conversion function.  
+    <dd>Registers a conversion function.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tregister_hard</code> registers a hard conversion function for a datatype
-        conversion path.  The path is specified by the source and destination
-        datatypes <code>src_id</code> and <code>dst_id</code>.  A conversion
-        path can only have one hard function, so <code>func</code> replaces any
-        previous hard function.
+    <dd><code>H5Tregister</code> registers a hard or soft conversion function 
+        for a datatype conversion path.  
         <p>
-        If <code>func</code> is the null pointer then any hard function
-        registered for this path is removed from this path.  The soft functions
-        are then used when determining which conversion function is appropriate
-        for this path.  The <code>name</code> argument is used only
-        for debugging and should be a short identifier for the function.
+        The parameter <code>pers</code> indicates whether a conversion function 
+        is <code>HARD</code> or <code>SOFT</code>.
+        <p>
+        A conversion path can have only one hard function.
+        When <code>pers</code> is <code>HARD</code>, <code>func</code> replaces 
+        any previous hard function.
+        If  <code>pers</code> is <code>HARD</code> and <code>func</code> 
+        is the null pointer, then any hard function registered for this 
+        path is removed.  
+        <p>
+        When <code>pers</code> is <code>SOFT</code>, <code>H5Tregister</code> 
+        adds the function to the end of the master soft list and replaces 
+        the soft function in all applicable existing conversion paths. 
+        Soft functions are used when determining which conversion function 
+        is appropriate for this path.  
+        <p>
+        The <code>name</code> is used only for debugging and should be a 
+        short identifier for the function.  
+        <p>
+        The path is specified by the source and destination datatypes 
+        <code>src_id</code> and <code>dst_id</code>.  
+        For soft conversion functions, only the class of these types is important.
         <p>
         The type of the conversion function pointer is declared as:
-        <br>
-        <code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
+        <dl>
+        <dd><code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) 
+                   (<em>hid_t </em><code>src_id</code>, 
                     <em>hid_t </em><code>dst_id</code>, 
                     <em>H5T_cdata_t *</em><code>cdata</code>,
                     <em>size_t </em><code>nelmts</code>, 
                     <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg)</code>;
+                    <em>void *</em><code>bkg</code>);
+        </dl>
 <dt><strong>Parameters:</strong>
     <dl>
+        <dt><em>H5T_pers_t</em> <code>pers</code>
+            <dd><code>HARD</code> for hard conversion functions;
+                <code>SOFT</code> for soft conversion functions.
         <dt><em>const char *</em> <code>name</code>
             <dd>Name displayed in diagnostic output.
         <dt><em>hid_t</em> <code>src_id</code>
             <dd>Identifier of source datatype.
         <dt><em>hid_t</em> <code>dst_id</code>
             <dd>Identifier of destination datatype.
-        <dt><em>H5T_conv_t</em> <code>func</code>
-            <dd>Function to convert between source and destination datatypes.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Datatype-RegisterSoft">H5Tregister_soft</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Tregister_soft</code>(<em>const char
-    *</em> <code>name</code>, <em>H5T_class_t </em><code>src_cls</code>,
-        <em>H5T_class_t</em> <code>dst_cls</code>,
-        <em>H5T_conv_t</em> <code>func</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Registers a soft conversion function.
-<dt><strong>Description:</strong>
-    <dd><code>H5Tregister_soft</code> registers a soft conversion function by adding it to the
-        end of the master soft list and replacing the soft function in all
-        applicable existing conversion paths.  The <code>name</code>
-        is used only for debugging and should be a short identifier
-        for the function.
-        <P>
-        The type of the conversion function pointer is declared as:
-        <br>
-        <code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
-                    <em>hid_t </em><code>dst_id</code>, 
-                    <em>H5T_cdata_t *</em><code>cdata</code>,
-                    <em>size_t </em><code>nelmts</code>, 
-                    <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg)</code>;
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const char *</em> <code>name</code>
-            <dd>Name displayed in diagnostic output.
-        <dt><em>H5T_class_t</em> <code>src_cls</code>
-            <dd>Identifier of source datatype class.
-        <dt><em>H5T_class_t</em> <code>dst_cls</code>
-            <dd>Identifier of destination datatype class.
         <dt><em>H5T_conv_t</em> <code>func</code>
             <dd>Function to convert between source and destination datatypes.
     </dl>
@@ -1759,14 +1769,8 @@ zero.
 <dt><strong>Description:</strong>
     <dd><code>H5Tunregister</code> removes a conversion function from all conversion paths.
         <P>
-        The type of the conversion function pointer is declared as:
-        <br>
-        <code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
-                    <em>hid_t </em><code>dst_id</code>, 
-                    <em>H5T_cdata_t *</em><code>cdata</code>,
-                    <em>size_t </em><code>nelmts</code>, 
-                    <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg)</code>;
+        The conversion function pointer type declaration is described in 
+        <a href="#Datatype-Register">H5Tregister</a>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5T_conv_t</em> <code>func</code>
@@ -1775,6 +1779,224 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumCreate">H5Tenum_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tenum_create</code>(<em>hid_t</em> <code>parent_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_create</code> creates a new enumeration datatype 
+        based on the specified base datatype, <code>parent_id</code>, 
+        which must be an integer type.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>parent_id</code>
+            <dd>IN: Datatype identifier for the base datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype identifier for the new enumeration datatype if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumInsert">H5Tenum_insert</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tenum_insert</code>(<em>hid_t</em> <code>type</code>,
+        <em>const char</em> *<code>name</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Inserts a new enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_insert</code> inserts a 
+        new enumeration datatype member into an enumeration datatype. 
+        <p>
+        <code>type</code> is the enumeration datatype, 
+        <code>name</code> is the name of the new member, and 
+        <code>value</code> points to the value of the new member.
+        <p>
+        <code>name</code> and <code>value</code> must both 
+        be unique within <code>type</code>. 
+        <p>
+        <code>value</code> points to data which is of the 
+        datatype defined when the enumeration datatype was created.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Datatype identifier for the enumeration datatype.
+        <dt><em>const char</em> *<code>name</code>
+            <dd>IN: Name of the new member.
+        <dt><em>void</em> *<code>value</code>
+            <dd>IN: Pointer to the value of the new member.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumNameOf">H5Tenum_nameof</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tenum_nameof</code>(<em>hid_t</em> <code>type</code>
+        <em>void</em> *<code>value</code>,
+        <em>char</em> *<code>name</code>,
+        <em>size_t</em> <code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the symbol name corresponding to a specified member of an enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_nameof</code> finds the symbol name that 
+        corresponds to the specified <code>value</code>
+        of the enumeration datatype <code>type</code>. 
+        <p>
+        At most <code>size</code> characters of the symbol 
+        name are copied into the <code>name</code> buffer. 
+        If the entire symbol name and null terminator 
+        do not fit in the <code>name</code> buffer, then as 
+        many characters as possible are copied 
+        (not null terminated) and the function fails.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Enumeration datatype identifier.
+        <dt><em>void</em> *<code>value</code>,
+            <dd>IN: Value of the enumeration datatype.
+        <dt><em>char</em> *<code>name</code>,
+            <dd>OUT: Buffer for output of the symbol name.
+        <dt><em>size_t</em> <code>size</code>
+            <dd>IN: Anticipated size of the symbol name, in bytes (characters).
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value 
+        and, if <code>size</code> allows it, 
+        the first character of <code>name</code> is 
+        set to <code>NULL</code>.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumValueOf">H5Tenum_valueof</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tenum_valueof</code>(<em>hid_t</em> <code>type</code>
+        <em>char</em> *<code>name</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the symbol name corresponding to a specified member of an enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_valueof</code> finds the value that
+        corresponds to the specified <code>name</code>
+        of the enumeration datatype <code>type</code>. 
+        <p>
+        The <code>value</code> argument should be at least
+        as large as the value of <code>H5Tget_size(type)</code>
+        in order to hold the result.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Enumeration datatype identifier.
+        <dt><em>const char</em> *<code>name</code>,
+            <dd>IN: Symbol name of the enumeration datatype.
+        <dt><em>void</em> *<code>value</code>,
+            <dd>OUT: Buffer for output of the value of the enumeration datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberValue">H5Tget_member_value</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_member_value</code>(<em>hid_t</em> <code>type</code>
+        <em>int</em> <code>memb_no</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the value of an enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_value</code> returns the value of 
+        the enumeration datatype member <code>memb_no</code>.
+        <p>
+        The member value is returned in a user-supplied buffer 
+        pointed to by <code>value</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Datatype identifier for the enumeration datatype.
+        <dt><em>int</em> <code>memb_no</code>,
+            <dd>IN: Number of the enumeration datatype member.
+        <dt><em>void</em> *<code>value</code>
+            <dd>OUT: Pointer to a buffer for output of the 
+                value of the enumeration datatype member.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetTag">H5Tset_tag</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tset_tag</code>(<em>hid_t</em> <code>type_id</code>
+        <em>const char</em> *<code>tag</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Tags an opaque datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_tag</code> tags an opaque datatype <code>type_id</code>
+        with a unique ASCII identifier <code>tag</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>IN: Datatype identifier for the opaque datatype to be tagged.
+        <dt><em>const char</em> *<code>tag</code>
+            <dd>IN: Unique ASCII string with which the opaque datatype is to be tagged.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetTag">H5Tget_tag</a>
+<dt><strong>Signature:</strong>
+    <dd><em>char</em> *<code>H5Tget_tag</code>(<em>hid_t</em> <code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the tag associated with an opaque datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_tag</code> returns the tag associated with 
+        the opaque datatype <code>type_id</code>.
+        <P>
+        The tag is returned via a pointer to an 
+        allocated string, which the caller must free.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Datatype identifier for the opaque datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a pointer to an allocated string if successful;
+        otherwise returns <code>NULL</code>.
 </dl>
 
 

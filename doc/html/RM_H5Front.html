@@ -48,7 +48,6 @@ HDF5 Reference Manual&nbsp;&nbsp;
 </center>
 The HDF5 library provides several interfaces, each of which provides the 
 tools required to meet specific aspects of the HDF5 data-handling requirements.
-<i>(See <a href="#NotDocced">below</a> for a list of functions that are not yet documented in this HDF5 Reference Manual.)</i>
 
 <center>
 <table border=0>
@@ -104,147 +103,8 @@ tools required to meet specific aspects of the HDF5 data-handling requirements.
 </td></tr>
 </table>
 </center>
-<a name="NotDocced">
-<hr>
-</a>
 
-<pre>
-SPECIAL NOTE
-HDF5 Release 1.2 Beta
-
-The following HDF5 functions are not documented in the HDF5 Reference 
-Manual that accompanies this Beta release; they will be documented in 
-the final Release 1.2.  Brief descriptions, as extracted from comments 
-in the source code, are appended below.
-
-	H5Tenum_create
-	H5Tenum_insert
-	H5Tenum_nameof
-	H5Tenum_valueof
-	H5Tset_tag
-	H5Tget_tag
-	H5Tget_super
-	H5Tget_member_value
-	H5Tregister
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tenum_create
- *
- * Purpose:	Create a new enumeration data type based on the specified
- *		TYPE, which must be an integer type.
- *
- * Return:	Success:	ID of new enumeration data type
- *		Failure:	Negative
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tenum_insert
- *
- * Purpose:	Insert a new enumeration data type member into an enumeration
- *		type. TYPE is the enumeration type, NAME is the name of the
- *		new member, and VALUE points to the value of the new member.
- *		The NAME and VALUE must both be unique within the TYPE. VALUE
- *		points to data which is of the data type defined when the
- *		enumeration type was created.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tenum_nameof
- *
- * Purpose:	Finds the symbol name that corresponds to the specified VALUE
- *		of an enumeration data type TYPE. At most SIZE characters of
- *		the symbol name are copied into the NAME buffer. If the
- *		entire symbol name and null terminator do not fit in the NAME
- *		buffer then as many characters as possible are copied (not
- *		null terminated) and the function fails.
- *
- * Return:	Success:	Non-negative.
- *		Failure:	Negative, first character of NAME is set to
- *				null if SIZE allows it.
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tenum_valueof
- *
- * Purpose:	Finds the value that corresponds to the specified NAME f an
- *		enumeration TYPE. The VALUE argument should be at least as
- *		large as the value of H5Tget_size(type) in order to hold the
- *		result.
- *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tset_tag
- *
- * Purpose:	Tag an opaque datatype with a unique ASCII identifier.
- *
- * Return:	Non-negative on success/Negative on failure
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tget_tag
- *
- * Purpose:	Get the tag associated with an opaque datatype.
- *
- * Return:	A pointer to an allocated string. The caller should free
- *              the string. NULL is returned for errors.
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tget_super
- *
- * Purpose:	Returns the type from which TYPE is derived. In the case of
- *		an enumeration type the return value is an integer type.
- *
- * Return:	Success:	Type ID for base data type.
- *		Failure:	negative
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tget_member_value
- *
- * Purpose:	Return the value for an enumeration data type member.
- *
- * Return:	Success:	non-negative with the member value copied
- *				into the memory pointed to by VALUE.
- *		Failure:	negative, VALUE memory is undefined.
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tregister
- *
- * Purpose:	Register a hard or soft conversion function for a data type
- *		conversion path.  The path is specified by the source and
- *		destination data types SRC_ID and DST_ID (for soft functions
- *		only the class of these types is important). If FUNC is a
- *		hard function then it replaces any previous path; if it's a
- *		soft function then it replaces all existing paths to which it
- *		applies and is used for any new path to which it applies as
- *		long as that path doesn't have a hard function.
- *
- * Return:	Non-negative on success/Negative on failure
- *-------------------------------------------------------------------------
- */
-
-</pre>
-
-
-
-
+<br><br>
 
 <hr>
 <center>
