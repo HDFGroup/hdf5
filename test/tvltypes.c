@@ -56,12 +56,19 @@ void *test_vltypes_alloc_custom(size_t size, void *info)
 {
     void *ret_value=NULL;       /* Pointer to return */
     int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t extra;               /* Extra space needed */
 
-    if((ret_value=HDmalloc(sizeof(int)+size))!=NULL) {
+    /*
+     *  This weird contortion is required on the DEC Alpha to keep the
+     *  alignment correct - QAK
+     */
+    extra=MAX(sizeof(void *),sizeof(int));
+
+    if((ret_value=HDmalloc(extra+size))!=NULL) {
         *(int *)ret_value=size;
         *mem_used+=size;
     } /* end if */
-    ret_value=((unsigned char *)ret_value)+sizeof(int);
+    ret_value=((unsigned char *)ret_value)+extra;
     return(ret_value);
 }
 
@@ -77,9 +84,16 @@ void test_vltypes_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
     int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t extra;               /* Extra space needed */
+
+    /*
+     *  This weird contortion is required on the DEC Alpha to keep the
+     *  alignment correct - QAK
+     */
+    extra=MAX(sizeof(void *),sizeof(int));
 
     if(_mem!=NULL) {
-        mem=((unsigned char *)_mem)-sizeof(int);
+        mem=((unsigned char *)_mem)-extra;
         *mem_used-=*(int *)mem;
         HDfree(mem);
     } /* end if */
