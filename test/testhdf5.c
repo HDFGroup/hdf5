@@ -163,6 +163,7 @@ main(int argc, char *argv[])
 
     /* Tests are generally arranged from least to most complexity... */
     InitTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code");
+    InitTest("tbbt", test_tbbt, NULL,  "Threaded, Balanced, Binary Trees");
     InitTest("file", test_file, cleanup_file, "Low-Level File I/O");
     InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");

@@ -57,9 +57,9 @@ TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c      \
 	 external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
 	 iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
 	 ragged.c stab.c tattr.c testhdf5.c tfile.c th5s.c titerate.c tmeta.c \
-     trefer.c tselect.c tvltypes.c tvlstr.c unlink.c enum.c gass_write.c \
-	 gass_read.c gass_append.c dpss_read.c dpss_write.c srb_read.c \
-	 srb_write.c srb_append.c
+     trefer.c tselect.c ttbbt.c tvltypes.c tvlstr.c unlink.c enum.c \
+     gass_write.c gass_read.c gass_append.c dpss_read.c dpss_write.c \
+     srb_read.c srb_write.c srb_append.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
@@ -78,7 +78,7 @@ timings _timings: $(TIMINGS)
 
 ## How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
-TESTHDF5_OBJ=testhdf5.lo tattr.lo tfile.lo titerate.lo tmeta.lo trefer.lo tselect.lo tvltypes.lo tvlstr.lo th5s.lo
+TESTHDF5_OBJ=testhdf5.lo tattr.lo tfile.lo titerate.lo tmeta.lo trefer.lo tselect.lo ttbbt.lo tvltypes.lo tvlstr.lo th5s.lo
 testhdf5: $(TESTHDF5_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
