@@ -1274,7 +1274,11 @@ test_compatible(void)
   } 
   strcat(testfile, FILE_COMPATIBLE);
  
-  if((file=H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT))<0) goto error;
+  if ((file=H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT))<0) {
+      printf("    Could not open file %s. Try set $srcdir to point at the "
+	      "source directory of test\n", testfile);
+      goto error;
+  }
 
   if((dset1=H5Dopen(file, "dset1"))<0) goto error;
   if ((dcpl1=H5Dget_create_plist(dset1))<0) goto error;
