@@ -364,7 +364,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op, void *operate_data)
+H5Pset_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t op, void *operate_data)
 {
     H5P_genplist_t      *plist;      /* Property list pointer */
     herr_t              ret_value=SUCCEED;   /* return value */
@@ -406,7 +406,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t **op, void **operate_data)
+H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op, void **operate_data)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5T_conv_cb_t       cb_struct;

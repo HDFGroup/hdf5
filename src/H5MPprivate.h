@@ -219,8 +219,6 @@
 #define color_H5Tunregister "red"
 #define color_H5Tfind "red"
 #define color_H5Tconvert "red"
-#define color_H5Tget_overflow "red"
-#define color_H5Tset_overflow "red"
 #define color_H5Tget_native_type "red"
 
 #define color_H5Acreate "red"
@@ -366,6 +364,8 @@
 #define color_H5Pget_edc_check "red"
 #define color_H5Pset_edc_check "red"
 #define color_H5Pset_filter_callback "red"
+#define color_H5Pset_type_conv_cb "red"
+#define color_H5Pget_type_conv_cb "red"
 
 #define color_H5Screate "red"
 #define color_H5Screate_simple "red"

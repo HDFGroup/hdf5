@@ -57,6 +57,12 @@ typedef struct {
     void *free_info;            /* Free information */
 } H5T_vlen_alloc_info_t;
 
+/* Structure for conversion callback property */
+typedef struct H5T_conv_cb_t {
+    H5T_conv_except_func_t      func;
+    void*                       user_data;
+} H5T_conv_cb_t;
+
 /* Private functions */
 H5_DLL herr_t H5TN_init_interface(void);
 H5_DLL herr_t H5T_init(void);
