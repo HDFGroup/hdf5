@@ -18,7 +18,7 @@
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
-static void *H5O_shared_decode (H5F_t*, const uint8*, H5HG_t *hobj);
+static void *H5O_shared_decode (H5F_t*, const uint8*, H5O_shared_t *sh);
 static herr_t H5O_shared_encode (H5F_t*, uint8*, const void*);
 static size_t H5O_shared_size (H5F_t*, const void*);
 static herr_t H5O_shared_debug (H5F_t*, const void*, FILE*, intn, intn);
@@ -33,7 +33,8 @@ const H5O_class_t H5O_SHARED[1] = {{
     NULL,		    	/*no copy method			*/
     H5O_shared_size,	    	/*size method				*/
     NULL,		    	/*no reset method			*/
-    NULL,			/*no share method			*/
+    NULL,			/*get share method			*/
+    NULL, 			/*set share method			*/
     H5O_shared_debug,	    	/*debug method				*/
 }};
 
@@ -60,7 +61,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_decode (H5F_t *f, const uint8 *buf, H5HG_t __unused__ *hobj)
+H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
 {
     H5O_shared_t	*mesg;
     
@@ -69,12 +70,17 @@ H5O_shared_decode (H5F_t *f, const uint8 *buf, H5HG_t __unused__ *hobj)
     /* Check args */
     assert (f);
     assert (buf);
-    assert (!hobj || !H5HG_defined (hobj));
+    assert (!sh);
 
     /* Decode */
     mesg = H5MM_xcalloc (1, sizeof *mesg);
-    H5F_addr_decode (f, &buf, &(mesg->addr));
-    INT32DECODE (buf, mesg->idx);
+    UINT32DECODE (buf, mesg->in_gh);
+    if (mesg->in_gh) {
+	H5F_addr_decode (f, &buf, &(mesg->u.gh.addr));
+	INT32DECODE (buf, mesg->u.gh.idx);
+    } else {
+	H5G_ent_decode (f, &buf, &(mesg->u.ent));
+    }
 
     FUNC_LEAVE (mesg);
 }
@@ -109,8 +115,13 @@ H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
     assert (mesg);
 
     /* Encode */
-    H5F_addr_encode (f, &buf, &(mesg->addr));
-    INT32ENCODE (buf, mesg->idx);
+    INT32ENCODE (buf, mesg->in_gh);
+    if (mesg->in_gh) {
+	H5F_addr_encode (f, &buf, &(mesg->u.gh.addr));
+	INT32ENCODE (buf, mesg->u.gh.idx);
+    } else {
+	H5G_ent_encode (f, &buf, &(mesg->u.ent));
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -135,8 +146,15 @@ H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
 static size_t
 H5O_shared_size (H5F_t *f, const void __unused__ *_mesg)
 {
+    size_t	size;
+    
     FUNC_ENTER (H5O_shared_size, 0);
-    FUNC_LEAVE (H5F_SIZEOF_ADDR(f)+4);
+
+    size = 4 +				/*the flags field		*/
+	   MAX (H5F_SIZEOF_ADDR(f)+4,	/*sharing via global heap	*/
+		H5G_SIZEOF_ENTRY(f));	/*sharing by another obj hdr	*/
+
+    FUNC_LEAVE (size);
 }
 
 
@@ -171,14 +189,22 @@ H5O_shared_debug (H5F_t __unused__ *f, const void *_mesg,
     assert (indent>=0);
     assert (fwidth>=0);
 
-    fprintf (stream, "%*s%-*s ", indent, "", fwidth,
-	     "Collection address:");
-    H5F_addr_print (stream, &(mesg->addr));
-    fprintf (stream, "\n");
-
-    fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
-	     "Object ID within collection:",
-	     mesg->idx);
-
+    if (mesg->in_gh) {
+	HDfprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
+		   "Sharing method",
+		   "Global heap");
+	HDfprintf (stream, "%*s%-*s %a\n", indent, "", fwidth,
+		 "Collection address:",
+		   &(mesg->u.gh.addr));
+	HDfprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+		   "Object ID within collection:",
+		   mesg->u.gh.idx);
+    } else {
+	HDfprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
+		   "Sharing method",
+		   "Obj Hdr");
+	H5G_ent_debug (f, &(mesg->u.ent), stream, indent, fwidth, NULL);
+    }
+    
     FUNC_LEAVE (SUCCEED);
 }

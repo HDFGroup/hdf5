@@ -12,6 +12,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 #include <H5private.h>		/*generic functions			  */
+#include <H5Dprivate.h>		/*datasets (for H5Tcopy)		  */
 #include <H5Iprivate.h>		/*ID functions		   		  */
 #include <H5Eprivate.h>		/*error handling			  */
 #include <H5Gprivate.h>		/*groups				  */
@@ -94,6 +95,7 @@ H5T_init_interface(void)
 				    (herr_t (*)(void *)) H5T_close)) != FAIL) {
 	ret_value = H5_add_exit(&H5T_term_interface);
     }
+
     /*
      * Initialize pre-defined data types that depend on the architecture.
      */
@@ -158,7 +160,8 @@ H5T_init_interface(void)
 
     /* TIME */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
-    dt->locked = TRUE;
+    dt->state = H5T_STATE_IMMUTABLE;
+    H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_TIME;
     dt->size = 1;
     dt->u.atomic.order = H5Tget_order(H5T_NATIVE_INT_g);
@@ -173,7 +176,8 @@ H5T_init_interface(void)
 
     /* STRING */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
-    dt->locked = TRUE;
+    dt->state = H5T_STATE_IMMUTABLE;
+    H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_STRING;
     dt->size = 1;
     dt->u.atomic.order = H5T_ORDER_NONE;
@@ -190,7 +194,8 @@ H5T_init_interface(void)
 
     /* BITFIELD */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
-    dt->locked = TRUE;
+    dt->state = H5T_STATE_IMMUTABLE;
+    H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_BITFIELD;
     dt->size = 1;
     dt->u.atomic.order = H5Tget_order(H5T_NATIVE_INT_g);
@@ -205,7 +210,8 @@ H5T_init_interface(void)
 
     /* OPAQUE */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
-    dt->locked = TRUE;
+    dt->state = H5T_STATE_IMMUTABLE;
+    H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_OPAQUE;
     dt->size = 1;
     dt->u.atomic.order = H5T_ORDER_NONE;
@@ -254,7 +260,7 @@ H5T_init_interface(void)
 /*-------------------------------------------------------------------------
  * Function:	H5T_unlock_cb
  *
- * Purpose:	Clear the locked flag for a data type.  This function is
+ * Purpose:	Clear the immutable flag for a data type.  This function is
  *		called when the library is closing in order to unlock all
  *		registered data types and thus make them free-able.
  *
@@ -270,11 +276,15 @@ H5T_init_interface(void)
  *-------------------------------------------------------------------------
  */
 static intn
-H5T_unlock_cb (void *dt, const void __unused__ *key)
+H5T_unlock_cb (void *_dt, const void __unused__ *key)
 {
+    H5T_t	*dt = (H5T_t *)_dt;
+    
     FUNC_ENTER (H5T_unlock_cb, FAIL);
     assert (dt);
-    ((H5T_t*)dt)->locked = FALSE;
+    if (H5T_STATE_IMMUTABLE==dt->state) {
+	dt->state = H5T_STATE_RDONLY;
+    }
     FUNC_LEAVE (0);
 }
 
@@ -420,6 +430,136 @@ H5Tcreate(H5T_class_t type, size_t size)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Topen
+ *
+ * Purpose:	Opens a named data type.
+ *
+ * Return:	Success:	Object ID of the named data type.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, June  1, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Topen (hid_t loc_id, const char *name)
+{
+    H5G_t	*loc = NULL;
+    H5T_t	*type = NULL;
+    hid_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5Topen, FAIL);
+
+    /* Check args */
+    if (NULL==(loc=H5G_loc (loc_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
+    }
+
+    /* Open it */
+    if (NULL==(type=H5T_open (loc, name))) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL,
+		       "unable to open named data type");
+    }
+
+    /* Register the type and return the ID */
+    if ((ret_value=H5I_register (H5_DATATYPE, type))<0) {
+	H5T_close (type);
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+		       "unable to register named data type");
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tcommit
+ *
+ * Purpose:	Save a transient data type to a file and turn the type handle
+ *		into a named, immutable type.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, June  1, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tcommit (hid_t loc_id, const char *name, hid_t type_id)
+{
+    H5G_t	*loc = NULL;
+    H5T_t	*type = NULL;
+    
+    FUNC_ENTER (H5Tcommit, FAIL);
+
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc (loc_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
+    }
+    if (H5_DATATYPE!=H5I_group (type_id) ||
+	NULL==(type=H5I_object (type_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+
+    /* Commit the type */
+    if (H5T_commit (loc, name, type)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to commit data type");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tcommitted
+ *
+ * Purpose:	Determines if a data type is committed or not.
+ *
+ * Return:	Success:	TRUE if committed, FALSE otherwise.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5Tcommitted (hid_t type_id)
+{
+    H5T_t	*type = NULL;
+    
+    FUNC_ENTER (H5Tcommitted, FAIL);
+
+    /* Check arguments */
+    if (H5_DATATYPE!=H5I_group (type_id) ||
+	NULL==(type=H5I_object (type_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+
+    FUNC_LEAVE (H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tcopy
  *
  * Purpose:	Copies a data type.  The resulting data type is not locked.
@@ -435,6 +575,12 @@ H5Tcreate(H5T_class_t type, size_t size)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 4 Jun 1998
+ *	The returned type is always transient and unlocked.  If the TYPE_ID
+ *	argument is a dataset instead of a data type then this function
+ *	returns a transient, modifiable data type which is a copy of the
+ *	dataset's data type.
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -442,18 +588,37 @@ H5Tcopy(hid_t type_id)
 {
     H5T_t	*dt = NULL;
     H5T_t	*new_dt = NULL;
+    H5D_t	*dset = NULL;
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Tcopy, FAIL);
 
-    /* Check args */
-    if (H5_DATATYPE != H5I_group(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    switch (H5I_group (type_id)) {
+    case H5_DATATYPE:
+	/* The argument is a data type handle */
+	if (NULL==(dt=H5I_object (type_id))) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	break;
+
+    case H5_DATASET:
+	/* The argument is a dataset handle */
+	if (NULL==(dset=H5I_object (type_id))) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+	}
+	if (NULL==(dt=H5D_typeof (dset))) {
+	    HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+			   "unable to get the dataset data type");
+	}
+	break;
+
+    default:
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a data type or dataset");
     }
 
     /* Copy */
-    if (NULL == (new_dt = H5T_copy(dt))) {
+    if (NULL == (new_dt = H5T_copy(dt, H5T_COPY_TRANSIENT))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't copy");
     }
 
@@ -496,8 +661,8 @@ H5Tclose(hid_t type_id)
 	NULL == (dt = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
-    if (dt->locked) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "predefined data type");
+    if (H5T_STATE_IMMUTABLE==dt->state) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable data type");
     }
 
     /* When the reference count reaches zero the resources are freed */
@@ -557,7 +722,8 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
  *		the application doesn't inadvertently change or delete a
  *		predefined type.
  *
- *		Once a data type is locked it can never be unlocked.
+ *		Once a data type is locked it can never be unlocked unless
+ *		the entire library is closed.
  *
  * Return:	Success:	SUCCEED
  *
@@ -568,6 +734,10 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 1 Jun 1998
+ *	It is illegal to lock a named data type since we must allow named
+ *	types to be closed (to release file resources) but locking a type
+ *	prevents that.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -582,7 +752,14 @@ H5Tlock(hid_t type_id)
 	NULL == (dt = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
-    dt->locked = TRUE;
+    if (H5T_STATE_NAMED==dt->state || H5T_STATE_OPEN==dt->state) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "unable to lock named data type");
+    }
+    if (H5T_lock (dt, TRUE)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to lock transient data type");
+    }
     
     FUNC_LEAVE(SUCCEED);
 }
@@ -703,7 +880,7 @@ H5Tset_size(hid_t type_id, size_t size)
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (size <= 0) {
@@ -762,7 +939,6 @@ H5Tset_size(hid_t type_id, size_t size)
     }
 
     /* Commit */
-    H5T_unshare (dt);
     dt->size = size;
     dt->u.atomic.offset = offset;
     dt->u.atomic.prec = prec;
@@ -839,7 +1015,7 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (order < 0 || order > H5T_ORDER_NONE) {
@@ -847,7 +1023,6 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     }
 
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.order = order;
     FUNC_LEAVE(SUCCEED);
 }
@@ -939,7 +1114,7 @@ H5Tset_precision(hid_t type_id, size_t prec)
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (prec <= 0) {
@@ -993,7 +1168,6 @@ H5Tset_precision(hid_t type_id, size_t prec)
     }
 
     /* Commit */
-    H5T_unshare (dt);
     dt->size = size;
     dt->u.atomic.offset = offset;
     dt->u.atomic.prec = prec;
@@ -1108,7 +1282,7 @@ H5Tset_offset(hid_t type_id, size_t offset)
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (H5T_STRING == dt->type && offset != 0) {
@@ -1122,7 +1296,6 @@ H5Tset_offset(hid_t type_id, size_t offset)
     }
     
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.offset = offset;
 
     FUNC_LEAVE(SUCCEED);
@@ -1198,7 +1371,7 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (lsb < 0 || lsb >= H5T_NPAD || msb < 0 || msb >= H5T_NPAD) {
@@ -1206,7 +1379,6 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     }
 
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.lsb_pad = lsb;
     dt->u.atomic.msb_pad = msb;
 
@@ -1282,7 +1454,7 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
 	H5T_INTEGER != dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (sign < 0 || sign >= H5T_NSGN) {
@@ -1290,7 +1462,6 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     }
     
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.u.i.sign = sign;
     FUNC_LEAVE(SUCCEED);
 }
@@ -1383,7 +1554,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a floating-point data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (epos + esize > dt->u.atomic.prec) {
@@ -1415,7 +1586,6 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     }
     
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.u.f.sign = spos;
     dt->u.atomic.u.f.epos = epos;
     dt->u.atomic.u.f.mpos = mpos;
@@ -1495,12 +1665,11 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a floating-point data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
 
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.u.f.ebias = ebias;
 
     FUNC_LEAVE(SUCCEED);
@@ -1578,7 +1747,7 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a floating-point data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (norm < 0 || norm > H5T_NORM_NONE) {
@@ -1586,7 +1755,6 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     }
     
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.u.f.norm = norm;
     FUNC_LEAVE(SUCCEED);
 }
@@ -1667,7 +1835,7 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a floating-point data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (pad < 0 || pad >= H5T_NPAD) {
@@ -1676,7 +1844,6 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
     }
     
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.u.f.pad = pad;
     FUNC_LEAVE(SUCCEED);
 }
@@ -1754,7 +1921,7 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 	H5T_STRING != dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a string data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (cset < 0 || cset >= H5T_NCSET) {
@@ -1763,7 +1930,6 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     }
     
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.u.s.cset = cset;
     FUNC_LEAVE(SUCCEED);
 }
@@ -1843,7 +2009,7 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 	H5T_STRING != dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a string data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
     if (strpad < 0 || strpad >= H5T_NSTR) {
@@ -1851,7 +2017,6 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     }
     
     /* Commit */
-    H5T_unshare (dt);
     dt->u.atomic.u.s.pad = strpad;
     FUNC_LEAVE(SUCCEED);
 }
@@ -2051,6 +2216,10 @@ H5Tget_member_dims(hid_t type_id, int membno,
  *
  * Modifications:
  *
+ * 	Robb Matzke, 4 Jun 1998
+ *	If the member type is a named type then this function returns a
+ *	handle to the re-opened named type.
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -2072,7 +2241,8 @@ H5Tget_member_type(hid_t type_id, int membno)
     }
     
     /* Copy data type into an atom */
-    if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type))) {
+    if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type,
+				    H5T_COPY_REOPEN))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to copy member data type");
     }
@@ -2128,7 +2298,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
 	H5T_COMPOUND != parent->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
-    if (parent->locked) {
+    if (H5T_STATE_TRANSIENT!=parent->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parent type read-only");
     }
     if (!name || !*name) {
@@ -2179,7 +2349,7 @@ H5Tpack(hid_t type_id)
 	H5T_COMPOUND != dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
-    if (dt->locked) {
+    if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data type is read-only");
     }
 
@@ -2190,98 +2360,6 @@ H5Tpack(hid_t type_id)
     }
     
     FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tshare
- *
- * Purpose:	Marks a data type as sharable.  Using the type during the
- *		creation of a dataset will cause the dataset object header to
- *		point to the type in the global heap instead of containing
- *		the type directly in its object header.  Subsequent
- *		modifications to a shared type cause the type to become
- *		unshared.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March 31, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Tshare (hid_t loc_id, hid_t type_id)
-{
-    H5G_t	*loc = NULL;
-    H5T_t	*dt = NULL;
-    
-    FUNC_ENTER (H5Tshare, FAIL);
-
-    /* Check arguments */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (H5_DATATYPE!=H5I_group (type_id) ||
-	NULL==(dt=H5I_object (type_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
-
-    /* Make it sharable */
-    if (H5T_share (H5G_fileof (loc), dt)<0) {
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "unable to make data type sharable");
-    }
-
-    FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tis_shared
- *
- * Purpose:	Determines if a data type is shared in the specified file.
- *		The TYPE_ID is the type in question and LOC_ID is a file id
- *		or group id (a group id is used only to identify the file).
- *
- * Return:	Success:	TRUE or FALSE
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Friday, April  3, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5Tis_shared (hid_t loc_id, hid_t type_id)
-{
-    H5G_t	*loc = NULL;
-    H5T_t	*dt = NULL;
-    hbool_t	ret_value = FAIL;
-    
-    FUNC_ENTER (H5Tis_shared, FAIL);
-
-    /* Check arguments */
-    if (NULL==(loc=H5G_loc (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (H5_DATATYPE!=H5I_group (type_id) ||
-	NULL==(dt=H5I_object (type_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
-
-    /* Is it sharable */
-    ret_value = (H5HG_defined (&(dt->sh_heap)) &&
-		 dt->sh_file->shared==H5G_fileof(loc)->shared) ? TRUE : FALSE;
-
-    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2425,8 +2503,10 @@ H5Tregister_soft(const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
 	 * data type temporarily to an object id before we query the functions
 	 * capabilities.
 	 */
-	if ((src_id = H5I_register(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
-	    (dst_id = H5I_register(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
+	if ((src_id = H5I_register(H5_DATATYPE,
+				   H5T_copy(path->src, H5T_COPY_ALL))) < 0 ||
+	    (dst_id = H5I_register(H5_DATATYPE,
+				   H5T_copy(path->dst, H5T_COPY_ALL))) < 0) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
 			  "unable to register data types for conv query");
 	}
@@ -2545,9 +2625,11 @@ H5Tunregister(H5T_conv_t func)
 		 * object id's for the data types.
 		 */
 		if ((src_id = H5I_register(H5_DATATYPE,
-					   H5T_copy(path->src))) < 0 ||
+					   H5T_copy(path->src,
+						    H5T_COPY_ALL))) < 0 ||
 		    (dst_id = H5I_register(H5_DATATYPE,
-					   H5T_copy(path->dst))) < 0) {
+					   H5T_copy(path->dst,
+						    H5T_COPY_ALL))) < 0) {
 		    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
 				  "unable to register conv types for query");
 		}
@@ -2679,8 +2761,60 @@ H5T_create(H5T_class_t type, size_t size)
 		      "unknown data type class");
     }
 
+    H5F_addr_undef (&(dt->ent.header));
     dt->size = size;
     FUNC_LEAVE(dt);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_open
+ *
+ * Purpose:	Open a named data type.
+ *
+ * Return:	Success:	Ptr to a new data type.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, June  1, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_open (H5G_t *loc, const char *name)
+{
+    H5T_t	*dt = NULL;
+    H5G_entry_t	ent;
+    
+    FUNC_ENTER (H5T_open, NULL);
+    assert (loc);
+    assert (name && *name);
+
+    /*
+     * Find the named data type object header and read the data type message
+     * from it.
+     */
+    if (H5G_find (loc, name, NULL, &ent/*out*/)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
+    }
+    if (H5O_open (&ent)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL,
+		       "unable to open named data type");
+    }
+    if (NULL==(dt=H5O_read (&ent, H5O_DTYPE, 0, NULL))) {
+	H5O_close (&ent);
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
+		       "unable to load type message from object header");
+    }
+
+    /* Mark the type as named and open */
+    dt->state = H5T_STATE_OPEN;
+    dt->ent = ent;
+
+    FUNC_LEAVE (dt);
 }
 
 
@@ -2688,7 +2822,7 @@ H5T_create(H5T_class_t type, size_t size)
  * Function:	H5T_copy
  *
  * Purpose:	Copies datatype OLD_DT.	 The resulting data type is not
- *		locked.
+ *		locked and is a transient type.
  *
  * Return:	Success:	Pointer to a new copy of the OLD_DT argument.
  *
@@ -2699,10 +2833,20 @@ H5T_create(H5T_class_t type, size_t size)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 4 Jun 1998
+ *	Added the METHOD argument.  If it's H5T_COPY_TRANSIENT then the
+ *	result will be an unlocked transient type.  Otherwise if it's
+ *	H5T_COPY_ALL then the result is a named type if the original is a
+ *	named type, but the result is not opened.  Finally, if it's
+ *	H5T_COPY_REOPEN and the original type is a named type then the result
+ *	is a named type and the type object header is opened again.  The
+ *	H5T_COPY_REOPEN method is used when returning a named type to the
+ *	application.
+ *
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_copy(const H5T_t *old_dt)
+H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t	*new_dt=NULL, *tmp=NULL;
     intn	i;
@@ -2716,8 +2860,43 @@ H5T_copy(const H5T_t *old_dt)
     /* copy */
     new_dt = H5MM_xcalloc(1, sizeof(H5T_t));
     *new_dt = *old_dt;
-    new_dt->locked = FALSE;
 
+    switch (method) {
+    case H5T_COPY_TRANSIENT:
+	/*
+	 * Return an unlocked transient type.
+	 */
+	new_dt->state = H5T_STATE_TRANSIENT;
+	HDmemset (&(new_dt->ent), 0, sizeof(new_dt->ent));
+	H5F_addr_undef (&(new_dt->ent.header));
+	break;
+	
+    case H5T_COPY_ALL:
+	/*
+	 * Return a transient type (locked or unlocked) or an unopened named
+	 * type.
+	 */
+	if (H5T_STATE_OPEN==new_dt->state) {
+	    new_dt->state = H5T_STATE_NAMED;
+	}
+	break;
+
+    case H5T_COPY_REOPEN:
+	/*
+	 * Return a transient type (locked or unlocked) or an opened named
+	 * type.
+	 */
+	if (H5F_addr_defined (&(new_dt->ent.header))) {
+	    if (H5O_open (&(new_dt->ent))<0) {
+		H5MM_xfree (new_dt);
+		HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL,
+			       "unable to reopen named data type");
+	    }
+	    new_dt->state = H5T_STATE_OPEN;
+	}
+	break;
+    }
+    
     if (H5T_COMPOUND == new_dt->type) {
 	/*
 	 * Copy all member fields to new type, then overwrite the
@@ -2732,12 +2911,128 @@ H5T_copy(const H5T_t *old_dt)
 	for (i = 0; i < new_dt->u.compnd.nmembs; i++) {
 	    s = new_dt->u.compnd.memb[i].name;
 	    new_dt->u.compnd.memb[i].name = H5MM_xstrdup(s);
-	    tmp = H5T_copy (old_dt->u.compnd.memb[i].type);
+	    tmp = H5T_copy (old_dt->u.compnd.memb[i].type, method);
 	    new_dt->u.compnd.memb[i].type = tmp;
 	}
     }
     
     FUNC_LEAVE(new_dt);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_commit
+ *
+ * Purpose:	Commit a type, giving it a name and causing it to become
+ *		immutable.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, June  1, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_commit (H5G_t *loc, const char *name, H5T_t *type)
+{
+    herr_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5T_commit, FAIL);
+
+    /*
+     * Check arguments.  We cannot commit an immutable type because H5Tclose()
+     * normally fails on such types (try H5Tclose(H5T_NATIVE_INT)) but closing
+     * a named type should always succeed.
+     */
+    assert (loc);
+    assert (name && *name);
+    assert (type);
+    if (H5T_STATE_NAMED==type->state || H5T_STATE_OPEN==type->state) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "data type is already committed");
+    }
+    if (H5T_STATE_IMMUTABLE==type->state) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "data type is immutable");
+    }
+
+    /*
+     * Create the object header and open it for write access. Insert the data
+     * type message and then give the object header a name.
+     */
+    if (H5O_create (H5G_fileof (loc), 64, &(type->ent))<0) {
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to create data type object header");
+    }
+    if (H5O_modify (&(type->ent), H5O_DTYPE, 0, H5O_FLAG_CONSTANT, type)<0) {
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to update type header message");
+    }
+    if (H5G_insert (loc, name, &(type->ent))<0) {
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to name data type");
+    }
+    type->state = H5T_STATE_OPEN;
+    ret_value = SUCCEED;
+
+ done:
+    if (ret_value<0) {
+	if (H5F_addr_defined (&(type->ent.header))) {
+	    H5O_close (&(type->ent));
+	    H5F_addr_undef (&(type->ent.header));
+	}
+    }
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_lock
+ *
+ * Purpose:	Lock a transient data type making it read-only.  If IMMUTABLE
+ *		is set then the type cannot be closed except when the library
+ *		itself closes.
+ *
+ *		This function is a no-op if the type is not transient or if
+ *		the type is already read-only or immutable.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_lock (H5T_t *dt, hbool_t immutable)
+{
+    FUNC_ENTER (H5T_lock, FAIL);
+    assert (dt);
+
+    switch (dt->state) {
+    case H5T_STATE_TRANSIENT:
+	dt->state = immutable ? H5T_STATE_IMMUTABLE : H5T_STATE_RDONLY;
+	break;
+    case H5T_STATE_RDONLY:
+	if (immutable) dt->state = H5T_STATE_IMMUTABLE;
+	break;
+    case H5T_STATE_IMMUTABLE:
+    case H5T_STATE_NAMED:
+    case H5T_STATE_OPEN:
+	/*void*/
+	break;
+    }
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -2768,10 +3063,22 @@ H5T_close(H5T_t *dt)
     assert(dt);
 
     /*
-     * Don't free locked datatypes unless we are shutting the interface
-     * down.
+     * If a named type is being closed then close the object header also.
      */
-    if (!dt->locked) {
+    if (H5T_STATE_OPEN==dt->state) {
+	assert (H5F_addr_defined (&(dt->ent.header)));
+	if (H5O_close (&(dt->ent))<0) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			   "unable to close data type object header");
+	}
+	dt->state = H5T_STATE_NAMED;
+    }
+
+    /*
+     * Don't free locked datatypes unless we are shutting down the
+     * interface.
+     */
+    if (H5T_STATE_IMMUTABLE!=dt->state) {
 	if (dt && H5T_COMPOUND == dt->type) {
 	    for (i = 0; i < dt->u.compnd.nmembs; i++) {
 		H5MM_xfree(dt->u.compnd.memb[i].name);
@@ -2786,135 +3093,6 @@ H5T_close(H5T_t *dt)
     }
     
     FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_share
- *
- * Purpose:	Causes a data type to be marked as sharable.  If the data
- *		type isn't already marked sharable in the specified file then
- *		it is written to the global heap of that file and the heap
- *		location information is added to the sh_file and sh_heap
- *		fields of the data type.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March 31, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5T_share (H5F_t *f, H5T_t *dt)
-{
-    FUNC_ENTER (H5T_share, FAIL);
-    
-    /* Check args */
-    assert (f);
-    assert (dt);
-
-    /*
-     * If the type is sharable in some other file then unshare it first. A
-     * type can only be sharable in one file at a time.
-     */
-    if (H5HG_defined (&(dt->sh_heap)) && f->shared!=dt->sh_file->shared) {
-	H5T_unshare (dt);
-	H5E_clear (); /*don't really care if it fails*/
-    }
-
-    /*
-     * Write the message to the global heap if it isn't already shared in
-     * this file.
-     */
-    if (!H5HG_defined (&(dt->sh_heap))) {
-	if (H5O_share (f, H5O_DTYPE, dt, &(dt->sh_heap))<0) {
-	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			   "unable to store data type message in global heap");
-	}
-	dt->sh_file = f;
-    }
-    
-    FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_unshare
- *
- * Purpose:	If a data type is in the global heap then this function
- *		removes that information from the H5T_t struct.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March 31, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5T_unshare (H5T_t *dt)
-{
-    FUNC_ENTER (H5T_unshare, FAIL);
-
-    /* Check args */
-    assert (dt);
-
-    H5HG_undef (&(dt->sh_heap));
-    dt->sh_file = NULL;
-
-    FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_invalidate_cb
- *
- * Purpose:	This is a callback function for H5I_search(). When a file is
- *		closed we scan through the data type list and invalidate
- *		shared info for all types that have sharing enabled for the
- *		specified file.  This insures that we don't having dangling 
- *		pointers from data types to files.  We have to do this with
- *		data types but not datasets because a dataset_id always
- *		corresponds to an open object header which prevents the file
- *		from closing in the first place, but a data type can exist
- *		independent of a file and doesn't have an object header.
- *
- * Return:	Success:	0, this function never returns a non-zero
- *				value because that would terminate
- *				H5I_search().
- *
- *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Friday, April  3, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-intn
-H5T_invalidate_cb (void *obj, const void *call_data)
-{
-    H5T_t	*dt = (H5T_t *)obj;
-    const H5F_t	*f = (const H5F_t*)call_data; /*used only for comparison*/
-    
-    FUNC_ENTER (H5T_invalidate, 0);
-
-    if (H5HG_defined (&(dt->sh_heap)) && dt->sh_file->shared==f->shared) {
-	H5T_unshare (dt);
-	H5E_clear ();
-    }
-
-    FUNC_LEAVE (0);
 }
 
 
@@ -3003,7 +3181,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* check args */
     assert(parent && H5T_COMPOUND == parent->type);
-    assert(!parent->locked);
+    assert(H5T_STATE_TRANSIENT==parent->state);
     assert(member);
     assert(name && *name);
 
@@ -3036,12 +3214,11 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     }
 
     /* Add member to end of member array */
-    H5T_unshare (parent);
     i = parent->u.compnd.nmembs;
     parent->u.compnd.memb[i].name = H5MM_xstrdup(name);
     parent->u.compnd.memb[i].offset = offset;
     parent->u.compnd.memb[i].ndims = 0;		/*defaults to scalar */
-    parent->u.compnd.memb[i].type = H5T_copy (member);
+    parent->u.compnd.memb[i].type = H5T_copy (member, H5T_COPY_ALL);
 
     parent->u.compnd.nmembs++;
     FUNC_LEAVE(SUCCEED);
@@ -3074,9 +3251,8 @@ H5T_pack(H5T_t *dt)
     FUNC_ENTER(H5T_pack, FAIL);
 
     assert(dt);
-    assert(!dt->locked);
+    assert(H5T_STATE_TRANSIENT==dt->state);
 
-    H5T_unshare (dt);
     if (H5T_COMPOUND == dt->type) {
 	/* Recursively pack the members */
 	for (i = 0; i < dt->u.compnd.nmembs; i++) {
@@ -3534,8 +3710,8 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 	/* insert */
 	path = H5T_path_g + md;
 	HDmemset(path, 0, sizeof(H5T_path_t));
-	path->src = H5T_copy(src);
-	path->dst = H5T_copy(dst);
+	path->src = H5T_copy(src, H5T_COPY_ALL);
+	path->dst = H5T_copy(dst, H5T_COPY_ALL);
 
 	/* Associate a function with the path if possible */
 	if (func) {
@@ -3545,8 +3721,10 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 	    path->is_hard = TRUE;
 	    path->cdata.command = H5T_CONV_INIT;
 	    path->cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
-	    if ((src_id=H5I_register(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
-		(dst_id=H5I_register(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
+	    if ((src_id=H5I_register(H5_DATATYPE,
+				     H5T_copy(path->src, H5T_COPY_ALL))) < 0 ||
+		(dst_id=H5I_register(H5_DATATYPE,
+				     H5T_copy(path->dst, H5T_COPY_ALL))) < 0) {
 		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
 			      "unable to register conv types for query");
 	    }
@@ -3567,9 +3745,11 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 		    continue;
 		}
 		if ((src_id=H5I_register(H5_DATATYPE,
-					 H5T_copy(path->src))) < 0 ||
+					 H5T_copy(path->src,
+						  H5T_COPY_ALL))) < 0 ||
 		    (dst_id=H5I_register(H5_DATATYPE,
-					 H5T_copy(path->dst))) < 0) {
+					 H5T_copy(path->dst,
+						  H5T_COPY_ALL))) < 0) {
 		    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
 				  "unable to register conv types for query");
 		}
@@ -3665,7 +3845,7 @@ H5T_timer_end (H5_timer_t *timer, H5T_cdata_t *cdata, size_t nelmts)
 herr_t
 H5T_debug(H5T_t *dt, FILE * stream)
 {
-    const char	*s = "";
+    const char	*s1="", *s2="";
     int		i, j;
     uint64	tmp;
 
@@ -3677,53 +3857,70 @@ H5T_debug(H5T_t *dt, FILE * stream)
 
     switch (dt->type) {
     case H5T_INTEGER:
-	s = "int";
+	s1 = "int";
 	break;
     case H5T_FLOAT:
-	s = "float";
+	s1 = "float";
 	break;
     case H5T_TIME:
-	s = "time";
+	s1 = "time";
 	break;
     case H5T_STRING:
-	s = "str";
+	s1 = "str";
 	break;
     case H5T_BITFIELD:
-	s = "bits";
+	s1 = "bits";
 	break;
     case H5T_OPAQUE:
-	s = "opaque";
+	s1 = "opaque";
 	break;
     case H5T_COMPOUND:
-	s = "struct";
+	s1 = "struct";
 	break;
     default:
-	s = "";
+	s1 = "";
 	break;
     }
 
-    fprintf(stream, "%s%s {nbytes=%lu",
-	    s, dt->locked ? "[!]" : "", (unsigned long)(dt->size));
+    switch (dt->state) {
+    case H5T_STATE_TRANSIENT:
+	s2 = "[transient]";
+	break;
+    case H5T_STATE_RDONLY:
+	s2 = "[constant]";
+	break;
+    case H5T_STATE_IMMUTABLE:
+	s2 = "[predefined]";
+	break;
+    case H5T_STATE_NAMED:
+	s2 = "[named,closed]";
+	break;
+    case H5T_STATE_OPEN:
+	s2 = "[named,open]";
+	break;
+    }
+
+    fprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->size));
 
     if (H5T_is_atomic(dt)) {
 	switch (dt->u.atomic.order) {
 	case H5T_ORDER_BE:
-	    s = "BE";
+	    s1 = "BE";
 	    break;
 	case H5T_ORDER_LE:
-	    s = "LE";
+	    s1 = "LE";
 	    break;
 	case H5T_ORDER_VAX:
-	    s = "VAX";
+	    s1 = "VAX";
 	    break;
 	case H5T_ORDER_NONE:
-	    s = "NONE";
+	    s1 = "NONE";
 	    break;
 	default:
-	    s = "order?";
+	    s1 = "order?";
 	    break;
 	}
-	fprintf(stream, ", %s", s);
+	fprintf(stream, ", %s", s1);
 
 	if (dt->u.atomic.offset) {
 	    fprintf(stream, ", offset=%lu",
@@ -3737,39 +3934,39 @@ H5T_debug(H5T_t *dt, FILE * stream)
 	case H5T_INTEGER:
 	    switch (dt->u.atomic.u.i.sign) {
 	    case H5T_SGN_NONE:
-		s = "unsigned";
+		s1 = "unsigned";
 		break;
 	    case H5T_SGN_2:
-		s = NULL;
+		s1 = NULL;
 		break;
 	    default:
-		s = "sign?";
+		s1 = "sign?";
 		break;
 	    }
-	    if (s)
-		fprintf(stream, ", %s", s);
+	    if (s1)
+		fprintf(stream, ", %s", s1);
 	    break;
 
 	case H5T_FLOAT:
 	    switch (dt->u.atomic.u.f.norm) {
 	    case H5T_NORM_IMPLIED:
-		s = "implied";
+		s1 = "implied";
 		break;
 	    case H5T_NORM_MSBSET:
-		s = "msbset";
+		s1 = "msbset";
 		break;
 	    case H5T_NORM_NONE:
-		s = "no-norm";
+		s1 = "no-norm";
 		break;
 	    default:
-		s = "norm?";
+		s1 = "norm?";
 		break;
 	    }
 	    fprintf(stream, ", sign=%lu+1",
 		    (unsigned long) (dt->u.atomic.u.f.sign));
 	    fprintf(stream, ", mant=%lu+%lu (%s)",
 		    (unsigned long) (dt->u.atomic.u.f.mpos),
-		    (unsigned long) (dt->u.atomic.u.f.msize), s);
+		    (unsigned long) (dt->u.atomic.u.f.msize), s1);
 	    fprintf(stream, ", exp=%lu+%lu",
 		    (unsigned long) (dt->u.atomic.u.f.epos),
 		    (unsigned long) (dt->u.atomic.u.f.esize));

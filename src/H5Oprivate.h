@@ -66,16 +66,18 @@
 	       2 +	/*sizeof message data	*/			      \
 	       4)	/*reserved		*/
 
+struct H5O_shared_t;
 typedef struct H5O_class_t {
     intn	id;				 /*message type ID on disk   */
     const char	*name;				 /*for debugging             */
     size_t	native_size;			 /*size of native message    */
-    void	*(*decode)(H5F_t*, const uint8*, H5HG_t*);
+    void	*(*decode)(H5F_t*, const uint8*, struct H5O_shared_t*);
     herr_t	(*encode)(H5F_t*, uint8*, const void*);
     void	*(*copy)(const void*, void*);    /*copy native value         */
     size_t	(*raw_size)(H5F_t*, const void*);/*sizeof raw val	     */
     herr_t	(*reset)(void *);		 /*free nested data structs  */
-    herr_t	(*share)(H5F_t*, const void*, H5HG_t*);
+    herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);
+    herr_t      (*set_share)(H5F_t*, void*, const struct H5O_shared_t*);
     herr_t	(*debug)(H5F_t*, const void*, FILE*, intn, intn);
 } H5O_class_t;
 
@@ -205,7 +207,13 @@ typedef struct H5O_name_t {
 #define H5O_SHARED_ID	0x000f
 extern const H5O_class_t H5O_SHARED[1];
 
-typedef H5HG_t H5O_shared_t;
+typedef struct H5O_shared_t {
+    hbool_t		in_gh;		/*shared by global heap?	     */
+    union {
+	H5HG_t		gh;		/*global heap info		     */
+	H5G_entry_t	ent;		/*symbol table entry info	     */
+    } u;
+} H5O_shared_t;
 
 /*
  * Object header continuation message.

@@ -1384,8 +1384,9 @@ H5F_close(H5F_t *f)
      */
     if (f->nopen>0) {
 #ifndef NDEBUG
-	fprintf(stderr, "H5F: H5F_close: %u object header%s still "
+	fprintf(stderr, "H5F: H5F_close(%s): %u object header%s still "
 		"open (file close will complete when %s closed)\n",
+		f->name,
 		f->nopen,
 		1 == f->nopen ? " is" : "s are",
 		1 == f->nopen ? "that header is" : "those headers are");
@@ -1398,9 +1399,6 @@ H5F_close(H5F_t *f)
 #endif
     }
 
-    /* Invalidate shared data types since they depend on the H5F_t pointer */
-    H5I_search (H5_DATATYPE, H5T_invalidate_cb, f);
-    
     /*
      * If this is the last reference to the shared part of the file then
      * close it also.

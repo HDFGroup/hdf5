@@ -122,7 +122,7 @@ herr_t H5G_find (H5G_t *cwg, const char *name, H5G_entry_t *grp_ent/*out*/,
 herr_t H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 			   H5G_entry_t *obj_ent/*in,out*/,
 			   intn *nlinks/*in,out*/);
-herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
+herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, const H5G_entry_t *ent);
 herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent/*out*/);
 
 /*
@@ -139,7 +139,7 @@ herr_t H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
 H5G_entry_t *H5G_ent_calloc (H5G_entry_t *init);
 H5G_cache_t *H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type);
 herr_t H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type);
-herr_t H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE * stream, intn indent,
-                      intn fwidth, const haddr_t *heap);
+herr_t H5G_ent_debug (H5F_t *f, const H5G_entry_t *ent, FILE * stream,
+		      intn indent, intn fwidth, const haddr_t *heap);
 #endif
 

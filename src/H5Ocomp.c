@@ -16,7 +16,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_comp_encode (H5F_t *f, uint8 *p, const void *mesg);
-static void *H5O_comp_decode (H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static void *H5O_comp_decode (H5F_t *f, const uint8 *p, H5O_shared_t *sh);
 static void *H5O_comp_copy (const void *_mesg, void *_dest);
 static size_t H5O_comp_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_comp_reset (void *_mesg);
@@ -33,7 +33,8 @@ const H5O_class_t H5O_COMPRESS[1] = {{
     H5O_comp_copy,		/* copy the native value	*/
     H5O_comp_size,		/* size of raw message		*/
     H5O_comp_reset,		/* reset method			*/
-    NULL,			/* share method			*/
+    NULL,			/* get share method		*/
+    NULL, 			/* set share method		*/
     H5O_comp_debug,		/* debug the message		*/
 }};
 
@@ -59,7 +60,8 @@ static hbool_t		interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_comp_decode(H5F_t __unused__ *f, const uint8 *p, H5HG_t __unused__ *hobj)
+H5O_comp_decode(H5F_t __unused__ *f, const uint8 *p,
+		H5O_shared_t __unused__ *sh)
 {
     H5O_compress_t	*comp = NULL;
 

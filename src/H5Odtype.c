@@ -29,13 +29,16 @@ static char             RcsId[] = "@(#)$Revision$";
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_dtype_encode (H5F_t *f, uint8 *p, const void *mesg);
-static void *H5O_dtype_decode (H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static void *H5O_dtype_decode (H5F_t *f, const uint8 *p, H5O_shared_t *sh);
 static void *H5O_dtype_copy (const void *_mesg, void *_dest);
 static size_t H5O_dtype_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset (void *_mesg);
+static herr_t H5O_dtype_get_share (H5F_t *f, const void *_mesg,
+				   H5O_shared_t *sh);
+static herr_t H5O_dtype_set_share (H5F_t *f, void *_mesg,
+				   const H5O_shared_t *sh);
 static herr_t H5O_dtype_debug (H5F_t *f, const void *_mesg,
 			       FILE * stream, intn indent, intn fwidth);
-static herr_t H5O_dtype_share (H5F_t *f, const void *_mesg, H5HG_t *hobj);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_DTYPE[1] = {{
@@ -47,7 +50,8 @@ const H5O_class_t H5O_DTYPE[1] = {{
     H5O_dtype_copy,		/* copy the native value        */
     H5O_dtype_size,		/* size of raw message          */
     H5O_dtype_reset,		/* reset method                 */
-    H5O_dtype_share,		/* share method			*/
+    H5O_dtype_get_share,	/* get share method		*/
+    H5O_dtype_set_share,	/* set share method		*/
     H5O_dtype_debug,		/* debug the message            */
 }};
 
@@ -174,6 +178,7 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
             dt->u.compnd.memb[i].perm[2] = (perm_word >> 16) & 0xff;
             dt->u.compnd.memb[i].perm[3] = (perm_word >> 24) & 0xff;
 	    dt->u.compnd.memb[i].type = H5MM_xcalloc (1, sizeof(H5T_t));
+	    H5F_addr_undef (&(dt->u.compnd.memb[i].type->ent.header));
             if (H5O_dtype_decode_helper(pp, dt->u.compnd.memb[i].type) < 0 ||
                 H5T_COMPOUND == dt->u.compnd.memb[i].type->type) {
                 for (j = 0; j <= i; j++)
@@ -436,7 +441,7 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
+H5O_dtype_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh)
 {
     H5T_t                  *dt = NULL;
 
@@ -445,19 +450,16 @@ H5O_dtype_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
     /* check args */
     assert(f);
     assert(p);
+    assert (!sh);
 
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    H5F_addr_undef (&(dt->ent.header));
 
     if (H5O_dtype_decode_helper(&p, dt) < 0) {
         H5MM_xfree(dt);
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL,
                       "can't decode type");
     }
-    if (hobj) {
-	dt->sh_heap = *hobj;
-	dt->sh_file = f;
-    }
-
     FUNC_LEAVE(dt);
 }
 
@@ -515,7 +517,7 @@ H5O_dtype_encode(H5F_t __unused__ *f, uint8 *p, const void *mesg)
         This function copies a native (memory) simple datatype message,
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
-static void            *
+static void *
 H5O_dtype_copy(const void *_src, void *_dst)
 {
     const H5T_t            *src = (const H5T_t *) _src;
@@ -527,7 +529,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     assert(src);
 
     /* copy */
-    if (NULL == (dst = H5T_copy(src))) {
+    if (NULL == (dst = H5T_copy(src, H5T_COPY_ALL))) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "can't copy type");
     }
     /* was result already allocated? */
@@ -627,43 +629,78 @@ H5O_dtype_reset(void *_mesg)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_share
+ * Function:	H5O_dtype_get_share
  *
- * Purpose:	Returns, through argument HOBJ, whether a data type is shared
- *		in the specified file.
+ * Purpose:	Returns information about where the shared message is located
+ *		by filling in the SH shared message struct.
  *
- * Return:	Success:	SUCCEED if the data type is shared in file F,
- *				and HOBJ is set to the global heap address.
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	FAIL if the data type is not shared, or
- *				shared but not in file F.  The value of HOBJ
- *				is undefined.
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *              Thursday, April  2, 1998
+ *              Monday, June  1, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_share (H5F_t *f, const void *_mesg, H5HG_t *hobj/*out*/)
+H5O_dtype_get_share (H5F_t *f, const void *_mesg, H5O_shared_t *sh/*out*/)
 {
-    const H5T_t		*dt = (const H5T_t *)_mesg;
+    const H5T_t	*dt = (const H5T_t *)_mesg;
     
-    FUNC_ENTER (H5O_dtype_share, FAIL);
-    
-    if (!H5HG_defined (&(dt->sh_heap)) ||
-	NULL==dt->sh_file ||
-	dt->sh_file->shared != f->shared) {
+    FUNC_ENTER (H5O_dtype_get_share, FAIL);
+    assert (f);
+    assert (dt);
+    assert (sh);
+
+    if (H5F_addr_defined (&(dt->ent.header))) {
+	assert (H5T_STATE_NAMED==dt->state || H5T_STATE_OPEN==dt->state);
+	sh->in_gh = FALSE;
+	sh->u.ent = dt->ent;
+    } else {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "data type is not shared");
+		       "data type is not sharable");
     }
-    
-    *hobj = dt->sh_heap;
+
     FUNC_LEAVE (SUCCEED);
 }
-	
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_dtype_set_share
+ *
+ * Purpose:	Copies sharing information from SH into the message.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_dtype_set_share (H5F_t *f, void *_mesg/*in,out*/, const H5O_shared_t *sh)
+{
+    H5T_t	*dt = (H5T_t *)_mesg;
+    
+    FUNC_ENTER (H5O_dtype_set_share, FAIL);
+    assert (f);
+    assert (dt);
+    assert (sh);
+    assert (!sh->in_gh);
+
+    dt->ent = sh->u.ent;
+    dt->state = H5T_STATE_NAMED;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 /*--------------------------------------------------------------------------
  NAME
     H5O_dtype_debug

@@ -23,7 +23,7 @@
 #define PABLO_MASK      H5O_stab_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_stab_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static void *H5O_stab_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
 static herr_t H5O_stab_encode(H5F_t *f, uint8 *p, const void *_mesg);
 static void *H5O_stab_copy(const void *_mesg, void *_dest);
 static size_t H5O_stab_size(H5F_t *f, const void *_mesg);
@@ -32,16 +32,17 @@ static herr_t H5O_stab_debug(H5F_t *f, const void *_mesg,
 
 /* This message derives from H5O */
 const H5O_class_t H5O_STAB[1] = {{
-    H5O_STAB_ID,            /*message id number             */
-    "stab",                 /*message name for debugging    */
-    sizeof(H5O_stab_t),     /*native message size           */
-    H5O_stab_decode,        /*decode message                */
-    H5O_stab_encode,        /*encode message                */
-    H5O_stab_copy,          /*copy the native value         */
-    H5O_stab_size,          /*size of symbol table entry    */
-    NULL,                   /*default reset method          */
-    NULL,		    /*no share method		    */
-    H5O_stab_debug,         /*debug the message             */
+    H5O_STAB_ID,            	/*message id number             */
+    "stab",                 	/*message name for debugging    */
+    sizeof(H5O_stab_t),     	/*native message size           */
+    H5O_stab_decode,        	/*decode message                */
+    H5O_stab_encode,        	/*encode message                */
+    H5O_stab_copy,          	/*copy the native value         */
+    H5O_stab_size,          	/*size of symbol table entry    */
+    NULL,                   	/*default reset method          */
+    NULL,		    	/*get share method		*/
+    NULL, 			/*set share method		*/
+    H5O_stab_debug,         	/*debug the message             */
 }};
 
 /* Interface initialization */
@@ -67,7 +68,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
+H5O_stab_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5O_stab_t             *stab;
 
@@ -76,7 +77,7 @@ H5O_stab_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
     /* check args */
     assert(f);
     assert(p);
-    assert (!hobj || !H5HG_defined (hobj));
+    assert (!sh);
 
     /* decode */
     stab = H5MM_xcalloc(1, sizeof(H5O_stab_t));

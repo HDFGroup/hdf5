@@ -306,7 +306,8 @@ H5T_init (void)\n\
         /* The part common to fixed and floating types */
         printf("\
    dt = H5MM_xcalloc (1, sizeof(H5T_t));\n\
-   dt->locked = TRUE;\n\
+   dt->state = H5T_STATE_IMMUTABLE;\n\
+   H5F_addr_undef (&(dt->ent.header));\n\
    dt->type = H5T_%s;\n\
    dt->size = %d;\n\
    dt->u.atomic.order = H5T_ORDER_%s;\n\

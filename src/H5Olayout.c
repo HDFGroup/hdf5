@@ -14,7 +14,7 @@
 #include <H5Oprivate.h>
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_layout_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static void *H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
 static herr_t H5O_layout_encode(H5F_t *f, uint8 *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(H5F_t *f, const void *_mesg);
@@ -23,16 +23,17 @@ static herr_t H5O_layout_debug(H5F_t *f, const void *_mesg, FILE * stream,
 
 /* This message derives from H5O */
 const H5O_class_t H5O_LAYOUT[1] = {{
-    H5O_LAYOUT_ID,          /*message id number             */
-    "layout",               /*message name for debugging    */
-    sizeof(H5O_layout_t),   /*native message size           */
-    H5O_layout_decode,      /*decode message                */
-    H5O_layout_encode,      /*encode message                */
-    H5O_layout_copy,        /*copy the native value         */
-    H5O_layout_size,        /*size of message on disk       */
-    NULL,                   /*reset method                  */
-    NULL,		    /*no share method		    */
-    H5O_layout_debug,       /*debug the message             */
+    H5O_LAYOUT_ID,          	/*message id number             */
+    "layout",               	/*message name for debugging    */
+    sizeof(H5O_layout_t),   	/*native message size           */
+    H5O_layout_decode,      	/*decode message                */
+    H5O_layout_encode,      	/*encode message                */
+    H5O_layout_copy,        	/*copy the native value         */
+    H5O_layout_size,        	/*size of message on disk       */
+    NULL,                   	/*reset method                  */
+    NULL,		    	/*get share method		*/
+    NULL,			/*set share method		*/
+    H5O_layout_debug,       	/*debug the message             */
 }};
 
 /* Interface initialization */
@@ -59,7 +60,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
+H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5O_layout_t           *mesg = NULL;
     intn                    i;
@@ -69,7 +70,7 @@ H5O_layout_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
     /* check args */
     assert(f);
     assert(p);
-    assert (!hobj || !H5HG_defined (hobj));
+    assert (!sh);
 
     /* decode */
     mesg = H5MM_xcalloc(1, sizeof(H5O_layout_t));

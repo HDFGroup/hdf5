@@ -31,20 +31,20 @@
  * like:
  * 	H5E_BEGIN_TRY {
  *	    ...stuff here that's likely to fail...
- *      } H5E_END_TRY
+ *      } H5E_END_TRY;
  *
  * Warning: don't break, return, or longjmp() from the body of the loop or
  *	    the error reporting won't be properly restored!
  */
-#define H5T_BEGIN_TRY do {						      \
+#define H5E_BEGIN_TRY do {						      \
     herr_t (*H5E_saved_efunc)(void*);					      \
     void *H5E_saved_edata;						      \
     H5Eget_auto (&H5E_saved_efunc, &H5E_saved_edata);			      \
     H5Eset_auto (NULL, NULL);
 
-#define H5T_END_TRY							      \
+#define H5E_END_TRY							      \
     H5Eset_auto (H5E_saved_efunc, H5E_saved_edata);			      \
-}
+} while(0)
 
 
 /*

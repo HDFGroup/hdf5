@@ -243,12 +243,13 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 		}
 	    }
 	    if (priv->src2dst[i]>=0) {
-		type = H5T_copy (src->u.compnd.memb[i].type);
+		type = H5T_copy (src->u.compnd.memb[i].type, H5T_COPY_ALL);
 		tid = H5I_register (H5_DATATYPE, type);
 		assert (tid>=0);
 		priv->src_memb_id[priv->src2dst[i]] = tid;
 
-		type = H5T_copy (dst->u.compnd.memb[priv->src2dst[i]].type);
+		type = H5T_copy (dst->u.compnd.memb[priv->src2dst[i]].type,
+				 H5T_COPY_ALL);
 		tid = H5I_register (H5_DATATYPE, type);
 		assert (tid>=0);
 		priv->dst_memb_id[priv->src2dst[i]] = tid;

@@ -916,27 +916,37 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
 	/*
 	 * If the message is shared then then the native pointer points to an
 	 * H5O_SHARED message.  We use that information to look up the real
-	 * message in the global heap.
+	 * message in the global heap or some other object header.
 	 */
 	H5O_shared_t *shared;
 	void *tmp_buf, *tmp_mesg;
 
 	shared = (H5O_shared_t *)(oh->mesg[idx].native);
-	if (NULL==(tmp_buf = H5HG_read (ent->file, shared, NULL))) {
-	    HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
-			 "unable to read shared message from global heap");
-	}
-	tmp_mesg = (type->decode)(ent->file, tmp_buf, shared);
-	tmp_buf = H5MM_xfree (tmp_buf);
-	if (!tmp_mesg) {
-	    HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
-			 "unable to decode object header shared message");
-	}
-	if (mesg) {
-	    HDmemcpy (mesg, tmp_mesg, type->native_size);
-	    H5MM_xfree (tmp_mesg);
+	if (shared->in_gh) {
+	    if (NULL==(tmp_buf = H5HG_read (ent->file, &(shared->u.gh),
+					    NULL))) {
+		HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
+			     "unable to read shared message from global heap");
+	    }
+	    tmp_mesg = (type->decode)(ent->file, tmp_buf, shared);
+	    tmp_buf = H5MM_xfree (tmp_buf);
+	    if (!tmp_mesg) {
+		HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
+			     "unable to decode object header shared message");
+	    }
+	    if (mesg) {
+		HDmemcpy (mesg, tmp_mesg, type->native_size);
+		H5MM_xfree (tmp_mesg);
+	    } else {
+		ret_value = tmp_mesg;
+	    }
 	} else {
-	    ret_value = tmp_mesg;
+	    ret_value = H5O_read (&(shared->u.ent), type, 0, mesg);
+	    if (type->set_share &&
+		(type->set_share)(ent->file, ret_value, shared)<0) {
+		HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL,
+			     "unable to set sharing information");
+	    }
 	}
     } else {
 	/*
@@ -1124,12 +1134,12 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     if (overwrite < 0) {
 	/* Allocate space for the new message */
 	if (flags & H5O_FLAG_SHARED) {
-	    if (NULL==type->share) {
+	    if (NULL==type->get_share) {
 		HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, FAIL,
 			     "message class is not sharable");
 	    }
 	    sh_mesg = H5MM_xcalloc (1, sizeof *sh_mesg);
-	    if ((type->share)(ent->file, mesg, sh_mesg/*out*/)<0) {
+	    if ((type->get_share)(ent->file, mesg, sh_mesg/*out*/)<0) {
 		/*
 		 * If the message isn't shared then turn off the shared bit
 		 * and treat it as an unshared message.
@@ -1137,8 +1147,22 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		H5E_clear ();
 		flags &= ~H5O_FLAG_SHARED;
 		H5MM_xfree (sh_mesg);
+	    } else if (sh_mesg->in_gh) {
+		/*
+		 * The shared message is stored in the global heap.
+		 * Increment the reference count on the global heap message.
+		 */
+		if (H5HG_link (ent->file, &(sh_mesg->u.gh), 1)<0) {
+		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
+				 "unable to adjust shared object link count");
+		}
+		size = (H5O_SHARED->raw_size)(ent->file, sh_mesg);
 	    } else {
-		if (H5HG_link (ent->file, sh_mesg, 1)<0) {
+		/*
+		 * The shared message is stored in some other object header.
+		 * Increment the reference count on that object header.
+		 */
+		if (H5O_link (&(sh_mesg->u.ent), 1)<0) {
 		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
 				 "unable to adjust shared object link count");
 		}
@@ -1269,10 +1293,18 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 				     "unable to decode shared message info");
 		    }
 		}
-		if (H5HG_link (ent->file, sh_mesg, -1)<0) {
-		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
-				 "unable to decrement link count on shared "
-				 "message");
+		if (sh_mesg->in_gh) {
+		    if (H5HG_link (ent->file, &(sh_mesg->u.gh), -1)<0) {
+			HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
+				     "unable to decrement link count on "
+				     "shared message");
+		    }
+		} else {
+		    if (H5O_link (&(sh_mesg->u.ent), -1)<0) {
+			HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
+				     "unable to decrement link count on "
+				     "shared message");
+		    }
 		}
 	    }
 
@@ -1526,7 +1558,8 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
         oh->mesg = H5MM_xrealloc(oh->mesg,
 				 oh->alloc_nmesgs * sizeof(H5O_mesg_t));
         /* Set new object header info to zeros */
-        HDmemset(&oh->mesg[old_alloc],0,(oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
+        HDmemset(&oh->mesg[old_alloc], 0,
+		 (oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
     }
 
     /*
@@ -1779,7 +1812,7 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
     int		*sequence;
     haddr_t	tmp_addr;
     herr_t	ret_value = FAIL;
-    void	*(*decode)(H5F_t*, const uint8*, H5HG_t*);
+    void	*(*decode)(H5F_t*, const uint8*, H5O_shared_t*);
     herr_t      (*debug)(H5F_t*, const void*, FILE*, intn, intn)=NULL;
 
     FUNC_ENTER(H5O_debug, FAIL);
@@ -1912,14 +1945,20 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 
 	/* If the message is shared then also print the pointed-to message */
 	if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
-	    void *p = H5HG_read (f, oh->mesg[i].native, NULL);
-	    void *mesg = (oh->mesg[i].type->decode)(f, p, oh->mesg[i].native);
+	    H5O_shared_t *shared = (H5O_shared_t*)(oh->mesg[i].native);
+	    void *mesg = NULL;
+	    if (shared->in_gh) {
+		void *p = H5HG_read (f, oh->mesg[i].native, NULL);
+		mesg = (oh->mesg[i].type->decode)(f, p, oh->mesg[i].native);
+		H5MM_xfree (p);
+	    } else {
+		mesg = H5O_read (&(shared->u.ent), oh->mesg[i].type, 0, NULL);
+	    }
 	    if (oh->mesg[i].type->debug) {
 		(oh->mesg[i].type->debug)(f, mesg, stream, indent+3,
 					  MAX (0, fwidth-3));
 	    }
 	    H5O_free (oh->mesg[i].type, mesg);
-	    H5MM_xfree (p);
 	}
     }
     sequence = H5MM_xfree(sequence);

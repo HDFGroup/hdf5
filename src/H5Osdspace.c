@@ -25,7 +25,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK	H5O_sdspace_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static void *H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
 static herr_t H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *_mesg);
 static void *H5O_sdspace_copy(const void *_mesg, void *_dest);
 static size_t H5O_sdspace_size(H5F_t *f, const void *_mesg);
@@ -35,16 +35,17 @@ static herr_t H5O_sdspace_reset(void *_mesg);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_SDSPACE[1] = {{
-    H5O_SDSPACE_ID,	    /* message id number		    */
-    "simple_dspace",	    /* message name for debugging	    */
-    sizeof(H5S_simple_t),   /* native message size		    */
-    H5O_sdspace_decode,	    /* decode message			    */
-    H5O_sdspace_encode,	    /* encode message			    */
-    H5O_sdspace_copy,	    /* copy the native value		    */
-    H5O_sdspace_size,	    /* size of symbol table entry	    */
-    H5O_sdspace_reset,	    /* default reset method		    */
-    NULL,		    /* no share method			    */
-    H5O_sdspace_debug,	    /* debug the message		    */
+    H5O_SDSPACE_ID,	    	/* message id number		    	*/
+    "simple_dspace",	    	/* message name for debugging	   	*/
+    sizeof(H5S_simple_t),   	/* native message size		    	*/
+    H5O_sdspace_decode,	    	/* decode message			*/
+    H5O_sdspace_encode,	    	/* encode message			*/
+    H5O_sdspace_copy,	    	/* copy the native value		*/
+    H5O_sdspace_size,	    	/* size of symbol table entry	    	*/
+    H5O_sdspace_reset,	    	/* default reset method		    	*/
+    NULL,		    	/* get share method			*/
+    NULL, 			/* set share method			*/
+    H5O_sdspace_debug,	        /* debug the message		    	*/
 }};
 
 /* Is the interface initialized? */
@@ -75,7 +76,7 @@ static hbool_t interface_initialize_g = FALSE;
 	instead of just four bytes.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
+H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     intn		u;		/* local counting variable */
@@ -86,7 +87,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
     /* check args */
     assert(f);
     assert(p);
-    assert (!hobj || !H5HG_defined (hobj));
+    assert (!sh);
 
     /* decode */
     if ((sdim = H5MM_xcalloc(1, sizeof(H5S_simple_t))) != NULL) {

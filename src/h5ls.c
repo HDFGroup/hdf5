@@ -89,6 +89,9 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	    strcpy (buf+sizeof(buf)-4, "...");
 	}
 	printf (" -> %s\n", buf);
+    } else if ((obj=H5Topen (group, name))>=0) {
+	printf ("Data type\n");
+	H5Tclose (obj);
     } else {
 	printf ("Unknown Type\n");
     }

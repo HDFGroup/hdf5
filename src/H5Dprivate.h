@@ -78,5 +78,6 @@ herr_t H5D_write (H5D_t *dataset, const H5T_t *mem_type,
 hid_t H5D_find_name (hid_t file_id, H5I_group_t UNUSED, const char *name);
 herr_t H5D_extend (H5D_t *dataset, const hsize_t *size);
 H5G_entry_t *H5D_entof (H5D_t *dataset);
+H5T_t *H5D_typeof (H5D_t *dset);
 
 #endif

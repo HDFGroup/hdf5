@@ -393,6 +393,11 @@ H5Dget_space (hid_t dataset_id)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 1 Jun 1998
+ *	If the dataset has a named data type then a handle to the opened data
+ *	type is returned.  Otherwise the returned data type is read-only.  If
+ *	atomization of the data type fails then the data type is closed.
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -411,20 +416,27 @@ H5Dget_type (hid_t dataset_id)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
 
-    /* Copy the data type */
-    if (NULL==(copied_type=H5T_copy (dataset->type))) {
+    /* Copy the data type and mark it read-only */
+    if (NULL==(copied_type=H5T_copy (dataset->type, H5T_COPY_REOPEN))) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		       "unable to copy the data type");
     }
-
+    if (H5T_lock (copied_type, FALSE)<0) {
+	H5T_close (copied_type);
+	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		       "unable to lock transient data type");
+    }
+    
     /* Create an atom */
     if ((ret_value=H5I_register (H5_DATATYPE, copied_type))<0) {
+	H5T_close (copied_type);
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register data type");
     }
 
     FUNC_LEAVE (ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dget_create_plist
@@ -758,7 +770,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     /* Initialize the dataset object */
     new_dset = H5MM_xcalloc(1, sizeof(H5D_t));
     H5F_addr_undef(&(new_dset->ent.header));
-    new_dset->type = H5T_copy(type);
+    new_dset->type = H5T_copy(type, H5T_COPY_ALL);
     new_dset->space = H5S_copy(space);
     new_dset->create_parms = H5P_copy (H5P_DATASET_CREATE, create_parms);
     efl = &(new_dset->create_parms->efl);
@@ -781,35 +793,37 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 			"unable to initialize contiguous storage");
 	}
 
-    /* Don't go through all these checks for scalar dataspaces */
-    if(ndims>0) {
-        for (i=1; i<ndims; i++) {
-            if (max_dim[i]>new_dset->layout.dim[i]) {
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-                     "only the first dimension can be extendible");
-            }
-        }
-        if (efl->nused>0) {
-            hsize_t max_points = H5S_get_npoints_max (space);
-            hsize_t max_storage = H5O_efl_total_size (efl);
+	/* Don't go through all these checks for scalar dataspaces */
+	if(ndims>0) {
+	    for (i=1; i<ndims; i++) {
+		if (max_dim[i]>new_dset->layout.dim[i]) {
+		    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+				 "only the first dimension can be extendible");
+		}
+	    }
+	    if (efl->nused>0) {
+		hsize_t max_points = H5S_get_npoints_max (space);
+		hsize_t max_storage = H5O_efl_total_size (efl);
 
-            if (H5S_UNLIMITED==max_points) {
-            if (H5O_EFL_UNLIMITED!=max_storage) {
-                HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-                     "unlimited data space but finite storage");
-            }
-            } else if (max_points * H5T_get_size (type) < max_points) {
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-                     "data space * type size overflowed");
-            } else if (max_points * H5T_get_size (type) > max_storage) {
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-                     "data space size exceeds external storage size");
-            }
-        } else if (max_dim[0]>new_dset->layout.dim[0]) {
-            HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
-                 "extendible contiguous non-external dataset");
-        }
-    }
+		if (H5S_UNLIMITED==max_points) {
+		    if (H5O_EFL_UNLIMITED!=max_storage) {
+			HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+				     "unlimited data space but finite "
+				     "storage");
+		    }
+		} else if (max_points * H5T_get_size (type) < max_points) {
+		    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+				 "data space * type size overflowed");
+		} else if (max_points * H5T_get_size (type) > max_storage) {
+		    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+				 "data space size exceeds external storage "
+				 "size");
+		}
+	    } else if (max_dim[0]>new_dset->layout.dim[0]) {
+		HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+			     "extendible contiguous non-external dataset");
+	    }
+	}
 	break;
 
     case H5D_CHUNKED:
@@ -842,8 +856,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 
     /* Update the type and space header messages */
     if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0,
-		   (H5O_FLAG_CONSTANT|H5O_FLAG_SHARED),
-		   new_dset->type) < 0 ||
+		   H5O_FLAG_CONSTANT|H5O_FLAG_SHARED, new_dset->type)<0 ||
 	H5S_modify(&(new_dset->ent), new_dset->space) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to update type or space header messages");
@@ -1215,8 +1228,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-	if ((src_id=H5I_register(H5_DATATYPE, H5T_copy(dataset->type)))<0 ||
-	    (dst_id=H5I_register(H5_DATATYPE, H5T_copy(mem_type)))<0) {
+	if ((src_id=H5I_register(H5_DATATYPE,
+				 H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
+	    (dst_id=H5I_register(H5_DATATYPE,
+				 H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 			"unable to register types for conversion");
 	}
@@ -1520,8 +1535,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-	if ((src_id = H5I_register(H5_DATATYPE, H5T_copy(mem_type)))<0 ||
-	    (dst_id = H5I_register(H5_DATATYPE, H5T_copy(dataset->type)))<0) {
+	if ((src_id = H5I_register(H5_DATATYPE,
+				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
+	    (dst_id = H5I_register(H5_DATATYPE,
+				   H5T_copy(dataset->type, H5T_COPY_ALL)))<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 			"unable to register types for conversion");
 	}
@@ -1793,3 +1810,31 @@ H5D_entof (H5D_t *dataset)
 {
     return dataset ? &(dataset->ent) : NULL;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_typeof
+ *
+ * Purpose:	Returns a pointer to the dataset's data type.  The data type
+ *		is not copied.
+ *
+ * Return:	Success:	Ptr to the dataset's data type, uncopied.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5D_typeof (H5D_t *dset)
+{
+    FUNC_ENTER (H5D_typeof, NULL);
+    assert (dset);
+    assert (dset->type);
+    FUNC_LEAVE (dset->type);
+}
+

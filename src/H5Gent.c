@@ -240,7 +240,7 @@ H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec(H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
+H5G_ent_encode_vec(H5F_t *f, uint8 **pp, const H5G_entry_t *ent, intn n)
 {
     intn                    i;
 
@@ -288,7 +288,7 @@ H5G_ent_encode_vec(H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode(H5F_t *f, uint8 **pp, H5G_entry_t *ent)
+H5G_ent_encode(H5F_t *f, uint8 **pp, const H5G_entry_t *ent)
 {
     uint8                  *p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
@@ -358,7 +358,7 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t __unused__ *f, H5G_entry_t *ent, FILE * stream,
+H5G_ent_debug(H5F_t __unused__ *f, const H5G_entry_t *ent, FILE * stream,
 	      intn indent, intn fwidth, const haddr_t *heap)
 {
     const char		*lval = NULL;

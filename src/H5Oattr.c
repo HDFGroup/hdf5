@@ -29,24 +29,25 @@ static char             RcsId[] = "@(#)$Revision$";
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode (H5F_t *f, uint8 *p, const void *mesg);
-static void *H5O_attr_decode (H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static void *H5O_attr_decode (H5F_t *f, const uint8 *p, H5O_shared_t *sh);
 static void *H5O_attr_copy (const void *_mesg, void *_dest);
 static size_t H5O_attr_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
 static herr_t H5O_attr_debug (H5F_t *f, const void *_mesg,
-			       FILE * stream, intn indent, intn fwidth);
+			      FILE * stream, intn indent, intn fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_ATTR[1] = {{
     H5O_ATTR_ID,		/* message id number            */
     "attribute",		/* message name for debugging   */
     sizeof(H5A_t),		/* native message size          */
-    H5O_attr_decode,	/* decode message               */
-    H5O_attr_encode,	/* encode message               */
+    H5O_attr_decode,		/* decode message               */
+    H5O_attr_encode,		/* encode message               */
     H5O_attr_copy,		/* copy the native value        */
     H5O_attr_size,		/* size of raw message          */
     H5O_attr_reset,		/* reset method                 */
-    NULL,		/* no share method (currently)	        */
+    NULL,			/* get share method		*/
+    NULL,			/* set share method		*/
     H5O_attr_debug,		/* debug the message            */
 }};
 
@@ -73,7 +74,7 @@ static hbool_t          interface_initialize_g = FALSE;
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
+H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5A_t                  *attr = NULL;
 	H5S_simple_t	*simple;		/*simple dimensionality information  */

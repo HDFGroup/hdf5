@@ -63,10 +63,18 @@ typedef struct H5T_compnd_t {
     struct H5T_member_t *memb;		/*array of struct members	     */
 } H5T_compnd_t;
 
+typedef enum H5T_state_t {
+    H5T_STATE_TRANSIENT, 		/*type is a modifiable transient     */
+    H5T_STATE_RDONLY,			/*transient, not modifiable, closable*/
+    H5T_STATE_IMMUTABLE,		/*constant, not closable	     */
+    H5T_STATE_NAMED,			/*named constant, not open	     */
+    H5T_STATE_OPEN			/*named constant, open object header */
+} H5T_state_t;
+
 struct H5T_t {
-    hbool_t		locked;  /*if locked, then can't be modified	     */
-    H5HG_t		sh_heap; /*if defined, type is in global heap	     */
-    H5F_t		*sh_file; /*file pointer if this is a shared type    */
+    H5T_state_t		state;	/*current state of the type		     */
+    H5G_entry_t		ent;	/*the type is a named type		     */
+    H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
     union {

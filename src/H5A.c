@@ -237,7 +237,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "unable to allocate space for attribute info");
     attr->name=HDstrdup(name);
-    attr->dt=H5T_copy(type);
+    attr->dt=H5T_copy(type, H5T_COPY_ALL);
     attr->ds=H5S_copy(space);
     attr->initialized = TRUE; /*for now, set to false later*/
 
@@ -638,8 +638,10 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-        if ((src_id = H5I_register(H5_DATATYPE, H5T_copy(mem_type)))<0 ||
-                (dst_id = H5I_register(H5_DATATYPE, H5T_copy(attr->dt)))<0) {
+        if ((src_id = H5I_register(H5_DATATYPE,
+				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
+                (dst_id = H5I_register(H5_DATATYPE,
+				       H5T_copy(attr->dt, H5T_COPY_ALL)))<0) {
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL,
 			"unable to register types for conversion");
         }
@@ -803,8 +805,10 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-        if ((src_id = H5I_register(H5_DATATYPE, H5T_copy(attr->dt)))<0 ||
-                (dst_id = H5I_register(H5_DATATYPE, H5T_copy(mem_type)))<0) {
+        if ((src_id = H5I_register(H5_DATATYPE,
+				   H5T_copy(attr->dt, H5T_COPY_ALL)))<0 ||
+                (dst_id = H5I_register(H5_DATATYPE,
+				       H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL,
 			"unable to register types for conversion");
         }
@@ -908,6 +912,14 @@ H5Aget_space(hid_t attr_id)
         This function retrieves a copy of the datatype for an attribute.
     The datatype ID returned from this function must be released with H5Tclose
     or resource leaks will develop.
+ *
+ * Modifications:
+ * 	Robb Matzke, 4 Jun 1998
+ *	The data type is reopened if it's a named type before returning it to
+ *	the application.  If the data type of the attribute is read-only then
+ *	it is returned to the application as a read-only type. If an error
+ *	occurs when atomizing the return data type then the data type is
+ *	closed.
 --------------------------------------------------------------------------*/
 hid_t
 H5Aget_type(hid_t attr_id)
@@ -924,14 +936,18 @@ H5Aget_type(hid_t attr_id)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
 
-    /* Copy the attribute's dataspace */
-    if (NULL==(dst=H5T_copy (attr->dt))) {
+    /*
+     * Copy the attribute's data type.  If the type is a named type then
+     * reopen the type before returning it to the user.
+     */
+    if (NULL==(dst=H5T_copy (attr->dt, H5T_COPY_REOPEN))) {
 	HRETURN_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL,
 		       "unable to copy datatype");
     }
 
     /* Atomize */
     if ((ret_value=H5I_register (H5_DATATYPE, dst))<0) {
+	H5T_close (dst);
         HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register datatype atom");
     }
@@ -1278,7 +1294,7 @@ H5A_copy(const H5A_t *old_attr)
 
     /* Copy the guts of the attribute */
     new_attr->name=HDstrdup(old_attr->name);
-    new_attr->dt=H5T_copy(old_attr->dt);
+    new_attr->dt=H5T_copy(old_attr->dt, H5T_COPY_ALL);
     new_attr->ds=H5S_copy(old_attr->ds);
     if(old_attr->data) {
         new_attr->data=H5MM_xmalloc(old_attr->data_size);
