@@ -58,7 +58,7 @@ LIB_COBJ=$(LIB_XOBJ:.x=.o)
 LIB_OBJ=$(PABLO_OBJ) $(LIB_COBJ)
 
 .c.x:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $*.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$< -o $*.o
 	cp $*.o $@
 
 # 'vpath' directive is only supported in gmake, take out - QAK
