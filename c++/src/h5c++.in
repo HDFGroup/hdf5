@@ -92,10 +92,10 @@ usage() {
 }
 
 # Show the configuration summary of the library recorded in the
-# libhdf5.settings file reside in the lib directory.
+# libhdf5_cpp.settings file reside in the lib directory.
 showconfigure()
 {
-  cat ${libdir}/libhdf5.settings
+  cat ${libdir}/libhdf5_cpp.settings
   status=$?
 }
 

@@ -11952,17 +11952,17 @@ fi
 
 PRINT_PLAIN() {
   echo $ECHO_N "$1$ECHO_C"
-  echo $ECHO_N "$1$ECHO_C" 1>>src/libhdf5.settings
+  echo $ECHO_N "$1$ECHO_C" 1>>src/libhdf5_fortran.settings
 }
 
 PRINT_N() {
   echo $ECHO_N "$1:  $ECHO_C"
-  echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5.settings
+  echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5_fortran.settings
 }
 
 PRINT() {
   echo "$1"
-  echo "$1" 1>>src/libhdf5.settings
+  echo "$1" 1>>src/libhdf5_fortran.settings
 }
 
 IF_YES_NO() {

@@ -72,8 +72,8 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
-	@if test -f libhdf5.settings; then				      \
-	   (set -x; $(INSTALL_DATA) libhdf5.settings $(libdir)/. || exit 1);  \
+	@if test -f libhdf5_cpp.settings; then				      \
+	   (set -x; $(INSTALL_DATA) libhdf5_cpp.settings $(libdir)/. || exit 1);  \
 	fi
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
@@ -105,7 +105,7 @@ uninstall-examples:
 
 ## Removes those things that `make install' (would have) installed.
 uninstall:
-	@for f in libhdf5.settings $(LIB); do				      \
+	@for f in libhdf5_cpp.settings $(LIB); do				      \
             $(LT_UNINSTALL) $(libdir)/$$f;				      \
 	done
 	@if test -n "$(PUB_HDR)"; then   				      \

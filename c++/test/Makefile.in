@@ -48,7 +48,7 @@ TEST_PROGS=dsets testhdf5
 
 
 TEST_SCRIPTS=
-
+MOSTLYCLEAN= *.ii *.ti
 DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o)
 
 $(TEST_PROGS): $(LIB) $(LIBHDF5) $(LIBH5TEST)
