@@ -62,6 +62,7 @@ typedef struct H5G_node_key_t {
 #define PABLO_MASK	H5G_node_mask
 
 /* PRIVATE PROTOTYPES */
+static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
 static size_t H5G_node_size(H5F_t *f);
 static herr_t H5G_node_shared_free(void *shared);
 
@@ -463,7 +464,7 @@ done:
 static herr_t
 H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 {
-    uint8_t	*buf = NULL, *p = NULL;
+    uint8_t	*buf = NULL;
     size_t	size;
     int		i;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -499,24 +500,9 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
         /* Allocate temporary buffer */
         if ((buf=H5FL_BLK_MALLOC(symbol_node,size))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        p=buf;
 
-        /* magic number */
-        HDmemcpy(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC);
-        p += 4;
-
-        /* version number */
-        *p++ = H5G_NODE_VERS;
-
-        /* reserved */
-        *p++ = 0;
-
-        /* number of symbols */
-        UINT16ENCODE(p, sym->nsyms);
-
-        /* entries */
-        H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
-        HDmemset(p, 0, size - (p - buf));
+        if (H5G_node_serialize(f, sym, size, buf) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "node serialization failed");
 
         if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file");
@@ -534,6 +520,59 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
         if(H5G_node_dest(f, sym)<0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node");
     }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_node_serialize
+ *
+ * Purpose:     Serialize the symbol table node
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Bill Wendling
+ *              wendling@ncsa.uiuc.edu
+ *              Sept. 16, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf)
+{
+    uint8_t    *p;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_serialize);
+
+    /* check args */
+    assert(f);
+    assert(sym);
+    assert(buf);
+
+    p = buf;
+
+    /* magic number */
+    HDmemcpy(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC);
+    p += 4;
+
+    /* version number */
+    *p++ = H5G_NODE_VERS;
+
+    /* reserved */
+    *p++ = 0;
+
+    /* number of symbols */
+    UINT16ENCODE(p, sym->nsyms);
+
+    /* entries */
+    if (H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
+    HDmemset(p, 0, size - (p - buf));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1536,9 +1575,10 @@ H5G_node_init(H5F_t *f)
 
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_SNODE;
+    shared->two_k=2*H5F_KVALUE(f,H5B_SNODE);
     shared->sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
     assert(shared->sizeof_rkey);
-    shared->sizeof_rnode = H5B_nodesize(f, H5B_SNODE, &shared->sizeof_keys, shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(grp_page,shared->sizeof_rnode)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")

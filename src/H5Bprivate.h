@@ -78,6 +78,7 @@ typedef struct H5B_t H5B_t;
  */
 typedef struct H5B_shared_t {
     const struct H5B_class_t	*type;	/* Type of tree			     */
+    unsigned            two_k;          /* 2*"K" value for tree's nodes      */
     size_t		sizeof_rkey;	/* Size of raw (disk) key	     */
     size_t		sizeof_rnode;	/* Size of raw (disk) node	     */
     size_t		sizeof_keys;	/* Size of native (memory) key node  */
@@ -125,8 +126,8 @@ typedef struct H5B_class_t {
 /*
  * Library prototypes.
  */
-H5_DLL size_t H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
-			   size_t *total_nkey_size, size_t sizeof_rkey);
+H5_DLL size_t H5B_nodesize(const H5F_t *f, const H5B_shared_t *shared,
+			   size_t *total_nkey_size);
 H5_DLL herr_t H5B_create (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
 			   haddr_t *addr_p/*out*/);
 H5_DLL herr_t H5B_find (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
