@@ -3007,6 +3007,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 
 #ifdef QAK
     printf("%s: check 4.0, nelmts=%d, request_nelmts=%d, need_bkg=%d\n", FUNC,(int)nelmts,(int)request_nelmts,(int)need_bkg);
+    printf("%s: check 4.1, tconv_buf=%p, bkg_buf=%p\n",FUNC,tconv_buf,bkg_buf);
 #endif
 
     /* Start strip mining... */

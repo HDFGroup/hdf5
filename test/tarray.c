@@ -1684,6 +1684,7 @@ test_array_bkg(void)
     status = H5Dwrite (dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, fld);
     CHECK(status, FAIL, "H5Dwrite");
 
+    /* Read just the field changed */
     status = H5Dread (dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, fldr);
     CHECK(status, FAIL, "H5Dread");
    
@@ -1695,15 +1696,47 @@ test_array_bkg(void)
                 continue;
             }
     
-    status = H5Dclose(dataset);
-    CHECK(status, FAIL, "H5Dclose");
-
     status = H5Tclose (type);
     CHECK(status, FAIL, "H5Tclose");
   
     status = H5Tclose (array_dt);
     CHECK(status, FAIL, "H5Tclose");
 
+    type = H5Dget_type(dataset);
+    CHECK(type, FAIL, "H5Dget_type");
+
+    /* Read the entire dataset again */
+    status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
+    CHECK(status, FAIL, "H5Dread");
+
+    /* Verify correct data */    
+    /* ------------------- */
+    for (i = 0; i < LENGTH; i++) {        
+	    for (j = 0; j < ALEN; j++) {
+            if(cf[i].a[j]!=cfr[i].a[j]) {
+                num_errs++;
+                printf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
+                continue;
+            }
+            if(cf[i].b[j]!=cfr[i].b[j]) {
+                num_errs++;
+                printf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                continue;
+            }
+            if(cf[i].c[j]!=cfr[i].c[j]) {
+                num_errs++;
+                printf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                continue;
+            }
+        }
+    }
+
+    status = H5Dclose(dataset);
+    CHECK(status, FAIL, "H5Dclose");
+
+    status = H5Tclose (type);
+    CHECK(status, FAIL, "H5Tclose");
+  
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 

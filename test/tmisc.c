@@ -57,6 +57,55 @@ typedef struct {
 #define MISC4_GROUP_1           "/Group1"
 #define MISC4_GROUP_2           "/Group2"
 
+/* Definitions for misc. test #5 */
+#define MISC5_FILE              "tmisc5.h5"
+#define MISC5_DSETNAME          "dset1"
+#define MISC5_DSETRANK          1
+#define MISC5_NELMTOPLVL        1
+#define MISC5_DBGNELM1          2
+#define MISC5_DBGNELM2          1
+#define MISC5_DBGNELM3          1
+#define MISC5_DBGELVAL1         999999999
+#define MISC5_DBGELVAL2         888888888
+#define MISC5_DBGELVAL3         777777777
+
+typedef struct
+{   
+    int st1_el1;
+    hvl_t st1_el2;
+} misc5_struct1;
+
+typedef struct
+{   
+    int st2_el1;
+    hvl_t st2_el2;
+} misc5_struct2;
+
+typedef struct
+{   
+    int st3_el1;
+} misc5_struct3;
+
+typedef struct
+{   
+    hid_t         st3h_base;
+    hid_t         st3h_id;
+} misc5_struct3_hndl;
+
+typedef struct
+{   
+    hid_t         st2h_base;
+    hid_t         st2h_id;
+    misc5_struct3_hndl *st2h_st3hndl;
+} misc5_struct2_hndl;
+
+typedef struct
+{   
+    hid_t         st1h_base;
+    hid_t         st1h_id;
+    misc5_struct2_hndl *st1h_st2hndl;
+} misc5_struct1_hndl;
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -440,6 +489,314 @@ test_misc4(void)
 
 /****************************************************************
 **
+**  test_misc5(): Test several level deep nested compound & VL datatypes
+**
+****************************************************************/
+
+/*********************** struct3 ***********************/
+
+static misc5_struct3_hndl *
+create_struct3(void)
+{
+    misc5_struct3_hndl *str3hndl;       /* New 'struct3' created */
+    herr_t ret;                         /* For error checking */
+
+    str3hndl=malloc(sizeof(misc5_struct3_hndl));
+    CHECK(str3hndl,NULL,"malloc");
+
+    str3hndl->st3h_base=H5Tcreate( H5T_COMPOUND, sizeof(misc5_struct3));
+    CHECK(str3hndl->st3h_base,FAIL,"H5Tcreate");
+
+    ret=H5Tinsert(str3hndl->st3h_base, "st3_el1", HOFFSET( misc5_struct3, st3_el1), H5T_NATIVE_INT);
+    CHECK(ret,FAIL,"H5Tinsert");
+
+    str3hndl->st3h_id=H5Tvlen_create(str3hndl->st3h_base);
+    CHECK(str3hndl->st3h_id,FAIL,"H5Tvlen_create");
+
+    return(str3hndl);
+}
+
+static void 
+delete_struct3(misc5_struct3_hndl *str3hndl)
+{
+    herr_t ret;                         /* For error checking */
+
+    ret=H5Tclose(str3hndl->st3h_id);
+    CHECK(ret,FAIL,"H5Tclose");
+
+    ret=H5Tclose(str3hndl->st3h_base);
+    CHECK(ret,FAIL,"H5Tclose");
+
+    free(str3hndl);
+}
+
+static void 
+set_struct3(misc5_struct3 *buf)
+{
+    buf->st3_el1=MISC5_DBGELVAL3;
+}
+
+/*********************** struct2 ***********************/
+
+static misc5_struct2_hndl *
+create_struct2(void)
+{
+    misc5_struct2_hndl *str2hndl;       /* New 'struct2' created */
+    herr_t ret;                         /* For error checking */
+
+    str2hndl=malloc(sizeof(misc5_struct2_hndl));
+    CHECK(str2hndl,NULL,"malloc");
+
+    str2hndl->st2h_base=H5Tcreate( H5T_COMPOUND, sizeof(misc5_struct2));
+    CHECK(str2hndl->st2h_base,FAIL,"H5Tcreate");
+
+    ret=H5Tinsert(str2hndl->st2h_base, "st2_el1", HOFFSET( misc5_struct2, st2_el1), H5T_NATIVE_INT);
+    CHECK(ret,FAIL,"H5Tinsert");
+
+    str2hndl->st2h_st3hndl=create_struct3();
+    CHECK(str2hndl->st2h_st3hndl,NULL,"create_struct3");
+
+    ret=H5Tinsert(str2hndl->st2h_base, "st2_el2", HOFFSET(misc5_struct2, st2_el2), str2hndl->st2h_st3hndl->st3h_id);
+    CHECK(ret,FAIL,"H5Tinsert");
+
+    str2hndl->st2h_id= H5Tvlen_create(str2hndl->st2h_base);
+    CHECK(str2hndl->st2h_id,FAIL,"H5Tvlen_create");
+
+    return(str2hndl);
+}
+
+static void
+delete_struct2(misc5_struct2_hndl *str2hndl)
+{
+    herr_t ret;                         /* For error checking */
+
+    ret=H5Tclose(str2hndl->st2h_id);
+    CHECK(ret,FAIL,"H5Tclose");
+
+    delete_struct3(str2hndl->st2h_st3hndl);
+
+    H5Tclose(str2hndl->st2h_base);
+    CHECK(ret,FAIL,"H5Tclose");
+
+    free(str2hndl);
+}
+
+static void
+set_struct2(misc5_struct2 *buf)
+{
+    unsigned i;         /* Local index variable */
+
+    buf->st2_el1=MISC5_DBGELVAL2;
+    buf->st2_el2.len=MISC5_DBGNELM3;
+
+    buf->st2_el2.p=malloc((buf->st2_el2.len)*sizeof(misc5_struct3));
+    CHECK(buf->st2_el2.p,NULL,"malloc");
+
+    for(i=0; i<(buf->st2_el2.len); i++)
+        set_struct3(&(((misc5_struct3 *)(buf->st2_el2.p))[i]));
+}
+
+static void
+clear_struct2(misc5_struct2 *buf)
+{
+    free(buf->st2_el2.p);
+}
+
+/*********************** struct1 ***********************/
+
+static misc5_struct1_hndl *
+create_struct1(void)
+{
+    misc5_struct1_hndl *str1hndl;       /* New 'struct1' created */
+    herr_t ret;                         /* For error checking */
+
+    str1hndl=malloc(sizeof(misc5_struct1_hndl));
+    CHECK(str1hndl,NULL,"malloc");
+
+    str1hndl->st1h_base=H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct1));
+    CHECK(str1hndl->st1h_base,FAIL,"H5Tcreate");
+
+    ret=H5Tinsert(str1hndl->st1h_base, "st1_el1", HOFFSET(misc5_struct1, st1_el1), H5T_NATIVE_INT);
+    CHECK(ret,FAIL,"H5Tinsert");
+
+    str1hndl->st1h_st2hndl=create_struct2();
+    CHECK(str1hndl->st1h_st2hndl,NULL,"create_struct2");
+
+    ret=H5Tinsert(str1hndl->st1h_base, "st1_el2", HOFFSET(misc5_struct1, st1_el2), str1hndl->st1h_st2hndl->st2h_id);
+    CHECK(ret,FAIL,"H5Tinsert");
+
+    str1hndl->st1h_id=H5Tvlen_create(str1hndl->st1h_base);
+    CHECK(str1hndl->st1h_id,FAIL,"H5Tvlen_create");
+
+    return(str1hndl);
+}
+
+static void
+delete_struct1(misc5_struct1_hndl *str1hndl)
+{   
+    herr_t ret;                         /* For error checking */
+
+    ret=H5Tclose(str1hndl->st1h_id);
+    CHECK(ret,FAIL,"H5Tclose");
+
+    delete_struct2(str1hndl->st1h_st2hndl);
+
+    ret=H5Tclose(str1hndl->st1h_base);
+    CHECK(ret,FAIL,"H5Tclose");
+
+    free(str1hndl);
+}
+
+static void
+set_struct1(misc5_struct1 *buf)
+{   
+    unsigned i;         /* Local index variable */
+
+    buf->st1_el1=MISC5_DBGELVAL1;
+    buf->st1_el2.len=MISC5_DBGNELM2;
+
+    buf->st1_el2.p=malloc((buf->st1_el2.len)*sizeof(misc5_struct2));
+    CHECK(buf->st1_el2.p,NULL,"malloc");
+
+    for(i=0; i<(buf->st1_el2.len); i++)
+        set_struct2(&(((misc5_struct2 *)(buf->st1_el2.p))[i]));
+}
+
+static void
+clear_struct1(misc5_struct1 *buf)
+{
+    unsigned i;
+
+    for(i=0;i<buf->st1_el2.len;i++)
+        clear_struct2(&((( misc5_struct2 *)(buf->st1_el2.p))[i]));
+    free(buf->st1_el2.p);
+}
+
+static void
+test_misc5(void)
+{
+    hid_t loc_id, space_id, dataset_id;
+    hid_t mem_type_id;
+    misc5_struct1_hndl *str1hndl;
+    hsize_t dims[MISC5_DSETRANK];
+    hvl_t buf;
+    unsigned i,j,k;
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing several level deep nested compound & VL datatypes \n"));
+
+    /* Write the dataset out */
+    loc_id=H5Fcreate(MISC5_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(loc_id,FAIL,"H5Fcreate");
+
+    /* Create the memory structure to write */
+    str1hndl=create_struct1();
+    CHECK(str1hndl,NULL,"create_struct1");
+
+    /* Create the dataspace */
+    dims[0]=MISC5_NELMTOPLVL;
+    space_id=H5Screate_simple(MISC5_DSETRANK, dims, NULL);
+    CHECK(space_id,FAIL,"H5Screate_simple");
+
+    /* Create the dataset */
+    dataset_id=H5Dcreate(loc_id, MISC5_DSETNAME, str1hndl->st1h_id, space_id, H5P_DEFAULT);
+    CHECK(dataset_id,FAIL,"H5Dcreate");
+
+    /* Create the variable-length buffer */
+    buf.len=MISC5_DBGNELM1;
+    buf.p=malloc((buf.len)*sizeof(misc5_struct1));
+    CHECK(buf.p,NULL,"malloc");
+
+    /* Create the top-level VL information */
+    for(i=0; i<MISC5_DBGNELM1; i++)
+        set_struct1(&(((misc5_struct1 *) (buf.p))[i]));
+
+    /* Write the data out */
+    ret=H5Dwrite(dataset_id, str1hndl->st1h_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf);
+    CHECK(ret,FAIL,"H5Dwrite");
+
+    /* Release the top-level VL information */
+    for(j=0; j<MISC5_DBGNELM1; j++)
+        clear_struct1(&((( misc5_struct1 *)(buf.p))[j]));
+
+    /* Free the variable-length buffer */
+    free(buf.p);
+
+    /* Close dataset */
+    ret=H5Dclose(dataset_id);
+    CHECK(ret,FAIL,"H5Dclose");
+
+    /* Close dataspace */
+    ret=H5Sclose(space_id);
+    CHECK(ret,FAIL,"H5Sclose");
+
+    /* Delete memory structures */
+    delete_struct1(str1hndl);
+
+    /* Close file */
+    ret=H5Fclose(loc_id);
+    CHECK(ret,FAIL,"H5Fclose");
+
+
+    /* Read the dataset back in & verify it */
+    loc_id=H5Fopen(MISC5_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(loc_id,FAIL,"H5Fopen");
+
+    /* Open dataset again */
+    dataset_id=H5Dopen(loc_id, MISC5_DSETNAME);
+    CHECK(dataset_id,FAIL,"H5Dopen");
+
+    /* Get the dataset's datatype */
+    mem_type_id=H5Dget_type(dataset_id);
+    CHECK(mem_type_id,FAIL,"H5Dget_type");
+
+    /* Get the dataset's dataspace */
+    space_id=H5Dget_space(dataset_id);
+    CHECK(space_id,FAIL,"H5Dget_space");
+
+    /* Read the data back in */
+    ret=H5Dread(dataset_id, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf);
+    CHECK(ret,FAIL,"H5Dread");
+
+    /* Verify the correct information was read in */
+    for(i=0; i<(buf.len); i++) {
+        /* printf("[%d]=%d\n",i, ((misc5_struct1 *)(buf.p))[i].st1_el1); */
+        VERIFY(((misc5_struct1 *)(buf.p))[i].st1_el1,MISC5_DBGELVAL1,"H5Dread");
+        for(j=0; j<(((misc5_struct1 *)(buf.p)) [i].st1_el2.len); j++) {
+            /* printf("   [%d]=%d\n",j, ((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1); */
+            VERIFY(((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1, MISC5_DBGELVAL2,"H5Dread");
+            for(k=0; k<(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.len); k++) {
+                /* printf("      [%d]=%d\n",k, ((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1); */
+                VERIFY(((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1, MISC5_DBGELVAL3,"H5Dread");
+            } /* end for */
+        }
+    }
+
+    /* Reclaim the memory for the VL information */
+    ret=H5Dvlen_reclaim(mem_type_id, space_id, H5P_DEFAULT, &buf);
+    CHECK(ret,FAIL,"H5Dvlen_reclaim");
+
+    /* Close dataspace */
+    ret=H5Sclose(space_id);
+    CHECK(ret,FAIL,"H5Sclose");
+
+    /* Close dataset */
+    ret=H5Tclose(mem_type_id);
+    CHECK(ret,FAIL,"H5Tclose");
+
+    /* Close dataset */
+    ret=H5Dclose(dataset_id);
+    CHECK(ret,FAIL,"H5Dclose");
+
+    /* Close file */
+    ret=H5Fclose(loc_id);
+    CHECK(ret,FAIL,"H5Fclose");
+
+} /* end test_misc5() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -453,6 +810,7 @@ test_misc(void)
     test_misc2();       /* Test storing a VL-derived datatype in two different files */
     test_misc3();       /* Test reading from chunked dataset with non-zero fill value */
     test_misc4();       /* Test retrieving the fileno for various objects with H5Gget_objinfo() */
+    test_misc5();       /* Test several level deep nested compound & VL datatypes */
 
 } /* test_misc() */
 
@@ -480,4 +838,5 @@ cleanup_misc(void)
     remove(MISC3_FILE);
     remove(MISC4_FILE_1);
     remove(MISC4_FILE_2);
+    remove(MISC5_FILE);
 }
