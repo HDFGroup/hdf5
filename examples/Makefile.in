@@ -16,8 +16,8 @@ LIBHDF5=../src/libhdf5.la
 
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
-TEST_PROGS=h5_chunk_read h5_compound h5_extend_write h5_group h5_write \
-	h5_read h5_select h5_attribute
+TEST_PROGS= h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
+	h5_group h5_select h5_attribute
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
