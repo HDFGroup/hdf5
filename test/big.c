@@ -141,7 +141,8 @@ enough_room(hid_t fapl)
  done:
     for (i=0; i<NELMTS(fd) && fd[i]>=0; i++) {
 	HDsnprintf(name, sizeof name, filename, i);
-	close(fd[i]);
+	if(close(fd[i])<0)
+            ret_value=0;
 	unlink(name);
     }
     
@@ -219,6 +220,7 @@ writer (hid_t fapl, int wrt_n)
 		      H5P_DEFAULT, buf)<0) goto error;
     }
 	
+    fclose(out);
     if (H5Dclose (d1)<0) goto error;
     if (H5Dclose (d2)<0) goto error;
     if (H5Sclose (mem_space)<0) goto error;
@@ -226,7 +228,6 @@ writer (hid_t fapl, int wrt_n)
     if (H5Sclose (space2)<0) goto error;
     if (H5Fclose (file)<0) goto error;
     free (buf);
-    fclose(out);
     PASSED();
     return 0;
 
