@@ -312,7 +312,8 @@ RUNSNAPTEST()
     fi
 
     # Setup log file name to save test output
-    LOGFILE=${LOGBASENAME}${SRCDIRNAME}_${TODAY}
+    THIS_MINUTE=`date +%H%M`
+    LOGFILE=${LOGBASENAME}${SRCDIRNAME}_${TODAY}_${THIS_MINUTE}
     PRINT "Running snapshot with output saved in"
     PRINT "   $LOGFILE"
     (date; PRINT Hostname=$HOSTNAME) >> $LOGFILE
