@@ -126,7 +126,8 @@ H5F_init_interface(void)
     FUNC_ENTER(H5F_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5A_init_group(H5_FILE, H5A_FILEID_HASHSIZE, 0, NULL)) != FAIL)
+    if ((ret_value = H5A_init_group(H5_FILE, H5A_FILEID_HASHSIZE, 0,
+				    (herr_t (*)(void*))H5Fclose)) != FAIL)
         ret_value = H5_add_exit(&H5F_term_interface);
 
     FUNC_LEAVE(ret_value);

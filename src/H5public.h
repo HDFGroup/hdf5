@@ -104,7 +104,8 @@ extern "C" {
 #endif
 
 /* Functions in H5.c */
-herr_t H5init (void);
+herr_t H5open (void);
+herr_t H5close (void);
 herr_t H5dont_atexit (void);
 herr_t H5version (uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum);
 

@@ -42,11 +42,11 @@ while (<>) {
       
       # Ignore C statements that look sort of like function
       # calls.
-      next if $name =~ /^(if|for|return|sizeof|switch|while)$/;
+      next if $name =~ /^(if|for|return|sizeof|switch|while|void)$/;
 
       # These are really HDF5 functions/macros even though they don't
       # start with `h' or `H'.
-      next if $name =~ /^FUNC_(ENTER|LEAVE)$/;
+      next if $name =~ /^FUNC_(ENTER|LEAVE)(_INIT)?$/;
       next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)$/;
       next if $name =~ /^(MIN|MAX3?|NELMTS|BOUND|CONSTR)$/;
 

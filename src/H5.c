@@ -142,7 +142,7 @@ H5_add_exit(void        (*func) (void))
  PURPOSE
     Terminate various static buffers and shutdown the library.
  USAGE
-    void HPend()
+    void H5_term_library()
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -322,7 +322,7 @@ H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5init
+ * Function:    H5open
  *
  * Purpose:     Initialize the library.  This is normally called
  *              automatically, but if you find that an HDF5 library function
@@ -341,9 +341,38 @@ H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5init(void)
+H5open(void)
 {
-    FUNC_ENTER(H5init, FAIL);
+    FUNC_ENTER(H5open, FAIL);
     /* all work is done by FUNC_ENTER() */
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5close
+ *
+ * Purpose:	Terminate the library and release all resources.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January 30, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5close (void)
+{
+    /*
+     * Don't call FUNC_ENTER() since we don't want to initialize the whole
+     * thing just to release it all right away.  It is safe to call this
+     * function for an uninitialized library.
+     */
+    H5_term_library ();
+    return SUCCEED;
 }

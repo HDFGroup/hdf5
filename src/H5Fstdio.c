@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define PABLO_MASK      H5F_sec2
+#define PABLO_MASK      H5F_stdio
 static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
 

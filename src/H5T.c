@@ -309,6 +309,32 @@ H5T_term_interface(void)
     }
 
     H5A_destroy_group(H5_DATATYPE);
+    H5T_NATIVE_CHAR_g = FAIL;
+    H5T_NATIVE_UCHAR_g = FAIL;
+    H5T_NATIVE_SHORT_g = FAIL;
+    H5T_NATIVE_USHORT_g = FAIL;
+    H5T_NATIVE_INT_g = FAIL;
+    H5T_NATIVE_UINT_g = FAIL;
+    H5T_NATIVE_LONG_g = FAIL;
+    H5T_NATIVE_LLONG_g = FAIL;
+    H5T_NATIVE_ULLONG_g = FAIL;
+    H5T_NATIVE_HYPER_g = FAIL;
+    H5T_NATIVE_UHYPER_g = FAIL;
+    H5T_NATIVE_INT8_g = FAIL;
+    H5T_NATIVE_UINT8_g = FAIL;
+    H5T_NATIVE_INT16_g = FAIL;
+    H5T_NATIVE_UINT16_g = FAIL;
+    H5T_NATIVE_INT32_g = FAIL;
+    H5T_NATIVE_UINT32_g = FAIL;
+    H5T_NATIVE_INT64_g = FAIL;
+    H5T_NATIVE_UINT64_g = FAIL;
+    H5T_NATIVE_ULONG_g = FAIL;
+    H5T_NATIVE_FLOAT_g = FAIL;
+    H5T_NATIVE_DOUBLE_g = FAIL;
+    H5T_NATIVE_TIME_g = FAIL;
+    H5T_NATIVE_STRING_g = FAIL;
+    H5T_NATIVE_BITFIELD_g = FAIL;
+    H5T_NATIVE_OPAQUE_g = FAIL;
 }
 
 /*-------------------------------------------------------------------------

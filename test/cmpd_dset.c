@@ -397,7 +397,6 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     /* Create memory data space */
     s8_m_sid = H5Pcreate_simple (2, h_size);
     assert (s8_m_sid>=0);
-    }
 
     /* Read the dataset */
     s8 = calloc (h_size[0]*h_size[1], sizeof(s1_t));

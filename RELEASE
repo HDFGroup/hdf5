@@ -10,6 +10,11 @@ The following functions are implemented. Errors are returned if an
 attempt is made to use some feature which is not implemented and
 printing the error stack will show `not implemented yet'.
 
+Library
+   H5dont_atexit	- don't call library close on exit
+   H5init		- initialize library (happens automatically)
+   H5version		- retrieve library version info
+
 Templates
    H5Cclose		- release template resources
    H5Ccopy		- copy a template

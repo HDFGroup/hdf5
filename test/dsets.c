@@ -366,6 +366,9 @@ main(void)
     herr_t                  status;
     intn                    nerrors = 0;
 
+    status = H5open ();
+    assert (status>=0);
+
     unlink("dataset.h5");
     file = H5Fcreate("dataset.h5", H5ACC_DEFAULT, H5C_DEFAULT, H5C_DEFAULT);
     assert(file >= 0);
@@ -391,5 +394,9 @@ main(void)
         exit(1);
     }
     printf("All dataset tests passed.\n");
+
+    status = H5close ();
+    assert (status>=0);
+    
     exit(0);
 }

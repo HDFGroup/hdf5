@@ -215,8 +215,6 @@ main(void)
     herr_t                  status;
     intn                    nerrors = 0;
 
-    H5init();
-
     status = test_classes();
     nerrors += status < 0 ? 1 : 0;
 
