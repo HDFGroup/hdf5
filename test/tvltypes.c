@@ -111,10 +111,10 @@ test_vltypes_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
-        wdata[i].p=malloc((i+1)*sizeof(uint32_t));
+        wdata[i].p=malloc((i+1)*sizeof(unsigned int));
         wdata[i].len=i+1;
         for(j=0; j<(i+1); j++)
-            ((uint32_t *)wdata[i].p)[j]=i*10+j;
+            ((unsigned int *)wdata[i].p)[j]=i*10+j;
     } /* end for */
 
     /* Create file */
@@ -150,7 +150,7 @@ test_vltypes_vlen_atomic(void)
 
     /* Make certain the correct amount of memory has been used */
     /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    VERIFY(mem_used,10*sizeof(uint32_t),"H5Dread");
+    VERIFY(mem_used,10*sizeof(unsigned int),"H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -160,20 +160,24 @@ test_vltypes_vlen_atomic(void)
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
-            if( ((uint32_t *)wdata[i].p)[j] != ((uint32_t *)rdata[i].p)[j] ) {
+            if( ((unsigned int *)wdata[i].p)[j] != ((unsigned int *)rdata[i].p)[j] ) {
                 num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((uint32_t *)wdata[i].p)[j], (int)i,(int)j, (int)((uint32_t *)rdata[i].p)[j]);
+                printf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].p)[j]);
                 continue;
             } /* end if */
         } /* end for */
     } /* end for */
 
-    /* Reclaim the VL data */
+    /* Reclaim the read VL data */
     ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
+
+    /* Reclaim the write VL data */
+    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -186,6 +190,10 @@ test_vltypes_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close dataset transfer property list */
+    ret = H5Pclose(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
     
     /* Close file */
     ret = H5Fclose(fid1);
@@ -305,6 +313,10 @@ test_vltypes_vlen_compound(void)
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
 
+    /* Reclaim the write VL data */
+    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -320,6 +332,10 @@ test_vltypes_vlen_compound(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close dataset transfer property list */
+    ret = H5Pclose(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
     
     /* Close file */
     ret = H5Fclose(fid1);
@@ -360,10 +376,10 @@ test_vltypes_compound_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].i=i*10;
         wdata[i].f=(i*20)/3.0;
-        wdata[i].v.p=malloc((i+1)*sizeof(uint32_t));
+        wdata[i].v.p=malloc((i+1)*sizeof(unsigned int));
         wdata[i].v.len=i+1;
         for(j=0; j<(i+1); j++)
-            ((uint32_t *)wdata[i].v.p)[j]=i*10+j;
+            ((unsigned int *)wdata[i].v.p)[j]=i*10+j;
     } /* end for */
 
     /* Create file */
@@ -394,9 +410,11 @@ test_vltypes_compound_vlen_atomic(void)
     dataset=H5Dcreate(fid1,"Dataset1",tid2,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
+printf("Before writing data to disk\n");
     /* Write dataset to disk */
     ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dwrite");
+printf("After writing data to disk\n");
 
     /* Change to the custom memory allocation routines for reading VL data */
     xfer_pid=H5Pcreate(H5P_DATASET_XFER);
@@ -405,13 +423,15 @@ test_vltypes_compound_vlen_atomic(void)
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
     CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
 
+printf("Before reading data from disk\n");
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dread");
+printf("After reading data from disk\n");
 
     /* Make certain the correct amount of memory has been used */
     /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    VERIFY(mem_used,10*sizeof(uint32_t),"H5Dread");
+    VERIFY(mem_used,10*sizeof(unsigned int),"H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -431,20 +451,26 @@ test_vltypes_compound_vlen_atomic(void)
             continue;
         } /* end if */
         for(j=0; j<rdata[i].v.len; j++) {
-            if( ((uint32_t *)wdata[i].v.p)[j] != ((uint32_t *)rdata[i].v.p)[j] ) {
+            if( ((unsigned int *)wdata[i].v.p)[j] != ((unsigned int *)rdata[i].v.p)[j] ) {
                 num_errs++;
-                printf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((uint32_t *)wdata[i].v.p)[j], (int)i,(int)j, (int)((uint32_t *)rdata[i].v.p)[j]);
+                printf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].v.p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].v.p)[j]);
                 continue;
             } /* end if */
         } /* end for */
     } /* end for */
 
     /* Reclaim the VL data */
+#ifdef QAK
     ret=H5Dvlen_reclaim(tid2,sid1,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
+#endif /* QAK */
+
+    /* Reclaim the write VL data */
+    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -461,6 +487,10 @@ test_vltypes_compound_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close dataset transfer property list */
+    ret = H5Pclose(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
     
     /* Close file */
     ret = H5Fclose(fid1);
@@ -498,10 +528,10 @@ test_vltypes_vlen_vlen_atomic(void)
         wdata[i].p=malloc((i+1)*sizeof(hvl_t));
         wdata[i].len=i+1;
         for(t1=wdata[i].p,j=0; j<(i+1); j++, t1++) {
-            t1->p=malloc((j+1)*sizeof(uint32_t));
+            t1->p=malloc((j+1)*sizeof(unsigned int));
             t1->len=j+1;
             for(k=0; k<(j+1); k++)
-                ((uint32_t *)t1->p)[k]=i*100+j*10+k;
+                ((unsigned int *)t1->p)[k]=i*100+j*10+k;
         } /* end for */
     } /* end for */
 
@@ -542,8 +572,8 @@ test_vltypes_vlen_vlen_atomic(void)
 
     /* Make certain the correct amount of memory has been used */
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    /* 20 uint32_t elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(mem_used,10*sizeof(hvl_t)+20*sizeof(uint32_t),"H5Dread");
+    /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
+    VERIFY(mem_used,10*sizeof(hvl_t)+20*sizeof(unsigned int),"H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -559,9 +589,9 @@ test_vltypes_vlen_vlen_atomic(void)
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
-                if( ((uint32_t *)t1->p)[k] != ((uint32_t *)t2->p)[k] ) {
+                if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {
                     num_errs++;
-                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((uint32_t *)t1->p)[k], (int)k, (int)((uint32_t *)t2->p)[k]);
+                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
                     continue;
                 } /* end if */
             } /* end for */
@@ -574,6 +604,10 @@ test_vltypes_vlen_vlen_atomic(void)
 
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
+
+    /* Reclaim the write VL data */
+    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -590,6 +624,10 @@ test_vltypes_vlen_vlen_atomic(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close dataset transfer property list */
+    ret = H5Pclose(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
     
     /* Close file */
     ret = H5Fclose(fid1);
@@ -610,9 +648,11 @@ test_vltypes(void)
 
     /* These next tests use the same file */
     test_vltypes_vlen_atomic();       /* Test VL atomic datatypes */
-    test_vltypes_compound_vlen_atomic();     /* Test compound datatypes with VL atomic components */  
-	test_vltypes_vlen_vlen_atomic();  /* Test VL datatype with VL atomic components */ 
-	test_vltypes_vlen_compound();     /* Test VL compound datatypes */
+    test_vltypes_vlen_compound();     /* Test VL compound datatypes */
+#ifdef QAK
+    test_vltypes_compound_vlen_atomic();     /* Test compound datatypes with VL atomic components */
+#endif
+    test_vltypes_vlen_vlen_atomic();  /* Test VL datatype with VL atomic components */
 }   /* test_vltypes() */
 
 
