@@ -27,13 +27,13 @@ CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.
 ## C hdf5
-HDF5LIB=$(top_srcdir)/src/libhdf5.la
+HDF5LIB=$(top_builddir)/src/libhdf5.la
 ## fortran hdf5
-FLIB=$(top_srcdir)/fortran/src/libhdf5_fortran.la
+FLIB=$(top_builddir)/fortran/src/libhdf5_fortran.la
 ## C hl
-HL_LIB=$(top_srcdir)/hl/src/libhdf5_hl.la
+HL_LIB=$(top_builddir)/hl/src/libhdf5_hl.la
 ## fortran hl
-HL_FLIB=$(top_srcdir)/hl/fortran/src/libhdf5hl_fortran.la
+HL_FLIB=$(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 
 
 TCLIB=
