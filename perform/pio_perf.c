@@ -296,7 +296,6 @@ main(int argc, char **argv)
             goto finish;
         }
     }
-printf("file_size=%lld\n", opts->file_size);
     run_test_loop(opts);
 
 finish:
