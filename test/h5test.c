@@ -62,7 +62,7 @@
 #endif
 char	*paraprefix = NULL;	/* for command line option para-prefix */
 #ifdef H5_HAVE_PARALLEL
-MPI_Info    pio_info_g=MPI_INFO_NULL;/* MPI INFO object to run the PIO  */
+MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif
 
 /*
@@ -681,8 +681,8 @@ h5_set_info_object(void)
 	envp = HDstrdup(envp);
 
 	/* create an INFO object if not created yet */
-	if (pio_info_g==MPI_INFO_NULL)
-	    MPI_Info_create (&pio_info_g);
+	if (h5_io_info_g==MPI_INFO_NULL)
+	    MPI_Info_create (&h5_io_info_g);
 
 	/* parse only one setting.  Need to extend it to handle multiple */
 	/* settings.  LATER */
@@ -691,7 +691,7 @@ h5_set_info_object(void)
 	if (valp != NULL){
 	    /* change '=' to NULL, move valp down one */
 	    *valp++ = NULL;
-	    if (MPI_SUCCESS!=MPI_Info_set(pio_info_g, namep, valp)){
+	    if (MPI_SUCCESS!=MPI_Info_set(h5_io_info_g, namep, valp)){
 		printf("MPI_Info_set failed\n");
 		ret_value = -1;
 	    }

@@ -958,7 +958,7 @@ report_parameters(struct options *opts)
     }
 
     HDfprintf(output, "rank %d: ", rank);
-    h5_dump_info_object(pio_info_g);
+    h5_dump_info_object(h5_io_info_g);
     HDfprintf(output, "\n");
 }
 
