@@ -35,11 +35,14 @@ typedef struct H5FD_core_t {
     haddr_t	eoa;			/*end of allocated region	*/
     haddr_t	eof;			/*current allocated size	*/
     size_t	increment;		/*multiples for mem allocation	*/
+    int		fd;			/*backing store file descriptor	*/
+    hbool_t	dirty;			/*changes not saved?		*/
 } H5FD_core_t;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_core_fapl_t {
     size_t	increment;		/*how much to grow memory	*/
+    hbool_t	backing_store;		/*write to file name on flush	*/
 } H5FD_core_fapl_t;
 
 /* Allocate memory in multiples of this size by default */
@@ -71,6 +74,7 @@ typedef struct H5FD_core_fapl_t {
 static void *H5FD_core_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
+static herr_t H5FD_core_flush(H5FD_t *_file);
 static herr_t H5FD_core_close(H5FD_t *_file);
 static int H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static haddr_t H5FD_core_get_eoa(H5FD_t *_file);
@@ -104,7 +108,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_core_get_eof,				/*get_eof		*/
     H5FD_core_read,				/*read			*/
     H5FD_core_write,				/*write			*/
-    NULL,					/*flush			*/
+    H5FD_core_flush,				/*flush			*/
     H5FD_FLMAP_SINGLE,				/*fl_map		*/
 };
 
@@ -149,17 +153,21 @@ H5FD_core_init(void)
  *		Thursday, February 19, 1998
  *
  * Modifications:
- *
+ * 		Robb Matzke, 1999-10-19
+ *		Added the BACKING_STORE argument. If set then the entire file
+ *		contents are flushed to a file with the same name as this
+ *		core file.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_core(hid_t fapl_id, size_t increment)
+H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 {
     H5FD_core_fapl_t	fa;
 
     /* NO TRACE */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
     fa.increment = increment;
+    fa.backing_store = backing_store;
     return H5Pset_driver(fapl_id, H5FD_CORE, &fa);
 }
 
@@ -177,11 +185,13 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment)
  *              Tuesday, August 10, 1999
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-10-19
+ *		Added the BACKING_STORE argument.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/)
+H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
+		 hbool_t *backing_store/*out*/)
 {
     H5FD_core_fapl_t	*fa;
 
@@ -189,7 +199,10 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/)
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
     if (H5FD_CORE!=H5Pget_driver(fapl_id)) return -1;
     if (NULL==(fa=H5Pget_driver_info(fapl_id))) return -1;
+    
     if (increment) *increment = fa->increment;
+    if (backing_store) *backing_store = fa->backing_store;
+    
     return 0;
 }
 
@@ -217,6 +230,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
     H5FD_core_fapl_t	*fa = calloc(1, sizeof(H5FD_core_fapl_t));
 
     fa->increment = file->increment;
+    fa->backing_store = (file->fd>=0);
     return fa;
 }
 
@@ -236,7 +250,8 @@ H5FD_core_fapl_get(H5FD_t *_file)
  *              Thursday, July 29, 1999
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-10-19
+ *		The backing store file is created and opened if specified.
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -245,14 +260,22 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
 {
     H5FD_core_t		*file=NULL;
     H5FD_core_fapl_t	*fa=NULL;
+    int			fd=-1;
     
     /* Check arguments */
     if (0==maxaddr || HADDR_UNDEF==maxaddr) return NULL;
     if (ADDR_OVERFLOW(maxaddr)) return NULL;
     if (H5P_DEFAULT!=fapl_id) fa = H5Pget_driver_info(fapl_id);
 
+    /* Open backing store */
+    if (fa && fa->backing_store && name &&
+	(fd=open(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0) {
+	return NULL;
+    }
+
     /* Create the new file struct */
     file = calloc(1, sizeof(H5FD_core_t));
+    file->fd = fd;
     if (name && *name) {
 	file->name = malloc(strlen(name)+1);
 	strcpy(file->name, name);
@@ -271,6 +294,47 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_core_flush
+ *
+ * Purpose:	Flushes the file to backing store if there is any and if the
+ *		dirty flag is set.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, October 15, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_core_flush(H5FD_t *_file)
+{
+    H5FD_core_t	*file = (H5FD_core_t*)_file;
+    
+    /* Write to backing store */
+    if (file->dirty && file->fd>=0) {
+	haddr_t size = file->eof;
+	unsigned char *ptr = file->mem;
+	if (0!=lseek(file->fd, 0, SEEK_SET)) return -1;
+
+	while (size) {
+	    ssize_t n = write(file->fd, ptr, size);
+	    if (n<0 && EINTR==errno) continue;
+	    if (n<0) return -1;
+	    ptr += (size_t)n;
+	    size -= (size_t)n;
+	}
+	file->dirty = FALSE;
+    }
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_core_close
  *
  * Purpose:	Closes the file.
@@ -283,7 +347,9 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
  *              Thursday, July 29, 1999
  *
  * Modifications:
- *
+ * 		Robb Matzke, 1999-10-19
+ *		The contents of memory are written to the backing store if
+ *		one is open.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -291,6 +357,11 @@ H5FD_core_close(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
 
+    /* Flush */
+    if (H5FD_core_flush(_file)<0) return -1;
+
+    /* Release resources */
+    if (file->fd>=0) close(file->fd);
     if (file->name) free(file->name);
     if (file->mem) free(file->mem);
     memset(file, 0, sizeof(H5FD_core_t));
@@ -520,5 +591,6 @@ H5FD_core_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
 
     /* Write from BUF to memory */
     memcpy(file->mem+addr, buf, size);
+    file->dirty = TRUE;
     return 0;
 }

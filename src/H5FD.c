@@ -1083,17 +1083,21 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 
     /*
      * Try to satisfy the request from the free list. First try to find an
-     * exact match, otherwise use the best match.
+     * exact match, otherwise use the best match. Only perform the search if
+     * the free list has the potential of satisfying the request.
      */
-    if (mapped_type>=0) {
+    if (mapped_type>=0 &&
+	(0==file->maxsize || size<=file->maxsize)) {
 	H5FD_free_t *prev=NULL, *best=NULL;
 	H5FD_free_t *cur = file->fl[mapped_type];
 	while (cur) {
+	    file->maxsize = MAX(file->maxsize, cur->size);
 	    if (cur->size==size) {
 		ret_value = cur->addr;
 		if (prev) prev->next = cur->next;
 		else file->fl[mapped_type] = cur->next;
 		H5MM_xfree(cur);
+		if (size==file->maxsize) file->maxsize=0; /*unknown*/
 		HRETURN(ret_value);
 	    } else if (cur->size>size &&
 		       (!best || cur->size<best->size)) {
@@ -1103,6 +1107,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 	    cur = cur->next;
 	}
 	if (best) {
+	    if (best->size==file->maxsize) file->maxsize=0; /*unknown*/
 	    ret_value = best->addr;
 	    best->addr += size;
 	    best->size -= size;
@@ -1232,6 +1237,9 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 	cur->size = size;
 	cur->next = file->fl[mapped_type];
 	file->fl[mapped_type] = cur;
+	if (file->maxsize && size>file->maxsize) {
+	    file->maxsize = size;
+	}
     } else if (file->cls->free) {
 	if ((file->cls->free)(file, type, addr, size)<0) {
 	    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,

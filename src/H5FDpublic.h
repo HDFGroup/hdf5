@@ -125,6 +125,7 @@ struct H5FD_t {
     const H5FD_class_t	*cls;		/*constant class info		*/
     haddr_t		maxaddr;	/*for this file, overrides class*/
     H5FD_free_t		*fl[H5FD_MEM_NTYPES];/*freelist per allocation type*/
+    hsize_t		maxsize;	/*largest object on FL, or zero	*/
 };
 
 #ifdef __cplusplus

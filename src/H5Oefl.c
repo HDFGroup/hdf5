@@ -144,6 +144,11 @@ H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
  * Modifications:
  *	Robb Matzke, 1998-07-20
  *	Rearranged the message to add a version number near the beginning.
+ *
+ * 	Robb Matzke, 1999-10-14
+ *	Entering the name into the local heap happens when the dataset is
+ *	created. Otherwise we could end up in infinite recursion if the heap
+ *	happens to hash to the same cache slot as the object header.
  *	
  *-------------------------------------------------------------------------
  */
@@ -152,8 +157,6 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     int			i;
-    size_t		offset;
-    
 
     FUNC_ENTER(H5O_efl_encode, FAIL);
 
@@ -183,20 +186,10 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     /* Encode file list */
     for (i=0; i<mesg->nused; i++) {
 	/*
-	 * If the name has not been added to the heap yet then do so now.
+	 * The name should have been added to the heap when the dataset was
+	 * created.
 	 */
-	if (0==mesg->slot[i].name_offset) {
-	    offset = H5HL_insert (f, mesg->heap_addr,
-				  HDstrlen (mesg->slot[i].name)+1,
-				  mesg->slot[i].name);
-	    if ((size_t)(-1)==offset) {
-		HRETURN_ERROR (H5E_EFL, H5E_CANTINIT, FAIL,
-			       "unable to insert URL into name heap");
-	    }
-	    mesg->slot[i].name_offset = offset;
-	}
-
-	/* Encode the file info */
+	assert(mesg->slot[i].name_offset);
 	H5F_encode_length (f, p, mesg->slot[i].name_offset);
 	H5F_encode_length (f, p, mesg->slot[i].offset);
 	H5F_encode_length (f, p, mesg->slot[i].size);

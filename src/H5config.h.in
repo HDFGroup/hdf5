@@ -260,6 +260,9 @@
 /* Define if you have the <mfhdf.h> header file.  */
 #undef HAVE_MFHDF_H
 
+/* Define if you have the <pdb.h> header file.  */
+#undef HAVE_PDB_H
+
 /* Define if you have the <setjmp.h> header file.  */
 #undef HAVE_SETJMP_H
 
@@ -334,6 +337,12 @@
 
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
+
+/* Define if you have the pdb library (-lpdb).  */
+#undef HAVE_LIBPDB
+
+/* Define if you have the silo library (-lsilo).  */
+#undef HAVE_LIBSILO
 
 /* Define if you have the xnet library (-lxnet).  */
 #undef HAVE_LIBXNET

@@ -865,6 +865,10 @@ done:
  * 	Robb Matzke, 27 Jul 1998
  *	Added the MTIME message to the dataset object header.
  *
+ * 	Robb Matzke, 1999-10-14
+ *	The names for the external file list are entered into the heap hear
+ *	instead of when the efl message is encoded, preventing a possible
+ *	infinite recursion situation.
  *-------------------------------------------------------------------------
  */
 H5D_t *
@@ -1065,6 +1069,17 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	    (size_t)(-1)==H5HL_insert(f, efl->heap_addr, 1, "")) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 			 "unable to create external file list name heap");
+	}
+	for (i=0; i<efl->nused; i++) {
+	    size_t offset = H5HL_insert(f, efl->heap_addr,
+					HDstrlen(efl->slot[i].name)+1,
+					efl->slot[i].name);
+	    assert(0==efl->slot[i].name_offset);
+	    if ((size_t)(-1)==offset) {
+		HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, NULL,
+			    "unable to insert URL into name heap");
+	    }
+	    efl->slot[i].name_offset = offset;
 	}
 	if (H5O_modify (&(new_dset->ent), H5O_EFL, 0, H5O_FLAG_CONSTANT,
 			efl)<0) {

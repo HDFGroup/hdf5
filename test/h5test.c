@@ -286,7 +286,7 @@ h5_fileaccess(void)
 	if (H5Pset_fapl_sec2(fapl)<0) return -1;
     } else if (!strcmp(name, "core")) {
 	/* In-core temporary file with 1MB increment */
-	if (H5Pset_fapl_core(fapl, 1024*1024)<0) return -1;
+	if (H5Pset_fapl_core(fapl, 1024*1024, FALSE)<0) return -1;
     } else if (!strcmp(name, "split")) {
 	/* Split meta data and raw data each using default driver */
 	if (H5Pset_fapl_split(fapl,

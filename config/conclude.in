@@ -83,19 +83,17 @@ install: $(PUB_LIB) $(PUB_HDR) $(PROGS) $(libdir) $(includedir) $(bindir)
 
 ## Removes those things that `make install' (would have) installed.
 uninstall:
-	@if test "X$(LIB)" != X; then					      \
-	   for f in $(LIB); do						      \
-	      $(LT_UNINSTALL) $(libdir)/$$f;				      \
-	   done;							      \
-	fi
+	@for f in libhdf5.settings $(LIB); do				      \
+            $(LT_UNINSTALL) $(libdir)/$$f;				      \
+	done
 	@if test "X$(PUB_HDR)" != X; then				      \
 	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
-	@if test "X$(PROGS)" != X; then					      \
-	   for f in $(PROGS); do					      \
-	      $(LT_UNINSTALL) $(bindir)/$$f;				      \
-	   done;							      \
-	fi
+	@for f in X $(PROGS); do					      \
+	    if test $$f != X; then					      \
+	        $(LT_UNINSTALL) $(bindir)/$$f;				      \
+	    fi;								      \
+	done
 
 ## Removes temporary files without removing the final target files.  That is,
 ## remove things like object files but not libraries or executables.

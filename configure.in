@@ -283,7 +283,11 @@ H5TOH4=h5toh4
 AC_SUBST(TESTH5TOH4)
 TESTH5TOH4='$(srcdir)/testh5toh4'
 
-AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=[/usr/ncsa/include,/usr/ncsa/lib])
+dnl NCSA keeps hdf4 in a funny place, but for most sites we don't want these.
+test -d /usr/ncsa/include && CPPFLAGS="$CPPFLAGS -I/usr/ncsa/include"
+test -d /usr/ncsa/lib && LDFLAGS="$LDFLAGS -L/usr/ncsa/lib"
+
+AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case $withval in
     yes)
 	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
@@ -432,6 +436,14 @@ esac
 if test "X-" != "X-$GASS"; then
     AC_DEFINE(HAVE_GASS)
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
+dnl translator.
+AC_SUBST(PDB2HDF)
+AC_CHECK_LIB(pdb,PD_open)
+AC_CHECK_LIB(silo,lite_PD_open)
+AC_CHECK_HEADERS(pdb.h,PDB2HDF=pdb2hdf)
 
 dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a

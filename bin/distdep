@@ -1,6 +1,11 @@
 #!/usr/bin/perl -p
 # Usage: $0 [<].depend
+
 # Takes dependency info and generates on stdout dependencies suitable for
-# distribution by removing all the system include files from the list.
+# distribution by removing all the system include files from the list and
+# removing all but the base name of other include files (since the Makefiles
+# contain the logic for searching).
+
 ($h,$_)=/\s*\\/?$h.$`:("","$h\n");
 s|( +/\S*)*( *)|$2?" \\\n   ":""|eg;
+s|(([-\w\.]+)/)+([-\w\.]+)|\3|g;
