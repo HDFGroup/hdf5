@@ -27,6 +27,11 @@
  *               actual 'forward' pointer to update, instead of the node
  *               containing the forward pointer -QAK)
  *
+ *              (Note: This implementation does not have the information for
+ *               implementing the "Linear List Operations" (like insert/delete/
+ *               search by position) in section 3.4 of "A Skip List Cookbook",
+ *               but they shouldn't be that hard to add, if necessary)
+ *
  */
 
 /* Interface initialization */
@@ -47,7 +52,7 @@
 
 /* Define the code template for insertions for the "OP" in the H5SL_FIND macro */
 #define H5SL_FIND_INSERT_FOUND(SLIST,X,UPDATE,I,ITEM)                   \
-        HGOTO_DONE(FAIL);
+        HGOTO_ERROR(H5E_SLIST,H5E_CANTINSERT,FAIL,"can't insert duplicate key");
 
 /* Define the code template for removals for the "OP" in the H5SL_FIND macro */
 #define H5SL_FIND_REMOVE_FOUND(SLIST,X,UPDATE,I,ITEM)                   \
@@ -82,7 +87,7 @@
 
 /* Define a code template for comparing string keys for the "CMP" in the H5SL_FIND macro */
 #define H5SL_FIND_STRING_CMP(TYPE,PKEY1,PKEY2)                          \
-        (HDstrcmp(*(TYPE *)PKEY1,*(TYPE *)PKEY2)<0)
+        (HDstrcmp(PKEY1,PKEY2)<0)
 
 /* Define a code template for comparing scalar keys for the "EQ" in the H5SL_FIND macro */
 #define H5SL_FIND_SCALAR_EQ(TYPE,PKEY1,PKEY2)                           \
@@ -90,7 +95,7 @@
 
 /* Define a code template for comparing string keys for the "EQ" in the H5SL_FIND macro */
 #define H5SL_FIND_STRING_EQ(TYPE,PKEY1,PKEY2)                           \
-        (HDstrcmp(*(TYPE *)PKEY1,*(TYPE *)PKEY2)==0)
+        (HDstrcmp(PKEY1,PKEY2)==0)
 
 /* Macro used to find node for operation */
 #define H5SL_FIND(OP,DOUPDATE,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED) \
@@ -352,11 +357,11 @@ done:
  PURPOSE
     Count the number of objects in a skip list
  USAGE
-    ssize_t H5SL_count(slist)
+    size_t H5SL_count(slist)
         H5SL_t *slist;            IN: Pointer to skip list to count
 
  RETURNS
-    Returns non-negative on success, negative on failure.
+    Returns number of objects on success, can't fail
  DESCRIPTION
     Count elements in a skip list.
  GLOBAL VARIABLES
@@ -492,7 +497,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 void *
-H5SL_search(H5SL_t *slist, void *key)
+H5SL_search(H5SL_t *slist, const void *key)
 {
     H5SL_node_t *checked;                       /* Pointer to last node checked */
     H5SL_node_t *x;                             /* Current node to examine */
@@ -516,11 +521,11 @@ H5SL_search(H5SL_t *slist, void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,int,-,key,checked)
+            H5SL_SEARCH(SCALAR,slist,x,-,i,const int,-,key,checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_SEARCH(SCALAR,slist,x,-,i,haddr_t,-,key,checked)
+            H5SL_SEARCH(SCALAR,slist,x,-,i,const haddr_t,-,key,checked)
             break;
 
         case H5SL_TYPE_STR:
@@ -556,7 +561,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 void *
-H5SL_remove(H5SL_t *slist, void *key)
+H5SL_remove(H5SL_t *slist, const void *key)
 {
     H5SL_node_t **update[H5SL_LEVEL_MAX];       /* 'update' vector */
     H5SL_node_t *checked;                       /* Pointer to last node checked */
