@@ -1,15 +1,15 @@
 #############################
  output for 'h5ls -w80 -r -d tcompound.h5'
 #############################
-/tcompound.h5/dset1      Dataset {5}
+/dset1                   Dataset {5}
     Data:
         (0) {0, 0, 1}, {1, 1, 0.5}, {2, 4, 0.333333333333333}, {3, 9, 0.25},
         (4) {4, 16, 0.2}
-/tcompound.h5/group1     Group
-/tcompound.h5/group1/dset2 Dataset {5}
+/group1                  Group
+/group1/dset2            Dataset {5}
     Data:
         (0) {0, 0}, {1, 1.1}, {2, 2.2}, {3, 3.3}, {4, 4.4}
-/tcompound.h5/group1/dset3 Dataset {3, 6}
+/group1/dset3            Dataset {3, 6}
     Data:
         (0,0) {[0,1,2,3], [1,2,3,4,5,6,2,3,4,5,6,7,3,4,5,6,7,8,4,5,6,7,8,9,5,6,
         (0,0)  7,8,9,10]},
@@ -47,13 +47,13 @@
         (2,4)  11,12,13,14,15,11,12,13,14,15,16]},
         (2,5) {[7,8,9,10], [8,9,10,11,12,13,9,10,11,12,13,14,10,11,12,13,14,15,
         (2,5)  11,12,13,14,15,16,12,13,14,15,16,17]}
-/tcompound.h5/group1/dset4 Dataset {5}
+/group1/dset4            Dataset {5}
     Data:
         (0) {0, 3}, {1, 4}, {2, 5}, {3, 6}, {4, 7}
-/tcompound.h5/group1/type3 Type
-/tcompound.h5/group2     Group
-/tcompound.h5/group2/dset5 Dataset {5}
+/group1/type3            Type
+/group2                  Group
+/group2/dset5            Dataset {5}
     Data:
         (0) {0, 0}, {1, 0.1}, {2, 0.2}, {3, 0.3}, {4, 0.4}
-/tcompound.h5/type1      Type
-/tcompound.h5/type2      Type
+/type1                   Type
+/type2                   Type
