@@ -27,6 +27,9 @@ LDFLAGS="$LDFLAGS -lnoop_stubs"
 RUNSERIAL="yod -sz 1"
 RUNPARALLEL="yod -sz 8"
 
+# CFLAGS must be set else configure set it to -g
+CFLAGS="$CFLAGS"
+
 # What must *always* be present for things to compile correctly?
 #CPPFLAGS="$CPPFLAGS -I."
 
