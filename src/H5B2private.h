@@ -52,7 +52,7 @@
 typedef enum H5B2_subid_t {
     H5B2_TEST_ID	 = 0,	/* B-tree is for testing (do not use for actual data) */
     H5B2_GRP_NAME_ID,		/* B-tree is for group links, ordered by name	*/
-    H5B2_NUM_BTREE_ID           /* Number of B-tree key IDs (must be last)   */
+    H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)   */
 } H5B2_subid_t;
 
 /*
@@ -61,10 +61,10 @@ typedef enum H5B2_subid_t {
  */
 typedef struct H5B2_class_t {
     H5B2_subid_t id;				/*id as found in file*/
-    size_t	nkey_size;			/*size of native (memory) key*/
+    size_t	nrec_size;			/*size of native (memory) record*/
 
     /* Store & retrieve records */
-    herr_t (*store)(const H5F_t *f, hid_t dxpl_id, const void *udata, void *nrecord);  /*  Store record in native key table */
+    herr_t (*store)(const H5F_t *f, hid_t dxpl_id, const void *udata, void *nrecord);  /*  Store record in native record table */
 
     /* Compare records, according to a key */
     herr_t (*compare)(const H5F_t *f, hid_t dxpl_id, const void *rec1, const void *rec2);  /*  Compare two native records */
@@ -83,7 +83,7 @@ typedef struct H5B2_class_t {
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL herr_t H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    size_t node_size, size_t rkey_size,
+    size_t node_size, size_t rrec_size,
     unsigned split_percent, unsigned merge_percent,
     haddr_t *addr_p);
 H5_DLL herr_t H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,

@@ -114,7 +114,7 @@ static H5B2_t *
 H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void UNUSED *udata)
 {
     const H5B2_class_t	*type = (const H5B2_class_t *) _type;
-    size_t node_size, rkey_size;        /* Size info for B-tree */
+    size_t node_size, rrec_size;        /* Size info for B-tree */
     unsigned split_percent, merge_percent;      /* Split & merge info for B-tree */
     H5B2_t		*bt2 = NULL;
     size_t		size;
@@ -163,7 +163,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     UINT32DECODE(p, node_size);
 
     /* raw key size (in bytes) */
-    UINT16DECODE(p, rkey_size);
+    UINT16DECODE(p, rrec_size);
 
     /* depth of tree */
     UINT16DECODE(p, bt2->depth);
@@ -178,7 +178,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     H5F_DECODE_LENGTH(f, p, bt2->root.all_nrec);
 
     /* Initialize shared B-tree info */
-    if(H5B2_shared_init(f, bt2, type, node_size, rkey_size, split_percent, merge_percent)<0)
+    if(H5B2_shared_init(f, bt2, type, node_size, rrec_size, split_percent, merge_percent)<0)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "can't create shared B-tree info")
 
     /* Set return value */
@@ -251,7 +251,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         UINT32ENCODE(p, shared->node_size);
 
         /* raw key size (in bytes) */
-        UINT16ENCODE(p, shared->rkey_size);
+        UINT16ENCODE(p, shared->rrec_size);
 
         /* depth of tree */
         UINT16ENCODE(p, bt2->depth);
@@ -466,8 +466,8 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record");
 
         /* Move to next record */
-        p += shared->rkey_size;
-        native += shared->type->nkey_size;
+        p += shared->rrec_size;
+        native += shared->type->nrec_size;
     } /* end for */
 
     /* Set return value */
@@ -535,8 +535,8 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record");
 
             /* Move to next record */
-            p += shared->rkey_size;
-            native += shared->type->nkey_size;
+            p += shared->rrec_size;
+            native += shared->type->nrec_size;
         } /* end for */
 
 	/* Write the B-tree leaf node */
@@ -759,8 +759,8 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nre
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record");
 
         /* Move to next record */
-        p += shared->rkey_size;
-        native += shared->type->nkey_size;
+        p += shared->rrec_size;
+        native += shared->type->nrec_size;
     } /* end for */
 
     /* Deserialize node pointers for internal node */
@@ -841,8 +841,8 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record");
 
             /* Move to next record */
-            p += shared->rkey_size;
-            native += shared->type->nkey_size;
+            p += shared->rrec_size;
+            native += shared->type->nrec_size;
         } /* end for */
 
         /* Serialize node pointers for internal node */

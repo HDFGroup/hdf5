@@ -87,7 +87,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      shared->node_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      shared->rkey_size);
+	      shared->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      bt2->cache_info.is_dirty ? "True" : "False");
@@ -205,7 +205,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 	      shared->node_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      shared->rkey_size);
+	      shared->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      internal->cache_info.is_dirty ? "True" : "False");
@@ -317,7 +317,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	      shared->node_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      shared->rkey_size);
+	      shared->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      leaf->cache_info.is_dirty ? "True" : "False");
