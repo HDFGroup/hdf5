@@ -55,7 +55,7 @@ TEST() {
    shift
 
    # Run test.
-   TESTING $1 
+   TESTING $TEST_ERR
    (
       echo "#############################"
       echo "Expected output for $TEST_ERR" 
