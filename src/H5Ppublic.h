@@ -39,6 +39,10 @@ typedef enum H5P_class_t {
     H5P_NCLASSES         = 5    /*this must be last!                         */
 } H5P_class_t;
 
+/* Alias for the previous H5P_DATASER_XFER property list */
+/* This should eventually be publicly decommisioned - 10/6/99 - QAK */
+#define H5P_DATASET_XFER H5P_DATA_XFER
+
 #ifdef __cplusplus
 extern "C" {
 #endif
