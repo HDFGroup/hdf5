@@ -1,13 +1,19 @@
 	    Installation instructions for Parallel HDF5
 	    -------------------------------------------
-		(last updated: Feb 15, 1998)
+		(last updated: April 22, 1998)
 
 This file contains instructions for the installation of parallel
-HDF5.  Platforms supported by this release are SGI Origin 2000
-and IBM SP2.  The steps are kind of unnatural and will be more
-automized in the next release.   If you have difficulties installing
-the software in your system, please send mail to
+HDF5.  Platforms supported by this release are SGI Origin 2000,
+IBM SP2, and the Intel TFLOP.  The steps are kind of unnatural and
+will be more automized in the next release.   If you have difficulties
+installing the software in your system, please send mail to
 	hdfparallel@ncsa.uiuc.edu
+
+Note:
+For the users of the Intel TFLOPS machine, a special sequence of steps
+for the parallel install may be found in the file:  INSTALL.ascired.
+Also, MPI/MPIO information similar to that found below may be found in
+INSTALL_parallel.ascired.
 
 First, you must obtain and unpack the HDF5 source as
 described in the file INSTALL.  You also need to obtain the
@@ -32,3 +38,4 @@ MPI_LIB="$mpi1_lib $mpio_lib"
 export MPI_LIB
 
 ./configure --enable-parallel
+

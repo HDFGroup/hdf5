@@ -1,11 +1,18 @@
 
-FOR THE ASCI RED MACHINE:
+FOR THE INTEL TFLOPS MACHINE:
 
-The setup process for building the HDF5 library for the ASCI Red machine
-is done by a coordination of events from sasn100 and janus.  Special 
-effort must be made to move the compiled and linked testers to disks 
-local to the processors for execution.  This special effort is shown
-here at steps 8) and steps 9).
+Below are the step-by-step procedures for building, testing, and
+installing both the sequential and parallel versions of the HDF5 library.
+
+---------------
+Sequential HDF5:
+---------------
+
+The setup process for building the sequential HDF5 library for the
+ASCI Red machine is done by a coordination of events from sasn100 and
+janus.  Special effort must be made to move the compiled and linked
+testers to disks local to the processors for execution.  This special
+effort is shown here at steps 9) and steps 10).
 
 The total required steps are something similar to:
 FROM SASN100,
@@ -18,33 +25,115 @@ FROM SASN100,
 
 4) ./configure tflop
 
+5) make H5detect
+
 
 FROM JANUS, 
 
-5) cd ./hdf5
+6) cd ./hdf5
 
-6) make H5Tinit.c
+7) make H5Tinit.c
 
 
 FROM SASN100,
 
-7) make >&! comp.out &
+8) make >&! comp.out &
 
 
 When everything is finished compiling and linking,
 FROM JANUS, 
 
-8) cp -r ../hdf5 /scratch
+9) cp -r ../hdf5 /scratch
 
-9) cd /scratch/hdf5/test
+10) cd /scratch/hdf5/test
 
-10) make test >&! test.out
+11) make test >&! test.out
 
 
 Once satisfied with the test results, as long as you 
 have the correct permission,
 FROM SASN100,
 
-11) make install
+12) make install
+
+
+---------------
+Parallel HDF5:
+---------------
+
+The setup process for building the parallel version of the HDF5 library for the
+ASCI Red machine is very similar to the sequential version.  It is done by a
+coordination of events from sasn100 and janus.  Special effort must be made to
+move the compiled and linked single processor testers to disks local to the
+processor for execution.  This special effort is shown here at steps 9) and
+steps 10).  Following these test, there are the edit, compile, link, and
+execution of parallel tests described in steps 12) through 16).
+
+
+The total required steps are something similar to:
+FROM SASN100,
+
+1) uncompress hdf5-1.0.0a.tar.Z
+
+2) tar xvf hdf5-1.0.0a.tar
+
+3) cd ./hdf5
+
+4) sh INSTALL_parallel.ascired   /* this is different from the sequential version */
+
+5) make H5detect
+
+
+FROM JANUS, 
+
+6) cd ./hdf5
+
+7) make H5Tinit.c
+
+
+FROM SASN100,
+
+8) make >&! comp.out &
+
+
+When everything is finished compiling and linking,
+FROM JANUS, 
+
+9) cp -r ../hdf5 /scratch
+
+10) cd /scratch/hdf5/test
+
+11) make test >&! test.out
+
+
+Once satisfied with the single processor test results, 
+FROM SASN100,
+
+12) cd testpar
+
+13) /* edit testphdf5.c, edit the following line */
+    char    *filenames[]={ "pfs:/pfs/multi/tmp_1/your_own/Eg1.h5f", "pfs:/pfs/multi/tmp_1/your_own/Eg2.h5f" };
+
+    /* change "your_own" to your own directory name */
+    char    *filenames[]={ "pfs:/pfs/multi/tmp_1/my_name/Eg1.h5f", "pfs:/pfs/multi/tmp_1/my_name/Eg2.h5f" };
+
+    /* delete or comment-out the next line */
+    char    *filenames[]={ "ParaEg1.h5f", "ParaEg2.h5f" };
+
+14) make -f Makefile.ascired
+
+When everything is finished compiling and linking,
+FROM JANUS, 
+
+15) cd ./hdf5/testpar
+
+16) make test -f Makefile.ascired >&! test.out
+
+
+Once satisfied with the parallel test results, as long as you 
+have the correct permission,
+FROM SASN100,
+
+17) make install
 
 

@@ -12,7 +12,11 @@ can do the following:
 	$ make test
 	$ make install		# Optional
 
+Note:
+For the users of the Intel TFLOPS machine, a special sequence of steps
+for the install may be found in the file:  INSTALL.ascired.
 
+=======
 Step 0: Install optional third-party packages.
 
     * GNU zlib compression library, version 1.0.2 or later is used for
@@ -136,5 +140,4 @@ Step 5. Install public files.
 Step 6. Subscribe to mailing lists.
 
     * Subscribe to the mailing lists described in the README file.
-
 

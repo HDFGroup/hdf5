@@ -1,0 +1,53 @@
+#! /bin/sh
+# How to create a parallel version of HDF5 on the Intel Asci Red System
+# that uses MPI and MPI-IO.
+
+# Read the INSTALL.ascired file to understand the configure/make process
+# for the sequential (i.e., uniprocessor) version of HDF5.
+# The process for creating the parallel version of HDF5 using MPI-IO
+# is similar, but first you will have to set up some environment variables
+# with values specific to your local installation.
+# The relevant variables are shown below, with values that work for Sandia'a
+# ASCI Red Tflops machine as of the writing of these instructions (980421).
+
+# Don't try to make a parallel version of HDF5 from the same hdf5 root
+# directory where you made a sequential version of HDF5 -- start with
+# a fresh copy.
+# Here are the flags you must set before running the ./configure program
+# to create the parallel version of HDF5.
+# (We use sh here, but of course you can adapt to whatever shell you like.)
+
+# compile for MPI jobs
+CC=cicc
+
+# The following flags are only needed when compiling/linking a user program
+# for execution.
+#
+debug="-g -UH5O_DEBUG -DH5F_OPT_SEEK=0"
+default_mode="-DDOS386 $debug -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+MPICH="/usr/community/mpi-io/romio/mpich_1.1.0"
+ROMIO="/usr/community/mpi-io/romio/current"
+mpi1_inc="-I$MPICH/include"
+mpi1_lib="-L$MPICH/lib/tflops/ptls"
+mpio_inc="-I$ROMIO/include"
+mpio_lib="-L$ROMIO/lib/tflops"
+
+MPI_INC="$mpi1_inc $mpio_inc"
+MPI_LIB="$mpi1_lib $mpio_lib"
+
+CFLAGS="$default_mode"
+
+export CC CFLAGS MPI_INC MPI_LIB
+
+# Once these variables are set to the proper values for your installation,
+# you can run the configure program (i.e., ./configure tflop --enable-parallel=mpio)
+# to set up the Makefiles, etc.
+# After configuring, run the make as described in the INSTALL file.
+
+# When compiling and linking your application, don't forget to compile with
+# cicc and link to the MPI-IO library and the parallel version of the HDF5
+# library (that was created and installed with the configure/make process).
+
+./configure tflop --enable-parallel=mpio
+

@@ -63,6 +63,9 @@ lib progs test _test install uninstall TAGS dep depend:
 	done
 
 # Number format detection
+H5detect: 
+	(cd src && $(MAKE) $@)
+
 H5Tinit.c: 
 	(cd src && $(MAKE) $@)
 
