@@ -11,7 +11,7 @@
  ****************************************************************************/
 
 /*
- * This file contains public declarations for the H5 module.
+ * This file contains public declarations for the HDF5 module.
  */
 #ifndef _H5public_H
 #define _H5public_H
@@ -27,7 +27,7 @@
 /* Version numbers */
 #define H5_VERS_MAJOR	1       /* For major interface/format changes  	     */
 #define H5_VERS_MINOR	0       /* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	63      /* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	64      /* For tweaks, bug-fixes, or development     */
 
 #define H5check()	H5vers_check(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				     H5_VERS_RELEASE)
