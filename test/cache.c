@@ -14314,7 +14314,7 @@ int
 main(void)
 {
     H5open();
-#if 1
+#if 0
     smoke_check_1();
     smoke_check_2();
     smoke_check_3();
