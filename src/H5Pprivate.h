@@ -58,7 +58,7 @@ typedef struct H5P_genprop_tag {
 typedef struct H5P_genclass_tag {
     struct H5P_genclass_tag *parent;     /* Pointer to parent class */
     char *name;         /* Name of property list class */
-    uintn   nprops;     /* Number of properties in class */
+    size_t  nprops;     /* Number of properties in class */
     uintn   hashsize;   /* Hash table size */
     uintn   plists;     /* Number of property lists that have been created since the last modification to the class */
     uintn   classes;    /* Number of classes that have been derived since the last modification to the class */
@@ -78,7 +78,7 @@ typedef struct H5P_genclass_tag {
 /* Define structure to hold property list information */
 typedef struct H5P_genplist_tag {
     H5P_genclass_t *pclass; /* Pointer to class info */
-    uintn   nprops;         /* Number of properties in class */
+    size_t  nprops;         /* Number of properties in class */
     uintn   class_init:1;   /* Whether the class initialization callback finished successfully */
 
     /* Hash size for a property list is same as class */

@@ -4691,11 +4691,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_get_size
+    H5P_get_size_plist
  PURPOSE
     Internal routine to query the size of a property in a property list.
  USAGE
-    herr_t H5P_get_size(plist, name)
+    herr_t H5P_get_size_plist(plist, name)
         H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
         size_t *size;           OUT: Size of property
@@ -4711,12 +4711,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_get_size(H5P_genplist_t *plist, const char *name, size_t *size)
+static herr_t H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=SUCCEED;      /* return value */
 
-    FUNC_ENTER (H5P_get_size, FAIL);
+    FUNC_ENTER (H5P_get_size_plist, FAIL);
 
     assert(plist);
     assert(name);
@@ -4731,17 +4731,17 @@ static herr_t H5P_get_size(H5P_genplist_t *plist, const char *name, size_t *size
 
 done:
     FUNC_LEAVE (ret_value);
-}   /* H5P_get_size() */
+}   /* H5P_get_size_plist() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pget_size
+    H5P_get_size_pclass
  PURPOSE
-    Routine to query the size of a property in a property list.
+    Internal routine to query the size of a property in a property class.
  USAGE
-    herr_t H5Pget_size(plist_id, name)
-        hid_t plist_id;         IN: Property list to check
+    herr_t H5P_get_size_pclass(pclass, name)
+        H5P_genclass_t *pclass; IN: Property class to check
         const char *name;       IN: Name of property to query
         size_t *size;           OUT: Size of property
  RETURNS
@@ -4756,24 +4756,87 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pget_size(hid_t plist_id, const char *name, size_t *size)
+static herr_t H5P_get_size_pclass(H5P_genclass_t *pclass, const char *name, size_t *size)
 {
-    H5P_genplist_t	*plist;    /* Property list to modify */
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    herr_t ret_value=SUCCEED;      /* return value */
+
+    FUNC_ENTER (H5P_get_size_pclass, FAIL);
+
+    assert(pclass);
+    assert(name);
+    assert(size);
+
+    /* Find property */
+    if((prop=H5P_find_prop(pclass->props,pclass->hashsize,name))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
+
+    /* Get property size */
+    *size=prop->size;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_get_size_pclass() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pget_size
+ PURPOSE
+    Routine to query the size of a property in a property list or class.
+ USAGE
+    herr_t H5Pget_size(id, name)
+        hid_t id;               IN: ID of property list or class to check
+        const char *name;       IN: Name of property to query
+        size_t *size;           OUT: Size of property
+ RETURNS
+    Success: non-negative value
+    Failure: negative value
+ DESCRIPTION
+        This routine retrieves the size of a property's value in bytes.  Zero-
+    sized properties are allowed and return a value of 0.  This function works
+    for both property lists and classes.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t H5Pget_size(hid_t id, const char *name, size_t *size)
+{
+    H5P_genclass_t	*pclass;   /* Property class to query */
+    H5P_genplist_t	*plist;    /* Property list to query */
     herr_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5Pget_size, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
     if (size==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property size");
 
-    /* Create the new property list class */
-    if ((ret_value=H5P_get_size(plist,name,size))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query size in plist");
+    if (H5I_GENPROP_LST == H5I_get_type(id)) {
+        if (NULL == (plist = H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+        /* Check the property size */
+        if ((ret_value=H5P_get_size_plist(plist,name,size))<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query size in plist");
+    } /* end if */
+    else 
+        if (H5I_GENPROP_CLS == H5I_get_type(id)) {
+            if (NULL == (pclass = H5I_object(id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+            /* Check the property size */
+            if ((ret_value=H5P_get_size_pclass(pclass,name,size))<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query size in plist");
+        } /* end if */
+        else 
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
     FUNC_LEAVE (ret_value);
@@ -4864,6 +4927,136 @@ done:
 
     FUNC_LEAVE (ret_value);
 }   /* H5Pget_class_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_get_nprops_plist
+ PURPOSE
+    Internal routine to query the number of properties in a property list
+ USAGE
+    herr_t H5P_get_nprops_plist(plist, nprops)
+        H5P_genplist_t *plist;  IN: Property list to check
+        size_t *nprops;         OUT: Number of properties in the property list
+ RETURNS
+    Success: non-negative value
+    Failure: negative value
+ DESCRIPTION
+        This routine retrieves the number of a properties in a property list.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
+{
+    herr_t ret_value=SUCCEED;      /* return value */
+
+    FUNC_ENTER (H5P_get_nprops_plist, FAIL);
+
+    assert(plist);
+    assert(nprops);
+
+    /* Get property size */
+    *nprops=plist->nprops;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_get_nprops_plist() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_get_nprops_pclass
+ PURPOSE
+    Internal routine to query the number of properties in a property class
+ USAGE
+    herr_t H5P_get_nprops_pclass(pclass, nprops)
+        H5P_genclass_t *pclass;  IN: Property class to check
+        size_t *nprops;         OUT: Number of properties in the property list
+ RETURNS
+    Success: non-negative value
+    Failure: negative value
+ DESCRIPTION
+        This routine retrieves the number of a properties in a property class.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
+{
+    herr_t ret_value=SUCCEED;      /* return value */
+
+    FUNC_ENTER (H5P_get_nprops_pclass, FAIL);
+
+    assert(pclass);
+    assert(nprops);
+
+    /* Get property size */
+    *nprops=pclass->nprops;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_get_nprops_pclass() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pget_nprops
+ PURPOSE
+    Routine to query the size of a property in a property list or class.
+ USAGE
+    herr_t H5Pget_nprops(id, nprops)
+        hid_t id;               IN: ID of Property list or class to check
+        size_t *nprops;         OUT: Number of properties in the property object
+ RETURNS
+    Success: non-negative value
+    Failure: negative value
+ DESCRIPTION
+        This routine retrieves the number of properties in a property list or
+    class.  If a property class ID is given, the number of registered properties
+    in the class is returned in NPROPS.  If a property list ID is given, the
+    current number of properties in the list is returned in NPROPS.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t H5Pget_nprops(hid_t id, size_t *nprops)
+{
+    H5P_genplist_t	*plist;    /* Property list to query */
+    H5P_genclass_t	*pclass;   /* Property class to query */
+    herr_t ret_value=FAIL;     /* return value */
+
+    FUNC_ENTER (H5Pget_nprops, FAIL);
+
+    /* Check arguments. */
+    if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
+    if (nprops==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property nprops pointer");
+
+    if(H5I_GENPROP_LST == H5I_get_type(id)) {
+        if (NULL == (plist = H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if ((ret_value=H5P_get_nprops_plist(plist,nprops))<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in plist");
+    } /* end if */
+    else 
+        if(H5I_GENPROP_CLS == H5I_get_type(id)) {
+            if (NULL == (pclass = H5I_object(id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
+            if ((ret_value=H5P_get_nprops_pclass(pclass,nprops))<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in pclass");
+        } /* end if */
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Pget_nprops() */
 
 
 /*--------------------------------------------------------------------------
@@ -5185,7 +5378,7 @@ done:
  PURPOSE
     Internal routine to query the value of a property in a property list.
  USAGE
-    herr_t H5P_get_size(plist, name, value)
+    herr_t H5P_get(plist, name, value)
         H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
         void *value;            OUT: Pointer to the buffer for the property value
@@ -5267,7 +5460,7 @@ done:
  PURPOSE
     Routine to query the value of a property in a property list.
  USAGE
-    herr_t H5P_get_size(plist_id, name, value)
+    herr_t H5Pget(plist_id, name, value)
         hid_t plist_id;         IN: Property list to check
         const char *name;       IN: Name of property to query
         void *value;            OUT: Pointer to the buffer for the property value
@@ -5390,6 +5583,9 @@ static herr_t H5P_remove(H5P_genplist_t *plist, const char *name)
         } /* end while */
     } /* end else */
 
+    /* Decrement the number of properties in list */
+    plist->nprops--;
+
     /* Set return value */
     ret_value=SUCCEED;
 
@@ -5511,6 +5707,9 @@ static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name)
             tprop=tprop->next;
         } /* end while */
     } /* end else */
+
+    /* Decrement the number of registered properties in class */
+    pclass->nprops--;
 
     /* Set return value */
     ret_value=SUCCEED;
