@@ -492,10 +492,11 @@ hid_t H5File::getLocId() const
 ///		order to learn the true size of the underlying file.
 // Programmer   Raymond Lu - June 24, 2004
 //--------------------------------------------------------------------------
-haddr_t H5File::getFileSize(void) const
+hsize_t H5File::getFileSize() const
 {
-   haddr_t file_size = H5Fget_filesize(id);
-   if( file_size < 0 )
+   hsize_t file_size;
+   herr_t ret_value = H5Fget_filesize(id, &file_size);
+   if (ret_value < 0)
    {
       throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
    }
