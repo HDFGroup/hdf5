@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Performance</title>
+  </head>
+
+  <body bgcolor="#FFFFFF">
+
+
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+   <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+   <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+   <a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+   <!--
+   <a href="Glossary.html">Glossary</a><br>
+   -->
+</td>
+<td valign=top align=right>
+   And in this document, the 
+   <a href="H5.user.html"><strong>HDF5 User's Guide:</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;
+      <br>
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
+      <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
+      <a href="Groups.html">Groups</a>&nbsp;&nbsp;
+      <br>
+      <a href="References.html">References</a>&nbsp;&nbsp;
+      <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
+      <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
+      <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
+      <br>
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Palettes.html">Palettes</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
+      <br>
+      Performance&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <br>
+      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
+</td></tr>
+</table>
+</center>
+<hr>
+
+
+    <h1>Performance Analysis and Issues</h1>
+
+    <h2>1. Introduction</h2>
+
+    <p>This section includes brief discussions of performance issues 
+      in HDF5 and performance analysis tools for HDF5 or pointers to 
+      such discussions.
+
+    <h2>2. Dataset Chunking</h2>
+
+        Appropriate dataset chunking can make a siginificant difference
+        in HDF5 performance.  This topic is discussed in 
+        <a href="Chunking.html">Dataset Chunking Issues</a> elsewhere
+        in this <cite>User's Guide</cite>.
+
+    <h2>3. Use of the Pablo Instrumentation of HDF5</h2>
+
+      Pablo HDF5 Trace software provides a means of measuring the 
+      performance of programs using HDF5. 
+
+    <p>The Pablo software consists 
+      of an instrumented copy of the HDF5 library, the Pablo Trace and 
+      Trace Extensions libraries, and some utilities for processing the 
+      output.  The instrumented version of the HDF5 library has hooks 
+      inserted into the HDF5 code which call routines in the Pablo Trace 
+      library just after entry to each instrumented HDF5 routine and 
+      just prior to exit from the routine.  The Pablo Trace Extension 
+      library has programs that track the I/O activity between the 
+      entry and exit of the HDF5 routine during execution.  
+
+    <p>A few lines of code must be inserted in the user's main program 
+      to enable tracing and to specify which HDF5 procedures are to be 
+      traced.  The program is linked with the special HDF5 and Pablo 
+      libraries to produce an executable.   Running this executable on 
+      a single processor produces an output file called the trace file 
+      which contains records, called Pablo Self-Defining Data Format 
+      (SDDF) records, which can later be analyzed using the 
+      HDF5 Analysis Utilities. The HDF5 Analysis Utilites can be used 
+      to interpret the SDDF records in the trace files to produce a 
+      report describing the HDF5 IO activity that occurred during 
+      execution.  
+
+    <p>For further instructions, see the file <code>READ_ME</code> 
+      in the <code> $(toplevel)/hdf5/pablo/ </code> subdirectory of 
+      the HDF5 source code distribution. 
+
+    <p>For further information about Pablo and the 
+      Self-Defining Data Format, visit the Pablo website at
+      <code><a href="http://www-pablo.cs.uiuc.edu/">http://www-pablo.cs.uiuc.edu/</a></code>.
+
+
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+   <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+   <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+   <a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+   <!--
+   <a href="Glossary.html">Glossary</a><br>
+   -->
+</td>
+<td valign=top align=right>
+   And in this document, the 
+   <a href="H5.user.html"><strong>HDF5 User's Guide:</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;
+      <br>
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
+      <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
+      <a href="Groups.html">Groups</a>&nbsp;&nbsp;
+      <br>
+      <a href="References.html">References</a>&nbsp;&nbsp;
+      <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
+      <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
+      <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
+      <br>
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Palettes.html">Palettes</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
+      <br>
+      Performance&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <br>
+      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
+</td></tr>
+</table>
+</center>
+	
+
+
+<hr>
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+</address>
+
+<!-- Created: Thu Oct 14 16:46:00 CDT 1999 -->
+<!-- hhmts start -->
+Last modified: 14 October 1999
+<!-- hhmts end -->
+
+  </body>
+</html>
