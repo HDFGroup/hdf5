@@ -45,6 +45,7 @@ typedef struct H5D_chunk_info_t {
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
     hssize_t coords[H5O_LAYOUT_NDIMS];    /* Coordinates of chunk in file dataset's dataspace */
     H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
+    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
 } H5D_chunk_info_t;
 
 /* Main structure holding the mapping between file chunks and memory */
@@ -53,6 +54,7 @@ typedef struct fm_map {
     hsize_t last_index;         /* Index of last chunk operated on */
     const H5S_t *file_space;    /* Pointer to the file dataspace */
     const H5S_t *mem_space;     /* Pointer to the memory dataspace */
+    unsigned mem_space_copy;    /* Flag to indicate that the memory dataspace must be copied */
     hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
     H5S_t *last_chunk;          /* Pointer to last memory chunk's dataspace */
     H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
@@ -2391,6 +2393,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     /* Point at the dataspaces */
     fm->file_space=file_space;
     fm->mem_space=equiv_mspace;
+    fm->mem_space_copy=equiv_mspace_init;       /* Make certain to copy memory dataspace if necessary */
 
     /* Get type of selection on disk & in memory */
     if((fsel_type=H5S_get_select_type(file_space))<0)
@@ -2596,8 +2599,9 @@ H5D_free_chunk_info(void *_chunk_info)
     /* Close the chunk's file dataspace */
     (void)H5S_close(chunk_info->fspace);
 
-    /* Close the chunk's memory dataspace */
-    (void)H5S_close(chunk_info->mspace);
+    /* Close the chunk's memory dataspace, if it's not shared */
+    if(!chunk_info->mspace_shared)
+        (void)H5S_close(chunk_info->mspace);
 
     /* Free the actual chunk info */
     H5FL_FREE(H5D_chunk_info_t,chunk_info);
@@ -2752,6 +2756,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
 
             /* Set the memory chunk dataspace */
             new_chunk_info->mspace=NULL;
+            new_chunk_info->mspace_shared=0;
 
             /* Compute the chunk's coordinates */
             if(H5D_chunk_coords_assist(new_chunk_info->coords, fm->f_ndims, fm->chunks, chunk_index)<0) {
@@ -2873,9 +2878,19 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
         chunk_info=curr_node->data;
         assert(chunk_info);
 
-        /* Copy the memory dataspace & selection to be the chunk's dataspace & selection */
-        if((chunk_info->mspace = H5S_copy(fm->mem_space))==NULL)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+        /* Check if it's OK to share dataspace */
+        if(fm->mem_space_copy) {
+            /* Copy the memory dataspace & selection to be the chunk's dataspace & selection */
+            if((chunk_info->mspace = H5S_copy(fm->mem_space))==NULL)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+        } /* end if */
+        else {
+            /* Just point at the memory dataspace & selection */
+            chunk_info->mspace=fm->mem_space;
+
+            /* Indicate that the chunk's memory space is shared */
+            chunk_info->mspace_shared=1;
+        } /* end else */
     } /* end if */
     else {
         /* Get bounding box for file selection */
