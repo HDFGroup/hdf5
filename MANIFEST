@@ -312,6 +312,10 @@
 ./doc/html/extern2.gif
 ./doc/html/extern2.obj			_DO_NOT_DISTRIBUTE_
 
+./doc/html/cpplus/CppInterfaces.html
+./doc/html/cpplus/CppUserNotes.doc
+./doc/html/cpplus/CppUserNotes.pdf
+
 ./doc/html/fortran/F90UserNotes.html
 ./doc/html/fortran/h5a_FORTRAN.html
 ./doc/html/fortran/h5d_FORTRAN.html
