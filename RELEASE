@@ -82,6 +82,8 @@ Library
    * Added bounded garbage collection for the free lists when they run out of
      memory and also added H5set_free_list_limits API call to allow users to
      put an upper limit on the amount of memory used for free lists.
+   * Added new Virtual File Driver, Stream VFD, to send/receive entire
+     HDF5 files via socket connections.
 
 
 Configuration
@@ -97,6 +99,8 @@ Configuration
      if the MPI library is in the system library.
    * Added support for pthread library and thread-safe option.
    * The libhdf5.settings file shows the correct machine byte-sex.
+   * Added option "--with-Stream-VFD" to configure w/o the Stream VFD.
+     For Solaris, added -lsocket to the LIBS list of libraries.
 
 Tools
 ------
@@ -115,6 +119,8 @@ Tools
       and VERSION13, used in conditional compilation.  Updated the Windows project files
       for the tools.            
     * h5dump displays opaque and bitfield data correctly.
+    * h5dump and h5ls can browse files created with the Stream VFD
+      (eg. "h5ls <hostname>:<port>").
 
 Documentation
 -------------
@@ -154,4 +160,4 @@ Known Problems:
 o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
 
-
+o The Stream VFD was not tested yet under Windows.
