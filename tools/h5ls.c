@@ -16,18 +16,6 @@
 #include <h5tools.h>
 
 /*
- * File drivers
- */
-#if defined VERSION13
-#include <H5FDsec2.h>
-#include <H5FDmulti.h>
-#include <H5FDfamily.h>
-#elif defined VERSION12
-#include <H5Fpublic.h>
-#endif
-
-
-/*
  * If defined then include the file name as part of the object name when
  * printing full object names. Otherwise leave the file name off.
  */

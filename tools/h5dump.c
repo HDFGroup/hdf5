@@ -838,7 +838,7 @@ dump_attr(hid_t attr, const char *attr_name, void UNUSED *op_data)
  *
  *-----------------------------------------------------------------------*/
 static herr_t
-dump_selected_attr(hid_t loc_id, char *name)
+dump_selected_attr(hid_t loc_id, const char *name)
 {
     int j;
     char *obj_name, *attr_name;
@@ -1685,7 +1685,7 @@ main(int argc, const char *argv[])
 {
     hid_t               fid, gid;
     const char         *progname = "h5dump";
-    char               *fname = NULL;
+    const char         *fname = NULL;
     int                 i, display_bb = 0, display_all = 1, newwidth = 0;
     void               *edata;
     hid_t               (*func)(void*);
@@ -1834,8 +1834,7 @@ main(int argc, const char *argv[])
     /* init the find_objs_t */
     info.threshold = 0;
     info.prefix_len = prefix_len;
-    info.prefix = malloc((size_t)info.prefix_len);
-    info.prefix[0] = '\0';
+    info.prefix = calloc((size_t)info.prefix_len, 1);
     info.group_table = group_table;
     info.type_table = type_table;
     info.dset_table = dset_table;
@@ -1843,7 +1842,6 @@ main(int argc, const char *argv[])
 
     /* find all shared objects */
     H5Giterate(fid, "/", NULL, find_objs, (void *)&info);
-    prefix = NULL;
 
     /* does there exist unamed committed data type */
     for (i = 0; i < type_table->nobjs; i++)

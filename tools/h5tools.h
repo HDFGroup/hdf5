@@ -14,13 +14,9 @@
 #include <hdf5.h>
 #include <stdio.h>
 
-#if H5_VERS_MAJOR == 1
-#  if H5_VERS_MINOR == 2
-#    define VERSION12
-#  elif H5_VERS_MINOR == 3
-#    define VERSION13
-#  endif	/* H5_VERS_MINOR == 2 */
-#endif	/* H5_VERS_MAJOR = 1 */
+#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 2
+#define VERSION12
+#endif	/* H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 2 */
 
 #define ESCAPE_HTML     1
 
@@ -387,7 +383,7 @@ enum {
  * the ``opt_arg'' variable. get_option returns the shortname equivalent of
  * the option. The long options are specified in the following way:
  *
- * struct long_options[] = {
+ * struct long_options foo[] = {
  * 	{ "filename", require_arg, 'f' },
  * 	{ "append", no_arg, 'a' },
  * 	{ "width", require_arg, 'w' },
@@ -410,8 +406,8 @@ enum {
  * end.
  */
 typedef struct long_options {
-    const char  *name;          /* name of the long option		*/
-    int          has_arg;       /* whether we should look for an arg	*/
+    const char  *name;          /* name of the long option              */
+    int          has_arg;       /* whether we should look for an arg    */
     char         shortval;      /* the shortname equivalent of long arg
                                  * this gets returned from get_option   */
 } long_options;
@@ -424,9 +420,9 @@ extern int    get_option(int argc, const char **argv, const char *opt,
 
 extern hid_t  h5dump_fixtype(hid_t f_type);
 extern int    h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset,
-		          hid_t p_typ, int indentlevel);
+                          hid_t p_typ, int indentlevel);
 extern int    h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
-		         hid_t type, hid_t space, void *mem, int indentlevel);
+                         hid_t type, hid_t space, void *mem, int indentlevel);
 extern hid_t  h5dump_fopen(const char *fname, char *drivername, size_t drivername_len);
 
 
@@ -476,10 +472,11 @@ extern void    init_prefix(char **temp, int);
 
 #define COL             3
 
-extern int     indent;
+extern int     indent;              /*how far in to indent the line         */
+extern int     nCols;               /*max number of columns for outputting  */
+extern FILE   *rawdatastream;       /*output stream for raw data            */
+
 extern void    indentation(int);
-extern int     nCols;
-extern FILE   *rawdatastream;		/* output stream for raw data */
 
 /* taken from h5dump.h*/
 #define BOOT_BLOCK      "BOOT_BLOCK"
