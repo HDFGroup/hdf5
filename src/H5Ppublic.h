@@ -84,6 +84,7 @@ __DLLVAR__ hid_t H5P_MOUNT_g;
 __DLL__ hid_t H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
             H5P_cls_create_func_t cls_create, void *create_data,
             H5P_cls_close_func_t cls_close, void *close_data);
+__DLL__ char *H5Pget_class_name(hid_t pclass_id);
 __DLL__ hid_t H5Pcreate_list(hid_t cls_id);
 __DLL__ herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create,
@@ -95,6 +96,7 @@ __DLL__ herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
 __DLL__ herr_t H5Pset(hid_t plist_id, const char *name, void *value);
 __DLL__ htri_t H5Pexist(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Pget_size(hid_t plist_id, const char *name, size_t *size);
+__DLL__ hid_t H5Pget_class_new(hid_t plist_id);
 __DLL__ herr_t H5Pget(hid_t plist_id, const char *name, void * value);
 __DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Punregister(hid_t pclass_id, const char *name);

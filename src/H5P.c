@@ -1,13 +1,13 @@
 /****************************************************************************
-* NCSA HDF								   *
-* Software Development Group						   *
-* National Center for Supercomputing Applications			   *
-* University of Illinois at Urbana-Champaign				   *
-* 605 E. Springfield, Champaign IL 61820				   *
-*									   *
-* For conditions of distribution and use, see the accompanying		   *
-* hdf/COPYING file.							   *
-*									   *
+* NCSA HDF								                                    *
+* Software Development Group						                        *
+* National Center for Supercomputing Applications			                *
+* University of Illinois at Urbana-Champaign				                *
+* 605 E. Springfield, Champaign IL 61820				                    *
+*									                                        *
+* For conditions of distribution and use, see the accompanying		        *
+* hdf/COPYING file.							                                *
+*									                                        *
 ****************************************************************************/
 
 #ifdef RCSID
@@ -48,6 +48,14 @@ hid_t H5P_FILE_ACCESS_g         = FAIL;
 hid_t H5P_DATASET_CREATE_g      = FAIL;
 hid_t H5P_DATA_XFER_g           = FAIL;
 hid_t H5P_MOUNT_g               = FAIL;
+
+/* Local static functions */
+static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
+     const char *name, uintn hashsize, uintn internal,
+     H5P_cls_create_func_t cls_create, void *create_data,
+     H5P_cls_close_func_t cls_close, void *close_data);
+static herr_t H5P_close_list(void *_plist);
+static herr_t H5P_close_class(void *_pclass);
 
 /* Declare a free list to manage the H5P_t struct */
 H5FL_DEFINE_STATIC(H5P_t);
@@ -122,7 +130,6 @@ H5P_hash_name(const char *s, uintn hashsize)
 {
     return(H5P_xor_name(s)%hashsize);
 }   /* end H5P_hash_name() */
-
 
 /*--------------------------------------------------------------------------
 NAME
@@ -3496,6 +3503,14 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
             pclass->plists--;
             break;
 
+        case H5P_MOD_INC_REF:        /* Increment the ID reference count*/
+            pclass->ref_count++;
+            break;
+
+        case H5P_MOD_DEC_REF:        /* Decrement the ID reference count*/
+            pclass->ref_count--;
+            break;
+
         case H5P_MOD_CHECK:         /* NOOP, just check if we can delete the class */
             break;
         
@@ -3552,7 +3567,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5P_genclass_t *
+static H5P_genclass_t *
 H5P_create_class(H5P_genclass_t *par_class, const char *name, uintn hashsize, uintn internal,
     H5P_cls_create_func_t cls_create, void *create_data,
     H5P_cls_close_func_t cls_close, void *close_data
@@ -3582,6 +3597,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, uintn hashsize, ui
     pclass->hashsize = hashsize;
     pclass->plists = 0;     /* No properties lists of this class yet */
     pclass->classes = 0;    /* No classes derived from this class yet */
+    pclass->ref_count = 1;  /* This is the first reference to the new class */
     pclass->internal = internal;
     pclass->deleted = 0;    /* Not deleted yet... :-) */
 
@@ -3709,7 +3725,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5P_genplist_t *H5P_create_list(H5P_genclass_t *pclass)
+static H5P_genplist_t *H5P_create_list(H5P_genclass_t *pclass)
 {
     H5P_genclass_t *tclass=NULL;        /* Temporary class pointer */
     H5P_genplist_t *plist=NULL;         /* New property list created */
@@ -3983,7 +3999,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
+static herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
     H5P_prp_get_func_t prp_get, H5P_prp_close_func_t prp_close)
 {
@@ -4287,7 +4303,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
+static herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_close_func_t prp_close)
 {
@@ -4482,7 +4498,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_set(hid_t plist_id, const char *name, void *value)
+static herr_t H5P_set(hid_t plist_id, const char *name, void *value)
 {
     H5P_genplist_t *plist;      /* Property list to modify */
     H5P_genprop_t *prop;        /* Temporary property pointer */
@@ -4611,7 +4627,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t H5P_exist(H5P_genplist_t *plist, const char *name)
+static htri_t H5P_exist(H5P_genplist_t *plist, const char *name)
 {
     htri_t ret_value=FAIL;     /* return value */
 
@@ -4695,7 +4711,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_get_size(H5P_genplist_t *plist, const char *name, size_t *size)
+static herr_t H5P_get_size(H5P_genplist_t *plist, const char *name, size_t *size)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=SUCCEED;      /* return value */
@@ -4766,6 +4782,92 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P_get_class
+ PURPOSE
+    Internal routine to query the class of a generic property list
+ USAGE
+    H5P_genclass_t *H5P_get_class(plist)
+        H5P_genplist_t *plist;    IN: Property list to check
+ RETURNS
+    Success: Pointer to a copy of the class for a property list
+    Failure: NULL
+ DESCRIPTION
+    This routine retrieves a pointer to the class for a property list.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static H5P_genclass_t *H5P_get_class_new(H5P_genplist_t *plist)
+{
+    H5P_genclass_t *ret_value=NULL;      /* return value */
+
+    FUNC_ENTER (H5P_get_class, NULL);
+
+    assert(plist);
+
+    /* Get property size */
+    ret_value=plist->pclass;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_get_class() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pget_class
+ PURPOSE
+    Routine to query the class of a generic property list
+ USAGE
+    hid_t H5Pget_class(plist_id)
+        hid_t plist_id;         IN: Property list to query
+ RETURNS
+    Success: ID of class object
+    Failure: negative
+ DESCRIPTION
+    This routine retrieves the class of a property list.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Change the name of this function to H5Pget_class (and remove old H5Pget_class)
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t H5Pget_class_new(hid_t plist_id)
+{
+    H5P_genplist_t	*plist;         /* Property list to query */
+    H5P_genclass_t	*pclass=NULL;   /* Property list class */
+    hid_t ret_value=FAIL;           /* return value */
+
+    FUNC_ENTER (H5Pget_class, FAIL);
+
+    /* Check arguments. */
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Retrieve the property list class */
+    if ((pclass=H5P_get_class_new(plist))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to query class of property list");
+
+    /* Increment the outstanding references to the class object */
+    if(H5P_access_class(pclass,H5P_MOD_INC_REF)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment class ID ref count");
+
+    /* Get an atom for the class */
+    if ((ret_value = H5I_register(H5I_GENPROP_CLS, pclass))<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
+
+done:
+    if (ret_value<0 && pclass)
+        H5P_close_class(pclass);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Pget_class_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_get
  PURPOSE
     Internal routine to query the value of a property in a property list.
@@ -4792,7 +4894,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_get(hid_t plist_id, const char *name, void *value)
+static herr_t H5P_get(hid_t plist_id, const char *name, void *value)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5P_genprop_t *prop;        /* Temporary property pointer */
@@ -4923,7 +5025,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_remove(H5P_genplist_t *plist, const char *name)
+static herr_t H5P_remove(H5P_genplist_t *plist, const char *name)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
@@ -5052,7 +5154,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name)
+static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
@@ -5172,7 +5274,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_close_list(void *_plist)
+static herr_t H5P_close_list(void *_plist)
 {
     H5P_genplist_t *plist=(H5P_genplist_t *)_plist;
     herr_t ret_value=FAIL;     /* return value */
@@ -5245,6 +5347,81 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P_get_class_name
+ PURPOSE
+    Internal routine to query the name of a generic property list class
+ USAGE
+    char *H5P_get_class_name(pclass)
+        H5P_genpclass_t *pclass;    IN: Property list to check
+ RETURNS
+    Success: Pointer to a malloc'ed string containing the class name
+    Failure: NULL
+ DESCRIPTION
+        This routine retrieves the name of a generic property list class.
+    The pointer to the name must be free'd by the user for successful calls.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static char *H5P_get_class_name(H5P_genclass_t *pclass)
+{
+    char *ret_value=NULL;      /* return value */
+
+    FUNC_ENTER (H5P_get_class_name, NULL);
+
+    assert(pclass);
+
+    /* Get property size */
+    ret_value=HDstrdup(pclass->name);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_get_class_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pget_class_name
+ PURPOSE
+    Internal routine to query the name of a generic property list class
+ USAGE
+    char *H5Pget_class_name(pclass_id)
+        hid_t pclass_id;         IN: Property class to query
+ RETURNS
+    Success: Pointer to a malloc'ed string containing the class name
+    Failure: NULL
+ DESCRIPTION
+        This routine retrieves the name of a generic property list class.
+    The pointer to the name must be free'd by the user for successful calls.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+char *H5Pget_class_name(hid_t pclass_id)
+{
+    H5P_genclass_t	*pclass;    /* Property class to query */
+    char *ret_value=NULL;       /* return value */
+
+    FUNC_ENTER (H5Pget_class_name, NULL);
+
+    /* Check arguments. */
+    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
+
+    /* Create the new property list class */
+    if ((ret_value=H5P_get_class_name(pclass))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query name of class");
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Pget_class_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_close_class
  PURPOSE
     Internal routine to close a property list class.
@@ -5260,8 +5437,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
-H5P_close_class(void *_pclass)
+static herr_t H5P_close_class(void *_pclass)
 {
     H5P_genclass_t *pclass=(H5P_genclass_t *)_pclass;
     herr_t ret_value = FAIL;     /* return value */
@@ -5270,17 +5446,24 @@ H5P_close_class(void *_pclass)
 
     assert(pclass);
 
-    /* Decrement parent class's dependant property class value! */
-    if(pclass->parent)
-        if (H5P_access_class(pclass->parent, H5P_MOD_DEC_CLS) < 0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't decrement class ref count");
-    
-    /* Mark class as deleted */
-    pclass->deleted = 1;
+    /* Decrement the reference count & check if the object should go away */
+    if(H5P_access_class(pclass,H5P_MOD_DEC_REF)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL, "Can't decrement ID ref count");
 
-    /* Check dependancies on this class, deleting it if allowed */
-    if (H5P_access_class(pclass, H5P_MOD_CHECK) < 0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't check class ref count");
+    /* Check if the object should go away */
+    if(pclass->ref_count==0) {
+        /* Decrement parent class's dependant property class value! */
+        if(pclass->parent)
+            if (H5P_access_class(pclass->parent, H5P_MOD_DEC_CLS) < 0)
+                HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,"Can't decrement class ref count");
+        
+        /* Mark class as deleted */
+        pclass->deleted = 1;
+
+        /* Check dependancies on this class, deleting it if allowed */
+        if (H5P_access_class(pclass, H5P_MOD_CHECK) < 0)
+            HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,"Can't check class ref count");
+    } /* end if */
 
     /* Set return value */
     ret_value = SUCCEED;
