@@ -92,10 +92,11 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
     H5O_efl_t		*mesg = NULL;
     int			version;
     const char		*s = NULL;
+    const H5HL_t        *heap;
     size_t		u;      /* Local index variable */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_decode);
 
     /* Check args */
     assert(f);
@@ -121,10 +122,19 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
 
     /* Heap address */
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
+
 #ifndef NDEBUG
     assert (H5F_addr_defined(mesg->heap_addr));
-    s = H5HL_peek (f, dxpl_id, mesg->heap_addr, 0);
+
+    if (NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
+    
+    s = H5HL_offset_into(f, heap, 0);
+
     assert (s && !*s);
+
+    if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
 #endif
 
     /* Decode the file list */
@@ -134,9 +144,17 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
     for (u=0; u<mesg->nused; u++) {
 	/* Name */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].name_offset);
-	s = H5HL_peek(f, dxpl_id, mesg->heap_addr, mesg->slot[u].name_offset);
+
+        if (NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
+    
+        s = H5HL_offset_into(f, heap, mesg->slot[u].name_offset);
 	assert (s && *s);
 	mesg->slot[u].name = H5MM_xstrdup (s);
+        assert(mesg->slot[u].name);
+
+        if (H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
 	
 	/* File offset */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].offset);
@@ -184,9 +202,8 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     size_t		u;      /* Local index variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_encode);
 
     /* check args */
     assert(f);
@@ -223,8 +240,7 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 	H5F_ENCODE_LENGTH (f, p, mesg->slot[u].size);
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -253,7 +269,7 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     size_t		u;              /* Local index variable */
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_copy);
 
     /* check args */
     assert(mesg);
@@ -310,7 +326,7 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     size_t		ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5O_efl_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_size);
 
     /* check args */
     assert(f);
@@ -324,7 +340,6 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
 			       H5F_SIZEOF_SIZE(f) +	/*file offset	*/
 			       H5F_SIZEOF_SIZE(f));	/*file size	*/
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -349,9 +364,8 @@ H5O_efl_reset(void *_mesg)
 {
     H5O_efl_t	*mesg = (H5O_efl_t *) _mesg;
     size_t	u;              /* Local index variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_efl_reset, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_reset);
 
     /* check args */
     assert(mesg);
@@ -364,8 +378,7 @@ H5O_efl_reset(void *_mesg)
     if(mesg->slot)
         mesg->slot = H5MM_xfree(mesg->slot);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -391,7 +404,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
 {
     hsize_t	ret_value = 0, tmp;
     
-    FUNC_ENTER_NOAPI(H5O_efl_total_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_total_size);
 
     if (efl->nused>0 &&
 	H5O_EFL_UNLIMITED==efl->slot[efl->nused-1].size) {
@@ -443,7 +456,7 @@ H5O_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
     size_t      u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_efl_read, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_read);
 
     /* Check args */
     assert (efl && efl->nused>0);
@@ -529,7 +542,7 @@ H5O_efl_write (const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *b
     size_t	u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_efl_write, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_write);
 
     /* Check args */
     assert (efl && efl->nused>0);
@@ -765,9 +778,8 @@ H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * s
     const H5O_efl_t	   *mesg = (const H5O_efl_t *) _mesg;
     char		    buf[64];
     size_t		    u;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_debug);
 
     /* check args */
     assert(f);
@@ -804,6 +816,5 @@ H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * s
 		   (unsigned long)(mesg->slot[u].size));
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

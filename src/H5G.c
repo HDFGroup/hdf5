@@ -996,9 +996,9 @@ H5G_init_interface(void)
     /*
      * Initialize the type info table.  Begin with the most general types and
      * end with the most specific. For instance, any object that has a data
-     * type message is a data type but only some of them are datasets.
+     * type message is a datatype but only some of them are datasets.
      */
-    H5G_register_type(H5G_TYPE,    H5T_isa,  "data type");
+    H5G_register_type(H5G_TYPE,    H5T_isa,  "datatype");
     H5G_register_type(H5G_GROUP,   H5G_isa,  "group");
     H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
     H5G_register_type(H5G_LINK,    H5G_link_isa,  "link");
@@ -1596,6 +1596,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     char		*linkval = NULL;	/*the copied link value	*/
     H5G_entry_t         tmp_grp_ent;            /* Temporary copy of group entry */
     H5RS_str_t          *tmp_user_path_r=NULL, *tmp_canon_path_r=NULL; /* Temporary pointer to object's user path & canonical path */
+    const H5HL_t        *heap;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
@@ -1606,10 +1607,17 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     /* Get the link value */
     if (NULL==H5O_read (grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address");
-    if (NULL==(clv=H5HL_peek (grp_ent->file, dxpl_id, stab_mesg.heap_addr,
-			      obj_ent->cache.slink.lval_offset)))
-	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbolic link value");
+
+    if (NULL == (heap = H5HL_protect(grp_ent->file, dxpl_id, stab_mesg.heap_addr)))
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
+
+    clv = H5HL_offset_into(grp_ent->file, heap, obj_ent->cache.slink.lval_offset);
+
     linkval = H5MM_xstrdup (clv);
+    assert(linkval);
+
+    if (H5HL_unprotect(grp_ent->file, dxpl_id, heap, stab_mesg.heap_addr) < 0)
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 		
     /* Hold the entry's name (& old_name) to restore later */
     tmp_user_path_r=obj_ent->user_path_r;
@@ -1842,7 +1850,7 @@ H5G_isa(H5G_entry_t *ent, hid_t dxpl_id)
 {
     htri_t	ret_value;
     
-    FUNC_ENTER_NOAPI(H5G_isa, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_isa);
 
     assert(ent);
 
@@ -2340,12 +2348,8 @@ H5G_loc (hid_t loc_id)
                 
         case H5I_TEMPBUF:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of buffer");
-        
-        case H5I_NGROUPS:
-        case H5I_BADID:
-        case H5I_FILE_CLOSING:
-        case H5I_REFERENCE:
-        case H5I_VFL:
+
+        default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 
@@ -2581,12 +2585,21 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
      */
     if (statbuf) {
 	if (H5G_CACHED_SLINK==obj_ent.type) {
+            const H5HL_t *heap;
+
 	    /* Named object is a symbolic link */
-	    if (NULL==H5O_read (&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id) ||
-		NULL==(s=H5HL_peek (grp_ent.file, dxpl_id, stab_mesg.heap_addr, 
-				    obj_ent.cache.slink.lval_offset)))
-		HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value");
-	    statbuf->linklen = HDstrlen(s)+1; /*count the null terminator*/
+	    if (NULL == H5O_read(&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
+		HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value")
+
+            if (NULL == (heap = H5HL_protect(grp_ent.file, dxpl_id, stab_mesg.heap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
+
+            s = H5HL_offset_into(grp_ent.file, heap, obj_ent.cache.slink.lval_offset);
+
+	    statbuf->linklen = HDstrlen(s) + 1; /*count the null terminator*/
+
+            if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 	    statbuf->objno[0] = statbuf->objno[1] = 0;
 	    statbuf->nlink = 0;
 	    statbuf->type = H5G_LINK;
@@ -2810,6 +2823,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
     const char		*s = NULL;
     H5G_entry_t		grp_ent, obj_ent;
     H5O_stab_t		stab_mesg;
+    const H5HL_t        *heap;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_linkval, FAIL);
@@ -2830,13 +2844,18 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
      */
     if (NULL==H5O_read (&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
 	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine local heap address");
-    if (NULL==(s=H5HL_peek (grp_ent.file, dxpl_id, stab_mesg.heap_addr,
-			    obj_ent.cache.slink.lval_offset)))
-	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value");
+
+    if (NULL == (heap = H5HL_protect(grp_ent.file, dxpl_id, stab_mesg.heap_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read protect link value")
     
+    s = H5HL_offset_into(grp_ent.file, heap, obj_ent.cache.slink.lval_offset);
+
     /* Copy to output buffer */
     if (size>0 && buf)
 	HDstrncpy (buf, s, size);
+
+    if (H5HL_unprotect(grp_ent.file, dxpl_id, heap, stab_mesg.heap_addr) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
 done:
     /* Free the ID to name buffers */

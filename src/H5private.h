@@ -434,6 +434,7 @@
 #ifndef LLONG_MAX
 #   define LLONG_MAX	((long_long)(((unsigned long_long)1		      \
 				      <<(8*sizeof(long_long)-1))-1))
+#   define LLONG_MIN    ((long_long)(-LLONG_MAX)-1)
 #   define ULLONG_MAX	((unsigned long_long)((long_long)(-1)))
 #endif
 #ifndef SIZET_MAX
@@ -448,15 +449,6 @@
 #define HSSIZET_MAX	((hssize_t)SSIZET_MAX)
 #endif /* H5_HAVE_LARGE_HSIZET */
 #define HSSIZET_MIN	(~(HSSIZET_MAX))
-
-/*
- * Some compilers have problems declaring auto variables that point
- * to string constants.	 Use the CONSTR() macro so it's easy to fix
- * those compilers.
- */
-#ifndef CONSTR
-#  define CONSTR(VAR,STR) static const char VAR[]=STR
-#endif
 
 /*
  * A macro to portably increment enumerated types.
@@ -489,16 +481,16 @@
  * A macro for detecting over/under-flow when assigning between types
  */
 #ifndef NDEBUG
-#define H5_ASSIGN_OVERFLOW(var,expr,vartype,casttype)   \
+#define H5_ASSIGN_OVERFLOW(var,expr,exprtype,vartype)   \
 {                                                       \
-    vartype _tmp_overflow=(vartype)(expr);              \
-    casttype _tmp_overflow2=(casttype)(_tmp_overflow);  \
-    assert((casttype)_tmp_overflow==_tmp_overflow2);    \
+    exprtype _tmp_overflow=(exprtype)(expr);              \
+    vartype _tmp_overflow2=(vartype)(_tmp_overflow);  \
+    assert((vartype)_tmp_overflow==_tmp_overflow2);    \
     (var)=_tmp_overflow2;                               \
 }
 #else /* NDEBUG */
-#define H5_ASSIGN_OVERFLOW(var,expr,vartype,casttype)   \
-    (var)=(casttype)(expr);
+#define H5_ASSIGN_OVERFLOW(var,expr,exprtype,vartype)   \
+    (var)=(vartype)(expr);
 #endif /* NDEBUG */
 
 /*
@@ -578,6 +570,7 @@ H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #endif /* __MWERKS __ */
 #define HDexp(X)		exp(X)
 #define HDfabs(X)		fabs(X)
+/* use ABS() because fabsf() fabsl() are not common yet. */
 #define HDfabsf(X)		ABS(X)
 #define HDfabsl(X)		ABS(X)
 #define HDfclose(F)		fclose(F)
@@ -589,7 +582,11 @@ H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDfgetc(F)		fgetc(F)
 #define HDfgetpos(F,P)		fgetpos(F,P)
 #define HDfgets(S,N,F)		fgets(S,N,F)
+#ifdef WIN32
+#define HDfileno(F)		_fileno(F)
+#else /* WIN32 */
 #define HDfileno(F)		fileno(F)
+#endif /* WIN32 */
 #define HDfloor(X)		floor(X)
 #define HDfmod(X,Y)		fmod(X,Y)
 #define HDfopen(S,M)		fopen(S,M)
@@ -979,9 +976,13 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8) RTYPE=R;                                               \
                                            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
                                                              #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8)
-#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9) RTYPE=R;                                               \
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9) RTYPE=R;                                           \
                                            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
                                                              #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9)
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) RTYPE=R;                                       \
+                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9, \
+                                                             #A10,A10)
 #define H5TRACE_RETURN(V)		   if (RTYPE) {                                                 \
 					      H5_trace(&CALLTIME,FUNC,RTYPE,NULL,V);                    \
 					      RTYPE=NULL;                                               \
@@ -999,6 +1000,7 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)           /*void*/
 #define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)        /*void*/
 #define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)    /*void*/
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) /*void*/
 #define H5TRACE_RETURN(V)		                /*void*/
 #endif
 
@@ -1024,37 +1026,6 @@ H5_DLL double H5_trace(double *calltime, const char *func, const char *type, ...
  *
  * Modifications:
  *
- *	Robb Matzke, 4 Aug 1997
- *	The `interface_init_func' can be the null pointer.  Changed
- *	HGOTO_ERROR() to HRETURN_ERROR() since no clean-up needs to occur
- *	when an error is detected at this point since this must be the
- *	first executable statement in a function.  This allows functions
- *	to omit the `done:' label when convenient to do so.
- *
- *	Robb Matzke, 4 Aug 1997
- *	The pablo mask comes from the constant PABLO_MASK defined on
- *	a per-file basis.  The `pablo_func_id' is generated from the
- *	`func_name' argument by prepending an `ID_' to the name.  The
- *	pablo function identifier should be saved in a local variable
- *	so FUNC_LEAVE() can access it.
- *
- *	Robb Matzke, 4 Aug 1997
- *	It is safe to call this function even inside various library
- *	initializing functions.	 Infinite recursion is no longer a
- *	danger.
- *
- *	Robb Matzke, 3 Dec 1997
- *	The interface initialization function is no longer passed as an
- *	argument unless the `FUNC_ENTER_INIT' form is called.  Instead, the
- *	function comes from the `INTERFACE_INIT' constant which must be
- *	defined in every source file.
- *
- *	Robb Matzke, 17 Jun 1998
- *	Added auto variable RTYPE which is initialized by the tracing macros.
- *
- *	Quincey Koziol, 28 May 2002
- *	Split FUNC_ENTER macro into FUNC_ENTER_API, FUNC_ENTER_NOAPI and
- *      FUNC_ENTER_NOAPI_NOINIT.
  *-------------------------------------------------------------------------
  */
 
@@ -1115,7 +1086,6 @@ extern H5_api_t H5_g;
 /* extern global variables */
 extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 
-
 /* Macros for accessing the global variables */
 #define H5_INIT_GLOBAL H5_libinit_g
 
@@ -1140,7 +1110,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 /* Check if the function name is correct (if the compiler supports __FUNCTION__) */
 #ifdef H5_HAVE_FUNCTION
 #define H5_CHECK_FUNCNAME(func_name) \
-    assert(func_name && !HDstrcmp(#func_name, __FUNCTION__))
+    assert(!HDstrcmp(#func_name, __FUNCTION__))
 #else /* H5_HAVE_FUNCTION */
 #define H5_CHECK_FUNCNAME(func_name) \
     assert(func_name)
@@ -1159,8 +1129,8 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id)
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
-   CONSTR (FUNC, #func_name);						      \
-   FUNC_ENTER_COMMON_NOFUNC(func_name,asrt);                                  \
+    static const char FUNC[]=#func_name;                                      \
+    FUNC_ENTER_COMMON_NOFUNC(func_name,asrt);
 
 /* Threadsafety initialization code for API routines */
 #define FUNC_ENTER_API_THREADSAFE                                             \
@@ -1267,7 +1237,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
        H5_INIT_GLOBAL = TRUE;                                                 \
        if (H5_init_library()<0)  					      \
           HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
-            "library initialization failed");		                      \
+            "library initialization failed")		                      \
    }								              \
                                                                               \
    /* Initialize this interface or bust */				      \

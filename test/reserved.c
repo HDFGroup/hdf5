@@ -34,88 +34,90 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t rsrv_heap()
+static herr_t
+rsrv_heap(void)
 {
-	hid_t       file_id, dataset_id, dataspace_id;
-	hid_t       pfc_id;
-	hsize_t     dims[1] = {1};
-	herr_t      ret_value = 0;
-	char dset_name[10];
-	int    i;
+    hid_t       file_id, dataset_id, dataspace_id;
+    hid_t       pfc_id;
+    hsize_t     dims[1] = {1};
+    herr_t      ret_value = 0;
+    char dset_name[10];
+    int    i;
 
     TESTING("Reserving file space for heap");
 
-	/* Create a new file. */
-	pfc_id = H5Pcreate(H5P_FILE_CREATE);
-    H5Pset_userblock(pfc_id, (int)0);
-    H5Pset_sym_k(pfc_id, (int)1, (int)1);
-    H5Pset_istore_k(pfc_id, (int)1);
-		/* Set file address sizes to be very small. */
+    /* Create a new file. */
+    pfc_id = H5Pcreate(H5P_FILE_CREATE);
+    H5Pset_userblock(pfc_id, (hsize_t)0);
+    H5Pset_sym_k(pfc_id, 1, 1);
+    H5Pset_istore_k(pfc_id, 1);
+
+    /* Set file address sizes to be very small. */
     H5Pset_sizes(pfc_id, (size_t)2,(size_t)2);
 
-	file_id = H5Fcreate("rsrv_heap", H5F_ACC_TRUNC, pfc_id, H5P_DEFAULT);
+    file_id = H5Fcreate("rsrv_heap", H5F_ACC_TRUNC, pfc_id, H5P_DEFAULT);
 
-		/* Write datasets until the file is full, at which point HDF5
-		 * should throw an error.
-		 */
-	for (i = 0; i < 200; i++)
-	{
-		H5E_BEGIN_TRY {
-		dataspace_id = H5Screate_simple(1, dims, dims);
-		} H5E_END_TRY
-
-		sprintf(dset_name, "Dset %d", i);
-
-		H5E_BEGIN_TRY {
-	    dataset_id = H5Dcreate(file_id, dset_name, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT);
-		} H5E_END_TRY
-
-		if(dataset_id < 0)
-			break;
-
-		H5E_BEGIN_TRY {
-		H5Dwrite(dataset_id, H5T_NATIVE_INT, dataspace_id, dataspace_id, H5P_DEFAULT, &i);
-		} H5E_END_TRY
-
-		H5Dclose(dataset_id);
-		H5Sclose(dataspace_id);
-	}
-
-	/* Close the file, property lists, and library */
-    H5Fclose(file_id);
-	H5Pclose (pfc_id);
-	H5close();
-
-	/* The loop should have broken before completing--the file should not have had
-	 * enough address space to hold 200 datasets (or this test needs to be updated!).
-	 */
-	if(i == 200)
+    /* Write datasets until the file is full, at which point HDF5
+     * should throw an error.
+     */
+    for (i = 0; i < 200; i++)
     {
-        ret_value = -1;
-		H5_FAILED();
+        H5E_BEGIN_TRY {
+            dataspace_id = H5Screate_simple(1, dims, dims);
+        } H5E_END_TRY
+
+        sprintf(dset_name, "Dset %d", i);
+
+        H5E_BEGIN_TRY {
+            dataset_id = H5Dcreate(file_id, dset_name, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT);
+        } H5E_END_TRY
+
+        if(dataset_id < 0)
+            break;
+
+        H5E_BEGIN_TRY {
+            H5Dwrite(dataset_id, H5T_NATIVE_INT, dataspace_id, dataspace_id, H5P_DEFAULT, &i);
+        } H5E_END_TRY
+
+        H5Dclose(dataset_id);
+        H5Sclose(dataspace_id);
     }
 
-	/* Re-open the library and try to read a dataset from the file we created */
-	H5open();
+    /* Close the file, property lists, and library */
+    H5Fclose(file_id);
+    H5Pclose(pfc_id);
+    H5close();
 
-	sprintf(dset_name, "Dset %d", i - 2);
+    /* The loop should have broken before completing--the file should not have had
+     * enough address space to hold 200 datasets (or this test needs to be updated!).
+     */
+    if(i == 200)
+    {
+        ret_value = 1;
+        H5_FAILED();
+    }
 
-	file_id = H5Fopen("rsrv_heap", H5F_ACC_RDONLY, H5P_DEFAULT);
+    /* Re-open the library and try to read a dataset from the file we created */
+    H5open();
 
-	dataset_id = H5Dopen(file_id, dset_name);
+    sprintf(dset_name, "Dset %d", i - 2);
 
-	/* If we can read a dataset from the file, the file has been flushed to disk
-	 * (if the heap or object headers weren't flushed, the file would be empty).
-	 */
-	if(dataset_id == H5I_BADID)
-	{
-        ret_value = -1;
-		H5_FAILED();
-	}
+    file_id = H5Fopen("rsrv_heap", H5F_ACC_RDONLY, H5P_DEFAULT);
 
-	H5Dclose(dataset_id);
-	H5Fclose(file_id);
-    remove("rsrv_heap");
+    dataset_id = H5Dopen(file_id, dset_name);
+
+    /* If we can read a dataset from the file, the file has been flushed to disk
+     * (if the heap or object headers weren't flushed, the file would be empty).
+     */
+    if(dataset_id == H5I_BADID)
+    {
+        ret_value = 1;
+        H5_FAILED();
+    }
+
+    H5Dclose(dataset_id);
+    H5Fclose(file_id);
+    HDremove("rsrv_heap");
 
     if(ret_value == 0)
     {
@@ -145,35 +147,35 @@ herr_t rsrv_heap()
  *
  *-------------------------------------------------------------------------
  */
-herr_t rsrv_ohdr()
+static herr_t
+rsrv_ohdr(void)
 {
-	hid_t       file_id, dataset_id, dataspace_id;
-	hid_t       pfc_id, aid, attr_id;
-	hsize_t     dims[2];
-	herr_t      status, ret_value = 0;
-	int         attrval[4][6];
-	char *basenm = "attr";
-	char attrname[20], nm_suf[10];
-	int    i;
+    hid_t       file_id, dataset_id, dataspace_id;
+    hid_t       pfc_id, aid, attr_id;
+    hsize_t     dims[2];
+    herr_t      status, ret_value = 0;
+    int         attrval[4][6];
+    char attrname[20];
+    int    i;
 
     TESTING("Reserving file space for object headers");
 
-	/* Create a new file using default properties. */
-	pfc_id = H5Pcreate(H5P_FILE_CREATE);
-	H5Pset_userblock(pfc_id, (int)0);
-	H5Pset_sym_k(pfc_id, (int)1, (int)1);
-	H5Pset_istore_k(pfc_id, (int)1);
-	H5Pset_sizes(pfc_id, (size_t)2,(size_t)2);
+    /* Create a new file using default properties. */
+    pfc_id = H5Pcreate(H5P_FILE_CREATE);
+    H5Pset_userblock(pfc_id, (hsize_t)0);
+    H5Pset_sym_k(pfc_id, 1, 1);
+    H5Pset_istore_k(pfc_id, 1);
+    H5Pset_sizes(pfc_id, (size_t)2,(size_t)2);
 
-	file_id = H5Fcreate("rsrv_ohdr", H5F_ACC_TRUNC, pfc_id, H5P_DEFAULT);
+    file_id = H5Fcreate("rsrv_ohdr", H5F_ACC_TRUNC, pfc_id, H5P_DEFAULT);
 
-	/* Create the data space for the dataset. */
-	dims[0] = 4; 
-	dims[1] = 6; 
-	dataspace_id = H5Screate_simple(2, dims, NULL);
+    /* Create the data space for the dataset. */
+    dims[0] = 4; 
+    dims[1] = 6; 
+    dataspace_id = H5Screate_simple(2, dims, NULL);
 
-	/* Create the dataset. */
-	dataset_id = H5Dcreate(file_id, "/dset", H5T_STD_I32BE, dataspace_id, H5P_DEFAULT);
+    /* Create the dataset. */
+    dataset_id = H5Dcreate(file_id, "/dset", H5T_STD_I32BE, dataspace_id, H5P_DEFAULT);
 
     for(i=0; i<6; i++)
     {
@@ -183,63 +185,61 @@ herr_t rsrv_ohdr()
         attrval[3][i] = 3;
     }
 
-	for (i = 0; i< 2000; i++)
-	{
-		strcpy(attrname, basenm);
-		sprintf(nm_suf, "%d", i);
-		strcat(attrname, nm_suf);
-		H5E_BEGIN_TRY{
-		aid =  H5Screate_simple(2, dims, NULL);
-		attr_id = H5Acreate (dataset_id, attrname, H5T_STD_I32BE, aid, H5P_DEFAULT);
-		status = H5Awrite(attr_id, H5T_NATIVE_INT, attrval);
-		status = H5Aclose(attr_id);
-		}H5E_END_TRY
+    for (i = 0; i< 2000; i++)
+    {
+        sprintf(attrname, "attr %d", i);
+        H5E_BEGIN_TRY{
+            aid =  H5Screate_simple(2, dims, NULL);
+            attr_id = H5Acreate (dataset_id, attrname, H5T_STD_I32BE, aid, H5P_DEFAULT);
+            status = H5Awrite(attr_id, H5T_NATIVE_INT, attrval);
+            status = H5Aclose(attr_id);
+        } H5E_END_TRY
 
         if(status < 0)
             break;
-	} 
+    } 
 
-	/* End access to the dataset and dataspace and release resources. */
-	H5Dclose(dataset_id);
-	H5Pclose (pfc_id);
-	H5Sclose(dataspace_id);
+    /* End access to the dataset and dataspace and release resources. */
+    H5Dclose(dataset_id);
+    H5Pclose (pfc_id);
+    H5Sclose(dataspace_id);
 
-	/* Close the file and the library. */
-	H5Fclose(file_id);
-	H5close();
+    /* Close the file and the library. */
+    H5Fclose(file_id);
+    H5close();
 
-	/* The loop should have broken before completing--the file should not have had
-	 * enough address space to hold 2000 attributes (or this test needs to be updated!).
-	 */
+    /* The loop should have broken before completing--the file should not have had
+     * enough address space to hold 2000 attributes (or this test needs to be updated!).
+     */
     if(i == 2000)
     {
-        ret_value = -1;
+        ret_value = 1;
         H5_FAILED();
     }
 
-	/* Re-open the library and try to read a dataset from the file we created */
-	H5open();
+    /* Re-open the library and try to read a dataset from the file we created */
+    H5open();
 
-	file_id = H5Fopen("rsrv_ohdr", H5F_ACC_RDONLY, H5P_DEFAULT);
+    file_id = H5Fopen("rsrv_ohdr", H5F_ACC_RDONLY, H5P_DEFAULT);
 
-	dataset_id = H5Dopen(file_id, "/dset");
+    dataset_id = H5Dopen(file_id, "/dset");
 
-	/* If we can read the dataset from the file, the file has been flushed to disk
-	 * (if the heap or object headers weren't flushed, the file would be empty).
-	 */
-	if(dataset_id == H5I_BADID)
-	{
-		H5_FAILED();
-        ret_value = -1;
-	}
+    /* If we can read the dataset from the file, the file has been flushed to disk
+     * (if the heap or object headers weren't flushed, the file would be empty).
+     */
+    if(dataset_id == H5I_BADID)
+    {
+        ret_value = 1;
+        H5_FAILED();
+    }
 
     if(ret_value == 0)
         PASSED();
 
-	H5Dclose(dataset_id);
-	H5Fclose(file_id);
+    H5Dclose(dataset_id);
+    H5Fclose(file_id);
 
-    remove("rsrv_ohdr");
+    HDremove("rsrv_ohdr");
 
     return ret_value;
 }
@@ -266,11 +266,14 @@ herr_t rsrv_ohdr()
  *
  *-------------------------------------------------------------------------
  */
-herr_t rsrv_vlen()
+static herr_t
+rsrv_vlen(void)
 {
     hid_t       file_id, dataset_id, dataspace_id, type_id;
     hid_t       pfc_id, mem_space_id;
-    hsize_t     dims[1], start[1], count[1];
+    hssize_t    offset[1];
+    hssize_t    start[1];
+    hsize_t     dims[1], count[1];
     herr_t      status, ret_value = 0;
     int    i;
     int    write_buf[20];
@@ -280,9 +283,9 @@ herr_t rsrv_vlen()
 
     /* Create a new file using default properties. */
     pfc_id = H5Pcreate(H5P_FILE_CREATE);
-    H5Pset_userblock(pfc_id, (int)0);
-    H5Pset_sym_k(pfc_id, (int)1, (int)1);
-    H5Pset_istore_k(pfc_id, (int)1);
+    H5Pset_userblock(pfc_id, (hsize_t)0);
+    H5Pset_sym_k(pfc_id, 1, 1);
+    H5Pset_istore_k(pfc_id, 1);
     H5Pset_sizes(pfc_id, (size_t)2,(size_t)2);
 
     file_id = H5Fcreate("rsrv_vlen", H5F_ACC_TRUNC, pfc_id, H5P_DEFAULT);
@@ -315,11 +318,11 @@ herr_t rsrv_vlen()
     {
         vlen_data.len = (i%20) + 1;
 
-        dims[0] = i;
-        H5Soffset_simple(dataspace_id, dims); 
+        offset[0] = i;
+        H5Soffset_simple(dataspace_id, offset); 
 
         H5E_BEGIN_TRY
-        status = H5Dwrite(dataset_id, type_id, mem_space_id, dataspace_id, H5P_DEFAULT, &vlen_data);
+            status = H5Dwrite(dataset_id, type_id, mem_space_id, dataspace_id, H5P_DEFAULT, &vlen_data);
         H5E_END_TRY
 
         if(status < 0)
@@ -342,7 +345,7 @@ herr_t rsrv_vlen()
      */
     if(i == 2000)
     {
-        ret_value = -1;
+        ret_value = 1;
         H5_FAILED();
     }
 
@@ -358,8 +361,8 @@ herr_t rsrv_vlen()
      */
     if(dataset_id == H5I_BADID)
     {
+        ret_value = 1;
 	H5_FAILED();
-        ret_value = -1;
     }
 
     if(ret_value == 0)
@@ -368,7 +371,7 @@ herr_t rsrv_vlen()
     H5Dclose(dataset_id);
     H5Fclose(file_id);
 
-    remove("rsrv_vlen");
+    HDremove("rsrv_vlen");
 
     return ret_value;
 }
@@ -392,10 +395,12 @@ herr_t rsrv_vlen()
 int
 main(void)
 {
-   rsrv_ohdr();
-   rsrv_heap();
-   rsrv_vlen();
+    int num_errs=0;
 
-   return 0;
+    num_errs+=rsrv_ohdr();
+    num_errs+=rsrv_heap();
+    num_errs+=rsrv_vlen();
+
+    return num_errs;
 }
 

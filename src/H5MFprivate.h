@@ -49,8 +49,8 @@ H5_DLL herr_t H5MF_xfree(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 H5_DLL haddr_t H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr,
 			     hsize_t old_size, hsize_t new_size);
 H5_DLL herr_t H5MF_reserve(H5F_t *f, hsize_t size);
-H5_DLL void H5MF_free_reserved(H5F_t *f, hsize_t size);
-H5_DLL int H5MF_alloc_overflow(H5F_t *f, hsize_t size);
+H5_DLL herr_t H5MF_free_reserved(H5F_t *f, hsize_t size);
+H5_DLL hbool_t H5MF_alloc_overflow(H5F_t *f, hsize_t size);
 H5_DLL htri_t H5MF_can_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr,
     hsize_t size, hsize_t extra_requested);
 H5_DLL htri_t H5MF_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,

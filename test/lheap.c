@@ -110,14 +110,24 @@ main(void)
 	goto error;
     }
     for (i=0; i<NOBJS; i++) {
+        const H5HL_t *heap = NULL;
+
 	sprintf(buf, "%03d-", i);
         for (j=4; j<i; j++) buf[j] = '0' + j%10;
         if (j>4) buf[j] = '\0';
-        if (NULL==(s=H5HL_peek(f, H5P_DATASET_XFER_DEFAULT, heap_addr, obj[i]))) {
+
+        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr))) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
 	}
+        
+        if (NULL == (s = H5HL_offset_into(f, heap, obj[i]))) {
+	    H5_FAILED();
+	H5Eprint(stdout);
+	    goto error;
+	}
+
 	if (strcmp(s, buf)) {
 	    H5_FAILED();
 	    printf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
@@ -125,13 +135,18 @@ main(void)
 	    printf("    ans: \"%s\"\n", buf);
 	    goto error;
 	}
+
+        if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr) < 0) {
+	    H5_FAILED();
+	    H5Eprint(stdout);
+	    goto error;
+	}
     }
     if (H5Fclose(file)<0) goto error;
     PASSED();
 
-    h5_cleanup(FILENAME, fapl);
-
     puts("All local heap tests passed.");
+    h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:

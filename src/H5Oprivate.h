@@ -233,16 +233,16 @@ H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5O_open(H5G_entry_t *ent);
 H5_DLL herr_t H5O_close(H5G_entry_t *ent);
 H5_DLL int H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id);
-H5_DLL int H5O_count(H5G_entry_t *ent, hid_t type_id, hid_t dxpl_id);
-H5_DLL htri_t H5O_exists(H5G_entry_t *ent, hid_t type_id, int sequence,
+H5_DLL int H5O_count(H5G_entry_t *ent, unsigned type_id, hid_t dxpl_id);
+H5_DLL htri_t H5O_exists(H5G_entry_t *ent, unsigned type_id, int sequence,
     hid_t dxpl_id);
-H5_DLL void *H5O_read(H5G_entry_t *ent, hid_t type_id, int sequence,
+H5_DLL void *H5O_read(H5G_entry_t *ent, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
-H5_DLL int H5O_modify(H5G_entry_t *ent, hid_t type_id,
+H5_DLL int H5O_modify(H5G_entry_t *ent, unsigned type_id,
     int overwrite, unsigned flags, unsigned update_time, const void *mesg, hid_t dxpl_id);
 H5_DLL struct H5O_t * H5O_protect(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5O_unprotect(H5G_entry_t *ent, struct H5O_t *oh, hid_t dxpl_id);
-H5_DLL int H5O_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, hid_t type_id, 
+H5_DLL int H5O_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id, 
     unsigned flags, const void *mesg);
 H5_DLL herr_t H5O_touch(H5G_entry_t *ent, hbool_t force, hid_t dxpl_id);
 H5_DLL herr_t H5O_touch_oh(H5F_t *f, struct H5O_t *oh, hbool_t force);
@@ -250,13 +250,13 @@ H5_DLL herr_t H5O_touch_oh(H5F_t *f, struct H5O_t *oh, hbool_t force);
 H5_DLL herr_t H5O_bogus(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5O_bogus_oh(H5F_t *f, struct H5O_t *oh);
 #endif /* H5O_ENABLE_BOGUS */
-H5_DLL herr_t H5O_remove(H5G_entry_t *ent, hid_t type_id, int sequence,
+H5_DLL herr_t H5O_remove(H5G_entry_t *ent, unsigned type_id, int sequence,
     hid_t dxpl_id);
-H5_DLL herr_t H5O_reset(hid_t type_id, void *native);
-H5_DLL void *H5O_free(hid_t type_id, void *mesg);
-H5_DLL void *H5O_copy(hid_t type_id, const void *mesg, void *dst);
-H5_DLL size_t H5O_raw_size(hid_t type_id, H5F_t *f, const void *mesg);
-H5_DLL herr_t H5O_get_share(hid_t type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
+H5_DLL herr_t H5O_reset(unsigned type_id, void *native);
+H5_DLL void *H5O_free(unsigned type_id, void *mesg);
+H5_DLL void *H5O_copy(unsigned type_id, const void *mesg, void *dst);
+H5_DLL size_t H5O_raw_size(unsigned type_id, H5F_t *f, const void *mesg);
+H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
