@@ -66,7 +66,13 @@ New Features
       32-bit compilation modes.  See INSTALL document for instructions on
       compiling the distribution with 64-bit support.
     * Added support for the Metrowerks Code Warrior compiler for Windows.  
-
+    * For H4->H5 converter utility, added a new option to choose not to convert
+      HDF4 specified attributes(reference number, class) into HDF5 attributes.
+    * Added support chunking and compression in SDS and image in H4->H5 converter. 
+      Currently HDF5 only supports gzip compression, so by default an HDF4 file 
+      with any other compression method will be converted into an HDF5 file in 
+      gzip compression. 
+    * correct the order or reading HDF4 image array in H4->H5 conversion.  
          
 Bug Fixes since HDF5-1.4.1 Release
 ==================================
@@ -90,6 +96,10 @@ Bug Fixes since HDF5-1.4.1 Release
       when --enable-hdf5v1_2 configure flag is enabled.
     * Added --enable-linux-lfs flag to allow more control over whether to 
       enable or disable large file support on Linux.
+    * Fixed various bugs releated to SDS dimensional scale conversions in H4->H5 
+      converter.
+    * Fixed a bug to correctly convert HDF4 objects with fill value into HDF5.
+
 
 
 Documentation
@@ -263,6 +273,9 @@ Known Problems
 
     * IRIX 6.5 fails to compile if configured with --enable-static-exec.
     
+    * For 24-bit image conversion from H4->H5, the current conversion is
+      not consistent with HDF5 image specification. 
+
     * After "make install" or "make install-doc" one may need to reload
       the source from the tar file before doing another build.
 
