@@ -37,7 +37,6 @@ Introduction to HDF5&nbsp;<br>
 <tr><th colspan=3>Table of Contents</th></tr></a>
 <tr><td valign=top align=left width=42%>
 
-        <font size=-1>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               <A href="#CreateExample">1: Creating and writing a
               dataset</A><br>
@@ -46,42 +45,52 @@ Introduction to HDF5&nbsp;<br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               <A href="#WriteSelected">3. Writing selected data</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#Compound">4. Working with compound datatypes</A><br>
-            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#CreateExtendWrite">5. Creating and writing an extendible</a> <br>
+              <A href="#VariableLength">4. Working with variable-length</A><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#CreateExtendWrite">dataset</A><br>
+              <A href="#VariableLength">datatypes</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#ReadExtended">6. Reading data</A><br>
+              <A href="#Array">5. Working with array datatypes</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#CreateGroups">7. Creating groups</A><br>
-        </font>
+              <A href="#Compound">6. Working with compound</A><br>
+              &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="#Compound">datatypes</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="#CreateExtendWrite">7. Creating and writing an</a><br>
+              &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="#CreateExtendWrite">extendible dataset</A><br>
 
 </td><td width=6%>&nbsp;&nbsp;</td><td valign=top align=left width=42%>
 
-        <font size=-1>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <A href="#ReadWriteAttributes">8. Writing and reading 
+              <A href="#ReadExtended">8. Reading data</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="#CreateGroups">9. Creating groups</A><br>
+            &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
+              <A href="#ReadWriteAttributes">10. Writing and reading 
               attributes</A><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="#CreateWriteRefObj">9. Creating and writing references</a><br>
+              <a href="#CreateWriteRefObj">11. Creating and writing 
+              references</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               <a href="#CreateWriteRefObj">to objects</a><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="#ReadRefObj">10. Reading references to objects</a><br>
+              <a href="#ReadRefObj">12. Reading references to objects</a><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="#CreateWriteRefReg">11. Creating and writing references</a><br>
+              <a href="#CreateWriteRefReg">13. Creating and writing 
+              references</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               <a href="#CreateWriteRefReg">to dataset regions</a><br>
             &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
-              <a href="#ReadRefReg">12. Reading references to dataset</a><br>
+              <a href="#ReadRefReg">14. Reading references to dataset</a><br>
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;
               <a href="#ReadRefReg">regions</a>
-        </font>
+
 </td></tr>
 </table>
 </center>
@@ -98,9 +107,9 @@ Introduction to HDF5&nbsp;<br>
 /*  
  *  This example writes data to the HDF5 file.
  *  Data conversion is performed during write operation.  
- */
- 
-#include <hdf5.h>
+*/
+
+#include &lt;hdf5.h&gt;
 
 #define FILE        "SDS.h5"
 #define DATASETNAME "IntArray" 
@@ -121,8 +130,8 @@ main (void)
     /* 
      * Data  and output buffer initialization. 
      */
-    for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
+    for (j = 0; j &lt; NX; j++) {
+	for (i = 0; i &lt; NY; i++)
 	    data[j][i] = i + j;
     }     
     /*
@@ -235,9 +244,9 @@ main (void)
     hssize_t     offset_out[3];         /* hyperslab offset in memory */
     int          i, j, k, status_n, rank;
 
-    for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++) {
-	    for (k = 0; k < NZ ; k++)
+    for (j = 0; j &lt; NX; j++) {
+	for (i = 0; i &lt; NY; i++) {
+	    for (k = 0; k &lt; NZ ; k++)
 		data_out[j][i][k] = 0;
 	}
     } 
@@ -303,8 +312,8 @@ main (void)
      */
     status = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace,
 		     H5P_DEFAULT, data_out);
-    for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++) printf("%d ", data_out[j][i][0]);
+    for (j = 0; j &lt; NX; j++) {
+	for (i = 0; i &lt; NY; i++) printf("%d ", data_out[j][i][0]);
 	printf("\n");
     }
     /*
@@ -352,7 +361,7 @@ main (void)
  *  file is closed. Program reopens the file and reads and displays the result.
  */ 
  
-#include <hdf5.h>
+#include &lt;hdf5.h&gt;
 
 #define FILE "Select.h5"
 
@@ -405,10 +414,10 @@ int main (void)
     * Buffers' initialization.
     */
    vector[0] = vector[MSPACE1_DIM - 1] = -1;
-   for (i = 1; i < MSPACE1_DIM - 1; i++) vector[i] = i;
+   for (i = 1; i &lt; MSPACE1_DIM - 1; i++) vector[i] = i;
 
-   for (i = 0; i < MSPACE_DIM1; i++) {
-       for (j = 0; j < MSPACE_DIM2; j++)
+   for (i = 0; i &lt; MSPACE_DIM1; i++) {
+       for (j = 0; j &lt; MSPACE_DIM2; j++)
        matrix[i][j] = 0;
     }
 
@@ -544,8 +553,8 @@ int main (void)
     /*
      * Display the result.
      */
-    for (i=0; i < MSPACE_DIM1; i++) {
-        for(j=0; j < MSPACE_DIM2; j++) printf("%3d  ", matrix[i][j]);
+    for (i=0; i &lt; MSPACE_DIM1; i++) {
+        for(j=0; j &lt; MSPACE_DIM2; j++) printf("%3d  ", matrix[i][j]);
         printf("\n");
     }
 
@@ -560,10 +569,307 @@ int main (void)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="Compound"><A NAME="_Toc429885327"></A>Example 4. Working with compound datatypes.</A></H4>
+<H4><A NAME="VariableLength"><A NAME="_Toc429885327"></A>Example 4. Working with variable-length datatypes.</A></H4>
+
+<PRE>
+/*
+ * This example shows how to create a dataset with the variable-length 
+ * datatype using user-defined functions for memory management.
+ */
+
+#include &lt;hdf5.h&gt;
+
+#define FILE   "vltypes.h5"
+#define MAX(X,Y)        ((X)&gt;(Y)?(X):(Y))
+
+/* 1-D dataset with fixed dimensions */
+#define SPACE_NAME  "Space"
+#define SPACE_RANK	1
+#define SPACE_DIM	4
+
+void *vltypes_alloc_custom(size_t size, void *info);
+void vltypes_free_custom(void *mem, void *info);
+
+/****************************************************************
+**
+**  vltypes_alloc_custom():  VL datatype custom memory
+**      allocation routine.  This routine just uses malloc to
+**      allocate the memory and increments the amount of memory
+**      allocated.
+** 
+****************************************************************/
+void *vltypes_alloc_custom(size_t size, void *info)
+{
+
+    void *ret_value=NULL;       /* Pointer to return */
+    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t extra;               /* Extra space needed */
+
+    /*
+     *  This weird contortion is required on the DEC Alpha to keep the
+     *  alignment correct.
+     */
+    extra=MAX(sizeof(void *),sizeof(int));
+
+    if((ret_value=(void *)malloc(extra+size))!=NULL) {
+        *(int *)ret_value=size;
+        *mem_used+=size;
+    } /* end if */
+    ret_value=((unsigned char *)ret_value)+extra;
+    return(ret_value);
+}
+/******************************************************************
+**  vltypes_free_custom(): VL datatype custom memory
+**      allocation routine.  This routine just uses free to
+**      release the memory and decrements the amount of memory
+**      allocated.
+** ****************************************************************/
+void vltypes_free_custom(void *_mem, void *info)
+
+{  
+    unsigned char *mem;
+    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t extra;               /* Extra space needed */    
+    /*
+     *  This weird contortion is required on the DEC Alpha to keep the
+     *  alignment correct.      
+     */ 
+    extra=MAX(sizeof(void *),sizeof(int));
+    if(_mem!=NULL) {        
+        mem=((unsigned char *)_mem)-extra;
+       *mem_used-=*(int *)mem; 
+       free(mem); 
+    } /* end if */
+}
+
+int main(void)
+
+{   
+    hvl_t wdata[SPACE_DIM];   /* Information to write */
+    hvl_t rdata[SPACE_DIM];   /* Information read in */
+    hid_t		fid;	   /* HDF5 File IDs */  
+    hid_t		dataset;   /* Dataset ID */
+    hid_t		sid;       /* Dataspace ID */
+    hid_t		tid;       /* Datatype ID			*/
+    hid_t       xfer_pid;   /* Dataset transfer property list ID */
+    hsize_t		dims[] = {SPACE_DIM};
+    uint       i,j;        /* counting variables */
+    int         mem_used=0; /* Memory used during allocation */
+    herr_t		ret;		/* Generic return value		*/
+
+    /*
+     * Allocate and initialize VL data to write 
+     */
+    for(i=0; i &lt; SPACE_DIM; i++) {
+
+        wdata[i].p= (unsigned int *)malloc((i+1)*sizeof(unsigned int));
+        wdata[i].len=i+1;
+        for(j=0; j &lt; (i+1); j++)
+            ((unsigned int *)wdata[i].p)[j]=i*10+j;
+    } /* end for */
+
+    /* 
+     * Create file. 
+     */
+    fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* 
+     * Create dataspace for datasets. 
+     */
+    sid = H5Screate_simple(SPACE_RANK, dims, NULL);
+
+    /* 
+     * Create a datatype to refer to. 
+     */
+    tid = H5Tvlen_create (H5T_NATIVE_UINT);
+
+    /* 
+     * Create a dataset. 
+     */
+    dataset=H5Dcreate(fid, "Dataset", tid, sid, H5P_DEFAULT);
+
+    /* 
+     * Write dataset to disk. 
+     */
+    ret=H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+
+    /* 
+     * Change to the custom memory allocation routines for reading VL data 
+     */
+    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+
+    ret=H5Pset_vlen_mem_manager(xfer_pid, vltypes_alloc_custom,
+                                &mem_used, vltypes_free_custom, &mem_used);
+
+    /* 
+     * Read dataset from disk. vltypes_alloc_custom and
+     * will be used to manage memory.
+     */
+    ret=H5Dread(dataset, tid, H5S_ALL, H5S_ALL, xfer_pid, rdata);   
+
+    /* 
+     * Display data read in 
+     */
+    for(i=0; i &lt; SPACE_DIM; i++) {
+        printf("%d-th element length is %d \n", i, (unsigned) rdata[i].len);
+        for(j=0; j &lt; rdata[i].len; j++) {
+            printf(" %d ",((unsigned int *)rdata[i].p)[j] );   
+        } 
+        printf("\n"); 
+    } /* end for */
+
+    /* 
+     * Reclaim the read VL data. vltypes_free_custom will be used 
+     * to reclaim the space. 
+     */
+    ret=H5Dvlen_reclaim(tid, sid, xfer_pid, rdata);
+
+    /* 
+     * Reclaim the write VL data.  C language free function will be used 
+     * to reclaim space. 
+     */
+    ret=H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, wdata);
+
+    /* 
+     * Close Dataset 
+     */
+    ret = H5Dclose(dataset);
+
+    /* 
+     * Close datatype 
+     */
+    ret = H5Tclose(tid);
+
+    /* 
+     * Close disk dataspace 
+     */
+    ret = H5Sclose(sid);
+    
+    /* 
+     * Close dataset transfer property list 
+     */
+    ret = H5Pclose(xfer_pid);
+    
+    /* 
+     * Close file 
+     */
+    ret = H5Fclose(fid);
+
+} 
+</PRE>
+
+
+
+<P>&nbsp;
+<p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
+
+
+<H4><A NAME="Array"><A NAME="_Toc429885327"></A>Example 5. Working with array datatypes.</A></H4>
+
+<PRE>
+/*  
+ *  This example creates and writes dataset to the HDF5 file.
+ *  Elements of the datasets have an array datatype.
+ */
+ 
+#include <&lt;hdf5.h&gt;
+
+#define FILE        "SDS_array_type.h5"
+#define DATASETNAME "IntArray" 
+#define ARRAY_DIM1     5                      /* array dimensions and rank */
+#define ARRAY_DIM2     4 
+#define ARRAY_RANK     2 
+#define SPACE_DIM     10                      /* dataset dimensions and rank */ 
+#define RANK  1 
+
+int
+main (void)
+{
+    hid_t       file, dataset;         /* file and dataset handles */
+    hid_t       datatype, dataspace;   /* handles */
+    hsize_t     sdims[] = {SPACE_DIM};              /* dataset dimensions */
+    hsize_t     adims[] = {ARRAY_DIM1, ARRAY_DIM2}; /* array dimensions */
+    hsize_t     adims_out[2]; 
+    herr_t      status;                             
+    int         data[SPACE_DIM][ARRAY_DIM1][ARRAY_DIM2];          /* data to write */
+    int         k, i, j;
+    int         array_rank_out; 
+
+    /* 
+     * Data  and output buffer initialization. 
+     */
+    for (k = 0; k <&lt; SPACE_DIM; k++) {
+      for (j = 0; j <&lt; ARRAY_DIM1; j++) {
+	for (i = 0; i <&lt; ARRAY_DIM2; i++)
+               data[k][j][i] = k;
+      }
+    }     
+    /*
+     * Create a new file using H5F_ACC_TRUNC access,
+     * default file creation properties, and default file
+     * access properties.
+     */
+    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Describe the size of the array and create the data space for fixed
+     * size dataset. 
+     */
+    dataspace = H5Screate_simple(RANK, sdims, NULL); 
+
+    /* 
+     * Define array datatype for the data in the file.
+     */
+    datatype = H5Tarray_create(H5T_NATIVE_INT, ARRAY_RANK, adims, NULL);
+
+    /*
+     * Create a new dataset within the file using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
+			H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL,
+		      H5P_DEFAULT, data);
+
+
+    /*
+     * Close/release resources.
+     */
+    H5Sclose(dataspace);
+    H5Tclose(datatype);
+    H5Dclose(dataset);
+    /*
+     * Reopen dataset, and return information about its datatype.
+     */
+    dataset = H5Dopen(file, DATASETNAME);
+    datatype = H5Dget_type(dataset);
+    array_rank_out = H5Tget_array_ndims(datatype);
+    status = H5Tget_array_dims(datatype, adims_out, NULL); 
+    printf(" Array datatype rank is %d \n", array_rank_out);
+    printf(" Array dimensions are %d x %d \n", (int)adims_out[0], (int)adims_out[1]);
+
+    H5Tclose(datatype);
+    H5Dclose(dataset);
+    H5Fclose(file);
+ 
+    return 0;
+}     
+</PRE>
+
+
+
+<P>&nbsp;
+<p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
+
+
+<H4><A NAME="Compound"><A NAME="_Toc429885327"></A>Example 6. Working with compound datatypes.</A></H4>
 <P>This example shows how to create a compound datatype, write an array which has the compound datatype to the file, and read back subsets of fields.
 <PRE>
-<!-- Insert Example 4, h5_compound.c, here. -->
+<!-- Insert Example 6, h5_compound.c, here. -->
 /*
  * This example shows how to create a compound datatype,
  * write an array which has the compound datatype to the file,
@@ -611,7 +917,7 @@ main(void)
     /*
      * Initialize the data
      */
-    for (i = 0; i< LENGTH; i++) {
+    for (i = 0; i &lt; LENGTH; i++) {
         s1[i].a = i;
         s1[i].b = i*i;
         s1[i].c = 1./(i+1);
@@ -679,12 +985,12 @@ main(void)
      */
     printf("\n");
     printf("Field c : \n");
-    for( i = 0; i < LENGTH; i++) printf("%.4f ", s2[i].c);
+    for( i = 0; i &lt; LENGTH; i++) printf("%.4f ", s2[i].c);
     printf("\n");
 
     printf("\n");
     printf("Field a : \n");
-    for( i = 0; i < LENGTH; i++) printf("%d ", s2[i].a);
+    for( i = 0; i &lt; LENGTH; i++) printf("%d ", s2[i].a);
     printf("\n");
 
     /* 
@@ -704,7 +1010,7 @@ main(void)
      */
     printf("\n");
     printf("Field b : \n");
-    for( i = 0; i < LENGTH; i++) printf("%.4f ", s3[i]);
+    for( i = 0; i &lt; LENGTH; i++) printf("%.4f ", s3[i]);
     printf("\n");
 
     /*
@@ -726,10 +1032,10 @@ main(void)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="CreateExtendWrite"><A NAME="_Toc429885328"></A>Example 5. Creating and writing an extendible dataset.</A></H4>
+<H4><A NAME="CreateExtendWrite"><A NAME="_Toc429885328"></A>Example 7. Creating and writing an extendible dataset.</A></H4>
 <P>This example shows how to create a 3x3 extendible dataset, to extend the dataset to 10x3, then to extend it again to 10x5.
 <PRE>
-<!-- Insert Example 5, h5_extend_write.c, here. -->
+<!-- Insert Example 7, h5_extend_write.c, here. -->
 /*  
  *   This example shows how to work with extendible dataset.
  *   In the current version of the library dataset MUST be
@@ -910,10 +1216,10 @@ main (void)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="ReadExtended"><A NAME="_Toc429885329"></A>Example 6. Reading data.</A></H4>
-<P>This example shows how to read information the chunked dataset written by <A HREF="#CreateExtendWrite">Example 5</A>.
+<H4><A NAME="ReadExtended"><A NAME="_Toc429885329"></A>Example 8. Reading data.</A></H4>
+<P>This example shows how to read information the chunked dataset written by <A HREF="#CreateExtendWrite">Example 7</A>.
 <PRE>
-<!-- Insert Example 6, h5_chunk_read.c, here. -->
+<!-- Insert Example 8, h5_chunk_read.c, here. -->
 /*  
  *   This example shows how to read data from a chunked dataset.
  *   We will read from the file created by h5_extend_write.c 
@@ -998,8 +1304,8 @@ main (void)
 		     H5P_DEFAULT, data_out);
     printf("\n");
     printf("Dataset: \n");
-    for (j = 0; j < dims[0]; j++) {
-	for (i = 0; i < dims[1]; i++) printf("%d ", data_out[j][i]);
+    for (j = 0; j &lt; dims[0]; j++) {
+	for (i = 0; i &lt; dims[1]; i++) printf("%d ", data_out[j][i]);
 	printf("\n");
     }     
 
@@ -1041,7 +1347,7 @@ main (void)
 		     H5P_DEFAULT, column);
     printf("\n");
     printf("Third column: \n");
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i &lt; 10; i++) {
 	printf("%d \n", column[i]);
     }
 
@@ -1081,8 +1387,8 @@ main (void)
 		     H5P_DEFAULT, chunk_out);
     printf("\n");
     printf("Chunk: \n");
-    for (j = 0; j < chunk_dims[0]; j++) {
-	for (i = 0; i < chunk_dims[1]; i++) printf("%d ", chunk_out[j][i]);
+    for (j = 0; j &lt; chunk_dims[0]; j++) {
+	for (i = 0; i &lt; chunk_dims[1]; i++) printf("%d ", chunk_out[j][i]);
 	printf("\n");
     }     
     /*
@@ -1112,14 +1418,14 @@ main (void)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="CreateGroups"><A NAME="_Toc429885330"></A>Example 7. Creating groups.</A></H4>
+<H4><A NAME="CreateGroups"><A NAME="_Toc429885330"></A>Example 9. Creating groups.</A></H4>
 <P>This example shows how to create and access a group in an 
 HDF5 file and to place a dataset within this group.  
 It also illustrates the usage of the <code>H5Giterate</code>, 
 <code>H5Glink</code>, and <code>H5Gunlink</code> functions.
 
 <PRE>
-<!-- Insert Example 7, h5_group.c, here. -->
+<!-- Insert Example 9, h5_group.c, here. -->
 /*
  * This example creates a group in the file and dataset in the group. 
  * Hard link to the group object is created and the dataset is accessed
@@ -1196,7 +1502,7 @@ main(void)
      * Access "Compressed_Data" dataset in the group. 
      */
     dataset = H5Dopen(grp, "Compressed_Data");
-    if( dataset < 0) printf(" Dataset is not found. \n");
+    if( dataset &lt; 0) printf(" Dataset is not found. \n");
     printf("\"/Data/Compressed_Data\" dataset is open \n");
 
     /*
@@ -1214,7 +1520,7 @@ main(void)
      * hard link "Data_new". 
      */
     dataset = H5Dopen(file, "/Data_new/Compressed_Data");
-    if( dataset < 0) printf(" Dataset is not found. \n");
+    if( dataset &lt; 0) printf(" Dataset is not found. \n");
     printf("\"/Data_new/Compressed_Data\" dataset is open \n");
 
     /*
@@ -1232,7 +1538,7 @@ main(void)
      * Unlink  name "Data" and use iterator to see the names
      * of the objects in the file root direvtory.
      */
-    if (H5Gunlink(file, "Data") < 0)  
+    if (H5Gunlink(file, "Data") &lt; 0)  
       printf(" H5Gunlink failed \n");
     else  
       printf("\"Data\" is unlinked \n");
@@ -1279,11 +1585,11 @@ file_info(hid_t loc_id, const char *name, void *opdata)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="_Toc429885332"><A NAME="ReadWriteAttributes">Example 8</A>. Writing and reading attributes.</A></H4>
+<H4><A NAME="_Toc429885332"><A NAME="ReadWriteAttributes">Example 10</A>. Writing and reading attributes.</A></H4>
 <P>This example shows how to create HDF5 attributes, to attach them to a dataset, and to read through all of the attributes of a dataset. 
 
 <pre>
-<!-- Insert Example 8, h5_attribute.c, here. -->
+<!-- Insert Example 10, h5_attribute.c, here. -->
 /* 
  *  This program illustrates the usage of the H5A Interface functions.
  *  It creates and writes a dataset, and then creates and writes array,
@@ -1296,8 +1602,8 @@ file_info(hid_t loc_id, const char *name, void *opdata)
  *  of the array attribute. 
  */ 
  
-#include <stdlib.h>
-#include <hdf5.h>
+#include &lt;stdlib.h&gt;
+#include &lt;hdf5.h&gt;
 
 #define FILE "Attributes.h5"
 
@@ -1344,8 +1650,8 @@ main (void)
    char string[] = "ABCD";                /* Value of the string attribute */
 
    
-   for (i=0; i < ADIM1; i++) {            /* Values of the array attribute */
-       for (j=0; j < ADIM2; j++)
+   for (i=0; i &lt; ADIM1; i++) {            /* Values of the array attribute */
+       for (j=0; j &lt; ADIM2; j++)
        matrix[i][j] = -1.;
    }
 
@@ -1517,10 +1823,10 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
      *  Display rank and dimension sizes for the array attribute.
      */
 
-    if(rank > 0) {
+    if(rank &gt; 0) {
     printf("Rank : %d \n", rank); 
     printf("Dimension sizes : ");
-    for (i=0; i< rank; i++) printf("%d ", (int)sdim[i]);
+    for (i=0; i &lt; rank; i++) printf("%d ", (int)sdim[i]);
     printf("\n");
     }
 
@@ -1534,7 +1840,7 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
     float_array = (float *)malloc(sizeof(float)*(int)npoints); 
     ret = H5Aread(attr, atype, float_array);
     printf("Values : ");
-    for( i = 0; i < (int)npoints; i++) printf("%f ", float_array[i]); 
+    for( i = 0; i &lt; (int)npoints; i++) printf("%f ", float_array[i]); 
     printf("\n");
     free(float_array);
     }
@@ -1556,7 +1862,7 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="CreateWriteRefObj">Example 9</A>. Creating and storing references to objects.</A></H4>
+<H4><A NAME="CreateWriteRefObj">Example 11</A>. Creating and storing references to objects.</A></H4>
 This example creates a group and two datasets and a named datatype 
 in the group. References to these four objects are stored in the dataset 
 in the root group.  
@@ -1692,9 +1998,9 @@ typedef struct s1_t {
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="ReadRefObj">Example 10</A>. Reading references to objects.</A></H4>
+<H4><A NAME="ReadRefObj">Example 12</A>. Reading references to objects.</A></H4>
 This example opens and reads dataset <code>Dataset3</code> from 
-the file created in Example 9. Then the program dereferences the references 
+the file created in Example 11. Then the program dereferences the references 
 to dataset <code>Dataset1</code>, the group and the named datatype,
 and opens those objects. 
 The program reads and displays the dataset's data, the group's comment, and 
@@ -1805,7 +2111,7 @@ main(void)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="CreateWriteRefReg">Example 11</A>. Creating and writing a reference to a region.</A></H4>
+<H4><A NAME="CreateWriteRefReg">Example 13</A>. Creating and writing a reference to a region.</A></H4>
 
 This example creates a dataset in the file. Then it creates a dataset 
 to store references to the dataset regions (selections).
@@ -1934,7 +2240,7 @@ main(void)
 <p align=right><font size=-1><a href="#IEx-TOC">(Return to TOC)</a></font>
 
 
-<H4><A NAME="ReadRefReg">Example 12</A>. Reading a reference to a region.</A></H4>
+<H4><A NAME="ReadRefReg">Example 14</A>. Reading a reference to a region.</A></H4>
 
 This example reads a dataset containing dataset region references.
 It reads data from the dereferenced dataset and displays the number of 
@@ -2097,7 +2403,7 @@ Introduction to HDF5&nbsp;<br>
 <tr><td align=left valign=top>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 <br>
-Last modified:  30 January 2001
+Last modified:  15 February 2001
 <br>
 Describes HDF5 Release 1.4, February 2001
 
