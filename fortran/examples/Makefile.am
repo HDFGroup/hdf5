@@ -106,5 +106,6 @@ refobjexample: refobjexample.f90
 refregexample: refregexample.f90
 mountexample: mountexample.f90
 compound: compound.f90
+ph5example: ph5example.f90
 
 include $(top_srcdir)/config/conclude.am
