@@ -1,14 +1,28 @@
 #! /bin/sh
-# runs the hdf5/bin/snapshots
-#
 # $Id$
+# run the hdf5/bin/snapshot
+# Usage:
+#	runtest		run the test for the local host
+#	runtest <hostname>	run the test for <hostname>
+#	runtest -all		run the test for all predefined hosts
+#
+# Assumptions in knowing where to find the right scripts to execute.
+# 1. assume we are at the top level of the hdf5 source.  So, bin/* are
+#    where the script files are.
+# 2. after the cvs update is completed, we can go to the snapshot area
+#    hdf5 source tree and use the bin/* there.
+# 3. Cannot use the snapshot area scripts from the beginning because
+#    for one, the current directory is renamed as previous right after
+#    a snapshot release; and for another, some scripts may be changed
+#    by the cvs update while it is being used.
 
 # local setup
 DEBUGMODE=""
 test -n "$DEBUGMODE" && echo "******** DEBUGMODE is $DEBUGMODE ************"
+WHEREAMI='pwd'
 
 # the name of this program
-PROGNAME=$HOME/bin-sys/runsnap
+PROGNAME=bin/runtest
 
 # Email any errors to whom
 TOWHOM=${DEBUGMODE:+acheng}
@@ -28,7 +42,9 @@ SRCDIR="srcdir"
 SNAPCMD="$SRCDIR op-configure --enable-stream-vfd op-configure --enable-static-exec test clean"
 ENABLE_PARALLEL="op-configure --enable-parallel"
 
-# various hosts
+#***************
+# Various hosts
+#***************
 # DEC
 # Gondolin: DEC
 #DECHOST="skydive"	# skydive is being upgraded.
@@ -304,7 +320,7 @@ RUNSNAPTEST()
     (date; echo Hostname=$HOSTNAME) >> $LOGFILE
 
     (
-    cd $H5DIR
+    cd $SNAPYARD/current
     $SNAPSHOT $SNAPCMD $SNAPCMD_OPT
     ) >> $LOGFILE 2>&1
     retcode=$?
@@ -380,11 +396,12 @@ trap PRINT_TRAILER 0
 #
 StartTime=`SecOfDay`
 
+$WHEREAMI
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
 if [ ! -f $CVSLOG ]; then
     echo Running CVS checkout with output saved in $CVSLOG
-    (cd $H5DIR; $SNAPSHOT checkout ) >> $CVSLOG 2>&1
+    ($WHEREAMI; $SNAPSHOT checkout ) >> $CVSLOG 2>&1
     errcode=$?
     if [ $errcode -ne 0 ]; then
 	# test failed.
@@ -392,7 +409,7 @@ if [ ! -f $CVSLOG ]; then
 	exit $errcode
     fi
     echo Checking MAINFEST file ...
-    (cd $H5DIR; bin/chkmanifest)
+    (cd $SNAPYARD/current; $WHEREAMI; bin/chkmanifest)
     errcode=$?
     if [ $errcode -ne 0 ]; then
 	# test failed.
@@ -400,6 +417,12 @@ if [ ! -f $CVSLOG ]; then
     fi
     PRINT_BLANK
 fi
+
+# we can use the version of script in SNAPYARD/current now
+PROGNAME="$SNAPYARD/current/$PROGNAME"
+
+echo PROGNAME=$PROGNAME
+echo SNAPSHOT=$SNAPSHOT
 
 # Decide to do test for the local host or for remote hosts
 if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
