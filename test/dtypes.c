@@ -4494,6 +4494,35 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                     }
                 }
             }
+/* On some machines (notably the SGI machines) unsigned long values
+ * are not converted to float or double values correctly, they are
+ * consistently off by the lowest bit being rounded oppositely to our
+ * software conversion routines output.  So, on those machines, we allow
+ * the converted value to be +/- 1 from the machine's value.  -QAK
+ */
+#ifndef H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
+            if(dst_size==sizeof(unsigned)) {
+                unsigned tmp_s, tmp_h;
+                HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned));
+                HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned));
+                if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
+                    continue; /*no error*/
+            } /* end if */
+            else if (dst_size==sizeof(unsigned long)) {
+                unsigned long tmp_s, tmp_h;
+                HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long));
+                HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long));
+                if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
+                    continue; /*no error*/
+            } /* end if */
+            else if (dst_size==sizeof(unsigned long long)) {
+                unsigned long long tmp_s, tmp_h;
+                HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long long));
+                HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long long));
+                if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
+                    continue; /*no error*/
+            } /* end if */
+#endif /* end H5_ULONG_FP_BOTTOM_BIT_WORKS */
 
 	    /* Print errors */
 	    if (0==fails_this_test++)
@@ -5546,26 +5575,16 @@ run_int_float_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_LONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_LONG, H5T_NATIVE_DOUBLE);
 
-    /* Temporarily disable these tests for software conversion.  They fail on 
-     * some systems(like modi4, premium, o2 and arabica)
-     */
-    if(!strcmp(name, "hw")) {
-        nerrors += test_conv_int_float(name, H5T_NATIVE_ULONG, H5T_NATIVE_FLOAT);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_ULONG, H5T_NATIVE_DOUBLE);
-    }
+    nerrors += test_conv_int_float(name, H5T_NATIVE_ULONG, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_ULONG, H5T_NATIVE_DOUBLE);
 #endif
 
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
     nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_DOUBLE);
 
-    /* Temporarily disable these tests for software conversion.  They fail on 
-     * some systems(like modi4, premium, o2 and arabica)
-     */
-    if(!strcmp(name, "hw")) {
-        nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_DOUBLE);
-    }
+    nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_DOUBLE);
 #endif
 
     return nerrors;
@@ -5621,14 +5640,8 @@ run_float_int_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
 
-    /* Temporarily disable these two tests for software conversion because of 
-     * the bug in pgcc compiler.
-     * Will turn it back once the problem is solved.
-     */
-    if(!strcmp(name, "hw")) {
-        nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
-    }
+    nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
 #endif
     
     return nerrors;

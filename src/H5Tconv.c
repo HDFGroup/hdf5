@@ -9369,9 +9369,9 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		     */
 			
                     /* Check 1st dropoff bit, see if it's set. */
-                    if(H5T_bit_get_d(int_buf, (first-dst.u.f.msize-1), 1)) {
+                    if(H5T_bit_get_d(int_buf, ((first-dst.u.f.msize)-1), 1)) {
                     	/* Check all bits after 1st dropoff bit, see if any of them is set. */
-                        if((first-dst.u.f.msize-1) > 0 && H5T_bit_get_d(int_buf, 0, (first-dst.u.f.msize-1)))
+                        if(((first-dst.u.f.msize)-1) > 0 && H5T_bit_get_d(int_buf, 0, ((first-dst.u.f.msize)-1)))
                             do_round = 1;
                         else {  /* The .50...0 case */
                             /* Check if the least significant bit is odd. */

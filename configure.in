@@ -2381,6 +2381,23 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine can accurately convert
+dnl 'unsigned long long' values to 'float' and 'double' values.
+dnl (This flag should be set for all machines, except for the SGIs, where
+dnl the cache value is set in the config/irix6.x config file)
+dnl
+AC_MSG_CHECKING([if accurately converting unsigned long long to floating-point values works])
+AC_CACHE_VAL([hdf5_cv_sw_ulong_to_fp_bottom_bit_works], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes])
+
+if test ${hdf5_cv_sw_ulong_to_fp_bottom_bit_works} = "yes"; then
+  AC_DEFINE([SW_ULONG_TO_FP_BOTTOM_BIT_WORKS], [1],
+            [Define if your system can accurately convert unsigned long long values to floating-point values.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Set some variables for general configuration information to be saved
 dnl and installed with the libraries.
 dnl

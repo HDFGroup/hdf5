@@ -140,3 +140,8 @@ if test -z "$cxx_flags_set"; then
   PROFILE_CPPFLAGS=
   cxx_flags_set=yes
 fi
+
+# Hard set flag to indicate that the 'unsigned long long' to floating-point
+# value conversion are broken by the compilers (as of 4/27/04 - QAK)
+hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_works='no'}
+
