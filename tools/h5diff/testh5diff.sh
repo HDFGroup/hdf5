@@ -79,9 +79,9 @@ TOOLTEST() {
    fi
 
    # Clean up output file
-    if test -z "$HDF5_NOCLEANUP"; then
-    rm -f $actual $actual_err
-    fi
+     if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+     fi
 }
 
 ##############################################################################
@@ -91,7 +91,7 @@ TOOLTEST() {
 ##############################################################################
 
 ##############################################################################
-# tests 0., check for bad input values
+# tests 0., Check for individual options
 ##############################################################################
 
 # test 0.1: Check if the command line number of arguments is less than 3
@@ -100,66 +100,203 @@ TOOLTEST h5diff_01.txt h5diff_test1.h5
 # test 0.2: Check for invalid options
 TOOLTEST h5diff_02.txt -x h5diff_test1.h5 h5diff_test2.h5
 
-# test 0.3: Check for -h option
-TOOLTEST h5diff_03.txt -h h5diff_test1.h5 h5diff_test2.h5
+# test 0.3.1: Check for -h option
+TOOLTEST h5diff_031.txt -h h5diff_test1.h5 h5diff_test2.h5
 
-# test 0.4: Check for invalid -d options
-TOOLTEST h5diff_04.txt -d  h5diff_test1.h5 h5diff_test2.h5
+# test 0.3.2: Check for -l option
+TOOLTEST h5diff_032.txt -l h5diff_test1.h5 h5diff_test2.h5
 
-# test 0.5: Check for invalid -d options
-TOOLTEST h5diff_05.txt -d -4  h5diff_test1.h5 h5diff_test2.h5
-
-# test 0.6: Check for invalid -p options
-TOOLTEST h5diff_06.txt -p  h5diff_test1.h5 h5diff_test2.h5
-
-# test 0.7: Check for invalid -p options
-TOOLTEST h5diff_07.txt -p -4  h5diff_test1.h5 h5diff_test2.h5
-
-# test 0.8: Check for invalid -n options
-TOOLTEST h5diff_08.txt -n  h5diff_test1.h5 h5diff_test2.h5
-
-# test 0.9: Check for invalid -n options
-TOOLTEST h5diff_09.txt -n 0  h5diff_test1.h5 h5diff_test2.h5
-
-# test 0.10: Check if the file names supplied are valid files
-TOOLTEST h5diff_010.txt h5diff_test1.h6 h5diff_test2.h6
+# test 0.3.3: Check for -r option
+TOOLTEST h5diff_033.txt -r h5diff_test1.h5 h5diff_test2.h5
 
 ##############################################################################
-# tests 1., Check for not comparable issues
+# Test -d option
 ##############################################################################
 
-# test 1.1.1: Objects are not the same type (e.g try to compare a group with a dataset)
+
+# test 0.4.1: no value
+TOOLTEST h5diff_041.txt -d h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.2: negative value
+TOOLTEST h5diff_042.txt -d -4 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.3: zero
+TOOLTEST h5diff_043.txt -d 0 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.4: non number
+TOOLTEST h5diff_044.txt -d u h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.5: hexadecimal
+TOOLTEST h5diff_045.txt -d 0x1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.6: string
+TOOLTEST h5diff_046.txt -d "1" h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.7: repeated value
+TOOLTEST h5diff_047.txt -d 1 -d 2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.8: number larger than biggest difference
+TOOLTEST h5diff_048.txt dset2.1a dset2.1b -d 7 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.9: number smaller than smallest difference
+TOOLTEST h5diff_049.txt dset2.1a dset2.1b -d 1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.10: non-integer
+TOOLTEST h5diff_0410.txt dset2.1a dset2.1b -d 2.3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# Test -p option
+##############################################################################
+
+
+# test 0.5.1: no value
+TOOLTEST h5diff_051.txt -p  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.2: negative value
+TOOLTEST h5diff_052.txt -p -4 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.3: zero
+TOOLTEST h5diff_053.txt -p 0 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.4: non number
+TOOLTEST h5diff_054.txt -p u h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.5: hexadecimal
+TOOLTEST h5diff_055.txt -p 0x1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.6: string
+TOOLTEST h5diff_056.txt -p "1" h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.7: repeated value
+TOOLTEST h5diff_057.txt -p 1 -p 2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.8: number larger than biggest difference
+TOOLTEST h5diff_058.txt dset2.1a dset2.1b -p 7 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.9: number smaller than smallest difference
+TOOLTEST h5diff_059.txt dset2.1a dset2.1b -p 1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.10: non-integer
+TOOLTEST h5diff_0510.txt dset2.1a dset2.1b -p 2.3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# Test -n option
+##############################################################################
+
+
+# test 0.6.1: no value
+TOOLTEST h5diff_061.txt -n  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.2: negative value
+TOOLTEST h5diff_062.txt -n -4 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.3: zero
+TOOLTEST h5diff_063.txt -n 0 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.4: non number
+TOOLTEST h5diff_064.txt -n u h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.5: hexadecimal
+TOOLTEST h5diff_065.txt -n 0x1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.6: string
+TOOLTEST h5diff_066.txt -n "1" h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.7: repeated value
+TOOLTEST h5diff_067.txt -n 1 -n 2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.8: number larger than biggest difference
+TOOLTEST h5diff_068.txt dset2.1a dset2.1b -n 7 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.9: number smaller than smallest difference
+TOOLTEST h5diff_069.txt dset2.1a dset2.1b -n 1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.10: non-integer
+TOOLTEST h5diff_0610.txt dset2.1a dset2.1b -n 2.3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# Test valid files
+##############################################################################
+
+# test 0.7: Check if the file names supplied are valid files
+TOOLTEST h5diff_07.txt h5diff_test1.h6 h5diff_test2.h6
+
+
+##############################################################################
+# Check for not comparable issues
+##############################################################################
+
+##############################################################################
+# Different types
+##############################################################################
+
+# test 1.1.1: Compare a dataset with a group
 TOOLTEST h5diff_111.txt dset1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.1.2: Objects are not the same type (e.g try to compare a group with a dataset)
-TOOLTEST h5diff_112.txt g1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
+# test 1.1.2 Dataset vs Link
+TOOLTEST h5diff_112.txt dset1.1 soft h5diff_test1.h5 h5diff_test1.h5
 
-# test 1.2.1: Objects are of classes H5G_TYPE and H5G_GROUP and their name is supplied
-TOOLTEST h5diff_121.txt compound h5diff_test1.h5 h5diff_test2.h5
+# test 1.1.3 Dataset vs Named type
+TOOLTEST h5diff_113.txt dset1.1 compound h5diff_test1.h5 h5diff_test1.h5
 
-# test 1.2.2: Objects are of classes H5G_TYPE and H5G_GROUP and their name is supplied
-TOOLTEST h5diff_122.txt enum h5diff_test1.h5 h5diff_test2.h5
+##############################################################################
+# not comparable types
+##############################################################################
 
-# test 1.3: Check for non supported classes. Supported classes are H5T_INTEGER and H5T_FLOAT
-TOOLTEST h5diff_13.txt dset1.3 h5diff_test1.h5 h5diff_test2.h5
+# test 1.2.1: Group vs Group
+TOOLTEST h5diff_121.txt g1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.4: Objects are not the same dataset class type
+# test 1.2.2: Type vs Type
+TOOLTEST h5diff_122.txt compound h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.2.3: Link vs Link
+TOOLTEST h5diff_123.txt soft soft h5diff_test1.h5 h5diff_test1.h5
+
+
+##############################################################################
+# Class issues
+##############################################################################
+
+# test 1.3.1: H5T_STRING
+TOOLTEST h5diff_131.txt dset1.3.1 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.2: H5T_BITFIELD
+TOOLTEST h5diff_132.txt dset1.3.2 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.3: H5T_OPAQUE
+TOOLTEST h5diff_133.txt dset1.3.3 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.4: H5T_COMPOUND
+TOOLTEST h5diff_134.txt dset1.3.4 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.5: H5T_REFERENCE
+TOOLTEST h5diff_135.txt dset1.3.5 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.6: H5T_ENUM
+TOOLTEST h5diff_136.txt dset1.3.6 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.7: H5T_VLEN
+TOOLTEST h5diff_137.txt dset1.3.7 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.8: H5T_ARRAY
+TOOLTEST h5diff_138.txt dset1.3.8 h5diff_test1.h5 h5diff_test1.h5
+
+
+# test 1.4: Compare integer with float
 TOOLTEST h5diff_14.txt dset1.1 dset1.4 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.5: Check for the same rank, for datasets
+# test 1.5 : Check for the same rank, for datasets
 TOOLTEST h5diff_15.txt dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.6: Check for the same current dimensions
+# test 1.6: Check for the same current dimensions. Only compare if they are the same.
 TOOLTEST h5diff_16.txt dset1.1 dset1.6 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.7 Check for the same maximum dimensions
+# test 1.7: Check for the same maximum dimensions. Give a warning if they are different. 
 TOOLTEST h5diff_17.txt dset1.7 dset1.7 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.8 Check for different storage order
+# test 1.8: Check for the same storage datatype. Give a warning if they are different. 
 TOOLTEST h5diff_18.txt dset1.8 dset1.8 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.9 Check for H5S_SCALAR dataspace vs simple dataspace with 1 element
-TOOLTEST h5diff_19.txt dset1.9 dset1.9 h5diff_test1.h5 h5diff_test2.h5
 
 ##############################################################################
 # tests 2., Different datatype sizes and different mix of options 

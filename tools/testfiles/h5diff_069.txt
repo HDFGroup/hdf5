@@ -1,0 +1,11 @@
+#############################
+Expected output for 'h5diff dset2.1a dset2.1b -n 1 h5diff_test1.h5 h5diff_test2.h5'
+#############################
+$h5diff dset2.1a dset2.1b -n 1 h5diff_test1.h5 h5diff_test2.h5
+Comparing <dset2.1a> with <dset2.1b>
+using memory type H5T_NATIVE_SCHAR
+position        dset2.1a        dset2.1b        difference          
+------------------------------------------------------------
+[ 1 0 ]          1               3               2              
+1 differences found
+

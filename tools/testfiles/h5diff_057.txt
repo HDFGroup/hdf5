@@ -1,0 +1,53 @@
+#############################
+Expected output for 'h5diff -p 1 -p 2 h5diff_test1.h5 h5diff_test2.h5'
+#############################
+$h5diff -p 1 -p 2 h5diff_test1.h5 h5diff_test2.h5
+</compound> found in <h5diff_test1.h5> and </compound> found in <h5diff_test2.h5>
+</compound> and </compound> are of type H5G_TYPE
+</dset1.1> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.1> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.2> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.3> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.4> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.5> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.6> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.7> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.3.8> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset1.4> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset1.5> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset1.6> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset1.7> found in <h5diff_test1.h5> and </dset1.7> found in <h5diff_test2.h5>
+Comparing </dset1.7> with </dset1.7>
+Warning: </dset1.7> has different maximum dimensions than </dset1.7>
+</dset1.7>: [ 7 ]
+</dset1.7>: [ 8 ]
+using memory type H5T_NATIVE_INT
+0 differences found
+</dset1.8> found in <h5diff_test1.h5> and </dset1.8> found in <h5diff_test2.h5>
+Comparing </dset1.8> with </dset1.8>
+Warning: </dset1.8> has different storage datatype than </dset1.8>
+</dset1.8> has datatype H5T_STD_I32BE and </dset1.8> has datatype H5T_STD_I32LE
+using memory type H5T_NATIVE_INT
+0 differences found
+</dset1.9> found in <h5diff_test1.h5> and </dset1.9> found in <h5diff_test2.h5>
+Comparing </dset1.9> with </dset1.9>
+using memory type H5T_NATIVE_INT
+0 differences found
+</dset2.1a> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset2.1b> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset2.2a> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset2.2b> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset2.3a> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset2.3b> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset2.4a> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset2.4b> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset2.5a> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset2.5b> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</dset2.6a> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+</dset2.6b> is in <h5diff_test2.h5>, but not in <h5diff_test1.h5>
+</enum> found in <h5diff_test1.h5> and </enum> found in <h5diff_test2.h5>
+</enum> and </enum> are of type H5G_TYPE
+</g1.1> found in <h5diff_test1.h5> and </g1.1> found in <h5diff_test2.h5>
+</g1.1> and </g1.1> are of type H5G_GROUP
+</soft> is in <h5diff_test1.h5>, but not in <h5diff_test2.h5>
+

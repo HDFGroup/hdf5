@@ -1,0 +1,18 @@
+#############################
+Expected output for 'h5diff -n u h5diff_test1.h5 h5diff_test2.h5'
+#############################
+$h5diff -n u h5diff_test1.h5 h5diff_test2.h5
+<-n u> is not a valid option
+Usage: h5diff [obj1_name] [obj2_name] [OPTIONS] file1_name file2_name
+Items in [ ] are optional
+[obj1_name]       Name of an HDF5 object
+[obj2_name]       Name of an HDF5 object
+file1_name        File name of the first HDF5 file
+file2_name        File name of the second HDF5 file
+[OPTIONS] are:
+[-h ]             Print out this information
+[-l ]             List contents of file
+[-r ]             Print only what objects differ
+[-n count]        Print difference up to count number for each variable
+[-d delta]        Print difference when it is greater than limit delta
+[-p relative]     Print differences which are within a relative error value

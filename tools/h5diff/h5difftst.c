@@ -18,7 +18,6 @@
 #include "hdf5.h"
 
 
-
 /* diff tst*/
 int do_test_files(void);
 int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name,
@@ -35,39 +34,230 @@ int main(int argc, const char *argv[])
 
 
 
-
-
 /*-------------------------------------------------------------------------
  * these command line options are tested in ./testh5diff.sh
  *-------------------------------------------------------------------------
  */
 
 /*
-# test 1.1
+
+##############################################################################
+# tests 0., Check for individual options
+##############################################################################
+
+# test 0.1: Check if the command line number of arguments is less than 3
+h5diff_test1.h5 
+
+# test 0.2: Check for invalid options
+-x h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.3.1: Check for -h option
+-h h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.3.2: Check for -l option
+-l h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.3.3: Check for -r option
+-r h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# Test -d option
+##############################################################################
+
+
+# test 0.4.1: no value
+-d  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.2: negative value
+-d -4 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.3: zero
+-d 0 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.4: non number
+-d u h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.5: hexadecimal
+-d 0x1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.6: string which is a number
+-d "1" h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.7: repeated value
+-d 1 -d 2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.8: number larger than biggest difference
+dset2.1a dset2.1b -d 7 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.9: number smaller than smallest difference
+dset2.1a dset2.1b -d 1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.4.10: non-integer
+dset2.1a dset2.1b -d 2.3 h5diff_test1.h5 h5diff_test2.h5
+
+
+##############################################################################
+# Test -p option
+##############################################################################
+
+
+# test 0.5.1: no value
+-p  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.2: negative value
+-p -4 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.3: zero
+-p 0 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.4: non number
+-p u h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.5: hexadecimal
+-p 0x1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.6: string
+-p "1" h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.7: repeated value
+-p 1 -p 2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.8: number larger than biggest difference
+dset2.1a dset2.1b -p 7 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.9: number smaller than smallest difference
+dset2.1a dset2.1b -p 1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5.10: non-integer
+dset2.1a dset2.1b -p 2.3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# Test -n option
+##############################################################################
+
+
+# test 0.6.1: no value
+-n  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.2: negative value
+-n -4 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.3: zero
+-n 0 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.4: non number
+-n u h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.5: hexadecimal
+-n 0x1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.6: string
+-n "1" h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.7: repeated value
+-n 1 -n 2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.8: number larger than biggest difference
+dset2.1a dset2.1b -n 7 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.9: number smaller than smallest difference
+dset2.1a dset2.1b -n 1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6.10: non-integer
+dset2.1a dset2.1b -n 2.3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# Test valid files
+##############################################################################
+
+# test 0.7: Check if the file names supplied are valid files
+h5diff_test1.h6 h5diff_test2.h6
+
+
+##############################################################################
+# Check for not comparable issues
+##############################################################################
+
+##############################################################################
+# Different types
+##############################################################################
+
+# test 1.1.1: Compare a dataset with a group
 dset1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.1.2 Dataset vs Link
+dset1.1 soft h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.1.3 Dataset vs Named type
+dset1.1 compound h5diff_test1.h5 h5diff_test1.h5
+
+##############################################################################
+# not comparable types
+##############################################################################
+
+# test 1.2.1: Group vs Group
 g1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
-# test 1.2
+
+# test 1.2.2: Type vs Type
 compound h5diff_test1.h5 h5diff_test2.h5
-enum h5diff_test1.h5 h5diff_test2.h5
-# test 1.3
-dset1.3 h5diff_test1.h5 h5diff_test2.h5
-# test 1.4
+
+# test 1.2.3: Link vs Link
+soft soft h5diff_test1.h5 h5diff_test1.h5
+
+
+##############################################################################
+# Class issues
+##############################################################################
+
+# test 1.3.1: H5T_STRING
+dset1.3.1 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.2: H5T_BITFIELD
+dset1.3.2 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.3: H5T_OPAQUE
+dset1.3.3 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.4: H5T_COMPOUND
+dset1.3.4 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.5: H5T_REFERENCE
+dset1.3.5 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.6: H5T_ENUM
+dset1.3.6 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.7: H5T_VLEN
+dset1.3.7 h5diff_test1.h5 h5diff_test1.h5
+
+# test 1.3.8: H5T_ARRAY
+dset1.3.8 h5diff_test1.h5 h5diff_test1.h5
+
+
+# test 1.4: Compare integer with float
 dset1.1 dset1.4 h5diff_test1.h5 h5diff_test2.h5
-# test 1.5
+
+# test 1.5 : Check for the same rank, for datasets
 dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5
-# test 1.6
+
+# test 1.6: Check for the same current dimensions. Only compare if they are the same.
 dset1.1 dset1.6 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.7
+# test 1.7: Check for the same maximum dimensions. Give a warning if they are different. 
 dset1.7 dset1.7 h5diff_test1.h5 h5diff_test2.h5
-# test 1.8
+
+# test 1.8: Check for the same storage datatype. Give a warning if they are different. 
 dset1.8 dset1.8 h5diff_test1.h5 h5diff_test2.h5
-# test 1.9
-dset1.9 dset1.9 h5diff_test1.h5 h5diff_test2.h5
+
 
 #######################################################
 # Different datatype sizes and different mix of options 
 #######################################################
+
+##############################################################################
+# H5T_INTEGER size 1 
+##############################################################################
+
 # test 2.1.0
 dset2.1a dset2.1b h5diff_test1.h5 h5diff_test2.h5
 # test 2.1.1
@@ -76,7 +266,11 @@ dset2.1a dset2.1b -n 2 h5diff_test1.h5 h5diff_test2.h5
 dset2.1a dset2.1b -d 3 h5diff_test1.h5 h5diff_test2.h5
 # test 2.1.3
 dset2.1a dset2.1b -p 3 h5diff_test1.h5 h5diff_test2.h5
-#######################################################
+
+##############################################################################
+# H5T_INTEGER size 2
+##############################################################################
+
 # test 2.2.0
 dset2.2a dset2.2b h5diff_test1.h5 h5diff_test2.h5
 # test 2.2.1
@@ -85,7 +279,11 @@ dset2.2a dset2.2b -n 2 h5diff_test1.h5 h5diff_test2.h5
 dset2.2a dset2.2b -d 3 h5diff_test1.h5 h5diff_test2.h5
 # test 2.2.3
 dset2.2a dset2.2b -p 3 h5diff_test1.h5 h5diff_test2.h5
-#######################################################
+
+##############################################################################
+# H5T_INTEGER size 4
+##############################################################################
+
 # test 2.3.0
 dset2.3a dset2.3b h5diff_test1.h5 h5diff_test2.h5
 # test 2.3.1
@@ -94,7 +292,11 @@ dset2.3a dset2.3b -n 2 h5diff_test1.h5 h5diff_test2.h5
 dset2.3a dset2.3b -d 3 h5diff_test1.h5 h5diff_test2.h5
 # test 2.3.3
 dset2.3a dset2.3b -p 3 h5diff_test1.h5 h5diff_test2.h5
-#######################################################
+
+##############################################################################
+# H5T_INTEGER size 8
+##############################################################################
+
 # test 2.4.0
 dset2.4a dset2.4b h5diff_test1.h5 h5diff_test2.h5
 # test 2.4.1
@@ -103,7 +305,11 @@ dset2.4a dset2.4b -n 2 h5diff_test1.h5 h5diff_test2.h5
 dset2.4a dset2.4b -d 3 h5diff_test1.h5 h5diff_test2.h5
 # test 2.4.3
 dset2.4a dset2.4b -p 3 h5diff_test1.h5 h5diff_test2.h5
-#######################################################
+
+##############################################################################
+# H5T_FLOAT size 4
+##############################################################################
+
 # test 2.5.0
 dset2.5a dset2.5b h5diff_test1.h5 h5diff_test2.h5
 # test 2.5.1
@@ -112,7 +318,11 @@ dset2.5a dset2.5b -n 2 h5diff_test1.h5 h5diff_test2.h5
 dset2.5a dset2.5b -d 3 h5diff_test1.h5 h5diff_test2.h5
 # test 2.5.3
 dset2.5a dset2.5b -p 3 h5diff_test1.h5 h5diff_test2.h5
-#######################################################
+
+##############################################################################
+# H5T_FLOAT size 8
+##############################################################################
+		
 # test 2.6.0
 dset2.6a dset2.6b h5diff_test1.h5 h5diff_test2.h5
 # test 2.6.1
@@ -163,6 +373,7 @@ int do_test_files(void)
  hsize_t dims0  [1] = { 1 };
  hsize_t dims2  [2] = { 3,2 };
  char    data1_3[]  = {"A string"};
+ unsigned char data1_3_2[7] = {1,2,3,4,5,6,7};
  float   data1_4[7] = {1,1,3,4,5,6,7};
  
  /* Compound datatype */
@@ -268,7 +479,16 @@ int do_test_files(void)
  H5Tclose(type2_id);
 
 /*-------------------------------------------------------------------------
- * Test 1.3
+ * Test 1.2.3
+ * Links
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Create a symbolic link */
+ status = H5Glink(file1_id, H5G_LINK_SOFT, "dset1.1", "soft");
+
+/*-------------------------------------------------------------------------
+ * Tests 1.3.
  * Check for non supported classes. Supported classes are H5T_INTEGER and H5T_FLOAT
  * Non supported classes are
  * H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_COMPOUND, H5T_REFERENCE,
@@ -277,7 +497,8 @@ int do_test_files(void)
  */
 
 /*-------------------------------------------------------------------------
- * Write two string datatypes
+ * Test 1.3.1
+ * H5T_STRING
  *-------------------------------------------------------------------------
  */
 
@@ -289,16 +510,7 @@ int do_test_files(void)
  status = H5Tset_size (type_id, strlen(data1_3));
 
  /* Create a dataset "dset1.3" on file 1 */
- dataset_id = H5Dcreate(file1_id,"dset1.3",type_id,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,data1_3);
-
- /* Close */
- status = H5Dclose(dataset_id);
-
- /* Create a dataset "dset1.3" on file 2 */
- dataset_id = H5Dcreate(file2_id,"dset1.3",type_id,space_id,H5P_DEFAULT);
+ dataset_id = H5Dcreate(file1_id,"dset1.3.1",type_id,space_id,H5P_DEFAULT);
   
  /* Write the data */
  status = H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,data1_3);
@@ -307,6 +519,84 @@ int do_test_files(void)
  status = H5Dclose(dataset_id);
  status = H5Sclose(space_id);
  status = H5Tclose(type_id);
+
+/*-------------------------------------------------------------------------
+ * Test 1.3.2
+ * H5T_BITFIELD
+ *-------------------------------------------------------------------------
+ */
+
+ type_id = H5Tcopy(H5T_STD_B8LE);
+ write_dataset(file1_id,1,dims1,"dset1.3.2",type_id,data1_3_2);
+ status = H5Tclose(type_id);
+
+
+/*-------------------------------------------------------------------------
+ * Test 1.3.3
+ * H5T_OPAQUE
+ *-------------------------------------------------------------------------
+ */
+
+ type_id = H5Tcreate(H5T_OPAQUE, 1);
+ status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
+ write_dataset(file1_id,1,dims1,"dset1.3.3",type_id,data1_3_2);
+ status = H5Tclose(type_id);
+
+/*-------------------------------------------------------------------------
+ * Test 1.3.4
+ * H5T_COMPOUND
+ *-------------------------------------------------------------------------
+ */
+
+ type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
+ H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_INT);
+ H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_FLOAT);
+ write_dataset(file1_id,1,dims1,"dset1.3.4",type_id,0);
+ status = H5Tclose(type_id);
+ 
+/*-------------------------------------------------------------------------
+ * Test 1.3.5
+ * H5T_REFERENCE
+ *-------------------------------------------------------------------------
+ */
+
+ write_dataset(file1_id,1,dims1,"dset1.3.5",H5T_STD_REF_OBJ,0);
+
+
+/*-------------------------------------------------------------------------
+ * Test 1.3.6
+ * H5T_ENUM
+ *-------------------------------------------------------------------------
+ */
+
+ type_id = H5Tcreate(H5T_ENUM, sizeof(e_t));
+ H5Tenum_insert(type_id, "RED",   (val = 0, &val));
+ H5Tenum_insert(type_id, "GREEN", (val = 1, &val));
+ write_dataset(file1_id,1,dims1,"dset1.3.6",type_id,0);
+ status = H5Tclose(type_id);
+
+/*-------------------------------------------------------------------------
+ * Test 1.3.7
+ * H5T_VLEN
+ *-------------------------------------------------------------------------
+ */
+
+ type_id = H5Tvlen_create(H5T_NATIVE_INT);
+ write_dataset(file1_id,1,dims1,"dset1.3.7",type_id,0);
+ status = H5Tclose(type_id);
+
+
+/*-------------------------------------------------------------------------
+ * Test 1.3.8
+ * H5T_ARRAY
+ *-------------------------------------------------------------------------
+ */
+
+ type_id = H5Tarray_create(H5T_NATIVE_INT,1,dims1,NULL);
+ write_dataset(file1_id,1,dims1,"dset1.3.8",type_id,0);
+ status = H5Tclose(type_id);
+
+
 
 /*-------------------------------------------------------------------------
  * Test 1.4
@@ -509,6 +799,11 @@ int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name
  return 0;
 
 }
+
+
+
+
+
 
 
 

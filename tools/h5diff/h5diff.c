@@ -78,6 +78,14 @@ void leave();
 
 
 
+/* diff tst*/
+int do_test_files(void);
+int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name,
+                   hid_t type_id, void *data );
+
+
+
+
 /*-------------------------------------------------------------------------
  * Function: usage
  *
@@ -158,6 +166,9 @@ int main(int argc, const char *argv[])
  const char *file2_name;
  const char *obj1_name  = NULL;
  const char *obj2_name  = NULL;
+ 
+ /*do_test_files();*/
+
 
 /*-------------------------------------------------------------------------
  * print the command line options
@@ -440,6 +451,10 @@ int check_f_input( const char *str )
  unsigned i;
  char c;
 
+ /* '0' values not allowed */
+ if ( strlen(str)==1 && str[0]=='0' )
+  return -1;
+
  for ( i = 0; i < strlen(str); i++)
  {
   c = str[i];
@@ -486,8 +501,11 @@ void list( const char *filename, int nobjects, info_t *info )
   case H5G_TYPE:
    printf("%s %20s\n", info[i].name, "datatype" );
    break;
+  case H5G_LINK:
+   printf("%s %20s\n", info[i].name, "link" );
+   break;
   default:
-   printf("non supported object\n" );
+   printf("%s %20s\n", info[i].name, "User defined object" );
    break;
   }
  }
@@ -619,32 +637,25 @@ void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *ob
 
  switch ( type )
  {
-  
-/*-------------------------------------------------------------------------
- * H5G_GROUP
- *-------------------------------------------------------------------------
- */ 
-  
- case H5G_GROUP:
-  printf( "<%s> and <%s> are of type H5G_GROUP\n", obj1_name, obj2_name );
-  break;
-  
- /*-------------------------------------------------------------------------
-  * H5G_DATASET
-  *-------------------------------------------------------------------------
-  */
-  
+    
  case H5G_DATASET:
   diff_dataset(file1_id,file2_id,obj1_name,obj2_name,options);
   break;
-  
- /*-------------------------------------------------------------------------
-  * H5G_TYPE
-  *-------------------------------------------------------------------------
-  */
-  
+
+ case H5G_GROUP:
+  printf( "<%s> and <%s> are of type H5G_GROUP\n", obj1_name, obj2_name );
+  break;
+   
  case H5G_TYPE:
   printf( "<%s> and <%s> are of type H5G_TYPE\n", obj1_name, obj2_name ); 
+  break;
+
+ case H5G_LINK:
+  printf( "<%s> and <%s> are of type H5G_LINK\n", obj1_name, obj2_name ); 
+  break;
+
+ default:
+  printf( "<%s> and <%s> are user defined types\n", obj1_name, obj2_name ); 
   break;
   
  } /* switch */
@@ -1186,35 +1197,41 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( abs(1 - *i1ptr2 / *i1ptr1)  > options.p_relative  )
+      if (*i1ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs(1 - *i1ptr2 / *i1ptr1)  > options.p_relative  )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(IFORMAT, *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(IFORMAT, *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( abs(1 - *i1ptr2 / *i1ptr1)  > options.p_relative &&
-           abs(*i1ptr1 - *i1ptr2) > options.d_delta )
+      if (*i1ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs(1 - *i1ptr2 / *i1ptr1)  > options.p_relative &&
+        abs(*i1ptr1 - *i1ptr2) > options.d_delta )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(IFORMAT, *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(IFORMAT, *i1ptr1, *i1ptr2, abs(*i1ptr1 - *i1ptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
      
@@ -1268,35 +1285,41 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( abs(1 - *i2ptr2 / *i2ptr1)  > options.p_relative  )
+      if (*i2ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs(1 - *i2ptr2 / *i2ptr1)  > options.p_relative  )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(IFORMAT, *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(IFORMAT, *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
+        }
+        nfound++;
        }
-       nfound++;
-       }
+      }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( abs(1 - *i2ptr2 / *i2ptr1) > options.p_relative &&
-           abs(*i2ptr1 - *i2ptr2) > options.d_delta )
+      if (*i2ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs(1 - *i2ptr2 / *i2ptr1) > options.p_relative &&
+        abs(*i2ptr1 - *i2ptr2) > options.d_delta )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(IFORMAT, *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(IFORMAT, *i2ptr1, *i2ptr2, abs(*i2ptr1 - *i2ptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
      
@@ -1351,35 +1374,41 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( abs(1 - *i4ptr2 / *i4ptr1) > options.p_relative  )
+      if (*i4ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs(1 - *i4ptr2 / *i4ptr1) > options.p_relative  )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(IFORMAT, *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(IFORMAT, *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( abs(1 - *i4ptr2 / *i4ptr1) > options.p_relative &&
-           abs(*i4ptr1 - *i4ptr2) > options.d_delta )
+      if (*i4ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs(1 - *i4ptr2 / *i4ptr1) > options.p_relative &&
+        abs(*i4ptr1 - *i4ptr2) > options.d_delta )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(IFORMAT, *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(IFORMAT, *i4ptr1, *i4ptr2, abs(*i4ptr1 - *i4ptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
      
@@ -1435,35 +1464,41 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( abs((int)(1 - *i8ptr2 / *i8ptr1)) > options.p_relative  )
+      if (*i8ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs((int)(1 - *i8ptr2 / *i8ptr1)) > options.p_relative  )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( abs((int)(1 - *i8ptr2 / *i8ptr1)) > options.p_relative &&
-           abs(i8diff) > options.d_delta )
+      if (*i8ptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( abs((int)(1 - *i8ptr2 / *i8ptr1)) > options.p_relative &&
+        abs(i8diff) > options.d_delta )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
      
@@ -1530,35 +1565,41 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( fabs(1 - *fptr2 / *fptr1)  > options.p_relative  )
+      if (*fptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( fabs(1 - *fptr2 / *fptr1)  > options.p_relative  )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(FFORMAT, *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(FFORMAT, *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+        }
+        nfound++;
        }
-       nfound++;
-       }
+      }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( fabs(1 - *fptr2 / *fptr1)  > options.p_relative &&
-           fabs(*fptr1 - *fptr2) > options.d_delta )
+      if (*fptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( fabs(1 - *fptr2 / *fptr1)  > options.p_relative &&
+        fabs(*fptr1 - *fptr2) > options.d_delta )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(FFORMAT, *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(FFORMAT, *fptr1, *fptr2, fabs(*fptr1 - *fptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
      
@@ -1611,35 +1652,41 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( fabs(1 - *dptr2 / *dptr1)  > options.p_relative  )
+      if (*dptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( fabs(1 - *dptr2 / *dptr1)  > options.p_relative  )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(FFORMAT, *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(FFORMAT, *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
    
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( fabs(1 - *dptr2 / *dptr1)  > options.p_relative &&
-           fabs(*dptr1 - *dptr2) > options.d_delta )
+      if (*dptr1!=0)
       {
-       if ( options.n_ && nfound>=options.n_number_count)
-        return nfound;
-       if ( options.r_==0 ) 
+       if ( fabs(1 - *dptr2 / *dptr1)  > options.p_relative &&
+        fabs(*dptr1 - *dptr2) > options.d_delta )
        {
-        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
-        printf(SPACES);
-        printf(FFORMAT, *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+        if ( options.n_ && nfound>=options.n_number_count)
+         return nfound;
+        if ( options.r_==0 ) 
+        {
+         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
+         printf(SPACES);
+         printf(FFORMAT, *dptr1, *dptr2, fabs(*dptr1 - *dptr2));
+        }
+        nfound++;
        }
-       nfound++;
       }
      }
      
@@ -1972,4 +2019,7 @@ void print_datatype(hid_t type)
    
  }/*switch*/
 }
+
+
+
 

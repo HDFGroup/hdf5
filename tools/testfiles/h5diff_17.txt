@@ -2,6 +2,10 @@
 Expected output for 'h5diff dset1.7 dset1.7 h5diff_test1.h5 h5diff_test2.h5'
 #############################
 $h5diff dset1.7 dset1.7 h5diff_test1.h5 h5diff_test2.h5
-Object <dset1.7> could not be found in <h5diff_test1.h5>
-Object <dset1.7> could not be found in <h5diff_test2.h5>
+Comparing <dset1.7> with <dset1.7>
+Warning: <dset1.7> has different maximum dimensions than <dset1.7>
+<dset1.7>: [ 7 ]
+<dset1.7>: [ 8 ]
+using memory type H5T_NATIVE_INT
+0 differences found
 
