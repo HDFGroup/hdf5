@@ -84,7 +84,7 @@ H5_DLL H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
 H5_DLL hbool_t H5T_path_noop(const H5T_path_t *p);
 H5_DLL H5T_bkg_t H5T_path_bkg(const H5T_path_t *p);
 H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
-			   hsize_t nelmts, size_t buf_stride, size_t bkg_stride,
+			   size_t nelmts, size_t buf_stride, size_t bkg_stride,
                            void *buf, void *bkg, hid_t dset_xfer_plist);
 H5_DLL herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t ndim, hssize_t *point, void *_op_data);
 H5_DLL herr_t H5T_vlen_get_alloc_info(hid_t dxpl_id, H5T_vlen_alloc_info_t *vl_alloc_info);

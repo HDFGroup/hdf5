@@ -791,7 +791,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
     haddr_t		memb_eoa;
     unsigned char	*p;
-    hsize_t		nseen;
+    size_t		nseen;
     size_t		i;
     H5FD_mem_t		m;
     static const char *func="H5FD_multi_sb_encode";  /* Function Name for error reporting */
@@ -875,7 +875,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     char		x[2*H5FD_MEM_NTYPES*8];
     H5FD_mem_t		map[H5FD_MEM_NTYPES];
     int			i;
-    hsize_t		nseen=0;
+    size_t		nseen=0;
     hbool_t		map_changed=FALSE;
     hbool_t		in_use[H5FD_MEM_NTYPES];
     const char		*memb_name[H5FD_MEM_NTYPES];
@@ -918,8 +918,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Decode Address and EOA values */
     assert(sizeof(haddr_t)<=8);
-    assert((nseen*2*8)==(hsize_t)((size_t)(nseen*2*8))); /*check for overflow*/
-    memcpy(x, buf, (size_t)(nseen*2*8));
+    memcpy(x, buf, (nseen*2*8));
     buf += nseen*2*8;
     if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HADDR, nseen*2, x, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)

@@ -256,7 +256,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
 
             /* Perform data type conversion */
-            if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+            if (H5T_convert(tpath, src_id, dst_id, 1, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
         } /* end if */
     } /* end if */
@@ -1057,7 +1057,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
     size_t	dst_type_size;	        /*size of destination type*/
     size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
-    hsize_t	request_nelmts;		/*requested strip mine	*/
+    size_t	request_nelmts;		/*requested strip mine	*/
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
     hbool_t	mem_iter_init=0;	/*memory selection iteration info has been initialized */
     H5S_sel_iter_t bkg_iter;            /*background iteration info*/
@@ -1068,7 +1068,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
-    hsize_t	n, smine_nelmts;	/*elements per strip	*/
+    size_t	n, smine_nelmts;	/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read)
@@ -1171,8 +1171,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
-        H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
+        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
 
@@ -1309,7 +1308,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
     size_t	dst_type_size;	        /*size of destination type*/
     size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
-    hsize_t	request_nelmts;		/*requested strip mine	*/
+    size_t	request_nelmts;		/*requested strip mine	*/
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
     hbool_t	mem_iter_init=0;	/*memory selection iteration info has been initialized */
     H5S_sel_iter_t bkg_iter;            /*background iteration info*/
@@ -1320,7 +1319,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
-    hsize_t	n, smine_nelmts;	/*elements per strip	*/
+    size_t	n, smine_nelmts;	/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write)
@@ -1421,8 +1420,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
-        H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
+        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
 
@@ -1557,9 +1555,9 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
     size_t	dst_type_size;	        /*size of destination type*/
     size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
-    hsize_t	request_nelmts;		/*requested strip mine	*/
+    size_t	request_nelmts;		/*requested strip mine	*/
     hsize_t     smine_start;            /*strip mine start loc  */
-    hsize_t     n, smine_nelmts;        /*elements per strip    */    
+    size_t      n, smine_nelmts;        /*elements per strip    */    
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
     hbool_t	mem_iter_init=0;	/*memory selection iteration info has been initialized */
     H5S_sel_iter_t bkg_iter;            /*background iteration info*/
@@ -1683,8 +1681,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
-        H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
+        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
     
@@ -1873,9 +1870,9 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
     size_t	dst_type_size;	        /*size of destination type*/
     size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
-    hsize_t	request_nelmts;		/*requested strip mine	*/
+    size_t	request_nelmts;		/*requested strip mine	*/
     hsize_t     smine_start;            /*strip mine start loc  */
-    hsize_t     n, smine_nelmts;        /*elements per strip    */    
+    size_t      n, smine_nelmts;        /*elements per strip    */    
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
     hbool_t	mem_iter_init=0;	/*memory selection iteration info has been initialized */
     H5S_sel_iter_t bkg_iter;            /*background iteration info*/
@@ -2041,8 +2038,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
-        H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
+        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
 

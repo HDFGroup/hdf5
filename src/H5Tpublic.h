@@ -198,7 +198,7 @@ extern "C" {
 
 /* All datatype conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-      hsize_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
+      size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
       void *bkg, hid_t dset_xfer_plist);
 
 /* Exception handler.  If an exception like overflow happenes during conversion,
@@ -573,7 +573,7 @@ H5_DLL herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id,
 H5_DLL herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id,
 			     hid_t dst_id, H5T_conv_t func);
 H5_DLL H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
-H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts,
+H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
 			  void *buf, void *background, hid_t plist_id);
 
 #ifdef __cplusplus

@@ -191,7 +191,7 @@ overflow_handler(hid_t UNUSED src_id, hid_t UNUSED dst_id,
  *-------------------------------------------------------------------------
  */
 static H5T_conv_ret_t 
-except_func(int except_type, hid_t src_id, hid_t dst_id, void *src_buf,
+except_func(int except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id, void UNUSED *src_buf,
 		 void *dst_buf, void *user_data)
 {
     H5T_conv_ret_t      ret = H5T_CONV_HANDLED;
@@ -640,7 +640,7 @@ test_compound_2(void)
 	int e, d, c[4], b, a;
     } *d_ptr;
 
-    const int		nelmts = NTESTELEM;
+    const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
@@ -653,7 +653,7 @@ test_compound_2(void)
     buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
     bkg = malloc(nelmts * sizeof(struct dt));
     orig = malloc(nelmts * sizeof(struct st));
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
 	s_ptr = ((struct st*)orig) + i;
 	s_ptr->a    = i*8+0;
 	s_ptr->b    = i*8+1;
@@ -688,10 +688,10 @@ test_compound_2(void)
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, (hsize_t)nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
 
     /* Compare results */
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
 	s_ptr = ((struct st*)orig) + i;
 	d_ptr = ((struct dt*)buf)  + i;
 	if (s_ptr->a    != d_ptr->a    ||
@@ -757,7 +757,7 @@ test_compound_3(void)
 	int a,    c[4],    e;
     } *d_ptr;
 
-    const int		nelmts = NTESTELEM;
+    const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
@@ -770,7 +770,7 @@ test_compound_3(void)
     buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
     bkg = malloc(nelmts * sizeof(struct dt));
     orig = malloc(nelmts * sizeof(struct st));
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->a    = i*8+0;
         s_ptr->b    = i*8+1;
@@ -803,11 +803,11 @@ test_compound_3(void)
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, (hsize_t)nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
         goto error;
 
     /* Compare results */
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
 	s_ptr = ((struct st*)orig) + i;
 	d_ptr = ((struct dt*)buf)  + i;
 	if (s_ptr->a    != d_ptr->a    ||
@@ -875,7 +875,7 @@ test_compound_4(void)
 	int e;
     } *d_ptr;
 
-    const int		nelmts = NTESTELEM;
+    const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
@@ -888,7 +888,7 @@ test_compound_4(void)
     buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
     bkg = malloc(nelmts * sizeof(struct dt));
     orig = malloc(nelmts * sizeof(struct st));
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->a    = i*8+0;
         s_ptr->b    = (i*8+1) & 0x7fff;
@@ -923,11 +923,11 @@ test_compound_4(void)
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, (hsize_t)nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
         goto error;
 
     /* Compare results */
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
 	s_ptr = ((struct st*)orig) + i;
 	d_ptr = ((struct dt*)buf)  + i;
 	if (s_ptr->a    != d_ptr->a    ||
@@ -1044,7 +1044,7 @@ test_compound_5(void)
 
     /* Convert data */
     HDmemcpy(buf, src, sizeof(src));
-    H5Tconvert(src_type, dst_type, (hsize_t)2, buf, bkg, H5P_DEFAULT);
+    H5Tconvert(src_type, dst_type, 2, buf, bkg, H5P_DEFAULT);
     dst = (dst_type_t*)buf;
 
     /* Cleanup */
@@ -1106,7 +1106,7 @@ test_compound_6(void)
         long d;
     } *d_ptr;
 
-    const int		nelmts = NTESTELEM;
+    const size_t	nelmts = NTESTELEM;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
     int			i;
@@ -1117,7 +1117,7 @@ test_compound_6(void)
     buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
     bkg = malloc(nelmts * sizeof(struct dt));
     orig = malloc(nelmts * sizeof(struct st));
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->b    = (i*8+1) & 0x7fff;
         s_ptr->d    = (i*8+6) & 0x7fff;
@@ -1140,13 +1140,13 @@ test_compound_6(void)
     }
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, (hsize_t)nelmts, buf, bkg, H5P_DEFAULT)<0) {
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) {
         H5_FAILED();
         goto error;
     }
 
     /* Compare results */
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<(int)nelmts; i++) {
 	s_ptr = ((struct st*)orig) + i;
 	d_ptr = ((struct dt*)buf)  + i;
 	if (s_ptr->b    != d_ptr->b    ||
@@ -2249,13 +2249,13 @@ test_conv_str_1(void)
     dst_type = mkstr(5, H5T_STR_NULLTERM);
     buf = HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcdefghi\0", 20)) {
 	H5_FAILED();
 	HDputs("    Truncated C-string test failed");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Extended C-string test failed");
@@ -2272,13 +2272,13 @@ test_conv_str_1(void)
     dst_type = mkstr(5, H5T_STR_NULLPAD);
     buf = HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Truncated C buffer test failed");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Extended C buffer test failed");
@@ -2295,13 +2295,13 @@ test_conv_str_1(void)
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     buf = HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Truncated Fortran-string test failed");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcde     abcde     ", 20)) {
 	H5_FAILED();
 	HDputs("    Extended Fortran-string test failed");
@@ -2321,7 +2321,7 @@ test_conv_str_1(void)
     dst_type = mkstr(10, H5T_STR_NULLTERM);
     buf = HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Non-terminated string test 1");
@@ -2330,14 +2330,14 @@ test_conv_str_1(void)
     H5Tclose(dst_type);
     dst_type = mkstr(5, H5T_STR_NULLTERM);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Non-terminated string test 2");
 	goto error;
     }
     HDmemcpy(buf, "abcdeabcdexxxxxxxxxx", 20);
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Non-terminated string test 2");
@@ -2354,13 +2354,13 @@ test_conv_str_1(void)
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     buf = HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghi abcdefghi ", 20)) {
 	H5_FAILED();
 	HDputs("    C string to Fortran test 1");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghi\0abcdefghi\0", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C string test 1");
@@ -2369,13 +2369,13 @@ test_conv_str_1(void)
     if (H5Tclose(dst_type)<0) goto error;
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    C string to Fortran test 2");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C string test 2");
@@ -2386,13 +2386,13 @@ test_conv_str_1(void)
     src_type = mkstr(5, H5T_STR_NULLTERM);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd      abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    C string to Fortran test 3");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C string test 3");
@@ -2409,13 +2409,13 @@ test_conv_str_1(void)
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     buf = HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    C buffer to Fortran test 1");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C buffer test 1");
@@ -2424,13 +2424,13 @@ test_conv_str_1(void)
     if (H5Tclose(dst_type)<0) goto error;
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    C buffer to Fortran test 2");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C buffer test 2");
@@ -2441,13 +2441,13 @@ test_conv_str_1(void)
     src_type = mkstr(5, H5T_STR_NULLPAD);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
-    if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd      abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    C buffer to Fortran test 3");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C buffer test 3");
@@ -2516,9 +2516,9 @@ test_conv_str_2(void)
 	}
 	printf("%-70s", s);
 	HDfflush(stdout);
-	if (H5Tconvert(c_type, f_type, (hsize_t)nelmts, buf, NULL, H5P_DEFAULT)<0)
+	if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT)<0)
             goto error;
-	if (H5Tconvert(f_type, c_type, (hsize_t)nelmts, buf, NULL, H5P_DEFAULT)<0)
+	if (H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT)<0)
             goto error;
 	PASSED();
     }
@@ -2550,7 +2550,8 @@ test_conv_str_2(void)
 static int
 test_conv_enum_1(void)
 {
-    const int	nelmts=NTESTELEM, ntests=NTESTS;
+    const size_t nelmts=NTESTELEM;
+    const int	ntests=NTESTS;
     int		i, val, *buf=NULL;
     hid_t	t1, t2;
     char	s[80];
@@ -2568,7 +2569,7 @@ test_conv_enum_1(void)
 
     /* Initialize the buffer */
     buf = HDmalloc(nelmts*MAX(H5Tget_size(t1), H5Tget_size(t2)));
-    for (i=0; i<nelmts; i++)
+    for (i=0; i<(int)nelmts; i++)
         buf[i] = HDrand() % 26;
 
     /* Conversions */
@@ -2581,7 +2582,7 @@ test_conv_enum_1(void)
 	}
 	printf("%-70s", s);
 	HDfflush(stdout);
-	if (H5Tconvert(t1, t2, (hsize_t)nelmts, buf, NULL, H5P_DEFAULT)<0) goto error;
+	if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT)<0) goto error;
 	PASSED();
     }
 
@@ -2594,7 +2595,7 @@ test_conv_enum_1(void)
 	}
 	printf("%-70s", s);
 	HDfflush(stdout);
-	if (H5Tconvert(t2, t1, (hsize_t)nelmts, buf, NULL, H5P_DEFAULT)<0) goto error;
+	if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT)<0) goto error;
 	PASSED();
     }
     ret_value = 0;
@@ -2664,7 +2665,7 @@ test_conv_enum_2(void)
     }
 
     /* Convert to destination type */
-    H5Tconvert(srctype, dsttype, (hsize_t)NTESTELEM, data, NULL, H5P_DEFAULT);
+    H5Tconvert(srctype, dsttype, NTESTELEM, data, NULL, H5P_DEFAULT);
 
     /* Check results */
     for (i=0; i<NTESTELEM; i++) {
@@ -2728,7 +2729,7 @@ test_conv_bitfield(void)
     dt = H5Tcopy(H5T_STD_B32LE);
     buf[0] = buf[1] = 0xAA;
     buf[2] = buf[3] = 0x55; /*irrelevant*/
-    if (H5Tconvert(st, dt, (hsize_t)1, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (buf[0]!=0xAA || buf[1]!=0xAA || buf[2]!=0 || buf[3]!=0) {
 	H5_FAILED();
 	printf("    s=0xaaaa, d=0x%02x%02x%02x%02x (test 1)\n",
@@ -2747,7 +2748,7 @@ test_conv_bitfield(void)
     H5Tset_precision(dt, 12);
     H5Tset_offset(dt, 10);
     buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
-    if (H5Tconvert(st, dt, (hsize_t)1, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (buf[0]!=0 || buf[1]!=0xA8 || buf[2]!=0x2A || buf[3]!=0) {
 	H5_FAILED();
 	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 2)\n",
@@ -2761,7 +2762,7 @@ test_conv_bitfield(void)
      */
     H5Tset_pad(dt, H5T_PAD_ONE, H5T_PAD_ONE);
     buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
-    if (H5Tconvert(st, dt, (hsize_t)1, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (buf[0]!=0xff || buf[1]!=0xAB || buf[2]!=0xEA || buf[3]!=0xff) {
 	H5_FAILED();
 	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 3)\n",
@@ -2801,7 +2802,7 @@ test_conv_bitfield(void)
  */
 static herr_t
 convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
-	       hsize_t UNUSED nelmts, size_t UNUSED buf_stride,
+	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
                size_t UNUSED bkg_stride, void UNUSED *_buf,
 	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid)
 {
@@ -2892,7 +2893,7 @@ opaque_check(int tag_it)
 
     /* Make sure that we can't convert between the types yet */
     H5E_BEGIN_TRY {
-	status = H5Tconvert(st, dt, (hsize_t)OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT);
+	status = H5Tconvert(st, dt, OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -2905,7 +2906,7 @@ opaque_check(int tag_it)
 	goto error;
 
     /* Try the conversion again, this time it should work */
-    if (H5Tconvert(st, dt, (hsize_t)OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (saved+1 != num_opaque_conversions_g) {
 	H5_FAILED();
 	printf("    unexpected number of opaque conversions\n");
@@ -2954,7 +2955,7 @@ test_conv_int (void)
     /* (unsigned)0x80000000 -> (unsigned)0xffff */
     byte[0] = byte[1] = byte[2] = 0;
     byte[3] = 0x80;
-    if (H5Tconvert (H5T_STD_U32LE, H5T_STD_U16LE, (hsize_t)1, byte, NULL, H5P_DEFAULT)<0) {
+    if (H5Tconvert (H5T_STD_U32LE, H5T_STD_U16LE, 1, byte, NULL, H5P_DEFAULT)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
@@ -2967,7 +2968,7 @@ test_conv_int (void)
 
     /* (unsigned)0xffffffff -> (signed)0x7fff */
     byte[0] = byte[1] = byte[2] = byte[3] = 0xff;
-    if (H5Tconvert (H5T_STD_U32LE, H5T_STD_I16LE, (hsize_t)1, byte, NULL, H5P_DEFAULT)<0) {
+    if (H5Tconvert (H5T_STD_U32LE, H5T_STD_I16LE, 1, byte, NULL, H5P_DEFAULT)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
@@ -2980,7 +2981,7 @@ test_conv_int (void)
 
     /* (signed)0xffffffff -> (unsigned)0x0000 */
     byte[0] = byte[1] = byte[2] = byte[3] = 0xff;
-    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_U16LE, (hsize_t)1, byte, NULL, H5P_DEFAULT)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_U16LE, 1, byte, NULL, H5P_DEFAULT)<0) {
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x00) {
@@ -2994,7 +2995,7 @@ test_conv_int (void)
     /* (signed)0x7fffffff -> (unsigned)0xffff */
     byte[0] = byte[1] = byte[2] = 0xff;
     byte[3] = 0x7f;
-    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_U16LE, (hsize_t)1, byte, NULL, H5P_DEFAULT)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_U16LE, 1, byte, NULL, H5P_DEFAULT)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
@@ -3008,7 +3009,7 @@ test_conv_int (void)
     /* (signed)0x7fffffff -> (signed)0x7fff */
     byte[0] = byte[1] = byte[2] = 0xff;
     byte[3] = 0x7f;
-    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_I16LE, (hsize_t)1, byte, NULL, H5P_DEFAULT)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_I16LE, 1, byte, NULL, H5P_DEFAULT)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
@@ -3022,7 +3023,7 @@ test_conv_int (void)
     /* (signed)0xbfffffff -> (signed)0x8000 */
     byte[0] = byte[1] = byte[2] = 0xff;
     byte[3] = 0xbf;
-    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_I16LE, (hsize_t)1, byte, NULL, H5P_DEFAULT)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_I16LE, 1, byte, NULL, H5P_DEFAULT)<0) {
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x80) {
@@ -3222,7 +3223,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             buf[j] = saved[j] = HDrand();
 
 	/* Perform the conversion */
-	if (H5Tconvert(src, dst, (hsize_t)nelmts, buf, NULL, H5P_DEFAULT)<0)
+	if (H5Tconvert(src, dst, nelmts, buf, NULL, H5P_DEFAULT)<0)
             goto error;
 
 	/* Check the results from the library against hardware */
@@ -4049,7 +4050,7 @@ test_conv_int_2(void)
 	     * Conversion. If overlap calculations aren't right then an
 	     * assertion will fail in H5T_conv_i_i()
 	     */
-	    H5Tconvert(src_type, dst_type, (hsize_t)100, buf, NULL, H5P_DEFAULT);
+	    H5Tconvert(src_type, dst_type, 100, buf, NULL, H5P_DEFAULT);
 	    H5Tclose(src_type);
 	    H5Tclose(dst_type);
 	}
@@ -4315,7 +4316,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
             buf[j] = saved[j] = HDrand();
 
 	/* Perform the conversion */
-	if (H5Tconvert(src, dst, (hsize_t)nelmts, buf, NULL, dxpl_id)<0)
+	if (H5Tconvert(src, dst, nelmts, buf, NULL, dxpl_id)<0)
             goto error;
 
 	/* Check the results from the library against hardware */
@@ -5345,7 +5346,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	}
 
 	/* Perform the conversion in software */
-	if (H5Tconvert(src, dst, (hsize_t)nelmts, buf, NULL, H5P_DEFAULT)<0)
+	if (H5Tconvert(src, dst, nelmts, buf, NULL, H5P_DEFAULT)<0)
             goto error;
 
 	/* Check the software results against the hardware */
@@ -6019,7 +6020,7 @@ main(void)
 
     /* Test hardware integer conversion functions */
     nerrors += run_integer_tests("hw");
-    
+
     /* Test hardware floating-point conversion functions */
     nerrors += test_conv_flt_1("hw", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1("hw", H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);

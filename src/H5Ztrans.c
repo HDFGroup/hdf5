@@ -91,7 +91,7 @@ static H5Z_node *H5Z_parse_factor(H5Z_token *current);
 static H5Z_node *H5Z_new_node(H5Z_token_type type);
 static void H5Z_do_op(H5Z_node* tree);
 static hid_t H5Z_xform_find_type(const H5T_t* type);
-static H5Z_result H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size, hid_t array_type);
+static H5Z_result H5Z_eval_full(H5Z_node *tree, void* array, size_t array_size, hid_t array_type);
 static void H5Z_xform_destroy_parse_tree(H5Z_node *tree);
 static void* H5Z_xform_parse(const char *expression);
 static void* H5Z_xform_copy_tree(H5Z_node* tree);
@@ -722,7 +722,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z_eval_full
+ * Function:    H5Z_xform_eval
  * Purpose: 	If the transform is trivial, this function applies it.
  * 		Otherwise, it calls H5Z_xform_eval_full to do the full 
  * 		transform.
@@ -734,11 +734,11 @@ done:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, hsize_t array_size, const H5T_t *buf_type)
+herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size, const H5T_t *buf_type)
 {
     H5Z_node *tree;
     hid_t array_type;
-    unsigned int i;
+    size_t i;
     int n;  
     float f;
     H5Z_result res;
@@ -822,11 +822,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5Z_result
-H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type)
+H5Z_eval_full(H5Z_node *tree, void* array, size_t array_size,  hid_t array_type)
 {
 
     H5Z_result res, resl, resr, ret_value, error;
-    unsigned int i;
+    size_t i;
     
     error.type = H5Z_XFORM_ERROR;
         

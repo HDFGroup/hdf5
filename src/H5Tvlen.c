@@ -40,23 +40,23 @@ static herr_t H5T_init_vlen_interface(void);
 
 /* Local functions */
 static herr_t H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info);
-static hssize_t H5T_vlen_seq_mem_getlen(void *_vl);
+static ssize_t H5T_vlen_seq_mem_getlen(void *_vl);
 static void * H5T_vlen_seq_mem_getptr(void *_vl);
 static htri_t H5T_vlen_seq_mem_isnull(H5F_t *f, void *_vl);
 static herr_t H5T_vlen_seq_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
-static herr_t H5T_vlen_seq_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, hsize_t seq_len, hsize_t base_size);
+static herr_t H5T_vlen_seq_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t H5T_vlen_seq_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
-static hssize_t H5T_vlen_str_mem_getlen(void *_vl);
+static ssize_t H5T_vlen_str_mem_getlen(void *_vl);
 static void * H5T_vlen_str_mem_getptr(void *_vl);
 static htri_t H5T_vlen_str_mem_isnull(H5F_t *f, void *_vl);
 static herr_t H5T_vlen_str_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
-static herr_t H5T_vlen_str_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, hsize_t seq_len, hsize_t base_size);
+static herr_t H5T_vlen_str_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t H5T_vlen_str_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
-static hssize_t H5T_vlen_disk_getlen(void *_vl);
+static ssize_t H5T_vlen_disk_getlen(void *_vl);
 static void * H5T_vlen_disk_getptr(void *_vl);
 static htri_t H5T_vlen_disk_isnull(H5F_t *f, void *_vl);
 static herr_t H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
-static herr_t H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, hsize_t seq_len, hsize_t base_size);
+static herr_t H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
 
 /* Local variables */
@@ -316,7 +316,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hssize_t
+static ssize_t
 H5T_vlen_seq_mem_getlen(void *_vl)
 {
     hvl_t *vl=(hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
@@ -326,7 +326,7 @@ H5T_vlen_seq_mem_getlen(void *_vl)
     /* check parameters */
     assert(vl);
 
-    FUNC_LEAVE_NOAPI((hssize_t)vl->len)
+    FUNC_LEAVE_NOAPI((ssize_t)vl->len)
 }   /* end H5T_vlen_seq_mem_getlen() */
 
 
@@ -435,7 +435,7 @@ H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, size_t seq_len, size_t base_size)
 {
     hvl_t vl;                       /* Temporary hvl_t to use during operation */
     size_t len;
@@ -448,7 +448,7 @@ H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_all
     assert(buf);
 
     if(seq_len!=0) {
-        H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
+        len=seq_len*base_size;
 
         /* Use the user's memory allocation routine is one is defined */
         if(vl_alloc_info->alloc_func!=NULL) {
@@ -468,7 +468,7 @@ H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_all
         vl.p=NULL;
 
     /* Set the sequence length */
-    H5_ASSIGN_OVERFLOW(vl.len,seq_len,hsize_t,size_t);
+    vl.len=seq_len;
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
     HDmemcpy(_vl,&vl,sizeof(hvl_t));
@@ -528,7 +528,7 @@ H5T_vlen_seq_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
  *
  *-------------------------------------------------------------------------
  */
-static hssize_t
+static ssize_t
 H5T_vlen_str_mem_getlen(void *_vl)
 {
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
@@ -538,7 +538,7 @@ H5T_vlen_str_mem_getlen(void *_vl)
     /* check parameters */
     assert(s);
 
-    FUNC_LEAVE_NOAPI((hssize_t)HDstrlen(s))
+    FUNC_LEAVE_NOAPI((ssize_t)HDstrlen(s))
 }   /* end H5T_vlen_str_mem_getlen() */
 
 
@@ -646,7 +646,7 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, size_t seq_len, size_t base_size)
 {
     char *t;                        /* Pointer to temporary buffer allocated */
     size_t len;                     /* Maximum length of the string to copy */
@@ -656,19 +656,18 @@ H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_all
 
     /* check parameters */
     assert(buf);
-    H5_CHECK_OVERFLOW(((seq_len+1)*base_size),hsize_t,size_t);
 
     /* Use the user's memory allocation routine if one is defined */
     if(vl_alloc_info->alloc_func!=NULL) {
-        if(NULL==(t=(vl_alloc_info->alloc_func)((size_t)((seq_len+1)*base_size),vl_alloc_info->alloc_info)))
+        if(NULL==(t=(vl_alloc_info->alloc_func)((seq_len+1)*base_size,vl_alloc_info->alloc_info)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
       } /* end if */
     else {  /* Default to system malloc */
-        if(NULL==(t=H5MM_malloc((size_t)((seq_len+1)*base_size))))
+        if(NULL==(t=H5MM_malloc((seq_len+1)*base_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
       } /* end else */
 
-    H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
+    len=(seq_len*base_size);
     HDmemcpy(t,buf,len);
     t[len]='\0';
 
@@ -723,11 +722,11 @@ H5T_vlen_str_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
  *
  *-------------------------------------------------------------------------
  */
-static hssize_t
+static ssize_t
 H5T_vlen_disk_getlen(void *_vl)
 {
     uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
-    hssize_t	seq_len;        /* Sequence length */
+    size_t	seq_len;        /* Sequence length */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_disk_getlen)
 
@@ -736,7 +735,7 @@ H5T_vlen_disk_getlen(void *_vl)
 
     UINT32DECODE(vl, seq_len);
 
-    FUNC_LEAVE_NOAPI(seq_len)
+    FUNC_LEAVE_NOAPI((ssize_t)seq_len)
 }   /* end H5T_vlen_disk_getlen() */
 
 
@@ -871,7 +870,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED *vl_alloc_info, void *_vl, void *buf, void *_bg, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED *vl_alloc_info, void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size)
 {
     uint8_t *vl=(uint8_t *)_vl; /*Pointer to the user's hvl_t information*/
     uint8_t *bg=(uint8_t *)_bg; /*Pointer to the old data hvl_t          */
@@ -888,7 +887,7 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
     
     /* Free heap object for old data.  */
     if(bg!=NULL) {
-        hsize_t bg_seq_len=0;   /* "Background" VL info sequence's length */
+        size_t bg_seq_len;      /* "Background" VL info sequence's length */
         H5HG_t bg_hobjid;       /* "Background" VL info sequence's ID info */
 
         /* Get the length of the sequence and heap object ID from background data. */
@@ -907,11 +906,10 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
     } /* end if */
 
     /* Set the length of the sequence */
-    H5_CHECK_OVERFLOW(seq_len,hsize_t,size_t);
     UINT32ENCODE(vl, seq_len);
     
     /* Write the VL information to disk (allocates space also) */
-    H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
+    len=(seq_len*base_size);
     if(H5HG_insert(f,dxpl_id,len,buf,&hobjid)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information")
 

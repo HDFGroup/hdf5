@@ -370,7 +370,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")
                     HDmemcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
                     
-                    if(H5Tconvert(super_type_id, nat_super_type_id, (hsize_t)1, memb_value, NULL, H5P_DEFAULT)<0)
+                    if(H5Tconvert(super_type_id, nat_super_type_id, 1, memb_value, NULL, H5P_DEFAULT)<0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")
                                         
                     if(H5T_enum_insert(new_type, memb_name, memb_value)<0)

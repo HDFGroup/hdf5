@@ -1627,7 +1627,7 @@ done:
 herr_t
 H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     H5D_t *dset, const H5D_storage_t *store, 
-    const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
+    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     const void *_buf)
 {
     const uint8_t *buf=_buf;       /* Alias for pointer arithmetic */
@@ -1639,7 +1639,6 @@ H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];              /* Array to store sequence lengths */
     size_t *len=NULL;              /* Array to store sequence lengths */
     size_t orig_mem_len, mem_len;  /* Length of sequence in memory */
-    size_t maxelem;                /* Number of elements in the buffer */
     size_t  nseq;                  /* Number of sequences generated */
     size_t  nelem;                 /* Number of elements used in sequences */
     herr_t  ret_value=SUCCEED;     /* Return value */
@@ -1668,13 +1667,10 @@ H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         off=_off;
     } /* end else */
 
-    /* Compute the number of bytes available in buffer */
-    H5_ASSIGN_OVERFLOW(maxelem,nelmts,hsize_t,size_t);
-
     /* Loop until all elements are written */
-    while(maxelem>0) {
+    while(nelmts>0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,dxpl_cache->vec_size,maxelem,&nseq,&nelem,off,len)<0)
+        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Reset the current sequence information */
@@ -1690,7 +1686,7 @@ H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         buf += orig_mem_len;
 
         /* Decrement number of elements left to process */
-        maxelem -= nelem;
+        nelmts -= nelem;
     } /* end while */
 
 done:
@@ -1727,10 +1723,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+size_t
 H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     H5D_t *dset, const H5D_storage_t *store, 
-    const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
+    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     void *_buf/*out*/)
 {
     uint8_t *buf=_buf;          /* Alias for pointer arithmetic */
@@ -1742,10 +1738,9 @@ H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
     size_t *len=NULL;           /* Pointer to sequence lengths */
     size_t orig_mem_len, mem_len;       /* Length of sequence in memory */
-    size_t maxelem;             /* Number of elements in the buffer */
     size_t nseq;                /* Number of sequences generated */
     size_t nelem;               /* Number of elements used in sequences */
-    hsize_t ret_value=nelmts;   /* Return value */
+    size_t ret_value=nelmts;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_fgath, 0);
 
@@ -1770,13 +1765,10 @@ H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         off=_off;
     } /* end else */
 
-    /* Compute the number of elements available in buffer */
-    H5_ASSIGN_OVERFLOW(maxelem,nelmts,hsize_t,size_t);
-
     /* Loop until all elements are written */
-    while(maxelem>0) {
+    while(nelmts>0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,dxpl_cache->vec_size,maxelem,&nseq,&nelem,off,len)<0)
+        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Reset the current sequence information */
@@ -1792,7 +1784,7 @@ H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         buf += orig_mem_len;
 
         /* Decrement number of elements left to process */
-        maxelem -= nelem;
+        nelmts -= nelem;
     } /* end while */
 
 done:
@@ -1825,7 +1817,7 @@ done:
  */
 herr_t
 H5S_select_mscat (const void *_tscat_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
+    H5S_sel_iter_t *iter, size_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
     void *_buf/*out*/)
 {
     uint8_t *buf=(uint8_t *)_buf;   /* Get local copies for address arithmetic */
@@ -1835,7 +1827,6 @@ H5S_select_mscat (const void *_tscat_buf, const H5S_t *space,
     size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
     size_t *len=NULL;           /* Pointer to sequence lengths */
     size_t curr_len;            /* Length of bytes left to process in sequence */
-    size_t maxelem;             /* Number of elements in the buffer */
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequence being processed */
     size_t nelem;               /* Number of elements used in sequences */
@@ -1862,13 +1853,10 @@ H5S_select_mscat (const void *_tscat_buf, const H5S_t *space,
         off=_off;
     } /* end else */
 
-    /* Compute the number of elements available in buffer */
-    H5_ASSIGN_OVERFLOW(maxelem,nelmts,hsize_t,size_t);
-
     /* Loop until all elements are written */
-    while(maxelem>0) {
+    while(nelmts>0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space,0,iter,dxpl_cache->vec_size,maxelem,&nseq,&nelem,off,len)<0)
+        if(H5S_SELECT_GET_SEQ_LIST(space,0,iter,dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
@@ -1883,7 +1871,7 @@ H5S_select_mscat (const void *_tscat_buf, const H5S_t *space,
         } /* end for */
 
         /* Decrement number of elements left to process */
-        maxelem -= nelem;
+        nelmts -= nelem;
     } /* end while */
 
 done:
@@ -1916,9 +1904,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+size_t
 H5S_select_mgath (const void *_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
+    H5S_sel_iter_t *iter, size_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
     void *_tgath_buf/*out*/)
 {
     const uint8_t *buf=(const uint8_t *)_buf;   /* Get local copies for address arithmetic */
@@ -1928,11 +1916,10 @@ H5S_select_mgath (const void *_buf, const H5S_t *space,
     size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
     size_t *len=NULL;           /* Pointer to sequence lengths */
     size_t curr_len;            /* Length of bytes left to process in sequence */
-    size_t maxelem;             /* Number of elements in the buffer */
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequence being processed */
     size_t nelem;               /* Number of elements used in sequences */
-    hsize_t ret_value=nelmts;   /* Number of elements gathered */
+    size_t ret_value=nelmts;    /* Number of elements gathered */
 
     FUNC_ENTER_NOAPI(H5S_select_mgath, 0);
 
@@ -1955,13 +1942,10 @@ H5S_select_mgath (const void *_buf, const H5S_t *space,
         off=_off;
     } /* end else */
 
-    /* Compute the number of elements available in buffer */
-    H5_ASSIGN_OVERFLOW(maxelem,nelmts,hsize_t,size_t);
-
     /* Loop until all elements are written */
-    while(maxelem>0) {
+    while(nelmts>0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space,0,iter,dxpl_cache->vec_size,maxelem,&nseq,&nelem,off,len)<0)
+        if(H5S_SELECT_GET_SEQ_LIST(space,0,iter,dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
@@ -1976,7 +1960,7 @@ H5S_select_mgath (const void *_buf, const H5S_t *space,
         } /* end for */
 
         /* Decrement number of elements left to process */
-        maxelem -= nelem;
+        nelmts -= nelem;
     } /* end while */
 
 done:

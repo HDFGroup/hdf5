@@ -1272,7 +1272,7 @@ H5T_term_interface(void)
 		H5T_print_stats(path, &nprint/*in,out*/);
 		path->cdata.command = H5T_CONV_FREE;
 		if ((path->func)(FAIL, FAIL, &(path->cdata),
-				 (hsize_t)0, 0, 0, NULL, NULL,H5AC_dxpl_id)<0) {
+				 0, 0, 0, NULL, NULL,H5AC_dxpl_id)<0) {
 #ifdef H5T_DEBUG
 		    if (H5DEBUG(T)) {
 			fprintf (H5DEBUG(T), "H5T: conversion function "
@@ -1995,7 +1995,7 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive");
     if (size == H5T_VARIABLE && dt->type!=H5T_STRING)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) 
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
     if (H5T_REFERENCE==dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
@@ -2188,7 +2188,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data types for conv query");
             HDmemset(&cdata, 0, sizeof cdata);
             cdata.command = H5T_CONV_INIT;
-            if ((func)(tmp_sid, tmp_did, &cdata, (hsize_t)0, 0, 0, NULL, NULL, dxpl_id)<0) {
+            if ((func)(tmp_sid, tmp_did, &cdata, 0, 0, 0, NULL, NULL, dxpl_id)<0) {
                 H5I_dec_ref(tmp_sid);
                 H5I_dec_ref(tmp_did);
                 tmp_sid = tmp_did = -1;
@@ -2215,7 +2215,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             /* Free old path */
             H5T_print_stats(old_path, &nprint);
             old_path->cdata.command = H5T_CONV_FREE;
-            if ((old_path->func)(tmp_sid, tmp_did, &(old_path->cdata), (hsize_t)0, 0, 0, NULL, NULL, dxpl_id)<0) {
+            if ((old_path->func)(tmp_sid, tmp_did, &(old_path->cdata), 0, 0, 0, NULL, NULL, dxpl_id)<0) {
 #ifdef H5T_DEBUG
 		if (H5DEBUG(T)) {
 		    fprintf (H5DEBUG(T), "H5T: conversion function 0x%08lx "
@@ -2376,7 +2376,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
         /* Shut down path */
         H5T_print_stats(path, &nprint);
         path->cdata.command = H5T_CONV_FREE;
-        if ((path->func)(FAIL, FAIL, &(path->cdata), (hsize_t)0, 0, 0, NULL, NULL,
+        if ((path->func)(FAIL, FAIL, &(path->cdata), 0, 0, 0, NULL, NULL,
                          dxpl_id)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
@@ -2520,7 +2520,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
+H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 	    void *background, hid_t dxpl_id)
 {
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
@@ -2633,6 +2633,7 @@ H5T_create(H5T_class_t type, size_t size)
 
         case H5T_ARRAY:  /* Array datatype */
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tarray_create()");
+
         default:
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL, "unknown data type class");
     }
@@ -2727,7 +2728,7 @@ H5T_open (H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     /* Open the datatype object */
     if ((dt=H5T_open_oid(&ent, dxpl_id)) ==NULL)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
-    
+
     /* Mark any datatypes as being in memory now */
     if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
@@ -3808,7 +3809,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	HDstrcpy(H5T_g.path[0]->name, "no-op");
 	H5T_g.path[0]->func = H5T_conv_noop;
 	H5T_g.path[0]->cdata.command = H5T_CONV_INIT;
-	if (H5T_conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), (hsize_t)0, 0, 0,
+	if (H5T_conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), 0, 0, 0,
 			  NULL, NULL, dxpl_id)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
@@ -3896,7 +3897,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
                   H5T_copy(path->dst, H5T_COPY_ALL)))<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register destination conversion type for query");
 	path->cdata.command = H5T_CONV_INIT;
-	if ((func)(src_id, dst_id, &(path->cdata), (hsize_t)0, 0, 0, NULL, NULL,
+	if ((func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL,
                    dxpl_id)<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function");
 	if (src_id>=0) H5I_dec_ref(src_id);
@@ -3925,7 +3926,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register conversion types for query");
 	path->cdata.command = H5T_CONV_INIT;
 	if ((H5T_g.soft[i].func) (src_id, dst_id, &(path->cdata),
-                                  (hsize_t)0, 0, 0, NULL, NULL, dxpl_id)<0) {
+                                  0, 0, 0, NULL, NULL, dxpl_id)<0) {
 	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 	    H5E_clear(NULL); /*ignore the error*/
 	} else {
@@ -3968,7 +3969,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	assert(table==H5T_g.path[md]);
 	H5T_print_stats(table, &nprint/*in,out*/);
 	table->cdata.command = H5T_CONV_FREE;
-	if ((table->func)(FAIL, FAIL, &(table->cdata), (hsize_t)0, 0, 0, NULL, NULL,
+	if ((table->func)(FAIL, FAIL, &(table->cdata), 0, 0, 0, NULL, NULL,
                           dxpl_id)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
@@ -4114,7 +4115,7 @@ H5T_path_bkg(const H5T_path_t *p)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, hsize_t nelmts,
+H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
 	    size_t buf_stride, size_t bkg_stride, void *buf, void *bkg,
             hid_t dset_xfer_plist)
 {
