@@ -101,6 +101,8 @@ test_attr_basic_write(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {ATTR1_DIM1};
     hsize_t		dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
+    int       read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
+    int         i;
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -136,6 +138,17 @@ test_attr_basic_write(void)
     /* Write attribute information */
     ret=H5Awrite(attr,H5T_NATIVE_INT,attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information immediately, without closing attribute */
+    ret=H5Aread(attr,H5T_NATIVE_INT,read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i=0; i<ATTR1_DIM1; i++)
+        if(attr_data1[i]!=read_data1[i]) {
+            printf("attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            num_errs++;
+         } /* end if */
 
     /* Close attribute */
     ret=H5Aclose(attr);
