@@ -2025,12 +2025,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
 
     if (!file_space) {
-        if (NULL==(free_this_space=H5S_read (&(dataset->ent)))) {
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-                 "unable to read data space from dataset header");
-        }
+        if (NULL==(free_this_space=H5S_read (&(dataset->ent))))
+            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data space from dataset header");
         file_space = free_this_space;
-    }
+    } /* end if */
     if (!mem_space)
         mem_space = file_space;
     nelmts = H5S_get_select_npoints(mem_space);
@@ -2043,17 +2041,20 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    xfer_mode = dx->xfer_mode;
 	else
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to retrieve data xfer info");
-    }
+    } /* end if */
     /* Collective access is not permissible without the MPIO driver */
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
-	!(IS_H5FD_MPIO(dataset->ent.file)))
-	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		"collective access for MPIO driver only");
+            !(IS_H5FD_MPIO(dataset->ent.file)))
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
 #endif
 
 #ifdef QAK
 printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,(int)nelmts,(int)H5S_get_select_npoints(file_space));
 #endif /* QAK */
+    /* Make certain that the number of elements in each selection is the same */
+    if (nelmts!=H5S_get_select_npoints (file_space))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes");
+
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
@@ -2062,26 +2063,18 @@ printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
-    if (nelmts!=H5S_get_select_npoints (file_space)) {
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		     "src and dest data spaces have different sizes");
-    }
     if (NULL==(tpath=H5T_path_find(dataset->type, mem_type, NULL, NULL))) {
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		    "unable to convert between src and dest data types");
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
     } else if (!H5T_IS_NOOP(tpath)) {
-        if ((src_id=H5I_register(H5I_DATATYPE,
-				 H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
-	    (dst_id=H5I_register(H5I_DATATYPE,
-				 H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-                "unable to register types for conversion");
-        }
-    }
-    if (NULL==(sconv=H5S_find(mem_space, file_space))) {
-        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "unable to convert from file to memory data space");
-    }
+        if ((src_id=H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
+                (dst_id=H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
+    } /* end if */
+
+    /* Get dataspace functions */
+    if (NULL==(sconv=H5S_find(mem_space, file_space)))
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space");
+
 #ifdef H5_HAVE_PARALLEL
     /* rky 980813 This is a temporary KLUGE.
      * The sconv functions should be set by H5S_find,
@@ -2089,15 +2082,14 @@ printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,
      * mem-and-file-dataspace-xfer functions
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
-    if (H5_mpi_opt_types_g &&
-        IS_H5FD_MPIO(dataset->ent.file)) {
+    if (H5_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
 	/* Only collective write should call this since it eventually
 	 * calls MPI_File_set_view which is a collective call.
 	 * See H5S_mpio_spaces_xfer() for details.
 	 */
 	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
 	    sconv->read = H5S_mpio_spaces_read;
-    }
+    } /* end if */
 #endif /*H5_HAVE_PARALLEL*/
 
 #ifdef QAK
@@ -2114,17 +2106,15 @@ printf("%s: check 1.1, \n",FUNC);
         if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get pipeline");
         if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, 
-                        "can't get external file list");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
         status = (sconv->read)(dataset->ent.file, &(dataset->layout), &pline, 
                                &efl, H5T_get_size(dataset->type), file_space, 
                                mem_space, dxpl_id, buf/*out*/, &must_convert);
 
-        if (status<0) {
-            /* Supports only no conversion, type or space, for now. */
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
-		        "optimized read failed");
-        }
+        /* Supports only no conversion, type or space, for now. */
+        if (status<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed");
+
         if (must_convert) {
             /* sconv->read cannot do a direct transfer;
              * fall through and xfer the data in the more roundabout way */
@@ -2137,16 +2127,15 @@ printf("%s: check 1.1, \n",FUNC);
             sconv->stats[1].read_ncalls++;
 #endif
             HGOTO_DONE(SUCCEED);
-        }
+        } /* end else */
 #ifdef H5D_DEBUG
         if (H5DEBUG(D)) {
             fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
-                 "optimized for this case (using general method "
-                 "instead)\n");
-        }
+                 "optimized for this case (using general method instead)\n");
+        } /* end if */
 #endif
         H5E_clear ();
-    }
+    } /* end if */
 	
 #ifdef QAK
 printf("%s: check 1.2, \n",FUNC);
@@ -2157,7 +2146,7 @@ printf("%s: check 1.2, \n",FUNC);
      * request according to the MPI collective specification.
      * Do the collective request via independent mode.
      */
-    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE){
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE) {
 	/* Kludge: change the xfer_mode to independent, handle the request,
 	 * then xfer_mode before return.
 	 * Better way is to get a temporary data_xfer property with
@@ -2171,9 +2160,9 @@ printf("%s: check 1.2, \n",FUNC);
 		"H5D: Cannot handle this COLLECTIVE read request.  Do it via INDEPENDENT calls\n"
 		"dx->xfermode was %d, changed to %d\n",
 		xfer_mode, dx->xfer_mode);
-	}
+	} /* end if */
 #endif
-    }
+    } /* end if */
 #endif
     /*
      * This is the general case.
@@ -2189,26 +2178,18 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
     request_nelmts = target_size / MAX(src_type_size, dst_type_size);
 
     /* Figure out the strip mine size. */
-    if ((sconv->f->init)(file_space, src_type_size, &file_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize file selection information");
-    } 
-    if ((sconv->m->init)(mem_space, dst_type_size, &mem_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize memory selection information");
-    } 
-    if ((sconv->m->init)(mem_space, dst_type_size, &bkg_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize background selection information");
-    } 
+    if ((sconv->f->init)(file_space, src_type_size, &file_iter)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
+    if ((sconv->m->init)(mem_space, dst_type_size, &mem_iter)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
+    if ((sconv->m->init)(mem_space, dst_type_size, &bkg_iter)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
 
 #ifdef QAK
     printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
 #endif
-    if (request_nelmts<=0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "temporary buffer max size is too small");
-    }
+    if (request_nelmts<=0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small");
 
     /*
      * Get a temporary buffer for type conversion unless the app has already
@@ -2224,16 +2205,15 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         need_bkg = MAX(tpath->cdata.need_bkg, need_bkg);
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
-    }
+    } /* end else */
     if (NULL==(tconv_buf=H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))) {
 #ifdef QAK
     printf("%s: check 3.1, allocating conversion buffer\n",FUNC);
 #endif
         /* Allocate temporary buffer */
         if((tconv_buf=H5FL_BLK_ALLOC(type_conv,target_size,0))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                 "memory allocation failed for type conversion");
-    }
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+    } /* end if */
     if (need_bkg && NULL==(bkg_buf=H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))) {
 #ifdef QAK
     printf("%s: check 3.2, allocating conversion buffer\n",FUNC);
@@ -2241,14 +2221,20 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         /* Allocate temporary buffer */
         H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
         if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,(size_t)(request_nelmts*dst_type_size),0))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                 "memory allocation failed for background conversion");
-    }
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion");
+    } /* end if */
 
 #ifdef QAK
-    printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n",
-	   FUNC,(int)nelmts,(int)need_bkg);
+    printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n", FUNC,(int)nelmts,(int)need_bkg);
 #endif
+
+    /* Get some necessary information for later */
+    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve data pipeline");
+    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill value");
+    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
     
     /* Start strip mining... */
     H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
@@ -2257,8 +2243,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         smine_nelmts = (sconv->f->avail)(file_space,&file_iter,
                  MIN(request_nelmts, (nelmts-smine_start)));
 #ifdef QAK
-	printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",
-	       FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
+	printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n", FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
 #endif
 	
         /*
@@ -2269,12 +2254,6 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve data pipeline");
-        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill value");
-        if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
         n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout), &pline, 
                              &fill, &efl, src_type_size, file_space, 
                              &file_iter, smine_nelmts, dxpl_id, 
@@ -2286,9 +2265,8 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 	sconv->stats[1].gath_nbytes += n * src_type_size;
 	sconv->stats[1].gath_ncalls++;
 #endif
-	if (n!=smine_nelmts) {
+	if (n!=smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
-        }
 	
 #ifdef QAK
 	printf("%s: check 6.0\n",FUNC);
@@ -2320,9 +2298,8 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
             sconv->stats[1].bkg_nbytes += n * dst_type_size;
             sconv->stats[1].bkg_ncalls++;
 #endif
-            if (n!=smine_nelmts) {
+            if (n!=smine_nelmts)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
-            }
         } else if (need_bkg) {
             assert((request_nelmts*dst_type_size)==(hsize_t)((size_t)(request_nelmts*dst_type_size))); /*check for overflow*/
             HDmemset(bkg_buf, 0, (size_t)(request_nelmts*dst_type_size));
@@ -2335,11 +2312,8 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         /*
          * Perform data type conversion.
          */
-        if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf,
-                bkg_buf, dxpl_id)<0) {
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                "data type conversion failed");
-        }
+        if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed");
 
 #ifdef QAK
 	printf("%s: check 8.0\n",FUNC);
@@ -2373,28 +2347,26 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 	sconv->stats[1].scat_nbytes += smine_nelmts * dst_type_size;
 	sconv->stats[1].scat_ncalls++;
 #endif
-	if (status<0) {
+	if (status<0)
             HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "scatter failed");
-        }
 	
 #ifdef QAK
 	printf("%s: check 9.0\n",FUNC);
 #endif /* QAK */
-    }
+    } /* end for */
     
 done:
 #ifdef H5_HAVE_PARALLEL
     /* restore xfer_mode due to the kludge */
-    if (doing_mpio && xfer_mode_changed){
-
+    if (doing_mpio && xfer_mode_changed) {
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
 	    fprintf (H5DEBUG(D), "H5D: dx->xfermode was %d, restored to %d\n",
 		dx->xfer_mode, xfer_mode);
-	}
+	} /* end if */
 #endif
 	dx->xfer_mode = xfer_mode;
-    }
+    } /* end if */
 #endif
     /* Release selection iterators */
     H5S_sel_iter_release(file_space,&file_iter);
@@ -2539,7 +2511,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if (NULL==(free_this_space=H5S_read (&(dataset->ent))))
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data space from dataset header");
 	file_space = free_this_space;
-    }
+    } /* end if */
     if (!mem_space)
         mem_space = file_space;
     nelmts = H5S_get_select_npoints(mem_space);
@@ -2552,13 +2524,19 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    xfer_mode = dx->xfer_mode;
 	else
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to retrieve data xfer info");
-    }
+    } /* end if */
     /* Collective access is not permissible without the MPIO driver */
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
-	!(IS_H5FD_MPIO(dataset->ent.file)))
-	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		"collective access for MPIO driver only");
+            !(IS_H5FD_MPIO(dataset->ent.file)))
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
 #endif
+
+#ifdef QAK
+    printf("%s: check 0.5, nelmts=%d, mem_space->rank=%d\n", FUNC, (int)nelmts, mem_space->extent.u.simple.rank);
+#endif /* QAK */
+    /* Make certain that the number of elements in each selection is the same */
+    if (nelmts!=H5S_get_select_npoints (file_space))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes");
 
     /*
      * Locate the type conversion function and data space conversion
@@ -2568,33 +2546,21 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
-#ifdef QAK
-    printf("%s: check 0.5, nelmts=%d, mem_space->rank=%d\n", FUNC,
-	   (int)nelmts, mem_space->extent.u.simple.rank);
-#endif /* QAK */
-    if (nelmts!=H5S_get_select_npoints (file_space)) {
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		     "src and dest data spaces have different sizes");
-    }
     if (NULL==(tpath=H5T_path_find(mem_type, dataset->type, NULL, NULL))) {
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		    "unable to convert between src and dest data types");
+	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
     } else if (!H5T_IS_NOOP(tpath)) {
-	if ((src_id = H5I_register(H5I_DATATYPE,
-				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
-	    (dst_id = H5I_register(H5I_DATATYPE,
-				   H5T_copy(dataset->type, H5T_COPY_ALL)))<0) {
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-			"unable to register types for conversion");
-	}
-    }
+	if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
+                (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
+    } /* end if */
 #ifdef QAK
     printf("%s: check 0.6, after H5T_find, tpath=%p, tpath->name=%s\n",FUNC,tpath,tpath->name);
 #endif /* QAK */
-    if (NULL==(sconv=H5S_find(mem_space, file_space))) {
-	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "unable to convert from memory to file data space");
-    }
+
+    /* Get dataspace functions */
+    if (NULL==(sconv=H5S_find(mem_space, file_space)))
+	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space");
+
 #ifdef H5_HAVE_PARALLEL
     /* rky 980813 This is a temporary KLUGE.
      * The sconv functions should be set by H5S_find,
@@ -2603,14 +2569,14 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
     if (H5_mpi_opt_types_g &&
-        IS_H5FD_MPIO(dataset->ent.file)) {
+            IS_H5FD_MPIO(dataset->ent.file)) {
 	/* Only collective write should call this since it eventually
 	 * calls MPI_File_set_view which is a collective call.
 	 * See H5S_mpio_spaces_xfer() for details.
 	 */
 	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
 	    sconv->write = H5S_mpio_spaces_write;
-    }
+    } /* end if */
 #endif /*H5_HAVE_PARALLEL*/
     
     /*
@@ -2618,8 +2584,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * application buffer to file.
      */
 #ifdef QAK
-    printf("%s: check 0.7, H5T_IS_NOOP(path)=%d, sconv->write=%p\n", FUNC,
-	   (int)H5T_IS_NOOP(tpath), sconv->write);
+    printf("%s: check 0.7, H5T_IS_NOOP(path)=%d, sconv->write=%p\n", FUNC, (int)H5T_IS_NOOP(tpath), sconv->write);
 #endif /* QAK */
     if (H5T_IS_NOOP(tpath) && sconv->write) {
 #ifdef H5S_DEBUG
@@ -2646,16 +2611,16 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    sconv->stats[0].write_ncalls++;
 #endif
 	    HGOTO_DONE(SUCCEED);
-	}
+	} /* end else */
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
 	    fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
 		     "optimized for this case (using general method "
 		     "instead)\n");
-	}
+	} /* end if */
 #endif
 	H5E_clear ();
-    }
+    } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
     /* The following may not handle a collective call correctly
@@ -2663,7 +2628,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * request according to the MPI collective specification.
      * Do the collective request via independent mode.
      */
-    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE){
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE) {
 	/* Kludge: change the xfer_mode to independent, handle the request,
 	 * then xfer_mode before return.
 	 * Better way is to get a temporary data_xfer property with
@@ -2675,11 +2640,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if (H5DEBUG(D)) {
 	    fprintf(H5DEBUG(D),
 		"H5D: Cannot handle this COLLECTIVE write request.  Do it via INDEPENDENT calls\n"
-		"dx->xfermode was %d, changed to %d\n",
-		xfer_mode, dx->xfer_mode);
-	}
+		"dx->xfermode was %d, changed to %d\n", xfer_mode, dx->xfer_mode);
+	} /* end if */
 #endif
-    }
+    } /* end if */
 #endif
     /*
      * This is the general case.
@@ -2705,7 +2669,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
     if ((sconv->m->init)(mem_space, src_type_size, &mem_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
     if ((sconv->f->init)(file_space, dst_type_size, &bkg_iter)<0)
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
      
     /*
      * Get a temporary buffer for type conversion unless the app has already
@@ -2721,23 +2685,30 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
         need_bkg = MAX (tpath->cdata.need_bkg, need_bkg);
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
-    }
+    } /* end else */
     if (NULL==(tconv_buf=H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))) {
         /* Allocate temporary buffer */
         if((tconv_buf=H5FL_BLK_ALLOC(type_conv,target_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
-    }
+    } /* end if */
     if (need_bkg && NULL==(bkg_buf=H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))) {
         /* Allocate temporary buffer */
         H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
         if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,(size_t)(request_nelmts*dst_type_size),0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion");
-    }
+    } /* end if */
 
 #ifdef QAK
-    printf("%s: check 4.0, nelmts=%d, request_nelmts=%d, need_bkg=%d\n",
-	   FUNC,(int)nelmts,(int)request_nelmts,(int)need_bkg);
+    printf("%s: check 4.0, nelmts=%d, request_nelmts=%d, need_bkg=%d\n", FUNC,(int)nelmts,(int)request_nelmts,(int)need_bkg);
 #endif
+
+    /* Get some necessary information for later */
+    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data pipeline");
+    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
+    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
 
     /* Start strip mining... */
     H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
@@ -2747,8 +2718,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
                  MIN(request_nelmts, (nelmts-smine_start)));
 	
 #ifdef QAK
-	printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",
-	       FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
+	printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n", FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
 #endif
 	
         /*
@@ -2766,9 +2736,8 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 	sconv->stats[0].gath_nbytes += n * src_type_size;
 	sconv->stats[0].gath_ncalls++;
 #endif
-        if (n!=smine_nelmts) {
+        if (n!=smine_nelmts)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
-        }
 
 #ifdef QAK
 #ifdef QAK
@@ -2796,12 +2765,6 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data pipeline");
-            if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
-            if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
             n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout), &pline,
                                  &fill, &efl, dst_type_size, file_space, 
                                  &bkg_iter, smine_nelmts, dxpl_id, 
@@ -2820,7 +2783,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 #endif
             H5_CHECK_OVERFLOW(request_nelmts*dst_type_size,hsize_t,size_t);
             HDmemset(bkg_buf, 0, (size_t)(request_nelmts*dst_type_size));
-        }
+        } /* end if */
 	
         /*
          * Perform data type conversion.
@@ -2837,16 +2800,10 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 #ifdef H5S_DEBUG
         H5_timer_begin(&timer);
 #endif
-        if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data pipeline");
-        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
-        if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
         status = (sconv->f->scat)(dataset->ent.file, &(dataset->layout), 
                                   &pline, &fill, &efl, dst_type_size, 
                                   file_space, &file_iter, smine_nelmts, 
-                                  dxpl_id, tconv_buf/*out*/);
+                                  dxpl_id, tconv_buf);
 
 #ifdef QAK
 	printf("%s: check 6.35\n",FUNC);
@@ -2858,7 +2815,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 #endif
         if (status<0)
             HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
-    }
+    } /* end for */
 
 #ifdef QAK
 	printf("%s: check 6.4\n",FUNC);
@@ -2867,24 +2824,21 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
      * Update modification time.  We have to do this explicitly because
      * writing to a dataset doesn't necessarily change the object header.
      */
-    if (H5O_touch(&(dataset->ent), FALSE)<0) {
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		    "unable to update modification time");
-    }
+    if (H5O_touch(&(dataset->ent), FALSE)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time");
 
 done:
 #ifdef H5_HAVE_PARALLEL
     /* restore xfer_mode due to the kludge */
-    if (doing_mpio && xfer_mode_changed){
-
+    if (doing_mpio && xfer_mode_changed) {
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
 	    fprintf (H5DEBUG(D), "H5D: dx->xfermode was %d, restored to %d\n",
 		dx->xfer_mode, xfer_mode);
-	}
+	} /* end if */
 #endif
 	dx->xfer_mode = xfer_mode;
-    }
+    } /* end if */
 #endif
     /* Release selection iterators */
     H5S_sel_iter_release(file_space,&file_iter);
