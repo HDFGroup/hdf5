@@ -55,18 +55,6 @@
 #  include "ProcIDS.h"
 #endif
 
-/*
- * Low level I/O library
- */
-#define POSIXBUFIO	0
-#define POSIXUNBUFIO	1
-#define MACIO		2
-#define WINNTIO		3
-#define PAGEBUFIO	4
-#ifndef FILELIB
-#  define FILELIB		POSIXBUFIO
-#endif
-
 /* Does the compiler support the __attribute__(()) syntax? */
 #ifndef HAVE_ATTRIBUTE
 #  define __attribute__(X)	/*void*/

@@ -84,6 +84,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_SEEKERROR,     "Seek failed"},
     {H5E_READERROR,     "Read failed"},
     {H5E_WRITEERROR,    "Write failed"},
+    {H5E_CLOSEERROR, 	"Close failed"}, 
     {H5E_CANTINIT,      "Can't initialize interface"},
     {H5E_ALREADYINIT,   "Object already initialized"},
     {H5E_BADATOM,       "Can't find atom information"},

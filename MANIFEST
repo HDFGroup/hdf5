@@ -49,6 +49,9 @@
 ./src/H5Epublic.h
 ./src/H5F.c
 ./src/H5Fistore.c
+./src/H5Flow.c
+./src/H5Fsec2.c
+./src/H5Fstdio.c
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
 ./src/H5G.c

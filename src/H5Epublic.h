@@ -72,6 +72,7 @@ typedef enum
       H5E_SEEKERROR,           /* Seek failed */
       H5E_READERROR,           /* Read failed */
       H5E_WRITEERROR,          /* Write failed */
+      H5E_CLOSEERROR,          /* Close failed */
 
     /* Function entry/exit interface errors */
       H5E_CANTINIT,            /* Can't initialize interface */

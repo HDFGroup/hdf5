@@ -24,7 +24,6 @@
 
 #define H5H_MAGIC	"HEAP"		/*heap magic number		*/
 #define H5H_SIZEOF_MAGIC 4
-#define H5H_ALIGN(X)	((X)=((X)+1) & ~0x01)
 
 #define H5H_SIZEOF_HDR(F)						      \
    (H5H_SIZEOF_MAGIC +			/*heap signature		*/    \

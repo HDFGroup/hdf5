@@ -2,9 +2,9 @@
 
 CFLAGS_WARN="-Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
 
-CFLAGS_DEBUG="-g -DH5AC_DEBUG_PROTECT  -DFILELIB=1 -fverbose-asm"
+CFLAGS_DEBUG="-g -DH5AC_DEBUG_PROTECT -DH5F_LOW_DFLT=H5F_LOW_STDIO -DH5F_OPT_SEEK -fverbose-asm"
 CFLAGS_PROFILE="-pg"
-CFLAGS_PRODUCTION="-O3 -UH5AC_DEBUG_PROTECT -DNDEBUG -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
+CFLAGS_PRODUCTION="-O3 -UH5AC_DEBUG_PROTECT -DNDEBUG -DH5F_LOW_DFLT=H5F_LOW_STDIO -DH5F_OPT_SEEK -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
 
 if test "x$CFLAGS" = "x"; then
 

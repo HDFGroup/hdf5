@@ -54,7 +54,7 @@ static char RcsId[] = "@(#)$Revision$";
  * keep track of the file position and attempt to minimize calls to the file
  * seek method.
  */
-#define H5F_OPT_SEEK
+/* #define H5F_OPT_SEEK */
 
 
 #define PABLO_MASK	H5F_mask
@@ -325,7 +325,7 @@ done:
 --------------------------------------------------------------------------*/
 hbool_t H5Fis_hdf5(const char *filename)
 {
-    hdf_file_t f_handle=H5F_INVALID_FILE;      /* file handle */
+    H5F_low_t *f_handle=NULL;      /* file handle */
     uint8 temp_buf[H5F_SIGNATURE_LEN];    /* temporary buffer for checking file signature */
     haddr_t curr_off=0;          /* The current offset to check in the file */
     size_t file_len=0;          /* The length of the file we are checking */
@@ -339,41 +339,31 @@ hbool_t H5Fis_hdf5(const char *filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL); /*no filename specified*/
 
     /* Open the file */
-    f_handle=H5F_OPEN(filename,0);
-    if(H5F_OPENERR(f_handle)) {
+    if (NULL==(f_handle=H5F_low_open (H5F_LOW_DFLT, filename, 0))) {
        /* Low-level file open failure */
        HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL);
     }
 
     /* Get the length of the file */
-    if(H5F_SEEKEND(f_handle)==FAIL) {
-       /* Unable to determine length of file due to seek failure */
-       HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, BFAIL);
-    }
-    file_len=H5F_TELL(f_handle);
-
+    file_len = H5F_low_size (f_handle);
+    
     /* Check the offsets where the file signature is possible */
-    while(curr_off<file_len)
-      {
-        if(H5F_SEEK(f_handle,curr_off)==FAIL)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL); /*seek error*/
-        if(H5F_READ(f_handle,temp_buf, H5F_SIGNATURE_LEN)==FAIL)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL); /*read error*/
-        if(HDmemcmp(temp_buf,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==0)
-          {
-            ret_value=BTRUE;
-            break;
-          } /* end if */
-        if(curr_off==0)
-            curr_off=512;
-        else
-            curr_off*=2;
-      } /* end while */
+    while(curr_off<file_len) {
+       if (H5F_low_read (f_handle, curr_off, H5F_SIGNATURE_LEN, temp_buf)<0) {
+	  HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL); /*read error*/
+       }
+       if(HDmemcmp(temp_buf,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==0) {
+	  ret_value=BTRUE;
+	  break;
+       }
+       if(curr_off==0)
+	  curr_off=512;
+       else
+	  curr_off*=2;
+    } /* end while */
 
  done:
-    if(f_handle!=H5F_INVALID_FILE)
-       H5F_CLOSE(f_handle);   /* close the file we opened */
-
+    H5F_low_close(f_handle);   /* close the file we opened */
     FUNC_LEAVE(ret_value);
 }
 
@@ -510,6 +500,10 @@ H5F_dest (H5F_t *f)
  *		The CREATE_PARMS argument is optional.  A null pointer will
  *		cause the default file creation parameters to be used.
  *
+ *		The TYPE argument determins the low-level type of file that
+ *		is opened.  The special value H5F_LOW_DFLT uses the default
+ *		method which is defined at compile time.
+ *
  * Errors:
  *		ATOM      BADATOM       Can't unatomize default template
  *		                        id. 
@@ -557,7 +551,7 @@ H5F_dest (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_open (const char *name, uintn flags,
+H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	  const file_create_temp_t *create_parms)
 {
    H5F_t	*f = NULL;		/*return value			*/
@@ -565,7 +559,7 @@ H5F_open (const char *name, uintn flags,
    H5F_t	*old = NULL;		/*a file already opened		*/
    struct stat	sb;			/*file stat info		*/
    H5F_search_t search;			/*file search key		*/
-   hdf_file_t	fd = H5F_INVALID_FILE;	/*low level file desc		*/
+   H5F_low_t	*fd = NULL;		/*low level file desc		*/
    hbool_t	empty_file = FALSE;	/*is file empty?		*/
    hbool_t	file_exists = FALSE;	/*file already exists		*/
    uint8	buf[256], *p=NULL;	/*I/O buffer and ptr into it	*/
@@ -628,14 +622,14 @@ H5F_open (const char *name, uintn flags,
 	 }
 	 if ((flags & H5F_ACC_WRITE) &&
 	     0==(old->shared->flags & H5F_ACC_WRITE)) {
-	    if (H5F_INVALID_FILE==(fd = H5F_OPEN (name, H5ACC_WRITE))) {
+	    if (NULL==(fd=H5F_low_open (type, name, H5F_ACC_WRITE))) {
 	       /* File cannot be reopened with write access */
 	       HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
 	    }
-	    H5F_CLOSE (old->shared->file_handle);
+	    H5F_low_close (old->shared->file_handle);
 	    old->shared->file_handle = fd;
 	    old->shared->flags |=  H5F_ACC_WRITE;
-	    fd = H5F_INVALID_FILE; /*so we don't close it during error*/
+	    fd = NULL; /*so we don't close it during error*/
 	 }
 	 f = H5F_new (old->shared);
 	 
@@ -645,7 +639,8 @@ H5F_open (const char *name, uintn flags,
 	    /* Can't truncate without write intent */
 	    HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL);
 	 }
-	 if (H5F_INVALID_FILE==(fd=H5F_CREATE (name))) {
+	 fd = H5F_low_open (type, name, H5F_ACC_WRITE|H5F_ACC_TRUNC);
+	 if (!fd) {
 	    /* Can't truncate file */
 	    HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
 	 }
@@ -657,8 +652,8 @@ H5F_open (const char *name, uintn flags,
 	 empty_file = TRUE;
 	 
       } else {
-	 fd = H5F_OPEN (name, (flags & H5F_ACC_WRITE)?H5ACC_WRITE : 0);
-	 if (H5F_INVALID_FILE==fd) {
+	 fd = H5F_low_open (type, name, (flags & H5F_ACC_WRITE));
+	 if (!fd) {
 	    /* Cannot open existing file */
 	    HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
 	 }
@@ -673,12 +668,13 @@ H5F_open (const char *name, uintn flags,
 	 /* Can't create file without write intent */
 	 HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL);
       }
-      if (H5F_INVALID_FILE==(fd=H5F_CREATE (name))) {
+      fd = H5F_low_open (type, name, H5F_ACC_WRITE|H5F_ACC_CREAT|H5F_ACC_EXCL);
+      if (!fd) {
 	 /* Can't create file */
 	 HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
       }
       if (stat (name, &sb)<0) {
-	 /* Can't stat file */
+	 /* Can't stat file - can't get dev or inode */
 	 HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
       }
       f = H5F_new (NULL);
@@ -835,13 +831,7 @@ H5F_open (const char *name, uintn flags,
    }
 
    /* What is the current size of the file? */
-      if (H5F_SEEKEND (f->shared->file_handle)<0) {
-	 /* Cannot determine file size */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, NULL);
-      }
-      f->shared->logical_len = H5F_TELL (f->shared->file_handle);
-      f->shared->last_op=OP_SEEK;   /* change the last operation to a seek */
-   
+   f->shared->logical_len = H5F_low_size (f->shared->file_handle);
 
    /* Success! */
    ret_value = f;
@@ -849,7 +839,7 @@ H5F_open (const char *name, uintn flags,
  done:
    if (!ret_value) {
       if (f) H5F_dest (f);
-      if (H5F_INVALID_FILE!=fd) H5F_CLOSE (fd);
+      H5F_low_close (fd);
    }
    
    FUNC_LEAVE (ret_value);
@@ -941,7 +931,8 @@ hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
     /*
      * Create a new file or truncate an existing file.
      */
-    if (NULL==(new_file = H5F_open (filename, flags, create_parms))) {
+    if (NULL==(new_file = H5F_open (H5F_LOW_DFLT, filename, flags,
+				    create_parms))) {
        HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, FAIL); /*can't create file */
     }
 
@@ -1023,7 +1014,7 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 #endif
 
     /* Open the file */
-    if (NULL==(new_file=H5F_open (filename, flags, NULL))) {
+    if (NULL==(new_file=H5F_open (H5F_LOW_DFLT, filename, flags, NULL))) {
        HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, FAIL); /*cant open file*/
     }
 
@@ -1213,7 +1204,7 @@ H5F_close (H5F_t *f)
       /*can't flush cache*/
       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
    }
-   H5F_CLOSE(f->shared->file_handle);
+   H5F_low_close (f->shared->file_handle);
    H5F_dest (f);
 
    /* Did the H5F_flush() fail because of open objects? */
@@ -1291,8 +1282,7 @@ done:
  *		The data is contiguous.
  *
  * Errors:
- *		IO        READERROR     Low-level read failure. 
- *		IO        SEEKERROR     Low-level seek failure. 
+ *		IO        READERROR     Low-level read failed. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -1313,25 +1303,10 @@ H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf)
 
    if (0==size) return 0;
    addr += f->shared->file_create_parms.userblock_size;
-   
-  /* Check for switching file access operations or mis-placed seek offset */
-#ifdef H5F_OPT_SEEK
-  if(f->shared->last_op!=OP_READ || f->shared->f_cur_off!=addr)
-    {
-#endif
-      f->shared->last_op=OP_READ;
-      if (H5F_SEEK (f->shared->file_handle, addr)<0) {
-          /* low-level seek failure */
-          HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
-        } /* end if */
-#ifdef H5F_OPT_SEEK
-    } /* end if */
-#endif
-   if (H5F_READ (f->shared->file_handle, buf, size)<0) {
-      /* low-level read failure */
-      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
+
+   if (H5F_low_read (f->shared->file_handle, addr, size, buf)<0) {
+      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*low-level read failed*/
    }
-   f->shared->f_cur_off=addr+size;
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -1344,8 +1319,7 @@ H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf)
  *		data is contiguous.
  *
  * Errors:
- *		IO        SEEKERROR     Low-level seek failure. 
- *		IO        WRITEERROR    Low-level write failure. 
+ *		IO        WRITEERROR    Low-level write failed. 
  *		IO        WRITEERROR    No write intent. 
  *
  * Return:	Success:	SUCCEED
@@ -1373,25 +1347,9 @@ H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf)
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
    }
 
-  /* Check for switching file access operations or mis-placed seek offset */
-#ifdef H5F_OPT_SEEK
-  if(f->shared->last_op!=OP_WRITE || f->shared->f_cur_off!=addr)
-    {
-#endif
-      f->shared->last_op=OP_WRITE;
-      if (H5F_SEEK (f->shared->file_handle, addr)<0) {
-         /* low-level seek failure */
-         HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
-      }
-#ifdef H5F_OPT_SEEK
-    } /* end if */
-#endif
-
-   if (H5F_WRITE (f->shared->file_handle, buf, size)<0) {
-      /* low-level write failure */
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+   if (H5F_low_write (f->shared->file_handle, addr, size, buf)) {
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);/*low-level write failed*/
    }
-   f->shared->f_cur_off=addr+size;
 
    FUNC_LEAVE (SUCCEED);
 }

@@ -23,6 +23,16 @@
 /* This is a near top-level header! Try not to include much! */
 #include <H5private.h>
 
+/*
+ * Feature: Define this constant to be non-zero if you want to enable code
+ *	    that minimizes the number of calls to lseek().  This has a huge
+ *	    performance benefit on some systems.  Set this constant to zero
+ *	    on the compiler command line to disable that optimization.
+ */
+#ifndef H5F_OPT_SEEK
+#  define H5F_OPT_SEEK 1
+#endif
+
 /* Maximum size of boot-block buffer */
 #define H5F_BOOTBLOCK_SIZE  1024
 
@@ -42,120 +52,6 @@
 #define H5F_ACC_EXCL	0x0004	/* Fail if file exists			*/
 #define H5F_ACC_TRUNC	0x0008	/* Truncate existing file		*/
 
-/*
- * Define the low-level file interface.
- */
-#if FILELIB == POSIXBUFIO
-typedef FILE *hdf_file_t;
-#  ifdef VMS
-#     define H5F_OPEN(p, a)	(((a) & H5ACC_WRITE) ?			      \
-				 fopen ((p), "r+", "mbc=64") :		      \
-				 fopen ((p), "r", "mbc=64"))
-#     define H5F_CREATE(p)	fopen ((p), "w+", "mbc=64")
-#  elif defined SUN && defined (__GNUC__)
-#     define H5F_OPEN(p, a)	(((a) & H5ACC_WRITE) ?			      \
-				 fopen ((p), "r+") :			      \
-				 fopen ((p), "r"))
-#     define H5F_CREATE(p)	fopen ((p), "w+")
-#  else
-#     define H5F_OPEN(p, a)	(((a) & H5ACC_WRITE) ?			      \
-				 fopen ((p), "rb+") :			      \
-				 fopen((p), "rb"))
-#     define H5F_CREATE(p)	fopen((p), "wb+")
-#  endif
-
-#  define H5F_READ(f, b, n)	(((size_t)(n) == (size_t)fread ((b), 1,	      \
-								(size_t)(n),  \
-								(f))) ?	      \
-				 SUCCEED : FAIL)
-#  define H5F_WRITE(f, b, n)	(((size_t)(n) == (size_t)fwrite ((b), 1,      \
-								 (size_t)(n), \
-								 (f))) ?      \
-				 SUCCEED : FAIL)
-#  define H5F_CLOSE(f) 	       	fclose (f)
-#  define H5F_FLUSH(f)  	(0==fflush (f) ? SUCCEED : FAIL)
-#  define H5F_SEEK(f,o)      	(0==fseek ((f), (long)(o), SEEK_SET) ?	      \
-				 SUCCEED : FAIL)
-#  define H5F_SEEK_CUR(f,o) 	(0==fseek ((f), (long)(o), SEEK_CUR) ?	      \
-				 SUCCEED : FAIL)
-#  define H5F_SEEKEND(f)	(0==fseek ((f), (long)0, SEEK_END) ?	      \
-				 SUCCEED : FAIL)
-#  define H5F_TELL(f)      	ftell (f)
-#  define H5F_OPENERR(f)	(!f)
-#  define H5F_INVALID_FILE    	((FILE *)NULL)
-
-   
-#elif FILELIB == POSIXUNBUFIO
-typedef int hdf_file_t;
-#  define H5F_OPEN(p, a)	(((a) & H5ACC_WRITE) ?			      \
-				 open ((p), O_RDWR) :			      \
-				 open ((p), O_RDONLY))
-#  define H5F_CREATE(p)       	open ((p), O_RDWR | O_CREAT | O_TRUNC, 0666)
-#  define H5F_CLOSE(f)        	close(f)
-#  define H5F_FLUSH(f)        	SUCCEED
-#  define H5F_READ(f, b, n)  	 (((n)==read ((f), (char*)(b), (n))) ?	      \
-				  SUCCEED : FAIL)
-#  define H5F_WRITE(f, b, n)  	(((n)==write ((f), (char*)(b), (n))) ?	      \
-				 SUCCEED : FAIL)
-#  define H5F_SEEK(f, o)      	(lseek ((f), (off_t)(o), SEEK_SET)<0 ?	      \
-				 FAIL : SUCCEED)
-#  define H5F_SEEKEND(f)      	(lseek ((f), (off_t)0, SEEK_END)<0 ?	      \
-				 FAIL : SUCCEED)
-#  define H5F_TELL(f)         	lseek ((f), (off_t)0, SEEK_CUR)
-#  define H5F_OPENERR(f)      	((f) < 0)
-#  define H5F_INVALID_FILE    	(-1)
-
-
-#elif FILELIB == MACIO
-typedef short hdf_file_t;
-#  define H5F_OPEN(x,y)       	mopen (x, y)
-#  define H5F_CREATE(name)    	mopen (name, H5ACC_CREATE)
-#  define H5F_CLOSE(x)        	mclose (x)
-#  define H5F_FLUSH(a)        	SUCCEED
-#  define H5F_READ(a,b,c)     	mread (a, (char*)b, (int32)c)
-#  define H5F_WRITE(a,b,c)    	mwrite (a, (char*)b, (int32)c)
-#  define H5F_SEEK(x,y)       	mlseek (x, (int32)y, 0)
-#  define H5F_SEEKEND(x)      	mlseek (x, 0L, 2)
-#  define H5F_TELL(x)         	mlseek (x, 0L, 1)
-#  define H5F_OPENERR(f)      	(f < 0)
-#  define H5F_INVALID_FILE    	(-1)
-
-
-#elif FILELIB == WINNTIO
-typedef HFILE hdf_file_t;
-#  define H5F_OPEN(p, a)	(((a) & H5ACC_WRITE) ?			      \
-				 _lopen ((p), OF_READWRITE) :		      \
-				 _lopen ((p), OF_READ))
-#  define H5F_CREATE(p)       	_lcreat ((p), 0)
-#  define H5F_READ(f, b, n)   	(((int32)(n) == _hread ((f), (b), (n))) ?     \
-				 SUCCEED : FAIL)
-#  define H5F_WRITE(f, b, n)  	(((int32)(n) == _hwrite ((f), (b), (n))) ?    \
-				 SUCCEED : FAIL)
-#  define H5F_CLOSE(f)        	(_lclose(f)==0 ? SUCCEED : FAIL)
-#  define H5F_FLUSH(f)        	0
-#  define H5F_SEEK(f, o)      	_llseek ((f), (long)(o), 0)
-#  define H5F_SEEKEND(f)      	_llseek ((f), (long)0, 2)
-#  define H5F_TELL(f)         	_llseek ((f), 0l, 1)
-#  define H5F_OPENERR(f)      	((f) == (HFILE)HFILE_ERROR)
-#  define H5F_INVALID_FILE    	((HFILE)HFILE_ERROR)
-
-
-#elif FILELIB == PAGEBUFIO
-#  include "fmpio.h"
-typedef MPFILE *hdf_file_t;
-#  define H5F_OPEN(p, a)      	MPopen ((p), (a))
-#  define H5F_CREATE(p)         MPopen ((p), H5ACC_CREATE)
-#  define H5F_CLOSE(f)          MPclose (f)
-#  define H5F_FLUSH(f)          MPflush (f)
-#  define H5F_READ(f, b, n)     MPread ((f), (char *)(b), (n))
-#  define H5F_WRITE(f, b, n)    MPwrite ((f), (char *)(b), (n))
-#  define H5F_SEEK(f, o)        MPseek ((f), (off_t)(o), SEEK_SET)
-#  define H5F_SEEKEND(f)        MPseek ((f), (off_t)0, SEEK_END)
-#  define H5F_TELL(f)           MPseek ((f), (off_t)0, SEEK_CUR)
-#  define H5F_OPENERR(f)        ((f) == (MPFILE *)NULL)
-#  define H5F_INVALID_FILE      ((MPFILE *)NULL)
-
-#endif
 
 /*
  * Encode and decode macros for file meta-data.
@@ -188,45 +84,30 @@ typedef MPFILE *hdf_file_t;
    *(p) = (uint8)(((i) >> 24) & 0xff); (p)++;				      \
 }
 
-#  define INT64ENCODE(p, i) {						      \
-   *(p) = (uint8)( (uint64)(i)        & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint64)(i) >>  8) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint64)(i) >> 16) & 0xff); (p)++;			      \
-   *(p) = (uint8)(((uint64)(i) >> 24) & 0xff); (p)++;			      \
-   if (sizeof(int64)>4) {						      \
-      *(p) = (uint8)(((uint64)(i) >> 32) & 0xff); (p)++;		      \
-      *(p) = (uint8)(((uint64)(i) >> 40) & 0xff); (p)++;		      \
-      *(p) = (uint8)(((uint64)(i) >> 48) & 0xff); (p)++;		      \
-      *(p) = (uint8)(((uint64)(i) >> 56) & 0xff); (p)++;		      \
-   } else if ((i)<0) {							      \
-      *(p)++ = 0xff;							      \
-      *(p)++ = 0xff;							      \
-      *(p)++ = 0xff;							      \
-      *(p)++ = 0xff;							      \
-   } else {								      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
+#  define INT64ENCODE(p, n) {						      \
+   int64 _n = (n);							      \
+   intn _i;								      \
+   uint8 *_p = (uint8*)(p);						      \
+   for (_i=0; _i<sizeof(int64); _i++, _n>>=8) {				      \
+      *_p++ = _n & 0xff;						      \
    }									      \
+   for (/*void*/; _i<8; _i++) {						      \
+      *_p++ = (n)<0 ? 0xff : 0;						      \
+   }									      \
+   (p) = (uint8*)(p)+8;							      \
 }
 
-#  define UINT64ENCODE(p, i) {						      \
-   *(p) = (uint8)( (i)        & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >>  8) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 16) & 0xff); (p)++;				      \
-   *(p) = (uint8)(((i) >> 24) & 0xff); (p)++;				      \
-   if (sizeof(uint64)>4) {						      \
-      *(p) = (uint8)(((i) >> 32) & 0xff); (p)++;			      \
-      *(p) = (uint8)(((i) >> 40) & 0xff); (p)++;			      \
-      *(p) = (uint8)(((i) >> 48) & 0xff); (p)++;			      \
-      *(p) = (uint8)(((i) >> 56) & 0xff); (p)++;			      \
-   } else {								      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
+#  define UINT64ENCODE(p, n) {						      \
+   uint64 _n = (n);							      \
+   intn _i;								      \
+   uint8 *_p = (uint8*)(p);						      \
+   for (_i=0; _i<sizeof(uint64); _i++, _n>>=8) {			      \
+      *_p++ = _n & 0xff;						      \
    }									      \
+   for (/*void*/; _i<8; _i++) {						      \
+      *_p++ = 0;							      \
+   }									      \
+   (p) = (uint8*)(p)+8;							      \
 }
 
 #  define INT16DECODE(p, i) {						      \
@@ -253,34 +134,26 @@ typedef MPFILE *hdf_file_t;
    (i) |= ((uint32)(*(p) & 0xff) << 24); (p)++;				      \
 }
 
-#  define INT64DECODE(p, i) {						      \
-   (i)  = (        *(p) & 0xff);        (p)++;				      \
-   (i) |= ((int64)(*(p) & 0xff) <<  8); (p)++;				      \
-   (i) |= ((int64)(*(p) & 0xff) << 16); (p)++;				      \
-   (i) |= ((int64)(*(p) & 0xff) << 24); (p)++;				      \
-   if (sizeof(int64)>4) {						      \
-      (i) |= ((int64)(*(p) & 0xff) << 32); (p)++;			      \
-      (i) |= ((int64)(*(p) & 0xff) << 40); (p)++;			      \
-      (i) |= ((int64)(*(p) & 0xff) << 48); (p)++;			      \
-      (i) |= ((int64)(*(p) & 0xff) << 56); (p)++;			      \
-   } else {								      \
-      (p) += 4;								      \
+#  define INT64DECODE(p, n) {						      \
+   /* WE DON'T CHECK FOR OVERFLOW! */					      \
+   int64 _n = 0;							      \
+   intn _i;								      \
+   uint8 *_p = (uint8*)(p)+8;						      \
+   for (_i=0; _i<sizeof(int64); _i++, _n<<=8) {				      \
+      _n |= *(--_p);							      \
    }									      \
+   (p) = (uint8*)(p)+8;							      \
 }
 
-#  define UINT64DECODE(p, i) {						      \
-   (i)  =  (uint64)(*(p) & 0xff);        (p)++;				      \
-   (i) |= ((uint64)(*(p) & 0xff) <<  8); (p)++;				      \
-   (i) |= ((uint64)(*(p) & 0xff) << 16); (p)++;				      \
-   (i) |= ((uint64)(*(p) & 0xff) << 24); (p)++;				      \
-   if (sizeof(uint64)>4) {						      \
-      (i) |= ((uint64)(*(p) & 0xff) << 32); (p)++;			      \
-      (i) |= ((uint64)(*(p) & 0xff) << 40); (p)++;			      \
-      (i) |= ((uint64)(*(p) & 0xff) << 48); (p)++;			      \
-      (i) |= ((uint64)(*(p) & 0xff) << 56); (p)++;			      \
-   } else {								      \
-      (p) += 4;								      \
+#  define UINT64DECODE(p, n) {						      \
+   /* WE DON'T CHECK FOR OVERFLOW! */					      \
+   uint64 _n = 0;							      \
+   intn _i;								      \
+   uint8 *_p = (uint8*)(p)+8;						      \
+   for (_i=0; _i<sizeof(uint64); _i++, _n<<=8) {			      \
+      _n |= *(--_p);							      \
    }									      \
+   (p) = (uint8*)(p)+8;							      \
 }
 
 #else
@@ -352,27 +225,62 @@ typedef struct H5F_search_t {
 } H5F_search_t;
 
 /* For determining what the last file operation was */
-typedef enum
-  {
-      OP_UNKNOWN = 0,   /* Don't know what the last operation was (after fopen frex) */
-      OP_SEEK,          /* Last operation was a seek */
-      OP_WRITE,         /* Last operation was a write */
-      OP_READ           /* Last operation was a read */
-  }
-H5F_fileop_t;
+typedef enum {
+   H5F_OP_UNKNOWN,	   	/* Don't know what the last operation was */
+   H5F_OP_SEEK,          	/* Last operation was a seek		*/
+   H5F_OP_WRITE,         	/* Last operation was a write		*/
+   H5F_OP_READ           	/* Last operation was a read		*/
+} H5F_fileop_t;
 
+/*
+ * Define the low-level file interface.
+ */
+typedef struct H5F_low_class_t {
+   struct H5F_low_t *(*open)(const char*, uintn);
+   herr_t (*close)(struct H5F_low_t*);
+   herr_t (*read)(struct H5F_low_t*, haddr_t, size_t, uint8*);
+   herr_t (*write)(struct H5F_low_t*, haddr_t, size_t, const uint8*);
+   herr_t (*flush)(struct H5F_low_t*);
+   size_t (*size)(struct H5F_low_t*);
+} H5F_low_class_t;
+
+typedef struct H5F_low_t {
+   const H5F_low_class_t *type;	/* What type of file is this?		*/
+   union {
+
+      /* Posix section 2 I/O */
+      struct {
+	 int		fd;	/* The unix file descriptor		*/
+	 H5F_fileop_t	op;	/* Previous file operation		*/
+	 haddr_t	cur;	/* Current file position		*/
+      } sec2;
+
+      /* Posix stdio */
+      struct {
+	 FILE		*f;	/* Posix stdio file			*/
+	 H5F_fileop_t	op;	/* Previous file operation		*/
+	 haddr_t	cur;	/* Current file position		*/
+      } stdio;
+      
+   } u;
+} H5F_low_t;
+
+/* What types of low-level files are there? */
+#ifndef H5F_LOW_DFLT
+#  define H5F_LOW_DFLT	H5F_LOW_STDIO		/* The default type	*/
+#endif
+extern const H5F_low_class_t H5F_LOW_SEC2[];	/* Posix section 2	*/
+extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio 		*/
+
+   
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen().
  */
 typedef struct H5F_file_t {
-   /* Seek caching info */
-   haddr_t       f_cur_off; /* Current location in the file */
-   H5F_fileop_t  last_op;   /* the last file operation performed */
-
    H5F_search_t	key;		/* The key for looking up files		*/
    uintn	flags;         	/* Access Permissions for file		*/
-   hdf_file_t 	file_handle; 	/* File handle for actual I/O 		*/
+   H5F_low_t	*file_handle;	/* Lower level file handle for I/O	*/
    uintn	nrefs;        	/* Ref count for times file is opened 	*/
    uint32 	consist_flags; 	/* File Consistency Flags 		*/
    haddr_t 	smallobj_off;  	/* Offset of small-obj heap within the file */
@@ -452,16 +360,33 @@ struct H5O_istore_t; /*forward decl for prototype arguments*/
 /* Private functions, not part of the publicly documented API */
 void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
 void H5F_encode_offset_unusual(const H5F_t *f, uint8 **p, uint8 *o);
-H5F_t *H5F_open (const char *name, uintn flags,
+H5F_t *H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 		 const file_create_temp_t *create_parms);
 herr_t H5F_close (H5F_t *f);
-herr_t H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf);
-herr_t H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf);
-herr_t H5F_istore_read (H5F_t *f, struct H5O_istore_t *mesg,
-			size_t offset[], size_t size[], void *buf);
-herr_t H5F_istore_write (H5F_t *f, struct H5O_istore_t *mesg,
-			 size_t offset[], size_t size[], void *buf);
 herr_t H5F_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 		  intn fwidth);
+
+/* Functions that operate on indexed storage */
+herr_t H5F_istore_new (H5F_t *f, struct H5O_istore_t *istore,
+		       uintn ndims, const size_t alignment[]);
+herr_t H5F_istore_read (H5F_t *f, const struct H5O_istore_t *mesg,
+			const size_t offset[], const size_t size[],
+			void *buf);
+herr_t H5F_istore_write (H5F_t *f, const struct H5O_istore_t *mesg,
+			 const size_t offset[], const size_t size[],
+			 void *buf);
+
+/* Functions that operate on contiguous storage wrt boot block */
+herr_t H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf);
+herr_t H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf);
+
+/* Functions that operate directly on low-level files */
+H5F_low_t *H5F_low_open (const H5F_low_class_t *type, const char *name,
+			 uintn flags);
+H5F_low_t *H5F_low_close (H5F_low_t *lf);
+size_t H5F_low_size (H5F_low_t *lf);
+herr_t H5F_low_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf);
+herr_t H5F_low_write (H5F_low_t *lf, haddr_t addr, size_t size,
+		      const uint8 *buf);
 
 #endif

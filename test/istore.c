@@ -16,6 +16,9 @@
 
 #define FILENAME	"istore.h5"
 
+#define TEST_SMALL	0x0001
+#define TEST_MEDIUM	0x0002
+
 #define AT() printf ("   at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
    
@@ -82,6 +85,7 @@ new_object (H5F_t *f, const char *name, size_t ndims)
 {
    H5G_entry_t	*handle = NULL;
    H5O_istore_t	istore;
+   size_t	alignment[H5O_ISTORE_NDIMS];
    intn		i;
    
    /* Create the object symbol table entry and header */
@@ -95,10 +99,8 @@ new_object (H5F_t *f, const char *name, size_t ndims)
    }
 
    /* Add the indexed-storage message */
-   memset (&istore, 0, sizeof istore);
-   istore.ndims = ndims;
-   for (i=0; i<ndims; i++) istore.alignment[i] = 2;
-
+   for (i=0; i<ndims; i++) alignment[i] = 2;
+   H5F_istore_new (f, &istore, ndims, alignment);
    if (H5O_modify (f, H5O_NO_ADDR, handle, H5O_ISTORE, H5O_NEW_MESG,
 		   &istore)<0) {
       printf ("*FAILED*\n");
@@ -156,7 +158,8 @@ test_create (H5F_t *f, const char *prefix)
  * Function:	test_extend
  *
  * Purpose:	Creates an empty object and then writes to it in such a way
- *		as to always extend the object's domain.
+ *		as to always extend the object's domain without creating
+ *		holes and without causing the object to become concave.
  *
  * Return:	Success:	SUCCEED
  *
@@ -181,6 +184,7 @@ test_extend (H5F_t *f, const char *prefix,
    size_t	max_corner[3];
    size_t	size[3];
    size_t	whole_size[3];
+   size_t	nelmts;
    H5O_istore_t	istore;
 
    if (!nz) {
@@ -245,16 +249,17 @@ test_extend (H5F_t *f, const char *prefix,
       if (0==ctr) {
 	 offset[0] = offset[1] = offset[2] = 0;
 	 size[0] = size[1] = size[2] = 1;
+	 nelmts = 1;
       } else {
-	 for (i=0; i<ndims; i++) {
+	 for (i=0, nelmts=1; i<ndims; i++) {
 	    if (ctr % ndims == i) {
 	       offset[i] = max_corner[i];
-	       size[i] = 1;
-	       if (offset[i]+size[i]>whole_size[i]) continue;
+	       size[i] = MIN (1, whole_size[i]-offset[i]);
 	    } else {
 	       offset[i] = 0;
 	       size[i] = max_corner[i];
 	    }
+	    nelmts *= size[i];
 	 }
       }
 
@@ -266,11 +271,15 @@ test_extend (H5F_t *f, const char *prefix,
       printf ("), size=(%d", size[0]);
       if (ndims>1) printf (",%d", size[1]);
       if (ndims>2) printf (",%d", size[2]);
-      printf (")\n");
+      printf ("), %d element%s", nelmts, 1==nelmts?"":"s");
+      if (0==nelmts) printf (" *SKIPPED*");
+      printf ("\n");
+      fflush (stdout);
 #endif
       
       /* Fill the source array */
-      memset (buf, 128+ctr, size[0]*size[1]*size[2]);
+      if (0==nelmts) continue;
+      memset (buf, 128+ctr, nelmts);
 
       /* Write to disk */
       if (H5F_istore_write (f, &istore, offset, size, buf)<0) {
@@ -283,7 +292,7 @@ test_extend (H5F_t *f, const char *prefix,
       }
 
       /* Read from disk */
-      memset (check, 0xff, size[0]*size[1]*size[2]);
+      memset (check, 0xff, nelmts);
       if (H5F_istore_read (f, &istore, offset, size, check)<0) {
 	 puts ("*FAILED*");
 	 if (!isatty (1)) {
@@ -292,7 +301,7 @@ test_extend (H5F_t *f, const char *prefix,
 	 }
 	 goto error;
       }
-      if (memcmp (buf, check, size[0]*size[1]*size[2])) {
+      if (memcmp (buf, check, nelmts)) {
 	 puts ("*FAILED*");
 	 if (!isatty (1)) {
 	    AT ();
@@ -316,10 +325,6 @@ test_extend (H5F_t *f, const char *prefix,
       }
    }
 
-   /* Update the object header */
-   H5O_modify (f, H5O_NO_ADDR, handle, H5O_ISTORE, 0, &istore);
-
-
    /* Now read the entire array back out and check it */
    memset (buf, 0xff, nx*ny*nz);
    if (H5F_istore_read (f, &istore, H5V_ZERO, whole_size, buf)<0) {
@@ -339,8 +344,8 @@ test_extend (H5F_t *f, const char *prefix,
 		  AT ();
 		  printf ("   Check failed at i=%d", i);
 		  if (ndims>1) printf (", j=%d", j);
-		  if (ndims>2) printf (", k=%d\n", k);
-		  printf ("   Check array is:\n");
+		  if (ndims>2) printf (", k=%d", k);
+		  printf ("\n   Check array is:\n");
 		  print_array (whole, nx, ny, nz);
 		  printf ("   Value read is:\n");
 		  print_array (buf, nx, ny, nz);
@@ -364,7 +369,115 @@ test_extend (H5F_t *f, const char *prefix,
    H5MM_xfree (whole);
    return FAIL;
 }
-      
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_sparse
+ *
+ * Purpose:	Creates a sparse matrix consisting of NBLOCKS randomly placed
+ *		blocks each of size NX,NY,NZ.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, October 22, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
+	     size_t nx, size_t ny, size_t nz)
+{
+   intn		ndims, ctr;
+   char		dims[64], s[256], name[256];
+   size_t	offset[3], size[3];
+   H5G_entry_t	*handle = NULL;
+   H5O_istore_t	istore;
+   uint8	*buf = NULL;
+   
+   if (!nz) {
+      if (!ny) {
+	 ndims = 1;
+	 ny = nz = 1;
+	 sprintf (dims, "%d", nx);
+      } else {
+	 ndims = 2;
+	 nz = 1;
+	 sprintf (dims, "%dx%d", nx, ny);
+      }
+   } else {
+      ndims = 3;
+      sprintf (dims, "%dx%dx%d", nx, ny, nz);
+   }
+
+   sprintf (s, "Testing istore sparse: %s", dims);
+   printf ("%-70s", s);
+   fflush (stdout);
+   buf = H5MM_xmalloc (nx*ny*nz);
+
+   /* Build the new empty object */
+   sprintf (name, "%s_%s", prefix, dims);
+   if (NULL==(handle=new_object (f, name, ndims))) {
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   Cannot create %d-d object `%s'\n", ndims, name);
+      }
+      goto error;
+   }
+   if (NULL==H5O_read (f, H5O_NO_ADDR, handle, H5O_ISTORE, 0, &istore)) {
+      puts ("*FAILED*");
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   Unable to read istore message\n");
+      }
+      goto error;
+   }
+
+   for (ctr=0; ctr<nblocks; ctr++) {
+      offset[0] = rand () % 1000000;
+      offset[1] = rand () % 1000000;
+      offset[2] = rand () % 1000000;
+      size[0] = nx;
+      size[1] = ny;
+      size[2] = nz;
+      memset (buf, 128+ctr, nx*ny*nz);
+
+      /* write to disk */
+      if (H5F_istore_write (f, &istore, offset, size, buf)<0) {
+	 puts ("*FAILED*");
+	 if (!isatty (1)) {
+	    AT ();
+	    printf ("   Write failed: ctr=%d\n", ctr);
+	    printf ("   offset=(%d", offset[0]);
+	    if (ndims>1) printf (",%d", offset[1]);
+	    if (ndims>2) printf (",%d", offset[2]);
+	    printf ("), size=(%d", size[0]);
+	    if (ndims>1) printf (",%d", size[1]);
+	    if (ndims>2) printf (",%d", size[2]);
+	    printf (")\n");
+	 }
+	 goto error;
+      }
+
+      /* We don't test reading yet.... */
+   }
+   
+
+   H5G_close (f, handle);
+   puts (" PASSED");
+   H5MM_xfree (buf);
+   return SUCCEED;
+   
+ error:
+   H5MM_xfree (buf);
+   return FAIL;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -383,37 +496,84 @@ test_extend (H5F_t *f, const char *prefix,
  *-------------------------------------------------------------------------
  */
 int
-main (void)
+main (int argc, char *argv[])
 {
    H5F_t	*f;
    herr_t	status;
    int		nerrors = 0;
+   uintn	size_of_test;
+
+   /* Parse arguments or assume `small' */
+   if (1==argc) {
+      size_of_test = TEST_SMALL;
+   } else {
+      intn i;
+      for (i=1,size_of_test=0; i<argc; i++) {
+	 if (!strcmp (argv[i], "small")) {
+	    size_of_test |= TEST_SMALL;
+	 } else if (!strcmp (argv[i], "medium")) {
+	    size_of_test |= TEST_MEDIUM;
+	 } else {
+	    printf ("unrecognized argument: %s\n", argv[i]);
+	    exit (1);
+	 }
+      }
+   }
+   printf ("Test sizes: ");
+   if (size_of_test & TEST_SMALL) printf (" SMALL");
+   if (size_of_test & TEST_MEDIUM) printf (" MEDIUM");
+   printf ("\n");
+      
    
    /* Create the test file */
-   if (NULL==(f=H5F_open (FILENAME, H5F_ACC_CREAT|H5F_ACC_WRITE|H5F_ACC_TRUNC,
+   if (NULL==(f=H5F_open (H5F_LOW_DFLT, FILENAME,
+			  H5F_ACC_CREAT|H5F_ACC_WRITE|H5F_ACC_TRUNC,
 			  NULL))) {
       printf ("Cannot create file %s; test aborted\n", FILENAME);
       exit (1);
    }
 
-   /*----------------------
-    * INDEXED STORAGE TESTS
-    *---------------------- 
+   /*
+    * Creation test: Creates empty objects with various raw data sizes
+    * and alignments.
     */
-   status = test_create (f, "test_create_1");
+   status = test_create (f, "create");
    nerrors += status<0 ? 1 : 0;
 
-   status = test_extend (f, "test_extend_1", 10, 0, 0);
-   nerrors += status<0 ? 1 : 0;
-   status = test_extend (f, "test_extend_1", 10, 10, 0);
-   nerrors += status<0 ? 1 : 0;
-   status = test_extend (f, "test_extend_1", 10, 10, 10);
-   nerrors += status<0 ? 1 : 0;
+   if (size_of_test & TEST_SMALL) {
+      status = test_extend (f, "extend", 10, 0, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_extend (f, "extend", 10, 10, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_extend (f, "extend", 10, 10, 10);
+      nerrors += status<0 ? 1 : 0;
+   }
+   if (size_of_test & TEST_MEDIUM) {
+      status = test_extend (f, "extend", 10000, 0, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_extend (f, "extend", 2500, 10, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_extend (f, "extend", 10, 400, 10);
+      nerrors += status<0 ? 1 : 0;
+   }
    
+   if (size_of_test & TEST_SMALL) {
+      status = test_sparse (f, "sparse", 100, 5, 0, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_sparse (f, "sparse", 100, 3, 4, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_sparse (f, "sparse", 100, 2, 3, 4);
+      nerrors += status<0 ? 1 : 0;
+   }
+   if (size_of_test & TEST_MEDIUM) {
+      status = test_sparse (f, "sparse", 1000, 30, 0, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_sparse (f, "sparse", 2000, 7, 3, 0);
+      nerrors += status<0 ? 1 : 0;
+      status = test_sparse (f, "sparse", 2000, 4, 2, 3);
+      nerrors += status<0 ? 1 : 0;
+   }
    
-   
-
-
    /* Close the test file and exit */
    H5F_close (f);
    if (nerrors) {

@@ -29,8 +29,8 @@ static hbool_t interface_initialize_g = FALSE;
 
 /* PRIVATE PROTOTYPES */
 static size_t H5F_istore_sizeof_rkey (H5F_t *f, const void *_udata);
-static haddr_t H5F_istore_new (H5F_t *f, void *_lt_key, void *_udata,
-			       void *_rt_key);
+static haddr_t H5F_istore_new_node (H5F_t *f, void *_lt_key, void *_udata,
+				    void *_rt_key);
 static intn H5F_istore_cmp (H5F_t *f, void *_lt_key, void *_udata,
 			    void *_rt_key);
 static herr_t H5F_istore_found (H5F_t *f, haddr_t addr, const void *_lt_key,
@@ -43,10 +43,12 @@ static herr_t H5F_istore_decode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 				     void *_key);
 static herr_t H5F_istore_encode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 				     void *_key);
-static herr_t H5F_istore_copy_hyperslab (H5F_t *f, H5O_istore_t *istore,
-					 H5F_isop_t op, size_t offset_f[],
-					 size_t size[], size_t offset_m[],
-					 size_t size_m[], void *buf);
+static herr_t H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore,
+					 H5F_isop_t op,
+					 const size_t offset_f[],
+					 const size_t size[],
+					 const size_t offset_m[],
+					 const size_t size_m[], void *buf);
 
 
 /*
@@ -79,7 +81,7 @@ H5B_class_t H5B_ISTORE[1] = {{
    H5B_ISTORE_ID,				/*id			*/
    sizeof (H5F_istore_key_t),			/*sizeof_nkey		*/
    H5F_istore_sizeof_rkey,			/*get_sizeof_rkey	*/
-   H5F_istore_new,				/*new			*/
+   H5F_istore_new_node,				/*new			*/
    H5F_istore_cmp,				/*cmp			*/
    H5F_istore_found,				/*found			*/
    H5F_istore_insert,				/*insert		*/
@@ -262,7 +264,7 @@ H5F_istore_cmp (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_istore_new
+ * Function:	H5F_istore_new_node
  *
  * Purpose:	Adds a new entry to an i-storage B-tree.  We can assume that
  *		the domain represented by UDATA doesn't intersect the domain
@@ -281,7 +283,7 @@ H5F_istore_cmp (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5F_istore_new (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
+H5F_istore_new_node (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 {
    H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
    H5F_istore_key_t	*rt_key = (H5F_istore_key_t *)_rt_key;
@@ -289,7 +291,7 @@ H5F_istore_new (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
    size_t		nbytes;
    intn			i;
 
-   FUNC_ENTER (H5F_istore_new, NULL, FAIL);
+   FUNC_ENTER (H5F_istore_new_node, NULL, FAIL);
 
    /* check args */
    assert (f);
@@ -519,9 +521,10 @@ H5F_istore_insert (H5F_t *f, haddr_t addr, H5B_ins_t *parent_ins,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_copy_hyperslab (H5F_t *f, H5O_istore_t *istore, H5F_isop_t op,
-			   size_t offset_f[], size_t size[],
-			   size_t offset_m[], size_t size_m[], void *buf)
+H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
+			   const size_t offset_f[], const size_t size[],
+			   const size_t offset_m[], const size_t size_m[],
+			   void *buf)
 {
    intn			i, carry;
    size_t		idx_cur[H5O_ISTORE_NDIMS];
@@ -542,6 +545,7 @@ H5F_istore_copy_hyperslab (H5F_t *f, H5O_istore_t *istore, H5F_isop_t op,
    /* check args */
    assert (f);
    assert (istore);
+   assert (istore->btree_addr>0);
    assert (istore->ndims>0 && istore->ndims<=H5O_ISTORE_NDIMS);
    assert (H5F_ISTORE_READ==op || H5F_ISTORE_WRITE==op);
    assert (size);
@@ -558,22 +562,6 @@ H5F_istore_copy_hyperslab (H5F_t *f, H5O_istore_t *istore, H5F_isop_t op,
       assert (istore->alignment[i]>0);
    }
 #endif
-
-   /*
-    * Does the B-tree exist?
-    */
-   if (istore->btree_addr<=0) {
-      if (H5F_ISTORE_WRITE==op) {
-	 udata.mesg.ndims = istore->ndims;
-	 if ((istore->btree_addr=H5B_new (f, H5B_ISTORE, &udata))<0) {
-	    /* Can't create B-tree */
-	    HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL);
-	 }
-      } else {
-	 H5V_hyper_fill (istore->ndims, size, size_m, offset_m, buf, 0);
-	 HRETURN (SUCCEED);
-      }
-   }
 
    /* Initialize indices */
    for (i=0; i<istore->ndims; i++) {
@@ -677,8 +665,8 @@ H5F_istore_copy_hyperslab (H5F_t *f, H5O_istore_t *istore, H5F_isop_t op,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_read (H5F_t *f, struct H5O_istore_t *istore,
-		 size_t offset[], size_t size[], void *buf)
+H5F_istore_read (H5F_t *f, const H5O_istore_t *istore,
+		 const size_t offset[], const size_t size[], void *buf)
 {
    FUNC_ENTER (H5F_istore_read, NULL, FAIL);
 
@@ -717,8 +705,8 @@ H5F_istore_read (H5F_t *f, struct H5O_istore_t *istore,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_write (H5F_t *f, struct H5O_istore_t *istore,
-		  size_t offset[], size_t size[], void *buf)
+H5F_istore_write (H5F_t *f, const H5O_istore_t *istore,
+		  const size_t offset[], const size_t size[], void *buf)
 {
    FUNC_ENTER (H5F_istore_write, NULL, FAIL);
 
@@ -738,3 +726,58 @@ H5F_istore_write (H5F_t *f, struct H5O_istore_t *istore,
    FUNC_LEAVE (SUCCEED);
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_new
+ *
+ * Purpose:	Creates a new indexed-storage B-tree and initializes the
+ *		istore struct with information about the storage.  The
+ *		struct should be immediately written to the object header.
+ *
+ *		This function must be called before passing ISTORE to any of
+ *		the other indexed storage functions!
+ *
+ * Return:	Success:	SUCCEED with the ISTORE argument initialized
+ *				and ready to write to an object header.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, October 21, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_new (H5F_t *f, struct H5O_istore_t *istore,
+		uintn ndims, const size_t alignment[])
+{
+   H5F_istore_ud1_t	udata;
+   int			i;
+   
+   FUNC_ENTER (H5F_istore_new, NULL, FAIL);
+
+   /* Check args */
+   assert (f);
+   assert (istore);
+   assert (ndims>0 && ndims<=H5O_ISTORE_NDIMS);
+   assert (alignment);
+#ifndef NDEBUG
+   for (i=0; i<ndims; i++) {
+      assert (alignment[i]>0);
+   }
+#endif
+
+   udata.mesg.ndims = istore->ndims = ndims;
+   if ((istore->btree_addr=H5B_new (f, H5B_ISTORE, &udata))<0) {
+      HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL); /* Can't create B-tree */
+   }
+
+   for (i=0; i<ndims; i++) {
+      istore->alignment[i] = alignment[i];
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}

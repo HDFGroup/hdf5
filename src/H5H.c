@@ -519,7 +519,7 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
    H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *max_fl=NULL;
    off_t	offset = -1;
-   size_t	need, old_size, need_more;
+   size_t	old_size, need_more;
 #ifndef NDEBUG
    static	nmessages = 0;
 #endif
@@ -533,10 +533,6 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
    assert (buf_size>0);
    assert (buf);
 
-   /* allocate aligned file memory */
-   need = buf_size;
-   H5H_ALIGN (need);
-
    if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
    }
@@ -547,12 +543,12 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
     * leave zero or at least H5G_SIZEOF_FREE bytes left over.
     */
    for (fl=heap->freelist; fl; fl=fl->next) {
-      if (fl->size>need && fl->size-need>=H5H_SIZEOF_FREE(f)) {
+      if (fl->size>buf_size && fl->size-buf_size>=H5H_SIZEOF_FREE(f)) {
 	 offset = fl->offset;
-	 fl->offset += need;
-	 fl->size -= need;
+	 fl->offset += buf_size;
+	 fl->size -= buf_size;
 	 break;
-      } else if (fl->size==need) {
+      } else if (fl->size==buf_size) {
 	 offset = fl->offset;
 	 fl = H5H_remove_free (heap, fl);
 	 break;
@@ -570,15 +566,15 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
     */
    if (offset<0) {
 
-      need_more = MAX3 (need, heap->mem_alloc, H5H_SIZEOF_FREE(f));
+      need_more = MAX3 (buf_size, heap->mem_alloc, H5H_SIZEOF_FREE(f));
 
       if (max_fl && max_fl->offset+max_fl->size==heap->mem_alloc) {
 	 /*
 	  * Increase the size of the maximum free block.
 	  */
 	 offset = max_fl->offset;
-	 max_fl->offset += need;
-	 max_fl->size += need_more - need;
+	 max_fl->offset += buf_size;
+	 max_fl->size += need_more - buf_size;
 
 	 if (max_fl->size < H5H_SIZEOF_FREE(f)) {
 #ifndef NDEBUG
@@ -600,18 +596,18 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	  * take some space out of it right away.
 	  */
 	 offset = heap->mem_alloc;
-	 if (need_more-need >= H5H_SIZEOF_FREE(f)) {
+	 if (need_more-buf_size >= H5H_SIZEOF_FREE(f)) {
 	    fl = H5MM_xmalloc (sizeof(H5H_free_t));
-	    fl->offset = heap->mem_alloc + need;
-	    fl->size = need_more - need;
+	    fl->offset = heap->mem_alloc + buf_size;
+	    fl->size = need_more - buf_size;
 	    fl->prev = NULL;
 	    fl->next = heap->freelist;
 	    if (heap->freelist) heap->freelist->prev = fl;
 	    heap->freelist = fl;
 #ifndef NDEBUG
-	 } else if (need_more>need) {
+	 } else if (need_more>buf_size) {
 	    fprintf (stderr, "H5H_insert: lost %d bytes at line %d\n",
-		     need_more-need, __LINE__);
+		     need_more-buf_size, __LINE__);
 	    if (0==nmessages++) {
 	       fprintf (stderr, "Messages from H5H_insert() will go away "
 			"when assertions are turned off.\n");
