@@ -132,6 +132,7 @@ H5F_init(void)
 static herr_t 
 H5F_init_interface(void)
 {
+    size_t      nprops;                 /* Number of properties */
     herr_t	ret_value = SUCCEED;
     herr_t	status;
 
@@ -211,81 +212,65 @@ H5F_init_interface(void)
      * open within the file.
      */
     if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0 ||
-        H5I_init_group(H5I_FILE_CLOSING, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0) {
-            HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
-		       "unable to initialize interface");
-    }
+            H5I_init_group(H5I_FILE_CLOSING, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0)
+        HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface");
    
     /* ========== File Creation Property Class Initialization ============*/ 
     assert(H5P_CLS_FILE_CREATE_g!=-1);
+
     /* Get the pointer to file creation class */
-    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_CREATE_g) ||
-         NULL == (crt_pclass = H5I_object(H5P_CLS_FILE_CREATE_g)))
+    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_CREATE_g) || NULL == (crt_pclass = H5I_object(H5P_CLS_FILE_CREATE_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
-    /* Register the user block size */
-    if(H5P_register(crt_pclass,H5F_CRT_USER_BLOCK_NAME,H5F_CRT_USER_BLOCK_SIZE,
-                    &userblock_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");    
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(crt_pclass,&nprops)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties");
 
-    /* Register the 1/2 rank for symbol table leaf nodes */
-    if(H5P_register(crt_pclass,H5F_CRT_SYM_LEAF_NAME,H5F_CRT_SYM_LEAF_SIZE,
-                    &sym_leaf_k,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops==0) {
+        /* Register the user block size */
+        if(H5P_register(crt_pclass,H5F_CRT_USER_BLOCK_NAME,H5F_CRT_USER_BLOCK_SIZE, &userblock_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");    
 
-    /* Register the 1/2 rank for btree internal nodes */
-    if(H5P_register(crt_pclass,H5F_CRT_BTREE_RANK_NAME,H5F_CRT_BTREE_RANK_SIZE,
-                    btree_k,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+        /* Register the 1/2 rank for symbol table leaf nodes */
+        if(H5P_register(crt_pclass,H5F_CRT_SYM_LEAF_NAME,H5F_CRT_SYM_LEAF_SIZE, &sym_leaf_k,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-    /* Register the byte number for an address */
-    if(H5P_register(crt_pclass,H5F_CRT_ADDR_BYTE_NUM_NAME,
-         H5F_CRT_ADDR_BYTE_NUM_SIZE, &sizeof_addr,NULL,NULL,NULL,NULL,NULL,
-         NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+        /* Register the 1/2 rank for btree internal nodes */
+        if(H5P_register(crt_pclass,H5F_CRT_BTREE_RANK_NAME,H5F_CRT_BTREE_RANK_SIZE, btree_k,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-    /* Register the byte number for object size */
-    if(H5P_register(crt_pclass,H5F_CRT_OBJ_BYTE_NUM_NAME,
-         H5F_CRT_OBJ_BYTE_NUM_SIZE,&sizeof_size,NULL,NULL,NULL,NULL,NULL,
-         NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+        /* Register the byte number for an address */
+        if(H5P_register(crt_pclass,H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &sizeof_addr,NULL,NULL,NULL,NULL,NULL, NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-    /* Register the bootblock version number */
-    if(H5P_register(crt_pclass,H5F_CRT_BOOT_VERS_NAME,H5F_CRT_BOOT_VERS_SIZE,
-                    &bootblock_ver,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+        /* Register the byte number for object size */
+        if(H5P_register(crt_pclass,H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE,&sizeof_size,NULL,NULL,NULL,NULL,NULL, NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-    /* Register the free-space version number */
-    if(H5P_register(crt_pclass,H5F_CRT_FREESPACE_VERS_NAME,
-         H5F_CRT_FREESPACE_VERS_SIZE,&freespace_ver,NULL,NULL,NULL,NULL,NULL,
-         NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+        /* Register the bootblock version number */
+        if(H5P_register(crt_pclass,H5F_CRT_BOOT_VERS_NAME,H5F_CRT_BOOT_VERS_SIZE, &bootblock_ver,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-    /* Register the object directory version number */
-    if(H5P_register(crt_pclass,H5F_CRT_OBJ_DIR_VERS_NAME,
-         H5F_CRT_OBJ_DIR_VERS_SIZE,&objectdir_ver,NULL,NULL,NULL,NULL,NULL,
-         NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+        /* Register the free-space version number */
+        if(H5P_register(crt_pclass,H5F_CRT_FREESPACE_VERS_NAME, H5F_CRT_FREESPACE_VERS_SIZE,&freespace_ver,NULL,NULL,NULL,NULL,NULL, NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-    /* Register the shared-header version number */
-    if(H5P_register(crt_pclass,H5F_CRT_SHARE_HEAD_VERS_NAME,
-         H5F_CRT_SHARE_HEAD_VERS_SIZE, &sharedheader_ver,NULL,NULL,NULL,NULL,
-         NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, 
-                     "can't insert property into class");
+        /* Register the object directory version number */
+        if(H5P_register(crt_pclass,H5F_CRT_OBJ_DIR_VERS_NAME, H5F_CRT_OBJ_DIR_VERS_SIZE,&objectdir_ver,NULL,NULL,NULL,NULL,NULL, NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
-    /* Register the default file creation property list */
-    if((H5P_LST_FILE_CREATE_g = H5Pcreate(H5P_CLS_FILE_CREATE_g))<0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, 
-                     "can't insert property into class");
+        /* Register the shared-header version number */
+        if(H5P_register(crt_pclass,H5F_CRT_SHARE_HEAD_VERS_NAME, H5F_CRT_SHARE_HEAD_VERS_SIZE, &sharedheader_ver,NULL,NULL,NULL,NULL, NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+    } /* end if */
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_FILE_CREATE_g==(-1)) {
+        /* Register the default file creation property list */
+        if((H5P_LST_FILE_CREATE_g = H5P_create_id(crt_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class");
+    } /* end if */
 
     /* Register predefined file drivers */
     H5E_BEGIN_TRY {
@@ -312,94 +297,98 @@ H5F_init_interface(void)
     end_registration: ;
 	} H5E_END_TRY;
 
-    if (status<0) {
-	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-		      "file driver registration failed");
-    }
+    if (status<0)
+	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file driver registration failed");
     
     /* ========== File Access Property Class Initialization ============*/
     assert(H5P_CLS_FILE_ACCESS_g!=-1);
+
     /* Get the pointer to file creation class */
-    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_ACCESS_g) ||
-         NULL == (acs_pclass = H5I_object(H5P_CLS_FILE_ACCESS_g)))
+    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_ACCESS_g) || NULL == (acs_pclass = H5I_object(H5P_CLS_FILE_ACCESS_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
-    /* Register the size of meta data cache(elements) */
-    if(H5P_register(acs_pclass,H5F_ACS_META_CACHE_SIZE_NAME,H5F_ACS_META_CACHE_SIZE_SIZE, &mdc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(acs_pclass,&nprops)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties");
 
-    /* Register the size of raw data chunk cache (elements) */
-    if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME,H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops==0) {
+        /* Register the size of meta data cache(elements) */
+        if(H5P_register(acs_pclass,H5F_ACS_META_CACHE_SIZE_NAME,H5F_ACS_META_CACHE_SIZE_SIZE, &mdc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the size of raw data chunk cache(bytes) */
-    if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME,H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the size of raw data chunk cache (elements) */
+        if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME,H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the preemption for reading chunks */
-    if(H5P_register(acs_pclass,H5F_ACS_PREEMPT_READ_CHUNKS_NAME,H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the size of raw data chunk cache(bytes) */
+        if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME,H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the threshold for alignment */
-    if(H5P_register(acs_pclass,H5F_ACS_ALIGN_THRHD_NAME,H5F_ACS_ALIGN_THRHD_SIZE, &threshold,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the preemption for reading chunks */
+        if(H5P_register(acs_pclass,H5F_ACS_PREEMPT_READ_CHUNKS_NAME,H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the alignment */
-    if(H5P_register(acs_pclass,H5F_ACS_ALIGN_NAME,H5F_ACS_ALIGN_SIZE, &alignment,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the threshold for alignment */
+        if(H5P_register(acs_pclass,H5F_ACS_ALIGN_THRHD_NAME,H5F_ACS_ALIGN_THRHD_SIZE, &threshold,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the minimum metadata allocation block size */
-    if(H5P_register(acs_pclass,H5F_ACS_META_BLOCK_SIZE_NAME,H5F_ACS_META_BLOCK_SIZE_SIZE, &meta_block_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the alignment */
+        if(H5P_register(acs_pclass,H5F_ACS_ALIGN_NAME,H5F_ACS_ALIGN_SIZE, &alignment,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the maximum sieve buffer size */
-    if(H5P_register(acs_pclass,H5F_ACS_SIEVE_BUF_SIZE_NAME,H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the minimum metadata allocation block size */
+        if(H5P_register(acs_pclass,H5F_ACS_META_BLOCK_SIZE_NAME,H5F_ACS_META_BLOCK_SIZE_SIZE, &meta_block_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the garbage collection reference */
-    if(H5P_register(acs_pclass,H5F_ACS_GARBG_COLCT_REF_NAME,H5F_ACS_GARBG_COLCT_REF_SIZE, &gc_ref,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the maximum sieve buffer size */
+        if(H5P_register(acs_pclass,H5F_ACS_SIEVE_BUF_SIZE_NAME,H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the file driver ID */
-    if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_ID_NAME,H5F_ACS_FILE_DRV_ID_SIZE, &driver_id,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
+        /* Register the garbage collection reference */
+        if(H5P_register(acs_pclass,H5F_ACS_GARBG_COLCT_REF_NAME,H5F_ACS_GARBG_COLCT_REF_SIZE, &gc_ref,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the file driver info */
-    if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_INFO_NAME,H5F_ACS_FILE_DRV_INFO_SIZE, &driver_info,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class");
+        /* Register the file driver ID */
+        if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_ID_NAME,H5F_ACS_FILE_DRV_ID_SIZE, &driver_id,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
 
-    /* Register the default file access property list */
+        /* Register the file driver info */
+        if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_INFO_NAME,H5F_ACS_FILE_DRV_INFO_SIZE, &driver_info,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+    } /* end if */
 
-    if((H5P_LST_FILE_ACCESS_g = H5Pcreate(H5P_CLS_FILE_ACCESS_g))<0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, 
-                     "can't insert property into class");
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_FILE_ACCESS_g==(-1)) {
+        /* Register the default file access property list */
+        if((H5P_LST_FILE_ACCESS_g = H5P_create_id(acs_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class");
+    } /* end if */
 
     /* ================ Mount Porperty Class Initialization ==============*/
     assert(H5P_CLS_MOUNT_g!=-1);
+
     /* Get the pointer to file mount class */
-    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_MOUNT_g) ||
-         NULL == (mnt_pclass = H5I_object(H5P_CLS_MOUNT_g)))
+    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_MOUNT_g) || NULL == (mnt_pclass = H5I_object(H5P_CLS_MOUNT_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
-    /* Register property of whether symlinks is local to file */
-    if(H5P_register(mnt_pclass,H5F_MNT_SYM_LOCAL_NAME,H5F_MNT_SYM_LOCAL_SIZE, &local,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                     "can't insert property into class"); 
-    /* Register the default file mount property list */
-    if((H5P_LST_MOUNT_g = H5Pcreate(H5P_CLS_MOUNT_g))<0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL,
-                     "can't insert property into class");
+    /* Get the number of properties in the class */
+    if(H5P_get_nprops_pclass(mnt_pclass,&nprops)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't query number of properties");
+
+    /* Assume that if there are properties in the class, they are the default ones */
+    if(nprops==0) {
+        /* Register property of whether symlinks is local to file */
+        if(H5P_register(mnt_pclass,H5F_MNT_SYM_LOCAL_NAME,H5F_MNT_SYM_LOCAL_SIZE, &local,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class"); 
+    } /* end if */
+
+    /* Only register the default property list if it hasn't been created yet */
+    if(H5P_LST_MOUNT_g==(-1)) {
+        /* Register the default file mount property list */
+        if((H5P_LST_MOUNT_g = H5P_create_id(mnt_pclass))<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class");
+    } /* end if */
 
 done:
     FUNC_LEAVE(ret_value);
@@ -468,30 +457,32 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
 {
     hid_t          driver_id;
     void*          driver_info;
+    H5P_genplist_t *plist;              /* Property list */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER(H5F_acs_create, FAIL);
 
     /* Check argument */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id))
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Retrieve properties */
-    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver ID");
-    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+    if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info");
     
     if(driver_id > 0) {
         /* Increment the reference count on driver and copy driver info */
         H5I_inc_ref(driver_id);
         driver_info = H5FD_fapl_copy(driver_id, driver_info);
+
         /* Set the driver properties for the list */
-        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver ID");
-        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+        if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver info");
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE(ret_value);
@@ -521,13 +512,18 @@ H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
 {
     hid_t      driver_id;
     void       *driver_info;
+    H5P_genplist_t *plist;              /* Property list */
     herr_t     ret_value = SUCCEED;
 
-    /* Can't use FUNC_ENTER when library is shutting down */
+    FUNC_ENTER(H5F_acs_close, FAIL);
 
-    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+    /* Check argument */
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
-    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+    if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
 
     if(driver_id > 0) {
@@ -536,15 +532,14 @@ H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
         H5I_dec_ref(driver_id);
         driver_info = NULL;
         driver_id   = -1;
-        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
 	    HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
-        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+        if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
 	    HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
     }
 
 done:
-    /* Can't use FUNC_LEAVE when library is shutting down */
-    return(ret_value);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -569,27 +564,31 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
 {
     hid_t          driver_id;
     void*          driver_info;
+    H5P_genplist_t *new_plist;              /* New property list */
+    H5P_genplist_t *old_plist;              /* Old property list */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER(H5F_acs_copy, FAIL);
 
-    if(H5I_GENPROP_LST != H5I_get_type(new_fapl_id) || H5I_GENPROP_LST != 
-       H5I_get_type(old_fapl_id))
+    if(H5I_GENPROP_LST != H5I_get_type(new_fapl_id) || H5I_GENPROP_LST != H5I_get_type(old_fapl_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(NULL == (new_plist = H5I_object(new_fapl_id)) || NULL == (old_plist = H5I_object(old_fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
 
-    if(H5P_get(old_fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+    /* Get values from old property list */
+    if(H5P_get(old_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver ID");
-    if(H5P_get(old_fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+    if(H5P_get(old_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info");
     
     if(driver_id > 0) {
         H5I_inc_ref(driver_id);
         driver_info = H5FD_fapl_copy(driver_id, driver_info);
-        if(H5P_set(new_fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver ID");
-        if(H5P_set(new_fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+        if(H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver info");
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE(ret_value);
@@ -640,8 +639,9 @@ herr_t
 H5F_flush_all(hbool_t invalidate)
 {
     FUNC_ENTER(H5F_flush_all, FAIL);
-    H5I_search(H5I_FILE, (H5I_search_func_t)H5F_flush_all_cb,
-	       (void*)&invalidate);
+
+    H5I_search(H5I_FILE,(H5I_search_func_t)H5F_flush_all_cb,(void*)&invalidate);
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -668,10 +668,10 @@ herr_t
 H5F_close_all(void)
 {
     FUNC_ENTER(H5F_close_all, FAIL);
-    if (H5I_clear_group(H5I_FILE, FALSE)<0) {
-	HRETURN_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL,
-		      "unable to close one or more files");
-    }
+
+    if (H5I_clear_group(H5I_FILE, FALSE)<0)
+	HRETURN_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to close one or more files");
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -727,7 +727,7 @@ H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l)
  * Modifications:
  *
  * 	Robb Matzke, 18 Feb 1998
- *	Calls H5P_copy() to copy the property list and H5P_close() to free
+ *	Calls H5P_copy_plist() to copy the property list and H5P_close() to free
  *	that property list if an error occurs.
  *
  *	Raymond Lu, Oct 14, 2001
@@ -739,22 +739,23 @@ hid_t
 H5Fget_create_plist(hid_t file_id)
 {
     H5F_t		*file = NULL;
-    hid_t		ret_value = FAIL;
+    H5P_genplist_t *plist;              /* Property list */
+    hid_t		ret_value = SUCCEED;
 
     FUNC_ENTER(H5Fget_create_plist, FAIL);
     H5TRACE1("i","i",file_id);
 
     /* check args */
-    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(file=H5I_object(file_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
-    }
+    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(file=H5I_object(file_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+    if(NULL == (plist = H5I_object(file->shared->fcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     
     /* Create the property list object to return */
-    if((ret_value=H5Pcopy(file->shared->fcpl_id)) < 0) {
-	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		      "unable to copy file creation properties");
-    }
+    if((ret_value=H5P_copy_plist(plist)) < 0)
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties");
     
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -784,70 +785,53 @@ hid_t
 H5Fget_access_plist(hid_t file_id)
 {
     H5F_t		*f = NULL;
-    hid_t		ret_value = FAIL;
+    H5P_genplist_t *new_plist;              /* New property list */
+    H5P_genplist_t *old_plist;              /* Old property list */
+    hid_t		ret_value = SUCCEED;
     
     FUNC_ENTER(H5Fget_access_plist, FAIL);
     H5TRACE1("i","i",file_id);
 
     /* Check args */
-    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(f=H5I_object(file_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
-    }
+    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(f=H5I_object(file_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
     /* Make a copy of the default file access property list */
-    if((ret_value=H5Pcopy(H5P_LST_FILE_ACCESS_g)) < 0)
-	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, 
-                      "can't copy file access property list");
+    if(NULL == (old_plist = H5I_object(H5P_LST_FILE_ACCESS_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if((ret_value=H5P_copy_plist(old_plist)) < 0)
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list");
+    if(NULL == (new_plist = H5I_object(ret_value)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Copy properties of the file access property list */
-    if(H5P_set(ret_value, H5F_ACS_META_CACHE_SIZE_NAME, 
-               &(f->shared->mdc_nelmts)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set meta data cache size");
-    if(H5P_set(ret_value, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, 
-               &(f->shared->rdcc_nelmts)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set data cache element size");
-    if(H5P_set(ret_value, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, 
-               &(f->shared->rdcc_nbytes)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set data cache byte size");
+    if(H5P_set(new_plist, H5F_ACS_META_CACHE_SIZE_NAME, &(f->shared->mdc_nelmts)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data cache size");
+    if(H5P_set(new_plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &(f->shared->rdcc_nelmts)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache element size");
+    if(H5P_set(new_plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache byte size");
 
-    if(H5P_set(ret_value, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, 
-               &(f->shared->rdcc_w0)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set preempt read chunks");
-    if(H5P_set(ret_value, H5F_ACS_ALIGN_THRHD_NAME,
-               &(f->shared->threshold)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set alignment threshold");
-    if(H5P_set(ret_value, H5F_ACS_ALIGN_NAME, 
-               &(f->shared->alignment)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set alignment");
+    if(H5P_set(new_plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &(f->shared->rdcc_w0)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set preempt read chunks");
+    if(H5P_set(new_plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment threshold");
+    if(H5P_set(new_plist, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment");
 
-    if(H5P_set(ret_value, H5F_ACS_GARBG_COLCT_REF_NAME, 
-               &(f->shared->gc_ref)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set garbage collect reference");
-    if(H5P_set(ret_value, H5F_ACS_META_BLOCK_SIZE_NAME, 
-               &(f->shared->lf->def_meta_block_size)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set meta data cache size");
-    if(H5P_set(ret_value, H5F_ACS_SIEVE_BUF_SIZE_NAME, 
-               &(f->shared->sieve_buf_size)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't sieve buffer size");
+    if(H5P_set(new_plist, H5F_ACS_GARBG_COLCT_REF_NAME, &(f->shared->gc_ref)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set garbage collect reference");
+    if(H5P_set(new_plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(f->shared->lf->def_meta_block_size)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data cache size");
+    if(H5P_set(new_plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't sieve buffer size");
 
-    if(H5P_set(ret_value, H5F_ACS_FILE_DRV_ID_NAME, 
-               &(f->shared->lf->driver_id)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set file driver ID");
-    if(H5P_set(ret_value, H5F_ACS_FILE_DRV_INFO_NAME, 
-               H5FD_fapl_get(f->shared->lf)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set file driver info");
+    if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID");
+    if(H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, H5FD_fapl_get(f->shared->lf)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info");
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1037,13 +1021,12 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 #ifdef H5_HAVE_PARALLEL
     hid_t       driver_id = -1;
 #endif /* H5_HAVE_PARALLEL */
+    H5P_genplist_t *plist;              /* Property list */
  
     FUNC_ENTER(H5F_new, NULL);
 
-    if (NULL==(f=H5FL_ALLOC(H5F_t,1))) {
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		    "memory allocation failed");
-    }
+    if (NULL==(f=H5FL_ALLOC(H5F_t,1)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (shared) {
 	f->shared = shared;
@@ -1061,49 +1044,33 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 */
         if(H5P_DEFAULT == fcpl_id)
             fcpl_id = H5P_FILE_CREATE_DEFAULT;
-        if(H5I_GENPROP_LST != H5I_get_type(fcpl_id) ||
-            TRUE != H5Pisa_class(fcpl_id, H5P_FILE_CREATE))
+        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE) || NULL == (plist = H5I_object(fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
-        f->shared->fcpl_id = H5Pcopy(fcpl_id);
+        f->shared->fcpl_id = H5P_copy_plist(plist);
 
 
         if(H5P_DEFAULT == fapl_id)
             fapl_id = H5P_FILE_ACCESS_DEFAULT;
-        if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-            TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, 
-                          "not file access property list");
+        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list");
 
-        if(H5P_get(fapl_id, H5F_ACS_META_CACHE_SIZE_NAME, 
-                   &(f->shared->mdc_nelmts)) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                          "can't get meta data cache size");  
-        if(H5P_get(fapl_id, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, 
-                   &(f->shared->rdcc_nelmts)) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                          "can't get data cache element size");  
-        if(H5P_get(fapl_id, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, 
-                   &(f->shared->rdcc_nbytes)) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                          "can't get data cache cache size");  
-        if(H5P_get(fapl_id, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, 
-                   &(f->shared->rdcc_w0)) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                          "can't get preempt read chunk");
+        if(H5P_get(plist, H5F_ACS_META_CACHE_SIZE_NAME, &(f->shared->mdc_nelmts)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get meta data cache size");  
+        if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &(f->shared->rdcc_nelmts)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache element size");  
+        if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache cache size");  
+        if(H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &(f->shared->rdcc_w0)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get preempt read chunk");
   
-        if(H5P_get(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold))<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                          "can't get alignment threshold");  
-        if(H5P_get(fapl_id, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");  
-        if(H5P_get(fapl_id, H5F_ACS_GARBG_COLCT_REF_NAME,&(f->shared->gc_ref))<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                          "can't get garbage collect reference");  
-        if(H5P_get(fapl_id, H5F_ACS_SIEVE_BUF_SIZE_NAME, 
-                   &(f->shared->sieve_buf_size)) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                          "can't get sieve buffer size");  
-
+        if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold))<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold");  
+        if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");  
+        if(H5P_get(plist, H5F_ACS_GARBG_COLCT_REF_NAME,&(f->shared->gc_ref))<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get garbage collect reference");  
+        if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size");  
 
 #ifdef H5_HAVE_PARALLEL
 	/*
@@ -1111,8 +1078,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * does not permit caching.  (maybe able to relax it for
 	 * read only open.)
 	 */
-        if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
 	if (H5FD_MPIO==driver_id){
 	    f->shared->rdcc_nbytes = 0;
 	    f->shared->mdc_nelmts = 0;
@@ -1124,23 +1091,22 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * The cache might be created with a different number of elements and
 	 * the access property list should be updated to reflect that.
 	 */
-	if ((n=H5AC_create(f, f->shared->mdc_nelmts))<0) {
-	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
-			  "unable to create meta data cache");
-	}
+	if ((n=H5AC_create(f, f->shared->mdc_nelmts))<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache");
 	f->shared->mdc_nelmts = n;
 	
 	/* Create the chunk cache */
 	H5F_istore_init(f);
-    }
+    } /* end else */
     
     f->shared->nrefs++;
     f->nrefs = 1;
     ret_value = f;
 
- done:
+done:
     if (!ret_value && f) {
-	if (!shared) H5FL_FREE(H5F_file_t,f->shared);
+	if (!shared)
+            H5FL_FREE(H5F_file_t,f->shared);
 	H5FL_FREE(H5F_t,f);
     }
     
@@ -1205,19 +1171,17 @@ H5F_dest(H5F_t *f)
 	    }
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
 
-        /* Free the data sieve buffer, if it's been allocated */
-        if(f->shared->sieve_buf) {
-            assert(f->shared->sieve_dirty==0);    /* The buffer had better be flushed... */
-            f->shared->sieve_buf = H5MM_xfree (f->shared->sieve_buf);
-        } /* end if */
+            /* Free the data sieve buffer, if it's been allocated */
+            if(f->shared->sieve_buf) {
+                assert(f->shared->sieve_dirty==0);    /* The buffer had better be flushed... */
+                f->shared->sieve_buf = H5MM_xfree (f->shared->sieve_buf);
+            } /* end if */
 
 	    /* Destroy file creation properties */
             if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id)) 
-                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, 
-                            "not a property list");
-            if((ret_value=H5Pclose(f->shared->fcpl_id)) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, 
-                            "can't close property list");
+                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list");
+            if((ret_value=H5I_dec_ref(f->shared->fcpl_id)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list");
 
 	    /* Destroy shared file struct */
 	    if (H5FD_close(f->shared->lf)<0) {
@@ -1355,6 +1319,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     size_t              sizeof_size = 0;
     unsigned            sym_leaf_k = 0;
     int                 btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;              /* Property list */
     
     FUNC_ENTER(H5F_open, NULL);
 
@@ -1385,21 +1350,17 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	tent_flags = flags;
     }
     if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-	if (tent_flags == flags) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to open file");
-	}
+	if (tent_flags == flags)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
 	H5E_clear();
 	tent_flags = flags;
-	if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to open file");
-	}
-    }
+	if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
+    } /* end if */
 
     /* Is the file already open? */
     if ((file=H5I_search(H5I_FILE, H5F_equal, lf)) ||
-	(file=H5I_search(H5I_FILE_CLOSING, H5F_equal, lf))) {
+            (file=H5I_search(H5I_FILE_CLOSING, H5F_equal, lf))) {
 	/*
 	 * The file is already open, so use that one instead of the one we
 	 * just opened. We only one one H5FD_t* per file so one doesn't
@@ -1412,18 +1373,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	H5FD_close(lf);
 	if (flags & H5F_ACC_TRUNC) {
 	    file = NULL; /*to prevent destruction of wrong file*/
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to truncate a file which is already open");
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to truncate a file which is already open");
 	}
 	if (flags & H5F_ACC_EXCL) {
 	    file = NULL; /*to prevent destruction of wrong file*/
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"file exists");
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file exists");
 	}
 	if ((flags & H5F_ACC_RDWR) && 0==(file->intent & H5F_ACC_RDWR)) {
 	    file = NULL; /*to prevent destruction of wrong file*/
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"file is already open for read-only");
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only");
 	}
 	file = H5F_new(file->shared, fcpl_id, fapl_id);
 	lf = file->shared->lf;
@@ -1436,12 +1394,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	H5FD_close(lf);
 	if (NULL==(lf=H5FD_open(name, flags, fapl_id, HADDR_UNDEF))) {
 	    file = NULL; /*to prevent destruction of wrong file*/
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to open file");
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
 	}
 	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id)))
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to create new file object");
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object");
 	file->shared->flags = flags;
 	file->shared->lf = lf;
     } else {
@@ -1450,8 +1406,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	 * above is good enough.
 	 */
 	if (NULL==(file = H5F_new(NULL, fcpl_id, fapl_id)))
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to create new file object");
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object");
 	file->shared->flags = flags;
 	file->shared->lf = lf;
     }
@@ -1469,6 +1424,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     file->intent = flags;
     file->name = H5MM_xstrdup(name);
 
+    /* Get the shared file creation property list */
+    if(NULL == (plist = H5I_object(shared->fcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get property list");
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1479,36 +1438,25 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	 * which we have already insured is a proper size.  The base address
 	 * is set to the same thing as the superblock for now.
 	 */
-        if(H5P_get(shared->fcpl_id, H5F_CRT_USER_BLOCK_NAME, &userblock_size) 
-            < 0)
-            HRETURN_ERROR(H5E_FILE, H5E_CANTGET, NULL, 
-                          "unable to get user block size");
+        if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get user block size");
         shared->boot_addr = userblock_size;
 	shared->base_addr = shared->boot_addr;
 	shared->consist_flags = 0x03;
-	if (H5F_flush(file, H5F_SCOPE_LOCAL, FALSE, TRUE)<0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
-			"unable to write file superblock");
-	}
+	if (H5F_flush(file, H5F_SCOPE_LOCAL, FALSE, TRUE)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock");
 
 	/* Create and open the root group */
-	if (H5G_mkroot(file, NULL)<0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
-			"unable to create/open root group");
-	}
+	if (H5G_mkroot(file, NULL)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group");
 	
     } else if (1==shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
-	if (HADDR_UNDEF==(shared->boot_addr=H5F_locate_signature(lf))) {
-	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
-			"unable to find file signature");
-	}
+	if (HADDR_UNDEF==(shared->boot_addr=H5F_locate_signature(lf)))
+	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "unable to find file signature");
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size)<0 ||
-	    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, 
-                      shared->boot_addr, fixed_size, buf)<0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL,
-			"unable to read superblock");
-	}
+                H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, shared->boot_addr, fixed_size, buf)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock");
 
 	/* Signature, already checked */
 	p = buf + H5F_SIGNATURE_LEN;
@@ -1516,31 +1464,23 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	/* Superblock version */
         boot_vers = *p++;
         if(HDF5_BOOTBLOCK_VERSION != boot_vers) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, 
-                        "bad superblock version number");
-        if(H5P_set(shared->fcpl_id, H5F_CRT_BOOT_VERS_NAME, &boot_vers) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to set boot version");
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad superblock version number");
+        if(H5P_set(plist, H5F_CRT_BOOT_VERS_NAME, &boot_vers) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set boot version");
 
 	/* Freespace version */
         freespace_vers = *p++;
         if(HDF5_FREESPACE_VERSION != freespace_vers) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, 
-                        "bad free space version number");
-        if(H5P_set(shared->fcpl_id, H5F_CRT_FREESPACE_VERS_NAME, 
-            &freespace_vers)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to free space version");        
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad free space version number");
+        if(H5P_set(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to free space version");        
 
 	/* Root group version number */
         obj_dir_vers = *p++;
         if(HDF5_OBJECTDIR_VERSION != obj_dir_vers) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, 
-                        "bad object directory version number");
-        if(H5P_set(shared->fcpl_id, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers)
-            < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to set object directory version");
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad object directory version number");
+        if(H5P_set(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set object directory version");
 
 	/* reserved */
 	p++;
@@ -1548,60 +1488,44 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	/* Shared header version number */
         share_head_vers = *p++;
         if(HDF5_SHAREDHEADER_VERSION != share_head_vers) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, 
-                        "bad shared-header format version number");
-        if(H5P_set(shared->fcpl_id, H5F_CRT_SHARE_HEAD_VERS_NAME, 
-            &share_head_vers) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to set shared-header format version");
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad shared-header format version number");
+        if(H5P_set(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set shared-header format version");
 
 	/* Size of file addresses */
         sizeof_addr = *p++;
 	if (sizeof_addr != 2 && sizeof_addr != 4 &&
-	    sizeof_addr != 8 && sizeof_addr != 16 && sizeof_addr != 32) {
-	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
-                        "bad byte number in an address");
-	}        
-        if(H5P_set(shared->fcpl_id, H5F_CRT_ADDR_BYTE_NUM_NAME,&sizeof_addr)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to set byte number in an address");
+                sizeof_addr != 8 && sizeof_addr != 16 && sizeof_addr != 32)
+	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad byte number in an address");
+        if(H5P_set(plist, H5F_CRT_ADDR_BYTE_NUM_NAME,&sizeof_addr)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number in an address");
 
 	/* Size of file sizes */
         sizeof_size = *p++;
 	if (sizeof_size != 2 && sizeof_size != 4 &&
-	    sizeof_size != 8 && sizeof_size != 16 && sizeof_size != 32) {
-	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
-                        "bad byte number for object size");
-	}        
-        if(H5P_set(shared->fcpl_id, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to set byte number for object size");
+                sizeof_size != 8 && sizeof_size != 16 && sizeof_size != 32)
+	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad byte number for object size");
+        if(H5P_set(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number for object size");
 	
 	/* Reserved byte */
 	p++;
 
 	/* Various B-tree sizes */
 	UINT16DECODE(p, sym_leaf_k);
-	if(sym_leaf_k < 1) {
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL,
-			"bad symbol table leaf node 1/2 rank");
-	}
-        if(H5P_set(shared->fcpl_id, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to set rank for symbol table leaf nodes");
+	if(sym_leaf_k < 1)
+	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "bad symbol table leaf node 1/2 rank");
+        if(H5P_set(plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for symbol table leaf nodes");
 
 	/* Need 'get' call to set other array values */
-        if(H5P_get(shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                        "unable to get rank for btree internal nodes");        
+        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes");        
 	UINT16DECODE(p, btree_k[H5B_SNODE_ID]);
-	if(btree_k[H5B_SNODE_ID] < 1) {
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL,
-			"bad 1/2 rank for btree internal nodes");
-	}
-        if(H5P_set(shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
-                        "unable to set rank for btree internal nodes");
+	if(btree_k[H5B_SNODE_ID] < 1)
+	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "bad 1/2 rank for btree internal nodes");
+        if(H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for btree internal nodes");
 
 	/* File consistency flags. Not really used yet */
 	UINT32DECODE(p, shared->consist_flags);
@@ -1615,36 +1539,27 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 			H5G_SIZEOF_ENTRY(file);		/*root group ptr*/
 	assert(variable_size<=sizeof(buf));
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size+variable_size)<0 ||
-	    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, shared->boot_addr+fixed_size,
-		      variable_size, buf)<0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to read superblock");
-	}
+                H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, shared->boot_addr+fixed_size, variable_size, buf)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read superblock");
 	p = buf;
 	H5F_addr_decode(file, &p, &(shared->base_addr)/*out*/);
 	H5F_addr_decode(file, &p, &(shared->freespace_addr)/*out*/);
 	H5F_addr_decode(file, &p, &stored_eoa/*out*/);
 	H5F_addr_decode(file, &p, &(shared->driver_addr)/*out*/);
-	if (H5G_ent_decode(file, &p, &root_ent/*out*/)<0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to read root symbol entry");
-	}
+	if (H5G_ent_decode(file, &p, &root_ent/*out*/)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root symbol entry");
 
 	/* Decode the optional driver information block */
 	if (H5F_addr_defined(shared->driver_addr)) {
 	    haddr_t drv_addr = shared->base_addr + shared->driver_addr;
 	    if (H5FD_set_eoa(lf, drv_addr+16)<0 ||
-		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr, 16, buf)<0) {
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			    "unable to read driver information block");
-	    }
+                    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr, 16, buf)<0)
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read driver information block");
 	    p = buf;
 
 	    /* Version number */
-	    if (HDF5_DRIVERINFO_VERSION!=*p++) {
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			    "bad driver information block version number");
-	    }
+	    if (HDF5_DRIVERINFO_VERSION!=*p++)
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad driver information block version number");
 
 	    /* Reserved */
 	    p += 3;
@@ -1658,59 +1573,47 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 	    /* Read driver information and decode */
 	    if (H5FD_set_eoa(lf, drv_addr+16+driver_size)<0 ||
-		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr+16, driver_size, buf)<0) {
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			    "unable to read file driver information");
-	    }
-	    if (H5FD_sb_decode(lf, driver_name, buf)<0) {
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			    "unable to decode driver information");
-	    }
-	}
+                    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr+16, driver_size, buf)<0)
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file driver information");
+	    if (H5FD_sb_decode(lf, driver_name, buf)<0)
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information");
+	} /* end if */
 	
 	/* Make sure we can open the root group */
-	if (H5G_mkroot(file, &root_ent)<0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to read root group");
-	}
+	if (H5G_mkroot(file, &root_ent)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group");
 
 	/*
 	 * The user-defined data is the area of the file before the base
 	 * address.
 	 */
-        if(H5P_set(shared->fcpl_id, H5F_CRT_USER_BLOCK_NAME, &(shared->base_addr))
-           < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL,
-                        "unable to set usr block size");
+        if(H5P_set(plist, H5F_CRT_USER_BLOCK_NAME, &(shared->base_addr)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set usr block size");
 
 	/*
 	 * Make sure that the data is not truncated. One case where this is
 	 * possible is if the first file of a family of files was opened
 	 * individually.
 	 */
-        if (HADDR_UNDEF==(eof=H5FD_get_eof(lf))) {
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                        "unable to determine file size");
-        }
-        if (eof<stored_eoa) {
+        if (HADDR_UNDEF==(eof=H5FD_get_eof(lf)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine file size");
+        if (eof<stored_eoa)
             HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file");
-        }
         
 	/*
 	 * Tell the file driver how much address space has already been
 	 * allocated so that it knows how to allocated additional memory.
 	 */
-	if (H5FD_set_eoa(lf, stored_eoa)<0) {
-	    HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			  "unable to set end-of-address marker for file");
-	}
+	if (H5FD_set_eoa(lf, stored_eoa)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to set end-of-address marker for file");
     }
 
     /* Success */
     ret_value = file;
 
- done:
-    if (!ret_value && file) H5F_dest(file);
+done:
+    if (!ret_value && file)
+        H5F_dest(file);
     FUNC_LEAVE(ret_value);
 }
 
@@ -1781,32 +1684,24 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     H5TRACE4("i","sIuii",filename,flags,fcpl_id,fapl_id);
 
     /* Check/fix arguments */
-    if (!filename || !*filename) {
+    if (!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name");
-    }
-    if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG)) {
+    if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
-    }
-    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC)) {
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		     "mutually exclusive flags for file creation");
-    }
+    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation");
 
     /* Check file creation property list */
     if(H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(fcpl_id) ||
-        TRUE != H5Pisa_class(fcpl_id, H5P_FILE_CREATE))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not file create property list");
+    if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list");
 
     /* Check the file access property list */
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not file access property list");
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list");
 
     /*
      * Adjust bit flags by turning on the creation bit and making sure that
@@ -1821,18 +1716,16 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     /*
      * Create a new file or truncate an existing file.
      */
-    if (NULL==(new_file=H5F_open(filename, flags, fcpl_id, fapl_id))) {
+    if (NULL==(new_file=H5F_open(filename, flags, fcpl_id, fapl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
-    }
     
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5I_FILE, new_file))<0) {
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		    "unable to atomize file");
-    }
+    if ((ret_value = H5I_register(H5I_FILE, new_file))<0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file");
 
-  done:
-    if (ret_value<0 && new_file) H5F_close(new_file);
+done:
+    if (ret_value<0 && new_file)
+        H5F_close(new_file);
     FUNC_LEAVE(ret_value);
 }
 
@@ -1887,33 +1780,27 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     H5TRACE3("i","sIui",filename,flags,fapl_id);
 
     /* Check/fix arguments. */
-    if (!filename || !*filename) {
+    if (!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name");
-    }
     if ((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
-	(flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL)) {
+            (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags");
-    }
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-       TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not file access property list");
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list");
 
     /* Open the file */
-    if (NULL==(new_file=H5F_open(filename, flags, H5P_DEFAULT, fapl_id))) {
+    if (NULL==(new_file=H5F_open(filename, flags, H5P_DEFAULT, fapl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file");
-    }
 
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5I_FILE, new_file))<0) {
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		    "unable to atomize file handle");
-    }
+    if ((ret_value = H5I_register(H5I_FILE, new_file))<0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle");
 
- done:
-    if (ret_value<0 && new_file) H5F_close(new_file);
+done:
+    if (ret_value<0 && new_file)
+        H5F_close(new_file);
     FUNC_LEAVE(ret_value);
 }
 
@@ -2068,7 +1955,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
                         obj_dir_vers, share_head_vers,
                         btree_k[H5B_NUM_BTREE_ID];
     unsigned            sym_leaf_k;
-    
+    H5P_genplist_t *plist;              /* Property list */
     
     FUNC_ENTER(H5F_flush, FAIL);
 	
@@ -2078,68 +1965,56 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
      * once for read-only and once for read-write, and then calling
      * H5F_flush() with the read-only handle, still causes data to be flushed.
      */
-    if (0 == (H5F_ACC_RDWR & f->shared->flags)) {
+    if (0 == (H5F_ACC_RDWR & f->shared->flags))
 	HRETURN(SUCCEED);
-    }
 
     /* Flush other stuff depending on scope */
     if (H5F_SCOPE_GLOBAL==scope) {
-	while (f->mtab.parent) f = f->mtab.parent;
+	while (f->mtab.parent)
+            f = f->mtab.parent;
 	scope = H5F_SCOPE_DOWN;
     }
     if (H5F_SCOPE_DOWN==scope) {
 	for (i=0; i<f->mtab.nmounts; i++) {
-	    if (H5F_flush(f->mtab.child[i].file, scope, invalidate, FALSE)<0) {
+	    if (H5F_flush(f->mtab.child[i].file, scope, invalidate, FALSE)<0)
 		nerrors++;
-	    }
 	}
     }
 
     /* flush the data sieve buffer, if we have a dirty one */
     if(!alloc_only && f->shared->sieve_buf && f->shared->sieve_dirty) {
         /* Write dirty data sieve buffer to file */
-        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, H5P_DATASET_XFER_DEFAULT, f->shared->sieve_buf)<0) {
-            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-              "block write failed");
-        }
+        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, H5P_DATASET_XFER_DEFAULT, f->shared->sieve_buf)<0)
+            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
 
         /* Reset sieve buffer dirty flag */
         f->shared->sieve_dirty=0;
     } /* end if */
 
     /* flush the entire raw data cache */
-    if (!alloc_only && H5F_istore_flush (f, invalidate)<0) {
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-		      "unable to flush raw data cache");
-    }
+    if (!alloc_only && H5F_istore_flush (f, invalidate)<0)
+	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache");
     
     /* flush (and invalidate) the entire meta data cache */
-    if (!alloc_only && H5AC_flush(f, NULL, HADDR_UNDEF, invalidate)<0) {
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-		      "unable to flush meta data cache");
-    }
+    if (!alloc_only && H5AC_flush(f, NULL, HADDR_UNDEF, invalidate)<0)
+	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
 
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_BOOT_VERS_NAME, &boot_vers) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "unable to get boot block version");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_FREESPACE_VERS_NAME, 
-        &freespace_vers) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                      "unable to get free space version");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) 
-        < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "unable to get object directory version");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_SHARE_HEAD_VERS_NAME, 
-        &share_head_vers) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "unable to get shared-header format version");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "unable to get rank for symbol table leaf nodes");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "unable to get rank for btree internal nodes");
+    /* Get the shared file creation property list */
+    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, &boot_vers) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get boot block version");
+    if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get free space version");
+    if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get object directory version");
+    if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get shared-header format version");
+    if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for symbol table leaf nodes");
+    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for btree internal nodes");
 
     /* encode the file boot block */
     p = sbuf;
@@ -2183,14 +2058,12 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	UINT32ENCODE(p, driver_size-16);
 
 	/* Encode driver-specific data */
-	if (H5FD_sb_encode(f->shared->lf, driver_name, dbuf+16)<0) {
-	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-			  "unable to encode driver information");
-	}
+	if (H5FD_sb_encode(f->shared->lf, driver_name, dbuf+16)<0)
+	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information");
 
 	/* Driver name */
 	HDmemcpy(dbuf+8, driver_name, 8);
-    }
+    } /* end if */
 
     if (alloc_only) {
 	/*
@@ -2204,24 +2077,17 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 				  (f->shared->base_addr +
 				   superblock_size +
 				   driver_size));
-	if (HADDR_UNDEF==addr) {
-	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-			  "unable to allocate file space for userblock "
-			  "and/or superblock");
-	}
-	if (0!=addr) {
-	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-			  "file driver failed to allocate userblock "
-			  "and/or superblock at address zero");
-	}
+	if (HADDR_UNDEF==addr)
+	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate file space for userblock and/or superblock");
+	if (0!=addr)
+	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file driver failed to allocate userblock and/or superblock at address zero");
 	
 	/*
 	 * The file driver information block begins immediately after the
 	 * superblock.
 	 */
-	if (driver_size>0) {
+	if (driver_size>0)
 	    f->shared->driver_addr = superblock_size;
-	}
 	
     } else {
 	/* Write superblock */
@@ -2229,11 +2095,8 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	if (IS_H5FD_MPIO(f))
 	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
-	if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, f->shared->boot_addr,
-		       superblock_size, sbuf)<0) {
-	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-			  "unable to write superblock");
-	}
+	if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, f->shared->boot_addr, superblock_size, sbuf)<0)
+	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock");
 
 	/* Write driver information block */
 	if (HADDR_UNDEF!=f->shared->driver_addr) {
@@ -2242,21 +2105,19 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 		H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
 	    if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT,
-			   f->shared->base_addr+superblock_size, driver_size,
-			   dbuf)<0) {
-		HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-			      "unable to write driver information block");
-	    }
-	}
-    }
+                       f->shared->base_addr+superblock_size, driver_size, dbuf)<0)
+		HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write driver information block");
+	} /* end if */
+    } /* end else */
 
     /* Flush file buffers to disk */
-    if (!alloc_only && H5FD_flush(f->shared->lf)<0) {
+    if (!alloc_only && H5FD_flush(f->shared->lf)<0)
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
-    }
 
     /* Check flush errors for children - errors are already on the stack */
-    if (nerrors) HRETURN(FAIL);
+    if (nerrors)
+        HRETURN(FAIL);
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2485,27 +2346,23 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     assert(name && *name);
     assert(child);
 
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-        TRUE != H5Pisa_class(plist_id, H5P_MOUNT))
+    if(TRUE != H5P_isa_class(plist_id, H5P_MOUNT))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
 
     /*
      * Check that the child isn't mounted, that the mount point exists, and
      * that the mount wouldn't introduce a cycle in the mount tree.
      */
-    if (child->mtab.parent) {
+    if (child->mtab.parent)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted");
-    }
-    if (NULL==(mount_point=H5G_open(loc, name))) {
+    if (NULL==(mount_point=H5G_open(loc, name)))
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found");
-    }
+
     parent = H5G_fileof(mount_point);
     mp_ent = H5G_entof(mount_point);
     for (ancestor=parent; ancestor; ancestor=ancestor->mtab.parent) {
-	if (ancestor==child) {
-	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL,
-			"mount would introduce a cycle");
-	}
+	if (ancestor==child)
+	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle");
     }
     
     /*
@@ -2763,28 +2620,22 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     H5TRACE4("e","isii",loc_id,name,child_id,plist_id);
 
     /* Check arguments */
-    if (NULL==(loc=H5G_loc(loc_id))) {
+    if (NULL==(loc=H5G_loc(loc_id)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
+    if (!name || !*name)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
     if (H5I_FILE!=H5I_get_type(child_id) ||
-	NULL==(child=H5I_object(child_id))) {
+            NULL==(child=H5I_object(child_id)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
-    }
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_MOUNT_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-        TRUE != H5Pisa_class(plist_id, H5P_MOUNT))
+    if(TRUE != H5P_isa_class(plist_id, H5P_MOUNT))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
     
 
     /* Do the mount */
-    if (H5F_mount(loc, name, child, plist_id)<0) {
-	HRETURN_ERROR(H5E_FILE, H5E_MOUNT, FAIL,
-		      "unable to mount file");
-    }
+    if (H5F_mount(loc, name, child, plist_id)<0)
+	HRETURN_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -2868,22 +2719,16 @@ H5Freopen(hid_t file_id)
     FUNC_ENTER(H5Freopen, FAIL);
     H5TRACE1("i","i",file_id);
 
-    if (H5I_FILE!=H5I_get_type(file_id) ||
-	NULL==(old_file=H5I_object(file_id))) {
+    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(old_file=H5I_object(file_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
-    }
-    if (NULL==(new_file=H5F_new(old_file->shared, H5P_DEFAULT, H5P_DEFAULT))) {
+    if (NULL==(new_file=H5F_new(old_file->shared, H5P_DEFAULT, H5P_DEFAULT)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file");
-    }
-    if ((ret_value=H5I_register(H5I_FILE, new_file))<0) {
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		    "unable to atomize file handle");
-    }
+    if ((ret_value=H5I_register(H5I_FILE, new_file))<0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle");
 
- done:
-    if (ret_value<0 && new_file) {
+done:
+    if (ret_value<0 && new_file)
 	H5F_close(new_file);
-    }
     FUNC_LEAVE(ret_value);
 }
 
@@ -2938,12 +2783,19 @@ size_t
 H5F_sizeof_addr(const H5F_t *f)
 {
     size_t sizeof_addr = 0;
+    H5P_genplist_t *plist;              /* Property list */
 
     FUNC_ENTER(H5F_sizeof_addr, 0);
+
     assert(f);
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, 
-                      "can't get byte number for address");
+
+    /* Get property list */
+    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, UFAIL, "not a property list");
+
+    if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, "can't get byte number for address");
+
     FUNC_LEAVE(sizeof_addr);
 }
 
@@ -2971,14 +2823,19 @@ size_t
 H5F_sizeof_size(const H5F_t *f)
 {
     size_t   sizeof_size = 0;
+    H5P_genplist_t *plist;              /* Property list */
 
     FUNC_ENTER(H5F_sizeof_size, 0);
 
     assert(f);
 
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, 
-                      "can't get byte number for object size");
+    /* Get property list */
+    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, UFAIL, "not a property list");
+
+    if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, "can't get byte number for object size");
+
     FUNC_LEAVE(sizeof_size);
 }
 
@@ -3274,6 +3131,7 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
     unsigned sym_leaf_k;
     size_t  sizeof_addr, sizeof_size;
     int     boot_vers, freespace_vers, obj_dir_vers, share_head_vers;
+    H5P_genplist_t *plist;              /* Property list */
 
     FUNC_ENTER(H5F_debug, FAIL);
 
@@ -3284,37 +3142,30 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get user block size");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get rank for symbol table leaf nodes");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get rank for btree nodes");
+    /* Get property list */
+    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get byte number for an address");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get byte number for object size");
+    if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size");
+    if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
+    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree nodes");
 
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_BOOT_VERS_NAME, &boot_vers)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get boot block version");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_FREESPACE_VERS_NAME, 
-               &freespace_vers)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get boot block version");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get object directory version");
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_SHARE_HEAD_VERS_NAME,
-               &share_head_vers)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get shared-header format version");
+    if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address");
+    if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object size");
+
+    if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, &boot_vers)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get boot block version");
+    if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get boot block version");
+    if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version");
+    if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header format version");
 
     /* debug */
     HDfprintf(stream, "%*sFile Boot Block...\n", indent, "");
