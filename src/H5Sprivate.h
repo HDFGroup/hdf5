@@ -241,7 +241,10 @@ H5_DLL herr_t H5S_hyper_add_span_element(H5S_t *space, unsigned rank,
     hssize_t *coords);
 H5_DLL herr_t H5S_hyper_reset_scratch(H5S_t *space);
 H5_DLL herr_t H5S_hyper_convert(H5S_t *space);
+#ifdef LATER
 H5_DLL htri_t H5S_hyper_intersect (H5S_t *space1, H5S_t *space2);
+#endif /* LATER */
+H5_DLL htri_t H5S_hyper_intersect_block (const H5S_t *space, hssize_t *start, hssize_t *end);
 H5_DLL herr_t H5S_hyper_adjust(H5S_t *space, const hssize_t *offset);
 H5_DLL herr_t H5S_hyper_move(H5S_t *space, const hssize_t *offset);
 H5_DLL herr_t H5S_hyper_normalize_offset(H5S_t *space);

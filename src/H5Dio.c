@@ -2669,13 +2669,13 @@ done:
 static herr_t 
 H5D_create_chunk_file_map_hyper(const fm_map *fm)
 {
-    H5S_t       *tmp_fspace=NULL;           /* Temporary file dataspace */
     hssize_t    sel_points;                 /* Number of elements in file selection */
     hssize_t    sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
     hssize_t    sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     hssize_t    start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
     hssize_t    coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
     hsize_t     count[H5O_LAYOUT_NDIMS];    /* Hyperslab count information */
+    hssize_t    end[H5O_LAYOUT_NDIMS];      /* Current coordinates of chunk */
     hsize_t     chunk_index;                /* Index of chunk */
     int         curr_dim;                   /* Current dimension to increment */
     unsigned    u;                          /* Local index variable */
@@ -2686,16 +2686,12 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
     /* Sanity check */
     assert(fm->f_ndims>0);
 
-    /* Make a copy of file dataspace */
-    if((tmp_fspace = H5S_copy(fm->file_space))==NULL)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
-
     /* Get number of elements selected in file */
-    if((sel_points=H5S_get_select_npoints(tmp_fspace))<0)
+    if((sel_points=H5S_get_select_npoints(fm->file_space))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
 
     /* Get bounding box for selection (to reduce the number of chunks to iterate over) */
-    if(H5S_get_select_bounds(tmp_fspace, sel_start, sel_end)<0)
+    if(H5S_get_select_bounds(fm->file_space, sel_start, sel_end)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
     /* Set initial chunk location & hyperslab size */
@@ -2704,11 +2700,8 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
         start_coords[u]=(sel_start[u]/(hssize_t)fm->layout->dim[u])*(hssize_t)fm->layout->dim[u];
         coords[u]=start_coords[u];
         count[u]=fm->layout->dim[u];
+        end[u]=(coords[u]+count[u])-1;
     } /* end for */
-
-    /* Select initial chunk as hyperslab */
-    if(H5S_select_hyperslab(tmp_fspace,H5S_SELECT_SET,coords,NULL,count,NULL)<0) /*lint !e772 The coords and count arrays should always be initialized */
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't create hyperslab selection")
 
     /* Calculate the index of this chunk */
     if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
@@ -2717,7 +2710,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
     /* Iterate through each chunk in the dataset */
     while(sel_points) {
         /* Check for intersection of temporary chunk and file selection */
-        if(H5S_hyper_intersect(tmp_fspace,fm->file_space)==TRUE) {
+        if(H5S_hyper_intersect_block(fm->file_space,coords,end)==TRUE) {
             H5S_t *tmp_fchunk;                  /* Temporary file dataspace */
             H5D_chunk_info_t *new_chunk_info; /* chunk information to insert into tree */
             hssize_t    chunk_points;           /* Number of elements in chunk selection */
@@ -2797,6 +2790,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
         /* Increment chunk location in fastest changing dimension */
         H5_CHECK_OVERFLOW(count[curr_dim],hsize_t,hssize_t);
         coords[curr_dim]+=(hssize_t)count[curr_dim];
+        end[curr_dim]+=(hssize_t)count[curr_dim];
 
         /* Bring chunk location back into bounds, if necessary */
         if(coords[curr_dim]>sel_end[curr_dim]) {
@@ -2809,22 +2803,16 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
 
                 /* Increment chunk location in current dimension */
                 coords[curr_dim]+=(hssize_t)count[curr_dim];
+                end[curr_dim]=(coords[curr_dim]+(hssize_t)count[curr_dim])-1;
             } while(coords[curr_dim]>sel_end[curr_dim]);
 
             /* Re-Calculate the index of this chunk */
             if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
         } /* end if */
-
-        /* Move template chunk's offset to current location of chunk */
-        if(H5S_hyper_move(tmp_fspace,coords)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't move chunk selection")
     } /* end while */
 
 done:
-    if(tmp_fspace)
-        if(H5S_close(tmp_fspace)<0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file dataspace copy")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_create_chunk_file_map_hyper() */
 
