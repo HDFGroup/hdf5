@@ -797,7 +797,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 17 size[0] = 100;   /*size of hyperslab*/
 18 size[1] = 200;
 19 file_space = H5Dget_space (dataset);
-20 H5Sset_hyperslab (file_space, 2, offset, size);
+20 H5Sselect_hyperslab (file_space, H5S_SELECT_SET, offset, NULL, size, NULL);
 21 
 22 /*
 23  * Describe the memory data space.
@@ -810,7 +810,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 30 offset[1] = 0;
 31 size[0] = 100;  /*size of hyperslab*/
 32 size[1] = 200;
-33 H5Sset_hyperslab (mem_space, 2, offset, size);
+33 H5Sselect_hyperslab (mem_space, H5S_SELECT_SET, offset, NULL, size, NULL);
 34 
 35 /*
 36  * Read the dataset.
@@ -928,7 +928,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 
 <!-- Created: Tue Dec  2 09:17:09 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  7 April 2000
+Last modified:  2 March 2001
 <!-- hhmts end -->
 
 <br>
