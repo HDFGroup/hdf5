@@ -125,7 +125,7 @@ int make_szip(hid_t loc_id)
   pixels_per_block must be an even number, and <= pixels_per_scanline 
   and <= MAX_PIXELS_PER_BLOCK
   */
- szip_pixels_per_block=16;
+ szip_pixels_per_block=10;
  
  /* create a space */
  if((sid = H5Screate_simple(RANK, dims, NULL))<0)
