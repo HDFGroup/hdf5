@@ -4,6 +4,10 @@
 #include <mfhdf.h>
 #include <hdf5.h>
 
+#ifdef HAVE_SYS_STAT_H
+#   include <sys/stat.h>
+#endif
+
 /*
  * Copyright © 1998 NCSA
  *                  All rights reserved.
