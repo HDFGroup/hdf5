@@ -38,10 +38,10 @@ Configuration:
 --------------
 The following flags have been added to the configuration script:
 --enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface
---enable-mpe            Enable MPE instrumentation [default=no]
 --enable-filters=all    Turn on all internal I/O filters. One may also
                         specify a comma-separated list of filters or the
                         word no. The default is all internal I/O filters.
+--with-mpe=DIR          Use MPE instrumentation [default=no]
 --with-szlib=DIR        Use szlib library for external szlib I/O filter
                         [default=no]
 
@@ -90,7 +90,7 @@ Library:
       KY-2003/04/01
     * Added Fletcher32 checksum as a filter in pipeline.  It only works in 
       chunked dataset.  SLU - 2003/2/11
-    * MPICH/MPE instrumentation feature added.  Use --enable-mpe to configure
+    * MPICH/MPE instrumentation feature added.  Use --with-mpe[=DIR] to configure
       it.  AKC - 2003/1/3
     * New functions H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx 
       are added to the library.  SLU - 2002/11/25
