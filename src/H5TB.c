@@ -1,7 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
- * Copyright (C) 2000-2001 NCSA
- *		           All rights reserved.
- *
  * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
  *	       Saturday, April 22, 2000
  *
@@ -9,11 +20,13 @@
  *      Extended from (added threads to) Knuth 6.2.3, Algorithm A (AVL trees)
  *      Basic tree structure by Adel'son-Vel'skii and Landis
  *
- * These routines are designed to allow use of a general-purpose balanced tree
- * implimentation.  These trees are appropriate for maintaining in memory one
- * or more lists of items, each list sorted according to key values (key values
- * must form a "completely ordered set") where no two items in a single list
- * can have the same key value.  The following operations are supported:
+ * These routines are designed to allow use of a general-purpose balanced
+ * tree implimentation.  These trees are appropriate for maintaining in
+ * memory one or more lists of items, each list sorted according to key
+ * values (key values must form a "completely ordered set") where no two
+ * items in a single list can have the same key value.  The following
+ * operations are supported:
+ *
  *     Create an empty list
  *     Add an item to a list
  *     Look up an item in a list by key value
@@ -21,32 +34,36 @@
  *     Delete an item from a list
  *     Find the first/last/next/previous item in a list
  *     Destroy a list
- * Each of the above operations requires Order(log(N)) time where N is the
- * number of items in the list (except for list creation which requires
- * constant time and list destruction which requires Order(N) time if the user-
- * supplied free-data-item or free-key-value routines require constant time).
- * Each of the above operations (except create and destroy) can be performed
- * on a subtree.
  *
- * Each node of a tree has associated with it a generic pointer (void *) which
- * is set to point to one such "item" and a generic pointer to point to that
- * item's "key value".  The structure of the items and key values is up to the
- * user to define.  The user must specify a method for comparing key values.
- * This routine takes three arguments, two pointers to key values and a third
- * integer argument.  You can specify a routine that expects pointers to "data
- * items" rather than key values in which case the pointer to the key value in
- * each node will be set equal to the pointer to the data item.
+ * Each of the above operations requires Order(log(N)) time where N is
+ * the number of items in the list (except for list creation which
+ * requires constant time and list destruction which requires Order(N)
+ * time if the user- supplied free-data-item or free-key-value routines
+ * require constant time).  Each of the above operations (except create
+ * and destroy) can be performed on a subtree.
  *
- * Since the "data item" pointer is the first field of each tree node, these
- * routines may be used without this "tbbt.h" file.  For example, assume "ITM"
- * is the structre definition for the data items you want to store in lists:
+ * Each node of a tree has associated with it a generic pointer (void *)
+ * which is set to point to one such "item" and a generic pointer to
+ * point to that item's "key value".  The structure of the items and key
+ * values is up to the user to define.  The user must specify a method
+ * for comparing key values.  This routine takes three arguments, two
+ * pointers to key values and a third integer argument.  You can specify
+ * a routine that expects pointers to "data items" rather than key values
+ * in which case the pointer to the key value in each node will be set
+ * equal to the pointer to the data item.
+ *
+ * Since the "data item" pointer is the first field of each tree node,
+ * these routines may be used without this "tbbt.h" file.  For example,
+ * assume "ITM" is the structre definition for the data items you want to
+ * store in lists:
+ *
  * ITM ***H5TB_dmake( int (*cmp)(void *,void *,int), int arg );
  * ITM **root= NULL;        (* How to create an empty tree w/o H5TB_dmake() *)
  * ITM **H5TB_dfind( ITM ***tree, void *key, ITM ***pp );
  * ITM **H5TB_find( ITM **root, void *key, int (*cmp)(), int arg, ITM ***pp );
  * ITM **H5TB_dless( ITM ***tree, void *key, ITM ***pp );
  * ITM **H5TB_less( ITM **root, void *key, int (*cmp)(), int arg, ITM ***pp );
- * ITM **H5TB_indx( ITM **root, long indx );
+ * ITM **H5TB_index( ITM **root, long indx );
  * ITM **H5TB_dins( ITM ***tree, ITM *item, void *key );
  * ITM **H5TB_ins( ITM ***root, ITM *item, void *key, int (*cmp)(), int arg );
  * ITM *H5TB_rem( ITM ***root, ITM **node, void **kp );
@@ -102,11 +119,11 @@ static int		interface_initialize_g = 0;
  * (H5TB_dfind, H5TB_dins, H5TB_dfree) on them.
  * Examples:
  *     int keycmp();
- *     H5TB_ROOT *root= H5TB_dmake( keycmp, (int)keysiz , 0);
+ *     H5TB_TREE *tree = H5TB_dmake( keycmp, (int)keysiz , 0);
  * or
- *     void *root= H5TB_dmake( strcmp, 0 , 0);
+ *     void *tree= H5TB_dmake( strcmp, 0 , 0);
  * or
- *     void *root= H5TB_dmake( keycmp, (int)keysiz , H5TB_FAST_HADDR_COMPARE);
+ *     void *tree= H5TB_dmake( keycmp, (int)keysiz , H5TB_FAST_HADDR_COMPARE);
  * or
  *     H5TB_NODE *root= NULL;        (* Don't use H5TB_d* routines *)
  *
@@ -124,10 +141,10 @@ static int		interface_initialize_g = 0;
  * kind of assumption).  You can also use a key comparison routine that expects
  * pointers to data items rather than key values.
  *
- *  The "fast compare" option is for keys of simple numeric types (currently
- *      haddr_t and int) and avoids the function call for faster searches in
- *      some cases.  The key comparison routine is still required for some
- *      insertion routines which use it.
+ * The "fast compare" option is for keys of simple numeric types
+ * (currently haddr_t and int) and avoids the function call for faster
+ * searches in some cases.  The key comparison routine is still required
+ * for some insertion routines which use it.
  *
  * Most of the other routines expect a pointer to a root node of a tree, not
  * a pointer to the tree's control structure (only H5TB_dfind(), H5TB_dins(),
