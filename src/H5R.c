@@ -611,7 +611,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, void *_ref)
     file=loc->file;
 
     /* Get the dataspace with the correct region selected */
-    if ((space=H5R_get_region(file,H5AC_dxpl_id,ref_type,_ref))==NULL)
+    if ((space=H5R_get_region(file,H5AC_ind_dxpl_id,ref_type,_ref))==NULL)
         HGOTO_ERROR (H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
 
     /* Atomize */
@@ -869,7 +869,7 @@ H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
     file=loc->file;
 
     /* Get the object information */
-    if ((ret_value=H5R_get_obj_type(file,H5AC_dxpl_id,ref_type,_ref))<0)
+    if ((ret_value=H5R_get_obj_type(file,H5AC_ind_dxpl_id,ref_type,_ref))<0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
     
 done:

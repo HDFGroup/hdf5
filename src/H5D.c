@@ -980,7 +980,7 @@ herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Read data space address and return */
-    if(FAIL==(ret_value=H5D_get_space_status(dset, allocation, H5AC_dxpl_id)))
+    if(FAIL==(ret_value=H5D_get_space_status(dset, allocation, H5AC_ind_dxpl_id)))
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status");
 
 done:
@@ -3638,7 +3638,7 @@ H5Dget_storage_size(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset");
 
     /* Set return value */
-    ret_value = H5D_get_storage_size(dset,H5AC_dxpl_id);
+    ret_value = H5D_get_storage_size(dset,H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);

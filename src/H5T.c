@@ -5910,7 +5910,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no conversion function specified");
 
     /* Go register the function */
-    if(H5T_register(pers,name,src,dst,func,H5AC_dxpl_id)<0)
+    if(H5T_register(pers,name,src,dst,func,H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register conversion function");
 
 done:
@@ -6040,7 +6040,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     if (dst_id>0 && (NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst is not a data type");
 
-    if (H5T_unregister(pers,name,src,dst,func,H5AC_dxpl_id)<0)
+    if (H5T_unregister(pers,name,src,dst,func,H5AC_ind_dxpl_id)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "internal unregister function failed");
 
 done:
@@ -6086,7 +6086,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "no address to receive cdata pointer");
     
     /* Find it */
-    if (NULL==(path=H5T_path_find(src, dst, NULL, NULL, H5AC_dxpl_id)))
+    if (NULL==(path=H5T_path_find(src, dst, NULL, NULL, H5AC_ind_dxpl_id)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "conversion function not found");
 
     if (pcdata)

@@ -1113,7 +1113,7 @@ H5Aget_num_attrs(hid_t loc_id)
     }
 
     /* Look up the attribute for the object */
-    ret_value=H5O_count(ent, H5O_ATTR, H5AC_dxpl_id);
+    ret_value=H5O_count(ent, H5O_ATTR, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1158,7 +1158,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
 
 done:
     FUNC_LEAVE_API(ret_value);
-}
+} /* H5Arename() */
 
 
 /*-------------------------------------------------------------------------

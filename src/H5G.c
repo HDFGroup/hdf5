@@ -424,7 +424,7 @@ H5Gget_num_objs(hid_t group_id, hsize_t *num_objs)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "nil pointer");
 
     /* Call private function. */
-    ret_value = H5G_get_num_objs(group, num_objs, H5AC_dxpl_id);
+    ret_value = H5G_get_num_objs(group, num_objs, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -471,13 +471,13 @@ H5Gget_objname_by_idx(hid_t group_id, hsize_t idx, char *name, size_t size)
     if (!name)   
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "nil pointer for name");
         
-    if (H5G_get_num_objs(group, &num_objs, H5AC_dxpl_id)<0)
+    if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
     if(idx >= num_objs)    
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
         
     /*call private function*/
-    ret_value = H5G_get_objname_by_idx(group, idx, name, size, H5AC_dxpl_id);
+    ret_value = H5G_get_objname_by_idx(group, idx, name, size, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -515,13 +515,13 @@ H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
     if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
         
-    if (H5G_get_num_objs(group, &num_objs, H5AC_dxpl_id)<0)
+    if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
     if(idx >= num_objs)    
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
         
     /*call private function*/
-    ret_value = H5G_get_objtype_by_idx(group, idx, H5AC_dxpl_id);
+    ret_value = H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -736,7 +736,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
     /* Get info */
-    if (H5G_get_objinfo (loc, name, follow_link, statbuf, H5AC_dxpl_id)<0)
+    if (H5G_get_objinfo (loc, name, follow_link, statbuf, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object");
 
 done:
@@ -778,7 +778,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
     /* Get the link value */
-    if (H5G_linkval (loc, name, size, buf, H5AC_dxpl_id)<0)
+    if (H5G_linkval (loc, name, size, buf, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value");
 
 done:
@@ -864,7 +864,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
     if (bufsize>0 && !buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified");
 
-    if ((ret_value=H5G_get_comment(loc, name, bufsize, buf, H5AC_dxpl_id))<0)
+    if ((ret_value=H5G_get_comment(loc, name, bufsize, buf, H5AC_ind_dxpl_id))<0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get comment value");
 
 done:

@@ -1390,7 +1390,7 @@ H5Fis_hdf5(const char *name)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file");
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    ret_value = (HADDR_UNDEF!=H5F_locate_signature(file, H5AC_dxpl_id));
+    ret_value = (HADDR_UNDEF!=H5F_locate_signature(file, H5AC_ind_dxpl_id));
 
 done:
     /* Close the file */
