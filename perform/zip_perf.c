@@ -89,6 +89,7 @@ static const char *option_prefix;
 static char *filename;
 static int compress_level = Z_DEFAULT_COMPRESSION;
 static int output, random_test = FALSE;
+static int report_once_flag;
 
 /* internal functions */
 static void error(const char *fmt, ...);
@@ -193,6 +194,11 @@ write_file(Bytef *source, uLongf sourceLen)
         error("out of memory");
 
     compress_buffer(dest, &destLen, source, sourceLen);
+
+    if (report_once_flag) {
+        printf("\tCompression Ratio: %g\n", ((double)destLen) / sourceLen);
+        report_once_flag = 0;
+    }
 
     d_ptr = dest;
     d_len = destLen;
@@ -462,6 +468,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         if (output == -1)
             error(strerror(errno));
 
+        report_once_flag = 1;
 
         for (total_len = 0; total_len < file_size; total_len += src_len)
             write_file(src, src_len);
@@ -537,13 +544,20 @@ main(int argc, char **argv)
         error("minmum buffer size (%d) exceeds maximum buffer size (%d)",
               min_buf_size, max_buf_size);
 
+    printf("Filesize: %ld\n", file_size);
+
+    if (compress_level == Z_DEFAULT_COMPRESSION)
+        printf("Compression Level: 6\n");
+    else
+        printf("Compression Level: %d\n", compress_level);
+
     get_unique_name();
     do_write_test(file_size, min_buf_size, max_buf_size);
     cleanup();
     return EXIT_SUCCESS;
 }
 
-#else /* H5_HAVE_ZLIB_H */
+#else
 
 /*
  * Function:    main
