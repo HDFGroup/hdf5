@@ -707,13 +707,13 @@ void perf(p_time *perf_t, double start_t, double end_t)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
         MPI_Barrier(MPI_COMM_WORLD);
 
-        MPI_Reduce(&t, &reduced_t, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0,
+        MPI_Reduce(&t, &reduced_t, 1, MPI_DOUBLE, MPI_SUM, 0,
                 MPI_COMM_WORLD);
         reduced_t /= mpi_size;
         
-        MPI_Reduce(&t, &t_max, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0,
+        MPI_Reduce(&t, &t_max, 1, MPI_DOUBLE, MPI_MAX, 0,
                 MPI_COMM_WORLD);
-        MPI_Reduce(&t, &t_min, 1, MPI_DOUBLE_PRECISION, MPI_MIN, 0,
+        MPI_Reduce(&t, &t_min, 1, MPI_DOUBLE, MPI_MIN, 0,
                 MPI_COMM_WORLD);
 
         if (MAINPROCESS) {
