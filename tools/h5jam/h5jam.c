@@ -32,7 +32,7 @@ hsize_t compute_user_block_size (hsize_t);
 hsize_t copy_some_to_file (int, int, hsize_t, hsize_t, ssize_t);
 void parse_command_line (int, const char *[]);
 
-const char *progname = "jam";
+const char *progname = "h5jam";
 int d_status = EXIT_SUCCESS;
 int do_clobber = FALSE;
 char *output_file = NULL;
