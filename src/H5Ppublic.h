@@ -239,8 +239,13 @@ __DLL__ herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/);
 __DLL__ herr_t H5Pset_meta_block_size(hid_t fapl_id, size_t size);
 __DLL__ herr_t H5Pget_meta_block_size(hid_t fapl_id, size_t *size/*out*/);
 #endif /* H5_WANT_H5_V1_4_COMPAT */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+__DLL__ herr_t H5Pset_sieve_buf_size(hid_t fapl_id, hsize_t size);
+__DLL__ herr_t H5Pget_sieve_buf_size(hid_t fapl_id, hsize_t *size/*out*/);
+#else /* H5_WANT_H5_V1_4_COMPAT */
 __DLL__ herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
 __DLL__ herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 __DLL__ herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
 __DLL__ herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 

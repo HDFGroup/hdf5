@@ -3540,7 +3540,7 @@ H5Pset_meta_block_size(hid_t plist_id, hsize_t _size)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pset_meta_block_size, FAIL);
-    H5TRACE2("e","iz",plist_id,size);
+    H5TRACE2("e","iz",plist_id,_size);
 
     /* Check args */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
@@ -3587,7 +3587,7 @@ H5Pget_meta_block_size(hid_t plist_id, hsize_t *_size/*out*/)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pget_meta_block_size, FAIL);
-    H5TRACE2("e","ix",plist_id,size);
+    H5TRACE2("e","ix",plist_id,_size);
 
     /* Check args */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
@@ -3711,6 +3711,113 @@ done:
 }
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_sieve_buf_size
+ *
+ * Purpose:	Sets the maximum size of the data seive buffer used for file
+ *      drivers which are capable of using data sieving.  The data sieve
+ *      buffer is used when performing I/O on datasets in the file.  Using a
+ *      buffer which is large anough to hold several pieces of the dataset
+ *      being read in for hyperslab selections boosts performance by quite a
+ *      bit.
+ *      
+ *		The default value is set to 64KB, indicating that file I/O for raw data
+ *      reads and writes will occur in at least 64KB blocks.
+ *      Setting the value to 0 with this API function will turn off the
+ *      data sieving, even if the VFL driver attempts to use that strategy.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, September 21, 2000
+ *
+ * Modifications:
+ *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_sieve_buf_size(hid_t plist_id, hsize_t _size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    size_t size=(size_t)_size;  /* Work around size difference */
+    herr_t ret_value=SUCCEED;   /* return value */
+    
+    FUNC_ENTER (H5Pset_sieve_buf_size, FAIL);
+    H5TRACE2("e","iz",plist_id,_size);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sieve buffer size");
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5Pset_sieve_buf_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_sieve_buf_size
+ *
+ * Purpose:	Returns the current settings for the data sieve buffer size
+ *      property from a file access property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, September 21, 2000
+ *
+ * Modifications:
+ *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_sieve_buf_size(hid_t plist_id, hsize_t *_size/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    size_t size;                /* Work around size difference */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5Pget_sieve_buf_size, FAIL);
+    H5TRACE2("e","ix",plist_id,_size);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get values */
+    if (_size) {
+        if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sieve buffer size");
+        *_size=size;
+    } /* end if */
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5Pget_sieve_buf_size() */
+#else /* H5_WANT_H5_V1_4_COMPAT */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_sieve_buf_size
@@ -3812,6 +3919,7 @@ H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
 done:
     FUNC_LEAVE(ret_value);
 } /* end H5Pget_sieve_buf_size() */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------
