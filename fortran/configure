@@ -1955,7 +1955,7 @@ done
 
 if test -n "$F9XMODFLAG"; then
   echo $F9XMODFLAG 1>&6
-  FFLAGS="$(F9XMODFLAG). $(F9XMODFLAG)../src $FFLAGS"
+  FFLAGS="$F9XMODFLAG. $F9XMODFLAG../src $FFLAGS"
 else
   echo unknown 1>&6
 fi
