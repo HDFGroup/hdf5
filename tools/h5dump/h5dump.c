@@ -2532,7 +2532,7 @@ parse_start:
             do {
                 switch ((char)opt) {
                 case 's': free(s->start); s->start = parse_hsize_list(opt_arg); break;
-                case 'T': free(s->stride); s->stride = parse_hsize_list(opt_arg); break;
+                case 'S': free(s->stride); s->stride = parse_hsize_list(opt_arg); break;
                 case 'c': free(s->count); s->count = parse_hsize_list(opt_arg); break;
                 case 'k': free(s->block); s->block = parse_hsize_list(opt_arg); break;
                 default: goto end_collect;
@@ -2715,7 +2715,7 @@ main(int argc, const char *argv[])
     info.dset_table = dset_table;
     info.status = d_status;
 
-    if (doxml) {
+    If (doxml) {
 	/* initialize XML */
 	thefile = fid;
 
