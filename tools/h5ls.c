@@ -2162,6 +2162,7 @@ main (int argc, char *argv[])
 	}
 	if (file<0) {
 	    fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
+            continue;
 	}
 	if (oname) oname++;
 	if (!oname || !*oname) oname = root_name;
