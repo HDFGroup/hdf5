@@ -1,42 +1,48 @@
 	    Installation instructions for Parallel HDF5
 	    -------------------------------------------
 
+
 1. Overview
 -----------
-This file contains instructions for the installation of parallel
-HDF5.  Platforms supported by this release are SGI Origin 2000,
-IBM SP2, and the Intel TFLOP.  The steps are kind of unnatural and
-will be more automized in the next release.   If you have difficulties
-installing the software in your system, please send mail to
-	hdfparallel@ncsa.uiuc.edu
-In your mail, please enclose the output of "uname -a".  Also attach the
-content of "config.log" if you have run the "configure" command.
 
-First, you must obtain and unpack the HDF5 source as
-described in the file INSTALL.  You also need to obtain the
-information of the include and library paths of MPI and MPIO
-software installed in your system since the parallel HDF5 library
-uses them for parallel I/O access.
+This file contains instructions for the installation of parallel
+HDF5. Platforms supported by this release are SGI Origin 2000, IBM SP2,
+Intel TFLOPs, and Linux version 2.4 and greater. The steps are kind of
+unnatural and will be more automized in the next release. If you have
+difficulties installing the software in your system, please send mail to
+
+	hdfparallel@ncsa.uiuc.edu
+
+In your mail, please include the output of "uname -a". Also attach the
+content of "config.log" if you ran the "configure" command.
+
+First, you must obtain and unpack the HDF5 source as described in the
+INSTALL file. You also need to obtain the information of the include and
+library paths of MPI and MPIO software installed in your system since the
+parallel HDF5 library uses them for parallel I/O access.
 
 
 2. Quick Instruction for known systems
 --------------------------------------
+
 The following shows particular steps to run the parallel HDF5
-configure for a few machines we tested.  If your particular platform
+configure for a few machines we've tested. If your particular platform
 is not shown or somehow the steps do not work for yours, please go
-to the next section for more detail explanations.
+to the next section for more detailed explanations.
 
 ------
 TFLOPS
 ------
-follow the instuctions in INSTALL_TFLOPS.
+
+Follow the instuctions in INSTALL_TFLOPS.
 
 -------
 IBM SP2
 -------
+
 First of all, make sure your environment variables are set correctly
-to compile and execute single process mpi applications for the SP2
-machine.  They should be the same or comparable to the following.
+to compile and execute a single process mpi applications for the SP2
+machine. They should be similar to the following:
 
     setenv CC              mpcc_r
     setenv MP_PROCS         1
@@ -46,19 +52,21 @@ machine.  They should be the same or comparable to the following.
     setenv RUNPARALLEL      "MP_PROCS=2 MP_TASKS_PER_NODE=2 poe"
     setenv LLNL_COMPILE_SINGLE_THREADED TRUE
 
-The shared library configuration for this version is broken.
-So, only static library is supported.
-An error for powerpc-ibm-aix4.3.2.0 (LLNL Blue) about install method
-is discovered after code freeze.  You need to remove the following
-line from config/powerpc-ibm-aix4.3.2.0 before configuration.
+The shared library configuration for this version is broken. So, only
+static library is supported.
+
+An error for powerpc-ibm-aix4.3.2.0's (LLNL Blue) install method was
+discovered after the code freeze. You need to remove the following line
+from config/powerpc-ibm-aix4.3.2.0 before configuration:
+
     ac_cv_path_install=${ac_cv_path_install='cp -r'}
 
 Then do the following steps:
 
-./configure --disable-shared --prefix=<install-directory>
-make		# build the library
-make check	# verify the correctness
-make install
+    $ ./configure --disable-shared --prefix=<install-directory>
+    $ make		# build the library
+    $ make check	# verify the correctness
+    $ make install
 
 
 ---------------
@@ -82,10 +90,9 @@ make install
 ---------------
 SGI Origin 2000
 Cray T3E
-(where MPI-IO is not part of system MPI library or I want to
-use my own version of MPIO)
+(where MPI-IO is not part of system MPI library or I want to use my own
+ version of MPIO)
 ---------------
-
 
 mpi1_inc=""                                     #mpi-1 include
 mpi1_lib=""                                     #mpi-1 library
@@ -111,42 +118,53 @@ make check
 make install
 
 
+---------------
+Linux 2.4 and greater
+---------------
+
+Be sure that your installation of MPICH was configured with the following
+configuration command-line option:
+
+    -cflags="-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+
+This allows for >2GB sized files on Linux systems and is only available
+with Linux kernels 2.4 and greater.
+
+
 3. Detail explanation
 ---------------------
-The HDF5 library can be configured to use MPI and MPI-IO for
-parallelizm on a distributed multi-processor system. The easy
-way to do this is to have a properly installed parallel
-compiler (e.g., MPICH's mpicc or IBM's mpcc) and supply that
-executable as the value of the CC environment variable:
+
+The HDF5 library can be configured to use MPI and MPI-IO for parallelism
+on a distributed multi-processor system. The easiest way to do this is to
+have a properly installed parallel compiler (e.g., MPICH's mpicc or IBM's
+mpcc) and supply that executable as the value of the CC environment
+variable:
 
     $ CC=mpcc ./configure
     $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-If no such wrapper script is available then you must specify
-your normal C compiler along with the distribution of
-MPI/MPI-IO which is to be used (values other than `mpich' will 
-be added at a later date):
+If no such wrapper script is available then you must specify your normal
+C compiler along with the distribution of MPI/MPI-IO which is to be used
+(values other than `mpich' will be added at a later date):
 
     $ ./configure --enable-parallel=mpich
 
-If the MPI/MPI-IO include files and/or libraries cannot be
-found by the compiler then their directories must be given as
-arguments to CPPFLAGS and/or LDFLAGS:
+If the MPI/MPI-IO include files and/or libraries cannot be found by the
+compiler then their directories must be given as arguments to CPPFLAGS
+and/or LDFLAGS:
 
     $ CPPFLAGS=-I/usr/local/mpi/include \
       LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
       ./configure --enable-parallel=mpich
 
-If a parallel library is being built then configure attempts
-to determine how to run a parallel application on one
-processor and on many processors.  If the compiler is mpicc
-and the user hasn't specified values for RUNSERIAL and
-RUNPARALLEL then configure chooses `mpirun' from the same
-directory as `mpicc':
+If a parallel library is being built then configure attempts to determine
+how to run a parallel application on one processor and on many
+processors. If the compiler is `mpicc' and the user hasn't specified
+values for RUNSERIAL and RUNPARALLEL then configure chooses `mpirun' from
+the same directory as `mpicc':
 
     RUNSERIAL:    /usr/local/mpi/bin/mpirun -np 1
     RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=3}
 
-The `$${NPROCS:=3}' will be substituted with the value of the
-NPROCS environment variable at the time `make check' is run
-(or the value 3).
+The `$${NPROCS:=3}' will be substituted with the value of the NPROCS
+environment variable at the time `make check' is run (or the value 3).
