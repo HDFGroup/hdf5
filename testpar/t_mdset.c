@@ -75,12 +75,12 @@ void multiple_dset_write(char *filename, int ndatasets)
 	H5Dwrite (dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, outme);
 
 	H5Dclose (dataset);
+#ifdef BARRIER_CHECKS
 	if (! ((n+1) % 10)) {
-#ifdef VERBOSE
 	    printf("created %d datasets\n", n+1);
-#endif /* VERBOSE */
 	    MPI_Barrier(MPI_COMM_WORLD);
 	}
+#endif /* BARRIER_CHECKS */
     }
 
     H5Sclose (filespace);
@@ -137,12 +137,12 @@ void multiple_group_write(char *filename, int ngroups)
             write_dataset(memspace, filespace, gid); 
         H5Gclose(gid);
 
+#ifdef BARRIER_CHECKS
         if(! ((m+1) % 10)) {
-#ifdef VERBOSE
             printf("created %d groups\n", m+1);
-#endif /* VERBOSE */
             MPI_Barrier(MPI_COMM_WORLD);
 	}
+#endif /* BARRIER_CHECKS */
     }
     
     /* recursively creates subgroups under the first group. */
@@ -199,12 +199,12 @@ void create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid,
   
    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+#ifdef BARRIER_CHECKS
    if(! ((counter+1) % 10)) {
-#ifdef VERBOSE
         printf("created %dth child groups\n", counter+1);
-#endif /* VERBOSE */
         MPI_Barrier(MPI_COMM_WORLD);
    }
+#endif /* BARRIER_CHECKS */
  
    sprintf(gname, "%dth_child_group", counter+1);   
    child_gid = H5Gcreate(gid, gname, 0);
@@ -265,8 +265,10 @@ void multiple_group_read(char *filename, int ngroups)
                 nerrors += error_num;
         H5Gclose(gid);
 
+#ifdef BARRIER_CHECKS
         if(!((m+1)%10))
             MPI_Barrier(MPI_COMM_WORLD);
+#endif /* BARRIER_CHECKS */
     }
 
     /* open all the groups in vertical direction. */
@@ -337,8 +339,10 @@ void recursive_read_group(hid_t memspace, hid_t filespace, hid_t gid,
     char  gname[64];
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#ifdef BARRIER_CHECKS
     if((counter+1) % 10) 
         MPI_Barrier(MPI_COMM_WORLD);
+#endif /* BARRIER_CHECKS */
 
     if( (err_num = read_dataset(memspace, filespace, gid)) )
         nerrors += err_num;

@@ -340,7 +340,9 @@ if ((mpi_rank/2)*2 != mpi_rank){
 	    H5P_DEFAULT, data_array1);					    
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
 }
+#ifdef BARRIER_CHECKS
 MPI_Barrier(MPI_COMM_WORLD);
+#endif /* BARRIER_CHECKS */
 
     /* release dataspace ID */
     H5Sclose(file_dataspace);
