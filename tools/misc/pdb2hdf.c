@@ -10,11 +10,12 @@
  *		meta data that points into the PDB file.
  */
 #include <assert.h>
-#include <hdf5.h>
-#include <pdb.h>
-#include <score.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "hdf5.h"
+#include "pdb.h"
+#include "score.h"
 
 /*
  * libsilo renames all the PDB functions. However, this source files uses
