@@ -147,6 +147,11 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t
             p += mesg->size;
         }
     }
+    else if(mesg->type == H5D_CHUNKED) {
+        /* Compute chunk size */
+        for (u=0, mesg->chunk_size=1; u<mesg->ndims; u++)
+            mesg->chunk_size *= mesg->dim[u];
+    } /* end if */
 
     /* Set return value */
     ret_value=mesg;

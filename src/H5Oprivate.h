@@ -126,6 +126,7 @@ typedef struct H5O_layout_t {
     haddr_t	addr;			/*file address of data or B-tree     */ 
     unsigned	ndims;			/*num dimensions in stored data	     */
     hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk in bytes     */
+    hsize_t     chunk_size;             /*size of chunk in bytes   */
     hbool_t     dirty;                  /*dirty flag for compact dataset     */ 
     size_t      size;                   /*size of compact dataset in bytes   */
     void        *buf;                   /*buffer for compact dataset         */
