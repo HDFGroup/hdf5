@@ -51,7 +51,7 @@ New Features
 
     Tools:
     ------
-	      
+	- New tool, h5jam.  See reference manual.  2004/10/08	      
 
     F90 API:
     --------
