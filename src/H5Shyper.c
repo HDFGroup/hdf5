@@ -3699,7 +3699,7 @@ done:
  PURPOSE
     Detect intersections in span trees
  USAGE
-    htri_t H5S_hyper_intersect_helper(space1, space2)
+    htri_t H5S_hyper_intersect(space1, space2)
         H5S_t *space1;     IN: First dataspace to operate on span tree
         H5S_t *space2;     IN: Second dataspace to operate on span tree
  RETURNS
