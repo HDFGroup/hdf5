@@ -591,6 +591,46 @@ test_vltypes_vlen_vlen_atomic(void)
     ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Create file */
+    fid1 = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a VL datatype to refer to */
+    tid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+    CHECK(tid1, FAIL, "H5Tvlen_create");
+
+    /* Create the base VL type */
+    tid2 = H5Tvlen_create (tid1);
+    CHECK(tid2, FAIL, "H5Tvlen_create");
+
+    /* Open a dataset */
+    dataset=H5Dopen(fid1,"Dataset1");
+    CHECK(dataset, FAIL, "H5Dopen");
+
     /* Change to the custom memory allocation routines for reading VL data */
     xfer_pid=H5Pcreate(H5P_DATA_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
@@ -598,7 +638,7 @@ test_vltypes_vlen_vlen_atomic(void)
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
     CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
 
-    /* Make certain the correct amount of memory will be used */
+    /* Make certain the correct amount of memory was used */
     ret=H5Dvlen_get_buf_size(dataset,tid2,sid1,&size);
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
