@@ -43,9 +43,10 @@ case "X-$CC_BASENAME" in
 	CFLAGS="$CFLAGS -woff 799,803,835"
 
 	# Always turn off these loader warnings:
+	# (notice the peculiar syntax)
 	#      47:  branch instructions that degrade performance on R4000
 	#      84:  a library is not used
-	CFLAGS="$CFLAGS -Wl,-woff,47,84"
+	CFLAGS="$CFLAGS -Wl,-woff,47 -Wl,-woff,84"
 
 	# Extra debugging flags
 	DEBUG_CFLAGS="-g -fullwarn"
