@@ -53,7 +53,7 @@ fi
 
 # Copy the manifest file to get a list of file names.
 MANIFEST=/tmp/H5_MANIFEST.$$
-grep '^\.' MANIFEST | unexpand | cut -f1 >$MANIFEST
+grep '^\.' MANIFEST | expand | cut -f1 -d' ' >$MANIFEST
 
 # Check that all the files in MANIFEST exist and that (if this is a
 # CVS checkout) that all the CVS-managed files appear in the
