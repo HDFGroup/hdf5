@@ -46,13 +46,16 @@
      INTEGER :: error_total_error = 0
      INTEGER :: vl_total_error = 0
      INTEGER :: z_total_error = 0
+     INTEGER :: sz_total_error = 0
      INTEGER :: majnum, minnum, relnum
      CHARACTER(LEN=8) error_string
      CHARACTER(LEN=8) :: success = ' PASSED '
      CHARACTER(LEN=8) :: failure = '*FAILED*'
+     CHARACTER(LEN=8) :: skip = '--SKIP--'
      CHARACTER(LEN=4) :: e_format ='(8a)'
      LOGICAL :: cleanup = .TRUE.
 !     LOGICAL :: cleanup = .FALSE.
+     LOGICAL :: szip_flag
 
      CALL h5open_f(error) 
      write(*,*) '                       ==========================                            '
@@ -274,6 +277,15 @@
      write(*, fmt = '(57x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + z_total_error 
+
+     CALL szip_test(szip_flag, cleanup, sz_total_error)
+     IF (.NOT. szip_flag) error_string = skip
+     IF (sz_total_error == 0) error_string = success
+     IF (sz_total_error .gt. 0) error_string = failure
+     write(*, fmt = '(18a)', advance = 'no') ' SZIP filter test'     
+     write(*, fmt = '(53x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     if(sz_total_error .gt. 0) total_error = total_error + sz_total_error 
 
 !     write(*,*)
 !     write(*,*) '========================================='

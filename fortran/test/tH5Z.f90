@@ -81,3 +81,206 @@
 
      RETURN
      END SUBROUTINE filters_test
+
+        SUBROUTINE szip_test(szip_flag, cleanup, total_error)
+        USE HDF5 ! This module contains all necessary modules 
+
+          IMPLICIT NONE
+          LOGICAL, INTENT(OUT) :: szip_flag
+          LOGICAL, INTENT(IN) :: cleanup
+          INTEGER, INTENT(OUT) :: total_error 
+ 
+
+          CHARACTER(LEN=4), PARAMETER :: filename = "szip" ! File name
+          CHARACTER(LEN=80) :: fix_filename 
+          CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"     ! Dataset name
+          INTEGER, PARAMETER :: N = 1024
+          INTEGER, PARAMETER :: NN = 16
+          INTEGER, PARAMETER :: M = 512
+          INTEGER, PARAMETER :: MM = 8
+
+          INTEGER(HID_T) :: file_id       ! File identifier 
+          INTEGER(HID_T) :: dset_id       ! Dataset identifier 
+          INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
+          INTEGER(HID_T) :: dtype_id      ! Datatype identifier
+
+
+          INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/N,M/) ! Dataset dimensions
+          INTEGER(HSIZE_T), DIMENSION(2) :: chunk_dims = (/NN, MM/)
+          INTEGER     ::   rank = 2                        ! Dataset rank
+
+          INTEGER, DIMENSION(N,M) :: dset_data, data_out ! Data buffers
+          INTEGER     ::   error ! Error flag
+
+          INTEGER     :: i, j    !general purpose integers
+          INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
+          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HID_T) ::  crp_list
+          INTEGER :: options_mask, pix_per_block 
+          LOGICAL :: flag
+          CHARACTER(LEN=4) filter_name 
+          
+          INTEGER :: filter_flag = -1
+          INTEGER(SIZE_T) :: cd_nelemnts = 4
+          INTEGER(SIZE_T) :: filter_name_len = 4
+          INTEGER, DIMENSION(4) :: cd_values 
+
+          options_mask = H5_SZIP_RAWORNN_OM_F
+          pix_per_block = 32
+          !
+          ! Initialize the dset_data array.
+          !
+          do i = 1, N
+             do j = 1, M
+                dset_data(i,j) = (i-1)*6 + j;
+             end do
+          end do
+
+
+          !
+          ! Create a new file using default properties.
+          ! 
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+          CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
+              CALL check("h5fcreate_f", error, total_error)
+
+
+          ! 
+          ! Create the dataspace.
+          !
+          CALL h5screate_simple_f(rank, dims, dspace_id, error)
+              CALL check("h5screate_simple_f", error, total_error)
+          
+          CALL h5pcreate_f(H5P_DATASET_CREATE_F, crp_list, error)
+              CALL check("h5pcreat_f",error,total_error)
+
+          CALL h5pset_chunk_f(crp_list, rank, chunk_dims, error)
+              CALL check("h5pset_chunk_f",error,total_error)
+          CALL h5pset_szip_f(crp_list, options_mask, pix_per_block, error)
+              CALL check("h5pset_szip_f",error,total_error)
+          CALL h5pall_filters_avail_f(crp_list, flag, error)
+              CALL check("h5pall_filters_avail_f",error,total_error)
+          if (.NOT. flag) then
+             CALL h5pclose_f(crp_list, error)
+             CALL h5sclose_f(dspace_id, error)
+             CALL h5fclose_f(file_id, error)
+             szip_flag = .FALSE.
+             total_error = -1
+             return
+          endif
+ 
+         CALL h5pget_filter_by_id_f(crp_list, H5Z_FILTER_SZIP_F, filter_flag, &
+ 
+                                    cd_nelemnts, cd_values,&
+ 
+                                    filter_name_len, filter_name, error)
+               CALL check("h5pget_filter_by_id_f",error,total_error)
+          !
+          ! Create the dataset with default properties.
+          !
+          CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dspace_id, &
+                           dset_id, error, crp_list)
+              CALL check("h5dcreate_f", error, total_error)
+
+          !
+          ! Write the dataset.
+          !
+          data_dims_b(1) = N
+          data_dims_b(2) =  M
+          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims_b, error)
+              CALL check("h5dwrite_f", error, total_error)
+
+
+          !   
+          ! End access to the dataset and release resources used by it.
+          ! 
+          CALL h5dclose_f(dset_id, error)
+              CALL check("h5dclose_f", error, total_error)
+
+          !
+          ! Terminate access to the data space.
+          !
+          CALL h5sclose_f(dspace_id, error)
+              CALL check("h5sclose_f", error, total_error)
+
+          ! 
+          ! Close the file.
+          !
+             CALL h5pclose_f(crp_list, error)
+          CALL h5fclose_f(file_id, error)
+              CALL check("h5fclose_f", error, total_error)
+
+          !
+          ! Open the existing file.
+          !
+          CALL h5fopen_f (fix_filename, H5F_ACC_RDWR_F, file_id, error)
+              CALL check("h5fopen_f", error, total_error)
+
+          !
+          ! Open the existing dataset. 
+          !
+          CALL h5dopen_f(file_id, dsetname, dset_id, error)
+              CALL check("h5dopen_f", error, total_error)
+               CALL check("h5pget_filter_by_id_f",error,total_error)
+
+          !
+          ! Get the dataset type. 
+          !
+          CALL h5dget_type_f(dset_id, dtype_id, error)
+              CALL check("h5dget_type_f", error, total_error)
+
+          !
+          ! Get the data space. 
+          !
+          CALL h5dget_space_f(dset_id, dspace_id, error)
+              CALL check("h5dget_space_f", error, total_error)
+
+          !
+          ! Read the dataset.
+          !
+          CALL h5dread_f (dset_id, H5T_NATIVE_INTEGER, data_out, dims, error)
+              CALL check("h5dread_f", error, total_error)
+
+          !
+          !Compare the data.
+          ! 
+          do i = 1, N
+              do j = 1, M
+                  IF (data_out(i,j) .NE. dset_data(i, j)) THEN 
+                      write(*, *) "dataset test error occured"
+                      write(*,*) "data read is not the same as the data writen"
+                  END IF
+              end do    
+          end do
+
+          !   
+          ! End access to the dataset and release resources used by it.
+          ! 
+          CALL h5dclose_f(dset_id, error)
+              CALL check("h5dclose_f", error, total_error)
+
+          !
+          ! Terminate access to the data space.
+          !
+          CALL h5sclose_f(dspace_id, error)
+              CALL check("h5sclose_f", error, total_error)
+
+          !
+          ! Terminate access to the data type.
+          !
+          CALL h5tclose_f(dtype_id, error)
+              CALL check("h5tclose_f", error, total_error)
+          ! 
+          ! Close the file.
+          !
+          CALL h5fclose_f(file_id, error)
+              CALL check("h5fclose_f", error, total_error)
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+     
+          RETURN
+        END SUBROUTINE szip_test
