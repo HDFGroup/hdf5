@@ -767,11 +767,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /*OKAY: CAST DISCARDS CONST*/
-    if (MPI_SUCCESS !=
-	(mpi_code=MPI_File_open(fa->comm, (char*)name, mpi_amode, fa->info, &fh)))
-	    HMPI_RETURN_ERROR(NULL, "MPI_File_open failed", mpi_code);
-    if (MPI_SUCCESS != MPI_File_open(fa->comm, (char*)name, mpi_amode, fa->info, &fh))
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_File_open failed");
+    mpi_code=MPI_File_open(fa->comm, (char*)name, mpi_amode, fa->info, &fh);
+    if (MPI_SUCCESS != mpi_code)
+	HMPI_RETURN_ERROR(NULL, "MPI_File_open failed", mpi_code);
 
 
 /*  Following changes in handling file-truncation made be rkyates and ppweidhaas, sep 99  */
