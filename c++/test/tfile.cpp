@@ -59,6 +59,9 @@ using namespace H5;
 #define F3_SYM_INTERN_K         F2_SYM_INTERN_K
 #define FILE3                   "tfile3.h5"
 
+#define KB                      1024
+#define FILE4                   "tfile4.h5"
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_file_create
@@ -296,6 +299,60 @@ test_file_open(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_file_size
+ *
+ * Purpose:     Test file size.  
+ *
+ * Return:      None
+ *
+ * Programmer:  Raymond Lu
+ *              June, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void 
+test_file_size(void)
+{
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing File Size\n"));
+
+    hid_t	fapl_id;
+    fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
+
+    try {
+        // Use the file access template id to create a file access prop.
+        // list object to pass in H5File::H5File
+        FileAccPropList fapl(fapl_id);
+
+    	// Set to sec2 driver.  Do we want to test other file drivers.
+        // They're not tested in C++.
+	fapl.setSec2();
+
+        // Create a file
+	H5File fid( FILE4, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+
+        // Get file size
+        haddr_t file_size = fid.getFileSize();
+        CHECK(file_size, FAIL, "H5File::getFileSize");
+
+        // Check if file size is reasonable.  It's supposed to be 2KB now.
+        if(file_size<1*KB || file_size>4*KB)
+            CHECK(FAIL, FAIL, "H5File::getFileSize");
+    }   // end of try block
+
+    catch( Exception E ) {
+        CHECK(FAIL, FAIL, E.getCFuncName());
+    }
+
+    // use C test utility routine to close property list.
+    H5Pclose(fapl_id);
+    
+} /* test_file_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_file
  *
  * Purpose:     Main program
@@ -317,6 +374,7 @@ test_file(void)
 
     test_file_create();	/* Test file creation (also creation templates) */
     test_file_open();	/* Test file opening */
+    test_file_size();	/* Test file size */
 } /* test_file() */
 
 
@@ -339,4 +397,5 @@ cleanup_file(void)
     remove(FILE1);
     remove(FILE2);
     remove(FILE3);
+    remove(FILE4);
 } /* cleanup_file */
