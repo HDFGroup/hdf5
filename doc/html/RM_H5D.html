@@ -1076,12 +1076,6 @@ END SUBROUTINE h5dopen_f
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5dread_f
     
-	<dd>There are seperate versions of this interface.
-	    Their use depends on the datatype of the object being read.
-	
-	<p>Use the following <code>h5dread_f</code> call for 
-	    all datatypes except object and dataset region references:
-		
 	<dd>
 	<pre>
 SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &
@@ -1114,40 +1108,7 @@ SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &
 END SUBROUTINE h5dread_f
 	</pre>
 
-	<p>Use this <code>h5dread_f</code> call for 
-	   object reference and dataset region reference datatypes:
-	
-	<pre>
-SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, n, hdferr, &
-                     mem_space_id, file_space_id, xfer_prp)
 
-  IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
-  INTEGER(HID_T), INTENT(IN) :: mem_type_id  ! Memory datatype identifier
-  DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
-                                             ! Array to hold corresponding 
-                                             ! dimension sizes of data 
-                                             ! buffer buf 
-                                             ! dim(k) has value of the k-th 
-                                             ! dimension of buffer buf
-                                             ! Values are ignored if buf 
-                                             ! is a scalar
-  TYPE(hobj_ref_t_f), DIMENSION(dims(1)), INTENT(INOUT) :: buf
-                                             ! Data buffer of rank 1
-  INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-                                             ! 0 on success and -1 on failure
-  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                             ! Memory dataspace identfier 
-                                             ! Default value is H5S_ALL_F 
-  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                             ! File dataspace identfier 
-                                             ! Default value is H5S_ALL_F
-  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                             ! Transfer property list identifier
-                                             ! Default value is H5P_DEFAULT_F             
-END SUBROUTINE h5dread_f
-	</pre>
-			
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
@@ -1457,12 +1418,6 @@ SUBROUTINE
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5dwrite_f
-
-    <dd>There are seperate versions of this interface.
-	    Their use depends on the datatype of the object being written.
-	
-	<p>Use the following <code>h5dwrite_f</code> call for all 
-	   datatypes except object and dataset region references:
 	
 	<dd>
 	<pre>
@@ -1497,40 +1452,6 @@ SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &
 END SUBROUTINE h5dwrite_f
 	</pre>
 
-    <p>Use the following <code>h5dwrite_f</code> call for object reference 
-	   and dataset region reference datatypes:
-
-	<pre>
-SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, n, hdferr, &
-                      mem_space_id, file_space_id, xfer_prp)
-
-  IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
-  INTEGER(HID_T), INTENT(IN) :: mem_type_id  ! Memory datatype identifier
-  DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
-                                             ! Array to hold corresponding 
-                                             ! dimension sizes of data 
-                                             ! buffer buf 
-                                             ! dim(k) has valueof the k-th 
-                                             ! dimension of buffer buf; 
-                                             ! values are ignored if buf
-                                             ! is a scalar
-  TYPE(hobj_ref_t_f), DIMENSION(dims(1)), INTENT(INOUT) :: buf
-                                             ! Data buffer of rank 1
-  INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-                                             ! 0 on success and -1 on failure
-  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                             ! Memory dataspace identfier 
-                                             ! Default value is H5S_ALL_F
-  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                             ! File dataspace identfier 
-                                             ! Default value is H5S_ALL_F
-  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                             ! Transfer property list identifier
-                                             ! Default value is H5P_DEFAULT_F 
-            
-END SUBROUTINE h5dwrite_f
-	</pre>		
 		
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
@@ -1580,7 +1501,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 26 July 2004");
+document.writeln("Last modified: 2 August 2004");
 -->
 </SCRIPT>
  
