@@ -22,7 +22,7 @@ test -n "$DEBUGMODE" && echo "******** DEBUGMODE is $DEBUGMODE ************"
 WHEREAMI='pwd'
 
 # the name of this program
-PROGNAME=bin/runtest
+PROGNAME="bin/runtest $DEBUGMODE"
 
 # Setup
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
@@ -249,14 +249,8 @@ RUNSNAPTEST()
 	SNAPCMD_OPT="$SNAPCMD_OPT srcdirname ${SRCDIRNAME}"
     fi
 
-    # If LOGFILE already exists, it means this host has been tested today.
-    # Do at most one run per day.
+    # Setup log file name to save test output
     LOGFILE=${LOGBASENAME}${SRCDIRNAME}_${TODAY}
-    if [ -f $LOGFILE ]; then
-	echo LOGFILE $LOGFILE exists.  No more run today.
-	retcode=1 && errcode=$retcode && return $retcode
-    fi
-
     echo Running snapshot with output saved in $LOGFILE
     (date; echo Hostname=$HOSTNAME) >> $LOGFILE
 
@@ -335,11 +329,13 @@ FLUSH_FILES()
 USAGE()
 {
 cat <<EOF
-Usage: runtest [-h] [-r<version>] [-all] [<host> ...]
+Usage: runtest [-h] [-debug] [-r<version>] [-all] [<host> ...]
     -h
 	print this help page
     -r<version>
 	do runtest for <version>
+    -debug
+	turn on debug mode
     -all
 	launch tests for all pre-defined testing hosts
     <host>
@@ -370,6 +366,13 @@ while [ $# -gt 0 ]; do
 	-h) # help--show usage
 	    USAGE
 	    exit 0
+	    ;;
+	-debug*)
+	    # set debug mode
+	    DEBUGMODE="$1"
+	    SNAPSHOT="echo bin/snapshot"
+	    PROGNAME="$PROGNAME $DEBUGMODE"
+	    echo "******** DEBUGMODE is $DEBUGMODE ************"
 	    ;;
 	-r*)
 	    # the version string has a leading _ but not for H5DIR name
