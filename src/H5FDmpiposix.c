@@ -795,9 +795,6 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
         
         if (gpfs_fcntl(fd, &hint)<0)
             HGOTO_ERROR(H5E_FILE, H5E_FCNTL, NULL, "failed to send hints to GPFS");
-
-        if (0==mpi_rank)
-            HDfprintf(stderr, "HDF5: using GPFS hint mechanism...\n");
     }
 #endif
 
@@ -1186,8 +1183,8 @@ H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
     {
         int commrank;
         MPI_Comm_rank(MPI_COMM_WORLD, &commrank);
-        HDfprintf(stderr, "read:  rank=%d file=0x%08lx type=%d, addr=%lu size=%lu\n",
-                commrank, (unsigned long)file, (int)type, (unsigned long)addr, (unsigned long)size);
+        HDfprintf(stderr, "read:  rank=%d file=0x%08lx type=%d, addr=%a size=%Zu\n",
+                commrank, (unsigned long)file, (int)type, addr, size);
     }
 #endif
 
@@ -1315,8 +1312,8 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     {
         int commrank;
         MPI_Comm_rank(MPI_COMM_WORLD, &commrank);
-        HDfprintf(stderr, "write: rank=%d file=0x%08lx type=%d, addr=%lu size=%lu %s\n",
-                commrank, (unsigned long)file, (int)type, (unsigned long)addr, (unsigned long)size,
+        HDfprintf(stderr, "write: rank=%d file=0x%08lx type=%d, addr=%a size=%Zu %s\n",
+                commrank, (unsigned long)file, (int)type, addr, size,
                 0==file->naccess?"(FIRST ACCESS)":"");
     }
 #endif
