@@ -4186,9 +4186,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_id
  *
- * Purpose:	Quick and dirty routine to retrieve the file's 'file id'
- *              (Mainly added to stop non-file routines from poking about 
- *              in the H5F_t data structure)
+ * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
+ *              appropriate.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -4206,6 +4205,7 @@ H5F_get_id(H5F_t *file)
     FUNC_ENTER_NOINIT(H5F_get_id)
 
     assert(file);
+
     if(file->file_id == -1) {
         if(H5I_remove(file->closing)==NULL)
 	    HGOTO_ERROR(H5E_ATOM, H5E_READERROR, FAIL, "unable to remove from closing list")
