@@ -1168,7 +1168,12 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * So I'm commenting this out until it can be investigated. The
      * returned `bytes_written' isn't used anyway because of Kim's
      * kludge to avoid bytes_written<0. Likewise in H5FD_mpio_write(). */
-#ifndef LAM_MPI /*Robb's kludge*/
+
+#ifdef H5_HAVE_MPI_GET_COUNT /* Bill and Albert's kludge*/
+    /* Yet Another KLUDGE, Albert Cheng & Bill Wendling, 2001-05-11.
+     * Many systems don't support MPI_Get_count so we need to do a
+     * configure thingy to fix this. */
+
     /* How many bytes were actually read? */
     if (MPI_SUCCESS != MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read))
         HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
@@ -1437,7 +1442,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
      * So I'm commenting this out until it can be investigated. The
      * returned `bytes_written' isn't used anyway because of Kim's
      * kludge to avoid bytes_written<0. Likewise in H5FD_mpio_read(). */
-#ifndef LAM_MPI /*Robb's kludge*/
+
+#ifdef H5_HAVE_MPI_GET_COUNT /* Bill and Albert's kludge*/
+    /* Yet Another KLUDGE, Albert Cheng & Bill Wendling, 2001-05-11.
+     * Many systems don't support MPI_Get_count so we need to do a
+     * configure thingy to fix this. */
+
     /* How many bytes were actually written? */
     if (MPI_SUCCESS!= MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_written))
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
