@@ -3266,7 +3266,7 @@ irix5* | irix6*)
 # This must be Linux ELF.
 linux-gnu*)
   case $host_cpu in
-  alpha* | hppa* | i*86 | powerpc* | sparc* | ia64* )
+  alpha* | hppa* | i*86 | powerpc* | sparc* | ia64* | s390* )
     lt_cv_deplibs_check_method=pass_all ;;
   *)
     # glibc up to 2.1.1 does not perform some relocations on ARM
@@ -5468,7 +5468,6 @@ else
         # End MAJOR HACK
         #
         #######################################################################
-
 	# Warning - without using the other run time loading flags,
 	# -berok will link without error, but may produce a broken library.
 	allow_undefined_flag='${wl}-berok'
@@ -6733,7 +6732,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6736 "configure"
+#line 6735 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6831,7 +6830,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6834 "configure"
+#line 6833 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8117,6 +8116,7 @@ rm -f conftest conftest.o conftest.c core core.* *.core dummy.o
 saved_no_create=$no_create
 no_create=yes
 ac_config_files="$ac_config_files config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile test/Makefile examples/Makefile"
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
