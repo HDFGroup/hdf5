@@ -437,15 +437,15 @@
 #   define ULLONG_MAX	((unsigned long_long)((long_long)(-1)))
 #endif
 #ifndef SIZET_MAX
-#   define SIZET_MAX	((hsize_t)(size_t)(ssize_t)(-1))
-#   define SSIZET_MAX	((hsize_t)(ssize_t)((size_t)1<<(8*sizeof(ssize_t)-1)))
+#   define SIZET_MAX	((size_t)(ssize_t)(-1))
+#   define SSIZET_MAX	((ssize_t)(((size_t)1<<(8*sizeof(ssize_t)-1))-1))
 #endif
 #ifdef H5_HAVE_LARGE_HSIZET
-#define	HSIZET_MAX	ULLONG_MAX
-#define	HSSIZET_MAX	LLONG_MAX
+#define	HSIZET_MAX	((hsize_t)ULLONG_MAX)
+#define	HSSIZET_MAX	((hssize_t)LLONG_MAX)
 #else /* H5_HAVE_LARGE_HSIZET */
-#define HSIZET_MAX	SIZET_MAX
-#define HSSIZET_MAX	SSIZET_MAX
+#define HSIZET_MAX	((hsize_t)SIZET_MAX)
+#define HSSIZET_MAX	((hssize_t)SSIZET_MAX)
 #endif /* H5_HAVE_LARGE_HSIZET */
 #define HSSIZET_MIN	(~(HSSIZET_MAX))
 
