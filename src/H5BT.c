@@ -528,7 +528,7 @@ HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
 
         /* Check for exact fit */
         if(found.len == length) {
-            /* Delete recode from B-tree */
+            /* Delete record from B-tree */
             if(H5B2_remove(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &found)<0)
                 HGOTO_ERROR(H5E_BLKTRK, H5E_CANTDELETE, FAIL, "can't remove block")
 
@@ -584,8 +584,51 @@ HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
             bt->tot_block_size -= length;
         } /* end if */
         else if(found.len > length) {
-HDfprintf(stderr,"%s: found={%a/%Hu}\n",FUNC,found.addr,found.len);
-HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "Couldn't find block to remove")
+            H5BT_blk_info_t new_block;              /* Updated block info */
+
+            /* Update existing lower block */
+            new_block.addr = found.addr + length;
+            new_block.len = found.len - length;
+            if(H5B2_modify(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &found, H5BT_insert_modify_cb, &new_block) < 0)
+                HGOTO_ERROR(H5E_BLKTRK, H5E_CANTMODIFY, FAIL, "can't change block size")
+
+            /* Update max. block metadata */
+            if(found.len == bt->max_block_size) {
+                /* Decrement maximum block count */
+                bt->max_block_cnt--;
+
+                /* Check if we don't know the maximum size any longer */
+                if(bt->max_block_cnt==0) {
+                    bt->max_block_size = new_block.len;
+                    bt->max_block_cnt = 1;
+                    bt->status &= ~H5BT_STATUS_MAX_VALID;
+                } /* end if */
+            } /* end if */
+            else if(new_block.len > bt->max_block_size) {
+                /* Should only happen if we have partial knowledge */
+                HDassert((bt->status & H5BT_STATUS_MAX_VALID) == 0);
+
+                /* Track the newly discovered max. block size */
+                bt->max_block_size = new_block.len;
+                bt->max_block_cnt = 1;
+            } /* end if */
+            else if(new_block.len == bt->max_block_size) {
+                /* Should only happen if we have partial knowledge */
+                HDassert((bt->status & H5BT_STATUS_MAX_VALID) == 0);
+
+                bt->max_block_cnt++;
+            } /* end if */
+
+            /* Update min. block metadata */
+            if(new_block.len < bt->min_block_size) {
+                bt->min_block_size = new_block.len;
+                bt->min_block_cnt = 1;
+            } /* end if */
+            else if(new_block.len == bt->min_block_size)
+                bt->min_block_cnt++;
+
+            /* Decrement total amount of blocks tracked */
+            bt->tot_block_size -= length;
         } /* end if */
         else {
             /* Check for blocks at higher address, if necessary */

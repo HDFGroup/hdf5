@@ -1154,6 +1154,282 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_remove_partial_begin
+ *
+ * Purpose:	Basic tests for the block tracker code
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 11, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_remove_partial_begin(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    haddr_t     bt_addr;                /* Address of block tracker created */
+    hsize_t     tot_size;               /* Total size of blocks tracked */
+    hsize_t     max_size;               /* Max. size of blocks tracked */
+    uint32_t    max_count;              /* Ref. count of max. size of blocks tracked */
+    hbool_t     max_valid;              /* Is max. size valid over all blocks? */
+    hsize_t     min_size;               /* Min. size of blocks tracked */
+    uint32_t    min_count;              /* Ref. count of min. size of blocks tracked */
+    hbool_t     min_valid;              /* Is min. size valid over all blocks? */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	TEST_ERROR;
+    } /* end if */
+
+    if (H5BT_create(f, H5P_DATASET_XFER_DEFAULT, &bt_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert several blocks */
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)50, (hsize_t)20)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)100, (hsize_t)15)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)150, (hsize_t)15)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)200, (hsize_t)35)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)250, (hsize_t)35)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /*
+     * Test removing blocks
+     */
+    TESTING("remove partial block, at beginning of existing block");
+
+/* Remove piece from block in middle of size range */
+    /* Remove partial block */
+    if (H5BT_remove(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)50, (hsize_t)3)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 117) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 35) TEST_ERROR;
+    if(max_count != 2) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the min. info is correct */
+    if(min_size != 15) TEST_ERROR;
+    if(min_count != 2) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+/* Remove piece from blocks at max. of size range */
+    /* Remove partial block */
+    if (H5BT_remove(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)200, (hsize_t)5)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 112) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 35) TEST_ERROR;
+    if(max_count != 1) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the min. info is correct */
+    if(min_size != 15) TEST_ERROR;
+    if(min_count != 2) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    /* Remove partial block */
+    if (H5BT_remove(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)250, (hsize_t)5)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 107) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 30) TEST_ERROR;
+    if(max_count != 1) TEST_ERROR;
+    if(max_valid != 0) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the min. info is correct */
+    if(min_size != 15) TEST_ERROR;
+    if(min_count != 2) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+/* Remove piece from blocks at min. of size range */
+    /* Remove partial block */
+    if (H5BT_remove(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)100, (hsize_t)5)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 102) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 30) TEST_ERROR;
+    if(max_count != 1) TEST_ERROR;
+    if(max_valid != 0) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the min. info is correct */
+    if(min_size != 10) TEST_ERROR;
+    if(min_count != 1) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    /* Remove partial block */
+    if (H5BT_remove(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)150, (hsize_t)5)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 97) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 30) TEST_ERROR;
+    if(max_count != 1) TEST_ERROR;
+    if(max_valid != 0) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    /* Make certain that the min. info is correct */
+    if(min_size != 10) TEST_ERROR;
+    if(min_count != 2) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_remove_partial_begin() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the block tracker code
@@ -1191,6 +1467,7 @@ main(void)
 
     /* Test block tracker removal */
     nerrors += test_remove_whole(fapl);
+    nerrors += test_remove_partial_begin(fapl);
 
     if (nerrors) goto error;
     puts("All block tracker tests passed.");
