@@ -88,7 +88,7 @@ static herr_t H5I_init_interface(void);
  * than the ID_MASK constant).
  */
 #  define H5I_LOC(a,s)		((hid_t)((size_t)(a)&((s)-1)))
-#  define POWER_OF_TWO(n)	((((n) - 1) & (n)) == 0 && (n) > 1)
+#  define POWER_OF_TWO(n)	((((n) - 1) & (n)) == 0 && (n) > 0)
 #else
 /*
  * Map an ID to a hash location.
@@ -225,6 +225,10 @@ H5I_term_interface(void)
  * 		two, I placed it in a macro POWER_OF_TWO which uses the fact
  * 		that a number that is a power of two has only 1 bit set.
  *
+ * 		Bill Wendling, 2000-05-09
+ * 		Changed POWER_OF_TWO macro to allow 1 as a valid power of two.
+ * 		Changed test below accordingly.
+ *
  *-------------------------------------------------------------------------
  */
 intn 
@@ -241,7 +245,7 @@ H5I_init_group(H5I_type_t grp, size_t hash_size, uintn reserved,
 	HGOTO_DONE(FAIL);
     }
 #ifdef HASH_SIZE_POWER_2
-    if (!POWER_OF_TWO(hash_size))
+    if (!POWER_OF_TWO(hash_size) || hash_size == 1)
 	HGOTO_DONE(FAIL);
 #endif /* HASH_SIZE_POWER_2 */
 
