@@ -1220,7 +1220,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
         } /* end if */
         /* Otherwise allocate a node */
         else {
-            if (NULL==(new_obj = H5MM_malloc(sizeof(H5FL_arr_node_t)+head->size*elem)))
+            if (NULL==(new_obj = H5MM_malloc(sizeof(H5FL_arr_node_t)+mem_size)))
                 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
             /* Increment the number of blocks allocated in list */
