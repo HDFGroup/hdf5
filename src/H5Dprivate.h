@@ -136,12 +136,6 @@
 #define H5D_XFER_VFL_INFO_NAME       "vfl_info"
 #define H5D_XFER_VFL_INFO_SIZE       sizeof(void *)
 #define H5D_XFER_VFL_INFO_DEF  NULL
-#ifdef COALESCE_READS
-/* Definitions for 'gather reads' property */
-#define H5D_XFER_GATHER_READS_NAME       "gather_reads"
-#define H5D_XFER_GATHER_READS_SIZE       sizeof(hsize_t)
-#define H5D_XFER_GATHER_READS_DEF  0
-#endif /* COALESCE_READS */
 /* Definitions for hyperslab vector size property */
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME       "vec_size"
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)

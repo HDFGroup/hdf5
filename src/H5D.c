@@ -157,9 +157,6 @@ H5D_init_interface(void)
     void            *def_vlen_free_info      = H5D_XFER_VLEN_FREE_INFO_DEF;
     hid_t           def_vfl_id               = H5D_XFER_VFL_ID_DEF;     
     void            *def_vfl_info            = H5D_XFER_VFL_INFO_DEF;    
-#ifdef COALESCE_READS
-    hsize_t         def_gather_reads         = H5D_XFER_GATHER_READS_DEF;   
-#endif /* COALESCE_READS */
     size_t          def_hyp_vec_size         = H5D_XFER_HYPER_VECTOR_SIZE_DEF; 
 
     /* Dataset creation property class variables.  In sequence, they are,
@@ -257,12 +254,6 @@ H5D_init_interface(void)
         /* Register the file driver info property */
         if(H5P_register(xfer_pclass,H5D_XFER_VFL_INFO_NAME,H5D_XFER_VFL_INFO_SIZE,&def_vfl_info,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
-
-#ifdef COALESCE_READS
-        /* Register the 'gather reads' property */
-        if(H5P_register(xfer_pclass,H5D_XFER_GATHER_READS_NAME,H5D_XFER_GATHER_READS_SIZE,&def_gather_reads,NULL,NULL,NULL,NULL,NULL)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
-#endif /* COALESCE_READS */
 
         /* Register the vector size property */
         if(H5P_register(xfer_pclass,H5D_XFER_HYPER_VECTOR_SIZE_NAME,H5D_XFER_HYPER_VECTOR_SIZE_SIZE,&def_hyp_vec_size,NULL,NULL,NULL,NULL,NULL,NULL)<0)

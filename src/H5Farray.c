@@ -150,9 +150,6 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
     H5P_genplist_t *plist=NULL;                 /* Property list */
 #endif
-#ifdef COALESCE_READS
-    hsize_t gather_reads;                       /* # of MPIO reads to gather */
-#endif
     herr_t      ret_value = SUCCEED;            /* Return value */
    
     FUNC_ENTER_NOAPI(H5F_arr_read, FAIL);
@@ -278,15 +275,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             }
 #endif
 
-#ifdef COALESCE_READS
-            for (z=0, gather_reads = nelmts - 1; z<nelmts; z++, gather_reads--) {
-                /* Track the number of reads to gather */
-                if(H5P_set(plist, H5D_XFER_GATHER_READS_NAME, &gather_reads)<0)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve gather reads");
-#else
             for (z=0; z<nelmts; z++) {
-#endif
-
                 /* Read directly from file if the dataset is in an external file */
                 /* Note: We can't use data sieve buffers for datasets in external files
                  *  because the 'addr' of all external files is set to 0 (above) and
