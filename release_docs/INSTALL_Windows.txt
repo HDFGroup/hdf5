@@ -83,7 +83,7 @@ Preconditions
             environment variable.
       
          c. You might have to close and reopen running programs for
-            the new environment variable settings to take efcfect. 
+            the new environment variable settings to take effect. 
 
          d. By default, c:\zlib114\dll\zlib.dll and 
             c:\szlib\dll\szibdll.dll should be copied into the location
@@ -93,6 +93,12 @@ Preconditions
       
    6. Set up path for external libraries and headers
     
+      Skip this part if you don't want to use any compression features
+      provided by HDF5. Please do read section V.
+
+      You have to read this part is you want to only use gzip or szip.
+      You also need to read section V.
+
       Invoke Microsoft Visual C++ and go to "Tools" and select
       "Options", find "Directories";
       
