@@ -1,12 +1,12 @@
-HDF5 version 1.5.60 released on Fri Jun 20 10:29:00 CDT 2003
+HDF5 version 1.6.0 released on Thu Jul  3 16:20:52 CDT 2003
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.4.* and
-HDF5-1.5.*, and contains information on the platforms tested and
-known problems in HDF5-1.5.*. For more details check the HISTORY.txt
+HDF5-1.6.0, and contains information on the platforms tested and
+known problems in HDF5-1.6.0. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -38,10 +38,10 @@ Configuration:
 --------------
 The following flags have been added to the configuration script:
 --enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface
---enable-mpe            Enable MPE instrumentation [default=no]
 --enable-filters=all    Turn on all internal I/O filters. One may also
                         specify a comma-separated list of filters or the
                         word no. The default is all internal I/O filters.
+--with-mpe=DIR          Use MPE instrumentation [default=no]
 --with-szlib=DIR        Use szlib library for external szlib I/O filter
                         [default=no]
 
@@ -49,12 +49,18 @@ Library:
 --------
     Summary: This release has the following new features that are not
              available in 1.4.* releases
+
     1. Generic properties to give application more control on I/O pipeline
     2. Time allocation and fill value properties
     3. New  filters: external compression filter szip
                      internal shuffling and checksum filters
     4. Compact storage layout for datasets
     5. Redesigned I/O pipeline for better performance.
+
+    For more information see
+    http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html
+    http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide.html
+    http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/Changes.html 
     
     Complete list of changes:
 
@@ -90,7 +96,7 @@ Library:
       KY-2003/04/01
     * Added Fletcher32 checksum as a filter in pipeline.  It only works in 
       chunked dataset.  SLU - 2003/2/11
-    * MPICH/MPE instrumentation feature added.  Use --enable-mpe to configure
+    * MPICH/MPE instrumentation feature added.  Use --with-mpe[=DIR] to configure
       it.  AKC - 2003/1/3
     * New functions H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx 
       are added to the library.  SLU - 2002/11/25
@@ -202,10 +208,17 @@ Tools:
       Old h5import tool in the tools/misc directory was renamed to 
       h5createU8 to reflect its purpose. h5createU8 will be deleted in 
       1.6.1 release. 
+    * Two new scripts h5fc and h5c++ were added to compile F90 and C++
+      HDF5 applications.
 
-Support for new platforms and languages
+Support for new platforms, languages and compilers.
 =======================================
     * Added C++ API support on HPUX11.00.  BMR - 2003/03/19
+    * Absoft compiler is supported for Fortran HDF5 Library. 
+      When building with Absoft compiler, add -DH5_ABSOFT to
+      C compilation flags to get correct names of C functions
+      called by Fortran APIs. 
+
 
 Bug Fixes since HDF5-1.4.0 release
 ==================================
@@ -294,15 +307,24 @@ Documentation
 Platforms Tested
 ================
 
-    AIX 5.1  (32 and 64-bit)      C for AIX Compiler, Version 6.0.0.2
+    AIX 5.1  (32 and 64-bit)      xlc 6.0.0.2
                                   xlf 8.1.0.3
-                                  poe 3.2.0.11
+    				  xlC 6.0.0.4
+				  xlc 5.0.2.5
+				  xlf 7.1.1.2
+				  xlC 5.0.2.5
+				  mpcc_r 5.0.2.5
+				  mpxlf_r 7.1.1.2
+                                  poe 3.2.0.10
     Cray T3E sn6606 2.0.6.08      Cray Standard C Version 6.6.0.2
                                   Cray Fortran Version 3.6.0.0.2
-    Cray SV1 sn9617 10.0.1.0      Cray Standard C Version 6.6.0.2
+                                  mpt 2.2.0.0
+    Cray SV1 sn9617 10.0.1.2      Cray Standard C Version 6.6.0.2
+                                  mpt 2.2.0.0
                                   Cray Fortran Version 3.6.0.0.2
     Cray T90IEEE 10.0.1.01y       Cray Standard C Version 6.4.0.2.3
                                   Cray Fortran Version 3.4.0.3
+                                  mpt 2.1.0.0
     FreeBSD 4.7                   gcc 2.95.4
                                   g++ 2.95.5
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
@@ -313,16 +335,18 @@ Platforms Tested
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
                                   F90 MIPSpro 7.3.1.3m (64 only)
                                   MPIch 1.2.4
-    Linux 2.4.18                  gcc 3.2.2
-                                  g++ 3.22.
+    Linux 2.4.18                  gcc 2.96, 3.2.2, 3.2.3
+                                  g++ 3.2.2, 3.2.3
                                   Intel(R) C++ Version 7.1
                                   Intel(R) Fortran Compiler Version 7.1
                                   PGI compilers (pgcc, pgf90, pgCC) version 4.0-2
                                   MPIch 1.2.4
     OSF1 V5.1                     Compaq C V6.4-014
-                                  Compaq Fortran X5.4A-1684
-                                  Compaq C V6.3-027 , MPI_64bit_R5
-                                  gcc version 3.0 for C++
+                                  Compaq C V6.3-027
+				  Compaq Fortran V5.5-1877
+				  Compaq C++ V6.5-014
+				  MPI_64bit_R5
+                                  g++ version 3.0 for C++
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
      (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
                                   WorkShop Compilers 5.0 98/10/25 
@@ -345,8 +369,8 @@ Platforms Tested
     Windows 2000 (NT5.0)          MSVC++ 6.0
                                   DEC Visual Fortran 6.0
                                   Intel C and F90 compilers version 7.1
-    Windows XP                    .NET
-    Windows NT4.0                 Code Warrior 6.0
+				  Code Warrior 8.0
+    Windows XP                    MSVC++.NET
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
@@ -363,86 +387,95 @@ Supported Configuration Features Summary
           dna = does not apply
           ( ) = footnote appears below second table
 
+Platform              C   C         F90      F90       C++  Shared        zlib
+                          parallel           parallel       libraries (4)
+Solaris2.7 64-bit     y   y (1)     y        y (1)     y    y             y
+Solaris2.7 32-bit     y   y (1)     y        y (1)     y    y             y
+Solaris2.8 64-bit     y   y (1)     y        y (1)     y    y             y
+Solaris2.8 32-bit     y   y         y        y (1)     y    y             y
+IRIX6.5               y   y (1)     n        n         n    y             y 
+IRIX64_6.5 64-bit     y   y (2)     y        y         y    y             y
+IRIX64_6.5 32-bit     y   y (2)     n        n         n    y             y
+HPUX11.00             y   y (1)     y        y         y    y             y
+OSF1 v5.1             y   y         y        y         y    y             y
+T3E                   y   y (5)     y        y (5)     n    n             y
+SV1                   y   y (5)     y        y (5)     n    n             y
+T90 IEEE              y   y (5)     y        y (5)     n    n             y
+TFLOPS                n   y (1)     n        n         n    n             y
+AIX-5.1 32-bit        y   y         y        y         y    n             y
+AIX-5.1 64-bit        y   y         y        y         y    n             y
+WinXP           (6)   y   n         n        n         y    y             y
+WinXP Intel           y   n         n        n         y    y             y
+Win2000               y   n         y        n         y    y             y
+Win2000 Intel         y   n         y        n         y    y             y
+WinNT CW              y   n         n        n         n    n             y
+Mac OS X 10.2         y   n         n        n         y    y             y
+FreeBSD               y   y (1)     n        n         y    y             y
+Linux 2.4 gcc   (3)   y   y (1)     y (PGI)  n         y    y             y
+Linux 2.4 Intel (3)   y   n         y        n         y    n             y
+Linux 2.4 PGI   (3)   y   n         y        n         y    n             y
+Linux 2.4 IA32 Intel  y   n         y        n         y    n             y
+Linux 2.4 IA64 Intel  y   n         y        n         y    n             y
 
-    Platform             C   C         F90  F90       C++  Shared         zlib
-                             parallel       parallel       libraries (5)
-    Solaris2.6           y   n         y    n         y    y              y
-    Solaris2.7 64-bit    y   y (1)     y    y (1)     y    y              y
-    Solaris2.7 32-bit    y   y (1)     y    y (1)     y    y              y
-    Solaris2.8 64-bit    y   y         y    y (1)     y    y              y
-    Solaris2.8 32-bit    y   y         y    y (1)     y    y              y
-    IRIX6.5              y   y (1)     n    n         n    y              y 
-    IRIX64_6.5 64-bit    y   y (2)     y    y         y    y              y
-    IRIX64_6.5 32-bit    y   y (2)     n    n         n    y              y
-    HPUX11.00            y   y (1)     y    n         y    y              y
-    OSF1 v5.1            y   n         y    n         y    y              y
-    T3E             (6)  y   n         y    n         n    n              y
-    SV1                  y   n         y    n         n    n              y
-    T90 IEEE             y   n         y    n         n    n              y
-    TFLOPS               n   y (1)     n    n         n    n              y
-    AIX-5.1 32-bit       y   y         y    y         y    n              y
-    AIX-5.1 64-bit       y   y         y    y         y    n              y
-    WinXP           (7)  y   n         n    n         y    y              y
-    WinNT/2000           y   n         y    n         y    y              y
-    WinNT CW             y   n         n    n         n    n              y
-    Mac OS X 10.2        y   n         n    n         y    y              y
-    FreeBSD              y   y (1)     n    n         y    y              y
-    Linux 2.2            y   y (1)     y    y (1)     y    y              y
-    Linux 2.4 gcc   (3)  y   y (1)     y    n         y    y              y
-    Linux 2.4 Intel (3)  y   n         y    n         n    n              y
-    Linux 2.4 PGI   (3)  y   n         y    n         y    n              y
-    Linux 2.4 IA32       y   n         y    n         n    n              y
-    Linux 2.4 IA64       y   n         y    n         n    n              y
-    
 
-    Platform             static-  Thread-  SRB  GASS  STREAM-
-                         exec     safe                VFD
-    Solaris2.6           x        y        n    n     y
-    Solaris2.7 64-bit    x        y        n    n     y
-    Solaris2.7 32-bit    x        y        n    n     y
-    Solaris2.8 64-bit    x        y        n    n     y
-    Solaris2.8 32-bit    x        y        n    n     y
-    IRIX6.5              x        n        n    n     y
-    IRIX64_6.5 64-bit    x        y        n    y     y
-    IRIX64_6.5 32-bit    x        y        n    y     y
-    HPUX11.00            x        n        n    n     y
-    OSF1 v5.1            y        n        n    n     y
-    T3E             (6)  y        n        n    n     y
-    SV1                  y        n        n    n     y
-    T90 IEEE             y        n        n    n     y
-    TFLOPS               y        n        n    n     n
-    AIX-5.1 32-bit       y        n        n    n     y
-    AIX-5.1 64-bit       y        n        n    n     y
-    WinXP           (7)  dna      n        n    n     n
-    WinNT/2000           dna      n        n    n     n
-    WinNT CW             dna      n        n    n     n
-    Mac OS X 10.2        y        n        n    n     y
-    FreeBSD              y        y        n    n     y
-    Linux 2.2            y        y        n    n     y
-    Linux 2.4 gcc   (3)  y        y        n    n     y
-    Linux 2.4 Intel (3)  y        n        n    n     y
-    Linux 2.4 PGI   (3)  y        n        n    n     y
-    Linux 2.4 IA32       y        n        n    n     y
-    Linux 2.4 IA64       y        n        n    n     y
+ASCII Table 2 -- for RELEASE.txt
+
+Platform              static- Thread- SZIP GASS STREAM-  High-level  H4/H5 
+                      exec    safe              VFD      APIs        tools (7)
+Solaris2.7 64-bit     x       y       y    n    y        y           n
+Solaris2.7 32-bit     x       y       y    n    y        y           y
+Solaris2.8 64-bit     x       y       y    n    y        y           n
+Solaris2.8 32-bit     x       y       y    n    y        y           y
+IRIX6.5               x       n       y    n    y        y           y
+IRIX64_6.5 64-bit     x       y       y    y    y        y           y
+IRIX64_6.5 32-bit     x       y       y    y    y        y           y
+HPUX11.00             x       n       y    n    y        y           y
+OSF1 v5.1             y       n       y    n    y        y           y
+T3E                   y       n       n    n    y        y           y
+SV1                   y       n       n    n    y        y           y
+T90 IEEE              y       n       n    n    y        y           n
+TFLOPS                y       n       n    n    n        n           n
+AIX-5.1 32-bit        y       n       y    n    y        y           y
+AIX-5.1 64-bit        y       n       y    n    y        y           y
+WinXP           (6)   y       n       y    n    n        y           y
+WinXP Intel           y       n       y    n    n        y           y
+Win2000               y       n       y    n    n        y           y
+Win2000 Intel         y       n       y    n    n        y           y
+WinNT CW              y       n       y    n    n        y           y
+Mac OS X 10.2         y       n       y    n    y        y           n
+FreeBSD               y       y       y    n    y        y           y
+Linux 2.4 gcc   (3)   y       y       y    n    y        y           y
+Linux 2.4 Intel (3)   y       n       y    n    y        n           n
+Linux 2.4 PGI   (3)   y       n       y    n    y        n           n
+Linux 2.4 IA32 Intel  y       n       y    n    y        y           y
+Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
     Notes: (1) Using mpich 1.2.4.
            (2) Using mpt and mpich 1.2.4.
-           (3) Linux 2.4 with GNU, Intel, and PGI compilers.
-           (4) No HDF4-related tools.
-           (5) Shared libraries are provided only for the C library, 
-               except on Windows where they are provided for all languages.
-           (6) Debug mode only.
-           (7) Binaries only; source code for this platform is not being 
+           (3) Linux 2.4 with GNU, Intel, and PGI compilers, respectively.
+           (4) Shared libraries are provided only for the C library, except 
+               on Windows where they are provided for C and C++.
+           (5) Using mpt.
+           (6) Binaries only; source code for this platform is not being 
                released at this time.
+           (7) Includes the H4toH5 Library and the h4toh5 and h5toh4 
+               utilities.
+    Compiler versions for each platform are listed in the preceding
+    "Platforms Tested" table.
+
 
 
 Known Problems
 ==============
+
+* PGI C++ compiler fails when compiling the C++ library's tests.
+  Therefore, we cannot verify that the C++ library built with the PGI C++
+  compiler is correct.
+
 * The h5dump tests may fail to match the expected output on some platforms
   (e.g. parallel jobs, Windows) where the error messages directed to
   "stderr" do not appear in the "right order" with output from stdout.
   This is not an error.
-
 
 * The stream-vfd test uses ip port 10007 for testing. If another
   application is already using that port address, the test will hang
@@ -481,12 +514,12 @@ Known Problems
   program to fail.
 
 * Certain platforms give false negatives when testing h5ls:
-    - Cray J90 (and Cray T3E?) give errors during testing when displaying
+    - Cray J90 and Cray T90IEEE give errors during testing when displaying
       some floating-point values. These are benign differences due to
       the different precision in the values displayed and h5ls appears to
       be dumping floating-point numbers correctly.
 
-* Before building HDF5 F90 Library from source on Crays (T3E and J90) 
+* Before building HDF5 F90 Library from source on Crays 
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
@@ -496,7 +529,7 @@ Known Problems
   complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
 
-  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
+  ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
 
 * On IA32 and IA64 systems, if you use a compiler other than GCC (such as
   Intel's ecc or icc compilers), you will need to modify the generated
@@ -515,3 +548,5 @@ Known Problems
   you still experience a problem, you may want to check this line in the
   libtool file and make sure that it has the correct value.
 
+* Information about building with PGI and Intel compilers is available in
+  INSTALL file sections 5.7 and 5.8
