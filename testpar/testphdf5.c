@@ -465,20 +465,22 @@ int main(int argc, char **argv)
     /* By default, do not run big dataset. */
     AddTest("-bigdataset", big_dataset, NULL, 
 	    "big dataset test", filenames[7]);
-    if (dobig && sizeof(MPI_Offset)>4){
-	SetTest("bigdataset", ONLYTEST);
-    }
     AddTest("fillvalue", dataset_fillvalue, NULL, 
 	    "dataset fill value", filenames[8]);
 
-    AddTest("coll. chunked 1", coll_chunk1,NULL,
+    AddTest("coll_chunked1", coll_chunk1,NULL,
 	    "simple collective chunk io",filenames[10]);
-    AddTest("coll. chunked 2", coll_chunk2,NULL,
+    AddTest("coll_chunked2", coll_chunk2,NULL,
 	    "noncontiguous collective chunk io",filenames[11]);
-    AddTest("coll. chunked 3", coll_chunk3,NULL,
+    AddTest("coll_chunked3", coll_chunk3,NULL,
 	    "multi-chunk collective chunk io",filenames[12]);
-    AddTest("coll. chunked 4", coll_chunk4,NULL,
+    AddTest("coll_chunked4", coll_chunk4,NULL,
 	    "collective to independent chunk io",filenames[13]);
+
+    /* Argument requests */
+    if (dobig && sizeof(MPI_Offset)>4){
+	SetTest("bigdataset", ONLYTEST);
+    }
 
     /* Display testing information */
     TestInfo(argv[0]);
@@ -501,113 +503,6 @@ int main(int argc, char **argv)
 
     }
 
-#if 0
-    MPI_BANNER("test_fapl_mpio_dup...");
-    test_fapl_mpio_dup();
-
-    MPI_BANNER("test_fapl_mpiposix_dup...");
-    test_fapl_mpiposix_dup();
-
-    if (ndatasets){
-	MPI_BANNER("multiple datasets write ...");
-        multiple_dset_write(filenames[3], ndatasets);
-    }
-    else{
-        MPI_BANNER("Multiple datasets test skipped");
-    }
-
-    if (ngroups){
-	MPI_BANNER("multiple groups write ...");
-        multiple_group_write(filenames[4], ngroups);
-        if (doread) {
-       	    MPI_BANNER("multiple groups read ...");
-            multiple_group_read(filenames[4], ngroups);
-        }
-    }
-    else{
-        MPI_BANNER("Multiple groups test skipped");
-    }
-
-    if (dowrite){
-	MPI_BANNER("dataset using split communicators...");
-	test_split_comm_access(filenames[0]);
-
-	MPI_BANNER("dataset independent write...");
-	dataset_writeInd(filenames[0]);
-
-	MPI_BANNER("dataset collective write...");
-	dataset_writeAll(filenames[1]);
-
-	MPI_BANNER("extendible dataset independent write...");
-	extend_writeInd(filenames[2]);
-
-	MPI_BANNER("extendible dataset independent write #2...");
-	extend_writeInd2(filenames[2]);
-
-	MPI_BANNER("extendible dataset collective write...");
-	extend_writeAll(filenames[2]);
-    }
-    else{
-	MPI_BANNER("write tests skipped");
-    }
-
-    if (doread){
-	MPI_BANNER("dataset independent read...");
-	dataset_readInd(filenames[0]);
-
-	MPI_BANNER("dataset collective read...");
-	dataset_readAll(filenames[1]);
-
-	MPI_BANNER("extendible dataset independent read...");
-	extend_readInd(filenames[2]);
-
-	MPI_BANNER("extendible dataset collective read...");
-	extend_readAll(filenames[2]);
-    }
-    else{
-	MPI_BANNER("read tests skipped");
-    }
-
-    if (docompact){
-        MPI_BANNER("compact dataset test...");
-        compact_dataset(filenames[5]); 
-    }
-    else {
-        MPI_BANNER("compact dataset test skipped");
-    }
-
-    if (donull){
-        MPI_BANNER("null dataset test...");
-        null_dataset(filenames[6]); 
-    }
-    else {
-        MPI_BANNER("null dataset test skipped");
-    }
-   
-    if (doindependent){
-	MPI_BANNER("collective group and dataset write ...");
-        collective_group_write(filenames[7], ngroups);
-        if (doread) {
-       	    MPI_BANNER("independent group and dataset read ...");
-            independent_group_read(filenames[7], ngroups);
-        }
-    }
-    else{
-        MPI_BANNER("Independent test skipped");
-    }
-        
-    if (dobig && sizeof(MPI_Offset)>4){
-        MPI_BANNER("big dataset test...");
-        big_dataset(filenames[8]); 
-    }
-    else {
-        MPI_BANNER("big dataset test skipped");
-    }
-    
-    MPI_BANNER("dataset fill value test...");
-    dataset_fillvalue(filenames[9]); 
-#endif
-    
     if (!(dowrite || doread || ndatasets || ngroups || docompact || donull || doindependent || dobig )){
 	usage();
 	nerrors++;
