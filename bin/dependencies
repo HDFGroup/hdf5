@@ -39,7 +39,7 @@ open(DEPEND, "<$depend_file") || die "cannot open file $depend_file: $!\n";
 open(NEW, ">$new_depend_file") || die "cannot open file $new_depend_file: $!\n";
 
 while (<DEPEND>) {
-    s/\.o/\.lo/g;
+    s/\.o(\b)/\.lo$1/g;
     s/ $srcdir/ \$\(srcdir\)/g;
     s/ $top_srcdir/ \$\(top_srcdir\)/g;
     s/ $top_builddir/ \$\(top_builddir\)/g;
