@@ -36,6 +36,7 @@ New Features
 
     Configuration:
     --------------
+	- The IA64 will use ecc as the C++ compiler by default.
         - Added some initial support for making purify (or similar memory
             checking products) happier by initializing buffers to zero and
             disabling the internal free list code.  To take advantage of this,
