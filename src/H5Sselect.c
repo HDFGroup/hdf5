@@ -1237,7 +1237,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
             /* Determine how many file sequences will fit into current memory sequence */
             tmp_file_len=0;
             tot_file_seq=0;
-            while((tmp_file_len+file_len[curr_file_seq])<=mem_len[curr_mem_seq] && curr_file_seq<file_nseq) {
+            while( curr_file_seq<file_nseq && (tmp_file_len+file_len[curr_file_seq])<=mem_len[curr_mem_seq] ) {
                 tmp_file_len+=file_len[curr_file_seq];
                 curr_file_seq++;
                 tot_file_seq++;
@@ -1467,7 +1467,7 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
             /* Determine how many file sequences will fit into current memory sequence */
             tmp_file_len=0;
             tot_file_seq=0;
-            while((tmp_file_len+file_len[curr_file_seq])<=mem_len[curr_mem_seq] && curr_file_seq<file_nseq) {
+            while( curr_file_seq<file_nseq && (tmp_file_len+file_len[curr_file_seq])<=mem_len[curr_mem_seq] ) {
                 tmp_file_len+=file_len[curr_file_seq];
                 curr_file_seq++;
                 tot_file_seq++;
