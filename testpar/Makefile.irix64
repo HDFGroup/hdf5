@@ -47,7 +47,7 @@ PRIVATE_HDR=testhdf5.h
 
 # How to build the programs...
 testphdf5: $(TESTPHDF5_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(TESTPHDF5_OBJ) ../src/libhdf5.a $(MPI_LIBS)
+	$(CC) $(CFLAGS) -o $@ $(TESTPHDF5_OBJ) ../src/libhdf5.a $(MPI_LIBS) -lm
 
 #------------------------------------------------------------- -*- makefile -*-
 # The following section of this makefile comes from the
