@@ -8553,7 +8553,6 @@ echo "${ECHO_T}production" >&6
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     ;;
   X-|X-no)
     enable_production="no"
@@ -30265,8 +30264,8 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 
-echo "$as_me:$LINENO: checking for TIOCGGETD" >&5
-echo $ECHO_N "checking for TIOCGGETD... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking for TIOCGETD" >&5
+echo $ECHO_N "checking for TIOCGETD... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
@@ -30904,7 +30903,7 @@ else
   LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
 
-for hdf5_cv_printf_ll in l L q ll unknown; do
+for hdf5_cv_printf_ll in l L ll q unknown; do
    if test "$cross_compiling" = yes; then
   continue
 else

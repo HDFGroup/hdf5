@@ -597,7 +597,6 @@ case "X-$enable_production" in
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     ;;
   X-|X-no)
     enable_production="no"
@@ -1598,7 +1597,7 @@ AC_DEFINE([HAVE_TIOCGWINSZ], [1],
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
 
-AC_MSG_CHECKING([for TIOCGGETD])
+AC_MSG_CHECKING([for TIOCGETD])
 AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
 AC_DEFINE([HAVE_TIOCGETD], [1],
           [Define if the ioctl TIOCGETD is defined])
@@ -1623,8 +1622,8 @@ AC_MSG_CHECKING([for __attribute__ extension])
 AC_TRY_COMPILE(,[int __attribute__((unused)) x],
                AC_DEFINE([HAVE_ATTRIBUTE], [1],
                          [Define if the __attribute__(()) extension is present])
-               AC_MSG_RESULT(yes),
-               AC_MSG_RESULT(no))
+               AC_MSG_RESULT([yes]),
+               AC_MSG_RESULT([no]))
 
 AC_MSG_CHECKING([for __FUNCTION__ extension])
 AC_TRY_COMPILE(,[(void)__FUNCTION__],
@@ -1646,7 +1645,7 @@ AC_CACHE_VAL([hdf5_cv_printf_ll],
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
 
-for hdf5_cv_printf_ll in l L q ll unknown; do
+for hdf5_cv_printf_ll in l L ll q unknown; do
    AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
@@ -1738,10 +1737,10 @@ case "X-$enableval" in
                                     [int fd = 0; gpfs_fcntl(fd, (void *)0);],
                                     AC_DEFINE(HAVE_GPFS, 1,
                                               [Define if we have GPFS support])
-                                    AC_MSG_RESULT(yes)
+                                    AC_MSG_RESULT([yes])
                                     LIBS="$LIBS -lgpfs"
                                     GPFS="yes",
-                                    AC_MSG_RESULT(no)
+                                    AC_MSG_RESULT([no])
                                     GPFS="no"))
     ;;
   X-no|*)
@@ -1769,20 +1768,20 @@ case "X-$DEBUG_PKG" in
   X-|X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
     CPPFLAGS="$CPPFLAGS -UNDEBUG"
-    AC_MSG_RESULT(default ($DEBUG_PKG))
+    AC_MSG_RESULT([default ($DEBUG_PKG)])
     ;;
   X-all)
     DEBUG_PKG=$all_packages
     CPPFLAGS="$CPPFLAGS -UNDEBUG"
-    AC_MSG_RESULT(all ($DEBUG_PKG))
+    AC_MSG_RESULT([all ($DEBUG_PKG)])
     ;;
   X-no|X-none)
-    AC_MSG_RESULT(none)
+    AC_MSG_RESULT([none])
     DEBUG_PKG=
     CPPFLAGS="$CPPFLAGS -DNDEBUG"
     ;;
   *)
-    AC_MSG_RESULT($DEBUG_PKG)
+    AC_MSG_RESULT([$DEBUG_PKG])
     ;;
 esac
 
@@ -2124,7 +2123,7 @@ dnl
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
 
 if test -n "$PARALLEL"; then
-  dnl Should the 'testpar' directory participate in the build?
+  dnl The 'testpar' directory should participate in the build
   TESTPARALLEL=testpar
 
   dnl We are building a parallel library
@@ -2508,7 +2507,7 @@ SEARCH="$SEARCH_RULE`eval $cmd`"
 export SEARCH
 
 dnl We don't need to say when we're entering directories if we're using
-dnl GNU make becuase make does it for us.
+dnl GNU make because make does it for us.
 if test "X$GMAKE" = "Xyes"; then
   AC_SUBST([SETX]) SETX=":"
 else
