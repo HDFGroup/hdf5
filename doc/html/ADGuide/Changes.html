@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Library Changes</title>
+    <title>HDF5 Software Changes</title>
   </head>
 
   <body bgcolor="#FFFFFF">
@@ -28,7 +28,7 @@
 
 
 <center>
-<h1>HDF5 Library Changes from Release to Release</h1>
+<h1>HDF5 Software Changes from Release to Release</h1>
 </center>
 
 This document describes the changes in the HDF5 library as it has 
@@ -41,10 +41,197 @@ progressed from release to release.
 <!--   insert the file hdf5/HISTORY in next section   -->
 <!--                                                  -->
 
-    The following material is from the file <code>hdf5/RELEASE</code>, 
-    as distributed with the HDF5 library source code.
 
 <dir>
+
+    Several functions were added to or removed from the HDF5 library
+    in the development of Release 1.4.
+    A few functions have been modified in minor ways.
+
+    <h3>New Functions</h3>
+        The following functions are new for Release 1.4 and are included in the
+        <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+
+<dir>
+<pre>
+herr_t <font color=red>H5Dvlen_get_buf_size</font> (hid_t dataset_id, hid_t type_id, 
+           hid_t space_id, hsize_t *size);
+herr_t <font color=red>H5Epush</font> (const char *file, const char *func,
+           unsigned line, H5E_major_t maj, H5E_minor_t min, 
+           const char *str);
+hid_t <font color=red>H5Pget_driver</font> (hid_t plist_id);
+void *<font color=red>H5Pget_driver_info</font> (hid_t plist_id);
+herr_t <font color=red>H5Pget_dxpl_mpio</font> (hid_t dxpl_id, 
+           H5FD_mpio_xfer_t *xfer_mode/*out*/);
+herr_t <font color=red>H5Pget_dxpl_multi</font> (hid_t dxpl_id, 
+           hid_t *memb_dxpl/*out*/);
+herr_t <font color=red>H5Pget_fapl_core</font> (hid_t fapl_id, size_t *increment/*out*/,
+           hbool_t *backing_store/*out*/) 
+herr_t <font color=red>H5Pget_fapl_family</font> (hid_t fapl_id, 
+           hsize_t *memb_size/*out*/, hid_t *memb_fapl_id/*out*/);
+herr_t <font color=red>H5Pget_fapl_mpio</font> (hid_t fapl_id, MPI_Comm *comm/*out*/,
+           MPI_Info *info/*out*/);
+herr_t <font color=red>H5Pget_fapl_multi</font> (hid_t fapl_id, 
+           H5FD_mem_t *memb_map/*out*/, hid_t *memb_fapl/*out*/, 
+           char **memb_name/*out*/, haddr_t *memb_addr/*out*/, 
+           hbool_t *relax/*out*/);
+herr_t <font color=red>H5Pget_fapl_stream</font> (hid_t fapl_id,
+           H5FD_stream_fapl_t *fapl /*out*/ );
+herr_t <font color=red>H5Pget_meta_block_size</font> (hid_t fapl_id, 
+           hsize_t *size/*out*/);
+herr_t <font color=red>H5Pget_sieve_buf_size</font> (hid_t fapl_id, 
+           hsize_t *size/*out*/);
+herr_t <font color=red>H5Pset_driver</font> (hid_t plist_id, hid_t driver_id,
+           const void *driver_info);
+herr_t <font color=red>H5Pset_dxpl_mpio</font> (hid_t dxpl_id, 
+           H5FD_mpio_xfer_t xfer_mode);
+herr_t <font color=red>H5Pset_dxpl_multi</font> (hid_t dxpl_id, 
+           const hid_t *memb_dxpl);
+herr_t <font color=red>H5Pset_fapl_core</font> (hid_t fapl_id, size_t increment, 
+           hbool_t backing_store)
+herr_t <font color=red>H5Pset_fapl_family</font> (hid_t fapl_id, hsize_t memb_size,
+           hid_t memb_fapl_id);
+herr_t <font color=red>H5Pset_fapl_log</font> (hid_t fapl_id, char *logfile, 
+           int verbosity);
+herr_t <font color=red>H5Pset_fapl_mpio</font> (hid_t fapl_id, MPI_Comm comm, 
+           MPI_Info info);
+herr_t <font color=red>H5Pset_fapl_multi</font> (hid_t fapl_id, 
+           const H5FD_mem_t *memb_map, const hid_t *memb_fapl, 
+           const char **memb_name, const haddr_t *memb_addr, 
+           hbool_t relax);
+herr_t <font color=red>H5Pset_fapl_sec2</font> (hid_t fapl_id);
+herr_t <font color=red>H5Pset_fapl_split</font> (hid_t fapl, const char *meta_ext,
+           hid_t meta_plist_id, const char *raw_ext,
+           hid_t raw_plist_id);
+herr_t <font color=red>H5Pset_fapl_stdio</font> (hid_t fapl_id);
+herr_t <font color=red>H5Pset_fapl_stream</font> (hid_t fapl_id,
+           H5FD_stream_fapl_t *fapl);
+herr_t <font color=red>H5Pset_meta_block_size</font>(hid_t fapl_id, hsize_t size);
+herr_t <font color=red>H5Pset_sieve_buf_size</font>(hid_t fapl_id, hsize_t size);
+</pre>
+</dir>
+
+
+        <p>
+        The following functions are new for Release 1.4, but 
+        are intended only for use in specialized environments.
+        These are also included in the
+        <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+
+<dir>
+<pre>
+herr_t <font color=red>H5Pget_fapl_dpss</font> (hid_t fapl_id);
+herr_t <font color=red>H5Pget_fapl_gass</font> (hid_t fapl_id, GASS_Info *info/*out*/);
+herr_t <font color=red>H5Pget_fapl_srb</font> (hid_t fapl_id, SRB_Info *info);
+herr_t <font color=red>H5Pset_fapl_dpss</font> (hid_t fapl_id);
+herr_t <font color=red>H5Pset_fapl_gass</font> (hid_t fapl_id, GASS_Info info);
+herr_t <font color=red>H5Pset_fapl_srb</font> (hid_t fapl_id, SRB_Info info);
+</pre>
+</dir>
+
+
+        <p>
+        The following functions are new for Release 1.4 but are intended 
+        only for driver development work, not for general use.  
+        They are listed in the
+        <a href="../TechNotes/VFLfunc.html"><cite>List of VFL Functions</cite></a>
+        document in the 
+        <a href="../TechNotes.html"><cite>HDF5 Technical Notes</cite></a>.
+        They are described in detail only in the source code and 
+        do not appear in the <cite>HDF5 Reference Manual</cite>.
+
+<dir>
+<pre>
+haddr_t <font color=red>H5FDalloc</font> (H5FD_t *file, H5FD_mem_t type, 
+          hsize_t size);
+herr_t <font color=red>H5FDclose</font> (H5FD_t *file);
+int <font color=red>H5FDcmp</font> (const H5FD_t *f1, const H5FD_t *f2);
+herr_t <font color=red>H5FDflush</font> (H5FD_t *file);
+herr_t <font color=red>H5FDfree</font> (H5FD_t *file, H5FD_mem_t type, 
+          haddr_t addr, hsize_t size);
+haddr_t <font color=red>H5FDget_eoa</font> (H5FD_t *file);
+haddr_t <font color=red>H5FDget_eof</font> (H5FD_t *file);
+H5FD_t *<font color=red>H5FDopen</font> (const char *name, unsigned flags, 
+          hid_t fapl_id, haddr_t maxaddr);
+int <font color=red>H5FDquery</font> (const H5FD_t *f, unsigned long *flags);
+herr_t <font color=red>H5FDread</font> (H5FD_t *file, hid_t dxpl_id, haddr_t addr, 
+          hsize_t size, void *buf/*out*/);
+haddr_t <font color=red>H5FDrealloc</font> (H5FD_t *file, H5FD_mem_t type, 
+          haddr_t addr, hsize_t old_size, hsize_t new_size);
+hid_t <font color=red>H5FDregister</font> (const H5FD_class_t *cls);
+herr_t <font color=red>H5FDset_eoa</font> (H5FD_t *file, haddr_t eof);
+herr_t <font color=red>H5FDunregister</font> (hid_t driver_id);
+herr_t <font color=red>H5FDwrite</font> (H5FD_t *file, H5FD_mem_t type, 
+          hid_t dxpl_id, haddr_t addr, hsize_t size, 
+          const void *buf);
+</pre>
+</dir>
+
+
+    <h3>Deleted Functions</h3>
+        The following functions have been removed from the HDF5 library
+        and from the <cite>HDF5 Reference Manual</cite>.
+        <dir>
+        <table>
+        <tr valign=top align=left><td>
+<pre>
+H5Pget_core
+H5Pget_driver
+H5Pget_family
+H5Pget_mpi
+H5Pget_sec2
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+H5Pget_split
+H5Pget_stdio
+H5Pget_xfer
+H5Pset_core
+H5Pset_family
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+H5Pset_mpi
+H5Pset_sec2
+H5Pset_split
+H5Pset_stdio
+H5Pset_xfer
+</pre>
+        </td></tr>
+        </table>
+        </dir>
+
+
+    <h3>Functions with Changed Syntax</h3>
+        The following functions have changed slightly.
+        <dir>
+        <dl>
+        <dt><code>H5Pget_buffer</code>
+          <dd>Return type has changed to <em>hsize_t</em>.
+        <dt><code>H5Pset_buffer</code>
+          <dd>The type of the <code>size</code> parameter has changed 
+              to <em>hsize_t</em>.
+        <dt><code>H5Tconvert</code>
+          <dd>The type of the <code>nelmts</code> parameter has changed 
+              to <em>hsize_t</em>.
+        </dl>
+        </dir>
+
+    <h3>Constants with Changed Values</h3>
+        The values of the constants <code>H5P_DEFAULT</code> and 
+        <code>H5S_ALL</code> have been changed from <code>-2</code>
+        to <code>0</code>.   
+        These default values had to be special-cased in situations where
+        they could be returned to distinguish them from error values.
+
+    <h3>Full Release Notes</h3>
+        The following material is from the file <code>hdf5/RELEASE</code>, 
+        as distributed with the HDF5 library source code.
+
 <pre>
 
                        HDF5 Release 1.4-Beta2
@@ -443,10 +630,10 @@ Known Problems
 
 <h2>Previous Releases</h2>
 
+<dir>
     The following material is from the file <code>hdf5/HISTORY</code>, 
     as distributed with the HDF5 library source code.
 
-<dir>
 <pre>
 
 CONTENTS
@@ -1299,11 +1486,11 @@ Ragged Arrays (alpha)
 <h2>Release 1.4</h2>
 <dir>
 
-    <h3>New functions
+    <h3>New Functions</h3>
 
-    <h3>Deleted functions
+    <h3>Deleted Functions</h3>
 
-    <h3>Functions with changed syntax
+    <h3>Functions with Changed Syntax</h3>
 
 </dir>
 <h2>Release 1.2.2</h2>
