@@ -203,6 +203,9 @@ static herr_t H5T_print_stats(H5T_path_t *path, intn *nprint/*in,out*/);
 /* Declare the free list for H5T_t's */
 H5FL_DEFINE(H5T_t);
 
+/* Declare the free list for H5T_path_t's */
+H5FL_DEFINE(H5T_path_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_init
@@ -1391,7 +1394,7 @@ H5T_term_interface(void)
 	    }
 	    H5T_close (path->src);
 	    H5T_close (path->dst);
-	    H5MM_xfree (path);
+        H5FL_FREE(H5T_path_t,path);
 	    H5T_g.path[i] = NULL;
 	}
 
@@ -4251,7 +4254,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
             }
 
             /* Create a new conversion path */
-            if (NULL==(new_path=H5MM_calloc(sizeof(H5T_path_t)))) {
+            if (NULL==(new_path=H5FL_ALLOC(H5T_path_t,1))) {
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "memory allocation failed");
             }
@@ -4285,7 +4288,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
             }
             H5T_close(old_path->src);
             H5T_close(old_path->dst);
-            H5MM_xfree(old_path);
+            H5FL_FREE(H5T_path_t,old_path);
 
             /* Release temporary atoms */
             H5I_dec_ref(tmp_sid);
@@ -4304,7 +4307,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	if (new_path) {
 	    if (new_path->src) H5T_close(new_path->src);
 	    if (new_path->dst) H5T_close(new_path->dst);
-	    H5MM_xfree(new_path);
+        H5FL_FREE(H5T_path_t,new_path);
 	}
 	if (tmp_sid>=0) H5I_dec_ref(tmp_sid);
 	if (tmp_did>=0) H5I_dec_ref(tmp_did);
@@ -4389,7 +4392,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
         }
         H5T_close(path->src);
         H5T_close(path->dst);
-        H5MM_xfree(path);
+        H5FL_FREE(H5T_path_t,path);
         H5E_clear(); /*ignore all shutdown errors*/
     }
 
@@ -6648,7 +6651,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 			"table");
 	}
 	H5T_g.apaths = 128;
-	if (NULL==(H5T_g.path[0]=H5MM_calloc(sizeof(H5T_path_t)))) {
+	if (NULL==(H5T_g.path[0]=H5FL_ALLOC(H5T_path_t,1))) {
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 			"memory allocation failed for no-op conversion path");
 	}
@@ -6707,7 +6710,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
      * the path.
      */
     if (!table || func) {
-	if (NULL==(path=H5MM_calloc(sizeof(H5T_path_t)))) {
+	if (NULL==(path=H5FL_ALLOC(H5T_path_t,1))) {
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 			"memory allocation failed for type conversion path");
 	}
@@ -6815,7 +6818,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	}
 	if (table->src) H5T_close(table->src);
 	if (table->dst) H5T_close(table->dst);
-	H5MM_xfree(table);
+    H5FL_FREE(H5T_path_t,table);
 	table = path;
 	H5T_g.path[md] = path;
     } else if (path!=table) {
@@ -6844,7 +6847,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     if (!ret_value && path && path!=table) {
 	if (path->src) H5T_close(path->src);
 	if (path->dst) H5T_close(path->dst);
-	H5MM_xfree(path);
+    H5FL_FREE(H5T_path_t,path);
     }
     if (src_id>=0) H5I_dec_ref(src_id);
     if (dst_id>=0) H5I_dec_ref(dst_id);
