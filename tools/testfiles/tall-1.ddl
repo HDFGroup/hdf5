@@ -1,7 +1,4 @@
-#############################
-Expected output for 'h5dump tall.h5'
-#############################
-HDF5 "testfiles\tall.h5" {
+HDF5 "testfiles/tall.h5" {
 GROUP "/" {
    ATTRIBUTE "attr1" {
       DATATYPE { H5T_STD_I8BE }
@@ -56,8 +53,8 @@ GROUP "/" {
             DATATYPE { H5T_STD_I32BE }
             DATASPACE { SIMPLE ( 20 ) / ( 20 ) }
             DATA {
-               0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-               18, 19
+               0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+               19
             }
          }
       }

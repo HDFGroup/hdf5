@@ -1,7 +1,7 @@
 #############################
 Expected output for 'h5dump tstr.h5'
 #############################
-HDF5 "testfiles\tstr.h5" {
+HDF5 "tstr.h5" {
 GROUP "/" {
    DATASET "comp1" {
       DATATYPE {
