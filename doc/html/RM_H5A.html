@@ -138,18 +138,9 @@ and information about attributes.
 
 <br>
 <strong>The FORTRAN90 Interfaces:</strong>
-
 <br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below (electronic versions only) go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font>
+In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  
 <br>
 
 <table border=0>
@@ -305,7 +296,8 @@ END SUBROUTINE h5aclose_f
 <dt><strong>Fortran90 Interface:</strong> h5acreate_f
     <dd>
 	<pre>
-SUBROUTINE h5acreate_f(obj_id, name, type_id, space_id, attr_id, &amp; hdferr, creation_prp) 
+SUBROUTINE h5acreate_f(obj_id, name, type_id, space_id, attr_id, &amp; 
+                       hdferr, creation_prp) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
   CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -783,21 +775,20 @@ END SUBROUTINE h5aopen_name_f
 	<pre>
 SUBROUTINE h5aread_f(attr_id, memtype_id,  buf, dims, hdferr) 
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: attr_id         ! Attribute identifier 
-  INTEGER(HID_T), INTENT(IN) :: memtype_id      ! Attribute datatype 
-                                                ! identifier  (in memory)
-  TYPE, INTENT(INOUT)  :: buf                   ! Data buffer; may be a scalar or an array
+  INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier 
+  INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+                                           ! identifier  (in memory)
+  TYPE, INTENT(INOUT)  :: buf              ! Data buffer; may be a scalar or 
+                                           ! an array
   DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
-                                                ! Array to hold corresponding dimension 
-                                                ! sizes of data buffer buf; dim(k) has 
-                                                ! value of the k-th dimension of buffer buf;
-                                                ! values are ignored if buf is a scalar
-                                                ! 
-                                                ! Deprecated type, will be removed in 
-                                                ! Release 1.6:
-                                                ! INTEGER, INTENT(IN)  :: dims(7)     
-  INTEGER, INTENT(OUT) :: hdferr                ! Error code
-                                                ! 0 on success and -1 on failure
+                                           ! Array to hold corresponding 
+                                           ! dimension sizes of data buffer buf;
+                                           ! buf; dim(k) has value of the 
+                                           ! k-th dimension of buffer buf;
+                                           ! values are ignored if buf is a 
+                                           ! scalar
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5aread_f
 	</pre>		
 		
@@ -854,16 +845,14 @@ SUBROUTINE h5awrite_f(attr_id, memtype_id,  buf, dims, hdferr)
   INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier 
   INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
                                            ! identifier  (in memory)
-  TYPE, INTENT(IN) :: buf                  ! Data buffer; may be a scalar or an array
+  TYPE, INTENT(IN) :: buf                  ! Data buffer; may be a scalar or 
+                                           ! an array
   DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
-                                           ! Array to hold corresponding dimension 
-                                           ! sizes of data buffer buf; dim(k) has 
-                                           ! value of the k-th dimension of buffer buf;
-                                           ! values are ignored if buf is a scalar
-                                           ! 
-                                           ! Deprecated type, will be removed in 
-                                           ! Release 1.6:
-                                           ! INTEGER, INTENT(IN)  :: dims(7)     
+                                           ! Array to hold corresponding 
+                                           ! dimension sizes of data buffer buf;
+                                           ! dim(k) has value of the k-th 
+                                           ! dimension of buffer buf;values are
+                                           ! ignored if buf is a scalar
   INTEGER, INTENT(OUT) :: hdferr           ! Error code
                                            ! 0 on success and -1 on failure
 END SUBROUTINE h5awrite_f
@@ -916,7 +905,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 9 October 2003");
+document.writeln("Last modified: 21 October 2003");
 -->
 </SCRIPT>
  
