@@ -424,6 +424,9 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
                         (unsigned long)(cur->obj_ptr));
                     }
 #endif /*H5I_DEBUG*/
+                    /* Decrement the number of IDs in the group */
+                    (grp_ptr->ids)--;
+
                     /* Add ID struct to free list */
                     next = cur->next;
                     H5FL_FREE(H5I_id_info_t,cur);
@@ -435,6 +438,9 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
                     prev = cur;
                 }
             } else {
+                /* Decrement the number of IDs in the group */
+                (grp_ptr->ids)--;
+
                 /* Add ID struct to free list */
                 next = cur->next;
                 H5FL_FREE(H5I_id_info_t,cur);
