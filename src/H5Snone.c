@@ -21,15 +21,16 @@
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK      H5Snone_mask
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5Iprivate.h"
 #include "H5Spkg.h"
 #include "H5Vprivate.h"
 #include "H5Dprivate.h"
-
-/* Pablo mask */
-#define PABLO_MASK      H5Snone_mask
 
 /* Interface initialization */
 #define INTERFACE_INIT  NULL

@@ -21,15 +21,16 @@
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK      H5Shyper_mask
+
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5Eprivate.h"		/* Error handling		  */
 #include "H5FLprivate.h"	/* Free Lists	  */
 #include "H5Iprivate.h"		/* ID Functions		  */
 #include "H5Spkg.h"		/* Dataspace functions			  */
 #include "H5Vprivate.h"         /* Vector functions */
-
-/* Pablo mask */
-#define PABLO_MASK      H5Shyper_mask
 
 /* Interface initialization */
 #define INTERFACE_INIT  NULL

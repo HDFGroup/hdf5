@@ -14,6 +14,10 @@
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Dio_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -39,9 +43,6 @@
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
 #   include "H5Rpublic.h"
 #endif /*H5_HAVE_PARALLEL*/
-
-/* Pablo information */
-#define PABLO_MASK	H5Dio_mask
 
 /* Local typedefs */
 

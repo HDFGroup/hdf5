@@ -17,13 +17,16 @@
  *	       Friday, October 10, 1997
  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5V_mask
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5Oprivate.h"
 #include "H5Vprivate.h"
 
 #define H5V_HYPER_NDIMS H5O_LAYOUT_NDIMS
-#define PABLO_MASK	H5V_mask
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 

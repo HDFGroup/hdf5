@@ -17,11 +17,15 @@
 Bentley and Robert Sedgewick in the April, 1998, Dr. Dobb's Journal.
 */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5ST_mask
+
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5STprivate.h"        /* Ternary search trees                 */
 
-#define PABLO_MASK	H5ST_mask
+/* Interface initialization */
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 

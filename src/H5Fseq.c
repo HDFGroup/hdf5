@@ -25,6 +25,10 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Fseq_mask
+
 #include "H5private.h"
 #include "H5Dprivate.h"
 #include "H5Eprivate.h"
@@ -42,7 +46,6 @@
 #include "H5FDmpiposix.h"
 
 /* Interface initialization */
-#define PABLO_MASK	H5Fseq_mask
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
 

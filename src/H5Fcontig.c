@@ -24,6 +24,10 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Fcontig_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -47,7 +51,6 @@ H5F_contig_write(H5F_t *f, hsize_t max_data, haddr_t addr,
     const size_t size, hid_t dxpl_id, const void *buf);
 
 /* Interface initialization */
-#define PABLO_MASK	H5Fcontig_mask
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
