@@ -153,7 +153,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-gridstorage=INC,LIB     Use the Globus Grid Storage driver [default=no]"
 ac_help="$ac_help
-  --with-Stream-VFD       Build the Stream Virtual File Driver [default=no]"
+  --with-stream-vfd       Build the Stream Virtual File Driver [default=no]"
 ac_help="$ac_help
   --with-pthread=INC,LIB  Use the Pthreads library"
 ac_help="$ac_help
@@ -7456,9 +7456,9 @@ fi
 
 echo $ac_n "checking for Stream Virtual File Driver support""... $ac_c" 1>&6
 echo "configure:7459: checking for Stream Virtual File Driver support" >&5
-# Check whether --with-Stream-VFD or --without-Stream-VFD was given.
-if test "${with_Stream_VFD+set}" = set; then
-  withval="$with_Stream_VFD"
+# Check whether --with-stream-vfd or --without-stream-vfd was given.
+if test "${with_stream_vfd+set}" = set; then
+  withval="$with_stream_vfd"
   :
 else
   withval=no
