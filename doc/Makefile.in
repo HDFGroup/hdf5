@@ -8,12 +8,6 @@
 # reinvokes make in the various subdirectories.
 # You can alternatively invoke make from each subdirectory manually.
 #
-# This is just a preliminary version.  It turns the "install" and
-# "uninstall" targets to "install-doc" and "uninstall-doc" targets
-# for subdirectories.  This should be revised to more correct
-# separate targets as "install-all", "install" and "install-doc"
-# whereas "install-all" does both "install" and "install-doc".
-#
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
@@ -24,7 +18,7 @@ VPATH=.:@srcdir@
 SUBDIRS=html
 
 ##===========================================================================
-lib progs check test _test:
+lib progs check test _test install uninstall:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
@@ -37,14 +31,14 @@ tests TAGS dep depend:
 $(docdir):
 	mkdir $@ && chmod 755 $@
 
-install: $(docdir)
+install-doc: $(docdir)
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@-doc) || exit 1;			      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
-uninstall:
+uninstall-doc:
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@-doc) || exit 1;			      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
