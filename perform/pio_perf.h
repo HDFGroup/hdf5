@@ -10,6 +10,11 @@
 #include "pio_timer.h"
 #include "H5private.h"
 
+/* setup the dataset no fill option if this is v1.5 or more */
+#if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4
+#define H5_HAVE_NOFILL 1
+#endif
+
 typedef enum iotype_ {
     POSIXIO,
     MPIO,
