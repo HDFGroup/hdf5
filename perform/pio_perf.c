@@ -1148,6 +1148,7 @@ usage(const char *prog)
 
     if (myrank == 0) {
         fflush(stdout);
+	print_version(prog);
         printf("usage: %s [OPTIONS]\n", prog);
         printf("  OPTIONS\n");
         printf("     -h, --help                  Print a usage message and exit\n");
@@ -1164,6 +1165,7 @@ usage(const char *prog)
         printf("     -F N, --num-files=N         Number of files [default: 1]\n");
         printf("     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
         printf("     -n, --no-fill               Don't write fill values to HDF5 dataset\n");
+        printf("                                 (Supported in HDF5 library v1.5 only)\n");
         printf("                                 [default: off (i.e. write fill values)]\n");
         printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
         printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
@@ -1177,11 +1179,11 @@ usage(const char *prog)
         printf("  F  - is a filename.\n");
         printf("  N  - is an integer >=0.\n");
         printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
-        printf("          K - Kilobyte\n");
-        printf("          M - Megabyte\n");
-        printf("          G - Gigabyte\n");
+        printf("          K - Kilobyte (%d)\n", ONE_KB);
+        printf("          M - Megabyte (%d)\n", ONE_MB);
+        printf("          G - Gigabyte (%d)\n", ONE_GB);
         printf("\n");
-        printf("      Example: 37M = 37 Megabytes\n");
+        printf("      Example: 37M = 37 Megabytes = %d bytes\n", 37*ONE_MB);
         printf("\n");
         printf("  AL - is an API list. Valid values are:\n");
         printf("          phdf5 - Parallel HDF5\n");
