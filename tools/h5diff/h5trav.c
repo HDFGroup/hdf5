@@ -163,7 +163,7 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
  H5G_stat_t statbuf;
 
  if (H5Gget_objinfo( loc_id, name, FALSE, &statbuf) < 0 )
-  return 1;
+  return -1;
 
  ((info_t *)op_data)->type = statbuf.type;
  ((info_t *)op_data)->name = (char *)HDstrdup(name);
