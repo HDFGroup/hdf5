@@ -167,7 +167,6 @@ dnl
 AC_CHECK_LIB(m,ceil)
 AC_CHECK_LIB(nsl,xdr_int)	dnl ...for Solaris and hdf4
 AC_CHECK_LIB(coug,main)		dnl ...for ASCI/Red
-AC_CHECK_LIB(jpeg,main)		dnl ...required for linking hdf4 apps
 
 dnl ----------------------------------------------------------------------
 dnl Check for system header files.
@@ -268,6 +267,60 @@ case $HSIZET in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl Is HDF4 present?  If so then we can compile the h5toh4 converter. We
+dnl assume h5toh4 can be compiled and then prove otherwise when we don't find
+dnl a header file or library.
+dnl
+AC_SUBST(H5TOH4)
+H5TOH4=h5toh4
+AC_SUBST(TESTH5TOH4)
+TESTH5TOH4='$(srcdir)/testh5toh4'
+
+AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=[/usr/ncsa/include,/usr/ncsa/lib])
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(z,main,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(jpeg,main,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
+	;;
+    no)
+	AC_MSG_CHECKING(for HDF4)
+	AC_MSG_RESULT(suppressed)
+	unset H5TOH4 TESTH5TOH4
+	;;
+    *)
+	hdf4_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$hdf4_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
+	    AC_CHECK_HEADERS(mfhdf.h,,
+	        CPPFLAGS="$saved_CPPFLAGS"
+	        unset H5TOH4 TESTH5TOH4
+            )
+	else
+	    AC_CHECK_HEADERS(mfhdf.h)
+	fi
+	
+	hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$hdf4_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$hdf4_lib"
+	    AC_CHECK_LIB(z,main,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(jpeg,main,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
+	else
+	    AC_CHECK_LIB(z,main,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(jpeg,main,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(df,main)
+	    AC_CHECK_LIB(mfhdf,main)
+	fi
+	;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
 dnl `-lz' and their locations might be specified with the `--enable-zlib'
 dnl command-line switch.  The value is an include path and/or a library path.
@@ -305,55 +358,6 @@ case $withval in
 	fi
 	;;
 esac
-	
-dnl ----------------------------------------------------------------------
-dnl Is HDF4 present?  If so then we can compile the h5toh4 converter. We
-dnl assume h5toh4 can be compiled and then prove otherwise when we don't find
-dnl a header file or library.
-dnl
-AC_SUBST(H5TOH4)
-H5TOH4=h5toh4
-AC_SUBST(TESTH5TOH4)
-TESTH5TOH4='$(srcdir)/testh5toh4'
-
-AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=[/usr/ncsa/include,/usr/ncsa/lib])
-case $withval in
-    yes)
-	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
-	;;
-    no)
-	AC_MSG_CHECKING(for HDF4)
-	AC_MSG_RESULT(suppressed)
-	unset H5TOH4 TESTH5TOH4
-	;;
-    *)
-	hdf4_inc="`echo $withval |cut -f1 -d,`"
-	if test "X" != "$hdf4_inc"; then
-	    saved_CPPFLAGS="$CPPFLAGS"
-	    CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
-	    AC_CHECK_HEADERS(mfhdf.h,,
-	        CPPFLAGS="$saved_CPPFLAGS"
-	        unset H5TOH4 TESTH5TOH4
-            )
-	else
-	    AC_CHECK_HEADERS(mfhdf.h)
-	fi
-	
-	hdf4_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$hdf4_lib"; then
-	    saved_LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -L$hdf4_lib"
-	    AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
-	else
-	    AC_CHECK_LIB(df,main)
-	    AC_CHECK_LIB(mfhdf,main)
-	fi
-	;;
-esac
-
 
 dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
