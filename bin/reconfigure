@@ -4,9 +4,12 @@
 # has the paths of autoconf and automake hardcoded to work on HDF
 # machines.  Thus is enforces that HDF5 always uses the
 # same versions of autotools.
-# Uses automake version 1.6.3
+# Uses automake version 1.9.5
 # Uses autoconf version 2.59
 # Includes macros from libtool version 1.4.2
+#
+# When upgrading automake's version, don't forget to also update its
+# helper utilities, especially depcomp.
 
 # The autotools live in AFS, so as long as their paths don't change
 # and this machine has the right version of m4, this script should
@@ -24,8 +27,8 @@ PATH=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin:$PATH
   echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
   /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
 
-  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign
-  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign
+  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign --add-missing
+  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign --add-missing
 
   echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
   /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
