@@ -12,13 +12,13 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/****************************************************************************
-*                                                                           *
-* MODIFICATIONS                                                             *
-*	Robb Matzke, 30 Aug 1997                                            *
-*	Added `ERRORS' fields to function prologues.                        *
-*                                                                           *  
-****************************************************************************/
+/*****************************************************************************
+ *                                                                           *
+ * MODIFICATIONS                                                             *
+ *      Robb Matzke, 30 Aug 1997                                             *
+ *      Added `ERRORS' fields to function prologues.                         *
+ *                                                                           *  
+ ****************************************************************************/
 
 /* $Id$ */
 
@@ -27,6 +27,7 @@
 /* Predefined file drivers */
 #include "H5FDcore.h"		/*temporary in-memory files		  */
 #include "H5FDfamily.h"		/*family of files			  */
+#include "H5FDfphdf5.h"		/*FPHDF5                                  */
 #include "H5FDgass.h"           /*GASS I/O                                */
 #include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
 #include "H5FDmpio.h"		/*MPI-2 I/O				  */
@@ -46,6 +47,7 @@
 #include "H5Fpkg.h"             /*file access                             */
 #include "H5FDprivate.h"	/*file driver				  */
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5FPprivate.h"        /*Flexible Parallel HDF5                  */
 #include "H5Iprivate.h"		/*object IDs				  */
 #include "H5Gprivate.h"		/*symbol tables				  */
 #include "H5MMprivate.h"	/*core memory management		  */
@@ -326,6 +328,9 @@ H5F_init_interface(void)
 #ifdef H5_HAVE_PARALLEL
 	if ((status=H5FD_MPIO)<0) goto end_registration;
 	if ((status=H5FD_MPIPOSIX)<0) goto end_registration;
+#ifdef H5_HAVE_FPHDF5
+	if ((status=H5FD_FPHDF5)<0) goto end_registration;
+#endif /* H5_HAVE_FPHDF5 */
 #endif /* H5_HAVE_PARALLEL */
 #ifdef H5_HAVE_STREAM
 	if ((status=H5FD_STREAM)<0) goto end_registration;
@@ -1642,7 +1647,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 	--f->nrefs;
     }
 
-done:    
+done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1873,6 +1878,33 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * empty or not.
      */
     if (0==H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
+        /*
+         * We've just opened a fresh new file (or truncated one). We need
+         * to write the superblock.
+         */
+#ifdef H5_HAVE_FPHDF5
+        /*
+         * If this is an FPHDF5 driver, then we want to set a property
+         * which says so and that only the captain process will be able
+         * to allocate things for the duration. That is, only the captain
+         * process should allocate the superblock of a file.
+         */
+        if (H5FD_is_fphdf5_driver(lf)) {
+            unsigned value = 1;
+            H5P_genplist_t *d_plist;
+
+            /* Get the data xfer property list */
+            if ((d_plist = H5I_object(dxpl_id)) == NULL)
+                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a dataset transfer list");
+
+            /* Set that only captain should allocate */
+            if (H5P_insert(d_plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY,
+                           H5FD_FPHDF5_CAPTN_ALLOC_SIZE, &value,
+                           NULL, NULL, NULL, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't insert FPHDF5 property");
+        }
+#endif  /* H5_HAVE_FPHDF5 */
+
         /* Get values to cache from the FCPL */
         if(H5P_get(c_plist, H5F_CRT_ADDR_BYTE_NUM_NAME,&shared->sizeof_addr)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number in an address");
@@ -1900,7 +1932,24 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	/* Create and open the root group */
 	if (H5G_mkroot(file, dxpl_id, NULL)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group");
-	
+
+#ifdef H5_HAVE_FPHDF5
+        /*
+         * If this is an FPHDF5 driver, then remove the property which
+         * says so since we're allocating the superblock.
+         */
+        if (H5FD_is_fphdf5_driver(lf)) {
+            H5P_genplist_t *d_plist;
+
+            /* Get the data xfer property list */
+            if ((d_plist = H5I_object(dxpl_id)) == NULL)
+                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a dataset transfer list");
+
+            if (H5P_remove(dxpl_id, d_plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, NULL,
+                            "can't remove FPHDF5 property");
+        }
+#endif  /* H5_HAVE_FPHDF5 */
     } else if (1==shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
 	if (HADDR_UNDEF==(shared->boot_addr=H5F_locate_signature(lf,dxpl_id)))
@@ -2463,10 +2512,11 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     FUNC_ENTER_NOINIT(H5F_flush);
 
     /*
-     * Nothing to do if the file is read only.	This determination is made at
-     * the shared open(2) flags level, implying that opening a file twice,
-     * once for read-only and once for read-write, and then calling
-     * H5F_flush() with the read-only handle, still causes data to be flushed.
+     * Nothing to do if the file is read only.	This determination is
+     * made at the shared open(2) flags level, implying that opening a
+     * file twice, once for read-only and once for read-write, and then
+     * calling H5F_flush() with the read-only handle, still causes data
+     * to be flushed.
      */
     if (0 == (H5F_ACC_RDWR & f->shared->flags))
 	HGOTO_DONE(SUCCEED);
@@ -2622,31 +2672,56 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     if (flags & H5F_FLUSH_ALLOC_ONLY) {
 	haddr_t addr;
 
-	/*
-         * Allocate space for the userblock, superblock, and driver info
-         * block. We do it with one allocation request because the
-         * userblock and superblock need to be at the beginning of the
-         * file and only the first allocation request is required to
-         * return memory at format address zero.
-	 */
-        H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
-	addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-                          ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
+#ifdef H5_HAVE_FPHDF5
+        /*
+         * If this is an FPHDF5 file driver, then we only want the
+         * captain process allocating the space. The rest of the
+         * processes should just get the broadcast message sent from the
+         * captain.
+         */
+        if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
+                H5FD_fphdf5_is_captain(f->shared->lf)) {
+#endif  /* H5_HAVE_FPHDF5 */
 
-	if (HADDR_UNDEF == addr)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+            /*
+             * Allocate space for the userblock, superblock, and driver
+             * info block. We do it with one allocation request because
+             * the userblock and superblock need to be at the beginning
+             * of the file and only the first allocation request is
+             * required to return memory at format address zero.
+             */
+            H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
+
+            addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                              ((hsize_t)f->shared->base_addr +
+                                            superblock_size + driver_size));
+
+#ifdef H5_HAVE_FPHDF5
+        }
+
+        if (H5FD_is_fphdf5_driver(f->shared->lf)) {
+            int mrc;
+
+            if ((mrc = MPI_Bcast(&addr, 1, HADDR_AS_MPI_TYPE,
+                                 (int)H5FP_capt_barrier_rank,
+                                 H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mrc);
+        }
+#endif  /* H5_HAVE_FPHDF5 */
+
+        if (HADDR_UNDEF == addr)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
                         "unable to allocate file space for userblock and/or superblock");
-
-	if (0 != addr)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+        if (0 != addr)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
                         "file driver failed to allocate userblock and/or superblock at address zero");
 
-	/*
-	 * The file driver information block begins immediately after the
-	 * superblock.
-	 */
-	if (driver_size > 0)
-	    f->shared->driver_addr = superblock_size;
+        /*
+         * The file driver information block begins immediately after
+         * the superblock.
+         */
+        if (driver_size > 0)
+            f->shared->driver_addr = superblock_size;
     } else {
         /* Compute boot block checksum */
         assert(sizeof(chksum)==sizeof(f->shared->boot_chksum));
@@ -2688,11 +2763,25 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 	} /* end if */
     } /* end else */
 
-    /* If we're not just allocating... */
-    if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0)
-        /* ...flush file buffers to disk. */
-        if (H5FD_flush(f->shared->lf, dxpl_id, (flags&H5F_FLUSH_CLOSING)>0) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
+#ifdef H5_HAVE_FPHDF5
+    /*
+     * We only want the captain to perform the flush of the metadata to
+     * the file.
+     */
+    if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
+            H5FD_fphdf5_is_captain(f->shared->lf)) {
+#endif  /* H5_HAVE_FPHDF5 */
+
+        /* If we're not just allocating... */
+        if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0)
+            /* ...flush file buffers to disk. */
+            if (H5FD_flush(f->shared->lf, dxpl_id,
+                           (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
+
+#ifdef H5_HAVE_FPHDF5
+    }
+#endif  /* H5_HAVE_FPHDF5 */
 
     /* Check flush errors for children - errors are already on the stack */
     ret_value = (nerrors ? FAIL : SUCCEED);
@@ -2785,7 +2874,9 @@ H5F_close(H5F_t *f)
     } /* end if */
     f->mtab.nmounts = 0;
 
-    /* Close file according to close degree:
+    /*
+     * Close file according to close degree:
+     *
      *  H5F_CLOSE_WEAK:	if there are still objects open, wait until
      *			they are all closed.
      *  H5F_CLOSE_SEMI:	if there are still objects open, return fail;
@@ -2887,15 +2978,32 @@ H5F_close(H5F_t *f)
     } /* end switch */
 
     /* Only flush at this point if the file will be closed */
-    if(closing) {
-	/* Dump debugging info */
-	H5AC_debug(f);
-	H5F_istore_stats(f, FALSE);
+    if (closing) {
+#ifdef H5_HAVE_FPHDF5
+        /*
+         * We only want the captain to perform the flush of the metadata
+         * to the file.
+         */
+        if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
+                H5FD_fphdf5_is_captain(f->shared->lf)) {
+#endif  /* H5_HAVE_FPHDF5 */
 
-	/* Flush and destroy all caches */
-	if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                      H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
+            /* Dump debugging info */
+            H5AC_debug(f);
+            H5F_istore_stats(f, FALSE);
+
+            /* Flush and destroy all caches */
+            if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
+                          H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
+
+#ifdef H5_HAVE_FPHDF5
+        }
+
+        /* Wait for the captain to finish up... */
+        if (H5FD_is_fphdf5_driver(f->shared->lf))
+            MPI_Barrier(H5FP_SAP_BARRIER_COMM);
+#endif  /* H5_HAVE_FPHDF5 */
     } /* end if */
 
     /*

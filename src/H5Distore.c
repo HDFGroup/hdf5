@@ -1802,12 +1802,13 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 chunk_addr!=HADDR_UNDEF)
 
         /*
-         * If MPIO or MPIPOSIX is used and file can be written to, we must bypass the
-         * chunk-cache scheme because other MPI processes could be writing to
-         * other elements in the same chunk.
-         * Do a direct write-through of only the elements requested.
+         * If MPIO, MPIPOSIX, or FPHDF5 is used and file can be written
+         * to, we must bypass the chunk-cache scheme because other MPI
+         * processes could be writing to other elements in the same
+         * chunk.  Do a direct write-through of only the elements
+         * requested.
          */
-            || ((IS_H5FD_MPIO(f) ||IS_H5FD_MPIPOSIX(f)) && (H5F_ACC_RDWR & f->shared->flags))
+            || ((IS_H5FD_MPIO(f) ||IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) && (H5F_ACC_RDWR & f->shared->flags))
             ) {
             H5O_layout_t	l;	/* temporary layout */
 
@@ -1983,11 +1984,12 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 chunk_addr!=HADDR_UNDEF)
 
         /*
-         * If MPIO or MPIPOSIX is used, must bypass the chunk-cache scheme because other
-         * MPI processes could be writing to other elements in the same chunk.
-         * Do a direct write-through of only the elements requested.
+         * If MPIO, MPIPOSIX, or FPHDF5 is used, must bypass the
+         * chunk-cache scheme because other MPI processes could be
+         * writing to other elements in the same chunk.  Do a direct
+         * write-through of only the elements requested.
          */
-            || ((IS_H5FD_MPIO(f) ||IS_H5FD_MPIPOSIX(f)) && (H5F_ACC_RDWR & f->shared->flags))
+            || ((IS_H5FD_MPIO(f) ||IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) && (H5F_ACC_RDWR & f->shared->flags))
             ) {
             H5O_layout_t	l;	/* temporary layout */
 
