@@ -568,6 +568,46 @@ AC_CHECK_LIB(silo,lite_PD_open)
 AC_CHECK_HEADERS(pdb.h,PDB2HDF=pdb2hdf)
 
 dnl ----------------------------------------------------------------------
+dnl Is the Pthreads library present?  It has a header file `pthread.h' and
+dnl a library `-lpthread' and their locations might be specified with the
+dnl `--with-pthread' command-line switch.  The value is an include path
+dnl and/or a library path.  If the library path is specified then it must
+dnl be preceded by a comma.
+dnl
+
+AC_ARG_WITH(pthread,[  --with-pthread=INC,LIB  Use the Pthreads library],
+            ,withval=no)
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(pthread.h)
+	AC_CHECK_LIB(pthread, pthread_create)
+	;;
+    no)
+	AC_MSG_CHECKING(for pthread)
+	AC_MSG_RESULT(suppressed)
+	;;
+    *)
+	pthread_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$pthread_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$pthread_inc"
+	    AC_CHECK_HEADERS(pthread.h,,CPPFLAGS="$saved_CPPFLAGS")
+        else
+	    AC_CHECK_HEADERS(pthread.h)
+	fi
+
+	pthread_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$pthread_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$pthread_lib"
+	    AC_CHECK_LIB(pthread, pthread_create,,LDFLAGS="$saved_LDFLAGS")
+	else
+	    AC_CHECK_LIB(pthread, pthread_create)
+	fi
+	;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
 dnl Posix way to do this?
 dnl
