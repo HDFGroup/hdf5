@@ -1593,26 +1593,32 @@ struct h5dump_str_t tempstr;
 static void display_string
 (hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
  hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno) {
-hsize_t i, row_size=0;
-int j, m, x, y, z,  first_row=1;
-int free_space, long_string = 0;
-char p_buf[256], out_buf[NCOLS];
-
+	hsize_t i, row_size=0;
+	int j, m, x, y, z,  first_row=1;
+	int free_space, long_string = 0;
+	char out_buf[NCOLS];
+	struct h5dump_str_t tempstr;
+	
     out_buf[0] = '\0';
-    if ((indent+COL) > NCOLS) indent = 0;
-
+	
+	memset(&tempstr, 0, sizeof(h5dump_str_t));
+	
+	
+	h5dump_str_reset(&tempstr); 
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
-         row_size++;
-         h5dump_sprint(p_buf, NULL,p_type, sm_buf+i*p_type_nbytes);
-
-         free_space = NCOLS - indent - COL - strlen(out_buf);
+		row_size++;
+		
+		h5dump_str_reset(&tempstr);		
+		h5dump_sprint(&tempstr, NULL,p_type, sm_buf+i*p_type_nbytes);
+		
+		free_space = NCOLS - indent - COL - strlen(out_buf);
 
          if ((elmtno+i+1) == p_nelmts) { /* last element */
             /* 2 for double quotes */
-            if (((int)strlen(p_buf) + 2) > free_space) long_string = 1;
+            if (((int)strlen(tempstr.s) + 2) > free_space) long_string = 1;
          } else 
             /* 3 for double quotes and one comma */
-            if (((int)strlen(p_buf) + 3) > free_space) long_string = 1;
+            if (((int)strlen(tempstr.s) + 3) > free_space) long_string = 1;
 
          if (long_string) {
 
@@ -1631,14 +1637,14 @@ char p_buf[256], out_buf[NCOLS];
                  x = free_space - 5;
                  if (compound_data && first_row) {
                      printf("%s\"", out_buf);
-                     strncpy(out_buf, p_buf, x);
+                     strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
                      printf("%s\" //\n", out_buf);
                      first_row = 0;
                  } else {
                      indentation(indent+COL); 
                      printf("%s\"", out_buf);
-                     strncpy(out_buf, p_buf, x);
+                     strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
                      printf("%s\" //\n", out_buf);
                  }
@@ -1647,26 +1653,26 @@ char p_buf[256], out_buf[NCOLS];
 
              y = NCOLS - indent -COL - 5;
 
-             m = (strlen(p_buf) - x)/y;
+             m = (strlen(tempstr.s) - x)/y;
 
-             z = (strlen(p_buf) - x) % y;
+             z = (strlen(tempstr.s) - x) % y;
 
 
              for (j = 0; j < m - 1 ; j++) {
                   indentation(indent+COL);
-                  strncpy(out_buf, p_buf+x+j*y, y);
+                  strncpy(out_buf, tempstr.s+x+j*y, y);
                   out_buf[y] = '\0';
                   printf("\"%s\" //\n", out_buf);
              }
 
              if ((elmtno+i+1) == p_nelmts) { /* last element */
-                  if ((int)strlen(p_buf+x+j*y) > (NCOLS - indent - COL -2)) { /* 2 for double quotes */
+                  if ((int)strlen(tempstr.s+x+j*y) > (NCOLS - indent - COL -2)) { /* 2 for double quotes */
                      indentation(indent+COL);
-                     strncpy(out_buf, p_buf+x+j*y, y);
+                     strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
                      printf("\"%s\" //\n", out_buf);
                      indentation(indent+COL);
-                     printf("\"%s\"", p_buf+x+m*y);
+                     printf("\"%s\"", tempstr.s+x+m*y);
                      if (compound_data) {
                          if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
@@ -1677,7 +1683,7 @@ char p_buf[256], out_buf[NCOLS];
 
                   } else {
                      indentation(indent+COL);
-                     printf("\"%s\"", p_buf+x+j*y);
+                     printf("\"%s\"", tempstr.s+x+j*y);
                      if (compound_data) {
                          if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
@@ -1689,33 +1695,33 @@ char p_buf[256], out_buf[NCOLS];
                   }
                   out_buf[0] = '\0';
              } else if ( row_size == dim_n_size) {
-                  if ((int)strlen(p_buf+x+j*y) > (NCOLS - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
+                  if ((int)strlen(tempstr.s+x+j*y) > (NCOLS - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
                      indentation(indent+COL);
-                     strncpy(out_buf, p_buf+x+j*y, y);
+                     strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
                      printf("\"%s\" //\n", out_buf);
                      indentation(indent+COL);
-                     printf("\"%s\",\n", p_buf+x+m*y);
+                     printf("\"%s\",\n", tempstr.s+x+m*y);
                   } else {
                      indentation(indent+COL);
-                     printf("\"%s\",\n", p_buf+x+j*y);
+                     printf("\"%s\",\n", tempstr.s+x+j*y);
                   }
                   out_buf[0] = '\0';
                   row_size = 0;
 
              } else {
-                  if ((int)strlen(p_buf+x+j*y) > (NCOLS - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
+                  if ((int)strlen(tempstr.s+x+j*y) > (NCOLS - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
                      indentation(indent+COL);
-                     strncpy(out_buf, p_buf+x+j*y, y);
+                     strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
                      printf("\"%s\" //\n", out_buf);
                      strcpy(out_buf, "\"");
-                     strcat(out_buf, p_buf+x+m*y);
+                     strcat(out_buf, tempstr.s+x+m*y);
                      strcat(out_buf, "\",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   } else {
                      strcpy(out_buf, "\"");
-                     strcat (out_buf, p_buf+x+j*y);
+                     strcat (out_buf, tempstr.s+x+j*y);
                      strcat(out_buf, "\",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   }
@@ -1727,17 +1733,17 @@ char p_buf[256], out_buf[NCOLS];
             /* flush out_buf if it's end of a row */
             if (row_size == dim_n_size) {
                 if (compound_data && (elmtno+i+1) == dim_n_size) { /* 1st row */
-                    printf("%s\"%s\"", out_buf, p_buf);
+                    printf("%s\"%s\"", out_buf, tempstr.s);
                     first_row = 0;
                 } else {
                     indentation(indent+COL); 
-                    printf("%s\"%s\"", out_buf, p_buf);
+                    printf("%s\"%s\"", out_buf, tempstr.s);
                 }
 
                if ((elmtno+i+1) != p_nelmts) 
                    printf(",\n");
                else if (compound_data) {
-                       if ((NCOLS-strlen(out_buf)-strlen(p_buf)-indent-COL) < 2) {
+                       if ((NCOLS-strlen(out_buf)-strlen(tempstr.s)-indent-COL) < 2) {
                            /* 2 for space and ] */
                            printf("\n");
                            indentation(indent+COL-3);
@@ -1749,7 +1755,7 @@ char p_buf[256], out_buf[NCOLS];
                row_size = 0;
             } else {
                  strcat(out_buf, "\"");
-                 strcat(out_buf, p_buf);
+                 strcat(out_buf, tempstr.s);
                  strcat(out_buf, "\",");
                  if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " ");
             }
