@@ -75,6 +75,24 @@ int make_filters(hid_t loc_id)
    buf[i][j]=n++;
   }
  }
+
+ 
+/*-------------------------------------------------------------------------
+ * make several dataset with no filters
+ *-------------------------------------------------------------------------
+ */
+ for (i=0; i<4; i++)
+ {
+  sprintf(name,"dset%d",i+1);
+  if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf)<0)
+   return -1;
+ }
+
+ 
+/*-------------------------------------------------------------------------
+ * make several dataset with filters
+ *-------------------------------------------------------------------------
+ */
   
  /* create a space */
  if((sid = H5Screate_simple(RANK, dims, NULL))<0)
@@ -87,29 +105,22 @@ int make_filters(hid_t loc_id)
   goto out;
 
 /*-------------------------------------------------------------------------
- * make several dataset with no filters
- *-------------------------------------------------------------------------
- */
- for (i=0; i<4; i++)
- {
-  sprintf(name,"dset%d",i+1);
-  if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf)<0)
-   return -1;
- }
-/*-------------------------------------------------------------------------
  * SZIP
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_FILTER_SZIP
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
  if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
   goto out;
+#endif
 
 /*-------------------------------------------------------------------------
  * GZIP
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_FILTER_DEFLATE
  /* remove the filters from the dcpl */
  if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
   goto out;
@@ -118,6 +129,8 @@ int make_filters(hid_t loc_id)
   goto out;
  if (make_dset(loc_id,"dset_gzip",sid,dcpl,buf)<0)
   goto out;
+#endif
+
 
 /*-------------------------------------------------------------------------
  * shuffle
@@ -158,9 +171,11 @@ int make_filters(hid_t loc_id)
  /* set the checksum filter */
  if (H5Pset_fletcher32(dcpl)<0) 
   goto out;
+#ifdef H5_HAVE_FILTER_SZIP
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
+#endif
  if (make_dset(loc_id,"dset_all",sid,dcpl,buf)<0)
   goto out;
 
