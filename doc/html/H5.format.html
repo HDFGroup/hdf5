@@ -4,7 +4,7 @@
       HDF5 Disk-Format Specification
     </title>
   </head>
-  <body>
+  <body bgcolor="#FFFFFF">
     <center><h1>HDF5: Disk Format Implementation</h1></center>
 
     <ol type=I>
@@ -81,10 +81,97 @@
 
     <P>The format of a HDF5 file on disk encompasses several
       key ideas of the current HDF4 & AIO file formats as well as
-      addressing some short-comings therein.  The new format will be
-      more self-describing than the HDF4 format and will be more
+      addressing some short-comings therein.  The new format is
+      more self-describing than the HDF4 format and is more
       uniformly applied to data objects in the file.
       
+    <P>An HDF5 file can be thought of as a directed graph.  
+      The nodes of this graph are the higher-level HDF5 objects, 
+      including groups, datasets, datatypes, and dataspaces.  
+      This document describes the lower-level data objects used by 
+      the HDF5 library to represent those higher-level objects and 
+      their properties.
+
+    <P>At the lowest level, an HDF5 file is made up of the following 
+      objects:
+      <ul>
+         <li>A bool block
+         <li>B-tree nodes (containing either symbol nodes or raw data chunks)
+         <li>Object headers
+         <li>Collections
+         <li>Local heaps
+         <li>Free space
+      </ul>
+      As indicated above, the HDF5 library uses and interprets these 
+      low-level objects to describe the high-level HDF5 objects that 
+      are revealed to the user, and to higher-level applications, 
+      through the HDF5 APIs.
+
+<!--
+<blockquote>
+<pre>
+
+---------- Edit from here... -------------
+
+
+Once you know about all these low-level objects you can build bigger
+and better things, which is what most people are interested in and
+which are the objects that the hdf5 library exposes in the API.  They
+are:
+
+    * Groups
+    * Datasets
+    * Datatypes
+    * Data spaces
+
+For instance, a group is an object header that contains a message that
+points to a local heap and to a B-tree which points to symbol nodes.
+A dataset is an object header that contains messages that describe
+data type, space, layout, filters, external files, fill value, etc
+with the layout message pointing to either a raw data chunk or to a
+B-tree that points to raw data chunks.
+
+Elena>    Would it be more logical to discuss things in this order?
+
+Elena>          Intro ( What is HDF5 file, etc.)
+Elena>          File Header  
+Elena>          File Body
+Elena>               Objects
+Elena>                   Object Header
+Elena>                   Object Header Message Data 
+Elena> NOTE: give reference to the detailed discussion of the B-trees
+Elena>       when needed. Right now we do not have specification (only general one)
+Elena>       for the Symbol Table B-trees and B-trees used to manage chunked datasets.
+Elena>               B-trees
+Elena>                   General Discussion
+Elena>                   Object related discussions
+Elena>               Symbol Tables
+Elena>               Global heap
+Elena>               "Free-space object"
+
+That might be a good order for someone that's familiar with the API
+but if you're trying to get all the way down to the file format level
+it results in a lot of forward references in the documentation. It
+might be better to do a bottom-up documentation similar to the order I 
+used above:
+
+    * General file layout
+    * Boot block
+    * Format-level objects (B-trees, symbol nodes, object headers, etc).
+    * Object header messages
+    * High-level objects (datasets, groups, named types and spaces, etc)
+
+where "high-level objects" description mostly describes which object
+header messages are required, optional, mutually exclusive, etc. for
+each high-level object.
+
+---------- ...to here. -------------
+
+</pre>
+</blockquote>
+-->
+
+
 
     <P>Three levels of information compose the file format.  The level
       0 contains basic information for identifying and
