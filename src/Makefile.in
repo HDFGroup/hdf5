@@ -21,7 +21,7 @@ CLEAN=libhdf5.settings
 ## Source and object files for the library (lexicographically)...
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fistore.c \
     H5FD.c H5FDsec2.c H5FDfamily.c H5FDmpio.c H5FDcore.c H5FDdpss.c H5FDmulti.c\
-    H5FDgass.c H5FDqak.c H5FDsrb.c H5FDstdio.c H5FL.c H5G.c H5Gent.c H5Gnode.c \
+    H5FDgass.c H5FDsrb.c H5FDstdio.c H5FL.c H5G.c H5Gent.c H5Gnode.c \
     H5Gstab.c H5HG.c H5HL.c H5I.c H5MF.c H5MM.c H5O.c H5Oattr.c H5Ocomp.c \
     H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c H5Omtime.c H5Oname.c \
     H5Onull.c H5Osdspace.c H5Oshared.c H5Ostab.c H5P.c H5R.c H5RA.c H5S.c \
@@ -37,7 +37,7 @@ MOSTLYCLEAN=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
 ## Public header files (to be installed)...
 PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h \
     H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDdpss.h H5FDfamily.h H5FDgass.h \
-    H5FDmpio.h H5FDqak.h H5FDsec2.h H5FDsrb.h H5FDcore.h H5FDmulti.h H5FDstdio.h \
+    H5FDmpio.h H5FDsec2.h H5FDsrb.h H5FDcore.h H5FDmulti.h H5FDstdio.h \
     H5Gpublic.h H5HGpublic.h H5HLpublic.h H5Ipublic.h H5MMpublic.h \
     H5Opublic.h H5Ppublic.h H5Rpublic.h H5RApublic.h H5Spublic.h H5Tpublic.h \
     H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
