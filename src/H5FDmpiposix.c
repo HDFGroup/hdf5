@@ -214,7 +214,9 @@ static const H5FD_class_t H5FD_mpiposix_g = {
     H5FD_mpiposix_read,				/*read			*/
     H5FD_mpiposix_write,			/*write			*/
     H5FD_mpiposix_flush,			/*flush			*/
-    H5FD_FLMAP_SINGLE,				/*fl_map		*/
+    NULL,                                       /*lock                  */
+    NULL,                                       /*unlock                */
+    H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
 /* Global var to allow elimination of redundant metadata writes

@@ -168,35 +168,36 @@ static herr_t  H5FD_stream_write (H5FD_t *_stream, H5FD_mem_t type,
                                   size_t size, const void *buf);
 
 /* The Stream VFD's class information structure */
-static const H5FD_class_t H5FD_stream_g =
-{
-  "stream",                         /* name                                */
-  MAXADDR,                          /* maxaddr                             */
-  H5F_CLOSE_WEAK,		    /* fc_degree			   */
-  NULL,                             /* sb_size                             */
-  NULL,                             /* sb_encode                           */
-  NULL,                             /* sb_decode                           */
-  sizeof (H5FD_stream_fapl_t),      /* fapl_size                           */
-  H5FD_stream_fapl_get,             /* fapl_get                            */
-  NULL,                             /* fapl_copy                           */
-  NULL,                             /* fapl_free                           */
-  0,                                /* dxpl_size                           */
-  NULL,                             /* dxpl_copy                           */
-  NULL,                             /* dxpl_free                           */
-  H5FD_stream_open,                 /* open                                */
-  H5FD_stream_close,                /* close                               */
-  NULL,                             /* cmp                                 */
-  H5FD_stream_query,                /* query                               */
-  NULL,                             /* alloc                               */
-  NULL,                             /* free                                */
-  H5FD_stream_get_eoa,              /* get_eoa                             */
-  H5FD_stream_set_eoa,              /* set_eoa                             */
-  H5FD_stream_get_eof,              /* get_eof                             */
-  H5FD_stream_get_handle,           /* get_handle                          */
-  H5FD_stream_read,                 /* read                                */
-  H5FD_stream_write,                /* write                               */
-  H5FD_stream_flush,                /* flush                               */
-  H5FD_FLMAP_SINGLE,                /* fl_map                              */
+static const H5FD_class_t H5FD_stream_g = {
+    "stream",                                   /*name                  */
+    MAXADDR,                                    /*maxaddr               */
+    H5F_CLOSE_WEAK,                             /*fc_degree             */
+    NULL,                                       /*sb_size               */
+    NULL,                                       /*sb_encode             */
+    NULL,                                       /*sb_decode             */
+    sizeof (H5FD_stream_fapl_t),                /*fapl_size             */
+    H5FD_stream_fapl_get,                       /*fapl_get              */
+    NULL,                                       /*fapl_copy             */
+    NULL,                                       /*fapl_free             */
+    0,                                          /*dxpl_size             */
+    NULL,                                       /*dxpl_copy             */
+    NULL,                                       /*dxpl_free             */
+    H5FD_stream_open,                           /*open                  */
+    H5FD_stream_close,                          /*close                 */
+    NULL,                                       /*cmp                   */
+    H5FD_stream_query,                          /*query                 */
+    NULL,                                       /*alloc                 */
+    NULL,                                       /*free                  */
+    H5FD_stream_get_eoa,                        /*get_eoa               */
+    H5FD_stream_set_eoa,                        /*set_eoa               */
+    H5FD_stream_get_eof,                        /*get_eof               */
+    H5FD_stream_get_handle,                     /*get_handle            */
+    H5FD_stream_read,                           /*read                  */
+    H5FD_stream_write,                          /*write                 */
+    H5FD_stream_flush,                          /*flush                 */
+    NULL,                                       /*lock                  */
+    NULL,                                       /*unlock                */
+    H5FD_FLMAP_SINGLE                           /*fl_map                */
 };
 
 /* Interface initialization */
