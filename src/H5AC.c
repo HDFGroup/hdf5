@@ -311,7 +311,14 @@ H5AC_compare(const void *_a, const void *_b)
 
     assert(current_cache_g);
 
-    if (NULL == current_cache_g->slot[a]->type) {
+    if(NULL==current_cache_g->slot[a]) {
+        if (NULL == current_cache_g->slot[b]) {
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+    else if (NULL == current_cache_g->slot[a]->type) {
         if (NULL == current_cache_g->slot[b]->type) {
             return 0;
         } else {
@@ -412,7 +419,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
             if (NULL == (*info))
                 continue;
 #endif
-            if ((*info) || type == (*info)->type) {
+            if (!type || type == (*info)->type) {
                 flush = (*info)->type->flush;
                 status = (flush)(f, destroy, (*info)->addr, (*info));
                 if (status < 0) {
