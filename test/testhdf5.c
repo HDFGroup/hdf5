@@ -170,6 +170,7 @@ main(int argc, char *argv[])
     InitTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration");
     InitTest("array", test_array, cleanup_array,  "Array Datatypes");
     InitTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties");
+    InitTest("misc", test_misc, cleanup_misc,  "Miscellaneous");
 
     Verbosity = 4;              /* Default Verbosity is Low */
     H5get_libversion(&major, &minor, &release);

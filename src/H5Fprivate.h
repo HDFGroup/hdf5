@@ -169,6 +169,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_addr_cmp(X,Y)	(H5F_addr_eq(X,Y)?0:			      \
 				 (H5F_addr_lt(X, Y)?-1:1))
 #define H5F_addr_pow2(N)	((haddr_t)1<<(N))
+#define H5F_addr_overlap(O1,L1,O2,L2) ((O1<O2 && (O1+L1)>O2) ||               \
+                                 (O1>=O2 && O1<(O2+L2)))
 
 /* size of size_t and off_t as they exist on disk */
 #ifdef H5F_PACKAGE

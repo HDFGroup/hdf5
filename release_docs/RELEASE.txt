@@ -91,6 +91,8 @@ Bug Fixes since HDF5-1.4.2 Release
       option).
     * Fixed bug where variable-length datatypes for attributes was not working
       correctly.
+    * Fixed bug where raw data re-allocated from the free-list would sometimes
+      overlap with the metadata accumulator and get corrupted. QAK - 1/23/02
 
 
 Documentation
