@@ -61,14 +61,14 @@ void write_dset_in(hid_t loc_id,
  herr_t  status;
  int     val, i, j, k, n;
  float   f;
- int     fillvalue=2;
 
  /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
+ hsize_t    dims1r[1]={1};
  char       buf1[2][2]= {"ab","de"};        /* string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
- hobj_ref_t buf4[2];                        /* reference */
+ hobj_ref_t buf4[1];                        /* reference */
  e_t        buf45[2]= {RED,GREEN};          /* enum */
  hvl_t      buf5[2];                        /* vlen */
  hsize_t    dimarray[1]={3};                /* array dimension */
@@ -78,10 +78,11 @@ void write_dset_in(hid_t loc_id,
 
  /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
+ hsize_t    dims2r[2]={1,1};
  char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
- hobj_ref_t buf42[3][2];                                          /* reference */
+ hobj_ref_t buf42[1][1];                                          /* reference */
  hvl_t      buf52[3][2];                                          /* vlen */
  int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
  int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
@@ -89,12 +90,13 @@ void write_dset_in(hid_t loc_id,
 
  /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
+ hsize_t    dims3r[3]={1,1,1};
  char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
  "rs","tu","vw","xz","AB","CD","EF","GH",
  "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
- hobj_ref_t buf43[4][3][2];    /* reference */
+ hobj_ref_t buf43[1][1][1];    /* reference */
  hvl_t      buf53[4][3][2];    /* vlen */
  int        buf63[24][3];      /* array */
  int        buf73[4][3][2];    /* integer */
@@ -192,8 +194,7 @@ void write_dset_in(hid_t loc_id,
  if (dset_name)
  {
   status=H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,-1);
-  status=H5Rcreate(&buf4[1],file_id,dset_name,H5R_OBJECT,-1);
-  write_dset(loc_id,1,dims,"reference to object ",H5T_STD_REF_OBJ,buf4);
+  write_dset(loc_id,1,dims1r,"reference to object ",H5T_STD_REF_OBJ,buf4);
  }
 
  /* Dataset region reference ( H5R_DATASET_REGION  )  */
@@ -347,12 +348,12 @@ void write_dset_in(hid_t loc_id,
  /* Create references to dataset */
  if (dset_name)
  {
-  for (i = 0; i < 3; i++) {
-   for (j = 0; j < 2; j++) {
+  for (i = 0; i < 1; i++) {
+   for (j = 0; j < 1; j++) {
     status=H5Rcreate(&buf42[i][j],file_id,dset_name,H5R_OBJECT,-1);
    }
   }
-  write_dset(loc_id,2,dims2,"reference to object 2D",H5T_STD_REF_OBJ,buf42);
+  write_dset(loc_id,2,dims2r,"reference to object 2D",H5T_STD_REF_OBJ,buf42);
  }
 
 /*-------------------------------------------------------------------------
@@ -424,7 +425,6 @@ void write_dset_in(hid_t loc_id,
 
 
  plist_id = H5Pcreate(H5P_DATASET_CREATE);
- status = H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue);
  space_id = H5Screate_simple(2,dims2,NULL);
  dset_id = H5Dcreate(loc_id,"integer2D",H5T_NATIVE_INT,space_id,plist_id);
  status = H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf72);
@@ -525,13 +525,13 @@ void write_dset_in(hid_t loc_id,
  /* Create references to dataset */
  if (dset_name)
  {
-  for (i = 0; i < 4; i++) {
-   for (j = 0; j < 3; j++) {
-    for (k = 0; k < 2; k++)
+  for (i = 0; i < 1; i++) {
+   for (j = 0; j < 1; j++) {
+    for (k = 0; k < 1; k++)
      status=H5Rcreate(&buf43[i][j][k],file_id,dset_name,H5R_OBJECT,-1);
    }
   }
- write_dset(loc_id,3,dims3,"reference to object 3D",H5T_STD_REF_OBJ,buf43);
+ write_dset(loc_id,3,dims3r,"reference to object 3D",H5T_STD_REF_OBJ,buf43);
  }
 
 /*-------------------------------------------------------------------------
@@ -628,7 +628,7 @@ void write_dset_in(hid_t loc_id,
  */
 
 #define SPACE1_RANK 1
-#define SPACE1_DIM1 4
+#define SPACE1_DIM1 1
 #define SPACE2_RANK	2
 #define SPACE2_DIM1	10
 #define SPACE2_DIM2	10
@@ -646,7 +646,6 @@ static void make_dset_reg_ref(hid_t loc_id)
  hsize_t         stride[SPACE2_RANK];    /* Stride of hyperslab */
  hsize_t         count[SPACE2_RANK];     /* Element count of hyperslab */
  hsize_t         block[SPACE2_RANK];     /* Block size of hyperslab */
- hssize_t        coord1[NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
  hdset_reg_ref_t *wbuf;  /* buffer to write to disk */
  int             *dwbuf; /* Buffer for writing numeric data to disk */
  int             i;      /* counting variables */
@@ -686,25 +685,9 @@ static void make_dset_reg_ref(hid_t loc_id)
  block[0]=1; block[1]=1;
  ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
  
- /* Store first dataset region */
+ /* Store dataset region */
  ret = H5Rcreate(&wbuf[0],loc_id,"dset referenced region",H5R_DATASET_REGION,sid2);
- 
- /* Select sequence of ten points for second reference */
- coord1[0][0]=6; coord1[0][1]=9;
- coord1[1][0]=2; coord1[1][1]=2;
- coord1[2][0]=8; coord1[2][1]=4;
- coord1[3][0]=1; coord1[3][1]=6;
- coord1[4][0]=2; coord1[4][1]=8;
- coord1[5][0]=3; coord1[5][1]=2;
- coord1[6][0]=0; coord1[6][1]=4;
- coord1[7][0]=9; coord1[7][1]=0;
- coord1[8][0]=7; coord1[8][1]=1;
- coord1[9][0]=3; coord1[9][1]=3;
- ret = H5Sselect_elements(sid2,H5S_SELECT_SET,NPOINTS,(const hssize_t **)coord1);
- 
- /* Store second dataset region */
- ret = H5Rcreate(&wbuf[1],loc_id,"dset referenced region",H5R_DATASET_REGION,sid2);
- 
+  
  /* Write selection to disk */
  ret=H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
  
