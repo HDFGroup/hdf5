@@ -400,6 +400,9 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 #   define CI_INC_DST(d) /* void */
 #endif
 
+/* Swap two elements (I & J) of an array using a temporary variable */
+#define H5_SWAP_BYTES(ARRAY,I,J) {uint8_t _tmp; _tmp=ARRAY[I]; ARRAY[I]=ARRAY[J]; ARRAY[J]=_tmp;}
+
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_noop
  *
@@ -444,6 +447,396 @@ H5T_conv_noop(hid_t UNUSED src_id, hid_t UNUSED dst_id, H5T_cdata_t *cdata,
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_conv_order_opt
+ *
+ * Purpose:	Convert one type to another when byte order is the only
+ *		difference. This is the optimized version of H5T_conv_order()
+ *              for a handful of different sizes.
+ *
+ * Note:	This is a soft conversion function.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, January 25, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+                   hsize_t nelmts, size_t buf_stride,
+                   size_t UNUSED bkg_stride, void *_buf,
+                   void UNUSED *background, hid_t UNUSED dset_xfer_plist)
+{
+    uint8_t	*buf = (uint8_t*)_buf;
+    H5T_t	*src = NULL;
+    H5T_t	*dst = NULL;
+    hsize_t	i;
+
+    FUNC_ENTER(H5T_conv_order_opt, FAIL);
+
+    switch (cdata->command) {
+    case H5T_CONV_INIT:
+	/* Capability query */
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
+	    NULL == (src = H5I_object(src_id)) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
+	    NULL == (dst = H5I_object(dst_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	if (src->size != dst->size ||
+	    0 != src->u.atomic.offset ||
+	    0 != dst->u.atomic.offset ||
+	    !((H5T_ORDER_BE == src->u.atomic.order &&
+	       H5T_ORDER_LE == dst->u.atomic.order) ||
+	      (H5T_ORDER_LE == src->u.atomic.order &&
+	       H5T_ORDER_BE == dst->u.atomic.order))) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "conversion not supported");
+	}
+        if (src->size!=1 && src->size!=2 && src->size!=4 &&
+            src->size!=8 && src->size!=16) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                          "conversion not supported");
+        }
+	switch (src->type) {
+	case H5T_INTEGER:
+	case H5T_BITFIELD:
+	    /* nothing to check */
+	    break;
+
+	case H5T_FLOAT:
+	    if (src->u.atomic.u.f.sign != dst->u.atomic.u.f.sign ||
+		src->u.atomic.u.f.epos != dst->u.atomic.u.f.epos ||
+		src->u.atomic.u.f.esize != dst->u.atomic.u.f.esize ||
+		src->u.atomic.u.f.ebias != dst->u.atomic.u.f.ebias ||
+		src->u.atomic.u.f.mpos != dst->u.atomic.u.f.mpos ||
+		src->u.atomic.u.f.msize != dst->u.atomic.u.f.msize ||
+		src->u.atomic.u.f.norm != dst->u.atomic.u.f.norm ||
+		src->u.atomic.u.f.pad != dst->u.atomic.u.f.pad) {
+		HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			      "conversion not supported");
+	    }
+	    break;
+
+	default:
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "conversion not supported");
+	}
+	cdata->need_bkg = H5T_BKG_NO;
+	break;
+
+    case H5T_CONV_CONV:
+	/* The conversion */
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
+	    NULL == (src = H5I_object(src_id)) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
+	    NULL == (dst = H5I_object(dst_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+
+        buf_stride = buf_stride ? buf_stride : src->size;
+        switch (src->size) {
+        case 1:
+            /*no-op*/
+            break;
+        case 2:
+            for (/*void*/; nelmts>=20; nelmts-=20) {
+                H5_SWAP_BYTES(buf, 0,   1); /*  0 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  1 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  2 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  3 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  4 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  5 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  6 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  7 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  8 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /*  9 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 10 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 11 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 12 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 13 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 14 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 15 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 16 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 17 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 18 */
+                buf += buf_stride; 
+                H5_SWAP_BYTES(buf, 0,   1); /* 19 */
+                buf += buf_stride;
+            }
+            for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                H5_SWAP_BYTES(buf, 0, 1);
+            }
+            break;
+        case 4:
+            for (/*void*/; nelmts>=20; nelmts-=20) {
+                H5_SWAP_BYTES(buf,  0,  3); /*  0 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  1 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  2 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  3 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  4 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  5 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  6 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  7 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  8 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /*  9 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 10 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 11 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 12 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 13 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 14 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 15 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 16 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 17 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 18 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  3); /* 19 */
+                H5_SWAP_BYTES(buf,  1,  2);
+                buf += buf_stride;
+            }
+            for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                H5_SWAP_BYTES(buf, 0, 3);
+                H5_SWAP_BYTES(buf, 1, 2);
+            }
+            break;
+        case 8:
+            for (/*void*/; nelmts>=10; nelmts-=10) {
+                H5_SWAP_BYTES(buf,  0,  7); /*  0 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  1 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  2 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  3 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  4 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  5 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  6 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  7 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  8 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,  0,  7); /*  9 */
+                H5_SWAP_BYTES(buf,  1,  6);
+                H5_SWAP_BYTES(buf,  2,  5);
+                H5_SWAP_BYTES(buf,  3,  4);
+                buf += buf_stride;
+            }
+            for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                H5_SWAP_BYTES(buf, 0, 7);
+                H5_SWAP_BYTES(buf, 1, 6);
+                H5_SWAP_BYTES(buf, 2, 5);
+                H5_SWAP_BYTES(buf, 3, 4);
+            }
+            break;
+        case 16:
+            for (/*void*/; nelmts>=10; nelmts-=10) {
+                H5_SWAP_BYTES(buf,   0,  15); /*  0 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  1 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  2 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  3 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  4 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  5 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  6 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  7 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  8 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+                H5_SWAP_BYTES(buf,   0,  15); /*  9 */
+                H5_SWAP_BYTES(buf,   1,  14);
+                H5_SWAP_BYTES(buf,   2,  13);
+                H5_SWAP_BYTES(buf,   3,  12);
+                H5_SWAP_BYTES(buf,   4,  11);
+                H5_SWAP_BYTES(buf,   5,  10);
+                H5_SWAP_BYTES(buf,   6,   9);
+                H5_SWAP_BYTES(buf,   7,   8);
+                buf += buf_stride;
+            }
+            for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                H5_SWAP_BYTES(buf, 0, 15);
+                H5_SWAP_BYTES(buf, 1, 14);
+                H5_SWAP_BYTES(buf, 2, 13);
+                H5_SWAP_BYTES(buf, 3, 12);
+                H5_SWAP_BYTES(buf, 4, 11);
+                H5_SWAP_BYTES(buf, 5, 10);
+                H5_SWAP_BYTES(buf, 6,  9);
+                H5_SWAP_BYTES(buf, 7,  8);
+            }
+            break;
+        }
+        break;
+
+    case H5T_CONV_FREE:
+	/* Free private data */
+	break;
+
+    default:
+	HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+		       "unknown conversion command");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_conv_order
  *
  * Purpose:	Convert one type to another when byte order is the only
@@ -464,6 +857,9 @@ H5T_conv_noop(hid_t UNUSED src_id, hid_t UNUSED dst_id, H5T_cdata_t *cdata,
  *
  * 		Robb Matzke, 1999-06-16
  *		Added support for bitfields.
+ *
+ *              Robb Matzke, 2002-01-24
+ *              Unrolled two loops by hand. Ugly code bug *much* faster.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -472,12 +868,9 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                void UNUSED *background, hid_t UNUSED dset_xfer_plist)
 {
     uint8_t	*buf = (uint8_t*)_buf;
-    uint8_t	tmp;
     H5T_t	*src = NULL;
     H5T_t	*dst = NULL;
-#ifdef NO_DUFFS_DEVICE
     hsize_t	i;
-#endif /* NO_DUFFS_DEVICE */
     size_t	j, md;
 
     FUNC_ENTER(H5T_conv_order, FAIL);
@@ -537,542 +930,13 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
 
-	md = src->size / 2;
-    buf_stride = buf_stride ? buf_stride : src->size;
-
-    /* Optimize for popular sizes */
-    if(nelmts>0) {
-        switch(md) {
-            case 1:     /* Swap 2-byte objects */
-#ifdef NO_DUFFS_DEVICE
-                for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                    /* Swap the byte pair */
-                    tmp = buf[0];
-                    buf[0] = buf[1];
-                    buf[1] = tmp;
-                }
-#else /* NO_DUFFS_DEVICE */
-    {
-    size_t duff_count = (nelmts + 7) / 8;
-
-              switch ((long)(nelmts % 8))
-                {
-                    case 0:
-                        do
-                          {
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                    case 7:
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                    case 6:
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                    case 5:
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                    case 4:
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                    case 3:
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                    case 2:
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                    case 1:
-                            /* Swap the byte pair */
-                            tmp = buf[0];
-                            buf[0] = buf[1];
-                            buf[1] = tmp;
-                            buf+=buf_stride;
-                          }
-                        while (--duff_count > 0);
-                }
-    }
-#endif /* NO_DUFFS_DEVICE */
-                break;
-
-            case 2:     /* Swap 4-byte objects */
-#ifdef NO_DUFFS_DEVICE
-                for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                    /* Swap the outer pair of bytes */
-                    tmp = buf[0];
-                    buf[0] = buf[3];
-                    buf[3] = tmp;
-
-                    /* Swap the inner pair of bytes */
-                    tmp = buf[1];
-                    buf[1] = buf[2];
-                    buf[2] = tmp;
-                }
-#else /* NO_DUFFS_DEVICE */
-    {
-    size_t duff_count = (nelmts + 7) / 8;
-
-              switch ((long)(nelmts % 8))
-                {
-                    case 0:
-                        do
-                          {
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 7:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 6:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 5:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 4:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 3:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 2:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 1:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[3];
-                            buf[3] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[2];
-                            buf[2] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                          }
-                        while (--duff_count > 0);
-                }
-    }
-#endif /* NO_DUFFS_DEVICE */
-                break;
-
-            case 4:     /* Swap 8-byte objects */
-#ifdef NO_DUFFS_DEVICE
-                for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                    /* Swap the outer pair of bytes */
-                    tmp = buf[0];
-                    buf[0] = buf[7];
-                    buf[7] = tmp;
-
-                    /* Swap the next-outer pair of bytes */
-                    tmp = buf[1];
-                    buf[1] = buf[6];
-                    buf[6] = tmp;
-
-                    /* Swap the next-next-outer pair of bytes */
-                    tmp = buf[2];
-                    buf[2] = buf[5];
-                    buf[5] = tmp;
-
-                    /* Swap the inner pair of bytes */
-                    tmp = buf[3];
-                    buf[3] = buf[4];
-                    buf[4] = tmp;
-                }
-#else /* NO_DUFFS_DEVICE */
-    {
-    size_t duff_count = (nelmts + 7) / 8;
-
-              switch ((long)(nelmts % 8))
-                {
-                    case 0:
-                        do
-                          {
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 7:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 6:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 5:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 4:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 3:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 2:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 1:
-                            /* Swap the outer pair of bytes */
-                            tmp = buf[0];
-                            buf[0] = buf[7];
-                            buf[7] = tmp;
-
-                            /* Swap the next-outer pair of bytes */
-                            tmp = buf[1];
-                            buf[1] = buf[6];
-                            buf[6] = tmp;
-
-                            /* Swap the next-next-outer pair of bytes */
-                            tmp = buf[2];
-                            buf[2] = buf[5];
-                            buf[5] = tmp;
-
-                            /* Swap the inner pair of bytes */
-                            tmp = buf[3];
-                            buf[3] = buf[4];
-                            buf[4] = tmp;
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                          }
-                        while (--duff_count > 0);
-                }
-    }
-#endif /* NO_DUFFS_DEVICE */
-                break;
-
-            default:    /* Swap n-byte objects */
-#ifdef NO_DUFFS_DEVICE
-                for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                    for (j=0; j<md; j++) {
-                        tmp = buf[j];
-                        buf[j] = buf[src->size-(j+1)];
-                        buf[src->size-(j+1)] = tmp;
-                    }
-                }
-#else /* NO_DUFFS_DEVICE */
-    {
-    size_t duff_count = (nelmts + 7) / 8;
-
-              switch ((long)(nelmts % 8))
-                {
-                    case 0:
-                        do
-                          {
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 7:
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 6:
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 5:
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 4:
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 3:
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 2:
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                    case 1:
-                            /* Generic byte-swapping loop */
-                            for (j=0; j<md; j++) {
-                                tmp = buf[j];
-                                buf[j] = buf[src->size-(j+1)];
-                                buf[src->size-(j+1)] = tmp;
-                            }
-
-                            /* Advance the pointer */
-                            buf+=buf_stride;
-                          }
-                        while (--duff_count > 0);
-                }
-    }
-#endif /* NO_DUFFS_DEVICE */
-                break;
-        } /* end switch */
-    } /* end if */
+        buf_stride = buf_stride ? buf_stride : src->size;
+        md = src->size / 2;
+        for (i=0; i<nelmts; i++, buf+=buf_stride) {
+            for (j=0; j<md; j++) {
+                H5_SWAP_BYTES(buf, j, src->size-(j+1));
+            }
+        }
 	break;
 
     case H5T_CONV_FREE:
