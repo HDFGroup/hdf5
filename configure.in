@@ -560,6 +560,28 @@ done
 rm maketest
 
 dnl ----------------------------------------------------------------------
+dnl pmake will throw an error if variables are undefined in a Makefile.
+dnl These errors can be changed to warnings using the -V flag.
+dnl
+AC_SUBST(AM_MAKEFLAGS) AM_MAKEFLAGS=""
+
+AC_MSG_CHECKING([whether make will build with undefined variables])
+
+  cat >maketest <<EOF
+foo: \$(UNDEFINED) \$(UNDEFINED2)
+	@echo \$(UNDEFINED3) works
+EOF
+
+  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no, setting -V flag])
+    AM_MAKEFLAGS="\-V"
+  fi
+
+rm maketest
+
+dnl ----------------------------------------------------------------------
 dnl Production flags?  Save the value in $CONFIG_MODE so we have it for
 dnl the record.
 dnl

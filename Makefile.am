@@ -21,6 +21,20 @@
 #
 # Top-level HDF5 Makefile(.in)
 
+# pmake has issues if variables are undefined.  Solve this problem in
+# top-level Makefile by defining all variables it complains about.
+# Configure should set AM_MAKEFLAGS to -V to solve this problem in
+# subdirectories.
+# NOTE: This means that invoking pmake in a subdirectory will not work.
+CONFIG_STATUS_DEPENDENCIES=
+TAGS_DEPENDENCIES=
+TAGS_FILES=
+HEADERS=
+SOURCES=
+TEXINFOS=
+EXTRA_DIST=
+LISP=
+
 include $(top_srcdir)/config/commence.am
 
 # Define subdirectories to build.
@@ -35,17 +49,27 @@ include $(top_srcdir)/config/commence.am
 # are cleaned as well).
 # Note that `make clean' will not affect the examples or doc directories. 
 
+# Conditionals.  These conditionals are defined during configure
+# Define each variable to empty if it is not used to placate pmake
 if BUILD_PARALLEL_CONDITIONAL
    TESTPARALLEL_DIR =testpar
+else
+   TESTPARALLEL_DIR=
 endif
 if BUILD_CXX_CONDITIONAL
    CXX_DIR =c++
+else
+   CXX_DIR=
 endif
 if BUILD_FORTRAN_CONDITIONAL
    FORTRAN_DIR =fortran
+else
+   FORTRAN_DIR=
 endif
 if BUILD_HDF5_HL_CONDITIONAL
    HDF5_HL_DIR =hl
+else
+   HDF5_HL_DIR=
 endif
 
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
@@ -63,17 +87,17 @@ test _test: check
 lib progs:
 	@@SETX@; for d in $(SUBDIRS); do                                \
           if test $$d != .; then                                        \
-	   (cd $$d && $(MAKE) $@) || exit 1;                            \
+	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
           fi;                                                           \
 	done
 
 # Make all and make tests also create tests in perform directory
 all-local:
-	cd perform && $(MAKE) all
+	cd perform && $(MAKE) $(AM_MAKEFLAGS) all
 tests:
 	@@SETX@; for d in $(SUBDIRS) perform; do                        \
           if test $$d != .; then                                        \
-	   (cd $$d && $(MAKE) $@) || exit 1;                            \
+	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
           fi;                                                           \
 	done
 
@@ -82,47 +106,47 @@ tests:
 clean-local:
 	@@SETX@; for d in docs examples perform; do                     \
 	  if test -f $$d/Makefile; then                                 \
-	    (cd $$d && $(MAKE) clean) || exit 1;                        \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) clean) || exit 1;        \
 	  fi;                                                           \
 	done
 
 mostlyclean-local:
 	@@SETX@; for d in docs examples perform; do                     \
 	  if test -f $$d/Makefile; then                                 \
-	    (cd $$d && $(MAKE) mostlyclean) || exit 1;                  \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1;  \
 	  fi;                                                           \
 	done
 
 # 'make install-all' also installs docs and examples
 install-all:
-	$(MAKE) install
-	$(MAKE) install-doc
+	$(MAKE) $(AM_MAKEFLAGS) install
+	$(MAKE) $(AM_MAKEFLAGS) install-doc
 uninstall-all:
-	$(MAKE) uninstall
-	$(MAKE) uninstall-doc
+	$(MAKE) $(AM_MAKEFLAGS) uninstall
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-doc
 
 # Install examples in this directory and recursively
 install-examples uninstall-examples:
 	@@SETX@; for d in examples $(HDF5_INTERFACES); do               \
-	    (cd $$d && $(MAKE) $@) || exit 1;                           \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
 	done
 
 # Install documentation and examples
 install-doc:
-	$(MAKE) install-examples
-	(cd doc && $(MAKE) $@) || exit 1;
+	$(MAKE) $(AM_MAKEFLAGS) install-examples
+	(cd doc && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 uninstall-doc:
-	$(MAKE) uninstall-examples
-	(cd doc && $(MAKE) $@) || exit 1;
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
+	(cd doc && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # `make check-install' or `make installcheck' checks that examples can 
 #  be successfully built
 check-install:
-	$(MAKE) installcheck
+	$(MAKE) $(AM_MAKEFLAGS) installcheck
 
 installcheck-local:
-	(cd examples && $(MAKE) $@) || exit 1;
+	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # Don't include conclude.am in root Makefile; tests target needs to
 # recurse into perform directory as well as reguar subdirs.

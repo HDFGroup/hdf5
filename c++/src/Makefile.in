@@ -29,18 +29,6 @@
 #
 # HDF5-C++ Makefile(.in)
 # 
-
-#------------------------------------------------------------ -*- makefile -*-
-# The following section of this makefile comes from the
-# `./config/commence' file which was generated with config.status
-# from `./config/commence.in'.
-#-----------------------------------------------------------------------------
-
-#------------------------------------------------------------ -*- makefile -*-
-# The following section of this makefile comes from the
-# `./config/conclude' file which was generated with config.status
-# from `./config/conclude.in'.
-#-----------------------------------------------------------------------------
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -100,6 +88,7 @@ AUTOMAKE = /usr/bin/automake
 AUTOHEADER = /usr/local/autoconf-2.59/bin/autoheader
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMTAR = @AMTAR@
+AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
 AS = @AS@
 AWK = @AWK@
@@ -610,10 +599,10 @@ build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(TESTS)
 
 lib progs tests ::
-	@$(MAKE) build-$@ || exit 1;                                          \
+	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;                          \
 	for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X -a $$d != .; then                                \
-	        (set -x; cd $$d && $(MAKE) $@) || exit 1;                     \
+	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
 	    fi;                                                               \
 	done
 
@@ -720,7 +709,7 @@ check-vfd:
 	        echo "============================";                          \
 	        echo "Testing Virtual File Driver $$vfd";                     \
 	        echo "============================";                          \
-	        HDF5_DRIVER=$$vfd $(MAKE) check;                              \
+	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check;              \
 	    fi;                                                               \
 	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

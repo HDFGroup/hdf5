@@ -23,26 +23,4 @@ include $(top_srcdir)/config/commence.am
 # All subdirectories
 SUBDIRS=lib h5dump h5diff h5ls misc gifconv h5import h5repack h5jam
 
-
-##lib:
-##	(cd lib && $(MAKE) $@) || exit 1;
-
-##progs tests: $(LIBTOOLS) $(LIBHDF5)
-##	@@SETX@; for d in X $(SUBDIRS); do                                    \
-##	  if test $$d != X; then                                              \
-##	    (cd $$d && $(MAKE) $@) || exit 1;                                 \
-##	  fi;                                                                 \
-##	done
-
-##tests: $(LIBTOOLS) $(LIBHDF5)
-##	@@SETX@; for d in X $(SUBDIRS); do                                \
-##	  if test $$d != X; then                                              \
-##	    (cd $$d && $(MAKE) $@) || exit 1;                                 \
-##	  fi;                                                                 \
-##	done
-
-# Makefile needs to recognize these targets
-#test _test: check
-#check-install:
-
 include $(top_srcdir)/config/conclude.am

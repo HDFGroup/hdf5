@@ -33,18 +33,6 @@
 #
 # Top-level HDF5-Fortran Makefile(.in)
 #
-
-#------------------------------------------------------------ -*- makefile -*-
-# The following section of this makefile comes from the
-# `./config/commence' file which was generated with config.status
-# from `./config/commence.in'.
-#-----------------------------------------------------------------------------
-
-#------------------------------------------------------------ -*- makefile -*-
-# The following section of this makefile comes from the
-# `./config/conclude' file which was generated with config.status
-# from `./config/conclude.in'.
-#-----------------------------------------------------------------------------
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -104,6 +92,7 @@ AUTOMAKE = /usr/bin/automake
 AUTOHEADER = /usr/local/autoconf-2.59/bin/autoheader
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMTAR = @AMTAR@
+AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
 AS = @AS@
 AWK = @AWK@
@@ -477,24 +466,24 @@ uninstall-info: uninstall-info-recursive
 
 # Clean and mostlyclean need to recurse into examples directory     
 clean-local:     
-	if test -f examples/Makefile; then                         \
-	  (cd examples && $(MAKE) clean) || exit 1;                \
+	if test -f examples/Makefile; then                                \
+	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) clean) || exit 1;       \
 	fi;
 mostlyclean-local:         
-	if test -f examples/Makefile; then                         \
-	  (cd examples && $(MAKE) mostlyclean) || exit 1;          \
+	if test -f examples/Makefile; then                                \
+	  (cd examples && $(MAKE) $(AM_MAKEFLAGS) mostlyclean) || exit 1; \
 	fi; 
 
 # Install examples
 install-examples uninstall-examples:
-	(cd examples && $(MAKE) $@) || exit 1;
+	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # Check that examples can be successfully built 
 check-install:
-	$(MAKE) installcheck 
+	$(MAKE) $(AM_MAKEFLAGS) installcheck 
 
 installcheck-local:
-	(cd examples && $(MAKE) $@) || exit 1;
+	(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
@@ -503,10 +492,10 @@ build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(TESTS)
 
 lib progs tests ::
-	@$(MAKE) build-$@ || exit 1;                                          \
+	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;                          \
 	for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X -a $$d != .; then                                \
-	        (set -x; cd $$d && $(MAKE) $@) || exit 1;                     \
+	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
 	    fi;                                                               \
 	done
 
@@ -613,7 +602,7 @@ check-vfd:
 	        echo "============================";                          \
 	        echo "Testing Virtual File Driver $$vfd";                     \
 	        echo "============================";                          \
-	        HDF5_DRIVER=$$vfd $(MAKE) check;                              \
+	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check;              \
 	    fi;                                                               \
 	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

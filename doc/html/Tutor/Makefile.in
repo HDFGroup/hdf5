@@ -21,12 +21,6 @@
 #     All rights reserved.
 #
 #
-
-#------------------------------------------------------------ -*- makefile -*-
-# The following section of this makefile comes from the
-# `./config/commence' file which was generated with config.status
-# from `./config/commence.in'.
-#-----------------------------------------------------------------------------
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -86,6 +80,7 @@ AUTOMAKE = /usr/bin/automake
 AUTOHEADER = /usr/local/autoconf-2.59/bin/autoheader
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMTAR = @AMTAR@
+AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
 AS = @AS@
 AWK = @AWK@
@@ -478,16 +473,16 @@ lib progs check test _test:
 
 tests dep depend:
 	@@SETX@; for d in X $(SUBDIRS); do                                  \
-	  if test $$d != X; then                                              \
-	    (cd $$d && $(MAKE) $@) || exit 1;                                 \
+	  if test $$d != X; then                                            \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;               \
 	  fi;     
 	done
 
 # In docs directory, install-doc is the same as install
 install-doc install-all:
-	$(MAKE) install
+	$(MAKE) $(AM_MAKEFLAGS) install
 uninstall-doc uninstall-all:
-	$(MAKE) uninstall
+	$(MAKE) $(AM_MAKEFLAGS) uninstall
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,8 +1,6 @@
-#------------------------------------------------------------ -*- makefile -*-
-# The following section of this makefile comes from the
-# `./config/commence' file which was generated with config.status
-# from `./config/commence.in'.
-#-----------------------------------------------------------------------------
+## config/commence.am
+## Textually included in the beginning of every HDF5 Makefile.am
+## Contains definitions, etc. used across multiple Makefiles.
 
 # Shell commands used in Makefiles
 RM=rm -f

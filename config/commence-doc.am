@@ -1,3 +1,4 @@
+## config/commence-doc.am
 ## This file supplies Makefile.am files in the doc directory (and subdirectories)
 ## with the rules they need.
 
@@ -9,13 +10,13 @@ lib progs check test _test:
 
 tests dep depend:
 	@@SETX@; for d in X $(SUBDIRS); do                                  \
-	  if test $$d != X; then                                              \
-	    (cd $$d && $(MAKE) $@) || exit 1;                                 \
+	  if test $$d != X; then                                            \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;               \
 	  fi;     
 	done
 
 # In docs directory, install-doc is the same as install
 install-doc install-all:
-	$(MAKE) install
+	$(MAKE) $(AM_MAKEFLAGS) install
 uninstall-doc uninstall-all:
-	$(MAKE) uninstall
+	$(MAKE) $(AM_MAKEFLAGS) uninstall

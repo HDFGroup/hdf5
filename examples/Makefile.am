@@ -67,9 +67,9 @@ $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
 
 install-data-local:
-	$(MAKE) install-examples
+	$(MAKE) $(AM_MAKEFLAGS) install-examples
 uninstall-local:
-	$(MAKE) uninstall-examples
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
 # We want to install the source files, not the examples themselves.  Add '.c' to
 # each example to get its source.  This is a bit kludgy.
@@ -86,9 +86,9 @@ uninstall-examples:
 	fi
 
 check-install:
-	$(MAKE) installcheck
+	$(MAKE) $(AM_MAKEFLAGS) installcheck
 installcheck-local:
-	$(MAKE) check
+	$(MAKE) $(AM_MAKEFLAGS) check
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
