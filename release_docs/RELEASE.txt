@@ -1,12 +1,11 @@
 HDF5 version 1.6.4-pre3 currently under development
 ================================================================================
 
-
 INTRODUCTION
-
+============
 This document describes the differences between HDF5-1.6.3 and
-HDF5-1.6.3-*, and contains information on the platforms tested and
-known problems in HDF5-1.6.3-*. For more details check the HISTORY.txt
+HDF5-1.6.4, and contains information on the platforms tested and
+known problems in HDF5-1.6.4. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -22,8 +21,9 @@ If you have any questions or comments, please send them to:
 
     hdfhelp@ncsa.uiuc.edu
 
-CONTENTS
 
+CONTENTS
+========
 - New Features
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.6.3
@@ -35,26 +35,26 @@ CONTENTS
 
 New Features
 ============
-    Source code distribuiton:
+    Source code distribution:
     -------------------------
 
-    High-Level (HL) C APIs were added to the source code distribution.
-    For HL documentation see
-    http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html
-    HL library libhdf5_hl.a(so) is built and installed
-    by default. Use --disable-hl configure flag to disable HL library.
+    The High-Level (HL) C APIs were added to the source code distribution.
+    For HL documentation, see
+    http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html.
+
+    The HL library, libhdf5_hl.a(so), is built and installed by default. 
+    Use --disable-hl configure flag to disable the HL library.
 
     Library:
     --------
         - We recommend you to use SZIP v2.0 with this release. 
           For more information see
           http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/ 
-        - Compound datatype has been enhanced with a new feature of size 
-            adjustment.  The size can be increased and decreased(without
+        - The compound datatype has been enhanced with a new feature of size 
+            adjustment.  The size can be increased and decreased (without
             cutting the last member).  No API change is involved.  SLU - 
             2004/10/1
-        - Removed PABLO support 
-                                2005/01/20 EIP 
+        - Removed PABLO support.  2005/01/20 EIP 
 
     Parallel Library:
     -----------------
@@ -63,7 +63,7 @@ New Features
 
     Tools:
     ------
-	- New tool, h5jam.  See reference manual.  2004/10/08	      
+	- New tool, h5jam.  See HDF5 Reference Manual.  2004/10/08	      
 
     F90 API:
     --------
@@ -71,9 +71,9 @@ New Features
 
     C++ API:
     --------
-	- Started using C library's reference counting in place of class
-	  RefCounter, which existed before the C's was available.  As the
-	  result, RefCounter has been removed.  2005/03/12 BMR
+	- Started using C library's reference counting in place of the class
+	  RefCounter, which existed before the C mechanism was available.  
+	  As a result, RefCounter has been removed.  2005/03/12 BMR
 
 
 Support for new platforms, languages and compilers.
@@ -105,9 +105,9 @@ Bug Fixes since HDF5-1.6.3 release
         - The byte order of all 1-byte integer types was fixed as
           little-endian even on a big-endian machine.  It's corrected.
           SLU - 2005/02/07
-        - Fix segmentation fault when calling H5Fflush with an attribute that
+        - Fixed segmentation fault when calling H5Fflush with an attribute that
           hasn't had a value written to it open.  QAK - 2004/10/18
-        - Back up supporting bitfield and time types in H5Tget_native_type.  
+        - Backed out support for bitfield and time types in H5Tget_native_type.
           Leave it to future support.  The function simply returns error 
           message of "not support" for bitfield and time types. SLU - 2004/10/5
         - Fixed address check in Core VFL driver to avoid spurious address/size
@@ -123,13 +123,12 @@ Bug Fixes since HDF5-1.6.3 release
 	  code with -O3 option.  Changed enable-production default compiler
 	  option to -O2. AKC - 2004/12/06
 	- Long double is assumed to be a supported C data type.  It is a
-	  stanadard C89 type. AKC - 2004/10/22
-
+	  standard C89 type. AKC - 2004/10/22
 
     Performance
     -------------
-    Many changes were done to the library to improve performance
-    especially for the variable length datatypes and metadata cache.
+    Many changes were made to the library to improve performance,
+    especially for the variable-length datatypes and metadata cache.
    
     Tools
     -----
@@ -145,16 +144,21 @@ Bug Fixes since HDF5-1.6.3 release
 
     F90 API
     -------
-       - on windows, previously Fortran DLL built and tested failed,
-                     now Fortran DLL has been built and tested successfully
-                         with Dec Fortran 6.6c or Dec Fortran 6.0.
+       - On windows, previously Fortran DLL built and tested failed.
+         Now Fortran DLL has been built and tested successfully
+         with Dec Fortran 6.6c or Dec Fortran 6.0.
+
     C++ API
     -------
+
+
 Documentation
 =============
 
     HDF5 Library documentation
     --------------------------
+    No substantive changes to the structure or types of content in the 
+    HDF5 Library documentation.
 
     Windows installation documentation
     ----------------------------------
@@ -162,11 +166,10 @@ Documentation
        either http://www.zlib.net/zlib122-dll.zip or
               ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/bin/windows
 
-    2. Only DLL of external libraries(zlib and szip) are linked with HDF5
-       library. We will no longer provide binary to link static library with
-       HDF5. For details, please check INSTALL_Windows under this directory.
+    2. Only DLLs of external libraries (zlib and szip) are linked with the 
+       HDF5 Library. We will no longer provide binary to link static library 
+       with HDF5. For details, please check INSTALL_Windows in this directory.
         
-
 
 Platforms Tested
 ================
@@ -242,126 +245,115 @@ Platforms Tested
                                   Sun C++ 5.6 2004/07/15
     TFLOPS r1.0.4 v4.5.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
-
     Xeon Linux 2.4.20-31.9smp_perfctr_lustre
     (tungsten)	                  Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
-                                  
-
     IA-64 Linux 2.4.21.SuSE_128.bef1 ia64
     (NCSA tg-login)               Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..intel
-
     Windows XP                    MSVC++.NET
                                   MSVC++ 6.0
                                   Compaq Visual Fortran 6.6C
                                   Intel 8.1 C++
-
-
     MAC OS X                      Darwin 7.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1175, based on gcc version 3.3.2
                                   IBM XL Fortran version 8.1 
                                   Absoft Fortran compiler v8.2
-                                  
 
 
 Supported Configuration Features Summary
 ========================================
 
-Key:   y = tested and supported
-       n = not supported or not tested in this release
-       x = not working in this release
+Key:   y   = tested and supported
+       n   = not supported or not tested in this release
+       x   = not working in this release
        dna = does not apply
        ( ) = footnote appears below second table
 
 Platform                             C        F90    F90      C++  zlib  SZIP
                                      parallel        parallel      
-Solaris2.7 64-bit                    y (1)    y      y (1)    y    y     y
-Solaris2.7 32-bit                    y (1)    y      y (1)    y    y     y
-Solaris2.8 64-bit                    y (1)    y      y (1)    y    y     y
-Solaris2.8 32-bit                    y        y      y (1)    y    y     y
-IRIX64_6.5 64-bit                    y (2)    y      y        y    y     y
-IRIX64_6.5 32-bit                    y (2)    n      n        n    y     y
-HPUX11.00                            y (1)    y      y        y    y     y
+Solaris2.8 64-bit                    y        y      y(1)     y    y     y
+Solaris2.8 32-bit                    y        y      y(1)     y    y     y
+Solaris2.9 64-bit                    y(1)     y      y(1)     y    y     y
+Solaris2.9 32-bit                    y(1)     y      y(1)     y    y     y
+IRIX64_6.5 64-bit                    y(2)     y      y        y    y     y
+IRIX64_6.5 32-bit                    y(2)     n      n        n    y     y
+HPUX11.00                            y(1)     y      y        y    y     y
 OSF1 v5.1                            y        y      y        y    y     y
 T90 IEEE                             n        y      n        n    y     n
-T3E                                  y (5)    y      y (5)    n    y     n
-SV1                                  y (5)    y      y (5)    n    y     n
-TFLOPS                               y (1)    n      n        n    y     n
+SV1                                  y(5)     y      y(5)     n    y     n
+TFLOPS                               y(1)     n      n        n    y     n
 AIX-5.1 & 5.2 32-bit                 y        y      y        y    y     y
 AIX-5.1 & 5.2 64-bit                 y        y      y        y    y     y
-WinXP Visual Studio 6.0              n        y (9)  n        y    y     y
-WinXP .Net                           n        n      n        y    y     y
-WinXP Code Warrior                   n        n      n        n    y     y
-Win2000 Visual Studio 6.0            n        y (10) n        y    y     y
-Win2000 Visual Studio Intel (6)      n        y      n        y    y     y
-Win2000 .Net                         n        n      n        y    y     y
-Mac OS X 10.3                        n        y (11) n        y    y     y
-FreeBSD 4.9                          y (1)    n      n        y    y     y
-RedHat 7   W        (3)              y (1)    y (12) n        y    y     y
+WinXP Visual Studio 6.0              n        y(9)   n        y    y     y
+WinXP .Net                           n        n      n        y(8) y     y
+Mac OS X 10.3                        n        y(10)  n        y    y     y
+FreeBSD 4.9                          y(1)     n      n        y    y     y
+RedHat 7.3  W (3)                    y(1)     y(11)  n        y    y     y
 RedHat 7.3  W Intel (3)              n        y      n        y    y     y
-RedHat 7.3  W PGI   (3)              n        y      n        y    y     y
-RedHat 8 & SuSe x86_64 gcc     (3)   n        y (13) n        y    y     y
-Linux 2.4 Xeon C Lustre Intel (3,7)  n        y      n        y    y     y
-Linux 2.4 SuSE ia64 C   Intel (3,8)  y        y      y        y    y     y
+RedHat 7.3  W PGI (3)                n        y      n        y    y     y
+SuSe x86_64 gcc (3,13)               n        y(12)  n        y    y     y
+SuSe x86_64 icc (3,13)               n        y(14)  n        y    y     y
+Linux 2.4 Xeon C Lustre Intel (3,6)  n        y      n        y    y     y
+Linux 2.4 SuSE ia64 C Intel (3,7)    y        y      y        y    y     y
 Linux 2.4 SGI Altix ia64 Intel (3)   y        y      y        y    y     y
 
 
-Platform                             Shared         static-  Thread-  STREAM- 
-                                     libraries (4)  exec     safe     VFD    
-Solaris2.7 64-bit                    y              x        y        y
-Solaris2.7 32-bit                    y              x        y        y
-Solaris2.8 64-bit                    y              x        y        y
-Solaris2.8 32-bit                    y              x        y        y
-IRIX64_6.5 64-bit                    y              y        y        y
-IRIX64_6.5 32-bit                    y              y        y        y
-HPUX11.00                            y              x        n        y
-OSF1 v5.1                            y              y        n        y
-T90 IEEE                             n              y        n        y
-T3E                                  n              y        n        y
-SV1                                  n              y        n        y
-TFLOPS                               n              y        n        n
-AIX-5.1 & 5.2 32-bit                 n              y        n        y
-AIX-5.1 & 5.2 64-bit                 n              y        n        y
-WinXP Visual Studio 6.0              y              y        n        n
-WinXP .Net                           y              y        n        n
-WinXP Code Warrior                   n              y        n        n
-Mac OS X 10.3                        y              y        n        y
-FreeBSD 4.9                          y              y        y        y
-RedHat 7    W       (3)              y              y        y        y
-RedHat 7.3  W Intel (3)              n              y        n        y
-RedHat 7.3  W PGI   (3)              n              y        n        y
-RedHat 8 & SuSe x86_64 gcc     (3)   n              y        n        y
-Linux 2.4 Xeon C Lustre Intel (3,7)  y              y        n        y
-Linux 2.4 SuSE ia64 C Intel   (3,8)  y              y        n        n
-Linux 2.4 SGI Altix ia64 Intel (3)   y              y        n        y
-
+Platform                             Shared        static-  Thread-  STREAM- 
+                                     libraries(4)  exec     safe     VFD    
+Solaris2.8 64-bit                    y              x       y        y
+Solaris2.8 32-bit                    y              x       y        y
+Solaris2.9 64-bit                    y              x       y        y
+Solaris2.9 32-bit                    y              x       y        y
+IRIX64_6.5 64-bit                    y              y       y        y
+IRIX64_6.5 32-bit                    y              y       y        y
+HPUX11.00                            y              x       n        y
+OSF1 v5.1                            y              y       n        y
+T90 IEEE                             n              y       n        y
+SV1                                  n              y       n        y
+TFLOPS                               n              y       n        n
+AIX-5.1 & 5.2 32-bit                 n              y       n        y
+AIX-5.1 & 5.2 64-bit                 n              y       n        y
+WinXP Visual Studio 6.0              y              y       n        n
+WinXP .Net                           y              y       n        n
+Mac OS X 10.3                        y              y       n        y
+FreeBSD 4.9                          y              y       y        y
+RedHat 7.3   W (3)                   y              y       y        y
+RedHat 7.3  W  Intel (3)             n              y       n        y
+RedHat 7.3  W  PGI (3)               n              y       n        y
+SuSe x86_64 gcc (3,13)               n              y       n        y
+SuSe x86_64 icc (3,13)               y              y(15)   n        y
+Linux 2.4 Xeon C Lustre Intel (3,6)  y              y       n        y
+Linux 2.4 SuSE ia64 C Intel (3,7)    y              y       n        n
+Linux 2.4 SGI Altix ia64 Intel  (3)  y              y       n        y
 
 
 Compiler versions for each platform are listed in the "Platforms Tested" 
 table found elsewhere in this file (RELEASE.txt).  Unless otherwise noted, 
 compilers used are the system compilers.
 
-Footnotes:  (1) Using mpich 1.2.4
-            (2) Using mpt and mpich 1.2.4
-            (3) Linux 2.4 with GNU, Intel, and PGI compilers, as indicated  
-                W or C indicates workstation or cluster, respectively
+Footnotes:  (1) Using mpich 1.2.6
+            (2) Using mpt and mpich 1.2.6.
+            (3) Linux 2.4 with GNU, Intel, and PGI compilers, as indicated.  
+                  W or C indicates workstation or cluster, respectively.
             (4) Shared libraries are provided only for the C library, 
-                except on Windows where they are provided for C and C++
-            (5) Using mpt
-            (6) Intel 7.1 compilers in Visual Studio 6.0 environment
-            (7) Linux 2.4.20-31.9.  Xeon cluster with smp_perfctr_lustre 
+                except on Windows where they are provided for C and C++.
+            (5) Using mpt.
+            (6) Linux 2.4.20-31.9.  Xeon cluster with smp_perfctr_lustre 
                 and Intel compilers
-            (8) Linux 2.4.21, SuSE_128.befl.  Ia64 cluster with Intel compilers
-            (9) DEC Visual Fortran 6.0 and Intel 7.1
-            (10) DEC Visual Fortran 6.0
-            (11) IBM XLF and Absoft
-            (12) PGI, Absoft
-            (13) PGI
-       FMB/EIP - 2004/09/21
-
+            (7) Linux 2.4.21, SuSE_128.befl.  Ia64 cluster with Intel compilers
+            (8) Intel 8.1
+            (9) Compaq Visual Fortran 6.6C
+           (10) IBM XLF and Absoft
+           (11) PGI, Absoft.  No shared libraries with Absoft; 
+                use '--disable-shared'.
+           (12) PGI and Intel compilers for both C and Fortran
+           (13) AMD Opteron x86_64
+           (14) ifort
+           (15) Yes with C and Fortran, but not with C++
+       FMB/EIP - 2005/03/15
 
 
 Known Problems
@@ -374,10 +366,12 @@ Known Problems
 
 * Cray SV1 fails to correctly convert between floating-point and "long double"
   for software conversion.  Problem is being investigated. SLU - 2005/03/04
+
 * Newer SGI MIPSpro compilers (version 7.4.x) support C99 features but it
   has a "guard" statement in stdint.h that will #error and skip the rest
-  of the header file if C99 option is not used explicitely.  Hardset
+  of the header file if C99 option is not used explicitly.  Hardset
   $CC to c99 will resolve the problem. AKC - 2004/12/13
+
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
   messages like "INFO: 0031-XXX ...".  This is from the command poe.
   Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
@@ -390,11 +384,12 @@ Known Problems
   Ask your system administrator to clean them out.  Lastly, request IBM
   to provide a mean to run poe without the debug socket.
 
-* Fortran subroutine h5pget_driver_f doesn't return a correct driver information.
+* Fortran subroutine h5pget_driver_f doesn't return a correct driver 
+  information.
 
-* There are two h5dump xml tests(h5dump --xml thlink.h5 and h5dump --xml tmany.h5)
-  failed on windows xp with .NET for debug and debug dll. Release and Release
-  dll work fine. 
+* There are two h5dump xml tests(h5dump --xml thlink.h5 and 
+  h5dump --xml tmany.h5) failed on windows xp with .NET for debug and 
+  debug dll. Release and Release dll work fine. 
 
 * The h5dump tests may fail to match the expected output on some platforms
   (e.g. parallel jobs, Windows) where the error messages directed to
@@ -439,11 +434,10 @@ Known Problems
   from the site:
   ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/
 
-* On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
-  compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
-  complaining about exit subroutine. Comment out the line 
+* On some platforms that use Intel and Absoft compilers to build HDF5 fortran 
+  library, compilation may fail for fortranlib_test.f90, fflush1.f90 and 
+  fflush2.f90 complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
-
 
 * Use --disable-shared configure flag if building with Absoft Fortran
   compiler
@@ -468,6 +462,7 @@ Known Problems
 
 * Fortran release DLL randomly failed with compaq visual fortran 6.6c on
   windows. 
+
 * Fortran DLL built with Intel 8.1 in .NET environment crushed the compiler,
   To build Fortran Static library with Intel 8.1 in .NET environment 
   needs manually setting the project file,
