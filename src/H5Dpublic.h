@@ -53,7 +53,8 @@ typedef enum H5D_space_status_t {
 typedef enum H5D_fill_time_t {
     H5D_FILL_TIME_ERROR	=-1,
     H5D_FILL_TIME_ALLOC =0,
-    H5D_FILL_TIME_NEVER	=1
+    H5D_FILL_TIME_NEVER	=1,
+    H5D_FILL_TIME_IFSET	=2
 } H5D_fill_time_t;
 
 /* Values for fill value status */

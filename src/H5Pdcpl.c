@@ -1532,6 +1532,10 @@ H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
     FUNC_ENTER_API(H5Pset_fill_time, FAIL);
     H5TRACE2("e","iDf",plist_id,fill_time);
 
+    /* Check arguments */
+    if(fill_time<H5D_FILL_TIME_ALLOC || fill_time>H5D_FILL_TIME_IFSET)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fill time setting");
+
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");

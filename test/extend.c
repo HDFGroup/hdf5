@@ -48,7 +48,7 @@ static int			buf1[NY][NX], buf2[NX/2][NY/2];
  *
  *-------------------------------------------------------------------------
  */
-int
+static int
 write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t mem_space)
 {
     hid_t			dataset, file_space, half_space;
@@ -105,7 +105,6 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 	    for (k=0; k<NX/2; k++) {
 		for (m=0; m<NY/2; m++) {
 		    if (buf2[k][m]!=buf1[(i%2)*NX/2+k][(j%2)*NY/2+m]) {
-			H5_FAILED();
 			printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
 			printf("    buf2[%d][%d]=%d\n",k,m,buf2[k][m]);
 			printf("    buf1[%d][%d]=%d\n",(i%2)*NX/2+k,(j%2)*NY/2+m,buf1[(i%2)*NX/2+k][(j%2)*NY/2+m]);

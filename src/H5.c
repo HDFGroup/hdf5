@@ -1632,6 +1632,9 @@ H5_trace (double *returning, const char *func, const char *type, ...)
 		    case H5D_FILL_TIME_NEVER:
 			fprintf (out, "H5D_FILL_TIME_NEVER");
 			break;
+		    case H5D_FILL_TIME_IFSET:
+			fprintf (out, "H5D_FILL_TIME_IFSET");
+			break;
 		    }
 		}
 		break;

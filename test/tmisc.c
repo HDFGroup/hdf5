@@ -1223,6 +1223,10 @@ test_misc8(void)
     ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
     CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
+    /* Set the fill time to allocation */
+    ret = H5Pset_fill_time(dcpl,H5D_FILL_TIME_ALLOC);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
+
     /* Create a contiguous dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
     CHECK(did, FAIL, "H5Dcreate");

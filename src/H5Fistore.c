@@ -1348,9 +1348,9 @@ done:
  */
 static void *
 H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-		const H5O_pline_t *pline, const H5O_fill_t *fill,
-		const hssize_t offset[], hbool_t relax,
-		unsigned *idx_hint/*in,out*/)
+    const H5O_pline_t *pline, const H5O_fill_t *fill, H5D_fill_time_t fill_time,
+    const hssize_t offset[], hbool_t relax,
+    unsigned *idx_hint/*in,out*/)
 {
     int		idx=0;			/*hash index number	*/
     hsize_t	temp_idx=0;			/* temporary index number	*/
@@ -1458,24 +1458,33 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             }
             rdcc->nmisses++;
         } else {
+            H5D_fill_value_t	fill_status;
+
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
             if (NULL==(chunk = H5MM_malloc (chunk_size)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
-            if (fill && fill->buf) {
-                /*
-                 * The chunk doesn't exist in the file.  Replicate the fill
-                 * value throughout the chunk.
-                 */
-                assert(0==chunk_size % fill->size);
-                H5V_array_fill(chunk, fill->buf, fill->size, chunk_size/fill->size);
-            } else {
-                /*
-                 * The chunk doesn't exist in the file and no fill value was
-                 * specified.  Assume all zeros.
-                 */
-                HDmemset (chunk, 0, chunk_size);
-            }
+
+            if (H5P_is_fill_value_defined(fill, &fill_status) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined");
+
+            if(fill_time==H5D_FILL_TIME_ALLOC ||
+                    (fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_USER_DEFINED)) {
+                if (fill && fill->buf) {
+                    /*
+                     * The chunk doesn't exist in the file.  Replicate the fill
+                     * value throughout the chunk.
+                     */
+                    assert(0==chunk_size % fill->size);
+                    H5V_array_fill(chunk, fill->buf, fill->size, chunk_size/fill->size);
+                } else {
+                    /*
+                     * The chunk doesn't exist in the file and no fill value was
+                     * specified.  Assume all zeros.
+                     */
+                    HDmemset (chunk, 0, chunk_size);
+                } /* end else */
+            } /* end if */
             rdcc->ninits++;
         } /* end else */
     }
@@ -1771,18 +1780,21 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
     else {
         uint8_t         *chunk;         /* Pointer to cached chunk in memory */
         H5O_fill_t      fill;           /* Fill value information */
+        H5D_fill_time_t fill_time;      /* Fill time information */
         unsigned        idx_hint=0;     /* Cache index hint      */
         ssize_t         naccessed;      /* Number of bytes accessed in chunk */
 
         /* Get necessary properties from property list */
         if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
+        if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill time");
 
         /*
          * Lock the chunk, copy from application to chunk, then unlock the
          * chunk.
          */
-        if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, &pline, &fill,
+        if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, &pline, &fill, fill_time,
                      chunk_coords_in_elmts, FALSE, &idx_hint)))
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
 
@@ -1902,6 +1914,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
     else {
         uint8_t         *chunk;         /* Pointer to cached chunk in memory */
         H5O_fill_t      fill;           /* Fill value information */
+        H5D_fill_time_t fill_time;      /* Fill time information */
         unsigned        idx_hint=0;     /* Cache index hint      */
         ssize_t         naccessed;      /* Number of bytes accessed in chunk */
         hbool_t         relax;          /* Whether whole chunk is selected */
@@ -1909,6 +1922,8 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         /* Get necessary properties from property list */
         if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
+        if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill time");
 
         /*
          * Lock the chunk, copy from application to chunk, then unlock the
@@ -1919,7 +1934,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         else
             relax = FALSE;
 
-        if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, &pline, &fill,
+        if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, &pline, &fill, fill_time,
                  chunk_coords_in_elmts, relax, &idx_hint)))
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
 
@@ -2131,6 +2146,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5O_pline_t pline;          /* I/O pipeline information */
     H5O_fill_t fill;            /* Fill value information */
     H5D_fill_time_t fill_time;  /* When to write fill values */
+    H5D_fill_value_t fill_status;    /* The fill value status */
+    unsigned   should_fill=0;   /* Whether fill values should be written */
     H5F_istore_ud1_t udata;	/* B-tree pass-through for creating chunk */
     void *chunk=NULL;           /* Chunk buffer for writing fill values */
     H5P_genplist_t *dx_plist;   /* Data xfer property list */
@@ -2239,8 +2256,20 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         chunk_size *= layout->dim[u];
     } /* end for */
 
+    /* Check the dataset's fill-value status */
+    if (H5P_is_fill_value_defined(&fill, &fill_status) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
+
+    /* If we are filling the dataset on allocation or "if set" and
+     * the fill value _is_ set, _and_ we are not overwriting the new blocks,
+     * set the "should fill" flag
+     */
+    if(!full_overwrite && (fill_time==H5D_FILL_TIME_ALLOC ||
+            (fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_USER_DEFINED)))
+        should_fill=1;
+
     /* Check if fill values should be written to blocks */
-    if(fill_time != H5D_FILL_TIME_NEVER && !full_overwrite) {
+    if(should_fill) {
         /* Allocate chunk buffer for processes to use when writing fill values */
         H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
         if (NULL==(chunk = H5MM_malloc((size_t)chunk_size)))
@@ -2318,7 +2347,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk");
 
             /* Check if fill values should be written to blocks */
-            if(fill_time != H5D_FILL_TIME_NEVER && !full_overwrite) {
+            if(should_fill) {
 #ifdef H5_HAVE_PARALLEL
                 /* Check if this file is accessed with an MPI-capable file driver */
                 if(using_mpi) {
@@ -2709,6 +2738,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *lay
     int                     found = 0;	/*initialize this entry  */
     H5O_pline_t             pline;      /* I/O pipeline information */
     H5O_fill_t              fill;       /* Fill value information */
+    H5D_fill_time_t         fill_time;  /* Fill time information */
     herr_t	            ret_value=SUCCEED;	/* Return value */
 
     FUNC_ENTER_NOAPI(H5F_istore_initialize_by_extent, FAIL);
@@ -2723,6 +2753,8 @@ H5F_istore_initialize_by_extent(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *lay
     /* Get necessary properties from property list */
     if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
+    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill time");
     if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data pipeline");
 
@@ -2780,7 +2812,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *lay
 
 	if(found) {
 
-	    if(NULL == (chunk = H5F_istore_lock(f, dxpl_id, layout, &pline, &fill,
+	    if(NULL == (chunk = H5F_istore_lock(f, dxpl_id, layout, &pline, &fill, fill_time,
 			    chunk_offset, FALSE, &idx_hint)))
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
 

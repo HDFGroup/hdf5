@@ -1387,9 +1387,6 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time");
         dset->fill_time=fill_time;    /* Cache this for later */
 
-        if(fill_time==H5D_FILL_TIME_NEVER && H5T_detect_class(type, H5T_VLEN))
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Dataset doesn't support VL datatype when fill value is not defined");
-     
         /* Get the fill value information from the property list */
         if (H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value");
@@ -1397,6 +1394,17 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
 
     if (H5P_is_fill_value_defined(fill_prop, &fill_status) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
+
+    /* Special case handling for variable-length types */
+    if(H5T_detect_class(type, H5T_VLEN)) {
+        /* If the default fill value is chosen for variable-length types, always write it */
+        if(fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_DEFAULT)
+            dset->fill_time=fill_time=H5D_FILL_TIME_ALLOC;
+
+        /* Don't allow never writing fill values with variable-length types */
+        if(fill_time==H5D_FILL_TIME_NEVER)
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Dataset doesn't support VL datatype when fill value is not defined");
+    } /* end if */
 
     if (fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
         if (H5O_copy(H5O_FILL_ID, fill_prop, &fill) == NULL)
@@ -1417,7 +1425,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     fill.alloc_time = alloc_time;
     fill.fill_time = fill_time;
    
-    if (fill.fill_defined == FALSE && fill_time != H5D_FILL_TIME_NEVER)
+    if (fill.fill_defined == FALSE && fill_time == H5D_FILL_TIME_ALLOC)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL, "unable to create dataset");
 
     /* Write new fill value message */
@@ -2457,8 +2465,8 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                 } /* end if */
 
                 /* If space allocation is set to 'early' and we are extending
-                 *  the dataset, indicate that space was allocated, so the
-                 * B-tree gets expanded. -QAK
+                 *  the dataset, indicate that space should be allocated, so the
+                 *  B-tree gets expanded. -QAK
                  */
                 if(dset->alloc_time==H5D_ALLOC_TIME_EARLY && time_alloc==H5D_ALLOC_EXTEND)
                     init_space=1;
@@ -2487,22 +2495,46 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                 HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
         } /* end switch */
 
-        /* Check if we actually allocated space before performing other actions */
-        if(init_space || addr_set) {
-            /* If we are filling the dataset on allocation, do that now */
-            if(dset->fill_time==H5D_FILL_TIME_ALLOC
-                    && !(dset->alloc_time==H5D_ALLOC_TIME_INCR && time_alloc==H5D_ALLOC_WRITE)) {
-                if(H5D_init_storage(dset, full_overwrite, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
+        /* Check if we need to initialize the space */
+        if(init_space) {
+            if (layout->type==H5D_CHUNKED) {
+                /* If we are doing incremental allocation and the B-tree got
+                 * created during a H5Dwrite call, don't initialize the storage
+                 * now, wait for the actual writes to each block and let the
+                 * low-level chunking routines handle initialize the fill-values.
+                 * Otherwise, pass along the space initialization call and let
+                 * the low-level chunking routines sort out whether to write
+                 * fill values to the chunks they allocate space for.  Yes,
+                 * this is icky. -QAK
+                 */
+                if(!(dset->alloc_time==H5D_ALLOC_TIME_INCR && time_alloc==H5D_ALLOC_WRITE)) {
+                    if(H5D_init_storage(dset, full_overwrite, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
+                } /* end if */
             } /* end if */
+            else {
+                H5D_fill_value_t	fill_status;    /* The fill value status */
 
-            /* Also update header message for layout with new address, if we
-             * set the address.  (this is mainly for forward compatibility).
-             */
-            if(time_alloc!=H5D_ALLOC_CREATE && addr_set)
-                if (H5O_modify (&(dset->ent), H5O_LAYOUT_ID, 0, H5O_FLAG_CONSTANT, update_time, &(dset->layout), dxpl_id) < 0)
-                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
+                /* Check the dataset's fill-value status */
+                if (H5P_is_fill_value_defined(&(dset->fill), &fill_status) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
+
+                /* If we are filling the dataset on allocation or "if set" and
+                 * the fill value _is_ set, do that now */
+                if(dset->fill_time==H5D_FILL_TIME_ALLOC ||
+                        (dset->fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_USER_DEFINED)) {
+                    if(H5D_init_storage(dset, full_overwrite, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
+                } /* end if */
+            } /* end else */
         } /* end if */
+
+        /* Also update header message for layout with new address, if we
+         * set the address.  (this is improves forward compatibility).
+         */
+        if(time_alloc!=H5D_ALLOC_CREATE && addr_set)
+            if (H5O_modify (&(dset->ent), H5O_LAYOUT_ID, 0, H5O_FLAG_CONSTANT, update_time, &(dset->layout), dxpl_id) < 0)
+                HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
     } /* end if */
 
 done:

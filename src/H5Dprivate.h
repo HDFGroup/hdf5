@@ -59,7 +59,7 @@
 /* Definitions for time of fill value writing */
 #define H5D_CRT_FILL_TIME_NAME     "fill_time"
 #define H5D_CRT_FILL_TIME_SIZE     sizeof(H5D_fill_time_t)
-#define H5D_CRT_FILL_TIME_DEF      H5D_FILL_TIME_ALLOC 
+#define H5D_CRT_FILL_TIME_DEF      H5D_FILL_TIME_IFSET 
 /* Definitions for external file list */
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"
 #define H5D_CRT_EXT_FILE_LIST_SIZE sizeof(H5O_efl_t)

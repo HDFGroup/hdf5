@@ -177,6 +177,7 @@ int main( void )
     /* Modify dataset creation properties, i.e. enable chunking. */
     if ((plist_id = H5Pcreate (H5P_DATASET_CREATE ))<0) goto out;
     if (H5Pset_chunk( plist_id, RANK, dims_chunk )<0) goto out;
+    if (H5Pset_fill_time( plist_id, H5D_FILL_TIME_ALLOC)<0) goto out;
 
     /*-------------------------------------------------------------------------
     * Create and write one dataset
@@ -383,6 +384,7 @@ int main( void )
     /* Modify dataset creation properties, i.e. enable chunking. */
     if ((plist_id = H5Pcreate (H5P_DATASET_CREATE ))<0) goto out;
     if (H5Pset_chunk( plist_id, RANK, dims_chunk )<0) goto out;
+    if (H5Pset_fill_time( plist_id, H5D_FILL_TIME_ALLOC)<0) goto out;
 
     /* Create a new dataset within the file using cparms creation properties. */
     if ((dataset_id = H5Dcreate( file_id , "Dataset2", H5T_NATIVE_INT, space_id, plist_id ))<0) goto out;
