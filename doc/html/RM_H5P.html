@@ -476,7 +476,7 @@ which require many different parameters to be easily manipulated.
 
 <br>
 
-* Functions labelled with an asterisk (*) are provided only for 
+* Functions labeled with an asterisk (*) are provided only for 
 backwards compatibility with HDF5 Releases 1.4.<i>x</i>.  
 See further notes in the description of each function.
 <p>
@@ -1214,7 +1214,7 @@ END SUBROUTINE h5pcreate_f
                  <em>const char *</em><code>name</code>,
                  <em>H5P_cls_create_func_t</em> <code>create</code>,
                  <em>H5P_cls_copy_func_t</em> <code>copy</code>,
-                 <em>H5P_cls_close_func_t</em> <coode>close</code>
+                 <em>H5P_cls_close_func_t</em> <code>close</code>
          )
 
   <dt><strong>Purpose:</strong>
@@ -1276,7 +1276,7 @@ END SUBROUTINE h5pcreate_f
     The <code>copy</code> routine is called after any registered 
 	<code>copy</code> function is called for each property value.  
     If the <code>copy</code> routine returns a negative value, the new list 
-    is not returned to the user and thenproperty list copy routine returns 
+    is not returned to the user and the property list copy routine returns 
     an error value.
     </P>
 
@@ -1343,7 +1343,7 @@ SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr)
                                         !    H5P_DATASET_CREATE_F
                                         !    H5P_DATASET_XFER_F
                                         !    H5P_MOUNT_F
-  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property tocreate 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to create 
   INTEGER(HID_T), INTENT(OUT) :: class  ! Property list class identifier
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                         ! 0 on success and -1 on failure
@@ -1541,7 +1541,7 @@ END SUBROUTINE h5pexist_f
     <dd><code>H5Pfill_value_defined</code> determines whether a fill value 
         is defined in the dataset creation property list <code>plist_id</code>.
         <p>
-	Valid values returnrd in <code>status</code> are as follows:
+	Valid values returned in <code>status</code> are as follows:
 	<table border=0 width="80%">
            <tr valign="top"><td rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
 	     <code>H5D_FILL_VALUE_UNDEFINED</code> 
@@ -1894,7 +1894,7 @@ END SUBROUTINE h5pget_btree_ratios_f
 	<pre>
 SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN)    :: plist_id ! Dataset trasfer 
+  INTEGER(HID_T), INTENT(IN)    :: plist_id ! Dataset transfer 
                                             ! property list identifier
   INTEGER(HSIZE_T), INTENT(OUT) :: size     ! Conversion buffer size
   INTEGER, INTENT(OUT)          :: hdferr   ! Error code
@@ -2119,9 +2119,9 @@ SUBROUTINE h5pget_class_name_f(prp_id, name, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier to
                                            ! query 
-  CHARACTER(LEN=*), INTENT(INOUT) :: name  ! Buffer to retireve class name
+  CHARACTER(LEN=*), INTENT(INOUT) :: name  ! Buffer to retrieve class name
   INTEGER, INTENT(OUT) :: hdferr           ! Error code, possible values:
-                                           ! Success:  Actual lenght of the 
+                                           ! Success:  Actual length of the 
                                            ! class name
                                            ! If provided buffer "name" is 
                                            ! smaller, than name will be 
@@ -2573,7 +2573,7 @@ END SUBROUTINE h5pget_external_count_f
     <dd><code>H5Pget_family_offset</code> retrieves the value of <code>offset</code>
         from the file access property list <code>fapl_id</code>
 	so that the user application 
-	can retrieve a file handle for low-level access to a particluar member 
+	can retrieve a file handle for low-level access to a particular member 
 	of a family of files.  The file handle is retrieved with a separate call 
 	to <a href="RM_H5F.html#File-GetVfdHandle"><code>H5Fget_vfd_handle</code></a>
 	(or, in special circumstances, to <code>H5FDget_vfd_handle</code>; 
@@ -3725,7 +3725,7 @@ END SUBROUTINE h5pget_istore_k_f
                         chunks in separate locations in the file.
             </dl> </ul>	
 	<p>
-        Otherwise, returns a negative value indicating faliure.
+        Otherwise, returns a negative value indicating failure.
   <dt><strong>Fortran90 Interface:</strong> h5pget_layout_f
     <dd>
 	<pre>
@@ -3818,7 +3818,7 @@ END SUBROUTINE h5pget_meta_block_size_f
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_multi_type</code> retrieves the data type setting from the
         file access or data transfer property list <code>fapl_id</code>.
-	This enables a user application to specifiy the type of data the
+	This enables a user application to specify the type of data the
         application wishes to access so that the application 
 	can retrieve a file handle for low-level access to the particular member 
 	of a set of <code>MULTI</code> files in which that type of data is stored.  
@@ -3961,7 +3961,7 @@ END SUBROUTINE h5pget_nfilters_f
 SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier 
-  INTEGER(SIZE_T), INTENT(OUT) :: nporps  ! Number of properties
+  INTEGER(SIZE_T), INTENT(OUT) :: nprops  ! Number of properties
   INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5pget_nprops_f
@@ -4089,7 +4089,7 @@ END SUBROUTINE h5pget_sieve_buf_size_f
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_size</code> retrieves the size of a 
     property's value in bytes.  This function operates on both 
-    poperty lists and property classes
+    property lists and property classes
 	
     <p>
     Zero-sized properties are allowed and return <code>0</code>.  
@@ -4211,7 +4211,7 @@ END SUBROUTINE h5pget_sizes_f
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise a negative value.
-  <dt><strong>F ortran90 Interface:</strong> h5pget_small_data_block_size_f
+  <dt><strong>Fortran90 Interface:</strong> h5pget_small_data_block_size_f
     <dd>
 	<pre>
 SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr) 
@@ -4502,7 +4502,7 @@ SUBROUTINE
 
     The <code>set</code> routine is called before a new value is copied 
     into the property.  
-    The <code>H5P_prp_set_func_t</code> calback function is defined 
+    The <code>H5P_prp_set_func_t</code> callback function is defined 
     as follows:
         <ul><em>typedef herr_t</em> (*<code>H5P_prp_set_func_t</code>)(
             <em>hid_t</em> <code>prop_id</code>,
@@ -4536,7 +4536,7 @@ SUBROUTINE
     <strong>Note:</strong> 
     The <code>set</code> callback function may be useful 
     to range check the value being set for the property 
-    or may perform some tranformation or translation of the
+    or may perform some transformation or translation of the
     value set.  The <code>get</code> callback would then 
     reverse the transformation or translation.  
     A single <code>get</code> or <code>set</code> callback 
@@ -4547,7 +4547,7 @@ SUBROUTINE
     <p>
     The <code>get</code> routine is called when a value is retrieved 
     from a property value.  
-    The <code>H5P_prp_get_func_t</code> callback functioin is defined 
+    The <code>H5P_prp_get_func_t</code> callback function is defined 
     as follows:
         <ul><em>typedef herr_t</em> (*<code>H5P_prp_get_func_t</code>)(
             <em>hid_t</em> <code>prop_id</code>, 
@@ -4611,7 +4611,7 @@ SUBROUTINE
     
     The <code>copy</code> routine is called when a new property list 
     with this property is being created through a copy operation.  
-    The <code>H5P_prp_copy_func_t</code> collback function is defined 
+    The <code>H5P_prp_copy_func_t</code> callback function is defined 
     as follows:
         <ul><em>typedef herr_t</em> (*<code>H5P_prp_copy_func_t</code>)(
             <em>const char *</em><code>name</code>,
@@ -5101,7 +5101,7 @@ END SUBROUTINE h5pmodify_filter_f
     <strong>Note:</strong> 
     The <code>set</code> callback function may be useful 
     to range check the value being set for the property 
-    or may perform some tranformation or translation of the
+    or may perform some transformation or translation of the
     value set.  The <code>get</code> callback would then 
     reverse the 
     <!-- NEW PAGE --> 
@@ -6362,7 +6362,7 @@ END SUBROUTINE h5pset_external_f
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_family_offset</code> sets the offset property in the 
         file access property list <code>fapl_id</code> so that the user application 
-	can retrieve a file handle for low-level access to a particluar member 
+	can retrieve a file handle for low-level access to a particular member 
 	of a family of files.  The file handle is retrieved with a separate call 
 	to <a href="RM_H5F.html#File-GetVfdHandle"><code>H5Fget_vfd_handle</code></a>
 	(or, in special circumstances, to <code>H5FDget_vfd_handle</code>; 
@@ -7549,7 +7549,7 @@ SUBROUTINE
         <tr> 
           <td valign="top"><code>H5F_CLOSE_STRONG</code></td>
           <td valign="top">Actual file is closed.</td>
-          <td valign="top">All open objects ramaining in the file are closed then 
+          <td valign="top">All open objects remaining in the file are closed then 
             file is closed</td>
         </tr>
         <tr> 
@@ -7819,7 +7819,7 @@ END SUBROUTINE h5pset_fill_value_f
         </center>
 	<p>
 	The <code>filter</code> parameter specifies the filter to be set.  
-	Valid filter identifers are as follows:
+	Valid filter identifiers are as follows:
 
         <center>
         <table width=75%>
@@ -8411,8 +8411,8 @@ END SUBROUTINE h5pset_meta_block_size_f
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_multi_type</code> sets the data type property in the 
         file access or data transfer property list <code>fapl_id</code>.
-	This enables a user application to specifiy the type of data the
-        appication wishes to access so that the application 
+	This enables a user application to specify the type of data the
+        application wishes to access so that the application 
 	can retrieve a file handle for low-level access to the particular member 
 	of a set of <code>MULTI</code> files in which that type of data is stored.  
 	The file handle is retrieved with a separate call 
@@ -8887,7 +8887,7 @@ END SUBROUTINE h5pset_sym_k_f
 	is automatically set, based on the HDF5 datatype.
 	SZIP can be used with atomic datatypes that may have size 
         of 8, 16, 32, or 64 bits.
-        Specifically, a dataset with a dataype that is 
+        Specifically, a dataset with a datatype that is 
             8-, 16-, 32-, or 64-bit 
 	    signed or unsigned integer; 
             char; or
@@ -8943,7 +8943,7 @@ END SUBROUTINE h5pset_sym_k_f
         </td></tr>
 	</table>
 	</center>
-	The following guidelines can be used in dermining 
+	The following guidelines can be used in determining 
         which option to select:
 	<ul>
 	  <li>The entropy coding method, the EC option specified by
@@ -9008,7 +9008,7 @@ END SUBROUTINE h5pset_sym_k_f
         used SZIP compression outside of the HDF5 context.
 	<p>
 	In non-HDF5 applications, SZIP typically requires that the 
-        user application supply additional paramaters:
+        user application supply additional parameters:
         <ul>
           <li><code>pixels_in_object</code>, 
               the number of pixels in the object to be compressed 
