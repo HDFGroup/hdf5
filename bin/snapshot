@@ -256,10 +256,11 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	fi
     fi
 
-    # Make sure all the serial tests work.
+    # Build, run tests and install procedures
     if [ "$snapshot" = "yes" ]; then
 	if (cd ${TESTDIR} && \
 	    ${srcdir:+${CURRENT}/}${CONFIGURE} --prefix=$INSTALLDIR && \
+	    ${MAKE} && \
 	    ${MAKE} check && \
 	    ${MAKE} install install-doc && \
 	    ${MAKE} uninstall uninstall-doc); then
