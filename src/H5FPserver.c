@@ -1548,7 +1548,7 @@ H5FP_sap_handle_free_request(H5FP_request_t *req)
     FUNC_ENTER_NOINIT(H5FP_sap_handle_free_request);
 
     sap_alloc.req_id = req->req_id;
-    sap_alloc.file_id = info->file_id;
+    sap_alloc.file_id = req->file_id;
     sap_alloc.status = H5FP_STATUS_OK;
     sap_alloc.addr = HADDR_UNDEF;
 
