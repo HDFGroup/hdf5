@@ -4716,7 +4716,10 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     H5P_cls_close_func_t cls_close, void *close_data
     )
 {
-    H5P_genclass_t *pclass;             /* Property list class created */
+    H5P_genclass_t *pclass;         /* Property list class created */
+    H5P_genprop_t *tmp;             /* Temporary pointer to parent class properties */
+    H5P_genprop_t *pcopy;           /* Copy of property to insert into class */
+    unsigned u;                     /* Local index variable */
     H5P_genclass_t *ret_value=NULL;     /* return value */
 
     FUNC_ENTER (H5P_create_class, NULL);
@@ -4753,9 +4756,35 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     pclass->close_data = close_data;
 
     /* Increment parent class's derived class value */
-    if(par_class!=NULL)
+    if(par_class!=NULL) {
         if(H5P_access_class(par_class,H5P_MOD_INC_CLS)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment parent class ref count");
+
+        /* Copy parent class's properties into this new class */
+        if(par_class->nprops>0) {
+            /* Walk through the hash table */
+            for(u=0; u<par_class->hashsize; u++) {
+                tmp=par_class->props[u];
+
+                /* Walk through the list of properties at each hash location */
+                while(tmp!=NULL) {
+                    /* Make a copy of the class's property */
+                    if((pcopy=H5P_dup_prop(tmp))==NULL)
+                        HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
+
+                    /* Insert the initialized property into the property list */
+                    if(H5P_add_prop(pclass->props,pclass->hashsize,pcopy)<0)
+                        HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
+
+                    /* Increment property count for class */
+                    pclass->nprops++;
+
+                    /* Go to next registered property in class */
+                    tmp=tmp->next;
+                } /* end while */
+            } /* end for */
+        } /* end if */
+    } /* end if */
 
     /* Set return value */
     ret_value=pclass;
@@ -6726,39 +6755,43 @@ done:
  NAME
     H5P_isa_class_real
  PURPOSE
-    Internal routine to query whether a property list is a certain class
+    Internal routine to query whether a property class is the same as another
+    class.
  USAGE
-    htri_t H5P_isa_class_real(plist, pclass)
-        H5P_genplist_t *plist;    IN: Property list to check
-        H5P_genclass_t *pclass;   IN: Property class to compare with
+    htri_t H5P_isa_class_real(pclass1, pclass2)
+        H5P_genclass_t *pclass1;   IN: Property class to check
+        H5P_genclass_t *pclass2;   IN: Property class to compare with
  RETURNS
     Success: TRUE (1) or FALSE (0)
     Failure: negative value
  DESCRIPTION
-    This routine queries whether a property list is a member of the property
-    list class.
+    This routine queries whether a property class is the same as another class,
+    and walks up the hierarchy of derived classes, checking if the first class
+    is derived from the second class also.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    What about returning a value indicating that the property class is further
-    up the class hierarchy?
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t H5P_isa_class_real(H5P_genplist_t *plist, H5P_genclass_t *pclass)
+static htri_t H5P_isa_class_real(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
 {
     htri_t ret_value=FAIL;
 
     FUNC_ENTER (H5P_isa_class_real, FAIL);
 
-    assert(plist);
-    assert(pclass);
+    assert(pclass1);
+    assert(pclass2);
 
     /* Compare property classes */
-    if(H5P_cmp_class(plist->pclass,pclass)==0) {
+    if(H5P_cmp_class(pclass1,pclass2)==0) {
         HGOTO_DONE(TRUE);
     } else {
-        HGOTO_DONE(FALSE);
+        /* Check if the class is derived, and walk up the chain, if so */
+        if(pclass1->parent!=NULL)
+            ret_value=H5P_isa_class_real(pclass1->parent,pclass2);
+        else
+            HGOTO_DONE(FALSE);
     } /* end else */
 
 done:
@@ -6809,7 +6842,7 @@ htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
     /* Compare the property list's class against the other class */
-    if ((ret_value = H5P_isa_class_real(plist, pclass))<0)
+    if ((ret_value = H5P_isa_class_real(plist->pclass, pclass))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to compare property list classes");
 
 done:
