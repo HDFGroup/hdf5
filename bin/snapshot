@@ -23,10 +23,8 @@ fi
 # What compression methods to use?
 METHODS="gzip bzip2"
 
-# How to configure? We disable hdf4 because that's almost always the
-# culprit for tests failing -- hawkwind seems to have a version older
-# than what h5toh4 requires.
-CONFIGURE="./configure"
+# At NCSA, the standard place to find HDF4 software is in /usr/ncsa/.
+CONFIGURE="./configure --with-hdf4=/usr/ncsa/include,/usr/ncsa/lib"
 
 # Create a working directory.  Hopefully one is left over from last
 # time that still has the contents of the previous release.  But if
@@ -72,9 +70,9 @@ fi
 if [ "$snapshot" = "yes" ]; then
     (
 	cd ${COMPARE}/current
-	cvs -Q tag hdf5-`./bin/h5vers |tr . _`
-	./bin/release -d $ARCHIVES $METHODS
-	./bin/h5vers -i
+	cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
+	bin/release -d $ARCHIVES $METHODS
+	perl -w bin/h5vers -i
 	cvs -Q commit -m Snapshot
     )
 fi
