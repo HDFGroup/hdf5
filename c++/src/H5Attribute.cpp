@@ -13,6 +13,11 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -140,7 +145,7 @@ Attribute::~Attribute()
     try {
         resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-        throw AttributeIException("Attribute::~Attribute", close_error.getDetailMsg());
+        cerr << "Attribute::~Attribute" << close_error.getDetailMsg() << endl;
     }
 }
 

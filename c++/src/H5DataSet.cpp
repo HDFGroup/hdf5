@@ -13,6 +13,11 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
 
 #include "H5Include.h"
 #include "H5RefCounter.h"
@@ -257,7 +262,7 @@ DataSet::~DataSet()
     try {
 	resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-	throw DataSetIException("DataSet::~DataSet", close_error.getDetailMsg());
+        cerr << "DataSet::~DataSet" << close_error.getDetailMsg() << endl;
     }
 }
 
