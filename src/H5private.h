@@ -618,15 +618,18 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 /* definitions related to the file stat utilities */
 #ifdef WIN32
      #ifdef __MWERKS__
-     #define HDfstat(F,B)            fstat(F,B)
+     #define HDfstat(F,B)               fstat(F,B)
      typedef struct stat		h5_stat_t;
+     typedef off_t                      h5_stat_size_t;
      #else /*MSVC*/
      #define HDfstat(F,B)		_fstati64(F,B)
      typedef struct _stati64		h5_stat_t;
+     typedef __int64                    h5_stat_size_t;
      #endif
 #else
 #define HDfstat(F,B)            fstat(F,B)
 typedef struct stat		h5_stat_t;
+typedef off_t                   h5_stat_size_t;
 #endif
 
 #define HDftell(F)		ftell(F)

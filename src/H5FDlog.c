@@ -544,7 +544,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     fa = H5P_get_driver_info(plist);
 
     file->fd = fd;
-    H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,off_t,haddr_t);
+    H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,h5_stat_size_t,haddr_t);
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
 #ifdef WIN32
