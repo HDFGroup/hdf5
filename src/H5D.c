@@ -1442,7 +1442,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_path_t		*tpath = NULL;		/*type conversion info	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t		*sconv=NULL;		/*space conversion funcs*/
-    H5S_sel_iter_t 	mem_iter;        /* mem selection iteration info*/
+    H5S_sel_iter_t 	mem_iter;         /*mem selection iteration info*/
     H5S_sel_iter_t	bkg_iter;	     /*background iteration info*/
     H5S_sel_iter_t	file_iter;            /*file selection iter info*/
     herr_t		ret_value = FAIL;	/*return value		*/
@@ -1451,10 +1451,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		dst_type_size;	      /*size of destination type*/
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
-    size_t      min_elem_out=1;     /* Minimum # of elements to output */
+    size_t		min_elem_out=1;/*Minimum # of elements to output*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
-    hbool_t             must_convert;           /*have to xfer the slow way */
+    hbool_t             must_convert;        /*have to xfer the slow way*/
 #if defined(H5S_DEBUG) || defined(H5T_DEBUG)
     H5_timer_t		timer;
 #endif
@@ -1814,7 +1814,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		dst_type_size;	      /*size of destination type*/
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
-    size_t      min_elem_out=1;     /* Minimum # of elements to output */
+    size_t		min_elem_out=1;/*Minimum # of elements to output*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t             must_convert;        /*have to xfer the slow way*/
@@ -2066,7 +2066,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
         if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
-    H5_timer_begin(&timer);
+	    H5_timer_begin(&timer);
 #endif
             n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout),
 				 &(dataset->create_parms->pline),
@@ -2075,9 +2075,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				 file_space, &bkg_iter, smine_nelmts,
 				 xfer_parms, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
-    H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
-    sconv->stats[0].bkg_nbytes += n * dst_type_size;
-    sconv->stats[0].bkg_ncalls++;
+	    H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
+	    sconv->stats[0].bkg_nbytes += n * dst_type_size;
+	    sconv->stats[0].bkg_ncalls++;
 #endif
 	    if (n!=smine_nelmts) {
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
@@ -2387,7 +2387,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 		    }
 		} else {
 		    if (H5F_block_write(dset->ent.file, &addr, size,
-					H5D_XFER_DFLT, buf)<0) {
+					&H5F_xfer_dflt, buf)<0) {
 			HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 				    "unable to write fill value to dataset");
 		    }

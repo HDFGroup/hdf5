@@ -33,12 +33,11 @@ static H5F_low_t *H5F_core_open(const char *name,
 				H5F_search_t *key/*out*/);
 static herr_t H5F_core_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_core_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-			    const H5D_transfer_t xfer_mode,
-			    const haddr_t *addr, size_t size, uint8_t *buf);
+			    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			    size_t size, uint8_t *buf);
 static herr_t H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-			     const H5D_transfer_t xfer_mode,
-			     const haddr_t *addr, size_t size,
-			     const uint8_t *buf);
+			     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			     size_t size, const uint8_t *buf);
 
 const H5F_low_class_t	H5F_LOW_CORE_g[1] = {{
     H5F_core_access,		/*access method				*/
@@ -184,8 +183,8 @@ H5F_core_close(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
  */
 static herr_t
 H5F_core_read(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
-	      const H5D_transfer_t UNUSED xfer_mode,
-	      const haddr_t *addr, size_t size, uint8_t *buf)
+	      const H5F_xfer_t UNUSED *xfer_parms, const haddr_t *addr,
+	      size_t size, uint8_t *buf)
 {
     size_t		n;
     size_t		eof;
@@ -232,8 +231,8 @@ H5F_core_read(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
  */
 static herr_t
 H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-	       const H5D_transfer_t UNUSED xfer_mode,
-	       const haddr_t *addr, size_t size, const uint8_t *buf)
+	       const H5F_xfer_t UNUSED *xfer_parms, const haddr_t *addr,
+	       size_t size, const uint8_t *buf)
 {
     size_t		need_more, na;
     size_t		increment = 1;

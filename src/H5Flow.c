@@ -216,8 +216,8 @@ H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  */
 herr_t
 H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-	     const H5D_transfer_t xfer_mode,
-	     const haddr_t *addr, size_t size, uint8_t *buf/*out*/)
+	     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+	     size_t size, uint8_t *buf/*out*/)
 {
     herr_t		    ret_value = FAIL;
 
@@ -228,7 +228,7 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(buf);
 
     if (lf->type->read) {
-	if ((ret_value = (lf->type->read) (lf, access_parms, xfer_mode,
+	if ((ret_value = (lf->type->read) (lf, access_parms, xfer_parms,
 					   addr, size, buf)) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_READERROR, ret_value, "read failed");
 	}
@@ -271,8 +271,8 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  */
 herr_t
 H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-	      const H5D_transfer_t xfer_mode,
-	      const haddr_t *addr, size_t size, const uint8_t *buf)
+	      const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+	      size_t size, const uint8_t *buf)
 {
     herr_t		ret_value = FAIL;
     haddr_t		tmp_addr;
@@ -320,7 +320,7 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     
     /* Write the data */
     if (lf->type->write) {
-	if ((ret_value = (lf->type->write) (lf, access_parms, xfer_mode,
+	if ((ret_value = (lf->type->write) (lf, access_parms, xfer_parms,
 					    addr, size, buf)) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, ret_value, "write failed");
 	}
@@ -372,12 +372,13 @@ H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     if (addr_defined(&(lf->eof)) && H5F_addr_gt(&(lf->eof), &last_byte)) {
 	last_byte = lf->eof;
 	last_byte.offset -= 1;
-	if (H5F_low_read(lf, access_parms, H5D_XFER_DFLT, &last_byte,
+	if (H5F_low_read(lf, access_parms, &H5F_xfer_dflt, &last_byte,
 			 1, buf) >= 0) {
 #ifdef HAVE_PARALLEL
 	    H5F_mpio_tas_allsame( lf, TRUE );	/* only p0 will write */
 #endif /* HAVE_PARALLEL */
-	    H5F_low_write(lf, access_parms, H5D_XFER_DFLT, &last_byte, 1, buf);
+	    H5F_low_write(lf, access_parms, &H5F_xfer_dflt, &last_byte,
+			  1, buf);
 	}
     }
     /* Invoke the subclass the flush method */

@@ -553,7 +553,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
     H5F_low_size(f_handle, &max_addr);
     H5F_addr_reset(addr);
     while (H5F_addr_lt(addr, &max_addr)) {
-        if (H5F_low_read(f_handle, access_parms, H5D_XFER_DFLT, addr,
+        if (H5F_low_read(f_handle, access_parms, &H5F_xfer_dflt, addr,
                  H5F_SIGNATURE_LEN, buf) < 0) {
             HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read file");
         }
@@ -1107,7 +1107,7 @@ H5F_open(const char *name, uintn flags,
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
 			"unable to find signature");
 	}
-	if (H5F_low_read(f->shared->lf, access_parms, H5D_XFER_DFLT,
+	if (H5F_low_read(f->shared->lf, access_parms, &H5F_xfer_dflt,
 			 &(f->shared->boot_addr), fixed_size, buf) < 0) {
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL,
 			"unable to read boot block");
@@ -1188,7 +1188,7 @@ H5F_open(const char *name, uintn flags,
 	assert(variable_size <= sizeof buf);
 	addr1 = f->shared->boot_addr;
 	H5F_addr_inc(&addr1, (hsize_t)fixed_size);
-	if (H5F_low_read(f->shared->lf, access_parms, H5D_XFER_DFLT,
+	if (H5F_low_read(f->shared->lf, access_parms, &H5F_xfer_dflt,
 			 &addr1, variable_size, buf) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
 			"unable to read boot block");
@@ -1684,8 +1684,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 #ifdef HAVE_PARALLEL
     H5F_mpio_tas_allsame(f->shared->lf, TRUE);	/* only p0 will write */
 #endif
-    if (H5F_low_write(f->shared->lf, f->shared->access_parms,
-    		      H5D_XFER_DFLT,
+    if (H5F_low_write(f->shared->lf, f->shared->access_parms, &H5F_xfer_dflt,
 		      &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write header");
     }
@@ -2358,7 +2357,7 @@ H5Freopen(hid_t file_id)
  */
 herr_t
 H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
-	       const H5D_transfer_t xfer_mode, void *buf)
+	       const H5F_xfer_t *xfer_parms, void *buf)
 {
     haddr_t		    abs_addr;
 
@@ -2371,7 +2370,7 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
     H5F_addr_add(&abs_addr, addr);
 
     /* Read the data */
-    if (H5F_low_read(f->shared->lf, f->shared->access_parms, xfer_mode,
+    if (H5F_low_read(f->shared->lf, f->shared->access_parms, xfer_parms,
 		     &abs_addr, (size_t)size, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "low-level read failed");
     }
@@ -2403,7 +2402,7 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
  */
 herr_t
 H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
-		const H5D_transfer_t xfer_mode, const void *buf)
+		const H5F_xfer_t *xfer_parms, const void *buf)
 {
     haddr_t		    abs_addr;
 
@@ -2420,7 +2419,7 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
     H5F_addr_add(&abs_addr, addr);
 
     /* Write the data */
-    if (H5F_low_write(f->shared->lf, f->shared->access_parms, xfer_mode,
+    if (H5F_low_write(f->shared->lf, f->shared->access_parms, xfer_parms,
 		      &abs_addr, (size_t)size, buf)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low-level write failed");
     }

@@ -355,7 +355,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
 #ifdef HAVE_PARALLEL
 	H5F_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
 #endif /* HAVE_PARALLEL */
-	status = H5F_block_write(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf);
+	status = H5F_block_write(f, addr, (hsize_t)size, &H5F_xfer_dflt, buf);
 	buf = H5MM_xfree(buf);
 	if (status < 0)
 	    HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
@@ -423,7 +423,7 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void UNUSED *_udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, &H5F_xfer_dflt, buf) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL,
 		    "unabel to read symbol table node");
     }

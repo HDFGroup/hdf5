@@ -312,7 +312,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, H5D_XFER_DFLT, bt->page) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, &H5F_xfer_dflt, bt->page) < 0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL,
 		      "can't read B-tree node");
     }
@@ -457,7 +457,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 #ifdef HAVE_PARALLEL
 	H5F_mpio_tas_allsame(f->shared->lf, TRUE); /* only p0 will write */
 #endif /* HAVE_PARALLEL */
-	if (H5F_block_write(f, addr, (hsize_t)size, H5D_XFER_DFLT,
+	if (H5F_block_write(f, addr, (hsize_t)size, &H5F_xfer_dflt,
 	    bt->page) < 0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 			  "unable to save B-tree node to disk");
@@ -747,7 +747,9 @@ H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
 /*-------------------------------------------------------------------------
  * Function:	H5B_decode_key
  *
- * Purpose:	Decode the specified key into native format.
+ * Purpose:	Decode the specified key into native format.  Do not call
+ *		this function if the key is already decoded since it my
+ *		decode a stale raw key into the native key.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -920,11 +922,11 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 		    "unable to flush B-tree root node");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, &H5F_xfer_dflt, buf) < 0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, FAIL,
 		    "unable to read B-tree root node");
     }
-    if (H5F_block_write(f, &old_root, (hsize_t)size, H5D_XFER_DFLT, buf) < 0) {
+    if (H5F_block_write(f, &old_root, (hsize_t)size, &H5F_xfer_dflt, buf)<0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_WRITEERROR, FAIL,
 		    "unable to move B-tree root node");
     }
@@ -1516,11 +1518,9 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     }
     if (bt->level > 0) {
 	/* Keep following the left-most child until we reach a leaf node. */
-	if (H5B_iterate(f, type, bt->child + 0, udata) < 0) {
+	if ((ret_value=H5B_iterate(f, type, bt->child+0, udata))<0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL,
 			"unable to list B-tree node");
-	} else {
-	    HRETURN(SUCCEED);
 	}
     } else {
 	/*
@@ -1548,7 +1548,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 		child[i] = bt->child[i];
 	    }
 	    for (i=0; i<bt->nchildren+1; i++) {
-		H5B_decode_key(f, bt, i);
+		if (!bt->key[i].nkey) H5B_decode_key(f, bt, i);
 		memcpy(key+i*type->sizeof_nkey, bt->key[i].nkey,
 		       type->sizeof_nkey);
 	    }
@@ -1564,13 +1564,17 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 		ret_value = (type->list)(f, key+i*type->sizeof_nkey,
 					 child+i, key+(i+1)*type->sizeof_nkey,
 					 udata);
+		if (ret_value<0) {
+		    HGOTO_ERROR(H5E_BTREE, H5E_INTERNAL, FAIL,
+				"iterator function failed");
+		}
 	    }
 	}
-	H5MM_xfree(child);
-	H5MM_xfree(key);
     }
 
   done:
+    H5MM_xfree(child);
+    H5MM_xfree(key);
     FUNC_LEAVE(ret_value);
 }
 

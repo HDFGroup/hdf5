@@ -872,8 +872,8 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			 "unable to allocate chunk");
 	}
-	if (H5F_block_write (f, &(udata.addr), udata.key.nbytes, H5D_XFER_DFLT,
-			     buf)<0) {
+	if (H5F_block_write (f, &(udata.addr), udata.key.nbytes,
+			     &H5F_xfer_dflt, buf)<0) {
 	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			 "unable to write raw data to file");
 	}
@@ -1287,7 +1287,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	     * The chunk exists on disk.
 	     */
 	    if (H5F_block_read (f, &(udata.addr), udata.key.nbytes,
-	        H5D_XFER_DFLT, chunk)<0) {
+	        &H5F_xfer_dflt, chunk)<0) {
 		HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
 			     "unable to read raw data chunk");
 	    }

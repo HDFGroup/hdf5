@@ -320,6 +320,18 @@ typedef struct H5MF_free_t {
     hsize_t	size;		/*size of free area			*/
 } H5MF_free_t;
 
+/* Dataset transfer property list */
+typedef struct H5F_xfer_t {
+    size_t		buf_size;	/*max temp buffer size		     */
+    void		*tconv_buf;	/*type conversion buffer or null     */
+    void		*bkg_buf;	/*background buffer or null	     */
+    H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
+    double		split_ratios[3];/*B-tree node splitting ratios	     */
+    uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
+    uintn       	block_limit;    /*largest hyperslab block to cache   */
+    H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
+} H5F_xfer_t;
+
 /*
  * Define the low-level file interface.
  */
@@ -332,11 +344,12 @@ typedef struct H5F_low_class_t {
     herr_t	(*close)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms);
     herr_t	(*read)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
-    			const H5D_transfer_t xfer_mode,
-			const haddr_t *addr, size_t size, uint8_t *buf);
-    herr_t	(*write)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
-			 const H5D_transfer_t xfer_mode,
-			 const haddr_t *addr, size_t size, const uint8_t *buf);
+    			const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			size_t size, uint8_t *buf);
+    herr_t	(*write)(struct H5F_low_t *lf,
+			 const H5F_access_t *access_parms,
+			 const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			 size_t size, const uint8_t *buf);
     herr_t	(*flush)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms);
     herr_t	(*extend)(struct H5F_low_t *lf,
@@ -512,18 +525,6 @@ typedef struct H5F_t {
     H5F_mtab_t		mtab;		/* File mount table		*/
 } H5F_t;
 
-/* Dataset transfer property list */
-typedef struct H5F_xfer_t {
-    size_t		buf_size;	/*max temp buffer size		     */
-    void		*tconv_buf;	/*type conversion buffer or null     */
-    void		*bkg_buf;	/*background buffer or null	     */
-    H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
-    double		split_ratios[3];/*B-tree node splitting ratios	     */
-    uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
-    uintn       	block_limit;    /*largest hyperslab block to cache   */
-    H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
-} H5F_xfer_t;
-
 #ifdef NOT_YET
 #define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_ADDR(f)==4 ? UINT32ENCODE(p,o) \
     : H5F_SIZEOF_ADDR(f)==8 ? UINT64ENCODE(p,o) \
@@ -649,10 +650,9 @@ __DLL__ herr_t H5F_istore_allocate (H5F_t *f,
 
 /* Functions that operate on contiguous storage wrt boot block */
 __DLL__ herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
-			      const H5D_transfer_t xfer_mode, void *buf);
+			      const H5F_xfer_t *xfer_parms, void *buf);
 __DLL__ herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
-			       const H5D_transfer_t xfer_mode,
-			       const void *buf);
+			       const H5F_xfer_t *xfer_parms, const void *buf);
 
 /* Functions that operate directly on low-level files */
 __DLL__ const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
@@ -672,12 +672,11 @@ __DLL__ H5F_low_t *H5F_low_close(H5F_low_t *lf,
 				 const H5F_access_t *access_parms);
 __DLL__ hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
 __DLL__ herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-			    const H5D_transfer_t xfer_mode,
-			    const haddr_t *addr, size_t size, uint8_t *buf);
+			    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			    size_t size, uint8_t *buf);
 __DLL__ herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-			     const H5D_transfer_t xfer_mode,
-			     const haddr_t *addr, size_t size,
-			     const uint8_t *buf);
+			     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			     size_t size, const uint8_t *buf);
 __DLL__ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 /* Functions that operate on addresses */

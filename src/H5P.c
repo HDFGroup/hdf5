@@ -273,7 +273,8 @@ H5Pclose(hid_t plist_id)
 
     /* Check arguments */
     if (plist_id==H5P_DEFAULT)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't close predefined object");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "unable to close predefined object");
     if ((type=H5P_get_class (plist_id))<0 || NULL==(plist=H5I_object (plist_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     }

@@ -28,13 +28,11 @@ static H5F_low_t *H5F_sec2_open(const char *name,
 				H5F_search_t *key/*out*/);
 static herr_t H5F_sec2_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_sec2_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-			    const H5D_transfer_t xfer_mode,
-			    const haddr_t *addr, size_t size,
-			    uint8_t *buf/*out*/);
+			    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			    size_t size, uint8_t *buf/*out*/);
 static herr_t H5F_sec2_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-			    const H5D_transfer_t xfer_mode,
-			     const haddr_t *addr, size_t size,
-			     const uint8_t *buf);
+			     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			     size_t size, const uint8_t *buf);
 
 const H5F_low_class_t	H5F_LOW_SEC2_g[1] = {{
     NULL,			/* access method			*/
@@ -192,8 +190,8 @@ H5F_sec2_close(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
  */
 static herr_t
 H5F_sec2_read(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
-	      const H5D_transfer_t UNUSED xfer_mode,
-	      const haddr_t *addr, size_t size, uint8_t *buf)
+	      const H5F_xfer_t UNUSED *xfer_parms, const haddr_t *addr,
+	      size_t size, uint8_t *buf)
 {
     ssize_t		n;
     uint64_t		mask;
@@ -297,8 +295,8 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
  */
 static herr_t
 H5F_sec2_write(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
-	       const H5D_transfer_t UNUSED xfer_mode,
-	       const haddr_t *addr, size_t size, const uint8_t *buf)
+	       const H5F_xfer_t UNUSED *xfer_parms, const haddr_t *addr,
+	       size_t size, const uint8_t *buf)
 {
     uint64_t	mask;
     ssize_t	n;

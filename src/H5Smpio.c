@@ -525,13 +525,13 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     	HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"transfer size overflows size_t");
     if (do_write) {
     	err = H5F_low_write( f->shared->lf, f->shared->access_parms,
-			     xfer_parms->xfer_mode, &addr, mpi_count, buf );
+			     xfer_parms, &addr, mpi_count, buf );
     	if (err) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
 	}
     } else {
     	err = H5F_low_read ( f->shared->lf, f->shared->access_parms,
-			     xfer_parms->xfer_mode, &addr, mpi_count, buf );
+			     xfer_parms, &addr, mpi_count, buf );
     	if (err) {
 	    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
 	}

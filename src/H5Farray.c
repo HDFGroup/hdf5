@@ -254,8 +254,7 @@ H5F_arr_read (H5F_t *f, const H5F_xfer_t *xfer,
 		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 				   "external data read failed");
 		}
-	    } else if (H5F_block_read (f, &addr, elmt_size, xfer->xfer_mode,
-				       buf)<0) {
+	    } else if (H5F_block_read (f, &addr, elmt_size, xfer, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			       "block read failed");
 	    }
@@ -482,8 +481,7 @@ H5F_arr_write (H5F_t *f, const H5F_xfer_t *xfer,
 		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 				   "external data write failed");
 		}
-	    } else if (H5F_block_write(f, &addr, elmt_size, xfer->xfer_mode,
-				       buf)<0) {
+	    } else if (H5F_block_write(f, &addr, elmt_size, xfer, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "block write failed");
 	    }
