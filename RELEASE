@@ -46,6 +46,8 @@ New features
      all VFL drivers except the mpio & core drivers.  Setting the sieve buffer
      size is controlled with new API functions: H5Pset_sieve_buf_size() and
      retrieved with H5Pget_sieve_buf_size().
+   * Added new Virtual File Driver, Stream VFD, to send/receive entire
+     HDF5 files via socket connections.
 
 Bug fixes since HDF5-1.2.0
 ==========================
@@ -86,8 +88,8 @@ Library
    * Added bounded garbage collection for the free lists when they run out of
      memory and also added H5set_free_list_limits API call to allow users to
      put an upper limit on the amount of memory used for free lists.
-   * Added new Virtual File Driver, Stream VFD, to send/receive entire
-     HDF5 files via socket connections.
+   * Checked for non-existent or deleted objects when dereferencing one with
+     object or region references and disallow dereference.
 
 
 Configuration

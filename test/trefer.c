@@ -30,6 +30,7 @@ static char		RcsId[] = "$Revision$";
 
 #define FILE1   "trefer1.h5"
 #define FILE2	"trefer2.h5"
+#define FILE3	"trefer3.h5"
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -537,6 +538,100 @@ test_reference_region(void)
 
 /****************************************************************
 **
+**  test_reference_obj_deleted(): Test H5R (reference) object reference code.
+**      Tests for correct failures for deleted and non-existent objects
+** 
+****************************************************************/
+static void 
+test_reference_obj_deleted(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset,	/* Dataset ID			*/
+                dset2;      /* Dereferenced dataset ID */
+    hid_t		sid1;       /* Dataspace ID			*/
+    hobj_ref_t  oref;       /* Object Reference to test */
+    herr_t		ret;		/* Generic return value		*/
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create scalar dataspace for datasets */
+    sid1 = H5Screate_simple(0, NULL, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a dataset to reference (deleted later) */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_INT,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset2",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Create reference to dataset */
+    ret = H5Rcreate(&oref,fid1,"/Dataset1",H5R_OBJECT,-1);
+    CHECK(ret, FAIL, "H5Rcreate");
+    ret = H5Rget_object_type(dataset,&oref);
+    VERIFY(ret, H5G_DATASET, "H5Rget_object_type");
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,&oref);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Delete referenced dataset */
+    ret = H5Gunlink(fid1,"/Dataset1");
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file */
+    fid1 = H5Fopen(FILE3, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset=H5Dopen(fid1,"/Dataset2");
+    CHECK(ret, FAIL, "H5Dcreate");
+
+    /* Read selection from disk */
+    memset(&oref,0,sizeof(hobj_ref_t));
+    ret=H5Dread(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,&oref);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Open deleted dataset object */
+    dset2 = H5Rdereference(dataset,H5R_OBJECT,&oref);
+    VERIFY(dset2, FAIL, "H5Rdereference");
+
+    /* Open nonsense reference */
+    memset(&oref,0,sizeof(hobj_ref_t));
+    dset2 = H5Rdereference(dataset,H5R_OBJECT,&oref);
+    VERIFY(dset2, FAIL, "H5Rdereference");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+}   /* test_reference_obj_deleted() */
+
+/****************************************************************
+**
 **  test_reference(): Main H5R reference testing routine.
 ** 
 ****************************************************************/
@@ -546,9 +641,9 @@ test_reference(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing References\n"));
 
-    /* These next tests use the same file */
     test_reference_obj();       /* Test basic H5R object reference code */
     test_reference_region();    /* Test basic H5R dataset region reference code */
+    test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
 
 }   /* test_reference() */
 
@@ -572,5 +667,6 @@ cleanup_reference(void)
 {
     remove(FILE1);
     remove(FILE2);
+    remove(FILE3);
 }
 

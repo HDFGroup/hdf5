@@ -409,6 +409,10 @@ H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref)
                   "internal error (unknown reference type)");
     } /* end switch */
 
+    /* Check to make certain that this object hasn't been deleted since the reference was created */
+    if(H5O_link(&ent,0)<=0)
+        HRETURN_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object");
+
     /* Open the dataset object */
     oid_type=H5G_get_type(&ent);
     switch(oid_type) {
