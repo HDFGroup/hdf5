@@ -22,32 +22,13 @@ namespace H5 {
 #endif  // H5_NO_STD
 #endif
 
+const string Exception::DEFAULT_MSG("No detailed information provided");
+
 // Default constructor
 Exception::Exception() : detailMessage(""), funcName("") {}
 
-// Constructor taking only a detailed message as string object
-//Exception::Exception(const string& message) : detailMessage(message) {}
-
 // Constructor taking a function name and a detailed message as string objects
-Exception::Exception(const string& func_name, const string& message) : detailMessage(message), funcName(func_name) {}
-
-// Constructor taking a detailed message as character string
-// digital alpha (gondolin) produces compilation error at static_cast<string>
-// so I replaced this constructor by the one below it
-//Exception::Exception( const char* message) : detailMessage(static_cast<string>(message)) {}
-//Exception::Exception(const char* message)
-//{
-   //detailMessage = string(message); 
-//}
-
-// Constructor taking a function name and a detailed message as character
-// strings
-Exception::Exception(const char* func_name, const char* message)
-{
-    detailMessage = string(message);
-    if (func_name != NULL)
-	funcName = string(func_name);
-}
+Exception::Exception(const string func_name, const string message) : detailMessage(message), funcName(func_name) {}
 
 // copy constructor
 Exception::Exception( const Exception& orig )
@@ -153,7 +134,7 @@ const char* Exception::getCFuncName() const
 // Prints the error stack in a default manner.
 void Exception::printError( FILE* stream ) const
 {
-   herr_t ret_value = H5Eprint( H5E_DEFAULT, NULL ); // print to stderr
+   herr_t ret_value = H5Eprint( H5E_DEFAULT, stream ); // print to stderr
    if( ret_value < 0 )
       throw Exception( "Exception::printError", "H5Eprint failed" );
 }
@@ -161,53 +142,43 @@ void Exception::printError( FILE* stream ) const
 Exception::~Exception() {}
 
 FileIException::FileIException():Exception(){}
-FileIException::FileIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-FileIException::FileIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+FileIException::FileIException(const string func_name, const string message) : Exception(func_name, message) {}
 FileIException::~FileIException() {}
 
 GroupIException::GroupIException():Exception(){}
-GroupIException::GroupIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-GroupIException::GroupIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+GroupIException::GroupIException(const string func_name, const string message) : Exception(func_name, message) {}
 GroupIException::~GroupIException() {}
 
 DataSpaceIException::DataSpaceIException():Exception(){}
-DataSpaceIException::DataSpaceIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-DataSpaceIException::DataSpaceIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+DataSpaceIException::DataSpaceIException(const string func_name, const string message) : Exception(func_name, message) {}
 DataSpaceIException::~DataSpaceIException() {}
 
 DataTypeIException::DataTypeIException():Exception(){}
-DataTypeIException::DataTypeIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-DataTypeIException::DataTypeIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+DataTypeIException::DataTypeIException(const string func_name, const string message) : Exception(func_name, message) {}
 DataTypeIException::~DataTypeIException() {}
 
 PropListIException::PropListIException():Exception(){}
-PropListIException::PropListIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-PropListIException::PropListIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+PropListIException::PropListIException(const string func_name, const string message) : Exception(func_name, message) {}
 PropListIException::~PropListIException() {}
 
 DataSetIException::DataSetIException():Exception(){}
-DataSetIException::DataSetIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-DataSetIException::DataSetIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+DataSetIException::DataSetIException(const string func_name, const string message) : Exception(func_name, message) {}
 DataSetIException::~DataSetIException() {}
 
 AttributeIException::AttributeIException():Exception(){}
-AttributeIException::AttributeIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-AttributeIException::AttributeIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+AttributeIException::AttributeIException(const string func_name, const string message) : Exception(func_name, message) {}
 AttributeIException::~AttributeIException() {}
 
 ReferenceException::ReferenceException():Exception(){}
-ReferenceException::ReferenceException(const string& func_name, const string& message) : Exception(func_name, message) {}
-ReferenceException::ReferenceException(const char* func_name, const char* message) : Exception(func_name, message) {}
+ReferenceException::ReferenceException(const string func_name, const string message) : Exception(func_name, message) {}
 ReferenceException::~ReferenceException() {}
 
 LibraryIException::LibraryIException():Exception(){}
-LibraryIException::LibraryIException(const string& func_name, const string& message) : Exception(func_name, message) {}
-LibraryIException::LibraryIException(const char* func_name, const char* message) : Exception(func_name, message) {}
+LibraryIException::LibraryIException(const string func_name, const string message) : Exception(func_name, message) {}
 LibraryIException::~LibraryIException() {}
 
 IdComponentException::IdComponentException(): Exception() {}
-IdComponentException::IdComponentException(const string& func_name, const string& message) : Exception(func_name, message) {}
-IdComponentException::IdComponentException(const char* func_name, const char* message) : Exception(func_name, message) {}
+IdComponentException::IdComponentException(const string func_name, const string message) : Exception(func_name, message) {}
 IdComponentException::~IdComponentException() {}
 
 #ifndef H5_NO_NAMESPACE

@@ -32,8 +32,7 @@ class H5_DLLCPP Exception {
 
 	// Creates an exception with a function name where the failure occurs
 	// and an optional detailed message
-	Exception( const string& func_name, const string& message = 0);
-	Exception( const char* func_name, const char* message = NULL);
+	Exception(const string func_name, const string message = DEFAULT_MSG);
 
 	// copy constructor
 	Exception( const Exception& orig);
@@ -85,85 +84,79 @@ class H5_DLLCPP Exception {
 #endif
 	string detailMessage;
 	string funcName;
+   protected:
+        // Default value for detailMessage
+        static const string DEFAULT_MSG;
+
 };
 
 class H5_DLLCPP FileIException : public Exception {
    public:
 	FileIException();
-	FileIException( const string& func_name, const string& message = NULL);
-	FileIException( const char* func_name, const char* message = NULL);
+	FileIException(const string func_name, const string message = DEFAULT_MSG);
 	virtual ~FileIException();
 };
 
 class H5_DLLCPP GroupIException : public Exception {
    public:
 	GroupIException();
-	GroupIException( const string& func_name, const string& message=NULL);
-	GroupIException( const char* func_name, const char* message = NULL);
+	GroupIException(const string func_name, const string message = DEFAULT_MSG);
 	virtual ~GroupIException();
 };
 
 class H5_DLLCPP DataSpaceIException : public Exception {
    public:
 	DataSpaceIException();
-	DataSpaceIException(const string& func_name, const string& message=NULL);
-	DataSpaceIException(const char* func_name, const char* message = NULL);
+	DataSpaceIException(const string func_name, const string message = DEFAULT_MSG);
 	virtual ~DataSpaceIException();
 };
 
 class H5_DLLCPP DataTypeIException : public Exception {
    public:
 	DataTypeIException();
-	DataTypeIException(const string& func_name, const string& message = NULL);
-	DataTypeIException(const char* func_name, const char* message = NULL);
+	DataTypeIException(const string func_name, const string message = DEFAULT_MSG);
 	virtual ~DataTypeIException();
 };
 
 class H5_DLLCPP PropListIException : public Exception {
    public:
 	PropListIException();
-	PropListIException(const string& func_name, const string& message=NULL);
-	PropListIException(const char* func_name, const char* message = NULL);
+	PropListIException(const string func_name, const string message = DEFAULT_MSG);
 	virtual ~PropListIException();
 };
 
 class H5_DLLCPP DataSetIException : public Exception {
    public:
 	DataSetIException();
-	DataSetIException(const string& func_name, const string& message=NULL);
-	DataSetIException(const char* func_name, const char* message = NULL);
+	DataSetIException(const string func_name, const string message = DEFAULT_MSG);
 	virtual ~DataSetIException();
 };
 
 class H5_DLLCPP AttributeIException : public Exception {
    public:
 	AttributeIException();
-	AttributeIException(const string& func_name, const string& message=NULL);
-	AttributeIException(const char* func_name, const char* message = NULL);
+	AttributeIException(const string func_name, const string message = DEFAULT_MSG);
 	virtual ~AttributeIException();
 };
 
 class H5_DLLCPP ReferenceException : public Exception {
    public:
 	ReferenceException();
-	ReferenceException(const string& func_name, const string& message=NULL);
-	ReferenceException(const char* func_name, const char* message = NULL);
+	ReferenceException(const string func_name, const string message=DEFAULT_MSG);
 	virtual ~ReferenceException();
 };
 
 class H5_DLLCPP LibraryIException : public Exception {
    public:
 	LibraryIException();
-	LibraryIException(const string& func_name, const string& message=NULL);
-	LibraryIException(const char* func_name, const char* message = NULL);
+	LibraryIException(const string func_name, const string message=DEFAULT_MSG);
 	virtual ~LibraryIException();
 };
 
 class H5_DLLCPP IdComponentException : public Exception {
    public:
 	IdComponentException();
-	IdComponentException(const string& func_name, const string& message=NULL);
-	IdComponentException(const char* func_name, const char* message = NULL);
+	IdComponentException(const string func_name, const string message=DEFAULT_MSG);
 	virtual ~IdComponentException();
 };
 
