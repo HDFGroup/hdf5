@@ -25,6 +25,7 @@ HDF5/H5E API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -60,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5E: Error Interface</h1>
 </center>
 
@@ -100,43 +100,49 @@ These functions provide error handling capabilities in the HDF5 environment.
 <table border="0">
   <tr>
     <td valign="top">
+	<ul>
       <li><a href="#Error-Clear">H5Eclear</a>
       <li><a href="#Error-GetAuto">H5Eget_auto</a>
-      <li><a href="#Error-GetMajor">H5Eget_major</a>     
+      <li><a href="#Error-GetMajor">H5Eget_major</a>
+	</ul>     
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Error-GetMinor">H5Eget_minor</a>
       <li><a href="#Error-Print">H5Eprint</a>
       <li><a href="#Error-Push">H5Epush</a>
+	</ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Error-SetAuto">H5Eset_auto</a>
       <li><a href="#Error-Walk">H5Ewalk</a>
       <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
 information.  You will probably want to adjust the size and location of 
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
-</font>
+</font><br>
 
 <table border=0>
 <tr><td valign=top>
@@ -185,42 +191,33 @@ package maintains a single error stack. The error stack is
 statically allocated to reduce the complexity of handling
 errors within the H5E package.    
 
-
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eclear" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Error-SetAuto">H5Eset_auto</a>
+<dt><strong>Name:</strong> <a name="Error-Clear">H5Eclear</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Eset_auto</code>(<em>H5E_auto_t</em> <code>func</code>,
-        <em>void *</em><code>client_data</code>
-    )
+    <dd><em>herr_t</em> <code>H5Eclear</code>(<code>void</code>)
 <dt><strong>Purpose:</strong>
-    <dd>Turns automatic error printing on or off.
+    <dd>Clears the error stack for the current thread.
 <dt><strong>Description:</strong>
-    <dd><code>H5Eset_auto</code> turns on or off automatic printing of 
-        errors.  When turned on (non-null <code>func</code> pointer), 
-        any API function which returns an error indication will 
-        first call <code>func</code>, passing it <code>client_data</code>
-        as an argument.
+    <dd><code>H5Eclear</code> clears the error stack for the current thread.
         <p>
-        When the library is first initialized the auto printing function 
-	  is set to <code>H5Eprint</code> (cast appropriately) and
-	  <code>client_data</code> is the standard error stream pointer,
-	  <code>stderr</code>.
+        The stack is also cleared whenever an API function is called, 
+	  with certain exceptions (for instance, <code>H5Eprint</code>).
         <p>
-        Automatic stack traversal is always in the 
-        <code>H5E_WALK_DOWNWARD</code> direction. 
+        <code>H5Eclear</code> can fail if there are problems initializing 
+        the library.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>H5E_auto_t</em> <code>func</code>
-            <dd>IN: Function to be called upon an error condition.
-        <dt><em>void *</em><code>client_data</code>
-            <dd>IN: Data passed to the error function.
+        <dt>None
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eset_auto_f" 
+    <dd><a href="fortran/h5e_FORTRAN.html#h5eclear_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -228,7 +225,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_auto" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-GetAuto">H5Eget_auto</a>
@@ -266,31 +264,29 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_major" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Error-Clear">H5Eclear</a>
+<dt><strong>Name:</strong> <a name="Error-GetMajor">H5Eget_major</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Eclear</code>(<code>void</code>)
+    <dd><em>const char *</em> <code>H5Eget_major</code>(<em>H5E_major_t</em> <code>n</code>)
 <dt><strong>Purpose:</strong>
-    <dd>Clears the error stack for the current thread.
+    <dd>Returns a character string describing an error specified by a 
+        major error number.
 <dt><strong>Description:</strong>
-    <dd><code>H5Eclear</code> clears the error stack for the current thread.
-        <p>
-        The stack is also cleared whenever an API function is called, 
-	  with certain exceptions (for instance, <code>H5Eprint</code>).
-        <p>
-        <code>H5Eclear</code> can fail if there are problems initializing 
-        the library.
+    <dd>Given a major error number, <code>H5Eget_major</code> returns a 
+        constant character string that describes the error.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt>None
+        <dt><em>H5E_major_t</em> <code>n</code>
+            <dd>IN: Major error number.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
+    <dd> Returns a character string describing the error if successful.
+         Otherwise returns "Invalid major error number."
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eclear_f" 
+    <dd><a href="fortran/h5e_FORTRAN.html#h5eget_major_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -298,7 +294,74 @@ errors within the H5E package.
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_minor" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetMinor">H5Eget_minor</a>
+<dt><strong>Signature:</strong>
+    <dd><em>const char *</em> <code>H5Eget_minor</code>(<em>H5E_minor_t</em> <code>n</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns a character string describing an error specified by a 
+        minor error number.
+<dt><strong>Description:</strong>
+    <dd>Given a minor error number, <code>H5Eget_minor</code> returns a 
+        constant character string that describes the error.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5E_minor_t</em> <code>n</code>
+            <dd>IN: Minor error number.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd> Returns a character string describing the error if successful.
+         Otherwise returns "Invalid minor error number."
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5e_FORTRAN.html#h5eget_minor_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eprint" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-Print">H5Eprint</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eprint</code>(<em>FILE *</em> <code>stream</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Prints the error stack in a default manner.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Eprint</code> prints the error stack on the specified 
+        stream, <code>stream</code>.  
+        Even if the error stack is empty, a one-line message will be printed:
+        <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	  <code>HDF5-DIAG: Error detected in thread 0.</code>
+        <p>
+        <code>H5Eprint</code> is a convenience function for 
+        <code>H5Ewalk</code> with a function that prints error messages.  
+        Users are encouraged to write their own more specific error handlers.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>FILE *</em> <code>stream</code>
+            <dd>IN: File pointer, or stderr if NULL.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5e_FORTRAN.html#h5eprint_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Epush" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Push">H5Epush</a>
@@ -355,34 +418,43 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eset_auto" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Error-Print">H5Eprint</a>
+<dt><strong>Name:</strong> <a name="Error-SetAuto">H5Eset_auto</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Eprint</code>(<em>FILE *</em> <code>stream</code>)
+    <dd><em>herr_t</em> <code>H5Eset_auto</code>(<em>H5E_auto_t</em> <code>func</code>,
+        <em>void *</em><code>client_data</code>
+    )
 <dt><strong>Purpose:</strong>
-    <dd>Prints the error stack in a default manner.  
+    <dd>Turns automatic error printing on or off.
 <dt><strong>Description:</strong>
-    <dd><code>H5Eprint</code> prints the error stack on the specified 
-        stream, <code>stream</code>.  
-        Even if the error stack is empty, a one-line message will be printed:
-        <br>&nbsp;&nbsp;&nbsp;&nbsp;
-	  <code>HDF5-DIAG: Error detected in thread 0.</code>
+    <dd><code>H5Eset_auto</code> turns on or off automatic printing of 
+        errors.  When turned on (non-null <code>func</code> pointer), 
+        any API function which returns an error indication will 
+        first call <code>func</code>, passing it <code>client_data</code>
+        as an argument.
         <p>
-        <code>H5Eprint</code> is a convenience function for 
-        <code>H5Ewalk</code> with a function that prints error messages.  
-        Users are encouraged to write their own more specific error handlers.
+        When the library is first initialized the auto printing function 
+	  is set to <code>H5Eprint</code> (cast appropriately) and
+	  <code>client_data</code> is the standard error stream pointer,
+	  <code>stderr</code>.
+        <p>
+        Automatic stack traversal is always in the 
+        <code>H5E_WALK_DOWNWARD</code> direction. 
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>FILE *</em> <code>stream</code>
-            <dd>IN: File pointer, or stderr if NULL.
+        <dt><em>H5E_auto_t</em> <code>func</code>
+            <dd>IN: Function to be called upon an error condition.
+        <dt><em>void *</em><code>client_data</code>
+            <dd>IN: Data passed to the error function.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eprint_f" 
+    <dd><a href="fortran/h5e_FORTRAN.html#h5eset_auto_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -390,7 +462,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Ewalk" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Walk">H5Ewalk</a>
@@ -469,7 +542,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Ewalk_cb" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-WalkCB">H5Ewalk_cb</a>
@@ -526,65 +600,6 @@ errors within the H5E package.
         -->
 </dl>
 
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Error-GetMajor">H5Eget_major</a>
-<dt><strong>Signature:</strong>
-    <dd><em>const char *</em> <code>H5Eget_major</code>(<em>H5E_major_t</em> <code>n</code>)
-<dt><strong>Purpose:</strong>
-    <dd>Returns a character string describing an error specified by a 
-        major error number.
-<dt><strong>Description:</strong>
-    <dd>Given a major error number, <code>H5Eget_major</code> returns a 
-        constant character string that describes the error.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5E_major_t</em> <code>n</code>
-            <dd>IN: Major error number.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd> Returns a character string describing the error if successful.
-         Otherwise returns "Invalid major error number."
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eget_major_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Error-GetMinor">H5Eget_minor</a>
-<dt><strong>Signature:</strong>
-    <dd><em>const char *</em> <code>H5Eget_minor</code>(<em>H5E_minor_t</em> <code>n</code>)
-<dt><strong>Purpose:</strong>
-    <dd>Returns a character string describing an error specified by a 
-        minor error number.
-<dt><strong>Description:</strong>
-    <dd>Given a minor error number, <code>H5Eget_minor</code> returns a 
-        constant character string that describes the error.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5E_minor_t</em> <code>n</code>
-            <dd>IN: Minor error number.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd> Returns a character string describing the error if successful.
-         Otherwise returns "Invalid minor error number."
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eget_minor_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
@@ -618,14 +633,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 6 June 2003
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 3 October 2003");
+-->
+</SCRIPT>
  
 </body>
 </html>

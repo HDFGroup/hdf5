@@ -25,6 +25,7 @@ HDF5/H5F API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -60,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5F: File Interface</h1>
 </center>
 
@@ -106,49 +106,53 @@ documented below.
 <table border="0">
   <tr>
     <td valign="top">
+	<ul>
       <li><a href="#File-Close">H5Fclose</a>
       <li><a href="#File-Create">H5Fcreate</a>
       <li><a href="#File-Flush">H5Fflush</a>
       <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
       <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
-      
-      
+    </ul>      
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
       <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
       <li><a href="#File-GetVfdHandle">H5Fget_vfd_handle</a>
       <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
       <li><a href="#File-Mount">H5Fmount</a>
+	</ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#File-Open">H5Fopen</a>
       <li><a href="#File-Reopen">H5Freopen</a>
       <li><a href="#File-Unmount">H5Funmount</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
 information.  You will probably want to adjust the size and location of 
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
-</font>
+</font><br>
 
 <table border=0>
 <tr><td valign=top>
@@ -176,98 +180,65 @@ facilitate moving easily between them.</i>
 </td></tr>
 </table>
 
-
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fclose" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="File-Open">H5Fopen</a>
+<dt><strong>Name:</strong> <a name="File-Close">H5Fclose</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Fopen</code>(<em>const char *</em><code>name</code>,
-            <em>unsigned</em> <code>flags</code>,
-            <em>hid_t</em> <code>access_id</code>
+    <dd><em>herr_t </em><code>H5Fclose</code>(<em>hid_t</em> <code>file_id</code>
         )
 <dt><strong>Purpose:</strong>
-        <dd>Opens an existing file.
+        <dd>Terminates access to an HDF5 file.  
 <dt><strong>Description:</strong>
-        <dd><code>H5Fopen</code> opens an existing file and is the primary 
-            function for accessing existing HDF5 files.  
+        <dd><code>H5Fclose</code> terminates access to an HDF5 file
+            by flushing all data to storage and terminating access
+            to the file through <code>file_id</code>.  
             <p>
-            The parameter <code>access_id</code> is a file access property
-            list identifier or <code>H5P_DEFAULT</code> if the 
-            default I/O access parameters are to be used  
+            If this is the last file identifier open for the file 
+            and no other access identifier is open (e.g., a dataset 
+            identifier, group identifier, or shared datatype identifier),
+            the file will be fully closed and access will end.
             <p>
-            The <code>flags</code> argument determines whether writing 
-            to an existing file will be allowed.  
-            The file is opened with read and write permission if 
-            <code>flags</code> is set to <code>H5F_ACC_RDWR</code>.  
-            All flags may be combined with the bit-wise OR operator (`|') 
-            to change the behavior of the file open call.  
-            More complex behaviors of file access are controlled 
-            through the file-access property list.
-            <p>
-            The return value is a file identifier for the open file;
-            this file identifier should be closed by calling 
-            <code>H5Fclose</code> when it is no longer needed. 
-            <p>
-
-            <b>Special case -- Multiple opens:</b>
+            <strong>Delayed close:</strong> 
             <br>
-            A file can often be opened with a new <code>H5Fopen</code> 
-            call without closing an already-open identifier established 
-            in a previous <code>H5Fopen</code> or <code>H5Fcreate</code> 
-            call.  Each such <code>H5Fopen</code> call will return a 
-            unique identifier and the file can be accessed through any 
-            of these identifiers as long as the identifier remains valid.
-            In such multiply-opened cases, all the open calls should 
-            use the same <code>flags</code> argument. 
+            Note the following deviation from the above-described behavior.
+            If <code>H5Fclose</code> is called for a file but one or more 
+            objects within the file remain open, those objects will remain 
+            accessible until they are individually closed.  
+            Thus, if the dataset <code>data_sample</code> is open when 
+            <code>H5Fclose</code> is called for the file containing it, 
+            <code>data_sample</code> will remain open and accessible 
+            (including writable) until it is explicitely closed.  
+            The file will be automatically closed once all objects in the
+            file have been closed.
             <p>
-            In some cases, such as files on a local Unix file system, 
-            the HDF5 library can detect that a file is multiply opened and 
-            will maintain coherent access among the file identifiers.
+            Be warned, hoever, that there are circumstances where it is 
+            not possible to delay closing a file.  
+            For example, an MPI-IO file close is a collective call; all of
+            the processes that opened the file must close it collectively.
+            The file cannot be closed at some time in the future by each 
+            process in an independent fashion.
+            Another example is that an application using an AFS token-based 
+            file access privilage may destroy its AFS token after 
+            <code>H5Fclose</code> has returned successfully.  
+            This would make any future access to the file, or any object 
+            within it, illegal. 
             <p>
-            But in many other cases, such as parallel file systems or
-            networked file systems, it is not always possible to detect 
-            multiple opens of the same physical file.  
-            In such cases, HDF5 will treat the file identifiers 
-            as though they are accessing different files and
-            will be unable to maintain coherent access.
-            Errors are likely to result in these cases.
-            While unlikely, the HDF5 library may not be able to detect,
-            and thus report, such errors.
-            <p>
-            It is generally recommended that applications avoid 
-            multiple opens of the same file.
-
+            In such situations, applications must close all open objects 
+            in a file before calling <code>H5Fclose</code>.  
+            It is generally recommended to do so in all cases.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of the file to access.
-        <dt><em>unsigned</em> <code>flags</code>
-            <dd>IN: File access flags.  Allowable values are:
-                <ul><dl>
-                    <dt><code>H5F_ACC_RDWR</code>
-                        <dd>Allow read and write access to file.
-                    <dt><code>H5F_ACC_RDONLY</code>
-                        <dd>Allow read-only access to file.
-                </dl>
-                <li><code>H5F_ACC_RDWR</code> and <code>H5F_ACC_RDONLY</code> 
-                are mutually exclusive; use exactly one.
-                <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints 
-                debug information.  This flag is used only by HDF5 library 
-                developers; it is neither tested nor supported
-                for use in applications.
-                </ul>
-        <dt><em>hid_t</em> <code>access_id</code>
-            <dd>IN: Identifier for the file access properties list.
-                If parallel file access is desired, this is a collective
-                call according to the communicator stored in the
-                <code>access_id</code>. 
-                Use <code>H5P_DEFAULT</code> for default file access properties.
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>IN: Identifier of a file to terminate access to.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a file identifier if successful;
+    <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fopen_f" 
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fclose_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -275,7 +246,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fcreate" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-Create">H5Fcreate</a>
@@ -382,7 +354,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fflush" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-Flush">H5Fflush</a>
@@ -438,37 +411,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="File-IsHDF5">H5Fis_hdf5</a>
-<dt><strong>Signature:</strong>
-    <dd><em>htri_t </em><code>H5Fis_hdf5</code>(<em>const char *</em><code>name</code>
-        )
-<dt><strong>Purpose:</strong>
-        <dd>Determines whether a file is in the HDF5 format.
-<dt><strong>Description:</strong>
-        <dd><code>H5Fis_hdf5</code> determines whether a file is in 
-            the HDF5 format.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: File name to check format.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>When successful, returns a positive value, for <code>TRUE</code>,
-        or <code>0</code> (zero), for <code>FALSE</code>.
-        Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fis_hdf5_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_access_plist" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetAccessPlist">H5Fget_access_plist</a>
@@ -504,7 +448,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_create_plist" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetCreatePlist">H5Fget_create_plist</a>
@@ -543,7 +488,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_obj_count" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjCount">H5Fget_obj_count</a>
@@ -622,7 +568,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_obj_ids" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjIDs">H5Fget_obj_ids</a>
@@ -674,7 +621,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_vfd_handle" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetVfdHandle">H5Fget_vfd_handle</a>
@@ -727,63 +675,30 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fis_hdf5" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="File-Close">H5Fclose</a>
+<dt><strong>Name:</strong> <a name="File-IsHDF5">H5Fis_hdf5</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Fclose</code>(<em>hid_t</em> <code>file_id</code>
+    <dd><em>htri_t </em><code>H5Fis_hdf5</code>(<em>const char *</em><code>name</code>
         )
 <dt><strong>Purpose:</strong>
-        <dd>Terminates access to an HDF5 file.  
+        <dd>Determines whether a file is in the HDF5 format.
 <dt><strong>Description:</strong>
-        <dd><code>H5Fclose</code> terminates access to an HDF5 file
-            by flushing all data to storage and terminating access
-            to the file through <code>file_id</code>.  
-            <p>
-            If this is the last file identifier open for the file 
-            and no other access identifier is open (e.g., a dataset 
-            identifier, group identifier, or shared datatype identifier),
-            the file will be fully closed and access will end.
-            <p>
-            <strong>Delayed close:</strong> 
-            <br>
-            Note the following deviation from the above-described behavior.
-            If <code>H5Fclose</code> is called for a file but one or more 
-            objects within the file remain open, those objects will remain 
-            accessible until they are individually closed.  
-            Thus, if the dataset <code>data_sample</code> is open when 
-            <code>H5Fclose</code> is called for the file containing it, 
-            <code>data_sample</code> will remain open and accessible 
-            (including writable) until it is explicitely closed.  
-            The file will be automatically closed once all objects in the
-            file have been closed.
-            <p>
-            Be warned, hoever, that there are circumstances where it is 
-            not possible to delay closing a file.  
-            For example, an MPI-IO file close is a collective call; all of
-            the processes that opened the file must close it collectively.
-            The file cannot be closed at some time in the future by each 
-            process in an independent fashion.
-            Another example is that an application using an AFS token-based 
-            file access privilage may destroy its AFS token after 
-            <code>H5Fclose</code> has returned successfully.  
-            This would make any future access to the file, or any object 
-            within it, illegal. 
-            <p>
-            In such situations, applications must close all open objects 
-            in a file before calling <code>H5Fclose</code>.  
-            It is generally recommended to do so in all cases.
+        <dd><code>H5Fis_hdf5</code> determines whether a file is in 
+            the HDF5 format.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of a file to terminate access to.
+        <dt><em>const char *</em><code>name</code>
+            <dd>IN: File name to check format.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
+    <dd>When successful, returns a positive value, for <code>TRUE</code>,
+        or <code>0</code> (zero), for <code>FALSE</code>.
+        Otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fclose_f" 
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fis_hdf5_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -791,7 +706,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fmount" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-Mount">H5Fmount</a>
@@ -837,7 +753,153 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fopen" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Open">H5Fopen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fopen</code>(<em>const char *</em><code>name</code>,
+            <em>unsigned</em> <code>flags</code>,
+            <em>hid_t</em> <code>access_id</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Opens an existing file.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fopen</code> opens an existing file and is the primary 
+            function for accessing existing HDF5 files.  
+            <p>
+            The parameter <code>access_id</code> is a file access property
+            list identifier or <code>H5P_DEFAULT</code> if the 
+            default I/O access parameters are to be used  
+            <p>
+            The <code>flags</code> argument determines whether writing 
+            to an existing file will be allowed.  
+            The file is opened with read and write permission if 
+            <code>flags</code> is set to <code>H5F_ACC_RDWR</code>.  
+            All flags may be combined with the bit-wise OR operator (`|') 
+            to change the behavior of the file open call.  
+            More complex behaviors of file access are controlled 
+            through the file-access property list.
+            <p>
+            The return value is a file identifier for the open file;
+            this file identifier should be closed by calling 
+            <code>H5Fclose</code> when it is no longer needed. 
+            <p>
 
+            <b>Special case -- Multiple opens:</b>
+            <br>
+            A file can often be opened with a new <code>H5Fopen</code> 
+            call without closing an already-open identifier established 
+            in a previous <code>H5Fopen</code> or <code>H5Fcreate</code> 
+            call.  Each such <code>H5Fopen</code> call will return a 
+            unique identifier and the file can be accessed through any 
+            of these identifiers as long as the identifier remains valid.
+            In such multiply-opened cases, all the open calls should 
+            use the same <code>flags</code> argument. 
+            <p>
+            In some cases, such as files on a local Unix file system, 
+            the HDF5 library can detect that a file is multiply opened and 
+            will maintain coherent access among the file identifiers.
+            <p>
+            But in many other cases, such as parallel file systems or
+            networked file systems, it is not always possible to detect 
+            multiple opens of the same physical file.  
+            In such cases, HDF5 will treat the file identifiers 
+            as though they are accessing different files and
+            will be unable to maintain coherent access.
+            Errors are likely to result in these cases.
+            While unlikely, the HDF5 library may not be able to detect,
+            and thus report, such errors.
+            <p>
+            It is generally recommended that applications avoid 
+            multiple opens of the same file.
+
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>const char *</em><code>name</code>
+            <dd>IN: Name of the file to access.
+        <dt><em>unsigned</em> <code>flags</code>
+            <dd>IN: File access flags.  Allowable values are:
+                <ul><dl>
+                    <dt><code>H5F_ACC_RDWR</code>
+                        <dd>Allow read and write access to file.
+                    <dt><code>H5F_ACC_RDONLY</code>
+                        <dd>Allow read-only access to file.
+                </dl>
+                <li><code>H5F_ACC_RDWR</code> and <code>H5F_ACC_RDONLY</code> 
+                are mutually exclusive; use exactly one.
+                <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints 
+                debug information.  This flag is used only by HDF5 library 
+                developers; it is neither tested nor supported
+                for use in applications.
+                </ul>
+        <dt><em>hid_t</em> <code>access_id</code>
+            <dd>IN: Identifier for the file access properties list.
+                If parallel file access is desired, this is a collective
+                call according to the communicator stored in the
+                <code>access_id</code>. 
+                Use <code>H5P_DEFAULT</code> for default file access properties.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fopen_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Freopen" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Reopen">H5Freopen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Freopen</code>(<em>hid_t</em> <code>file_id</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Returns a new identifier for a previously-opened HDF5 file.
+<dt><strong>Description:</strong>
+        <dd><code>H5Freopen</code> returns a new file identifier for an
+            already-open HDF5 file, as specified by <code>file_id</code>.  
+            Both identifiers share caches and other information.  
+            The only difference between the identifiers is that the 
+            new identifier is not mounted anywhere and no files are 
+            mounted on it.
+            <p>
+            Note that there is no circumstance under which 
+            <code>H5Freopen</code> can actually open a closed file; 
+            the file  must already be open and have an active 
+            <code>file_id</code>.  E.g., one cannot close a file with 
+            <code> H5Fclose&nbsp;(file_id) </code> then use 
+            <code> H5Freopen&nbsp;(file_id) </code> to reopen it.
+            <p>
+            The new file identifier should be closed by calling
+            <code>H5Fclose</code> when it is no longer needed.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>IN: Identifier of a file for which an additional identifier 
+                is required.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a new file identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5freopen_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Funmount" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-Unmount">H5Funmount</a>
@@ -883,48 +945,6 @@ facilitate moving easily between them.</i>
 </dl>
 
 
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="File-Reopen">H5Freopen</a>
-<dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Freopen</code>(<em>hid_t</em> <code>file_id</code>
-        )
-<dt><strong>Purpose:</strong>
-        <dd>Returns a new identifier for a previously-opened HDF5 file.
-<dt><strong>Description:</strong>
-        <dd><code>H5Freopen</code> returns a new file identifier for an
-            already-open HDF5 file, as specified by <code>file_id</code>.  
-            Both identifiers share caches and other information.  
-            The only difference between the identifiers is that the 
-            new identifier is not mounted anywhere and no files are 
-            mounted on it.
-            <p>
-            Note that there is no circumstance under which 
-            <code>H5Freopen</code> can actually open a closed file; 
-            the file  must already be open and have an active 
-            <code>file_id</code>.  E.g., one cannot close a file with 
-            <code> H5Fclose&nbsp;(file_id) </code> then use 
-            <code> H5Freopen&nbsp;(file_id) </code> to reopen it.
-            <p>
-            The new file identifier should be closed by calling
-            <code>H5Fclose</code> when it is no longer needed.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of a file for which an additional identifier 
-                is required.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a new file identifier if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5freopen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -960,14 +980,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 6 June 2003
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 3 October 2003");
+-->
+</SCRIPT>
  
 </body>
 </html>
