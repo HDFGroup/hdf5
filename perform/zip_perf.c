@@ -28,6 +28,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <math.h>
 #include <sys/time.h>
 #include <sys/uio.h>
 #include <sys/types.h>
@@ -78,10 +79,7 @@
 #define MICROSECOND         1000000.0
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
-
-/* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) ((fabs(t)<0.0000000001) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1

@@ -1,6 +1,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
+
 #include "hdf5.h"
 
 /* Local macros */
@@ -14,8 +16,9 @@
 #define ONE_KB              1024
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
+
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) ((fabs(t)<0.0000000001) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
 /* Control default behavior (with no command line arguments) */
 #define DEFAULT_RANK    3
