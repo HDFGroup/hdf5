@@ -34,6 +34,7 @@
 ./bin/iostats
 ./bin/locate_sw
 ./bin/ltmain.sh
+./bin/make_err
 ./bin/mkdirs
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
@@ -770,6 +771,7 @@
 ./src/Dependencies
 ./src/H5.c
 ./src/H5api_adpt.h
+./src/H5err.txt
 ./src/H5A.c
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
@@ -787,8 +789,12 @@
 ./src/H5Dpublic.h
 ./src/H5Dpkg.h
 ./src/H5E.c
+./src/H5Edefin.h
+./src/H5Einit.h
 ./src/H5Eprivate.h
+./src/H5Epubgen.h
 ./src/H5Epublic.h
+./src/H5Eterm.h
 ./src/H5F.c
 ./src/H5Fcontig.c
 ./src/H5Fcompact.c
