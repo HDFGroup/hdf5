@@ -22,6 +22,7 @@
 #include <H5ACprivate.h>		/*cache				*/
 #include <H5Eprivate.h>			/*error handling	  	*/
 #include <H5Fprivate.h>			/*file access                   */
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5HLprivate.h>		/*self				*/
 #include <H5MFprivate.h>		/*file memory management	*/
 #include <H5MMprivate.h>		/*core memory management  	*/
@@ -67,6 +68,15 @@ static const H5AC_class_t H5AC_LHEAP[1] = {{
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
+
+/* Declare a free list to manage the H5HL_free_t struct */
+H5FL_DEFINE_STATIC(H5HL_free_t);
+
+/* Declare a free list to manage the H5HL_t struct */
+H5FL_DEFINE_STATIC(H5HL_t);
+
+/* Declare a PQ free list to manage the heap chunk information */
+H5FL_BLK_DEFINE_STATIC(heap_chunk);
 
 
 /*-------------------------------------------------------------------------
@@ -122,21 +132,21 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
     }
 
     /* allocate memory version */
-    if (NULL==(heap = H5MM_calloc(sizeof(H5HL_t)))) {
+    if (NULL==(heap = H5FL_ALLOC(H5HL_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
     heap->addr = *addr_p + (hsize_t)H5HL_SIZEOF_HDR(f);
     heap->disk_alloc = size_hint;
     heap->mem_alloc = size_hint;
-    if (NULL==(heap->chunk = H5MM_calloc(H5HL_SIZEOF_HDR(f) + size_hint))) {
+    if (NULL==(heap->chunk = H5FL_BLK_ALLOC(heap_chunk,H5HL_SIZEOF_HDR(f) + size_hint,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
 
     /* free list */
     if (size_hint) {
-	if (NULL==(heap->freelist = H5MM_malloc(sizeof(H5HL_free_t)))) {
+	if (NULL==(heap->freelist = H5FL_ALLOC(H5HL_free_t,0))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			 "memory allocation failed");
 	}
@@ -161,9 +171,9 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
 	    H5MF_xfree(f, H5FD_MEM_LHEAP, *addr_p, total_size);
 	}
 	if (heap) {
-	    H5MM_xfree (heap->chunk);
-	    H5MM_xfree (heap->freelist);
-	    H5MM_xfree (heap);
+	    H5FL_BLK_FREE (heap_chunk,heap->chunk);
+	    H5FL_FREE (H5HL_free_t,heap->freelist);
+	    H5FL_FREE (H5HL_t,heap);
 	}
     }
     FUNC_LEAVE(ret_value);
@@ -213,7 +223,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 		      "unable to read heap header");
     }
     p = hdr;
-    if (NULL==(heap = H5MM_calloc(sizeof(H5HL_t)))) {
+    if (NULL==(heap = H5FL_ALLOC(H5HL_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -241,7 +251,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
-    heap->chunk = H5MM_calloc(H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
+    heap->chunk = H5FL_BLK_ALLOC(heap_chunk,H5HL_SIZEOF_HDR(f) + heap->mem_alloc,1);
     if (NULL==heap->chunk) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
@@ -259,7 +269,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
 			"bad heap free list");
 	}
-	if (NULL==(fl = H5MM_malloc(sizeof(H5HL_free_t)))) {
+	if (NULL==(fl = H5FL_ALLOC(H5HL_free_t,0))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
@@ -284,12 +294,12 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 
   done:
     if (!ret_value && heap) {
-	heap->chunk = H5MM_xfree(heap->chunk);
-	H5MM_xfree(heap);
-	for (fl = heap->freelist; fl; fl = tail) {
-	    tail = fl->next;
-	    H5MM_xfree(fl);
-	}
+        heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
+        for (fl = heap->freelist; fl; fl = tail) {
+            tail = fl->next;
+            H5FL_FREE(H5HL_free_t,fl);
+        }
+        H5FL_FREE(H5HL_t,heap);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -420,13 +430,13 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
      * Should we destroy the memory version?
      */
     if (destroy) {
-	heap->chunk = H5MM_xfree(heap->chunk);
-	while (heap->freelist) {
-	    fl = heap->freelist;
-	    heap->freelist = fl->next;
-	    H5MM_xfree(fl);
-	}
-	H5MM_xfree(heap);
+        heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
+        while (heap->freelist) {
+            fl = heap->freelist;
+            heap->freelist = fl->next;
+            H5FL_FREE(H5HL_free_t,fl);
+        }
+        H5FL_FREE(H5HL_t,heap);
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -560,7 +570,7 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
     if (fl->next) fl->next->prev = fl->prev;
 
     if (!fl->prev) heap->freelist = fl->next;
-    return H5MM_xfree(fl);
+    return H5FL_FREE(H5HL_free_t,fl);
 }
 
 /*-------------------------------------------------------------------------
@@ -677,7 +687,7 @@ H5HL_insert(H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	     */
 	    offset = heap->mem_alloc;
 	    if (need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
-		if (NULL==(fl = H5MM_malloc(sizeof(H5HL_free_t)))) {
+		if (NULL==(fl = H5FL_ALLOC(H5HL_free_t,0))) {
 		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1),
 				   "memory allocation failed");
 		}
@@ -708,7 +718,7 @@ H5HL_insert(H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 #endif
 	old_size = heap->mem_alloc;
 	heap->mem_alloc += need_more;
-	heap->chunk = H5MM_realloc(heap->chunk,
+	heap->chunk = H5FL_BLK_REALLOC(heap_chunk,heap->chunk,
 				   H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
 	if (NULL==heap->chunk) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1),
@@ -893,7 +903,7 @@ H5HL_remove(H5F_t *f, haddr_t addr, size_t offset, size_t size)
     /*
      * Add an entry to the free list.
      */
-    if (NULL==(fl = H5MM_malloc(sizeof(H5HL_free_t)))) {
+    if (NULL==(fl = H5FL_ALLOC(H5HL_free_t,0))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }

@@ -16,6 +16,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
@@ -27,6 +28,7 @@ static void *H5O_stab_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_stab_copy(const void *_mesg, void *_dest);
 static size_t H5O_stab_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_stab_free (void *_mesg);
 static herr_t H5O_stab_debug(H5F_t *f, const void *_mesg,
 			     FILE * stream, intn indent, intn fwidth);
 
@@ -40,7 +42,7 @@ const H5O_class_t H5O_STAB[1] = {{
     H5O_stab_copy,          	/*copy the native value         */
     H5O_stab_size,          	/*size of symbol table entry    */
     NULL,                   	/*default reset method          */
-    NULL,		            /*default free method			*/
+    H5O_stab_free,		        /* free method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
     H5O_stab_debug,         	/*debug the message             */
@@ -49,6 +51,10 @@ const H5O_class_t H5O_STAB[1] = {{
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
+
+/* Declare a free list to manage the H5O_stab_t struct */
+H5FL_DEFINE_STATIC(H5O_stab_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_stab_decode
@@ -81,7 +87,7 @@ H5O_stab_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if (NULL==(stab = H5MM_calloc(sizeof(H5O_stab_t)))) {
+    if (NULL==(stab = H5FL_ALLOC(H5O_stab_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -158,7 +164,7 @@ H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
     if (H5O_STAB == type) {
         if (_mesg) {
 	    stab = (H5O_stab_t *) _mesg;
-        } else if (NULL==(stab = H5MM_calloc(sizeof(H5O_stab_t)))) {
+        } else if (NULL==(stab = H5FL_ALLOC(H5O_stab_t,1))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}
@@ -196,7 +202,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(stab);
-    if (!dest && NULL==(dest = H5MM_calloc(sizeof(H5O_stab_t)))) {
+    if (!dest && NULL==(dest = H5FL_ALLOC(H5O_stab_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -232,6 +238,34 @@ H5O_stab_size(H5F_t *f, const void UNUSED *_mesg)
     FUNC_ENTER(H5O_stab_size, 0);
     FUNC_LEAVE(2 * H5F_SIZEOF_ADDR(f));
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_stab_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 30, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_stab_free (void *mesg)
+{
+    FUNC_ENTER (H5O_stab_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(H5O_stab_t,mesg);
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_stab_debug

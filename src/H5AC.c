@@ -26,6 +26,7 @@
 #include <H5private.h>
 #include <H5ACprivate.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>
 
 /*
@@ -44,6 +45,21 @@ static intn             interface_initialize_g = 0;
 #ifdef H5AC_SORT_BY_ADDR
 static H5AC_t          *current_cache_g = NULL;         /*for sorting */
 #endif
+
+/* Declare a free list to manage the H5AC_t struct */
+H5FL_DEFINE_STATIC(H5AC_t);
+
+/* Declare a PQ free list to manage the cache mapping array information */
+H5FL_ARR_DEFINE_STATIC(intn,-1);
+
+/* Declare a PQ free list to manage the cache slot array information */
+H5FL_ARR_DEFINE_STATIC(H5AC_info_ptr_t,-1);
+
+#ifdef H5AC_DEBUG
+/* Declare a PQ free list to manage the protected slot array information */
+H5FL_ARR_DEFINE_STATIC(H5AC_prot_t,-1);
+#endif /* H5AC_DEBUG */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_create
@@ -75,20 +91,20 @@ H5AC_create(H5F_t *f, intn size_hint)
     assert(NULL == f->shared->cache);
     if (size_hint < 1) size_hint = H5AC_NSLOTS;
 
-    if (NULL==(f->shared->cache = cache = H5MM_calloc(sizeof(H5AC_t)))) {
+    if (NULL==(f->shared->cache = cache = H5FL_ALLOC(H5AC_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
     cache->nslots = size_hint;
-    cache->slot = H5MM_calloc(cache->nslots*sizeof(H5AC_info_t *));
+    cache->slot = H5FL_ARR_ALLOC(H5AC_info_ptr_t,cache->nslots,1);
     if (NULL==cache->slot) {
-        f->shared->cache = H5MM_xfree (f->shared->cache);
+        f->shared->cache = H5FL_FREE (H5AC_t,f->shared->cache);
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
 #ifdef H5AC_DEBUG
-    if ((cache->prot = H5MM_calloc(cache->nslots*sizeof(H5AC_prot_t)))==NULL) {
-        cache->slot = H5MM_xfree (cache->slot);
-        f->shared->cache = H5MM_xfree (f->shared->cache);
+    if ((cache->prot = H5FL_ARR_ALLOC(H5AC_prot_t,cache->nslots,1))==NULL) {
+        cache->slot = H5FL_ARR_FREE (H5AC_info_ptr_t,cache->slot);
+        f->shared->cache = H5FL_FREE (H5AC_t,f->shared->cache);
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
 #endif /* H5AC_DEBUG */
@@ -135,13 +151,13 @@ H5AC_dest(H5F_t *f)
             cache->prot[i].aprots = 0;
             cache->prot[i].nprots = 0;
         }
-        cache->prot = H5MM_xfree(cache->prot);
+        cache->prot = H5FL_ARR_FREE(H5AC_prot_t,cache->prot);
     }
 #endif
 
-    cache->slot = H5MM_xfree(cache->slot);
+    cache->slot = H5FL_ARR_FREE(H5AC_info_ptr_t,cache->slot);
     cache->nslots = 0;
-    f->shared->cache = cache = H5MM_xfree(cache);
+    f->shared->cache = cache = H5FL_FREE(H5AC_t,cache);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -375,7 +391,9 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
     herr_t                  status;
     H5AC_flush_func_t       flush=NULL;
     H5AC_info_t           **info;
+#ifdef H5AC_SORT_BY_ADDR
     intn                   *map = NULL;
+#endif /* H5AC_SORT_BY_ADDR */
     uintn                   nslots;
     H5AC_t                 *cache = NULL;
 
@@ -392,7 +410,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
          * Sort the cache entries by address since flushing them in
          * ascending order by address may be much more efficient.
          */
-        if (NULL==(map=H5MM_malloc(cache->nslots * sizeof(intn)))) {
+        if (NULL==(map=H5FL_ARR_ALLOC(intn,cache->nslots,0))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
@@ -409,9 +427,9 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
             assert(H5F_addr_lt(cache->slot[i - 1]->addr, cache->slot[i]->addr));
         }
 #endif
-#else
+#else /* H5AC_SORT_BY_ADDR */
         nslots = cache->nslots;
-#endif
+#endif /* H5AC_SORT_BY_ADDR */
 
         /*
          * Look at all cache entries.
@@ -421,18 +439,20 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
             info = cache->slot + map[i];
             if (NULL == (*info))
                  break;          /*the rest are empty */
-#else
+#else /* H5AC_SORT_BY_ADDR */
             info = cache->slot + i;
             if (NULL == (*info))
                 continue;
-#endif
+#endif /* H5AC_SORT_BY_ADDR */
             if (!type || type == (*info)->type) {
                 H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
 
                 flush = (*info)->type->flush;
                 status = (flush)(f, destroy, (*info)->addr, (*info));
                 if (status < 0) {
-                    map = H5MM_xfree(map);
+#ifdef H5AC_SORT_BY_ADDR
+                    map = H5FL_ARR_FREE(intn,map);
+#endif /* H5AC_SORT_BY_ADDR */
                     HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                                   "unable to flush cache");
                 }
@@ -441,7 +461,9 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
                     (*info)= NULL;
             }
         }
-        map = H5MM_xfree(map);
+#ifdef H5AC_SORT_BY_ADDR
+        map = H5FL_ARR_FREE(intn,map);
+#endif /* H5AC_SORT_BY_ADDR */
 
         /*
          * If there are protected object then fail.  However, everything

@@ -82,6 +82,7 @@ typedef struct H5AC_info_t {
     const H5AC_class_t	*type;		/*type of object stored here	     */
     haddr_t		addr;		/*file address for object	     */
 } H5AC_info_t;
+typedef H5AC_info_t *H5AC_info_ptr_t;   /* Typedef for free lists */
 
 #ifdef H5AC_DEBUG
 typedef struct H5AC_prot_t {

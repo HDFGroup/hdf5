@@ -97,6 +97,7 @@ typedef struct H5F_rdcc_ent_t {
     struct H5F_rdcc_ent_t *next;/*next item in doubly-linked list	*/
     struct H5F_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
 } H5F_rdcc_ent_t;
+typedef H5F_rdcc_ent_t *H5F_rdcc_ent_ptr_t; /* For free lists */
 
 /* Private prototypes */
 static size_t H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata);
@@ -186,6 +187,9 @@ H5FL_BLK_DEFINE_STATIC(istore_chunk);
 
 /* Declare a free list to manage H5F_rdcc_ent_t objects */
 H5FL_DEFINE_STATIC(H5F_rdcc_ent_t);
+
+/* Declare a PQ free list to manage the H5F_rdcc_ent_ptr_t array information */
+H5FL_ARR_DEFINE_STATIC(H5F_rdcc_ent_ptr_t,-1);
 
 
 /*-------------------------------------------------------------------------
@@ -900,7 +904,7 @@ H5F_istore_init (H5F_t *f)
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
     if (f->shared->rdcc_nbytes>0 && f->shared->rdcc_nelmts>0) {
 	rdcc->nslots = f->shared->rdcc_nelmts;
-	rdcc->slot = H5MM_calloc (rdcc->nslots*sizeof(H5F_rdcc_ent_t*));
+	rdcc->slot = H5FL_ARR_ALLOC (H5F_rdcc_ent_ptr_t,rdcc->nslots,1);
 	if (NULL==rdcc->slot) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
@@ -1177,7 +1181,7 @@ H5F_istore_dest (H5F_t *f)
 		       "unable to flush one or more raw data chunks");
     }
 
-    H5MM_xfree (rdcc->slot);
+    H5FL_ARR_FREE (H5F_rdcc_ent_ptr_t,rdcc->slot);
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
     FUNC_LEAVE (SUCCEED);
 }

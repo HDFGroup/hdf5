@@ -16,6 +16,7 @@
 #include <H5Eprivate.h>		/*error handling			*/
 #include <H5Fprivate.h>		/*files					*/
 #include <H5FDsec2.h>       /* Sec2 file driver */
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>    /* Memory allocation */
 #include <H5Pprivate.h>		/*property lists			*/
 
@@ -162,6 +163,9 @@ static const H5FD_class_t H5FD_sec2_g = {
 #define INTERFACE_INIT	H5FD_sec2_init
 static intn interface_initialize_g = 0;
 
+/* Declare a free list to manage the H5FD_sec2_t struct */
+H5FL_DEFINE_STATIC(H5FD_sec2_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_sec2_init
@@ -282,7 +286,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     }
 
     /* Create the new file struct */
-    if (NULL==(file=H5MM_calloc(sizeof(H5FD_sec2_t))))
+    if (NULL==(file=H5FL_ALLOC(H5FD_sec2_t,1)))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 		      "unable to allocate file struct");
     file->fd = fd;
@@ -330,7 +334,7 @@ H5FD_sec2_close(H5FD_t *_file)
     if (close(file->fd)<0)
         HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
-    H5MM_xfree(file);
+    H5FL_FREE(H5FD_sec2_t,file);
 
     FUNC_LEAVE(SUCCEED);
 }

@@ -36,6 +36,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5private.h>		/*library functions			  */
 #include <H5Aprivate.h>		/*attributes				  */
 #include <H5Dprivate.h>		/*datasets				  */
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Iprivate.h>		/*object IDs				  */
 #include <H5ACprivate.h>	/*cache					  */
 #include <H5Eprivate.h>		/*error handling			  */
@@ -123,6 +124,15 @@ static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 			hbool_t alloc_only);
 static haddr_t H5F_locate_signature(H5FD_t *file);
 static intn H5F_flush_all_cb(H5F_t *f, const void *_invalidate);
+
+/* Declare a free list to manage the H5F_t struct */
+H5FL_DEFINE_STATIC(H5F_t);
+
+/* Declare a free list to manage the H5F_file_t struct */
+H5FL_DEFINE_STATIC(H5F_file_t);
+
+/* Declare the external free list for the H5G_t struct */
+H5FL_EXTERN(H5G_t);
 
 
 /*-------------------------------------------------------------------------
@@ -709,7 +719,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
     
     FUNC_ENTER(H5F_new, NULL);
 
-    if (NULL==(f=H5MM_calloc(sizeof(H5F_t)))) {
+    if (NULL==(f=H5FL_ALLOC(H5F_t,1))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 		    "memory allocation failed");
     }
@@ -717,7 +727,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
     if (shared) {
 	f->shared = shared;
     } else {
-	f->shared = H5MM_calloc(sizeof(H5F_file_t));
+	f->shared = H5FL_ALLOC(H5F_file_t,1);
 	f->shared->boot_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
@@ -776,8 +786,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 
  done:
     if (!ret_value && f) {
-	if (!shared) H5MM_xfree(f->shared);
-	H5MM_xfree(f);
+	if (!shared) H5FL_FREE(H5F_file_t,f->shared);
+	H5FL_FREE(H5F_t,f);
     }
     
     FUNC_LEAVE(ret_value);
@@ -823,7 +833,7 @@ H5F_dest(H5F_t *f)
 	     * Do not close the root group since we didn't count it, but free
 	     * the memory associated with it.
 	     */
-	    H5MM_xfree(f->shared->root_grp);
+	    H5FL_FREE(H5G_t,f->shared->root_grp);
 	    f->shared->root_grp=NULL;
 	    if (H5AC_dest(f)) {
 		HERROR(H5E_FILE, H5E_CANTINIT, "problems closing file");
@@ -843,7 +853,7 @@ H5F_dest(H5F_t *f)
 		HERROR(H5E_FILE, H5E_CANTINIT, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
-	    f->shared = H5MM_xfree(f->shared);
+	    f->shared = H5FL_FREE(H5F_file_t,f->shared);
 	    
 	} else if (f->shared->nrefs>0) {
 	    /*
@@ -857,7 +867,7 @@ H5F_dest(H5F_t *f)
 	f->name = H5MM_xfree(f->name);
 	f->mtab.child = H5MM_xfree(f->mtab.child);
 	f->mtab.nalloc = 0;
-	H5MM_xfree(f);
+	H5FL_FREE(H5F_t,f);
     } else if (f && f->nrefs>0) {
 	/*
 	 * There are other references to this file. Only decrement the

@@ -79,6 +79,7 @@
 #include <H5Bprivate.h>
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gpkg.h>
 #include <H5HLprivate.h>
 #include <H5Iprivate.h>
@@ -97,6 +98,9 @@ static herr_t H5G_init_interface(void);
 static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
 static size_t H5G_ntypes_g = 0;			/*entries in type table	*/
 static size_t H5G_atypes_g = 0;			/*entries allocated	*/
+
+/* Declare a free list to manage the H5G_t struct */
+H5FL_DEFINE(H5G_t);
 
 
 /*-------------------------------------------------------------------------
@@ -1218,7 +1222,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
      * don't count the root group as an open object.  The root group will
      * never be closed.
      */
-    if (NULL==(f->shared->root_grp = H5MM_calloc (sizeof(H5G_t)))) {
+    if (NULL==(f->shared->root_grp = H5FL_ALLOC (H5G_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -1294,12 +1298,12 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     }
     
     /* create an open group */
-    if (NULL==(grp = H5MM_calloc(sizeof(H5G_t)))) {
+    if (NULL==(grp = H5FL_ALLOC(H5G_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
     if (H5G_stab_create(grp_ent.file, size_hint, &(grp->ent)/*out*/) < 0) {
-	grp = H5MM_xfree(grp);
+	grp = H5FL_FREE(H5G_t,grp);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
     }
     
@@ -1309,7 +1313,7 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     }
     if (H5G_stab_insert(&grp_ent, rest, &(grp->ent)) < 0) {
 	H5O_close(&(grp->ent));
-	grp = H5MM_xfree(grp);
+	grp = H5FL_FREE(H5G_t,grp);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't insert");
     }
     grp->nref = 1;
@@ -1395,7 +1399,7 @@ H5G_open(H5G_entry_t *loc, const char *name)
 
 done:
     if (!ret_value && grp) {
-        H5MM_xfree(grp);
+        H5FL_FREE(H5G_t,grp);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1431,7 +1435,7 @@ H5G_open_oid(H5G_entry_t *ent)
     assert(ent);
 
     /* Open the object, making sure it's a group */
-    if (NULL==(grp = H5MM_calloc(sizeof(H5G_t)))) {
+    if (NULL==(grp = H5FL_ALLOC(H5G_t,1))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -1452,7 +1456,7 @@ H5G_open_oid(H5G_entry_t *ent)
 
  done:
     if (!ret_value && grp) {
-        H5MM_xfree(grp);
+        H5FL_FREE(H5G_t,grp);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1517,7 +1521,7 @@ H5G_close(H5G_t *grp)
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
 	}
 	grp->nref = 0;
-	H5MM_xfree (grp);
+	H5FL_FREE (H5G_t,grp);
     } else {
 	--grp->nref;
     }
