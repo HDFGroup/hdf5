@@ -44,6 +44,7 @@ Bug fixes since HDF5-1.2.0
 
 Library
 -------
+   * The function H5Pset_mpi is renamed as H5Pset_fapl_mpio.
    * Corrected a floating point number conversion error for the
      Cray J90 platform.  The error did not convert the value 0.0
      correctly.
