@@ -166,8 +166,6 @@ int do_copy_refobjs(hid_t fidin,
 
 
 void read_info(const char *filename,pack_opt_t *options);
-void close_obj(H5G_obj_t obj_type, hid_t obj_id);
-
 void init_packobject(pack_info_t *obj);
 int print_filters(hid_t dcpl_id);
 

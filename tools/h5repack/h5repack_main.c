@@ -50,7 +50,7 @@ int main(int argc, char **argv)
   }
   else if (strcmp(argv[i], "-f") == 0) {  
    
-   /* add the -t option */
+   /* add the -f filter option */
    h5repack_addfilter(argv[i+1],&options);
 
    /* jump to next */
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   }
   else if (strcmp(argv[i], "-l") == 0) {       
    
-   /* parse the -c option */
+   /* parse the -l layout option */
    h5repack_addlayout(argv[i+1],&options);
    
    /* jump to next */
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
    ++i;
   }
   
-  else if (strcmp(argv[i], "-f") == 0) {       
+  else if (strcmp(argv[i], "-e") == 0) {       
    read_info(argv[++i],&options);
   }
   

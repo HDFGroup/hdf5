@@ -22,6 +22,9 @@
 static const char* MapIdToName(hid_t refobj_id, 
                                trav_table_t *travt);
 
+static void close_obj(H5G_obj_t obj_type, hid_t obj_id);
+
+
 static int copy_refs_attr(hid_t loc_in, 
                           hid_t loc_out, 
                           pack_opt_t *options,
@@ -64,8 +67,6 @@ int do_copy_refobjs(hid_t fidin,
  hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
  int       i, j;
 
- /* initialize to test for non reference cases */
- 
 /*-------------------------------------------------------------------------
  * browse
  *-------------------------------------------------------------------------
@@ -73,7 +74,6 @@ int do_copy_refobjs(hid_t fidin,
  
  for ( i = 0; i < travt->nobjs; i++)
  {
-
   switch ( travt->objs[i].type )
   {
  /*-------------------------------------------------------------------------
@@ -181,13 +181,12 @@ int do_copy_refobjs(hid_t fidin,
        /* create the reference, -1 parameter for objects */
        if (H5Rcreate(&refbuf[u],fidout,refname,H5R_OBJECT,-1)<0)
         goto error;
-       
        if (options->verbose)
         printf("object <%s> object reference created to <%s>\n",
         travt->objs[i].name,
         refname);
-       close_obj(obj_type,refobj_id);
       }/*refname*/
+      close_obj(obj_type,refobj_id);
      }/*  u */
     }/*nelmts*/
     
@@ -260,23 +259,19 @@ int do_copy_refobjs(hid_t fidin,
       if ((refname=MapIdToName(refobj_id,travt))!=NULL)
       {
        hid_t region_id;    /* region id of the referenced dataset */
-       
        if ((region_id = H5Rget_region(dset_in,H5R_DATASET_REGION,&buf[u]))<0)
         goto error;
-       
        /* create the reference, we need the space_id */
        if (H5Rcreate(&refbuf[u],fidout,refname,H5R_DATASET_REGION,region_id)<0)
         goto error;
-       
        if (H5Sclose(region_id)<0) 
         goto error;
-       
        if (options->verbose)
         printf("object <%s> region reference created to <%s>\n",
         travt->objs[i].name,
         refname);
-       close_obj(obj_type,refobj_id);
       }/*refname*/
+      close_obj(obj_type,refobj_id);
      }/*  u */
     }/*nelmts*/
    
@@ -518,50 +513,52 @@ static int copy_refs_attr(hid_t loc_in,
    {
     H5G_obj_t   obj_type;
     hid_t       refobj_id;
-    hobj_ref_t  *refbuf;
+    hobj_ref_t  *refbuf=NULL;
     unsigned    k;
     const char* refname;
-    hobj_ref_t  *buf;
+    hobj_ref_t  *buf=NULL;
  
    /*-------------------------------------------------------------------------
     * read input to memory
     *-------------------------------------------------------------------------
     */
 
-    buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-    if ( buf==NULL){
-     printf( "cannot read into memory\n" );
-     goto error;
-    }
-    if (H5Aread(attr_id,mtype_id,buf)<0)
-     goto error;
-      
-    if ((obj_type = H5Rget_obj_type(attr_id,H5R_OBJECT,buf))<0)
-     goto error;
-    refbuf=HDmalloc((unsigned)nelmts*msize);
-    if ( refbuf==NULL){
-     printf( "cannot allocate memory\n" );
-     goto error;
-    }
-    for ( k=0; k<nelmts; k++)
+    if (nelmts)
     {
-     if ((refobj_id = H5Rdereference(attr_id,H5R_OBJECT,&buf[k]))<0)
+     buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+     if ( buf==NULL){
+      printf( "cannot read into memory\n" );
+      goto error;
+     }
+     if (H5Aread(attr_id,mtype_id,buf)<0)
       goto error;
      
-      /* get the name. a valid name could only occur in the 
-     second traversal of the file */
-     if ((refname=MapIdToName(refobj_id,travt))!=NULL)
-     {
-      /* create the reference */
-      if (H5Rcreate(&refbuf[k],fidout,refname,H5R_OBJECT,-1)<0)
-       goto error;
-      
-      if (options->verbose)
-       printf("object <%s> reference created to <%s>\n",name,refname);
+     if ((obj_type = H5Rget_obj_type(attr_id,H5R_OBJECT,buf))<0)
+      goto error;
+     refbuf=HDmalloc((unsigned)nelmts*msize);
+     if ( refbuf==NULL){
+      printf( "cannot allocate memory\n" );
+      goto error;
      }
-     close_obj(obj_type,refobj_id);
-    }/*  i */
-
+     for ( k=0; k<nelmts; k++)
+     {
+      H5E_BEGIN_TRY {
+       if ((refobj_id = H5Rdereference(attr_id,H5R_OBJECT,&buf[k]))<0)
+        goto error;
+      } H5E_END_TRY;
+      /* get the name. a valid name could only occur in the 
+      second traversal of the file */
+      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+      {
+       /* create the reference */
+       if (H5Rcreate(&refbuf[k],fidout,refname,H5R_OBJECT,-1)<0)
+        goto error;
+       if (options->verbose)
+        printf("object <%s> reference created to <%s>\n",name,refname);
+      }
+      close_obj(obj_type,refobj_id);
+     }/*  k */
+    }/*nelmts*/
     
     /*-------------------------------------------------------------------------
      * copy 
@@ -570,14 +567,18 @@ static int copy_refs_attr(hid_t loc_in,
     
     if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
      goto error;
-    if(H5Awrite(attr_out,mtype_id,refbuf)<0)
-     goto error;
+    if (nelmts) {
+     if(H5Awrite(attr_out,mtype_id,refbuf)<0)
+      goto error;
+    }
     
     if (H5Aclose(attr_out)<0) 
      goto error;
 
-    free(refbuf);
-    free(buf);
+    if (refbuf)
+     free(refbuf);
+    if (buf)
+     free(buf);
   
    }/*H5T_STD_REF_OBJ*/
 
@@ -589,65 +590,62 @@ static int copy_refs_attr(hid_t loc_in,
    {
     H5G_obj_t        obj_type;
     hid_t            refobj_id;
-    hdset_reg_ref_t  *refbuf; /* input buffer for region references */
-    hdset_reg_ref_t  *buf;    /* output buffer */
+    hdset_reg_ref_t  *refbuf=NULL; /* input buffer for region references */
+    hdset_reg_ref_t  *buf=NULL;    /* output buffer */
     const char*      refname;
-    unsigned         u;
+    unsigned         k;
 
    /*-------------------------------------------------------------------------
     * read input to memory
     *-------------------------------------------------------------------------
     */
     
-    buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-    if ( buf==NULL){
-     printf( "cannot read into memory\n" );
-     goto error;
-    }
-    if (H5Aread(attr_id,mtype_id,buf)<0)
-     goto error;
-
-    if ((obj_type = H5Rget_obj_type(attr_id,H5R_DATASET_REGION,buf))<0)
-     goto error;
-
-   /*-------------------------------------------------------------------------
-    * create output
-    *-------------------------------------------------------------------------
-    */
-
-    refbuf=HDcalloc(sizeof(hdset_reg_ref_t),(size_t)nelmts); /*init to zero */
-    if ( refbuf==NULL){
-     printf( "cannot allocate memory\n" );
-     goto error;
-    }
-    for ( u=0; u<nelmts; u++)
+    if (nelmts) 
     {
-     H5E_BEGIN_TRY {
-     if ((refobj_id = H5Rdereference(attr_id,H5R_DATASET_REGION,&buf[u]))<0)
-      continue;
-     } H5E_END_TRY;
-
-      /* get the name. a valid name could only occur in the 
-     second traversal of the file */
-     if ((refname=MapIdToName(refobj_id,travt))!=NULL)
-     {
-      hid_t region_id;    /* region id of the referenced dataset */
-      
-      if ((region_id = H5Rget_region(attr_id,H5R_DATASET_REGION,&buf[u]))<0)
-       goto error;
-   
-      /* create the reference, we need the space_id */
-      if (H5Rcreate(&refbuf[u],fidout,refname,H5R_DATASET_REGION,region_id)<0)
-       goto error;
-
-      if (H5Sclose(region_id)<0) 
-       goto error;
-   
-      if (options->verbose)
-       printf("object <%s> region reference created to <%s>\n",name,refname);
+     buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+     if ( buf==NULL){
+      printf( "cannot read into memory\n" );
+      goto error;
      }
-     close_obj(obj_type,refobj_id);
-    }/*  u */
+     if (H5Aread(attr_id,mtype_id,buf)<0)
+      goto error;
+     if ((obj_type = H5Rget_obj_type(attr_id,H5R_DATASET_REGION,buf))<0)
+      goto error;
+     
+    /*-------------------------------------------------------------------------
+     * create output
+     *-------------------------------------------------------------------------
+     */
+     
+     refbuf=HDcalloc(sizeof(hdset_reg_ref_t),(size_t)nelmts); /*init to zero */
+     if ( refbuf==NULL){
+      printf( "cannot allocate memory\n" );
+      goto error;
+     }
+     for ( k=0; k<nelmts; k++)
+     {
+      H5E_BEGIN_TRY {
+       if ((refobj_id = H5Rdereference(attr_id,H5R_DATASET_REGION,&buf[k]))<0)
+        continue;
+      } H5E_END_TRY;
+      /* get the name. a valid name could only occur in the 
+      second traversal of the file */
+      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+      {
+       hid_t region_id;    /* region id of the referenced dataset */
+       if ((region_id = H5Rget_region(attr_id,H5R_DATASET_REGION,&buf[k]))<0)
+        goto error;
+       /* create the reference, we need the space_id */
+       if (H5Rcreate(&refbuf[k],fidout,refname,H5R_DATASET_REGION,region_id)<0)
+        goto error;
+       if (H5Sclose(region_id)<0) 
+        goto error;
+       if (options->verbose)
+        printf("object <%s> region reference created to <%s>\n",name,refname);
+      }
+      close_obj(obj_type,refobj_id);
+     }/*  k */
+    }/*nelmts */
    
     /*-------------------------------------------------------------------------
      * copy 
@@ -656,18 +654,18 @@ static int copy_refs_attr(hid_t loc_in,
     
     if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
      goto error;
-    if(H5Awrite(attr_out,mtype_id,refbuf)<0)
-     goto error;
-    
+    if (nelmts) {
+     if(H5Awrite(attr_out,mtype_id,refbuf)<0)
+      goto error;
+    }
     if (H5Aclose(attr_out)<0) 
      goto error;
-
-    free(refbuf);
-    free(buf);
+    if (refbuf)
+     free(refbuf);
+    if (buf)
+     free(buf);
    } /* H5T_STD_REF_DSETREG */
 
-   
-   
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
@@ -700,23 +698,25 @@ error:
  *-------------------------------------------------------------------------
  */
 
-void close_obj(H5G_obj_t obj_type, hid_t obj_id)
+static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
 {
- 
- switch (obj_type) {
- case H5G_GROUP:
-  H5Gclose(obj_id);
-  break;
- case H5G_DATASET:
-  H5Dclose(obj_id);
-  break;
- case H5G_TYPE:
-  H5Tclose(obj_id);
-  break;
- default:
-  assert(0);
-  break;
- }
+ H5E_BEGIN_TRY 
+ {
+  switch (obj_type) 
+  {
+  case H5G_GROUP:
+   H5Gclose(obj_id);
+   break;
+  case H5G_DATASET:
+   H5Dclose(obj_id);
+   break;
+  case H5G_TYPE:
+   H5Tclose(obj_id);
+   break;
+  default:
+   break;
+  }
+ } H5E_END_TRY; 
 }
 
 /*-------------------------------------------------------------------------
@@ -737,7 +737,6 @@ static const char* MapIdToName(hid_t refobj_id,
  /* obtains the file ID given an object ID.  This ID must be closed */
  if ((fid = H5Iget_file_id(refobj_id))<0)
  {
-  assert(0);
   return NULL;
  }
 
@@ -747,13 +746,8 @@ static const char* MapIdToName(hid_t refobj_id,
   switch ( travt->objs[i].type ) 
   {
   default:
-   assert(0);
    break;
-  case H5G_GROUP:
-  case H5G_TYPE:
-  case H5G_LINK:
-   break;
-   
+ 
   /*-------------------------------------------------------------------------
    * H5G_DATASET
    *-------------------------------------------------------------------------
@@ -762,15 +756,9 @@ static const char* MapIdToName(hid_t refobj_id,
   case H5G_DATASET:
    
    if ((id = H5Dopen(fid,travt->objs[i].name))<0)
-   {
-    assert(0);
     return NULL;
-   }
    if (H5Dclose(id)<0)
-   {
-    assert(0);
     return NULL;
-   }
    if (id==refobj_id)
    {
     H5Fclose(fid);
