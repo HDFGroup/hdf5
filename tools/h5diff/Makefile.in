@@ -64,13 +64,13 @@ check test _test: $(PROGS)
 ## How to build the programs...They all depend on the hdf5 library and
 ## the tools library compiled in this directory.
 ##
-$(PROGS): $(LIBTOOLS) $(LIBHDF5)
+$(PROGS): $(LIBHDF5)
 
 h5diff: h5diff.lo h5trav.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5diff.lo h5trav.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5diff.lo h5trav.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5difftst: h5difftst.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5difftst.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5difftst.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 
 @CONCLUDE@
