@@ -726,7 +726,7 @@ H5Sget_select_npoints(hid_t spaceid)
     hssize_t ret_value=FAIL;        /* return value */
 
     FUNC_ENTER (H5Sget_select_npoints, 0);
-    H5TRACE1("h","i",spaceid);
+    H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(spaceid) ||

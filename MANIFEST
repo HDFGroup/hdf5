@@ -307,11 +307,13 @@
 ./test/overhead.c
 ./test/ragged.c
 ./test/shtype.c
+./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/tattr.c
 ./test/tfile.c
 ./test/th5s.c
+./test/th5s.h5
 ./test/theap.c
 ./test/tmeta.c
 ./test/tohdr.c

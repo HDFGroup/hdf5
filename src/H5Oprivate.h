@@ -168,10 +168,10 @@ typedef struct H5O_efl_t {
 } H5O_efl_t;
 
 /*
- * Data Layout Message
+ * Data Layout Message.
  */
 #define H5O_LAYOUT_ID		0x0008
-#define H5O_LAYOUT_NDIMS	32
+#define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
 extern const H5O_class_t H5O_LAYOUT[1];
 
 typedef struct H5O_layout_t {

@@ -1011,7 +1011,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     hssize_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Aget_name, FAIL);
-    H5TRACE3("z","izs",attr_id,buf_size,buf);
+    H5TRACE3("Hs","izs",attr_id,buf_size,buf);
 
     /* check arguments */
     if (H5I_ATTR != H5I_get_type(attr_id) ||

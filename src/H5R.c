@@ -401,6 +401,7 @@ H5Rget_region(hid_t dset, H5R_type_t rtype, void *ref)
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Rget_region, FAIL);
+    H5TRACE3("i","iRtx",dset,rtype,ref);
 
     /* Check args */
     if(ref==NULL)

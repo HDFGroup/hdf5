@@ -940,7 +940,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
  */
 int
 H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
-		hsize_t maxdims[]/*out*/)
+			  hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
@@ -1047,7 +1047,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
     switch (ds->extent.type) {
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_modify(ent, H5O_SDSPACE, 0, 0, &(ds->extent.u.simple)) < 0) {
+            if (H5O_modify(ent, H5O_SDSPACE, 0, 0, &(ds->extent.u.simple))<0) {
                 HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
                       "can't update simple data space message");
             }
@@ -1261,25 +1261,27 @@ H5Sis_simple(hid_t space_id)
         hid_t space_id;	      IN: Dataspace object to query
         intn rank;	      IN: # of dimensions for the dataspace
         const size_t *dims;   IN: Size of each dimension for the dataspace
-        const size_t *max;    IN: Maximum size of each dimension for the dataspace
+ 	const size_t *max;    IN: Maximum size of each dimension for the
+ 				  dataspace
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
-	This function sets the number and size of each dimension in the
-    dataspace.	Setting RANK to a value of zero converts the dataspace to a
-    scalar dataspace.  Dimensions are specified from slowest to fastest changing
-    in the DIMS array (i.e. 'C' order).  Setting the size of a dimension in the
-    MAX array to zero indicates that the dimension is of unlimited size and
-    should be allowed to expand.  If MAX is NULL, the dimensions in the DIMS
-    array are used as the maximum dimensions.  Currently, only the first
-    dimension in the array (the slowest) may be unlimited in size.
+    This function sets the number and size of each dimension in the
+    dataspace. Setting RANK to a value of zero converts the dataspace to a
+    scalar dataspace.  Dimensions are specified from slowest to fastest
+    changing in the DIMS array (i.e. 'C' order).  Setting the size of a
+    dimension in the MAX array to zero indicates that the dimension is of
+    unlimited size and should be allowed to expand.  If MAX is NULL, the
+    dimensions in the DIMS array are used as the maximum dimensions.
+    Currently, only the first dimension in the array (the slowest) may be
+    unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
 H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
 		      const hsize_t max[/*rank*/])
 {
-    H5S_t		   *space = NULL;	/* dataspace to modify */
-    intn		    u;	/* local counting variable */
+    H5S_t	*space = NULL;	/* dataspace to modify */
+    intn	u;	/* local counting variable */
 
     FUNC_ENTER(H5Sset_extent_simple, FAIL);
     H5TRACE4("e","iIs*[a1]h*[a1]h",space_id,rank,dims,max);
@@ -1291,8 +1293,8 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     if (rank > 0 && dims == NULL) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
     }
-    if (rank<0) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
+    if (rank<0 || rank>H5S_MAX_RANK) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
     }
 #ifdef OLD_WAY
     if (dims) {
@@ -1353,7 +1355,7 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
     FUNC_ENTER(H5S_set_extent_simple, FAIL);
 
     /* Check args */
-    assert(rank>=0);
+    assert(rank>=0 && rank<=H5S_MAX_RANK);
     assert(0==rank || dims);
     
     /* If there was a previous offset for the selection, release it */
@@ -1605,6 +1607,10 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     if (rank<0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "dimensionality cannot be negative");
+    }
+    if (rank>H5S_MAX_RANK) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "dimensionality is too large");
     }
     if (!dims && dims!=0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,

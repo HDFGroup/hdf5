@@ -85,10 +85,14 @@ test_h5s_basic(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		sid1, sid2;	/* Dataspace ID			*/
+    hid_t		dset1;		/* Dataset ID			*/
     unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3, SPACE2_DIM4};
-    hsize_t		max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
+    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3,
+				   SPACE2_DIM4};
+    hsize_t		dims3[H5S_MAX_RANK+1];
+    hsize_t		max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3,
+				  SPACE2_MAX4};
     hsize_t		tdims[4];	/* Dimension array to test with */
     hsize_t		tmax[4];
     size_t		n;	 	/* Number of dataspace elements */
@@ -106,7 +110,8 @@ test_h5s_basic(void)
 
     n = H5Sget_simple_extent_npoints(sid1);
     CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
-    VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3, "H5Sget_simple_extent_npoints");
+    VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
+	   "H5Sget_simple_extent_npoints");
 
     rank = H5Sget_simple_extent_ndims(sid1);
     CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
@@ -145,6 +150,26 @@ test_h5s_basic(void)
     /* Close first file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /*
+     * Check to be sure we can't create a simple data space that has too many
+     * dimensions.
+     */
+    H5E_BEGIN_TRY {
+	sid1 = H5Screate_simple(H5S_MAX_RANK+1, dims3, NULL);
+    } H5E_END_TRY;
+    VERIFY(sid1, FAIL, "H5Screate_simple");
+
+    /*
+     * Try reading a file that has been prepared that has a dataset with a
+     * higher dimensionality than what the library can handle.
+     */
+    fid1 = H5Fopen("th5s.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK_I(fid1, "H5Fopen(th5s.h5)");
+    dset1 = H5Dopen(fid1, "dset");
+    VERIFY(dset1, FAIL, "H5Dopen");
+    ret = H5Fclose(fid1);
+    CHECK_I(ret, "H5Fclose");
 }				/* test_h5s_basic() */
 
 /****************************************************************

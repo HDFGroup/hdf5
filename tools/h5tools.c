@@ -52,7 +52,7 @@ static void
 h5dump_prefix(char *s/*out*/, const h5dump_t *info, hsize_t elmtno, int ndims,
 	      hsize_t min_idx[], hsize_t max_idx[])
 {
-    hsize_t	p_prod[8], p_idx[8];
+    hsize_t	p_prod[H5S_MAX_RANK], p_idx[H5S_MAX_RANK];
     hsize_t	n, i;
     char	temp[1024];
 
@@ -112,7 +112,7 @@ h5dump_prefix(char *s/*out*/, const h5dump_t *info, hsize_t elmtno, int ndims,
 static void
 h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 {
-    size_t	i, n, offset, size, dims[4], nelmts;
+    size_t	i, n, offset, size, dims[H5S_MAX_RANK], nelmts;
     unsigned	overflow = 0xaaaaaaaa;
     char	temp[8192];
     char	*name, quote='\0';
@@ -280,7 +280,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    memb = H5Tget_member_type(type, j);
 	    size = H5Tget_size(memb);
 	    ndims = H5Tget_member_dims(type, j, dims, NULL);
-	    assert(ndims>=0 && ndims<=4);
+	    assert(ndims>=0 && ndims<=H5S_MAX_RANK);
 	    for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
 
 	    if (nelmts>1) strcat(temp, OPT(info->arr_pre, "["));
@@ -340,8 +340,8 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
     int			need_prefix=1;		/*indices need printing	*/
 
     /* Print info */
-    hsize_t		p_min_idx[8];		/*min selected index	*/
-    hsize_t		p_max_idx[8];		/*max selected index	*/
+    hsize_t		p_min_idx[H5S_MAX_RANK];/*min selected index	*/
+    hsize_t		p_max_idx[H5S_MAX_RANK];/*max selected index	*/
     size_t		p_type_nbytes;		/*size of memory type	*/
     hsize_t		p_nelmts;		/*total selected elmts	*/
     char		p_buf[8192];		/*output string		*/
@@ -350,15 +350,15 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
     char 		p_prefix[1024];		/*line prefix string	*/
 
     /* Stripmine info */
-    hsize_t		sm_size[8];		/*stripmine size	*/
+    hsize_t		sm_size[H5S_MAX_RANK];	/*stripmine size	*/
     hsize_t		sm_nbytes;		/*bytes per stripmine	*/
     hsize_t		sm_nelmts;		/*elements per stripmine*/
     unsigned char	*sm_buf;		/*buffer for raw data	*/
     hid_t		sm_space;		/*stripmine data space	*/
 
     /* Hyperslab info */
-    hssize_t		hs_offset[8];		/*starting offset	*/
-    hsize_t		hs_size[8];		/*size this pass	*/
+    hssize_t		hs_offset[H5S_MAX_RANK];/*starting offset	*/
+    hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
     hsize_t		hs_nelmts;		/*elements in request	*/
 
     /*

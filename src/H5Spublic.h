@@ -25,7 +25,6 @@
 #define H5S_UNLIMITED	((hsize_t)(hssize_t)(-1))
 
 /* Define user-level maximum number of dimensions */
-/* This is not used internally to the library, see H5O_LAYOUT_NDIMS for the internal constant */
 #define H5S_MAX_RANK    31
 
 /* Different types of dataspaces */
@@ -39,9 +38,13 @@ typedef enum H5S_class_t {
 /* Different ways of combining selections */
 typedef enum H5S_seloper_t {
     H5S_SELECT_NOOP      = -1,  /* error                                     */
-    H5S_SELECT_SET       = 0,   /* Select "set" operation */
-    H5S_SELECT_OR,              /* Binary "or" operation (add new selection to existing selection) */
-    H5S_SELECT_INVALID          /* Invalid upper bound on selection operations */
+    H5S_SELECT_SET       = 0,   /* Select "set" operation 		     */
+    H5S_SELECT_OR,              /* Binary "or" operation (add new selection
+				 * to existing selection)		
+				 */
+    H5S_SELECT_INVALID          /* Invalid upper bound on selection
+				 * operations			
+				 */
 } H5S_seloper_t;
 
 #ifdef __cplusplus
@@ -58,7 +61,8 @@ hid_t H5Scopy (hid_t space_id);
 herr_t H5Sclose (hid_t space_id);
 hsize_t H5Sget_simple_extent_npoints (hid_t space_id);
 int H5Sget_simple_extent_ndims (hid_t space_id);
-int H5Sget_simple_extent_dims (hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
+int H5Sget_simple_extent_dims (hid_t space_id, hsize_t dims[],
+			       hsize_t maxdims[]);
 hbool_t H5Sis_simple (hid_t space_id);
 herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
 hssize_t H5Sget_select_npoints (hid_t spaceid);

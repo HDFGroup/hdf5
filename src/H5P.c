@@ -1070,7 +1070,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality must be positive");
     }
-    if ((size_t)ndims > NELMTS(plist->chunk_size)) {
+    if (ndims > H5S_MAX_RANK) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality is too large");
     }

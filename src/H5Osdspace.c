@@ -84,6 +84,7 @@ static void *
 H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
+    void		*ret_value = NULL;
     intn		u;		/* local counting variable */
     uintn		flags, version;
     
@@ -98,18 +99,22 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     if ((sdim = H5MM_calloc(sizeof(H5S_simple_t))) != NULL) {
 	version = *p++;
 	if (version!=H5O_SDSPACE_VERSION) {
-	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-			  "wrong version number in data space message");
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
+			"wrong version number in data space message");
 	}
 	sdim->rank = *p++;
+	if (sdim->rank>H5S_MAX_RANK) {
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
+			"simple data space dimensionality is too large");
+	}
 	flags = *p++;
 	p += 5; /*reserved*/
 
 	if (sdim->rank > 0) {
 	    if (NULL==(sdim->size=H5MM_malloc(sizeof(sdim->size[0])*
 					      sdim->rank))) {
-		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			       "memory allocation failed");
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			     "memory allocation failed");
 	    }
 	    for (u = 0; u < sdim->rank; u++) {
 		H5F_decode_length (f, p, sdim->size[u]);
@@ -117,8 +122,8 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 	    if (flags & H5S_VALID_MAX) {
 		if (NULL==(sdim->max=H5MM_malloc(sizeof(sdim->max[0])*
 						 sdim->rank))) {
-		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-				   "memory allocation failed");
+		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+				 "memory allocation failed");
 		}
 		for (u = 0; u < sdim->rank; u++) {
 		    H5F_decode_length (f, p, sdim->max[u]);
@@ -128,8 +133,8 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 	    if (flags & H5S_VALID_PERM) {
 		if (NULL==(sdim->perm=H5MM_malloc(sizeof(sdim->perm[0])*
 						  sdim->rank))) {
-		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-				   "memory allocation failed");
+		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+				 "memory allocation failed");
 		}
 		for (u = 0; u < sdim->rank; u++)
 		    UINT32DECODE(p, sdim->perm[u]);
@@ -137,15 +142,11 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 #endif
 	}
     }
+    ret_value = (void*)sdim;	/*success*/
     
-#ifdef LATER
   done:
-#endif /* LATER */
-    if (sdim == NULL) {		/* Error condition cleanup */
-
-    }
-    /* Normal function cleanup */
-    FUNC_LEAVE(sdim);
+    if (!ret_value) H5MM_xfree(sdim);
+    FUNC_LEAVE(ret_value);
 }
 
 /*--------------------------------------------------------------------------

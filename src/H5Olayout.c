@@ -91,6 +91,11 @@ H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 
     /* Dimensionality */
     mesg->ndims = *p++;
+    if (mesg->ndims>H5O_LAYOUT_NDIMS) {
+	H5MM_xfree(mesg);
+	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+		      "dimensionality is too large");
+    }
 
     /* Layout class */
     mesg->type = *p++;

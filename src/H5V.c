@@ -159,7 +159,7 @@ H5V_hyper_stride(intn n, const hsize_t *size,
 
     FUNC_ENTER(H5V_hyper_stride, (HDabort(), 0));
 
-    assert(n >= 0 && n < H5V_HYPER_NDIMS);
+    assert(n >= 0 && n <= H5V_HYPER_NDIMS);
     assert(size);
     assert(total_size);
     assert(stride);
