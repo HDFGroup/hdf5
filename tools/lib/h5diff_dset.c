@@ -162,17 +162,16 @@ int diff_dataset( hid_t file1_id,
  case H5T_COMPOUND:
  case H5T_STRING:
  case H5T_ARRAY:
-
-#endif
-
-
- case H5T_TIME:
  case H5T_BITFIELD:
  case H5T_OPAQUE:
-
- case H5T_REFERENCE:
  case H5T_ENUM:
  case H5T_VLEN:
+#endif
+
+ case H5T_TIME:
+ case H5T_REFERENCE:
+
+
   if (options->verbose ) {
    printf("Comparison not supported\n");
    printf("<%s> is of class %s and <%s> is of class %s\n", 
@@ -194,7 +193,11 @@ int diff_dataset( hid_t file1_id,
  storage_size1=H5Dget_storage_size(dset1_id);
  storage_size2=H5Dget_storage_size(dset2_id);
  if (storage_size1<=0 && storage_size2<=0)
+ {
+  if (options->verbose) 
+   printf("<%s> and <%s> are empty datasets\n", obj1_name, obj2_name);
   goto out;
+ }
 
 
 /*-------------------------------------------------------------------------
@@ -327,6 +330,7 @@ int diff_dataset( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
+#if 0
  can1=diff_can(m_type1);
  can2=diff_can(m_type2);
  if ( (can1==0 || can2==0))
@@ -340,6 +344,7 @@ int diff_dataset( hid_t file1_id,
   }
   goto out;
  }
+#endif
 
 /*-------------------------------------------------------------------------
  * check for different signed/unsigned types

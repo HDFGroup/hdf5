@@ -5,4 +5,3 @@ $h5diff file6.h5 file6.h5 -v dset3a dset4b
 Comparing </dset4b> with </dset4b>
 0 differences found
 
-

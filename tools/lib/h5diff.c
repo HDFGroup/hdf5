@@ -366,8 +366,10 @@ int diff( hid_t file1_id,
   break;
  } 
  
+#if 0
  if (options->verbose) 
   printf("\n");
+#endif
  return nfound;
 }
 

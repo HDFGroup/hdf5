@@ -2,5 +2,5 @@
 Expected output for 'h5diff file5.h5 file5.h5 -v dset5 dset6'
 #############################
 $h5diff file5.h5 file5.h5 -v dset5 dset6
-
+</dset6> and </dset6> are empty datasets
 

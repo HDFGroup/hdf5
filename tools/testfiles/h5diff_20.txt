@@ -5,4 +5,3 @@ $h5diff file3.h5 file3.h5 -v dset group
 Comparison not supported
 </group> is of type H5G_GROUP and </group> is of type H5G_GROUP
 
-

@@ -56,11 +56,18 @@ int diff_native_uchar(unsigned char *mem1,
  *
  * Date: May 30, 2003
  *
- * Modifications: October 29, 2003
+ * Modifications: October 30, 2003
  *  Added support for H5T_COMPOUND types; to handle compounds a recursive
  *  function is called. because of this , the data is compared datum by datum
  *  instead of the previous cycle that compared all the array  the native 
  *  types 
+ * Added support for  
+ *  H5T_STRING                          
+ *  H5T_BITFIELD                          
+ *  H5T_OPAQUE           
+ *  H5T_ENUM		 
+ *  H5T_VLEN		
+ *  H5T_ARRAY	                 
  *
  *-------------------------------------------------------------------------
  */
@@ -79,6 +86,8 @@ int diff_array( void *_mem1,
  size_t        size;              /* size of datum */
  unsigned char *mem1 = (unsigned char*)_mem1;
  unsigned char *mem2 = (unsigned char*)_mem2;
+ unsigned char *tmp1;
+ unsigned char *tmp2;
  int           acc[32];           /* accumulator and matrix position */
  int           pos[32];
  unsigned      i;
@@ -89,25 +98,48 @@ int diff_array( void *_mem1,
  {
   acc[j]=acc[j+1]*(int)dims[j+1];
  }
- 
-  /* Get the size. */
- size = H5Tget_size( m_type );
-  
- for ( i = 0; i < nelmts; i++)
+
+
+ if(H5Tis_variable_str(m_type)) 
  {
-  nfound+=diff_array_mem(
-   mem1 + i * size,
-   mem2 + i * size, /* offset */
+  tmp1 = ((unsigned char**)mem1)[0]; 
+  tmp2 = ((unsigned char**)mem2)[0]; 
+		nfound+=diff_array_mem(
+   tmp1,
+   tmp2, 
    m_type,
-   i,
+   0,
    rank,
    acc,
    pos,
    options,
    name1,
    name2);
-  if (options->n && nfound>=options->count)
-   return nfound;
+ }
+
+ else
+
+ {
+  
+  /* get the size. */
+  size = H5Tget_size( m_type );
+  
+  for ( i = 0; i < nelmts; i++)
+  {
+   nfound+=diff_array_mem(
+    mem1 + i * size,
+    mem2 + i * size, /* offset */
+    m_type,
+    i,
+    rank,
+    acc,
+    pos,
+    options,
+    name1,
+    name2);
+   if (options->n && nfound>=options->count)
+    return nfound;
+  }
  }
   
  return nfound;
@@ -153,10 +185,11 @@ int diff_array_mem( void       *_mem1,
  size_t        offset;
  int           nmembs;
  int           j;
- /* for H5T_ARRAY */
- hsize_t       adims[H5S_MAX_RANK],anelmts,andims;
- hid_t         amemb_id;
- size_t        asize;
+ hsize_t       dims[H5S_MAX_RANK];
+ hsize_t       nelmts;
+ hsize_t       ndims;
+ size_t        size;
+
 
  /* Build default formats for long long types */
  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
@@ -178,6 +211,12 @@ int diff_array_mem( void       *_mem1,
  default:
   assert(0);
   break;
+ case H5T_TIME:
+  assert(0);
+  break;
+ case H5T_REFERENCE:
+  assert(0);
+  break;
 /*-------------------------------------------------------------------------
  * H5T_COMPOUND
  *-------------------------------------------------------------------------
@@ -188,40 +227,70 @@ int diff_array_mem( void       *_mem1,
   {
    offset    = H5Tget_member_offset(m_type, j);
    memb_type = H5Tget_member_type(m_type, j);
-   nfound+=diff_array_mem(mem1+offset,
-                          mem2+offset,
-                          memb_type,
-                          i,
-                          rank,
-                          acc,
-                          pos,
-                          options,
-                          obj1,
-                          obj2);
+   nfound+=diff_array_mem(
+    mem1+offset,
+    mem2+offset,
+    memb_type,
+    i,
+    rank,
+    acc,
+    pos,
+    options,
+    obj1,
+    obj2);
    H5Tclose(memb_type);
   }
   break;
- case H5T_TIME:
-  break;
+
 /*-------------------------------------------------------------------------
- * H5T_STRING
+ * H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE, H5T_ENUM:
  *-------------------------------------------------------------------------
  */
  case H5T_STRING:
+  
+  if(H5Tis_variable_str(m_type)) 
+   type_size = HDstrlen(mem1);
+  else 
+   type_size = H5Tget_size(m_type);
+  
+  for (u=0; u<type_size; u++)
+   nfound+=diff_native_uchar(
+   mem1 + u,
+   mem2 + u, /* offset */
+   type_size,
+   u, 
+   rank, 
+   acc,
+   pos,
+   options, 
+   obj1, 
+   obj2,
+   ph);
+  
+
+  break;
+
+/*-------------------------------------------------------------------------
+ * H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE, H5T_ENUM:
+ *-------------------------------------------------------------------------
+ */
+ case H5T_BITFIELD:
+ case H5T_OPAQUE:
+ case H5T_ENUM:
 
   for (u=0; u<type_size; u++)
    nfound+=diff_native_uchar(
-                    mem1 + u,
-                    mem2 + u, /* offset */
-                    type_size,
-                    u, 
-                    rank, 
-                    acc,
-                    pos,
-                    options, 
-                    obj1, 
-                    obj2,
-                    ph);
+   mem1 + u,
+   mem2 + u, /* offset */
+   type_size,
+   u, 
+   rank, 
+   acc,
+   pos,
+   options, 
+   obj1, 
+   obj2,
+   ph);
 
   
   break;
@@ -231,23 +300,20 @@ int diff_array_mem( void       *_mem1,
  */
  case H5T_ARRAY:
   /* get the array's base datatype for each element */
-  amemb_id = H5Tget_super(m_type);
-  asize    = H5Tget_size(amemb_id);
-  andims   = H5Tget_array_ndims(m_type);
-  H5Tget_array_dims(m_type, adims, NULL);
-  assert(andims >= 1 && andims <= H5S_MAX_RANK);
+  memb_type = H5Tget_super(m_type);
+  size      = H5Tget_size(memb_type);
+  ndims     = H5Tget_array_ndims(m_type);
+  H5Tget_array_dims(m_type, dims, NULL);
+  assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
   
   /* calculate the number of array elements */
-  for (u = 0, anelmts = 1; u <andims; u++){
-   anelmts *= adims[u];
-  } 
-
-  for (u = 0; u < anelmts; u++) 
-  {
+  for (u = 0, nelmts = 1; u <ndims; u++)
+   nelmts *= dims[u];
+  for (u = 0; u < nelmts; u++) 
    nfound+=diff_array_mem(
-    mem1+u*asize,
-    mem2+u*asize,
-    amemb_id,
+    mem1 + u * size,
+    mem2 + u * size, /* offset */
+    memb_type,
     u,
     rank,
     acc,
@@ -255,19 +321,37 @@ int diff_array_mem( void       *_mem1,
     options,
     obj1,
     obj2);
-  }
-  H5Tclose(amemb_id);
+  H5Tclose(memb_type);
   break;
 
- case H5T_BITFIELD:
-  break;
- case H5T_OPAQUE:
-  break;
- case H5T_REFERENCE:
-  break;
- case H5T_ENUM:
-  break;
+/*-------------------------------------------------------------------------
+ * H5T_VLEN
+ *-------------------------------------------------------------------------
+ */
  case H5T_VLEN:
+
+  /* get the VL sequences's base datatype for each element */
+  memb_type = H5Tget_super(m_type);
+  size      = H5Tget_size(memb_type);
+    
+  /* get the number of sequence elements */
+  nelmts = ((hvl_t *)mem1)->len;
+  
+  for (j = 0; j < nelmts; j++) 
+    nfound+=diff_array_mem(
+    ((char *)(((hvl_t *)mem1)->p)) + j * size,
+    ((char *)(((hvl_t *)mem2)->p)) + j * size, /* offset */
+    memb_type,
+    j,
+    rank,
+    acc,
+    pos,
+    options,
+    obj1,
+    obj2);
+  
+  H5Tclose(memb_type);
+  
   break;
  case H5T_INTEGER:
 
