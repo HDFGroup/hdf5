@@ -150,8 +150,16 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
+          compiler version 8.1. This is a default compiler.
+        - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
+          version 8.2; set F9X environment varibale to f95, for example
+          setenv F9X f95
+          Use --disable-shared --enable-static configure flags when Absoft
+          compiler is used.
+                             EIP - 2004/07/27
         - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran
-            Compiler version 8.1 Beta. Use "--disable-shared --enable-static"
+            Compiler version 8.1 Use "--disable-shared --enable-static"
             configure flags along with the "--enable-fortran" flag to build
             Fortran library.  EIP - 2004/01/07
 

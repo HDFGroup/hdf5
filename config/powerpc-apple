@@ -14,9 +14,6 @@ fi
 # Architecture-specific flags
 ARCH=
 
-# Add "_POSIX_C_SOURCE" define to cpp flags, to quiet warnings
-#       from /usr/include/sys/cdefs.h
-#CPPFLAGS="$CPPFLAGS -D_POSIX_C_SOURCE=1" 
 
 # Omit frame pointer for optimized code?
 NOFP=${NOFP:=-fomit-frame-pointer}
@@ -24,14 +21,10 @@ NOFP=${NOFP:=-fomit-frame-pointer}
 # Figure out compiler flags
 . $srcdir/config/gnu-flags
 
-# Special setup to use pthread support if enable-threadsafe is on.
-# Works with static executable only.
-#if test "X-" != "X-$enable_threadsafe"; then
-#    CFLAGS="$CFLAGS -pthread -D_THREAD_SAFE" 
-#    LDFLAGS="$LDFLAGS -pthread"
-#    LIBS="$LIBS -lcipher"
-#    enable_static_exec=yes
-#fi
+    if test "X-$F9X" = "X-f95"; then
+    CFLAGS="$CFLAGS -DH5_ABSOFT"
+    fi
+
 
 # The default Fortran 90 compiler
 
@@ -52,14 +45,15 @@ SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
 if test "X-" = "X-$F9X"; then
-  if test "X-$enable_parallel" = "X-yes"; then
-    F9X=mpxlf_r
-  else
     F9X=xlf
-  fi
+    F9X_BASENAME=xlf
+  else
+    F9X_BASENAME=f95
+    
 fi
 
-if test "X-" = "X-$f9x_flags_set"; then
+case $F9X_BASENAME in
+    xlf) 
     F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
     FFLAGS="$FFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ "
     FSEARCH_DIRS="-I./ -I../src"
@@ -67,4 +61,20 @@ if test "X-" = "X-$f9x_flags_set"; then
     PROD_FFLAGS="-O"
     PROFILE_FFLAGS="-O"
     f9x_flags_set=yes
-fi
+    ;;
+#
+# Assume Absoft compiler
+#
+    f95)
+    F9XSUFFIXFLAG=""
+# We force compiler to use upper case for external names 
+# (just in case since this should be a default EIP)
+    FFLAGS="$FFLAGS -YEXT_NAMES=UCS"
+    FSEARCH_DIRS=""
+    DEBUG_FFLAGS="-O"
+    PROD_FFLAGS="-O"
+    PROFILE_FFLAGS="-O"
+    f9x_flags_set=yes
+    ;;
+
+esac  
