@@ -43,6 +43,7 @@ New Features
       an hdf5 library or hdf5 application binary.
       Also added a verification of the consistency between H5_lib_vers_info_g
       and other version information in the source code.
+    * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
 
 
 Bug Fixes since HDF5-1.4.1 Release
@@ -65,7 +66,6 @@ Bug Fixes since HDF5-1.4.1 Release
 
 Documentation
 =============
-
 
 
 Platforms Tested
@@ -125,4 +125,3 @@ Known Problems
 
     * See "Known problems" section for the HDF5 1.4.0 release in the
       HISTORY.txt file.
-
