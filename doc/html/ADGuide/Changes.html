@@ -357,14 +357,20 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 
         <p>
         <dt><u>Fortran subroutines:</u>
-        <dt><code>subroutine</code>
+        <dt><code>h5sselect_hyperslab_f</code>
           <dd><code>
-              syntax
+              SUBROUTINE h5sselect_hyperslab_f(space_id, operator, 
+              <font color="red">start</font>, count, &
+              <br>
+              hdferr, stride, block)
               </code>
 
         <dt><code>subroutine</code>
           <dd><code>
-              syntax
+              SUBROUTINE h5sselect_elements_f(space_id, operator, rank, &
+              <br>
+              <font color="red">num_elements</font>, 
+              <font color="red">coord</font>, hdferr)
               </code>
 
 
@@ -510,7 +516,7 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
         </dl>
         <p>
         <cite>(These lists of syntax changes were added 
-          on 31 March 2005, shortly after Release 1.6.4.)</cite>
+          on 31 March and 5 April 2005, shortly after Release 1.6.4.)</cite>
 
 
     <h3>Deleted Constants</h3>
@@ -2206,7 +2212,7 @@ Describes HDF5 Release 1.6.4, March 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 31 March 2005 
+Last modified: 5 April 2005 
 <!-- hhmts end -->
 
 </body>
