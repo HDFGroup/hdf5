@@ -1,4 +1,4 @@
-HDF5 version 1.6.3-snap4 released on Sun Aug 22 20:59:52 CDT 2004
+HDF5 version 1.6.3-snap5 released on Sun Aug 29 20:59:47 CDT 2004
 ================================================================================
 
 
@@ -110,6 +110,9 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Changed H5Dread() to not overwrite data in an application's buffer
+          with garbage when accessing a chunked dataset with an undefined fill
+          value and an unwritten chunk is uncountered.  QAK - 2004/08/25
         - Fixed error which could cause a core dump when a type conversion
           routine was registered after a compound datatype had been
           converted and then an equivalment compound datatype was converted
