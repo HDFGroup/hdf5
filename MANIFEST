@@ -83,7 +83,6 @@
 ./doc/html/Datasets.html
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
-./doc/html/DatatypesEnum.html
 ./doc/html/ddl.html
 ./doc/html/Debugging.html
 ./doc/html/EnumMap.gif
@@ -137,7 +136,6 @@
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
 ./doc/html/Tools.html
-./doc/html/VLdatatypes.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
