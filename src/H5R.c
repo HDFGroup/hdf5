@@ -416,7 +416,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
             break;
 
         case H5G_TYPE:
-            if ((type=H5T_open(&ent, dxpl_id))<0)
+            if ((type=H5T_open(&ent, dxpl_id)) ==NULL)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
 
             /* Create an atom for the datatype */
@@ -428,7 +428,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
 
         case H5G_DATASET:
             /* Open the dataset */
-            if ((dset=H5D_open(&ent,dxpl_id)) <0)
+            if ((dset=H5D_open(&ent,dxpl_id)) ==NULL)
                 HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
 
             /* Create an atom for the dataset */

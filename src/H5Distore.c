@@ -2104,7 +2104,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         || (IS_H5FD_MPI(f) && (H5F_ACC_RDWR & H5F_get_intent(f)))) {
 #ifdef H5_HAVE_PARALLEL
         /* Additional sanity check when operating in parallel */
-        if (chunk_addr==HADDR_UNDEF || dset->dcpl_cache.pline.nused>0)
+        if (chunk_addr==HADDR_UNDEF || dset->shared->dcpl_cache.pline.nused>0)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
 #endif /* H5_HAVE_PARALLEL */
         if ((ret_value=H5D_contig_writevv(f, dxpl_id, dset, chunk_addr, (hsize_t)dset->shared->layout.u.chunk.size, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, buf))<0)
