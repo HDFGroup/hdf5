@@ -352,6 +352,7 @@ int main(int argc, char **argv)
     TestInit(argv[0], usage, parse_options);
 
     /* Tests are generally arranged from least to most complexity... */
+
     AddTest("mpiodup", test_fapl_mpio_dup, NULL, 
 	    "fapl_mpio duplicate", NULL);
     AddTest("posixdup", test_fapl_mpiposix_dup, NULL, 
@@ -434,6 +435,10 @@ int main(int argc, char **argv)
 	      "collective to independent chunk io",PARATESTFILE);
     }
 
+#ifdef KYANG
+    AddTest("span_tree",t_span_tree,NULL,
+            "derived datatype test",PARATESTFILE);
+#endif
     AddTest("null", null_dataset, NULL, 
 	    "null dataset test", PARATESTFILE);
 

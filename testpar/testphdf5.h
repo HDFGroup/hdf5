@@ -119,6 +119,21 @@
 #define BYROW_DISCONT 2
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
 
+
+/*Constants for MPI derived data type generated from span tree */
+
+#define MSPACE1_RANK     1          /* Rank of the first dataset in memory */                            
+#define MSPACE1_DIM      50         /* Dataset size in memory */                                                                                                                                                  
+#define MSPACE2_RANK     1          /* Rank of the second dataset in memory */                           
+#define MSPACE2_DIM      4          /* Dataset size in memory */                                                                                                                                                  
+#define FSPACE_RANK      2          /* Dataset rank as it is stored in the file */                       
+#define FSPACE_DIM1      8          /* Dimension sizes of the dataset as it is                                                                  stored in the file */                                             
+#define FSPACE_DIM2      12                                                                                                                                                                                                                           /* We will read dataset back from the file                                                                  to the dataset in memory with these                                                                      dataspace parameters. */                                          
+#define MSPACE_RANK      2                                                                               
+#define MSPACE_DIM1      8                                                                               
+#define MSPACE_DIM2      9                                                                                                                                                                                        
+#define NPOINTS          4          /* Number of points that will be selected                                                                   and overwritten */                        
+
 /* type definitions */
 typedef struct H5Ptest_param_t  /* holds extra test parameters */
 {
@@ -163,6 +178,7 @@ void coll_chunk1(void);
 void coll_chunk2(void);
 void coll_chunk3(void);
 void coll_chunk4(void);
+void t_span_tree(void);
 void io_mode_confusion(void);
 #ifdef H5_HAVE_FILTER_DEFLATE
 void compress_readAll(void);
