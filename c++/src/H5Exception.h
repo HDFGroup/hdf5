@@ -66,9 +66,11 @@ class __DLLCPP__ Exception {
 
    private:
 // Because 'string' is not instantiated at compilation time, this
-// warning is displayed; but the class is exported so the warning
-// is harmless
+// warning is displayed when building DLL; but the class is exported 
+// so the warning is harmless
+#if defined(WIN32)
 #pragma warning(disable: 4251)
+#endif
 	string detailMessage;
 	string funcName;
 };
