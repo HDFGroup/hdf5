@@ -33,8 +33,9 @@ TIMINGS=testmeta
 ## The libh5test.a library provides common support code for the tests. We link
 ## this library statically because some systems can only link executables to
 ## a single shared library and libhdf5 is much bigger than libh5test.
-LIBHDF5=../src/libhdf5.la
+LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5test.la
+LIBHDF5=$(top_builddir)/src/libhdf5.la
 LIB_SRC=h5test.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=

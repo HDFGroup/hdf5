@@ -109,7 +109,7 @@ int         pio_debug_level = 0;/* The debug level:
                                  */
 
 /* local variables */
-static const char  *progname = "pio_perf";
+static const char  *progname = "h5perf";
 
 /*
  * Command-line options: The user can specify short or long-named
@@ -1101,7 +1101,7 @@ parse_command_line(int argc, char *argv[])
                     } else if (!strcasecmp(buf, "posix")) {
                         cl_opts->io_types |= PIO_POSIX;
                     } else {
-                        fprintf(stderr, "pio_perf: invalid --api option %s\n",
+                        fprintf(stderr, "h5perf: invalid --api option %s\n",
                                 buf);
                         exit(EXIT_FAILURE);
                     }
@@ -1148,7 +1148,7 @@ parse_command_line(int argc, char *argv[])
 
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)
                             if (!isdigit(buf[j])) {
-                                fprintf(stderr, "pio_perf: invalid --debug option %s\n",
+                                fprintf(stderr, "h5perf: invalid --debug option %s\n",
                                         buf);
                                 exit(EXIT_FAILURE);
                             }
@@ -1174,7 +1174,7 @@ parse_command_line(int argc, char *argv[])
 			    cl_opts->verify = TRUE;
 			    break;
                         default:
-                            fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
+                            fprintf(stderr, "h5perf: invalid --debug option %s\n", buf);
                             exit(EXIT_FAILURE);
                         }
                     }
@@ -1203,7 +1203,7 @@ parse_command_line(int argc, char *argv[])
 #ifdef H5_HAVE_NOFILL
             cl_opts->h5_no_fill = TRUE;
 #else
-	    fprintf(stderr, "pio_perf: --no-fill not supported\n");
+	    fprintf(stderr, "h5perf: --no-fill not supported\n");
             usage(progname);
 	    exit(EXIT_FAILURE);
 #endif

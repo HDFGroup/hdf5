@@ -1,8 +1,16 @@
 ## HDF5 Library Performance Makefile(.in)
 ##
-## Copyright (C) 2001, 2002
-##     National Center for Supercomputing Applications.
-##     All rights reserved.
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
+##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
 top_srcdir=@top_srcdir@
 top_builddir=..
@@ -19,8 +27,10 @@ LIBTOOLS=../tools/lib/libh5tools.la
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
-TEST_PROGS_PARA=pio_perf
+TEST_PROGS_PARA=h5perf
 TEST_PROGS=iopipe chunk overhead
+
+PUB_PROGS=h5perf
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
@@ -40,7 +50,7 @@ TEST_OBJ=$(TEST_SRC:.c=.lo)
 ## How to build the programs... they all depend on the hdf5 library
 $(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
 
-pio_perf: $(PIO_PERF_OBJ)
+h5perf: $(PIO_PERF_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(PIO_PERF_OBJ) $(LIBH5TEST) \
 	$(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 

@@ -75,7 +75,7 @@ tests TAGS dep depend:
 	done
 
 install:
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) perform; do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 	@$(LT) --mode=finish $(libdir);
