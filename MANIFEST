@@ -51,6 +51,7 @@
 ./config/conclude.in
 ./config/dec-flags
 ./config/dec-osf4.x
+./config/dec-osf5.x
 ./config/depend1.in
 ./config/depend2.in
 ./config/depend3.in
@@ -502,6 +503,7 @@
 ./fortran/config/conclude.in
 ./fortran/config/dec-flags
 ./fortran/config/dec-osf4.x
+./fortran/config/dec-osf5.x
 ./fortran/config/depend
 ./fortran/config/depend1.in
 ./fortran/config/depend2.in
