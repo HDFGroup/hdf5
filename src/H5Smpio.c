@@ -578,7 +578,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     assert (IS_H5FD_MPIO(f));
     /* Make certain we have the correct type of property list */
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* INCOMPLETE!!!  rky 980816 */
     /* Currently can only handle H5D_CONTIGUOUS layout */

@@ -334,7 +334,7 @@ H5Pcreate(hid_t type)
     H5P_class_t_old old_type;
 
     FUNC_ENTER(H5Pcreate, FAIL);
-    H5TRACE1("i","p",type);
+    H5TRACE1("i","i",type);
 
     /* Kludge to detect generic property creations and divert them to the */
     /* generic property list creation routine - QAK */
@@ -559,7 +559,7 @@ H5Pget_class(hid_t plist_id)
     hid_t ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5Pget_class, H5P_NO_CLASS);
-    H5TRACE1("p","i",plist_id);
+    H5TRACE1("i","i",plist_id);
 
     ret_value = H5P_get_class(plist_id);
     FUNC_LEAVE(ret_value);
@@ -7080,6 +7080,7 @@ H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
     herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER (H5Pcopy_prop, FAIL);
+    H5TRACE3("e","iis",dst_id,src_id,name);
 
     /* Check arguments. */
     if ((H5I_GENPROP_LST != H5I_get_type(src_id) && H5I_GENPROP_CLS != H5I_get_type(src_id))
