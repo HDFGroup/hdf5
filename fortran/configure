@@ -2607,7 +2607,7 @@ else
    echo "$ac_t""generic" 1>&6
 fi
 
-if test -n "$DEPEND"; then
+if test -z "$DEPEND"; then
    echo $ac_n "checking how to include a makefile""... $ac_c" 1>&6
 echo "configure:2613: checking how to include a makefile" >&5
 

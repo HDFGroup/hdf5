@@ -484,7 +484,7 @@ else
 fi
 
 dnl How do we include another file into a Makefile?
-if test -n "$DEPEND"; then
+if test -z "$DEPEND"; then
    AC_MSG_CHECKING(how to include a makefile)
 
    dnl The include file contains the target for `foo'
