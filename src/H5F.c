@@ -806,6 +806,10 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
  *	More careful about decrementing reference counts so they don't go
  *	negative or wrap around to some huge value.  Nothing happens if a
  *	reference count is already zero.
+ *
+ *      Robb Matzke, 2000-10-31
+ *      H5FL_FREE() aborts if called with a null pointer (unlike the
+ *      original H5MM_free()).
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -821,8 +825,10 @@ H5F_dest(H5F_t *f)
 	     * Do not close the root group since we didn't count it, but free
 	     * the memory associated with it.
 	     */
-	    H5FL_FREE(H5G_t,f->shared->root_grp);
-	    f->shared->root_grp=NULL;
+	    if (f->shared->root_grp) {
+                H5FL_FREE(H5G_t,f->shared->root_grp);
+                f->shared->root_grp=NULL;
+            }
 	    if (H5AC_dest(f)) {
 		HERROR(H5E_FILE, H5E_CANTINIT, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
