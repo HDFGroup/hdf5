@@ -1,4 +1,4 @@
-HDF5 version 1.7.32 released on Sun Aug  1 03:44:41 CDT 2004
+HDF5 version 1.7.33 released on Sun Aug  8 04:46:20 CDT 2004
 ================================================================================
 
 
@@ -36,6 +36,7 @@ New Features
 
     Configuration:
     --------------
+	- The IA64 will use ecc as the C++ compiler by default.
         - Added some initial support for making purify (or similar memory
             checking products) happier by initializing buffers to zero and
             disabling the internal free list code.  To take advantage of this,
@@ -170,6 +171,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed memory overwrite when encoding "multi" file driver information
+            for file's superblock.  QAK - 2004/08/05
         - Fixed obscure bug where a filter which failed during chunk allocation
             could allow library to write uncompressed data to disk but think
             the data was compressed.  QAK - 2004/07/29
