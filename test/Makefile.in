@@ -212,8 +212,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests     \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum gass_write gass_read gass_append \
            set_extent srb_write srb_append srb_read ttsafe stream_test       \
-           getname file_handle ntypes dangle dtransform filename reserved    \
-           btree2
+           getname file_handle ntypes dangle dtransform filename reserved
 
 
 # List programs to be built when testing here. error_test and err_compat are
@@ -299,8 +298,7 @@ check_PROGRAMS = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	ttsafe$(EXEEXT) stream_test$(EXEEXT) getname$(EXEEXT) \
 	file_handle$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) filename$(EXEEXT) reserved$(EXEEXT) \
-	btree2$(EXEEXT) error_test$(EXEEXT) err_compat$(EXEEXT) \
-	testmeta$(EXEEXT)
+	error_test$(EXEEXT) err_compat$(EXEEXT) testmeta$(EXEEXT)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
 big_LDADD = $(LDADD)
@@ -311,11 +309,6 @@ bittests_OBJECTS = bittests.$(OBJEXT)
 bittests_LDADD = $(LDADD)
 bittests_DEPENDENCIES = libh5test.la $(top_builddir)/src/libhdf5.la
 bittests_LDFLAGS =
-btree2_SOURCES = btree2.c
-btree2_OBJECTS = btree2.$(OBJEXT)
-btree2_LDADD = $(LDADD)
-btree2_DEPENDENCIES = libh5test.la $(top_builddir)/src/libhdf5.la
-btree2_LDFLAGS =
 cache_SOURCES = cache.c
 cache_OBJECTS = cache.$(OBJEXT)
 cache_LDADD = $(LDADD)
@@ -532,36 +525,35 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/big.Po ./$(DEPDIR)/bittests.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/btree2.Po ./$(DEPDIR)/cache.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/cmpd_dset.Po ./$(DEPDIR)/dangle.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/dsets.Po ./$(DEPDIR)/dtransform.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/dtypes.Po ./$(DEPDIR)/enum.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/err_compat.Po ./$(DEPDIR)/error_test.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/extend.Po ./$(DEPDIR)/external.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/file_handle.Po ./$(DEPDIR)/filename.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/fillval.Po ./$(DEPDIR)/flush1.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/flush2.Po ./$(DEPDIR)/gass_append.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gass_read.Po ./$(DEPDIR)/gass_write.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/getname.Po ./$(DEPDIR)/gheap.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/h5test.Plo ./$(DEPDIR)/hyperslab.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/istore.Po ./$(DEPDIR)/lheap.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/links.Po ./$(DEPDIR)/mount.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/mtime.Po ./$(DEPDIR)/ntypes.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/ohdr.Po ./$(DEPDIR)/reserved.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/set_extent.Po ./$(DEPDIR)/srb_append.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/srb_read.Po ./$(DEPDIR)/srb_write.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/stab.Po ./$(DEPDIR)/stream_test.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tarray.Po ./$(DEPDIR)/tattr.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tconfig.Po ./$(DEPDIR)/testframe.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/testhdf5.Po ./$(DEPDIR)/testmeta.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tfile.Po ./$(DEPDIR)/tgenprop.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/th5s.Po ./$(DEPDIR)/theap.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tid.Po ./$(DEPDIR)/titerate.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tmeta.Po ./$(DEPDIR)/tmisc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/trefer.Po ./$(DEPDIR)/trefstr.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tselect.Po ./$(DEPDIR)/tskiplist.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/ttime.Po ./$(DEPDIR)/ttsafe.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/ttsafe_acreate.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/cache.Po ./$(DEPDIR)/cmpd_dset.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dangle.Po ./$(DEPDIR)/dsets.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dtransform.Po ./$(DEPDIR)/dtypes.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/enum.Po ./$(DEPDIR)/err_compat.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/error_test.Po ./$(DEPDIR)/extend.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/external.Po ./$(DEPDIR)/file_handle.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/filename.Po ./$(DEPDIR)/fillval.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/flush1.Po ./$(DEPDIR)/flush2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gass_append.Po ./$(DEPDIR)/gass_read.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gass_write.Po ./$(DEPDIR)/getname.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gheap.Po ./$(DEPDIR)/h5test.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hyperslab.Po ./$(DEPDIR)/istore.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lheap.Po ./$(DEPDIR)/links.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mount.Po ./$(DEPDIR)/mtime.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ntypes.Po ./$(DEPDIR)/ohdr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/reserved.Po ./$(DEPDIR)/set_extent.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/srb_append.Po ./$(DEPDIR)/srb_read.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/srb_write.Po ./$(DEPDIR)/stab.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/stream_test.Po ./$(DEPDIR)/tarray.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tattr.Po ./$(DEPDIR)/tconfig.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/testframe.Plo ./$(DEPDIR)/testhdf5.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/testmeta.Po ./$(DEPDIR)/tfile.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tgenprop.Po ./$(DEPDIR)/th5s.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/theap.Po ./$(DEPDIR)/tid.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/titerate.Po ./$(DEPDIR)/tmeta.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tmisc.Po ./$(DEPDIR)/trefer.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/trefstr.Po ./$(DEPDIR)/tselect.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/tskiplist.Po ./$(DEPDIR)/ttime.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ttsafe.Po ./$(DEPDIR)/ttsafe_acreate.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ttsafe_cancel.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ttsafe_dcreate.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ttsafe_error.Po ./$(DEPDIR)/ttst.Po \
@@ -575,7 +567,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
-DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c \
+DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c cache.c \
 	cmpd_dset.c dangle.c dsets.c dtransform.c dtypes.c enum.c \
 	err_compat.c error_test.c extend.c external.c file_handle.c \
 	filename.c fillval.c flush1.c flush2.c gass_append.c \
@@ -585,7 +577,7 @@ DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c \
 	stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) \
 	unlink.c
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c cmpd_dset.c dangle.c dsets.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c file_handle.c filename.c fillval.c flush1.c flush2.c gass_append.c gass_read.c gass_write.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c set_extent.c srb_append.c srb_read.c srb_write.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
+SOURCES = $(libh5test_la_SOURCES) big.c bittests.c cache.c cmpd_dset.c dangle.c dsets.c dtransform.c dtypes.c enum.c err_compat.c error_test.c extend.c external.c file_handle.c filename.c fillval.c flush1.c flush2.c gass_append.c gass_read.c gass_write.c getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c ntypes.c ohdr.c reserved.c set_extent.c srb_append.c srb_read.c srb_write.c stab.c stream_test.c $(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c
 
 all: all-am
 
@@ -620,9 +612,6 @@ big$(EXEEXT): $(big_OBJECTS) $(big_DEPENDENCIES)
 bittests$(EXEEXT): $(bittests_OBJECTS) $(bittests_DEPENDENCIES) 
 	@rm -f bittests$(EXEEXT)
 	$(LINK) $(bittests_LDFLAGS) $(bittests_OBJECTS) $(bittests_LDADD) $(LIBS)
-btree2$(EXEEXT): $(btree2_OBJECTS) $(btree2_DEPENDENCIES) 
-	@rm -f btree2$(EXEEXT)
-	$(LINK) $(btree2_LDFLAGS) $(btree2_OBJECTS) $(btree2_LDADD) $(LIBS)
 cache$(EXEEXT): $(cache_OBJECTS) $(cache_DEPENDENCIES) 
 	@rm -f cache$(EXEEXT)
 	$(LINK) $(cache_LDFLAGS) $(cache_OBJECTS) $(cache_LDADD) $(LIBS)
@@ -752,7 +741,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/big.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bittests.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btree2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmpd_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dangle.Po@am__quote@

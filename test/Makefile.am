@@ -32,8 +32,7 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests     \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum gass_write gass_read gass_append \
            set_extent srb_write srb_append srb_read ttsafe stream_test       \
-           getname file_handle ntypes dangle dtransform filename reserved    \
-           btree2
+           getname file_handle ntypes dangle dtransform filename reserved
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
