@@ -19,23 +19,14 @@
 #ifndef HDF5TEST_H
 #define HDF5TEST_H
 
-/* Include required headers */
-#include "hdf5.h"
-#include <stdarg.h>
+/*
+ * Include required headers.  This file tests internal library functions,
+ * so we include the private headers here.
+ */
+#include <H5private.h>
 
-/* Define these for use in all the tests */
-#ifndef HDF5_TEST_MASTER
-extern
-#endif
-int         num_errs
-#ifdef HDF5_TEST_MASTER
-= 0
-#endif
-,           Verbosity
-#ifdef HDF5_TEST_MASTER
-= 0
-#endif
-           ;
+extern int num_errs;
+extern int Verbosity;
 
 /* Use %ld to print the value because long should cover most cases. */
 /* Used to make certain a return value _is_not_ a value */

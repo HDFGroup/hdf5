@@ -24,7 +24,10 @@ static char RcsId[] = "$Revision$";
 *
 *************************************************************/
 
-#include "testhdf5.h"
+#include <testhdf5.h>
+
+#include <H5private.h>
+#include <H5Fprivate.h>
 
 #define TEST_INT16_VALUE    -7641
 #define TEST_UINT16_VALUE   45002

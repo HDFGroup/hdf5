@@ -14,12 +14,13 @@
  *
  *-------------------------------------------------------------------------
  */
-#include "testhdf5.h"
+#include <testhdf5.h>
 
-#include "H5ACprivate.h"
-#include "H5Fprivate.h"
-#include "H5Gprivate.h"
-#include "H5Oprivate.h"
+#include <H5private.h>
+#include <H5ACprivate.h>
+#include <H5Fprivate.h> 
+#include <H5Gprivate.h>
+#include <H5Oprivate.h>
 
 
 /*-------------------------------------------------------------------------
@@ -65,7 +66,7 @@ test_stab (void)
     * Create a directory that has so many entries that the root
     * of the B-tree ends up splitting.
     */
-   status = H5G_new (f, NULL, NULL, "/big", nsyms*10+2, &cwd);
+   status = H5G_new (f, NULL, NULL, "/big", nsyms*12+2, &cwd);
    CHECK_I (status, "H5G_new");
    addr = H5G_stab_new (f, &sub, 0);
    CHECK_I (addr, "H5G_stab_new");
@@ -73,7 +74,7 @@ test_stab (void)
    
    
    for (i=0; i<nsyms; i++) {
-      sprintf (name, "sub%05d", i);
+      sprintf (name, "%05d%05d", rand()%100000, i);
       MESSAGE (8, print_func ("%s\n", name););
 #if 1
       status = H5G_insert (f, &cwd, NULL, name, &sub);

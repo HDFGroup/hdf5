@@ -14,12 +14,13 @@
  *
  *-------------------------------------------------------------------------
  */
-#include "testhdf5.h"
+#include <testhdf5.h>
 
-#include "H5ACprivate.h"
-#include "H5Fprivate.h"
-#include "H5Gprivate.h"
-#include "H5Oprivate.h"
+#include <H5private.h>
+#include <H5ACprivate.h>
+#include <H5Fprivate.h>
+#include <H5Gprivate.h>
+#include <H5Oprivate.h>
 
 
 /*-------------------------------------------------------------------------

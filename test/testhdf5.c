@@ -43,14 +43,20 @@ static char RcsId[] = "@(#)$Revision$";
 #include <console.h>
 #endif
 
+#include <stdarg.h>
+
 #define MAXNUMOFTESTS 30
 #define HDF5_TEST_MASTER
 
 /* Internal Variables */
 static int  Index = 0;
 
+/* Global variables */
+int num_errs;
+int Verbosity;
+
 /* ANY new test needs to have a prototype in tproto.h */
-#include "testhdf5.h"
+#include <testhdf5.h>
 
 struct TestStruct
   {

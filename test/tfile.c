@@ -24,13 +24,17 @@ static char RcsId[] = "$Revision$";
 *
 *************************************************************/
 
-#include "testhdf5.h"
-#include "H5Bprivate.h"
+#include <testhdf5.h>
 
-#define F1_USERBLOCK_SIZE  HDF5_USERBLOCK_DEFAULT
-#define F1_OFFSET_SIZE     HDF5_OFFSETSIZE_DEFAULT
-#define F1_LENGTH_SIZE     HDF5_LENGTHSIZE_DEFAULT
-#define F1_SYM_LEAF_K	   HDF5_SYM_LEAF_K_DEFAULT
+#include <H5private.h>
+#include <H5Bprivate.h>
+#include <H5Cprivate.h>
+#include <H5Mprivate.h>
+
+#define F1_USERBLOCK_SIZE  H5C_USERBLOCK_DEFAULT
+#define F1_OFFSET_SIZE     H5C_OFFSETSIZE_DEFAULT
+#define F1_LENGTH_SIZE     H5C_LENGTHSIZE_DEFAULT
+#define F1_SYM_LEAF_K	   H5C_SYM_LEAF_K_DEFAULT
 #define F1_SYM_INTERN_K	   (btree_k_default_g[H5B_SNODE_ID])
 #define FILE1   "tfile1.h5"
 
@@ -41,14 +45,14 @@ static char RcsId[] = "$Revision$";
 #define F2_SYM_INTERN_K	   32
 #define FILE2   "tfile2.h5"
 
-#define F3_USERBLOCK_SIZE  HDF5_USERBLOCK_DEFAULT
+#define F3_USERBLOCK_SIZE  H5C_USERBLOCK_DEFAULT
 #define F3_OFFSET_SIZE     F2_OFFSET_SIZE
 #define F3_LENGTH_SIZE     F2_LENGTH_SIZE
 #define F3_SYM_LEAF_K	   F2_SYM_LEAF_K
 #define F3_SYM_INTERN_K	   F2_SYM_INTERN_K
 #define FILE3   "tfile3.h5"
 
-static const uintn btree_k_default_g[] = HDF5_BTREE_K_DEFAULT;
+static const uintn btree_k_default_g[] = H5C_BTREE_K_DEFAULT;
 
 /****************************************************************
 **
