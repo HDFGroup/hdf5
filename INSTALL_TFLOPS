@@ -4,6 +4,13 @@ FOR THE INTEL TFLOPS MACHINE:
 Below are the step-by-step procedures for building, testing, and
 installing both the sequential and parallel versions of the HDF5 library.
 
+-----------------
+Software locations
+------------------
+The zlib compression library is installed in /usr/community/hdf5/ZLIB.
+The mpich library, including mpi-io support, is in
+/usr/community/mpich/mpich-1.2.0.
+
 ---------------
 Sequential HDF5:
 ---------------
@@ -24,6 +31,26 @@ FROM SASN100,
 1) cd <hdf5>
 
 2) ./configure tflop
+   Due to a bug, you need to patch up two Makefile, src/Makefile and
+   test/Makefile, before the next step.  You can use the following
+   shell commands.
+
+# Patch up various Makefile's.
+# patch up src/Makefile
+echo "patching src/Makefile"
+ed - src/Makefile <<'EOF'
+/^LT_RUN=.*/s//LT_RUN=$(RUNTEST)/
+w
+q
+EOF
+
+# patch up test/Makefile
+echo "patching test/Makefile"
+ed - test/Makefile <<'EOF'
+/^RUNTEST=$(LT_RUN)/s/^/#/
+w
+q
+EOF
 
 3) make H5detect
 
@@ -44,11 +71,8 @@ When everything is finished compiling and linking,
 you can run the tests by
 FROM JANUS, 
 
-7.1) Due to a bug, you must first remove the following line from
-     the file test/Makefile before the next step.
-     RUNTEST=$(LT_RUN)
-7.2) make check 
-7.3) Sometimes the "make check" fails in the sub-directories of test
+7) make check 
+     Sometimes the "make check" fails in the sub-directories of test
      or tools with a message as "print not found".  This is due to the
      "make" of Janus thinking some binary code needs to be recompiled.
      The easiest way to fix it is
@@ -79,7 +103,28 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) sh bin/config_para_tflops.sh   /* this is different from the sequential version */
+2) CC=/usr/community/mpich/mpich-1.2.0/bin/mpicc ./configure tflop
+   Due to a bug, you need to patch up two Makefile, src/Makefile and
+   test/Makefile, before the next step.  You can use the following
+   shell commands.
+
+# Patch up various Makefile's.
+# patch up src/Makefile
+echo "patching src/Makefile"
+ed - src/Makefile <<'EOF'
+/^LT_RUN=.*/s//LT_RUN=$(RUNTEST)/
+w
+q
+EOF
+
+# patch up test/Makefile
+echo "patching test/Makefile"
+ed - test/Makefile <<'EOF'
+/^RUNTEST=$(LT_RUN)/s/^/#/
+w
+q
+EOF
+
 
 3) make H5detect
 
@@ -99,11 +144,8 @@ FROM SASN100,
 When everything is finished compiling and linking,
 FROM JANUS, 
 
-7.1) Due to a bug, you must first remove the following line from
-     the file test/Makefile before the next step.
-     RUNTEST=$(LT_RUN)
-7.2) make check 
-7.3) Sometimes the "make check" fails in the sub-directories of test
+7) make check 
+     Sometimes the "make check" fails in the sub-directories of test
      or tools with a message as "print not found".  This is due to the
      "make" of Janus thinking some binary code needs to be recompiled.
      The easiest way to fix it is
