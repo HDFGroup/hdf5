@@ -12,19 +12,19 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* Pablo mask */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK          H5FP_mask
+
 /* Private header files */
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"         /* Object Headers                       */
-#include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
 
 #include "H5FPprivate.h"        /* Flexible Parallel Functions          */
-
-/* Pablo mask */
-#define PABLO_MASK          H5FP_mask
 
 MPI_Datatype H5FP_request;      /* MPI datatype for the H5FP_request_t type */
 MPI_Datatype H5FP_reply;        /* MPI datatype for the H5FP_reply_t type   */

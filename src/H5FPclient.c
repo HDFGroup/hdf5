@@ -15,6 +15,10 @@
 #define H5S_PACKAGE             /*suppress error about including H5Spkg */
 #define H5G_PACKAGE             /*suppress error about including H5Gpkg */
 
+/* Pablo mask */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK      H5FP_client_mask
+
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5ACprivate.h"        /* Metadata Cache                       */
 #include "H5Dprivate.h"         /* Dataset Functions                    */
@@ -27,15 +31,11 @@
 #include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5Rprivate.h"         /* References                           */
 #include "H5Spkg.h"             /* Dataspace Functions                  */
-#include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
 
 #include "H5FDfphdf5.h"         /* File Driver for FPHDF5               */
 #include "H5FPprivate.h"        /* Flexible Parallel Functions          */
-
-/* Pablo mask */
-#define PABLO_MASK      H5FPclient_mask
 
 /* local functions */
 static unsigned H5FP_gen_request_id(void);
