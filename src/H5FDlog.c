@@ -18,6 +18,7 @@
 #include <H5Eprivate.h>		/*error handling			*/
 #include <H5Fprivate.h>		/*files					*/
 #include <H5FDlog.h>        /* logging file driver */
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>    /* Memory allocation */
 #include <H5Pprivate.h>		/*property lists			*/
 
@@ -28,13 +29,6 @@
 
 /* The size of the buffer to track allocation requests */
 #define TRACK_BUFFER    5000000
-
-#define AGGREGATE_METADATA
-
-#ifdef AGGREGATE_METADATA
-/* Define the default size of the minimum metadata block */
-#define METADATA_BLOCK_SIZE 2048
-#endif /* AGGREGATE_METADATA */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_LOG_g = 0;
@@ -76,23 +70,10 @@ static const char *flavors[]={   /* These are defined in H5FDpublic.h */
 typedef struct H5FD_log_t {
     H5FD_t	pub;			/*public stuff, must be first	*/
     int		fd;			/*the unix file			*/
-#ifdef AGGREGATE_METADATA
-    haddr_t	eoma;			/* End of metadata allocated region	*/
-    hsize_t masize;         /* Current size of metadata allocated region left */
-    hsize_t def_masize;     /* Default size of metadata allocated region */
-    haddr_t	eoa;			/* Actual end of allocated region	*/
-#else /* AGGREGATE_METADATA */
     haddr_t	eoa;			/*end of allocated region	*/
-#endif /* AGGREGATE_METADATA */
     haddr_t	eof;			/*end of file; current file size*/
     haddr_t	pos;			/*current file I/O position	*/
     int		op;			    /*last operation		*/
-#ifdef ACCUMULATE_METADATA
-    unsigned char *meta_accum;  /* Buffer to hold the accumulated metadata */
-    haddr_t accum_loc;      /* File location (offset) of the accumulated metadata */
-    hsize_t accum_size;     /* Size of the accumulated metadata (in bytes) */
-    uintn   accum_dirty;    /* Flag to indicate that the accumulated metadata is dirty */
-#endif /* ACCUMULATE_METADATA */
     unsigned char *nread;   /* Number of reads from a file location */
     unsigned char *nwrite;  /* Number of write to a file location */
     unsigned char *flavor;  /* Flavor of information written to file location */
@@ -172,13 +153,14 @@ static H5FD_t *H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_log_close(H5FD_t *_file);
 static int H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t H5FD_log_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size);
 static haddr_t H5FD_log_get_eoa(H5FD_t *_file);
 static herr_t H5FD_log_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_log_get_eof(H5FD_t *_file);
 static herr_t H5FD_log_read(H5FD_t *_file, hid_t fapl_id, haddr_t addr,
 			     hsize_t size, void *buf);
-static herr_t H5FD_log_write(H5FD_t *_file, hid_t fapl_id, haddr_t addr,
+static herr_t H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      hsize_t size, const void *buf);
 static herr_t H5FD_log_flush(H5FD_t *_file);
 
@@ -211,6 +193,7 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_open,				/*open			*/
     H5FD_log_close,				/*close			*/
     H5FD_log_cmp,				/*cmp			*/
+    H5FD_log_query,				/*query			*/
     H5FD_log_alloc,				/*alloc			*/
     NULL,					/*free			*/
     H5FD_log_get_eoa,				/*get_eoa		*/
@@ -285,7 +268,10 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
 
-    fa.logfile = H5MM_xstrdup(logfile);
+    if(logfile!=NULL)
+        fa.logfile = H5MM_xstrdup(logfile);
+    else
+        fa.logfile = NULL;
     fa.verbosity=verbosity;
     ret_value= H5Pset_driver(fapl_id, H5FD_LOG, &fa);
 
@@ -386,7 +372,8 @@ H5FD_log_fapl_free(void *_fa)
     FUNC_ENTER(H5FD_log_fapl_free, FAIL);
 
     /* Free the fapl information */
-    H5MM_xfree(fa->logfile);
+    if(fa->logfile)
+        H5MM_xfree(fa->logfile);
     H5MM_xfree(fa);
 
     FUNC_LEAVE(SUCCEED);
@@ -459,10 +446,6 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     fa = H5Pget_driver_info(fapl_id);
 
     file->fd = fd;
-#ifdef AGGREGATE_METADATA
-    /* Set the default metadata block size, this could easily be user-tunable */
-    file->def_masize=METADATA_BLOCK_SIZE;
-#endif /* AGGREGATE_METADATA */
     file->eof = sb.st_size;
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
@@ -520,6 +503,7 @@ H5FD_log_close(H5FD_t *_file)
 
     if (H5FD_log_flush(_file)<0)
         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to flush file");
+
     if (close(file->fd)<0)
         HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
@@ -635,6 +619,41 @@ H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_log_query
+ *
+ * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ *      (listed in H5FDpublic.h)
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, August 25, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_log_query(const H5FD_t *_f, unsigned long *flags /* out */)
+{
+    const H5FD_log_t	*f = (const H5FD_log_t*)_f;
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER(H5FD_log_query, FAIL);
+
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_log_alloc
  *
  * Purpose:	Allocate file memory.
@@ -658,44 +677,8 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size)
 
     FUNC_ENTER(H5FD_log_alloc, HADDR_UNDEF);
 
-#ifdef AGGREGATE_METADATA
-    /* Allocate all types of metadata out of the metadata block */
-    if(type!=H5FD_MEM_DRAW) {
-        /* Check if the space requested is larger than the space left in the block */
-        if(size>file->masize) {
-            /* Check if the block asked for is too large for a metadata block */
-            if(size>=file->def_masize) {
-                /* Allocate just enough room for this new block the regular way */
-                addr = file->eoa;
-                file->eoa += size;
-            } /* end if */
-            else {
-                /* Allocate another metadata block */
-                file->eoma=file->eoa;
-                file->masize=file->def_masize;
-                file->eoa += file->masize;
-
-                /* Allocate space out of the metadata block */
-                addr=file->eoma;
-                file->masize-=size;
-                file->eoma+=size;
-            } /* end else */
-        } /* end if */
-        else {
-            /* Allocate space out of the metadata block */
-            addr=file->eoma;
-            file->masize-=size;
-            file->eoma+=size;
-        } /* end else */
-    } /* end if */
-    else { /* Allocate raw data the regular way */
-        addr = file->eoa;
-        file->eoa += size;
-    } /* end else */
-#else /* AGGREGATE_METADATA */
 	addr = file->eoa;
 	file->eoa += size;
-#endif /* AGGREGATE_METADATA */
 
 #ifdef QAK
 printf("%s: flavor=%s, size=%lu\n",FUNC,flavors[type],(unsigned long)size);
@@ -917,7 +900,7 @@ H5FD_log_read(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
+H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr,
 		hsize_t size, const void *buf)
 {
     H5FD_log_t		*file = (H5FD_log_t*)_file;
@@ -927,6 +910,9 @@ H5FD_log_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
 
     assert(file && file->pub.cls);
     assert(buf);
+
+    /* Verify that we are writing out the type of data we allocated in this location */
+    assert(type==file->flavor[addr]);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr) 
