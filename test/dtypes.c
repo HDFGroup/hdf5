@@ -926,17 +926,23 @@ test_compound_6(void)
     /* Build hdf5 datatypes */
     if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
             H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0)
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0) {
+        H5_FAILED();
         goto error;
+    }
     
     if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
             H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0)
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0) {
+        H5_FAILED();
         goto error;
+    }
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, (hsize_t)nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(st, dt, (hsize_t)nelmts, buf, bkg, H5P_DEFAULT)<0) {
+        H5_FAILED();
         goto error;
+    }
 
     /* Compare results */
     for (i=0; i<nelmts; i++) {
@@ -958,7 +964,115 @@ test_compound_6(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) {
+        H5_FAILED();
+        goto error;
+    }
+
+    PASSED();
+    reset_hdf5();
+    return 0;
+
+ error:
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_7
+ *
+ * Purpose:	Tests inserting fields into compound datatypes when the field
+ *              overlaps the end of the compound datatype.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, December 18, 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_7(void)
+{
+    struct s1 {
+        int a;
+        float b;
+        long c;
+    };
+
+    struct s2 {
+        int a;
+        float b;
+        long c;
+        double d;
+    };
+
+    hid_t tid1,tid2;
+    herr_t ret;
+
+    TESTING("compound element insertion");
+
+    if((tid1= H5Tcreate( H5T_COMPOUND, sizeof(struct s1)))<0) {
+        H5_FAILED();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(tid1,"a",HOFFSET(struct s1,a),H5T_NATIVE_INT)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'a'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(tid1,"b",HOFFSET(struct s1,b),H5T_NATIVE_FLOAT)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'b'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(tid1,"c",HOFFSET(struct s1,c),H5T_NATIVE_LONG)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'c'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tget_size(tid1)!=sizeof(struct s1)) {
+        H5_FAILED();
+        printf("Incorrect size for struct 1\n");
+        goto error;
+    } /* end if */
+
+    if((tid2= H5Tcopy(tid1))<0) {
+        H5_FAILED();
+        printf("Can't copy datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tget_size(tid2)==sizeof(struct s2)) {
+        H5_FAILED();
+        printf("Incorrect size for struct 2\n");
+        goto error;
+    } /* end if */
+
+    /* Should not be able to insert field past end of compound datatype */
+    H5E_BEGIN_TRY {
+        ret=H5Tinsert(tid2,"d",HOFFSET(struct s2,d),H5T_NATIVE_DOUBLE);
+    } H5E_END_TRY;
+    if(ret>=0) {
+        H5_FAILED();
+        printf("Inserted field 'd'?\n");
+        goto error;
+    } /* end if */
+
+    /* Release resources */
+    if (H5Tclose(tid1)<0 || H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatypes\n");
+        goto error;
+    } /* end if */
 
     PASSED();
     reset_hdf5();
@@ -3790,6 +3904,7 @@ main(void)
     nerrors += test_compound_4();
     nerrors += test_compound_5();
     nerrors += test_compound_6();
+    nerrors += test_compound_7();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_bitfield();
