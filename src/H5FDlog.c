@@ -26,8 +26,18 @@
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
 #endif /* MAX */
 
+/* The size of the buffer to track allocation requests */
+#define TRACK_BUFFER    5000000
+
+#define AGGREGATE_METADATA
+
+#ifdef AGGREGATE_METADATA
+/* Define the default size of the minimum metadata block */
+#define METADATA_BLOCK_SIZE 2048
+#endif /* AGGREGATE_METADATA */
+
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_QAK_g = 0;
+static hid_t H5FD_LOG_g = 0;
 
 /* File operations */
 #define OP_UNKNOWN	0
@@ -66,13 +76,26 @@ static const char *flavors[]={   /* These are defined in H5FDpublic.h */
 typedef struct H5FD_log_t {
     H5FD_t	pub;			/*public stuff, must be first	*/
     int		fd;			/*the unix file			*/
+#ifdef AGGREGATE_METADATA
+    haddr_t	eoma;			/* End of metadata allocated region	*/
+    hsize_t masize;         /* Current size of metadata allocated region left */
+    hsize_t def_masize;     /* Default size of metadata allocated region */
+    haddr_t	eoa;			/* Actual end of allocated region	*/
+#else /* AGGREGATE_METADATA */
     haddr_t	eoa;			/*end of allocated region	*/
+#endif /* AGGREGATE_METADATA */
     haddr_t	eof;			/*end of file; current file size*/
     haddr_t	pos;			/*current file I/O position	*/
-    int		op;			/*last operation		*/
+    int		op;			    /*last operation		*/
+#ifdef ACCUMULATE_METADATA
+    unsigned char *meta_accum;  /* Buffer to hold the accumulated metadata */
+    haddr_t accum_loc;      /* File location (offset) of the accumulated metadata */
+    hsize_t accum_size;     /* Size of the accumulated metadata (in bytes) */
+    uintn   accum_dirty;    /* Flag to indicate that the accumulated metadata is dirty */
+#endif /* ACCUMULATE_METADATA */
     unsigned char *nread;   /* Number of reads from a file location */
     unsigned char *nwrite;  /* Number of write to a file location */
-    unsigned char *flavor;  /* Flaver of information written to file location */
+    unsigned char *flavor;  /* Flavor of information written to file location */
     size_t  iosize;         /* Size of I/O information buffers */
     FILE   *logfp;          /* Log file pointer */
     H5FD_log_fapl_t fa;	/*driver-specific file access properties*/
@@ -227,17 +250,17 @@ H5FD_log_init(void)
 {
     FUNC_ENTER(H5FD_log_init, FAIL);
 
-    if (H5I_VFL!=H5Iget_type(H5FD_QAK_g))
-        H5FD_QAK_g = H5FDregister(&H5FD_log_g);
+    if (H5I_VFL!=H5Iget_type(H5FD_LOG_g))
+        H5FD_LOG_g = H5FDregister(&H5FD_log_g);
 
-    FUNC_LEAVE(H5FD_QAK_g);
+    FUNC_LEAVE(H5FD_LOG_g);
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_log
  *
- * Purpose:	Modify the file access property list to use the H5FD_QAK
+ * Purpose:	Modify the file access property list to use the H5FD_LOG
  *		driver defined in this source file.  There are no driver
  *		specific properties.
  *		
@@ -264,7 +287,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
 
     fa.logfile = H5MM_xstrdup(logfile);
     fa.verbosity=verbosity;
-    ret_value= H5Pset_driver(fapl_id, H5FD_QAK, &fa);
+    ret_value= H5Pset_driver(fapl_id, H5FD_LOG, &fa);
 
     FUNC_LEAVE(ret_value);
 }
@@ -436,6 +459,10 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     fa = H5Pget_driver_info(fapl_id);
 
     file->fd = fd;
+#ifdef AGGREGATE_METADATA
+    /* Set the default metadata block size, this could easily be user-tunable */
+    file->def_masize=METADATA_BLOCK_SIZE;
+#endif /* AGGREGATE_METADATA */
     file->eof = sb.st_size;
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
@@ -454,7 +481,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Check if we are doing any logging at all */
     if(file->fa.verbosity>=0) {
-        file->iosize=3000000;   /* Default size for now */
+        file->iosize=TRACK_BUFFER;   /* Default size for now */
         file->nread=H5MM_calloc(file->iosize);
         file->nwrite=H5MM_calloc(file->iosize);
         file->flavor=H5MM_calloc(file->iosize);
@@ -631,9 +658,48 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size)
 
     FUNC_ENTER(H5FD_log_alloc, HADDR_UNDEF);
 
+#ifdef AGGREGATE_METADATA
+    /* Allocate all types of metadata out of the metadata block */
+    if(type!=H5FD_MEM_DRAW) {
+        /* Check if the space requested is larger than the space left in the block */
+        if(size>file->masize) {
+            /* Check if the block asked for is too large for a metadata block */
+            if(size>=file->def_masize) {
+                /* Allocate just enough room for this new block the regular way */
+                addr = file->eoa;
+                file->eoa += size;
+            } /* end if */
+            else {
+                /* Allocate another metadata block */
+                file->eoma=file->eoa;
+                file->masize=file->def_masize;
+                file->eoa += file->masize;
+
+                /* Allocate space out of the metadata block */
+                addr=file->eoma;
+                file->masize-=size;
+                file->eoma+=size;
+            } /* end else */
+        } /* end if */
+        else {
+            /* Allocate space out of the metadata block */
+            addr=file->eoma;
+            file->masize-=size;
+            file->eoma+=size;
+        } /* end else */
+    } /* end if */
+    else { /* Allocate raw data the regular way */
+        addr = file->eoa;
+        file->eoa += size;
+    } /* end else */
+#else /* AGGREGATE_METADATA */
 	addr = file->eoa;
 	file->eoa += size;
+#endif /* AGGREGATE_METADATA */
 
+#ifdef QAK
+printf("%s: flavor=%s, size=%lu\n",FUNC,flavors[type],(unsigned long)size);
+#endif /* QAK */
     /* Retain the (first) flavor of the information written to the file */
     if(file->fa.verbosity>=0) {
         assert(addr<file->iosize);
@@ -879,6 +945,11 @@ H5FD_log_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
         while(tmp_size-->0)
             file->nwrite[tmp_addr++]++;
 
+        /* Log information about the seek, if it's going to occur */
+        if(file->fa.verbosity>1 && (addr!=file->pos || OP_WRITE!=file->op))
+            HDfprintf(file->logfp,"Seek: From %10a To %10a\n",file->pos,addr);
+
+        /* Log information about the write */
         if(file->fa.verbosity>0)
             HDfprintf(file->logfp,"%10a-%10a (%10lu bytes) Written, flavor=%s\n",addr,addr+size-1,(unsigned long)size,flavors[file->flavor[addr]]);
     }

@@ -12,7 +12,7 @@
 
 #include <H5Ipublic.h>
 
-#define H5FD_QAK	(H5FD_log_init())
+#define H5FD_LOG	(H5FD_log_init())
 
 __DLL__ hid_t H5FD_log_init(void);
 __DLL__ herr_t H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity);
