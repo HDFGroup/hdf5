@@ -80,7 +80,7 @@ clean: mostlyclean
 # in the distribution.
 #
 distclean: clean
-	$(RM) .depend TAGS *~ core *.bak *.old *.new $(DISTCLEAN)
+	$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
 	@if test -f Makefile.in; then					      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
