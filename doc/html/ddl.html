@@ -87,10 +87,12 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;root_group&gt; ::= GROUP "/" { &lt;unamed_datatype&gt;* &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_attribute&gt;* &lt;group_member&gt;* }  
 
-&lt;unamed_datatype&gt ::= DATATYPE &lt;unamed_type_name&gt; { &lt;compound_type&gt; }
+&lt;unamed_datatype&gt; ::= DATATYPE &lt;unamed_type_name&gt; { &lt;compound_type&gt; }
 
 &lt;unamed_type_name&gt; ::= the assigned name for unamed type is in the form of 
                       #oid1:oid2, where oid1 and oid2 are the object ids of the type
+
+&lt;variable_length_type&gt; ::= H5T_VLEN of &lt;atomic_type&gt;
 
 &lt;compound_type&gt; ::= &lt;member_type_def&gt;+ 
 
@@ -102,12 +104,12 @@ This section contains a brief explanation of the symbols used in the DDL.
                  &lt;reference&gt; | &lt;enum&gt;
 
 &lt;integer&gt; ::=  H5T_STD_I8BE | H5T_STD_I8LE | H5T_STD_I16BE | H5T_STD_I16LE | H5T_STD_I32BE |
-              H5T_STD_I32LE | H5T_STD_I64BE | H5T_STD_I64LE |  H5T_STD_U8BE |
-              H5T_STD_U8LE | H5T_STD_U16BE | H5T_STD_U16LE | H5T_STD_U32BE |
-              H5T_STD_U32LE | H5T_STD_U64BE | H5T_STD_U64LE | H5T_NATIVE_CHAR |
-              H5T_NATIVE_UCHAR | H5T_NATIVE_SHORT | H5T_NATIVE_USHORT | 
-              H5T_NATIVE_INT | H5T_NATIVE_UINT | H5T_NATIVE_LONG | H5T_NATIVE_ULONG |
-              H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
+               H5T_STD_I32LE | H5T_STD_I64BE | H5T_STD_I64LE |  H5T_STD_U8BE |
+               H5T_STD_U8LE | H5T_STD_U16BE | H5T_STD_U16LE | H5T_STD_U32BE |
+               H5T_STD_U32LE | H5T_STD_U64BE | H5T_STD_U64LE | H5T_NATIVE_CHAR |
+               H5T_NATIVE_UCHAR | H5T_NATIVE_SHORT | H5T_NATIVE_USHORT | 
+               H5T_NATIVE_INT | H5T_NATIVE_UINT | H5T_NATIVE_LONG | H5T_NATIVE_ULONG |
+               H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
 
 &lt;float&gt; ::= H5T_IEEE_F32BE | H5T_IEEE_F32LE | H5T_IEEE_F64BE |  H5T_IEEE_F64LE |
             H5T_NATIVE_FLOAT |  H5T_NATIVE_DOUBLE | H5T_NATIVE_LDOUBLE
@@ -141,7 +143,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;group_attribute&gt; ::= &lt;attribute&gt; 
 
-&lt;attribute&gt; ::= ATTRIBUTE &lt;attr_name&gt { &lt;datatype&gt;    
+&lt;attribute&gt; ::= ATTRIBUTE &lt;attr_name&gt; { &lt;datatype&gt;    
                                         &lt;dataspace&gt;
                                         &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
                                         &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
@@ -151,6 +153,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;datatype&gt; ::= DATATYPE { &lt;atomic_type&gt; }  |         
                DATATYPE { &lt;compound_type&gt; } |
+               DATATYPE { &lt;variable_length_type&gt; } |
                DATATYPE { &lt;named_type&gt; } 
 
 &lt;enum&gt; ::= H5T_ENUM { &lt;integer&gt;; &lt;enum_def&gt;+  }
@@ -167,8 +170,8 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;dataspace&gt; ::= DATASPACE { SCALAR } |
                 DATASPACE { SIMPLE &lt;current_dims&gt; / &lt;max_dims&gt; } | 
-                DATASPACE { COMPLEX &lt;ds_definition&gt;+ } 
-                DATASPACE { &lt;dataspace_name&gt; } |
+                DATASPACE { COMPLEX &lt;ds_definition&gt;+ } |
+                DATASPACE { &lt;dataspace_name&gt; }
 
 &lt;current_dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ), where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer, <i>k</i> = 1,2,...
 
@@ -178,7 +181,10 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;dataspace_name&gt; ::= &lt;identifier&gt;
 
-&lt;data&gt; ::= DATA { &lt;scalar_space_data&gt; | &lt;simple_space_data&gt; | &lt;complex_space_data&gt; }
+&lt;data&gt; ::= DATA { &lt;scalar_space_data&gt; |
+                  &lt;simple_space_data&gt; |
+                  &lt;complex_space_data&gt; |
+                  &lt;variable_length_space_data&gt; }
                   
 &lt;scalar_space_data&gt; ::= &lt;atomic_scalar_data&gt; | &lt;compound_scalar_data&gt;
 
@@ -229,11 +235,13 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;member_data&gt; ::= &lt;atomic_scalar_data&gt; | &lt;atomic_simple_data&gt; 
 
-&lt;atomic_simple_data&gt; :: = &lt;atomic_element&gt;, &lt;atomic_element&gt;, ... 
+&lt;atomic_simple_data&gt; :: = &lt;atomic_element&gt;, &lt;atomic_simple_data&gt; | &lt;atomic_element&gt;
 
 &lt;atomic_element&gt; ::= &lt;atomic_scalar_data&gt;
 
 &lt;simple_space_data&gt; :: = &lt;atomic_simple_data&gt; | &lt;compound_simple_data&gt;
+
+&lt;variable_length_space_data&gt; ::= &lt;atomic_simple_data&gt;
 
 &lt;compound_simple_data&gt; ::= &lt;compoud_element&gt;, &lt;compound_element&gt;, ...
 
@@ -428,6 +436,16 @@ GROUP "/" {
          }
       }
    }
+   DATASET "dset3" {
+      DATATYPE { H5T_VLEN of H5T_STD_I32LE } 
+      DATASPACE { SIMPLE ( 4 ) / ( 4 ) } 
+      DATA {
+         0
+         10, 11
+         20, 21, 22
+         30, 31, 32, 33
+      } 
+   }
    GROUP "group2" {
       HARDLINK "/group1"
    }
@@ -492,7 +510,7 @@ GROUP "/" {
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 </address>
 
-Last modified:  09 October 2000
+Last modified:  17 November 2000
 
 </body>
 </html>
