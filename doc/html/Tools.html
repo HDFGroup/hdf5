@@ -165,6 +165,16 @@ to convert files from HDF4 format to HDF5 format and vice versa.
             <font size=-1>CORRECT:</font> &nbsp;
             <code>h5dump -a /attr1 -a /attr2 foo.h5</code>
           </br>
+          </p>
+          <p>
+          It's possible to select the file driver with which to open the
+          HDF5 file by using the --filedriver (-f) command-line option.
+          Acceptable values for the --filedriver option are: "sec2",
+          "family", "split", "multi", and "stream". If the file driver flag
+          isn't specified, then the file will be opened with each driver in
+          turn and in the order specified above until one driver succeeds
+          in opening the file.
+          </p>
 
 <dt><strong>XML Output:</strong>
     <dd>With the <code>--xml</code> option, <code>h5dump</code> generates
