@@ -352,8 +352,60 @@ const char * H5AC_entry_type_names[H5AC_NTYPES] =
 int
 H5AC_create(const H5F_t *f, int UNUSED size_hint)
 {
-    H5AC_t *cache = NULL;
-    int ret_value=SUCCEED;      /* Return value */
+    H5AC_t * cache_ptr = NULL;
+    int ret_value = SUCCEED;      /* Return value */
+#if 1 /* JRM */ /* test code -- remove when done */
+    H5C_auto_size_ctl_t auto_size_ctl =
+    {
+        /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+#if 1
+        /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
+#else
+        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
+#endif
+        /* hbool_t     set_initial_size       = */ TRUE,
+        /* size_t      initial_size           = */ (1 * 1024 * 1024),
+
+        /* double      min_clean_fraction     = */ 0.25,
+
+        /* size_t      max_size               = */ (32 * 1024 * 1024),
+        /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+
+        /* int64_t     epoch_length           = */ 50000,
+
+#if 0
+        /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
+#else
+        /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+#endif
+        /* double     lower_hr_threshold      = */ 0.75,
+
+        /* double      increment              = */ 2.0,
+
+        /* hbool_t     apply_max_increment    = */ TRUE,
+        /* size_t      max_increment          = */ (8 * 1024 * 1024),
+
+#if 0
+        /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
+#else
+        /* enum H5C_cache_decr_mode decr_mode = */ 
+                                              H5C_decr__age_out_with_threshold,
+#endif
+
+        /* double      upper_hr_threshold     = */ 0.999,
+
+        /* double      decrement              = */ 0.9,
+
+        /* hbool_t     apply_max_decrement    = */ TRUE,
+        /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+
+        /* int32_t     epochs_before_eviction = */ 3,
+
+        /* hbool_t     apply_empty_reserve    = */ TRUE,
+        /* double      empty_reserve          = */ 0.1
+    };
+
+#endif /* JRM */
 
     FUNC_ENTER_NOAPI(H5AC_create, FAIL)
 
@@ -364,29 +416,41 @@ H5AC_create(const H5F_t *f, int UNUSED size_hint)
      * in proper size hints.
      *                                             -- JRM
      */
-    cache = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
+    cache_ptr = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
                            H5C__DEFAULT_MIN_CLEAN_SIZE,
                            (H5AC_NTYPES - 1),
                            (const char **)H5AC_entry_type_names,
                            H5AC_check_if_write_permitted);
 
-    if ( NULL == cache ) {
+    if ( NULL == cache_ptr ) {
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     } else {
 
-        f->shared->cache = cache;
+        f->shared->cache = cache_ptr;
 
     }
+
+#if 1 /* JRM */ /* test code -- remove when done */
+    if ( cache_ptr ) {
+
+        if ( H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl) 
+             != SUCCEED ) {
+
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                        "auto resize config test failed")
+        }
+    }
+#endif /* JRM */
 
 done:
 
     if ( ret_value < 0 ) {
 
-        if ( cache != NULL ) {
+        if ( cache_ptr != NULL ) {
 
-            H5C_dest_empty(cache);
+            H5C_dest_empty(cache_ptr);
             f->shared->cache = NULL;
 
         } /* end if */
