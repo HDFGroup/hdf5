@@ -1,0 +1,20 @@
+// Turn off warnings about not using the return value from these functions
+-esym(534, H5E_clear, H5E_push, H5I_clear_group, H5I_destroy_group)
+-esym(534, H5MM_xfree)
+
+// Don't whine about our use of 'goto' in our error macros
+-emacro(801,HGOTO_DONE)
+
+// Suppress message about "boolean test of a paranthesized assignment"
+-e820
+
+// Suppress message about "Constant value boolean" in FUNC_ENTER* macros
+-emacro(506,FUNC_ENTER_API)
+-emacro(506,FUNC_ENTER_NOAPI)
+
+// Suppress message about "enum constant not used within defaulted switch"
+-e788
+
+/* So far, the following files have been linted with these options:
+        H5A.c
+*/
