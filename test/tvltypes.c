@@ -272,7 +272,7 @@ test_vltypes_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            printf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
@@ -429,7 +429,7 @@ rewrite_vltypes_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            printf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
@@ -571,7 +571,7 @@ test_vltypes_vlen_compound(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
@@ -719,7 +719,7 @@ rewrite_vltypes_vlen_compound(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
@@ -881,7 +881,7 @@ test_vltypes_compound_vlen_atomic(void)
         } /* end if */
         if(wdata[i].v.len!=rdata[i].v.len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
+            printf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].v.len; j++) {
@@ -1040,7 +1040,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
         } /* end if */
         if(wdata[i].v.len!=rdata[i].v.len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
+            printf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].v.len; j++) {
@@ -1249,13 +1249,13 @@ test_vltypes_vlen_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++) {
             if(t1->len!=t2->len) {
                 num_errs++;
-                printf("VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",(int)i,(int)j,(int)t1->len,(int)t2->len);
+                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
@@ -1434,14 +1434,14 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++)
 {
             if(t1->len!=t2->len) {
                 num_errs++;
-                printf("VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",(int)i,(int)j,(int)t1->len,(int)t2->len);
+                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
@@ -1615,20 +1615,18 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
             num_errs++;
-            printf("VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
-        for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++)
-{
+        for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++) {
             if(t1->len!=t2->len) {
                 num_errs++;
-                printf("VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",(int)i,(int)j,(int)t1->len,(int)t2->len);
+                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
                 if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) { 
                     num_errs++;
-/*printf("rdata[i].len=%d, t2->len=%d\n", rdata[i].len, t2->len);*/
                     printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
                     continue;
                 } /* end if */
