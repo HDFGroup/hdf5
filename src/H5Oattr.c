@@ -142,6 +142,9 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     } else {
         attr->ds->extent.type = H5S_SCALAR;
     }
+    /* Default to entire dataspace being selected */
+    if(H5S_select_all(attr->ds,0)<0)
+        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
     p += H5O_ALIGN(attr->ds_size);
 
     /* Compute the size of the data */

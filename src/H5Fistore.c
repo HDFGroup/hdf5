@@ -2908,7 +2908,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, const H5O_layout_t *layout,
 			    chunk_offset, FALSE, &idx_hint)))
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
 
-	    if(H5S_select_all(space_chunk) < 0)
+	    if(H5S_select_all(space_chunk,1) < 0)
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to select space");
 
 	    for(i = 0; i < rank; i++)

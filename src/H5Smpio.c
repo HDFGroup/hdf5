@@ -544,7 +544,7 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, size_t elmt_size, hbool_t prefer
     assert (space);
 
     /* Get the number of elements in the selection */
-    nelem=H5S_get_select_npoints(space);
+    nelem=(*space->select.get_npoints)(space);
 
     /* Compute the number of bytes in selection */
     total_bytes = (hsize_t)elmt_size*nelem;
@@ -664,7 +664,7 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derive
                     break;
 
                 case H5S_SEL_HYPERSLABS:
-                    if(H5S_select_contiguous(space)) {
+                    if((*space->select.is_contiguous)(space)) {
                         err = H5S_mpio_hyper_contig_type( space, elmt_size, prefer_derived_types,
                             /* out: */ new_type, count, extra_offset, use_view, is_derived_type );
                     } /* end if */
@@ -967,8 +967,8 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
         HGOTO_DONE(FALSE);
 
     /* Check whether both selections are "regular" */
-    c1=H5S_select_regular(file_space);
-    c2=H5S_select_regular(mem_space);
+    c1=(*file_space->select.is_regular)(file_space);
+    c2=(*mem_space->select.is_regular)(mem_space);
     if(c1==FAIL || c2==FAIL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
     if(c1==FALSE || c2==FALSE)

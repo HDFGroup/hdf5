@@ -641,12 +641,11 @@ H5I_object(hid_t id)
     FUNC_ENTER_NOAPI(H5I_object, NULL);
 
     /* General lookup of the ID */
-    if (NULL==(id_ptr = H5I_find_id(id))) HGOTO_DONE(NULL);
+    if (NULL!=(id_ptr = H5I_find_id(id))) {
+        /* Get the object pointer to return */
+        ret_value = id_ptr->obj_ptr;
+    } /* end if */
 
-    /* Check if we've found the correct ID */
-    if (id_ptr) ret_value = id_ptr->obj_ptr;
-
-  done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -677,7 +676,9 @@ H5I_get_type(hid_t id)
 
     FUNC_ENTER_NOAPI(H5I_get_type, H5I_BADID);
 
-    if (id>0) ret_value = H5I_GROUP(id);
+    if (id>0)
+        ret_value = H5I_GROUP(id);
+
     assert(ret_value>=H5I_BADID && ret_value<H5I_NGROUPS);
 
     FUNC_LEAVE(ret_value);

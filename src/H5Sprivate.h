@@ -40,7 +40,7 @@
 #define H5S_CONV_STORAGE_CHUNKED        0x0004  /* i.e. '2' */
 #define H5S_CONV_STORAGE_MASK           0x0006
 
-/* Flags for H5S_select_get_seq_list() */
+/* Flags for "get_seq_list" methods */
 #define H5S_GET_SEQ_LIST_SORTED         0x0001
 
 /* Forward references of common typedefs */
@@ -154,38 +154,20 @@ __DLL__ herr_t H5S_modify(struct H5G_entry_t *ent, const H5S_t *space);
 __DLL__ H5S_t *H5S_read(struct H5G_entry_t *ent);
 __DLL__ int H5S_cmp(const H5S_t *ds1, const H5S_t *ds2);
 __DLL__ htri_t H5S_is_simple(const H5S_t *sdim);
-__DLL__ unsigned H5S_nelem(const H5S_t *space);
-__DLL__ int H5S_get_hyperslab(const H5S_t *ds, hssize_t offset[]/*out*/,
-			       hsize_t size[]/*out*/, hsize_t stride[]/*out*/);
-__DLL__ herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
 __DLL__ herr_t H5S_extent_release(H5S_t *space);
-__DLL__ herr_t H5S_select_release(H5S_t *space);
-__DLL__ hssize_t H5S_get_select_npoints(const H5S_t *space);
 __DLL__ int H5S_extend(H5S_t *space, const hsize_t *size);
 __DLL__ herr_t H5S_set_extent(H5S_t *space, const hsize_t *size);
-__DLL__ htri_t H5S_select_valid(const H5S_t *space);
 __DLL__ herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
-__DLL__ hssize_t H5S_select_serial_size(const H5S_t *space);
-__DLL__ herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
+
+/* Operations on selections */
+__DLL__ herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
 __DLL__ herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
-__DLL__ htri_t H5S_select_contiguous(const H5S_t *space);
-__DLL__ htri_t H5S_select_single(const H5S_t *space);
-__DLL__ htri_t H5S_select_regular(const H5S_t *space);
 __DLL__ htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				H5D_operator_t op, void *operator_data);
-__DLL__ herr_t H5S_select_iter_init(const H5S_t *space, size_t elmt_size,
-            H5S_sel_iter_t *iter);
-__DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
-                                H5S_sel_iter_t *sel_iter);
 __DLL__ herr_t H5S_select_fill(void *fill, size_t fill_size,
                                 const H5S_t *space, void *buf);
-__DLL__ herr_t H5S_select_get_seq_list(unsigned flags, const H5S_t *space,H5S_sel_iter_t *iter,
-        size_t elem_size, size_t maxseq, size_t maxbytes,
-        size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
-__DLL__ hsize_t H5S_select_favail(const H5S_t *space, const H5S_sel_iter_t *iter,
-        hsize_t max);
 __DLL__ herr_t H5S_select_fscat (H5F_t *f, const struct H5O_layout_t *layout,
         H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
         H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
@@ -208,7 +190,7 @@ __DLL__ herr_t H5S_select_write(H5F_t *f, const struct H5O_layout_t *layout,
         const H5S_t *mem_space, hid_t dxpl_id, const void *buf/*out*/);
 
 /* Needed for internal use of selections in H5Fistore code */
-__DLL__ herr_t H5S_select_all(H5S_t *space);
+__DLL__ herr_t H5S_select_all(H5S_t *space, unsigned rel_prev);
 __DLL__ herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssize_t start[],
                 const hsize_t stride[], const hsize_t count[],
                 const hsize_t block[]);

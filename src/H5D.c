@@ -12,6 +12,8 @@
 
 /* $Id$ */
 
+#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -23,7 +25,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspace functions                  */
+#include "H5Spkg.h"		/* Dataspace functions			*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 #include "H5Zprivate.h"		/* Data filters				*/
 
@@ -1214,7 +1216,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
 	/* Check for valid selection */
-	if(H5S_select_valid(mem_space)!=TRUE) {
+	if((*mem_space->select.is_valid)(mem_space)!=TRUE) {
 	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			  "selection+offset not within extent");
 	}
@@ -1225,7 +1227,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
 	/* Check for valid selection */
-	if(H5S_select_valid(file_space)!=TRUE) {
+	if((*file_space->select.is_valid)(file_space)!=TRUE) {
 	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			  "selection+offset not within extent");
 	}
@@ -1312,7 +1314,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
 	/* Check for valid selection */
-	if (H5S_select_valid(mem_space)!=TRUE) {
+	if ((*mem_space->select.is_valid)(mem_space)!=TRUE) {
 	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			  "selection+offset not within extent");
 	}
@@ -1323,7 +1325,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
 	/* Check for valid selection */
-	if (H5S_select_valid(file_space)!=TRUE) {
+	if ((*file_space->select.is_valid)(file_space)!=TRUE) {
 	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			  "selection+offset not within extent");
 	}
@@ -2203,7 +2205,7 @@ herr_t
 H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
-    hssize_t	nelmts;                 /*total number of elmts	*/
+    hsize_t	nelmts;                 /*total number of elmts	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
@@ -2268,7 +2270,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end if */
     if (!mem_space)
         mem_space = file_space;
-    nelmts = H5S_get_select_npoints(mem_space);
+    nelmts = (*mem_space->select.get_npoints)(mem_space);
 
 #ifdef H5_HAVE_PARALLEL
     /* Collect Parallel I/O information for possible later use */
@@ -2297,7 +2299,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Make certain that the number of elements in each selection is the same */
-    if (nelmts!=H5S_get_select_npoints (file_space))
+    if (nelmts!=(*file_space->select.get_npoints) (file_space))
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes");
 
     /* Retrieve dataset properties */
@@ -2432,11 +2434,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     request_nelmts = target_size / MAX(src_type_size, dst_type_size);
 
     /* Figure out the strip mine size. */
-    if (H5S_select_iter_init(file_space, src_type_size, &file_iter)<0)
+    if ((*file_space->select.iter_init)(file_space, src_type_size, &file_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
-    if (H5S_select_iter_init(mem_space, dst_type_size, &mem_iter)<0)
+    if ((*mem_space->select.iter_init)(mem_space, dst_type_size, &mem_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
-    if (H5S_select_iter_init(mem_space, dst_type_size, &bkg_iter)<0)
+    if ((*mem_space->select.iter_init)(mem_space, dst_type_size, &bkg_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
 
     /* Sanity check elements in temporary buffer */
@@ -2471,11 +2473,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end if */
 
     /* Start strip mining... */
-    H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
-    for (smine_start=0; smine_start<(hsize_t)nelmts; smine_start+=smine_nelmts) {
+    for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = H5S_select_favail(file_space,&file_iter,
-                 MIN(request_nelmts, (nelmts-smine_start)));
+        assert((*file_space->select.iter_nelmts)(&file_iter)==(nelmts-smine_start));
+        smine_nelmts = MIN(request_nelmts, (nelmts-smine_start));
 	
         /*
          * Gather the data from disk into the data type conversion
@@ -2552,9 +2553,9 @@ done:
     } /* end if */
 #endif /*H5_HAVE_PARALLEL*/
     /* Release selection iterators */
-    H5S_sel_iter_release(file_space,&file_iter);
-    H5S_sel_iter_release(mem_space,&mem_iter);
-    H5S_sel_iter_release(mem_space,&bkg_iter);
+    (*file_space->select.iter_release)(&file_iter);
+    (*mem_space->select.iter_release)(&mem_iter);
+    (*mem_space->select.iter_release)(&bkg_iter);
 
     if (src_id >= 0)
         H5I_dec_ref(src_id);
@@ -2619,7 +2620,7 @@ herr_t
 H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
-    hssize_t	nelmts;                 /*total number of elmts	*/
+    hsize_t	nelmts;                 /*total number of elmts	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
@@ -2703,7 +2704,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end if */
     if (!mem_space)
         mem_space = file_space;
-    nelmts = H5S_get_select_npoints(mem_space);
+    nelmts = (*mem_space->select.get_npoints)(mem_space);
 
 #ifdef H5_HAVE_PARALLEL
     /* Collect Parallel I/O information for possible later use */
@@ -2732,7 +2733,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Make certain that the number of elements in each selection is the same */
-    if (nelmts!=H5S_get_select_npoints (file_space))
+    if (nelmts!=(*file_space->select.get_npoints) (file_space))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes");
 
     /* Retrieve dataset properties */
@@ -2863,11 +2864,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small");
 
     /* Figure out the strip mine size. */
-    if (H5S_select_iter_init(file_space, dst_type_size, &file_iter)<0)
+    if ((*file_space->select.iter_init)(file_space, dst_type_size, &file_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
-    if (H5S_select_iter_init(mem_space, src_type_size, &mem_iter)<0)
+    if ((*mem_space->select.iter_init)(mem_space, src_type_size, &mem_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
-    if (H5S_select_iter_init(file_space, dst_type_size, &bkg_iter)<0)
+    if ((*file_space->select.iter_init)(file_space, dst_type_size, &bkg_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
      
     /*
@@ -2902,11 +2903,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end if */
 
     /* Start strip mining... */
-    H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
-    for (smine_start=0; smine_start<(hsize_t)nelmts; smine_start+=smine_nelmts) {
+    for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = H5S_select_favail(file_space,&file_iter,
-                 MIN(request_nelmts, (nelmts-smine_start)));
+        assert((*file_space->select.iter_nelmts)(&file_iter)==(nelmts-smine_start));
+        smine_nelmts = MIN(request_nelmts, (nelmts-smine_start));
 	
         /*
          * Gather data from application buffer into the data type conversion
@@ -2991,9 +2991,9 @@ done:
     } /* end if */
 #endif /*H5_HAVE_PARALLEL*/
     /* Release selection iterators */
-    H5S_sel_iter_release(file_space,&file_iter);
-    H5S_sel_iter_release(mem_space,&mem_iter);
-    H5S_sel_iter_release(file_space,&bkg_iter);
+    (*file_space->select.iter_release)(&file_iter);
+    (*mem_space->select.iter_release)(&mem_iter);
+    (*file_space->select.iter_release)(&bkg_iter);
 
     if (src_id >= 0)
         H5I_dec_ref(src_id);

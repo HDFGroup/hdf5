@@ -119,7 +119,7 @@ __DLL__ herr_t H5Sselect_select(hid_t space1_id, H5S_seloper_t op,
                                   hid_t space2_id);
 __DLL__ hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
                                   hid_t space2_id);
-#endif /* OLD_WAY */
+#endif /* NEW_HYPERSLAB_API */
 __DLL__ herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
 				  size_t num_elemn,
 				  const hssize_t **coord);
