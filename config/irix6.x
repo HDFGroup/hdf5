@@ -41,24 +41,25 @@ case "X-$CC_BASENAME" in
 		;;
 	esac
 
-        # Do *not* use -ansi because it prevents hdf5 from being able
-        # to read modification dates from the file. On some systems it
-        # can also result in compile errors in system header files
-        # since hdf5 includes a couple non-ANSI header files.
-        #CFLAGS="$CFLAGS -ansi"
+    # Do *not* use -ansi because it prevents hdf5 from being able
+    # to read modification dates from the file. On some systems it
+    # can also result in compile errors in system header files
+    # since hdf5 includes a couple non-ANSI header files.
+    #CFLAGS="$CFLAGS -ansi"
 
 	# Always turn off these compiler warnings for the -64 compiler:
 	#    1174:  function declared but not used
-	#    1429:  the `long long' type is not standard
-	#    1209:  constant expressions
 	#    1196:  __vfork() (this is an SGI config problem)
+	#    1209:  constant expressions
+	#    1429:  the `long long' type is not standard
 	#    1685:  turn off warnings about turning off invalid warnings
-	CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685"
+    #    3201:  remark - parameter not referenced
+	CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685,3201"
 
 	# Always turn off these compiler warnings for the old compiler:
 	#    799:   the `long long' type is not standard
 	#    803:   turn off warnings about turning off invalid warnings
-        #    835:   __vfork() (this is an SGI config problem)
+    #    835:   __vfork() (this is an SGI config problem)
 	CFLAGS="$CFLAGS -woff 799,803,835"
 
 	# Always turn off these loader warnings:
