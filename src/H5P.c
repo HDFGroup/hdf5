@@ -2370,6 +2370,118 @@ done:
 }
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_buffer
+ *
+ * Purpose:	Given a dataset transfer property list, set the maximum size
+ *		for the type conversion buffer and background buffer and
+ *		optionally supply pointers to application-allocated buffers.
+ *		If the buffer size is smaller than the entire amount of data
+ *		being transfered between application and file, and a type
+ *		conversion buffer or background buffer is required then
+ *		strip mining will be used.
+ *
+ *		If TCONV and/or BKG are null pointers then buffers will be
+ *		allocated and freed during the data transfer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, March 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_buffer(hid_t plist_id, hsize_t _size, void *tconv, void *bkg)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    size_t size=(size_t)_size;  /* Work around size difference */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5Pset_buffer, FAIL);
+    H5TRACE4("e","izxx",plist_id,_size,tconv,bkg);
+
+    /* Check arguments */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if (size<=0)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Update property list */
+    if(H5P_set(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer buffer size");
+    if(H5P_set(plist, H5D_XFER_TCONV_BUF_NAME, &tconv)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer type conversion buffer");
+    if(H5P_set(plist, H5D_XFER_BKGR_BUF_NAME, &bkg)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_buffer
+ *
+ * Purpose:	Reads values previously set with H5Pset_buffer().
+ *
+ * Return:	Success:	Buffer size.
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, March 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    size_t size;                /* Type conversion buffer size */
+    hsize_t ret_value=0;        /* Type conversion buffer size */
+
+    FUNC_ENTER (H5Pget_buffer, 0);
+    H5TRACE3("z","ixx",plist_id,tconv,bkg);
+
+    /* Check arguments */
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, 0, "not a dataset transfer property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, 0, "can't find object for ID");
+
+    /* Return values */
+    if (tconv)
+        if(H5P_get(plist, H5D_XFER_TCONV_BUF_NAME, tconv)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, 0, "Can't get transfer type conversion buffer");
+    if (bkg)
+        if(H5P_get(plist, H5D_XFER_BKGR_BUF_NAME, bkg)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, 0, "Can't get background type conversion buffer");
+
+    /* Get the size */
+    if(H5P_get(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, 0, "Can't set transfer buffer size");
+
+    /* Set the return value */
+    ret_value=(hsize_t)size;
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+#else /* H5_WANT_H5_V1_4_COMPAT */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_buffer
@@ -2478,6 +2590,8 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 done:
     FUNC_LEAVE(ret_value);
 }
+
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------

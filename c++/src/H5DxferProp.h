@@ -16,11 +16,19 @@ class DSetMemXferPropList : public PropList {
 	// Copy constructor: creates a copy of a DSetMemXferPropList object
 	DSetMemXferPropList( const DSetMemXferPropList& orig );
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
+	// Sets type conversion and background buffers
+	void setBuffer( hsize_t size, void* tconv, void* bkg ) const;
+
+	// Reads buffer settings
+	hsize_t getBuffer( void** tconv, void** bkg ) const;
+#else /* H5_WANT_H5_V1_4_COMPAT */
 	// Sets type conversion and background buffers
 	void setBuffer( size_t size, void* tconv, void* bkg ) const;
 
 	// Reads buffer settings
 	size_t getBuffer( void** tconv, void** bkg ) const;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 	// Sets the dataset transfer property list status to TRUE or FALSE
 	void setPreserve( bool status ) const;

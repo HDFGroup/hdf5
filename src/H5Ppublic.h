@@ -179,10 +179,17 @@ __DLL__ herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
 __DLL__ hid_t H5Pget_driver(hid_t plist_id);
 __DLL__ void *H5Pget_driver_info(hid_t plist_id);
+#ifdef H5_WANT_H5_V1_4_COMPAT
+__DLL__ herr_t H5Pset_buffer(hid_t plist_id, hsize_t size, void *tconv,
+        void *bkg);
+__DLL__ hsize_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,
+        void **bkg/*out*/);
+#else /* H5_WANT_H5_V1_4_COMPAT */
 __DLL__ herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv,
         void *bkg);
 __DLL__ size_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,
         void **bkg/*out*/);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 __DLL__ herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
 __DLL__ int H5Pget_preserve(hid_t plist_id);
 __DLL__ herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,

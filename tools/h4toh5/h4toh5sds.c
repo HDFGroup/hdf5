@@ -95,7 +95,11 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   hid_t   write_plist;
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
+#ifdef H5_WANT_H5_V1_4_COMPAT
   hsize_t bufsize;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+  size_t bufsize;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
   char*   h5csds_name;
   herr_t  ret;
 
@@ -1480,7 +1484,11 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   hid_t   write_plist;
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
+#ifdef H5_WANT_H5_V1_4_COMPAT
   hsize_t bufsize;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+  size_t bufsize;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
   char*   h5csds_name;
 
   if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,

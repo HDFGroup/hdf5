@@ -95,7 +95,11 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   hsize_t   fielddim[1];
   hsize_t  h5dims[2];
   hsize_t  h5dims24[3];
+#ifdef H5_WANT_H5_V1_4_COMPAT
   hsize_t bufsize;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+  size_t bufsize;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
   herr_t   ret;
   hid_t    create_plist;
   hid_t    write_plist;
