@@ -120,11 +120,11 @@ As the functions unwind, additional entries are pushed onto the stack.
 The API function will return some indication that an error occurred and 
 the application can print the error stack.
 <p>
-Certain API functions in the H5E package, such as <code>H5Eprint()</code>,
+Certain API functions in the H5E package, such as <code>H5Eprint</code>,
 do not clear the error stack.  Otherwise, any function which
 does not have an underscore immediately after the package name
-will clear the error stack.  For instance, <code>H5Fopen()</code> 
-clears the error stack while <code>H5F_open()</code> does not.
+will clear the error stack.  For instance, <code>H5Fopen</code> 
+clears the error stack while <code>H5F_open</code> does not.
 <p>
 An error stack has a fixed maximum size.  
 If this size is exceeded then the stack will be truncated and only the
@@ -155,7 +155,7 @@ errors within the H5E package.
         as an argument.
         <p>
         When the library is first initialized the auto printing function 
-	  is set to <code>H5Eprint()</code> (cast appropriately) and
+	  is set to <code>H5Eprint</code> (cast appropriately) and
 	  <code>client_data</code> is the standard error stream pointer,
 	  <code>stderr</code>.
         <p>
@@ -164,9 +164,9 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_auto_t</em> <code>func</code>
-            <dd>Function to be called upon an error condition.
+            <dd>IN: Function to be called upon an error condition.
         <dt><em>void *</em><code>client_data</code>
-            <dd>Data passed to the error function.
+            <dd>IN: Data passed to the error function.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -199,10 +199,10 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_auto_t *</em> <code>func</code>
-            <dd>Current setting for the function to be called upon an 
+            <dd>OUT: Current setting for the function to be called upon an 
                 error condition.
         <dt><em>void **</em><code>client_data</code>
-            <dd>Current setting for the data passed to the error function.
+            <dd>OUT: Current setting for the data passed to the error function.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -230,7 +230,7 @@ errors within the H5E package.
     <dd><code>H5Eclear</code> clears the error stack for the current thread.
         <p>
         The stack is also cleared whenever an API function is called, 
-	  with certain exceptions (for instance, <code>H5Eprint()</code>).
+	  with certain exceptions (for instance, <code>H5Eprint</code>).
         <p>
         <code>H5Eclear</code> can fail if there are problems initializing 
         the library.
@@ -323,12 +323,12 @@ errors within the H5E package.
 	  <code>HDF5-DIAG: Error detected in thread 0.</code>
         <p>
         <code>H5Eprint</code> is a convenience function for 
-        <code>H5Ewalk()</code> with a function that prints error messages.  
-        Users are encouraged to write there own more specific error handlers.
+        <code>H5Ewalk</code> with a function that prints error messages.  
+        Users are encouraged to write their own more specific error handlers.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>FILE *</em> <code>stream</code>
-            <dd>File pointer, or stderr if NULL.
+            <dd>IN: File pointer, or stderr if NULL.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -401,11 +401,11 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_direction_t</em> <code>direction</code>
-            <dd>Direction in which the error stack is to be walked.
+            <dd>IN: Direction in which the error stack is to be walked.
         <dt><em>H5E_walk_t</em> <code>func</code>
-            <dd>Function to be called for each error encountered.
+            <dd>IN: Function to be called for each error encountered.
         <dt><em>void *</em> <code>client_data</code>
-            <dd>Data to be passed with <code>func</code>.
+            <dd>IN: Data to be passed with <code>func</code>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -437,8 +437,8 @@ errors within the H5E package.
     <dd><code>H5Ewalk_cb</code> is a default error stack traversal callback
         function that prints error messages to the specified output stream.
         It is not meant to be called directly but rather as an
-        argument to the <code>H5Ewalk()</code> function.  
-        This function is called also by <code>H5Eprint()</code>.  
+        argument to the <code>H5Ewalk</code> function.  
+        This function is called also by <code>H5Eprint</code>.  
         Application writers are encouraged to use this function as a 
         model for their own error stack walking functions.
         <p>
@@ -452,17 +452,17 @@ errors within the H5E package.
         information about a particular error. 
         <p>
         <code>client_data</code> is the same pointer that was passed as the
-        <code>client_data</code> argument of <code>H5Ewalk()</code>.  
+        <code>client_data</code> argument of <code>H5Ewalk</code>.  
         It is expected to be a file pointer (or stderr if null). 
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>int</em> <code>n</code>
-            <dd>Number of times this function has been called 
+            <dd>IN/OUT: Number of times this function has been called 
                 for this traversal of the stack.
         <dt><em>H5E_error_t *</em><code>err_desc</code>
-            <dd>Error description.
+            <dd>OUT: Error description.
         <dt><em>void</em> <code>*client_data</code>
-            <dd>A file pointer, or stderr if null.
+            <dd>IN: A file pointer, or stderr if null.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -493,7 +493,7 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_major_t</em> <code>n</code>
-            <dd>Major error number.
+            <dd>IN: Major error number.
     </dl>
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
@@ -522,7 +522,7 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_minor_t</em> <code>n</code>
-            <dd>Minor error number.
+            <dd>IN: Minor error number.
     </dl>
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
@@ -577,7 +577,7 @@ H5E&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  13 November 2000
+Last modified:  10 August 2001
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
