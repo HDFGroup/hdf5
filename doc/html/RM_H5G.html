@@ -587,6 +587,15 @@ create or access function.
         HDF5 files which are open: if all four values are the same 
         between two objects, then the two objects are the same 
         (provided both files are still open).  
+        <ul>
+        <li>Note that if a file is closed and re-opened, the
+        value in <code>fileno</code> will change.
+        <li>If a VFL driver either does not or cannot detect that 
+        two <code>H5Fopen</code> calls referencing the same file 
+        actually open the same file, each will get a different 
+        <code>fileno</code>.
+        </ul>
+        <p>
         The <code>nlink</code> field is the number of hard links to  
         the object or zero when information is being returned about a 
         symbolic link (symbolic links do not have hard links but 
@@ -828,7 +837,7 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  1 February 2002
+Last modified:  18 April 2002
 <br>
 Describes HDF5 Release 1.4.3, February 2002
 
