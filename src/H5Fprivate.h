@@ -412,7 +412,7 @@ struct H5G_entry_t;
 /* library variables */
 __DLLVAR__ const H5F_create_t H5F_create_dflt;
 __DLLVAR__ H5F_access_t H5F_access_dflt;
-__DLLVAR__ const H5F_xfer_t H5F_xfer_dflt;
+__DLLVAR__ H5F_xfer_t H5F_xfer_dflt;
 __DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
 
 #ifdef HAVE_PARALLEL

@@ -1402,7 +1402,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	
 	{
 	    H5F_xfer_t *dxpl;
-	    dxpl = (H5P_DEFAULT==dxpl_id)?&H5F_xfer_dflt:H5I_object(dxpl_id);
+	    dxpl = (H5P_DEFAULT==dxpl_id) ? &H5F_xfer_dflt : H5I_object(dxpl_id);
 	    ent->split_ratios[0] = dxpl->split_ratios[0];
 	    ent->split_ratios[1] = dxpl->split_ratios[1];
 	    ent->split_ratios[2] = dxpl->split_ratios[2];
@@ -1544,7 +1544,7 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	    x.chunk = chunk;
 	    {
 		H5F_xfer_t *dxpl;
-		dxpl = (H5P_DEFAULT==dxpl_id)?&H5F_xfer_dflt:H5I_object(dxpl_id);
+		dxpl = (H5P_DEFAULT==dxpl_id) ? &H5F_xfer_dflt : H5I_object(dxpl_id);
 		x.split_ratios[0] = dxpl->split_ratios[0];
 		x.split_ratios[1] = dxpl->split_ratios[1];
 		x.split_ratios[2] = dxpl->split_ratios[2];

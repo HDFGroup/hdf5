@@ -299,9 +299,6 @@
 /* Define if you have the <zlib.h> header file.  */
 #undef HAVE_ZLIB_H
 
-/* Define if you have the coug library (-lcoug).  */
-#undef HAVE_LIBCOUG
-
 /* Define if you have the df library (-ldf).  */
 #undef HAVE_LIBDF
 

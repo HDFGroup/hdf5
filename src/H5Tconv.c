@@ -1766,7 +1766,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs     */
     uint8_t 	**dptr;		     /*pointer to correct destination pointer*/
     size_t	src_delta, dst_delta;	/*source & destination stride	     */
-    hsize_t 	seq_len;     /*the number of elements in the current sequence*/
+    hssize_t 	seq_len;     /*the number of elements in the current sequence*/
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     size_t	src_size, dst_size;/*source & destination total size in bytes*/
     hid_t 	conv_buf_id;		/*ID for comversion buffer	     */
@@ -1885,6 +1885,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 /* Get length of sequences in bytes */
                 seq_len=(*(src->u.vlen.getlen))(src->u.vlen.f,s);
+                assert(seq_len>=0);
                 src_size=seq_len*src_base_size;
                 dst_size=seq_len*dst_base_size;
 

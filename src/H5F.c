@@ -75,7 +75,8 @@ const H5F_create_t	H5F_create_dflt = {
 H5F_access_t H5F_access_dflt;
 
 /* Default data transfer property list */
-const H5F_xfer_t	H5F_xfer_dflt = {
+/* Not const anymore before some of the VFL drivers modify this struct - QAK */
+H5F_xfer_t	H5F_xfer_dflt = {
     1024*1024,			/*Temporary buffer size			    */
     NULL,			/*Type conversion buffer or NULL	    */
     NULL, 			/*Background buffer or NULL		    */
@@ -629,7 +630,7 @@ htri_t
 H5Fis_hdf5(const char *name)
 {
     H5FD_t	*file = NULL;
-    hbool_t	ret_value = FAIL;
+    htri_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Fis_hdf5, FAIL);
     H5TRACE1("b","s",name);
@@ -1081,7 +1082,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	}
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size)<0 ||
 	    H5FD_read(lf, H5P_DEFAULT, shared->boot_addr, fixed_size, buf)<0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_IO, NULL,
+	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL,
 			"unable to read superblock");
 	}
 
@@ -1206,7 +1207,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	    UINT32DECODE(p, driver_size);
 
 	    /* Driver name and/or version */
-	    strncpy(driver_name, p, 8);
+	    strncpy(driver_name, (const char *)p, 8);
 	    driver_name[8] = '\0';
 
 	    /* Read driver information and decode */

@@ -57,18 +57,26 @@ typedef struct H5T_path_t {
  * VL types allowed.
  */
 typedef enum {
-    H5T_VLEN_BADTYPE =   0, /* invalid VL Type */
-    H5T_VLEN_MEMORY,        /* VL datatype stored in memory */
-    H5T_VLEN_DISK,          /* VL datatype stored on disk */
+    H5T_VLEN_BADTYPE =  -1, /* invalid VL Type */
+    H5T_VLEN_SEQUENCE=0,    /* VL sequence */
+    H5T_VLEN_STRING,        /* VL string */
     H5T_VLEN_MAXTYPE        /* highest type (Invalid as true type) */
 } H5T_vlen_type_t;
+
+typedef enum {
+    H5T_VLEN_BADLOC =   0,  /* invalid VL Type */
+    H5T_VLEN_MEMORY,        /* VL data stored in memory */
+    H5T_VLEN_DISK,          /* VL data stored on disk */
+    H5T_VLEN_MAXLOC         /* highest type (Invalid as true type) */
+} H5T_vlen_loc_t;
 
 /*
  * Internal data structure for passing information to H5T_vlen_get_buf_size
  */
 typedef struct {
     hid_t dataset_id;       /* ID of the dataset we are working on */
-    hid_t space_id;         /* ID of the dataset's dataspace we are working on */
+    hid_t fspace_id;        /* ID of the file dataset's dataspace we are working on */
+    hid_t mspace_id;        /* ID of the memory dataset's dataspace we are working on */
     hid_t fl_tbuf_id;       /* ID of the temporary buffer we are using for fixed-length data */
     hid_t vl_tbuf_id;       /* ID of the temporary buffer we are using for VL data */
     hid_t xfer_pid;         /* ID of the dataset xfer property list */
@@ -120,7 +128,7 @@ __DLL__ char *H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/,
 __DLL__ herr_t H5T_enum_valueof(H5T_t *dt, const char *name,
 				void *value/*out*/);
 __DLL__ herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void UNUSED *_op_data);
-__DLL__ herr_t H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc);
+__DLL__ herr_t H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 __DLL__ H5R_type_t H5T_get_ref_type(const H5T_t *dt);
 
 #endif

@@ -998,10 +998,10 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     /* Iterate through the entire dataset */
     while(nelemts>0 && ret_value==0) {
         /* Get the offset in the memory buffer */
-        offset=H5V_array_offset(rank+1,mem_size,mem_offset);
+        offset=H5V_array_offset(rank+1,mem_size,(const hssize_t *)mem_offset);
         tmp_buf=((char *)buf+offset);
 
-        ret_value=(*op)(tmp_buf,type_id,rank,mem_offset,operator_data);
+        ret_value=(*op)(tmp_buf,type_id,rank,(hssize_t *)mem_offset,operator_data);
 
         /* Decrement the number of elements to iterate through */
         nelemts--;

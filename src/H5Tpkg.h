@@ -86,13 +86,14 @@ typedef struct H5T_enum_t {
 } H5T_enum_t;
 
 /* VL function pointers */
-typedef hsize_t (*H5T_vlen_getlenfunc_t)(H5F_t *f, void *vl_addr);
+typedef hssize_t (*H5T_vlen_getlenfunc_t)(H5F_t *f, void *vl_addr);
 typedef herr_t (*H5T_vlen_readfunc_t)(H5F_t *f, void *vl_addr, void *buf, size_t len);
 typedef herr_t (*H5T_vlen_writefunc_t)(const H5F_xfer_t *xfer_parms, H5F_t *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size);
 
 /* A VL datatype */
 typedef struct H5T_vlen_t {
     H5T_vlen_type_t     type;   /* Type of VL data in buffer */
+    H5T_vlen_loc_t      loc;    /* Location of VL data in buffer */
     H5F_t *f;                   /* File ID (if VL data is on disk) */
     H5T_vlen_getlenfunc_t getlen;   /* Function to get VL sequence size (in element units, not bytes) */
     H5T_vlen_readfunc_t read;   /* Function to read VL sequence into buffer */
@@ -537,10 +538,13 @@ __DLL__ ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 __DLL__ htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
-__DLL__ hsize_t H5T_vlen_mem_getlen(H5F_t *f, void *vl_addr);
-__DLL__ herr_t H5T_vlen_mem_read(H5F_t *f, void *vl_addr, void *_buf, size_t len);
-__DLL__ herr_t H5T_vlen_mem_write(const H5F_xfer_t *xfer_parms, H5F_t *f, void *vl_addr, void *_buf, hsize_t seq_len, hsize_t base_size);
-__DLL__ hsize_t H5T_vlen_disk_getlen(H5F_t *f, void *vl_addr);
+__DLL__ hssize_t H5T_vlen_seq_mem_getlen(H5F_t *f, void *vl_addr);
+__DLL__ herr_t H5T_vlen_seq_mem_read(H5F_t *f, void *vl_addr, void *_buf, size_t len);
+__DLL__ herr_t H5T_vlen_seq_mem_write(const H5F_xfer_t *xfer_parms, H5F_t *f, void *vl_addr, void *_buf, hsize_t seq_len, hsize_t base_size);
+__DLL__ hssize_t H5T_vlen_str_mem_getlen(H5F_t *f, void *vl_addr);
+__DLL__ herr_t H5T_vlen_str_mem_read(H5F_t *f, void *vl_addr, void *_buf, size_t len);
+__DLL__ herr_t H5T_vlen_str_mem_write(const H5F_xfer_t *xfer_parms, H5F_t *f, void *vl_addr, void *_buf, hsize_t seq_len, hsize_t base_size);
+__DLL__ hssize_t H5T_vlen_disk_getlen(H5F_t *f, void *vl_addr);
 __DLL__ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *_buf, size_t len);
 __DLL__ herr_t H5T_vlen_disk_write(const H5F_xfer_t *xfer_parms, H5F_t *f, void *vl_addr, void *_buf, hsize_t seq_len, hsize_t base_size);
 

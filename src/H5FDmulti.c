@@ -27,8 +27,12 @@
 #undef MIN
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
 
+#ifndef FALSE
 #define FALSE		0
+#endif
+#ifndef TRUE
 #define TRUE		1
+#endif
 
 /* Loop through all mapped files */
 #define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
@@ -679,7 +683,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     p = buf + 8 + nseen*2*8;
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
 	size_t n = strlen(file->fa.memb_name[mt]) + 1;
-	strcpy(p, file->fa.memb_name[mt]);
+	strcpy((char *)p, file->fa.memb_name[mt]);
 	p += n;
 	for (i=n; i%8; i++) *p++ = '\0';
     } END_MEMBERS;
@@ -761,8 +765,8 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Decode name templates */
     UNIQUE_MEMBERS(map, mt) {
-	size_t n = strlen(buf)+1;
-	memb_name[_unmapped] = buf;
+	size_t n = strlen((char *)buf)+1;
+	memb_name[_unmapped] = (char *)buf;
 	buf += (n+7) & ~0x0007;
     } END_MEMBERS;
 

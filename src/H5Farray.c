@@ -183,10 +183,10 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 {
     extern int qak_debug;
 
-    printf("%s: layout->ndims=%d\n",FUNC,(int)layout->ndims);
-    for(i=0; i<layout->ndims; i++)
-        printf("%s: %d: hslab_size=%d, mem_size=%d, mem_offset=%d, file_offset=%d\n",FUNC,i,(int)_hslab_size[i],(int)mem_size[i],(int)mem_offset[i],(int)file_offset[i]);
     if(qak_debug) {
+        printf("%s: layout->ndims=%d\n",FUNC,(int)layout->ndims);
+        for(i=0; i<layout->ndims; i++)
+            printf("%s: %d: hslab_size=%d, mem_size=%d, mem_offset=%d, file_offset=%d\n",FUNC,i,(int)_hslab_size[i],(int)mem_size[i],(int)mem_offset[i],(int)file_offset[i]);
         printf("%s: *buf=%d, *(buf+1)=%d\n", FUNC,(int)*(const uint16_t *)buf,(int)*((const uint16 *)buf+1));
     }
 }

@@ -1192,7 +1192,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
         mem_offset[rank]=0;
 
         /* Get the offset in the memory buffer */
-        offset=H5V_array_offset(rank+1,mem_size,mem_offset);
+        offset=H5V_array_offset(rank+1,mem_size,(const hssize_t *)mem_offset);
         tmp_buf=((char *)buf+offset);
 
         ret_value=(*op)(tmp_buf,type_id,rank,node->pnt,operator_data);

@@ -1848,11 +1848,19 @@ H5Tget_class(hid_t type_id)
 H5T_class_t
 H5T_get_class(const H5T_t *dt)
 {
+    H5T_class_t ret_value;
+
     FUNC_ENTER(H5T_get_class, H5T_NO_CLASS);
 
     assert(dt);
     
-    FUNC_LEAVE(dt->type);
+    /* Lie to the user if they have a VL string and tell them it's in the string class */
+    if(dt->type==H5T_VLEN && dt->u.vlen.type==H5T_VLEN_STRING)
+        ret_value=H5T_STRING;
+    else
+        ret_value=dt->type;
+
+    FUNC_LEAVE(ret_value);
 }   /* end H5T_get_class() */
 
 
@@ -3412,10 +3420,6 @@ H5Tget_member_type(hid_t type_id, int membno)
  *		the member in an instance of the compound data type, and
  *		MEMBER_ID is the type of the new member.
  *
- * Note:	All members of a compound data type must be atomic; a
- *		compound data type cannot have a member which is a compound
- *		data type.
- *
  * Return:	Success:	Non-negative, the PARENT_ID compound data
  *				type is modified to include a copy of the
  *				member type MEMBER_ID.
@@ -3930,10 +3934,13 @@ H5Tvlen_create(hid_t base_id)
 
     /*
      * Force conversions (i.e. memory to memory conversions should duplicate
-     * data, not point to the same VL sequences
+     * data, not point to the same VL sequences)
      */
     dt->force_conv = TRUE;
     dt->parent = H5T_copy(base, H5T_COPY_ALL);
+
+    /* This is a sequence, not a string */
+    dt->u.vlen.type = H5T_VLEN_SEQUENCE;
 
     /* Set up VL information */
     if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0) {
@@ -5175,65 +5182,98 @@ H5T_set_size(H5T_t *dt, size_t size)
     assert(H5T_ENUM!=dt->type || 0==dt->u.enumer.nmembs);
 
     if (dt->parent) {
-	if (H5T_set_size(dt->parent, size)<0) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "unable to set size for parent data type");
-	}
-	dt->size = dt->parent->size;
+        if (H5T_set_size(dt->parent, size)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                  "unable to set size for parent data type");
+        }
+        dt->size = dt->parent->size;
     } else {
-	if (H5T_is_atomic(dt)) {
-	    offset = dt->u.atomic.offset;
-	    prec = dt->u.atomic.prec;
-	    /* Decrement the offset and precision if necessary */
-	    if (prec > 8*size) offset = 0;
-	    else if (offset+prec > 8*size) offset = 8 * size - prec;
-	    if (prec > 8*size) prec = 8 * size;
-	} else {
-	    prec = offset = 0;
-	}
+        if (H5T_is_atomic(dt)) {
+            offset = dt->u.atomic.offset;
+            prec = dt->u.atomic.prec;
 
-	switch (dt->type) {
-	case H5T_COMPOUND:
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-			  "unable to set size of a compound data type");
+            /* Decrement the offset and precision if necessary */
+            if (prec > 8*size)
+                offset = 0;
+            else
+                if (offset+prec > 8*size)
+                    offset = 8 * size - prec;
+            if (prec > 8*size)
+                prec = 8 * size;
+        } else {
+            prec = offset = 0;
+        }
 
-	case H5T_INTEGER:
-	case H5T_TIME:
-	case H5T_BITFIELD:
-	case H5T_ENUM:
-	case H5T_OPAQUE:
-	    /* nothing to check */
-	    break;
+        switch (dt->type) {
+            case H5T_COMPOUND:
+                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                      "unable to set size of a compound data type");
 
-	case H5T_STRING:
-	    prec = 8 * size;
-	    offset = 0;
-	    break;
+            case H5T_INTEGER:
+            case H5T_TIME:
+            case H5T_BITFIELD:
+            case H5T_ENUM:
+            case H5T_OPAQUE:
+                /* nothing to check */
+                break;
 
-	case H5T_FLOAT:
-	    /*
-	     * The sign, mantissa, and exponent fields should be adjusted
-	     * first when decreasing the size of a floating point type.
-	     */
-	    if (dt->u.atomic.u.f.sign >= prec ||
-		dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
-		dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec) {
-		HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-			      "adjust sign, mantissa, and exponent fields "
-			      "first");
-	    }
-	    break;
+            case H5T_STRING:
+                /* Convert string to variable-length datatype */
+                if(size==H5T_VARIABLE) {
+                    H5T_t	*base = NULL;		/* base data type */
 
-	default:
-	    assert("not implemented yet" && 0);
-	}
+                    /* Get a copy of unsigned char type as the base/parent type */
+                    if (NULL==(base=H5I_object(H5T_NATIVE_UCHAR)))
+                        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid base datatype");
+                    dt->parent=H5T_copy(base,H5T_COPY_ALL);
 
-	/* Commit */
-	dt->size = size;
-	if (H5T_is_atomic(dt)) {
-	    dt->u.atomic.offset = offset;
-	    dt->u.atomic.prec = prec;
-	}
+                    /* change this datatype into a VL string */
+                    dt->type = H5T_VLEN;
+
+                    /*
+                     * Force conversions (i.e. memory to memory conversions should duplicate
+                     * data, not point to the same VL strings)
+                     */
+                    dt->force_conv = TRUE;
+
+                    /* This is a string, not a sequence */
+                    dt->u.vlen.type = H5T_VLEN_STRING;
+
+                    /* Set up VL information */
+                    if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
+                        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+
+                } else {
+                    prec = 8 * size;
+                    offset = 0;
+                } /* end else */
+                break;
+
+            case H5T_FLOAT:
+                /*
+                 * The sign, mantissa, and exponent fields should be adjusted
+                 * first when decreasing the size of a floating point type.
+                 */
+                if (dt->u.atomic.u.f.sign >= prec ||
+                        dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
+                        dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec) {
+                    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                          "adjust sign, mantissa, and exponent fields first");
+                }
+                break;
+
+            default:
+                assert("not implemented yet" && 0);
+        }
+
+        /* Commit */
+        if(dt->type!=H5T_VLEN) {
+            dt->size = size;
+            if (H5T_is_atomic(dt)) {
+                dt->u.atomic.offset = offset;
+                dt->u.atomic.prec = prec;
+            }
+        }
     }
     
     FUNC_LEAVE(SUCCEED);

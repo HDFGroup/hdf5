@@ -1890,6 +1890,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+#ifdef QAK
+    printf("%s: check 0.3, buf=%p\n", FUNC,buf);
+#endif /* QAK */
 
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
@@ -2129,7 +2132,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		printf("\n");
 	    }
 	}
-	printf("%s: check 6.0\n",FUNC);
+	printf("%s: check 6.0, tconv_buf=%p, *tconv_buf=%p\n",FUNC,tconv_buf,*(char **)tconv_buf);
 #endif
 
         if (H5T_BKG_YES==need_bkg) {
@@ -2807,11 +2810,11 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't resize tbuf");
 
     /* Select point to read in */
-    if (H5Sselect_elements(vlen_bufsize->space_id,H5S_SELECT_SET,1,(const hssize_t **)point)<0)
+    if (H5Sselect_elements(vlen_bufsize->fspace_id,H5S_SELECT_SET,1,(const hssize_t **)point)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't select point");
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5Dread(vlen_bufsize->dataset_id,type_id,H5S_ALL,vlen_bufsize->space_id,vlen_bufsize->xfer_pid,tbuf)<0)
+    if(H5Dread(vlen_bufsize->dataset_id,type_id,vlen_bufsize->mspace_id,vlen_bufsize->fspace_id,vlen_bufsize->xfer_pid,tbuf)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point");
 
     /* Set the correct return value, if we get this far */
@@ -2871,8 +2874,12 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     vlen_bufsize.dataset_id=dataset_id;
 
     /* Get a copy of the dataspace ID */
-    if((vlen_bufsize.space_id=H5Dget_space(dataset_id))<0)
+    if((vlen_bufsize.fspace_id=H5Dget_space(dataset_id))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace");
+    
+    /* Create a scalar for the memory dataspace */
+    if((vlen_bufsize.mspace_id=H5Screate(H5S_SCALAR))<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't create dataspace");
 
     /* Grab the temporary buffers required */
     if((vlen_bufsize.fl_tbuf_id=H5TB_get_buf(1,0,NULL))<0)
@@ -2899,8 +2906,10 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         *size=vlen_bufsize.size;
 
 done:
-    if(vlen_bufsize.space_id>0)
-        H5Sclose(vlen_bufsize.space_id);
+    if(vlen_bufsize.fspace_id>0)
+        H5Sclose(vlen_bufsize.fspace_id);
+    if(vlen_bufsize.mspace_id>0)
+        H5Sclose(vlen_bufsize.mspace_id);
     if(vlen_bufsize.fl_tbuf_id>0)
         H5TB_release_buf(vlen_bufsize.fl_tbuf_id);
     if(vlen_bufsize.vl_tbuf_id>0)
