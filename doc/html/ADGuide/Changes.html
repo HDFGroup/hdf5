@@ -48,15 +48,182 @@ Note that changes at the subrelease level in the Release 1.4 production
 branch, i.e., Releases 1.4.1, 1.4.2, ..., are summarized in the 
 Release 1.4.x versions of this document; they are not reported here.
 
-    <h3>New Functions</h3>
-        The following functions are new for Release 1.5 and are included in the
+    <h3>New Functions and Tools</h3>
+        <dl>
+	<dt>The following functions are new for Release 1.5 and are included in the
         <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
 
-<dir>
-<pre>
-H5function with full syntax
-</pre>
-</dir>
+    <dd>&nbsp;</dd>  
+    <dd><em>herr_t</em> <code><font color="red">H5Pset_filter</font></code> 
+        (<em>hid_t</em> <code>plist</code>, <em>H5Z_filter_t</em> <code>filter</code>,
+        <em>unsigned int</em> <code>flags</code>, <em>size_t</em> <code>cd_nelmts</code>,
+        <em>const unsigned int</em> <code>cd_values[])</code>
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_fletcher32</font></code> (<em>hid_t</em> 
+        <code>plist</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_edc_check</font></code> (<em>hid_t</em> 
+	<code>plist</code>, <em>H5Z_EDC_t</em> <code>check</code>)
+    </dd>
+    <dd>
+        <em>H5Z_EDC_t</em> <code><font color="red">H5Pget_edc_check</font></code> (<em>hid_t</em> 
+        <code>plist</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_filter_callback</font></code> (<em>hid_t</em> 
+        <code>plist</code>, <em>H5Z_filter_func_t</em> <code>func</code>,
+        <em>void *</em><code>op_data</code>)
+    </dd>
+    <dd>
+        <em>hid_t</em> <code><font color="red">H5Dget_space_status</font></code> (<em>hid_t</em> 
+	<code>dset_id</code>, <em>H5D_space_status_t *</em><code>status</code>)
+    </dd>
+    <dd>
+        <em>herr_t </em><code><font color="red">H5Pset_alloc_time</font></code> (<em>hid_t</em> 
+	<code>plist_id</code>, <em>H5D_alloc_time_t</em> <code>alloc_time</code>)
+    </dd>
+    <dd>
+        <em>herr_t </em><code><font color="red">H5Pget_alloc_time</font></code> (<em>hid_t</em> <code>plist_id</code>,
+        <em>H5D_alloc_time_t *</em><code>alloc_time</code>)
+    </dd>
+    <dd>
+        <em>herr_t </em><code><font color="red">H5Pset_fill_time</font></code> (<em>hid_t</em> <code>plist_id</code>,
+        <em>H5D_fill_time_t</em> <code>fill_time</code>)
+    </dd>
+    <dd>
+        <em>herr_t </em><code><font color="red">H5Pget_fill_time</font></code> (<em>hid_t</em> <code>plist_id</code>,
+        <em>H5D_fill_time_t *</em><code>fill_time</code>)
+    </dd>
+    <dd>
+        <em>herr_t </em><code><font color="red">H5Pfill_value_defined</font></code> (<em>hid_t</em> <code>plist_id</code>,
+        <em>H5D_fill_value_t *</em><code>status</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_shuffle</font></code> (<em>hid_t</em> <code>plist_id</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Zfilter_avail</font></code> (<em>H5Z_filter_t</em> <code>filter</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Zunregister</font></code> (<em>H5Z_filter_t</em> <code>filter</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pmodify_filter</font></code> (<em>hid_t</em> <code>plist</code>,
+        <em>H5Z_filter_t</em> <code>filter</code>, <em>unsigned int</em> <code>flags</code>,
+        <em>size_t</em> <code>cd_nelmts</code>, <em>const unsigned int</em> <code>cd_values[]</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pget_filter_by_id</font></code> (<em>hid_t</em> <code>plist_id</code>,
+        <em>H5Z_filter_t</em> <code>filter</code>, <em>unsigned int *</em><code>flags</code>,
+        <em>size_t *</em><code>cd_nelmts</code>, <em>unsigned int</em> <code>cd_values[]</code>,
+        <em>size_t</em> <code>namelen</code>, <em>char *</em><code>name[]</code>)
+    </dd>
+    <dd>
+        <em>htri_t</em> <code><font color="red">H5Pall_filters_avail</font></code> (<em>hid_t</em> <code>dcpl_id</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_szip</font></code> (<em>hid_t</em> <code>plist</code>,
+        <em>unsigned int</em> <code>options_mask</code>, <em>unsigned int</em> 
+	<code>pixels_per_block</code>)
+    </dd>
+    <dd>
+        <em>H5S_sel_type</em> <code><font color="red">H5Sget_select_type</font></code> (<em>hid_t</em> <code>space_id</code>)
+    </dd>
+    <dd>
+        <em>ssize_t</em> <code><font color="red">H5Iget_name</font></code> (<em>hid_t</em> <code>obj_id</code>,
+	<em>char *</em><code>name</code>, <em>size_t</em> <code>size</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5set_free_list_limits</font></code> (<em>int</em> <code>reg_global_lim</code>, 
+        <em>int</em> <code>reg_list_lim</code>, <em>int</em> <code>arr_global_lim</code>,
+        <em>int</em> <code>arr_list_lim</code>, <em>int</em> <code>blk_global_lim</code>, 
+	<em>int</em> <code>blk_list_lim</code>)
+    </dd>
+    <dd>
+        <em>hsize_t </em><code><font color="red">H5Dget_offset</font></code> (<em>hid_t </em><code>dset_id</code>)
+    </dd>
+    <dd>
+        <em>herr_t </em><code><font color="red">H5Fget_vfd_handle</font></code> (<em>hid_t</em> <code>file_id</code>,
+        <em>hid_t</em> <code>fapl_id</code>, <em>void *</em><code>file_handle</code>)
+    </dd>
+    <dd>
+        <em>herr_t </em><code><font color="red">H5Fget_obj_ids</font></code> (<em>hid_t</em> <code>file_id</code>,
+        <em>unsigned int</em> <code>types</code>, <em>hid_t *</em><code>obj_id_list</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Gget_num_objs</font></code> (<em>hid_t</em> <code>loc_id</code>,
+        <em>hsize_t* </em> <code>num_obj</code>)
+    </dd>
+    <dd>
+        <em>ssize_t</em> <code><font color="red">H5Gget_objname_by_idx</font></code> (<em>hid_t</em> <code>group_id</code>, 
+        <em>hsize_t</em> <code>idx</code>, <em>char *</em><code>name</code>, 
+        <em>size_t*</em> <code>size</code>)
+    </dd>
+    <dd>
+        <em>int</em> <code><font color="red">H5Gget_objtype_by_idx</font></code> (<em>hid_t</em> <code>group_id</code>, 
+        <em>hsize_t</em> <code>idx</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_family_offset</font></code> (<em>hid_t</em> <code>fapl_id</code>,
+        <em>hsize_t</em> <code>offset</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pget_family_offset</font></code> (<em>hid_t</em> <code>fapl_id</code>,
+        <em>hsize_t *</em><code>offset</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_multi_type</font></code> (<em>hid_t</em> <code>fapl_id</code>,
+        <em>H5FD_mem_t</em> <code>type</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pget_multi_type</font></code> (<em>hid_t</em> <code>fapl_id</code>,
+        <em>H5FD_mem_t *</em><code>type</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_fapl_mpiposix</font></code> (<em>hid_t</em> <code>fapl_id</code>,
+        <em>MPI_Comm</em> <code>comm</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pget_fapl_mpiposix</font></code> (<em>hid_t</em> <code>fapl_id</code>,
+        <em>MPI_Comm *</em><code>comm</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pset_hyper_vector_size</font></code> (<em>hid_t</em> <code>dxpl_id</code>,
+        <em>size_t</em> <code>vector_size</code>)
+    </dd>
+    <dd>
+        <em>herr_t</em> <code><font color="red">H5Pget_hyper_vector_size</font></code> (<em>hid_t</em> <code>dxpl_id</code>,
+        <em>size_t *</em><code>vector_size</code>)
+    </dd>
+    <dd>
+        <em>int</em> <code><font color="red">H5Rget_object_type</font></code> (<em>hid_t</em> <code>id</code>,
+        <em>void *</em><code>ref</code> )
+    </dd>
+    <dd>
+        <em>hid_t</em> <code><font color="red">H5Tget_native_type</font></code> (<em>hid_t</em> <code>type_id</code>,
+        <em>H5T_direction_t</em> <code>direction</code>)
+    </dd>
+    <dd>
+        <em>htri_t </em><code><font color="red">H5Tis_variable_str</font></code> (<em>hid_t </em><code>dtype_id</code>)
+    </dd>
+    <dd>
+        <em>htri_t </em><code><font color="red">H5Tdetect_class</font></code> (<em>hid_t</em> <code>dtype_id</code>,
+        <em>H5T_class_t</em> <code>dtype_class</code>)
+    </dd>
+    <dd>&nbsp;</dd>
+  </dt>
+  <dt>The following tools are new for Release 1.5 and are included in the
+        <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+    <dd>&nbsp;</dd>
+    <dd><code><font color="red">h5import</font></code>
+    <dd><code><font color="red">h5fc</font></code> 
+    <dd><code><font color="red">h5perf</font></code>
+    <dd><code><font color="red">h5redeploy</font></code>
+  </dt>
+</dl>
+
 
     <h3>Deleted Functions</h3>
         The following functions have been removed from the HDF5 library
