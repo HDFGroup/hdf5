@@ -64,7 +64,7 @@ install-doc:
 	   (cd $$d && $(MAKE) $@);                                            \
 	done
 
-.PHONY: all lib progs test _test install uninstall dep depend clean           \
+.PHONY: all lib progs test _test install uninstall dep depend clean       \
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
@@ -73,8 +73,8 @@ clean mostlyclean:
 	done
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS) examples pablo; do			      \
-	   (cd $$d && $(MAKE) $@);					      \
+	@@SETX@; for d in $(SUBDIRS); do                                      \
+	   (cd $$d && $(MAKE) $@);                                            \
 	done
 	-$(RM) Makefile
 
