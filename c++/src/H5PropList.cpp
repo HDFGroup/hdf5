@@ -352,7 +352,7 @@ size_t PropList::getPropSize(const char *name) const
 {
    size_t prop_size;
    herr_t ret_value = H5Pget_size(id, name, &prop_size);
-   if (prop_size < 0)
+   if (ret_value < 0)
    {
       throw PropListIException("PropList::getPropSize", "H5Pget_size failed");
    }
@@ -404,7 +404,7 @@ size_t PropList::getNumProps() const
 {
    size_t nprops;
    herr_t ret_value = H5Pget_nprops (id, &nprops);
-   if( nprops < 0 )
+   if (ret_value < 0)
    {
       throw PropListIException("PropList::getNumProps", "H5Pget_nprops failed");
    }
