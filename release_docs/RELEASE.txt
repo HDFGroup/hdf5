@@ -99,6 +99,8 @@ Library
       be inserted past the end of the datatype.
     * Retired the DPSS virtual file driver (--with-gridstorage configure
       option).
+    * Fixed bug where variable-length datatypes for attributes was not working
+      correctly.
 
 Configuration
 -------------
