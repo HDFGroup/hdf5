@@ -1581,10 +1581,12 @@ touch ./config/stamp1
 saved_no_create=$no_create
 no_create=yes
 
-PARALLEL_MAKE=
+PARALLEL_MAKE=""
+AC_SUBST(PARALLEL_EXAMPLES_SRC) PARALLEL_EXAMPLES_SRC=""
 
 if test -n "$TESTPARALLEL"; then
    PARALLEL_MAKE="$TESTPARALLEL/Makefile"
+   PARALLEL_EXAMPLES_SRC="examples/ph5example.c"
 fi
 
 EXTRA_H4_MAKEFILES=
