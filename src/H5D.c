@@ -102,6 +102,31 @@ H5FL_BLK_DEFINE_STATIC(vlen_vl_buf);
 H5FL_BLK_DEFINE_STATIC(vlen_fl_buf);
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5D_init
+ *
+ * Purpose:	Initialize the interface from some other layer.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, March 4, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_init(void)
+{
+    FUNC_ENTER(H5D_init, FAIL);
+    /* FUNC_ENTER() does all the work */
+    FUNC_LEAVE(SUCCEED);
+}
+
+
 /*--------------------------------------------------------------------------
 NAME
    H5D_init_interface -- Initialize interface-specific information
@@ -125,6 +150,8 @@ H5D_init_interface(void)
         HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		      "unable to initialize interface");
     }
+
+/* Register the default dataset creation & data xfer properties */
     
     FUNC_LEAVE(SUCCEED);
 }

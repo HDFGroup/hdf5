@@ -19,6 +19,7 @@ static char             RcsId[] = "@(#)$Revision$";
 /* private headers */
 #include <H5private.h>          /*library                 		*/
 #include <H5Bprivate.h>         /*B-link trees                    	*/
+#include <H5Dprivate.h>         /*datasets          		    */
 #include <H5Eprivate.h>         /*error handling          		*/
 #include <H5FDprivate.h>	/*file driver				*/
 #include <H5FLprivate.h>	/*Free Lists	  */
@@ -110,8 +111,11 @@ H5_init_library(void)
 
     /*
      * Initialize interfaces that might not be able to initialize themselves
-     * soon enough.  The file interface must be initialized because calling
-     * H5Pcreate() might require the H5F_access_dflt to be initialized.
+     * soon enough.  The file & dataset interfaces must be initialized because
+     * calling H5Pcreate() might require the file/dataset property classes to be
+     * initialized.  The property lists are be initialized during the H5F/H5D
+     * init calls (because they call H5P functions, which initialize the H5P
+     * API, before using the properties).
      */
     if (H5F_init()<0) {
 	HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
@@ -120,6 +124,10 @@ H5_init_library(void)
     if (H5T_init()<0) {
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
                       "unable to initialize type interface");
+    }
+    if (H5D_init()<0) {
+	HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+		      "unable to initialize file interface");
     }
 
     /* Debugging? */

@@ -30,7 +30,7 @@ typedef enum {
     H5I_BADID		= (-1),	/*invalid Group				    */
     H5I_FILE		= 1,	/*group ID for File objects		    */
     H5I_FILE_CLOSING,		/*files pending close due to open objhdrs   */
-    H5I_TEMPLATE_0,		/*group ID for Template objects		    */
+    H5I_TEMPLATE_0,		    /*group ID for Template objects		    */
     H5I_TEMPLATE_1,	       	/*group ID for Template objects		    */
     H5I_TEMPLATE_2,	        /*group ID for Template objects		    */
     H5I_TEMPLATE_3,	        /*group ID for Template objects		    */
@@ -39,17 +39,19 @@ typedef enum {
     H5I_TEMPLATE_6,	        /*group ID for Template objects		    */
     H5I_TEMPLATE_7,	        /*group ID for Template objects		    */
 #ifndef NDEBUG
-    H5I_TEMPLATE_MAX,	        /*not really a group ID			    */
+    H5I_TEMPLATE_MAX,	    /*not really a group ID			        */
 #endif
     H5I_GROUP,		        /*group ID for Group objects		    */
     H5I_DATATYPE,	        /*group ID for Datatype objects		    */
     H5I_DATASPACE,	        /*group ID for Dataspace objects	    */
     H5I_DATASET,	        /*group ID for Dataset objects		    */
     H5I_ATTR,		        /*group ID for Attribute objects	    */
-    H5I_TEMPBUF,	        /*group ID for Temporary buffer objects	    */
+    H5I_TEMPBUF,	        /*group ID for Temporary buffer objects	*/
     H5I_RAGGED,		        /*group ID for Ragged array objects	    */
     H5I_REFERENCE,	        /*group ID for Reference objects	    */
-    H5I_VFL,			/*group ID for virtual file layer	    */
+    H5I_VFL,			    /*group ID for virtual file layer	    */
+    H5I_GENPROP_CLS,        /*group ID for generic property list classes */
+    H5I_GENPROP_LST,        /*group ID for generic property lists   */
     
     H5I_NGROUPS		        /*number of valid groups, MUST BE LAST!	    */
 } H5I_type_t;

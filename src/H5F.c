@@ -203,13 +203,13 @@ H5F_init_interface(void)
      * which are pending completion because there are object headers still
      * open within the file.
      */
-    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
-		       (H5I_free_t)H5F_close)<0 ||
-	H5I_init_group(H5I_FILE_CLOSING, H5I_FILEID_HASHSIZE, 0,
-		       (H5I_free_t)H5F_close)<0) {
-	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
+    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0 ||
+        H5I_init_group(H5I_FILE_CLOSING, H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<0) {
+            HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
     }
+
+/* Register the default file creation & access properties */
 
     /* Register predefined file drivers */
     H5E_BEGIN_TRY {

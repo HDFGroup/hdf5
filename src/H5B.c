@@ -95,7 +95,7 @@
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MFprivate.h>	/*file memory management		*/
 #include <H5MMprivate.h>	/*core memory management		*/
-#include <H5Pprivate.h>		/*property lists			*/
+#include <H5Pprivate.h>		/*property lists				*/
 
 #include <H5FDmpio.h>		/*for H5FD_mpio_tas_allsame()		*/
 

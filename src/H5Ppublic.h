@@ -29,25 +29,76 @@
 
 /* Property list classes */
 typedef enum H5P_class_t {
-    H5P_NO_CLASS         = -1,  /*error return value                         */
-    H5P_FILE_CREATE      = 0,   /*file creation properties                   */
-    H5P_FILE_ACCESS      = 1,   /*file access properties                     */
-    H5P_DATASET_CREATE   = 2,   /*dataset creation properties                */
-    H5P_DATA_XFER        = 3,   /*data transfer properties	             */
-    H5P_MOUNT		 = 4,	/*file mounting properties		     */
+    H5P_NO_CLASS         = -1,  /*error return value                 */
+    H5P_FILE_CREATE      = 0,   /*file creation properties           */
+    H5P_FILE_ACCESS      = 1,   /*file access properties             */
+    H5P_DATASET_CREATE   = 2,   /*dataset creation properties        */
+    H5P_DATA_XFER        = 3,   /*data transfer properties	         */
+    H5P_MOUNT		     = 4,	/*file mounting properties		     */
 
-    H5P_NCLASSES         = 5    /*this must be last!                         */
+    H5P_NCLASSES         = 5    /*this must be last!                 */
 } H5P_class_t;
 
 /* Alias for the previous H5P_DATASER_XFER property list */
 /* This should eventually be publicly decommisioned - 10/6/99 - QAK */
 #define H5P_DATASET_XFER H5P_DATA_XFER
 
+/* Define property list class callback function pointer types */
+typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
+typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
+
+/* Define property list callback function pointer types */
+typedef herr_t (*H5P_prp_create_func_t)(const char *name, void **def_value);
+typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name, void **value);
+typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name, void *value);
+typedef herr_t (*H5P_prp_close_func_t)(const char *name, void *value);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*
+ * The library created property list classes
+ */
+#define H5P_NO_CLASS_NEW   	(H5open(), H5P_NO_CLASS_g)
+#define H5P_NO_CLASS_HASH_SIZE   0
+#define H5P_FILE_CREATE_NEW	(H5open(), H5P_FILE_CREATE_g)
+#define H5P_FILE_CREATE_HASH_SIZE   17
+#define H5P_FILE_ACCESS_NEW (H5open(), H5P_FILE_ACCESS_g)
+#define H5P_FILE_ACCESS_HASH_SIZE   17
+#define H5P_DATASET_CREATE_NEW  (H5open(), H5P_DATASET_CREATE_g)
+#define H5P_DATASET_CREATE_HASH_SIZE   17
+#define H5P_DATA_XFER_NEW   (H5open(), H5P_DATA_XFER_g)
+#define H5P_DATA_XFER_HASH_SIZE   17
+#define H5P_MOUNT_NEW       (H5open(), H5P_MOUNT_g)
+#define H5P_MOUNT_HASH_SIZE   17
+__DLLVAR__ hid_t H5P_NO_CLASS_g;
+__DLLVAR__ hid_t H5P_FILE_CREATE_g;
+__DLLVAR__ hid_t H5P_FILE_ACCESS_g;
+__DLLVAR__ hid_t H5P_DATASET_CREATE_g;
+__DLLVAR__ hid_t H5P_DATA_XFER_g;
+__DLLVAR__ hid_t H5P_MOUNT_g;
+
 /* Public functions */
+__DLL__ hid_t H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
+            H5P_cls_create_func_t cls_create, void *create_data,
+            H5P_cls_close_func_t cls_close, void *close_data);
+__DLL__ hid_t H5Pcreate_list(hid_t cls_id);
+__DLL__ herr_t H5Pregister(hid_t class, const char *name, size_t size,
+            void *def_value, H5P_prp_create_func_t prp_create,
+            H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+            H5P_prp_close_func_t prp_close);
+__DLL__ herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
+            void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+            H5P_prp_close_func_t prp_close);
+__DLL__ herr_t H5Pset(hid_t plist_id, const char *name, void *value);
+__DLL__ herr_t H5Pexist(hid_t plist_id, const char *name);
+__DLL__ herr_t H5Pget_size(hid_t plist_id, const char *name);
+__DLL__ herr_t H5Pget(hid_t plist_id, const char *name, void * value);
+__DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
+__DLL__ herr_t H5Punregister(hid_t pclass_id, const char *name);
+__DLL__ herr_t H5Pclose_list(hid_t plist_id);
+__DLL__ herr_t H5Pclose_class(hid_t plist_id);
 __DLL__ hid_t H5Pcreate(H5P_class_t type);
 __DLL__ herr_t H5Pclose(hid_t plist_id);
 __DLL__ hid_t H5Pcopy(hid_t plist_id);

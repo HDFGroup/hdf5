@@ -55,6 +55,7 @@ typedef struct H5D_t H5D_t;
 __DLLVAR__ const H5D_create_t H5D_create_dflt;
 
 /* Functions defined in H5D.c */
+__DLL__ herr_t H5D_init(void);
 __DLL__ H5D_t *H5D_create(H5G_entry_t *loc, const char *name,
 			  const H5T_t *type, const H5S_t *space,
 			  const H5D_create_t *create_parms);
