@@ -42,7 +42,9 @@
 !
         INTERFACE
           INTEGER FUNCTION h5open_c()
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
           !MS$ATTRIBUTES C,reference,alias:'_H5OPEN_C'::h5open_c
+          !DEC$ ENDIF
           END FUNCTION h5open_c
         END INTERFACE
         INTERFACE
@@ -51,7 +53,9 @@
           INTEGER(HID_T), DIMENSION(PREDEF_TYPES_LEN) :: p_types
           INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: f_types
           INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN) :: i_types   
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
           !MS$ATTRIBUTES C,reference,alias:'_H5INIT_TYPES_C'::h5init_types_c
+          !DEC$ ENDIF
           END FUNCTION h5init_types_c
         END INTERFACE
         INTERFACE
@@ -77,7 +81,9 @@
           INTEGER i_H5S_flags(H5S_FLAGS_LEN)
           INTEGER i_H5T_flags(H5T_FLAGS_LEN)
 
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
           !MS$ATTRIBUTES C,reference,alias:'_H5INIT_FLAGS_C'::h5init_flags_c
+          !DEC$ ENDIF
           END FUNCTION h5init_flags_c
         END INTERFACE
         error_0 = h5open_c()
@@ -134,7 +140,9 @@
 !        INTEGER, EXTERNAL :: h5close_types_c, h5close_c
         INTERFACE
           INTEGER FUNCTION h5close_c()
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
           !MS$ATTRIBUTES C,reference,alias:'_H5CLOSE_C'::h5close_c
+          !DEC$ ENDIF
           END FUNCTION h5close_c
         END INTERFACE
         INTERFACE
@@ -148,7 +156,9 @@
           INTEGER(HID_T), DIMENSION(P_TYPES_LEN) :: p_types
           INTEGER(HID_T), DIMENSION(F_TYPES_LEN) :: f_types
           INTEGER(HID_T), DIMENSION(I_TYPES_LEN) :: i_types   
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
           !MS$ATTRIBUTES C,reference,alias:'_H5CLOSE_TYPES_C'::h5close_types_c
+          !DEC$ ENDIF
           END FUNCTION h5close_types_c
         END INTERFACE
         error_1 = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &

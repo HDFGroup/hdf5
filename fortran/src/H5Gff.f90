@@ -62,7 +62,9 @@
               INTEGER FUNCTION h5gcreate_c(loc_id, name, namelen, &
                                size_hint_default, grp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GCREATE_C'::h5gcreate_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -127,7 +129,9 @@
             INTERFACE
               INTEGER FUNCTION h5gopen_c(loc_id, name, namelen, grp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GOPEN_C'::h5gopen_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -182,7 +186,9 @@
             INTERFACE
               INTEGER FUNCTION h5gclose_c(grp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GCLOSE_C'::h5gclose_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: grp_id
               END FUNCTION h5gclose_c
             END INTERFACE
@@ -248,7 +254,9 @@
                                namelen, idx, &
                                obj_name, obj_namelen, obj_type)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GGET_OBJ_INFO_IDX_C'::h5gget_obj_info_idx_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               !DEC$ATTRIBUTES reference :: obj_name
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -317,7 +325,9 @@
             INTERFACE
               INTEGER FUNCTION h5gn_members_c(loc_id, name, namelen, nmembers)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GN_MEMBERS_C'::h5gn_members_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -395,7 +405,9 @@
                                current_namelen, new_name, new_namelen)
                               
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GLINK_C'::h5glink_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: current_name
               !DEC$ATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: loc_id 
@@ -461,7 +473,9 @@
             INTERFACE
               INTEGER FUNCTION h5gunlink_c(loc_id, name, namelen)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GUNLINK_C'::h5gunlink_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -523,7 +537,9 @@
             INTERFACE
               INTEGER FUNCTION h5gmove_c(loc_id, name, namelen, new_name, new_namelen)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GMOVE_C'::h5gmove_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               !DEC$ATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -595,7 +611,9 @@
             INTERFACE
               INTEGER FUNCTION h5gget_linkval_c(loc_id, name, namelen, size, buffer)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GGET_LINKVAL_C'::h5gget_linkval_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               !DEC$ATTRIBUTES reference :: buffer 
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -660,7 +678,9 @@
               INTEGER FUNCTION h5gset_comment_c(loc_id, name, namelen, &
                                                 comment, commentlen)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GSET_COMMENT_C'::h5gset_comment_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name 
               !DEC$ATTRIBUTES reference :: comment 
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -728,7 +748,9 @@
               INTEGER FUNCTION h5gget_comment_c(loc_id, name, namelen, &
                                                 size, buffer)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5GGET_COMMENT_C'::h5gget_comment_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name 
               !DEC$ATTRIBUTES reference :: buffer 
               INTEGER(HID_T), INTENT(IN) :: loc_id

@@ -142,7 +142,9 @@
               INTEGER FUNCTION h5dcreate_c(loc_id, name, namelen, type_id, &
                                            space_id, creation_prp_default, dset_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DCREATE_C'::h5dcreate_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -205,7 +207,9 @@
             INTERFACE
               INTEGER FUNCTION h5dopen_c(loc_id, name, namelen, dset_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DOPEN_C'::h5dopen_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -259,7 +263,9 @@
             INTERFACE
               INTEGER FUNCTION h5dclose_c(dset_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DCLOSE_C'::h5dclose_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               END FUNCTION h5dclose_c
             END INTERFACE
@@ -343,7 +349,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REF_OBJ_C'::h5dwrite_ref_obj_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -413,7 +421,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REF_REG_C'::h5dwrite_ref_reg_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -484,7 +494,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -543,7 +555,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -603,7 +617,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -664,7 +680,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -725,7 +743,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -785,7 +805,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -847,7 +869,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -908,7 +932,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -968,7 +994,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1028,7 +1056,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1089,7 +1119,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1150,7 +1182,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1211,7 +1245,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1272,7 +1308,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1333,7 +1371,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1394,7 +1434,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1452,7 +1494,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1510,7 +1554,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1570,7 +1616,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1629,7 +1677,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1688,7 +1738,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1747,7 +1799,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1806,7 +1860,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1865,7 +1921,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1924,7 +1982,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1983,7 +2043,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2043,7 +2105,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2103,7 +2167,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2163,7 +2229,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2223,7 +2291,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2284,7 +2354,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2345,7 +2417,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2445,7 +2519,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REF_OBJ_C'::h5dread_ref_obj_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -2515,7 +2591,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REF_REG_C'::h5dread_ref_reg_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -2585,7 +2663,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2644,7 +2724,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2704,7 +2786,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2765,7 +2849,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2826,7 +2912,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2887,7 +2975,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2948,7 +3038,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3009,7 +3101,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3068,7 +3162,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3128,7 +3224,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3189,7 +3287,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3250,7 +3350,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3311,7 +3413,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3372,7 +3476,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3433,7 +3539,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3494,7 +3602,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -3552,7 +3662,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3610,7 +3722,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3669,7 +3783,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3728,7 +3844,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3787,7 +3905,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3846,7 +3966,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3905,7 +4027,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3965,7 +4089,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4023,7 +4149,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4082,7 +4210,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4142,7 +4272,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4202,7 +4334,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4263,7 +4397,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4323,7 +4459,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4384,7 +4522,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4445,7 +4585,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4511,7 +4653,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_space_c(dataset_id, dataspace_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DGET_SPACE_C'::h5dget_space_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HID_T), INTENT(OUT) :: dataspace_id
               END FUNCTION h5dget_space_c
@@ -4561,7 +4705,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_type_c (dataset_id, datatype_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DGET_TYPE_C'::h5dget_type_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HID_T), INTENT(OUT) :: datatype_id
               END FUNCTION h5dget_type_c
@@ -4615,7 +4761,9 @@
             INTERFACE
               INTEGER FUNCTION h5dextend_c(dataset_id, size)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DEXTEND_C'::h5dextend_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
               END FUNCTION h5dextend_c
@@ -4669,7 +4817,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_create_plist_c(dataset_id, plist_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5DGET_CREATE_PLIST_C'::h5dget_create_plist_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HID_T), INTENT(OUT) :: plist_id
               END FUNCTION h5dget_create_plist_c

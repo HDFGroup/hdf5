@@ -63,7 +63,9 @@
             INTERFACE
               INTEGER FUNCTION h5iget_type_c(obj_id, type)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5IGET_TYPE_C':: h5iget_type_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: obj_id 
               INTEGER, INTENT(OUT) :: type
               END FUNCTION h5iget_type_c

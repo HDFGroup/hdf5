@@ -81,7 +81,9 @@
             INTERFACE
               INTEGER FUNCTION h5pcreate_c(classtype, prp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PCREATE_C'::h5pcreate_c
+              !DEC$ ENDIF
               INTEGER, INTENT(IN) :: classtype
               INTEGER(HID_T), INTENT(OUT) :: prp_id
               END FUNCTION h5pcreate_c
@@ -138,7 +140,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_preserve_c(prp_id, flag)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_PRESERVE_C'::h5pset_preserve_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) ::  flag
               END FUNCTION h5pset_preserve_c
@@ -192,7 +196,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_preserve_c(prp_id, flag)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_PRESERVE_C'::h5pget_preserve_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) ::  flag
               END FUNCTION h5pget_preserve_c
@@ -259,7 +265,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_class_c(prp_id, classtype)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_CLASS_C'::h5pget_class_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: classtype 
               END FUNCTION h5pget_class_c
@@ -315,7 +323,9 @@
             INTERFACE
               INTEGER FUNCTION h5pcopy_c(prp_id, new_prp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PCOPY_C'::h5pcopy_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(OUT) :: new_prp_id
               END FUNCTION h5pcopy_c
@@ -367,7 +377,9 @@
             INTERFACE
               INTEGER FUNCTION h5pclose_c(prp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PCLOSE_C'::h5pclose_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               END FUNCTION h5pclose_c
             END INTERFACE
@@ -424,7 +436,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_chunk_c(prp_id, ndims, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_CHUNK_C'::h5pset_chunk_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: ndims
               INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(IN) :: dims
@@ -486,7 +500,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_chunk_c(prp_id, ndims, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_CHUNK_C'::h5pget_chunk_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER :: ndims
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: dims
@@ -540,7 +556,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_deflate_c(prp_id, level)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_DEFLATE_C'::h5pset_deflate_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: level
               END FUNCTION h5pset_deflate_c
@@ -601,7 +619,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_C'::h5pset_fill_value_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: fillvalue
@@ -634,7 +654,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_C'::h5pget_fill_value_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER :: fillvalue
@@ -667,7 +689,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_C'::h5pset_fill_value_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               REAL, INTENT(IN) :: fillvalue
@@ -700,7 +724,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_C'::h5pget_fill_value_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               REAL :: fillvalue
@@ -733,7 +759,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUE_C'::h5pset_fill_value_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               DOUBLE PRECISION, INTENT(IN) :: fillvalue
@@ -766,7 +794,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUE_C'::h5pget_fill_value_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
               DOUBLE PRECISION :: fillvalue
@@ -798,7 +828,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fill_valuec_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILL_VALUEC_C'::h5pset_fill_valuec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: fillvalue 
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
@@ -831,7 +863,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_fill_valuec_c(prp_id, type_id, fillvalue)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILL_VALUEC_C'::h5pget_fill_valuec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: fillvalue 
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(IN) :: type_id
@@ -899,7 +933,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_version_c(prp_id, boot, freelist, stab, shhdr)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_VERSION_C'::h5pget_version_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, DIMENSION(:), INTENT(OUT) :: boot 
               INTEGER, DIMENSION(:), INTENT(OUT) :: freelist 
@@ -954,7 +990,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_userblock_c(prp_id, size)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_USERBLOCK_C'::h5pset_userblock_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HSIZE_T), INTENT(IN) :: size
               END FUNCTION h5pset_userblock_c
@@ -1008,7 +1046,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_userblock_c(prp_id, block_size)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_USERBLOCK_C'::h5pget_userblock_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HSIZE_T), INTENT(OUT) :: block_size
               END FUNCTION h5pget_userblock_c
@@ -1064,7 +1104,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_sizes_c(prp_id, sizeof_addr, sizeof_size)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_SIZES_C'::h5pset_sizes_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr
               INTEGER(SIZE_T), INTENT(IN) :: sizeof_size
@@ -1124,7 +1166,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_sizes_c(prp_id, sizeof_addr, sizeof_size)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_SIZES_C'::h5pget_sizes_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER(SIZE_T), INTENT(OUT) :: sizeof_addr
               INTEGER(SIZE_T), INTENT(OUT) :: sizeof_size
@@ -1181,7 +1225,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_sym_k_c(prp_id, ik, lk)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_SYM_K_C'::h5pset_sym_k_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER, INTENT(IN) :: ik
               INTEGER, INTENT(IN) :: lk
@@ -1238,7 +1284,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_sym_k_c(prp_id, ik, lk)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_SYM_K_C'::h5pget_sym_k_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER, INTENT(OUT) :: ik
               INTEGER, INTENT(OUT) :: lk
@@ -1293,7 +1341,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_istore_k_c(prp_id, ik)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_ISTORE_K_C'::h5pset_istore_k_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: ik
               END FUNCTION h5pset_istore_k_c
@@ -1346,7 +1396,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_istore_k_c(prp_id, ik)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_ISTORE_K_C'::h5pget_istore_k_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: ik
               END FUNCTION h5pget_istore_k_c
@@ -1399,7 +1451,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_driver_c(prp_id, driver)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_DRIVER_C'::h5pget_driver_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HID_T), INTENT(OUT) :: driver
               END FUNCTION h5pget_driver_c
@@ -1449,7 +1503,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fapl_stdio_c(prp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_STDIO_C'::h5pset_fapl_stdio_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               END FUNCTION h5pset_fapl_stdio_c
             END INTERFACE
@@ -1538,7 +1594,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fapl_sec2_c(prp_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_SEC2_C'::h5pset_fapl_sec2_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
               END FUNCTION h5pset_fapl_sec2_c
             END INTERFACE
@@ -1625,7 +1683,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_alignment_c(prp_id, threshold, alignment)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_ALIGNMENT_C'::h5pset_alignment_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HSIZE_T), INTENT(IN) :: threshold
               INTEGER(HSIZE_T), INTENT(IN) :: alignment
@@ -1681,7 +1741,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_alignment_c(prp_id, threshold, alignment)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_ALIGNMENT_C'::h5pget_alignment_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HSIZE_T), INTENT(OUT) :: threshold
               INTEGER(HSIZE_T), INTENT(OUT) :: alignment
@@ -1739,7 +1801,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fapl_core_c(prp_id, increment, backing_store)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_CORE_C'::h5pset_fapl_core_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER(SIZE_T), INTENT(IN) :: increment 
               INTEGER, INTENT(IN) :: backing_store 
@@ -1797,7 +1861,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_fapl_core_c(prp_id, increment, backing_store)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FAPL_CORE_C'::h5pget_fapl_core_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER(SIZE_T), INTENT(OUT) :: increment 
               INTEGER, INTENT(OUT) :: backing_store 
@@ -1856,7 +1922,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fapl_family_c(prp_id, memb_size, memb_plist)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_FAMILY_C'::h5pset_fapl_family_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HSIZE_T), INTENT(IN) :: memb_size
               INTEGER(HID_T), INTENT(IN) :: memb_plist
@@ -1916,7 +1984,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_fapl_family_c(prp_id, memb_size, memb_plist)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FAPL_FAMILY_C'::h5pget_fapl_family_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER(HSIZE_T), INTENT(OUT) :: memb_size
               INTEGER(HID_T), INTENT(OUT) :: memb_plist
@@ -1981,7 +2051,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_cache_c(prp_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_CACHE_C'::h5pset_cache_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: mdc_nelmts 
               INTEGER, INTENT(IN) :: rdcc_nelmts 
@@ -2049,7 +2121,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_cache_c(prp_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_CACHE_C'::h5pget_cache_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: mdc_nelmts 
               INTEGER, INTENT(OUT) :: rdcc_nelmts 
@@ -2116,7 +2190,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_fapl_split_c(prp_id,meta_len,meta_ext,meta_plist,raw_len,raw_ext,raw_plist)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_SPLIT_C'::h5pset_fapl_split_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: meta_ext
               !DEC$ATTRIBUTES reference :: raw_ext
               INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -2227,7 +2303,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_gc_references_c(prp_id, gc_reference)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_GC_REFERENCES_C'::h5pset_gc_references_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: gc_reference
               END FUNCTION h5pset_gc_references_c
@@ -2281,7 +2359,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_gc_references_c(prp_id, gc_reference)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_GC_REFERENCES_C'::h5pget_gc_references_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: gc_reference
               END FUNCTION h5pget_gc_references_c
@@ -2342,7 +2422,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_layout_c(prp_id, layout)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_LAYOUT_C'::h5pset_layout_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: layout
               END FUNCTION h5pset_layout_c
@@ -2402,7 +2484,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_layout_c(prp_id, layout)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_LAYOUT_C'::h5pget_layout_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: layout
               END FUNCTION h5pget_layout_c
@@ -2464,7 +2548,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_filter_c(prp_id, filter, flags, cd_nelmts, cd_values)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FILTER_C'::h5pset_filter_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER, INTENT(IN) :: filter 
               INTEGER, INTENT(IN) :: flags 
@@ -2520,7 +2606,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_nfilters_c(prp_id, nfilters)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_NFILTERS_C'::h5pget_nfilters_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: nfilters
               END FUNCTION h5pget_nfilters_c
@@ -2592,7 +2680,9 @@
               INTEGER FUNCTION h5pget_filter_c(prp_id, filter_number, flags, cd_nelmts,  &
                                               cd_values, namelen, name, filter_id )
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILTER_C'::h5pget_filter_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: filter_number 
@@ -2663,7 +2753,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_external_c(prp_id, name,namelen, offset, bytes)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_EXTERNAL_C'::h5pset_external_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -2721,7 +2813,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_external_count_c(prp_id, count)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_EXTERNAL_COUNT_C'::h5pget_external_count_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER, INTENT(OUT) :: count
               END FUNCTION h5pget_external_count_c
@@ -2788,7 +2882,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_external_c(prp_id, idx, name_size, name, offset, bytes)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_EXTERNAL_C'::h5pget_external_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: idx 
@@ -2850,7 +2946,9 @@
             INTERFACE
               INTEGER FUNCTION h5pset_hyper_cache_c(prp_id, cache, limit)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_HYPER_CACHE_C'::h5pset_hyper_cache_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(IN) :: cache 
               INTEGER, INTENT(IN) :: limit 
@@ -2910,7 +3008,9 @@
             INTERFACE
               INTEGER FUNCTION h5pget_hyper_cache_c(prp_id, cache, limit)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_HYPER_CACHE_C'::h5pget_hyper_cache_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: cache 
               INTEGER, INTENT(OUT) :: limit 
@@ -2971,7 +3071,9 @@
             INTERFACE
               INTEGER FUNCTION  h5pset_btree_ratios_c(prp_id, left, middle, right)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_BTREE_RATIOS_C'::h5pset_btree_ratios_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               REAL, INTENT(IN) :: left
               REAL, INTENT(IN) :: middle
@@ -3033,7 +3135,9 @@
             INTERFACE
               INTEGER FUNCTION  h5pget_btree_ratios_c(prp_id, left, middle, right)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_BTREE_RATIOS_C'::h5pget_btree_ratios_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               REAL, INTENT(OUT) :: left
               REAL, INTENT(OUT) :: middle

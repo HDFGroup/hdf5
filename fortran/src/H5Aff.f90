@@ -140,7 +140,9 @@
               INTEGER FUNCTION h5acreate_c(obj_id, name, namelen, type_id, &
                                space_id, creation_prp_default, attr_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5ACREATE_C'::h5acreate_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: obj_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -204,7 +206,9 @@
             INTERFACE
               INTEGER FUNCTION h5aopen_name_c(obj_id, name, namelen, attr_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AOPEN_NAME_C'::h5aopen_name_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: obj_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -261,7 +265,9 @@
             INTERFACE
               INTEGER FUNCTION h5aopen_idx_c(obj_id, index, attr_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AOPEN_IDX_C'::h5aopen_idx_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: obj_id
               INTEGER, INTENT(IN) :: index
               INTEGER(HID_T), INTENT(OUT) :: attr_id
@@ -326,7 +332,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -358,7 +366,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -392,7 +402,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -426,7 +438,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -460,7 +474,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -494,7 +510,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -528,7 +546,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -562,7 +582,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -594,7 +616,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -626,7 +650,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -660,7 +686,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -694,7 +722,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -728,7 +758,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -762,7 +794,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -796,7 +830,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -830,7 +866,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -862,7 +900,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -893,7 +933,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -927,7 +969,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -961,7 +1005,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -995,7 +1041,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1029,7 +1077,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1063,7 +1113,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1097,7 +1149,9 @@
             INTERFACE
               INTEGER FUNCTION h5awrite_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITE_C'::h5awrite_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1128,7 +1182,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               !DEC$ATTRIBUTES reference :: buf
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1160,7 +1216,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1194,7 +1252,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               !DEC$ATTRIBUTES reference :: buf
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1228,7 +1288,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1262,7 +1324,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1296,7 +1360,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1330,7 +1396,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1364,7 +1432,9 @@
             INTERFACE
               INTEGER FUNCTION h5awritec_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AWRITEC_C'::h5awritec_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1429,7 +1499,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1460,7 +1532,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1493,7 +1567,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1526,7 +1602,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1560,7 +1638,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1594,7 +1674,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1628,7 +1710,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1662,7 +1746,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1694,7 +1780,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1726,7 +1814,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1760,7 +1850,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1794,7 +1886,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1828,7 +1922,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1862,7 +1958,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1896,7 +1994,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1930,7 +2030,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1962,7 +2064,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -1994,7 +2098,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2028,7 +2134,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2062,7 +2170,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2096,7 +2206,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2130,7 +2242,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2164,7 +2278,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2198,7 +2314,9 @@
             INTERFACE
               INTEGER FUNCTION h5aread_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREAD_C'::h5aread_c
+              !DEC$ ENDIF
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2230,7 +2348,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2264,7 +2384,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2299,7 +2421,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2334,7 +2458,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2369,7 +2495,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2404,7 +2532,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2439,7 +2569,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2474,7 +2606,9 @@
             INTERFACE
               INTEGER FUNCTION h5areadc_c(attr_id, memtype_id,  buf, dims)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AREADC_C'::h5areadc_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER, DIMENSION(7) :: dims   
               INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -2528,7 +2662,9 @@
             INTERFACE
               INTEGER FUNCTION h5aget_space_c(attr_id, space_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AGET_SPACE_C'::h5aget_space_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(OUT) :: space_id
               END FUNCTION h5aget_space_c
@@ -2578,7 +2714,9 @@
             INTERFACE
               INTEGER FUNCTION h5aget_type_c(attr_id, type_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AGET_TYPE_C'::h5aget_type_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(HID_T), INTENT(OUT) :: type_id
               END FUNCTION h5aget_type_c
@@ -2632,7 +2770,9 @@
             INTERFACE
               INTEGER FUNCTION h5aget_name_c(attr_id, size, buf)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AGET_NAME_C'::h5aget_name_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER(HID_T), INTENT(IN) :: attr_id
               INTEGER(SIZE_T), INTENT(IN) :: size
@@ -2686,7 +2826,9 @@
             INTERFACE
               INTEGER FUNCTION h5aget_num_attrs_c(obj_id, attr_num)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5AGET_NUM_ATTRS_C'::h5aget_num_attrs_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: obj_id
               INTEGER, INTENT(OUT) :: attr_num
               END FUNCTION h5aget_num_attrs_c
@@ -2738,7 +2880,9 @@
             INTERFACE
               INTEGER FUNCTION h5adelete_c(obj_id, name, namelen) 
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5ADELETE_C'::h5adelete_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: obj_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -2789,7 +2933,9 @@
             INTERFACE
               INTEGER FUNCTION h5aclose_c(attr_id)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5ACLOSE_C'::h5aclose_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: attr_id
               END FUNCTION h5aclose_c
             END INTERFACE
