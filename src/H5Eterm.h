@@ -38,7 +38,6 @@ H5E_DATATYPE_g=
 H5E_RS_g=    
 H5E_HEAP_g=    
 H5E_OHDR_g=    
-H5E_TBBT_g=    
 H5E_ATOM_g=    
 H5E_ATTR_g=    
 H5E_IO_g=    
@@ -53,9 +52,6 @@ H5E_CACHE_g= (-1);
 
 /* Reset minor error IDs */
 
-
-/* Threaded, balanced binary tree errors */    
-H5E_CANTMAKETREE_g=
 
 /* Generic low-level file I/O errors */    
 H5E_SEEKERROR_g=    
@@ -150,6 +146,9 @@ H5E_CANTUNPROTECT_g=
 /* Parallel MPI errors */    
 H5E_MPI_g=    
 H5E_MPIERRSTR_g=
+
+/* Block tracker errors */    
+H5E_OVERLAPS_g=
 
 /* Dataspace errors */    
 H5E_CANTCLIP_g=    

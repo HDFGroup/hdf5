@@ -66,7 +66,6 @@ MAJOR, H5E_PLINE, Data filters
 MAJOR, H5E_EFL, External file list
 MAJOR, H5E_REFERENCE, References
 MAJOR, H5E_VFL, Virtual File Layer
-MAJOR, H5E_TBBT, Threaded, Balanced, Binary Trees
 MAJOR, H5E_FPHDF5, Flexible Parallel HDF5
 MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
@@ -90,9 +89,9 @@ SECTION, DSPACE, Dataspace errors
 SECTION, PLIST, Property list errors
 SECTION, MPI, Parallel MPI errors
 SECTION, HEAP, Heap errors
-SECTION, TBBT, Threaded, balanced binary tree errors
 SECTION, FPH5, FPHDF5 errors
 SECTION, PIPELINE, I/O pipeline errors
+SECTION, BLKTRK, Block tracker errors
 
 # Minor errors
 
@@ -207,9 +206,6 @@ MINOR, MPI, H5E_MPIERRSTR, MPI Error String
 # Heap errors
 MINOR, HEAP, H5E_CANTRESTORE, Can't restore condition
 
-# TBBT errors
-MINOR, TBBT, H5E_CANTMAKETREE, Can't create a binary tree node
-
 # FPHDF5 errors
 MINOR, FPH5, H5E_CANTRECV, Can't receive messages from processes
 MINOR, FPH5, H5E_CANTSENDMDATA, Can't send metadata message
@@ -222,3 +218,7 @@ MINOR, PIPELINE, H5E_CALLBACK, Callback failed
 MINOR, PIPELINE, H5E_CANAPPLY, Error from filter 'can apply' callback
 MINOR, PIPELINE, H5E_SETLOCAL, Error from filter 'set local' callback
 MINOR, PIPELINE, H5E_NOENCODER, Filter present but encoding disabled
+
+# Block tracker errors
+MINOR, BLKTRK, H5E_OVERLAPS, Blocks overlap
+

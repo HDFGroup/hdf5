@@ -2419,7 +2419,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
 
     /* Initialize skip list for chunk selections */
     if((fm->fsel=H5SL_create(H5SL_TYPE_HSIZE,0.5,H5D_DEFAULT_SKIPLIST_HEIGHT))==NULL)
-        HGOTO_ERROR(H5E_DATASET,H5E_CANTMAKETREE,FAIL,"can't create skip list for chunk selections")
+        HGOTO_ERROR(H5E_DATASET,H5E_CANTCREATE,FAIL,"can't create skip list for chunk selections")
 
     /* Initialize "last chunk" information */
     fm->last_index=(hsize_t)-1;

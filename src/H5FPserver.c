@@ -194,7 +194,7 @@ H5FP_sap_receive_loop(void)
 
     /* Create the file structure tree. */
     if ((file_info_list = H5SL_create(H5SL_TYPE_UNSIGNED,0.5,H5FP_DEFAULT_SKIPLIST_HEIGHT)) == NULL)
-        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, FAIL, "cannot make skip list")
+        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTCREATE, FAIL, "cannot make skip list")
 
     for (;;) {
         char *buf = NULL;
@@ -969,13 +969,13 @@ H5FP_new_file_info_node(unsigned file_id)
 
     if ((ret_value->mod_list = H5SL_create(H5SL_TYPE_HADDR,0.5,H5FP_DEFAULT_SKIPLIST_HEIGHT)) == NULL) {
         HDfree(ret_value);
-        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, NULL, "cannot make skip list")
+        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTCREATE, NULL, "cannot make skip list")
     }
 
     if ((ret_value->locks = H5SL_create(H5SL_TYPE_HADDR,0.5,H5FP_DEFAULT_SKIPLIST_HEIGHT)) == NULL) {
         H5SL_close(ret_value->mod_list);
         HDfree(ret_value);
-        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, NULL, "cannot make skip list")
+        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTCREATE, NULL, "cannot make skip list")
     }
 
 done:
@@ -1166,7 +1166,7 @@ H5FP_dump(H5FP_file_info *info, unsigned to, unsigned req_id, unsigned file_id)
 
     /* Free up the nodes in the modification list */
     if(H5SL_free(info->mod_list, H5FP_free_mod_node_cb, NULL)<0)
-        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, FAIL, "cannot make skip list")
+        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL, "cannot free skip list")
 
     info->num_mods = 0;
 

@@ -108,11 +108,6 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "Object header"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_OHDR_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_TBBT_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MAJOR, "Threaded, Balanced, Binary Trees"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_TBBT_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_ATOM_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "Object atom"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
@@ -173,13 +168,6 @@ if((H5E_CACHE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
 /* Minor error codes */
 /*********************/
 
-
-/* Threaded, balanced binary tree errors */
-assert(H5E_CANTMAKETREE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't create a binary tree node"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_CANTMAKETREE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Generic low-level file I/O errors */
 assert(H5E_SEEKERROR_g==(-1));
@@ -545,6 +533,13 @@ assert(H5E_MPIERRSTR_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "MPI Error String"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_MPIERRSTR_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+
+/* Block tracker errors */
+assert(H5E_OVERLAPS_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Blocks overlap"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_OVERLAPS_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Dataspace errors */

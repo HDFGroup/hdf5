@@ -40,7 +40,6 @@
 #define H5E_RS               (H5OPEN H5E_RS_g)
 #define H5E_HEAP             (H5OPEN H5E_HEAP_g)
 #define H5E_OHDR             (H5OPEN H5E_OHDR_g)
-#define H5E_TBBT             (H5OPEN H5E_TBBT_g)
 #define H5E_ATOM             (H5OPEN H5E_ATOM_g)
 #define H5E_ATTR             (H5OPEN H5E_ATTR_g)
 #define H5E_IO               (H5OPEN H5E_IO_g)
@@ -69,7 +68,6 @@ H5_DLLVAR hid_t H5E_DATATYPE_g;      /* Datatype */
 H5_DLLVAR hid_t H5E_RS_g;            /* Reference Counted Strings */
 H5_DLLVAR hid_t H5E_HEAP_g;          /* Heap */
 H5_DLLVAR hid_t H5E_OHDR_g;          /* Object header */
-H5_DLLVAR hid_t H5E_TBBT_g;          /* Threaded, Balanced, Binary Trees */
 H5_DLLVAR hid_t H5E_ATOM_g;          /* Object atom */
 H5_DLLVAR hid_t H5E_ATTR_g;          /* Attribute */
 H5_DLLVAR hid_t H5E_IO_g;            /* Low-level I/O */
@@ -85,10 +83,6 @@ H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
 /*********************/
 /* Minor error codes */
 /*********************/
-
-/* Threaded, balanced binary tree errors */
-#define H5E_CANTMAKETREE     (H5OPEN H5E_CANTMAKETREE_g)
-H5_DLLVAR hid_t H5E_CANTMAKETREE_g;  /* Can't create a binary tree node */
 
 /* Generic low-level file I/O errors */
 #define H5E_SEEKERROR        (H5OPEN H5E_SEEKERROR_g)
@@ -251,6 +245,10 @@ H5_DLLVAR hid_t H5E_CANTUNPROTECT_g; /* Unable to unprotect metadata */
 #define H5E_MPIERRSTR        (H5OPEN H5E_MPIERRSTR_g)
 H5_DLLVAR hid_t H5E_MPI_g;           /* Some MPI function failed */
 H5_DLLVAR hid_t H5E_MPIERRSTR_g;     /* MPI Error String */
+
+/* Block tracker errors */
+#define H5E_OVERLAPS         (H5OPEN H5E_OVERLAPS_g)
+H5_DLLVAR hid_t H5E_OVERLAPS_g;      /* Blocks overlap */
 
 /* Dataspace errors */
 #define H5E_CANTCLIP         (H5OPEN H5E_CANTCLIP_g)
