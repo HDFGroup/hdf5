@@ -64,7 +64,6 @@ const H5O_class_t H5O_CONT[1] = {{
 }};
 
 /* Interface initialization */
-static int             interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /* Declare the free list for H5O_cont_t's */

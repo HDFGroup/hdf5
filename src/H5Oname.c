@@ -37,7 +37,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_name_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_name_copy(const void *_mesg, void *_dest);
+static void *H5O_name_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_name_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_name_reset(void *_mesg);
 static herr_t H5O_name_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
@@ -62,7 +62,6 @@ const H5O_class_t H5O_NAME[1] = {{
 }};
 
 /* Interface initialization */
-static int interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 
@@ -91,7 +90,7 @@ H5O_name_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     H5O_name_t          *mesg;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_name_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_name_decode);
 
     /* check args */
     assert(f);
@@ -136,9 +135,8 @@ static herr_t
 H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_name_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_encode);
 
     /* check args */
     assert(f);
@@ -148,8 +146,7 @@ H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     /* encode */
     HDstrcpy((char*)p, mesg->s);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -172,13 +169,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_name_copy(const void *_mesg, void *_dest)
+H5O_name_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     H5O_name_t             *dest = (H5O_name_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_name_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_name_copy);
 
     /* check args */
     assert(mesg);
@@ -224,7 +221,7 @@ H5O_name_size(H5F_t UNUSED *f, const void *_mesg)
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     size_t                  ret_value;
 
-    FUNC_ENTER_NOAPI(H5O_name_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_size);
 
     /* check args */
     assert(f);
@@ -232,7 +229,6 @@ H5O_name_size(H5F_t UNUSED *f, const void *_mesg)
 
     ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -257,9 +253,8 @@ static herr_t
 H5O_name_reset(void *_mesg)
 {
     H5O_name_t             *mesg = (H5O_name_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_name_reset, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_reset);
 
     /* check args */
     assert(mesg);
@@ -267,8 +262,7 @@ H5O_name_reset(void *_mesg)
     /* reset */
     mesg->s = H5MM_xfree(mesg->s);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -292,9 +286,8 @@ H5O_name_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
 	       int indent, int fwidth)
 {
     const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_name_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_debug);
 
     /* check args */
     assert(f);
@@ -307,6 +300,5 @@ H5O_name_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
             "Name:",
             mesg->s);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

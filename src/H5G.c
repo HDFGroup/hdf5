@@ -186,8 +186,8 @@ static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
 static H5G_t * H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 static herr_t H5G_get_num_objs(H5G_entry_t *grp, hsize_t *num_objs, hid_t dxpl_id);
-static ssize_t H5G_get_objname_by_idx(H5G_entry_t *grp, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
-static int H5G_get_objtype_by_idx(H5G_entry_t *grp, hsize_t idx, hid_t dxpl_id);
+static ssize_t H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
+static int H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id);
 static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
                   H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
@@ -287,7 +287,7 @@ H5Gopen(hid_t loc_id, const char *name)
     H5G_t       *grp = NULL;
     H5G_entry_t	*loc = NULL;
     H5G_entry_t	 ent;
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl to use to open group */
+    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open group */
 
     FUNC_ENTER_API(H5Gopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
@@ -298,7 +298,7 @@ H5Gopen(hid_t loc_id, const char *name)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
 
-    /* Open the object, making sure it's a group */
+    /* Open the parent group, making sure it's a group */
     if (H5G_find(loc, name, NULL, &ent/*out*/, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
 
@@ -1426,7 +1426,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     unsigned null_grp;          /* Flag to indicate this function was called with grp_ent set to NULL */
     unsigned group_copy = 0;    /* Flag to indicate that the group entry is copied */
     unsigned last_comp = 0;     /* Flag to indicate that a component is the last component in the name */
-    unsigned did_insert = 0;     /* Flag to indicate that H5G_stab_insert was called */
+    unsigned did_insert = 0;    /* Flag to indicate that H5G_stab_insert was called */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5G_namei);
@@ -1587,7 +1587,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
         *rest = name; /*final null */
 
     /* If this was an insert, make sure that the insert function was actually
-     * called (this catches no-op names like "/" and ".")  */
+     * called (this catches no-op names like "." and "/") */
      if(action == H5G_NAMEI_INSERT && !did_insert)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group already exists");
 
@@ -1869,7 +1869,7 @@ done:
                 HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, NULL, "unable to delete object header");
         } /* end if */
         if(grp!=NULL) {
-            if(grp->shared!=NULL)
+            if(grp->shared != NULL)
                 H5FL_FREE(H5G_shared_t, grp->shared);
             H5FL_FREE(H5G_t,grp);
         }
@@ -2015,6 +2015,7 @@ H5G_open(H5G_entry_t *ent, hid_t dxpl_id)
         shared_fo->fo_count++;
     }
 
+    /* Set return value */
     ret_value = grp;
 
 done:
@@ -2177,7 +2178,6 @@ done:
 }
 
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5G_free
  *
@@ -2210,6 +2210,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5G_rootof
  *
@@ -2282,13 +2283,13 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent, hid_t dxpl_id)
      * Lookup and insert the name -- it shouldn't exist yet.
      */
     if (H5G_namei(loc, name, NULL, NULL, NULL, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_INSERT, ent, dxpl_id)<0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
+	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
 
     /*
      * Insert the object into a symbol table.
      */
     if (H5O_link(ent, 1, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count");
+	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2897,7 +2898,7 @@ H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
     H5G_bt_ud3_t    udata;              /* User data for B-tree callback */
     int	    ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, FAIL);
+    FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, H5G_UNKNOWN);
     
     /* Sanity check */
     assert(loc);
@@ -2912,7 +2913,7 @@ H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
     /* Iterate over the group members */
     if (H5B_iterate (loc->file, dxpl_id, H5B_SNODE,
               H5G_node_type, loc->cache.stab.btree_addr, &udata)<0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "iteration operator failed");
     
     /* If we don't know the type now, we almost certainly went out of bounds */
     if(udata.type==H5G_UNKNOWN)
@@ -3035,7 +3036,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
     /* Add the new message */
     if (buf && *buf) {
 	comment.s = H5MM_xstrdup(buf);
-	if (H5O_modify(&obj_ent, H5O_NAME_ID, H5O_NEW_MESG, 0, 1, &comment, dxpl_id)<0)
+	if (H5O_modify(&obj_ent, H5O_NAME_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &comment, dxpl_id)<0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
 	H5O_reset(H5O_NAME_ID, &comment);
     }

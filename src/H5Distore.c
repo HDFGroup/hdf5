@@ -148,7 +148,7 @@ typedef struct H5D_istore_ud1_t {
 /* Private prototypes */
 static void *H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
-static herr_t H5D_istore_shared_create (H5F_t *f, H5O_layout_t *layout);
+static herr_t H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout);
 static herr_t H5D_istore_shared_free (void *page);
 
 /* B-tree iterator callbacks */
@@ -1277,7 +1277,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_istore_shared_create (H5F_t *f, H5O_layout_t *layout)
+H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout)
 {
     H5D_istore_ud1_t	udata;
     H5B_shared_t *shared;               /* Shared B-tree node info */

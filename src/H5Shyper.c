@@ -3798,7 +3798,7 @@ H5S_hyper_adjust_helper (H5S_hyper_span_info_t *spans, const hssize_t *offset)
 {
     H5S_hyper_span_t *span;     /* Pointer to current span in span tree */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_adjust_helper);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_adjust_helper);
 
     /* Sanity check */
     assert(spans);
@@ -3909,7 +3909,7 @@ H5S_hyper_move_helper (H5S_hyper_span_info_t *spans, const hssize_t *offset)
 {
     H5S_hyper_span_t *span;     /* Pointer to current span in span tree */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_move_helper);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_move_helper);
 
     /* Sanity check */
     assert(spans);
@@ -6814,7 +6814,7 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
 {
     herr_t ret_value;      /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_get_seq_list);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_get_seq_list);
 
     /* Check args */
     assert(space);

@@ -40,7 +40,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_stab_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_stab_copy(const void *_mesg, void *_dest);
+static void *H5O_stab_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_stab_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free (void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
@@ -66,7 +66,6 @@ const H5O_class_t H5O_STAB[1] = {{
 }};
 
 /* Interface initialization */
-static int interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /* Declare a free list to manage the H5O_stab_t struct */
@@ -97,7 +96,7 @@ H5O_stab_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t U
     H5O_stab_t          *stab=NULL;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_decode);
 
     /* check args */
     assert(f);
@@ -142,9 +141,8 @@ static herr_t
 H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_encode);
 
     /* check args */
     assert(f);
@@ -155,8 +153,7 @@ H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     H5F_addr_encode(f, &p, stab->btree_addr);
     H5F_addr_encode(f, &p, stab->heap_addr);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -185,7 +182,7 @@ H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
     H5O_stab_t          *stab = NULL;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_fast, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_fast);
 
     /* check args */
     assert(cache);
@@ -228,13 +225,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy(const void *_mesg, void *_dest)
+H5O_stab_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     H5O_stab_t             *dest = (H5O_stab_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_copy);
 
     /* check args */
     assert(stab);
@@ -276,12 +273,11 @@ H5O_stab_size(H5F_t *f, const void UNUSED *_mesg)
 {
     size_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_size);
 
     /* Set return value */
     ret_value=2 * H5F_SIZEOF_ADDR(f);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -303,16 +299,13 @@ done:
 static herr_t
 H5O_stab_free (void *mesg)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5O_stab_free, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_free);
 
     assert (mesg);
 
     H5FL_FREE(H5O_stab_t,mesg);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -336,7 +329,7 @@ H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_delete, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_delete);
 
     /* check args */
     assert(f);
@@ -371,9 +364,8 @@ H5O_stab_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
 	       int indent, int fwidth)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_debug);
 
     /* check args */
     assert(f);
@@ -388,6 +380,5 @@ H5O_stab_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Name heap address:", stab->heap_addr);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

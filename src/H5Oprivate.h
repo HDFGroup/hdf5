@@ -49,6 +49,10 @@
 #define H5O_FLAG_SHARED		0x02u
 #define H5O_FLAG_BITS		(H5O_FLAG_CONSTANT|H5O_FLAG_SHARED)
 
+/* Flags for updating messages */
+#define H5O_UPDATE_TIME         0x01u
+#define H5O_UPDATE_DATA_ONLY    0x02u
+
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
 #define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.  */
@@ -225,6 +229,10 @@ typedef struct H5O_stab_t {
     haddr_t	heap_addr;		/*address of name heap		     */
 } H5O_stab_t;
 
+/* Typedef for iteration operations */
+typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
+    void *operator_data/*in,out*/);
+
 /* General message operators */
 H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 			  H5G_entry_t *ent/*out*/);
@@ -237,7 +245,7 @@ H5_DLL htri_t H5O_exists(H5G_entry_t *ent, unsigned type_id, int sequence,
 H5_DLL void *H5O_read(H5G_entry_t *ent, unsigned type_id, int sequence,
     void *mesg, hid_t dxpl_id);
 H5_DLL int H5O_modify(H5G_entry_t *ent, unsigned type_id,
-    int overwrite, unsigned flags, unsigned update_time, const void *mesg, hid_t dxpl_id);
+    int overwrite, unsigned flags, unsigned update_flags, const void *mesg, hid_t dxpl_id);
 H5_DLL struct H5O_t * H5O_protect(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5O_unprotect(H5G_entry_t *ent, struct H5O_t *oh, hid_t dxpl_id);
 H5_DLL int H5O_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id, 
@@ -257,6 +265,8 @@ H5_DLL size_t H5O_raw_size(unsigned type_id, H5F_t *f, const void *mesg);
 H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id);
+H5_DLL herr_t H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
+    void *op_data, hid_t dxpl_id);
 H5_DLL herr_t H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
