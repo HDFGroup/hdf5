@@ -35,6 +35,10 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * The library now correctly reuses space when objects are deleted in the
+      file.  This should be handled correctly for every situation, except
+      datasets with variable-length datatypes are not returning the space they
+      use in the global heap currently. QAK - 2003/04/13
     * Fixed error in B-tree deletion routine which could cause groups to be
       corrupted when objects are removed from them.
       QAK - 2003/04/11
