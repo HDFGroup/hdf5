@@ -103,6 +103,9 @@ typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
 #define FNAME(x) x 
+#if defined H5_ABSOFT
+#define DF_CAPFNAMES
+#endif /*H5_ABSOFT*/
 #define _fcdtocp(desc) (desc)
 
 #endif /*APPLE*/
