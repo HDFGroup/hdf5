@@ -969,7 +969,7 @@ H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
     /* Set the fact that we're dumping metadata to the file */
     if (H5P_insert(plist, H5FD_FPHDF5_XFER_DUMPING_METADATA,
                    H5FD_FPHDF5_XFER_DUMPING_SIZE, &dumping,
-                   NULL, NULL, NULL, NULL, NULL) < 0)
+                   NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property");
 
     /*

@@ -104,15 +104,15 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     version = *p++;
     if (version!=H5O_PLINE_VERSION)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message");
-    pline->nfilters = *p++;
-    if (pline->nfilters>H5Z_MAX_NFILTERS)
+    pline->nused = *p++;
+    if (pline->nused>H5Z_MAX_NFILTERS)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter pipeline message has too many filters");
     p += 6;	/*reserved*/
-    pline->nalloc = pline->nfilters;
+    pline->nalloc = pline->nused;
     pline->filter = H5MM_calloc(pline->nalloc*sizeof(pline->filter[0]));
     if (NULL==pline->filter)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    for (i=0; i<pline->nfilters; i++) {
+    for (i=0; i<pline->nused; i++) {
 	UINT16DECODE(p, pline->filter[i].id);
 	UINT16DECODE(p, name_length);
 	if (name_length % 8)
@@ -150,7 +150,7 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 done:
     if (NULL==ret_value && pline) {
         if (pline->filter) {
-            for (i=0; i<pline->nfilters; i++) {
+            for (i=0; i<pline->nused; i++) {
                 H5MM_xfree(pline->filter[i].name);
                 H5MM_xfree(pline->filter[i].cd_values);
             }
@@ -193,7 +193,7 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     assert (mesg);
 
     *p++ = H5O_PLINE_VERSION;
-    *p++ = (uint8_t)(pline->nfilters);
+    *p++ = (uint8_t)(pline->nused);
     *p++ = 0;	/*reserved 1*/
     *p++ = 0;	/*reserved 2*/
     *p++ = 0;	/*reserved 3*/
@@ -201,7 +201,7 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     *p++ = 0;	/*reserved 5*/
     *p++ = 0;	/*reserved 6*/
 
-    for (i=0; i<pline->nfilters; i++) {
+    for (i=0; i<pline->nused; i++) {
 	/*
 	 * Get the filter name.  If the pipeline message has a name in it then
 	 * use that one.  Otherwise try to look up the filter and get the name
@@ -266,7 +266,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     *dst = *src;
-    dst->nalloc = dst->nfilters;
+    dst->nalloc = dst->nused;
     if (dst->nalloc>0) {
 	dst->filter = H5MM_calloc(dst->nalloc * sizeof(dst->filter[0]));
 	if (NULL==dst->filter)
@@ -275,7 +275,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
 	dst->filter = NULL;
     }
     
-    for (i=0; i<src->nfilters; i++) {
+    for (i=0; i<src->nused; i++) {
 	dst->filter[i] = src->filter[i];
 	if (src->filter[i].name) {
 	    dst->filter[i].name = H5MM_xstrdup(src->filter[i].name);
@@ -296,7 +296,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
 done:
     if (!ret_value && dst) {
 	if (dst->filter) {
-	    for (i=0; i<dst->nfilters; i++) {
+	    for (i=0; i<dst->nused; i++) {
 		H5MM_xfree(dst->filter[i].name);
 		H5MM_xfree(dst->filter[i].cd_values);
 	    }
@@ -342,7 +342,7 @@ H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
 	   1 +				/*number of filters		*/
 	   6;				/*reserved			*/
 
-    for (i=0; i<pline->nfilters; i++) {
+    for (i=0; i<pline->nused; i++) {
 	/* Get the name of the filter, same as done with H5O_pline_encode() */
 	if (NULL==(name=pline->filter[i].name) &&
                 (cls=H5Z_find(pline->filter[i].id)))
@@ -395,7 +395,7 @@ H5O_pline_reset (void *mesg)
 
     assert (pline);
 
-    for (i=0; i<pline->nfilters; i++) {
+    for (i=0; i<pline->nused; i++) {
         H5MM_xfree(pline->filter[i].name);
         H5MM_xfree(pline->filter[i].cd_values);
     }
@@ -473,10 +473,10 @@ H5O_pline_debug (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg, FILE *
 
     fprintf(stream, "%*s%-*s %lu/%lu\n", indent, "", fwidth,
 	    "Number of filters:",
-	    (unsigned long)(pline->nfilters),
+	    (unsigned long)(pline->nused),
 	    (unsigned long)(pline->nalloc));
 
-    for (i=0; i<pline->nfilters; i++) {
+    for (i=0; i<pline->nused; i++) {
 	char		name[32];
 	sprintf(name, "Filter at position %lu", (unsigned long)i);
 	fprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);

@@ -4184,6 +4184,7 @@ SUBROUTINE
                   <em>H5P_prp_get_func_t</em> <code>get</code>,
                   <em>H5P_prp_delete_func_t</em> <code>delete</code>,
                   <em>H5P_prp_copy_func_t</em> <code>copy</code>,
+                  <em>H5P_prp_compare_func_t</em> <code>compare</code>,
                   <em>H5P_prp_close_func_t</em> <code>close</code>
 		)
 
@@ -4290,6 +4291,7 @@ SUBROUTINE
     routine returns an error value.
     </p>
 
+    <P>
     The <code>delete</code> routine is called when a property is being 
     deleted from a property list.  
     The <code>H5P_prp_delete_func_t</code> callback function is defined 
@@ -4323,6 +4325,7 @@ SUBROUTINE
     error value but the property is still deleted. 
     </P>
     
+    <P>
     The <code>copy</code> routine is called when a new property list 
     with this property is being created through a copy operation.  
     The <code>H5P_prp_copy_func_t</code> collback function is defined 
@@ -4349,6 +4352,36 @@ SUBROUTINE
     If the <code>copy</code> routine returns a negative value, the 
     new property value is not copied into the property and the 
     copy routine returns an error value.
+    </P>
+
+    <P>
+    The <code>compare</code> routine is called when a property list with 
+    this property is compared to another property list with the same property.
+    The <code>H5P_prp_compare_func_t</code> callback function is defined
+    as follows:
+        <ul><em>typedef int</em> (*<code>H5P_prp_compare_func_t</code>)(
+            <em>const void *</em><code>value1</code>,
+            <em>const void *</em><code>value2</code>,
+            <em>size_t </em><code>size</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>const void *</em><code>value1</code></td>
+        <td>IN: The value of the first property to compare</td></tr>
+    <tr>
+        <td><em>const void *</em><code>value2</code></td>
+        <td>IN: The value of the second property to compare</td></tr>
+    <tr>
+        <td><em>size_t </em><code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    </table></ul>
+    The <code>compare</code> routine may <EM>not</EM> modify the values.
+    The <code>compare</code> routine should return a positive value if
+    <code>value1</code> is greater than <code>value2</code>, a negative value
+    if <code>value2</code> is greater than <code>value1</code> and zero if
+    <code>value1</code> and <code>value2</code> are equal.
+    </P>
 
     <P>The <code>close</code> routine is called when a property list 
     with this property is being closed.  
@@ -4722,6 +4755,7 @@ END SUBROUTINE h5pmodify_filter_f
                   <em>H5P_prp_get_func_t</em> <code>get</code>,
                   <em>H5P_prp_delete_func_t</em> <code>delete</code>,
                   <em>H5P_prp_copy_func_t</em> <code>copy</code>,
+                  <em>H5P_prp_compare_func_t</em> <code>compare</code>,
                   <em>H5P_prp_close_func_t</em> <code>close</code>
 				 )
 				 
@@ -4749,6 +4783,7 @@ END SUBROUTINE h5pmodify_filter_f
     <code>get</code> callbacks are never called.
     </P>
 	
+    <P>
     The <code>create</code> routine is called when a new property list 
     with this property is being created.  
     The <code>H5P_prp_create_func_t</code> callback function is defined 
@@ -4778,6 +4813,7 @@ END SUBROUTINE h5pmodify_filter_f
     create routine returns an error value.
     </P>
 	
+    <P>
     The <code>set</code> routine is called before a new value is copied 
     into the property.  
     The <code>H5P_prp_set_func_t</code> callback function is defined 
@@ -4855,6 +4891,7 @@ END SUBROUTINE h5pmodify_filter_f
     routine returns an error value.
     </P>
 
+    <P>
     The <code>delete</code> routine is called when a property is being 
     deleted from a property list.  
     The <code>H5P_prp_delete_func_t</code> callback function is defined 
@@ -4888,6 +4925,7 @@ END SUBROUTINE h5pmodify_filter_f
     an error value but the property is still deleted.
     </P>
 
+    <P>
     The <code>copy</code> routine is called when a new property list with 
     this property is being created through a copy operation.  
     The <code>H5P_prp_copy_func_t</code> callback function is defined
@@ -4916,6 +4954,36 @@ END SUBROUTINE h5pmodify_filter_f
     the copy routine returns an error value.
     </P>
 
+    <P>
+    The <code>compare</code> routine is called when a property list with 
+    this property is compared to another property list with the same property.
+    The <code>H5P_prp_compare_func_t</code> callback function is defined
+    as follows:
+        <ul><em>typedef int</em> (*<code>H5P_prp_compare_func_t</code>)(
+            <em>const void *</em><code>value1</code>,
+            <em>const void *</em><code>value2</code>,
+            <em>size_t </em><code>size</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>const void *</em><code>value1</code></td>
+        <td>IN: The value of the first property to compare</td></tr>
+    <tr>
+        <td><em>const void *</em><code>value2</code></td>
+        <td>IN: The value of the second property to compare</td></tr>
+    <tr>
+        <td><em>size_t </em><code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    </table></ul>
+    The <code>compare</code> routine may <EM>not</EM> modify the values.
+    The <code>compare</code> routine should return a positive value if
+    <code>value1</code> is greater than <code>value2</code>, a negative value
+    if <code>value2</code> is greater than <code>value1</code> and zero if
+    <code>value1</code> and <code>value2</code> are equal.
+    </P>
+
+    <P>
     The <code>close</code> routine is called when a property list with 
     this property is being closed.  
     The <code>H5P_prp_close_func_t</code> callback function is defined 
@@ -4948,6 +5016,7 @@ END SUBROUTINE h5pmodify_filter_f
     If the <code>close</code> routine returns a negative value, 
     the property list close routine returns an error value but
     the property list is still closed.
+    </P>
 	
 <dt><strong>Parameters:</strong>
     <ul><dl>

@@ -74,6 +74,7 @@ typedef struct H5P_genprop_t {
     H5P_prp_get_func_t get; /* Function to call when a property value is retrieved */
     H5P_prp_delete_func_t del; /* Function to call when a property is deleted */
     H5P_prp_copy_func_t copy;  /* Function to call when a property is copied */
+    H5P_prp_compare_func_t cmp; /* Function to call when a property is compared */
     H5P_prp_close_func_t close; /* Function to call when a property is closed */
 } H5P_genprop_t;
 

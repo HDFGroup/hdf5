@@ -41,6 +41,8 @@ New Features
 
     Library:
     --------
+        - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
+            routines.  QAK - 2004/01/07
         - Data type conversion between integers and floats was added.
             SLU 2003/11/21
         - New function H5Iget_file_id() was added.  It returns file ID given
@@ -86,10 +88,10 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
-        HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran
-        Compiler version 8.1 Beta. Use "--disable-shared --enable-static"
-        configure flags along with the "--enable-fortran" flag to build
-        Fortran library.
+        - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran
+            Compiler version 8.1 Beta. Use "--disable-shared --enable-static"
+            configure flags along with the "--enable-fortran" flag to build
+            Fortran library.  EIP - 2004/01/07
 
 Bug Fixes since HDF5-1.6.0 release
 ==================================

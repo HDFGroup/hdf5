@@ -105,7 +105,7 @@ typedef struct H5O_fill_new_t {
 #define H5O_EFL_UNLIMITED	H5F_UNLIMITED /*max possible file size	     */
 
 typedef struct H5O_efl_entry_t {
-    size_t	name_offset;	/*offset of name within heap	     */
+    size_t	name_offset;		/*offset of name within heap	     */
     char	*name;			/*malloc'd name			     */
     off_t	offset;			/*offset of data within file	     */
     hsize_t	size;			/*size allocated within file	     */
@@ -113,8 +113,8 @@ typedef struct H5O_efl_entry_t {
 
 typedef struct H5O_efl_t {
     haddr_t	heap_addr;		/*address of name heap		     */
-    int	nalloc;				/*number of slots allocated	     */
-    int	nused;				/*number of slots used		     */
+    size_t	nalloc;			/*number of slots allocated	     */
+    size_t	nused;			/*number of slots used		     */
     H5O_efl_entry_t *slot;		/*array of external file entries     */
 } H5O_efl_t;
 
@@ -153,8 +153,8 @@ typedef struct H5O_bogus_t {
  * (Data structure in memory)
  */
 typedef struct H5O_pline_t {
-    size_t	nfilters;		/*num filters defined		     */
     size_t	nalloc;			/*num elements in `filter' array     */
+    size_t	nused;			/*num filters defined		     */
     H5Z_filter_info_t *filter;		/*array of filters		     */
 } H5O_pline_t;
 

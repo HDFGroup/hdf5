@@ -938,7 +938,7 @@ H5F_istore_flush_entry(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t *ent, hbool_t res
         alloc = ent->alloc_size;
 
         /* Should the chunk be filtered before writing it to disk? */
-        if (ent->pline && ent->pline->nfilters) {
+        if (ent->pline && ent->pline->nused) {
             H5P_genplist_t *plist;   /* Data xfer property list */
             H5Z_cb_t            cb_struct;
             H5Z_EDC_t           edc;
@@ -1771,7 +1771,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      * for the chunk has been defined, then don't load the chunk into the
      * cache, just write the data to it directly.
      */
-    if (chunk_size>f->shared->rdcc_nbytes && pline.nfilters==0 &&
+    if (chunk_size>f->shared->rdcc_nbytes && pline.nused==0 &&
             chunk_addr!=HADDR_UNDEF) {
         if ((ret_value=H5F_contig_readvv(f, chunk_size, chunk_addr, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, dxpl_id, buf))<0)
             HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "unable to read raw data to file");
@@ -1898,11 +1898,11 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      * writing to other elements in the same chunk.  Do a direct
      * write-through of only the elements requested.
      */
-    if ((chunk_size>f->shared->rdcc_nbytes && pline.nfilters==0 && chunk_addr!=HADDR_UNDEF)
+    if ((chunk_size>f->shared->rdcc_nbytes && pline.nused==0 && chunk_addr!=HADDR_UNDEF)
         || (IS_H5FD_MPI(f) && (H5F_ACC_RDWR & f->shared->flags))) {
 #ifdef H5_HAVE_PARALLEL
         /* Additional sanity check when operating in parallel */
-        if (chunk_addr==HADDR_UNDEF || pline.nfilters>0)
+        if (chunk_addr==HADDR_UNDEF || pline.nused>0)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
 #endif /* H5_HAVE_PARALLEL */
         if ((ret_value=H5F_contig_writevv(f, chunk_size, chunk_addr, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, dxpl_id, buf))<0)
@@ -2279,7 +2279,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         } /* end else */
 
         /* Check if there are filters which need to be applied to the chunk */
-        if (pline.nfilters>0) {
+        if (pline.nused>0) {
             unsigned filter_mask=0;
             size_t buf_size=(size_t)chunk_size;
             size_t nbytes=(size_t)chunk_size;

@@ -982,9 +982,13 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8) RTYPE=R;                                               \
                                            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
                                                              #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8)
-#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9) RTYPE=R;                                               \
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9) RTYPE=R;                                           \
                                            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
                                                              #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9)
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) RTYPE=R;                                       \
+                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9, \
+                                                             #A10,A10)
 #define H5TRACE_RETURN(V)		   if (RTYPE) {                                                 \
 					      H5_trace(&CALLTIME,FUNC,RTYPE,NULL,V);                    \
 					      RTYPE=NULL;                                               \
@@ -1002,6 +1006,7 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)           /*void*/
 #define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)        /*void*/
 #define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)    /*void*/
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) /*void*/
 #define H5TRACE_RETURN(V)		                /*void*/
 #endif
 

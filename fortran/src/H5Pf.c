@@ -2253,7 +2253,7 @@ nh5pregister_c(hid_t_f *class, _fcd name, int_f *name_len, size_t_f *size, void 
      /*
       * Call H5Pregister function.
       */
-     if( H5Pregister(c_class, c_name, c_size, value, NULL,NULL,NULL,NULL,NULL,NULL) <0) goto DONE;
+     if( H5Pregister(c_class, c_name, c_size, value, NULL,NULL,NULL,NULL,NULL,NULL,NULL) <0) goto DONE;
      ret_value = 0;
 
 DONE:
@@ -2314,7 +2314,7 @@ nh5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *v
      /*
       * Call H5Pinsert function.
       */
-     if( H5Pinsert(c_plist, c_name, c_size, value, NULL,NULL,NULL,NULL,NULL) <0) goto DONE;
+     if( H5Pinsert(c_plist, c_name, c_size, value, NULL,NULL,NULL,NULL,NULL,NULL) <0) goto DONE;
      ret_value = 0;
 
 DONE:

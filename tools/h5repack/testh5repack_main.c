@@ -50,10 +50,8 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
   TEST_ERROR;
-#if 0
  if (h5repack_cmpdcpl(FNAME1,FNAME1OUT)<=0)
   TEST_ERROR;
-#endif
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
@@ -68,6 +66,8 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME2OUT,&pack_options)<=0)
   TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME2,FNAME2OUT)<=0)
+  TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED();      
@@ -80,6 +80,8 @@ test_copy(void)
  if (h5diff(FNAME3,FNAME3OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  if (h5repack_verify(FNAME3OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME3,FNAME3OUT)<=0)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
@@ -135,6 +137,8 @@ test_filter_deflate(void)
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME4,FNAME4OUT)<=0)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
@@ -569,6 +573,8 @@ test_layout_contiguous(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME4,FNAME4OUT)<=0)
+  TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
@@ -586,6 +592,8 @@ test_layout_contiguous(void)
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_cmpdcpl(FNAME4,FNAME4OUT)<=0)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;

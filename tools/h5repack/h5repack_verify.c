@@ -413,6 +413,7 @@ int h5repack_cmpdcpl(const char *fname1,
    if (ret==0)
    {
     printf("Property lists for <%s> are different\n",travt1->objs[i].name); 
+    goto error;
    }
 
 /*-------------------------------------------------------------------------

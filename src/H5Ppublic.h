@@ -57,6 +57,7 @@ typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
+typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
@@ -116,6 +117,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
             H5P_cls_close_func_t cls_close, void *close_data);
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create,
             H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
@@ -127,6 +129,21 @@ H5_DLL herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
             H5P_prp_delete_func_t prp_delete,
             H5P_prp_copy_func_t prp_copy,
             H5P_prp_close_func_t prp_close);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5_DLL herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
+            void *def_value, H5P_prp_create_func_t prp_create,
+            H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+            H5P_prp_delete_func_t prp_del, 
+            H5P_prp_copy_func_t prp_copy,
+            H5P_prp_compare_func_t prp_cmp,
+            H5P_prp_close_func_t prp_close);
+H5_DLL herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
+            void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+            H5P_prp_delete_func_t prp_delete,
+            H5P_prp_copy_func_t prp_copy,
+            H5P_prp_compare_func_t prp_cmp,
+            H5P_prp_close_func_t prp_close);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, void *value);
 H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
 H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
@@ -144,6 +161,7 @@ H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 H5_DLL herr_t H5Pclose(hid_t plist_id);
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
+
 #ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL herr_t H5Pget_version(hid_t plist_id, int *boot/*out*/,
          int *freelist/*out*/, int *stab/*out*/,
@@ -181,9 +199,15 @@ H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
 H5_DLL int H5Pget_external_count(hid_t plist_id);
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL herr_t H5Pget_external(hid_t plist_id, int idx, size_t name_size,
           char *name/*out*/, off_t *offset/*out*/,
           hsize_t *size/*out*/);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
+          char *name/*out*/, off_t *offset/*out*/,
+          hsize_t *size/*out*/);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
@@ -205,11 +229,19 @@ H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter,
         unsigned int flags, size_t cd_nelmts,
         const unsigned int c_values[]);
 H5_DLL int H5Pget_nfilters(hid_t plist_id);
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
        unsigned int *flags/*out*/,
        size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[]);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, unsigned filter,
+       unsigned int *flags/*out*/,
+       size_t *cd_nelmts/*out*/,
+       unsigned cd_values[]/*out*/,
+       size_t namelen, char name[]);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL H5Z_filter_t H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id,
        unsigned int *flags/*out*/,
        size_t *cd_nelmts/*out*/,

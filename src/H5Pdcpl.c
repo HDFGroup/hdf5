@@ -288,7 +288,7 @@ done:
 herr_t
 H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
 {
-    int			idx;
+    size_t		idx;
     hsize_t		total, tmp;
     H5O_efl_t           efl;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -426,16 +426,26 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
 herr_t
 H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
 		 off_t *offset/*out*/, hsize_t *size/*out*/)
+#else /* H5_WANT_H5_V1_6_COMPAT */
+herr_t
+H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name/*out*/,
+		 off_t *offset/*out*/, hsize_t *size/*out*/)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     H5O_efl_t           efl;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_external, FAIL);
+#ifdef H5_WANT_H5_V1_6_COMPAT
     H5TRACE6("e","iIszxxx",plist_id,idx,name_size,name,offset,size);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    H5TRACE6("e","iIuzxxx",plist_id,idx,name_size,name,offset,size);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -445,8 +455,13 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
-    if (idx<0 || idx>=efl.nused)
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    if (idx<0 || (size_t)idx>=efl.nused)
         HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "external file index is out of range");
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    if (idx>=efl.nused)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "external file index is out of range");
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Return values */
     if (name_size>0 && name)
@@ -661,7 +676,7 @@ H5Pget_nfilters(hid_t plist_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Set return value */
-    ret_value=(int)(pline.nfilters);
+    ret_value=(int)(pline.nused);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -698,10 +713,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5Z_filter_t
 H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
 	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
 	       size_t namelen, char name[]/*out*/)
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5Z_filter_t
+H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
+	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
+	       size_t namelen, char name[]/*out*/)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     H5O_pline_t         pline;  /* Filter pipeline */
     H5Z_filter_info_t *filter;  /* Pointer to filter information */
@@ -710,8 +732,13 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
     H5Z_filter_t ret_value;     /* return value */
     
     FUNC_ENTER_API(H5Pget_filter, H5Z_FILTER_ERROR);
+#ifdef H5_WANT_H5_V1_6_COMPAT
     H5TRACE7("Zf","iIsx*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
              name);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    H5TRACE7("Zf","iIux*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
+             name);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     
     /* Check args */
     if (cd_nelmts || cd_values) {
@@ -743,8 +770,13 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
 
     /* Check more args */
-    if (idx<0 || (size_t)idx>=pline.nfilters)
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    if (idx<0 || (size_t)idx>=pline.nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    if (idx>=pline.nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Set pointer to particular filter to query */
     filter=&pline.filter[idx];

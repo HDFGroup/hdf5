@@ -479,7 +479,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter")
 
             /* Check if the chunks have filters */
-            if(dcpl_pline.nfilters > 0) {
+            if(dcpl_pline.nused > 0) {
                 unsigned chunk_ndims;   /* # of chunk dimensions */
                 hsize_t chunk_size[H5O_LAYOUT_NDIMS];       /* Size of chunk dimensions */
                 H5S_t *space;           /* Dataspace describing chunk */
@@ -503,7 +503,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                 } /* end if */
     
                 /* Iterate over filters */
-                for (u=0; u<dcpl_pline.nfilters; u++) {
+                for (u=0; u<dcpl_pline.nused; u++) {
                     H5Z_class_t	*fclass;        /* Individual filter information */
 
                     /* Get filter information */
@@ -684,12 +684,12 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     assert(0==cd_nelmts || cd_values);
 
     /* Locate the filter in the pipeline */
-    for(idx=0; idx<pline->nfilters; idx++)
+    for(idx=0; idx<pline->nused; idx++)
         if(pline->filter[idx].id==filter)
             break;
 
     /* Check if the filter was not already in the pipeline */
-    if(idx>pline->nfilters)
+    if(idx>pline->nused)
 	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline")
 
     /* Change parameters for filter */
@@ -748,11 +748,11 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
      * Check filter limit.  We do it here for early warnings although we may
      * decide to relax this restriction in the future.
      */
-    if (pline->nfilters>=H5Z_MAX_NFILTERS)
+    if (pline->nused>=H5Z_MAX_NFILTERS)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "too many filters in pipeline")
 
     /* Allocate additional space in the pipeline if it's full */
-    if (pline->nfilters>=pline->nalloc) {
+    if (pline->nused>=pline->nalloc) {
 	H5O_pline_t x;
 	x.nalloc = MAX(H5Z_MAX_NFILTERS, 2*pline->nalloc);
 	x.filter = H5MM_realloc(pline->filter, x.nalloc*sizeof(x.filter[0]));
@@ -763,7 +763,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     }
     
     /* Add the new filter to the pipeline */
-    idx = pline->nfilters;
+    idx = pline->nused;
     pline->filter[idx].id = filter;
     pline->filter[idx].flags = flags;
     pline->filter[idx].name = NULL; /*we'll pick it up later*/
@@ -777,7 +777,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     } else {
        pline->filter[idx].cd_values = NULL;
     }
-    pline->nfilters++;
+    pline->nused++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -907,10 +907,10 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
     assert(nbytes && *nbytes>0);
     assert(buf_size && *buf_size>0);
     assert(buf && *buf);
-    assert(!pline || pline->nfilters<H5Z_MAX_NFILTERS);
+    assert(!pline || pline->nused<H5Z_MAX_NFILTERS);
 
     if (pline && (flags & H5Z_FLAG_REVERSE)) { /* Read */
-	for (i=pline->nfilters; i>0; --i) {
+	for (i=pline->nused; i>0; --i) {
 	    idx = i-1;
 	    
 	    if (*filter_mask & ((unsigned)1<<idx)) {
@@ -949,7 +949,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             }
 	}
     } else if (pline) { /* Write */
-	for (idx=0; idx<pline->nfilters; idx++) {
+	for (idx=0; idx<pline->nused; idx++) {
 	    if (*filter_mask & ((unsigned)1<<idx)) {
 		failed |= (unsigned)1 << idx;
 		continue; /*filter excluded*/
@@ -1025,12 +1025,12 @@ H5Z_filter_info(const H5O_pline_t *pline, H5Z_filter_t filter)
     assert(filter>=0 && filter<=H5Z_FILTER_MAX);
 
     /* Locate the filter in the pipeline */
-    for(idx=0; idx<pline->nfilters; idx++)
+    for(idx=0; idx<pline->nused; idx++)
         if(pline->filter[idx].id==filter)
             break;
 
     /* Check if the filter was not already in the pipeline */
-    if(idx>pline->nfilters)
+    if(idx>pline->nused)
 	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, NULL, "filter not in pipeline")
 
     /* Set return value */
@@ -1068,7 +1068,7 @@ H5Z_all_filters_avail(const H5O_pline_t *pline)
     assert(pline);
 
     /* Iterate through all the filters in pipeline */
-    for(i=0; i<pline->nfilters; i++) {
+    for(i=0; i<pline->nused; i++) {
 
         /* Look for each filter in the list of registered filters */
         for(j=0; j<H5Z_table_used_g; j++)

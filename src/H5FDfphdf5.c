@@ -554,13 +554,13 @@ H5FD_fphdf5_setup(hid_t dxpl_id, MPI_Datatype btype,
     /* Set buffer MPI type */
     if (H5P_insert(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME,
                    H5FD_FPHDF5_XFER_MEM_MPI_TYPE_SIZE, &btype,
-                   NULL, NULL, NULL, NULL, NULL) < 0)
+                   NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
 
     /* Set file MPI type */
     if (H5P_insert(plist, H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME,
                    H5FD_FPHDF5_XFER_FILE_MPI_TYPE_SIZE, &ftype,
-                   NULL, NULL, NULL, NULL, NULL) < 0)
+                   NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
 
 done:
