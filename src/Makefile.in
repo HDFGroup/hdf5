@@ -34,7 +34,7 @@ PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Cpublic.h	      \
 # Other header files (not to be installed)...
 PRIVATE_HDR=H5private.h H5Aprivate.h H5ACprivate.h H5Bprivate.h		      \
 	H5Cprivate.h H5Dprivate.h H5Eprivate.h H5Fprivate.h H5Gprivate.h      \
-	H5Hprivate.h H5Mprivate.h H5MFprivate.h H5MMprivate.h		      \
+	H5Gpkg.h H5Hprivate.h H5Mprivate.h H5MFprivate.h H5MMprivate.h	      \
 	H5Oprivate.h H5Pprivate.h H5Tprivate.h
 
 # How to build the programs...

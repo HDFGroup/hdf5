@@ -209,32 +209,27 @@ H5G_shadow_list (haddr_t dir_addr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_shadow_assoc_node (hdf5_file_t *f, H5G_node_t *sym, H5G_entry_t *self)
+H5G_shadow_assoc_node (hdf5_file_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
 {
    H5G_shadow_t *shadow = NULL;
-   H5O_stab_t	stab;
    const char	*s = NULL;
    intn		i = 0;
+   haddr_t	heap_addr;
 
    FUNC_ENTER (H5G_shadow_assoc_node, NULL, FAIL);
 
    /* Check arguments */
    assert (f);			/* The file			*/
    assert (sym);		/* The symbol table node	*/
-   assert (self);		/* The symbol table header info	*/
+   assert (ac_udata);		/* The symbol table header info	*/
 
-   if ((shadow=H5G_shadow_list (self->header))) {
-
-      /* We need the heap address so we can see the symbol names */
-      if (NULL==H5O_read (f, self->header, self, H5O_NAME, 0, &stab)) {
-	 HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
-      }
+   if ((shadow=H5G_shadow_list (ac_udata->dir_addr))) {
+      heap_addr = ac_udata->heap_addr;
 
       while (i<sym->nsyms && shadow) {
-
 	 /* Advance the Entry ptr until it gets to the next shadow. */
 	 while (i<sym->nsyms &&
-		(s=H5H_peek (f, stab.heap_addr, sym->entry[i].name_off)) &&
+		(s=H5H_peek (f, heap_addr, sym->entry[i].name_off)) &&
 		strcmp (s, shadow->name)<0) i++;
 
 	 /* Advance the Shadow ptr until it gets to the next entry. */

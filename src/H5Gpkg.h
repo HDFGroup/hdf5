@@ -146,7 +146,7 @@ herr_t H5G_shadow_close (hdf5_file_t *f, H5G_entry_t *ent);
 hbool_t H5G_shadow_p (H5G_entry_t *ent);
 herr_t H5G_shadow_dissociate (H5G_entry_t *ent);
 herr_t H5G_shadow_assoc_node (hdf5_file_t *f, H5G_node_t *sym,
-			      H5G_entry_t *self);
+			      H5G_ac_ud1_t *ac_udata);
 H5G_shadow_t *H5G_shadow_list (haddr_t stab_header_addr);
 
 /*

@@ -382,7 +382,7 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, void *_udata)
    H5G_node_t	*sym = NULL;
    size_t	size = 0;
    uint8	*buf = NULL, *p = NULL;
-   H5G_entry_t	*self = NULL;
+   H5G_ac_ud1_t	*ac_udata = (H5G_ac_ud1_t*)_udata;
    H5G_node_t	*ret_value = NULL; /*for error handling*/
 
    FUNC_ENTER (H5G_node_load, NULL, NULL);
@@ -392,8 +392,7 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, void *_udata)
     */
    assert (f);
    assert (addr>=0);
-   assert (_udata);
-   self = (H5G_entry_t*)_udata;
+   assert (ac_udata);
 
    /*
     * Initialize variables.
@@ -431,7 +430,7 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, void *_udata)
    buf = H5MM_xfree (buf);
 
    /* shadows */
-   if (H5G_shadow_assoc_node (f, sym, self)<0) {
+   if (H5G_shadow_assoc_node (f, sym, ac_udata)<0) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
    }
    
