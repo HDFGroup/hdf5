@@ -1133,7 +1133,6 @@
 ./tools/testfiles/tstring-at.h5.xml
 ./tools/testfiles/tstring.h5
 ./tools/testfiles/tstring.h5.xml
-./tools/testfiles/tvldtypes.h5.xml
 ./tools/testfiles/tvldtypes1.h5.xml
 ./tools/testfiles/tvldtypes2.h5.xml
 ./tools/testfiles/tvldtypes3.h5.xml
