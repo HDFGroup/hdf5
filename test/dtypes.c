@@ -5706,7 +5706,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 {
     dtype_t		src_type, dst_type;	/*data types		*/
     const size_t	ntests=NTESTS;		/*number of tests	*/
-    const size_t	nelmts=NTESTELEM;		/*num values per test	*/
+    size_t	        nelmts=0;		/*num values per test	*/
     const size_t	max_fails=8;		/*max number of failures*/
     size_t		fails_all_tests=0;	/*number of failures	*/
     size_t		fails_this_test;	/*fails for this test	*/
@@ -5733,6 +5733,8 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     size_t		dst_epos;		/* Destination type's exponent position */
     size_t		dst_esize;		/* Destination type's exponent size */
     size_t		dst_msize;		/* Destination type's mantissa size */
+    size_t		src_nbits;		/* source length in bits */
+    size_t		dst_nbits;		/* dst length in bits */
 
 #ifdef HANDLE_SIGFPE
     pid_t		child_pid;		/*process ID of child	*/
@@ -5816,18 +5818,35 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     /* Get "interesting" values */
     src_size = H5Tget_size(src);
     dst_size = H5Tget_size(dst);
+    src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
+    dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
     dst_ebias=H5Tget_ebias(dst);
     H5Tget_fields(src,NULL,&src_epos,&src_esize,NULL,NULL);
     H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,NULL,&dst_msize);
+    endian = H5Tget_order(H5T_NATIVE_FLOAT);
 
     /* Allocate buffers */
-    endian = H5Tget_order(H5T_NATIVE_FLOAT);
-    buf   = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
-    aligned = HDmalloc(32); /*should be big enough for any type*/
+    aligned = HDmalloc(MAX(sizeof(long double), sizeof(double)));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
+
+    /* Allocate and initialize the source buffer through macro INIT_FP.  The BUF will be used 
+     * for the conversion while the SAVED buffer will be used for the comparison later.
+     */
+    if(src_type == FLT_FLOAT) {
+        INIT_FP(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP, FLT_MANT_DIG, 
+                src_size, src_nbits, endian, dst_size, buf, saved, nelmts);
+    } else if(src_type == FLT_DOUBLE) {
+        INIT_FP(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP, DBL_MANT_DIG, 
+                src_size, src_nbits, endian, dst_size, buf, saved, nelmts);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+    } else if(src_type == FLT_LDOUBLE) {
+        INIT_FP(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP, LDBL_MANT_DIG, 
+                src_size, src_nbits, endian, dst_size, buf, saved, nelmts);
+#endif 
+    } else
+        goto error;
 
     for (i=0; i<ntests; i++) {
 
@@ -5845,44 +5864,6 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	printf("%-70s", str);
 	HDfflush(stdout);
 	fails_this_test = 0;
-
-	/*
-	 * Initialize the source buffers to random bits.  The `buf' buffer
-	 * will be used for the conversion while the `saved' buffer will be
-	 * used for the comparison later.
-	 */
-	if (!skip_overflow_tests_g) {
-	    for (j=0; j<nelmts*src_size; j++)
-                buf[j] = saved[j] = HDrand();
-	} else {
-	    for (j=0; j<nelmts; j++) {
-		/* Do it this way for alignment reasons */
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-		long double temp[1];
-#else
-		double temp[1];
-#endif
-		if (src_size<=dst_size) {
-		    for (k=0; k<dst_size; k++) buf[j*src_size+k] = HDrand();
-		} else {
-		    for (k=0; k<dst_size; k++)
-			((unsigned char*)temp)[k] = HDrand();
-		    if (FLT_DOUBLE==src_type && FLT_FLOAT==dst_type) {
-			hw_d = *((float*)temp);
-			HDmemcpy(buf+j*src_size, &hw_d, src_size);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-		    } else if (FLT_LDOUBLE==src_type && FLT_FLOAT==dst_type) {
-			hw_ld = *((float*)temp);
-			HDmemcpy(buf+j*src_size, &hw_ld, src_size);
-		    } else if (FLT_LDOUBLE==src_type && FLT_DOUBLE==dst_type) {
-			hw_ld = *((double*)temp);
-			HDmemcpy(buf+j*src_size, &hw_ld, src_size);
-#endif
-		    }
-		}
-		HDmemcpy(saved+j*src_size, buf+j*src_size, src_size);
-	    }
-	}
 
 	/* Perform the conversion in software */
 	if (H5Tconvert(src, dst, nelmts, buf, NULL, H5P_DEFAULT)<0)
