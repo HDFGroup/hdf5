@@ -29,16 +29,19 @@ void *old_client_data;			/* previous error handler arg.*/
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
 int docompact=1;                        /* compact dataset test */
+int doindependent=1;			/* independent test */
+
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[7]={
+const char *FILENAME[8]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
 	    "ParaMdset",
             "ParaMgroup",
             "ParaCompact",
+            "ParaIndividual",
 	    NULL};
-char	filenames[7][PATH_MAX];
+char	filenames[8][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -107,6 +110,7 @@ usage(void)
     printf("\t-n<n_groups>"
         "\tset number of groups for the multiple group test\n");  
     printf("\t-o\t\tno compact dataset test\n");
+    printf("\t-i\t\tno independent read test\n");
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-s\t\tuse Split-file together with MPIO\n");
@@ -156,6 +160,8 @@ parse_options(int argc, char **argv)
 			    }
                             break;
                 case 'o':   docompact = 0;
+                            break;
+                case 'i':   doindependent = 0;
                             break;
 		case 'v':   verbose = 1;
 			    break;
@@ -391,6 +397,18 @@ int main(int argc, char **argv)
     }
     else {
         MPI_BANNER("compact dataset test skipped");
+    }
+    
+    if (doindependent){
+	MPI_BANNER("collective group and dataset write ...");
+        collective_group_write(filenames[6], ngroups);
+        if (doread) {
+       	    MPI_BANNER("indepenent group and dataset read ...");
+            independent_group_read(filenames[6], ngroups);
+        }
+    }
+    else{
+        MPI_BANNER("Independent test skipped");
     }
         
     if (!(dowrite || doread || ndatasets || ngroups || docompact)){
