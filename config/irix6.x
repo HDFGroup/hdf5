@@ -31,11 +31,15 @@ case "X-$CC_BASENAME" in
 	#    1209:  constant expressions
 	#    1196:  __vfork() (this is an SGI config problem)
 	# Always turn off these loader warnings:
+	#      47:  linked module might degrade performance
 	#      84:  a library is not used
-	CFLAGS="$CFLAGS -ansi -n32 -woff 1174,1429,1209,1196 -Wl,-woff,84"
+	#      85:  duplicate definition preemption
+	#     134:  duplicate weak definition preemption
+	CFLAGS="$CFLAGS -ansi -n32 -woff 1174,1429,1209,1196 -Wl,-woff,47 -Wl,-woff,84 -Wl,-woff,85 -Wl,-woff,134"
 	DEBUG_CFLAGS=-g
 	DEBUG_CPPFLAGS=
-	PROD_CFLAGS=-O
+	# Higher optimizations relax alignment requirements needed
+	PROD_CFLAGS=-O1
 	PROD_CPPFLAGS=
 	PROFILE_CFLAGS=-pg
 	PROFILE_CPPFLAGS=
