@@ -26,7 +26,7 @@
 #define PABLO_MASK	H5O_stab_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_stab_decode (hdf5_file_t *f, const uint8 *p);
+static void *H5O_stab_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
 static herr_t H5O_stab_encode (hdf5_file_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
 static void *H5O_stab_fast (const H5G_entry_t *ent, void *_mesg);
@@ -40,18 +40,19 @@ static herr_t H5O_stab_debug (hdf5_file_t *f, const void *_mesg,
 const H5O_class_t H5O_STAB[1] = {{
    H5O_STAB_ID,				/*message id number		*/
    "stab",				/*message name for debugging	*/
+   sizeof (H5O_stab_t),			/*native message size		*/
    H5O_stab_decode,			/*decode message		*/
    H5O_stab_encode,			/*encode message		*/
    H5O_stab_fast,			/*get message from stab entry	*/
    H5O_stab_cache,			/*put message into stab entry	*/
    H5O_stab_copy,			/*copy the native value		*/
    H5O_stab_size,			/*size of symbol table entry	*/
-   NULL,				/*default free method		*/
+   NULL,				/*default reset method		*/
    H5O_stab_debug,			/*debug the message		*/
 }};
 
 /* Is the interface initialized? */
-static intn interface_initialize_g = FALSE;
+static hbool_t interface_initialize_g = FALSE;
 
 
 /*-------------------------------------------------------------------------
@@ -73,7 +74,7 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_decode (hdf5_file_t *f, const uint8 *p)
+H5O_stab_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
 {
    H5O_stab_t	*stab;
    
@@ -81,6 +82,7 @@ H5O_stab_decode (hdf5_file_t *f, const uint8 *p)
 
    /* check args */
    assert (f);
+   assert (raw_size == 2*H5F_SIZEOF_OFFSET(f));
    assert (p);
 
    /* decode */
@@ -95,7 +97,7 @@ H5O_stab_decode (hdf5_file_t *f, const uint8 *p)
 /*-------------------------------------------------------------------------
  * Function:	H5O_stab_encode
  *
- * Purpose:	Encodes a symbol table entry.
+ * Purpose:	Encodes a symbol table message.
  *
  * Return:	Success:	SUCCEED
  *
@@ -110,7 +112,7 @@ H5O_stab_decode (hdf5_file_t *f, const uint8 *p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_encode (hdf5_file_t *f, size_t size, uint8 *p, const void *_mesg)
+H5O_stab_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *_mesg)
 {
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
 
@@ -118,7 +120,7 @@ H5O_stab_encode (hdf5_file_t *f, size_t size, uint8 *p, const void *_mesg)
 
    /* check args */
    assert (f);
-   assert (size == 2 * H5F_SIZEOF_OFFSET(f));
+   assert (raw_size == 2 * H5F_SIZEOF_OFFSET(f));
    assert (p);
    assert (stab);
 

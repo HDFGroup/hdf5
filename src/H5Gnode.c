@@ -68,7 +68,7 @@ static const H5AC_class_t H5AC_SNODE[1] = {{
 /* H5G inherits B-tree like properties from H5B */
 const H5B_class_t H5B_SNODE[1] = {{
    H5B_SUBTYPE_SNODE,				/*id			*/
-   64,						/*k			*/
+   16,						/*k			*/
    sizeof (H5G_node_key_t),			/*sizeof_nkey		*/
    H5G_node_sizeof_rkey,			/*get_sizeof_rkey	*/
    H5G_node_new,				/*new			*/
@@ -454,7 +454,7 @@ H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
    if (NULL==(s=H5H_peek (f, udata->heap, rt_key->offset))) {
       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
    }
-   if (HDstrcmp (udata->name, s)>0) HRETURN(-1);
+   if (HDstrcmp (udata->name, s)>0) HRETURN(1);
 
    FUNC_LEAVE (0);
 }

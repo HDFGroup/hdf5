@@ -24,6 +24,17 @@
 #define H5H_SIZEOF_MAGIC 4
 #define H5H_ALIGN(X)	((X)=((X)+1) & ~0x01)
 
+#define H5H_SIZEOF_HDR(F)						      \
+   (H5H_SIZEOF_MAGIC +			/*heap signature		*/    \
+    H5F_SIZEOF_SIZE (F) +		/*data size			*/    \
+    H5F_SIZEOF_OFFSET (F) +		/*free list head		*/    \
+    H5F_SIZEOF_OFFSET (F))		/*data address			*/
+   
+#define H5H_SIZEOF_FREE(F)						      \
+   (H5F_SIZEOF_OFFSET (F) +		/*ptr to next free block	*/    \
+   H5F_SIZEOF_SIZE (F))			/*size of this free block	*/
+
+
 typedef enum H5H_type_t {
    H5H_LOCAL	=0,			/*local symtab name heap	*/
    H5H_GLOBAL	=1			/*global small object heap	*/

@@ -62,7 +62,7 @@ static const H5O_class_t *const message_type_g[] = {
    NULL,		/*0x000A Data storage -- sparse object		*/
    NULL,		/*0x000B Data storage -- compressed object	*/
    NULL,		/*0x000C Attribute list				*/
-   NULL,		/*0x000D Object name				*/
+   H5O_NAME,		/*0x000D Object name				*/
    NULL,		/*0x000E Object modification date and time	*/
    NULL,		/*0x000F Shared header message			*/
    H5O_CONT,		/*0x0010 Object header continuation		*/
@@ -273,8 +273,8 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
       for (chunk_addr=0; 0==chunk_addr && curmesg<oh->nmesgs; curmesg++) {
 	 if (H5O_CONT_ID==oh->mesg[curmesg].type->id) {
 	    uint8 *p2 = oh->mesg[curmesg].raw;
-	    oh->mesg[curmesg].native = (H5O_CONT->decode)(f, p2);
-	    cont = (H5O_cont_t*)(oh->mesg[curmesg].native);
+	    cont = (H5O_CONT->decode)(f, oh->mesg[curmesg].raw_size, p2);
+	    oh->mesg[curmesg].native = cont;
 	    chunk_addr = cont->addr;
 	    chunk_size = cont->size;
 	    cont->chunkno = oh->nchunks; /*the next chunk to allocate*/
@@ -407,18 +407,51 @@ H5O_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
       /* destroy messages */
       for (i=0; i<oh->nmesgs; i++) {
 	 if (oh->mesg[i].native) {
-	    if (oh->mesg[i].type->free) {
-	       (oh->mesg[i].type->free)(oh->mesg[i].native);
-	       oh->mesg[i].native = NULL;
-	    } else {
-	       oh->mesg[i].native = H5MM_xfree (oh->mesg[i].native);
-	    }
+	    H5O_reset (oh->mesg[i].type, oh->mesg[i].native);
+	    oh->mesg[i].native = H5MM_xfree (oh->mesg[i].native);
 	 }
       }
       oh->mesg = H5MM_xfree (oh->mesg);
 
       /* destroy object header */
       H5MM_xfree (oh);
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_reset
+ *
+ * Purpose:	Some message data structures have internal fields that
+ *		need to be freed.  This function does that if appropriate
+ *		but doesn't free NATIVE.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 12 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_reset (const H5O_class_t *type, void *native)
+{
+   FUNC_ENTER (H5O_reset, NULL, FAIL);
+   
+   if (type->reset) {
+      if ((type->reset)(native)<0) {
+	 /* reset class method failed */
+	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+      }
+   } else {
+      HDmemset (native, 0, type->native_size);
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -586,7 +619,9 @@ H5O_find_in_ohdr (hdf5_file_t *f, haddr_t addr, const H5O_class_t **type_p,
    /* decode the message if necessary */
    if (NULL==oh->mesg[i].native) {
       assert (oh->mesg[i].type->decode);
-      oh->mesg[i].native = (oh->mesg[i].type->decode)(f, oh->mesg[i].raw);
+      oh->mesg[i].native = (oh->mesg[i].type->decode)(f,
+						      oh->mesg[i].raw_size,
+						      oh->mesg[i].raw);
       if (NULL==oh->mesg[i].native) {
 	 HRETURN_ERROR (H5E_OHDR, H5E_CANTDECODE, FAIL);
       }
@@ -709,7 +744,7 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
    /* Allocate space for the new message */
    if (overwrite<0) {
-      size = (type->size)(f, mesg);
+      size = (type->raw_size)(f, mesg);
       H5O_ALIGN (size, oh->alignment);
       idx = H5O_alloc (f, oh, type, size);
       if (idx<0) HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
@@ -1220,7 +1255,9 @@ H5O_debug (hdf5_file_t *f, haddr_t addr, FILE *stream,
       
       /* decode the message */
       if (NULL==oh->mesg[i].native && oh->mesg[i].type->decode) {
-	 oh->mesg[i].native = (oh->mesg[i].type->decode)(f, oh->mesg[i].raw);
+	 oh->mesg[i].native = (oh->mesg[i].type->decode)(f,
+							 oh->mesg[i].raw_size,
+							 oh->mesg[i].raw);
       }
 
       /* print the message */

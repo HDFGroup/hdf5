@@ -27,7 +27,7 @@
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
 #define H5G_NODE_SIZEOF_MAGIC 4 /*sizeof symbol node magic number	*/
 #define H5G_NODE_VERS	1	/*symbol table node version number	*/
-#define H5G_NODE_K	64	/*min degree.  max degree is twice this	*/
+#define H5G_NODE_K	4	/*min degree.  max degree is twice this	*/
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 #define H5G_SIZEOF_ENTRY(F)						      \
    (H5F_SIZEOF_OFFSET(F) +	/*offset of name into heap     		*/    \
@@ -133,8 +133,19 @@ extern const H5B_class_t H5B_SNODE[1];
 /*
  * Library prototypes...
  */
-herr_t H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
-		       intn fwidth, haddr_t heap);
+
+/* functions that understand directories */
+herr_t H5G_mkroot (hdf5_file_t *f, size_t size_hint);
+herr_t H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+		const char *name, size_t size_hint, H5G_entry_t *ent);
+herr_t H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+		 const char *name, H5G_entry_t *ent);
+herr_t H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+		   const char *name, H5G_entry_t *ent);
+herr_t H5G_modify (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+		   const char *name, H5G_entry_t *ent);
+
+/* functions that understand symbol tables */
 haddr_t H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init);
 haddr_t H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 		       H5G_entry_t *ent);
@@ -144,6 +155,12 @@ herr_t H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 			H5G_entry_t *ent);
 intn H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
 		    char *names[], H5G_entry_t entries[]);
+
+/* functions that understand symbol table nodes */
+herr_t H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+		       intn fwidth, haddr_t heap);
+
+/* functions that understand symbol table entries */
 herr_t H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
 herr_t H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);

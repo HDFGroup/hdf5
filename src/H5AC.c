@@ -27,9 +27,16 @@
 #include "H5ACprivate.h"
 #include "H5MMprivate.h"
 
+/*
+ * Sorting the cache by address before flushing is sometimes faster
+ * than flushing in cache order.
+ */
+/* #define SORT_BY_ADDR */
+
 #define PABLO_MASK	H5AC_mask
 
 static int	interface_initialize_g = FALSE;		/*initialized?*/
+static H5AC_cache_t *current_cache_g = NULL;		/*for sorting */
 
 
 /*-------------------------------------------------------------------------
@@ -200,6 +207,41 @@ H5AC_find_f (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5AC_compare
+ *
+ * Purpose:	Compare two hash entries by address.  Unused entries are
+ *		all equal to one another and greater than all used entries.
+ *
+ * Return:	Success:	-1, 0, 1
+ *
+ *		Failure:	never fails
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 12 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5AC_compare (const void *_a, const void *_b)
+{
+   intn 	a = *((const intn *)_a);
+   intn		b = *((const intn *)_b);
+
+   assert (current_cache_g);
+
+   if (NULL==current_cache_g[a].type) return 1;
+   if (NULL==current_cache_g[b].type) return -1;
+
+   if (current_cache_g[a].addr < current_cache_g[b].addr) return -1;
+   if (current_cache_g[a].addr > current_cache_g[b].addr) return 1;
+   return 0;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5AC_flush
  *
  * Purpose:	Flushes (and destroys if DESTROY is non-zero) the specified
@@ -226,6 +268,8 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
    uintn	i = H5AC_HASH(addr);
    herr_t	status;
    herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
+   H5AC_cache_t	*slot;
+   intn		*map=NULL;
 
    FUNC_ENTER (H5AC_flush, NULL, FAIL);
 
@@ -233,22 +277,43 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
    assert (f->cache);
 
    if (!type || 0==addr) {
+
+#ifdef SORT_BY_ADDR
+      /*
+       * Sort the cache entries by address since flushing them in
+       * ascending order by address may be much more efficient.
+       */
+      map = H5MM_xmalloc (H5AC_NSLOTS * sizeof(intn));
+      for (i=0; i<H5AC_NSLOTS; i++) map[i] = i;
+      assert (NULL==current_cache_g);
+      current_cache_g = f->cache;
+      qsort (map, H5AC_NSLOTS, sizeof(intn), H5AC_compare);
+      current_cache_g = NULL;
+#endif
+
       /*
        * Look at all cache entries.
        */
       for (i=0; i<H5AC_NSLOTS; i++) {
-	 if (NULL==f->cache[i].type) continue;
-	 if ((!type || type==f->cache[i].type) &&
-	     (0==addr || addr==f->cache[i].addr)) {
-	    flush = f->cache[i].type->flush;
-	    status = (flush)(f, destroy, f->cache[i].addr,
-			     f->cache[i].thing);
+#ifdef SORT_BY_ADDR
+	 slot = f->cache + map[i];
+	 if (NULL==slot->type) break; /*the rest are empty*/
+#else
+	 slot = f->cache + i;
+	 if (NULL==slot->type) continue;
+#endif
+	 if ((!type || type==slot->type) &&
+	     (0==addr || addr==slot->addr)) {
+	    flush = slot->type->flush;
+	    status = (flush)(f, destroy, slot->addr, slot->thing);
 	    if (status<0) {
+	       map = H5MM_xfree (map);
 	       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
 	    }
-	    if (destroy) f->cache[i].type = NULL;
+	    if (destroy) slot->type = NULL;
 	 }
       }
+      map = H5MM_xfree (map);
 
    } else if (f->cache[i].type==type && f->cache[i].addr==addr) {
       /*

@@ -170,6 +170,8 @@ typedef MPFILE *hdf_file_t;
 /* non-standard function, not defined on the following mahcines - */
 #if !(defined VMS || defined macintosh || defined MAC || defined __MWERKS__ || defined SYMANTEC_C || defined MIPSEL || defined NEXT || defined CONVEX || defined IBM6000 || defined ANSISUN || defined IRIX)
 #  define HDstrdup(s)      ((char *)strdup((const char *)(s)))
+#else
+#  define HDstrdup(s)	strdup(s)
 #endif /* !(VMS | etc..) */
 
 

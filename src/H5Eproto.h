@@ -81,7 +81,8 @@ typedef enum
       H5E_BTREE,	       /* B-Tree Node */
       H5E_SYM,		       /* Symbol Table */
       H5E_HEAP,		       /* Heap */
-      H5E_OHDR		       /* Object Header */
+      H5E_OHDR,		       /* Object Header */
+      H5E_DIRECTORY	       /* Directory */
   }
 hdf_maj_err_code_t;
 
@@ -127,6 +128,7 @@ typedef enum
 
     /* B-tree related errors */
       H5E_NOTFOUND,	       /* Object not found */
+      H5E_EXISTS,	       /* Object already exists */
       H5E_CANTENCODE,	       /* Can't encode value */
       H5E_CANTDECODE,	       /* Can't decode value */
       H5E_CANTSPLIT,	       /* Can't split node */
@@ -137,7 +139,10 @@ typedef enum
       H5E_LINKCOUNT,	       /* Bad object header link count */
       H5E_VERSION,	       /* Wrong version number */
       H5E_ALIGNMENT,	       /* Alignment error */
-      H5E_BADMESG	       /* Unrecognized message */
+      H5E_BADMESG,	       /* Unrecognized message */
+
+    /* Directory related errors */
+      H5E_COMPLEN	       /* Name component is too long */
   }
 hdf_min_err_code_t;
 

@@ -26,7 +26,7 @@
 #define PABLO_MASK	H5O_cont_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_cont_decode (hdf5_file_t *f, const uint8 *p);
+static void *H5O_cont_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
 static herr_t H5O_cont_encode (hdf5_file_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
 static herr_t H5O_cont_debug (hdf5_file_t *f, const void *_mesg, FILE *stream,
@@ -36,13 +36,14 @@ static herr_t H5O_cont_debug (hdf5_file_t *f, const void *_mesg, FILE *stream,
 const H5O_class_t H5O_CONT[1] = {{
    H5O_CONT_ID,				/*message id number		*/
    "hdr continuation",			/*message name for debugging	*/
+   sizeof (H5O_cont_t),			/*native message size		*/
    H5O_cont_decode,			/*decode message		*/
    H5O_cont_encode,			/*encode message		*/
    NULL,				/*no fast method		*/
    NULL,				/*no cache method		*/
    NULL,				/*no copy method		*/
    NULL,				/*no size method		*/
-   NULL,				/*default free method		*/
+   NULL,				/*default reset method		*/
    H5O_cont_debug,			/*debugging			*/
 }};
 
@@ -68,12 +69,18 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cont_decode (hdf5_file_t *f, const uint8 *p)
+H5O_cont_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
 {
    H5O_cont_t	*cont = NULL;
    
    FUNC_ENTER (H5O_cont_decode, NULL, NULL);
 
+   /* check args */
+   assert (f);
+   assert (raw_size == H5F_SIZEOF_OFFSET(f) + H5F_SIZEOF_SIZE(f));
+   assert (p);
+
+   /* decode */
    cont = H5MM_xcalloc (1, sizeof(H5O_cont_t));
    H5F_decode_offset (f, p, cont->addr);
    H5F_decode_length (f, p, cont->size);

@@ -30,16 +30,6 @@
 #define H5H_FREE_NULL	1		/*end of free list on disk	*/
 #define PABLO_MASK	H5H_mask
 
-#define H5H_SIZEOF_HDR(F)						      \
-   (H5H_SIZEOF_MAGIC +			/*heap signature		*/    \
-    H5F_SIZEOF_SIZE (F) +		/*data size			*/    \
-    H5F_SIZEOF_OFFSET (F) +		/*free list head		*/    \
-    H5F_SIZEOF_OFFSET (F))		/*data address			*/
-   
-#define H5H_SIZEOF_FREE(F)						      \
-   (H5F_SIZEOF_OFFSET (F) +		/*ptr to next free block	*/    \
-   H5F_SIZEOF_SIZE (F))			/*size of this free block	*/
-
 typedef struct H5H_free_t {
    off_t	offset;			/*offset of free block		*/
    size_t	size;			/*size of free block		*/

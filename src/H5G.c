@@ -49,15 +49,570 @@ static intn interface_initialize_g = FALSE;
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_component
+ *
+ * Purpose:	Returns the pointer to the first component of the
+ *		specified name by skipping leading slashes.  Returns
+ *		the size in characters of the component through SIZE_P not
+ *		counting leading slashes or the null terminator.
+ *
+ * Return:	Success:	Ptr into NAME.
+ *
+ *		Failure:	Ptr to the null terminator of NAME.
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 11 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static const char *
+H5G_component (const char *name, size_t *size_p)
+{
+   assert (name);
+   
+   while ('/'==*name) name++;
+   if (size_p) *size_p = strcspn (name, "/");
+   return name;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_basename
+ *
+ * Purpose:	Returns a pointer into NAME for the start of the last
+ *		component of NAME.  On return, the optional SIZE_P is
+ *		initialized to point to the size of the base name not
+ *		counting trailing slashes or the null character.
+ *
+ * Return:	Success:	Ptr to base name within NAME with SIZE_P
+ *				pointing to the number of characters in the
+ *				base name.
+ *
+ *		Failure:	Ptr to the null terminator of NAME.
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 11 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static const char *
+H5G_basename (const char *name, size_t *size_p)
+{
+   const char	*s;
+   
+   assert (name);
+
+   s = name + strlen(name);
+   while (s>name && '/'==s[-1]) --s; /*skip past trailing slashes*/
+   while (s>name && '/'!=s[-1]) --s; /*skip past base name*/
+
+   /*
+    * If the input was the name of the root directory `/' (or
+    * equivalent) then return the null string.
+    */
+   if ('/'==*s) {
+      if (size_p) *size_p = 0;
+      return s + strlen(s); /*null terminator*/
+   }
+
+   if (size_p) *size_p = strcspn (s, "/");
+   return s;
+}
+   
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_namei
+ *
+ * Purpose:	Given a name (absolute or relative) return the symbol table
+ *		entry for that name and for the directory that contains the
+ *		base name.  These entries (DIR_ENT and BASE_ENT) are returned
+ *		through memory passed into the function by the caller.  Either
+ *		or both pointers may be null.  Absolute names are looked up
+ *		relative to the root directory of file F while relative
+ *		names are traversed beginning at the CWD argument.
+ *
+ * 		Consecutive slash characters are treated like single
+ *		slash characters.  Trailing slashes are ignored. The
+ *		component `.' is recognized as the current directory
+ *		during the traversal (initially CWD), but the component
+ *		`..' is not internally recognized (it is recognized if
+ * 		such a name appears in the symbol table).
+ *
+ * 		As a special case, if the NAME is the string `/' (or
+ *		equivalent) then DIR_ENT and BASE_ENT are both initialized
+ *		to the contents of the root symbol table entry.  However,
+ *		the contents of the root symbol table entry may be
+ *		uninitialized.
+ *
+ * 		If the name cannot be fully resolved, then REST will
+ *		point to the part of NAME where the traversal failed
+ *		(REST will always point to a relative name) and BASE_ENT
+ * 		will not be initialized.  DIR_ENT will be initialized with
+ *		information about the directory (or other object) at which
+ *		the traversal failed.  However, if the name can be fully
+ *		resolved, then REST points to the null terminator of NAME.
+ *
+ * Return:	Success:	SUCCEED if the name can be fully
+ *				resolved.
+ *
+ *		Failure:	FAIL if something bad happened (REST and
+ *				DIR_ENT have undefined values).
+ *				
+ *				-2 if the name could not be fully resolved
+ * 				(REST and DIR_ENT are initialized).
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 11 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
+	   const char **rest, H5G_entry_t *dir_ent, H5G_entry_t *base_ent)
+{
+   H5G_entry_t	ent[2];
+   H5G_entry_t	*tmp, *dir, *base;	/*ptrs to DIR and BASE entries	*/
+   size_t	nchars;			/*component name length		*/
+   char		comp[1024];		/*component name buffer		*/
+   
+   FUNC_ENTER (H5G_namei, NULL, FAIL);
+
+   /* check args */
+   assert (f);
+   assert (f->root_sym);
+   assert (name && *name);
+   assert (cwd || '/'==*name);
+
+   /* starting point */
+   dir = ent+0;
+   base = ent+1;
+   if ('/'==*name) {
+      ent[0] = ent[1] = *(f->root_sym);
+   } else {
+      ent[0] = ent[1] = *cwd;
+   }
+
+   /* traverse the name */
+   while ((name=H5G_component (name, &nchars)) && *name) {
+
+      /*
+       * The special name `.'.
+       */
+      if ('.'==name[0] && !name[1]) continue;
+
+      /*
+       * Advance.
+       */
+      tmp=dir; dir=base; base=tmp; 	/*swap*/
+      if (rest) *rest = name;
+
+      /*
+       * Copy the component name into a null-terminated buffer so
+       * we can pass it down to the other symbol table functions.
+       */
+      if (nchars+1 > sizeof(comp)) {
+	 /* component name is too long */
+	 if (dir_ent) *dir_ent = *dir;
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, -2);
+      }
+      HDmemcpy (comp, name, nchars);
+      comp[nchars] = '\0';
+
+      /*
+       * Look for the component in the current symbol table.
+       */
+      if (H5G_stab_find (f, dir, comp, base)<0) {
+	 /* component not found */
+	 if (dir_ent) *dir_ent = *dir;
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, -2);
+      }
+
+      /* next component */
+      name += nchars;
+   }
+   
+   /* output parameters */
+   if (rest) *rest = name; /*final null*/
+   if (dir_ent) *dir_ent = *dir;
+   if (base_ent) *base_ent = *base;
+   
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_mkroot
+ *
+ * Purpose:	Creates the root directory if it doesn't exist; otherwise
+ *		nothing happens.  If the root symbol table previously
+ *		pointed to something other than a directory, then that
+ *		object is made a member of the root directory and is
+ *		given a name corresponding to the object name message.
+ *		If the root object doesn't have an object name message
+ *		then the name `Root Object' is used.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 11 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_mkroot (hdf5_file_t *f, size_t size_hint)
+{
+   H5O_stab_t	stab;			/*symbol table message		*/
+   H5O_name_t	name;			/*object name message		*/
+   H5G_entry_t	root;			/*old root entry		*/
+   const char	*root_name=NULL;	/*name of old root object	*/
+   
+   FUNC_ENTER (H5G_mkroot, NULL, FAIL);
+
+   /*
+    * Is there already a root object that needs to move into the new
+    * root symbol table?
+    */
+   name.s = NULL;
+   if (f->root_sym->header>0) {
+      if (H5O_read (f, f->root_sym->header, f->root_sym, H5O_STAB, 0, &stab)) {
+	 /* root directory already exists */
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, FAIL);
+      } else if (H5O_read (f, f->root_sym->header, f->root_sym, H5O_NAME,
+			   0, &name)) {
+	 root = *(f->root_sym);
+	 root_name = name.s; /*dont reset name until root_name is done*/
+      } else {
+	 root = *(f->root_sym);
+	 root_name = "Root Object";
+      }
+   }
+
+   /*
+    * Create the root directory.
+    */
+   if (H5G_stab_new (f, f->root_sym, size_hint)<0) {
+      H5O_reset (H5O_NAME, &name);
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't create dir*/
+   }
+
+   /*
+    * Insert the old root object.
+    */
+   if (root_name) {
+      if (H5G_stab_insert (f, f->root_sym, root_name, &root)) {
+	 /* can't insert old root object in new root directory */
+	 H5O_reset (H5O_NAME, &name);
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
+      }
+      H5O_reset (H5O_NAME, &name);
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_new
+ *
+ * Purpose:	Creates a new empty directory with the specified name.  The
+ *		name is either an absolute name or is relative to the
+ *		directory whose symbol table entry is CWD. On return, the
+ *		optional DIR_ENT pointer is initialized with the symbol
+ *		table entry for the new directory's parent and ENT will
+ *		contain the symbol table entry for the new directory.
+ *
+ * 		Do not use this function to create the root symbol table
+ *		since it is a special case.  Use H5G_mkroot() instead.
+ *		Creating `/' with this function will return failure.
+ *
+ * Return:	Success:	SUCCEED, if DIR_ENT is not the null pointer
+ *				then it will be initialized with the
+ *				symbol table entry for the new directory.
+ *
+ *		Failure:	FAIL, the memory pointed to by CWD is
+ *				not modified.
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 11 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+	 const char *name, size_t size_hint, H5G_entry_t *ent)
+{
+   const char	*rest=NULL;
+   H5G_entry_t	_parent, _child;
+   herr_t	status;
+   char		_comp[1024];
+   size_t	nchars;
+   
+   FUNC_ENTER (H5G_new, NULL, FAIL);
+
+   /* check args */
+   assert (f);
+   assert (name && *name);
+   assert (cwd || '/'==*name);
+   if (!dir_ent) dir_ent = &_parent;
+   if (!ent) ent = &_child;
+
+   /* lookup name */
+   status = H5G_namei (f, cwd, name, &rest, dir_ent, NULL);
+   if (status<0 && !rest) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*lookup failed*/
+   } else if (0==status) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, FAIL); /*already exists*/
+   }
+   H5ECLEAR; /*it's OK that we didn't find it*/
+
+   /* should be one null-terminated component left */
+   rest = H5G_component (rest, &nchars);
+   assert (rest && *rest);
+   if (rest[nchars]) {
+      if (H5G_component (rest+nchars, NULL)) {
+	 /* missing component */
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
+      } else if (nchars+1 > sizeof _comp) {
+	 /* component name is too long */
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, FAIL);
+      } else {
+	 /* null terminate */
+	 memcpy (_comp, rest, nchars);
+	 _comp[nchars] = '\0';
+	 rest = _comp;
+      }
+   }
+   
+   /* create directory */
+   if (H5G_stab_new (f, ent, size_hint)<0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't create dir*/
+   }
+
+   /* insert child name into parent */
+   if (H5G_stab_insert (f, dir_ent, rest, ent)<0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't insert*/
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_find
+ *
+ * Purpose:	Finds an object with the specified NAME in file F.  If the
+ *		name is relative then it is interpretted relative to CWD,
+ *		a symbol table entry for a symbol table.  On successful return,
+ *		DIR_ENT (if non-null) will be initialized with the symbol table
+ *		information for the directory in which the object appears
+ *		and ENT will be initialized with the symbol table entry for
+ *		the object.
+ *
+ * 		ENT is optional when the caller is interested only in the
+ *		existence of the object.
+ *
+ * Return:	Success:	SUCCEED with DIR_ENT and ENT initialized.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 12 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+	  const char *name, H5G_entry_t *ent)
+{
+   FUNC_ENTER (H5G_find, NULL, FAIL);
+
+   /* check args */
+   assert (f);
+   assert (name && *name);
+   assert (cwd || '/'==*name);
+
+   if (H5G_namei (f, cwd, name, NULL, dir_ent, ent)<0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*object not found*/
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_insert
+ *
+ * Purpose:	Inserts symbol table ENT into the directory hierarchy
+ *		giving it the specified NAME.  If NAME is relative then
+ *		it is interpreted with respect to the CWD pointer.  If
+ *		non-null, DIR_ENT will be initialized with the symbol table
+ *		entry for the directory which contains the new ENT.
+ *
+ * 		NAME must not be the name of the root symbol table entry
+ *		('/') since that is a special case.  If NAME is the root
+ * 		symbol table entry, then this function will return failure.
+ *
+ * Return:	Success:	SUCCEED with optional DIR_ENT initialized with
+ *				the symbol table entry for the directory
+ *				which contains the new ENT.
+ *
+ *		Failure:	FAIL (DIR_ENT is not modified).
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 11 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+	    const char *name, H5G_entry_t *ent)
+{
+   herr_t	status;
+   const char	*rest=NULL;
+   H5G_entry_t	_parent;
+   size_t	nchars;
+   char		_comp[1024];
+   
+   FUNC_ENTER (H5G_insert, NULL, FAIL);
+
+   /* check args */
+   assert (f);
+   assert (name && *name);
+   assert (cwd || '/'==*name);
+   assert (ent);
+   if (!dir_ent) dir_ent = &_parent;
+
+   /* lookup name */
+   status = H5G_namei (f, cwd, name, &rest, dir_ent, NULL);
+   if (status<0 && !rest) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*lookup failed*/
+   } else if (0==status) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, FAIL); /*already exists*/
+   }
+   H5ECLEAR; /*it's OK that we didn't find it*/
+
+   /* should be one null-terminated component left */
+   rest = H5G_component (rest, &nchars);
+   assert (rest && *rest);
+   if (rest[nchars]) {
+      if (H5G_component (rest+nchars, NULL)) {
+	 /* missing component */
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
+      } else if (nchars+1 > sizeof _comp) {
+	 /* component name is too long */
+	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, FAIL);
+      } else {
+	 /* null terminate */
+	 memcpy (_comp, rest, nchars);
+	 _comp[nchars] = '\0';
+	 rest = _comp;
+      }
+   }
+
+   /* insert entry into parent */
+   if (H5G_stab_insert (f, dir_ent, rest, ent)<0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't insert*/
+   }
+      
+   FUNC_LEAVE (SUCCEED);
+}
+   
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_modify
+ *
+ * Purpose:	Modifies the symbol table entry for the object with the
+ *		specified NAME by copying the new symbol table entry ENT
+ *		over the top of the old one.  If NAME is relative then it
+ *		is interpreted with respect to the CWD pointer.  If non-null,
+ *		DIR_ENT will be initialized with the symbol table entry for the
+ *		directory which contains the new ENT.
+ *
+ * 		Do not use this function to change the entry for the root
+ *		symbol since that's a special case.  This function returns
+ *		failure if that is attempted.
+ *
+ * Return:	Success:	SUCCEED with optional DIR_ENT initialized with
+ *				the symbol table entry for the directory
+ *				which contains the new ENT.
+ *
+ *		Failure:	FAIL (DIR_ENT is not modified).
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 11 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_modify (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+	    const char *name, H5G_entry_t *ent)
+{
+   const char	*rest=NULL;
+   H5G_entry_t	_parent;
+   size_t	nchars;
+   
+   FUNC_ENTER (H5G_modify, NULL, FAIL);
+
+   /* check args */
+   assert (f);
+   assert (name && *name);
+   assert (cwd || '/'==*name);
+   assert (ent);
+   if (!dir_ent) dir_ent = &_parent;
+
+   /* lookup name */
+   if (H5G_namei (f, cwd, name, &rest, dir_ent, NULL)<0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*entry not found*/
+   }
+
+   /* get the base name */
+   rest = H5G_basename (name, &nchars);
+
+   /* cannot modify the root symbol entry */
+   if (!*rest) HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
+
+   /* modify entry in parent */
+   if (H5G_stab_modify (f, dir_ent, rest, ent)<0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't modify*/
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+   
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_stab_new
  *
  * Purpose:	Creates a new empty symbol table (object header, name heap,
  *		and B-tree).  The caller can specify an initial size for the
- *		name heap.  If no size is specified then a default heap is
- *		created when the first symbol is added to the table.
- *
- * 		The B-tree is created when the first symbol is added to
- *		the table.
+ *		name heap.
  *
  * 		In order for the B-tree to operate correctly, the first
  *		item in the heap is the empty string, and must appear at
@@ -91,40 +646,39 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
     * Check arguments.
     */
    assert (f);
+   init = MAX(init, H5H_SIZEOF_FREE(f)+2);
 
    /* Create symbol table private heap */
-   if (init>0) {
-      if ((stab.heap = H5H_new (f, H5H_LOCAL, init))<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-      }
-      if ((name = H5H_insert (f, stab.heap, 1, "")<0)) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-      }
-      if (0!=name) {
-	 /*
-	  * B-tree's won't work if the first name isn't at the beginning
-	  * of the heap.
-	  */
-	 HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
-      }
-   } else {
-      stab.heap = 0; /*we'll create it later*/
+   if ((stab.heap = H5H_new (f, H5H_LOCAL, init))<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
+   if ((name = H5H_insert (f, stab.heap, 1, "")<0)) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
+   if (0!=name) {
+      /*
+       * B-tree's won't work if the first name isn't at the beginning
+       * of the heap.
+       */
+      HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
    }
 
-   /* The B-tree is created on demand later */
-   stab.btree = 0;
+   /* Create the B-tree */
+   if ((stab.btree = H5B_new (f, H5B_SNODE))<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
 
    /* Create symbol table object header with a single link */
    if ((addr = H5O_new (f, 1, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
    }
+   
+   /* insert the symbol table message */
    if (self) {
       self->name_off = 0;
       self->header = addr;
       self->type = H5G_NOTHING_CACHED;
    }
-
-   /* insert the symbol table message */
    if (H5O_modify(f, addr, self, NULL, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
    }
@@ -165,14 +719,10 @@ H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
    assert (f);
    assert (self && self->header>=0);
    assert (name && *name);
-   assert (ent);
 
    /* set up the udata */
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
-   }
-   if (stab.btree<=0 || stab.heap<=0) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*empty symbol table*/
    }
    udata.operation = H5G_OPER_FIND;
    udata.name = name;
@@ -228,9 +778,6 @@ H5G_stab_modify (hdf5_file_t *f, H5G_entry_t *self, const char *name,
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
    }
-   if (stab.btree<=0 || stab.heap<=0) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*empty symbol table*/
-   }
    udata.operation = H5G_OPER_MODIFY;
    udata.name = name;
    udata.heap = stab.heap;
@@ -270,7 +817,6 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 {
    H5O_stab_t		stab;		/*symbol table message		*/
    H5G_node_ud1_t	udata;		/*data to pass through B-tree	*/
-   off_t		offset;		/*offset of name within heap	*/
 
    FUNC_ENTER (H5G_stab_insert, NULL, FAIL);
 
@@ -280,34 +826,15 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
    assert (name && *name);
    assert (ent);
    
-   /* make sure we have a B-tree and a heap */
+   /* initialize data to pass through B-tree */
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
    }
-   if (stab.btree<=0 || stab.heap<=0) {
-      if (stab.btree<=0 &&
-	  (stab.btree = H5B_new (f, H5B_SNODE))<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-      }
-      if (stab.heap<=0) {
-	 stab.heap = H5H_new (f, H5H_LOCAL,
-			      MAX(strlen(name)+1, H5G_INIT_HEAP));
-	 if (stab.heap<0) {
-	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-	 }
-	 if (0!=(offset = H5H_insert (f, stab.heap, 1, ""))) {
-	    HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
-	 }
-      }
-      if (H5O_modify (f, self->header, self, NULL, H5O_STAB, 0, &stab)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-      }
-   }
-
-   /* initialize data to pass through B-tree */
    udata.name = name;
    udata.heap = stab.heap;
    udata.entry = *ent;
+
+   /* insert */
    if (H5B_insert (f, H5B_SNODE, stab.btree, &udata)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
    }
@@ -358,18 +885,18 @@ H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
    assert (self && self->header>=0);
    assert (maxentries>=0);
 
+   /* initialize data to pass through B-tree */
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
    }
-   if (stab.btree<=0 || stab.heap<=0) HRETURN (0); /*empty directory*/
-
    udata.entry = entries;
    udata.name = names;
    udata.heap = stab.heap;
    udata.maxentries = maxentries;
    udata.nsyms = 0;
-
    if (names) HDmemset (names, 0, maxentries);
+
+   /* list */
    if (H5B_list (f, H5B_SNODE, stab.btree, &udata)<0) {
       if (names) {
 	 for (i=0; i<maxentries; i++) H5MM_xfree (names[i]);

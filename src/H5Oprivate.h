@@ -41,13 +41,14 @@
 typedef struct H5O_class_t {
    intn		id;			/*message type ID on disk	*/
    const char	*name;			/*message name for debugging	*/
-   void		*(*decode)(hdf5_file_t*,const uint8*); /*decode mesg	*/
+   size_t	native_size;		/*size of native message	*/
+   void		*(*decode)(hdf5_file_t*,size_t,const uint8*);
    herr_t	(*encode)(hdf5_file_t*,size_t,uint8*,const void*);
-   void		*(*fast)(const H5G_entry_t*, void*); /*get from stab ent */
+   void		*(*fast)(const H5G_entry_t*, void*); /*get from stab ent*/
    hbool_t	(*cache)(H5G_entry_t*,const void*); /*put into entry	*/
    void		*(*copy)(const void*,void*); /*copy native value	*/
-   size_t	(*size)(hdf5_file_t*,const void*);  /*size of raw value	*/
-   void		*(*free)(void*);	/*free native data struct	*/
+   size_t	(*raw_size)(hdf5_file_t*,const void*); /*sizeof raw val	*/
+   herr_t	(*reset)(void*); /*free nested data structures		*/
    herr_t	(*debug)(hdf5_file_t*,const void*, FILE*, intn, intn);
 } H5O_class_t;
 
@@ -87,6 +88,16 @@ typedef struct H5O_t {
 extern const H5O_class_t H5O_NULL[1];
 
 /*
+ * Object name message.
+ */
+#define H5O_NAME_ID	0x000d
+extern const H5O_class_t H5O_NAME[1];
+
+typedef struct H5O_name_t {
+   char		*s;			/*ptr to malloc'd memory	*/
+} H5O_name_t;
+
+/*
  * Object header continuation message.
  */
 #define H5O_CONT_ID	0x0010
@@ -121,6 +132,7 @@ const void *H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
 intn H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 		 hbool_t *ent_modified, const H5O_class_t *type,
 		 intn overwrite, const void *mesg);
+herr_t H5O_reset (const H5O_class_t *type, void *native);
 herr_t H5O_debug (hdf5_file_t *f, haddr_t addr, FILE *stream,
 		  intn indent, intn fwidth);
 

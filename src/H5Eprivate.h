@@ -62,6 +62,7 @@ static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
     {H5E_SYM,		"Symbol Table"},
     {H5E_HEAP,		"Heap"},
     {H5E_OHDR,		"Object Header"},
+    {H5E_DIRECTORY,	"Directory"},
 };
 
 typedef struct 
@@ -96,6 +97,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_CANTFLUSH,	"Can't flush object from cache"},
     {H5E_CANTLOAD,	"Can't load object into cache"},
     {H5E_NOTFOUND,	"Object not found"},
+    {H5E_EXISTS,	"Object already exists"},
     {H5E_CANTENCODE,	"Can't encode value"},
     {H5E_CANTDECODE,	"Can't decode value"},
     {H5E_CANTSPLIT,	"Can't split node"},
@@ -105,6 +107,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_VERSION,	"Wrong version number"},
     {H5E_ALIGNMENT,	"Alignment error"},
     {H5E_BADMESG,	"Unrecognized message"},
+    {H5E_COMPLEN,	"Name component is too long"},
 };
 
 /* We use a stack to hold the errors plus we keep track of the function,

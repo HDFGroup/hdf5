@@ -113,7 +113,7 @@
 
 #define PABLO_MASK	H5B_mask
 
-#define BOUND(MIN,X,MAX) ((MIN)<(X)?(MIN):((MAX)>(X)?(MAX):(X)))
+#define BOUND(MIN,X,MAX) ((X)<(MIN)?(MIN):((X)>(MAX)?(MAX):(X)))
 #define false 0
 #define true 1
 
@@ -173,7 +173,6 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type)
     */
    assert (f);
    assert (type);
-   assert (sizeof_rkey>0);
 
    /*
     * Allocate file and memory data structures.
@@ -608,7 +607,7 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
     */
    memcpy (bt->page + H5B_SIZEOF_HDR(f),
 	   old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
-	   type->k * recsize);
+	   type->k * recsize + bt->sizeof_rkey);
    memcpy (bt->native,
 	   old->native + delta * type->sizeof_nkey,
 	   (type->k+1) * type->sizeof_nkey);
@@ -626,7 +625,7 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
 	 }
       } else {
 	 bt->key[i].dirty = 0;
-	 bt->key[i].rkey = bt->native + offset;
+	 bt->key[i].rkey = bt->page + offset;
 	 bt->key[i].nkey = NULL;
       }
 
@@ -642,7 +641,7 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
    /*
     * Truncate the old node.
     */
-   delta = H5B_ANCHOR_LT ? 0 : type->k;
+   delta = H5B_ANCHOR_LT==anchor ? 0 : type->k;
    old->dirty += 1;
    old->ndirty = BOUND (0, old->ndirty-delta, type->k);
    old->nchildren = type->k;
