@@ -348,7 +348,7 @@ H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf,
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
-    hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
+    hvl_t vl;                       /* Temporary hvl_t to use during operation */
     size_t len;
     H5P_genplist_t *plist;      /* Property list */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -356,7 +356,7 @@ H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf,
     FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_write, FAIL);
 
     /* check parameters */
-    assert(vl);
+    assert(vl_addr);
     assert(buf);
 
     if(seq_len!=0) {
@@ -373,23 +373,26 @@ H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
         if(alloc_func!=NULL) {
-            if(NULL==(vl->p=(alloc_func)(len,alloc_info)))
+            if(NULL==(vl.p=(alloc_func)(len,alloc_info)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end if */
         else {  /* Default to system malloc */
-            if(NULL==(vl->p=H5MM_malloc(len)))
+            if(NULL==(vl.p=H5MM_malloc(len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end else */
 
         /* Copy the data into the newly allocated buffer */
-        HDmemcpy(vl->p,buf,len);
+        HDmemcpy(vl.p,buf,len);
 
     } /* end if */
     else
-        vl->p=NULL;
+        vl.p=NULL;
 
     /* Set the sequence length */
-    H5_ASSIGN_OVERFLOW(vl->len,seq_len,hsize_t,size_t);
+    H5_ASSIGN_OVERFLOW(vl.len,seq_len,hsize_t,size_t);
+
+    /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
+    HDmemcpy(vl_addr,&vl,sizeof(hvl_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -488,7 +491,6 @@ H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf,
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
-    char **s=(char **)vl_addr;      /* Pointer to the user's hvl_t information */
     char *t;                        /* Pointer to temporary buffer allocated */
     size_t len;                     /* Maximum length of the string to copy */
     H5P_genplist_t *plist;          /* Property list */
@@ -524,7 +526,7 @@ H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf,
     t[len]='\0';
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
-    HDmemcpy(s,&t,sizeof(char *));
+    HDmemcpy(vl_addr,&t,sizeof(char *));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
