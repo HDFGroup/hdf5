@@ -50,129 +50,129 @@ EXAMPLE_PROGS=$(TEST_SRC)
 ## How to build the programs... they all depend on the Fortran & C hdf5 libraries
 $(TEST_PROGS): $(LIBHDF5)
 dsetexample: $(srcdir)/dsetexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 fileexample: $(srcdir)/fileexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 rwdsetexample: $(srcdir)/rwdsetexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 attrexample: $(srcdir)/attrexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 groupexample: $(srcdir)/groupexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 grpsexample: $(srcdir)/grpsexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 grpdsetexample: $(srcdir)/grpdsetexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 hyperslab: $(srcdir)/hyperslab.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 selectele: $(srcdir)/selectele.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 grpit: $(srcdir)/grpit.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 refobjexample: $(srcdir)/refobjexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 refregexample: $(srcdir)/refregexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 mountexample: $(srcdir)/mountexample.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 compound: $(srcdir)/compound.f90
-	@if test "X$(PARALLEL)" = "Xno"; then					\
-	  echo $(FC) -o $@ $<;							\
-	  $(FC) -o $@ $<;							\
-	else									\
-	  echo $(FC_PP) -o $@ $<;						\
-	  $(FC_PP) -o $@ $<;							\
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(FC) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC) -o $@ $(srcdir)/$@.f90;					\
+	else								\
+	  echo $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
+	  $(FC_PP) -o $@ $(srcdir)/$@.f90;				\
 	fi
 
 @CONCLUDE@
