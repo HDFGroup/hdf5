@@ -1020,13 +1020,6 @@ int test_report( int nerrors )
  *
  *-------------------------------------------------------------------------
  */
-static hid_t tempid = H5T_STD_B8LE;
-// the following statement caused seg. fault, need to check into - BMR
-//static PredType temp = PredType::STD_B8LE;
-// because PredType::STD_B8LE was not defined yet, so ref_counter is nil
-// and it'll fail when the ref_counter is being incremented
-// this can be a problem; must check ref_counter before increment or decrement
-
 int
 main(void)
 {
@@ -1069,18 +1062,7 @@ main(void)
 	nerrors += test_create(file)<0 	?1:0;
 	nerrors += test_simple_io(file)<0	?1:0;
 	nerrors += test_tconv(file)<0	?1:0;
-
-	/****  Temporarily disable compresion (write) on Linux ****/
-	/* A call to HDmemcpy by H5Dwrite in this test failed because of
-	 * some kind of type conversion.  Currently, there is no known
-	 * way to fix it, so we disable the entire test for Linux.
-	 * Note that the hdf5 1.5 branch doesn't fail, however. 
-	 * BMR - Mar 27, 01
-	 */
-#if !defined (__linux__)
-	    nerrors += test_compression(file)<0	?1:0;
-#endif
-
+	nerrors += test_compression(file)<0	?1:0;
 	nerrors += test_multiopen (file)<0	?1:0;
 	nerrors += test_types(file)<0       ?1:0;
 
