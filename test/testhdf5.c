@@ -160,7 +160,7 @@ main(int argc, char *argv[])
     InitTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code");
     InitTest("tbbt", test_tbbt, NULL,  "Threaded, Balanced, Binary Trees");
     InitTest("file", test_file, cleanup_file, "Low-Level File I/O");
-/*    InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");*/
+    InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");
     InitTest("select", test_select, cleanup_select,  "Selections");
     InitTest("time", test_time, cleanup_time,  "Time Datatypes");
