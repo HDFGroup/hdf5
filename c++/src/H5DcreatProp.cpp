@@ -15,6 +15,9 @@ namespace H5 {
 
 const DSetCreatPropList DSetCreatPropList::DEFAULT( H5P_DEFAULT );
 
+// Creates a dataset creation property list
+DSetCreatPropList::DSetCreatPropList() : PropList( H5P_DATASET_CREATE) {}
+
 // Copy constructor: makes a copy of the original DSetCreatPropList object;
 DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList( orig ) {}
 
