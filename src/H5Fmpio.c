@@ -42,9 +42,6 @@
  *		  requested.  This kluge is activated by #ifdef MPI_KLUGE0202.
  *
  */
-#include <mpi.h>
-#include <mpio.h>
-#include <H5private.h>
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5Dprivate.h>
@@ -52,6 +49,21 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifndef HAVE_PARALLEL
+/* 
+ * The H5F_mpio_xxxx functions are for parallel I/O only and are
+ * valid only when HAVE_PARALLEL is #defined.  This empty #ifndef
+ * body is used to allow this source file be included in the serial
+ * distribution.
+ * Some compilers/linkers may complain about "empty" object file.
+ * If that happens, uncomment the following statement to pacify
+ * them.
+ */
+/* const hbool_t H5F_mpio_avail = FALSE; */
+#else	/* HAVE_PARALLEL */
+#include <mpi.h>
+#include <mpio.h>
 
 #define PABLO_MASK      H5F_mpio
 static hbool_t          interface_initialize_g = FALSE;	/* rky??? */
@@ -677,3 +689,5 @@ H5F_haddr_to_MPIOff( haddr_t addr, MPI_Offset *mpi_off )
 
     return (ret_val);
 }
+
+#endif	/* HAVE_PARALLEL */
