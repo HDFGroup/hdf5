@@ -11,7 +11,7 @@
 #include "H5private.h"
 
 typedef enum iotype_ {
-    RAW,
+    RAWIO,
     MPIO,
     PHDF5
     /*NUM_TYPES*/

@@ -174,7 +174,7 @@ do_pio(parameters param)
         fd.mpifd = MPI_FILE_NULL;
         res.timers = pio_time_new(MPI_TIMER);
         break;
-    case RAW:
+    case RAWIO:
         fd.rawfd = -1;
         res.timers = pio_time_new(SYS_TIMER);
         break;
@@ -323,7 +323,7 @@ done:
     /* close any opened files */
     /* no remove(fname) because that should have happened normally. */
     switch (iot) {
-    case RAW:
+    case RAWIO:
         if (fd.rawfd != -1)
             hrc = do_fclose(iot, &fd);
         break;
@@ -366,7 +366,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     memset(fullname, 0, size);
 
     switch (iot) {
-    case RAW:
+    case RAWIO:
         suffix = ".raw";
         break;
     case MPIO:
@@ -517,7 +517,7 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
 
         /* create dataset */
         switch (iot) {
-        case RAW:
+        case RAWIO:
         case MPIO:
             /* both raw and mpi io just need dataset offset in file*/
             dset_offset = (ndset - 1) * dset_size;
@@ -581,7 +581,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
             /* Write */
             /* Calculate offset of write within a dataset/file */
             switch (iot) {
-            case RAW:
+            case RAWIO:
                 file_offset = dset_offset + (elmts_begin + nelmts_written)*ELMT_SIZE;
 
 #if AKCDEBUG
@@ -742,7 +742,7 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
 
         /* create dataset */
         switch (iot) {
-        case RAW:
+        case RAWIO:
         case MPIO:
             /* both raw and mpi io just need dataset offset in file*/
             dset_offset = (ndset - 1) * dset_size;
@@ -793,7 +793,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
             /* read */
             /* Calculate offset of read within a dataset/file */
             switch (iot){
-            case RAW:
+            case RAWIO:
                 file_offset = dset_offset + (elmts_begin + nelmts_read)*ELMT_SIZE;
 
 #if AKCDEBUG
@@ -920,7 +920,7 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
     hid_t acc_tpl = -1;     /* file access templates */
 
     switch (iot) {
-    case RAW:
+    case RAWIO:
         if (flags & (PIO_CREATE | PIO_WRITE))
             fd->rawfd = RAWCREATE(fname);
         else
@@ -1031,7 +1031,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
     int mrc = 0, rc = 0;
 
     switch (iot) {
-    case RAW:
+    case RAWIO:
         rc = RAWCLOSE(fd->rawfd);
 
         if (rc != 0){
@@ -1090,7 +1090,7 @@ do_cleanupfile(iotype iot, char *fname)
     
     if (clean_file_g){
         switch (iot){
-        case RAW:
+        case RAWIO:
             remove(fname);
             break;
         case MPIO:

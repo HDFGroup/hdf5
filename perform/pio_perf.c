@@ -13,7 +13,7 @@
  * This is what the report should look like:
  *
  *  nprocs = Max#Procs
- *      IO Type = Raw
+ *      IO Type = RAWIO
  *          # Files = 1, # of dsets = 1000, Elements per dset = 37000
  *              Write Results = x MB/s
  *              Read Results = x MB/s
@@ -312,7 +312,7 @@ finish:
  *              number by 2 and rerun the test.
  *
  *            - The second slowest is what type of IO to perform. We have
- *              three choices: RAW, MPI-IO, and PHDF5.
+ *              three choices: RAWIO, MPI-IO, and PHDF5.
  *
  *            - Then we change the size of the buffer. This information is
  *              inferred from the number of datasets to create and the number
@@ -381,7 +381,7 @@ run_test_loop(FILE *output, struct options *opts)
                               parms.num_files, parms.num_dsets, parms.num_elmts);
 
                 if (io_runs & PIO_RAW)
-                    run_test(output, RAW, parms);
+                    run_test(output, RAWIO, parms);
 
                 if (io_runs & PIO_MPI)
                     run_test(output, MPIO, parms);
@@ -427,7 +427,7 @@ run_test(FILE *output, iotype iot, parameters parms)
     output_report(output, "Type of IO = ");
 
     switch (iot) {
-    case RAW:
+    case RAWIO:
         output_report(output, "Raw\n");
         break;
     case MPIO:
@@ -787,10 +787,10 @@ print_indent(register FILE *output, register int indent)
     MPI_Comm_rank(pio_comm_g, &myrank);
 
     if (myrank == 0) {
-		indent *= TAB_SPACE;
+	indent *= TAB_SPACE;
 
-		for (; indent > 0; --indent)
-			fputc(' ', output);
+	for (; indent > 0; --indent)
+	    fputc(' ', output);
     }
 }
 
