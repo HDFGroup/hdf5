@@ -1,4 +1,4 @@
-HDF5 version 1.5.57 currently under development
+HDF5 version 1.5.58 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
