@@ -46,13 +46,13 @@ nh5_fixname_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl, _fcd full_name
      c_base_namelen = *base_namelen;
      c_base_name = (char *)HD5f2cstring(base_name, c_base_namelen); 
      if (c_base_name == NULL) goto DONE;
-     c_full_name = (char *) HDmalloc(*full_namelen + 1);
+     c_full_name = (char *) HDmalloc((size_t)*full_namelen + 1);
      if (c_full_name == NULL) goto DONE;
 
      /*
       * Call h5_fixname function.
       */
-     if (NULL != h5_fixname(c_base_name, c_fapl, c_full_name, *full_namelen + 1)) {
+     if (NULL != h5_fixname(c_base_name, c_fapl, c_full_name, (size_t)*full_namelen + 1)) {
      HD5packFstring(c_full_name, _fcdtocp(full_name), *full_namelen);         
      ret_value = 0;
      goto DONE;

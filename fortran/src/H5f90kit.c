@@ -78,10 +78,10 @@ HD5f2cstring(_fcd fdesc, int len)
     /* This should be equivalent to the above test -QAK */
     for(i=len-1; i>=0 && !isgraph((int)str[i]); i--)
         /*EMPTY*/;
-    cstr = (char *) HDmalloc( (i + 2));
+    cstr = (char *) HDmalloc( (size_t)(i + 2));
     if (cstr == NULL) return NULL;
     cstr[i + 1] = '\0';
-    HDmemcpy(cstr,str,i+1);
+    HDmemcpy(cstr,str,(size_t)(i+1));
     return cstr;
 }   /* HD5f2cstring */
 

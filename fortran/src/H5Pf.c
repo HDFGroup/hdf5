@@ -224,11 +224,11 @@ nh5pset_deflate_c ( hid_t_f *prp_id , int_f *level)
 {
   int ret_value = 0;
   hid_t c_prp_id;
-  int c_level;
+  unsigned c_level;
   herr_t status;
 
   c_prp_id = (hid_t)*prp_id;
-  c_level = (int)*level;
+  c_level = (unsigned)*level;
   status = H5Pset_deflate(c_prp_id, c_level);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
@@ -1412,7 +1412,7 @@ nh5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nel
      unsigned int c_flags;
      H5Z_filter_t c_filter;
      unsigned int * c_cd_values;
-     int i;
+     unsigned i;
      
      c_filter = (H5Z_filter_t)*filter;
      c_flags = (unsigned)*flags;
@@ -1498,7 +1498,7 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
      H5Z_filter_t c_filter;
      unsigned int * c_cd_values;
      char* c_name;
-     int i;
+     unsigned i;
 
      c_cd_nelmts_in = (size_t)*cd_nelmts;
      c_namelen = (size_t)*namelen;
@@ -1523,7 +1523,7 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
      *filter_id = (int_f)c_filter;
      *cd_nelmts = (size_t_f)c_cd_nelmts;
      *flags = (int_f)c_flags;
-     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
+     HD5packFstring(c_name, _fcdtocp(name), (int)strlen(c_name)); 
  
      for (i = 0; i < c_cd_nelmts_in; i++)
           cd_values[i] = (int_f)c_cd_values[i];
@@ -1656,7 +1656,7 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
 
      *offset = (int_f)c_offset;
      *bytes = (hsize_t_f)size;
-     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
+     HD5packFstring(c_name, _fcdtocp(name), (int)strlen(c_name)); 
      ret_value = 0;
 
 DONE:    
@@ -1813,10 +1813,10 @@ nh5pset_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 {
   int ret_value = 0;
   hid_t c_prp_id;
-  hsize_t c_size;
+  size_t c_size;
 
   c_prp_id = (hid_t)*prp_id;
-  c_size = (hsize_t)*size;
+  c_size = (size_t)*size;
   if ( H5Pset_buffer(c_prp_id, c_size, NULL, NULL) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -1841,7 +1841,7 @@ nh5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 
   c_prp_id = (hid_t)*prp_id;
   c_size = H5Pget_buffer(c_prp_id, NULL, NULL);
-  if ( c_size < 0  ) return ret_value;
+  if ( c_size <= 0  ) return ret_value;
   *size = (hsize_t)c_size;
   ret_value = 0;
   return ret_value;
@@ -2916,8 +2916,8 @@ nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
   if (tmp ==NULL) return ret_value; 
   tmp_p = tmp;
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
-       c_memb_name[i] = (char *) malloc(len[i] + 1);
-       memcpy((char *)c_memb_name[i], tmp_p, len[i]);
+       c_memb_name[i] = (char *) malloc((size_t)len[i] + 1);
+       memcpy((char *)c_memb_name[i], tmp_p, (size_t)len[i]);
        tmp_pp = (char *)c_memb_name[i];
        tmp_pp[len[i]] = '\0';
        tmp_p = tmp_p + c_lenmax;
@@ -3011,9 +3011,9 @@ nh5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
   herr_t status;
   char *tmp, *tmp_p;
   int i;
-  int c_lenmax;
-  int length = 0;
-  c_lenmax = (int)*lenmax;
+  size_t c_lenmax;
+  size_t length = 0;
+  c_lenmax = (size_t)*lenmax;
 
   c_prp_id = (hid_t)*prp_id;
 /*
@@ -3028,7 +3028,7 @@ nh5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
  */
   tmp = (char *)malloc(c_lenmax*H5FD_MEM_NTYPES + 1);
   tmp_p = tmp;
-  for (i=0; i < c_lenmax*H5FD_MEM_NTYPES; i++) tmp[i] = ' ';
+  memset(tmp,' ', c_lenmax*H5FD_MEM_NTYPES);
   tmp[c_lenmax*H5FD_MEM_NTYPES] = '\0';
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
        memcpy(tmp_p, c_memb_name[i], strlen(c_memb_name[i]));
@@ -3036,7 +3036,7 @@ nh5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _f
        length = H5_MAX(length, strlen(c_memb_name[i]));
        tmp_p = tmp_p + c_lenmax;
  } 
-HD5packFstring(tmp, _fcdtocp(memb_name), c_lenmax*H5FD_MEM_NTYPES);
+HD5packFstring(tmp, _fcdtocp(memb_name), (int)(c_lenmax*H5FD_MEM_NTYPES));
 
 /*
  * Take care of other arguments
@@ -3152,7 +3152,7 @@ nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f
      size_t c_cd_nelmts_in;
      unsigned int * c_cd_values;
      char* c_name;
-     int i;
+     unsigned i;
      herr_t status;
      c_cd_nelmts_in = (size_t)*cd_nelmts;
      c_cd_nelmts = (size_t)*cd_nelmts;
@@ -3176,7 +3176,7 @@ nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f
 
      *cd_nelmts = (size_t_f)c_cd_nelmts;
      *flags = (int_f)c_flags;
-     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
+     HD5packFstring(c_name, _fcdtocp(name), (int)strlen(c_name)); 
  
      for (i = 0; i < c_cd_nelmts_in; i++)
           cd_values[i] = (int_f)c_cd_values[i];
@@ -3213,7 +3213,7 @@ nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_
      unsigned int c_flags;
      H5Z_filter_t c_filter;
      unsigned int * c_cd_values;
-     int i;
+     unsigned i;
      
      c_filter = (H5Z_filter_t)*filter;
      c_flags = (unsigned)*flags;
