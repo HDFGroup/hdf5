@@ -1266,242 +1266,247 @@ dump_all(hid_t group, const char *name, void * op_data)
     strcpy(tmp, prefix);
 
     switch (statbuf.type) {
-    if (display_links) {
     case H5G_LINK:
-	indentation(indent);
-	targbuf = malloc(statbuf.linklen);
-
-	if (!doxml) {
-	    begin_obj(dump_header_format->softlinkbegin, name,
+     
+     if (display_links) 
+     {
+      indentation(indent);
+      targbuf = malloc(statbuf.linklen);
+      
+      if (!doxml) {
+       begin_obj(dump_header_format->softlinkbegin, name,
 		      dump_header_format->softlinkblockbegin);
-	    indentation(indent + COL);
-	}
-
-	if (H5Gget_linkval(group, name, statbuf.linklen, targbuf) < 0) {
-            error_msg(progname, "unable to get link value\n");
-	    d_status = EXIT_FAILURE;
-            ret = FAIL;
-	} else {
-	    /* print the value of a soft link */
-	    if (!doxml) {
-		/* Standard DDL: no modification */
-		printf("LINKTARGET \"%s\"\n", targbuf);
-	    } else {
-		/* XML */
-		char *linkxid = malloc(100);
-		char *parentxid = malloc(100);
-		char *targetxid = malloc(100);
-                char *t_prefix = xml_escape_the_name(strcmp(prefix,"") ? prefix : "/");
-                char *t_name = xml_escape_the_name(name);
-                char *t_targbuf = xml_escape_the_name(targbuf);
-                char *tmp2, *t_tmp;
-		int res;
-
-                tmp2 = malloc(strlen(prefix) + statbuf.linklen + 1);
-                strcpy(tmp2, prefix);
-
-                if (targbuf && targbuf[0] == '/')
-                    strcpy(tmp2, targbuf);
-                else
-                    strcat(strcat(tmp2, "/"), targbuf);
-
-                t_tmp = xml_escape_the_name(strcat(strcat(tmp, "/"), name));
-		res = xml_name_to_XID(t_tmp,linkxid,100,1);
-		res = xml_name_to_XID(prefix,parentxid,100,1);
-
-		res = xml_name_to_XID(tmp2,targetxid,100,0);
-
-		if (res == 0) {
-			/* target obj found */
-			printf("<%sSoftLink LinkName=\"%s\" "
+       indentation(indent + COL);
+      }
+      
+      if (H5Gget_linkval(group, name, statbuf.linklen, targbuf) < 0) {
+       error_msg(progname, "unable to get link value\n");
+       d_status = EXIT_FAILURE;
+       ret = FAIL;
+      } else {
+       /* print the value of a soft link */
+       if (!doxml) {
+        /* Standard DDL: no modification */
+        printf("LINKTARGET \"%s\"\n", targbuf);
+       } else {
+        /* XML */
+        char *linkxid = malloc(100);
+        char *parentxid = malloc(100);
+        char *targetxid = malloc(100);
+        char *t_prefix = xml_escape_the_name(strcmp(prefix,"") ? prefix : "/");
+        char *t_name = xml_escape_the_name(name);
+        char *t_targbuf = xml_escape_the_name(targbuf);
+        char *tmp2, *t_tmp;
+        int res;
+        
+        tmp2 = malloc(strlen(prefix) + statbuf.linklen + 1);
+        strcpy(tmp2, prefix);
+        
+        if (targbuf && targbuf[0] == '/')
+         strcpy(tmp2, targbuf);
+        else
+         strcat(strcat(tmp2, "/"), targbuf);
+        
+        t_tmp = xml_escape_the_name(strcat(strcat(tmp, "/"), name));
+        res = xml_name_to_XID(t_tmp,linkxid,100,1);
+        res = xml_name_to_XID(prefix,parentxid,100,1);
+        
+        res = xml_name_to_XID(tmp2,targetxid,100,0);
+        
+        if (res == 0) {
+         /* target obj found */
+         printf("<%sSoftLink LinkName=\"%s\" "
 			       "OBJ-XID=\"%s\" "
 			       "H5SourcePath=\"%s\" "
-                               "TargetPath=\"%s\" TargetObj=\"%s\" "
+          "TargetPath=\"%s\" TargetObj=\"%s\" "
 			       "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
-				xmlnsprefix,
-				t_name, 
-				linkxid, 
-				t_tmp, 
-				t_targbuf, targetxid,
-				parentxid, t_prefix);
-			free(targetxid);
-		} else {
-			/* dangling link -- omit from xml attributes */
-			printf("<%sSoftLink LinkName=\"%s\" "
+          xmlnsprefix,
+          t_name, 
+          linkxid, 
+          t_tmp, 
+          t_targbuf, targetxid,
+          parentxid, t_prefix);
+         free(targetxid);
+        } else {
+         /* dangling link -- omit from xml attributes */
+         printf("<%sSoftLink LinkName=\"%s\" "
 			       "OBJ-XID=\"%s\" "
 			       "H5SourcePath=\"%s\" "
-                               "TargetPath=\"%s\"  "
+          "TargetPath=\"%s\"  "
 			       "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
-				xmlnsprefix,
-				t_name, 
-				linkxid,
-				t_tmp, 
-				t_targbuf, 
-				parentxid, t_prefix);
-		}
-
-                free(t_name);
-                free(t_targbuf);
-                free(t_tmp);
-                free(tmp2);
-                free(linkxid);
-                free(parentxid);
-	    }
-	}
-
-	if (!doxml) {
-	    indentation(indent);
-	    end_obj(dump_header_format->softlinkend,
-		    dump_header_format->softlinkblockend);
-	}
-
-	free(targbuf);
-    }
-	break;
+          xmlnsprefix,
+          t_name, 
+          linkxid,
+          t_tmp, 
+          t_targbuf, 
+          parentxid, t_prefix);
+        }
+        
+        free(t_name);
+        free(t_targbuf);
+        free(t_tmp);
+        free(tmp2);
+        free(linkxid);
+        free(parentxid);
+       }
+      }
+      
+      if (!doxml) {
+       indentation(indent);
+       end_obj(dump_header_format->softlinkend,
+        dump_header_format->softlinkblockend);
+      }
+      
+      free(targbuf);
+     } /*display_links */
+     break;
 
     case H5G_GROUP:
-    if (display_groups) {
-	if ((obj = H5Gopen(group, name)) < 0) {
-            error_msg(progname, "unable to dump group \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-            ret = FAIL;
-	} else {
-            size_t new_len = strlen(prefix) + strlen(name) + 2;
-
-            if (prefix_len <= new_len) {
-                prefix_len = new_len + 1;
-                prefix = realloc(prefix, prefix_len);
-            }
-
-	    strcat(strcat(prefix, "/"), name);
-	    dump_function_table->dump_group_function(obj, name);
-	    strcpy(prefix, tmp);
-	    H5Gclose(obj);
-	}
-    }
-	break;
+     if (display_groups) 
+     {
+      if ((obj = H5Gopen(group, name)) < 0) {
+       error_msg(progname, "unable to dump group \"%s\"\n", name);
+       d_status = EXIT_FAILURE;
+       ret = FAIL;
+      } else {
+       size_t new_len = strlen(prefix) + strlen(name) + 2;
+       
+       if (prefix_len <= new_len) {
+        prefix_len = new_len + 1;
+        prefix = realloc(prefix, prefix_len);
+       }
+       
+       strcat(strcat(prefix, "/"), name);
+       dump_function_table->dump_group_function(obj, name);
+       strcpy(prefix, tmp);
+       H5Gclose(obj);
+      }
+     } /*display_groups*/
+     break;
 
     case H5G_DATASET:
-      if (display_dsets) {
-	if ((obj = H5Dopen(group, name)) >= 0) {
-	    /* hard link */
-	    H5Gget_objinfo(obj, ".", TRUE, &statbuf);
-
-	    if (statbuf.nlink > 1) {
-		i = search_obj(dset_table, statbuf.objno);
-
-		if (i < 0) {
-		    indentation(indent);
-		    begin_obj(dump_header_format->datasetbegin, name,
-			      dump_header_format->datasetblockbegin);
-		    indentation(indent + COL);
-                    error_msg(progname,
-                              "internal error (file %s:line %d)\n",
-                              __FILE__, __LINE__);
-		    indentation(indent);
-		    end_obj(dump_header_format->datasetend,
-			    dump_header_format->datasetblockend);
-		    d_status = EXIT_FAILURE;
-                    ret = FAIL;
-		    H5Dclose(obj);
-		    goto done;
-		} else if (dset_table->objs[i].displayed) {
-		    indentation(indent);
-
-		    if (!doxml) {
-			begin_obj(dump_header_format->datasetbegin, name,
-				  dump_header_format->datasetblockbegin);
-			indentation(indent + COL);
-			printf("%s \"%s\"\n", HARDLINK,
-			       dset_table->objs[i].objname);
-			indentation(indent);
-			end_obj(dump_header_format->datasetend,
-				dump_header_format->datasetblockend);
-		    } else {
-			/* the XML version */
-                        char *t_tmp;
-                        char *t_prefix;
-                        char *t_name;
-			char *dsetxid = malloc(100);
-			char *parentxid = malloc(100);
-			char *pointerxid = malloc(100);
-                        char *tx_tmp = malloc(strlen(tmp)+strlen(name)+1);
-				strcpy(tx_tmp,tmp);
-                        t_tmp = xml_escape_the_name(strcat(strcat(tx_tmp, "/"), name));
-                        t_prefix = xml_escape_the_name(prefix);
-                        t_name = xml_escape_the_name(name);
-			xml_name_to_XID( strcat(strcat(tmp,"/"),name), dsetxid,100,1);
-			xml_name_to_XID( prefix ,parentxid,100,1);
-
-			printf("<%sDataset Name=\"%s\" OBJ-XID=\"%s-%d\" "
-                               "H5Path=\"%s\" Parents=\"%s\" "
-                               "H5ParentPaths=\"%s\">\n",
-				xmlnsprefix,
-			       t_name, dsetxid, get_next_xid(), 
-				t_tmp, parentxid,
-			       (strcmp(prefix, "") ? t_prefix : "/"));
-
-			indentation(indent + COL);
-			xml_name_to_XID(dset_table->objs[i].objname,pointerxid,100,1);
-			printf("<%sDatasetPtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n", 
-				xmlnsprefix,
-				pointerxid,t_tmp);
-			indentation(indent);
-			printf("</%sDataset>\n", xmlnsprefix);
-
-                        free(t_name);
-                        free(dsetxid);
-                        free(parentxid);
-                        free(pointerxid);
-                        free(t_tmp);
+     if (display_dsets) 
+     {
+      if ((obj = H5Dopen(group, name)) >= 0) {
+       /* hard link */
+       H5Gget_objinfo(obj, ".", TRUE, &statbuf);
+       
+       if (statbuf.nlink > 1) {
+        i = search_obj(dset_table, statbuf.objno);
+        
+        if (i < 0) {
+         indentation(indent);
+         begin_obj(dump_header_format->datasetbegin, name,
+          dump_header_format->datasetblockbegin);
+         indentation(indent + COL);
+         error_msg(progname,
+          "internal error (file %s:line %d)\n",
+          __FILE__, __LINE__);
+         indentation(indent);
+         end_obj(dump_header_format->datasetend,
+          dump_header_format->datasetblockend);
+         d_status = EXIT_FAILURE;
+         ret = FAIL;
+         H5Dclose(obj);
+         goto done;
+        } else if (dset_table->objs[i].displayed) {
+         indentation(indent);
+         
+         if (!doxml) {
+          begin_obj(dump_header_format->datasetbegin, name,
+           dump_header_format->datasetblockbegin);
+          indentation(indent + COL);
+          printf("%s \"%s\"\n", HARDLINK,
+           dset_table->objs[i].objname);
+          indentation(indent);
+          end_obj(dump_header_format->datasetend,
+           dump_header_format->datasetblockend);
+         } else {
+          /* the XML version */
+          char *t_tmp;
+          char *t_prefix;
+          char *t_name;
+          char *dsetxid = malloc(100);
+          char *parentxid = malloc(100);
+          char *pointerxid = malloc(100);
+          char *tx_tmp = malloc(strlen(tmp)+strlen(name)+1);
+          strcpy(tx_tmp,tmp);
+          t_tmp = xml_escape_the_name(strcat(strcat(tx_tmp, "/"), name));
+          t_prefix = xml_escape_the_name(prefix);
+          t_name = xml_escape_the_name(name);
+          xml_name_to_XID( strcat(strcat(tmp,"/"),name), dsetxid,100,1);
+          xml_name_to_XID( prefix ,parentxid,100,1);
+          
+          printf("<%sDataset Name=\"%s\" OBJ-XID=\"%s-%d\" "
+           "H5Path=\"%s\" Parents=\"%s\" "
+           "H5ParentPaths=\"%s\">\n",
+           xmlnsprefix,
+           t_name, dsetxid, get_next_xid(), 
+           t_tmp, parentxid,
+           (strcmp(prefix, "") ? t_prefix : "/"));
+          
+          indentation(indent + COL);
+          xml_name_to_XID(dset_table->objs[i].objname,pointerxid,100,1);
+          printf("<%sDatasetPtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n", 
+           xmlnsprefix,
+           pointerxid,t_tmp);
+          indentation(indent);
+          printf("</%sDataset>\n", xmlnsprefix);
+          
+          free(t_name);
+          free(dsetxid);
+          free(parentxid);
+          free(pointerxid);
+          free(t_tmp);
 #ifdef WIN32
-           /*             free(tx_tmp);*/
+          /*             free(tx_tmp);*/
 #else
-                        free(tx_tmp);
+          free(tx_tmp);
 #endif
-                        free(t_prefix);
-		    }
-
-		    H5Dclose(obj);
-		    goto done;
-		} else {
-		    dset_table->objs[i].displayed = 1;
-		    strcat(tmp, "/");
-		    strcat(tmp, name);
-		    free(dset_table->objs[i].objname);
-		    dset_table->objs[i].objname = HDstrdup(tmp);
-		}
-	    }
-
-	    dump_function_table->dump_dataset_function(obj, name, NULL);
-	    H5Dclose(obj);
-	} else {
-            error_msg(progname, "unable to dump dataset \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-            ret = FAIL;
-	}
+          free(t_prefix);
+         }
+         
+         H5Dclose(obj);
+         goto done;
+        } else {
+         dset_table->objs[i].displayed = 1;
+         strcat(tmp, "/");
+         strcat(tmp, name);
+         free(dset_table->objs[i].objname);
+         dset_table->objs[i].objname = HDstrdup(tmp);
+        }
+       }
+       
+       dump_function_table->dump_dataset_function(obj, name, NULL);
+       H5Dclose(obj);
+      } else {
+       error_msg(progname, "unable to dump dataset \"%s\"\n", name);
+       d_status = EXIT_FAILURE;
+       ret = FAIL;
       }
-	break;
-
+     } /*display_dsets*/
+     break;
+     
     case H5G_TYPE:
-     if (display_dtypes) {
-	if ((obj = H5Topen(group, name)) < 0) {
-            error_msg(progname, "unable to dump data type \"%s\"\n", name);
-	    d_status = EXIT_FAILURE;
-            ret = FAIL;
-	} else {
-	    dump_function_table->dump_named_datatype_function(obj, name);
-	    H5Tclose(obj);
-	}
-     }
-	break;
-
+     if (display_dtypes) 
+     {
+      if ((obj = H5Topen(group, name)) < 0) {
+       error_msg(progname, "unable to dump data type \"%s\"\n", name);
+       d_status = EXIT_FAILURE;
+       ret = FAIL;
+      } else {
+       dump_function_table->dump_named_datatype_function(obj, name);
+       H5Tclose(obj);
+      }
+     } /*display_dtypes */
+     break;
+     
     default:
-        error_msg(progname, "unknown object \"%s\"\n", name);
-	d_status = EXIT_FAILURE;
-	ret = FAIL;
+     error_msg(progname, "unknown object \"%s\"\n", name);
+     d_status = EXIT_FAILURE;
+     ret = FAIL;
     }
-
+    
 done:
     free(tmp);
     return ret;
