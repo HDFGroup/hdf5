@@ -350,6 +350,129 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_insert_level1_2leaf_split
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to split the root node and force the tree to depth 1.
+ *              It continues to add a more records to the each of the
+ *              left and right leaf nodes after the split to force a 2 node
+ *              split, adding another node to the B-tree
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, February  9, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_insert_level1_2leaf_split(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Test inserting many records into v2 B-tree 
+     */
+    TESTING("B-tree many - split 2 leaves to 3 in level 1 B-tree (l->r)");
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
+        record=u+INSERT_SPLIT_ROOT_NREC;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Force split from left node into right node */
+    for(u=0; u<(3*INSERT_SPLIT_ROOT_NREC)/4; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+    PASSED();
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Test inserting many records into v2 B-tree 
+     */
+    TESTING("B-tree many - split 2 leaves to 3 in level 1 B-tree (r->l)");
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Force redistribution from left node into right node */
+    for(u=0; u<(3*INSERT_SPLIT_ROOT_NREC)/4; u++) {
+        record=u+INSERT_SPLIT_ROOT_NREC;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_insert_level1_2leaf_redistrib() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the B-tree v2 code
@@ -379,6 +502,7 @@ main(void)
     nerrors += test_insert_basic(fapl);
     nerrors += test_insert_split_root(fapl);
     nerrors += test_insert_level1_2leaf_redistrib(fapl);
+    nerrors += test_insert_level1_2leaf_split(fapl);
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");
