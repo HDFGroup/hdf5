@@ -236,21 +236,25 @@ MESG 3 "$TestName"
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
 TEST tgroup.h5
 TEST tdset.h5
+TEST tdset2.h5
 TEST tattr.h5
 TEST tslink.h5
 TEST thlink.h5
 TEST tcompound.h5
+TEST tcompound2.h5
 TEST tall.h5
 $RM ./testfiles/*.tmp
 TEST tgroup.h5 tgroup.hdf
 TEST tdset.h5 tdset.hdf
+TEST tdset2.h5 tdset2.hdf
 TEST tattr.h5 tattr.hdf
 TEST tslink.h5 tslink.hdf
 TEST thlink.h5 thlink.hdf
 TEST tcompound.h5 tcompound.hdf
+TEST tcompound2.h5 tcompound2.hdf
 TEST tall.h5 tall.hdf
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
-TEST -m tgroup.h5 tdset.h5 tattr.h5 tslink.h5 thlink.h5 tcompound.h5 tall.h5
+TEST -m tgroup.h5 tdset.h5 tdset2.h5 tattr.h5 tslink.h5 thlink.h5 tcompound.h5 tcompound2.h5 tall.h5
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
 else
 MESG 3 "$TestName <<<SKIPPED>>>"

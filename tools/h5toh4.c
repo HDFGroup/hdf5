@@ -534,295 +534,300 @@ hid_t fieldtype;
 int32 order;
 off_t offset;
 
-	sd_id = op_data->sd_id;
+    sd_id = op_data->sd_id;
 
     /* hard link */
     if ((status = H5Gget_objinfo(did, ".", TRUE, &statbuf)) != SUCCEED ) {
-		fprintf(stderr,"Error: H5Gget_objinfo() did not work\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		return (status);
+	fprintf(stderr,"Error: H5Gget_objinfo() did not work\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	return (status);
     }
 
-	if ((type = H5Dget_type(did)) <= 0) {
-		fprintf(stderr, "Error: H5Dget_type() didn't return appropriate value.\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		status = FAIL;
+    if ((type = H5Dget_type(did)) <= 0) {
+	fprintf(stderr, "Error: H5Dget_type() didn't return appropriate value.\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	status = FAIL;
         return status;
-	}
+    }
 
-	if ((space = H5Dget_space(did)) <= 0) {
-		fprintf(stderr, "Error: H5Dget_space() didn't return appropriate value.\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		status = FAIL;
+    if ((space = H5Dget_space(did)) <= 0) {
+	fprintf(stderr, "Error: H5Dget_space() didn't return appropriate value.\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	status = FAIL;
         return status;
-	}
+    }
 
-	if ((n_values = H5Sget_simple_extent_npoints(space)) <= 0) {
-		fprintf(stderr, "Error: H5Sget_simple_extent_npoints() returned inappropriate value.\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		status = FAIL;
+    if ((n_values = H5Sget_simple_extent_npoints(space)) <= 0) {
+	fprintf(stderr, "Error: H5Sget_simple_extent_npoints() returned inappropriate value.\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	status = FAIL;
         return status;
-	}
+    }
 
-	if ((ndims = H5Sget_simple_extent_dims(space,dims,maxdims)) < 0 ) {
-		fprintf(stderr, "Error: Problems getting ndims, dims, and maxdims of dataset\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		status = ndims;
+    if ((ndims = H5Sget_simple_extent_dims(space,dims,maxdims)) < 0 ) {
+	fprintf(stderr, "Error: Problems getting ndims, dims, and maxdims of dataset\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	status = ndims;
         return status;
     }
 
     if ((class = H5Tget_class(type)) < 0 ) {
         fprintf(stderr,"Error: problem with getting class\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		status = class;
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	status = class;
         return status;
     }
 
     switch (class) {
     case H5T_INTEGER:
     case H5T_FLOAT:
-		if ((h4_type = h5type_to_h4type(type)) == FAIL ) {
-			fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-			status = FAIL;
-			break;
-		}
-		if ((mem_type = h4type_to_memtype(h4_type)) == FAIL ) {
-			fprintf(stderr, "Error: Problems translating h4 type to mem type\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-			status = FAIL;
+	if ((h4_type = h5type_to_h4type(type)) == FAIL ) {
+		fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+		status = FAIL;
+		break;
+	}
+	if ((mem_type = h4type_to_memtype(h4_type)) == FAIL ) {
+		fprintf(stderr, "Error: Problems translating h4 type to mem type\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+		status = FAIL;
         	return status;
+	}
+	if ((typesize = H5Tget_size(mem_type)) <= 0) {
+		fprintf(stderr, "Error: H5Tget_size() didn't return appropriate value.\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+		status = FAIL;
+		break;
+	}
+    	if ((buffer = HDmalloc(n_values*typesize)) == NULL) {
+		fprintf(stderr, "Error: Problems with HDmalloc of memory space\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+		status = FAIL;
+		break;
+	}
+        if ((status = H5Dread(did, mem_type, space, space, H5P_DEFAULT, buffer)) != SUCCEED) {
+		fprintf(stderr, "Error: Problems with H5Dread\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+		status = FAIL;
+		break;
+	}
+	for (i=0;i<ndims;i++) {
+		if (maxdims[i] == H5S_UNLIMITED) {
+			if ( i == 0 ) {
+				dim_sizes[0] = 0;	/* this is how HDF4 communicates unlimited dimension */
+			} else {
+				dim_sizes[i] = (int32)dims[i];
+			}
+		} else {
+			dim_sizes[i] = (int32)maxdims[i];
 		}
-		if ((typesize = H5Tget_size(mem_type)) <= 0) {
-			fprintf(stderr, "Error: H5Tget_size() didn't return appropriate value.\n");
+		start[i] = 0;
+		edges[i] = (int32)dims[i];
+	}
+	if ((sds_id = SDcreate(sd_id, name, h4_type, ndims, dim_sizes)) <= 0 ) {
+		fprintf(stderr, "Error: Unable to create SDS %s.\n",name);
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+		status = FAIL;
+		break;
+	}
+	op_data->sds_id = sds_id;
+	if ((status = SDwritedata(sds_id, start, NULL, edges, buffer)) != SUCCEED ) {
+		fprintf(stderr, "Error: Unable to write SDS %s.\n",name);
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	}
+    	if ((status = H5Aiterate(did, NULL, (H5G_operator_t)convert_attr, op_data)) < 0 ) {
+        	fprintf(stderr,"Error: iterate over attributes\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+    	}
+	if ((status = SDendaccess(sds_id)) != SUCCEED ) {
+		fprintf(stderr, "Error: Unable to end access to SDS %s.\n",name);
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	}
+        break;
+    case H5T_TIME:
+        fprintf(stderr,"Error: H5T_TIME not yet implemented.\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+        break;
+    case H5T_STRING:
+        fprintf(stderr,"Error: H5T_STRING not yet implemented.\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+        break;
+    case H5T_BITFIELD:
+        fprintf(stderr,"Error: H5T_BITFIELD not yet implemented.\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+        break;
+    case H5T_OPAQUE:
+        fprintf(stderr,"Error: H5T_OPAQUE not yet implemented.\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+        break;
+    case H5T_COMPOUND:
+	if (ndims==1) {
+		if ((nmembers = H5Tget_nmembers(type)) <= 0 ) {
+			fprintf(stderr, "Error: Unable to get information about compound datatype %d\n",nmembers);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		for (idx=0;idx<nmembers;idx++) {
+			if ((ndimf = H5Tget_member_dims(type, idx, dimf, permf)) > 1 ) {
+       				fprintf(stdout,"Warning: H5 datasets of H5T_COMPOUND type with ndims = 1, whose members\n");
+        			fprintf(stdout,"Warning: of the H5T_COMPOUND type have rank > 1 are not converted.\n");
+				break;
+			} 
+		}
+		hfile_id = op_data->hfile_id;
+		if ((vdata_id = VSattach(hfile_id, -1, "w")) <= 0 ) {
+			fprintf(stderr, "Error: Unable to create vdata %s.\n",name);
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
 			status = FAIL;
 			break;
 		}
-    	if ((buffer = HDmalloc(n_values*typesize)) == NULL) {
+		op_data->vdata_id = vdata_id;
+		if ((status = VSsetname(vdata_id, name)) != SUCCEED ) {
+			fprintf(stderr, "Error: Unable to set vdata name %s.\n",name);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		if ((status = VSsetclass(vdata_id, "HDF5")) != SUCCEED ) {
+			fprintf(stderr, "Error: Unable to set class on vdata %s\n", name);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		for (idx=0;idx<nmembers;idx++) {
+			if ((ndimf = H5Tget_member_dims(type, idx, dimf, NULL)) < 0 ) {
+				fprintf(stderr, "Error: field rank for H5T_COMPOUND type %d, idx %d < 0\n", type, idx);
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+				break;
+			}
+			if ((fieldname = H5Tget_member_name(type, idx)) == NULL ) {
+				fprintf(stderr, "Error: Unable to get fieldname for compound type %d, idx %d\n", type, idx);
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+				break;
+			}
+			if ((fieldtype = H5Tget_member_type(type, idx)) < 0 ) {
+        			fprintf(stderr,"Error: H5 datasets of H5T_COMPOUND type with fieldtype %d, idx %d.\n",fieldtype,idx);
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+				break;
+			}
+			if ((h4_type = h5type_to_h4type(fieldtype)) < 0 ) {
+				fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+				break;
+			}
+/*
+			if ((mem_type = h4type_to_memtype(h4_type)) == FAIL ) {
+				fprintf(stderr, "Error: Problems translating h4 type to mem type\n");
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+       				return FAIL;
+			}
+*/
+			if (ndimf == 0 ) {
+				order = 1;
+			} else {
+				order = dimf[0];
+			}
+			if ((status = VSfdefine(vdata_id, fieldname, h4_type, order)) != SUCCEED ) {
+				fprintf(stderr, "Error: Unable to set field %d\n", idx);
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+				break;
+			}
+			strcat(fieldname_list,fieldname);
+			if (idx<nmembers-1) {
+				strcat(fieldname_list,", ");
+			}
+
+			HDfree(fieldname);
+		}
+		if ((status = VSsetfields(vdata_id, fieldname_list)) != SUCCEED ) {
+			fprintf(stderr, "Error: Unable to set fieldname list  %s\n", name);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		if ((status = VSsetinterlace(vdata_id, FULL_INTERLACE)) != SUCCEED ) {
+			fprintf(stderr, "Error: Unable to set FULL_INTERLACE mode, status %d\n", (int)status);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+
+		if ((type2 = H5Tcopy(type)) <= 0  ) {
+			fprintf(stderr, "Error: H5Tcopy did not SUCCEED, type %d\n", type2);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		if ((status = H5Tpack(type2)) != SUCCEED ) {
+			fprintf(stderr, "Error: H5Tpack did not SUCCEED, status %d\n", (int)status);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		if ((recsize = H5Tget_size(type2)) <= 0 ) {
+			fprintf(stderr, "Error: Unable to get record size %d\n", (int)recsize);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+/*
+		Since the space is rank 1, n_records does not depend on maxdims.
+*/
+		n_records = n_values;
+    		if ((buffer = HDmalloc(n_records*recsize)) == NULL) {
 			fprintf(stderr, "Error: Problems with HDmalloc of memory space\n");
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
 			status = FAIL;
 			break;
 		}
-        if ((status = H5Dread(did, mem_type, space, space, H5P_DEFAULT, buffer)) != SUCCEED) {
-			fprintf(stderr, "Error: Problems with H5Aread\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-			status = FAIL;
-			break;
-		}
-		for (i=0;i<ndims;i++) {
-			if (i==0) {
-				dim_sizes[i] = (int32)maxdims[i];
-			} else if (maxdims[i] == 0) {
-				dim_sizes[i] = (int32)dims[i];
-			} else {
-				dim_sizes[i] = (int32)maxdims[i];
-			}
-			start[i] = 0;
-			edges[i] = (int32)dims[i];
-		}
-		if ((sds_id = SDcreate(sd_id, name, h4_type, ndims, dim_sizes)) <= 0 ) {
-			fprintf(stderr, "Error: Unable to create SDS %s.\n",name);
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-			status = FAIL;
-			break;
-		}
-		op_data->sds_id = sds_id;
-		if ((status = SDwritedata(sds_id, start, NULL, edges, buffer)) != SUCCEED ) {
-			fprintf(stderr, "Error: Unable to write SDS %s.\n",name);
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		}
-    	if ((status = H5Aiterate(did, NULL, (H5G_operator_t)convert_attr, op_data)) < 0 ) {
-        	fprintf(stderr,"Error: iterate over attributes\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-    	}
-		if ((status = SDendaccess(sds_id)) != SUCCEED ) {
-			fprintf(stderr, "Error: Unable to end access to SDS %s.\n",name);
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-		}
-        break;
-    case H5T_TIME:
-        fprintf(stderr,"Error: H5T_TIME not yet implemented.\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-        break;
-    case H5T_STRING:
-        fprintf(stderr,"Error: H5T_STRING not yet implemented.\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-        break;
-    case H5T_BITFIELD:
-        fprintf(stderr,"Error: H5T_BITFIELD not yet implemented.\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-        break;
-    case H5T_OPAQUE:
-        fprintf(stderr,"Error: H5T_OPAQUE not yet implemented.\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-        break;
-    case H5T_COMPOUND:
-		if (ndims==1) {
-			if ((nmembers = H5Tget_nmembers(type)) <= 0 ) {
-				fprintf(stderr, "Error: Unable to get information about compound datatype %d\n",nmembers);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			for (idx=0;idx<nmembers;idx++) {
-				if ((ndimf = H5Tget_member_dims(type, idx, dimf, permf)) > 1 ) {
-        			fprintf(stdout,"Warning: H5 datasets of H5T_COMPOUND type with ndims = 1, whose members\n");
-        			fprintf(stdout,"Warning: of the H5T_COMPOUND type have rank > 1 are not converted.\n");
-					break;
-				} 
-			}
-			hfile_id = op_data->hfile_id;
-			if ((vdata_id = VSattach(hfile_id, -1, "w")) <= 0 ) {
-				fprintf(stderr, "Error: Unable to create vdata %s.\n",name);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				status = FAIL;
-				break;
-			}
-			op_data->vdata_id = vdata_id;
-			if ((status = VSsetname(vdata_id, name)) != SUCCEED ) {
-				fprintf(stderr, "Error: Unable to set vdata name %s.\n",name);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			if ((status = VSsetclass(vdata_id, "HDF5")) != SUCCEED ) {
-				fprintf(stderr, "Error: Unable to set class on vdata %s\n", name);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			for (idx=0;idx<nmembers;idx++) {
-				if ((ndimf = H5Tget_member_dims(type, idx, dimf, NULL)) < 0 ) {
-					fprintf(stderr, "Error: field rank for H5T_COMPOUND type %d, idx %d < 0\n", type, idx);
-					DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-					break;
-				}
-				if ((fieldname = H5Tget_member_name(type, idx)) == NULL ) {
-					fprintf(stderr, "Error: Unable to get fieldname for compound type %d, idx %d\n", type, idx);
-					DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-					break;
-				}
-				if ((fieldtype = H5Tget_member_type(type, idx)) < 0 ) {
-        			fprintf(stderr,"Error: H5 datasets of H5T_COMPOUND type with fieldtype %d, idx %d.\n",fieldtype,idx);
-					DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-					break;
-				}
-				if ((h4_type = h5type_to_h4type(fieldtype)) < 0 ) {
-					fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
-					DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-					break;
-				}
-/*
-				if ((mem_type = h4type_to_memtype(h4_type)) == FAIL ) {
-					fprintf(stderr, "Error: Problems translating h4 type to mem type\n");
-					DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-        				return FAIL;
-				}
-*/
-				if (ndimf == 0 ) {
-					order = 1;
-				} else {
-					order = dimf[0];
-				}
-				if ((status = VSfdefine(vdata_id, fieldname, h4_type, order)) != SUCCEED ) {
-					fprintf(stderr, "Error: Unable to set field %d\n", idx);
-					DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-					break;
-				}
-				strcat(fieldname_list,fieldname);
-				if (idx<nmembers-1) {
-					strcat(fieldname_list,", ");
-				}
-
-				HDfree(fieldname);
-			}
-			if ((status = VSsetfields(vdata_id, fieldname_list)) != SUCCEED ) {
-				fprintf(stderr, "Error: Unable to set fieldname list  %s\n", name);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			if ((status = VSsetinterlace(vdata_id, FULL_INTERLACE)) != SUCCEED ) {
-				fprintf(stderr, "Error: Unable to set FULL_INTERLACE mode, status %d\n", (int)status);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-
-			if ((type2 = H5Tcopy(type)) <= 0  ) {
-				fprintf(stderr, "Error: H5Tcopy did not SUCCEED, type %d\n", type2);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			if ((status = H5Tpack(type2)) != SUCCEED ) {
-				fprintf(stderr, "Error: H5Tpack did not SUCCEED, status %d\n", (int)status);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			if ((recsize = H5Tget_size(type2)) <= 0 ) {
-				fprintf(stderr, "Error: Unable to get record size %d\n", (int)recsize);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			n_records = (int32)dims[0];
-    		if ((buffer = HDmalloc(n_records*recsize)) == NULL) {
-				fprintf(stderr, "Error: Problems with HDmalloc of memory space\n");
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				status = FAIL;
-				break;
-			}
         	if ((status = H5Dread(did, type2, space, space, H5P_DEFAULT, buffer)) != SUCCEED) {
-				fprintf(stderr, "Error: Problems with H5Aread\n");
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				status = FAIL;
-				break;
-			}
+			fprintf(stderr, "Error: Problems with H5Dread\n");
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			status = FAIL;
+			break;
+		}
 
-			if ((record_pos = VSseek(vdata_id, 0)) != 0 ) {
-				fprintf(stderr, "Error: Could not seek the beginning of the Vdata, %d\n", (int)record_pos);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			if ((num_of_recs = VSwrite(vdata_id, (void *)buffer, n_records, FULL_INTERLACE)) != n_records ) {
-				fprintf(stderr, "Error: Only able to write %d of %d records\n", (int)num_of_recs, (int)n_records);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-			/* there are only vdata attributes, no field attributes */
+		if ((record_pos = VSseek(vdata_id, 0)) != 0 ) {
+			fprintf(stderr, "Error: Could not seek the beginning of the Vdata, %d\n", (int)record_pos);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		if ((num_of_recs = VSwrite(vdata_id, (void *)buffer, n_records, FULL_INTERLACE)) != n_records ) {
+			fprintf(stderr, "Error: Only able to write %d of %d records\n", (int)num_of_recs, (int)n_records);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+		/* there are only vdata attributes, no field attributes */
     		if ((status = H5Aiterate(did, NULL, (H5G_operator_t)convert_attr, op_data)) < 0 ) {
         		fprintf(stderr,"Error: iterate over attributes\n");
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
     		}
-			if ((status = VSdetach(vdata_id)) != SUCCEED ) {
-				fprintf(stderr, "Error: Unable to detach to vdata %s.\n",name);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-
-			if ((status = H5Tclose(type2)) != SUCCEED  ) {
-				fprintf(stderr, "Error: H5Tclose did not SUCCEED, status %d\n", (int)status);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-				break;
-			}
-		} else {
-        	fprintf(stdout,"Warning: H5 datasets of H5T_COMPOUND type with ndims > 1 are not converted.\n");
+		if ((status = VSdetach(vdata_id)) != SUCCEED ) {
+			fprintf(stderr, "Error: Unable to detach to vdata %s.\n",name);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
 		}
-		break;
+
+		if ((status = H5Tclose(type2)) != SUCCEED  ) {
+			fprintf(stderr, "Error: H5Tclose did not SUCCEED, status %d\n", (int)status);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			break;
+		}
+	} else {
+        	fprintf(stdout,"Warning: H5 datasets of H5T_COMPOUND type with ndims > 1 are not converted.\n");
+	}
+	break;
     default:
         fprintf(stderr,"Error: %d class not found\n",class);
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
     }
 
     if ((status = H5Tclose(type)) < 0 ) {
         fprintf(stderr,"Error: closing type\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
     }
 
     if ((status = H5Sclose(space)) < 0 ) {
         fprintf(stderr,"Error: closing space\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
     }
 
     HDfree(buffer);
 
-	return status;
+    return status;
     
 }
 
@@ -889,7 +894,7 @@ int32  n_values;
 
 		if ((mem_type = h4type_to_memtype(h4_type)) == FAIL ) {
 			fprintf(stderr, "Error: Problems translating h4 type to mem type\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
 			status = FAIL;
         	return status;
 		}
