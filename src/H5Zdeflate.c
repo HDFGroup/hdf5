@@ -19,6 +19,10 @@
 
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Z_deflate_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -31,7 +35,6 @@
 #endif
 
 /* Interface initialization */
-#define PABLO_MASK	H5Z_deflate_mask
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
 

@@ -14,6 +14,10 @@
 
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
+/* Pablo mask */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Z_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -23,9 +27,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Zpkg.h"		/* Data filters				*/
-
-/* Pablo mask */
-#define PABLO_MASK	H5Z_mask
 
 /* Interface initialization */
 #define INTERFACE_INIT H5Z_init_interface
