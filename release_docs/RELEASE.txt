@@ -57,6 +57,7 @@ New Features
 
     F90 API:
     --------
+          No new features in this release.
 
     C++ API:
     --------
@@ -120,10 +121,12 @@ Bug Fixes since HDF5-1.6.3 release
 
     Tools
     -----
+        - h5fc and h5c++ work correctly when -c compiler flag
+          is used.  EIP - 2005/03/14        
 	- Fixed h5dump to print attributes data in ASCII if -r option is used.
 	  AKC - 2004/11/18
-        - Fixed space utilization reported in h5ls to correct error in formula
-            used.  QAK - 2004/10/22
+        - Fixed space utilization reported in h5ls to correct error 
+          in formula used.  QAK - 2004/10/22
 
     Documentation 
     ------------- 
@@ -393,11 +396,6 @@ Known Problems
   sockets used by the poe command and left behind due to failed commands.
   Ask your system administrator to clean them out.  Lastly, request IBM
   to provide a mean to run poe without the debug socket.
-
-* h5fc and h5c++ compilation scripts have a bug: object files (*.o) cannot be
-  created when source code is compiled using h5fc or h5c++. We will provide
-  a fix. Please check ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/ 
-  for the patches.
 
 * Fortran subroutine h5pget_driver_f doesn't return a correct driver information.
 
