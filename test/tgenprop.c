@@ -72,7 +72,7 @@ test_genprop_basic_class(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Creation Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check class name */
@@ -89,7 +89,7 @@ test_genprop_basic_class(void)
     CHECK_I(cid2, "H5Pget_class_parent");
 
     /* Verify class parent correct */
-    ret = H5Pequal(cid2,H5P_NO_CLASS_NEW);
+    ret = H5Pequal(cid2,H5P_NO_CLASS);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Make certain false postives aren't being returned */
@@ -130,7 +130,7 @@ test_genprop_basic_class(void)
     CHECK_I(cid3, "H5Pget_class_parent");
 
     /* Verify class parent's parent correct */
-    ret = H5Pequal(cid3,H5P_NO_CLASS_NEW);
+    ret = H5Pequal(cid3,H5P_NO_CLASS);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Close parent class's parent */
@@ -164,7 +164,7 @@ test_genprop_basic_class_prop(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Properties Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check the number of properties in class */
@@ -320,7 +320,7 @@ test_genprop_class_iter(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Property Iteration Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
@@ -416,7 +416,7 @@ test_genprop_class_callback(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Callback Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,test_genprop_cls_cb1,&crt_cb_struct,NULL,NULL,test_genprop_cls_cb1,&cls_cb_struct);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,test_genprop_cls_cb1,&crt_cb_struct,NULL,NULL,test_genprop_cls_cb1,&cls_cb_struct);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
@@ -447,12 +447,12 @@ test_genprop_class_callback(void)
     cls_cb_struct.id=(-1);
 
     /* Create a property list from the class */
-    lid1 = H5Pcreate_list(cid1);
-    CHECK_I(lid1, "H5Pcreate_list");
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
 
     /* Verify that the creation callback occurred */
-    VERIFY(crt_cb_struct.count, 1, "H5Pcreate_list");
-    VERIFY(crt_cb_struct.id, lid1, "H5Pcreate_list");
+    VERIFY(crt_cb_struct.count, 1, "H5Pcreate");
+    VERIFY(crt_cb_struct.id, lid1, "H5Pcreate");
 
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
@@ -460,12 +460,12 @@ test_genprop_class_callback(void)
     VERIFY(nprops, 4, "H5Pget_nprops");
 
     /* Create another property list from the class */
-    lid2 = H5Pcreate_list(cid1);
-    CHECK_I(lid2, "H5Pcreate_list");
+    lid2 = H5Pcreate(cid1);
+    CHECK_I(lid2, "H5Pcreate");
 
     /* Verify that the creation callback occurred */
-    VERIFY(crt_cb_struct.count, 2, "H5Pcreate_list");
-    VERIFY(crt_cb_struct.id, lid2, "H5Pcreate_list");
+    VERIFY(crt_cb_struct.count, 2, "H5Pcreate");
+    VERIFY(crt_cb_struct.id, lid2, "H5Pcreate");
 
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid2,&nprops);
@@ -473,20 +473,20 @@ test_genprop_class_callback(void)
     VERIFY(nprops, 4, "H5Pget_nprops");
 
     /* Close first list */
-    ret = H5Pclose_list(lid1);
-    CHECK_I(ret, "H5Pclose_list");
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
 
     /* Verify that the close callback occurred */
-    VERIFY(cls_cb_struct.count, 1, "H5Pclose_list");
-    VERIFY(cls_cb_struct.id, lid1, "H5Pclose_list");
+    VERIFY(cls_cb_struct.count, 1, "H5Pclose");
+    VERIFY(cls_cb_struct.id, lid1, "H5Pclose");
 
     /* Close second list */
-    ret = H5Pclose_list(lid2);
-    CHECK_I(ret, "H5Pclose_list");
+    ret = H5Pclose(lid2);
+    CHECK_I(ret, "H5Pclose");
 
     /* Verify that the close callback occurred */
-    VERIFY(cls_cb_struct.count, 2, "H5Pclose_list");
-    VERIFY(cls_cb_struct.id, lid2, "H5Pclose_list");
+    VERIFY(cls_cb_struct.count, 2, "H5Pclose");
+    VERIFY(cls_cb_struct.id, lid2, "H5Pclose");
 
     /* Close class */
     ret = H5Pclose_class(cid1);
@@ -515,7 +515,7 @@ test_genprop_basic_list(void)
     MESSAGE(5, ("Testing Basic Generic Property List Creation Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (w/default values) */
@@ -534,12 +534,12 @@ test_genprop_basic_list(void)
     VERIFY(nprops, 2, "H5Pget_nprops");
 
     /* Create a property list from the class */
-    lid1 = H5Pcreate_list(cid1);
-    CHECK_I(lid1, "H5Pcreate_list");
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
 
     /* Get the list's class */
-    cid2 = H5Pget_class_new(lid1);
-    CHECK_I(cid2, "H5Pget_class_new");
+    cid2 = H5Pget_class(lid1);
+    CHECK_I(cid2, "H5Pget_class");
 
     /* Check that the list's class is correct */
     ret = H5Pequal(cid1,cid2);
@@ -585,8 +585,8 @@ test_genprop_basic_list(void)
     VERIFY(prop2_value, *PROP2_DEF_VALUE, "H5Pget");
 
     /* Close list */
-    ret = H5Pclose_list(lid1);
-    CHECK_I(ret, "H5Pclose_list");
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
 
     /* Close class */
     ret = H5Pclose_class(cid1);
@@ -617,7 +617,7 @@ test_genprop_basic_list_prop(void)
     MESSAGE(5, ("Testing Basic Generic Property List Property Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (several w/default values) */
@@ -631,8 +631,8 @@ test_genprop_basic_list_prop(void)
     CHECK_I(ret, "H5Pregister");
 
     /* Create a property list from the class */
-    lid1 = H5Pcreate_list(cid1);
-    CHECK_I(lid1, "H5Pcreate_list");
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
 
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
@@ -718,8 +718,8 @@ test_genprop_basic_list_prop(void)
     VERIFY(prop4_value, *PROP4_DEF_VALUE, "H5Pget");
 
     /* Close list */
-    ret = H5Pclose_list(lid1);
-    CHECK_I(ret, "H5Pclose_list");
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
 
     /* Close class */
     ret = H5Pclose_class(cid1);
@@ -774,7 +774,7 @@ test_genprop_list_iter(void)
     MESSAGE(5, ("Testing Generic Property List Iteration Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (several w/default values) */
@@ -788,8 +788,8 @@ test_genprop_list_iter(void)
     CHECK_I(ret, "H5Pregister");
 
     /* Create a property list from the class */
-    lid1 = H5Pcreate_list(cid1);
-    CHECK_I(lid1, "H5Pcreate_list");
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
 
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
@@ -824,8 +824,8 @@ test_genprop_list_iter(void)
     VERIFY(idx, (int)nprops, "H5Piterate");
 
     /* Close list */
-    ret = H5Pclose_list(lid1);
-    CHECK_I(ret, "H5Pclose_list");
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
 
     /* Close class */
     ret = H5Pclose_class(cid1);
@@ -1013,7 +1013,7 @@ test_genprop_list_callback(void)
     MESSAGE(5, ("Testing Basic Generic Property List Property Callback Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,test_genprop_cls_cb2,&cop_cb_struct,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,test_genprop_cls_cb2,&cop_cb_struct,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with callbacks) */
@@ -1046,11 +1046,11 @@ test_genprop_list_callback(void)
     HDmemset(&prop2_cb_info,0,sizeof(prop_cb_info));
 
     /* Create a property list from the class */
-    lid1 = H5Pcreate_list(cid1);
-    CHECK_I(lid1, "H5Pcreate_list");
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
 
     /* Verify creation callback information for properties tracked */
-    VERIFY(prop1_cb_info.crt_count, 1, "H5Pcreate_list");
+    VERIFY(prop1_cb_info.crt_count, 1, "H5Pcreate");
     if(HDstrcmp(prop1_cb_info.crt_name,PROP1_NAME)!=0) {
         num_errs++;
         printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
@@ -1160,8 +1160,8 @@ test_genprop_list_callback(void)
     VERIFY(cop_cb_struct.id, lid2, "H5Pcopy");
 
     /* Close first list */
-    ret = H5Pclose_list(lid1);
-    CHECK_I(ret, "H5Pclose_list");
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
 
     /* Verify close callback information for properties tracked */
     VERIFY(prop1_cb_info.cls_count, 1, "H5Pclose");
@@ -1175,8 +1175,8 @@ test_genprop_list_callback(void)
     } /* end if */
 
     /* Close second list */
-    ret = H5Pclose_list(lid2);
-    CHECK_I(ret, "H5Pclose_list");
+    ret = H5Pclose(lid2);
+    CHECK_I(ret, "H5Pclose");
 
     /* Verify close callback information for properties tracked */
     VERIFY(prop1_cb_info.cls_count, 2, "H5Pclose");
