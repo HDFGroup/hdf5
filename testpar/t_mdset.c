@@ -179,7 +179,7 @@ void compact_dataset(char *filename)
     for (i = 0; i < SIZE; i++)
         for (j = 0; j < SIZE; j++)
             if(inme[i][j] != outme[i][j])
-                if(err_num++ < MAX_ERR_REPORT || verbose)
+                if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                     printf("Dataset Verify failed at [%d][%d]: expect %f, got %f\n", i, j, outme[i][j], inme[i][j]); 
                                                             
     H5Pclose(plist);
@@ -382,9 +382,9 @@ void dataset_fillvalue(const char *filename)
             for (k=0; k<(int)dset_dims[2]; k++)
                 for (l=0; l<(int)dset_dims[3]; l++, twdata++, trdata++)
 		    if( *trdata != 0)
-			if(err_num++ < MAX_ERR_REPORT || verbose)
+			if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
 			    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,j,k,l, *trdata);
-    if(err_num > MAX_ERR_REPORT && !verbose)
+    if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
     if(err_num){
         printf("%d errors found in check_value\n", err_num);
@@ -445,15 +445,15 @@ void dataset_fillvalue(const char *filename)
                 for (l=0; l<(int)dset_dims[3]; l++, twdata++, trdata++)
                     if(i<mpi_size) {
                         if( *twdata != *trdata )
-                            if(err_num++ < MAX_ERR_REPORT || verbose)
+                            if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                                 printf("Dataset Verify failed at [%d][%d][%d][%d]: expect %d, got %d\n", i,j,k,l, *twdata, *trdata); 
                     } /* end if */
                     else {
                         if( *trdata != 0)
-                            if(err_num++ < MAX_ERR_REPORT || verbose)
+                            if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                                 printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,j,k,l, *trdata);
                     } /* end else */
-    if(err_num > MAX_ERR_REPORT && !verbose)
+    if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
     if(err_num){
         printf("%d errors found in check_value\n", err_num);
@@ -1029,10 +1029,10 @@ int check_value(DATATYPE *indata, DATATYPE *outdata)
     for(i=chunk_origin[0]; i<(chunk_origin[0]+chunk_dims[0]); i++)
          for(j=chunk_origin[1]; j<(chunk_origin[1]+chunk_dims[1]); j++) {
               if( *indata != *outdata )
-	          if(err_num++ < MAX_ERR_REPORT || verbose)
+	          if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
 		      printf("Dataset Verify failed at [%ld][%ld](row %ld, col%ld): expect %d, got %d\n", (long)i, (long)j, (long)i, (long)j, *outdata, *indata); 
 	 }
-    if(err_num > MAX_ERR_REPORT && !verbose)
+    if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
     if(err_num)
         printf("%d errors found in check_value\n", err_num);

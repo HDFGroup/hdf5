@@ -30,7 +30,6 @@ int dim1 = DIM1;
 int chunkdim0;
 int chunkdim1;
 int nerrors = 0;			/* errors count */
-int verbose = 0;			/* verbose, default as no. */
 int ndatasets = 300;			/* number of datasets to create*/
 int ngroups = 512;                      /* number of groups to create in root
                                          * group. */
@@ -183,7 +182,7 @@ parse_options(int argc, char **argv)
                             break;
                 case 'b':   dobig = 1;
                             break;
-		case 'v':   verbose = 1;
+		case 'v':   SetTestVerbosity(VERBO_MED);
 			    break;
 		case 'f':   if (--argc < 1) {
 				nerrors++;

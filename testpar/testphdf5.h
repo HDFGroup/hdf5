@@ -27,11 +27,20 @@
 #define FALSE   (!TRUE)
 #endif  /* !FALSE */
 
+/* temporary fix for restoring the H5EXXX API. */
+/* An ISO compliant compiler should handle the repeated name correctly. */
+/* If it barks at it, try change the second name to something like */
+/*     H5E/@@/xxx   where '@' is actually '*'.    */
+#ifndef H5_WANT_H5_V1_6_COMPAT
+#define H5Eget_auto(func, data) H5Eget_auto(H5E_DEFAULT, func, data)
+#define H5Eset_auto(func, data) H5Eset_auto(H5E_DEFAULT, func, data)
+#endif
+
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 
 #define MESG(x)                                                         \
-	if (verbose) printf("%s\n", x);                                 \
+	if (VERBOSE_MED) printf("%s\n", x);                                 \
 
 #define VRFY(val, mesg) do {                                            \
     if (val) {                                                          \
@@ -45,7 +54,7 @@
                mesg, (int)__LINE__, __FILE__);                          \
         ++nerrors;                                                      \
         fflush(stdout);                                                 \
-        if (!verbose) {                                                 \
+        if (!VERBOSE_MED) {                                                 \
             printf("aborting MPI process\n");                           \
             MPI_Finalize();                                             \
             exit(nerrors);                                              \
@@ -119,7 +128,6 @@ typedef int DATATYPE;
 extern int dim0, dim1;				/*Dataset dimensions */
 extern int chunkdim0, chunkdim1;		/*Chunk dimensions */
 extern int nerrors;				/*errors count */
-extern int verbose;				/*verbose, default as no. */
 extern H5E_auto_t old_func;		        /* previous error handler */
 extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */

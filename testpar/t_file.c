@@ -44,7 +44,7 @@ test_split_comm_access(char *filename)
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     herr_t ret;			/* generic return value */
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Split Communicator access test on file %s\n",
 	    filename);
 
