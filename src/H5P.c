@@ -4455,6 +4455,7 @@ H5P_get(H5P_genplist_t *plist, const char *name, void *value)
 
     assert(plist);
     assert(name);
+
     assert(value);
 
     /* Check if the property has been deleted */

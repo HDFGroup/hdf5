@@ -720,154 +720,103 @@ done:
         FUNC_LEAVE_NOAPI(new_node);
 }
 
-#ifdef H5Z_XFORM_DEBUG
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5Z_XFORM_DEBUG
- * Purpose:     Print out the expression in a nice format which displays
- *              the precedences explicitly with parentheses.
- * Return:      Nothing
- * Programmer:  Bill Wendling
- *              26. August 2003
+ * Function:    H5Z_eval_full
+ * Purpose: 	If the transform is trivial, this function applies it.
+ * 		Otherwise, it calls H5Z_xform_eval_full to do the full 
+ * 		transform.
+ * Return:      SUCCEED if transform applied succesfully, FAIL otherwise
+ * Programmer:  Leon Arber
+ * 		5/1/04
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 
-static void
-H5Z_XFORM_DEBUG(H5Z_node *tree)
-{
-    int i;
-    printf("Expression: ");
-    H5Z_result res;
-    res = H5Z_eval(tree);
-
-    if(res.type == H5Z_INTEGER)
-        printf("H5Z_result is: %d",res.value.int_val );
-    else if(res.type == H5Z_FLOAT)
-        printf("H5Z_result is: %f",res.value.float_val );
-    else 
-    {
-        printf("H5Z_result is ");
-        for(i=0; i<5; i++)
-            printf("%d ", array[i]);
-    }
-    printf("\n");
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5Z_print
- * Purpose:     Print out the expression in a nice format which displays
- *              the precedences explicitly with parentheses.
- * Return:      Nothing
- * Programmer:  Bill Wendling
- *              26. August 2003
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-H5Z_print(H5Z_node *tree, FILE *stream)
-{
-    /* check args */
-    assert(stream);
-
-    if (!tree)
-        return;
-
-    if (tree->type == H5Z_INTEGER) {
-        fprintf(stream, "%ld", tree->value.int_val);
-    } else if (tree->type == H5Z_FLOAT) {
-        fprintf(stream, "%f", tree->value.float_val);
-    } else if (tree->type == SYMBOL) {
-        fprintf(stream, "%s", tree->value.sym_val);
-    } else {
-        fprintf(stream, "(");
-        H5Z_print(tree->lchild, stream);
-
-        switch (tree->type) {
-        case PLUS:      fprintf(stream, "+"); break;
-        case MINUS:     fprintf(stream, "-"); break;
-        case MULT:      fprintf(stream, "*"); break;
-        case DIVIDE:    fprintf(stream, "/"); break;
-        default: fprintf(stream, "Invalid expression tree\n");
-            return;
-        }
-
-        H5Z_print(tree->rchild, stream);
-        fprintf(stream, ")");
-    }
-}
-#endif  /* H5Z_XFORM_DEBUG */
-
-
-
-void H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, hsize_t array_size, const H5T_t *buf_type)
+herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, hsize_t array_size, const H5T_t *buf_type)
 {
     H5Z_node *tree;
     hid_t array_type;
     unsigned int i;
     int n;  
     float f;
- 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5Z_xform_eval)
-      
-    assert(data_xform_prop);
+    H5Z_result res;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5Z_xform_eval, FAIL)
+
+	assert(data_xform_prop);
 
     tree=data_xform_prop->parse_root;
 
     /* Get the datatype ID for the buffer's type */
-    array_type = H5Z_xform_find_type(buf_type);
+    if( (array_type = H5Z_xform_find_type(buf_type)) < 0) 
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Could not find matching data type for data transform.")
 
-   if( tree->type == H5Z_INTEGER)
-   {
-           if(array_type == H5T_NATIVE_INT)
-           {
-	     n = tree->value.int_val;
-               for(i=0; i<array_size; i++)
-		 *((int*)array + i) = n;
-            
-           }
-           else if(array_type == H5T_NATIVE_FLOAT)
-           {
-               f = (float)tree->value.int_val;
-               for(i=0; i<array_size; i++)
-                   *((float*)array + i) = f;
-           }
-   }
-   else if (tree->type == H5Z_FLOAT)
-   {
-       for(i=0; i<array_size; i++)
-       {
-           if(array_type == H5T_NATIVE_INT)
-           {
-               n = (int)tree->value.float_val;
-               for(i=0; i<array_size; i++)
-		 *((int*)array + i) = n;
-                  
-           }
-           else if(array_type == H5T_NATIVE_FLOAT)
-           {
-               f = tree->value.float_val;
-               for(i=0; i<array_size; i++)
-                   *((float*)array + i) = f;
-           }
-       }
-   }
-   else
-       H5Z_eval_full(tree, array, array_size, array_type);
+    /* If it's a trivial data transform, perform it */
+    if( tree->type == H5Z_INTEGER)
+    {
+	if(array_type == H5T_NATIVE_INT)
+	{
+	    n = tree->value.int_val;
+	    for(i=0; i<array_size; i++)
+		*((int*)array + i) = n;
 
-    FUNC_LEAVE_NOAPI_VOID 
+	}
+	else if(array_type == H5T_NATIVE_FLOAT)
+	{
+	    f = (float)tree->value.int_val;
+	    for(i=0; i<array_size; i++)
+		*((float*)array + i) = f;
+	}
+	else
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unsupported data type for data transform")
+
+
+    }
+    else if (tree->type == H5Z_FLOAT)
+    {
+	if(array_type == H5T_NATIVE_INT)
+	{
+	    n = (int)tree->value.float_val;
+	    for(i=0; i<array_size; i++)
+		*((int*)array + i) = n;
+
+	}
+	else if(array_type == H5T_NATIVE_FLOAT)
+	{
+	    f = tree->value.float_val;
+	    for(i=0; i<array_size; i++)
+		*((float*)array + i) = f;
+	}
+	else
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unsupported data type for data transform")
+
+    }
+    /* Otherwise, do the full data transform */
+    else
+    {
+	res = H5Z_eval_full(tree, array, array_size, array_type);
+	if(res.type == ERROR)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
+    }
+
+   	   
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
            
 
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z_eval
+ * Function:    H5Z_eval_full
+ * Purpose: 	Does a full evaluation of the parse tree contained in tree
+ * 		and applies this transform to array.
  * Return:      Nothing
  * Programmer:  Leon Arber
+ * 		5/1/04
  * Modifications:
  *
  *-------------------------------------------------------------------------
@@ -876,20 +825,13 @@ static H5Z_result
 H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type)
 {
 
-    H5Z_result res, resl, resr;
-    int n;
+    H5Z_result res, resl, resr, ret_value, error;
     unsigned int i;
-    float f;
-    H5Z_result ret_value;
-    ret_value.type = ERROR;
+    
+    error.type = ERROR;
         
     FUNC_ENTER_NOAPI(H5Z_eval_full, ret_value);
     
-    /*if (!tree)
-    {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "tree was NULL")
-    }*/
-
     /* check args */
     assert(tree);
 
@@ -922,161 +864,155 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
            if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
             {
                 res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
-                {
                     if(array_type == H5T_NATIVE_INT)
                     {
-                        n = resr.value.int_val + *((int*)array + i);
-			*((int*)array + i) = n;
+			for(i=0; i<array_size; i++)
+			    *((int*)array + i) = resr.value.int_val + *((int*)array + i);
                     }
                     else if(array_type == H5T_NATIVE_FLOAT)
                     {
-                        f = resr.value.int_val +*((float*)array + i);
-                        *((float*)array + i) = f;
+			for(i=0; i<array_size; i++)
+			    *((float*)array + i) = resr.value.int_val + *((float*)array + i);
                     }
-                }
-                HGOTO_DONE(res)
+		    else
+			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+             HGOTO_DONE(res)
             }
             else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
             {
                 res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
                     if(array_type == H5T_NATIVE_INT)
                     {
-                        n = resr.value.float_val + *((int*)array + i);
-                        *((int*)array + i) = n;
+			for(i=0; i<array_size; i++)
+			    *((int*)array + i) += resr.value.float_val;
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((float*)array + i) += resr.value.float_val;
                     }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resr.value.float_val +*((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
+		    else
+			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
                 HGOTO_DONE(res)
             }
             else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
             {
                  res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
-                {
                     if(array_type == H5T_NATIVE_INT)
                     {
-                        n = resl.value.int_val + *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.int_val +*((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
+			for(i=0; i<array_size; i++)
+			    *((int*)array + i) += resl.value.int_val;
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((float*)array + i) += resl.value.int_val ;
+		    }
+		    else
+			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
                 HGOTO_DONE(res)
           
             }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT))
-            {
-             
-                res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resl.value.float_val + *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.float_val +*((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
+	   else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT))
+	   {
+
+	       res.type = SYMBOL;
+	       if(array_type == H5T_NATIVE_INT)
+	       {
+		   for(i=0; i<array_size; i++)
+		       *((int*)array + i) += resl.value.float_val;
+	       }
+	       else if(array_type == H5T_NATIVE_FLOAT)
+	       {
+		   for(i=0; i<array_size; i++)
+		       *((float*)array + i) += resl.value.float_val ;
+	       }else
+		   HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
+		       HGOTO_DONE(res)
             }
             else
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, ret_value, "Unexpected type conversion operation")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type conversion operation")
 
             HGOTO_DONE(res) 
             break;
-        case MINUS:
-        
-           if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
-            {
-                res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n =  *((int*)array + i) - resr.value.int_val;
-                        *((int*)array + i) = n;
-                        /* array[i] +=  resr.value.int_val;*/
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f =*((float*)array + i) -  resr.value.int_val;
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
-            }
-            else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) /*we can't upgrade an array w/o allocating more memory, so we downgrade the float_val to an int.*/
-            {
-                res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n =  *((int*)array + i) - resr.value.float_val;
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f =*((float*)array + i) -  resr.value.float_val; 
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
-            }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
-            {
-                res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resl.value.int_val - *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.int_val -*((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
+	case MINUS:
 
-            }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT))
+	    if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
+	    {
+		res.type = SYMBOL; 
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) -= resr.value.int_val;
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) -= resr.value.int_val;
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
+			HGOTO_DONE(res)
+	    }
+	    else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) /*we can't upgrade an array w/o allocating more memory, so we downgrade the float_val to an int.*/
+	    {
+                res.type = SYMBOL;
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+			for(i=0; i<array_size; i++)
+			    *((int*)array + i) -= resr.value.float_val;
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((float*)array + i) -= resr.value.float_val;
+		    }
+		    else
+		    {
+			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+		    }
+		    HGOTO_DONE(res)
+	    }
+	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
+	    {
+		res.type = SYMBOL; 
+		    if(array_type == H5T_NATIVE_INT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((int*)array + i) = resl.value.int_val - *((int*)array + i);
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((float*)array + i) = resl.value.int_val - *((float*)array + i);
+		    }else
+			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
+		HGOTO_DONE(res)
+
+	    }
+	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT))
             {
 
-                res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resl.value.float_val - *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.float_val -*((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
-            }
+		res.type = SYMBOL;
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) = resl.value.float_val - *((int*)array + i);
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) =  resl.value.float_val - *((float*)array + i);
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
+			HGOTO_DONE(res)
+	    }
             else
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, ret_value, "Unexpected type conversion operation")
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type conversion operation")
 
 
             HGOTO_DONE(res) 
@@ -1085,141 +1021,136 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
         case MULT:
 
-           if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
-            {
-                res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resr.value.int_val * *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resr.value.int_val **((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
-            }
-            else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
-            {
-                res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resr.value.float_val * *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resr.value.float_val **((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
-            }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
-            {
-                res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resl.value.int_val * *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.int_val **((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
+	    if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
+	    {
+		res.type = SYMBOL; 
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) *=  resr.value.int_val;
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) *=  resr.value.int_val;
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
 
-            }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT)) 
-            {
+			HGOTO_DONE(res)
+	    }
+	    else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
+	    {
+		res.type = SYMBOL;
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) *=  resr.value.float_val;
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) *= resr.value.float_val;
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
 
-                res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resl.value.float_val * *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.float_val **((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
-            }
-            else
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, ret_value, "Unexpected type operation")
+			HGOTO_DONE(res)
+	    }
+	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
+	    {
+		res.type = SYMBOL; 
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) *= resl.value.int_val;
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) *= resl.value.int_val;
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
 
-            HGOTO_DONE(res) 
-            break;
+			HGOTO_DONE(res)
+
+	    }
+	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT)) 
+	    {
+
+		res.type = SYMBOL;
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) *= resl.value.float_val;
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) *= resl.value.float_val;
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
+			HGOTO_DONE(res)
+	    }
+	    else
+		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type operation")
+
+	    HGOTO_DONE(res) 
+	    break;
 
 
-        case DIVIDE: 
+	case DIVIDE: 
 
-           if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
-            {
-                res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = *((int*)array + i) / resr.value.int_val; 
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f =*((float*)array + i) / resr.value.int_val ;
-                        *((float*)array + i) = f;
-                    }
-                }
-                HGOTO_DONE(res)
-            }
-            else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
-            {
-                res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = *((int*)array + i) / resr.value.float_val;
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f =*((float*)array + i) / resr.value.float_val;
-                        *((float*)array + i) = f;
-                    }
-                }
+	    if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
+	    {
+		res.type = SYMBOL; 
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) /= resr.value.int_val;
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) /= resr.value.int_val;
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
+			HGOTO_DONE(res)
+	    }
+	    else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
+	    {
+		res.type = SYMBOL;
+		if(array_type == H5T_NATIVE_INT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((int*)array + i) /=  resr.value.float_val;
+		}
+		else if(array_type == H5T_NATIVE_FLOAT)
+		{
+		    for(i=0; i<array_size; i++)
+			*((float*)array + i) /= resr.value.float_val;
+		}else
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
                 HGOTO_DONE(res)
             }
             else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
             {
                 res.type = SYMBOL; 
-                for(i=0; i<array_size; i++)
                 {
                     if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resl.value.int_val / *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.int_val / *((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
-                }
+		    {
+			for(i=0; i<array_size; i++)
+			    *((int*)array + i) = resl.value.int_val / *((int*)array + i);
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((float*)array + i) =  resl.value.int_val / *((float*)array + i);
+		    }else
+			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
+		}
                 HGOTO_DONE(res)
 
             }
@@ -1227,23 +1158,24 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
             {
 
                 res.type = SYMBOL;
-                for(i=0; i<array_size; i++)
-                {
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-                        n = resl.value.float_val / *((int*)array + i);
-                        *((int*)array + i) = n;
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-                        f = resl.value.float_val / *((float*)array + i);
-                        *((float*)array + i) = f;
-                    }
+		{
+		    if(array_type == H5T_NATIVE_INT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((int*)array + i) = resl.value.float_val / *((int*)array + i);
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			for(i=0; i<array_size; i++)
+			    *((float*)array + i) = resl.value.float_val / *((float*)array + i);
+		    }else
+			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+
                 }
                 HGOTO_DONE(res)
             }
             else
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, ret_value, "Unexpected type operation")
+             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type operation")
 
             HGOTO_DONE(res) 
             break;
@@ -1251,12 +1183,14 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
 
         default: 
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, ret_value, "Invalid expression tree")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Invalid expression tree")
         }
     }
 
 done:
-    FUNC_LEAVE_NOAPI(res)
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+
 }
 
 
@@ -1273,80 +1207,63 @@ done:
 static hid_t H5Z_xform_find_type(const H5T_t* type)
 {
     hid_t          ret_value = SUCCEED;
-    
+
     FUNC_ENTER_NOAPI_NOINIT(H5Z_xform_find_type);
 
     assert(type);
 
-/*    H5T_NATIVE_CHAR         
-        H5T_NATIVE_SHORT        
-        H5T_NATIVE_INT          
-        H5T_NATIVE_LONG         
-        H5T_NATIVE_LLONG        
-
-        H5T_NATIVE_UCHAR
-        H5T_NATIVE_USHORT
-        H5T_NATIVE_UINT
-        H5T_NATIVE_ULONG
-        H5T_NATIVE_ULLONG
-
-        H5T_NATIVE_FLOAT
-        H5T_NATIVE_DOUBLE
-        H5T_NATIVE_LDOUBLE
-*/
-    
     /* Check for SHORT type */
     if((H5T_cmp(type, H5I_object_verify(H5T_NATIVE_SHORT,H5I_DATATYPE) ))==0)
-        HGOTO_DONE(H5T_NATIVE_SHORT)
+	HGOTO_DONE(H5T_NATIVE_SHORT)
 
-    /* Check for INT type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_INT,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_INT)
+	    /* Check for INT type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_INT,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_INT)
 
- /* Check for LONG type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LONG,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_LONG)
+	    /* Check for LONG type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LONG,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_LONG)
 
- /* Check for LONGLONG type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LLONG,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_LLONG)
+	    /* Check for LONGLONG type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LLONG,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_LLONG)
 
- /* Check for UCHAR type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_UCHAR,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_UCHAR)
+	    /* Check for UCHAR type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_UCHAR,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_UCHAR)
 
- /* Check for USHORT type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_USHORT,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_USHORT)
+	    /* Check for USHORT type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_USHORT,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_USHORT)
 
- /* Check for UINT type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_UINT,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_UINT)
+	    /* Check for UINT type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_UINT,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_UINT)
 
- /* Check for ULONG type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_ULONG,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_ULONG)
+	    /* Check for ULONG type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_ULONG,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_ULONG)
 
- /* Check for ULONGLONG type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_ULLONG,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_ULLONG)
+	    /* Check for ULONGLONG type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_ULLONG,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_ULLONG)
 
- /* Check for FLOAT type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_FLOAT,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_FLOAT)
+	    /* Check for FLOAT type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_FLOAT,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_FLOAT)
 
- /* Check for DOUBLE type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_DOUBLE,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_DOUBLE)
+	    /* Check for DOUBLE type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_DOUBLE,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_DOUBLE)
 
 
- /* Check for LONGDOUBLE type */
-            else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LDOUBLE,H5I_DATATYPE)))==0)
-        HGOTO_DONE(H5T_NATIVE_LDOUBLE)
+	    /* Check for LONGDOUBLE type */
+    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LDOUBLE,H5I_DATATYPE)))==0)
+	HGOTO_DONE(H5T_NATIVE_LDOUBLE)
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type");
 
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -1473,11 +1390,12 @@ void* H5Z_xform_copy_tree(H5Z_node* tree)
  */
 void H5Z_xform_reduce_tree(H5Z_node* tree)
 {
-  
+    hid_t ret_value = SUCCEED;
+    
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5Z_xform_reduce_tree)
  
         if(!tree)
-            goto done;
+            HGOTO_DONE(SUCCEED)
 
     if((tree->type == PLUS) || (tree->type == DIVIDE) ||(tree->type == MULT) ||(tree->type == MINUS))
     {
@@ -1487,14 +1405,19 @@ void H5Z_xform_reduce_tree(H5Z_node* tree)
         {
             H5Z_xform_reduce_tree(tree->lchild);
             if(((tree->lchild->type == H5Z_INTEGER) || (tree->lchild->type == H5Z_FLOAT)) && ((tree->rchild->type == H5Z_INTEGER) || (tree->rchild->type == H5Z_FLOAT)))
-                H5Z_do_op(tree);
+	    {
+	       	H5Z_do_op(tree);
+		HGOTO_DONE(SUCCEED)
+	    }
 
             H5Z_xform_reduce_tree(tree->rchild);
             if(((tree->lchild->type == H5Z_INTEGER) || (tree->lchild->type == H5Z_FLOAT)) && ((tree->rchild->type == H5Z_INTEGER) || (tree->rchild->type == H5Z_FLOAT)))
-                H5Z_do_op(tree);
+	    {
+	     	H5Z_do_op(tree);
+		HGOTO_DONE(SUCCEED)
+	    }
         }
     }
-    goto done;
 
 done:
     FUNC_LEAVE_NOAPI_VOID;

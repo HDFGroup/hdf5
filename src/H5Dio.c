@@ -1207,17 +1207,21 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
         } /* end if */
 	
-        /*
+	/*
          * Perform data type conversion.
          */
         if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
+   
 
-
-        /* Added by LA to do data transforms */
+	/* Do the data transform after the conversion (since we're using type mem_type) */
         if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
-             H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, mem_type);
+	{
+             if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, mem_type) < 0)
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+	}
         /* end of LA additions */
+
 
         /*
          * Scatter the data into memory.
@@ -1445,11 +1449,22 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
         } /* end if */
 	
-        /*
+	       
+    
+	/*
          * Perform data type conversion.
          */
         if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
+
+	/* Do the data transform after the type conversion (since we're using dataset->type). */ 
+	if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
+	{ 
+	    if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->type) < 0)
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+	}
+        /* End of LA modifications */
+
 
         /*
          * Scatter the data out to the file.
@@ -1458,14 +1473,10 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
         H5_timer_begin(&timer);
 #endif
  
-        /* LA additions for data transforms */ 
-        if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
-             H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->type);
-        /* End of LA modifications */
-
-        status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
+	status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
               &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, &file_iter,
               smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
+
 
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[0].scat_timer), &timer);
@@ -1734,9 +1745,12 @@ UNUSED
                     tconv_buf, bkg_buf, dxpl_id)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
-           /* LA additions for data transforms */
+           /* Do the data transform after the conversion (since we're using type mem_type) */
             if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
-                 H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, mem_type);
+	    {
+	       if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, mem_type) < 0)
+		      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+	    }
 
             /*
              * Scatter the data into memory.
@@ -2070,17 +2084,22 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
                 if (n!=smine_nelmts)
                     HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
             } /* end if */
-    
-            /*
+   
+
+
+	    /*
              * Perform data type conversion.
              */
             if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, 
                     tconv_buf, bkg_buf, dxpl_id)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
-            /* LA additions for data transforms */
+ 	    /* Do the data transform after the type conversion (since we're using dataset->type) */
             if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
-                 H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->type);
+	    {
+	      if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->type) < 0)
+		     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+	    }          
 
             /*
              * Scatter the data out to the file.

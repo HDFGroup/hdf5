@@ -453,7 +453,6 @@ H5D_term_interface(void)
     FUNC_LEAVE_NOAPI(n)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function: H5D_xfer_xform_del
  *
