@@ -33,8 +33,11 @@ CONTENTS
 - Pablo Support 
 - Bug Fixes since HDF5-1.2.0 
 - Bug Fixes since HDF5-1.4.0-beta2
+- Documentation
 - Platforms Tested
+- Supported Configuration Features
 - Known Problems
+
 
 New Features
 ============
@@ -62,9 +65,10 @@ New Features
    * Added 'query' function to VFL drivers.  Also added 'type' parameter to
      VFL 'read' & 'write' calls, so they are aware of the type of data
      being accessed in the file.  Updated the VFL document also.
-   * A new h4toh5 uitlity, to convert HDF4 files to analogous HDF5 files.
-   * Added a new array datatype to the datatypes which can be created.  Removed
-     "array fields" from compound datatypes (use an array datatype instead).
+   * A new h4toh5 utility, to convert HDF4 files to analogous HDF5 files.
+   * Added a new array datatype to the datatypes which can be created.  
+     Removed "array fields" from compound datatypes (use an array datatype 
+     instead).
    * Parallel HDF5 works correctly with mpich-1.2.1 on Solaris, SGI, Linux.
    * You can now install the HDF5 documentation using the
      ``make install-doc'' command. The documentation is installed in the
@@ -73,9 +77,9 @@ New Features
    * HDF5 can operate correctly in the OpenMP environment in a limited way.
      Check doc/html/TechNotes/openmp-hdf5.html for details.
 
+
 h4toh5 Utility 
 ==============
-
     The h4toh5 utility is a new utility that converts an HDF4 file to an 
     HDF5 file.  For details, see the document, "Mapping HDF4 Objects to 
     HDF5 Objects":
@@ -147,12 +151,12 @@ h4toh5 Utility
 
     The h4toh5 utility requires HDF5-1.4.0 and HDF4r1.4
 
-    h4toh5 utility has been tested on all platforms listed below ( see section
-    "Platforms Tested" ) except TFLOPS.
+    h4toh5 utility has been tested on all platforms listed below (see 
+    section "Platforms Tested") except TFLOPS.
 
+ 
 F90 Support
 ===========
- 
     This is the first release of the HDF5 Library with fully integrated 
     F90 API support.  The Fortran Library is created when the 
     --enable-fortran flag is specified during configuration.
@@ -166,7 +170,6 @@ F90 Support
 
     Changes since the last prototype release (July 2000)
     ----------------------------------------------------
-
        * h5open_f and h5close_f must be called instead of h5init_types and 
          h5close_types.
 
@@ -209,28 +212,28 @@ F90 Support
              
 C++ Support
 ===========
+    This is the first release of the HDF5 Library with fully integrated 
+    C++ API support. The HDF5 C++ library is built when the --enable-cxx
+    flag is specified during configuration.
 
-        This is the first release of the HDF5 Library with fully integrated 
-        C++ API support. The HDF5 C++ library is built when the --enable-cxx
-        flag is specified during configuration.
+    Check the HDF5 Reference Manual for available C++ documentation.
 
-        Check the HDF5 Reference Manual for available C++ documentation.
+    C++ APIs are available for Solaris 2.6 and 2.7, Linux, and FreeBSD. 
 
-        C++ APIs are available for Solaris 2.6 and 2.7, Linux, and FreeBSD. 
- 
+
 Pablo Support
 =============
-	This version does not allow proper building of the Pablo-instrumented
-        version of the library.  A version supporting the pablo build is
-	available on the Pablo Website at 
-	www-pablo.cs.uiuc.edu/pub/Pablo.Release.5/HDFLibrary/hdf5_v1.4.tar.gz
+    This version does not allow proper building of the Pablo-instrumented
+    version of the library.  A version supporting the pablo build is
+    available on the Pablo Website at 
+    www-pablo.cs.uiuc.edu/pub/Pablo.Release.5/HDFLibrary/hdf5_v1.4.tar.gz
+
 
 Bug Fixes since HDF5-1.2.0
 ==========================
 
 Library
 -------
-
    * The function H5Pset_mpi is renamed as H5Pset_fapl_mpio.
    * Corrected a floating point number conversion error for the Cray J90
      platform. The error did not convert the value 0.0 correctly.
@@ -282,7 +285,6 @@ Library
 
 Configuration
 -------------
-
    * The hdf5.h include file was fixed to allow the HDF5 Library to be
      compiled with other libraries/applications that use GNU autoconf. 
    * Configuration for parallel HDF5 was improved. Configure now attempts
@@ -298,215 +300,285 @@ Configuration
 
 Tools
 -----
-    * h5dump now accepts both short and long command-line parameters:
-          -h, --help          Print a usage message and exit
-          -B, --bootblock     Print the content of the boot block
-          -H, --header        Print the header only; no data is displayed
-          -i, --object-ids    Print the object ids
-          -V, --version       Print version number and exit
-          -a P, --attribute=P Print the specified attribute
-          -d P, --dataset=P   Print the specified dataset
-          -g P, --group=P     Print the specified group and all members
-          -l P, --soft-link=P Print the value(s) of the specified soft link
-          -o F, --output=F    Output raw data into file F
-          -t T, --datatype=T  Print the specified named data type
-          -w #, --width=#     Set the number of columns
+   * h5dump now accepts both short and long command-line parameters:
+         -h, --help          Print a usage message and exit
+         -B, --bootblock     Print the content of the boot block
+         -H, --header        Print the header only; no data is displayed
+         -i, --object-ids    Print the object ids
+         -V, --version       Print version number and exit
+         -a P, --attribute=P Print the specified attribute
+         -d P, --dataset=P   Print the specified dataset
+         -g P, --group=P     Print the specified group and all members
+         -l P, --soft-link=P Print the value(s) of the specified soft link
+         -o F, --output=F    Output raw data into file F
+         -t T, --datatype=T  Print the specified named data type
+         -w #, --width=#     Set the number of columns
 
-      P - is the full path from the root group to the object.
-      T - is the name of the data type.
-      F - is a filename.
-      # - is an integer greater than 1.
-    * A change from the old way command line parameters were interpreted
-      is that multiple attributes, datasets, groups, soft-links, and
-      object-ids cannot be specified with just one flag but you have to
-      use a flag with each object. I.e., instead of doing this:
+     P - is the full path from the root group to the object.
+     T - is the name of the data type.
+     F - is a filename.
+     # - is an integer greater than 1.
+   * A change from the old way command line parameters were interpreted
+     is that multiple attributes, datasets, groups, soft-links, and
+     object-ids cannot be specified with just one flag but you have to
+     use a flag with each object. I.e., instead of doing this:
 
-        h5dump -a /attr1 /attr2 foo.h5
+       h5dump -a /attr1 /attr2 foo.h5
 
-      do this:
+     do this:
 
-        h5dump -a /attr1 -a /attr2 foo.h5
+       h5dump -a /attr1 -a /attr2 foo.h5
 
-      The cases are similar for the other object types.
-    * h5dump correctly displays compound datatypes.
-    * Corrected an error in h5toh4 which did not convert the 32bits
-      int from HDF5 to HDF4 corectly for the T3E platform.
-    * h5dump correctly displays the committed copy of predefined types
-      correctly.
-    * Added an option, -V, to show the version information of h5dump.
-    * Fixed a core dumping bug of h5toh4 when executed on platforms like 
-      TFLOPS.
-    * The test script for h5toh4 used to not able to detect the hdp
-      dumper command was not valid.  It now detects and reports the
-      failure of hdp execution.
-    * Merged the tools with the 1.2.2 branch. Required adding new
-      macros, VERSION12 and VERSION13, used in conditional compilation.
-      Updated the Windows project files for the tools.            
-    * h5dump displays opaque and bitfield data correctly.
-    * h5dump and h5ls can browse files created with the Stream VFD
-      (eg. "h5ls <hostname>:<port>").
-    * h5dump has a new feature "-o <filename>" which outputs the raw data
-      of the dataset into ascii text file <filename>.
-    * h5toh4 used to converts hdf5 strings type to hdf4 DFNT_INT8 type.
-      Corrected to produce hdf4 DFNT_CHAR type instead.
-    * h5dump and h5ls displays array data correctly.
+     The cases are similar for the other object types.
+   * h5dump correctly displays compound datatypes.
+   * Corrected an error in h5toh4 which did not convert the 32bits
+     int from HDF5 to HDF4 correctly for the T3E platform.
+   * h5dump correctly displays the committed copy of predefined types
+     correctly.
+   * Added an option, -V, to show the version information of h5dump.
+   * Fixed a core dumping bug of h5toh4 when executed on platforms like 
+     TFLOPS.
+   * The test script for h5toh4 used to not able to detect the hdp
+     dumper command was not valid.  It now detects and reports the
+     failure of hdp execution.
+   * Merged the tools with the 1.2.2 branch. Required adding new
+     macros, VERSION12 and VERSION13, used in conditional compilation.
+     Updated the Windows project files for the tools.            
+   * h5dump displays opaque and bitfield data correctly.
+   * h5dump and h5ls can browse files created with the Stream VFD
+     (eg. "h5ls <hostname>:<port>").
+   * h5dump has a new feature "-o <filename>" which outputs the raw data
+     of the dataset into ascii text file <filename>.
+   * h5toh4 used to converts hdf5 strings type to hdf4 DFNT_INT8 type.
+     Corrected to produce hdf4 DFNT_CHAR type instead.
+   * h5dump and h5ls displays array data correctly.
 
-Documentation
--------------
 
-    * User's Guide and Reference Manual were updated. 
-      See doc/html/PSandPDF/index.html for more details. 
-
-   
 Bug Fixes since HDF5-1.4.0-beta2
 ================================
+   * Fixed a bug in the conversion from a little endian double to a big 
+     endian float in some special cases.
+   * Corrected configuration error which was not including compression 
+     support correctly. 
+   * Cleaned up lots of warnings.
+   * Changed a few h5dump command line switches and added long versions of
+     the switches.
+   * Changed parameters for H5Tconvert, H5Pset_bufer and H5Pget_buffer from
+     size_t to hsize_t
+   * Fixed fairly obscure bug in hyperslab I/O which could (in rare cases)
+     not copy all the data during a transfer.
+   * Removed ragged array code from library.
+   * F90 library and module files are installed properly now on all supported 
+     platforms.
 
-    * Fixed a bug in the conversion from a little endian double to a big endian float
-      in some special cases.
-    * Corrected configuration error which was not including compression support
-      correctly.
-    * Cleaned up lots of warnings.
-    * Changed a few h5dump command line switches and added long versions of
-      the switches.
-    * Changed parameters for H5Tconvert, H5Pset_bufer and H5Pget_buffer from
-      size_t to hsize_t
-    * Fixed fairly obscure bug in hyperslab I/O which could (in rare cases)
-      not copy all the data during a transfer.
-    * Removed ragged array code from library.
-    * F90 library and module files are installed properly now on all supported platforms.
 
+Documentation
+=============
+   * A new document summarizing the changes in the library leading up to 
+     the current release has been added: 
+           HDF5 Software Changes from Release to Release
+     This document is in the Application Developer's Guide and is of 
+     particular interest to developers who must keep an application 
+     synchronized with the library.
+   * The documentation for the Fortran90 and C++ APIs is linked to the
+     opening page of the Reference Manual.  Fortran90 functions are 
+     individually referenced from the corresponding C functions through-
+     out the Reference Manual.
+   * User's Guide and Reference Manual were updated to reflect changed 
+     function syntax and to fix reported bugs. 
+   * Functions that are new at this release were added to the Reference 
+     Manual.  
+   * Functions that have been removed from the library were removed from 
+     the User's Guide and the Reference Manual.
+   * PostScript and PDF versions of the Release 1.4 document set are 
+     not available at the time of Release 1.4.0.
+
+   
 Platforms Tested
 ================
+    AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6
+                                  mpcc_r 3.6.6
+    Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
+                                  Cray Fortran Version 3.4.0.2
+    Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
+                                  Cray Fortran Version 3.4.0.2
+    FreeBSD 4.2                   gcc 2.95.2
+                                  g++ 2.95.2
+    HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
+    HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
+    IRIX 6.5                      MIPSpro cc 7.30
+                                  mpich-1.2.1
+    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
+                                  mpt.1.4.0.2
+                                  mpich-1.2.1
+    Linux 2.2.16-3smp             gcc-2.95.2
+                                  g++ 2.95.2
+                                  pgf90 3.1-3
+                                  mpich-1.2.1
+    OSF1 V4.0                     DEC-V5.2-040
+                                  Digital Fortran 90 V4.1-270
+    SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
+    (Solaris 2.6)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
+                                         2.0 Patch 107356-04
+                                  Workshop Compilers 5.0 98/12/15 C++ 5.0
+    SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
+     (Solaris 2.7)                WorkShop Compilers 5.0 99/10/25 Fortran 90
+                                         2.0 Patch 107356-04
+                                  Workshop Compilers 5.0 98/12/15 C++ 5.0
+                                  mpich-1.2.1
+    SunOS 5.5.1                   gcc-2.7.2 
+     (Solaris 2.5.1 (x86))
+    TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
+    Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
+    Windows 98                    MSVC++ 6.0
 
 
-  AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6
-  				mpcc_r 3.6.6
-  Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
-                                Cray Fortran Version 3.4.0.2
-  Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
-                                Cray Fortran Version 3.4.0.2
-  FreeBSD 4.2                   gcc 2.95.2
-                                g++ 2.95.2
-  HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
-  HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
-  IRIX 6.5                      MIPSpro cc 7.30
-                                mpich-1.2.1
-  IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
-                                mpt.1.4.0.2
-                                mpich-1.2.1
-  Linux 2.2.16-3smp             gcc-2.95.2
-                                g++ 2.95.2
-                                pgf90 3.1-3
-                                mpich-1.2.1
-  OSF1 V4.0                     DEC-V5.2-040
-                                Digital Fortran 90 V4.1-270
-  SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
-  (Solaris 2.6)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
-                                       2.0 Patch 107356-04
-                                Workshop Compilers 5.0 98/12/15 C++ 5.0
-  SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
-  (Solaris 2.7)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
-                                       2.0 Patch 107356-04
-                                Workshop Compilers 5.0 98/12/15 C++ 5.0
-                                mpich-1.2.1
-  SunOS 5.5.1                   gcc-2.7.2 
-   (Solaris 2.5.1 (x86))
-  TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
-  Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
-  Windows 98                    MSVC++ 6.0
+Supported Configuration Features Summary
+========================================
+    In the tables below
+          y  = tested and supported
+          n  = not supported or not working in this release
+         ( ) = footnote appears below table
+
+    Platform       C   C         F90  F90       C++  Shared     zlib   Tools
+                       parallel       parallel       libraries
+    Solaris2.6     y   n         y    n         y    y          y      y
+    Solaris2.7     y   y (1)     y    n         y    y          y      y
+    Solarisx86     y   n         n    n         n    y          y      y
+    IRIX6.5        y   y (1)     n    n         n    n          y      y
+    IRIX64_6.5 64  y   y (2)     y    y         n    y          y      y
+    IRIX64_6.5 32  y   y (2)     n    n         n    y          y      y
+    HPUX10.20      y   n         n    n         n    y          y      y
+    DECOSF         y   n         y    n         n    y          y      y
+    T3E            y   y         y    y         n    n          y      y
+    SV1            y   n         y    n         n    n          y      y
+    TFLOPS         y   y (1)     n    n         n    n          y      y (4)
+    AIX-4.3        y   y         n    n         n    n          y      n
+    Win2000        y   n         n    n         n    y          y      y
+    Win98          y   n         n    n         n    y          y      y
+    WinNT          y   n         n    n         n    y          y      y
+    FreeBSD        y   n         n    n         y    y          y      y
+    Linux          y   y (1)     y    n         y    y          y      y
+
+
+    Platform       1.2            static-   Thread-  SRB  GASS  STREAM-
+                   compatibility  exec      safe                VFD
+    Solaris2.6     y              n         n        n    n     y
+    Solaris2.7     y              n         y        n    n     y
+    Solarisx86     y              n         n        n    n     y
+    IRIX6.5        y              n         y        n    n     y
+    IRIX64_6.5 64  y              n         n        n    n     y
+    IRIX64_6.5 32  y              n         n        n    n     y
+    HPUX10.20      y              y         n        n    n     y
+    DECOSF         y              y         n        n    n     y
+    T3E            y              y         n        n    n     y
+    SV1            y              y         n        n    n     y
+    TFLOPS         y              y         n        n    n     n
+    AIX-4.3        y              y (3)     n        n    n     y
+    Win2000        y              y         n        n    n     n
+    Win98          y              y         n        n    n     n
+    WinNT          y              y         n        n    n     n
+    FreeBSD        y              y         n        n    n     y
+    Linux          y              n         y        n    n     y
+
+    Footnotes:  (1) Using mpich.
+                (2) Using mpt and mpich.
+                (3) When configured with static-exec enabled, tests fail 
+                    in serial mode.
+                (4) No HDF4-related tools.
+
 
 Known Problems
 ==============
+   * The stream-vfd test uses ip port 10007 for testing.  If another 
+     application is already using that port address, the test will hang 
+     indefinitely and has to be terminated by the kill command.  To try the 
+     test again, change the port address in test/stream_test.c to one not 
+     being used in the host.
 
-* The stream-vfd test uses ip port 10007 for testing.  If another application
-  is already using that port address, the test will hang indefinitely and
-  has to be terminated by the kill command.  To try the test again, change
-  the port address in test/stream_test.c to one not being used in the host.
+   * The --enable-static-exec configure flag fails to compile for Solaris
+     platforms. This is due to the fact that not all of the system
+     libraries on Solaris are available in a static format.
 
-* The --enable-static-exec configure flag fails to compile for Solaris
-  platforms. This is due to the fact that not all of the system
-  libraries on Solaris are available in a static format.
+     The --enable-static-exec configure flag also fails to correctly compile
+     on Linux platforms using the gcc-2.95.2 compiler.
+   
+     The --enable-static-exec configure flag also fails to correctly compile
+     on IBM SP2 platform for the serial mode.  The parallel mode works fine
+     with this option.
 
-  The --enable-static-exec configure flag also fails to correctly compile
-  on Linux platforms using the gcc-2.95.2 compiler.
+     The compilation fails if configured with --enable-static-exec on IRIX 6.5.
 
-  The --enable-static-exec configure flag also fails to correctly compile
-  on IBM SP2 platform for the serial mode.  The parallel mode works fine
-  with this option.
-
-  The compilation fails if configured with --enable-static-exec on IRIX 6.5.
-
-  The executable files in hdf5/bin are dynamic-linked for IRIX64 6.5(64 and
-  n32 modes) and IRIX 6.5, even though they are compiled with static library.
+     The executable files in hdf5/bin are dynamic-linked for IRIX64 6.5(64 and
+     n32 modes) and IRIX 6.5, even though they are compiled with static library.
   
-  It is suggested that you don't use this option on these platforms
-  during configuration.
+     It is suggested that you don't use this option on these platforms
+     during configuration.
 
-* testhdf5 got bus error with configuration options --prefix and --with-hdf4
-  on IRIX 6.5.
+   * testhdf5 got bus error with configuration options --prefix and --with-hdf4
+     on IRIX 6.5.
 
-* With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
-  compilation. The ANSI version of the compiler complains about not being
-  able to handle the `long long' datatype with the warning:
+   * With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
+     compilation. The ANSI version of the compiler complains about not being
+     able to handle the `long long' datatype with the warning:
 
-        warning: ANSI C does not support `long long'
+           warning: ANSI C does not support `long long'
   
-  This warning is innocuous and can be safely ignored.
+     This warning is innocuous and can be safely ignored.
 
-* SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
-  fail if library is compiled using optimization of any level.
+   * SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
+     fail if library is compiled using optimization of any level.
 
-* When building hdf5 tools and applications on windows platform, a linking
-  warning: defaultlib "LIBC" conflicts with use of other libs will appear
-  on debug version when running VC++6.0. This warning doesn't affect building
-  and testing hdf5 applications. We will continue investigating this.
+   * When building hdf5 tools and applications on windows platform, a linking
+     warning: defaultlib "LIBC" conflicts with use of other libs will appear
+     on debug version when running VC++6.0. This warning doesn't affect building
+     and testing hdf5 applications. We will continue investigating this.
 
-* h5toh4 converter fails two cases(tstr.h5 and tmany.h5) for release dll version on
-  windows 2000 and NT.
-  The reason is possibly due to windows NT DLL convention on freeing memory. It seems   
-  that memory cannot be free across library or DLL. It is still under investigated.
+   * h5toh4 converter fails two cases(tstr.h5 and tmany.h5) for release dll 
+     version on windows 2000 and NT.  The reason is possibly due to Windows NT 
+     DLL convention on freeing memory. It seems that memory cannot be freed
+     across library or DLL. It is still under investigation.
 
-* HDF-GASS testings and testhdf5 in the test directory will get bus error if
-  the configured with --with-gass.
+   * HDF-GASS testings and testhdf5 in the test directory will get bus error if
+     the configured with --with-gass.
 
-* HDF-SRB testing got segmentation error on Solaris 2.7.
- 
-* The Stream VFD was not tested yet under Windows.
-  It is not supported in the TFLOPS machine.
+   * HDF-SRB testing got segmentation error on Solaris 2.7.
+    
+   * The Stream VFD was not tested yet under Windows.
+     It is not supported in the TFLOPS machine.
 
-* Shared library option is broken for IBM SP and some Origin 2000 platforms.
-  One needs to run ./configure with '--disable-shared --enable-static'.
+   * Shared library option is broken for IBM SP and some Origin 2000 platforms.
+     One needs to run ./configure with '--disable-shared --enable-static'.
 
-* The ./dsets tests failed in the TFLOPS machine if the test program,
-  dsets.c, is compiled with the -O option.  The hdf5 library still works
-  correctly with the -O option.  The test program works fine if it is
-  compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
-  program to fail.
+   * The ./dsets tests failed in the TFLOPS machine if the test program,
+     dsets.c, is compiled with the -O option.  The hdf5 library still works
+     correctly with the -O option.  The test program works fine if it is
+     compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
+     program to fail.
 
-* Certain platforms give false negatives when testing h5ls:
-    - Solaris x86 2.5.1, Cray T3E and Cray J90 give errors during testing
-        when displaying object references in certain files.  These are benign 
-        differences due to the difference in sizes of the objects created on
-        those platforms.  h5ls appears to be dumping object references
-        correctly.
-    - Cray J90 give errors during testing when displaying
-        some floating-point values.  These are benign differences due to the
-        different precision in the values displayed and h5ls appears to be
-        dumping floating-point numbers correctly.
+   * Certain platforms give false negatives when testing h5ls:
+       - Solaris x86 2.5.1, Cray T3E and Cray J90 give errors during testing
+         when displaying object references in certain files.  These are benign 
+         differences due to the difference in sizes of the objects created on
+         those platforms.  h5ls appears to be dumping object references
+         correctly.
+       - Cray J90 give errors during testing when displaying
+         some floating-point values.  These are benign differences due to the
+         different precision in the values displayed and h5ls appears to be
+         dumping floating-point numbers correctly.
 
-* Before building HDF5 F90 Library from source on Crays (T3E and SV1) 
-  replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src subdirectory 
-  in the top level directory with the Cray-specific files from the 
-  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0/F90_source_for_Crays
-  directory.
+   * Before building HDF5 F90 Library from source on Crays (T3E and SV1) 
+     replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src 
+     subdirectory in the top level directory with the Cray-specific files from 
+     the ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/hdf5-1.4.0/src/crayf90/  directory.
 
-* The h4toh5 utility produces images that do not correctly conform
-  to the HDF5 Image and Palette Specification. 
+   * The h4toh5 utility produces images that do not correctly conform
+     to the HDF5 Image and Palette Specification. 
 
-      http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+         http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
 
-  Several required HDF5 attributes are omitted, and the dataspace 
-  is reversed (i.e., the ht. and width of the image dataset is 
-  incorrectly described.)  For more information, please see:
+     Several required HDF5 attributes are omitted, and the dataspace 
+     is reversed (i.e., the ht. and width of the image dataset is 
+     incorrectly described.)  For more information, please see:
 
-     http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
+         http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
