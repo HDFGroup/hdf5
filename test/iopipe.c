@@ -11,6 +11,16 @@
 #include "hdf5.h"
 #include "H5private.h"
 
+#if defined (__MWERKS__)
+#ifdef H5_HAVE_SYS_TIMEB 
+#undef H5_HAVE_SYS_TIMEB
+#endif
+#ifdef H5_HAVE_SYSTEM 
+#undef H5_HAVE_SYSTEM
+#endif
+#endif /* __MWERKS__*/
+
+
 #ifdef H5_STDC_HEADERS
 #   include <assert.h>
 #   include <fcntl.h>
@@ -40,6 +50,8 @@
 #ifdef H5_HAVE_WINSOCK_H
 #   include <Winsock.h>
 #endif
+
+
 
 #ifdef H5_HAVE_SYS_TIMEB 
 #   include <sys/timeb.h>
