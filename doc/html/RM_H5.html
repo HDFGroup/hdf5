@@ -300,8 +300,9 @@ facilitate moving easily between them.</i>
         <p>
         First, the function is intended to be called by the user to verify 
         that the version of the header files compiled into an application 
-        matches the version of the HDF5 library being used.  One may look at
-	the H5check() definition in H5public.h as an example.
+        matches the version of the HDF5 library being used.  
+        One may look at the <code>H5check</code> definition in the file 
+        <code>H5public.h</code> as an example.
         <p>
         Due to the risks of data corruption or segmentation faults, 
         <code>H5check_version</code> causes the application to abort if the
@@ -325,8 +326,10 @@ facilitate moving easily between them.</i>
         This is designed to catch source code inconsistencies, 
         but does not generate the fatal error as in the first stage
 	because this inconsistency does not cause errors in the data files.
-        <p>
+        If this check reveals inconsistencies, the library issues a warning
+        but the function does not fail.
 <!--
+        <p>
 <strong><em>Alternate to preceding paragraph / More to the point?</em></strong>
 <br>
         If the function passes the above test and does not generate 
