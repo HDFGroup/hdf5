@@ -1052,9 +1052,7 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
 	fputs(OPT(info->line_suf, ""), stream);
-		if (info->line_ncols != ctx->cur_column) {
-			putc('\n', stream);
-		}
+        putc('\n',stream);
 	fputs(OPT(info->line_sep, ""), stream);
     }
 
@@ -1167,7 +1165,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 	if (1==info->line_multi_new &&
 	    (ctx->cur_column + h5dump_ncols(s) +
 	     strlen(OPT(info->elmt_suf2, " ")) +
-	     strlen(OPT(info->line_suf, ""))) >= ncols) {
+	     strlen(OPT(info->line_suf, ""))) > ncols) {
 	    if (ctx->prev_multiline) {
 		/*
 		 * ... and the previous element also occupied more than one
