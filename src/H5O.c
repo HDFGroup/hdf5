@@ -3173,7 +3173,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 	type = curr_msg->type;
 
         /* Check if there is a file space deletion callback for this type of message */
-        if(type->delete) {
+        if(type->del) {
             /*
              * Decode the message if necessary.
              */
@@ -3184,7 +3184,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message");
             } /* end if */
 
-            if ((type->delete)(f, dxpl_id, curr_msg->native)<0)
+            if ((type->del)(f, dxpl_id, curr_msg->native)<0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
         } /* end if */
     } /* end for */

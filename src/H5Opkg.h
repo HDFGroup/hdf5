@@ -66,7 +66,7 @@ typedef struct H5O_class_t {
     size_t	(*raw_size)(H5F_t*, const void*);/*sizeof raw val	     */
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */
-    herr_t	(*delete)(H5F_t *, hid_t, const void *); /* Delete space in file referenced by this message */
+    herr_t	(*del)(H5F_t *, hid_t, const void *); /* Delete space in file referenced by this message */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);

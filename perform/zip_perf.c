@@ -322,7 +322,7 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
 static void
 get_unique_name(void)
 {
-    const char *prefix = "/tmp", *template = "/zip_perf.data";
+    const char *prefix = "/tmp", *tmpl = "/zip_perf.data";
     const char *env = getenv("HDF5_PREFIX");
 
     if (env)
@@ -331,13 +331,13 @@ get_unique_name(void)
     if (option_prefix)
         prefix = option_prefix;
 
-    filename = calloc(1, strlen(prefix) + strlen(template) + 1);
+    filename = calloc(1, strlen(prefix) + strlen(tmpl) + 1);
 
     if (!filename)
         error("out of memory");
 
     strcpy(filename, prefix);
-    strcat(filename, template);
+    strcat(filename, tmpl);
 }
 
 /*
