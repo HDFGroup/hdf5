@@ -172,7 +172,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(H5F_t *f,
  *		The name is not particularly descriptive, but is retained
  *		to avoid changes in existing code.
  *
- * dirty:	Boolean flag indicating whether the contents of the cache
+ * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
  *		to disk.
  *
@@ -186,7 +186,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(H5F_t *f,
  *		      someday.  However it will require a change in the 
  *		      cache interface.
  *
- * protected:	Boolean flag indicating whether this entry is protected
+ * is_protected: Boolean flag indicating whether this entry is protected
  *		(or locked, to use more conventional terms).  When it is
  *		protected, the entry cannot be flushed or accessed until
  *		it is unprotected (or unlocked -- again to use more
@@ -279,8 +279,8 @@ typedef struct H5C_cache_entry_t
     haddr_t		addr;
     size_t		size;
     const H5C_class_t *	type;
-    hbool_t		dirty;
-    hbool_t		protected;
+    hbool_t		is_dirty;
+    hbool_t		is_protected;
 
     /* fields supporting replacement policies: */
 
@@ -312,7 +312,7 @@ typedef struct H5C_t H5C_t;
 H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
                           size_t                     min_clean_size,
                           int                        max_type_id,
-                          const char *               (* type_name_table_ptr)[],
+                          const char *              (* type_name_table_ptr),
                           H5C_write_permitted_func_t check_write_permitted);
 
 H5_DLL herr_t H5C_dest(H5F_t * f,

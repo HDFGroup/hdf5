@@ -65,6 +65,10 @@
  *
  *	 - Create MPI type for dirty objects when flushing in parallel.
  *
+ *	 - Fix TBBT routines so deletions don't move nodes in memory and
+ *         point directly to the TBBT node from the LRU list, eliminating
+ *         binary tree lookups when evicting objects from the cache.
+ *
  *	Tests:
  *
  *	 - Trim execution time.
@@ -91,12 +95,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
-
-/* Interface initialization -- disabled in this case */
-#if 0
-static int             interface_initialize_g = 0;
-#endif
-#define INTERFACE_INIT NULL
 
 
 /****************************************************************************
@@ -866,7 +864,7 @@ struct H5C_t
     uint32_t			magic;
 
     int32_t			max_type_id;
-    const char *                (* type_name_table_ptr)[];
+    const char *                (* type_name_table_ptr);
 
     size_t                      max_cache_size;
     size_t                      min_clean_size;
@@ -1025,7 +1023,7 @@ H5C_t *
 H5C_create(size_t		      max_cache_size,
            size_t		      min_clean_size,
            int			      max_type_id,
-           const char *		      (* type_name_table_ptr)[],
+           const char *		      (* type_name_table_ptr),
            H5C_write_permitted_func_t check_write_permitted)
 {
     int i;
@@ -1043,8 +1041,8 @@ H5C_create(size_t		      max_cache_size,
 
     for ( i = 0; i <= max_type_id; i++ ) {
 
-        HDassert( (*type_name_table_ptr)[i] );
-        HDassert( strlen((* type_name_table_ptr)[i]) > 0 );
+        HDassert( (type_name_table_ptr)[i] );
+        HDassert( HDstrlen(( type_name_table_ptr)[i]) > 0 );
     }
 
 
@@ -1328,7 +1326,7 @@ H5C_flush_cache(H5F_t *  f,
         actual_index_size += entry_ptr->size;
 #endif /* H5C_DO_SANITY_CHECKS */
 
-        if ( entry_ptr->protected ) {
+        if ( entry_ptr->is_protected ) {
 
             /* we have major problems -- but lets flush everything 
              * we can before we flag an error.
@@ -1573,7 +1571,7 @@ H5C_insert_entry(H5F_t * 	     f,
      * marking it unprotected.
      */
 
-    entry_ptr->protected = FALSE;
+    entry_ptr->is_protected = FALSE;
 
     if ( H5C_insert_entry_in_tree(cache_ptr, entry_ptr) < 0 ) {
 
@@ -1654,7 +1652,7 @@ H5C_rename_entry(H5F_t *	     f,
         entry_ptr = old_node_ptr->key;
         HDassert( entry_ptr->addr == old_addr );
         HDassert( entry_ptr->type == type );
-        HDassert( !(entry_ptr->protected) );
+        HDassert( !(entry_ptr->is_protected) );
     }
 
     search_target.addr = new_addr;
@@ -1891,7 +1889,7 @@ H5C_protect(H5F_t *	       f,
     HDassert( entry_ptr->addr == addr );
     HDassert( entry_ptr->type == type );
 
-    if ( entry_ptr->protected ) {
+    if ( entry_ptr->is_protected ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                     "Target already protected?!?.")
@@ -1903,7 +1901,7 @@ H5C_protect(H5F_t *	       f,
                     "Can't update replacement policy for protect")
     }
 
-    entry_ptr->protected = TRUE;
+    entry_ptr->is_protected = TRUE;
 
     ret_value = thing;
 
@@ -1984,7 +1982,7 @@ H5C_unprotect(H5F_t *		  f,
     HDassert( entry_ptr->addr == addr );
     HDassert( entry_ptr->type == type );
 
-    if ( ! (entry_ptr->protected) ) {
+    if ( ! (entry_ptr->is_protected) ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                         "Entry already unprotected??")
@@ -1996,7 +1994,7 @@ H5C_unprotect(H5F_t *		  f,
                         "Can't update replacement policy for unprotect.")
     }
 
-    entry_ptr->protected = FALSE;    
+    entry_ptr->is_protected = FALSE;    
 
     /* this implementation of the "deleted" option is a bit inefficient, as
      * we re-insert the entry to be deleted into the replacement policy
@@ -2068,7 +2066,11 @@ done:
 herr_t
 H5C_stats(H5C_t * cache_ptr,
           const char *  cache_name,
-          hbool_t display_detailed_stats)
+          hbool_t
+#ifndef H5C_COLLECT_CACHE_STATS
+          UNUSED
+#endif /* H5C_COLLECT_CACHE_STATS */
+          display_detailed_stats)
 {
     herr_t	ret_value = SUCCEED;   /* Return value */
 #if H5C_COLLECT_CACHE_STATS
@@ -2202,7 +2204,7 @@ H5C_stats(H5C_t * cache_ptr,
             HDfprintf(stdout, "\n");
 
             HDfprintf(stdout, "  Stats on %s:\n", 
-                      (*(cache_ptr->type_name_table_ptr))[i]);
+                      ((cache_ptr->type_name_table_ptr))[i]);
 
             if ( ( cache_ptr->hits[i] > 0 ) || ( cache_ptr->misses[i] > 0 ) ) {
 
@@ -2274,7 +2276,9 @@ done:
 void
 H5C_stats__reset(H5C_t * cache_ptr)
 {
+#if H5C_COLLECT_CACHE_STATS
     int i;
+#endif /* H5C_COLLECT_CACHE_STATS */
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -2432,7 +2436,7 @@ H5C_flush_single_entry(H5F_t *		   f,
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t	search_target;
 
-    FUNC_ENTER_NOAPI(H5C_flush_single_entry, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_flush_single_entry)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -2464,7 +2468,7 @@ H5C_flush_single_entry(H5F_t *		   f,
         HDassert( node_ptr->data == node_ptr->key );
     }
 
-    if ( ( entry_ptr != NULL ) && ( entry_ptr->protected ) )
+    if ( ( entry_ptr != NULL ) && ( entry_ptr->is_protected ) )
     {
         /* Attempt to flush a protected entry -- scream and die. */
         HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, \
@@ -2491,7 +2495,7 @@ H5C_flush_single_entry(H5F_t *		   f,
          */
         if ( ( ! cache_ptr->skip_dxpl_id_checks ) && 
              ( ! clear_only ) && 
-             ( entry_ptr->dirty ) && 
+             ( entry_ptr->is_dirty ) && 
              ( IS_H5FD_MPI(f) ) ) {
 
             H5P_genplist_t *dxpl;           /* Dataset transfer property list */
@@ -2565,7 +2569,7 @@ H5C_flush_single_entry(H5F_t *		   f,
             /* Only block for all the processes on the first piece of metadata 
              */
 
-            if ( *first_flush_ptr && entry_ptr->dirty ) {
+            if ( *first_flush_ptr && entry_ptr->is_dirty ) {
                 status = (entry_ptr->type->flush)(f, primary_dxpl_id, destroy, 
                                                  entry_ptr->addr, entry_ptr);
                 *first_flush_ptr = FALSE;
@@ -2583,7 +2587,7 @@ H5C_flush_single_entry(H5F_t *		   f,
 
         if ( ! destroy ) {
         
-            HDassert( !(entry_ptr->dirty) );
+            HDassert( !(entry_ptr->is_dirty) );
         }
     }
 
@@ -2618,7 +2622,7 @@ H5C_insert_entry_in_tree(H5C_t *	     cache_ptr,
     herr_t		ret_value = SUCCEED;      /* Return value */
     H5TB_NODE *		node_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C_insert_entry_in_tree, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_insert_entry_in_tree)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -2683,7 +2687,7 @@ H5C_load_entry(H5F_t *             f,
     void *		ret_value = NULL;
     H5C_cache_entry_t *	entry_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C_load_entry, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_load_entry)
 
     HDassert( skip_file_checks || f );
     HDassert( type );
@@ -2699,11 +2703,11 @@ H5C_load_entry(H5F_t *             f,
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
-    HDassert( entry_ptr->dirty == FALSE );
+    HDassert( entry_ptr->is_dirty == FALSE );
 
     entry_ptr->addr = addr;
     entry_ptr->type = type;
-    entry_ptr->protected = FALSE;
+    entry_ptr->is_protected = FALSE;
 
     if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
 
@@ -2783,7 +2787,7 @@ H5C_make_space_in_cache(H5F_t *	f,
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	prev_ptr;
 
-    FUNC_ENTER_NOAPI(H5C_make_space_in_cache, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_make_space_in_cache)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -2803,11 +2807,11 @@ H5C_make_space_in_cache(H5F_t *	f,
                 ( entry_ptr != NULL )
               )
         {
-            HDassert( ! (entry_ptr->protected) );
+            HDassert( ! (entry_ptr->is_protected) );
 
             prev_ptr = entry_ptr->prev;
 
-            if ( entry_ptr->dirty ) {
+            if ( entry_ptr->is_dirty ) {
 
                 result = H5C_flush_single_entry(f, 
                                                 primary_dxpl_id, 
@@ -2850,8 +2854,8 @@ H5C_make_space_in_cache(H5F_t *	f,
                 ( entry_ptr != NULL )
               )
         {
-            HDassert( ! (entry_ptr->protected) );
-            HDassert( entry_ptr->dirty );
+            HDassert( ! (entry_ptr->is_protected) );
+            HDassert( entry_ptr->is_dirty );
 
             prev_ptr = entry_ptr->aux_prev;
 
@@ -2889,8 +2893,8 @@ H5C_make_space_in_cache(H5F_t *	f,
                 ( entry_ptr != NULL )
               )
         {
-            HDassert( ! (entry_ptr->protected) );
-            HDassert( ! (entry_ptr->dirty) );
+            HDassert( ! (entry_ptr->is_protected) );
+            HDassert( ! (entry_ptr->is_dirty) );
 
             prev_ptr = entry_ptr->aux_prev;
 
@@ -2946,21 +2950,15 @@ H5C_remove_entry_from_tree(H5C_t *	       cache_ptr,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_remove_entry_from_tree, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_remove_entry_from_tree)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( entry_ptr );
+    HDassert( !entry_ptr->is_protected);
     HDassert( node_ptr );
     HDassert( node_ptr->data == entry_ptr );
     HDassert( entry_ptr->size > 0 );
-
-    if ( entry_ptr->protected )
-    {
-        /* Attempt to delete a protected entry -- scream and die. */
-        HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, \
-                    "Attempt to delete protected entry")
-    }
 
     if ( H5TB_rem(&(cache_ptr->index_tree_ptr->root), node_ptr, NULL) 
          != entry_ptr ) {
@@ -3010,21 +3008,13 @@ H5C_update_rp_for_eviction(H5C_t *		cache_ptr,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_update_rp_for_eviction, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_eviction)
 
-#if H5C_DO_SANITY_CHECKS
-
-    if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( entry_ptr == NULL ) ||
-         ( entry_ptr->protected ) ||
-         ( entry_ptr->size <= 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "General sanity checks failed")
-    }
-
-#endif /* H5C_DO_SANITY_CHECKS */
-
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( entry_ptr );
+    HDassert( !entry_ptr->is_protected);
+    HDassert( entry_ptr->size > 0 );
 
     /* modified LRU specific code */
 
@@ -3040,7 +3030,7 @@ H5C_update_rp_for_eviction(H5C_t *		cache_ptr,
      * dirty flag.
      */
 
-    if ( entry_ptr->dirty ) {
+    if ( entry_ptr->is_dirty ) {
 
         H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
                             cache_ptr->dLRU_tail_ptr, \
@@ -3053,7 +3043,9 @@ H5C_update_rp_for_eviction(H5C_t *		cache_ptr,
                              cache_ptr->cLRU_list_size)
     }
 
+#if H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3087,18 +3079,13 @@ H5C_update_rp_for_flush(H5C_t *		    cache_ptr,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_update_rp_for_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_flush)
 
-#if H5C_DO_SANITY_CHECKS
-    if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( entry_ptr == NULL ) ||
-         ( entry_ptr->protected ) ||
-         ( entry_ptr->size <= 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "General sanity checks failed")
-    }
-#endif /* H5C_DO_SANITY_CHECKS */
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( entry_ptr );
+    HDassert( !entry_ptr->is_protected);
+    HDassert( entry_ptr->size > 0 );
 
     /* modified LRU specific code */
 
@@ -3122,7 +3109,7 @@ H5C_update_rp_for_flush(H5C_t *		    cache_ptr,
      * LRU list.
      */
 
-    if ( entry_ptr->dirty ) {
+    if ( entry_ptr->is_dirty ) {
         H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
                             cache_ptr->dLRU_tail_ptr, \
                             cache_ptr->dLRU_list_len, \
@@ -3138,7 +3125,9 @@ H5C_update_rp_for_flush(H5C_t *		    cache_ptr,
                           cache_ptr->cLRU_tail_ptr, cache_ptr->cLRU_list_len, \
                           cache_ptr->cLRU_list_size)
 
+#if H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3172,18 +3161,13 @@ H5C_update_rp_for_insertion(H5C_t *		cache_ptr,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_update_rp_for_insertion, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_insertion)
 
-#if H5C_DO_SANITY_CHECKS
-    if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( entry_ptr == NULL ) ||
-         ( entry_ptr->protected ) ||
-         ( entry_ptr->size <= 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "General sanity checks failed")
-    }
-#endif /* H5C_DO_SANITY_CHECKS */
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( entry_ptr );
+    HDassert( !entry_ptr->is_protected);
+    HDassert( entry_ptr->size > 0 );
 
     /* modified LRU specific code */
 
@@ -3197,7 +3181,7 @@ H5C_update_rp_for_insertion(H5C_t *		cache_ptr,
      * appropriate.
      */
 
-    if ( entry_ptr->dirty ) {
+    if ( entry_ptr->is_dirty ) {
         H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->dLRU_head_ptr, \
                              cache_ptr->dLRU_tail_ptr, \
                              cache_ptr->dLRU_list_len, \
@@ -3209,7 +3193,9 @@ H5C_update_rp_for_insertion(H5C_t *		cache_ptr,
                               cache_ptr->cLRU_list_size)
     }
 
+#if H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3247,18 +3233,13 @@ H5C_update_rp_for_protect(H5C_t *	      cache_ptr,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_update_rp_for_protect, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_protect)
 
-#if H5C_DO_SANITY_CHECKS
-    if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( entry_ptr == NULL ) ||
-         ( entry_ptr->protected ) ||
-         ( entry_ptr->size <= 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "General sanity checks failed")
-    }
-#endif /* H5C_DO_SANITY_CHECKS */
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( entry_ptr );
+    HDassert( !entry_ptr->is_protected);
+    HDassert( entry_ptr->size > 0 );
 
     /* modified LRU specific code */
 
@@ -3272,7 +3253,7 @@ H5C_update_rp_for_protect(H5C_t *	      cache_ptr,
      * as appropriate.
      */
 
-    if ( entry_ptr->dirty ) {
+    if ( entry_ptr->is_dirty ) {
 
         H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
                             cache_ptr->dLRU_tail_ptr, \
@@ -3297,7 +3278,9 @@ H5C_update_rp_for_protect(H5C_t *	      cache_ptr,
     H5C__DLL_APPEND(entry_ptr, cache_ptr->pl_head_ptr, cache_ptr->pl_tail_ptr, \
                      cache_ptr->pl_len, cache_ptr->pl_size)
 
+#if H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3331,18 +3314,13 @@ H5C_update_rp_for_rename(H5C_t *	     cache_ptr,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_update_rp_for_rename, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_rename)
 
-#if H5C_DO_SANITY_CHECKS
-    if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( entry_ptr == NULL ) ||
-         ( entry_ptr->protected ) ||
-         ( entry_ptr->size <= 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "General sanity checks failed")
-    }
-#endif /* H5C_DO_SANITY_CHECKS */
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( entry_ptr );
+    HDassert( !entry_ptr->is_protected);
+    HDassert( entry_ptr->size > 0 );
 
     /* modified LRU specific code */
 
@@ -3360,7 +3338,7 @@ H5C_update_rp_for_rename(H5C_t *	     cache_ptr,
      * as appropriate.
      */
 
-    if ( entry_ptr->dirty ) {
+    if ( entry_ptr->is_dirty ) {
 
         H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
                             cache_ptr->dLRU_tail_ptr, \
@@ -3385,7 +3363,9 @@ H5C_update_rp_for_rename(H5C_t *	     cache_ptr,
                              cache_ptr->cLRU_list_size)
     }
 
+#if H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3423,18 +3403,13 @@ H5C_update_rp_for_unprotect(H5C_t *		cache_ptr,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_update_rp_for_unprotect, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_unprotect)
 
-#if H5C_DO_SANITY_CHECKS
-    if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( entry_ptr == NULL ) ||
-         ( !(entry_ptr->protected) ) ||
-         ( entry_ptr->size <= 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "General sanity checks failed")
-    }
-#endif /* H5C_DO_SANITY_CHECKS */
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( entry_ptr );
+    HDassert( entry_ptr->is_protected);
+    HDassert( entry_ptr->size > 0 );
 
     /* Regardless of the replacement policy, remove the entry from the 
      * protected list.
@@ -3456,7 +3431,7 @@ H5C_update_rp_for_unprotect(H5C_t *		cache_ptr,
      * dirty LRU list as appropriate.
      */
 
-    if ( entry_ptr->dirty ) {
+    if ( entry_ptr->is_dirty ) {
 
         H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->dLRU_head_ptr, \
                              cache_ptr->dLRU_tail_ptr, \
@@ -3473,18 +3448,11 @@ H5C_update_rp_for_unprotect(H5C_t *		cache_ptr,
 
     /* End modified LRU specific code. */
 
+#if H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_update_rp_for_unprotect() */
-
-
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-/********************************** END **********************************/
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
 

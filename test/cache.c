@@ -137,10 +137,10 @@ typedef struct test_entry_t
     int32_t		  writes;	/* number of times this entry has 
                                          * been written 
                                          */
-    hbool_t		  dirty;	/* entry has been modified since 
+    hbool_t		  is_dirty;	/* entry has been modified since 
                                          * last write 
                                          */
-    hbool_t		  protected;	/* entry should currently be on 
+    hbool_t		  is_protected;	/* entry should currently be on 
 					 * the cache's protected list.
                                          */
 } test_entry_t;
@@ -159,7 +159,7 @@ typedef struct local_H5C_t
     uint32_t                    magic;
 
     int32_t                     max_type_id;
-    const char *                (* type_name_table_ptr)[];
+    const char *                (* type_name_table_ptr);
 
     size_t                      max_cache_size;
     size_t                      min_clean_size;
@@ -806,8 +806,8 @@ clear(H5F_t * f,
     HDassert( entry_ptr->header.size == entry_ptr->size );
     HDassert( entry_ptr->size == entry_sizes[entry_ptr->type] );
 
-    entry_ptr->header.dirty = FALSE;
-    entry_ptr->dirty = FALSE;
+    entry_ptr->header.is_dirty = FALSE;
+    entry_ptr->is_dirty = FALSE;
 
     if ( dest ) {
 
@@ -920,8 +920,8 @@ destroy(H5F_t UNUSED * f,
     HDassert( entry_ptr->header.size == entry_ptr->size );
     HDassert( entry_ptr->size == entry_sizes[entry_ptr->type] );
 
-    HDassert( !(entry_ptr->dirty) );
-    HDassert( !(entry_ptr->header.dirty) );
+    HDassert( !(entry_ptr->is_dirty) );
+    HDassert( !(entry_ptr->header.is_dirty) );
 
     return(SUCCEED);
 
@@ -1032,17 +1032,17 @@ flush(H5F_t *f,
     HDassert( entry_ptr->header.size == entry_ptr->size );
     HDassert( entry_ptr->size == entry_sizes[entry_ptr->type] );
 
-    if ( ( ! write_permitted ) && ( entry_ptr->dirty ) ) {
+    if ( ( ! write_permitted ) && ( entry_ptr->is_dirty ) ) {
 
         pass = FALSE;
         failure_mssg = "called flush when write_permitted is FALSE.";
     }
 
-    if ( entry_ptr->dirty ) {
+    if ( entry_ptr->is_dirty ) {
 
         (entry_ptr->writes)++;
-        entry_ptr->dirty = FALSE;
-        entry_ptr->header.dirty = FALSE;
+        entry_ptr->is_dirty = FALSE;
+        entry_ptr->header.is_dirty = FALSE;
     }
 
     if ( dest ) {
@@ -1163,7 +1163,7 @@ load(H5F_t UNUSED *f,
     HDassert( entry_ptr->addr == addr );
     HDassert( entry_ptr->size == entry_sizes[type] );
 
-    entry_ptr->dirty = FALSE;
+    entry_ptr->is_dirty = FALSE;
 
     (entry_ptr->reads)++;
 
@@ -1452,8 +1452,8 @@ reset_entries(void)
             base_addr[j].header.addr = (haddr_t)0;
             base_addr[j].header.size = (size_t)0;
             base_addr[j].header.type = NULL;
-            base_addr[j].header.dirty = FALSE;
-            base_addr[j].header.protected = FALSE;
+            base_addr[j].header.is_dirty = FALSE;
+            base_addr[j].header.is_protected = FALSE;
             base_addr[j].header.next = NULL;
             base_addr[j].header.prev = NULL;
             base_addr[j].header.aux_next = NULL;
@@ -1469,8 +1469,8 @@ reset_entries(void)
             base_addr[j].index = j;
             base_addr[j].reads = 0;
             base_addr[j].writes = 0;
-            base_addr[j].dirty = FALSE;
-            base_addr[j].protected = FALSE;
+            base_addr[j].is_dirty = FALSE;
+            base_addr[j].is_protected = FALSE;
 
             addr += (haddr_t)entry_size;
             alt_addr += (haddr_t)entry_size;
@@ -1521,7 +1521,7 @@ verify_clean(void)
 
             for ( j = 0; j <= max_index; j++ )
             {
-                if ( ( base_addr[j].header.dirty ) || ( base_addr[j].dirty ) ) {
+                if ( ( base_addr[j].header.is_dirty ) || ( base_addr[j].is_dirty ) ) {
             
                     dirty_count++;
                 }
@@ -1579,11 +1579,11 @@ verify_unprotected(void)
 
             for ( j = 0; j <= max_index; j++ )
             {
-                HDassert( base_addr[j].header.protected == 
-                          base_addr[j].protected );
+                HDassert( base_addr[j].header.is_protected == 
+                          base_addr[j].is_protected );
 
-                if ( ( base_addr[j].header.protected ) || 
-                     ( base_addr[j].protected ) ) {
+                if ( ( base_addr[j].header.is_protected ) || 
+                     ( base_addr[j].is_protected ) ) {
             
                     protected_count++;
                 }
@@ -1628,7 +1628,7 @@ setup_cache(size_t max_cache_size,
     cache_ptr = H5C_create(max_cache_size, 
                            min_clean_size,
                            (NUMBER_OF_ENTRY_TYPES - 1),
-			   &entry_type_names,
+			   (const char **)entry_type_names,
                            check_write_permitted);
 
     if ( cache_ptr == NULL ) {
@@ -1785,19 +1785,19 @@ insert_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
-        HDassert( !(entry_ptr->protected) );
+        HDassert( !(entry_ptr->is_protected) );
 
         if ( dirty ) {
 
-            (entry_ptr->header).dirty = dirty;
-            entry_ptr->dirty = dirty;
+            (entry_ptr->header).is_dirty = dirty;
+            entry_ptr->is_dirty = dirty;
         }
 
         result = H5C_insert_entry(NULL, -1, -1, cache_ptr, &(types[type]),
                                   entry_ptr->addr, (void *)entry_ptr);
 
         if ( ( result < 0 ) ||
-             ( entry_ptr->header.protected ) ||
+             ( entry_ptr->header.is_protected ) ||
              ( entry_ptr->header.type != &(types[type]) ) ||
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
@@ -1854,8 +1854,8 @@ rename_entry(H5C_t * cache_ptr,
     HDassert( entry_ptr->index == idx );
     HDassert( entry_ptr->type == type );
     HDassert( entry_ptr == entry_ptr->self );
-    HDassert( !(entry_ptr->protected) );
-    HDassert( !(entry_ptr->header.protected) );
+    HDassert( !(entry_ptr->is_protected) );
+    HDassert( !(entry_ptr->header.is_protected) );
 
     if ( entry_ptr->at_main_addr && !main_addr ) { 
 
@@ -1944,13 +1944,13 @@ protect_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
-        HDassert( !(entry_ptr->protected) );
+        HDassert( !(entry_ptr->is_protected) );
 
         cache_entry_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[type]),
                                       entry_ptr->addr, NULL, NULL);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
-             ( !(entry_ptr->header.protected) ) ||
+             ( !(entry_ptr->header.is_protected) ) ||
              ( entry_ptr->header.type != &(types[type]) ) ||
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
@@ -1960,7 +1960,7 @@ protect_entry(H5C_t * cache_ptr,
 
         } else {
 
-            entry_ptr->protected = TRUE;
+            entry_ptr->is_protected = TRUE;
 
         }
 
@@ -2015,20 +2015,20 @@ unprotect_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
-        HDassert( entry_ptr->header.protected );
-        HDassert( entry_ptr->protected );
+        HDassert( entry_ptr->header.is_protected );
+        HDassert( entry_ptr->is_protected );
 
         if ( ( dirty == TRUE ) || ( dirty == FALSE ) ) {
 
-            entry_ptr->header.dirty = dirty;
-            entry_ptr->dirty = dirty;
+            entry_ptr->header.is_dirty = dirty;
+            entry_ptr->is_dirty = dirty;
         }
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[type]),
                                entry_ptr->addr, (void *)entry_ptr, deleted);
 
         if ( ( result < 0 ) ||
-             ( entry_ptr->header.protected ) ||
+             ( entry_ptr->header.is_protected ) ||
              ( entry_ptr->header.type != &(types[type]) ) ||
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
@@ -2039,7 +2039,7 @@ unprotect_entry(H5C_t * cache_ptr,
         }
         else
         {
-            entry_ptr->protected = FALSE;
+            entry_ptr->is_protected = FALSE;
         }
 
         HDassert( ((entry_ptr->header).type)->id == type );
@@ -2209,7 +2209,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
                             break;
 
                         case 1:
-                            if ( (entries[type])[idx-lag].dirty ) {
+                            if ( (entries[type])[idx-lag].is_dirty ) {
 
                                 unprotect_entry(cache_ptr, type, idx - lag,
                                                 NO_CHANGE, FALSE);
@@ -2226,7 +2226,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
                             break;
 
                         case 3:
-                            if ( (entries[type])[idx-lag].dirty ) {
+                            if ( (entries[type])[idx-lag].is_dirty ) {
 
                                 unprotect_entry(cache_ptr, type, idx - lag,
                                                 NO_CHANGE, TRUE);
@@ -2428,7 +2428,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
                     switch ( (idx + lag) %4 ) {
 
                         case 0:
-                            if ( (entries[type])[idx+lag].dirty ) {
+                            if ( (entries[type])[idx+lag].is_dirty ) {
 
                                 unprotect_entry(cache_ptr, type, idx + lag,
                                                 NO_CHANGE, FALSE);
@@ -2445,7 +2445,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
                             break;
 
                         case 2:
-                            if ( (entries[type])[idx + lag].dirty ) {
+                            if ( (entries[type])[idx + lag].is_dirty ) {
 
                                 unprotect_entry(cache_ptr, type, idx + lag,
                                                 NO_CHANGE, TRUE);

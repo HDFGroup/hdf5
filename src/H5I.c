@@ -439,9 +439,7 @@ herr_t H5Inmembers(H5I_type_t type, hsize_t *num_members)
     FUNC_ENTER_API(H5Inmembers, FAIL);
 
     if( H5I_IS_LIB_TYPE( type ) )
-    {
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type");
-    }
 
     /* Validate parameters.  This needs to be done here, instead of letting
      * the private interface handle it, because the public interface throws
@@ -454,10 +452,12 @@ herr_t H5Inmembers(H5I_type_t type, hsize_t *num_members)
 
     if (num_members)
     {
-        *num_members = H5I_nmembers(type);
+        int members;
 
-        if (*num_members < 0)
-            ret_value = FAIL;
+        if ((members = H5I_nmembers(type)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTCOUNT, FAIL, "can't compute number of members");
+
+        *num_members=(hsize_t)members;
     }
 
 done:

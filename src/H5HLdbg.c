@@ -73,7 +73,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     fprintf(stream, "%*sLocal Heap...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	    "Dirty:",
-	    (int) (h->cache_info.dirty));
+	    (int) (h->cache_info.is_dirty));
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Header size (in bytes):",
 	    (unsigned long) H5HL_SIZEOF_HDR(f));

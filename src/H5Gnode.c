@@ -442,7 +442,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
     for (i=0; i<sym->nsyms; i++) {
 	if (sym->entry[i].dirty) {
             /* Set the node's dirty flag */
-            sym->cache_info.dirty = TRUE;
+            sym->cache_info.is_dirty = TRUE;
 
             /* Reset the entry's dirty flag */
             sym->entry[i].dirty=FALSE;
@@ -452,7 +452,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
     /*
      * Write the symbol node to disk.
      */
-    if (sym->cache_info.dirty) {
+    if (sym->cache_info.is_dirty) {
         size = H5G_node_size(f);
 
         /* Allocate temporary buffer */
@@ -468,7 +468,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
             H5FL_BLK_FREE(symbol_node,buf);
 
         /* Reset the node's dirty flag */
-        sym->cache_info.dirty = FALSE;
+        sym->cache_info.is_dirty = FALSE;
     }
 
     /*
@@ -563,7 +563,7 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
     assert(sym);
 
     /* Verify that node is clean */
-    assert (sym->cache_info.dirty==0);
+    assert (sym->cache_info.is_dirty==0);
 
     if(sym->entry)
         sym->entry = H5FL_SEQ_FREE(H5G_entry_t,sym->entry);
@@ -605,7 +605,7 @@ H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
     /* Look for dirty entries and reset the dirty flag.  */
     for (i=0; i<sym->nsyms; i++)
         sym->entry[i].dirty=FALSE;
-    sym->cache_info.dirty = FALSE;
+    sym->cache_info.is_dirty = FALSE;
 
     /*
      * Destroy the symbol node?	 This might happen if the node is being
@@ -639,9 +639,7 @@ done:
 static herr_t
 H5G_compute_size(H5F_t *f, H5G_node_t UNUSED *sym, size_t *size_ptr)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_compute_size, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_compute_size);
 
     /*
      * Check arguments.
@@ -651,9 +649,7 @@ H5G_compute_size(H5F_t *f, H5G_node_t UNUSED *sym, size_t *size_ptr)
 
     *size_ptr = H5G_node_size(f);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5G_compute_size() */
 
 
@@ -701,7 +697,7 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     size = H5G_node_size(f);
     if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
-    sym->cache_info.dirty = TRUE;
+    sym->cache_info.is_dirty = TRUE;
     sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)));
     if (NULL==sym->entry)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -1096,13 +1092,13 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	HDmemcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
 	snrt->nsyms = H5F_SYM_LEAF_K(f);
-	snrt->cache_info.dirty = TRUE;
+	snrt->cache_info.is_dirty = TRUE;
 
 	/* The left node */
 	HDmemset(sn->entry + H5F_SYM_LEAF_K(f), 0,
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
 	sn->nsyms = H5F_SYM_LEAF_K(f);
-	sn->cache_info.dirty = TRUE;
+	sn->cache_info.is_dirty = TRUE;
 
 	/* The middle key */
 	md_key->offset = sn->entry[sn->nsyms - 1].name_off;
@@ -1130,7 +1126,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     } else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
-	sn->cache_info.dirty = TRUE;
+	sn->cache_info.is_dirty = TRUE;
 	insert_into = sn;
 	if (idx == sn->nsyms) {
 	    rt_key->offset = offset;
@@ -1314,7 +1310,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             *rt_key = *lt_key;
             *rt_key_changed = TRUE;
             sn->nsyms = 0;
-            sn->cache_info.dirty = TRUE;
+            sn->cache_info.is_dirty = TRUE;
             if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
                     || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, TRUE)<0) {
                 sn = NULL;
@@ -1330,7 +1326,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * change.
              */
             sn->nsyms -= 1;
-            sn->cache_info.dirty = TRUE;
+            sn->cache_info.is_dirty = TRUE;
             HDmemmove(sn->entry+idx, sn->entry+idx+1,
                       (sn->nsyms-idx)*sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
@@ -1342,7 +1338,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * should be changed to reflect the new right-most entry.
              */
             sn->nsyms -= 1;
-            sn->cache_info.dirty = TRUE;
+            sn->cache_info.is_dirty = TRUE;
             rt_key->offset = sn->entry[sn->nsyms-1].name_off;
             *rt_key_changed = TRUE;
             ret_value = H5B_INS_NOOP;
@@ -1353,7 +1349,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * node.
              */
             sn->nsyms -= 1;
-            sn->cache_info.dirty = TRUE;
+            sn->cache_info.is_dirty = TRUE;
             HDmemmove(sn->entry+idx, sn->entry+idx+1,
                       (sn->nsyms-idx)*sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
@@ -1380,7 +1376,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         *rt_key = *lt_key;
         *rt_key_changed = TRUE;
         sn->nsyms = 0;
-        sn->cache_info.dirty = TRUE;
+        sn->cache_info.is_dirty = TRUE;
         if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
                 || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, TRUE)<0) {
             sn = NULL;
@@ -1729,7 +1725,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     fprintf(stream, "%*sSymbol Table Node...\n", indent, "");
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Dirty:",
-	    sn->cache_info.dirty ? "Yes" : "No");
+	    sn->cache_info.is_dirty ? "Yes" : "No");
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Size of Node (in bytes):", (unsigned)H5G_node_size(f));
     fprintf(stream, "%*s%-*s %d of %d\n", indent, "", fwidth,

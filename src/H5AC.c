@@ -369,7 +369,7 @@ H5AC_create(const H5F_t *f,
     cache_ptr = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
                            H5C__DEFAULT_MIN_CLEAN_SIZE,
                            (H5AC_NTYPES - 1),
-                           &H5AC_entry_type_names,
+                           (const char **)H5AC_entry_type_names,
                            H5AC_check_if_write_permitted);
 
     if ( NULL == cache_ptr ) {
@@ -378,7 +378,7 @@ H5AC_create(const H5F_t *f,
 
     } else {
 
-        f->shared->cache = (struct H5AC_t *)cache_ptr;
+        f->shared->cache = (H5AC_t *)cache_ptr;
 
     }
 
@@ -620,7 +620,7 @@ H5AC_set(H5F_t *f,
 
     info_ptr->addr = addr;
     info_ptr->type = type;
-    info_ptr->protected = FALSE;
+    info_ptr->is_protected = FALSE;
 
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_FPHDF5
@@ -966,7 +966,7 @@ H5AC_protect(H5F_t *f,
 
             info_ptr->addr = addr;
             info_ptr->type = type;
-            info_ptr->protected = TRUE;
+            info_ptr->is_protected = TRUE;
 
             if ( (type->size)(f, thing, &(info_ptr->size)) < 0 ) {
 
@@ -1119,9 +1119,9 @@ H5AC_unprotect(H5F_t *f,
 
         if ( H5FD_is_fphdf5_driver(lf) ) {
 
-            HDassert( info_ptr->protected );
+            HDassert( info_ptr->is_protected );
 
-            info_ptr->protected = FALSE;
+            info_ptr->is_protected = FALSE;
 
             /*
              * FIXME: If the metadata is *really* deleted at this point
