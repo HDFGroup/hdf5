@@ -90,7 +90,7 @@ test_file_create(void)
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
     ret = H5Fclose(fid2);
-    VERIFY(ret, FAIL, "H5Fclose"); /*file should already be closed*/
+    VERIFY(ret, FAIL, "H5Fclose"); /*file should not have been open */
 
     /*
      * Try again with H5F_ACC_EXCL. This should fail because the file already
