@@ -379,6 +379,7 @@
 ./tools/h5debug.c
 ./tools/h5dump.c
 ./tools/h5dump.h
+./tools/h5dumptst.c
 ./tools/h5dumputil.c
 ./tools/h5findshd.c
 ./tools/h5import.c
@@ -391,7 +392,6 @@
 ./tools/testh5dump.sh
 ./tools/testh5toh4
 
-./tools/testfiles/h5dumptst.c
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
 ./tools/testfiles/tall-3.ddl
