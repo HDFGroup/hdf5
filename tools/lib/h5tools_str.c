@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "H5private.h"
 #include "h5tools.h"            /*for h5dump_t structure    */
 #include "h5tools_str.h"        /*function prototypes       */
 
@@ -101,7 +102,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 
     while (1) {
 	size_t avail = str->nalloc - str->len;
-	size_t nchars = (size_t)vsnprintf(str->s + str->len, avail, fmt, ap);
+	size_t nchars = (size_t)HDvsnprintf(str->s + str->len, avail, fmt, ap);
 
 	if (nchars < avail) {
 	    /* success */
