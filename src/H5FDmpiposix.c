@@ -86,6 +86,7 @@ typedef struct H5FD_mpiposix_t {
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
     haddr_t	pos;		/* Current file I/O position	        */
+    hsize_t	naccess;	/* Number of (write) accesses to file   */
     int		op;		/* Last file I/O operation		*/
 #ifndef WIN32
     /*
