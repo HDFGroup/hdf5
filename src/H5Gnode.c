@@ -335,7 +335,13 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
      * Look for dirty entries and set the node dirty flag.
      */
     for (i=0; i<sym->nsyms; i++) {
-	if (sym->entry[i].dirty) sym->dirty = TRUE;
+	if (sym->entry[i].dirty) {
+            /* Set the node's dirty flag */
+            sym->dirty = TRUE;
+
+            /* Reset the entry's dirty flag */
+            sym->entry[i].dirty=FALSE;
+        } /* end if */
     }
 
     /*
@@ -373,7 +379,11 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
                   "unable to write symbol table node to the file");
         if (buf)
             H5FL_BLK_FREE(symbol_node,buf);
+
+        /* Reset the node's dirty flag */
+        sym->dirty = FALSE;
     }
+
     /*
      * Destroy the symbol node?	 This might happen if the node is being
      * preempted from the cache.

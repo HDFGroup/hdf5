@@ -88,6 +88,8 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Clear symbol table node "dirty" flag when flushing symbol tables to
+        disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
     * Fixed bug where an object's header could get corrupted in certain
         obscure situations where many objects were created in the
         file.  QAK - 2002/05/31
