@@ -109,6 +109,10 @@ herr_t <font color=red>H5Pset_fapl_stream</font> (hid_t fapl_id,
            H5FD_stream_fapl_t *fapl);
 herr_t <font color=red>H5Pset_meta_block_size</font>(hid_t fapl_id, hsize_t size);
 herr_t <font color=red>H5Pset_sieve_buf_size</font>(hid_t fapl_id, hsize_t size);
+hid_t <font color=red>H5Tarray_create</font> (hid_t base, int rank, const hsize_t dims[], 
+           const int perm[])
+int <font color=red>H5Tget_array_dims</font> (hid_t adtype_id, hsize_t *dims[], int *perm[])
+int <font color=red>H5Tget_array_ndims</font> (hid_t adtype_id)
 </pre>
 </dir>
 
@@ -181,26 +185,28 @@ H5Pget_driver
 H5Pget_family
 H5Pget_mpi
 H5Pget_sec2
+H5Pget_split
 </pre>
         </td><td>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </td><td>
 <pre>
-H5Pget_split
 H5Pget_stdio
 H5Pget_xfer
 H5Pset_core
 H5Pset_family
+H5Pset_mpi
+H5Pset_sec2
 </pre>
         </td><td>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </td><td>
 <pre>
-H5Pset_mpi
-H5Pset_sec2
 H5Pset_split
 H5Pset_stdio
 H5Pset_xfer
+H5Tget_member_dims
+H5Tinsert_array
 </pre>
         </td></tr>
         </table>
@@ -1549,7 +1555,7 @@ Ragged Arrays (alpha)
 
 <!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified:  2 June 2000 
+Last modified:  12 January 2001 
 <!-- hhmts end -->
 
 <br>
