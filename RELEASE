@@ -66,6 +66,10 @@ Bug fixes since HDF5-1.2.1
      many hash flushes and also remove some redundant I/O when moving metadata
      blocks in the file.
    * The libhdf5.settings file shows the correct machine byte-sex.
+   * The "struct(opt)" type conversion function which gets invoked for
+     certain compound datatype conversions was fixed for nested compound
+     types. This required a small change in the datatype conversion
+     function API.
    * h5dump correctly displays opaque and bitfield types.
 
 Known Problems:
