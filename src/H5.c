@@ -448,6 +448,7 @@ H5close (void)
 }
 
 
+#ifndef HAVE_SNPRINTF
 /*-------------------------------------------------------------------------
  * Function:	HDsnprintf
  *
@@ -487,6 +488,7 @@ HDsnprintf(char *buf, size_t __unused__ size, const char *fmt, ...)
     va_end(ap);
     return n;
 }
+#endif /* HAVE_SNPRINTF */
 
 
 /*-------------------------------------------------------------------------
