@@ -706,9 +706,12 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDwrite(F,M,Z)		write(F,M,Z)
 
 /*
- * And now for a couple non-Posix functions...
+ * And now for a couple non-Posix functions...  Watch out for systems that
+ * define these in terms of macros.
  */
+#ifndef strdup
 char *strdup(const char *s);
+#endif
 #define HDstrdup(S)		strdup(S)
 
 #ifndef HAVE_SNPRINTF
