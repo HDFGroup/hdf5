@@ -23,9 +23,6 @@
 #include "H5Fprivate.h"
 #include "H5Ppublic.h"
 
-#ifdef H5_HAVE_SZLIB_H
-#include "szlib.h"
-#endif
 /*
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
