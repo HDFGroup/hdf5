@@ -9814,10 +9814,16 @@ ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "src/libhdf5.settings config/depend1 config/depend2 config/depend3
-	  config/depend4 config/dependN config/commence config/conclude
+          config/depend4 config/dependN config/commence config/conclude
           Makefile src/Makefile pablo/Makefile test/Makefile
           testpar/Makefile tools/Makefile examples/Makefile
-	  doc/Makefile doc/html/Makefile doc/html/Tutor/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+          doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile
+          doc/html/Graphics/Makefile doc/html/PSandPDF/Makefile
+          doc/html/TechNotes/Makefile doc/html/Tutor/Makefile
+          doc/html/Tutor/Graphics/Makefile
+          doc/html/Tutor/examples/Makefile
+          doc/html/Tutor/examples/java/Makefile
+          doc/html/cpplus/Makefile doc/html/fortran/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -9951,10 +9957,16 @@ EOF
 cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"src/libhdf5.settings config/depend1 config/depend2 config/depend3
-	  config/depend4 config/dependN config/commence config/conclude
+          config/depend4 config/dependN config/commence config/conclude
           Makefile src/Makefile pablo/Makefile test/Makefile
           testpar/Makefile tools/Makefile examples/Makefile
-	  doc/Makefile doc/html/Makefile doc/html/Tutor/Makefile"}
+          doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile
+          doc/html/Graphics/Makefile doc/html/PSandPDF/Makefile
+          doc/html/TechNotes/Makefile doc/html/Tutor/Makefile
+          doc/html/Tutor/Graphics/Makefile
+          doc/html/Tutor/examples/Makefile
+          doc/html/Tutor/examples/java/Makefile
+          doc/html/cpplus/Makefile doc/html/fortran/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
