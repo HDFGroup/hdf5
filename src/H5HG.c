@@ -37,18 +37,20 @@
  */
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5HG_PACKAGE		/*suppress error about including H5HGpkg	  */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5HG_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5HGprivate.h"	/* Global heaps				*/
+#include "H5HGpkg.h"		/* Global heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-
-/* Pablo information */
-#define PABLO_MASK	H5HG_mask
 
 /* Private macros */
 
@@ -56,17 +58,6 @@
  * Global heap collection version.
  */
 #define H5HG_VERSION	1
-
-/*
- * Pad all global heap messages to a multiple of eight bytes so we can load
- * the entire collection into memory and operate on it there.  Eight should
- * be sufficient for machines that have alignment constraints because our
- * largest data type is eight bytes.
- */
-#define H5HG_ALIGNMENT	8
-#define H5HG_ALIGN(X)	(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/	      \
-					 H5HG_ALIGNMENT))
-#define H5HG_ISALIGNED(X) ((X)==H5HG_ALIGN(X))
 
 /*
  * All global heap collections are at least this big.  This allows us to read
@@ -98,16 +89,6 @@
 	       H5F_SIZEOF_SIZE(f))	/*collection size	*/
 
 /*
- * The overhead associated with each object in the heap, always a multiple of
- * the alignment so that the stuff that follows the header is aligned.
- */
-#define H5HG_SIZEOF_OBJHDR(f)						      \
-    H5HG_ALIGN(2 +			/*object id number	*/	      \
-	       2 +			/*reference count	*/	      \
-	       4 +			/*reserved		*/	      \
-	       H5F_SIZEOF_SIZE(f))	/*object data size	*/
-
-/*
  * The initial guess for the number of messages in a collection.  We assume
  * that all objects in that collection are zero length, giving the maximum
  * possible number of objects in the collection.  The collection itself has
@@ -126,22 +107,6 @@
 
 /* Private typedefs */
 
-typedef struct H5HG_obj_t {
-    int		nrefs;		/*reference count		*/
-    size_t		size;		/*total size of object		*/
-    uint8_t		*begin;		/*ptr to object into heap->chunk*/
-} H5HG_obj_t;
-
-struct H5HG_heap_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    haddr_t		addr;		/*collection address		*/
-    size_t		size;		/*total size of collection	*/
-    uint8_t		*chunk;		/*the collection, incl. header	*/
-    size_t		nalloc;		/*numb object slots allocated	*/
-    H5HG_obj_t	*obj;		/*array of object descriptions	*/
-};
-
 /* PRIVATE PROTOTYPES */
 static H5HG_heap_t *H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size);
 #ifdef NOT_YET
@@ -159,7 +124,7 @@ static herr_t H5HG_clear(H5HG_heap_t *heap);
 /*
  * H5HG inherits cache-like properties from H5AC
  */
-static const H5AC_class_t H5AC_GHEAP[1] = {{
+const H5AC_class_t H5AC_GHEAP[1] = {{
     H5AC_GHEAP_ID,
     (H5AC_load_func_t)H5HG_load,
     (H5AC_flush_func_t)H5HG_flush,
@@ -1045,103 +1010,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5HG_debug
- *
- * Purpose:	Prints debugging information about a global heap collection.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Mar 27, 1998
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *              Robb Matzke, LLNL, 2003-06-05
- *              The size does not include the object header, just the data.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
-	  int fwidth)
-{
-    unsigned		u, nused, maxobj;
-    unsigned		j, k;
-    H5HG_heap_t		*h = NULL;
-    char		buf[64];
-    uint8_t		*p = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HG_debug, FAIL);
-
-    /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined (addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
-
-    if (NULL == (h = H5AC_find(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load global heap collection");
-    fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");
-    fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-	    "Dirty:",
-	    (int)(h->cache_info.dirty));
-    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Total collection size in file:",
-	    (unsigned long)(h->size));
-
-    for (u=1, nused=0, maxobj=0; u<h->nalloc; u++) {
-	if (h->obj[u].begin) {
-	    nused++;
-	    if (u>maxobj) maxobj = u;
-	}
-    }
-    fprintf (stream, "%*s%-*s %u/%lu/", indent, "", fwidth,
-	     "Objects defined/allocated/max:",
-	     nused, (unsigned long)h->nalloc);
-    fprintf (stream, nused ? "%u\n": "NA\n", maxobj);
-
-    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	     "Free space:",
-	     (unsigned long)(h->obj[0].size));
-
-    for (u=1; u<h->nalloc; u++) {
-	if (h->obj[u].begin) {
-	    sprintf (buf, "Object %u", u);
-	    fprintf (stream, "%*s%s\n", indent, "", buf);
-	    fprintf (stream, "%*s%-*s %d\n", indent+3, "", MIN(fwidth-3, 0),
-		     "Reference count:",
-		     h->obj[u].nrefs);
-	    fprintf (stream, "%*s%-*s %lu/%lu\n", indent+3, "",
-		     MIN(fwidth-3, 0),
-		     "Size of object body:",
-		     (unsigned long)(h->obj[u].size),
-		     (unsigned long)H5HG_ALIGN(h->obj[u].size));
-	    p = h->obj[u].begin + H5HG_SIZEOF_OBJHDR (f);
-	    for (j=0; j<h->obj[u].size; j+=16) {
-		fprintf (stream, "%*s%04d: ", indent+6, "", j);
-		for (k=0; k<16; k++) {
-		    if (8==k) fprintf (stream, " ");
-		    if (j+k<h->obj[u].size) {
-			fprintf (stream, "%02x ", p[j+k]);
-		    } else {
-			HDfputs("   ", stream);
-		    }
-		}
-		for (k=0; k<16 && j+k<h->obj[u].size; k++) {
-		    if (8==k) fprintf (stream, " ");
-		    HDfputc(p[j+k]>' ' && p[j+k]<='~' ? p[j+k] : '.', stream);
-		}
-		fprintf (stream, "\n");
-	    }
-	}
-    }
-    
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}

@@ -146,7 +146,9 @@ H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, hadd
 H5_DLL herr_t H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5AC_debug(H5F_t *f);
+#ifdef H5AC_DEBUG
+H5_DLL herr_t H5AC_stats(H5F_t *f);
+#endif /* H5AC_DEBUG */
 
 #endif /* !_H5ACprivate_H */
 

@@ -28,47 +28,26 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5F_PACKAGE		/* Suppress error about including H5Fpkg  */
+#define H5HL_PACKAGE		/* Suppress error about including H5HLpkg */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5HL_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5HLpkg.h"		/* Local Heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-
-/* Pablo information */
-#define PABLO_MASK	H5HL_mask
 
 /* Private macros */
 #define H5HL_FREE_NULL	1		/*end of free list on disk	*/
 #define H5HL_MIN_HEAP   256             /* Minimum size to reduce heap buffer to */
-#define H5HL_SIZEOF_HDR(F)						      \
-    H5HL_ALIGN(H5HL_SIZEOF_MAGIC +	/*heap signature		*/    \
-	       4 +			/*reserved			*/    \
-	       H5F_SIZEOF_SIZE (F) +	/*data size			*/    \
-	       H5F_SIZEOF_SIZE (F) +	/*free list head		*/    \
-	       H5F_SIZEOF_ADDR (F))	/*data address			*/
 
 /* Private typedefs */
-typedef struct H5HL_free_t {
-    size_t		offset;		/*offset of free block		*/
-    size_t		size;		/*size of free block		*/
-    struct H5HL_free_t	*prev;		/*previous entry in free list	*/
-    struct H5HL_free_t	*next;		/*next entry in free list	*/
-} H5HL_free_t;
-
-typedef struct H5HL_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    haddr_t		    addr;	/*address of data		*/
-    size_t		    disk_alloc;	/*data bytes allocated on disk	*/
-    size_t		    mem_alloc;	/*data bytes allocated in mem	*/
-    uint8_t		   *chunk;	/*the chunk, including header	*/
-    H5HL_free_t		   *freelist;	/*the free list			*/
-} H5HL_t;
 
 /* PRIVATE PROTOTYPES */
 #ifdef NOT_YET
@@ -89,7 +68,7 @@ static herr_t H5HL_clear(H5HL_t *heap);
 /*
  * H5HL inherits cache-like properties from H5AC
  */
-static const H5AC_class_t H5AC_LHEAP[1] = {{
+const H5AC_class_t H5AC_LHEAP[1] = {{
     H5AC_LHEAP_ID,
     (H5AC_load_func_t)H5HL_load,
     (H5AC_flush_func_t)H5HL_flush,
@@ -1158,140 +1137,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HL_delete() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5HL_debug
- *
- * Purpose:	Prints debugging information about a heap.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  1 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int fwidth)
-{
-    H5HL_t		*h = NULL;
-    int			i, j, overlap, free_block;
-    uint8_t		c;
-    H5HL_free_t		*freelist = NULL;
-    uint8_t		*marker = NULL;
-    size_t		amount_free = 0;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HL_debug, FAIL);
-
-    /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
-
-    if (NULL == (h = H5AC_find(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
-    fprintf(stream, "%*sLocal Heap...\n", indent, "");
-    fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-	    "Dirty:",
-	    (int) (h->cache_info.dirty));
-    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Header size (in bytes):",
-	    (unsigned long) H5HL_SIZEOF_HDR(f));
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-	      "Address of heap data:",
-	      h->addr);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	    "Data bytes allocated on disk:",
-            h->disk_alloc);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	    "Data bytes allocated in core:",
-            h->mem_alloc);
-
-    /*
-     * Traverse the free list and check that all free blocks fall within
-     * the heap and that no two free blocks point to the same region of
-     * the heap.
-     */
-    if (NULL==(marker = H5MM_calloc(h->mem_alloc)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
-    for (free_block=0, freelist = h->freelist; freelist; freelist = freelist->next, free_block++) {
-        char temp_str[32];
-
-        sprintf(temp_str,"Block #%d:",free_block);
-	HDfprintf(stream, "%*s%-*s %8Zu, %8Zu\n", indent+3, "", MAX(0,fwidth-9),
-		temp_str,
-		freelist->offset, freelist->size);
-	if (freelist->offset + freelist->size > h->mem_alloc) {
-	    fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
-	} else {
-	    for (i=overlap=0; i<(int)(freelist->size); i++) {
-		if (marker[freelist->offset + i])
-		    overlap++;
-		marker[freelist->offset + i] = 1;
-	    }
-	    if (overlap) {
-		fprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS "
-			"ONE!\n");
-	    } else {
-		amount_free += freelist->size;
-	    }
-	}
-    }
-
-    if (h->mem_alloc) {
-	fprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth,
-		"Percent of heap used:",
-		(100.0 * (double)(h->mem_alloc - amount_free) / (double)h->mem_alloc));
-    }
-    /*
-     * Print the data in a VMS-style octal dump.
-     */
-    fprintf(stream, "%*sData follows (`__' indicates free region)...\n",
-	    indent, "");
-    for (i=0; i<(int)(h->disk_alloc); i+=16) {
-	fprintf(stream, "%*s %8d: ", indent, "", i);
-	for (j = 0; j < 16; j++) {
-	    if (i+j<(int)(h->disk_alloc)) {
-		if (marker[i + j]) {
-		    fprintf(stream, "__ ");
-		} else {
-		    c = h->chunk[H5HL_SIZEOF_HDR(f) + i + j];
-		    fprintf(stream, "%02x ", c);
-		}
-	    } else {
-		fprintf(stream, "   ");
-	    }
-	    if (7 == j)
-		HDfputc(' ', stream);
-	}
-
-	for (j = 0; j < 16; j++) {
-	    if (i+j < (int)(h->disk_alloc)) {
-		if (marker[i + j]) {
-		    HDfputc(' ', stream);
-		} else {
-		    c = h->chunk[H5HL_SIZEOF_HDR(f) + i + j];
-		    if (c > ' ' && c < '~')
-			HDfputc(c, stream);
-		    else
-			HDfputc('.', stream);
-		}
-	    }
-	}
-
-	HDfputc('\n', stream);
-    }
-
-    H5MM_xfree(marker);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}

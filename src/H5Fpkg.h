@@ -195,8 +195,6 @@ H5_DLLVAR  hbool_t H5_mpiposix_1_metawrite_g;
 H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 #endif /* NOT_YET */
 H5_DLL herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
-H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
-			 int indent, int fwidth);
 H5_DLL herr_t H5F_sieve_overlap_clear(H5F_t *f, haddr_t addr, hsize_t size);
 
 /* Functions that operate on indexed storage */
@@ -213,7 +211,9 @@ H5_DLL ssize_t H5F_istore_writevv(H5F_t *f, hid_t dxpl_id,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
+#ifdef H5F_ISTORE_DEBUG
 H5_DLL herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
+#endif /* H5F_ISTORE_DEBUG */
 H5_DLL herr_t H5F_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 				int indent, int fwidth, int ndims);
 

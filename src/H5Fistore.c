@@ -2959,6 +2959,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+#ifdef H5F_ISTORE_DEBUG
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_istore_stats
@@ -3023,6 +3024,7 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /* H5F_ISTORE_DEBUG */
 
 
 /*-------------------------------------------------------------------------

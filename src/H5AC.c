@@ -1788,11 +1788,12 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+#ifdef H5AC_DEBUG
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_debug
+ * Function:    H5AC_stats
  *
- * Purpose:     Prints debugging info about the cache.
+ * Purpose:     Prints statistics about the cache.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1804,19 +1805,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_debug(H5F_t UNUSED *f)
+H5AC_stats(H5F_t UNUSED *f)
 {
-#ifdef H5AC_DEBUG
     H5AC_subid_t            i;
     char                    s[32], ascii[32];
     H5AC_t                 *cache = f->shared->cache;
     double                  miss_rate;
-#endif /* H5AC_DEBUG */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5AC_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5AC_stats, FAIL);
 
-#ifdef H5AC_DEBUG
     if (H5DEBUG(AC)) {
 	fprintf(H5DEBUG(AC), "H5AC: meta data cache statistics for file %s\n",
 		f->name);
@@ -1870,9 +1868,9 @@ H5AC_debug(H5F_t UNUSED *f)
 		     (long)(cache->diagnostics[i].ninits)));
 	}
     }
-#endif /* H5AC_DEBUG */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /* H5AC_DEBUG */
 

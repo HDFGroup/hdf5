@@ -470,4 +470,7 @@ H5_DLL herr_t H5F_acs_close(hid_t fapl_id, void *close_data);
 H5_DLL herr_t H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, 
                             void *close_data);
 
+/* Debugging functions */
+H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth);
+
 #endif
