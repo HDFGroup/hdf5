@@ -142,6 +142,23 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	Group::close
+///\brief	Closes this group.
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
+//--------------------------------------------------------------------------
+void Group::close()
+{
+   herr_t ret_value = H5Gclose( id );
+   if( ret_value < 0 )
+   {
+      throw GroupIException("Group::close", "H5Gclose failed");
+   }
+   // reset the id because the group that it represents is now closed
+   id = 0;
+}
+
+//--------------------------------------------------------------------------
 // Function:	Group::throwException
 ///\brief	Throws H5::GroupIException.
 ///\param	func_name - Name of the function where failure occurs

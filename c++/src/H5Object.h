@@ -76,6 +76,10 @@ class H5_DLLCPP H5Object : public IdComponent {
 	void removeAttr( const char* name ) const;
 	void removeAttr( const string& name ) const;
 
+	// Renames the attribute to a new name.
+	void renameAttr(const char* oldname, const char* newname) const;
+	void renameAttr(const string& oldname, const string& newname) const;
+
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object(const H5Object& original);
 

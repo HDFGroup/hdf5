@@ -22,6 +22,9 @@ namespace H5 {
 
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
+        // Close this group.
+        virtual void close();
+
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
 

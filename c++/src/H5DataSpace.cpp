@@ -538,6 +538,28 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataSpace::close
+///\brief	Closes this dataspace.
+///\exception	H5::DataSpaceIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
+//--------------------------------------------------------------------------
+void DataSpace::close()
+{
+   if( id != H5S_ALL ) // not a constant, should call H5Sclose
+   {
+      herr_t ret_value = H5Sclose(id);
+      if( ret_value < 0 )
+      {
+         throw DataSpaceIException("DataSpace::close", "H5Sclose failed");
+      }
+      // reset the id because the dataspace that it represents is now closed
+      id = 0;
+   }
+   else // cannot close a constant
+      throw DataSpaceIException("DataSpace::close", "Cannot close a constant");
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataSpace destructor
 ///\brief	Properly terminates access to this dataspace.
 // Programmer	Binh-Minh Ribler - 2000
@@ -554,7 +576,7 @@ DataSpace::~DataSpace()
          decRefCount();
       }
       catch (Exception close_error) {
-         throw DataSpaceIException("DataSpace::copy", close_error.getDetailMsg());
+	 cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
       }
    }  // if
 }  

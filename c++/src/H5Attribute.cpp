@@ -257,6 +257,38 @@ string Attribute::getName() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	Attribute::close
+///\brief:	Closes this attribute.
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
+//--------------------------------------------------------------------------
+void Attribute::close()
+{
+   herr_t ret_value = H5Aclose(id);
+   if( ret_value < 0 )
+   {
+      throw AttributeIException("Attribute::close", "H5Aclose failed");
+   }
+   // reset the id because the attribute that it represents is now closed
+   id = 0;
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::getStorageSize
+///\brief	Returns the amount of storage size required for this attribute.
+///\return	Size of the storage or 0, for no data
+///\exception	H5::AttributeIException
+// Note:        H5Dget_storage_size returns 0 when there is no data.  This
+//              function should have no failure. (from SLU)
+// Programmer	Binh-Minh Ribler - Mar, 2005
+//--------------------------------------------------------------------------
+hsize_t Attribute::getStorageSize() const
+{
+   hsize_t storage_size = H5Aget_storage_size(id);
+   return (storage_size);
+}
+
+//--------------------------------------------------------------------------
 // Function:	Attribute destructor
 ///\brief	Properly terminates access to this attribute.
 // Programmer	Binh-Minh Ribler - 2000

@@ -30,6 +30,9 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	   const FileCreatPropList& create_plist = FileCreatPropList::DEFAULT,
 	   const FileAccPropList& access_plist = FileAccPropList::DEFAULT );
 
+        // Close this file.
+        virtual void close();
+
 	// Gets the access property list of this file.
 	FileAccPropList getAccessPlist() const;
 

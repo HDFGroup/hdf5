@@ -160,6 +160,27 @@ void PropList::copyProp( PropList& dest, PropList& src, const string& name ) con
    copyProp( dest, src, name.c_str());
 }
 
+//--------------------------------------------------------------------------
+// Function:	PropList::close
+///\brief	Closes the property list if it is not a default one.
+///\exception	H5::PropListIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
+//--------------------------------------------------------------------------
+void PropList::close()
+{
+   if( id != H5P_NO_CLASS ) // not a constant, should call H5Pclose
+   {
+      herr_t ret_value = H5Pclose( id );
+      if( ret_value < 0 )
+      {
+         throw PropListIException("PropList::close", "H5Pclose failed");
+      }
+      // reset the id because the property list that it represents is now closed
+      id = 0;
+   }
+   else
+      throw PropListIException("PropList::close", "Cannot close a constant");
+}
 
 //--------------------------------------------------------------------------
 // Function:	PropList::getClass

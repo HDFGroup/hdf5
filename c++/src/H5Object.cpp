@@ -269,6 +269,35 @@ void H5Object::removeAttr( const string& name ) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	H5Object::renameAttr
+///\brief	Renames the named attribute from this object.
+///\param	oldname - IN: Name of the attribute to be renamed
+///\param	newname - IN: New name ame of the attribute
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - Mar, 2005
+//--------------------------------------------------------------------------
+void H5Object::renameAttr(const char* oldname, const char* newname) const
+{
+   herr_t ret_value = H5Arename(id, oldname, newname);
+   if (ret_value < 0)
+   {
+      throw AttributeIException("H5Object::renameAttr", "H5Arename failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::renameAttr
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes 
+///		a reference to an \c std::string for the names.
+// Programmer	Binh-Minh Ribler - Mar, 2005
+//--------------------------------------------------------------------------
+void H5Object::renameAttr(const string& oldname, const string& newname) const
+{
+   renameAttr (oldname.c_str(), newname.c_str());
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5Object::flush
 ///\brief	Flushes all buffers associated with a file to disk.
 ///\param	scope - IN: Specifies the scope of the flushing action,

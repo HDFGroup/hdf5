@@ -28,6 +28,7 @@ class H5_DLLCPP AtomType : public DataType {
    public:
 	// Returns the byte order of an atomic datatype. 
 	H5T_order_t getOrder( string& order_string ) const;
+	H5T_order_t getOrder() const;
 
 	// Sets the byte ordering of an atomic datatype. 
 	void setOrder( H5T_order_t order ) const;

@@ -208,6 +208,10 @@ H5T_class_t CompType::getMemberClass( unsigned member_num ) const
       throw DataTypeIException("CompType::getMemberClass", 
 		"H5Tget_class returns H5T_NO_CLASS");
    }
+
+   // close the member datatype
+   H5Tclose(member_type_id);
+
    return( member_class );
 }
 

@@ -24,6 +24,9 @@ namespace H5 {
 
 class H5_DLLCPP DataSet : public AbstractDs {
    public:
+	// Close this dataset.
+	virtual void close();
+
 	// Extends the dataset with unlimited dimension.
 	void extend( const hsize_t* size ) const;
 
@@ -44,7 +47,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Determines whether space has been allocated for a dataset.
 	void getSpaceStatus(H5D_space_status_t& status) const;
 
-	// Gets the storage size of this dataset.
+	// Returns the amount of storage size required for this dataset.
 	hsize_t getStorageSize() const;
 
 	// not yet implemented??

@@ -30,26 +30,31 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	// Note that this datatype is a generic one and can only be accessed 
 	// via generic member functions, i.e., member functions belong 
 	// to DataType.  To get specific datatype, i.e. EnumType, FloatType, 
-	// etc..., use the specific functions, that follow, instead .
+	// etc..., use the specific functions, that follow, instead.
 	DataType getDataType() const;
 
-        // Gets a copy of the specific datatype of this abstract dataset
+        // Gets a copy of the specific datatype of this abstract dataset.
         EnumType getEnumType() const;
         CompType getCompType() const;
         IntType getIntType() const;
         FloatType getFloatType() const;
         StrType getStrType() const;
 
-	// Gets the dataspace of this abstract dataset - pure virtual
+	// Gets the dataspace of this abstract dataset - pure virtual.
 	virtual DataSpace getSpace() const = 0;
 
         // Gets the class of the datatype that is used by this abstract 
-	// dataset        
+	// dataset.
 	H5T_class_t getTypeClass() const;
+
+        // Returns the amount of storage size required for this abstract 
+	// dataset - pure virtual.
+        virtual hsize_t getStorageSize() const = 0;
 
 	// Copy constructor
 	AbstractDs( const AbstractDs& original );
 
+	// Destructor
 	virtual ~AbstractDs(); 
 
    protected:

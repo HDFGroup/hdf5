@@ -118,20 +118,16 @@ DSetCreatPropList DataSet::getCreatePlist() const
 //--------------------------------------------------------------------------
 // Function:	DataSet::getStorageSize
 ///\brief	Returns the amount of storage required for a dataset.  
-///\return	Amount of storage
+///\return	Size of the storage or 0, for no data
 ///\exception	H5::DataSetIException
-// Programmer	Binh-Minh Ribler - 2000
+// Note:	H5Dget_storage_size returns 0 when there is no data.  This
+//		function should have no failure. (from SLU)
+// Programmer	Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 hsize_t DataSet::getStorageSize() const
 {
-   hsize_t storage_size = H5Dget_storage_size( id );
-
-   if( storage_size > 0 )  // checking with Quincey for failure value - BMR
-      return( storage_size );
-   else
-   {
-      throw DataSetIException("DataSet::getStorageSize", "H5Dget_storage_size failed");
-   }
+   hsize_t storage_size = H5Dget_storage_size(id);
+   return(storage_size);
 }
 
 //--------------------------------------------------------------------------
@@ -187,13 +183,13 @@ hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
    herr_t ret_value = H5Dvlen_get_buf_size( id, type_id, space_id, &size );
    if( ret_value < 0 )
    {
-      throw DataSetIException("DataSet::getStorageSize", "H5Dget_storage_size failed");
+      throw DataSetIException("DataSet::getVlenBufSize", "H5Dvlen_get_buf_size failed");
    }
    return( size );
 }
 
 //--------------------------------------------------------------------------
-// Function:	DataSet::getVlenBufSize
+// Function:	DataSet::vlenReclaim
 ///\brief	Reclaims VL datatype memory buffers. 
 ///\param	type - IN: Datatype, which is the datatype stored in the buffer
 ///\param	space - IN: Selection for the memory buffer to free the 
@@ -476,6 +472,23 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
 {
    DataSpace dataspace(p_get_region(ref, ref_type));
    return(dataspace);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataSet::close
+///\brief	Closes this dataset.
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
+//--------------------------------------------------------------------------
+void DataSet::close()
+{
+   herr_t ret_value = H5Dclose( id );
+   if( ret_value < 0 )
+   {
+      throw DataSetIException("DataSet::close", "H5Dclose failed");
+   }
+   // reset the id because the group that it represents is now closed
+   id = 0;
 }
 
 //--------------------------------------------------------------------------

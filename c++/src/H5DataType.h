@@ -28,6 +28,9 @@ class H5_DLLCPP DataType : public H5Object {
 	// Copy constructor: makes a copy of the original object
 	DataType( const DataType& original );
 
+	// Closes this datatype.
+	virtual void close();
+
 	// Copies an existing datatype to this datatype object
 	void copy( const DataType& like_type );
 

@@ -598,6 +598,29 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataType::close
+///\brief	Closes the datatype if it is not a predefined type.
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
+//--------------------------------------------------------------------------
+void DataType::close()
+{
+   // If this datatype is not a predefined type, call H5Tclose on it.
+   if( is_predtype == false )
+   {
+      herr_t ret_value = H5Tclose(id);
+      if( ret_value < 0 )
+      {
+         throw DataTypeIException("DataType::close", "H5Tclose failed");
+      }
+      // reset the id because the datatype that it represents is now closed
+      id = 0;
+   }
+   else // cannot close a predefined type
+      throw DataTypeIException("DataType::close", "Cannot close a predefined type");
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataType destructor
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000

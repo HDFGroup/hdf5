@@ -532,6 +532,23 @@ hid_t H5File::getLocId() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	H5File::close
+///\brief	Closes this HDF5 file.
+///\exception	H5::FileIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
+//--------------------------------------------------------------------------
+void H5File::close()
+{
+   herr_t ret_value = H5Fclose( id );
+   if( ret_value < 0 )
+   {
+      throw FileIException("H5File::close", "H5Fclose failed");
+   }
+   // reset the id because the file that it represents is now closed
+   id = 0;
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5File::throwException
 ///\brief	Throws file exception - initially implemented for CommonFG
 ///\param	func_name - Name of the function where failure occurs
