@@ -373,6 +373,10 @@ printf("%s: check 3.0, num_regions=%d\n",FUNC,(int)num_regions);
 printf("%s: check 4.0, dim=%d, location=%d\n",FUNC,dim,j);
 #endif /* QAK */
 
+                    /* If we are moving to a new position in this dim, reset the next lower dim. location */
+                    if(fhyper_info->iter->hyp.pos[dim]!=j)
+                        fhyper_info->iter->hyp.pos[dim+1]=(-1);
+
                     /* Set the correct position we are working on */
                     fhyper_info->iter->hyp.pos[dim]=j;
 
@@ -587,6 +591,10 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
             for(i=0; i<num_regions && fhyper_info->nelmts>0; i++) {
                 /* Step through each location in each region */
                 for(j=regions[i].start; j<=regions[i].end && fhyper_info->nelmts>0; j++) {
+
+                    /* If we are moving to a new position in this dim, reset the next lower dim. location */
+                    if(fhyper_info->iter->hyp.pos[dim]!=j)
+                        fhyper_info->iter->hyp.pos[dim+1]=(-1);
 
                     /* Set the correct position we are working on */
                     fhyper_info->iter->hyp.pos[dim]=j;
@@ -816,6 +824,10 @@ printf("%s: check 3.0, num_regions=%d\n",FUNC,(int)num_regions);
 #ifdef QAK
 printf("%s: check 4.0, dim=%d, location=%d\n",FUNC,dim,j);
 #endif /* QAK */
+
+                    /* If we are moving to a new position in this dim, reset the next lower dim. location */
+                    if(fhyper_info->iter->hyp.pos[dim]!=j)
+                        fhyper_info->iter->hyp.pos[dim+1]=(-1);
 
                     /* Set the correct position we are working on */
                     fhyper_info->iter->hyp.pos[dim]=j;
@@ -1053,6 +1065,10 @@ printf("%s: check 3.0\n",FUNC);
             for(i=0; i<num_regions && fhyper_info->nelmts>0; i++) {
                 /* Step through each location in each region */
                 for(j=regions[i].start; j<=regions[i].end && fhyper_info->nelmts>0; j++) {
+
+                    /* If we are moving to a new position in this dim, reset the next lower dim. location */
+                    if(fhyper_info->iter->hyp.pos[dim]!=j)
+                        fhyper_info->iter->hyp.pos[dim+1]=(-1);
 
                     /* Set the correct position we are working on */
                     fhyper_info->iter->hyp.pos[dim]=j;

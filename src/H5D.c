@@ -1443,15 +1443,18 @@ printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)n
         }
 #ifdef QAK
 printf("%s: check 6.0\n",FUNC);
+#endif /* QAK */
+#ifdef QAK
+printf("%s: check 6.5\n",FUNC);
     {
         int i;
-        int *b;
+        uint8 *b;
 
         if(qak_debug) {
             b=tconv_buf;
             printf("\ntconv_buf:");
             for (i=0; i<smine_nelmts; i++,b++) {
-                printf("(%d)%d ",i,*b);
+                printf("(%d)%u ",i,(unsigned)*b);
             }
             printf("\n");
         }
