@@ -196,6 +196,11 @@ TOOLTEST tchar1.ddl -r tchar.h5
 # Missing file name
 TOOLTEST tnofilename.ddl
 
+# test for super block
+TOOLTEST tboot.ddl -H -B -d compact tfilters.h5
+
+# test for file contents
+TOOLTEST tcontents.ddl -n tfilters.h5
 
 
 if test $nerrors -eq 0 ; then

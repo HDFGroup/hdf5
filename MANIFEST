@@ -1336,6 +1336,9 @@
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
+./tools/testfiles/tboot.ddl
+./tools/testfiles/tcontents.ddl
+./tools/testfiles/tfilters.h5
 
 # Expected output from h5ls tests
 ./tools/testfiles/help-1.ls
