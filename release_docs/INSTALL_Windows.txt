@@ -19,10 +19,10 @@ Preconditions
 	    c:\					(any drive)
 	   MyHDFstuff\				(any folder name)
 
-   3. Download the hdf5xxx distribution archive and use WinZip to
+   3. Download the hdf5-1.* distribution archive and use WinZip to
       extract the hdf5 package into c:\MyHDFstuff.  This creates a 
-      directory called 'hdf5xxx' under MyHDFstuff which contains
-      several files and directories. Rename "hdf5xxx" to "hdf5".  
+      directory called 'hdf5-1.*' under MyHDFstuff which contains
+      several files and directories. Rename "hdf5-1.*" to "hdf5".  
 
    4. HDF5 uses zlib for compression and zlib is NOT distributed 
       with hdf5 lib in 1.6.0 release. You have to install your own
@@ -94,8 +94,6 @@ What do we build and install?
  HDF5 related tools testing programs:
 	hdf5 tools testing programs
 
- HDF5 examples:
-      simple HDF5 examples
 
 NOTE: ** We use zlib 1.1.4 for both binary and source
 	release.
@@ -112,12 +110,10 @@ Section II:
 STEP 1: Building hdf5 libraries and non-hdf4 related tools
 
 
-    1. Unpack all.zip in 'hdf5' and move the zlib.dll from
-       c:\myHDFstuff\hdf5\src\zlib\dll to the Windows system 
-       directory.
+    1. Extract all.zip under c:\myHDFstuff\hdf5\windows  to c:\myHDFstuff'
 
-	 The system directory can usually be found under the path 
-		C:\WINNT\system or C:\WINDOWS\system
+       The system directory can usually be found under the path 
+       C:\WINNT\system or C:\WINDOWS\system
       
     2. Invoke Microsoft Visual C++, go to "File" and select 
        the "Open Workspace" option. 
@@ -126,27 +122,25 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
        workspace. 
 
     3. Select project hdf5dll, right click mouse; choose settings,
-       find "Link", go to the Category box and choose "Input",
-       go to the box "Object/library modules" and go to the end of the line;
-       see whether the zlib dll library path is the same as C:\zlib114\dll
-       or the correct path where you install your dll export library.
-       If not, replace the old zlib dll library path with the correct path.
-       check the same path for szlib dll.
+	 find "Link", go to the Category box and choose "Input",
+	 go to the box "Object/library modules" and go to the end of the line;
+	 check whether the zlib dll library path is correct.
+	 If not, replace the old path with the correct path.
 
-       You should do this for both Debug and release version.
+	 You should do this for both Debug and release version.
 
     4. Go to "Tools" and select "Options", find "Directories";
         4.1 Find the box "Show directories for", choose "Include files",
             If you cannot find your zlib and szlib header path
-           (for example, C:\zlib114\include,C:\szlib\include)
-	    from the directory list,
-            add the header path(C:\zlib114\include,C:\szlib\include) to 
+            (for example, C:\zlib114\include,C:\szlib\include)
+	      from the directory list,
+            add them(for example,C:\zlib114\include,C:\szlib\include) to 
             the included directories.
         4.2 Find the box "Show directories for", choose "Library files",
             If you cannot find your zlib and szlib library path
-            (for example, C:\zlib114\lib,C:szlib\lib)
-	    from the directory list,
-            add the library path(C:\zlib114\lib,C:\szlib\lib) to the included directories.
+            (for example, C:\zlib114\lib,C:szlib\lib,C:szlib\dll)
+	      from the directory list,
+            add them(C:\zlib114\lib,C:\szlib\lib,C:\szlib\dll) to the included directories.
 
     5. Select "Build", then Select "Set Active Configuration".
 
@@ -184,57 +178,7 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
 
             c:\MyHDFstuff\hdf5\test\"test directory"-
 
-            where test directory is one of the following:
-
-			big(dll)
-
-			bittests(dll)
-
-			chunk(dll)
-
-			cmpd_dset(dll)
-
-			dsets(dll)
-
-			dtypes(dll)
-			
-			enum(dll)
-
-			extend(dll)
-
-			external(dll)
-
-			fillval(dll)
-
-			flush1(dll)
-
-			flush2(dll)
-
-			gheap(dll)
-
-			hyperslab(dll)
-
-			iopipe(dll)
-
-			istore(dll)
-
-			links(dll)
-
-			mount(dll) 
-
-			mtime(dll)
-
-			ohdr(dll)
-
-			overhead(dll)
-
-			stab(dll)
-
-			testhdf5(dll) 
-
-			unlink(dll)
-
-            
+                        
 		c:\MyHDFstuff\hdf5\tools\toolslib\debug
 	      c:\MyHDFstuff\hdf5\tools\toolslib\release
 
@@ -251,15 +195,15 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
  
 	          h5dump(dll)
 
-                  h5ls(dll)
+                h5ls(dll)
 
-                  h5debug(dll)
+                h5debug(dll)
 
-                  h5import(dll)
+                h5import(dll)
                     
-                  h5repart(dll)	            
+                h5repart(dll)	            
 
-                  gifconv(dll)
+                gifconv(dll)
 		
 
            Test and tool directory contains debug and release 
