@@ -397,14 +397,23 @@ void read_info(const char *filename,
  FILE *fp;
  char c;
  int  i, rc=1;
+ char  *srcdir = getenv("srcdir"); /* the source directory */
+ char  data_file[512]="";          /* buffer to hold name of existing file */
+ 
+ /* compose the name of the file to open, using the srcdir, if appropriate */
+ if (srcdir){
+  strcpy(data_file,srcdir);
+  strcat(data_file,"/");
+ } 
+ strcat(data_file,filename);
 
  
- if ((fp = fopen(filename, "r")) == (FILE *)NULL) {
+ if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
   printf( "Cannot open options file %s", filename);
   exit(1);
  }
 
- /* Cycle until end of file reached */
+ /* cycle until end of file reached */
  while( 1 )
  {
   rc=fscanf(fp, "%s", stype);
@@ -419,17 +428,20 @@ void read_info(const char *filename,
 
    /* find begining of info */
    i=0; c='0';
-   while( c!='"' )
+   while( c!=' ' )
    {
     fscanf(fp, "%c", &c);
+    if (feof(fp)) break;
    }
    c='0';
    /* go until end */
-   while( c!='"' )
+   while( c!=' ' )
    {
     fscanf(fp, "%c", &c);
     comp_info[i]=c;
     i++;
+    if (feof(fp)) break;
+    if (c==10 /*eol*/) break;
    }
    comp_info[i-1]='\0'; /*cut the last " */    
 
@@ -446,17 +458,20 @@ void read_info(const char *filename,
    
    /* find begining of info */
    i=0; c='0';
-   while( c!='"' )
+   while( c!=' ' )
    {
     fscanf(fp, "%c", &c);
+    if (feof(fp)) break;
    }
    c='0';
    /* go until end */
-   while( c!='"' )
+   while( c!=' ' )
    {
     fscanf(fp, "%c", &c);
     comp_info[i]=c;
     i++;
+    if (feof(fp)) break;
+    if (c==10 /*eol*/) break;
    }
    comp_info[i-1]='\0'; /*cut the last " */    
 

@@ -169,7 +169,7 @@ TOOLTEST test4.h5 -f dset_all:GZIP=1
 TOOLTEST test4.h5 -f GZIP=1 -m 1024
 
 #file
-#TOOLTEST test4.h5 -e h5repack_info.txt
+TOOLTEST test4.h5 -e ../testfiles/h5repack_info.txt
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
