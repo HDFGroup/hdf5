@@ -59,6 +59,8 @@ New Features
 
     Library:
     --------
+	- Retired GASS vfd (--with-gass).  Functions H5Pset_fapl_gass and
+	  H5Pget_fapl_gass are removed too.  AKC - 2005/3/3
         - Pablo was removed from the source code EIP - 2005/01/21
         - Modified registration of SZIP to dynamically detect the presence
             or absence of the encoder.  Changed configure and Makefiles,
@@ -203,7 +205,6 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
-	- Retired GASS vfd (--with-gass).  AKC - 2005/3/3
         - Fixed a racing condition in MPIPOSIX virtual file drive close
 	  function.  Now all processes must completed the close before any
 	  of them is returned.  This prevents some "faster" processes start
