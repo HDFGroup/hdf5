@@ -402,14 +402,11 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
                 if (HDstat(fullname, &buf) < 0)
                     /* The directory doesn't exist just yet */
-#ifdef WIN32
-					if (_mkdir(fullname)<0){ 
-#else
-                    if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST){
-#endif 
+                    if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
                         /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                          * Default to PREFIX's original prefix value. */
-                        HDstrcpy(fullname, prefix);}
+                        HDstrcpy(fullname, prefix);
+                    }
 
                 HDstrcat(fullname, "/");
                 HDstrcat(fullname, base_name);
