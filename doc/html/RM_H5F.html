@@ -291,6 +291,12 @@ facilitate moving easily between them.</i>
             <td align=left valign=bottom>Flushes only the specified file.</td></tr>
         </table>
         </center>       
+<dt><strong>Note:</strong>
+        <dd>HDF5 does not possess full control over buffering.
+        <code>H5Fflush</code> flushes the internal HDF5 buffers then 
+        asks the operating system (the OS) to flush the system buffers for the 
+        open files.  After that, the OS is responsible for ensuring that
+        the data is actually flushed to disk.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t </em><code>object_id</code>
@@ -447,11 +453,11 @@ facilitate moving easily between them.</i>
             <p>
             <strong>EXCEPTION:</strong> 
             Note the following deviation from the above-described behavior.
-            If <code>H5close</code> is called for a file but one or more 
+            If <code>H5Fclose</code> is called for a file but one or more 
             objects within the file remain open, those objects will remain 
             accessible until they are individually closed.  
             Thus, if the dataset <code>data_sample</code> is open when 
-            <code>H5close</code> is called for the file containing it, 
+            <code>H5Fclose</code> is called for the file containing it, 
             <code>data_sample</code> will remain open and accessible 
             (including writable) until it is explicitely closed.  
             The file will be automatically closed once all objects in the

@@ -407,7 +407,7 @@ facilitate moving easily between them.</i>
     <dd><code>H5Pget_class</code> returns the property list class for the 
         property list identified by the <code>plist</code> parameter.
         Valid property list classes are defined in the description of
-        <code>H5Pcreate()</code>.
+        <code>H5Pcreate</code>.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>plist</code>
@@ -1167,7 +1167,7 @@ facilitate moving easily between them.</i>
     <dd><code>H5Pget_external</code> returns information about an external 
         file.  The external file is specified by its index, <code>idx</code>,
         which is a number from zero to N-1, where N is the value 
-        returned by <code>H5Pget_external_count()</code>.  
+        returned by <code>H5Pget_external_count</code>.  
         At most <code>name_size</code> characters are copied into the 
         <code>name</code> array.  If the external file name is
         longer than <code>name_size</code> with the null terminator, the
@@ -1338,16 +1338,16 @@ facilitate moving easily between them.</i>
             <td>&nbsp;&nbsp;</td>
             <td valign=top>If this bit is set then the filter is 
               optional.  If the filter fails (see below) during an
-              <code>H5Dwrite()</code> operation then the filter is
+              <code>H5Dwrite</code> operation then the filter is
               just excluded from the pipeline for the chunk for which
               it failed; the filter will not participate in the
-              pipeline during an <code>H5Dread()</code> of the chunk.
+              pipeline during an <code>H5Dread</code> of the chunk.
               This is commonly used for compression filters: if the
               compression result would be larger than the input then
               the compression filter returns failure and the
               uncompressed data is stored in the file.  If this bit is
-              clear and a filter fails then <code>H5Dwrite()</code> 
-              or <code>H5Dread()</code> also fails.</td>
+              clear and a filter fails then <code>H5Dwrite</code> 
+              or <code>H5Dread</code> also fails.</td>
           </tr>
         </table>
         </center>
@@ -1457,7 +1457,7 @@ facilitate moving easily between them.</i>
         <p>
         <code>filter_number</code> is a value between zero and 
         <em>N</em>-1, as described in 
-        <a href="#Property-GetNFilters"><code>H5Pget_nfilters()</code></a>.
+        <a href="#Property-GetNFilters"><code>H5Pget_nfilters</code></a>.
         The function will return a negative value if the filter number 
         is out of range.  
         <p>
@@ -1469,7 +1469,7 @@ facilitate moving easily between them.</i>
         for the filter, or an empty string.  
         <p>
         The structure of the <code>flags</code> argument is discussed
-        in <a href="#Property-SetFilter"><code>H5Pset_filter()</code></a>.
+        in <a href="#Property-SetFilter"><code>H5Pset_filter</code></a>.
   <dt><strong>Note:</strong>
     <dd>This function currently supports only the permanent filter
         pipeline; <code>plist</code> must be a dataset creation property 
@@ -1798,7 +1798,7 @@ facilitate moving easily between them.</i>
         The total size of the raw data chunk cache and the preemption policy 
         are <em>rdcc_nbytes</em> and <em>rdcc_w0</em>.  
         <p>
-        Any (or all) of the <code>H5Pget_cache()</code> pointer arguments 
+        Any (or all) of the <code>H5Pget_cache</code> pointer arguments 
         may be null pointers.
         <p>
         The <em>rdcc_w0</em> value should be between 0 and 1 inclusive and
@@ -2138,7 +2138,7 @@ facilitate moving easily between them.</i>
     <dd>Reads buffer settings.
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_buffer</code> reads values previously set 
-        with H5Pset_buffer().
+        with H5Pset_buffer.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -2252,7 +2252,7 @@ facilitate moving easily between them.</i>
         in a dataset creation property list.  This is a catch-all 
         function for defining compression methods
 	and is intended to be called from a wrapper such as
-	<code>H5Pset_deflate()</code>. The dataset creation property
+	<code>H5Pset_deflate</code>. The dataset creation property
 	list <em>plist</em> is adjusted to use the specified
 	compression method.  The <em>flags</em> is an 8-bit vector
 	which is stored in the file as part of the compression message
@@ -2931,8 +2931,8 @@ facilitate moving easily between them.</i>
         <p>
         The array <code>memb_name</code> should be a name generator 
         (a printf-style format with a %s which will be replaced with the
-        name passed to <code>H5FDopen()</code>, usually from 
-        <code>H5Fcreate()</code> or <code>H5Fopen()</code>).
+        name passed to <code>H5FDopen</code>, usually from 
+        <code>H5Fcreate</code> or <code>H5Fopen</code>).
         <p>
         The array <code>memb_addr</code> specifies the offsets within the 
         virtual address space, from <code>0</code> (zero) to 
