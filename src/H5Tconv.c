@@ -3199,7 +3199,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         msize = bitno;
                     } else if (0==bitno) {
                         msize = 1;
-                        /*H5T_bit_set(s, src.u.f.mpos, 1, FALSE); - Why do this? */
+                        /* This line was moved to line 3229 */
+                        /* H5T_bit_set(s, src.u.f.mpos, 1, FALSE);  - Why do this? */
                     }
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     msize = src.u.f.msize;
@@ -3223,6 +3224,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                          H5T_BIT_MSB, TRUE);
                     assert(bitno>=0);
                     expo -= (src.u.f.ebias-1) + (src.u.f.msize-bitno);
+                    if(0==bitno)
+                        /* This line was moved from line 3203 */
+                        H5T_bit_set(s, src.u.f.mpos, 1, FALSE); /* - Why do this? */
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     expo -= src.u.f.ebias;
                 } else {
