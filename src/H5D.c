@@ -13,13 +13,13 @@
 /* $Id$ */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gprivate.h"		/* Group headers		  	*/
 #include "H5HLprivate.h"	/* Name heap				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -70,11 +70,8 @@ H5FL_DEFINE_STATIC(H5D_t);
 /* Declare a free list to manage blocks of type conversion data */
 H5FL_BLK_DEFINE_STATIC(type_conv);
 
-/* Declare a free list to manage blocks of background conversion data */
-H5FL_BLK_DEFINE_STATIC(bkgr_conv);
-
-/* Declare a free list to manage blocks of fill conversion data */
-H5FL_BLK_DEFINE_STATIC(fill_conv);
+/* Declare a free list to manage blocks of single datatype element data */
+H5FL_BLK_DEFINE(type_elem);
 
 /* Declare a free list to manage blocks of VL data */
 H5FL_BLK_DEFINE_STATIC(vlen_vl_buf);
@@ -1694,6 +1691,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     H5O_reset(H5O_FILL, &fill_prop);
     if(fill.buf && (NULL==H5O_copy(H5O_FILL, &fill, &fill_prop)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL,"unable to copy fill value");
+    H5O_reset(H5O_FILL_NEW, &fill);
     /* Write old fill value */
     if (fill_prop.buf && H5O_modify(&(new_dset->ent), H5O_FILL, 0, 
 	H5O_FLAG_CONSTANT, &fill_prop) < 0)        
@@ -2373,10 +2371,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space");
 
     /*
-     * If there is no type conversion then try reading directly into the
+     * If there is no type conversion then read directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if (H5T_IS_NOOP(tpath) && sconv->read) {
+    if (H5T_IS_NOOP(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -2434,11 +2432,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     request_nelmts = target_size / MAX(src_type_size, dst_type_size);
 
     /* Figure out the strip mine size. */
-    if ((sconv->f->init)(file_space, src_type_size, &file_iter)<0)
+    if (H5S_select_iter_init(file_space, src_type_size, &file_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
-    if ((sconv->m->init)(mem_space, dst_type_size, &mem_iter)<0)
+    if (H5S_select_iter_init(mem_space, dst_type_size, &mem_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
-    if ((sconv->m->init)(mem_space, dst_type_size, &bkg_iter)<0)
+    if (H5S_select_iter_init(mem_space, dst_type_size, &bkg_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
 
     /* Sanity check elements in temporary buffer */
@@ -2468,7 +2466,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (need_bkg && NULL==(bkg_buf=H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))) {
         /* Allocate background buffer */
         H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,(size_t)(request_nelmts*dst_type_size),0))==NULL)
+        if((bkg_buf=H5FL_BLK_ALLOC(type_conv,(size_t)(request_nelmts*dst_type_size),0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion");
     } /* end if */
 
@@ -2476,7 +2474,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
     for (smine_start=0; smine_start<(hsize_t)nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = (sconv->f->avail)(file_space,&file_iter,
+        smine_nelmts = H5S_select_favail(file_space,&file_iter,
                  MIN(request_nelmts, (nelmts-smine_start)));
 	
         /*
@@ -2489,7 +2487,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
 	/* Sanity check that space is allocated, then read data from it */ 
         assert(dataset->layout.addr!=HADDR_UNDEF || efl.nused > 0);
-        n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout), 
+        n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
                 dc_plist, src_type_size, file_space, 
                 &file_iter, smine_nelmts, dxpl_id, tconv_buf/*out*/);
 
@@ -2505,8 +2503,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = (sconv->m->gath)(buf, dst_type_size, mem_space, &bkg_iter,
-				 smine_nelmts, bkg_buf/*out*/);
+            n = H5S_select_mgath(buf, dst_type_size, mem_space, &bkg_iter,
+				 smine_nelmts, dxpl_id, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
             sconv->stats[1].bkg_nbytes += n * dst_type_size;
@@ -2528,8 +2526,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        status = (sconv->m->scat)(tconv_buf, dst_type_size, mem_space,
-				  &mem_iter, smine_nelmts, buf/*out*/);
+        status = H5S_select_mscat(tconv_buf, dst_type_size, mem_space,
+                          &mem_iter, smine_nelmts, dxpl_id, buf/*out*/);
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
 	sconv->stats[1].scat_nbytes += smine_nelmts * dst_type_size;
@@ -2566,7 +2564,7 @@ done:
     if (tconv_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))
         H5FL_BLK_FREE(type_conv,tconv_buf);
     if (bkg_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))
-        H5FL_BLK_FREE(bkgr_conv,bkg_buf);
+        H5FL_BLK_FREE(type_conv,bkg_buf);
     if (free_this_space)
         H5S_close(free_this_space);
     FUNC_LEAVE(ret_value);
@@ -2803,10 +2801,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space");
 
     /*
-     * If there is no type conversion then try writing directly into the
+     * If there is no type conversion then write directly from the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if (H5T_IS_NOOP(tpath) && sconv->write) {
+    if (H5T_IS_NOOP(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -2865,11 +2863,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small");
 
     /* Figure out the strip mine size. */
-    if ((sconv->f->init)(file_space, dst_type_size, &file_iter)<0)
+    if (H5S_select_iter_init(file_space, dst_type_size, &file_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
-    if ((sconv->m->init)(mem_space, src_type_size, &mem_iter)<0)
+    if (H5S_select_iter_init(mem_space, src_type_size, &mem_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
-    if ((sconv->f->init)(file_space, dst_type_size, &bkg_iter)<0)
+    if (H5S_select_iter_init(file_space, dst_type_size, &bkg_iter)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
      
     /*
@@ -2899,7 +2897,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (need_bkg && NULL==(bkg_buf=H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))) {
         /* Allocate background buffer */
         H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,(size_t)(request_nelmts*dst_type_size),1))==NULL)
+        if((bkg_buf=H5FL_BLK_ALLOC(type_conv,(size_t)(request_nelmts*dst_type_size),1))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion");
     } /* end if */
 
@@ -2907,7 +2905,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
     for (smine_start=0; smine_start<(hsize_t)nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = (sconv->f->avail)(file_space,&file_iter,
+        smine_nelmts = H5S_select_favail(file_space,&file_iter,
                  MIN(request_nelmts, (nelmts-smine_start)));
 	
         /*
@@ -2918,8 +2916,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        n = (sconv->m->gath)(buf, src_type_size, mem_space, &mem_iter,
-			     smine_nelmts, tconv_buf/*out*/);
+        n = H5S_select_mgath(buf, src_type_size, mem_space, &mem_iter,
+			     smine_nelmts, dxpl_id, tconv_buf/*out*/);
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].gath_timer), &timer);
 	sconv->stats[0].gath_nbytes += n * src_type_size;
@@ -2932,7 +2930,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout), 
+            n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
                                  dc_plist, dst_type_size, file_space, 
                                  &bkg_iter, smine_nelmts, dxpl_id, 
                                  bkg_buf/*out*/); 
@@ -2958,7 +2956,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
         H5_timer_begin(&timer);
 #endif
-        status = (sconv->f->scat)(dataset->ent.file, &(dataset->layout), 
+        status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
                                   dc_plist, dst_type_size, 
                                   file_space, &file_iter, smine_nelmts, 
                                   dxpl_id, tconv_buf);
@@ -3005,7 +3003,7 @@ done:
     if (tconv_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))
         H5FL_BLK_FREE(type_conv,tconv_buf);
     if (bkg_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))
-        H5FL_BLK_FREE(bkgr_conv,bkg_buf);
+        H5FL_BLK_FREE(type_conv,bkg_buf);
     if (free_this_space)
         H5S_close(free_this_space);
 
@@ -3244,7 +3242,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
                 bufsize = ptsperbuf*fill.size;
 
                 /* Allocate temporary buffer */
-                if ((buf=H5FL_BLK_ALLOC(fill_conv,bufsize,0))==NULL)
+                if ((buf=H5FL_BLK_ALLOC(type_conv,bufsize,0))==NULL)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
 
                 /* Fill the buffer with the fill value */
@@ -3291,7 +3289,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 
 done:
     if (buf)
-        H5FL_BLK_FREE(fill_conv,buf);
+        H5FL_BLK_FREE(type_conv,buf);
     FUNC_LEAVE(ret_value);
 }
 
@@ -3765,7 +3763,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
 
     /* Get the maximum buffer size needed and allocate it */
     buf_size=MAX(src_type_size,dst_type_size);
-    if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+    if (NULL==(tconv_buf = H5FL_BLK_ALLOC(type_elem,buf_size,0)) || NULL==(bkg_buf = H5FL_BLK_ALLOC(type_elem,buf_size,1)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Copy the user's data into the buffer for conversion */
@@ -3794,11 +3792,11 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
 
 done:
     if (tconv_buf)
-        H5MM_xfree(tconv_buf);
+        H5FL_BLK_FREE(type_elem,tconv_buf);
     if (bkg_buf)
-        H5MM_xfree(bkg_buf);
+        H5FL_BLK_FREE(type_elem,bkg_buf);
     FUNC_LEAVE (ret_value);
-}   /* H5Dfill() */
+}   /* H5D_fill() */
 
 
 /*--------------------------------------------------------------------------

@@ -16,12 +16,12 @@
 
 #define _H5S_IN_H5S_C
 #include "H5private.h"		/* Generic Functions			  */
-#include "H5Iprivate.h"		/* ID Functions		  */
 #include "H5Eprivate.h"		/* Error handling		  */
+#include "H5Iprivate.h"		/* ID Functions		  */
 #include "H5FLprivate.h"	/* Free Lists	  */
 #include "H5MMprivate.h"	/* Memory Management functions		  */
 #include "H5Oprivate.h"		/* object headers		  */
-#include "H5Spkg.h"		    /* Data-space functions			  */
+#include "H5Spkg.h"		/* Dataspace functions			  */
 
 /* Local static function prototypes */
 
@@ -31,9 +31,12 @@
 static int		interface_initialize_g = 0;
 static herr_t		H5S_init_interface(void);
 
-/* Tables of file and memory conversion information */
-static const H5S_fconv_t	*H5S_fconv_g[H5S_SEL_N];
-static const H5S_mconv_t	*H5S_mconv_g[H5S_SEL_N];
+#ifdef H5S_DEBUG
+/* Names of the selection names, for debugging */
+static const char *H5S_sel_names[]={
+    "none", "point", "hyperslab", "all"
+};
+#endif /* H5S_DEBUG */
 
 /* The path table, variable length */
 static H5S_conv_t		**H5S_conv_g = NULL;
@@ -81,14 +84,6 @@ H5S_init_interface(void)
 		       H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
-    }
-
-    /* Register space conversion functions */
-    if (H5S_register(H5S_SEL_POINTS, H5S_POINT_FCONV, H5S_POINT_MCONV)<0 ||
-	H5S_register(H5S_SEL_ALL, H5S_ALL_FCONV, H5S_ALL_MCONV) <0 ||
-	H5S_register(H5S_SEL_HYPERSLABS, H5S_HYPER_FCONV, H5S_HYPER_MCONV) <0) {
-	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		      "unable to register one or more conversion functions");
     }
 
 #ifdef H5_HAVE_PARALLEL
@@ -175,7 +170,7 @@ H5S_term_interface(void)
 
 			/* Summary */
 			sprintf(buf, "%s %c %s",
-				path->m->name, 0==j?'>':'<', path->f->name);
+				H5S_sel_names[path->mtype], 0==j?'>':'<', H5S_sel_names[path->ftype]);
 			fprintf(H5DEBUG(S), "   %-16s\n", buf);
 
 			/* Gather */
@@ -266,9 +261,8 @@ H5S_term_interface(void)
 	    H5I_destroy_group(H5I_DATASPACE);
 
 	    /* Clear/free conversion table */
-	    HDmemset(H5S_fconv_g, 0, sizeof(H5S_fconv_g));
-	    HDmemset(H5S_mconv_g, 0, sizeof(H5S_mconv_g));
-	    for (i=0; i<H5S_nconv_g; i++) H5MM_xfree(H5S_conv_g[i]);
+	    for (i=0; i<H5S_nconv_g; i++)
+                H5MM_xfree(H5S_conv_g[i]);
 	    H5S_conv_g = H5MM_xfree(H5S_conv_g);
 	    H5S_nconv_g = H5S_aconv_g = 0;
 
@@ -279,46 +273,6 @@ H5S_term_interface(void)
     }
     
     FUNC_LEAVE(n);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_register
- *
- * Purpose:	Adds information about a data space conversion to the space
- *		conversion table.  A space conversion has two halves: the
- *		half that copies data points between application memory and
- *		the type conversion array, and the half that copies points
- *		between the type conversion array and the file.  Both halves
- *		are required.
- *
- * Note:	The conversion table will contain pointers to the file and
- *		memory conversion info.  The FCONV and MCONV arguments are
- *		not copied.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August 11, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
-	     const H5S_mconv_t *mconv)
-{
-    FUNC_ENTER_NOAPI(H5S_register, FAIL);
-
-    assert(cls>=0 && cls<H5S_SEL_N);
-    assert(fconv);
-    assert(mconv);
-
-    H5S_fconv_g[cls] = fconv;
-    H5S_mconv_g[cls] = mconv;
-
-    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -1514,7 +1468,9 @@ H5S_conv_t *
 H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
 {
     H5S_conv_t	*path;  /* Space conversion path */
+#ifdef H5_HAVE_PARALLEL
     htri_t opt;         /* Flag whether a selection is optimizable */
+#endif /* H5_HAVE_PARALLEL */
     size_t	i;      /* Index variable */
     
     FUNC_ENTER_NOAPI(H5S_find, NULL);
@@ -1537,8 +1493,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
      * If so then return a pointer to that entry.
      */
     for (i=0; i<H5S_nconv_g; i++) {
-        if (H5S_conv_g[i]->f->type==file_space->select.type &&
-                H5S_conv_g[i]->m->type==mem_space->select.type) {
+        if (H5S_conv_g[i]->ftype==file_space->select.type &&
+                H5S_conv_g[i]->mtype==mem_space->select.type) {
 
 #ifdef H5_HAVE_PARALLEL
             /*
@@ -1555,22 +1511,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
             } /* end if */
             else {
 #endif /* H5_HAVE_PARALLEL */
-                /*
-                 * Check if we can set direct "all" read/write functions
-                 */
-                opt=H5S_all_opt_possible(mem_space,file_space,flags);
-                if(opt==FAIL)
-                    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
-
-                /* Check if we can use the optimized "all" I/O routines */
-                if(opt==TRUE) {
-                    H5S_conv_g[i]->read = H5S_all_read;
-                    H5S_conv_g[i]->write = H5S_all_write;
-                } /* end if */
-                else {
-                    H5S_conv_g[i]->read = NULL;
-                    H5S_conv_g[i]->write = NULL;
-                } /* end else */
+                H5S_conv_g[i]->read = H5S_select_read;
+                H5S_conv_g[i]->write = H5S_select_write;
 #ifdef H5_HAVE_PARALLEL
             } /* end else */
 #endif /* H5_HAVE_PARALLEL */
@@ -1580,21 +1522,14 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
     }
     
     /*
-     * The path wasn't found.  Do we have enough information to create a new
-     * path?
-     */
-    if (NULL==H5S_fconv_g[file_space->select.type] || NULL==H5S_mconv_g[mem_space->select.type])
-        HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, NULL, "unable to convert between data space selections");
-
-    /*
-     * Create a new path.
+     * The path wasn't found.  Create a new path.
      */
     if (NULL==(path = H5MM_calloc(sizeof(*path))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path");
 
     /* Initialize file & memory conversion functions */
-    path->f = H5S_fconv_g[file_space->select.type];
-    path->m = H5S_mconv_g[mem_space->select.type];
+    path->ftype = file_space->select.type;
+    path->mtype = mem_space->select.type;
 
 #ifdef H5_HAVE_PARALLEL
     /*
@@ -1611,22 +1546,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
     } /* end if */
     else {
 #endif /* H5_HAVE_PARALLEL */
-        /*
-         * Check if we can set direct "all" read/write functions
-         */
-        opt=H5S_all_opt_possible(mem_space,file_space,flags);
-        if(opt==FAIL)
-            HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
-
-        /* Check if we can use the optimized "all" I/O routines */
-        if(opt==TRUE) {
-            path->read = H5S_all_read;
-            path->write = H5S_all_write;
-        } /* end if */
-        else {
-            path->read = NULL;
-            path->write = NULL;
-        } /* end else */
+        path->read = H5S_select_read;
+        path->write = H5S_select_write;
 #ifdef H5_HAVE_PARALLEL
     } /* end else */
 #endif /* H5_HAVE_PARALLEL */

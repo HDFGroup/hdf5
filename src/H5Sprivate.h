@@ -40,11 +40,15 @@
 #define H5S_CONV_STORAGE_CHUNKED        0x0004  /* i.e. '2' */
 #define H5S_CONV_STORAGE_MASK           0x0006
 
+/* Flags for H5S_select_get_seq_list() */
+#define H5S_GET_SEQ_LIST_SORTED         0x0001
+
 /* Forward references of common typedefs */
 typedef struct H5S_t H5S_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;
 typedef struct H5S_hyper_span_info_t H5S_hyper_span_info_t;
+typedef struct H5S_hyper_dim_t H5S_hyper_dim_t;
 
 /* Point selection iteration container */
 typedef struct {
@@ -54,10 +58,24 @@ typedef struct {
 
 /* New Hyperslab selection iteration container */
 typedef struct {
+    /* Common fields for all hyperslab selections */
     hsize_t elmt_left;      /* Number of elements left to iterate over */
+    hssize_t *off;          /* Offset in span node (used as position for regular hyperslabs) */
+    unsigned iter_rank;     /* Rank of iterator information */
+                            /* (This should always be the same as the dataspace
+                             * rank, except for regular hyperslab selections in
+                             * which there are contiguous regions in the lower
+                             * dimensions which have been "flattened" out
+                             */
+
+    /* "Flattened" regular hyperslab selection fields */
+    H5S_hyper_dim_t *diminfo;   /* "Flattened" regular selection information */
+    hsize_t *size;          /* "Flattened" dataspace extent information */
+    hssize_t *sel_off;      /* "Flattened" selection offset information */
+
+    /* Irregular hyperslab selection fields */
     H5S_hyper_span_info_t *spans;  /* Pointer to copy of the span tree */
-    H5S_hyper_span_t **span;  /* Array of pointers to span nodes */
-    hssize_t *off;          /* Offset in span node (position for regular hyperslabs) */
+    H5S_hyper_span_t **span;/* Array of pointers to span nodes */
 } H5S_hyper_iter_t;
 
 /* "All" selection iteration container */
@@ -73,59 +91,9 @@ typedef union {
     H5S_all_iter_t all;     /* "All" selection iteration information */
 } H5S_sel_iter_t;
 
-/*
- * Data space conversions usually take place in two halves.  One half
- * transfers data points between memory and a data type conversion array
- * where the points are contiguous, and the other half transfers points
- * between the type conversion array and the file.
- */
-typedef struct H5S_fconv_t {
-    /* Identification */
-    const char 		*name;
-    H5S_sel_type	type;
-    
-    /* Initialize file element numbering information */
-    herr_t (*init)(const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *iter);
-
-    /* Determine optimal number of elements to transfer */
-    hsize_t (*avail)(const H5S_t *file_space, const H5S_sel_iter_t *file_iter,
-		    hsize_t max);
-
-    /* Gather elements from disk to type conversion buffer */
-    hsize_t (*gath)(H5F_t *f, const struct H5O_layout_t *layout,
-                   H5P_genplist_t *dc_plist, size_t elmt_size,
-		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   hsize_t nelmts, hid_t dxpl_id, void *tconv_buf/*out*/);
-
-    /* Scatter elements from type conversion buffer to disk */
-    herr_t (*scat)(H5F_t *f, const struct H5O_layout_t *layout,
-                   H5P_genplist_t *dc_plist, size_t elmt_size,
-		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   hsize_t nelmts, hid_t dxpl_id, const void *tconv_buf);
-} H5S_fconv_t;
-
-typedef struct H5S_mconv_t {
-    /* Identification */
-    const char		*name;
-    H5S_sel_type	type;
-    
-    /* Initialize memory element numbering information */
-    herr_t (*init)(const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *iter);
-
-    /* Gather elements from app buffer to type conversion buffer */
-    hsize_t (*gath)(const void *buf, size_t elmt_size,
-		   const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		   hsize_t nelmts, void *tconv_buf/*out*/);
-
-    /* Scatter elements from type conversion buffer to application buffer */
-    herr_t (*scat)(const void *tconv_buf, size_t elmt_size,
-		   const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		   hsize_t nelmts, void *buf/*out*/);
-} H5S_mconv_t;
-
 typedef struct H5S_conv_t {
-    const H5S_fconv_t	*f;
-    const H5S_mconv_t	*m;
+    H5S_sel_type	ftype;
+    H5S_sel_type	mtype;
 
     /*
      * If there is no data type conversion then it might be possible to
@@ -167,14 +135,6 @@ typedef struct H5S_conv_t {
 #endif
 } H5S_conv_t;
 
-/* Conversion information for the various data space selection types */
-__DLLVAR__ const H5S_fconv_t	H5S_POINT_FCONV[];
-__DLLVAR__ const H5S_mconv_t	H5S_POINT_MCONV[];
-__DLLVAR__ const H5S_fconv_t	H5S_ALL_FCONV[];
-__DLLVAR__ const H5S_mconv_t	H5S_ALL_MCONV[];
-__DLLVAR__ const H5S_fconv_t	H5S_HYPER_FCONV[];
-__DLLVAR__ const H5S_mconv_t	H5S_HYPER_MCONV[];
-
 /* We get the declaration of H5G_entry_t from the H5Oprivate.h file */
 
 __DLL__ H5S_t *H5S_create(H5S_class_t type);
@@ -215,10 +175,37 @@ __DLL__ htri_t H5S_select_regular(const H5S_t *space);
 __DLL__ htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				H5D_operator_t op, void *operator_data);
+__DLL__ herr_t H5S_select_iter_init(const H5S_t *space, size_t elmt_size,
+            H5S_sel_iter_t *iter);
 __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
                                 H5S_sel_iter_t *sel_iter);
 __DLL__ herr_t H5S_select_fill(void *fill, size_t fill_size,
                                 const H5S_t *space, void *buf);
+__DLL__ herr_t H5S_select_get_seq_list(unsigned flags, const H5S_t *space,H5S_sel_iter_t *iter,
+        size_t elem_size, size_t maxseq, size_t maxbytes,
+        size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+__DLL__ hsize_t H5S_select_favail(const H5S_t *space, const H5S_sel_iter_t *iter,
+        hsize_t max);
+__DLL__ herr_t H5S_select_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
+        H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
+        const void *_buf);
+__DLL__ hsize_t H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
+        H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
+        void *buf);
+__DLL__ herr_t H5S_select_mscat (const void *_tscat_buf, size_t elmt_size,
+        const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
+        hid_t dxpl_id, void *_buf/*out*/);
+__DLL__ hsize_t H5S_select_mgath (const void *_buf, size_t elmt_size,
+        const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
+        hid_t dxpl_id, void *_tgath_buf/*out*/);
+__DLL__ herr_t H5S_select_read(H5F_t *f, const struct H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
+        const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/);
+__DLL__ herr_t H5S_select_write(H5F_t *f, const struct H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist, size_t elmt_size, const H5S_t *file_space,
+        const H5S_t *mem_space, hid_t dxpl_id, const void *buf/*out*/);
 
 /* Needed for internal use of selections in H5Fistore code */
 __DLL__ herr_t H5S_select_all(H5S_t *space);

@@ -2372,8 +2372,11 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		    } /* end if */
 
                     /* If the sequence gets shorter, pad out the original sequence with zeros */
-                    if(bg_seq_len<seq_len)
-                        HDmemset((uint8_t *)tmp_buf+dst_base_size*bg_seq_len,0,(seq_len-bg_seq_len)*dst_base_size);
+                    H5_CHECK_OVERFLOW(bg_seq_len,hsize_t,hssize_t);
+                    if((hssize_t)bg_seq_len<seq_len) {
+                        H5_CHECK_OVERFLOW((seq_len-bg_seq_len),hsize_t,size_t);
+                        HDmemset((uint8_t *)tmp_buf+dst_base_size*bg_seq_len,0,(size_t)(seq_len-bg_seq_len)*dst_base_size);
+                    } /* end if */
 		} /* end if */
 
                 /* Convert VL sequence */
@@ -2388,7 +2391,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                                   "can't write VL data");
 
                 /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorted than the old data elements.*/
-                if(nested && seq_len<bg_seq_len) {
+                H5_CHECK_OVERFLOW(bg_seq_len,hsize_t,hssize_t);
+                if(nested && seq_len<(hssize_t)bg_seq_len) {
                     uint8_t *tmp_p=tmp_buf;
 		    tmp_p += seq_len*dst_base_size;
                     for(i=0; i<(bg_seq_len-seq_len); i++) {
