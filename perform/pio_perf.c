@@ -83,7 +83,7 @@
 FILE       *output;             /* output file                          */
 int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
 int         comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
-MPI_Info    pio_info_g=MPI_INFO_NULL;/* MPI INFO object to run the PIO  */
+MPI_Info    pio_info_g = MPI_INFO_NULL; /*MPI INFO object to run the PIO*/
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
 int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
 int         pio_mpi_nprocs_g;   /* Number of processes of pio_comm_g    */
@@ -134,7 +134,6 @@ static struct long_options l_opts[] = {
     { "debu", require_arg, 'D' },
     { "deb", require_arg, 'D' },
     { "de", require_arg, 'D' },
-    { "d", require_arg, 'D' },
     { "file-size", require_arg, 'f' },
     { "file-siz", require_arg, 'f' },
     { "file-si", require_arg, 'f' },
@@ -254,11 +253,13 @@ static void get_minmax(minmax *mm, double val);
 static minmax accumulate_minmax_stuff(minmax *mm, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
-static void output_results(const struct options *options, const char *name, minmax *table, int table_size,off_t data_size);
+static void output_results(const struct options *options, const char *name,
+                           minmax *table, int table_size, off_t data_size);
 static void output_report(const char *fmt, ...);
 static void print_indent(register int indent);
 static void usage(const char *prog);
 static int parse_environment(void);
+static void report_parameters(struct options *opts);
 
 /*
  * Function:    main
@@ -292,6 +293,7 @@ main(int argc, char **argv)
         exit_value = EXIT_FAILURE;
         goto finish;
     }
+
     ret = MPI_Comm_rank(MPI_COMM_WORLD, &comm_world_rank_g);
 
     if (ret != MPI_SUCCESS) {
@@ -323,6 +325,8 @@ main(int argc, char **argv)
             goto finish;
         }
     }
+
+    report_parameters(opts);
     run_test_loop(opts);
 
 finish:
@@ -356,7 +360,7 @@ run_test_loop(struct options *opts)
 {
     parameters parms;
     int num_procs;
-    int		doing_pio;		/* if this process is doing PIO */
+    int doing_pio;      /* if this process is doing PIO */
     int io_runs = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* default to run all tests */
 
     if (opts->io_types & ~0x7) {
@@ -401,12 +405,14 @@ run_test_loop(struct options *opts)
             for (buf_size = opts->min_xfer_size;
                     buf_size <= opts->max_xfer_size; buf_size <<= 1) {
                 parms.buf_size = buf_size;
-                parms.num_elmts = opts->file_size / (off_t)(parms.num_dsets * sizeof(int));
+                parms.num_elmts = opts->file_size /
+                                    (off_t)(parms.num_dsets * sizeof(int));
 
                 print_indent(1);
                 output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
                               buf_size,
-                              ((double)parms.num_dsets * (double)parms.num_elmts * (double)sizeof(int)) / ONE_MB);
+                              ((double)parms.num_dsets * (double)parms.num_elmts *
+                                    (double)sizeof(int)) / ONE_MB);
                 print_indent(1);
                 output_report("  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
                               parms.num_files, parms.num_dsets, parms.num_elmts);
@@ -555,7 +561,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
      */
     /* Write statistics	*/
     /* Print the raw data throughput if desired */
-    if(opts->print_raw) {
+    if (opts->print_raw) {
         /* accumulate and output the max, min, and average "raw write" times */
         if (pio_debug_level >= 3) {
             /* output all of the times for all iterations */
@@ -902,6 +908,59 @@ print_indent(register int indent)
     }
 }
 
+static void
+recover_size_and_print(long_long val, const char *end)
+{
+    if (val >= ONE_KB && (val % ONE_KB) == 0) {
+        if (val >= ONE_MB && (val % ONE_MB) == 0) {
+            if (val >= ONE_GB && (val % ONE_GB) == 0)
+                HDfprintf(output, "%HdGB%s", val / ONE_GB, end);
+            else
+                HDfprintf(output, "%HdMB%s", val / ONE_MB, end);
+        } else {
+            HDfprintf(output, "%HdKB%s", val / ONE_KB, end);
+        }
+    } else {
+        HDfprintf(output, "%Hd%s", val, end);
+    }
+}
+
+static void
+report_parameters(struct options *opts)
+{
+    int rank;
+
+    MPI_Comm_rank(pio_comm_g, &rank);
+
+    HDfprintf(output, "rank %d: File size=", rank);
+    recover_size_and_print((long_long)opts->file_size, "\n");
+
+    HDfprintf(output, "rank %d: Number of files=%Hd\n", rank,
+              (long_long)opts->num_files);
+    HDfprintf(output, "rank %d: Number of datasets=%Hd\n", rank,
+              (long_long)opts->num_dsets);
+    HDfprintf(output, "rank %d: Number of iterations=%Hd\n", rank,
+              (long_long)opts->num_iters);
+    HDfprintf(output, "rank %d: Number of processes=%Hd:%Hd\n", rank,
+              (long_long)opts->min_num_procs,
+              (long_long)opts->max_num_procs);
+
+    HDfprintf(output, "rank %d: Transfer buffer size=", rank);
+    recover_size_and_print((long_long)opts->min_xfer_size, ":");
+    recover_size_and_print((long_long)opts->max_xfer_size, "\n");
+
+    {
+        char *prefix = getenv("H5_PARAPREFIX");
+
+        HDfprintf(output, "rank %d: H5_PARAPREFIX Environment Var=%s\n", rank,
+                  (prefix ? prefix : "not set"));
+    }
+
+    HDfprintf(output, "rank %d: ", rank);
+    h5_dump_info_object(pio_info_g);
+    HDfprintf(output, "\n");
+}
+
 /*
  * Function:    parse_command_line
  * Purpose:     Parse the command line options and return a STRUCT OPTIONS
@@ -965,7 +1024,7 @@ parse_command_line(int argc, char *argv[])
                     } else {
                         fprintf(stderr, "pio_perf: invalid --api option %s\n",
                                 buf);
-                        exit(1);
+                        exit(EXIT_FAILURE);
                     }
 
                     if (*end == '\0')
@@ -1008,7 +1067,7 @@ parse_command_line(int argc, char *argv[])
                             if (!isdigit(buf[i])) {
                                 fprintf(stderr, "pio_perf: invalid --debug option %s\n",
                                         buf);
-                                exit(1);
+                                exit(EXIT_FAILURE);
                             }
 
                         pio_debug_level = atoi(buf);
@@ -1029,7 +1088,7 @@ parse_command_line(int argc, char *argv[])
                             break;
                         default:
                             fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
-                            exit(1);
+                            exit(EXIT_FAILURE);
                         }
                     }
 
@@ -1056,7 +1115,7 @@ parse_command_line(int argc, char *argv[])
 #else
 	    fprintf(stderr, "pio_perf: --no-fill not supported\n");
             usage(progname);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 #endif
             break;
         case 'o':

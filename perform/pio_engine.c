@@ -24,6 +24,10 @@
 #   include <mpio.h>
 #endif  /* !MPI_FILE_NULL */
 
+#ifdef H5_HAVE_GPFS
+#   include <gpfs_fcntl.h>
+#endif  /* H5_HAVE_GPFS */
+
 #include "pio_perf.h"
 #include "pio_timer.h"
 
@@ -71,10 +75,8 @@ enum {
 
 /* Global variables */
 static int	clean_file_g = -1;	/*whether to cleanup temporary test     */
-                                /*files. -1 is not defined;             */
-                                /*0 is no cleanup; 1 is do cleanup      */
-
-
+                                        /*files. -1 is not defined;             */
+                                        /*0 is no cleanup; 1 is do cleanup      */
 
 /*
  * In a parallel machine, the filesystem suitable for compiling is
@@ -92,7 +94,7 @@ static int	clean_file_g = -1;	/*whether to cleanup temporary test     */
 #endif  /* !HDF5_PARAPREFIX */
 
 #ifndef MIN
-#define MIN(a,b) (a < b ? a : b)
+#   define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif  /* !MIN */
 
 /* the different types of file descriptors we can expect */
@@ -113,6 +115,10 @@ static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
                        int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
+
+/* GPFS-specific functions */
+static void start_data_shipping(int handle, int num_insts);
+static void stop_data_shipping(int handle);
 
 /*
  * Function:    do_pio
@@ -1165,6 +1171,88 @@ do_cleanupfile(iotype iot, char *fname)
         }
     }
 }
+
+#ifdef H5_HAVE_GPFS
+
+/*
+ * Function:    start_data_shipping
+ * Purpose:     Start up data shipping. The second parameter is the total
+ *              number of open instances on all nodes that will be
+ *              operating on the file. Must be called for every such
+ *              instance with the same value of NUM_INSTS.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 28. May 2002
+ * Modifications:
+ */
+static void
+start_data_shipping(int handle, int num_insts)
+{
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsDataShipStart_t start;
+    } ds_start;
+
+    ds_start.hdr.totalLength = sizeof(ds_start);
+    ds_start.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    ds_start.hdr.fcntlReserved = 0;
+    ds_start.start.structLen = sizeof(gpfsDataShipStart_t);
+    ds_start.start.structType = GPFS_DATA_SHIP_START;
+    ds_start.start.numInstances = num_insts;
+    ds_start.start.reserved = 0;
+
+    if (gpfs_fcntl(handle, &ds_start) != 0) {
+        fprintf(stderr,
+                "gpfs_fcntl DS start directive failed. errno=%d errorOffset=%d\n",
+                errno, ds_start.hdr.errorOffset);
+        exit(EXIT_FAILURE);
+    }
+}
+
+/*
+ * Function:    stop_data_shipping
+ * Purpose:     Shut down data shipping. Must be called for every handle
+ *              for which start_data_shipping was called.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 28. May 2002
+ * Modifications:
+ */
+static void
+stop_data_shipping(int handle)
+{
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsDataShipStop_t stop;
+    } ds_stop;
+
+    ds_stop.hdr.totalLength = sizeof(ds_stop);
+    ds_stop.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    ds_stop.hdr.fcntlReserved = 0;
+    ds_stop.stop.structLen = sizeof(ds_stop.stop);
+    ds_stop.stop.structType = GPFS_DATA_SHIP_STOP;
+
+    if (gpfs_fcntl(handle, &ds_stop) != 0)
+        fprintf(stderr,
+                "gpfs_fcntl DS stop directive failed. errno=%d errorOffset=%d\n",
+                errno, ds_stop.hdr.errorOffset);
+}
+
+#else
+
+/* H5_HAVE_GPFS isn't defined */
+
+static void
+start_data_shipping(int handle, int num_insts)
+{
+    return;
+}
+
+static void
+stop_data_shipping(int handle)
+{
+    return;
+}
+
+#endif  /* H5_HAVE_GPFS */
 
 #ifndef TIME_MPI
 #define TIME_MPI
