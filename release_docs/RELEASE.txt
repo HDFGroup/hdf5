@@ -56,6 +56,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Corrected bugs in H5Gget_num_objs, H5Gget_objname_by_idx and
+            H5Gget_objtype_by_idx to allow them to accept location IDs, not just
+            group IDs.  QAK - 2003/08/21
         - Corrected bug when using scalar dataspace for memory selection and
             operating on chunked dataset.  QAK - 2003/08/18
         - Corrected bugs with multiple '/' characters in names for H5Glink

@@ -180,9 +180,9 @@ static herr_t H5G_linkval(H5G_entry_t *loc, const char *name, size_t size,
 static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
 			H5G_entry_t *dst_loc, const char *dst_name, hid_t dxpl_it);
 static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
-static herr_t H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs, hid_t dxpl_id);
-static ssize_t H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
-static int H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id);
+static herr_t H5G_get_num_objs(H5G_entry_t *grp, hsize_t *num_objs, hid_t dxpl_id);
+static ssize_t H5G_get_objname_by_idx(H5G_entry_t *grp, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
+static int H5G_get_objtype_by_idx(H5G_entry_t *grp, hsize_t idx, hid_t dxpl_id);
 static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
                   H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
@@ -381,6 +381,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     int			_idx = 0;
     H5G_bt_ud2_t	udata;
     H5G_entry_t		*loc = NULL;
+    H5G_t		*grp = NULL;
     herr_t		ret_value;
     
     FUNC_ENTER_API(H5Giterate, FAIL);
@@ -402,15 +403,16 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
      * Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
      */
-    if (NULL==(udata.group = H5G_open (loc, name, H5AC_dxpl_id)))
+    if (NULL==(grp = H5G_open (loc, name, H5AC_dxpl_id)))
 	HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-    if ((udata.group_id=H5I_register (H5I_GROUP, udata.group))<0) {
-	H5G_close(udata.group);
+    if ((udata.group_id=H5I_register (H5I_GROUP, grp))<0) {
+	H5G_close(grp);
 	HGOTO_ERROR (H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group");
     }
     
     /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
     udata.skip = *idx;
+    udata.ent = &(grp->ent);
     udata.op = op;
     udata.op_data = op_data;
 
@@ -418,11 +420,11 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     udata.final_ent = 0;
 
     /* Iterate over the group members */
-    if ((ret_value = H5B_iterate (H5G_fileof(udata.group), H5AC_dxpl_id, H5B_SNODE,
-              H5G_node_iterate, udata.group->ent.cache.stab.btree_addr, &udata))<0)
+    if ((ret_value = H5B_iterate (H5G_fileof(grp), H5AC_dxpl_id, H5B_SNODE,
+              H5G_node_iterate, udata.ent->cache.stab.btree_addr, &udata))<0)
         HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
-    H5I_dec_ref (udata.group_id); /*also closes udata.group*/
+    H5I_dec_ref (udata.group_id); /*also closes 'grp'*/
 
     /* Check for too high of a starting index (ex post facto :-) */
     /* (Skipping exactly as many entries as are in the group is currently an error) */
@@ -455,22 +457,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_num_objs(hid_t group_id, hsize_t *num_objs)
+H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
 {
-    H5G_t		*group = NULL;
+    H5G_entry_t		*loc = NULL;    /* Pointer to symbol table entry */
     herr_t		ret_value;
     
     FUNC_ENTER_API(H5Gget_num_objs, FAIL);
-    H5TRACE2("e","i*h",group_id,num_objs);
+    H5TRACE2("e","i*h",loc_id,num_objs);
 
     /* Check args */
-    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
+    if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
     if (!num_objs)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "nil pointer");
 
     /* Call private function. */
-    ret_value = H5G_get_num_objs(group, num_objs, H5AC_ind_dxpl_id);
+    ret_value = H5G_get_num_objs(loc, num_objs, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -502,28 +506,30 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Gget_objname_by_idx(hid_t group_id, hsize_t idx, char *name, size_t size)
+H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
 {
-    H5G_t		*group = NULL;
+    H5G_entry_t		*loc = NULL;    /* Pointer to symbol table entry */
     hsize_t             num_objs;
     ssize_t		ret_value = FAIL;
     
     FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL);
-    H5TRACE4("Zs","ihsz",group_id,idx,name,size);
+    H5TRACE4("Zs","ihsz",loc_id,idx,name,size);
 
     /* Check args */
-    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
+    if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
     if (!name)   
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "nil pointer for name");
         
-    if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
+    if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
     if(idx >= num_objs)    
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
         
     /*call private function*/
-    ret_value = H5G_get_objname_by_idx(group, idx, name, size, H5AC_ind_dxpl_id);
+    ret_value = H5G_get_objname_by_idx(loc, idx, name, size, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -549,26 +555,28 @@ done:
  */
 #ifdef H5_WANT_H5_V1_4_COMPAT
 int
-H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
+H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 {
-    H5G_t		*group = NULL;
+    H5G_entry_t		*loc = NULL;    /* Pointer to symbol table entry */
     hsize_t             num_objs;
     int 		ret_value = H5G_UNKNOWN;
     
     FUNC_ENTER_API(H5Gget_objtype_by_idx, FAIL);
-    H5TRACE2("Is","ih",group_id,idx);
+    H5TRACE2("Is","ih",loc_id,idx);
 
     /* Check args */
-    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
+    if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
         
-    if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
+    if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
     if(idx >= num_objs)    
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
         
     /*call private function*/
-    ret_value = H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
+    ret_value = H5G_get_objtype_by_idx(loc, idx, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -577,26 +585,28 @@ done:
 
 #else /*H5_WANT_H5_V1_4_COMPAT*/
 H5G_obj_t
-H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
+H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 {
-    H5G_t		*group = NULL;
+    H5G_entry_t		*loc = NULL;    /* Pointer to symbol table entry */
     hsize_t             num_objs;
     H5G_obj_t		ret_value;
     
     FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN);
-    H5TRACE2("Is","ih",group_id,idx);
+    H5TRACE2("Is","ih",loc_id,idx);
 
     /* Check args */
-    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a group");
+    if (NULL==(loc=H5G_loc (loc_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
+    if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
         
-    if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
+    if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "unable to retrieve number of members");
     if(idx >= num_objs)    
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound");
         
     /*call private function*/
-    ret_value = H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
+    ret_value = H5G_get_objtype_by_idx(loc, idx, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2595,16 +2605,23 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs, hid_t dxpl_id)
+H5G_get_num_objs(H5G_entry_t *loc, hsize_t *num_objs, hid_t dxpl_id)
 {
     herr_t		ret_value;
     
     FUNC_ENTER_NOAPI(H5G_get_num_objs, FAIL);
 
+    /* Sanity check */
+    assert(loc);
+    assert(loc->type==H5G_CACHED_STAB);
+    assert(num_objs);
+
+    /* Reset the number of objects in the group */
     *num_objs = 0;
+
     /* Iterate over the group members */
-    if ((ret_value = H5B_iterate (H5G_fileof(grp), dxpl_id, H5B_SNODE,
-              H5G_node_sumup, grp->ent.cache.stab.btree_addr, num_objs))<0)
+    if ((ret_value = H5B_iterate (loc->file, dxpl_id, H5B_SNODE,
+              H5G_node_sumup, loc->cache.stab.btree_addr, num_objs))<0)
         HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
         
 done:
@@ -2630,21 +2647,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t 
-H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size, hid_t dxpl_id)
+H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, hid_t dxpl_id)
 {
-    ssize_t		ret_value;
-    H5G_bt_ud3_t	udata;
+    H5G_bt_ud3_t	udata;          /* Iteration information */
+    ssize_t		ret_value;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_get_objname_by_idx, FAIL);
 
+    /* Sanity check */
+    assert(loc);
+    assert(loc->type==H5G_CACHED_STAB);
+
+    /* Set iteration information */
     udata.idx = idx;
     udata.num_objs = 0;
-    udata.group = grp;
+    udata.ent = loc;
     udata.name = NULL;
 
     /* Iterate over the group members */
-    if ((ret_value = H5B_iterate (H5G_fileof(grp), dxpl_id, H5B_SNODE,
-              H5G_node_name, grp->ent.cache.stab.btree_addr, &udata))<0)
+    if ((ret_value = H5B_iterate (loc->file, dxpl_id, H5B_SNODE,
+              H5G_node_name, loc->cache.stab.btree_addr, &udata))<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
     
     ret_value = (ssize_t)HDstrlen(udata.name);
@@ -2680,20 +2702,25 @@ done:
  *-------------------------------------------------------------------------
  */
 static int 
-H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id)
+H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
 {
-    int		        ret_value = H5G_UNKNOWN;
-    H5G_bt_ud3_t	udata;
+    H5G_bt_ud3_t    udata;              /* User data for B-tree callback */
+    int	    ret_value;          /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, FAIL);
     
+    /* Sanity check */
+    assert(loc);
+    assert(loc->type==H5G_CACHED_STAB);
+
+    /* Set iteration information */
     udata.idx = idx;
     udata.num_objs = 0;
-    udata.group = grp;
+    udata.ent = loc;
     
     /* Iterate over the group members */
-    if (H5B_iterate (H5G_fileof(grp), dxpl_id, H5B_SNODE,
-              H5G_node_type, grp->ent.cache.stab.btree_addr, &udata)<0)
+    if (H5B_iterate (loc->file, dxpl_id, H5B_SNODE,
+              H5G_node_type, loc->cache.stab.btree_addr, &udata)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
     
     ret_value = udata.type;

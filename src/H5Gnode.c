@@ -1284,7 +1284,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
         if (bt_udata->skip>0) {
             --bt_udata->skip;
         } else {
-            name = H5HL_peek (f, dxpl_id, bt_udata->group->ent.cache.stab.heap_addr, name_off[i]);
+            name = H5HL_peek (f, dxpl_id, bt_udata->ent->cache.stab.heap_addr, name_off[i]);
             assert (name);
             n = HDstrlen (name);
             if (n+1>sizeof(buf)) {
@@ -1294,8 +1294,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
                 s = buf;
             }
             HDstrcpy (s, name);
-            ret_value = (bt_udata->op)(bt_udata->group_id, s,
-                           bt_udata->op_data);
+            ret_value = (bt_udata->op)(bt_udata->group_id, s, bt_udata->op_data);
             if (s!=buf)
                 H5MM_xfree (s);
         }
@@ -1399,7 +1398,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
         loc_idx = bt_udata->idx - bt_udata->num_objs; 
         name_off = sn->entry[loc_idx].name_off;  
-        name = H5HL_peek (f, dxpl_id, bt_udata->group->ent.cache.stab.heap_addr, name_off);
+        name = H5HL_peek (f, dxpl_id, bt_udata->ent->cache.stab.heap_addr, name_off);
         assert (name);
         bt_udata->name = H5MM_strdup (name);
         HGOTO_DONE(H5B_ITER_STOP);
