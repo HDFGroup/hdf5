@@ -150,6 +150,184 @@ test_mpio_overlap_writes(char *filename)
 }
 
 
+#define MB      1048576        /* 1024*1024 == 2**20 */
+#define GB      1073741824     /* 1024**3 == 2**30 */
+#define TWO_GB_LESS1    2147483647     /* 2**31 - 1 */
+#define FOUR_GB_LESS1   4294967295L     /* 2**32 - 1 */
+/*
+ * Verify that MPI_Offset exceeding 2**31 can be computed correctly.
+ */
+void
+test_mpio_offset()
+{
+    int mpi_size, mpi_rank;
+    MPI_Offset  mpi_off;
+    MPI_Offset  mpi_off_old;
+    int i;
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    if (verbose)
+        printf("MPIO OFFSET test\n");
+
+    /* verify correctness of increasing from below 2 GB to above 2GB */
+    mpi_off = TWO_GB_LESS1;
+    for (i=0; i < 3; i++){
+        mpi_off_old = mpi_off;
+        mpi_off = mpi_off + 1;
+        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
+        VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
+    }
+
+    /* verify correctness of increasing from below 4 GB to above 4 GB */
+    mpi_off = TWO_GB_LESS1;
+    for (i=0; i < 3; i++){
+        mpi_off_old = mpi_off;
+        mpi_off = mpi_off + 1;
+        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
+	VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
+    }
+
+    /* verify correctness of assigning 2GB sizes */
+    mpi_off = 2 * 1024 * (MPI_Offset)MB;
+    VRFY((mpi_off>0), "OFFSET assignment no overflow");
+    VRFY((mpi_off-1)==TWO_GB_LESS1, "OFFSET assignment succeed");
+    for (i=0; i < 3; i++){
+        mpi_off_old = mpi_off;
+        mpi_off = mpi_off + 1;
+        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
+	VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
+    }
+
+    /* verify correctness of assigning 4GB sizes */
+    mpi_off = 4 * 1024 * (MPI_Offset)MB;
+    VRFY((mpi_off>0), "OFFSET assignment no overflow");
+    VRFY((mpi_off-1)==FOUR_GB_LESS1, "OFFSET assignment succeed");
+    for (i=0; i < 3; i++){
+        mpi_off_old = mpi_off;
+        mpi_off = mpi_off + 1;
+        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
+	VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
+    }
+}
+
+
+/*
+ * Test if MPIO can write file from under 2GB to over 2GB and then 
+ * from under 4GB to over 4GB.
+ * Each process writes 1MB in round robin fashion.
+ * Then reads the file back in by reverse order, that is process 0 
+ * reads the data of process n-1 and vice versa.
+ */
+void
+test_mpio_gb_file(char *filename)
+{
+    int mpi_size, mpi_rank;
+    MPI_Comm comm;
+    MPI_Info info = MPI_INFO_NULL;
+    int color, mrc;
+    MPI_File	fh;
+    int newrank, newprocs;
+    hid_t fid;			/* file IDs */
+    hid_t acc_tpl;		/* File access properties */
+    herr_t ret;			/* generic return value */
+    int i, j, n;
+    int ntimes;			/* how many times */
+    char  *buf;
+    char  expected;
+    int bufsize = MB;
+    int stride;
+    MPI_Offset  mpi_off;
+    MPI_Status  mpi_stat;
+
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    if (verbose)
+	printf("MPIO GB file test %s\n", filename);
+
+    buf = malloc(MB);
+    VRFY((buf!=NULL), "malloc succeed");
+
+    /* open a new file. Remove it first in case it exists. */
+    if (MAINPROCESS)
+	remove(filename);
+    mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE|MPI_MODE_RDWR,
+		info, &fh);
+    VRFY((mrc==MPI_SUCCESS), "");
+
+    printf("MPIO GB file write test %s\n", filename);
+
+    /* instead of writing every bytes of the file, we will just write
+     * some data around the 2 and 4 GB boundaries.  That should cover
+     * potential integer overflow and filesystem size limits.
+     */
+    for (n=2; n <= 4; n+=2){
+	ntimes = GB/MB*n/mpi_size + 1;
+	for (i=ntimes-2; i <= ntimes; i++){
+	    mpi_off = (i*mpi_size + mpi_rank)*(MPI_Offset)MB;
+	    if (verbose)
+		printf("proc %d: write to mpi_off=%016llx, %lld\n",
+		    mpi_rank, mpi_off, mpi_off);
+	    /* set data to some trivial pattern for easy verification */
+	    for (j=0; j<MB; j++)
+		*(buf+j) = i*mpi_size + mpi_rank;
+	    if (verbose)
+		printf("proc %d: writing %d bytes at offset %lld\n",
+		    mpi_rank, MB, mpi_off);
+	    mrc = MPI_File_write_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
+	    VRFY((mrc==MPI_SUCCESS), "");
+	}
+    }
+
+    /* close file and free the communicator */
+    mrc = MPI_File_close(&fh);
+    VRFY((mrc==MPI_SUCCESS), "MPI_FILE_CLOSE");
+    
+    mrc = MPI_Barrier(MPI_COMM_WORLD);
+    VRFY((mrc==MPI_SUCCESS), "Sync after writes");
+
+    /* open it again to verify the data written */
+    mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, info, &fh);
+    VRFY((mrc==MPI_SUCCESS), "");
+
+    printf("MPIO GB file read test %s\n", filename);
+
+    /* Only read back parts of the file that have been written. */
+    for (n=2; n <= 4; n+=2){
+	ntimes = GB/MB*n/mpi_size + 1;
+	for (i=ntimes-2; i <= ntimes; i++){
+	    mpi_off = (i*mpi_size + (mpi_size - mpi_rank - 1))*(MPI_Offset)MB;
+	    if (verbose)
+		printf("proc %d: read from mpi_off=%016llx, %lld\n",
+		    mpi_rank, mpi_off, mpi_off);
+	    mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
+	    VRFY((mrc==MPI_SUCCESS), "");
+	    expected = i*mpi_size + (mpi_size - mpi_rank - 1);
+	    for (j=0; j<MB; j++)
+		if (*(buf+j) != expected)
+		    printf("proc %d: found data error at [%ld+%d], expect %d, got %d\n",
+			mpi_rank, mpi_off, j, expected, *(buf+j));
+	}
+    }
+
+    /* close file and free the communicator */
+    mrc = MPI_File_close(&fh);
+    VRFY((mrc==MPI_SUCCESS), "MPI_FILE_CLOSE");
+
+    /*
+     * one more sync to ensure all processes have done reading
+     * before ending this test.
+     */
+    mrc = MPI_Barrier(MPI_COMM_WORLD);
+    VRFY((mrc==MPI_SUCCESS), "Sync before leaving test");
+}
+
+
 /*
  * parse the command line options
  */
@@ -242,6 +420,10 @@ main(int argc, char **argv)
 	goto finish;
     }
 
+	MPI_BANNER("MPIO OFFSET overflow test...");
+	test_mpio_offset(filenames[0]);
+	MPI_BANNER("MPIO GB size file test...");
+	test_mpio_gb_file(filenames[0]);
 	MPI_BANNER("MPIO independent overlapping writes...");
 	test_mpio_overlap_writes(filenames[0]);
 
