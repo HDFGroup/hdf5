@@ -1926,21 +1926,27 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
             break;
 
         case H5D_COMPACT:
-            /*
-             * Compact dataset is stored in dataset object header message of 
-             * layout.
-             */
-            new_dset->layout.size = H5S_get_simple_extent_npoints(space) *
-                                    H5T_get_size(type);
-	    /* Verify data size is smaller than maximum header message size
-	     * (64KB) minus other layout message fields.
-	     */
-            comp_data_size=H5O_MAX_SIZE-H5O_layout_meta_size(file, &(new_dset->layout));
-            if(new_dset->layout.size > comp_data_size)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size");
-            if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0) 
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize dimension size of compact dataset storage");
-            /* remember to check if size is small enough to fit header message */
+            {
+                hssize_t tmp_size;      /* Temporary holder for raw data size */
+
+                /*
+                 * Compact dataset is stored in dataset object header message of 
+                 * layout.
+                 */
+                tmp_size = H5S_get_simple_extent_npoints(space) *
+                                        H5T_get_size(type);
+                H5_ASSIGN_OVERFLOW(new_dset->layout.size,tmp_size,hssize_t,size_t);
+                /* Verify data size is smaller than maximum header message size
+                 * (64KB) minus other layout message fields.
+                 */
+                comp_data_size=H5O_MAX_SIZE-H5O_layout_meta_size(file, &(new_dset->layout));
+                if(new_dset->layout.size > comp_data_size)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size");
+                if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0) 
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize dimension size of compact dataset storage");
+                /* remember to check if size is small enough to fit header message */
+
+            }
 
             break;
             

@@ -1242,7 +1242,8 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     *nseq=curr_seq;
 
     /* Set the number of bytes used */
-    *nbytes=(start_bytes_left-bytes_left);
+    H5_CHECK_OVERFLOW( (start_bytes_left-bytes_left) ,hsize_t,size_t);
+    *nbytes=(size_t)(start_bytes_left-bytes_left);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -1216,7 +1216,14 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
 
     /* Get number of bytes in selection */
-    maxbytes=(*file_space->select.get_npoints)(file_space)*elmt_size;
+#ifndef NDEBUG
+    {
+        hsize_t tmp_maxbytes=(*file_space->select.get_npoints)(file_space)*elmt_size;
+        H5_ASSIGN_OVERFLOW(maxbytes,tmp_maxbytes,hsize_t,size_t);
+    }
+#else /* NDEBUG */
+    maxbytes=(size_t)((*file_space->select.get_npoints)(file_space)*elmt_size);
+#endif /* NDEBUG */
 
     /* Initialize sequence counts */
     curr_mem_seq=curr_file_seq=0;
@@ -1443,7 +1450,14 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
 
     /* Get number of bytes in selection */
-    maxbytes=(*file_space->select.get_npoints)(file_space)*elmt_size;
+#ifndef NDEBUG
+    {
+        hsize_t tmp_maxbytes=(*file_space->select.get_npoints)(file_space)*elmt_size;
+        H5_ASSIGN_OVERFLOW(maxbytes,tmp_maxbytes,hsize_t,size_t);
+    }
+#else /* NDEBUG */
+    maxbytes=(size_t)((*file_space->select.get_npoints)(file_space)*elmt_size);
+#endif /* NDEBUG */
 
     /* Initialize sequence counts */
     curr_mem_seq=curr_file_seq=0;

@@ -689,7 +689,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 	    (hssize_t)((size_t)(nelmts*sizeof(comp_datatype))));
 	buf_c = (comp_datatype*)calloc((size_t)nelmts,sizeof(comp_datatype));
         for (i=0; i<nelmts; i++) {
-	    buf_c[i].a = 1111.11;
+	    buf_c[i].a = (float)1111.11;
  	    buf_c[i].x = 2222;
 	    buf_c[i].y = 3333.3333;
 	    buf_c[i].z = 'd';

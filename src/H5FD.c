@@ -1786,7 +1786,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
                     size_t new_accum_size;      /* Size of new accumulator buffer */
 
                     /* Calculate the size of the overlap with the accumulator, etc. */
-                    overlap_size=(addr+size)-file->accum_loc;
+                    H5_ASSIGN_OVERFLOW(overlap_size,(addr+size)-file->accum_loc,haddr_t,size_t);
                     new_accum_size=file->accum_size-overlap_size;
 
                     /* Move the accumulator buffer information to eliminate the freed block */
@@ -1800,7 +1800,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
             /* Block to free must start within the accumulator */
             else {
                 /* Calculate the size of the overlap with the accumulator */
-                overlap_size=(file->accum_loc+file->accum_size)-addr;
+                H5_ASSIGN_OVERFLOW(overlap_size,(file->accum_loc+file->accum_size)-addr,haddr_t,size_t);
 
                 /* Block to free is in the middle of the accumulator */
                 if(H5F_addr_lt(addr,file->accum_loc+file->accum_size)) {
@@ -1809,7 +1809,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 
                     /* Calculate the address & size of the tail to write */
                     tail_addr=addr+size;
-                    tail_size=(file->accum_loc+file->accum_size)-tail_addr;
+                    H5_ASSIGN_OVERFLOW(tail_size,(file->accum_loc+file->accum_size)-tail_addr,haddr_t,size_t);
 
                     /* Write out the part of the accumulator after the block to free */
                     if (H5FD_write(file, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT, tail_addr, tail_size, file->meta_accum+(tail_addr-file->accum_loc))<0)

@@ -229,7 +229,7 @@ test(fill_t fill_style, const double splits[],
  /* 
   workaround for a bug in the Metrowerks version 6.0 open function
   */		
-    if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;
+    if ((fd=HDopen(FILE_NAME_1, O_RDONLY, 0666))<0) goto error;
 #endif  
 
     for (i=1; i<=cur_size[0]; i++) {
@@ -246,11 +246,11 @@ test(fill_t fill_style, const double splits[],
 	    hs_start[0] = i%2 ? i/2 : cur_size[0]-i/2;
 	    break;
 	case FILL_OUTWARD:
-	    j = (cur_size[0]-i)+1;
+	    j = (int)(cur_size[0]-i)+1;
 	    hs_start[0] = j%2 ? j/2 : (hssize_t)cur_size[0]-j/2;
 	    break;
 	case FILL_RANDOM:
-	    for (j=rand()%cur_size[0]; had[j]; j=(j+1)%cur_size[0]) /*void*/;
+	    for (j=HDrand()%(int)cur_size[0]; had[j]; j=(j+1)%(int)cur_size[0]) /*void*/;
 	    hs_start[0] = j;
 	    had[j] = 1;
 	    break;
@@ -326,7 +326,7 @@ test(fill_t fill_style, const double splits[],
 
 
 #if !defined( __MWERKS__)
-    close(fd);
+    HDclose(fd);
 #endif
 
     return 0;
@@ -339,7 +339,7 @@ test(fill_t fill_style, const double splits[],
     H5Pclose(xfer);
     H5Fclose(file);
     free(had);
-    close(fd);
+    HDclose(fd);
     return 1;
 }
 

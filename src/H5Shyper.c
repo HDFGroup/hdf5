@@ -5099,7 +5099,8 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     ispan=iter->hyp.span;
 
     /* Set the amount of elements to perform I/O on, etc. */
-    start_io_bytes_left=io_bytes_left=MIN(maxbytes,(iter->hyp.elmt_left*elem_size));
+    H5_CHECK_OVERFLOW( (iter->hyp.elmt_left*elem_size) ,hsize_t,size_t);
+    start_io_bytes_left=io_bytes_left=MIN(maxbytes,(size_t)(iter->hyp.elmt_left*elem_size));
     nelem=io_bytes_left/elem_size;
 
     /* Compute the cumulative size of dataspace dimensions */
@@ -5563,10 +5564,11 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         size_t leftover;  /* The number of elements left over from the last sequence */
 
         /* Calculate the number of elements left in the sequence */
+        H5_CHECK_OVERFLOW( tdiminfo[fast_dim].block-(iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start) ,hsize_t,size_t);
         if(tdiminfo[fast_dim].stride==1)
-            leftover=tdiminfo[fast_dim].block-(iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start);
+            leftover=(size_t)(tdiminfo[fast_dim].block-(iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start));
         else
-            leftover=tdiminfo[fast_dim].block-((iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start)%tdiminfo[fast_dim].stride);
+            leftover=(size_t)(tdiminfo[fast_dim].block-((iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start)%tdiminfo[fast_dim].stride));
 
         /* Make certain that we don't write too many */
         actual_elem=MIN(leftover,io_left);
@@ -5651,7 +5653,8 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         fast_dim_offset=fast_dim_start+sel_off[fast_dim];
 
         /* Compute the number of blocks which would fit into the buffer */
-        tot_blk_count=io_left/fast_dim_block;
+        H5_CHECK_OVERFLOW(io_left/fast_dim_block,hsize_t,size_t);
+        tot_blk_count=(size_t)(io_left/fast_dim_block);
 
         /* Don't go over the maximum number of sequences allowed */
         tot_blk_count=MIN(tot_blk_count,(maxseq-curr_seq));
@@ -5748,7 +5751,8 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         } /* end if */
 
         /* Compute the number of entire rows to read in */
-        curr_rows=total_rows=tot_blk_count/tdiminfo[fast_dim].count;
+        H5_CHECK_OVERFLOW( tot_blk_count/tdiminfo[fast_dim].count ,hsize_t,size_t);
+        curr_rows=total_rows=(size_t)(tot_blk_count/tdiminfo[fast_dim].count);
 
         /* Reset copy of number of blocks in fastest dimension */
         H5_ASSIGN_OVERFLOW(fast_dim_count,tdiminfo[fast_dim].count,hsize_t,size_t);
@@ -5910,10 +5914,12 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         /* Adjust the number of blocks & elements left to transfer */
 
         /* Decrement number of elements left */
-        io_left -= actual_elem*(total_rows*tdiminfo[fast_dim].count);
+        H5_CHECK_OVERFLOW( actual_elem*(total_rows*tdiminfo[fast_dim].count) ,hsize_t,size_t);
+        io_left -= (size_t)(actual_elem*(total_rows*tdiminfo[fast_dim].count));
 
         /* Decrement number of blocks left */
-        tot_blk_count -= (total_rows*tdiminfo[fast_dim].count);
+        H5_CHECK_OVERFLOW( (total_rows*tdiminfo[fast_dim].count) ,hsize_t,size_t);
+        tot_blk_count -= (size_t)(total_rows*tdiminfo[fast_dim].count);
 
         /* Read in partial row of blocks */
         if(io_left>0 && curr_seq<maxseq) {

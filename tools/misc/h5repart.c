@@ -196,7 +196,6 @@ main (int argc, char *argv[])
 	h5_stat_t sb;
 
     int		verbose=FALSE;		/*display file names?		*/
-    size_t	left_overs=0;		/*amount of zeros left over	*/
 
     const char	*src_gen_name;		/*general source name		*/
     char	src_name[NAMELEN];	/*source member name		*/
@@ -211,15 +210,17 @@ main (int argc, char *argv[])
 
 #ifdef WIN32
 
-	_int64	src_offset=0;		/*offset in source member	*/
-	_int64	dst_offset=0;		/*offset in destination member	*/
-	_int64	src_size;		/*source logical member size	*/
+    _int64	left_overs=0;		/*amount of zeros left over	*/
+    _int64	src_offset=0;		/*offset in source member	*/
+    _int64	dst_offset=0;		/*offset in destination member	*/
+    _int64	src_size;		/*source logical member size	*/
     _int64	src_act_size;		/*source actual member size	*/
     _int64	dst_size=1 GB;		/*destination logical memb size	*/
 #else
-	off_t	src_offset=0;		/*offset in source member	*/
-	off_t	dst_offset=0;		/*offset in destination member	*/
-	off_t	src_size;		/*source logical member size	*/
+    off_t	left_overs=0;		/*amount of zeros left over	*/
+    off_t	src_offset=0;		/*offset in source member	*/
+    off_t	dst_offset=0;		/*offset in destination member	*/
+    off_t	src_size;		/*source logical member size	*/
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
 #endif

@@ -2272,16 +2272,13 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     uint8_t *tmp=bg_ptr;
 		    UINT32DECODE(tmp, bg_seq_len);
 		    if(bg_seq_len>0) {
-			if(tmp_buf_size<bg_seq_len*MAX(src_base_size,
-			    dst_base_size)) {
-			    tmp_buf_size=bg_seq_len*MAX(src_base_size,
-			    		 	dst_base_size);
-                    	    if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,
-                                    tmp_buf_size))==NULL)
+                        H5_CHECK_OVERFLOW( bg_seq_len*MAX(src_base_size,dst_base_size) ,hsize_t,size_t);
+			if(tmp_buf_size<(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size))) {
+			    tmp_buf_size=bg_seq_len*MAX(src_base_size, dst_base_size);
+                    	    if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf, tmp_buf_size))==NULL)
                         	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
                         }
-			H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp,
-					&(bg_hobjid.addr));
+			H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp, &(bg_hobjid.addr));
 		    	INT32DECODE(tmp, bg_hobjid.idx);
 		    	if(H5HG_read(dst->u.vlen.f,&bg_hobjid,tmp_buf)==NULL)
 			    HGOTO_ERROR (H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL sequence into background buffer");

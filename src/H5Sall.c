@@ -646,7 +646,8 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
 
     /* Compute the offset in the dataset */
     off[0]=iter->all.offset*elem_size;
-    len[0]=MIN(maxbytes,bytes_left);
+    H5_CHECK_OVERFLOW(bytes_left,hsize_t,size_t);
+    len[0]=MIN(maxbytes,(size_t)bytes_left);
 
     /* Should only need one sequence for 'all' selections */
     *nseq=1;

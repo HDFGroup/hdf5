@@ -79,12 +79,12 @@ is_sparse(void)
     int		fd;
     h5_stat_t	sb;
     
-    if ((fd=open("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
-    if (lseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
-    if (5!=write(fd, "hello", 5)) return 0;
-    if (close(fd)<0) return 0;
-    if (stat("x.h5", &sb)<0) return 0;
-    if (unlink("x.h5")<0) return 0;
+    if ((fd=HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
+    if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
+    if (5!=HDwrite(fd, "hello", 5)) return 0;
+    if (HDclose(fd)<0) return 0;
+    if (HDstat("x.h5", &sb)<0) return 0;
+    if (HDunlink("x.h5")<0) return 0;
 #ifdef H5_HAVE_STAT_ST_BLOCKS
     return ((unsigned long)sb.st_blocks*512 < (unsigned long)sb.st_size);
 #else

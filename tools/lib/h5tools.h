@@ -394,7 +394,7 @@ typedef struct h5tools_context_t {
     int		prev_multiline;	/*was prev datum multiline?	*/
     size_t	prev_prefix_len;/*length of previous prefix	*/
     int		continuation;	/*continuation of previous data?*/
-    int		size_last_dim;  /*the size of the last dimension,
+    hsize_t	size_last_dim;  /*the size of the last dimension,
                                  *needed so we can break after each
                                  *row */
     int		indent_level;   /*the number of times we need some

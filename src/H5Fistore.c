@@ -2431,7 +2431,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         /* Check if there are filters which need to be applied to the chunk */
         if (pline.nfilters>0) {
             unsigned filter_mask=0;
-            size_t buf_size=chunk_size;
+            size_t buf_size=(size_t)chunk_size;
             size_t nbytes=(size_t)chunk_size;
 
             /* Push the chunk through the filters */
@@ -2476,7 +2476,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             udata.mesg = *layout;
             udata.key.filter_mask = 0;
             udata.addr = HADDR_UNDEF;
-            udata.key.nbytes = chunk_size;
+            H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
+            udata.key.nbytes = (size_t)chunk_size;
             for (u=0; u<layout->ndims; u++)
                 udata.key.offset[u] = chunk_offset[u];
 
