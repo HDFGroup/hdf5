@@ -397,6 +397,9 @@ test_compound_1(void)
     /* Create the empty type */
     if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof tmp))<0) goto error;
 
+    /* Attempt to add the new compound datatype as a field within itself */
+    if (H5Tinsert(complex_id, "compound", 0, complex_id)>=0) goto error;
+
     /* Add a couple fields */
     if (H5Tinsert(complex_id, "real", HOFFSET(complex_t, re),
 		  H5T_NATIVE_DOUBLE)<0) goto error;

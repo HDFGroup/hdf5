@@ -4315,6 +4315,8 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     H5TRACE4("e","iszi",parent_id,name,offset,member_id);
 
     /* Check args */
+    if (parent_id==member_id)
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't insert compound datatype within itself");
     if (H5I_DATATYPE != H5I_get_type(parent_id) ||
 	NULL == (parent = H5I_object(parent_id)) ||
 	H5T_COMPOUND != parent->type) {
