@@ -42,7 +42,7 @@
 ./config/commence.in
 ./config/conclude.in
 ./config/depend.in
-./config/freebsd2.2.1
+./config/freebsd2.2.7
 ./config/hpux10.20
 ./config/hpux9.03
 ./config/intel-osf1
@@ -294,6 +294,7 @@
 ./test/istore.c
 ./test/links.c
 ./test/mtime.c
+./test/overhead.c
 ./test/ragged.c
 ./test/shtype.c
 ./test/testhdf5.c
@@ -330,13 +331,29 @@
 ./tools/testh5dump.sh
 
 ./tools/testfiles/h5dumptst.c
+./tools/testfiles/tall-1.ddl
+./tools/testfiles/tall-2.ddl
+./tools/testfiles/tall-3.ddl
 ./tools/testfiles/tall.ddl
 ./tools/testfiles/tall.h5
+./tools/testfiles/tattr-1.ddl
+./tools/testfiles/tattr-2.ddl
+./tools/testfiles/tattr-3.ddl
+./tools/testfiles/tattr-4.ddl
 ./tools/testfiles/tattr.ddl
 ./tools/testfiles/tattr.h5
+./tools/testfiles/tdset-1.ddl
+./tools/testfiles/tdset-2.ddl
+./tools/testfiles/tdset-3.ddl
+./tools/testfiles/tdset-4.ddl
 ./tools/testfiles/tdset.ddl
 ./tools/testfiles/tdset.h5
+./tools/testfiles/tgroup-1.ddl
+./tools/testfiles/tgroup-2.ddl
+./tools/testfiles/tgroup-3.ddl
 ./tools/testfiles/tgroup.ddl
 ./tools/testfiles/tgroup.h5
+./tools/testfiles/tslink-1.ddl
+./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.ddl
 ./tools/testfiles/tslink.h5

@@ -20,6 +20,7 @@
 
 /* Private headers needed by this file */
 #include <H5private.h>
+#include <H5Fprivate.h>
 #include <H5Gprivate.h>		/*for H5G_entry_t			     */
 #include <H5Oprivate.h>
 
@@ -192,7 +193,7 @@ typedef struct H5S_fconv_t {
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, const void *xfer_parms,
+		   size_t nelmts, const struct H5D_xfer_t *xfer_parms,
 		   void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to disk */
@@ -200,7 +201,7 @@ typedef struct H5S_fconv_t {
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, const void *xfer_parms,
+		   size_t nelmts, const struct H5D_xfer_t *xfer_parms,
 		   const void *tconv_buf);
 } H5S_fconv_t;
 

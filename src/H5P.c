@@ -2524,6 +2524,103 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_btree_ratios
+ *
+ * Purpose:	Queries B-tree split ratios.  See H5Pset_btree_ratios().
+ *
+ * Return:	Success:	SUCCEED with split ratios returned through
+ *				the non-null arguments.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, September 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
+		    double *right/*out*/)
+{
+    H5D_xfer_t		*plist = NULL;
+
+    FUNC_ENTER(H5Pget_btree_ratios, FAIL);
+    H5TRACE4("e","ixxx",plist_id,left,middle,right);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
+	NULL==(plist=H5I_object(plist_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset transfer property list");
+    }
+
+    /* Get values */
+    if (left) *left = plist->split_ratios[0];
+    if (middle) *middle = plist->split_ratios[1];
+    if (right) *right = plist->split_ratios[2];
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_btree_ratios
+ *
+ * Purpose:	Sets B-tree split ratios for a dataset transfer property
+ *		list. The split ratios determine what percent of children go
+ *		in the first node when a node splits.  The LEFT ratio is
+ *		used when the splitting node is the left-most node at its
+ *		level in the tree; the RIGHT ratio is when the splitting node
+ *		is the right-most node at its level; and the MIDDLE ratio for
+ *		all other cases.  A node which is the only node at its level
+ *		in the tree uses the RIGHT ratio when it splits.  All ratios
+ *		are real numbers between 0 and 1, inclusive.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, September 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
+		    double right)
+{
+    
+    H5D_xfer_t		*plist = NULL;
+
+    FUNC_ENTER(H5Pget_btree_ratios, FAIL);
+    H5TRACE4("e","iddd",plist_id,left,middle,right);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
+	NULL==(plist=H5I_object(plist_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset transfer property list");
+    }
+    if (left<0.0 || left>1.0 || middle<0.0 || middle>1.0 ||
+	right<0.0 || right>1.0) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "split ratio must satisfy 0.0<=X<=1.0");
+    }
+    
+    /* Set values */
+    plist->split_ratios[0] = left;
+    plist->split_ratios[1] = middle;
+    plist->split_ratios[2] = right;
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
 #ifdef HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_mpi

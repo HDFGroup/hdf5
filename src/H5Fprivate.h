@@ -506,6 +506,7 @@ typedef struct H5F_t {
 struct H5O_layout_t;		/*forward decl for prototype arguments */
 struct H5O_efl_t;		/*forward decl for prototype arguments */
 struct H5O_pline_t;		/*forward decl for prototype arguments */
+struct H5D_xfer_t;		/*forward decl for prototype arguments */
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
@@ -529,18 +530,18 @@ herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
 
 /* Functions that operate on array storage */
 herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
-herr_t H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
+herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
+		     const struct H5O_layout_t *layout,
 		     const struct H5O_pline_t *pline,
 		     const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		     const hsize_t mem_size[], const hssize_t mem_offset[],
-		     const hssize_t file_offset[],
-		     const H5D_transfer_t xfer_mode, void *_buf/*out*/);
-herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
+		     const hssize_t file_offset[], void *_buf/*out*/);
+herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
+		      const struct H5O_layout_t *layout,
 		      const struct H5O_pline_t *pline,
 		      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		      const hsize_t mem_size[], const hssize_t mem_offset[],
-		      const hssize_t file_offset[],
-		      const H5D_transfer_t xfer_mode, const void *_buf);
+		      const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on indexed storage */
 herr_t H5F_istore_init (H5F_t *f);
@@ -548,17 +549,20 @@ herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
 herr_t H5F_istore_dest (H5F_t *f);
 herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
 herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
-herr_t H5F_istore_read(H5F_t *f, const struct H5O_layout_t *layout,
+herr_t H5F_istore_read(H5F_t *f, const struct H5D_xfer_t *xfer,
+		       const struct H5O_layout_t *layout,
 		       const struct H5O_pline_t *pline,
 		       const hssize_t offset[], const hsize_t size[],
 		       void *buf /*out */ );
-herr_t H5F_istore_write(H5F_t *f, const struct H5O_layout_t *layout,
+herr_t H5F_istore_write(H5F_t *f, const struct H5D_xfer_t *xfer,
+			const struct H5O_layout_t *layout,
 			const struct H5O_pline_t *pline,
 			const hssize_t offset[], const hsize_t size[],
 			const void *buf);
 herr_t H5F_istore_allocate (H5F_t *f,
 			    const struct H5O_layout_t *layout,
 			    const hsize_t *space_dim,
+			    const double split_ratios[], 
 			    const struct H5O_pline_t *pline);
 
 /* Functions that operate on contiguous storage wrt boot block */

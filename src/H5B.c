@@ -102,6 +102,7 @@
 /* PRIVATE PROTOTYPES */
 static H5B_ins_t H5B_insert_helper(H5F_t *f, const haddr_t *addr,
 				   const H5B_class_t *type,
+				   const double split_ratios[],
 				   uint8 *lt_key,
 				   hbool_t *lt_key_changed,
 				   uint8 *md_key, void *udata,
@@ -121,8 +122,9 @@ static herr_t H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx);
 static size_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 			   size_t *total_nkey_size, size_t sizeof_rkey);
 static herr_t H5B_split(H5F_t *f, const H5B_class_t *type,
-			H5B_t *old_bt, const haddr_t *old_addr,
-			void *udata, haddr_t *new_addr /*out*/ );
+			H5B_t *old_bt, const haddr_t *old_addr, intn idx,
+			const double split_ratios[], void *udata,
+			haddr_t *new_addr/*out*/);
 #ifdef H5B_DEBUG
 static herr_t H5B_assert(H5F_t *f, const haddr_t *addr,
 			 const H5B_class_t *type, void *udata);
@@ -259,6 +261,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_load
@@ -280,12 +283,12 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
 static H5B_t *
 H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
 {
-    const H5B_class_t	   *type = (const H5B_class_t *) _type;
-    size_t		    size, total_nkey_size;
-    H5B_t		   *bt = NULL;
-    intn		    i;
-    uint8		   *p;
-    H5B_t		   *ret_value = NULL;
+    const H5B_class_t	*type = (const H5B_class_t *) _type;
+    size_t		size, total_nkey_size;
+    H5B_t		*bt = NULL;
+    intn		i;
+    uint8		*p;
+    H5B_t		*ret_value = NULL;
 
     FUNC_ENTER(H5B_load, NULL);
 
@@ -391,9 +394,9 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
 static herr_t
 H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 {
-    intn		    i;
-    size_t		    size = 0;
-    uint8		   *p = bt->page;
+    intn	i;
+    size_t	size = 0;
+    uint8	*p = bt->page;
 
     FUNC_ENTER(H5B_flush, FAIL);
 
@@ -506,9 +509,9 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 herr_t
 H5B_find(H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
 {
-    H5B_t		   *bt = NULL;
-    intn		    idx = -1, lt = 0, rt, cmp = 1;
-    int			    ret_value = FAIL;
+    H5B_t	*bt = NULL;
+    intn	idx = -1, lt = 0, rt, cmp = 1;
+    int		ret_value = FAIL;
 
     FUNC_ENTER(H5B_find, FAIL);
 
@@ -605,12 +608,13 @@ H5B_find(H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
  */
 static herr_t
 H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
-	  const haddr_t *old_addr, void *udata, haddr_t *new_addr /*out */ )
+	  const haddr_t *old_addr, intn idx, const double split_ratios[],
+	  void *udata, haddr_t *new_addr/*out*/)
 {
-    H5B_t		   *new_bt = NULL, *tmp_bt = NULL;
-    herr_t		    ret_value = FAIL;
-    intn		    i, k;
-    size_t		    recsize = 0;
+    H5B_t	*new_bt = NULL, *tmp_bt = NULL;
+    herr_t	ret_value = FAIL;
+    intn	i, k, nleft, nright;
+    size_t	recsize = 0;
 
     FUNC_ENTER(H5B_split, FAIL);
 
@@ -628,6 +632,53 @@ H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
     recsize = old_bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
     k = H5B_K(f, type);
 
+#ifdef H5B_DEBUG
+    if (H5DEBUG(B)) {
+	const char *side;
+	if (!H5F_addr_defined(&(old_bt->left)) &&
+	    !H5F_addr_defined(&(old_bt->right))) {
+	    side = "ONLY";
+	} else if (!H5F_addr_defined(&(old_bt->right))) {
+	    side = "RIGHT";
+	} else if (!H5F_addr_defined(&(old_bt->left))) {
+	    side = "LEFT";
+	} else {
+	    side = "MIDDLE";
+	}
+	fprintf(H5DEBUG(B), "H5B_split: %3d {%5.3f,%5.3f,%5.3f} %6s",
+		2*k, split_ratios[0], split_ratios[1], split_ratios[2], side);
+    }
+#endif
+
+    /*
+     * Decide how to split the children of the old node among the old node
+     * and the new node.
+     */
+    if (!H5F_addr_defined(&(old_bt->right))) {
+	nleft = 2 * k * split_ratios[2];	/*right*/
+    } else if (!H5F_addr_defined(&(old_bt->left))) {
+	nleft = 2 * k * split_ratios[0];	/*left*/
+    } else {
+	nleft = 2 * k * split_ratios[1];	/*middle*/
+    }
+
+    /*
+     * Keep the new child in the same node as the child that split.  This can
+     * result in nodes that have an unused child when data is written
+     * sequentially, but it simplifies stuff below.
+     */
+    if (idx<nleft && nleft==2*k) {
+	--nleft;
+    } else if (idx>=nleft && 0==nleft) {
+	nleft++;
+    }
+    nright = 2*k - nleft;
+#ifdef H5B_DEBUG
+    if (H5DEBUG(B)) {
+	fprintf(H5DEBUG(B), " split %3d/%-3d\n", nleft, nright);
+    }
+#endif
+    
     /*
      * Create the new B-tree node.
      */
@@ -645,31 +696,32 @@ H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
      * Copy data from the old node to the new node.
      */
     HDmemcpy(new_bt->page + H5B_SIZEOF_HDR(f),
-	     old_bt->page + H5B_SIZEOF_HDR(f) + k * recsize,
-	     k * recsize + new_bt->sizeof_rkey);
+	     old_bt->page + H5B_SIZEOF_HDR(f) + nleft * recsize,
+	     nright * recsize + new_bt->sizeof_rkey);
     HDmemcpy(new_bt->native,
-	     old_bt->native + k * type->sizeof_nkey,
-	     (k+1) * type->sizeof_nkey);
+	     old_bt->native + nleft * type->sizeof_nkey,
+	     (nright+1) * type->sizeof_nkey);
 
-    for (i = 0; i <= k; i++) {
+    for (i=0; i<=nright; i++) {
 	/* key */
-	new_bt->key[i].dirty = old_bt->key[k+i].dirty;
-	if (old_bt->key[k+i].nkey) {
+	new_bt->key[i].dirty = old_bt->key[nleft+i].dirty;
+	if (old_bt->key[nleft+i].nkey) {
 	    new_bt->key[i].nkey = new_bt->native + i * type->sizeof_nkey;
 	}
 	/* child */
-	if (i < k) {
-	    new_bt->child[i] = old_bt->child[k+i];
+	if (i < nright) {
+	    new_bt->child[i] = old_bt->child[nleft+i];
 	}
     }
-    new_bt->ndirty = new_bt->nchildren = k;
+    new_bt->ndirty = new_bt->nchildren = nright;
 
     /*
      * Truncate the old node.
      */
     old_bt->dirty = TRUE;
-    old_bt->ndirty = old_bt->nchildren = k;
-
+    old_bt->nchildren = nleft;
+    old_bt->ndirty = MIN(old_bt->ndirty, old_bt->nchildren);
+    
     /*
      * Update sibling pointers.
      */
@@ -782,11 +834,21 @@ H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 28 Sep 1998
+ *	The optional SPLIT_RATIOS[] indicates what percent of the child
+ *	pointers should go in the left node when a node splits.  There are
+ *	three possibilities and a separate split ratio can be specified for
+ *	each: [0] The node that split is the left-most node at its level of
+ *	the tree, [1] the node that split has left and right siblings, [2]
+ *	the node that split is the right-most node at its level of the tree.
+ *	When a node is an only node at its level then we use the right-most
+ *	rule.  If SPLIT_RATIOS is null then default values are used.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-	   void *udata)
+	   const double split_ratios[], void *udata)
 {
     /*
      * These are defined this way to satisfy alignment constraints.
@@ -815,9 +877,10 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     assert(type->sizeof_nkey <= sizeof _lt_key);
     assert(addr && H5F_addr_defined(addr));
 
-    if ((my_ins = H5B_insert_helper(f, addr, type, lt_key, &lt_key_changed,
-				    md_key, udata, rt_key, &rt_key_changed,
-				    &child/*out*/ )) < 0 || my_ins < 0) {
+    if ((my_ins = H5B_insert_helper(f, addr, type, split_ratios, lt_key,
+				    &lt_key_changed, md_key, udata, rt_key,
+				    &rt_key_changed, &child/*out*/))<0 ||
+	my_ins<0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
 		    "unable to insert key");
     }
@@ -934,14 +997,14 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     buf = H5MM_xfree(buf);
     FUNC_LEAVE(ret_value);
 }
-
+    
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_insert_child
  *
- * Purpose:	Insert a child at the specified address with the
- *		specified left or right key.  The BT argument is a pointer
- *		to a protected B-tree node.
+ * Purpose:	Insert a child to the left or right of child[IDX] depending
+ *		on whether ANCHOR is H5B_INS_LEFT or H5B_INS_RIGHT. The BT
+ *		argument is a pointer to a protected B-tree node.
  *
  * Return:	Success:	SUCCEED
  *
@@ -960,12 +1023,13 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
 		 intn idx, const haddr_t *child, H5B_ins_t anchor,
 		 void *md_key)
 {
-    size_t		    recsize;
-    intn		    i;
+    size_t	recsize;
+    intn	i;
 
     FUNC_ENTER(H5B_insert_child, FAIL);
     assert(bt);
     assert(child);
+    assert(bt->nchildren<2*H5B_K(f, type));
 
     bt->dirty = TRUE;
     recsize = bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
@@ -974,6 +1038,8 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
 	/*
 	 * The MD_KEY is the left key of the new node.
 	 */
+	idx++;
+	
 	HDmemmove(bt->page + H5B_SIZEOF_HDR(f) + (idx+1) * recsize,
 		  bt->page + H5B_SIZEOF_HDR(f) + idx * recsize,
 		  (bt->nchildren - idx) * recsize + bt->sizeof_rkey);
@@ -1060,20 +1126,30 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
  *
  * Modifications:
  *
+ * 	Robb Matzke, 28 Sep 1998
+ *	The optional SPLIT_RATIOS[] indicates what percent of the child
+ *	pointers should go in the left node when a node splits.  There are
+ *	three possibilities and a separate split ratio can be specified for
+ *	each: [0] The node that split is the left-most node at its level of
+ *	the tree, [1] the node that split has left and right siblings, [2]
+ *	the node that split is the right-most node at its level of the tree.
+ *	When a node is an only node at its level then we use the right-most
+ *	rule.  If SPLIT_RATIOS is null then default values are used.
+ *
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
 H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
-		  uint8 *lt_key, hbool_t *lt_key_changed,
-		  uint8 *md_key, void *udata,
+		  const double split_ratios[], uint8 *lt_key,
+		  hbool_t *lt_key_changed, uint8 *md_key, void *udata,
 		  uint8 *rt_key, hbool_t *rt_key_changed,
 		  haddr_t *new_node/*out*/)
 {
-    H5B_t		   *bt = NULL, *twin = NULL, *tmp_bt = NULL;
-    intn		    lt = 0, idx = -1, rt, cmp = -1;
-    haddr_t		    child_addr;
-    H5B_ins_t		    my_ins = H5B_INS_ERROR;
-    H5B_ins_t		    ret_value = H5B_INS_ERROR;
+    H5B_t	*bt = NULL, *twin = NULL, *tmp_bt = NULL;
+    intn	lt = 0, idx = -1, rt, cmp = -1;
+    haddr_t	child_addr;
+    H5B_ins_t	my_ins = H5B_INS_ERROR;
+    H5B_ins_t	ret_value = H5B_INS_ERROR;
 
     FUNC_ENTER(H5B_insert_helper, H5B_INS_ERROR);
 
@@ -1163,7 +1239,7 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR,
 			"unable to decode key");
 	}
-	if ((my_ins = H5B_insert_helper(f, bt->child+idx, type,
+	if ((my_ins = H5B_insert_helper(f, bt->child+idx, type, split_ratios,
 					bt->key[idx].nkey, lt_key_changed,
 					md_key, udata, bt->key[idx+1].nkey,
 					rt_key_changed,
@@ -1219,7 +1295,7 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR,
 			"unable to decode key");
 	}
-	if ((my_ins = H5B_insert_helper(f, bt->child+idx, type,
+	if ((my_ins = H5B_insert_helper(f, bt->child+idx, type, split_ratios,
 					bt->key[idx].nkey, lt_key_changed,
 					md_key, udata, bt->key[idx+1].nkey,
 					rt_key_changed,
@@ -1278,7 +1354,7 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	 * Follow a branch out of this node to another subtree.
 	 */
 	assert(idx >= 0 && idx < bt->nchildren);
-	if ((my_ins = H5B_insert_helper(f, bt->child + idx, type,
+	if ((my_ins = H5B_insert_helper(f, bt->child+idx, type, split_ratios,
 					bt->key[idx].nkey, lt_key_changed,
 					md_key, udata,
 					bt->key[idx+1].nkey, rt_key_changed,
@@ -1332,27 +1408,24 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	ret_value = H5B_INS_NOOP;
 
     } else if (H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
-	/* Make sure IDX is the slot number for the new node. */
-	if (H5B_INS_RIGHT == my_ins)
-	    idx++;
-
 	/*
 	 * If this node is full then split it before inserting the new child.
 	 */
 	if (bt->nchildren == 2 * H5B_K(f, type)) {
-	    if (H5B_split(f, type, bt, addr, udata, new_node /*out */ ) < 0) {
+	    if (H5B_split(f, type, bt, addr, idx, split_ratios, udata,
+			  new_node/*out*/)<0) {
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, H5B_INS_ERROR,
-			    "can't split node");
+			    "unable to split node");
 	    }
 	    if (NULL == (twin = H5AC_protect(f, H5AC_BT, new_node, type,
 					     udata))) {
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR,
-			    "can't load B-tree");
+			    "unable to load node");
 	    }
-	    if (idx <= H5B_K(f, type)) {
+	    if (idx<bt->nchildren) {
 		tmp_bt = bt;
 	    } else {
-		idx -= H5B_K(f, type);
+		idx -= bt->nchildren;
 		tmp_bt = twin;
 	    }
 	} else {
@@ -1881,7 +1954,7 @@ static size_t
 H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
 {
-    size_t		    size;
+    size_t	size;
 
     FUNC_ENTER(H5B_nodesize, (size_t) 0);
 
@@ -1930,8 +2003,8 @@ herr_t
 H5B_debug(H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 	  intn fwidth, const H5B_class_t *type, void *udata)
 {
-    H5B_t		   *bt = NULL;
-    int			    i;
+    H5B_t	*bt = NULL;
+    int		i;
 
     FUNC_ENTER(H5B_debug, FAIL);
 
@@ -2027,10 +2100,10 @@ static herr_t
 H5B_assert(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	   void *udata)
 {
-    H5B_t		   *bt = NULL;
-    intn		    i, ncell, cmp;
-    static int		    ncalls = 0;
-    herr_t		    status;
+    H5B_t	*bt = NULL;
+    intn	i, ncell, cmp;
+    static int	ncalls = 0;
+    herr_t	status;
 
     /* A queue of child data */
     struct child_t {

@@ -55,8 +55,9 @@ typedef struct H5D_xfer_t {
     void		*tconv_buf;	/*type conversion buffer or null     */
     void		*bkg_buf;	/*background buffer or null	     */
     H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
-    uintn       cache_hyper;    /* Whether to (try to) cache hyperslab blocks during I/O */
-    uintn       block_limit;    /* The largest hyperslab block to try to cache */
+    double		split_ratios[3];/*B-tree node splitting ratios	     */
+    uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
+    uintn       	block_limit;    /*largest hyperslab block to cache   */
     H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
 } H5D_xfer_t;
 

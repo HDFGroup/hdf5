@@ -58,15 +58,13 @@ static size_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const void *_xfer_parms,
-			       void *buf/*out*/);
+			       const H5D_xfer_t *xfer_parms, void *buf/*out*/);
 static herr_t H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
-			       const void *_xfer_parms,
-			       const void *buf);
+			       const H5D_xfer_t *xfer_parms, const void *buf);
 static size_t H5S_hyper_mgath (const void *_buf, size_t elmt_size,
 			       const H5S_t *mem_space,
 			       H5S_sel_iter_t *mem_iter, size_t nelmts,
@@ -454,10 +452,10 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_i
             hsize[i]=(node->end[i]-node->start[i])+1;
         hsize[fhyper_info->space->extent.u.simple.rank]=fhyper_info->elmt_size;
 
-        if (H5F_arr_read (fhyper_info->f, fhyper_info->layout,
-                fhyper_info->pline, fhyper_info->efl,
-                hsize, hsize, zero, file_offset,
-                fhyper_info->xfer_parms->xfer_mode, node->cinfo.block/*out*/)<0)
+        if (H5F_arr_read (fhyper_info->f, fhyper_info->xfer_parms,
+			  fhyper_info->layout, fhyper_info->pline,
+			  fhyper_info->efl, hsize, hsize, zero, file_offset,
+			  node->cinfo.block/*out*/)<0)
             HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
     } /* end if */
     else {
@@ -571,10 +569,10 @@ H5S_hyper_block_write (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_i
             hsize[i]=(node->end[i]-node->start[i])+1;
         hsize[fhyper_info->space->extent.u.simple.rank]=fhyper_info->elmt_size;
 
-        if (H5F_arr_write (fhyper_info->f, fhyper_info->layout,
-                fhyper_info->pline, fhyper_info->efl,
-                hsize, hsize, zero, file_offset,
-                fhyper_info->xfer_parms->xfer_mode, node->cinfo.block/*out*/)<0)
+        if (H5F_arr_write (fhyper_info->f, fhyper_info->xfer_parms,
+			   fhyper_info->layout, fhyper_info->pline,
+			   fhyper_info->efl, hsize, hsize, zero, file_offset,
+			   node->cinfo.block/*out*/)<0)
             HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Release the temporary buffer */
@@ -691,13 +689,13 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                     /*
                      * Gather from file.
                      */
-                    if (H5F_arr_read (fhyper_info->f, fhyper_info->layout,
-                      fhyper_info->pline, fhyper_info->efl,
-                      hsize, hsize, zero, file_offset,
-                      fhyper_info->xfer_parms->xfer_mode,
-                      fhyper_info->dst/*out*/)<0) {
+                    if (H5F_arr_read (fhyper_info->f, fhyper_info->xfer_parms,
+				      fhyper_info->layout, fhyper_info->pline,
+				      fhyper_info->efl, hsize, hsize, zero,
+				      file_offset,
+				      fhyper_info->dst/*out*/)<0) {
                         HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0,
-                       "read error");
+				       "read error");
                     }
 #ifdef QAK
             printf("%s: check 2.3, region #%d\n",FUNC,(int)i);
@@ -793,10 +791,9 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		 size_t nelmts, const void *_xfer_parms,
+		 size_t nelmts, const H5D_xfer_t *xfer_parms,
 		 void *_buf/*out*/)
 {
-    const H5D_xfer_t *xfer_parms=(const H5D_xfer_t *)_xfer_parms;   /* Coerce the type */
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
     H5S_hyper_bound_t **hi_bounds;    /* Upper (farthest from the origin) bound array for each dimension */
     H5S_hyper_fhyper_info_t fhyper_info;  /* Block of parameters to pass into recursive calls */
@@ -962,12 +959,12 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                     /*
                      * Scatter to file.
                      */
-                    if (H5F_arr_write (fhyper_info->f, fhyper_info->layout,
-                       fhyper_info->pline, fhyper_info->efl,
-                       hsize, hsize, zero, file_offset,
-                       fhyper_info->xfer_parms->xfer_mode,
-                       fhyper_info->src)<0) {
-                        HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+                    if (H5F_arr_write (fhyper_info->f, fhyper_info->xfer_parms,
+				       fhyper_info->layout, fhyper_info->pline,
+				       fhyper_info->efl, hsize, hsize, zero,
+				       file_offset, fhyper_info->src)<0) {
+                        HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0,
+				       "write error");
                     }
                 } /* end else */
 
@@ -1054,10 +1051,9 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		 size_t nelmts, const void *_xfer_parms,
+		 size_t nelmts, const H5D_xfer_t *xfer_parms,
 		 const void *_buf)
 {
-    const H5D_xfer_t *xfer_parms=(const H5D_xfer_t *)_xfer_parms;   /* Coerce the type */
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
     H5S_hyper_bound_t **hi_bounds;    /* Upper (farthest from the origin) bound array for each dimension */
     H5S_hyper_fhyper_info_t fhyper_info;  /* Block of parameters to pass into recursive calls */

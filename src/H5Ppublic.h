@@ -108,6 +108,10 @@ herr_t H5Pget_cache (hid_t plist_id, int *mdc_nelmts/*out*/,
 		     double *rdcc_w0);
 herr_t H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit);
 herr_t H5Pget_hyper_cache(hid_t plist_id, unsigned *cache, unsigned *limit);
+herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
+			   double right);
+herr_t H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/,
+			   double *middle/*out*/, double *right/*out*/);
 
 #ifdef HAVE_PARALLEL
 herr_t H5Pset_mpi (hid_t plist_id, MPI_Comm comm, MPI_Info info);

@@ -72,12 +72,19 @@ const H5D_xfer_t	H5D_xfer_dflt = {
     NULL,			/* Type conversion buffer or NULL	*/
     NULL, 			/* Background buffer or NULL		*/
     H5T_BKG_NO,			/* Type of background buffer needed	*/
+    {0.1, 0.5, 0.9},		/* B-tree node splitting ratios		*/
 #ifndef HAVE_PARALLEL
-    1,              /* Cache the hyperslab blocks by default */
-#else /* HAVE_PARALLEL */
-    0,              /* Don't cache the hyperslab blocks by default (for parallel) */
+    1,				/* Cache the hyperslab blocks by default*/
+#else
+    0,				/*
+				 * Don't cache the hyperslab blocks by
+				 * default (for parallel)
+				 */
 #endif /* HAVE_PARALLEL */
-    0,              /* Default to no upper limit on hyperslab block size to cache */
+    0,              		/*
+				 * Default to no upper limit on hyperslab
+				 * block size to cache
+				 */
 #ifdef HAVE_PARALLEL
     H5D_XFER_DFLT,      	/* Independent data transfer      	*/
 #endif
@@ -89,7 +96,7 @@ static hbool_t interface_initialize_g = FALSE;
 static herr_t H5D_init_interface(void);
 static void H5D_term_interface(void);
 #ifdef HAVE_PARALLEL
-static herr_t H5D_allocate (H5D_t *dataset);
+static herr_t H5D_allocate (H5D_t *dataset, const H5D_xfer_t *xfer);
 #endif
 
 
@@ -876,7 +883,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	 * Also, only the slowest varying dimension of a simple data space
 	 * can be extendible.
 	 */
-	if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0) {
+	if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim,
+					      max_dim))<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 			"unable to initialize contiguous storage");
 	}
@@ -1011,7 +1019,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
      */
     if (new_dset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
 	new_dset->layout.type == H5D_CHUNKED){
-	if (H5D_allocate(new_dset)==FAIL){
+	if (H5D_allocate(new_dset, &H5D_xfer_dflt)<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		"fail in file space allocation for chunks");
 	}
@@ -1164,7 +1172,7 @@ H5D_open(H5G_entry_t *loc, const char *name)
     if (dataset->ent.file->shared->access_parms->driver==H5F_LOW_MPIO &&
 	dataset->layout.type == H5D_CHUNKED &&
 	(dataset->ent.file->intent & H5F_ACC_RDWR)){
-	if (H5D_allocate(dataset)==FAIL){
+	if (H5D_allocate(dataset, &H5D_xfer_dflt)<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		"fail in file space allocation dataset");
 	}
@@ -2052,7 +2060,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
 	 */
 	if (dataset->ent.file->shared->access_parms->driver==H5F_LOW_MPIO &&
 	    dataset->layout.type==H5D_CHUNKED){
-	    if (H5D_allocate(dataset)==FAIL){
+	    if (H5D_allocate(dataset, &H5D_xfer_dflt)<0) {
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "fail in file space allocation for chunks");
 	    }
@@ -2141,10 +2149,10 @@ H5D_typeof (H5D_t *dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_allocate (H5D_t *dataset)
+H5D_allocate (H5D_t *dataset, const H5D_xfer_t *xfer)
 {
-    H5S_t	*space = NULL;
-    herr_t	ret_value = FAIL;
+    H5S_t		*space = NULL;
+    herr_t		ret_value = FAIL;
     hsize_t		space_dim[H5O_LAYOUT_NDIMS];
     intn		space_ndims;
     H5O_layout_t	*layout;
@@ -2172,7 +2180,8 @@ H5D_allocate (H5D_t *dataset)
 			 "unable to read data space info from dataset header");
 	}
 	/* get current dims of dataset */
-	if ((space_ndims=H5S_get_simple_extent_dims(space, space_dim, NULL)) <= 0 ||
+	if ((space_ndims=H5S_get_simple_extent_dims(space, space_dim,
+						    NULL)) <= 0 ||
 	    space_ndims+1 != layout->ndims){
 	    HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 			"unable to allocate chunk storage");
@@ -2181,9 +2190,9 @@ H5D_allocate (H5D_t *dataset)
 	space_dim[space_ndims] = layout->dim[space_ndims];
 
 	if (H5F_istore_allocate(dataset->ent.file,
-		(layout), space_dim,
-		&(dataset->create_parms->pline))==FAIL){
-		HRETURN(FAIL);
+				(layout), space_dim, xfer->split_ratios,
+				&(dataset->create_parms->pline))<0) {
+	    HRETURN(FAIL);
 	}
 	break;
 

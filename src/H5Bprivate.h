@@ -127,7 +127,7 @@ herr_t H5B_create (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *);
 herr_t H5B_find (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 		 void *udata);
 herr_t H5B_insert (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-		   void *udata);
+		   const double split_ratios[], void *udata);
 herr_t H5B_remove(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 		  void *udata);
 herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
