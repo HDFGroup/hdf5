@@ -118,9 +118,9 @@ make check
 make install
 
 
----------------
+---------------------
 Linux 2.4 and greater
----------------
+---------------------
 
 Be sure that your installation of MPICH was configured with the following
 configuration command-line option:
@@ -129,6 +129,13 @@ configuration command-line option:
 
 This allows for >2GB sized files on Linux systems and is only available
 with Linux kernels 2.4 and greater.
+
+
+------------------
+HP V2500 and N4000
+------------------
+
+Follow the instructions in section 3.
 
 
 3. Detail explanation

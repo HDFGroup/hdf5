@@ -95,6 +95,7 @@ New Features
     * H5 <-> GIF convertor has been added. This is available under 
       tools/gifconv. The convertor supports the ability to create animated
       gifs as well.
+    * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
 
 Platforms Tested
 ================
@@ -108,6 +109,7 @@ Platforms Tested
                                 g++ 2.95.2
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
   HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
+                                HP C  HP92453-01 A.11.01.20
   IRIX 6.5                      MIPSpro cc 7.30
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.4.0.2
