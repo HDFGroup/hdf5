@@ -75,26 +75,31 @@ Bug Fixes since HDF5-1.6.3 release
 
     Library
     -------
-        - H5Tget_member_value calls for enum datatype didn't return correct 
-            value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
-            2005/02/08
+        - Fixed a racing condition in MPIPOSIX virtual file drive close
+	  function.  Now all processes must completed the close before any
+	  of them is returned.  This prevents some "faster" processes start
+	  accessing the file for another purpose (e.g., open with truncate)
+	  while other "slower" processes have not closed the same file with
+	  the previous purpose.  AKC - 2005/03/01
+	- H5Tget_member_value calls for enum datatype didn't return correct 
+          value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
+          2005/02/08
         - For variable-length string, H5Tget_class returned H5T_STRING as its
-            class.  But H5Tdetect_class and H5Tget_member_class considered it
-            as H5T_VLEN.  This is fixed to let all these 3 functions treat it
-            as H5T_STRING.  SLU - 2005/02/08
+          class.  But H5Tdetect_class and H5Tget_member_class considered it
+          as H5T_VLEN.  This is fixed to let all these 3 functions treat it
+          as H5T_STRING.  SLU - 2005/02/08
         - The byte order of all 1-byte integer types was fixed as
-            little-endian even on a big-endian machine.  It's corrected.
-            SLU - 2005/02/07
+          little-endian even on a big-endian machine.  It's corrected.
+          SLU - 2005/02/07
         - Fix segmentation fault when calling H5Fflush with an attribute that
-            hasn't had a value written to it open.  QAK - 2004/10/18
+          hasn't had a value written to it open.  QAK - 2004/10/18
         - Back up supporting bitfield and time types in H5Tget_native_type.  
-            Leave it to future support.  The function simply returns error 
-            message of "not support" for bitfield and time types.  
-            SLU - 2004/10/5
+          Leave it to future support.  The function simply returns error 
+          message of "not support" for bitfield and time types. SLU - 2004/10/5
         - Fixed address check in Core VFL driver to avoid spurious address/size
-            overflows for odd valued addresses and/or sizes.  QAK - 2004/09/27
+          overflows for odd valued addresses and/or sizes.  QAK - 2004/09/27
         - Fixed problem where chunked datasets were not able to be deleted
-            from a file under certain circumstances.  QAK - 2004/09/27/
+          from a file under certain circumstances.  QAK - 2004/09/27/
 
     Configuration
     -------------
