@@ -51,7 +51,7 @@
       name which begins with a slash is an <em>absolute</em> name
       which is looked up beginning at the root group of the file while
       all other <em>relative</em> names are looked up beginning at the
-      current working group (described below) or a specified group.
+      specified group.
       Multiple consecutive slashes in a full name are treated as
       single slashes and trailing slashes are not significant.  A
       special case is the name "/" (or equivalent) which refers to the
@@ -104,9 +104,7 @@
 	    <td>File ID</td>
 	    <td><code>foo/bar</code></td>
 	    <td>The object <code>bar</code> in group <code>foo</code>
-	      in the current working group of the specified file.  The
-	      initial current working group is the root group of the
-	      file as described below.</td>
+	      in the specified group.</td>
 	  </tr>
 
 	  <tr>
@@ -119,7 +117,7 @@
 	  <tr>
 	    <td>File ID</td>
 	    <td><code>.</code></td>
-	    <td>The current working group of the specified file.</td>
+	    <td>The specified file.</td>
 	  </tr>
 
 	  <tr>
@@ -181,51 +179,7 @@
 	returns zero for success or a negative value for failure.
     </dl>
 
-    <h2>4. Current Working Group</h2>
-
-    <p>Each file handle (<code>hid_t <em>file_id</em></code>) has a
-      current working group, initially the root group of the file.
-      Names which do not begin with a slash are relative to the
-      specified group or to the current working group as described
-      above.  For instance, the name "/Foo/Bar/Baz" is resolved by
-      first looking up "Foo" in the root group.  But the name
-      "Foo/Bar/Baz" is resolved by first looking up "Foo" in the
-      current working group.
-
-    <dl>
-      <dt><code>herr_t H5Gset (hid_t <em>location_id</em>, const char
-	  *<em>name</em>)</code>
-      <dd>The group with the specified name is made the current
-	working group for the file which contains it. The
-	<em>location_id</em> can be a file handle or a group handle
-	and the name is resolved as described above.  Each file handle
-	has it's own current working group and if the
-	<em>location_id</em> is a group handle then the file handle is
-	derived from the group handle. This function returns zero for
-	success or negative for failure.
-
-	<br><br>
-      <dt><code>herr_t H5Gpush (hid_t <em>location_id</em>, const char
-	  *<em>name</em>)</code>
-      <dd>Each file handle has a stack of groups and the top group on
-	that stack is the current working group.  The stack initially
-	contains only the root group.  This function pushes a new
-	group onto the stack and returns zero for success or negative
-	for failure.
-
-	<br><br>
-      <dt><code>herr_t H5Gpop (hid_t <em>location_id</em>)</code>
-      <dd>This function pops one group off the group stack for the
-	specified file (if the <em>location_id</em> is a group then
-	the file is derived from that group), changing the current
-	working group to the new top-of-stack group.  The function
-	returns zero for success or negative for failure (failure
-	includes attempting to pop from an empty stack).  If the last
-	item is popped from the stack then the current working group
-	is set to the root group.
-    </dl>
-
-    <h2>5. Objects with Multiple Names</h2>
+    <h2>4. Objects with Multiple Names</h2>
 
     <p>An object (including a group) can have more than one
       name. Creating the object gives it the first name, and then
@@ -263,8 +217,7 @@
 	<code>H5T_LINK_SOFT</code> a soft link is created which is an
 	alias for the <em>current_name</em>.  When creating a soft
 	link the object need not exist.  This function returns zero
-	for success or negative for failure. <b>This function is not
-	part of the prototype API.</b>
+	for success or negative for failure. 
 
 	<br><br>
       <dt><code>herr_t H5Gunlink (hid_t <em>file_id</em>, const char
@@ -274,11 +227,10 @@
 	to the object and when the hard link count reaches zero the
 	object can be removed from the file (but objects which are
 	open are not removed until all handles to the object are
-	closed).  <b>This function is not part of the prototype
-	API.</b>
+	closed).  
     </dl>
 
-    <h2>6. Comments</h2>
+    <h2>5. Comments</h2>
 
     <p>Objects can have a comment associated with them.  The comment
       is set and queried with these two functions:
@@ -320,7 +272,7 @@ Last modified: Wed Jul 22 14:24:34 EDT 1998
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 </address>
 
-Last modified:  9 September 1998
+Last modified:  29 October 1998
 
   </body>
 </html>

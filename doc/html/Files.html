@@ -76,11 +76,13 @@
         function returns zero for success or a negative value for failure.
 
 	<br><br>
-      <dt><code>herr_t H5Fflush (hid_t <em>object_id</em>)</code>
+      <dt><code>herr_t H5Fflush (hid_t <em>object_id</em>, 
+          H5F_scope_t <em>scope</em>)</code>
       <dd>This function will cause all buffers associated with a file
 	to be immediately flushed to the file.  The <em>object_id</em> 
 	can be any object which is associated with a file, including
-	the file itself.
+	the file itself.  <em>scope</em> specifies whether the flushing
+        action is to be global or local.
     </dl>
 
     <h2>4. File Property Lists</h2>

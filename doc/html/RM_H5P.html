@@ -14,7 +14,10 @@ HDF5/H5P Draft API Specification
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 H5P&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -57,6 +60,11 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetIstoreK">H5Pset_istore_k</a>
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
     </ul>
+<br>&nbsp;
+<br>
+||&nbsp;&nbsp;&nbsp;<i>Available only in the 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;
+parallel HDF5 library.</i>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -95,6 +103,8 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetCompression">H5Pset_compression</a>
     <li><a href="#Property-GetCompression">H5Pget_compression</a>
 -->
+    <li><a href="#Property-SetFillValue">H5Pset_fill_value</a>
+    <li><a href="#Property-GetFillValue">H5Pget_fill_value</a>
     <li><a href="#Property-SetFilter">H5Pset_filter</a>
     <li><a href="#Property-GetNFilters">H5Pget_nfilters</a>
     <li><a href="#Property-GetFilter">H5Pget_filter</a>
@@ -115,10 +125,12 @@ many different parameters to be easily manipulated.
 
 </td></tr>
 
+<!--
 <tr><td colspan=5 align=right>
 <br>
 ||&nbsp;&nbsp;&nbsp;<i>Available only in the parallel HDF5 library.</i>
 </td></tr>
+-->
 
 </table>
 </dir
@@ -187,8 +199,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Identifier of the property list to terminate access to.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -202,7 +214,7 @@ many different parameters to be easily manipulated.
     <dd>Returns the property list class for a property list.
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_class</code> returns the property list class for the 
-        property list identied by the <code>plist</code> parameter.
+        property list identified by the <code>plist</code> parameter.
         Valid property list classes are defined in the description of
         <code>H5Pcreate()</code>.
   <dt><strong>Parameters:</strong>
@@ -236,7 +248,7 @@ many different parameters to be easily manipulated.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -271,8 +283,8 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to location to return shared object header version number.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -298,8 +310,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Size of the user-block in bytes.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -323,8 +335,8 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to location to return user-block size.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -344,7 +356,7 @@ many different parameters to be easily manipulated.
             address objects in an HDF5 file.  This function is only valid for
             file creation property lists.  Passing in a value of 0 for one of the
             sizeof parameters retains the current value.  The default value
-            for both values is 4 bytes.  Valid values currenly are 2, 4, 8 and
+            for both values is 4 bytes.  Valid values currently are 2, 4, 8 and
             16.
   <dt><strong>Parameters:</strong>
     <dl>
@@ -356,8 +368,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Size of an object length in bytes.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -385,8 +397,8 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to location to return length size in bytes.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -426,8 +438,8 @@ many different parameters to be easily manipulated.
                 again to setup the property list.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -457,8 +469,8 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to location to return the info object.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if the file access property list is set to the MPI.
-        Otherwise returns FAIL (-1).
+    <dd>Returns a non-negative value if the file access property list is set to the MPI.
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -495,8 +507,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Data transfer mode.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -522,8 +534,8 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to location to return the data transfer mode.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -565,8 +577,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Symbol table node size.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -599,8 +611,8 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to location to return the symbol table's leaf node 1/2 size.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -633,8 +645,8 @@ many different parameters to be easily manipulated.
             <dd>IN: 1/2 rank of chunked storage B-tree.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -662,8 +674,8 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to location to return the chunked storage B-tree 1/2 rank.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -687,12 +699,12 @@ many different parameters to be easily manipulated.
                         This should only be used for very small amounts of raw
                         data (suggested less than 1KB).
                 <dt>H5D_CONTIGUOUS
-                    <dd>Store raw data seperately from object header in one
+                    <dd>Store raw data separately from object header in one
                         large chunk in the file.
                 <dt>H5D_CHUNKED
-                    <dd>Store raw data seperately from object header in one
+                    <dd>Store raw data separately from object header in one
                         large chunk in the file and store chunks of the raw
-                        data in seperate locations in the file.
+                        data in separate locations in the file.
             </dl></ul>
   <dt><strong>Parameters:</strong>
     <dl>
@@ -702,8 +714,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Type of storage layout for raw data.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -722,11 +734,11 @@ many different parameters to be easily manipulated.
                 <dt>H5D_COMPACT
                     <dd>Raw data and object header stored contiguously in file.
                 <dt>H5D_CONTIGUOUS
-                    <dd>Raw data stored seperately from object header in one
+                    <dd>Raw data stored separately from object header in one
                         large chunk in the file.
                 <dt>H5D_CHUNKED
-                    <dd>Raw data stored seperately from object header in 
-                        chunks in seperate locations in the file.
+                    <dd>Raw data stored separately from object header in 
+                        chunks in separate locations in the file.
             </dl> </ul>
   <dt><strong>Parameters:</strong>
     <dl>
@@ -769,8 +781,8 @@ many different parameters to be easily manipulated.
             <dd>IN: An array containing the size of each chunk.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -802,7 +814,7 @@ many different parameters to be easily manipulated.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns chunk dimensionality successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -836,13 +848,13 @@ many different parameters to be easily manipulated.
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier for a file access property list.
         <dt><em>hsize_t</em> <code>threshold</code>
-            <dd>IN: Threshhold value.
+            <dd>IN: Threshold value.
         <dt><em>hsize_t</em> <code>alignment</code>
             <dd>IN: Alignment value.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -867,13 +879,13 @@ many different parameters to be easily manipulated.
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier of a file access property list.
         <dt><em>hsize_t</em> <code>*threshold</code>
-            <dd>OUT: Pointer to location of return threshhold value.
+            <dd>OUT: Pointer to location of return threshold value.
         <dt><em>hsize_t</em> <code>*alignment</code>
             <dd>OUT: Pointer to location of return alignment value.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -911,8 +923,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Number of bytes reserved in the file for the data.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -934,7 +946,7 @@ many different parameters to be easily manipulated.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of external files if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -982,9 +994,90 @@ many different parameters to be easily manipulated.
                 external file data.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFillValue">H5Pset_fill_value</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fill_value</code>(<em>hid_t</em> <code>plist_id</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>const void *</em><code>value</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets a dataset fill value.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fill_value</code> sets the fill value for a
+        dataset creation property list.  
+        <p>
+        The <code>value</code> is interpreted as being of type 
+        <code>type_id</code>.  This need not be the same type 
+        as the dataset, but the library must be able to convert 
+        <code>value</code> to the dataset type when the dataset 
+        is created. 
+  <dt><strong>Notes:</strong>
+    <dd>If a fill value is set for a dataset (even if the 
+        fill value is all zeros), the fill value will be written 
+        to the file. If no fill value is set, then HDF5 relies on 
+        the underlying file driver (usually a Unix file system) 
+        to initialize unwritten parts of the file to zeros.
+        <p>
+        Creating a contiguous dataset with a fill value can be a
+        very expensive operation since the optimization has not 
+        yet been implemented that would delay the writing of the 
+        fill values until after some data has been written.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Property list identifier.
+        <dt><em>hid_t</em> <code>type_id</code>,
+            <dd>IN: The datatype identifier of <code>value</code>.
+        <dt><em>const void *</em><code>value</code>
+            <dd>IN: The fill value.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFillValue">H5Pget_fill_value</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fill_value</code>(<em>hid_t</em> <code>plist_id</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>void *</em><code>value</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves a dataset fill value.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fill_value</code> queries the 
+        fill value property of a dataset creation property list.
+        <p>
+        The fill value is returned through the <code>value</code>
+        pointer.  
+        <p>
+        Memory is allocated by the caller.  
+        <p>
+        The fill value will be converted from its current 
+        data type to the type specified by <code>type_id</code>.  
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Property list identifier.
+        <dt><em>hid_t</em> <code>type_id</code>,
+            <dd>IN: The datatype identifier of <code>value</code>.
+        <dt><em>const void *</em><code>value</code>
+            <dd>IN: The fill value.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
 
 
 <hr>
@@ -1055,8 +1148,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Auxiliary data for the filter.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1092,7 +1185,7 @@ many different parameters to be easily manipulated.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of filters in the pipeline if successful;
-        otherwise returns FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1129,8 +1222,8 @@ many different parameters to be easily manipulated.
         <code>filter_number</code> is a value between zero and 
         <em>N</em>-1, as described in 
         <a href="#Property-GetNFilters"><code>H5Pget_nfilters()</code></a>.
-        The function will return FAIL (-1) if the filter number is out 
-        of range.  
+        The function will return a negative value if the filter number 
+        is out of range.  
         <p>
         If <code>name</code> is a pointer to an array of at least 
         <code>namelen</code> bytes, the filter name will be copied 
@@ -1218,8 +1311,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Identifier of a file access property list.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1242,9 +1335,9 @@ many different parameters to be easily manipulated.
             <dd>IN: Identifier of a file access property list.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if the file access propety list is set 
+    <dd>Returns a non-negative value if the file access property list is set 
         to the stdio driver.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -1267,8 +1360,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Identifier of a file access property list.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1278,7 +1371,7 @@ many different parameters to be easily manipulated.
   <dt><strong>Signature:</strong>
     <dd><em>returntype</em> <code>H5Pget_sec2</code>(<em>hid_t</em> <code>plist</code>)
   <dt><strong>Purpose:</strong>
-    <dd>Checks whether the file access propety list is set 
+    <dd>Checks whether the file access property list is set 
         to the sec2 driver.
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_sec2</code> checks to determine whether the 
@@ -1291,9 +1384,9 @@ many different parameters to be easily manipulated.
             <dd>IN: Identifier of a file access property list.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if the file access propety list is set 
+    <dd>Returns a non-negative value if the file access property list is set 
         to the sec2 driver.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -1323,8 +1416,8 @@ many different parameters to be easily manipulated.
             <dd>IN: File block size in bytes.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1353,9 +1446,9 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to a location to return the file block size (in bytes).
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if the file access propety list is set 
+    <dd>Returns a non-negative value if the file access property list is set 
         to the core driver.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -1399,8 +1492,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Identifier of the raw file access property list.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1458,9 +1551,9 @@ many different parameters to be easily manipulated.
             <dd>OUT: Pointer to a copy of the raw file access property list.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if the file access propety list is set 
+    <dd>Returns a non-negative value if the file access property list is set 
         to the split driver.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -1491,7 +1584,7 @@ many different parameters to be easily manipulated.
 	opened. Note: if the size of the <code>off_t</code> type is
 	four bytes then the maximum family member size is usually
 	2^31-1 because the byte at offset 2,147,483,647 is generally
-	inaccessable.  Additional parameters may be added to this
+	inaccessible.  Additional parameters may be added to this
 	function in the future.
   <dt><strong>Parameters:</strong>
     <dl>
@@ -1504,8 +1597,8 @@ many different parameters to be easily manipulated.
                 for each member of the family.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1526,7 +1619,7 @@ many different parameters to be easily manipulated.
         to use the <code>family</code> driver; any previously defined 
         driver properties are erased from the property list.  
         See <a href="Files.html#File_Families">File Families</a>
-        in the <cite>HDF5 User's Guide</dite> for a discussion
+        in the <cite>HDF5 User's Guide</cite> for a discussion
         of file families.
         <p>
         Each member of the file family will use <code>memb_plist</code>
@@ -1543,7 +1636,7 @@ many different parameters to be easily manipulated.
         Note: If the size of the <code>off_t</code> type is
 	four bytes, then the maximum family member size is usually
 	2^31-1 because the byte at offset 2,147,483,647 is generally
-	inaccessable.  
+	inaccessible.  
         <p>
         Additional parameters may be added to this function in the 
         future.
@@ -1558,8 +1651,8 @@ many different parameters to be easily manipulated.
                 for each member of the family.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1596,9 +1689,9 @@ many different parameters to be easily manipulated.
                 for each member of the family.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if the file access propety list is set 
+    <dd>Returns a non-negative value if the file access property list is set 
         to the family driver.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -1645,8 +1738,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Preemption policy.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1660,7 +1753,7 @@ many different parameters to be easily manipulated.
         <em>double</em> <code>*rdcc_w0</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Retrieves maximun sizes of meta data cache and RDCC_WO.
+    <dd>Retrieves maximum sizes of meta data cache and RDCC_WO.
   <dt><strong>Description:</strong>
     <dd>Retrieves the maximum possible number of elements in the meta
         data cache and the maximum possible number of bytes and the
@@ -1679,8 +1772,8 @@ many different parameters to be easily manipulated.
             <dd>IN/OUT: Preemption policy.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1701,7 +1794,7 @@ many different parameters to be easily manipulated.
          for the type conversion buffer and background buffer and
          optionally supply pointers to application-allocated buffers.
          If the buffer size is smaller than the entire amount of data
-         being transfered between application and file, and a type
+         being transferred between application and file, and a type
          conversion buffer or background buffer is required then
          strip mining will be used.  However, certain restrictions
          apply for the size of buffer which can be used for strip
@@ -1725,8 +1818,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Pointer to application-allocated background buffer.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1787,8 +1880,8 @@ many different parameters to be easily manipulated.
                 (TRUE/FALSE).
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1809,7 +1902,7 @@ many different parameters to be easily manipulated.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns TRUE or FALSE if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1830,7 +1923,7 @@ many different parameters to be easily manipulated.
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_compression</code> sets the compression method 
         in a dataset creation property list.  This is a catch-all 
-        function for defining compresion methods
+        function for defining compression methods
 	and is intended to be called from a wrapper such as
 	<code>H5Pset_deflate()</code>. The dataset creation property
 	list <em>plist</em> is adjusted to use the specified
@@ -1861,8 +1954,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Client data byte array passed to the compression method.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 -->
@@ -1902,7 +1995,7 @@ many different parameters to be easily manipulated.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns compression method if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 -->
@@ -1932,8 +2025,8 @@ many different parameters to be easily manipulated.
             <dd>IN: Compression level.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1958,7 +2051,7 @@ many different parameters to be easily manipulated.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns compression level, a value between 0 and 9, if successful.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 -->
@@ -1973,7 +2066,10 @@ many different parameters to be easily manipulated.
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 H5P&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -1989,7 +2085,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  25 August 1998
+Last modified:  27 October 1998
 
 </body>
 </html>

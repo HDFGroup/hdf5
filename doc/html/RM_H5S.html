@@ -14,7 +14,10 @@ HDF5/H5S Draft API Specification
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 H5S&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -117,7 +120,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -156,7 +159,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -180,7 +183,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -229,8 +232,8 @@ of the <cite>HDF5 User's Guide.</cite>.
                 elements being selected.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful; 
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful; 
+        otherwise returns a negative value.
 </dl>
 
 
@@ -256,8 +259,8 @@ of the <cite>HDF5 User's Guide.</cite>.
                 selection is being made.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -278,8 +281,8 @@ of the <cite>HDF5 User's Guide.</cite>.
                 selection is being reset.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -303,7 +306,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns <tt>TRUE</tt> if the selection is contained within 
         the extent and <tt>FALSE</tt> if it is not.
-        Returns <tt>FAIL</tt> (<tt>-1</tt>) on error conditions 
+        Returns returns a negative value on error conditions 
         such as the selection or extent not being defined.
 </dl>
 
@@ -334,7 +337,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-SelectNpoints">H5Sget_select_npoints</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hsize_t</em> <code>H5Sget_select_npoints</code>(<em>hid_t</em> <code>space_id</code>)
+    <dd><em>hssize_t</em> <code>H5Sget_select_npoints</code>(<em>hid_t</em> <code>space_id</code>)
 <dt><strong>Purpose:</strong>
     <dd>Determines the number of elements in a dataspace.
 <dt><strong>Description:</strong>
@@ -347,7 +350,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of elements in the selection if successful; 
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -368,7 +371,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of dimensions in the dataspace if successful;
-        otherwise FAIL (-1)
+        otherwise returns a negative value.
 </dl>
 
 
@@ -397,7 +400,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of dimensions in the dataspace if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -467,7 +470,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -489,7 +492,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns TRUE or FALSE if Successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -521,8 +524,8 @@ of the <cite>HDF5 User's Guide.</cite>.
             <dd>IN: The offset at which to position the selection.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -574,8 +577,8 @@ of the <cite>HDF5 User's Guide.</cite>.
                 the extent is copied.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -596,8 +599,8 @@ of the <cite>HDF5 User's Guide.</cite>.
                 the extent is to be removed.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -690,8 +693,8 @@ I/O is performed.
             <dd>IN: Size of block in hyperslab.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -714,8 +717,8 @@ I/O is performed.
             <dd>Identifier of dataspace to release.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -728,7 +731,10 @@ I/O is performed.
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 H5S&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -743,7 +749,7 @@ H5S&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  1 September 1998
+Last modified:  27 October 1998
 
 </body>
 </html>

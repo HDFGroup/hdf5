@@ -14,7 +14,10 @@ H5&nbsp;&nbsp;
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -57,7 +60,7 @@ and it users.
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5open</code>(<em>void</em>)
 <dt><strong>Purpose:</strong>
-    <dd>Flushes all data to disk, closes file identifiers, and cleans up memory.
+    <dd>Initializes the HDF5 library.
 <dt><strong>Description:</strong>
     <dd><code>H5open</code> initialize the library.  This function is 
         normally called automatically, but if you find that an 
@@ -68,8 +71,8 @@ and it users.
         <dt>None.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -92,8 +95,8 @@ and it users.
         <dt>None.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -123,8 +126,8 @@ and it users.
         <dt>None.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -152,8 +155,8 @@ and it users.
             <dd>The release number of the library.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -188,7 +191,7 @@ and it users.
             <dd>The patch number of the library.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful.
+    <dd>Returns a non-negative value if successful.
         Upon failure, this function causes the application to abort.
 </dl>
 
@@ -202,7 +205,10 @@ H5&nbsp;&nbsp;
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -217,7 +223,7 @@ H5&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  2 September 1998
+Last modified:  27 October 1998
 
 </body>
 </html>

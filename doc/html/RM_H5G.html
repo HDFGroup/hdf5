@@ -14,7 +14,10 @@ HDF5/H5G Draft API Specification
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 H5G&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -31,8 +34,8 @@ H5G&nbsp;&nbsp;
 
 <h2>Group Object API Functions</h2>
 
-The Group interface functions create and manipulate physical groups 
-of objects on disk.
+The Group interface functions create and manipulate groups
+of objects in an HDF5 file.
 
 <table border=0>
 <tr><td valign=top>
@@ -77,7 +80,7 @@ object is located by looking for the first component in the root
 object, then looking for the second component in the first object, etc.,
 until the entire name is traversed.  A relative name does not begin 
 with a slash and the traversal begins at the location specified by the 
-calling function.
+create or access function.
 
 <p>
 
@@ -105,7 +108,7 @@ calling function.
 	  is usually adequate since the library is able to dynamically
 	  resize the name heap, but a correct hint may result in better
 	  performance.  
-        If a non-positive value is supplied for size_hint, 
+        If a non-positive value is supplied for <code>size_hint</code>, 
         then a default size is chosen.
         <p>
         The return value is a group identifier for the open group.
@@ -128,7 +131,7 @@ calling function.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier for the open group if successful; 
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -143,12 +146,14 @@ calling function.
     <dd>Opens an existing group for modification and returns a group 
         identifier for that group.
   <dt><strong>Description:</strong>
-    <dd><code>H5Gopen</code> opens an existing group with the specified name at 
-	  the specified location, <code>loc_id</code>. 
-        The location is identified by a file or 
-        group identifier, and returns a group identifier for the group.  
-        The obtained group identifier should be released by calling 
-	  <code>H5Gclose()</code> when it is no longer needed.  
+    <dd><code>H5Gopen</code> opens an existing group with the specified 
+        name at the specified location, <code>loc_id</code>.
+        <p>
+        The location is identified by a file or group identifier
+        <p>
+        <code>H5Gopen</code> returns a group identifier for the group
+        that was opened.  This group identifier should be released by 
+        calling <code>H5Gclose()</code> when it is no longer needed.  
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
@@ -158,7 +163,7 @@ calling function.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier if successful; 
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -181,8 +186,8 @@ calling function.
         <dd>Group identifier to release.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -203,7 +208,8 @@ calling function.
 	  name, possibly one of many names it currently has.  
         <p>
         If <code>link_type</code> is <code>H5G_LINK_HARD</code>, then 
-        <code>current_name</code> must name an existing object and both 
+        <code>current_name</code> must specify the name of an 
+        existing object and both
         names are interpreted relative to <code>loc_id</code>, which is 
         either a file identifier or a group identifier.
         <p>
@@ -229,8 +235,8 @@ calling function.
         <dd>New name for the object.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -263,8 +269,8 @@ calling function.
         <dd>Name of the object to unlink.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -334,7 +340,7 @@ calling function.
   <dt><strong>Returns:</strong>
     <dd>Returns the return value of the last operator if it was non-zero, 
         or zero if all group members were processed.
-        Otherwise, returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -365,8 +371,8 @@ calling function.
         <dd>Object's new name.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -384,7 +390,8 @@ calling function.
   <dt><strong>Description:</strong>
     <dd><code>H5Gget_objinfo</code> returns information about the 
         specified object through the <code>statbuf</code> argument. 
-        <code>loc_id</code> (a file, group, or dataset identifier) and 
+        <code>loc_id</code> (a file, group, dataset, or 
+        named datatype identifier) and 
         <code>name</code> together determine the object.  
         If the object is a symbolic link and <code>follow_link</code> is
         zero (<code>0</code>), then the information returned is that for the link itself;
@@ -441,9 +448,9 @@ calling function.
         <dd>OUT: Buffer in which to return information about the object.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd> Returns SUCCEED (0) with the fields of <code>statbuf</code> 
-         (if non-null) initialized.
-         Otherwise returns FAIL (-1).
+    <dd> Returns a non-negative value if successful, with the fields of 
+         <code>statbuf</code> (if non-null) initialized.
+         Otherwise returns a negative value.
 </dl>
 
 
@@ -484,9 +491,9 @@ calling function.
         <dd>OUT: Link value.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0), with the link value in <code>value</code>, 
+    <dd>Returns a non-negative value, with the link value in <code>value</code>, 
         if successful.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -528,8 +535,8 @@ calling function.
         <dd>IN: The new comment.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise returns FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -571,7 +578,7 @@ calling function.
     <dd>Returns the number of characters in the comment, 
         counting the null terminator, if successful; the value 
         returned may be larger than <code>bufsize</code>.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -589,7 +596,10 @@ calling function.
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 H5G&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -604,7 +614,7 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  2 September 1998
+Last modified:  27 October 1998
 
 </body>
 </html>

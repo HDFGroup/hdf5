@@ -14,7 +14,9 @@ HDF5/H5RA Draft API Specification
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 H5RA&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
@@ -46,11 +48,13 @@ Do not create any archives using this interface!</center>
 <p>
 These functions enable the user to store and retrieve data in ragged arrays.
 
-
 <table border=0>
 <tr><td valign=top>
 <ul>
     <li><a href="#Ragged-Create">H5RAcreate</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
     <li><a href="#Ragged-Open">H5RAopen</a>
     <li><a href="#Ragged-Close">H5RAclose</a>
 </ul>
@@ -63,6 +67,21 @@ These functions enable the user to store and retrieve data in ragged arrays.
 </table>
 
 <p>
+This version of the Ragged Array interface implements a 
+two-dimensional array where each row of the array is a different length.
+It is intended for applications where the distribution of row lengths 
+is such that most rows are near an average length with only a few rows 
+that are significantly shorter or longer. The raw data is split among 
+two datasets, <code>raw</code> and <code>over</code>: the <code>raw</code> 
+dataset is a two-dimensional chunked dataset whose width is large enough 
+to hold most of the rows while the <code>over</code> dataset is a heap 
+that stores the ends of rows that overflow the first dataset.  
+A third dataset, called <code>meta</code>, contains one record for each 
+row and describes what elements, if any, overflow the <code>raw</code> 
+dataset and where they are stored in the <code>over</code> dataset.  
+All three datasets are contained in a single group whose name is the 
+name of the ragged array.                  
+<p>
 
 
 
@@ -70,26 +89,49 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <dl>
 <dt><strong>Name:</strong> <a name="Ragged-Create">H5RAcreate</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5RAcreate</code>(<em> </em> <code> </code>,
-        <em> </em> <code> </code>,
-        <em> </em> <code> </code>
+    <dd><em>hid_t</em> <code>H5RAcreate</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>hid_t</em> <code>plist_id</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Creates a ragged array.
 <dt><strong>Description:</strong>
-    <dd><code>H5RAcreate</code>
+    <dd><code>H5RAcreate</code> creates a new ragged array with the 
+        name specified in <code>name</code>.  A ragged array is 
+        implemented as a group containing three datasets.  
+        The dataset <code>raw</code> is a fixed width dataset 
+        which will hold the majority of the data.  
+        The dataset <code>over</code> is a one dimensional heap 
+        which will hold the end of rows which are too long to fit 
+        in <code>raw</code>  
+        Finally, the <code>meta</code> dataset contains information 
+        about the <code>over</code> array.  All elements of the 
+        ragged array are stored with the same data type.
+        <p>
+        The property list <code>plist_id</code> should contain 
+        information about chunking. The chunk width will determine 
+        the width of the <code>raw</code> dataset while the chunk
+        length should be such that the total chunk size is
+        reasonably large since I/O will be performed in units 
+        of chunks).  If the <code>plist_id</code> does not have 
+        a chunk size defined (e.g., <code>H5P_DEFAULT</code>) 
+        then this function will fail.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>Location identifier of the dataset.
+        <dt><em>const char *</em><code>name</code>
+            <dd>The assigned name of the data set to be stored in the 
+                ragged array.
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Data type identifier for the ragged array data.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list of the dataset.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a ragged array identifier if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -97,26 +139,27 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <dl>
 <dt><strong>Name:</strong> <a name="Ragged-Open">H5RAopen</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5RAopen</code>(<em> </em> <code> </code>,
-        <em> </em> <code> </code>,
-        <em> </em> <code> </code>
+    <dd><em>hid_t</em> <code>H5RAopen</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Opens a ragged array.
 <dt><strong>Description:</strong>
-    <dd><code>H5RAopen</code>
+    <dd><code>H5RAopen</code> opens an existing ragged array.  
+        <p>
+        The name of the array, <code>name</code>, should be the same 
+        that was used when the array was created, i.e., the name of 
+        the group which implements the array.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>The location identifier of the dataset.
+        <dt><em>const char *</em><code>name</code>
+            <dd>The name of the ragged array.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a ragged array identifier if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -124,26 +167,20 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <dl>
 <dt><strong>Name:</strong> <a name="Ragged-Close">H5RAclose</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5RAclose</code>(<em> </em> <code> </code>,
-        <em> </em> <code> </code>,
-        <em> </em> <code> </code>
-    )
+    <dd><em>herr_t</em> <code>H5RAclose</code>(<em>hid_t</em> <code>array_id</code>)
 <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Closes a ragged array.
 <dt><strong>Description:</strong>
-    <dd><code>H5RAclose</code>
+    <dd><code>H5RAclose</code> closes the ragged array specified 
+        with the array identifier <code>array_id</code>.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
+        <dt><em>hid_t</em> <code>array_id</code>
+            <dd>The array identifier for the ragged array to be closed.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -151,14 +188,23 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <dl>
 <dt><strong>Name:</strong> <a name="Ragged-Write">H5RAwrite</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5RAwrite</code>(<em> </em> <code> </code>,
-        <em> </em> <code> </code>,
-        <em> </em> <code> </code>
+    <dd><em>herr_t</em> <code>H5RAwrite</code>(<em>hid_t</em> <code>array_id</code>,
+        <em>hssize_t</em> <code>start_row</code>,
+        <em>hsize_t</em> <code>nrows</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>hsize_t</em> <code>size[/*nrows*/]</code>,
+        <em>void *</em><code>buf[/*nrows*/]</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Writes to a ragged array.
 <dt><strong>Description:</strong>
-    <dd><code>H5RAwrite</code>
+    <dd><code>H5RAwrite</code> writes a contiguous set of rows to a 
+        ragged array beginning at row number <code>start_row</code> 
+        and continuing for <code>nrows</code> rows.  
+        <p>
+        Each row of the ragged array contains <code>size[]</code> 
+        elements of type <code>type_id</code> and each row is stored 
+        in a buffer pointed to by <code>buf[]</code>. 
         <p>
         Datatype conversion takes place at the time of a read or write
         and is automatic.  See the
@@ -169,16 +215,22 @@ These functions enable the user to store and retrieve data in ragged arrays.
         supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
+        <dt><em>hid_t</em> <code>array_id</code>
+            <dd>Array identifier for the ragged array to be written to.
+        <dt><em>hssize_t</em> <code>start_row</code>
+            <dd>Row at which the write will start.
+        <dt><em>hsize_t</em> <code>nrows</code>
+            <dd>Number of rows to be written
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Data type identifier for the data to be written.
+        <dt><em>hsize_t</em> <code>size[/*nrows*/]</code>
+            <dd>Lengths of the rows to be written.
+        <dt><em>void *</em><code>buf[/*nrows*/]</code>
+            <dd>Pointers to buffers containing the data to be written.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -186,14 +238,36 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <dl>
 <dt><strong>Name:</strong> <a name="Ragged-Read">H5RAread</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5RAread</code>(<em> </em> <code> </code>,
-        <em> </em> <code> </code>,
-        <em> </em> <code> </code>
+    <dd><em>herr_t</em> <code>H5RAread</code>(<em>hid_t</em> <code>array_id</code>,
+        <em>hssize_t</em> <code>start_row</code>,
+        <em>hsize_t</em> <code>nrows</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>hsize_t</em> <code>size[/*nrows*/]</code>,
+        <em>void *</em><code>buf[/*nrows*/]</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>
 <dt><strong>Description:</strong>
-    <dd><code>H5RAread</code>
+    <dd><code>H5RAread</code> reads the contents of one or more rows 
+        of the ragged array pointed to by <code>array_id</code>.  
+        <p> 
+        The rows to be read begin at row <code>start_row</code> and 
+        continue for <code>nrows</code> rows.  
+        <p> 
+        All raw data is converted to type <code>type_id</code>.
+        <p> 
+        The caller must allocate the <code>size[]</code> and 
+        <code>buf[]</code> arrays.  
+        <p> 
+        Memory for the data can be allocated by either the caller or 
+        the library.  In the former case, the caller should initialize 
+        the <code>buf[]</code> array with pointers to valid memory and
+        the <code>size[]</code> array with the lengths of the buffers.
+        In the latter case, the caller should initialize 
+        <code>buf[]</code> with null pointers (the input value of 
+        <code>size[]</code> is irrelevant in this case) and the
+        library will allocate memory for each row by calling 
+        <code>malloc()</code>. 
         <p>
         Datatype conversion takes place at the time of a read or write
         and is automatic.  See the
@@ -204,16 +278,31 @@ These functions enable the user to store and retrieve data in ragged arrays.
         supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
-        <dt><em> </em> <code> </code>
-            <dd>
+        <dt><em>hid_t</em> <code>array_id</code>
+            <dd>Array identifier for the ragged array to be read from.
+        <dt><em>hssize_t</em> <code>start_row</code>
+            <dd>Row at which the read will start.
+        <dt><em>hsize_t</em> <code>nrows</code>
+            <dd>Number of rows to be read
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Data type identifier for the data to be read.
+        <dt><em>hsize_t</em> <code>size[/*nrows*/]</code>
+            <dd>Lengths of the rows to be read.
+        <dt><em>void *</em><code>buf[/*nrows*/]</code>
+            <dd>Pointers to buffers into which the data is to be read.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful.
+        The values of the <code>size[]</code> array will be the 
+        true length of each row.  If a row is longer than the 
+        caller-allocated length, then <code>size[]</code> will 
+        contain the true length of the row although not all elements 
+        of that row will be stored in the buffer.
+        <p>
+        Returns a negative value on failure.  The <code>buf[]</code> 
+        array will contain it's original pointers (null or otherwise), 
+        although the caller-supplied buffers may have been modified. 
+        The <code>size[]</code> array may also have been modified.    
 </dl>
 
 
@@ -226,7 +315,9 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 H5RA&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
@@ -242,7 +333,7 @@ H5RA&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 
 <br>
-Last modified:  1 September 1998
+Last modified:  27 October 1998
 
 </body>
 </html>

@@ -14,10 +14,10 @@ HDF5/Tools Draft API Specification
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-<!--
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
--->
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -64,40 +64,56 @@ These tools enable the user to examine HDF5 files interactively.
         [-a </code><em>names</em><code>]
         [-d </code><em>names</em><code>]
         [-g </code><em>names</em><code>]
-        [-l </code><em>names</em><code>] </code>
+        [-l </code><em>names</em><code>]
+        [-t </code><em>names</em><code>] </code>
         <em>file</em>
 <dt><strong>Purpose:</strong>
     <dd>Displays HDF5 file contents.
 <dt><strong>Description:</strong>
     <dd><code>h5dump</code> enables the user to interactively examine 
         the contents of an HDF5 file and dump those contents, 
-        in human readable form, to an ASCII file or to other tools.
+        in human readable form, to an ASCII file.
         <p>
         <code>h5dump</code> displays HDF5 file content on 
         standard output.  It may display the content of the 
         whole HDF5 file or selected objects, which can be groups, 
-        datasets, links, or attributes. 
+        datasets, links, attributes, or data types. 
         <p>
         The <code>-header</code> option displays object 
-        header information only and must appear before the 
-        <code>-a</code>, <code>-d</code>, <code>-g</code>, or 
-        <code>-l</code> options. 
+        header information only.
         <p>
-        Native data types created in one machine are displayed with native
-        names when <code>h5dump</code> runs in the same machine type. But when 
-        <code>h5dump</code> runs in a different machine type, it displays the 
-        native data types with standard type names. This will be changed in the 
-        next release to always display with standard type names.
+        Names are the absolute names of the objects. 
+        <code>h5dump</code> displays objects in the order same as the
+        command order.  If a name does not start with a slash, 
+        <code>h5dump</code> begins searching for the specified object 
+        starting at the root group.
         <p>
-        The <code>h5dump</code> output is described in detail in 
-        <a href="../html/ddl.html">DDL</a>, the <cite>Data Description 
-        Language</cite> document. 
+        If an object is hard linked with multiple names, 
+        <code>h5dump</code> displays the content of the object in the
+        first occurrence. Only the link information is displayed in 
+        later occurrences.
+        <p>
+        <code>h5dump</code> assigns a name for any unnamed data type in
+        the form of <code>#</code><em>oid1</em><code>:</code><em>oid2</em>,
+        where <em>oid1</em> and <em>oid2</em> are the object identifiers
+        assigned by the library. The unnamed types are displayed within
+        the root group.
+        <p>
+        Data types are displayed with standard type names. For example,
+        if a data set is created with <code>H5T_NATIVE_INT</code> type
+        and the standard type name for integer on that machine is
+        <code>H5T_STD_I32BE</code>, <code>h5dump</code> displays
+        <code>H5T_STD_I32BE</code> as the type of the data set.            
+        <p>
+        The <code>h5dump</code> output is described in detail in the
+        <a href="DDL.html"><cite>DDL for HDF5</cite></a>, the 
+        <cite>Data Description Language</cite> document. 
 <dt><strong>Options and Parameters:</strong>
     <dl>
         <dt><code>-h</code>
-            <dd>Print information on this command.
+            <dd>Prints information on this command.
         <dt><code>-bb</code>
-            <dd>Displays the content of boot block. The default is 
+            <dd>Displays the contents of the boot block. The default is 
                 not to display.
         <dt><code>-header</code>
             <dd>Displays header information only; no data is displayed.
@@ -106,35 +122,44 @@ These tools enable the user to examine HDF5 files interactively.
         <dt><code>-d</code> <em>names</em>
             <dd>Displays the specified dataset(s).
         <dt><code>-g</code> <em>names</em>
-            <dd>Displays all the objects within the specified group(s).
+            <dd>Displays the specified group(s) and all the members.
         <dt><code>-l</code> <em>names</em>
-            <dd>Displays the specified link value(s).
+            <dd>Displays the values of the specified soft link(s).
+        <dt><code>-t</code> <em>names</em>
+            <dd>Displays the specified named data type(s).
         <dt><em>file</em>
             <dd>The file to be examined.
     </dl>
 <dt><strong>Current Status:</strong>
-    <dd>The current version of <code>h5dump</code> can display the
-        following types of information:
+    <dd>The current version of <code>h5dump</code> displays the
+        following information:
         <ul>
-          <li>Group name
-          <li>Attribute name, data type, data space, and data
-          <li>Dataset name, data type, data space, and data
-          <li>Soft link name, link value
+        <li>Group
+        <ul>
+           <li>group attributes
+           <li>group member
         </ul>
-
-        <dd>Limitions in the current implementaion include the
-            following:
+        <li>Dataset
         <ul>
-          <li>Only one file is displayed at a time (file families are 
-              not supported).
-          <li>The whole file content is displayed (none of above 
-              options are supported).
-          <li>Compound data types are not yet supported.
-          <li>Complex data spaces are not yet supported.
+           <li>dataset attributes
+           <li>data type
+           <li>data space
+           <li>data
+        </ul>
+        <li>Data type
+        <ul>
+           <li>scalar type
+           <li>transient type
+           <li>named type
+           <li>unnamed type
+        </ul>
+        <li>Simple data space
+        <li>Soft link
+        <li>Hard link
         </ul>
 <dt><strong>See Also:</strong>
     <dd>HDF5 Data Description Language syntax 
-        (<a href="../html/ddl.html">DDL</a>)
+        (<a href="DDL.html"><cite>DDL for HDF5</cite></a>)
 </dl>
 
 
@@ -241,10 +266,10 @@ These tools enable the user to examine HDF5 files interactively.
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-<!--
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
--->
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -259,7 +284,7 @@ Tools&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 
 <br>
-Last modified:  9 September 1998
+Last modified:  27 October 1998
 
 </body>
 </html>

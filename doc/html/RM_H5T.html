@@ -14,7 +14,10 @@ HDF5/H5T Draft API Specification
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 H5T&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -151,7 +154,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a named datatype identifier if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -181,8 +184,8 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
             <dd>A datatype identifier.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -208,7 +211,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
     </dl>
 <dt><strong>Returns:</strong>
     <dd>The successful return values are TRUE if committed, else FALSE.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -256,8 +259,8 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
             <dd>Identifier of the datatype of the new member.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -334,8 +337,8 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
             <dd>Optional background buffer.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -367,8 +370,8 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
             <dd>Overflow function.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -424,7 +427,7 @@ H5Tget_overflow ()
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -511,7 +514,7 @@ H5Tget_overflow ()
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
-        otherwise FAIL (-1)
+        otherwise returns a negative value
 </dl>
 
 
@@ -537,7 +540,7 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>When successful, returns TRUE if the datatype identifiers
         refer to the same datatype, else FALSE.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -562,8 +565,8 @@ H5Tget_overflow ()
             <dd>Identifier of datatype to lock.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -647,8 +650,8 @@ H5Tget_overflow ()
             <dd>Size in bytes to modify datatype.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -712,8 +715,8 @@ H5Tget_overflow ()
             <dd>Byte ordering constant.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -769,8 +772,8 @@ H5Tget_overflow ()
             <dd>Number of bits of precision for datatype.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -913,8 +916,8 @@ zero.
             <dd>Offset of first significant bit.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -951,8 +954,8 @@ zero.
                 bit padding type.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -986,8 +989,8 @@ zero.
             <dd>Padding type for most-significant bits.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1044,8 +1047,8 @@ zero.
             <dd>Sign type.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1081,8 +1084,8 @@ zero.
             <dd>OUT: Pointer to location to return size of mantissa in bits.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1120,8 +1123,8 @@ zero.
             <dd>Size of mantissa in bits.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1165,8 +1168,8 @@ zero.
             <dd>Exponent bias value.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1228,8 +1231,8 @@ zero.
             <dd>Mantissa normalization type.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1295,8 +1298,8 @@ zero.
             <dd>Padding type.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1353,8 +1356,8 @@ zero.
             <dd>Character set type.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1415,8 +1418,8 @@ zero.
             <dd>String padding type.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1437,7 +1440,7 @@ zero.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns number of members datatype has if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1503,7 +1506,7 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns the number of dimensions, a number from 0 to 4, 
         if successful.
-        Otherwise returns FAIL (-1).
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -1529,7 +1532,7 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns the identifier of a copy of the datatype of the field
         if successful;
-        otherwise FAIL (-1).
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1567,8 +1570,8 @@ zero.
             <dd>Datatype identifier of the field to insert.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1589,8 +1592,8 @@ zero.
             <dd>Identifier of datatype to modify.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1638,8 +1641,8 @@ zero.
             <dd>Function to convert between source and destination datatypes.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1681,8 +1684,8 @@ zero.
             <dd>Function to convert between source and destination datatypes.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1711,8 +1714,8 @@ zero.
             <dd>Function to remove from conversion paths.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1734,8 +1737,8 @@ zero.
             <dd>Identifier of datatype to release.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns SUCCEED (0) if successful;
-        otherwise FAIL (-1).
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
 </dl>
 
 
@@ -1748,7 +1751,10 @@ zero.
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 H5T&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -1763,7 +1769,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  2 September 1998
+Last modified:  27 October 1998
 
 </body>
 </html>
