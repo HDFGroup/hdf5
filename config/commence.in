@@ -57,12 +57,14 @@ LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
 ## complains if it sees a reference to a variable which has never been
 ## defined. The main makefile is free to redefine these to something else.
 DOCDIR=$(docdir)
+SUBDOCDIR=
 LIB=
 LIB_SRC=
 LIB_OBJ=
 PUB_HDR=
 PUB_PROGS=
 PUB_DOCS=
+PUB_SUBDOCS=
 PROGS=
 TEST_PROGS=
 TEST_FLAGS=
