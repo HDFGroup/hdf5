@@ -317,14 +317,14 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
  * Function:    get_unique_name
  * Purpose:     Create a new file who's name doesn't conflict with
  *              pre-existing files.
- * Returns:
+ * Returns:     Nothing
  * Programmer:  Bill Wendling, 06. June 2002
  * Modifications:
  */
 static void
 get_unique_name(void)
 {
-    const char *prefix = "/tmp", *templte = "/zip_perf_XXXXXX";
+    const char *prefix = "/tmp", *template = "/zip_perf.data";
     const char *env = getenv("HDF5_PREFIX");
 
     if (env)
@@ -333,17 +333,13 @@ get_unique_name(void)
     if (option_prefix)
         prefix = option_prefix;
 
-    filename = calloc(1, strlen(prefix) + strlen(templte) + 1);
+    filename = calloc(1, strlen(prefix) + strlen(template) + 1);
 
     if (!filename)
         error("out of memory");
 
     strcpy(filename, prefix);
-    strcat(filename, templte);
-    output = mkstemp(filename);
-
-    if (output == -1)
-        error(strerror(errno));
+    strcat(filename, template);
 }
 
 /*
