@@ -275,6 +275,9 @@ to convert files from HDF4 format to HDF5 format and vice versa.
         <dt><code>-H</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--header</code></dt>
             <dd>Print the header only; no data is displayed.</dd>
+        <dt><code>-A</code> 
+            <dd>Print the header and value of attributes; 
+	        data of datasets is not displayed.</dd>
         <dt><code>-i</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--object-ids</code></dt>
             <dd>Print the object ids.</dd>
@@ -308,13 +311,21 @@ to convert files from HDF4 format to HDF5 format and vice versa.
         <dt><code>-w <em>N</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--width=<em>N</em></code></dt>
             <dd>Set the number of columns of output.</dd>
-        <dt><code>-x <em>U</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+        <dt><code>-x <em></em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--xml</code></dt>
-            <dd>Output XML instead of DDL.</dd>
+            <dd>Output XML using XML schema (default) instead of DDL.</dd>
+        <dt><code>-u <em></em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--use-dtd</code></dt>
+            <dd>Output XML using XML DTD instead of DDL.</dd>
         <dt><code>-D <em>U</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--xml-dtd=<em>U</em></code></dt>
-            <dd>In XML output, refer to the DTD at <em>U</em> 
-                instead of the default DTD.</dd>
+            <dd>In XML output, refer to the DTD or schema at <em>U</em> 
+                instead of the default schema/DTD.</dd>
+        <dt><code>-X <em>S</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--xml-dns=<em>S</em></code></dt>
+            <dd>In XML output, (XML Schema) use qualified names in the XML:<br>
+	        &nbsp;&nbsp; &nbsp;&nbsp;
+		":": no namespace, default: "hdf5:"</dd>
         <dt><code>-s <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--start=<em>L</em></code></dt>
             <dd>Offset of start of subsetting selection.  
@@ -476,8 +487,8 @@ to convert files from HDF4 format to HDF5 format and vice versa.
     <li>HDF5 Data Description Language syntax at
         <a href="ddl.html"><cite>DDL for HDF5</cite></a>
 
-    <li>HDF5 XML DTD at
-        <a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd</a>
+    <li>HDF5 XML Schema at
+        <a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd</a>
 
     <li>HDF5 XML information at
         <a href="http://hdf.ncsa.uiuc.edu/HDF5/XML">http://hdf.ncsa.uiuc.edu/HDF5/XML/</a>
@@ -2331,7 +2342,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --> 
 
-Last modified: 16 July 2003
+Last modified: 20 October 2003
 
 </body>
 </html>
