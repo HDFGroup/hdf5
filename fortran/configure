@@ -1485,6 +1485,7 @@ host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
 
 
+
 echo "$as_me:$LINENO: checking shell variables initial values" >&5
 echo $ECHO_N "checking shell variables initial values... $ECHO_C" >&6
 set >&5
@@ -3896,7 +3897,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3899 "configure"' > conftest.$ac_ext
+  echo '#line 3900 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4437,7 +4438,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4440: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4441: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6248,7 +6249,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6251 "configure"
+#line 6252 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6346,7 +6347,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6349 "configure"
+#line 6350 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11352,6 +11353,7 @@ s,@FFLAGS@,$FFLAGS,;t t
 s,@FSEARCH_DIRS@,$FSEARCH_DIRS,;t t
 s,@R_LARGE@,$R_LARGE,;t t
 s,@R_INTEGER@,$R_INTEGER,;t t
+s,@HADDR_T@,$HADDR_T,;t t
 s,@HSIZE_T@,$HSIZE_T,;t t
 s,@HSSIZE_T@,$HSSIZE_T,;t t
 s,@HID_T@,$HID_T,;t t
