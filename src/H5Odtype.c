@@ -58,7 +58,14 @@ const H5O_class_t H5O_DTYPE[1] = {{
     H5O_dtype_debug,		/* debug the message		*/
 }};
 
-#define H5O_DTYPE_VERSION	1
+/* This is the correct version to create all datatypes which don't contain
+ * array datatypes (atomic types, compound datatypes without array fields,
+ * vlen sequences of objects which aren't arrays, etc.) */
+#define H5O_DTYPE_VERSION_COMPAT	1
+
+/* This is the correct version to create all datatypes which contain H5T_ARRAY
+ * class objects (array definitely, potentially compound & vlen sequences also) */
+#define H5O_DTYPE_VERSION_UPDATED	2
 
 /* Interface initialization */
 static intn		interface_initialize_g = 0;
@@ -86,7 +93,7 @@ H5FL_EXTERN(H5T_t);
 static herr_t
 H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 {
-    uintn		flags, perm_word, version;
+    uintn		flags, version;
     intn		i, j;
     size_t		z;
 
@@ -99,8 +106,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
     /* decode */
     UINT32DECODE(*pp, flags);
     version = (flags>>4) & 0x0f;
-    if (version!=H5O_DTYPE_VERSION) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL,
+    if (version!=H5O_DTYPE_VERSION_COMPAT && version!=H5O_DTYPE_VERSION_UPDATED) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL,
 		      "bad version number for data type message");
     }
     dt->type = (H5T_class_t)(flags & 0x0f);
@@ -194,53 +201,94 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                        "memory allocation failed");
             }
             for (i = 0; i < dt->u.compnd.nmembs; i++) {
+                intn ndims;     /* Number of dimensions of the array field */
+                hsize_t dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
+                int perm[H5O_LAYOUT_NDIMS];     /* Dimension permutations */
+                uintn perm_word;    /* Dimension permutation information */
+                H5T_t *array_dt;    /* Temporary pointer to the array datatype */
+                H5T_t *temp_type;   /* Temporary pointer to the field's datatype */
+
+                /* Decode the field name */
                 dt->u.compnd.memb[i].name = H5MM_xstrdup((const char *)*pp);
                 /*multiple of 8 w/ null terminator */
                 *pp += ((HDstrlen((const char *)*pp) + 8) / 8) * 8;
-                UINT32DECODE(*pp, dt->u.compnd.memb[i].offset);
-                dt->u.compnd.memb[i].ndims = *(*pp)++;
-                assert(dt->u.compnd.memb[i].ndims <= 4);
-                *pp += 3;		/*reserved bytes */
 
-                /* Dimension permutation */
-                UINT32DECODE(*pp, perm_word);
-                dt->u.compnd.memb[i].perm[0] = (perm_word >> 0) & 0xff;
-                dt->u.compnd.memb[i].perm[1] = (perm_word >> 8) & 0xff;
-                dt->u.compnd.memb[i].perm[2] = (perm_word >> 16) & 0xff;
-                dt->u.compnd.memb[i].perm[3] = (perm_word >> 24) & 0xff;
-                dt->u.compnd.memb[i].type = H5FL_ALLOC (H5T_t,1);
-                if (NULL==dt->u.compnd.memb[i].type) {
+                /* Decode the field offset */
+                UINT32DECODE(*pp, dt->u.compnd.memb[i].offset);
+
+                /* Older versions of the library allowed a field to have
+                 * intrinsic 'arrayness'.  Newer versions of the library 
+                 * use the separate array datatypes. */
+                if(version==H5O_DTYPE_VERSION_COMPAT) {
+                    /* Decode the number of dimensions */
+                    ndims = *(*pp)++;
+                    assert(ndims <= 4);
+                    *pp += 3;		/*reserved bytes */
+
+                    /* Decode dimension permutation (unused currently) */
+                    UINT32DECODE(*pp, perm_word);
+
+                    /* Skip reserved bytes */
+                    *pp += 4;
+                    
+                    /* Decode array dimension sizes */
+                    for (j=0; j<4; j++)
+                        UINT32DECODE(*pp, dim[j]);
+                } /* end if */
+
+                /* Allocate space for the field's datatype */
+                temp_type = H5FL_ALLOC (H5T_t,1);
+                if (NULL==temp_type) {
                     HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                            "memory allocation failed");
                 }
+                temp_type->ent.header = HADDR_UNDEF;
 
-                /* Reserved */
-                *pp += 4;
-                
-                /* Dimension sizes */
-                for (j=0; j<4; j++)
-                    UINT32DECODE(*pp, dt->u.compnd.memb[i].dim[j]);
-
-                dt->u.compnd.memb[i].type->ent.header = HADDR_UNDEF;
-                if (H5O_dtype_decode_helper(f, pp, dt->u.compnd.memb[i].type)<0) {
+                /* Decode the field's datatype information */
+                if (H5O_dtype_decode_helper(f, pp, temp_type)<0) {
                     for (j=0; j<=i; j++)
                         H5MM_xfree(dt->u.compnd.memb[j].name);
                     H5MM_xfree(dt->u.compnd.memb);
-                    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
-                          "unable to decode member type");
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode member type");
                 }
+
+                /* Go create the array datatype now, for older versions of the datatype message */
+                if(version==H5O_DTYPE_VERSION_COMPAT) {
+                    /* Check if this member is an array field */
+                    if(ndims>0) {
+                        /* Set up the permutation vector for the array create */
+                        for (j=0; j<ndims; j++)
+                            perm[j]=(perm_word>>(j*8))&0xff;
+
+                        /* Create the array datatype for the field */
+                        if ((array_dt=H5T_array_create(temp_type,ndims,dim,perm))==NULL) {
+                            for (j=0; j<=i; j++)
+                                H5MM_xfree(dt->u.compnd.memb[j].name);
+                            H5MM_xfree(dt->u.compnd.memb);
+                            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create array datatype");
+                        }
+                        
+                        /* Make the array type the type that is set for the field */
+                        temp_type=array_dt;
+                    } /* end if */
+                } /* end if */
 
                 /*
                  * Set the "force conversion" flag if VL datatype fields exist in this
                  * type or any component types
                  */
-                if(dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->force_conv==TRUE)
+                if(temp_type->type==H5T_VLEN || temp_type->force_conv==TRUE)
                     dt->force_conv=TRUE;
-                
-                /* Total member size */
-                dt->u.compnd.memb[i].size = dt->u.compnd.memb[i].type->size;
-                for (j=0; j<dt->u.compnd.memb[i].ndims; j++)
-                    dt->u.compnd.memb[i].size *= dt->u.compnd.memb[i].dim[j];
+
+                /* Set the "has array" flag if array datatype fields exist in this type */
+                if(temp_type->type==H5T_ARRAY)
+                    dt->u.compnd.has_array=TRUE;
+
+                /* Member size */
+                dt->u.compnd.memb[i].size = temp_type->size;
+
+                /* Set the field datatype (finally :-) */
+                dt->u.compnd.memb[i].type=temp_type;
             }
             break;
 
@@ -327,11 +375,43 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             UINT16DECODE(*pp, dt->u.atomic.prec);
             break;
 
+        case H5T_ARRAY:  /* Array datatypes...  */
+            /* Decode the number of dimensions */
+            dt->u.array.ndims = *(*pp)++;
+
+            /* Double-check the number of dimensions */
+            assert(dt->u.array.ndims <= H5S_MAX_RANK);
+
+            /* Skip reserved bytes */
+            *pp += 3;
+
+            /* Decode array dimension sizes & compute number of elements */
+            for (j=0, dt->u.array.nelem=1; j<dt->u.array.ndims; j++) {
+                UINT32DECODE(*pp, dt->u.array.dim[j]);
+                dt->u.array.nelem *= dt->u.array.dim[j];
+            } /* end for */
+
+            /* Skip dimension permutations (unused currently) */
+            *pp += 4*dt->u.array.ndims;
+
+            /* Decode base type of array */
+            if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1)))
+                HRETURN_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            dt->parent->ent.header = HADDR_UNDEF;
+            if (H5O_dtype_decode_helper(f, pp, dt->parent)<0)
+                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
+
+            /*
+             * Set the "force conversion" flag if a VL base datatype is used or
+             * or if any components of the base datatype are VL types.
+             */
+            if(dt->parent->type==H5T_VLEN || dt->parent->force_conv==TRUE)
+                dt->force_conv=TRUE;
+            break;
+
         default:
-            if (flags) {
-                HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                      "class flags are non-zero");
-            }
+            HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                  "unknown datatype class found");
             break;
     }
 
@@ -358,7 +438,6 @@ static herr_t
 H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
     uintn		flags = 0;
-    uintn		perm_word;
     char		*hdr = (char *)*pp;
     intn		i, j;
     size_t		n, z, aligned;
@@ -369,7 +448,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     assert(pp && *pp);
     assert(dt);
 
-    /* skip the type and class bit field for now */
+    /* skip the type and class bit-field for now */
     *pp += 4;
     UINT32ENCODE(*pp, dt->size);
 
@@ -574,31 +653,29 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 /* Member offset */
                 UINT32ENCODE(*pp, dt->u.compnd.memb[i].offset);
 
-                /* Dimensionality */
-                *(*pp)++ = dt->u.compnd.memb[i].ndims;
-                assert(dt->u.compnd.memb[i].ndims <= 4);
+                /* If we don't have any array fields, write out the old style
+                 * member information, for better backward compatibility
+                 * Write out all zeros for the array information, though...
+                 */
+                if(!dt->u.compnd.has_array) {
+                    /* Dimensionality */
+                    *(*pp)++ = 0;
 
-                /* Reserved */
-                *(*pp)++ = '\0';
-                *(*pp)++ = '\0';
-                *(*pp)++ = '\0';
+                    /* Reserved */
+                    *(*pp)++ = '\0';
+                    *(*pp)++ = '\0';
+                    *(*pp)++ = '\0';
 
-                /* Dimension permutation */
-                for (j = 0, perm_word = 0; j < dt->u.compnd.memb[i].ndims; j++) {
-                    perm_word |= dt->u.compnd.memb[i].perm[j] << (8 * j);
-                }
-                UINT32ENCODE(*pp, perm_word);
-
-                /* Reserved */
-                UINT32ENCODE(*pp, 0);
-
-                /* Dimensions */
-                for (j=0; j<dt->u.compnd.memb[i].ndims; j++) {
-                    UINT32ENCODE(*pp, dt->u.compnd.memb[i].dim[j]);
-                }
-                for (/*void*/; j<4; j++) {
+                    /* Dimension permutation */
                     UINT32ENCODE(*pp, 0);
-                }
+
+                    /* Reserved */
+                    UINT32ENCODE(*pp, 0);
+
+                    /* Dimensions */
+                    for (j=0; j<4; j++)
+                        UINT32ENCODE(*pp, 0);
+                } /* end if */
 
                 /* Subtype */
                 if (H5O_dtype_encode_helper(pp, dt->u.compnd.memb[i].type)<0) {
@@ -675,12 +752,37 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             UINT16ENCODE(*pp, dt->u.atomic.prec);
             break;
 
+        case H5T_ARRAY:  /* Array datatypes...  */
+            /* Double-check the number of dimensions */
+            assert(dt->u.array.ndims <= H5S_MAX_RANK);
+
+            /* Encode the number of dimensions */
+            *(*pp)++ = dt->u.array.ndims;
+
+            /* Reserved */
+            *(*pp)++ = '\0';
+            *(*pp)++ = '\0';
+            *(*pp)++ = '\0';
+
+            /* Encode array dimensions */
+            for (j=0; j<dt->u.array.ndims; j++)
+                UINT32ENCODE(*pp, dt->u.array.dim[j]);
+
+            /* Encode array dimension permutations */
+            for (j=0; j<dt->u.array.ndims; j++)
+                UINT32ENCODE(*pp, dt->u.array.perm[j]);
+
+            /* Encode base type of array's information */
+            if (H5O_dtype_encode_helper(pp, dt->parent)<0)
+                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type");
+            break;
+
         default:
             /*nothing */
             break;
     }
 
-    *hdr++ = ((uintn)(dt->type) & 0x0f) | (H5O_DTYPE_VERSION<<4);
+    *hdr++ = ((uintn)(dt->type) & 0x0f) | (((dt->type==H5T_COMPOUND && dt->u.compnd.has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
     *hdr++ = (flags >> 16) & 0xff;
@@ -837,54 +939,61 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     assert(mesg);
 
     switch (dt->type) {
-    case H5T_INTEGER:
-	ret_value += 4;
-	break;
+        case H5T_INTEGER:
+            ret_value += 4;
+            break;
 
-    case H5T_BITFIELD:
-	ret_value += 4;
-	break;
+        case H5T_BITFIELD:
+            ret_value += 4;
+            break;
 
-    case H5T_OPAQUE:
-	ret_value += (HDstrlen(dt->u.opaque.tag)+7) & 0xf8;
-	break;
+        case H5T_OPAQUE:
+            ret_value += (HDstrlen(dt->u.opaque.tag)+7) & 0xf8;
+            break;
 
-    case H5T_FLOAT:
-	ret_value += 12;
-	break;
+        case H5T_FLOAT:
+            ret_value += 12;
+            break;
 
-    case H5T_COMPOUND:
-	for (i=0; i<dt->u.compnd.nmembs; i++) {
-	    ret_value += ((HDstrlen(dt->u.compnd.memb[i].name) + 8) / 8) * 8;
-	    ret_value += 4 +		/*member offset*/
-			 1 +		/*dimensionality*/
-			 3 +		/*reserved*/
-			 4 +		/*permutation*/
-			 4 +		/*reserved*/
-			 16;		/*dimensions*/
-	    ret_value += H5O_dtype_size(f, dt->u.compnd.memb[i].type);
-	}
-	break;
+        case H5T_COMPOUND:
+            for (i=0; i<dt->u.compnd.nmembs; i++) {
+                ret_value += ((HDstrlen(dt->u.compnd.memb[i].name) + 8) / 8) * 8;
+                ret_value += 4 +		/*member offset*/
+                     1 +		/*dimensionality*/
+                     3 +		/*reserved*/
+                     4 +		/*permutation*/
+                     4 +		/*reserved*/
+                     16;		/*dimensions*/
+                ret_value += H5O_dtype_size(f, dt->u.compnd.memb[i].type);
+            }
+            break;
 
-    case H5T_ENUM:
-	ret_value += H5O_dtype_size(f, dt->parent);
-	for (i=0; i<dt->u.enumer.nmembs; i++) {
-	    ret_value += ((HDstrlen(dt->u.enumer.name[i])+8)/8)*8;
-	}
-	ret_value += dt->u.enumer.nmembs * dt->parent->size;
-	break;
+        case H5T_ENUM:
+            ret_value += H5O_dtype_size(f, dt->parent);
+            for (i=0; i<dt->u.enumer.nmembs; i++) {
+                ret_value += ((HDstrlen(dt->u.enumer.name[i])+8)/8)*8;
+            }
+            ret_value += dt->u.enumer.nmembs * dt->parent->size;
+            break;
 
-    case H5T_VLEN:
-        ret_value += H5O_dtype_size(f, dt->parent);
-        break;
+        case H5T_VLEN:
+            ret_value += H5O_dtype_size(f, dt->parent);
+            break;
 
-    case H5T_TIME:
-	ret_value += 2;
-	break;
+        case H5T_TIME:
+            ret_value += 2;
+            break;
 
-    default:
-	/*no properties */
-	break;
+        case H5T_ARRAY:
+            ret_value += 4; /* ndims & reserved bytes*/
+            ret_value += 4*dt->u.array.ndims; /* dimensions */
+            ret_value += 4*dt->u.array.ndims; /* dimension permutations */
+            ret_value += H5O_dtype_size(f, dt->parent);
+            break;
+
+        default:
+            /*no properties */
+            break;
     }
 
     FUNC_LEAVE(ret_value);
@@ -1048,7 +1157,7 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
     const H5T_t		*dt = (const H5T_t*)mesg;
     const char		*s;
     char		buf[256];
-    intn		i, j;
+    intn		i;
     size_t		k;
     
 
@@ -1111,6 +1220,7 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
 	    fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0, fwidth-3),
 		    "Byte offset:",
 		    (unsigned long) (dt->u.compnd.memb[i].offset));
+#ifdef OLD_WAY
 	    fprintf(stream, "%*s%-*s %d%s\n", indent+3, "", MAX(0, fwidth-3),
 		    "Dimensionality:",
 		    dt->u.compnd.memb[i].ndims,
@@ -1131,6 +1241,7 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
 		}
 		fprintf(stream, "}\n");
 	    }
+#endif /* OLD_WAY */
 	    H5O_dtype_debug(f, dt->u.compnd.memb[i].type, stream,
 			    indent+3, MAX(0, fwidth - 3));
 	}

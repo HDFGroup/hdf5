@@ -473,7 +473,8 @@ herr_t H5T_vlen_disk_write(const H5D_xfer_t UNUSED *xfer_parms, H5F_t *f, void *
 static herr_t 
 H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *free_info)
 {
-    intn i,j;   /* local counting variable */
+    intn i;     /* local index variable */
+    size_t j;   /* local index variable */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER(H5T_vlen_reclaim_recurse, FAIL);
@@ -483,36 +484,42 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
 
     /* Check the datatype of this element */
     switch(dt->type) {
-        /* Check each field and recurse on VL and compound ones */
+        case H5T_ARRAY:
+            /* Recurse on each element, if the array's base type is array, VL or compound */
+            if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+                void *off;     /* offset of field */
+
+                /* Calculate the offset member and recurse on it */
+                for(j=0; j<dt->u.array.nelem; j++) {
+                    off=((uint8_t *)elem)+j*(dt->parent->size);
+                    if(H5T_vlen_reclaim_recurse(off,dt->parent,free_func,free_info)<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free array element");
+                } /* end for */
+            } /* end if */
+            break;
+
         case H5T_COMPOUND:
+            /* Check each field and recurse on VL, compound or array ones */
             for (i=0; i<dt->u.compnd.nmembs; i++) {
-                /* Recurse if it's VL or compound */
-                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN) {
-                    uintn nelem=1;  /* Number of array elements in field */
+                /* Recurse if it's VL, compound or array */
+                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY) {
                     void *off;     /* offset of field */
 
-                    /* Compute the number of array elements in field */
-                    for(j=0; j<dt->u.compnd.memb[i].ndims; j++)
-                        nelem *= dt->u.compnd.memb[i].dim[j];
-                    
-                    /* Calculate the offset of each array element and recurse on it */
-                    while(nelem>0) {
-                        off=((uint8_t *)elem)+dt->u.compnd.memb[i].offset+(nelem-1)*dt->u.compnd.memb[i].type->size;
-                        if(H5T_vlen_reclaim_recurse(off,dt->u.compnd.memb[i].type,free_func,free_info)<0)
-                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free compound field");
-                        nelem--;
-                    } /* end while */
+                    /* Calculate the offset member and recurse on it */
+                    off=((uint8_t *)elem)+dt->u.compnd.memb[i].offset;
+                    if(H5T_vlen_reclaim_recurse(off,dt->u.compnd.memb[i].type,free_func,free_info)<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free compound field");
                 } /* end if */
             } /* end for */
             break;
 
-        /* Recurse on the VL information if it's VL or compound, then free VL sequence */
         case H5T_VLEN:
+            /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
             if(dt->u.vlen.type==H5T_VLEN_SEQUENCE) {
                 hvl_t *vl=(hvl_t *)elem;    /* Temp. ptr to the vl info */
 
                 /* Recurse if it's VL or compound */
-                if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN) {
+                if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
                     void *off;     /* offset of field */
 
                     /* Calculate the offset of each array element and recurse on it */
@@ -527,8 +534,9 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
                 /* Free the VL sequence */
                 if(free_func!=NULL)
                     (*free_func)(vl->p,free_info);
-                else
+                else {
                     H5MM_xfree(vl->p);
+                }
             } else if(dt->u.vlen.type==H5T_VLEN_STRING) {
                 /* Free the VL string */
                 if(free_func!=NULL)
@@ -628,6 +636,9 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 {
     htri_t vlen_changed;    /* Whether H5T_vlen_mark changed the type (even if the size didn't change) */
     htri_t ret_value = 0;   /* Indicate that success, but no location change */
+    intn i;                 /* Local index variable */
+    intn accum_change=0;    /* Amount of change in the offset of the fields */
+    size_t old_size;        /* Previous size of a field */
 
     FUNC_ENTER(H5T_vlen_mark, FAIL);
 
@@ -636,14 +647,30 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 
     /* Check the datatype of this element */
     switch(dt->type) {
-        /* Check each field and recurse on VL and compound ones */
-        case H5T_COMPOUND:
+        case H5T_ARRAY:  /* Recurse on VL, compound and array base element type */
+            /* Recurse if it's VL, compound or array */
+            /* (If the type is compound and the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
+            if((dt->parent->type==H5T_COMPOUND && dt->parent->force_conv) || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+                /* Keep the old base element size for later */
+                old_size=dt->parent->size;
+
+                /* Mark the VL, compound or array type */
+                if((vlen_changed=H5T_vlen_mark(dt->parent,f,loc))<0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                if(vlen_changed>0)
+                    ret_value=vlen_changed;
+                
+                /* Check if the field changed size */
+                if(old_size != dt->parent->size) {
+                    /* Adjust the size of the array */
+                    dt->size = dt->u.array.nelem*dt->parent->size;
+                } /* end if */
+            } /* end if */
+            break;
+
+        case H5T_COMPOUND:  /* Check each field and recurse on VL, compound and array type */
             /* Compound datatypes can't change in size if the force_conv flag is not set */
             if(dt->force_conv) {
-                intn i;   /* local counting variable */
-                intn accum_change=0;    /* Amount of change in the offset of the fields */
-                size_t old_size;        /* Preview size of a field */
-
                 /* Sort the fields based on offsets */
                 H5T_sort_value(dt,NULL);
         
@@ -651,13 +678,13 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
                     /* Apply the accumulated size change to the offset of the field */
                     dt->u.compnd.memb[i].offset += accum_change;
 
-                    /* Recurse if it's VL or compound */
+                    /* Recurse if it's VL, compound or array */
                     /* (If the type is compound and the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
-                    if((dt->u.compnd.memb[i].type->type==H5T_COMPOUND && dt->u.compnd.memb[i].type->force_conv) || dt->u.compnd.memb[i].type->type==H5T_VLEN) {
+                    if((dt->u.compnd.memb[i].type->type==H5T_COMPOUND && dt->u.compnd.memb[i].type->force_conv) || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY) {
                         /* Keep the old field size for later */
                         old_size=dt->u.compnd.memb[i].type->size;
 
-                        /* Mark the VL or compound type */
+                        /* Mark the VL, compound or array type */
                         if((vlen_changed=H5T_vlen_mark(dt->u.compnd.memb[i].type,f,loc))<0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                         if(vlen_changed>0)
@@ -679,11 +706,10 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
             } /* end if */
             break;
 
-        /* Recurse on the VL information if it's VL or compound, then free VL sequence */
-        case H5T_VLEN:
-            /* Recurse if it's VL or compound */
+        case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
+            /* Recurse if it's VL, compound or array */
             /* (If the type is compound and the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
-            if((dt->parent->type==H5T_COMPOUND && dt->parent->force_conv) || dt->parent->type==H5T_VLEN) {
+            if((dt->parent->type==H5T_COMPOUND && dt->parent->force_conv) || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
                 if((vlen_changed=H5T_vlen_mark(dt->parent,f,loc))<0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                 if(vlen_changed>0)

@@ -36,6 +36,7 @@ typedef enum H5T_class_t {
     H5T_REFERENCE        = 7,   /*reference types                            */
     H5T_ENUM		     = 8,	/*enumeration types                          */
     H5T_VLEN		     = 9,	/*Variable-Length types                      */
+    H5T_ARRAY	         = 10,	/*Array types                                */
 
     H5T_NCLASSES                /*this must be last                          */
 } H5T_class_t;
@@ -457,9 +458,11 @@ __DLL__ htri_t H5Tcommitted(hid_t type_id);
 /* Operations defined on compound data types */
 __DLL__ herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,
 			 hid_t member_id);
+#ifdef QAK
 __DLL__ herr_t H5Tinsert_array(hid_t parent_id, const char *name,
 			       size_t offset, int ndims, const size_t dim[],
 			       const int *perm, hid_t member_id);
+#endif /* QAK */
 __DLL__ herr_t H5Tpack(hid_t type_id);
 
 /* Operations defined on enumeration data types */
@@ -472,6 +475,12 @@ __DLL__ herr_t H5Tenum_valueof(hid_t type, const char *name,
 
 /* Operations defined on variable-length data types */
 __DLL__ hid_t H5Tvlen_create(hid_t base_id);
+
+/* Operations defined on array data types */
+__DLL__ hid_t H5Tarray_create(hid_t base_id, int ndims,
+            const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
+__DLL__ int H5Tget_array_ndims(hid_t type_id);
+__DLL__ herr_t H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[]);
 
 /* Operations defined on opaque data types */
 __DLL__ herr_t H5Tset_tag(hid_t type, const char *tag);
@@ -497,8 +506,10 @@ __DLL__ H5T_str_t H5Tget_strpad(hid_t type_id);
 __DLL__ int H5Tget_nmembers(hid_t type_id);
 __DLL__ char *H5Tget_member_name(hid_t type_id, int membno);
 __DLL__ size_t H5Tget_member_offset(hid_t type_id, int membno);
+#ifdef QAK
 __DLL__ int H5Tget_member_dims(hid_t type_id, int membno, size_t dims[]/*out*/,
 			       int perm[]/*out*/);
+#endif /* QAK */
 __DLL__ hid_t H5Tget_member_type(hid_t type_id, int membno);
 __DLL__ herr_t H5Tget_member_value(hid_t type_id, int membno,
 				   void *value/*out*/);

@@ -23,7 +23,6 @@ typedef struct H5T_conv_struct_t {
     hid_t	*src_memb_id;		/*source member type ID's	     */
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
     H5T_path_t	**memb_path;		/*conversion path for each member    */
-    size_t	*memb_nelmts;		/*member element count		     */
 } H5T_conv_struct_t;
 
 /* Conversion data for H5T_conv_enum() */
@@ -803,9 +802,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
             NULL==(priv->src_memb_id=H5MM_malloc(src->u.compnd.nmembs *
                                 sizeof(hid_t))) ||
             NULL==(priv->dst_memb_id=H5MM_malloc(dst->u.compnd.nmembs *
-                                sizeof(hid_t))) ||
-            NULL==(priv->memb_nelmts=H5MM_malloc(src->u.compnd.nmembs *
-                             sizeof(size_t)))) {
+                                sizeof(hid_t)))) {
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                    "memory allocation failed");
         }
@@ -846,44 +843,6 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
                 priv->dst_memb_id[src2dst[i]] = tid;
             }
         }
-
-        /*
-         * Those members which are in both the source and destination must be
-         * the same size and shape arrays.
-         */
-        for (i=0; i<src->u.compnd.nmembs; i++) {
-            if (src2dst[i]>=0) {
-                H5T_cmemb_t *src_memb = src->u.compnd.memb + i;
-                H5T_cmemb_t *dst_memb = dst->u.compnd.memb + src2dst[i];
-                if (src_memb->ndims != dst_memb->ndims) {
-                    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                          "source and dest members have incompatible "
-                          "size or shape");
-                }
-                for (j=0; j<src_memb->ndims; j++) {
-                    if (src_memb->dim[j] != dst_memb->dim[j]) {
-                        HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                              "source and dest members have "
-                              "incompatible size or shape");
-                    }
-#ifndef LATER
-                    /* Their permutation vectors must be equal */
-                    if (src_memb->perm[j]!=dst_memb->perm[j]) {
-                        HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                              "member permutations must be equal");
-                    }
-#endif
-                }
-            }
-        }
-
-        /* Calculate number of elements of each member */
-        for (i=0; i<src->u.compnd.nmembs; i++) {
-            priv->memb_nelmts[i] = 1;
-            for (j=0; j<src->u.compnd.memb[i].ndims; j++) {
-                priv->memb_nelmts[i] *= src->u.compnd.memb[i].dim[j];
-            }
-        }
     }
 
     /*
@@ -908,7 +867,6 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
                 H5MM_xfree(priv->src_memb_id);
                 H5MM_xfree(priv->dst_memb_id);
                 H5MM_xfree(priv->memb_path);
-                H5MM_xfree(priv->memb_nelmts);
                 cdata->priv = priv = H5MM_xfree (priv);
                 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
                        "unable to convert member data type");
@@ -1013,7 +971,6 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	H5MM_xfree(priv->src_memb_id);
 	H5MM_xfree(priv->dst_memb_id);
 	H5MM_xfree(priv->memb_path);
-	H5MM_xfree(priv->memb_nelmts);
 	cdata->priv = priv = H5MM_xfree (priv);
 	break;
 
@@ -1078,8 +1035,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		    if (H5T_convert(priv->memb_path[i],
 				    priv->src_memb_id[i],
 				    priv->dst_memb_id[src2dst[i]],
-				    priv->memb_nelmts[i],
-				    0, 0, /*no striding (packed array)*/
+                    1, 0, 0, /*no striding (packed array)*/
 				    xbuf+src_memb->offset,
 				    xbkg+dst_memb->offset,
                                     dset_xfer_plist)<0) {
@@ -1114,8 +1070,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		    if (H5T_convert(priv->memb_path[i],
 				    priv->src_memb_id[i],
 				    priv->dst_memb_id[src2dst[i]],
-				    priv->memb_nelmts[i],
-				    0, 0, /*no striding (packed array)*/
+				    1, 0, 0, /*no striding (packed array)*/
 				    xbuf+offset, xbkg+dst_memb->offset,
 				    dset_xfer_plist)<0) {
 			HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -1224,11 +1179,9 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     intn	*src2dst = NULL;	/*maps src member to dst member	*/
     H5T_cmemb_t	*src_memb = NULL;	/*source struct member descript.*/
     H5T_cmemb_t	*dst_memb = NULL;	/*destination struct memb desc.	*/
-    size_t	src_memb_size;		/*sizeof single source member	*/
-    size_t	dst_memb_size;		/*sizeof single destination memb*/
     size_t	offset;			/*byte offset wrt struct	*/
     uintn	elmtno;			/*element counter		*/
-    intn	i, j;			/*counters			*/
+    intn	i;			    /*counters			*/
     H5T_conv_struct_t *priv = NULL;	/*private data			*/
 
     FUNC_ENTER (H5T_conv_struct_opt, FAIL);
@@ -1270,41 +1223,31 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	 */
 	if (dst->size > src->size) {
 	    for (i=0, offset=0; i<src->u.compnd.nmembs; i++) {
-		if (src2dst[i]<0)
-		    continue;
-		src_memb = src->u.compnd.memb + i;
-		dst_memb = dst->u.compnd.memb + src2dst[i];
-		src_memb_size = src_memb->size / priv->memb_nelmts[i];
-		dst_memb_size = dst_memb->size / priv->memb_nelmts[i];
-		for (j=0; j<(intn)(priv->memb_nelmts[i]); j++) {
-		    if (dst_memb_size > src_memb_size)
-			offset += src_memb_size;
-		}
+            if (src2dst[i]<0)
+                continue;
+            src_memb = src->u.compnd.memb + i;
+            dst_memb = dst->u.compnd.memb + src2dst[i];
+            if (dst_memb->size > src_memb->size)
+                offset += src_memb->size;
 	    }
 	    for (i=src->u.compnd.nmembs-1; i>=0; --i) {
-		if (src2dst[i]<0)
-		    continue;
-		src_memb = src->u.compnd.memb + i;
-		dst_memb = dst->u.compnd.memb + src2dst[i];
-		src_memb_size = src_memb->size / priv->memb_nelmts[i];
-		dst_memb_size = dst_memb->size / priv->memb_nelmts[i];
-
-		for (j=(intn)(priv->memb_nelmts[i]-1); j>=0; --j) {
-		    if (dst_memb_size > src_memb_size) {
-			offset -= src_memb_size;
-			if (dst_memb_size > src->size-offset) {
-			    H5MM_xfree(priv->src2dst);
-			    H5MM_xfree(priv->src_memb_id);
-			    H5MM_xfree(priv->dst_memb_id);
-			    H5MM_xfree(priv->memb_path);
-			    H5MM_xfree(priv->memb_nelmts);
-			    cdata->priv = priv = H5MM_xfree (priv);
-			    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-					  "convertion is unsupported by this "
-					  "function");
-			}
-		    }
-		}
+            if (src2dst[i]<0)
+                continue;
+            src_memb = src->u.compnd.memb + i;
+            dst_memb = dst->u.compnd.memb + src2dst[i];
+            if (dst_memb->size > src_memb->size) {
+                offset -= src_memb->size;
+                if (dst_memb->size > src->size-offset) {
+                    H5MM_xfree(priv->src2dst);
+                    H5MM_xfree(priv->src_memb_id);
+                    H5MM_xfree(priv->dst_memb_id);
+                    H5MM_xfree(priv->memb_path);
+                    cdata->priv = priv = H5MM_xfree (priv);
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                          "convertion is unsupported by this "
+                          "function");
+                }
+            }
 	    }
 	}
 	break;
@@ -1318,7 +1261,6 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	H5MM_xfree(priv->src_memb_id);
 	H5MM_xfree(priv->dst_memb_id);
 	H5MM_xfree(priv->memb_path);
-	H5MM_xfree(priv->memb_nelmts);
 	cdata->priv = priv = H5MM_xfree (priv);
 	break;
 
@@ -1372,38 +1314,33 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    if (src2dst[i]<0) continue; /*subsetting*/
 	    src_memb = src->u.compnd.memb + i;
 	    dst_memb = dst->u.compnd.memb + src2dst[i];
-	    src_memb_size = src_memb->size / priv->memb_nelmts[i];
-	    dst_memb_size = dst_memb->size / priv->memb_nelmts[i];
 
-	    for (j=0; j<(intn)(priv->memb_nelmts[i]); j++) {
-		if (dst_memb_size <= src_memb_size) {
-		    xbuf = buf + src_memb->offset + j*src_memb_size;
-		    xbkg = bkg + dst_memb->offset + j*dst_memb_size;
-		    if (H5T_convert(priv->memb_path[i],
-				    priv->src_memb_id[i],
-				    priv->dst_memb_id[src2dst[i]], nelmts,
-				    buf_stride?buf_stride:src->size,
-                                    bkg_stride, xbuf, xbkg,
-                                    dset_xfer_plist)<0) {
-			HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-				      "unable to convert compound data "
-				      "type member");
-		    }
-		    for (elmtno=0; elmtno<nelmts; elmtno++) {
-			HDmemmove(xbkg, xbuf, dst_memb_size);
-			xbuf += buf_stride ? buf_stride : src->size;
-			xbkg += bkg_stride;
-		    }
-		} else {
-		    for (xbuf=buf, elmtno=0; elmtno<nelmts; elmtno++) {
-			HDmemmove(xbuf+offset,
-				  xbuf+src_memb->offset+j*src_memb_size,
-                                  src_memb_size);
-			xbuf += buf_stride ? buf_stride : src->size;
-		    }
-		    offset += src_memb_size;
-		}
-	    }
+        if (dst_memb->size <= src_memb->size) {
+            xbuf = buf + src_memb->offset;
+            xbkg = bkg + dst_memb->offset;
+            if (H5T_convert(priv->memb_path[i],
+                    priv->src_memb_id[i],
+                    priv->dst_memb_id[src2dst[i]], nelmts,
+                    buf_stride ? buf_stride : src->size,
+                    bkg_stride, xbuf, xbkg,
+                    dset_xfer_plist)<0) {
+                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                      "unable to convert compound data "
+                      "type member");
+            }
+            for (elmtno=0; elmtno<nelmts; elmtno++) {
+            HDmemmove(xbkg, xbuf, dst_memb->size);
+            xbuf += buf_stride ? buf_stride : src->size;
+            xbkg += bkg_stride;
+            }
+        } else {
+            for (xbuf=buf, elmtno=0; elmtno<nelmts; elmtno++) {
+            HDmemmove(xbuf+offset, xbuf+src_memb->offset,
+                                  src_memb->size);
+            xbuf += buf_stride ? buf_stride : src->size;
+            }
+            offset += src_memb->size;
+        }
 	}
 
 	/*
@@ -1414,21 +1351,18 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	 */
 	for (i=src->u.compnd.nmembs-1; i>=0; --i) {
 	    if (src2dst[i]<0)
-		continue;
+            continue;
 	    src_memb = src->u.compnd.memb + i;
 	    dst_memb = dst->u.compnd.memb + src2dst[i];
-	    src_memb_size = src_memb->size / priv->memb_nelmts[i];
-	    dst_memb_size = dst_memb->size / priv->memb_nelmts[i];
 
-	    for (j=(intn)(priv->memb_nelmts[i]-1); j>=0; --j) {
-		if (dst_memb_size > src_memb_size) {
-		    offset -= src_memb_size;
+		if (dst_memb->size > src_memb->size) {
+		    offset -= src_memb->size;
 		    xbuf = buf + offset;
-		    xbkg = bkg + dst_memb->offset + j*dst_memb_size;
+		    xbkg = bkg + dst_memb->offset;
 		    if (H5T_convert(priv->memb_path[i],
 				    priv->src_memb_id[i],
 				    priv->dst_memb_id[src2dst[i]], nelmts,
-                                    buf_stride?buf_stride:src->size,
+                                    buf_stride ? buf_stride : src->size,
                                     bkg_stride, xbuf, xbkg,
                                     dset_xfer_plist)<0) {
 			HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -1436,11 +1370,10 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                                       "member");
 		    }
 		    for (elmtno=0; elmtno<nelmts; elmtno++) {
-			HDmemmove(xbkg, xbuf, dst_memb_size);
+			HDmemmove(xbkg, xbuf, dst_memb->size);
 			xbuf += buf_stride ? buf_stride : src->size;
 			xbkg += bkg_stride;
 		    }
-		}
 	    }
 	}
 
@@ -2024,6 +1957,174 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     
     FUNC_LEAVE (SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_array
+ *
+ * Purpose:	Converts between array data types in memory and on disk.
+ *		This is a soft conversion function.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, November 6, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+	      size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
+              void UNUSED *_bkg, hid_t dset_xfer_plist)
+{
+    const H5D_xfer_t	   *xfer_parms = NULL;
+    H5T_path_t	*tpath;		/* Type conversion path		     */
+    hid_t   tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
+    H5T_t	*src = NULL;	/*source data type		     */
+    H5T_t	*dst = NULL;	/*destination data type		     */
+    uint8_t	*sp, *dp;	    /*source and dest traversal ptrs     */
+    size_t	src_delta, dst_delta;	/*source & destination stride	     */
+    intn	direction;		/*direction of traversal	     */
+    uintn	elmtno;			/*element number counter	     */
+    intn    i;              /* local index variable */
+
+    FUNC_ENTER (H5T_conv_array, FAIL);
+
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            /*
+             * First, determine if this conversion function applies to the
+             * conversion path SRC_ID-->DST_ID.  If not, return failure;
+             * otherwise initialize the `priv' field of `cdata' with
+             * information that remains (almost) constant for this
+             * conversion path.
+             */
+            if (H5I_DATATYPE != H5I_get_type(src_id) ||
+                NULL == (src = H5I_object(src_id)) ||
+                H5I_DATATYPE != H5I_get_type(dst_id) ||
+                NULL == (dst = H5I_object(dst_id))) {
+                HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+            }
+            assert (H5T_ARRAY==src->type);
+            assert (H5T_ARRAY==dst->type);
+
+            /* Check the number and sizes of the dimensions */
+            if(src->u.array.ndims!=dst->u.array.ndims)
+                HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same number of dimensions");
+            for(i=0; i<src->u.array.ndims; i++)
+                if(src->u.array.dim[i]!=dst->u.array.dim[i])
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same sizes of dimensions");
+#ifdef LATER
+            for(i=0; i<src->u.array.ndims; i++)
+                if(src->u.array.perm[i]!=dst->u.array.perm[i])
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same dimension permutations");
+#endif /* LATER */
+
+#ifdef LATER
+            /* QAK - Set up conversion function? */
+            if (H5T_conv_array_init (src, dst, cdata)<0) {
+                HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                       "unable to initialize conversion data");
+            }
+#endif /* LATER */
+            break;
+
+        case H5T_CONV_FREE:
+            /* QAK - Nothing to do currently */
+            break;
+
+        case H5T_CONV_CONV:
+            /*
+             * Conversion.
+             */
+            if (H5I_DATATYPE != H5I_get_type(src_id) ||
+                NULL == (src = H5I_object(src_id)) ||
+                H5I_DATATYPE != H5I_get_type(dst_id) ||
+                NULL == (dst = H5I_object(dst_id))) {
+                HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+            }
+
+            /* Get the dataset transfer property list */
+            if (H5P_DEFAULT == dset_xfer_plist) {
+                xfer_parms = &H5D_xfer_dflt;
+            } else if (H5P_DATA_XFER != H5P_get_class(dset_xfer_plist) ||
+                       NULL == (xfer_parms = H5I_object(dset_xfer_plist))) {
+                HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+            }
+
+            /*
+             * Do we process the values from beginning to end or vice
+             * versa? Also, how many of the elements have the source and
+             * destination areas overlapping?
+             */
+            if (src->size>=dst->size || buf_stride>0) {
+                sp = dp = (uint8_t*)_buf;
+                direction = 1;
+            } else {
+                sp = (uint8_t*)_buf + (nelmts-1) *
+                     (buf_stride ? buf_stride : src->size);
+                dp = (uint8_t*)_buf + (nelmts-1) *
+                     (buf_stride ? buf_stride : dst->size);
+                direction = -1;
+            }
+
+            /*
+             * Direction & size of buffer traversal.
+             */
+            src_delta = direction * (buf_stride ? buf_stride : src->size);
+            dst_delta = direction * (buf_stride ? buf_stride : dst->size);
+
+            /* Set up conversion path for base elements */
+            tpath = H5T_path_find(src->parent, dst->parent, NULL, NULL);
+            if (NULL==(tpath=H5T_path_find(src->parent, dst->parent,
+                                           NULL, NULL))) {
+                HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                              "unable to convert between src and dest "
+                              "datatypes");
+            } else if (!H5T_IS_NOOP(tpath)) {
+                if ((tsrc_id = H5I_register(H5I_DATATYPE,
+                                            H5T_copy(src->parent,
+                                                     H5T_COPY_ALL)))<0 ||
+                    (tdst_id = H5I_register(H5I_DATATYPE,
+                                            H5T_copy(dst->parent,
+                                                     H5T_COPY_ALL)))<0) {
+                    HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
+                                  "unable to register types for conversion");
+                }
+            }
+
+            /* Perform the actual conversion */
+            for (elmtno=0; elmtno<nelmts; elmtno++) {
+                /* Copy the source array into the correct location for the destination */
+                HDmemmove(dp, sp, src->size);
+
+                /* Convert array */
+                if (H5T_convert(tpath, tsrc_id, tdst_id, src->u.array.nelem, 0, 0,
+                                dp, NULL, dset_xfer_plist)<0)
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                                  "datatype conversion failed");
+
+                /* Advance the source & destination pointers */
+                sp += src_delta;
+                dp += dst_delta;
+            }
+
+            /* Release the temporary datatype IDs used */
+            if (tsrc_id >= 0)
+                H5I_dec_ref(tsrc_id);
+            if (tdst_id >= 0)
+                H5I_dec_ref(tdst_id);
+            break;
+
+        default:    /* Some other command we don't know about yet.*/
+            HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                   "unknown conversion command");
+    }   /* end switch */
+    
+    FUNC_LEAVE (SUCCEED);
+}   /* end H5T_conv_array() */
 
 
 /*-------------------------------------------------------------------------

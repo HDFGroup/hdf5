@@ -608,11 +608,15 @@
 ./test/overhead.c
 ./test/ragged.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/srb_append.c
 ./test/srb_read.c
 ./test/srb_write.c
 ./test/stab.c
 ./test/stream_test.c
+./test/tarray.c
+./test/tarrold.h5
 ./test/tattr.c
 ./test/testhdf5.c
 ./test/testhdf5.h

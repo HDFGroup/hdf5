@@ -86,13 +86,10 @@ H5RA_init_interface(void)
 
     /* The meta dataset type */
     if (NULL==(type=H5T_create(H5T_COMPOUND, sizeof(H5RA_meta_t))) ||
-	H5T_struct_insert(type, "nelmts", HOFFSET(H5RA_meta_t, nelmts),
-			  0, NULL, NULL, H5I_object(H5T_NATIVE_HSIZE_g))<0 ||
-	H5T_struct_insert(type, "offset", HOFFSET(H5RA_meta_t, offset),
-			  0, NULL, NULL, H5I_object(H5T_NATIVE_HSSIZE_g))<0 ||
-	H5T_struct_insert(type, "nover", HOFFSET(H5RA_meta_t, nover),
-			  0, NULL, NULL, H5I_object(H5T_NATIVE_HSIZE_g))) {
-	HRETURN_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+            H5T_insert(type, "nelmts", HOFFSET(H5RA_meta_t, nelmts), H5I_object(H5T_NATIVE_HSIZE_g))<0 ||
+            H5T_insert(type, "offset", HOFFSET(H5RA_meta_t, offset), H5I_object(H5T_NATIVE_HSSIZE_g))<0 ||
+            H5T_insert(type, "nover", HOFFSET(H5RA_meta_t, nover), H5I_object(H5T_NATIVE_HSIZE_g))) {
+        HRETURN_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		      "unable to define ragged array meta type");
     }
     H5RA_meta_type_g = type;

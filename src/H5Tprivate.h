@@ -109,9 +109,8 @@ __DLL__ H5T_class_t H5T_get_class(const H5T_t *dt);
 __DLL__ size_t H5T_get_size(const H5T_t *dt);
 __DLL__ intn H5T_cmp(const H5T_t *dt1, const H5T_t *dt2);
 __DLL__ htri_t H5T_is_atomic(const H5T_t *dt);
-__DLL__ herr_t H5T_struct_insert(H5T_t *parent, const char *name,
-				 size_t offset, intn ndims, const size_t *dim,
-				 const intn *perm, const H5T_t *member);
+__DLL__ herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
+        const H5T_t *member);
 __DLL__ herr_t H5T_enum_insert(H5T_t *dt, const char *name, void *value);
 __DLL__ herr_t H5T_pack(H5T_t *dt);
 __DLL__ herr_t H5T_debug(H5T_t *dt, FILE * stream);
