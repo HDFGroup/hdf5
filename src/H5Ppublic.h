@@ -92,14 +92,14 @@ herr_t H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg);
 size_t H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/);
 herr_t H5Pset_preserve (hid_t plist_id, hbool_t status);
 int H5Pget_preserve (hid_t plist_id);
-herr_t H5Pset_compression (hid_t plist_id, H5Z_method_t method,
-			   unsigned int flags, size_t cd_size,
-			   const void *client_data);
-H5Z_method_t H5Pget_compression (hid_t plist_id, unsigned int *flags/*out*/,
-				 size_t *cd_size/*in,out*/,
-				 void *client_data/*out*/);
-herr_t H5Pset_deflate (hid_t plist_id, int level);
-int H5Pget_deflate (hid_t plist_id);
+herr_t H5Pset_filter (hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
+		      size_t cd_nelmts, const unsigned int c_values[]);
+int H5Pget_nfilters(hid_t plist_id);
+H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
+			   unsigned int *flags/*out*/,
+			   size_t *cd_nelmts/*out*/,
+			   unsigned cd_values[]/*out*/);
+herr_t H5Pset_deflate (hid_t plist_id, unsigned aggression);
 herr_t H5Pset_cache (hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
 		     double rdcc_w0);
 herr_t H5Pget_cache (hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nbytes,

@@ -293,8 +293,10 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
 			    hs_size, NULL);
 	H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
 			    &hs_nelmts, NULL);
-	H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf);
-
+	if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf)<0) {
+	    return -1;
+	}
+	
 	/* Print the data */
 	for (i=0; i<hs_nelmts; i++) {
 	    /* Render the element */
@@ -375,7 +377,7 @@ h5dump_fixtype(hid_t f_type)
     hid_t	m_type=-1, f_memb;
     hid_t	*memb=NULL;
     char	**name=NULL;
-    int		nmembs, i, j, *ndims=NULL;
+    int		nmembs=0, i, j, *ndims=NULL;
     size_t	size, offset, *dims=NULL, nelmts;
 
     size = H5Tget_size(f_type);

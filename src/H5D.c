@@ -27,7 +27,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
-#include <H5Zprivate.h>		/* Data compression			*/
+#include <H5Zprivate.h>		/* Data filters				*/
 
 #ifdef QAK
 int qak_debug=0;
@@ -66,10 +66,8 @@ const H5D_create_t	H5D_create_dflt = {
      0,				/*...slots used				*/
      NULL}, 			/*...slot array				*/
 
-    /* Compression */
-    {H5Z_NONE, 			/* No compression			*/
-     0,				/*...flags				*/
-     0, NULL}			/*...client data			*/
+    /* Filters */
+    {0, 0, NULL} 		/* No filters in pipeline		*/
 };
 
 /* Default dataset transfer property list */
@@ -805,17 +803,17 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     assert (space);
     assert (create_parms);
 #ifdef HAVE_PARALLEL
-    /* If MPIO is used, no compression support yet. */
+    /* If MPIO is used, no filter support yet. */
     if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
-	H5Z_NONE!=create_parms->compress.method){
+	create_parms->pline.nfilters>0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
-		     "Parallel IO does not support compression yet");
+		     "Parallel IO does not support filters yet");
     }
 #endif
-    if (H5Z_NONE!=create_parms->compress.method &&
+    if (create_parms->pline.nfilters>0 &&
 	H5D_CHUNKED!=create_parms->layout) {
 	HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
-		     "compression can only be used with chunked layout");
+		     "filters can only be used with chunked layout");
     }
 
     /* Initialize the dataset object */
@@ -909,12 +907,12 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 		    "unable to update type or space header messages");
     }
 
-    /* Update the compression message */
-    if (H5Z_NONE!=new_dset->create_parms->compress.method &&
-	H5O_modify (&(new_dset->ent), H5O_COMPRESS, 0, H5O_FLAG_CONSTANT,
-		    &(new_dset->create_parms->compress))<0) {
+    /* Update the filters message */
+    if (new_dset->create_parms->pline.nfilters>0 &&
+	H5O_modify (&(new_dset->ent), H5O_PLINE, 0, H5O_FLAG_CONSTANT,
+		    &(new_dset->create_parms->pline))<0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-		     "unable to update compression header message");
+		     "unable to update filter header message");
     }
 
     /*
@@ -1065,21 +1063,21 @@ H5D_open(H5G_t *loc, const char *name)
 		     "unable to read data space info from dataset header");
     }
 
-    /* Get the optional compression message */
-    if (NULL==H5O_read (&(dataset->ent), H5O_COMPRESS, 0,
-			&(dataset->create_parms->compress))) {
+    /* Get the optional filters message */
+    if (NULL==H5O_read (&(dataset->ent), H5O_PLINE, 0,
+			&(dataset->create_parms->pline))) {
 	H5E_clear ();
-	HDmemset (&(dataset->create_parms->compress), 0,
-		  sizeof(dataset->create_parms->compress));
+	HDmemset (&(dataset->create_parms->pline), 0,
+		  sizeof(dataset->create_parms->pline));
     }
 
 #ifdef HAVE_PARALLEL
     f = H5G_fileof (loc);
-    /* If MPIO is used, no compression support yet. */
+    /* If MPIO is used, no filter support yet. */
     if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
-	H5Z_NONE!=dataset->create_parms->compress.method){
+	dataset->create_parms->pline.nfilters>0){
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
-		     "Parallel IO does not support compression yet");
+		     "Parallel IO does not support filters yet");
     }
 #endif
     
@@ -1356,7 +1354,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if (H5T_conv_noop==tconv_func &&
 	    NULL!=sconv_func.read) {
 	    status = (sconv_func.read)(dataset->ent.file, &(dataset->layout),
-					&(dataset->create_parms->compress),
+					&(dataset->create_parms->pline),
 					&(dataset->create_parms->efl),
 					H5T_get_size (dataset->type),
 					file_space, mem_space,
@@ -1376,7 +1374,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (H5D_OPTIMIZE_PIPE && H5T_conv_noop==tconv_func &&
             NULL!=sconv_func.read) {
         status = (sconv_func.read)(dataset->ent.file, &(dataset->layout),
-				    &(dataset->create_parms->compress),
+				    &(dataset->create_parms->pline),
 				    &(dataset->create_parms->efl),
 				    H5T_get_size (dataset->type), file_space,
 				    mem_space, xfer_parms->xfer_mode,
@@ -1474,7 +1472,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
          * if necessary.
          */
         if ((sconv_func.fgath)(dataset->ent.file, &(dataset->layout),
-                    &(dataset->create_parms->compress),
+                    &(dataset->create_parms->pline),
                     &(dataset->create_parms->efl), 
                     H5T_get_size (dataset->type), file_space, &file_iter,
                     smine_nelmts, xfer_parms->xfer_mode,
@@ -1703,7 +1701,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		NULL!=sconv_func.write) {
 		status = (sconv_func.write)(dataset->ent.file,
 					    &(dataset->layout),
-					    &(dataset->create_parms->compress),
+					    &(dataset->create_parms->pline),
 					    &(dataset->create_parms->efl),
 					    H5T_get_size (dataset->type),
 					    file_space, mem_space,
@@ -1724,7 +1722,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	H5T_conv_noop==tconv_func &&
 	NULL!=sconv_func.write) {
 	status = (sconv_func.write)(dataset->ent.file, &(dataset->layout),
-				     &(dataset->create_parms->compress),
+				     &(dataset->create_parms->pline),
 				     &(dataset->create_parms->efl),
 				     H5T_get_size (dataset->type), file_space,
 				     mem_space, xfer_parms->xfer_mode, buf);
@@ -1842,7 +1840,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
                 (!H5D_OPTIMIZE_PIPE && need_bkg)) {
             if ((sconv_func.fgath)(dataset->ent.file, &(dataset->layout),
-                    &(dataset->create_parms->compress),
+                    &(dataset->create_parms->pline),
                     &(dataset->create_parms->efl),
                     H5T_get_size (dataset->type), file_space,
                     &bkg_iter, smine_nelmts, xfer_parms->xfer_mode,
@@ -1873,7 +1871,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
          * Scatter the data out to the file.
          */
         if ((sconv_func.fscat)(dataset->ent.file, &(dataset->layout),
-                &(dataset->create_parms->compress),
+                &(dataset->create_parms->pline),
                 &(dataset->create_parms->efl),
                 H5T_get_size (dataset->type), file_space,
                 &file_iter, smine_nelmts,
@@ -2101,7 +2099,7 @@ H5D_allocate (H5D_t *dataset)
 
 	if (H5F_istore_allocate(dataset->ent.file,
 		(layout), space_dim,
-		&(dataset->create_parms->compress))==FAIL){
+		&(dataset->create_parms->pline))==FAIL){
 		HRETURN(FAIL);
 	}
 	break;

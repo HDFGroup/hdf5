@@ -35,6 +35,6 @@
 #include <H5Ppublic.h>      /* Property lists */
 #include <H5Spublic.h>      /* Dataspaces */
 #include <H5Tpublic.h>      /* Datatypes */
-#include <H5Zpublic.h>	    /* Data compression */
+#include <H5Zpublic.h>	    /* Data filters */
 
 #endif

@@ -2150,126 +2150,31 @@ H5Pget_preserve (hid_t plist_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_compression
+ * Function:	H5Pset_filter
  *
- * Purpose:	Sets the compression method in a dataset creation property
- *		list.  This sets default values for the compression
- *		attributes by setting the flags to zero and supplying no
- *		compression client data.  It's probably better to use
- *		specific compression initialization functions like
- *		H5Pset_deflate().
+ * Purpose:	Adds the specified FILTER and corresponding properties to the
+ *		end of the transient or permanent output filter pipeline
+ *		depending on whether PLIST is a dataset creation or dataset
+ *		transfer property list.  The FLAGS argument specifies certain
+ *		general properties of the filter and is documented below.
+ *		The CD_VALUES is an array of CD_NELMTS integers which are
+ *		auxiliary data for the filter.  The integer vlues will be
+ *		stored in the dataset object header as part of the filter
+ *		information.
  *
- *		The FLAGS, CD_SIZE, and CLIENT_DATA are copied to the
- *		property list and eventually to the file and passed to the
- *		compression functions.
+ * 		The FLAGS argument is a bit vector of the following fields:
  *
- * Return:	Success:	SUCCEED
+ * 		H5Z_FLAG_OPTIONAL(0x0001)
+ *		If this bit is set then the filter is optional.  If the
+ *		filter fails during an H5Dwrite() operation then the filter
+ *		is just excluded from the pipeline for the chunk for which it
+ *		failed; the filter will not participate in the pipeline
+ *		during an H5Dread() of the chunk.  If this bit is clear and
+ *		the filter fails then the entire I/O operation fails.
  *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_compression (hid_t plist_id, H5Z_method_t method, unsigned int flags,
-		    size_t cd_size, const void *client_data)
-{
-    H5D_create_t	*plist = NULL;
-    
-    FUNC_ENTER (H5Pset_compression, FAIL);
-    H5TRACE5("e","iZmIuzx",plist_id,method,flags,cd_size,client_data);
-
-    /* Check arguments */
-    if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
-	NULL==(plist=H5I_object (plist_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a dataset creation property list");
-    }
-    if (method<0 || method>H5Z_USERDEF_MAX) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "invalid compression method");
-    }
-
-    /* Clear any previous compression method info, then set new value */
-    H5O_reset (H5O_COMPRESS, &(plist->compress));
-    plist->compress.method = method;
-    plist->compress.flags = flags;
-    plist->compress.cd_size = cd_size;
-    if (cd_size) {
-	if (NULL==(plist->compress.client_data = H5MM_malloc (cd_size))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy (plist->compress.client_data, client_data, cd_size);
-    }
-    FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_compression
- *
- * Purpose:	Gets the compression method information from a dataset
- *		creation property list.  The CLIENT_DATA buffer is initially
- *		CD_SIZE bytes.  On return, CLIENT_DATA will be initialized
- *		with at most that many bytes, and CD_SIZE will contain the
- *		actual size of the client data, which might be larger than
- *		its original value.
- *
- * Return:	Success:	Compression method.
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5Z_method_t
-H5Pget_compression (hid_t plist_id, unsigned int *flags/*out*/,
-		    size_t *cd_size/*in_out*/, void *client_data/*out*/)
-{
-    H5D_create_t	*plist = NULL;
-    
-    FUNC_ENTER (H5Pget_compression, FAIL);
-    H5TRACE4("Zm","ix*zx",plist_id,flags,cd_size,client_data);
-    
-    /* Check arguments */
-    if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
-	NULL==(plist=H5I_object (plist_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a dataset creation property list");
-    }
-
-    /* Output values */
-    if (flags) *flags = plist->compress.flags;
-    if (cd_size) {
-	if (*cd_size>0 && client_data) {
-	    HDmemcpy (client_data, plist->compress.client_data,
-		      MIN(plist->compress.cd_size, *cd_size));
-	}
-	*cd_size = plist->compress.cd_size;
-    }
-
-    FUNC_LEAVE (plist->compress.method);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_deflate
- *
- * Purpose:	Sets the compression method for a dataset creation property
- *		list to H5D_COMPRESS_DEFLATE and the compression level to
- *		LEVEL which should be a value between zero and nine,
- *		inclusive.  Lower compression levels are faster but result in
- *		less compression.  This is the same algorithm as used by the
- *		GNU gzip program.
+ * Note:	This function currently supports only the permanent filter
+ *		pipeline.  That is, PLIST_ID must be a dataset creation
+ *		property list.
  *
  * Return:	Success:	SUCCEED
  *
@@ -2283,73 +2188,230 @@ H5Pget_compression (hid_t plist_id, unsigned int *flags/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_deflate (hid_t plist_id, int level)
+H5Pset_filter (hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
+	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     H5D_create_t	*plist = NULL;
     
-    FUNC_ENTER (H5Pset_deflate, FAIL);
-    H5TRACE2("e","iIs",plist_id,level);
+    FUNC_ENTER (H5Pset_filter, FAIL);
+    H5TRACE5("e","iZfIuz*[a3]Iu",plist_id,filter,flags,cd_nelmts,cd_values);
 
     /* Check arguments */
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
+	HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
+		      "transient pipelines are not supported yet");
+    }
     if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
 	NULL==(plist=H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset creation property list");
     }
-    if (level<0 || level>9) {
+    if (filter<0 || filter>H5Z_FILTER_MAX) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "invalid deflate level");
+		       "invalid filter identifier");
+    }
+    if (flags & ~H5Z_FLAG_DEFMASK) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "invalid flags");
+    }
+    if (cd_nelmts>0 && !cd_values) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "no client data values supplied");
     }
 
-    /* Clear previous compression parameters */
-    H5O_reset (H5O_COMPRESS, &(plist->compress));
-    plist->compress.method = H5Z_DEFLATE;
-    plist->compress.flags = level;
+    /* Do it */
+    if (H5Z_append(&(plist->pline), filter, flags, cd_nelmts, cd_values)<0) {
+	HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
+		      "unable to add filter to pipeline");
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_deflate
+ * Function:	H5Pget_nfilters
  *
- * Purpose:	Returns the deflate compression level from a dataset creation
- *		property list that uses that method.
+ * Purpose:	Returns the number of filters in the permanent or transient
+ *		pipeline depending on whether PLIST_ID is a dataset creation
+ *		or dataset transfer property list.  In each pipeline the
+ *		filters are numbered from zero through N-1 where N is the
+ *		value returned by this function.  During output to the file
+ *		the filters of a pipeline are applied in increasing order
+ *		(the inverse is true for input).
  *
- * Return:	Success:	A value between zero and nine, inclusive.
- *				Smaller values indicate faster compression
- *				while higher values indicate better
- *				compression ratios.
+ * Note:	Only permanent filters are supported at this time.
+ *
+ * Return:	Success:	Number of filters or zero if there are none.
  *
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
+ *              Tuesday, August  4, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_deflate (hid_t plist_id)
+H5Pget_nfilters (hid_t plist_id)
 {
     H5D_create_t	*plist = NULL;
     
-    FUNC_ENTER (H5Pget_deflate, FAIL);
+    FUNC_ENTER(H5Pget_nfilters, FAIL);
     H5TRACE1("Is","i",plist_id);
+
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
+	HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
+		      "transient pipelines are not supported yet");
+    }
+    if (H5P_DATASET_CREATE!=H5P_get_class(plist_id) ||
+	NULL==(plist=H5I_object(plist_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset creation property list");
+    }
+
+    FUNC_LEAVE(plist->pline.nfilters);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_filter
+ *
+ * Purpose:	This is the query counterpart of H5Pset_filter() and returns
+ *		information about a particular filter number in a permanent
+ *		or transient pipeline depending on whether PLIST_ID is a
+ *		dataset creation or transfer property list.  On input,
+ *		CD_NELMTS indicates the number of entries in the CD_VALUES
+ *		array allocated by the caller while on exit it contains the
+ *		number of values defined by the filter.  The IDX should be a
+ *		value between zero and N-1 as described for H5Pget_nfilters()
+ *		and the function will return failure if the filter number is
+ *		out or range.
+ * 
+ * Return:	Success:	Filter identification number.
+ *
+ *		Failure:	H5Z_FILTER_ERROR (-1)
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5Z_filter_t
+H5Pget_filter (hid_t plist_id, int idx, unsigned int *flags/*out*/,
+	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/)
+{
+    H5D_create_t	*plist = NULL;
+    size_t		i;
+    
+    FUNC_ENTER (H5Pget_filter, FAIL);
+    H5TRACE5("Zf","iIsx*zx",plist_id,idx,flags,cd_nelmts,cd_values);
     
     /* Check arguments */
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
+	HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
+		      "transient filters are not supported yet");
+    }
     if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
 	NULL==(plist=H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset creation property list");
     }
-    if (H5Z_DEFLATE!=plist->compress.method) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "deflate method is not being used");
+    if (idx<0 || (size_t)idx>=plist->pline.nfilters) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "filter number is invalid");
+    }
+    if (cd_nelmts || cd_values) {
+	if (cd_nelmts && *cd_nelmts>256) {
+	    /*
+	     * It's likely that users forget to initialize this on input, so
+	     * we'll check that it has a reasonable value.  The actual number
+	     * is unimportant because the H5O layer will detect when a message
+	     * is too large.
+	     */
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+			  "probable uninitialized *cd_nelmts argument");
+	}
+	if (cd_nelmts && *cd_nelmts>0 && !cd_values) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+			  "client data values not supplied");
+	}
+	/*
+	 * If cd_nelmts is null but cd_values is non-null then just ignore
+	 * cd_values
+	 */
+	if (!cd_nelmts) cd_values = NULL;
     }
 
-    FUNC_LEAVE (plist->compress.flags % 10);
+    /* Output values */
+    if (flags) *flags = plist->pline.filter[idx].flags;
+    if (cd_values) {
+	for (i=0; i<plist->pline.filter[idx].cd_nelmts && i<*cd_nelmts; i++) {
+	    cd_values[i] = plist->pline.filter[idx].cd_values[i];
+	}
+    }
+    if (cd_nelmts) *cd_nelmts = plist->pline.filter[idx].cd_nelmts;
+
+    FUNC_LEAVE (plist->pline.filter[idx].id);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_deflate
+ *
+ * Purpose:	Sets the compression method for a permanent or transient
+ *		filter pipeline (depending on whether PLIST_ID is a dataset
+ *		creation or transfer property list) to H5Z_FILTER_DEFLATE
+ *		and the compression level to LEVEL which should be a value
+ *		between zero and nine, inclusive.  Lower compression levels
+ *		are faster but result in less compression.  This is the same
+ *		algorithm as used by the GNU gzip program.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_deflate (hid_t plist_id, unsigned level)
+{
+    H5D_create_t	*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_deflate, FAIL);
+    H5TRACE2("e","iIu",plist_id,level);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
+	HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
+		      "transient filter pipelines are not supported yet");
+    }
+    if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
+	NULL==(plist=H5I_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset creation property list");
+    }
+    if (level>9) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "invalid deflate level");
+    }
+
+    /* Add the filter */
+    if (H5Z_append(&(plist->pline), H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL,
+		   1, &level)<0) {
+	HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
+		      "unable to add deflate filter to pipeline");
+    }
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 

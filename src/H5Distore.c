@@ -33,12 +33,13 @@ typedef struct H5F_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     H5O_layout_t *layout;	/*the layout message			*/
-    H5O_compress_t *comp;	/*compression message			*/
+    H5O_pline_t	*pline;		/*filter pipeline message		*/
     hssize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
-    size_t	chunk_size;	/*size of a chunk			*/
     size_t	rd_count;	/*bytes remaining to be read		*/
     size_t	wr_count;	/*bytes remaining to be written		*/
-    uint8	*chunk;		/*the uncompressed chunk data		*/
+    size_t	chunk_size;	/*size of a chunk			*/
+    size_t	alloc_size;	/*amount allocated for the chunk	*/
+    uint8	*chunk;		/*the unfiltered chunk data		*/
 } H5F_rdcc_ent_t;
 
 /* Private prototypes */
@@ -83,8 +84,9 @@ static herr_t H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
  * The chunk's file address is part of the B-tree and not part of the key.
  */
 typedef struct H5F_istore_key_t {
-    hsize_t	nbytes;				/*size of stored data	*/
+    size_t	nbytes;				/*size of stored data	*/
     hssize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    uintn	filter_mask;			/*excluded filters	*/
 } H5F_istore_key_t;
 
 typedef struct H5F_istore_ud1_t {
@@ -141,6 +143,7 @@ H5F_istore_sizeof_rkey(H5F_t __unused__ *f, const void *_udata)
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims <= H5O_LAYOUT_NDIMS);
 
     nbytes = 4 +			/*storage size		*/
+	     4 +			/*filter mask		*/
 	     udata->mesg.ndims * 4; 	/*dimension indices	*/
 
     return nbytes;
@@ -180,7 +183,8 @@ H5F_istore_decode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
     assert(ndims > 0 && ndims <= H5O_LAYOUT_NDIMS);
 
     /* decode */
-    UINT32DECODE (raw, key->nbytes);
+    UINT32DECODE(raw, key->nbytes);
+    UINT32DECODE(raw, key->filter_mask);
     for (i = 0; i < ndims; i++) {
 	UINT32DECODE(raw, key->offset[i]);
     }
@@ -222,7 +226,8 @@ H5F_istore_encode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
     assert(ndims > 0 && ndims <= H5O_LAYOUT_NDIMS);
 
     /* encode */
-    UINT32ENCODE (raw, key->nbytes);
+    UINT32ENCODE(raw, key->nbytes);
+    UINT32ENCODE(raw, key->filter_mask);
     for (i = 0; i < ndims; i++) {
 	UINT32ENCODE(raw, key->offset[i]);
     }
@@ -258,10 +263,12 @@ H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
     FUNC_ENTER (H5F_istore_debug_key, FAIL);
     assert (key);
 
-    HDfprintf (stream, "%*s%-*s %Hd bytes\n", indent, "", fwidth,
-	       "Chunk size:", key->nbytes);
-    HDfprintf (stream, "%*s%-*s {", indent, "", fwidth,
-	       "Logical offset:");
+    HDfprintf(stream, "%*s%-*s %Zd bytes\n", indent, "", fwidth,
+	      "Chunk size:", key->nbytes);
+    HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth,
+	      "Filter mask:", key->filter_mask);
+    HDfprintf(stream, "%*s%-*s {", indent, "", fwidth,
+	      "Logical offset:");
     for (i=0; i<udata->mesg.ndims; i++) {
 	HDfprintf (stream, "%s%Hd", i?", ":"", key->offset[i]);
     }
@@ -429,6 +436,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
      * inserted into the tree.
      */
     lt_key->nbytes = udata->key.nbytes;
+    lt_key->filter_mask = udata->key.filter_mask;
     for (i=0; i<udata->mesg.ndims; i++) {
 	lt_key->offset[i] = udata->key.offset[i];
     }
@@ -439,6 +447,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
      */
     if (H5B_INS_LEFT != op) {
 	rt_key->nbytes = 0;
+	rt_key->filter_mask = 0;
 	for (i=0; i<udata->mesg.ndims; i++) {
 	    assert (udata->mesg.dim[i] < MAX_HSSIZET);
 	    assert (udata->key.offset[i]+(hssize_t)(udata->mesg.dim[i]) >
@@ -494,6 +503,7 @@ H5F_istore_found(H5F_t __unused__ *f, const haddr_t *addr,
     /* Initialize return values */
     udata->addr = *addr;
     udata->key.nbytes = lt_key->nbytes;
+    udata->key.filter_mask = lt_key->filter_mask;
     assert (lt_key->nbytes>0);
     for (i = 0; i < udata->mesg.ndims; i++) {
 	udata->key.offset[i] = lt_key->offset[i];
@@ -589,6 +599,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 			       "unable to reallocate chunk storage");
 	    }
 	    lt_key->nbytes = udata->key.nbytes;
+	    lt_key->filter_mask = udata->key.filter_mask;
 	    *lt_key_changed = TRUE;
 	    udata->addr = *new_node;
 	    ret_value = H5B_INS_CHANGE;
@@ -608,6 +619,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 	 * current node.  The MD_KEY is where the split occurs.
 	 */
 	md_key->nbytes = udata->key.nbytes;
+	md_key->filter_mask = udata->key.filter_mask;
 	for (i=0; i<udata->mesg.ndims; i++) {
 	    assert(0 == udata->key.offset[i] % udata->mesg.dim[i]);
 	    md_key->offset[i] = udata->key.offset[i];
@@ -677,7 +689,10 @@ H5F_istore_init (H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function:	H5F_istore_flush_entry
  *
- * Purpose:	Writes a chunk to disk.
+ * Purpose:	Writes a chunk to disk.  If RESET is non-zero then the
+ *		entry is cleared -- it's slightly faster to flush a chunk if
+ *		the RESET flag is turned on because it results in one fewer
+ *		memory copy.
  *
  * Return:	Success:	SUCCEED
  *
@@ -691,65 +706,106 @@ H5F_istore_init (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent)
+H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 {
-    void	*c_buf = NULL;		/*temp compression buffer	*/
-    void	*out_ptr = NULL;	/*ptr to output buffer		*/
-    size_t	nbytes;			/*size of output buffer		*/
-    herr_t	ret_value = FAIL;	/*return value			*/
-    H5F_istore_ud1_t udata;		/*pass through B-tree		*/
-    intn	i;
+    herr_t		ret_value=FAIL;	/*return value			*/
+    H5F_istore_ud1_t 	udata;		/*pass through B-tree		*/
+    intn		i;		/*counters			*/
+    void		*buf=NULL;	/*temporary buffer		*/
+    size_t		alloc;		/*bytes allocated for BUF	*/
+    hbool_t		point_of_no_return = FALSE;
     
     FUNC_ENTER (H5F_istore_flush_entry, FAIL);
-    assert (ent);
+    assert(f);
+    assert(ent);
     assert (!ent->locked);
-    if (!ent->dirty) HRETURN (SUCCEED);
 
-    /* Should the chunk be compressed before writing it to disk? */
-    if (ent->comp && H5Z_NONE!=ent->comp->method) {
-	if (NULL==(c_buf = H5MM_malloc (ent->chunk_size))) {
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			 "memory allocation failed for data compression");
+    buf = ent->chunk;
+    if (ent->dirty) {
+	udata.mesg = *(ent->layout);
+	udata.key.filter_mask = 0;
+	H5F_addr_undef(&(udata.addr));
+	udata.key.nbytes = ent->chunk_size;
+	for (i=0; i<ent->layout->ndims; i++) {
+	    udata.key.offset[i] = ent->offset[i];
 	}
-	nbytes = H5Z_compress (ent->comp, ent->chunk_size, ent->chunk, c_buf);
-	if (nbytes && nbytes<ent->chunk_size) {
-	    out_ptr = c_buf;
-	} else {
-	    out_ptr = ent->chunk;
-	    nbytes = ent->chunk_size;
+	alloc = ent->alloc_size;
+
+	/* Should the chunk be filtered before writing it to disk? */
+	if (ent->pline && ent->pline->nfilters) {
+	    if (!reset) {
+		/*
+		 * Copy the chunk to a new buffer before running it through
+		 * the pipeline because we'll want to save the original buffer
+		 * for later.
+		 */
+		alloc = ent->chunk_size;
+		if (NULL==(buf = H5MM_malloc(alloc))) {
+		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+				"memory allocation failed for pipeline");
+		}
+		HDmemcpy(buf, ent->chunk, ent->chunk_size);
+	    } else {
+		/*
+		 * If we are reseting and something goes wrong after this
+		 * point then it's too late to recover because we may have
+		 * destroyed the original data by calling H5Z_pipeline().
+		 * The only safe option is to continue with the reset
+		 * even if we can't write the data to disk.
+		 */
+		point_of_no_return = TRUE;
+	    }
+	    if (H5Z_pipeline(f, ent->pline, 0, &(udata.key.filter_mask),
+			     &(udata.key.nbytes), &alloc, &buf)<0) {
+		HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
+			    "output pipeline failed");
+	    }
 	}
-    } else {
-	out_ptr = ent->chunk;
-	nbytes = ent->chunk_size;
+
+	/*
+	 * Create the chunk it if it doesn't exist, or reallocate the chunk if
+	 * its size changed.  Then write the data into the file.
+	 */
+	if (H5B_insert(f, H5B_ISTORE, &(ent->layout->addr), &udata)<0) {
+	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			 "unable to allocate chunk");
+	}
+	if (H5F_block_write (f, &(udata.addr), udata.key.nbytes, H5D_XFER_DFLT,
+			     buf)<0) {
+	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			 "unable to write raw data to file");
+	}
+
+	/* Mark cache entry as clean */
+	ent->dirty = FALSE;
+	f->shared->rdcc.nflushes++;
     }
     
-    /*
-     * Create the chunk it if it doesn't exist, or reallocate the chunk if its
-     * size changed.  Then write the data into the file.
-     */
-    udata.mesg = *(ent->layout);
-    H5F_addr_undef(&(udata.addr));
-    udata.key.nbytes = nbytes;
-    for (i=0; i<ent->layout->ndims; i++) {
-	udata.key.offset[i] = ent->offset[i];
+    /* Reset */
+    if (reset) {
+	point_of_no_return = FALSE;
+	ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
+	ent->pline = H5O_free(H5O_PLINE, ent->pline);
+	if (buf==ent->chunk) buf = NULL;
+	ent->chunk = H5MM_xfree(ent->chunk);
     }
     
-    if (H5B_insert(f, H5B_ISTORE, &(ent->layout->addr), &udata)<0) {
-	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-		     "unable to allocate chunk");
-    }
-    if (H5F_block_write (f, &(udata.addr), nbytes, H5D_XFER_DFLT, out_ptr)<0) {
-	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-		     "unable to write raw data to file");
-    }
-
-    /* Mark cache entry as clean */
-    ent->dirty = FALSE;
-    f->shared->rdcc.nflushes++;
     ret_value = SUCCEED;
 
  done:
-    H5MM_xfree (c_buf);
+    /* Free the temp buffer only if it's different than the entry chunk */
+    if (buf!=ent->chunk) H5MM_xfree(buf);
+    
+    /*
+     * If we reached the point of no return then we have no choice but to
+     * reset the entry.  This can only happen if RESET is true but the
+     * output pipeline failed.
+     */
+    if (ret_value<0 && point_of_no_return) {
+	ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
+	ent->pline = H5O_free(H5O_PLINE, ent->pline);
+	ent->chunk = H5MM_xfree(ent->chunk);
+    }
     FUNC_LEAVE (ret_value);
 }
 
@@ -780,7 +836,7 @@ H5F_istore_flush (H5F_t *f)
     FUNC_ENTER (H5F_istore_flush, FAIL);
 
     for (i=0; i<rdcc->nused; i++) {
-	if (H5F_istore_flush_entry (f, rdcc->slot+i)<0) {
+	if (H5F_istore_flush_entry (f, rdcc->slot+i, FALSE)<0) {
 	    nerrors++;
 	}
     }
@@ -791,18 +847,17 @@ H5F_istore_flush (H5F_t *f)
     FUNC_LEAVE (SUCCEED);
 }
 
-
 /*-------------------------------------------------------------------------
- * Function:	H5F_istore_preempt
+ * Function:    H5F_istore_preempt
  *
- * Purpose:	Preempts the specified entry from the cache, flushing it to
- *		disk if necessary.
+ * Purpose:     Preempts the specified entry from the cache, flushing it to
+ *              disk if necessary.
  *
- * Return:	Success:	SUCCEED
+ * Return:      Success:        SUCCEED
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, May 21, 1998
  *
  * Modifications:
@@ -812,21 +867,18 @@ H5F_istore_flush (H5F_t *f)
 static herr_t
 H5F_istore_preempt (H5F_t *f, intn idx)
 {
-    H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    H5F_rdcc_ent_t	*ent = rdcc->slot + idx;
+    H5F_rdcc_t          *rdcc = &(f->shared->rdcc);
+    H5F_rdcc_ent_t      *ent = rdcc->slot + idx;
     
     FUNC_ENTER (H5F_istore_preempt, FAIL);
     assert (idx>=0 && idx<rdcc->nused);
     assert (!ent->locked);
 
-    if (ent->dirty) H5F_istore_flush_entry (f, ent);
-    H5O_free (H5O_LAYOUT, ent->layout);
-    H5O_free (H5O_COMPRESS, ent->comp);
-    H5MM_xfree (ent->chunk);
+    H5F_istore_flush_entry (f, ent, TRUE);
+    HDmemmove (rdcc->slot+idx, rdcc->slot+idx+1,
+               (rdcc->nused-idx) * sizeof(H5F_rdcc_ent_t));
     rdcc->nused -= 1;
     rdcc->nbytes -= ent->chunk_size;
-    HDmemmove (rdcc->slot+idx, rdcc->slot+idx+1,
-	       (rdcc->nused-idx) * sizeof(H5F_rdcc_ent_t));
     
     FUNC_LEAVE (SUCCEED);
 }
@@ -858,10 +910,10 @@ H5F_istore_dest (H5F_t *f)
     FUNC_ENTER (H5F_istore_dest, FAIL);
 
     for (i=rdcc->nused-1; i>=0; --i) {
-	if (H5F_istore_flush_entry (f, rdcc->slot+i)<0) {
+	if (H5F_istore_flush_entry (f, rdcc->slot+i, TRUE)<0) {
 	    nerrors++;
 	}
-	if (H5F_istore_preempt (f, i)<0) {
+	if (H5F_istore_preempt(f, i)<0) {
 	    nerrors++;
 	}
     }
@@ -951,7 +1003,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
 /*-------------------------------------------------------------------------
  * Function:	H5F_istore_lock
  *
- * Purpose:	Return a pointer to an uncompressed chunk.  The pointer
+ * Purpose:	Return a pointer to a file chunk chunk.  The pointer
  *		points directly into the chunk cache and should not be freed
  *		by the caller but will be valid until it is unlocked.  The
  *		input value IDX_HINT is used to speed up cache lookups and
@@ -963,7 +1015,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
  *		for output functions that are about to overwrite the entire
  *		chunk.
  *
- * Return:	Success:	Ptr to an uncompressed chunk.
+ * Return:	Success:	Ptr to a file chunk.
  *
  *		Failure:	NULL
  *
@@ -976,7 +1028,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
  */
 static void *
 H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
-		 const H5O_compress_t *comp, const hssize_t offset[],
+		 const H5O_pline_t *pline, const hssize_t offset[],
 		 hbool_t relax, intn *idx_hint/*in,out*/)
 {
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
@@ -984,8 +1036,9 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     intn		i, j, found = -1;
     H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
     size_t		chunk_size=0;		/*size of a chunk	*/
+    size_t		chunk_alloc=0;		/*allocated chunk size	*/
     herr_t		status;			/*func return status	*/
-    void		*chunk=NULL;		/*the uncompressed chunk*/
+    void		*chunk=NULL;		/*the file chunk	*/
     void		*temp=NULL;		/*temporary chunk buffer*/
     void		*ret_value=NULL;	/*return value		*/
     
@@ -1031,7 +1084,8 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	for (i=0, chunk_size=1; i<layout->ndims; i++) {
 	    chunk_size *= layout->dim[i];
 	}
-	if (NULL==(chunk=H5MM_malloc (chunk_size))) {
+	chunk_alloc = chunk_size;
+	if (NULL==(chunk=H5MM_malloc (chunk_alloc))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed for raw data chunk");
 	}
@@ -1045,39 +1099,30 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	    udata.key.offset[i] = offset[i];
 	    chunk_size *= layout->dim[i];
 	}
+	chunk_alloc = chunk_size;
 	udata.mesg = *layout;
 	H5F_addr_undef (&(udata.addr));
 	status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
 	H5E_clear ();
-	if (NULL==(chunk = H5MM_malloc (chunk_size))) {
+	if (NULL==(chunk = H5MM_malloc (chunk_alloc))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed for raw data chunk");
 	}
 	if (status>=0 && H5F_addr_defined (&(udata.addr))) {
 	    /*
-	     * The chunk exists on disk but might be compressed.  Instead of
-	     * allocating the exact size for the compressed chunk we allocate
-	     * the entire chunk size -- it reduces strain on the malloc()
-	     * subsystem.
+	     * The chunk exists on disk.
 	     */
 	    if (H5F_block_read (f, &(udata.addr), udata.key.nbytes,
 	        H5D_XFER_DFLT, chunk)<0) {
 		HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
 			     "unable to read raw data chunk");
 	    }
-	    if (udata.key.nbytes<chunk_size) {
-		if (NULL==(temp = H5MM_malloc (chunk_size))) {
-		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-				 "memory allocation failed for uncompress");
-		}
-		if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
-						chunk, chunk_size, temp)) {
-		    HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
-				 "unable to uncompress raw data chunk"); 
-		}
-		H5MM_xfree (chunk);
-		chunk = temp;
-		temp = NULL;
+	    if (H5Z_pipeline(f, pline, H5Z_FLAG_REVERSE,
+			     &(udata.key.filter_mask), &(udata.key.nbytes),
+			     &chunk_alloc, &chunk)<0 ||
+		udata.key.nbytes!=chunk_size) {
+		HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL,
+			    "data pipeline read failed");
 	    }
 	    rdcc->nmisses++;
 	} else {
@@ -1117,8 +1162,9 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	ent->locked = 0;
 	ent->dirty = FALSE;
 	ent->chunk_size = chunk_size;
+	ent->alloc_size = chunk_alloc;
 	ent->layout = H5O_copy (H5O_LAYOUT, layout);
-	ent->comp = H5O_copy (H5O_COMPRESS, comp);
+	ent->pline = H5O_copy (H5O_PLINE, pline);
 	for (i=0; i<layout->ndims; i++) {
 	    ent->offset[i] = offset[i];
 	}
@@ -1191,7 +1237,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
  */
 static herr_t
 H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
-		   const H5O_compress_t *comp, hbool_t dirty,
+		   const H5O_pline_t *pline, hbool_t dirty,
 		   const hssize_t offset[], intn *idx_hint,
 		   uint8 *chunk, size_t naccessed)
 {
@@ -1215,7 +1261,7 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
 	/*
 	 * It's not in the cache, probably because it's too big.  If it's
 	 * dirty then flush it to disk.  In any case, free the chunk.
-	 * Note: we have to copy the layout and compression messages so we
+	 * Note: we have to copy the layout and filter messages so we
 	 *	 don't discard the `const' qualifier.
 	 */
 	if (dirty) {
@@ -1223,17 +1269,16 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
 	    HDmemset (&x, 0, sizeof x);
 	    x.dirty = TRUE;
 	    x.layout = H5O_copy (H5O_LAYOUT, layout);
-	    x.comp = H5O_copy (H5O_COMPRESS, comp);
+	    x.pline = H5O_copy (H5O_PLINE, pline);
 	    for (i=0, x.chunk_size=1; i<layout->ndims; i++) {
 		x.offset[i] = offset[i];
 		x.chunk_size *= layout->dim[i];
 	    }
 	    x.chunk = chunk;
-	    H5F_istore_flush_entry (f, &x);
-	    H5O_free (H5O_LAYOUT, x.layout);
-	    H5O_free (H5O_COMPRESS, x.comp);
+	    H5F_istore_flush_entry (f, &x, TRUE);
+	} else {
+	    H5MM_xfree (chunk);
 	}
-	H5MM_xfree (chunk);
     } else {
 	/*
 	 * It's in the cache so unlock it.
@@ -1272,7 +1317,7 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
-		const H5O_compress_t *comp, const hssize_t offset_f[],
+		const H5O_pline_t *pline, const hssize_t offset_f[],
 		const hsize_t size[], void *buf)
 {
     hssize_t		offset_m[H5O_LAYOUT_NDIMS];
@@ -1375,7 +1420,7 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 		l.dim[i] = layout->dim[i];
 	    l.addr = udata.addr;
 	    if (H5F_arr_read(f, &l,
-			    comp, NULL /* no efl */,
+			    pline, NULL /* no efl */,
 			    sub_size, size_m,
 			    sub_offset_m, offset_wrt_chunk,
 			    H5D_XFER_DFLT, buf)==FAIL){
@@ -1397,15 +1442,15 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
 	 * Lock the chunk, transfer data to the application, then unlock the
 	 * chunk.
 	 */
-	if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
+	if (NULL==(chunk=H5F_istore_lock (f, layout, pline, chunk_offset,
 					  FALSE, &idx_hint))) {
 	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			   "unable to read raw data chunk");
 	}
 	H5V_hyper_copy(layout->ndims, sub_size, size_m, sub_offset_m,
 		       (void*)buf, layout->dim, offset_wrt_chunk, chunk);
-	if (H5F_istore_unlock (f, layout, comp, FALSE, chunk_offset, &idx_hint,
-			       chunk, naccessed)<0) {
+	if (H5F_istore_unlock (f, layout, pline, FALSE, chunk_offset,
+			       &idx_hint, chunk, naccessed)<0) {
 	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			   "unable to unlock raw data chunk");
 	}
@@ -1443,7 +1488,7 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
-		 const H5O_compress_t *comp, const hssize_t offset_f[],
+		 const H5O_pline_t *pline, const hssize_t offset_f[],
 		 const hsize_t size[], const void *buf)
 {
     hssize_t		offset_m[H5O_LAYOUT_NDIMS];
@@ -1550,7 +1595,7 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 		l.dim[i] = layout->dim[i];
 	    l.addr = udata.addr;
 	    if (H5F_arr_write(f, &l,
-			    comp, NULL /* no efl */,
+			    pline, NULL /* no efl */,
 			    sub_size, size_m,
 			    sub_offset_m, offset_wrt_chunk,
 			    H5D_XFER_DFLT, buf)==FAIL){
@@ -1571,7 +1616,7 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 	     * Lock the chunk, copy from application to chunk, then unlock the
 	     * chunk.
 	     */
-	    if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
+	    if (NULL==(chunk=H5F_istore_lock (f, layout, pline, chunk_offset,
 					      naccessed==chunk_size,
 					      &idx_hint))) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
@@ -1580,7 +1625,7 @@ H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
 	    H5V_hyper_copy(layout->ndims, sub_size,
 			   layout->dim, offset_wrt_chunk, chunk,
 			   size_m, sub_offset_m, buf);
-	    if (H5F_istore_unlock (f, layout, comp, TRUE, chunk_offset,
+	    if (H5F_istore_unlock (f, layout, pline, TRUE, chunk_offset,
 				   &idx_hint, chunk, naccessed)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "uanble to unlock raw data chunk");
@@ -1826,7 +1871,7 @@ H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
-		const hsize_t *space_dim, const H5O_compress_t *comp)
+		     const hsize_t *space_dim, const H5O_pline_t *pline)
 {
 
     intn		i, carry;
@@ -1846,7 +1891,7 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
     /* Check args */
     assert(f);
     assert(space_dim);
-    assert(comp);
+    assert(pline);
     assert(layout && H5D_CHUNKED==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
     assert(H5F_addr_defined(&(layout->addr)));
@@ -1885,13 +1930,13 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 	     * Lock the chunk, copy from application to chunk, then unlock the
 	     * chunk.
 	     */
-	    if (NULL==(chunk=H5F_istore_lock (f, layout, comp, chunk_offset,
+	    if (NULL==(chunk=H5F_istore_lock (f, layout, pline, chunk_offset,
 					      FALSE, &idx_hint))) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "unable to read raw data chunk");
 	    }
-	    if (H5F_istore_unlock (f, layout, comp, TRUE, chunk_offset, &idx_hint,
-				   chunk, chunk_size)<0) {
+	    if (H5F_istore_unlock (f, layout, pline, TRUE, chunk_offset,
+				   &idx_hint, chunk, chunk_size)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "uanble to unlock raw data chunk");
 	    }

@@ -62,7 +62,7 @@ static const H5O_class_t *const message_type_g[] = {
     H5O_LAYOUT,		/*0x0008 Data Layout				*/
     NULL,		/*0x0009 Not assigned				*/
     NULL,		/*0x000A Not assigned				*/
-    H5O_COMPRESS,	/*0x000B Data storage -- compressed object	*/
+    H5O_PLINE,		/*0x000B Data storage -- filter pipeline	*/
     H5O_ATTR,		/*0x000C Attribute list				*/
     H5O_NAME,		/*0x000D Object name				*/
     H5O_MTIME,		/*0x000E Object modification date and time	*/

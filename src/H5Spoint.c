@@ -215,7 +215,7 @@ H5S_point_favail (const H5S_t __unused__ *space, const H5S_sel_iter_t *sel_iter,
  */
 size_t
 H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_compress_t *comp,
+		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 size_t nelmts, const H5D_transfer_t xfer_mode,
@@ -259,7 +259,8 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     while(num_read<nelmts) {
         if(file_iter->pnt.elmt_left>0) {
             /* Copy the location of the point to get */
-            HDmemcpy(file_offset, file_iter->pnt.curr->pnt,ndims*sizeof(hssize_t));
+            HDmemcpy(file_offset, file_iter->pnt.curr->pnt,
+		     ndims*sizeof(hssize_t));
             file_offset[ndims] = 0;
 
             /* Add in the offset */
@@ -267,7 +268,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
                 file_offset[i] += file_space->select.offset[i];
 
             /* Go read the point */
-            if (H5F_arr_read (f, layout, comp, efl, hsize, hsize, zero,
+            if (H5F_arr_read (f, layout, pline, efl, hsize, hsize, zero,
 			      file_offset, xfer_mode, buf/*out*/)<0) {
                 HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
             }
@@ -323,7 +324,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_compress_t *comp,
+		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 size_t nelmts, const H5D_transfer_t xfer_mode,
@@ -395,7 +396,7 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	}
 #endif /* QAK */
         /* Go write the point */
-        if (H5F_arr_write (f, layout, comp, efl, hsize, hsize, zero,
+        if (H5F_arr_write (f, layout, pline, efl, hsize, hsize, zero,
 			   file_offset, xfer_mode, buf)<0) {
             HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
         }

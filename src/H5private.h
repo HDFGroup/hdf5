@@ -215,6 +215,7 @@ typedef struct {
 void H5_timer_reset (H5_timer_t *timer);
 void H5_timer_begin (H5_timer_t *timer);
 void H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/);
+void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 
 /*
  * Redefine all the POSIX functions.  We should never see a POSIX
@@ -254,7 +255,11 @@ void H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/);
 #define HDctermid(S)            ctermid(S)
 #define HDctime(T)              ctime(T)
 #define HDcuserid(S)            cuserid(S)
+#ifdef HAVE_DIFFTIME
 #define HDdifftime(X,Y)         difftime(X,Y)
+#else
+#define HDdifftime(X,Y)		((double)(X)-(double)(Y))
+#endif
 #define HDdiv(X,Y)              div(X,Y)
 #define HDdup(F)                dup(F)
 #define HDdup2(F,I)             dup2(F,I)

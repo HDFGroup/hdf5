@@ -20,7 +20,7 @@
 #define TRUE		1
 #define FILE_NAME_1	"mtime.h5"
 
-#include <H5config.h>
+#include <H5private.h>
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
@@ -130,7 +130,7 @@ main(void)
 	puts("   Modification times will be mantained in the file bug cannot");
 	puts("   be queried on this system.  See H5O_mtime_decode().");
 	return 1;
-    } else if (fabs(difftime(now, sb.mtime))>60.0) {
+    } else if (fabs(HDdifftime(now, sb.mtime))>60.0) {
 	puts("*FAILED*");
 	tm = localtime(&(sb.mtime));
 	strftime(buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);

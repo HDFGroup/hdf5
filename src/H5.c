@@ -55,7 +55,7 @@ FILE *fdopen(int fd, const char *mode);
 #include <H5Pprivate.h>		/*property lists			*/
 #include <H5Sprivate.h>		/*data spaces				*/
 #include <H5Tprivate.h>         /*data types                      	*/
-#include <H5Zprivate.h>		/*compression				*/
+#include <H5Zprivate.h>		/*filters				*/
 
 #define PABLO_MASK      H5_mask
 
@@ -113,7 +113,7 @@ H5_init_library(void)
 	/* Turn on tracing? */
 	const char *s = getenv ("HDF5_TRACE");
 	if (s && isdigit(*s)) {
-	    int fd = HDstrtol (s, NULL, 0);
+	    int fd = (int)HDstrtol (s, NULL, 0);
 	    H5_trace_g = HDfdopen (fd, "w");
 	}
     }
@@ -795,7 +795,7 @@ HDstrtoll (const char *s, const char **rest, int base)
 			(*s>='a' && *s<'a'+base-10) ||
 			(*s>='A' && *s<'A'+base-10)))) {
 	if (!overflow) {
-	    int64 digit;
+	    int64 digit = 0;
 	    if (*s>='0' && *s<='9') digit = *s - '0';
 	    else if (*s>='a' && *s<='z') digit = *s-'a'+10;
 	    else digit = *s-'A'+10;
@@ -925,7 +925,74 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
 	sum->etime += timer->etime;
     }
 }
-    
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_bandwidth
+ *
+ * Purpose:	Prints the bandwidth (bytes per second) in a field 10
+ *		characters wide widh four digits of precision like this:
+ *
+ * 			       NaN	If <=0 seconds
+ *			1234. TB/s
+ * 			123.4 TB/s
+ *			12.34 GB/s
+ *			1.234 MB/s
+ *			4.000 kB/s
+ *			1.000  B/s
+ *			0.000  B/s	If NBYTES==0
+ *			1.2345e-10	For bandwidth less than 1
+ *			6.7893e+94	For exceptionally large values
+ *			6.678e+106	For really big values
+ *			
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
+{
+    double	bw;
+
+    if (nseconds<=0.0) {
+	strcpy(buf, "       NaN");
+    } else {
+	bw = nbytes/nseconds;
+	if (bw==0.0) {
+	    strcpy(buf, "0.000  B/s");
+	} else if (bw<1.0) {
+	    sprintf(buf, "%10.4e", bw);
+	} else if (bw<1024.0) {
+	    sprintf(buf, "%05.4f", bw);
+	    strcpy(buf+5, "  B/s");
+	} else if (bw<1024.0*1024.0) {
+	    sprintf(buf, "%05.4f", bw/1024.0);
+	    strcpy(buf+5, " kB/s");
+	} else if (bw<1024.0*1024.0*1024.0) {
+	    sprintf(buf, "%05.4f", bw/(1024.0*1024.0));
+	    strcpy(buf+5, " MB/s");
+	} else if (bw<1024.0*1024.0*1024.0*1024.0) {
+	    sprintf(buf, "%05.4f",
+		    bw/(1024.0*1024.0*1024.0));
+	    strcpy(buf+5, " GB/s");
+	} else if (bw<1024.0*1024.0*1024.0*1024.0*1024.0) {
+	    sprintf(buf, "%05.4f",
+		    bw/(1024.0*1024.0*1024.0*1024.0));
+	    strcpy(buf+5, " TB/s");
+	} else {
+	    sprintf(buf, "%10.4e", bw);
+	    if (strlen(buf)>10) {
+		sprintf(buf, "%10.3e", bw);
+	    }
+	}
+    }
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5_trace
@@ -989,7 +1056,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	for (ptr=0; '*'==*type; type++) ptr++;
 	if ('['==*type) {
 	    if ('a'==type[1]) {
-		asize_idx = strtol(type+2, &rest, 10);
+		asize_idx = (int)strtol(type+2, &rest, 10);
 		assert(']'==*rest);
 		type = rest+1;
 	    } else {
@@ -1959,7 +2026,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'Z':
 	    switch (type[1]) {
-	    case 'm':
+	    case 'f':
 		if (ptr) {
 		    if (vp) {
 			fprintf (out, "0x%lx", (unsigned long)vp);
@@ -1967,19 +2034,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5Z_method_t zmeth = va_arg (ap, H5Z_method_t);
-		    if (zmeth<0) {
-			fprintf (out, "%d (range)", (int)zmeth);
-		    } else if (H5Z_NONE==zmeth) {
-			fprintf (out, "H5Z_NONE");
-		    } else if (H5Z_DEFLATE==zmeth) {
-			fprintf (out, "H5Z_DEFLATE");
-		    } else if (zmeth<H5Z_USERDEF_MIN) {
-			fprintf (out, "H5Z_RES_%d", (int)zmeth);
-		    } else if (zmeth<=H5Z_USERDEF_MAX) {
-			fprintf (out, "%d", (int)zmeth);
+		    H5Z_filter_t id = va_arg (ap, H5Z_filter_t);
+		    if (H5Z_FILTER_DEFLATE==id) {
+			fprintf (out, "H5Z_FILTER_DEFLATE");
 		    } else {
-			fprintf (out, "%d (range)", (int)zmeth);
+			fprintf (out, "%ld", (long)id);
 		    }
 		}
 		break;

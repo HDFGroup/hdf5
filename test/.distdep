@@ -492,4 +492,5 @@ mtime.o: \
    ../src/H5Ppublic.h \
    ../src/H5Zpublic.h \
    ../src/H5Spublic.h \
-   ../src/H5Tpublic.h
+   ../src/H5Tpublic.h \
+   ../src/H5private.h

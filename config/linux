@@ -18,15 +18,24 @@ case `$CC -v 2>&1 |tail -1 |sed 's/gcc version //'` in
        echo "  | code generation may be wrong on some platforms.|"
        echo "  +------------------------------------------------+"
        sleep 5
+       CCVENDOR=gcc
        ;;
    2.8.*)
-       CFLAGS="$CFLAGS -Wundef -Wsign-compare"
+       CFLAGS="$CFLAGS -Wsign-compare"
+       CCVENDOR=gcc
+       ;;
+   egcs-*)
+       CFLAGS="$CFLAGS -Wsign-compare"
+       CCVENDOR=egcs
+       ;;
+   pgcc-*)
+       CFLAGS="$CFLAGS -Wsign-compare"
+       CCVENDOR=pgcc
        ;;
 esac
 
 # What must *always* be present for things to compile correctly?
 CFLAGS="$CFLAGS -ansi"
-#CPPFLAGS="$CPPFLAGS -I."
 
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS="-g -fverbose-asm"
@@ -34,8 +43,19 @@ DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
 
 # What compiler flags should be used for building a production
 # library?
-PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O3 -finline-functions -malign-double -fomit-frame-pointer -fschedule-insns2"
-PROD_CPPFLAGS=
+if [ "gcc" = "$CCVENDOR" ]; then
+    PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O3 -finline-functions -malign-double -fomit-frame-pointer -fschedule-insns2"
+    PROD_CPPFLAGS=
+elif [ "egcs" = "$CCVENDOR" ]; then
+    PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O6 -malign-double"
+    PROD_CPPFLAGS=
+elif [ "pgcc" = "$CCVENDOR" ]; then
+    PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O6 -malign-double"
+    PROD_CPPFLAGS=
+else
+    PROD_CFLAGS=
+    PROD_CPPFLAGS=
+fi
 
 # What compiler flags enable code profiling?
 PROFILE_CFLAGS=-pg

@@ -175,7 +175,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     hid_t	obj;
     hid_t	(*func)(void*);
     void	*edata;
-    int		i;
+    int		i, nf;
     char	buf[512], comment[50];
     H5G_stat_t	statbuf;
     struct tm	*tm;
@@ -204,6 +204,30 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	printf ("}\n");
 	H5Dclose (space);
 	H5Aiterate (obj, NULL, list_attr, NULL);
+
+	/* Print additional information about datasets */
+	if (verbose_g>0) {
+	    hid_t dcpl = H5Dget_create_plist(obj);
+	    if ((nf = H5Pget_nfilters(dcpl))>0) {
+		for (i=0; i<nf; i++) {
+		    unsigned filt_flags;
+		    H5Z_filter_t filt_id;
+		    unsigned cd_values[20];
+		    size_t cd_nelmts = NELMTS(cd_values);
+		    size_t cd_num;
+		    filt_id = H5Pget_filter(dcpl, i, &filt_flags, &cd_nelmts,
+					    cd_values);
+		    sprintf(comment, "Filter-%d:", i);
+		    printf("    %-10s %u %s {", comment, (unsigned)filt_id,
+			   filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
+		    for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
+			printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
+		    }
+		    printf("}\n");
+		}
+	    }
+	    H5Pclose(dcpl);
+	}
 	H5Dclose (obj);
     } else if ((obj=H5Gopen (group, name))>=0) {
 	printf ("Group\n");
@@ -240,7 +264,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	if (comment[0]) printf("    %-10s %s\n", "Comment:", comment);
     }
     
-    if (dump_g && (obj=H5Dopen(group, name))) {
+    if (dump_g && (obj=H5Dopen(group, name))>=0) {
 	/* Turn on error reporting before dumping the data */
 	H5Eset_auto(func, edata);
 	dump_dataset_values(obj);

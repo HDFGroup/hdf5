@@ -55,7 +55,7 @@ $Source = "";
 	       "H5T_overflow_t"            => "x",
                "H5Z_func_t"                => "x",
                "size_t"                    => "z",
-               "H5Z_method_t"              => "Zm",
+               "H5Z_filter_t"              => "Zf",
                "ssize_t"                   => "Zs",
               );
 

@@ -55,7 +55,7 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_STORAGE,	"Data storage layer"},
     {H5E_TEMPLATE,	"Property list interface"},
     {H5E_ATTR, 		"Attribute layer"},
-    {H5E_COMP,		"Data compression layer"},
+    {H5E_PLINE,		"Data filters layer"},
     {H5E_EFL, 		"External file list"},
 };
 
@@ -85,7 +85,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_ALREADYINIT, 	"Object already initialized"},
     {H5E_BADATOM, 	"Unable to find atom information (already closed?)"},
     {H5E_CANTREGISTER, 	"Unable to  register new atom"},
-    {H5E_CANTFLUSH, 	"Unable to flush meta data from cache"},
+    {H5E_CANTFLUSH, 	"Unable to flush data from cache"},
     {H5E_CANTLOAD, 	"Unable to load meta data into cache"},
     {H5E_PROTECT, 	"Protected meta data error"},
     {H5E_NOTCACHED, 	"Meta data not currently cached"},

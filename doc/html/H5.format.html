@@ -54,8 +54,8 @@
 		  Name: Reserved - not assigned yet</a>
 	      <li><a href="#ReservedMessage_000A">              <!-- 0x000a -->
 		  Name: Reserved - not assigned yet</a>
-	      <li><a href="#CompressionMessage">                <!-- 0x000b -->
-		  Name: Data Storage - Compressed</a>
+	      <li><a href="#FilterMessage">                	<!-- 0x000b -->
+		  Name: Data Storage - Filter Pipeline</a>
 	      <li><a href="#AttributeMessage">                  <!-- 0x000c -->
 		  Name: Attribute</a>
 	      <li><a href="#NameMessage">                       <!-- 0x000d -->
@@ -2433,18 +2433,20 @@
     <ol>
       <li>The array can be stored in one contiguous area of the file.
 	The layout requires that the size of the array be constant and
-	does not permit chunking or compression.  The message stores
-	the total size of the array and the offset of an element from
-	the beginning of the storage area is computed as in C.
+	does not permit chunking, compression, checksums, encryption,
+	etc.  The message stores the total size of the array and the
+	offset of an element from the beginning of the storage area is
+	computed as in C.
 
       <li>The array domain can be regularly decomposed into chunks and
 	each chunk is allocated separately.  This layout supports
-	arbitrary element traversals and compression and the chunks
-	can be distributed across external raw data files (these
-	features are described in other messages).  The message stores
-	the size of a chunk instead of the size of the entire array;
-	the size of the entire array can be calculated by traversing
-	the B-tree that stores the chunk addresses.
+	arbitrary element traversals, compression, encryption, and
+	checksums, and the chunks can be distributed across external
+	raw data files (these features are described in other
+	messages).  The message stores the size of a chunk instead of
+	the size of the entire array; the size of the entire array can
+	be calculated by traversing the B-tree that stores the chunk
+	addresses.
     </ol>
 
     <p>
@@ -2555,22 +2557,21 @@
     <b>Format of Data:</b> N/A
 
     <hr>
-    <h3><a name="CompressionMessage">Name: Data Storage - Compressed</a></h3>
+    <h3><a name="FilterMessage">Name: Data Storage - Filter Pipeline</a></h3>
     <b>Type:</b> 0x000B<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may not be repeated.
-    
-    <p><b>Purpose and Description:</b>  Compressed objects are
-      datasets which are stored in an HDF file after they have been
-      compressed.  The encoding algorithm and its parameters are
-      stored in a Compression Message in the object header of the
-      dataset.
+
+    <p><b>Purpose and Description:</b> This message describes the
+      filter pipeline which should be applied to the data stream by
+      providing filter identification numbers, flags, a name, an
+      client data.
 
     <p>
     <center>
       <table border align=center cellpadding=4 witdh="80%">
 	<caption align=top>
-	  <b>Compression Message</b>
+	  <b>Filter Pipeline Message</b>
 	</caption>
 
 	<tr align=center>
@@ -2581,13 +2582,17 @@
 	</tr>  
 
 	<tr align=center>
-	  <td>Method</td>
-	  <td>Flags</td>
-	  <td colspan=2>Client Data Size</td>
+	  <td>Version</td>
+	  <td>Number of Filters</td>
+	  <td colspan=2>Reserved</td>
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4><br>Client Data<br><br></td>
+	  <td colspan=4>Reserved</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Filter List<br><br></td>
 	</tr>
       </table>
     </center>
@@ -2601,105 +2606,137 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Method</td>
-	  <td>The compression method is a value between zero and 255,
-	    inclusive, that is used as a index into a compression
-	    method lookup table.  The value zero indicates no
-	    compression. The values one through 15, inclusive, are
-	    reserved for methods defined by NCSA.  All other values
-	    are user-defined compression methods.</td>
+	  <td>Version</td>
+	  <td>The version number for this message.  This document
+	    describes version one.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Number of Filters</td>
+	  <td>The total number of filters described by this
+	    message. The maximum possible number of filters in a
+	    message is 32.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Filter List</td>
+	  <td>A description of each filter.  A filter description
+	    appears in the next table.</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table border align=center cellpadding=4 witdh="80%">
+	<caption align=top>
+	  <b>Filter Pipeline Message</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>  
+
+	<tr align=center>
+	  <td colspan=2>Filter Identification</td>
+	  <td colspan=2>Name Length</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=2>Flags</td>
+	  <td colspan=2>Client Data Number of Values</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Name<br><br></td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Client Data<br><br></td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Padding</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th width="70%">Description</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Filter Identification</td>
+	  <td>This is a unique (except in the case of testing)
+	    identifier for the filter.  Values from zero through 255
+	    are reserved for filters defined by the NCSA HDF5
+	    library. Values 256 through 511 have been set aside for
+	    use when developing/testing new filters.  The remaining
+	    values are allocated to specific filters by contacting the 
+	    <a href="mailto:hdf5dev@ncsa.uiuc.edu">HDF5 Development
+	    Team</a>.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Name Length</td>
+	  <td>Each filter has an optional null-terminated ASCII name
+	    and this field holds the length of the name including the
+	    null termination padded with nulls to be a multiple of
+	    eight. If the filter has no name then a value of zero is
+	    stored in this field.</td>
 	</tr>
 
 	<tr valign=top>
 	  <td>Flags</td>
-	  <td>Eight bits of flags which are passed to the compression
-	    algorithm.  There meaning depends on the compression
-	    method.</td>
+	  <td>The flags indicate certain properties for a filter.  The 
+	    bit values defined so far are:
+
+	    <dl>
+	      <dt><code>bit 1</code>
+	      <dd>If set then the filter is an optional filter.
+		During output, if an optional filter fails it will be
+		silently removed from the pipeline.
+	    </dl>
 	</tr>
 
 	<tr valign=top>
-	  <td>Client Data Size</td>
-	  <td>The size in bytes of the optional Client Data
-	    field.</td>
+	  <td>Client Data Number of Values</td>
+	  <td>Each filter can store a few integer values to control
+	    how the filter operates.  The number of entries in the
+	    Client Data array is stored in this field.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Name</td>
+	  <td>If the Name Length field is non-zero then it will
+	    contain the size of this field, a multiple of eight.  This 
+	    field contains a null-terminated, ASCII character
+	    string to serve as a comment/name for the filter.</td>
 	</tr>
 
 	<tr valign=top>
 	  <td>Client Data</td>
-	  <td>Additional information needed by the compression method
-	    can be stored in this field.  The data will be passed to
-	    the compression algorithm as a void pointer.</td>
+	  <td>This is an array of four-byte integers which will be
+	    passed to the filter function.  The Client Data Number of
+	    Values determines the number of elements in the
+	    array.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Padding</td>
+	  <td>Four bytes of zeros are added to the message at this
+	    point if the Client Data Number of Values field contains
+	    an odd number.</td>
 	</tr>
       </table>
     </center>
-
-    <p>Sometimes additional redundancy can be added to the data before
-      it's compressed to result in a better compression ratio.  The
-      library doesn't specifically support modeling methods to add
-      redundancy, but the effect can be achieved through the use of
-      user-defined data types.
-
-    <p>The library uses the following compression methods.
-    <center>
-      <table align=center width="80%">
-	<tr valign=top>
-	  <td><code>0</code></td>
-	  <td>No compression:  The blocks of data are stored in
-	    their raw format.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>1</code></td>
-	  <td>Deflation:  This is the same algorithm used by
-	    GNU gzip which is a combination Huffman and LZ77
-	    dictionary encoder.  The <code>libz</code> library version
-	    1.1.2 or later must be available.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>2</code></td>
-	  <td>Run length encoding:  Not implemented yet.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>3</code></td>
-	  <td>Adaptive Huffman:  Not implemented yet.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>4</code></td>
-	  <td>Adaptive Arithmetic: Not implemented yet.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>5</code></td>
-	  <td>LZ78 Dictionary Encoding: Not implemented yet.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>6</code></td>
-	  <td>Adaptive Lempel-Ziv:  Similar to Unix
-	    <code>compress</code>.  Not implemented yet.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>7-15</code></td>
-	  <td>Reserved for future use.</td>
-	</tr>
-
-	<tr valign=top>
-	  <td><code>16-255</code></td>
-	  <td>User-defined.</td>
-	</tr>
-      </table>
-    </center>
-
-    <p>The compression is applied independently to each chunk of
-      storage (after data space and data type conversions).  If the
-      compression is unable to make the chunk smaller than it would
-      normally be, the chunk is stored without compression.  At the
-      library's discretion, chunks which fail the compression can also
-      be stored in their raw format.
-
 
     <hr>
     <h3><a name="AttributeMessage">Name: Attribute</a></h3>
@@ -3255,7 +3292,7 @@ data-type.
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- hhmts start -->
-Last modified: Fri Jul 24 15:10:57 EDT 1998
+Last modified: Tue Aug  4 10:04:40 EDT 1998
 <!-- hhmts end -->
 </body>
 </html>

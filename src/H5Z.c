@@ -5,7 +5,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, April 16, 1998
  *
- * Purpose:	Functions for data compression.
+ * Purpose:	Functions for data filters.
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
@@ -25,48 +25,39 @@ static herr_t H5Z_init_interface (void);
 static void H5Z_term_interface (void);
 
 /*
- * The compression table maps compression method number to a struct that
- * contains pointers to the compress and uncompress methods along with timing
- * statistics.
+ * The filter table maps filter identification numbers to structs that
+ * contain a pointers to the filter function and timing statistics.
  */
 typedef struct H5Z_class_t {
-    char	*name;		/*method name for debugging		*/
-    H5Z_func_t	compress;	/*compression function			*/
-    H5Z_func_t	uncompress;	/*uncompression function		*/
+    H5Z_filter_t id;		/*filter ID number			*/
+    char	*comment;	/*comment for debugging			*/
+    H5Z_func_t	func;		/*the filter function			*/
 
 #ifdef H5Z_DEBUG
     struct {
-	hsize_t	nbytes;		/*bytes compressed including overruns	*/
-	hsize_t over;		/*bytes of overrun			*/
-	H5_timer_t timer;	/*total compression time inc. overruns	*/
-	hsize_t	failed;		/*bytes of failure (not overruns)	*/
-    } comp;
-
-    struct {
-	hsize_t	nbytes;		/*bytes uncompressed, including overruns*/
-	hsize_t	over;		/*bytes of overrun			*/
-	H5_timer_t timer;	/*total uncompression time		*/
-	hsize_t failed;		/*bytes of failure (not overruns)	*/
-    } uncomp;
+	hsize_t	total;		/*total number of bytes processed	*/
+	hsize_t	errors;		/*bytes of total attributable to errors	*/
+	H5_timer_t timer;	/*execution time including errors	*/
+    } stats[2];			/*0=output, 1=input			*/
 #endif
 } H5Z_class_t;
-static H5Z_class_t	H5Z_g[H5Z_USERDEF_MAX+1];
 
-/* Compression and uncompression methods */
-static size_t H5Z_zlib_c (unsigned int flags, size_t __unused__ cd_size,
-			  const void __unused__ *client_data,
-			  size_t src_nbytes, const void *_src,
-			  size_t dst_nbytes, void *dst/*out*/);
-static size_t H5Z_zlib_u (unsigned int flags, size_t __unused__ cd_size,
-			  const void __unused__ *client_data,
-			  size_t src_nbytes, const void *_src,
-			  size_t dst_nbytes, void *dst/*out*/);
+static size_t		H5Z_table_alloc_g = 0;
+static size_t		H5Z_table_used_g = 0;
+static H5Z_class_t	*H5Z_table_g = NULL;
+
+static H5Z_class_t *H5Z_find(H5Z_filter_t id);
+
+/* Predefined filters */
+static size_t H5Z_filter_deflate(uintn flags, size_t cd_nelmts,
+				 const uintn cd_values[], size_t nbytes,
+				 size_t *buf_size, void **buf);
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_init_interface
  *
- * Purpose:	Initializes the data compression layer.
+ * Purpose:	Initializes the data filter layer.
  *
  * Return:	Success:	SUCCEED
  *
@@ -83,11 +74,10 @@ static herr_t
 H5Z_init_interface (void)
 {
     FUNC_ENTER (H5Z_init_interface, FAIL);
-
     H5_add_exit (H5Z_term_interface);
 
-    H5Z_register (H5Z_NONE, "none", NULL, NULL);
-    H5Z_register (H5Z_DEFLATE, "deflate", H5Z_zlib_c, H5Z_zlib_u);
+    H5Z_register (H5Z_FILTER_DEFLATE, "deflate",
+		  H5Z_filter_deflate);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -110,75 +100,69 @@ H5Z_init_interface (void)
 static void
 H5Z_term_interface (void)
 {
+    size_t	i;
+    
 #ifdef H5Z_DEBUG
-    int		i, nprint=0;
-    char	name[16];
+    int		dir, nprint=0;
+    char	comment[16], bandwidth[32];
 
-    for (i=0; i<=H5Z_USERDEF_MAX; i++) {
-	if (H5Z_g[i].comp.nbytes || H5Z_g[i].uncomp.nbytes) {
+    for (i=0; i<=H5Z_table_used_g; i++) {
+	for (dir=0; dir<2; dir++) {
+	    if (0==H5Z_table_g[i].stats[dir].total) continue;
+
 	    if (0==nprint++) {
-		HDfprintf (stderr, "H5Z: compression statistics accumulated "
+		/* Print column headers */
+		HDfprintf (stderr, "H5Z: filter statistics accumulated "
 			   "over life of library:\n");
-		HDfprintf (stderr, "   %-10s   %10s %7s %7s %8s %8s %8s %9s\n",
-			   "Method", "Total", "Overrun", "Errors", "User",
+		HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			   "Filter", "Total", "Errors", "User",
 			   "System", "Elapsed", "Bandwidth");
-		HDfprintf (stderr, "   %-10s   %10s %7s %7s %8s %8s %8s %9s\n",
-			   "------", "-----", "-------", "------", "----",
+		HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			   "------", "-----", "------", "----",
 			   "------", "-------", "---------");
 	    }
-	    sprintf (name, "%s-c", H5Z_g[i].name);
+
+	    /* Truncate the comment to fit in the field */
+	    strncpy(comment, H5Z_table_g[i].comment, sizeof comment);
+	    comment[sizeof(comment)-1] = '\0';
+
+	    /*
+	     * Format bandwidth to have four significant digits and units
+	     * of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or the word
+	     * `Inf' if the elapsed time is zero.
+	     */
+	    H5_bandwidth(bandwidth,
+			 (double)(H5Z_table_g[i].stats[dir].total),
+			 H5Z_table_g[i].stats[dir].timer.etime);
+
+	    /* Print the statistics */
 	    HDfprintf (stderr,
-		       "   %-12s %10Hd %7Hd %7Hd %8.2f %8.2f %8.2f ",
-		       name,
-		       H5Z_g[i].comp.nbytes,
-		       H5Z_g[i].comp.over,
-		       H5Z_g[i].comp.failed,
-		       H5Z_g[i].comp.timer.utime,
-		       H5Z_g[i].comp.timer.stime,
-		       H5Z_g[i].comp.timer.etime);
-	    if (H5Z_g[i].comp.timer.etime>0) {
-		HDfprintf (stderr, "%9.3e\n",
-			   H5Z_g[i].comp.nbytes / H5Z_g[i].comp.timer.etime);
-	    } else {
-		HDfprintf (stderr, "%9s\n", "NaN");
-	    }
-	    
-	    sprintf (name, "%s-u", H5Z_g[i].name);
-	    HDfprintf (stderr,
-		       "   %-12s %10Hd %7Hd %7Hd %8.2f %8.2f %8.2f ",
-		       name,
-		       H5Z_g[i].uncomp.nbytes,
-		       H5Z_g[i].uncomp.over,
-		       H5Z_g[i].uncomp.failed,
-		       H5Z_g[i].uncomp.timer.utime,
-		       H5Z_g[i].uncomp.timer.stime,
-		       H5Z_g[i].uncomp.timer.etime);
-	    if (H5Z_g[i].uncomp.timer.etime>0) {
-		HDfprintf (stderr, "%9.3e\n", 
-			   H5Z_g[i].uncomp.nbytes/H5Z_g[i].uncomp.timer.etime);
-	    } else {
-		HDfprintf (stderr, "%9s\n", "NaN");
-	    }
+		       "   %c%-15s %10Hd %10Hd %8.2f %8.2f %8.2f "
+		       "%10s\n", dir?'<':'>', comment, 
+		       H5Z_table_g[i].stats[dir].total,
+		       H5Z_table_g[i].stats[dir].errors,
+		       H5Z_table_g[i].stats[dir].timer.utime,
+		       H5Z_table_g[i].stats[dir].timer.stime,
+		       H5Z_table_g[i].stats[dir].timer.etime,
+		       bandwidth);
 	}
-	H5MM_xfree (H5Z_g[i].name);
     }
-    HDmemset (H5Z_g, 0, sizeof H5Z_g);
 #endif
+
+    /* Free the table */
+    for (i=0; i<H5Z_table_used_g; i++) {
+	H5MM_xfree(H5Z_table_g[i].comment);
+    }
+    H5Z_table_g = H5MM_xfree(H5Z_table_g);
+    H5Z_table_used_g = H5Z_table_alloc_g = 0;
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Zregister
  *
- * Purpose:	This function registers new compression and uncompression
- *		methods for a method number.  The NAME argument is used for
- *		debugging and may be the null pointer.  Either or both of
- *		CFUNC (the compression function) and UFUNC (the uncompression
- *		method) may be null pointers.
- *
- *		The statistics associated with a method number are not reset
- *		by this function; they accumulate over the life of the
- *		library.
+ * Purpose:	This function registers new filter. The COMMENT argument is
+ *		used for debugging and may be the null pointer.
  *
  * Return:	Success:	SUCCEED
  *
@@ -192,178 +176,40 @@ H5Z_term_interface (void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Zregister (H5Z_method_t method, const char *name, H5Z_func_t cfunc,
-	     H5Z_func_t ufunc)
+H5Zregister (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 {
     FUNC_ENTER (H5Zregister, FAIL);
-    H5TRACE4("e","Zmsxx",method,name,cfunc,ufunc);
+    H5TRACE3("e","Zfsx",id,comment,func);
 
     /* Check args */
-    if (method<0 || method>H5Z_USERDEF_MAX) {
+    if (id<0 || id>H5Z_FILTER_MAX) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "invalid data compression method number");
+		       "invalid filter identification number");
     }
-    if (method<16) {
+    if (id<256) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "unable to modify predefined compression methods");
+		       "unable to modify predefined filters");
+    }
+    if (!func) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		      "no function specified");
     }
 
     /* Do it */
-    if (H5Z_register (method, name, cfunc, ufunc)<0) {
-	HRETURN_ERROR (H5E_COMP, H5E_CANTINIT, FAIL,
-		       "unable to register compression methods");
+    if (H5Z_register (id, comment, func)<0) {
+	HRETURN_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL,
+		       "unable to register filter");
     }
 
     FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Z_compress
- *
- * Purpose:	Compress NBYTES from SRC into at most NBYTES of DST.
- *
- * Return:	Success:	Number of bytes in DST
- *
- *		Failure:	0 if the DST buffer overflowed or something
- *				else went wrong.
- *
- * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5Z_compress (const H5O_compress_t *comp, size_t nbytes, const void *src,
-	      void *dst/*out*/)
-{
-    size_t		ret_value = 0;
-    H5Z_method_t	method = comp ? comp->method : H5Z_NONE;
-    H5Z_func_t		cfunc = NULL;
-#ifdef H5Z_DEBUG
-    intn		over = 0;
-    H5_timer_t		timer;
-#endif
-    
-    FUNC_ENTER (H5Z_compress, 0);
-
-#ifdef H5Z_DEBUG
-    H5_timer_begin (&timer);
-#endif
-
-    if (H5Z_NONE==method) {
-	/* No compression method */
-	HGOTO_DONE (0);
-	
-    } else if (NULL==(cfunc=H5Z_g[method].compress)) {
-	/* No compress function */
-	HGOTO_ERROR (H5E_COMP, H5E_UNSUPPORTED, 0,
-		     "compression method is not supported");
-	
-    } else if (0==(ret_value=(cfunc)(comp->flags, comp->cd_size,
-				     comp->client_data, nbytes,
-				     src, nbytes, dst))) {
-	/* Compress failed */
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0, "compression failed");
-	
-    } else if (ret_value>=nbytes) {
-	/* Output is not smaller than input */
-#ifdef H5Z_DEBUG
-	H5Z_g[method].comp.over += nbytes;
-	over = 1;
-#endif
-	HGOTO_DONE (0);
-    }
-
- done:
-#ifdef H5Z_DEBUG
-    H5Z_g[method].comp.nbytes += nbytes;
-    if (0==ret_value && !over) H5Z_g[method].comp.failed += nbytes;
-    H5_timer_end (&(H5Z_g[method].comp.timer), &timer);
-#endif
-    FUNC_LEAVE (ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Z_uncompress
- *
- * Purpose:	Uncompress SRC_NBYTES from SRC into at most DST_NBYTES of
- *		DST. 
- *
- * Return:	Success:	Number of bytes in DST buffer.
- *
- *		Failure:	0 if the uncompression failed or DST wasn't
- *				big enough to hold the result.
- *
- * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5Z_uncompress (const H5O_compress_t *comp, size_t src_nbytes, const void *src,
-		size_t dst_nbytes, void *dst/*out*/)
-{
-    size_t		ret_value = 0;
-    H5Z_func_t		ufunc = NULL;
-    H5Z_method_t	method = comp ? comp->method : H5Z_NONE;
-#ifdef H5Z_DEBUG
-    H5_timer_t		timer;
-#endif
-    
-    FUNC_ENTER (H5Z_uncompress, 0);
-
-#ifdef H5Z_DEBUG
-    H5_timer_begin (&timer);
-#endif
-
-    if (H5Z_NONE==method) {
-	/* No compression method */
-	assert (src_nbytes<=dst_nbytes);
-	HDmemcpy (dst, src, src_nbytes);
-	ret_value = src_nbytes;
-	
-    } else if (src_nbytes==dst_nbytes) {
-	/* Data is not compressed */
-#ifdef H5Z_DEBUG
-	H5Z_g[method].uncomp.over += src_nbytes;
-#endif
-	HDmemcpy (dst, src, src_nbytes);
-	ret_value = src_nbytes;
-	
-    } else if (NULL==(ufunc=H5Z_g[method].uncompress)) {
-	/* No uncompress function */
-	HGOTO_ERROR (H5E_COMP, H5E_UNSUPPORTED, 0,
-		     "uncompression method is not supported");
-	
-    } else if (0==(ret_value=(ufunc)(comp->flags, comp->cd_size,
-				     comp->client_data, src_nbytes,
-				     src, dst_nbytes, dst))) {
-	/* Uncompress failed */
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0, "uncompression failed");
-    }
-
- done:
-#ifdef H5Z_DEBUG
-    H5Z_g[method].uncomp.nbytes += dst_nbytes;
-    if (0==ret_value) H5Z_g[method].uncomp.failed += dst_nbytes;
-    H5_timer_end (&(H5Z_g[method].uncomp.timer), &timer);
-#endif
-
-    FUNC_LEAVE (ret_value);
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_register
  *
- * Purpose:	Same as the public version except this one allows compression
- *		methods to be set for predefined method numbers <16.
+ * Purpose:	Same as the public version except this one allows filters
+ *		to be set for predefined method numbers <256
  *
  * Return:	Success:	SUCCEED
  *
@@ -377,86 +223,293 @@ H5Z_uncompress (const H5O_compress_t *comp, size_t src_nbytes, const void *src,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_register (H5Z_method_t method, const char *name, H5Z_func_t cfunc,
-	      H5Z_func_t ufunc)
+H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 {
+    size_t		i;
+    
     FUNC_ENTER (H5Z_register, FAIL);
 
-    assert (method>=0 && method<=H5Z_USERDEF_MAX);
-    H5MM_xfree (H5Z_g[method].name);
-    H5Z_g[method].name = H5MM_xstrdup (name);
-    H5Z_g[method].compress = cfunc;
-    H5Z_g[method].uncompress = ufunc;
+    assert (id>=0 && id<=H5Z_FILTER_MAX);
+
+    /* Is the filter already registered? */
+    for (i=0; i<H5Z_table_used_g; i++) {
+	if (H5Z_table_g[i].id==id) break;
+    }
+    if (i>=H5Z_table_used_g) {
+	if (H5Z_table_used_g>=H5Z_table_alloc_g) {
+	    size_t n = MAX(32, 2*H5Z_table_alloc_g);
+	    H5Z_class_t *table = H5MM_realloc(H5Z_table_g,
+					      n*sizeof(H5Z_class_t));
+	    if (!table) {
+		HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			      "unable to extend filter table");
+	    }
+	    H5Z_table_g = table;
+	    H5Z_table_alloc_g = n;
+	}
+
+	/* Initialize */
+	i = H5Z_table_used_g++;
+	HDmemset(H5Z_table_g+i, 0, sizeof(H5Z_class_t));
+	H5Z_table_g[i].id = id;
+	H5Z_table_g[i].comment = H5MM_xstrdup(comment);
+	H5Z_table_g[i].func = func;
+    } else {
+	/* Replace old contents */
+	H5MM_xfree(H5Z_table_g[i].comment);
+	H5Z_table_g[i].comment = H5MM_xstrdup(comment);
+	H5Z_table_g[i].func = func;
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_zlib_c
+ * Function:	H5Z_append
  *
- * Purpose:	Compress SRC_NBYTES bytes from SRC into at most DST_NBYTES of
- *		DST using the compression level as specified in FLAGS.
+ * Purpose:	Append another filter to the specified pipeline.
  *
- * Return:	Success:	Number of bytes compressed into DST limited
- *				by DST_NBYTES.
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	0
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
+ *              Tuesday, August  4, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5Z_zlib_c (unsigned int flags, size_t __unused__ cd_size,
-	    const void __unused__ *client_data, size_t src_nbytes,
-	    const void *src, size_t dst_nbytes, void *dst/*out*/)
+herr_t
+H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
+	   size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
-    size_t	ret_value = 0;
-#if defined(HAVE_LIBZ) && defined(HAVE_ZLIB_H)
-    const Bytef	*z_src = (const Bytef*)src;
-    Bytef	*z_dst = (Bytef*)dst;
-    uLongf	z_dst_nbytes = (uLongf)dst_nbytes;
-    uLong	z_src_nbytes = (uLong)src_nbytes;
-    int		level = flags % 10;
-    int		status;
-#endif
+    size_t	idx, i;
     
-    FUNC_ENTER (H5Z_zlib_c, 0);
+    FUNC_ENTER(H5Z_append, FAIL);
+    assert(pline);
+    assert(filter>=0 && filter<=H5Z_FILTER_MAX);
+    assert(0==(flags & ~H5Z_FLAG_DEFMASK));
+    assert(0==cd_nelmts || cd_values);
 
-#if defined(HAVE_LIBZ) && defined (HAVE_ZLIB_H)
-    status = compress2 (z_dst, &z_dst_nbytes, z_src, z_src_nbytes, level);
-    if (Z_BUF_ERROR==status) {
-	ret_value = dst_nbytes;
-    } else if (Z_MEM_ERROR==status) {
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0, "deflate memory error");
-    } else if (Z_OK!=status) {
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0, "deflate error");
-    } else {
-	ret_value = z_dst_nbytes;
+    /*
+     * Check filter limit.  We do it here for early warnings although we may
+     * decide to relax this restriction in the future.
+     */
+    if (pline->nfilters>=32) {
+	HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
+		      "too many filters in pipeline");
     }
-#else
-    HGOTO_ERROR (H5E_COMP, H5E_UNSUPPORTED, 0,
-		 "hdf5 was not compiled with zlib-1.0.2 or better");
-#endif
 
- done:
-    FUNC_LEAVE (ret_value);
+    /* Allocate additional space in the pipeline if it's full */
+    if (pline->nfilters>=pline->nalloc) {
+	H5O_pline_t x;
+	x.nalloc = MAX(32, 2*pline->nalloc);
+	x.filter = H5MM_realloc(pline->filter, x.nalloc*sizeof(x.filter[0]));
+	if (NULL==x.filter) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "memory allocation failed for filter pipeline");
+	}
+	pline->nalloc = x.nalloc;
+	pline->filter = x.filter;
+    }
+    
+    /* Add the new filter to the pipeline */
+    idx = pline->nfilters;
+    pline->filter[idx].id = filter;
+    pline->filter[idx].flags = flags;
+    pline->filter[idx].name = NULL; /*we'll pick it up later*/
+    pline->filter[idx].cd_nelmts = cd_nelmts;
+    if (cd_nelmts>0) {
+	pline->filter[idx].cd_values = H5MM_malloc(cd_nelmts*sizeof(uintn));
+	if (NULL==pline->filter[idx].cd_values) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "memory allocation failed for filter");
+	}
+	for (i=0; i<cd_nelmts; i++) {
+	    pline->filter[idx].cd_values[i] = cd_values[i];
+	}
+    }
+    pline->nfilters++;
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_zlib_u
+ * Function:	H5Z_find
  *
- * Purpose:	Uncompress SRC_NBYTES from SRC into at most DST_NBYTES of
- *		DST.
+ * Purpose:	Given a filter ID return a pointer to a global struct that
+ *		defines the filter.
  *
- * Return:	Success:	Number of bytes returned in DST.
+ * Return:	Success:	Ptr to entry in global filter table.
  *
- *		Failure:	0
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5Z_class_t *
+H5Z_find(H5Z_filter_t id)
+{
+    size_t	i;
+
+    FUNC_ENTER(H5Z_find, NULL);
+
+    for (i=0; i<H5Z_table_used_g; i++) {
+	if (H5Z_table_g[i].id == id) {
+	    return H5Z_table_g + i;
+	}
+    }
+
+    FUNC_LEAVE(NULL);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_pipeline
+ *
+ * Purpose:	Process data through the filter pipeline.  The FLAGS argument
+ *		is the filter invocation flags (definition flags come from
+ *		the PLINE->filter[].flags).  The filters are processed in
+ *		definition order unless the H5Z_FLAG_REVERSE is set.  The
+ *		FILTER_MASK is a bit-mask to indicate which filters to skip
+ *		and on exit will indicate which filters failed.  Each
+ *		filter has an index number in the pipeline and that index
+ *		number is the filter's bit in the FILTER_MASK.  NBYTES is the
+ *		number of bytes of data to filter and on exit should be the
+ *		number of resulting bytes while BUF_SIZE holds the total
+ *		allocated size of the buffer, which is pointed to BUF.
+ *
+ *		If the buffer must grow during processing of the pipeline
+ *		then the pipeline function should free the original buffer
+ *		and return a fresh buffer, adjusting BUF_SIZE accordingly.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_pipeline(H5F_t *f, const H5O_pline_t *pline, uintn flags,
+	     uintn *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
+	     size_t *buf_size/*in,out*/, void **buf/*in,out*/)
+{
+    size_t	i, idx, new_nbytes;
+    H5Z_class_t	*fclass=NULL;
+    uintn	failed = 0;
+#ifdef H5Z_DEBUG
+    H5_timer_t	timer;
+#endif
+    
+    FUNC_ENTER(H5Z_pipeline, FAIL);
+    
+    assert(f);
+    assert(0==(flags & ~H5Z_FLAG_INVMASK));
+    assert(filter_mask);
+    assert(nbytes && *nbytes>0);
+    assert(buf_size && *buf_size>0);
+    assert(buf && *buf);
+    assert(!pline || pline->nfilters<32);
+
+    if (pline && (flags & H5Z_FLAG_REVERSE)) {
+	for (i=pline->nfilters; i>0; --i) {
+	    idx = i-1;
+	    
+	    if (*filter_mask & ((unsigned)1<<idx)) {
+		failed |= (unsigned)1 << idx;
+		continue;/*filter excluded*/
+	    }
+	    if (NULL==(fclass=H5Z_find(pline->filter[idx].id))) {
+		failed |= (unsigned)1 << idx;
+		HRETURN_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
+			      "required filter is not registered");
+	    }
+#ifdef H5Z_DEBUG
+	    H5_timer_begin(&timer);
+#endif
+	    new_nbytes = (fclass->func)(flags|(pline->filter[idx].flags),
+					pline->filter[idx].cd_nelmts,
+					pline->filter[idx].cd_values,
+					*nbytes, buf_size, buf);
+#ifdef H5Z_DEBUG
+	    H5_timer_end(&(fclass->stats[1].timer), &timer);
+	    fclass->stats[1].total += MAX(*nbytes, new_nbytes);
+	    if (0==new_nbytes) fclass->stats[1].errors += *nbytes;
+#endif
+	    if (0==new_nbytes) {
+		failed |= (unsigned)1 << idx;
+		HRETURN_ERROR(H5E_PLINE, H5E_READERROR, FAIL,
+			      "filter returned failure");
+	    }
+	    *nbytes = new_nbytes;
+	}
+    } else if (pline) {
+	for (idx=0; idx<pline->nfilters; idx++) {
+	    if (*filter_mask & ((unsigned)1<<idx)) {
+		failed |= (unsigned)1 << idx;
+		continue; /*filter excluded*/
+	    }
+	    if (NULL==(fclass=H5Z_find(pline->filter[idx].id))) {
+		failed |= (unsigned)1 << idx;
+		if (pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) {
+		    H5E_clear();
+		    continue;
+		} else {
+		    HRETURN_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
+				  "required filter is not registered");
+		}
+	    }
+#ifdef H5Z_DEBUG
+	    H5_timer_begin(&timer);
+#endif
+	    new_nbytes = (fclass->func)(flags|(pline->filter[idx].flags),
+					pline->filter[idx].cd_nelmts,
+					pline->filter[idx].cd_values,
+					*nbytes, buf_size, buf);
+#ifdef H5Z_DEBUG
+	    H5_timer_end(&(fclass->stats[0].timer), &timer);
+	    fclass->stats[0].total += MAX(*nbytes, new_nbytes);
+	    if (0==new_nbytes) fclass->stats[0].errors += *nbytes;
+#endif
+	    if (0==new_nbytes) {
+		failed |= (unsigned)1 << idx;
+		if (0==(pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
+		    HRETURN_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
+				  "filter returned failure");
+		} else {
+		    H5E_clear();
+		}
+	    } else {
+		*nbytes = new_nbytes;
+	    }
+	}
+    }
+
+    *filter_mask = failed;
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_filter_deflate
+ *
+ * Purpose:	
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
  *
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
@@ -466,39 +519,99 @@ H5Z_zlib_c (unsigned int flags, size_t __unused__ cd_size,
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_zlib_u (unsigned int __unused__ flags, size_t __unused__ cd_size,
-	    const void __unused__ *client_data, size_t src_nbytes,
-	    const void *src, size_t dst_nbytes, void *dst/*out*/)
+H5Z_filter_deflate (uintn flags, size_t cd_nelmts, const uintn cd_values[],
+		    size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t	ret_value = 0;
-#ifdef HAVE_ZLIB_H
-    const Bytef	*z_src = (const Bytef*)src;
-    Bytef	*z_dst = (Bytef*)dst;
-    uLongf	z_dst_nbytes = (uLongf)dst_nbytes;
-    uLong	z_src_nbytes = (uLong)src_nbytes;
+    int		aggression = 6;
+    void	*outbuf = NULL;
+#if defined(HAVE_LIBZ) && defined(HAVE_ZLIB_H)
     int		status;
 #endif
     
-    FUNC_ENTER (H5Z_zlib_u, 0);
+    FUNC_ENTER (H5Z_filter_deflate, 0);
+
+    /* Get aggression level */
+    if (cd_nelmts!=1 || cd_values[0]>9) {
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0,
+		    "invalid deflate aggression level");
+    }
+    aggression = cd_values[0];
 
 #if defined(HAVE_LIBZ) && defined (HAVE_ZLIB_H)
-    status = uncompress (z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
-    if (Z_BUF_ERROR==status) {
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0,
-		     "deflate destination buffer was too small");
-    } else if (Z_MEM_ERROR==status) {
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0, "deflate memory error");
-    } else if (Z_DATA_ERROR==status) {
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0, "deflate corrupted data");
-    } else if (Z_OK!=status) {
-	HGOTO_ERROR (H5E_COMP, H5E_CANTINIT, 0, "deflate error");
+    if (flags & H5Z_FLAG_REVERSE) {
+	/* Input; uncompress */
+	z_stream	z_strm;
+	size_t		nalloc = *buf_size;
+
+	outbuf = H5MM_malloc(nalloc);
+	HDmemset(&z_strm, 0, sizeof(z_strm));
+	z_strm.next_in = *buf;
+	z_strm.avail_in = nbytes;
+	z_strm.next_out = outbuf;
+	z_strm.avail_out = nalloc;
+	if (Z_OK!=inflateInit(&z_strm)) {
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflateInit() failed");
+	}
+	while (1) {
+	    status = inflate(&z_strm, Z_SYNC_FLUSH);
+	    if (Z_STREAM_END==status) break;	/*done*/
+	    if (Z_OK!=status) {
+		inflateEnd(&z_strm);
+		HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflate() failed");
+	    }
+	    if (Z_OK==status && 0==z_strm.avail_out) {
+		nalloc *= 2;
+		outbuf = H5MM_realloc(outbuf, nalloc);
+		z_strm.next_out = (char*)outbuf + z_strm.total_out;
+		z_strm.avail_out = nalloc - z_strm.total_out;
+	    }
+	}
+	
+	H5MM_xfree(*buf);
+	*buf = outbuf;
+	outbuf = NULL;
+	*buf_size = nalloc;
+	ret_value = z_strm.total_out;
+	inflateEnd(&z_strm);
+	
+    } else {
+	/*
+	 * Output; compress but fail if the result would be larger than the
+	 * input.  The library doesn't provide in-place compression, so we
+	 * must allocate a separate buffer for the result.
+	 */
+	const Bytef	*z_src = (const Bytef*)(*buf);
+	Bytef		*z_dst;		/*destination buffer		*/
+	uLongf		z_dst_nbytes = (uLongf)nbytes;
+	uLong		z_src_nbytes = (uLong)nbytes;
+
+	if (NULL==(z_dst=outbuf=H5MM_malloc(nbytes))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
+			"unable to allocate deflate destination buffer");
+	}
+	status = compress2 (z_dst, &z_dst_nbytes, z_src, z_src_nbytes,
+			    aggression);
+	if (Z_BUF_ERROR==status) {
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "overflow");
+	} else if (Z_MEM_ERROR==status) {
+	    HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, 0, "deflate memory error");
+	} else if (Z_OK!=status) {
+	    HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, 0, "deflate error");
+	} else {
+	    H5MM_xfree(*buf);
+	    *buf = outbuf;
+	    outbuf = NULL;
+	    *buf_size = nbytes;
+	    ret_value = z_dst_nbytes;
+	}
     }
-    ret_value = z_dst_nbytes;
 #else
-    HGOTO_ERROR (H5E_COMP, H5E_UNSUPPORTED, 0,
+    HGOTO_ERROR (H5E_PLINE, H5E_UNSUPPORTED, 0,
 		 "hdf5 was not compiled with zlib-1.0.2 or better");
 #endif
 
  done:
+    H5MM_xfree(outbuf);
     FUNC_LEAVE (ret_value);
 }

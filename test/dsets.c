@@ -40,7 +40,7 @@
 #define DSET_COMPRESS_NAME	"compressed"
 #define DSET_BOGUS_NAME		"bogus"
 
-#define H5Z_BOGUS		255
+#define H5Z_BOGUS		305
 
 
 /*-------------------------------------------------------------------------
@@ -354,9 +354,9 @@ test_tconv(hid_t file)
 /*-------------------------------------------------------------------------
  * Function:	bogus
  *
- * Purpose:	A bogus compression method.
+ * Purpose:	A bogus compression method that doesn't do anything.
  *
- * Return:	Success:	SRC_NBYTES, see compression documentation.
+ * Return:	Success:	Data chunk size
  *
  *		Failure:	0
  *
@@ -368,12 +368,11 @@ test_tconv(hid_t file)
  *-------------------------------------------------------------------------
  */
 static size_t
-bogus (unsigned int __unused__ flags, size_t __unused__ cd_size,
-       const void __unused__ *client_data, size_t src_nbytes, const void *src,
-       size_t __unused__ dst_nbytes, void *dst/*out*/)
+bogus(unsigned int __unused__ flags, size_t __unused__ cd_nelmts,
+      const unsigned int __unused__ cd_values[], size_t nbytes,
+      size_t __unused__ *buf_size, void __unused__ **buf)
 {
-    memcpy (dst, src, src_nbytes);
-    return src_nbytes;
+    return nbytes;
 }
 
 
@@ -586,7 +585,7 @@ test_compression(hid_t file)
 	    points[hs_offset[0]+i][hs_offset[1]+j] = rand ();
 	}
     }
-    H5Sselect_hyperslab (space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
+    H5Sselect_hyperslab(space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
 
     status = H5Dwrite (dataset, H5T_NATIVE_INT, space, space, xfer, points);
     if (status<0) goto error;
@@ -603,8 +602,10 @@ test_compression(hid_t file)
 		printf("   At index %lu,%lu\n",
 		       (unsigned long)(hs_offset[0]+i),
 		       (unsigned long)(hs_offset[1]+j));
-		printf("   At original: %d\n", (int)points[hs_offset[0]+i][hs_offset[1]+j]);
-		printf("   At returned: %d\n", (int)check[hs_offset[0]+i][hs_offset[1]+j]);
+		printf("   At original: %d\n",
+		       (int)points[hs_offset[0]+i][hs_offset[1]+j]);
+		printf("   At returned: %d\n",
+		       (int)check[hs_offset[0]+i][hs_offset[1]+j]);
 		goto error;
 	    }
 	}
@@ -619,11 +620,11 @@ test_compression(hid_t file)
     printf ("%-70s", "Testing compression (app-defined method)");
     fflush (stdout);
 
-    H5Zregister (H5Z_BOGUS, "bogus", bogus, bogus);
-    H5Pset_compression (dc, H5Z_BOGUS, 0, 0, NULL);
-    H5Dclose (dataset);
-    H5Sclose (space);
-    space = H5Screate_simple (2, size, NULL);
+    if (H5Zregister (H5Z_BOGUS, "bogus", bogus)<0) goto error;
+    if (H5Pset_filter (dc, H5Z_BOGUS, 0, 0, NULL)<0) goto error;
+    if (H5Dclose (dataset)<0) goto error;
+    if (H5Sclose (space)<0) goto error;
+    if ((space = H5Screate_simple (2, size, NULL))<0) goto error;
     dataset = H5Dcreate (file, DSET_BOGUS_NAME, H5T_NATIVE_INT, space, dc);
     assert (dataset>=0);
 

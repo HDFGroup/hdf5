@@ -10,14 +10,13 @@
 
 #include <H5Zpublic.h>
 
-struct H5O_compress_t; /*forward decl*/
+struct H5O_pline_t; /*forward decl*/
 
-herr_t H5Z_register (H5Z_method_t method, const char *name,
-		     H5Z_func_t compress, H5Z_func_t uncompress);
-size_t H5Z_compress (const struct H5O_compress_t *compress, size_t nbytes,
-		     const void *src, void *dst/*out*/);
-size_t H5Z_uncompress (const struct H5O_compress_t *compress,
-		       size_t src_nbytes, const void *src, size_t dst_nbytes,
-		       void *dst/*out*/);
+herr_t H5Z_register(H5Z_filter_t id, const char *comment, H5Z_func_t filter);
+herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
+		  size_t cd_nelmts, const unsigned int cd_values[]);
+herr_t H5Z_pipeline(H5F_t *f, const struct H5O_pline_t *pline, uintn flags,
+		    uintn *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
+		    size_t *buf_size/*in,out*/, void **buf/*in,out*/);
 
 #endif

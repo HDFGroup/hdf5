@@ -1,5 +1,6 @@
 #!/bin/sh
 set -x
+date
 #
 # This script should be run nightly from cron.  It checks out hdf5
 # from the CVS source tree and compares it against the previous
@@ -33,8 +34,8 @@ cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
 
 # Compare it with the previous version.
 if [ -d ${COMPARE}/previous ]; then
-    if (diff -r -I H5_VERS_RELEASE -I " released on " \
-	    ${COMPARE}/previous ${COMPARE}/current >/dev/null); then
+    if (diff -r -I H5_VERS_RELEASE -I " released on " --exclude CVS \
+	    ${COMPARE}/previous ${COMPARE}/current); then
 	update=no
     else
         update=yes

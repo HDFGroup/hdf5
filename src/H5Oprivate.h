@@ -169,17 +169,22 @@ typedef struct H5O_layout_t {
 } H5O_layout_t;
 
 /*
- * Compression message.
+ * Filter pipeline message.
  */
-#define H5O_COMPRESS_ID	0x000b
-extern const H5O_class_t H5O_COMPRESS[1];
+#define H5O_PLINE_ID	0x000b
+extern const H5O_class_t H5O_PLINE[1];
 
-typedef struct H5O_compress_t {
-    H5Z_method_t method;		/*algorithm ID			     */
-    uintn	flags;			/*flags				     */
-    size_t	cd_size;		/*client data size		     */
-    uint8	*client_data;		/*client data passed to algorithm    */
-} H5O_compress_t;
+typedef struct H5O_pline_t {
+    size_t	nfilters;		/*num filters defined		     */
+    size_t	nalloc;			/*num elements in `filter' array     */
+    struct {
+	H5Z_filter_t	id;		/*filter identification number	     */
+	uintn		flags;		/*defn and invocation flags	     */
+	char		*name;		/*optional filter name		     */
+	size_t		cd_nelmts;	/*number of elements in cd_values[]  */
+	uintn		*cd_values;	/*client data values		     */
+    } *filter;				/*array of filters		     */
+} H5O_pline_t;
 
 /*
  * Attribute Message.
