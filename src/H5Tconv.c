@@ -2126,7 +2126,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     size_t	conv_buf_size=0;  	/*size of conversion buffer in bytes */
     void	*tmp_buf=NULL;     	/*temporary background buffer 	     */
     size_t	tmp_buf_size=0;	        /*size of temporary bkg buffer	     */
-    uint8_t	dbuf[64],*dbuf_ptr;     /*temp destination buffer	     */
+    void	*dbuf=NULL;             /*temp destination buffer	     */
+    size_t	dbuf_size=0;	        /*size of destination buffer	     */
     int	        direction;		/*direction of traversal	     */
     int         nested=0;               /*flag of nested VL case             */
     hsize_t	elmtno;			/*element number counter	     */
@@ -2205,18 +2206,17 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             dst_delta = direction * (buf_stride ? buf_stride : dst->size);
             bkg_delta = direction * (bkg_stride ? bkg_stride : dst->size);
 
-            /* Set the dbuf_ptr correctly, based on the alignment of the dbuf */
-            /* (Have to use the maximum alignment of hvl_t and 'char *' types */
-            /* since this routine is used for both variable-length sequences  */
-            /* and variable-length strings) */
-            dbuf_ptr=dbuf+(((size_t)dbuf)%MAX(H5T_HVL_COMP_ALIGN_g,H5T_POINTER_COMP_ALIGN_g));
+            /* Dynamically allocate the destination buffer */
+            dbuf_size=MAX(sizeof(hvl_t),sizeof(char *));
+            if ((dbuf=H5FL_BLK_MALLOC(vlen_seq,dbuf_size))==NULL)
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
             /*
              * If the source and destination buffers overlap then use a
              * temporary buffer for the destination.
              */
             if (direction>0) {
-                dptr = &dbuf_ptr;
+                dptr = (uint8_t **)&dbuf;
             } else {
                 dptr = &dp;
             }
@@ -2340,7 +2340,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  * then we should copy the value to the true destination
                  * buffer.
                  */
-                if (d==dbuf_ptr) HDmemcpy (dp, d, dst->size);
+                if (d==dbuf) HDmemcpy (dp, d, dst->size);
                 sp += src_delta;
                 dp += dst_delta;
                 if(bg_ptr!=NULL)
@@ -2348,10 +2348,10 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                 /* switch destination pointer around when the olap gets to 0 */
                 if(--olap==0) {
-                    if(dptr==&dbuf_ptr)
+                    if(dptr==(uint8_t **)&dbuf)
                         dptr=&dp;
                     else
-                        dptr=&dbuf_ptr;
+                        dptr=(uint8_t **)&dbuf;
                 } /* end if */
             }
 
@@ -2373,6 +2373,9 @@ done:
     /* Release the background buffer, if we have one */
     if(tmp_buf!=NULL)
         H5FL_BLK_FREE(vlen_seq,tmp_buf);
+    /* Release the destination buffer, if we have one */
+    if(dbuf!=NULL)
+        H5FL_BLK_FREE(vlen_seq,dbuf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
