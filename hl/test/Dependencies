@@ -1,69 +1,14 @@
 ## This file is machine generated on GNU systems.
 ## Only temporary changes may be made here.
 
-lite_dset_test.lo: \
-   $(srcdir)/lite_dset_test.c \
-   $(top_srcdir)/src/H5LT.h
-lite_attr_test.lo: \
-   $(srcdir)/lite_attr_test.c \
-   $(top_srcdir)/src/H5LT.h
-image_test.lo: \
-   $(srcdir)/image_test.c \
-   $(top_srcdir)/src/H5IM.h \
-   $(top_srcdir)/src/H5LT.h
-image_demo.lo: \
-   $(srcdir)/image_demo.c \
-   $(top_srcdir)/src/H5IM.h \
-   $(top_srcdir)/src/H5LT.h \
-   $(srcdir)/pal_rgb.h
-image_make.lo: \
-   $(srcdir)/image_make.c \
-   $(top_srcdir)/src/H5IM.h \
-   $(top_srcdir)/src/H5LT.h \
-   $(srcdir)/pal_rgb.h
-make_table.lo: \
-   $(srcdir)/make_table.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-append_record.lo: \
-   $(srcdir)/append_record.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-write_record_fill.lo: \
-   $(srcdir)/write_record_fill.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-field_names.lo: \
-   $(srcdir)/field_names.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-field_index.lo: \
-   $(srcdir)/field_index.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-query_table.lo: \
-   $(srcdir)/query_table.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-insert_record.lo: \
-   $(srcdir)/insert_record.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-delete_record.lo: \
-   $(srcdir)/delete_record.c
-add_record_from.lo: \
-   $(srcdir)/add_record_from.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-combine_tables.lo: \
-   $(srcdir)/combine_tables.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-insert_field.lo: \
-   $(srcdir)/insert_field.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
-delete_field.lo: \
-   $(srcdir)/delete_field.c \
-   $(top_srcdir)/src/H5TB.h \
-   $(top_srcdir)/src/H5LT.h
+test_lite.lo: \
+   $(srcdir)/test_lite.c \
+   $(top_srcdir)/hl/src/H5LT.h
+test_image.lo: \
+   $(srcdir)/test_image.c \
+   $(top_srcdir)/hl/src/H5IM.h \
+   $(top_srcdir)/hl/src/H5LT.h
+test_table.lo: \
+   $(srcdir)/test_table.c \
+   $(top_srcdir)/hl/src/H5TA.h \
+   $(top_srcdir)/hl/src/H5LT.h

@@ -34,7 +34,6 @@
 -esym(534, H5I_clear_type, H5I_dec_type_ref)
 -esym(534, H5MM_xfree)
 -esym(534, H5RC_decr)
--esym(534, H5TB_dfree)
 -esym(534, H5V_array_fill)
 
 // Turn off warnings about not using PABLO_MASK macro

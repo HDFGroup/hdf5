@@ -45,7 +45,6 @@ main(int argc, char *argv[])
     /* Tests are generally arranged from least to most complexity... */
     AddTest("config", test_configure, cleanup_configure, "Configure definitions", NULL);
     AddTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code", NULL);
-    AddTest("tbbt", test_tbbt, NULL,  "Threaded, Balanced, Binary Trees", NULL);
     AddTest("tst", test_tst, NULL,  "Ternary Search Trees", NULL);
     AddTest("heap", test_heap, NULL,  "Memory Heaps", NULL);
     AddTest("skiplist", test_skiplist, NULL,  "Skip Lists", NULL);
