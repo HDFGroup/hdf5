@@ -17,12 +17,6 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-/*
- * If defined then include the file name as part of the object name when
- * printing full object names. Otherwise leave the file name off.
- */
-#define H5LS_PREPEND_FILENAME
-
 /* Command-line switches */
 static int verbose_g = 0;		/*lots of extra output		     */
 static int width_g = 80;		/*output width in characters	     */
@@ -36,6 +30,7 @@ static hbool_t grp_literal_g = FALSE;	/*list group, not contents	     */
 static hbool_t hexdump_g = FALSE;	/*show data as raw hexadecimal	     */
 static hbool_t show_errors_g = FALSE;	/*print HDF5 error messages	     */
 static hbool_t simple_output_g = FALSE;	/*make output more machine-readable  */
+static hbool_t show_file_name_g = FALSE;/*show file name for full names      */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
@@ -1816,9 +1811,6 @@ fix_name(const char *path, const char *base)
 
     if (path) {
 	/* Path, followed by slash */
-#ifdef H5LS_PREPEND_FILENAME
-	if ('/'!=*path) s[len++] = '/';
-#endif
 	for (/*void*/; *path; path++) {
 	    if ('/'!=*path || '/'!=prev) prev = s[len++] = *path;
 	}
@@ -2129,6 +2121,7 @@ main (int argc, char *argv[])
      * then there must have been something wrong with the file (perhaps it
      * doesn't exist).
      */
+    show_file_name_g = (argc-argno > 1); /*show file names if more than one*/
     while (argno<argc) {
 	fname = argv[argno++];
 	oname = NULL;
@@ -2167,11 +2160,7 @@ main (int argc, char *argv[])
 	     * group.
 	     */
 	    sym_insert(&sb, oname);
-#ifdef H5LS_PREPEND_FILENAME
-	    iter.container = container = fix_name(fname, oname);
-#else
-	    iter.container = container = fix_name("", oname);
-#endif
+            iter.container = container = fix_name(show_file_name_g?fname:"", oname);
 	    H5Giterate(file, oname, NULL, list, &iter);
 	    free(container);
 
@@ -2183,11 +2172,7 @@ main (int argc, char *argv[])
 	     * Specified name is a non-group object -- list that object.  The
 	     * container for the object is everything up to the base name.
 	     */
-#ifdef H5LS_PREPEND_FILENAME
-	    iter.container = fname;
-#else
-	    iter.container = "/";
-#endif
+            iter.container = show_file_name_g ? fname : "/";
 	    list(root, oname, &iter);
 	    if (H5Gclose(root)<0) exit(1);
 	}
