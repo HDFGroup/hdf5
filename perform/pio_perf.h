@@ -17,13 +17,13 @@ typedef enum iotype_ {
 } iotype;
 
 typedef struct parameters_ {
-    unsigned int max_num_procs;     /* Maximum number of processes to use   */
-    iotype io_type;                 /* The type of IO test to perform       */
-    unsigned int num_files;         /* Number of files to create            */
-    unsigned long num_dsets;        /* Number of datasets to create         */
-    unsigned long num_elmts;        /* Number of native ints in each dset   */
-    unsigned int num_iters;         /* Number of times to loop doing the IO */
-    unsigned long buf_size;         /* Buffer size                          */
+    int		max_num_procs;	/* Maximum number of processes to use   */
+    iotype	io_type;	/* The type of IO test to perform       */
+    int		num_files;	/* Number of files to create            */
+    long	num_dsets;	/* Number of datasets to create         */
+    long	num_elmts;	/* Number of native ints in each dset   */
+    int		num_iters;	/* Number of times to loop doing the IO */
+    long 	buf_size;       /* Buffer size                          */
 } parameters;
 
 typedef struct results_ {
