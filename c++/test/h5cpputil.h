@@ -25,8 +25,29 @@
 
 #ifndef H5_NO_STD
 int test_report (int, const std::string&);
+using std::cerr;
+using std::endl;
 #else
 int test_report (int, const string&);
 #endif
+
+void issue_fail_msg(const char* where, int line, const char* file_name);
+
+template <class Type1, class Type2>
+    void verify_val(Type1 x, Type2 value, const char* where, int line, const char* file_name)
+{
+    if (GetTestVerbosity()>=VERBO_HI)
+    {
+        cerr << "   Call to routine: " << where << " at line " << line
+	     << " in " << file_name <<  " had value " << x << endl;
+    }
+    if (x != value)
+    {
+        cerr << "*** UNEXPECTED VALUE from " << where << " should be "
+	     << value << ", but is " << x << " at line " << line
+	     << " in " << file_name << endl;
+        H5Eprint (stdout);
+    }
+}
 
 #endif

@@ -32,9 +32,9 @@
 #include <iostream>
 #endif
 
-#include "H5Cpp.h"
-#include "h5test.h"
 #include "testhdf5.h"
+#include "h5test.h"
+#include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
@@ -42,23 +42,20 @@ using namespace H5;
 
 #include "h5cpputil.h"
 
-const char *FILENAME[] = {
-    "dataset",
-    NULL
-};
+const string	FILE1("dataset.h5");
+const string	DSET_DEFAULT_NAME("default");
+const string	DSET_CHUNKED_NAME("chunked");
+const string	DSET_SIMPLE_IO_NAME("simple_io");
+const string	DSET_TCONV_NAME	("tconv");
+const string	DSET_COMPRESS_NA("compressed");
+const string	DSET_BOGUS_NAME	("bogus");
 
-#define DSET_DEFAULT_NAME	"default"
-#define DSET_CHUNKED_NAME	"chunked"
-#define DSET_SIMPLE_IO_NAME	"simple_io"
-#define DSET_TCONV_NAME		"tconv"
-#define DSET_COMPRESS_NAME	"compressed"
-#define DSET_BOGUS_NAME		"bogus"
+const int H5Z_FILTER_BOGUS = 305;
 
-#define H5Z_FILTER_BOGUS		305
-
-/* Local prototypes for filter functions */
+// Local prototypes
 static size_t bogus(unsigned int flags, size_t cd_nelmts, 
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+void cleanup_dsets(void);
 
 
 /*-------------------------------------------------------------------------
@@ -113,7 +110,7 @@ test_create( H5File& file)
 			(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
 	    // continuation here, that means no exception has been thrown
 	    H5_FAILED();
-	    cout << "    Library allowed overwrite of existing dataset." << endl;
+	    cerr << "    Library allowed overwrite of existing dataset." << endl;
 	    goto error;
         }
         catch (FileIException E ) // catching invalid creating dataset
@@ -136,7 +133,7 @@ test_create( H5File& file)
 	    dataset = new DataSet (file.openDataSet( "does_not_exist" ));
 	    // continuation here, that means no exception has been thrown
 	    H5_FAILED();
-	    cout << "    Opened a non-existent dataset." << endl;
+	    cerr << "    Opened a non-existent dataset." << endl;
 	    goto error;
 	}
 	catch (FileIException E ) // catching creating non-existent dataset
@@ -203,8 +200,8 @@ check_values (hsize_t i, hsize_t j, int apoint, int acheck)
     if (apoint != acheck)
     {
 	H5_FAILED();
-	cout << "    Read different values than written.\n" << endl;
-	cout << "    At index " << (unsigned long)i << "," << 
+	cerr << "    Read different values than written.\n" << endl;
+	cerr << "    At index " << (unsigned long)i << "," << 
    	(unsigned long)j << endl;
 	return -1;
     }
@@ -353,14 +350,14 @@ test_tconv( H5File& file)
 		in[4*i+3]!=out[4*i+0]) 
 	    {
 		H5_FAILED();
-		cout << "    Read with byte order conversion failed." << endl;
+		cerr << "    Read with byte order conversion failed." << endl;
 		goto error;
 	    }
 	}
 
 	delete [] out;
 	delete [] in;
-	cout << " PASSED" << endl;
+	cerr << " PASSED" << endl;
 	return 0;
     }  // end try
 
@@ -375,9 +372,9 @@ test_tconv( H5File& file)
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version number */
+    H5Z_CLASS_T_VERS,		/* H5Z_class_t version number   */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
-    1, 1,                   /* Encode and decode enabled */
+    1, 1,			/* Encode and decode enabled    */
     "bogus",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
@@ -495,8 +492,8 @@ test_compression(H5File& file)
 	    for (j=0; j<size[1]; j++) {
 		if (0!=check[i][j]) {
 		    H5_FAILED();
-		    cout << "    Read a non-zero value." << endl;
-		    cout << "    At index " << (unsigned long)i << "," << 
+		    cerr << "    Read a non-zero value." << endl;
+		    cerr << "    At index " << (unsigned long)i << "," << 
 		   (unsigned long)j << endl;
 		    goto error;
 		}
@@ -622,12 +619,12 @@ test_compression(H5File& file)
 	    if (points[hs_offset[0]+i][hs_offset[1]+j] !=
 		check[hs_offset[0]+i][hs_offset[1]+j]) {
 		H5_FAILED();
-		cout << "    Read different values than written.\n" << endl;
-		cout << "    At index " << (unsigned long)(hs_offset[0]+i) << 
+		cerr << "    Read different values than written.\n" << endl;
+		cerr << "    At index " << (unsigned long)(hs_offset[0]+i) << 
 		   "," << (unsigned long)(hs_offset[1]+j) << endl;
 		
-		cout << "    At original: " << (int)points[hs_offset[0]+i][hs_offset[1]+j] << endl;
-		cout << "    At returned: " << (int)check[hs_offset[0]+i][hs_offset[1]+j] << endl;
+		cerr << "    At original: " << (int)points[hs_offset[0]+i][hs_offset[1]+j] << endl;
+		cerr << "    At returned: " << (int)check[hs_offset[0]+i][hs_offset[1]+j] << endl;
 		goto error;
 	    }
 	}
@@ -640,7 +637,7 @@ test_compression(H5File& file)
 #else
     TESTING("deflate filter");
     SKIPPED();
-    cout << not_supported << endl;
+    cerr << not_supported << endl;
 #endif
 
 	/*----------------------------------------------------------------------
@@ -748,7 +745,7 @@ test_multiopen (H5File& file)
 	if (cur_size[0]!=tmp_size[0]) 
 	{
 	    H5_FAILED();
-	    cout << "    Got " << (int)tmp_size[0] << " instead of " 
+	    cerr << "    Got " << (int)tmp_size[0] << " instead of " 
 		    << (int)cur_size[0] << "!" << endl;
 	    delete space;
 	    goto error;
@@ -843,7 +840,7 @@ test_types(H5File& file)
 
 	// catch exceptions thrown in try block of bitfield_1
 	catch (Exception E) { 
-	    cout << "Failure in " << E.getFuncName() << " - " 
+	    cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 	    goto error;
 	}
@@ -864,7 +861,7 @@ test_types(H5File& file)
 	    try { dset->write (buf, type); }
 	    catch(DataSetIException E) 
 	    {
-	    	cout << "Failure in " << E.getFuncName() << " - " 
+	    	cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 		delete dset;
 		goto error;
@@ -874,7 +871,7 @@ test_types(H5File& file)
 
 	// catch exceptions thrown in try block of bitfield_2
 	catch (Exception E) {
-	    cout << "Failure in " << E.getFuncName() << " - " 
+	    cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 	    goto error;
 	}
@@ -906,12 +903,12 @@ test_types(H5File& file)
 	// catch exceptions thrown in try block of opaque_1
 	catch (DataSetIException E) { 
 	    delete optype;
-	    cout << "Failure in " << E.getFuncName() << " - " 
+	    cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 	    goto error;
 	}
 	catch (Exception E) {
-	    cout << "Failure in " << E.getFuncName() << " - " 
+	    cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 	    goto error;
 	}
@@ -941,12 +938,12 @@ test_types(H5File& file)
 	} //end try block of opaque_2
 	catch (DataSetIException E) { 
 	    delete optype;
-	    cout << "Failure in " << E.getFuncName() << " - " 
+	    cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 	    goto error;
 	}
 	catch (Exception E) {
-	    cout << "Failure in " << E.getFuncName() << " - " 
+	    cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 	    goto error;
 	}
@@ -956,7 +953,7 @@ test_types(H5File& file)
     } // end top try block
 
     catch (Exception E) { // Group and DataType exceptions
-	    cout << "Failure in " << E.getFuncName() << " - " 
+	    cerr << "Failure in " << E.getFuncName() << " - " 
 		 << E.getDetailMsg() << endl;
 	    goto error;
     }
@@ -993,9 +990,6 @@ main(void)
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
     
-    char        filename[1024];
-    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
-
     int		nerrors=0;	// keep track of number of failures occurr
     try 
     {
@@ -1008,9 +1002,9 @@ main(void)
 	// list object to pass in H5File::H5File
 	FileAccPropList fapl(fapl_id);
 
-	H5File file( filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+	H5File file(FILE1, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
        
-	/* Cause the library to emit initial messages */
+	// Cause the library to emit initial messages
 	Group grp = file.createGroup( "emit diagnostics", 0);
 	grp.setComment( ".", "Causes diagnostic messages to be emitted");
 
@@ -1030,10 +1024,31 @@ main(void)
     {
 	return(test_report(nerrors, string(" Dataset")));
     }
-    /* use C test utility routine to clean up data files */
-    h5_cleanup(FILENAME, fapl_id);
 
-    /* print out dsets test results */
+    // Clean up data file
+    cleanup_dsets();
+
+    // Print out dsets test results 
     cerr << endl << endl;
     return(test_report(nerrors, string(" Dataset")));
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    cleanup_dsets
+ *
+ * Purpose:     Cleanup temporary test files
+ *
+ * Return:      none
+ *
+ * Programmer:  (use C version)
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+cleanup_dsets(void)
+{
+    remove(FILE1.c_str());
+} /* cleanup_dsets */
+

@@ -31,8 +31,8 @@
 using namespace std;
 #endif
 
-#include "h5cpputil.h"
 #include "h5test.h"
+#include "h5cpputil.h"
 
 /*-------------------------------------------------------------------------
  * Function:	test_report
@@ -58,16 +58,39 @@ int test_report( int nerrors, const string& testname )
    {
       nerrors = MAX(1, nerrors);
 	if (1 == nerrors)
-	    cout << "***** " << nerrors << testname
+	    cerr << "***** " << nerrors << testname
 					<< " TEST FAILED! *****" << endl;
 	else
-	    cout << "***** " << nerrors << testname
+	    cerr << "***** " << nerrors << testname
 					<< " TESTS FAILED! *****" << endl;
       return 1;
    }
    else 
    {
-      cout << "All" << testname << " tests passed." << endl;
+      cerr << "All" << testname << " tests passed." << endl;
       return 0;
    }
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	issue_fail_msg
+ *
+ * Purpose:	Displays that a function has failed with its location.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (copied and modified macro CHECK from C)
+ *		Monday, December 20, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+void issue_fail_msg(const char* where, int line, const char* file_name)
+{
+    if (GetTestVerbosity()>=VERBO_HI)
+    {
+        cerr << "   Call to routine: " << where << " at line " << line
+             << " in " << file_name << "has failed" << endl;
+    }
+}
+
+
