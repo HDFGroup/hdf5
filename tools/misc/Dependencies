@@ -43,8 +43,8 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Rpublic.h \
    $(top_srcdir)/src/H5Zprivate.h \
    $(top_srcdir)/src/H5FDfamily.h
-h5import.lo: \
-   $(srcdir)/h5import.c \
+h5createU8.lo: \
+   $(srcdir)/h5createU8.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
