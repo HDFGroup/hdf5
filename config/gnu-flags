@@ -158,7 +158,7 @@ case "$cc_vendor-$cc_version" in
     DEBUG_CPPFLAGS=
 
     # Profile
-    PROFILE_CFLAGS=-pg
+    PROFILE_CFLAGS=-g -pg
     PROFILE_CPPFLAGS=
     ;;
 esac
