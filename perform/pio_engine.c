@@ -215,6 +215,7 @@ do_pio(parameters param)
         GOTOERROR(FAIL);
     }
 
+#if 0
 /* DEBUG*/
 fprintf(stderr, "nfiles=%d\n", nfiles);
 fprintf(stderr, "ndsets=%ld\n", ndsets);
@@ -222,8 +223,10 @@ fprintf(stderr, "nelmts=%ld\n", nelmts);
 fprintf(stderr, "niters=%d\n", niters);
 fprintf(stderr, "maxprocs=%d\n", maxprocs);
 fprintf(stderr, "buffer size=%ld\n", buf_size);
-/* nfiles=3; */
-/*ndsets=5; */
+nfiles=MIN(3, nfiles);
+ndsets=MIN(5, ndsets);
+/* DEBUG END */
+#endif
 
     /* Create a sub communicator for this run. Easier to use the first N
      * processes. */
@@ -264,7 +267,7 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
 
         sprintf(base_name, "#pio_tmp_%u", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
-fprintf(stderr, "filename=%s\n", base_name);
+fprintf(stderr, "filename=%s\n", fname);
 
         set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fopen(iot, fname, &fd, PIO_CREATE | PIO_WRITE, comm);
@@ -464,6 +467,9 @@ do_write(file_descr *fd, iotype iot, long ndsets,
 {
     int		ret_code = SUCCESS;
     int		rc;             /*routine return code                   */
+    int         mrc;            /*MPI return code                       */
+    MPI_Offset	mpi_offset;
+    MPI_Status	mpi_status;
     long	ndset;
     long	nelmts_towrite, nelmts_written;
     char	dname[64];
@@ -513,7 +519,7 @@ do_write(file_descr *fd, iotype iot, long ndsets,
             break;
 
         case PHDF5:
-            sprintf(dname, "Dataset_%lu", ndset);
+            sprintf(dname, "Dataset_%ld", ndset);
             h5ds_id = H5Dcreate(fd->h5fd, dname, H5T_NATIVE_INT,
                                 h5dset_space_id, H5P_DEFAULT);
 
@@ -558,6 +564,11 @@ do_write(file_descr *fd, iotype iot, long ndsets,
                 break;
 
             case MPIO:
+		mpi_offset = dset_offset;
+		mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
+			nelmts_towrite*ELMT_SIZE, MPI_CHAR, &mpi_status);
+		VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
+		break;
             case PHDF5:
                 break;
             }
