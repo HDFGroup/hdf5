@@ -70,8 +70,7 @@ const H5F_low_class_t H5F_LOW_STDIO_g[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_stdio_open(const char *name,
-	       const H5F_access_t *access_parms __attribute__((unused)),
+H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
 	       uintn flags, H5F_search_t *key/*out*/)
 {
     H5F_low_t		   *lf = NULL;
@@ -113,9 +112,9 @@ H5F_stdio_open(const char *name,
     if (fseek(lf->u.stdio.f, 0, SEEK_END) < 0) {
 	lf->u.stdio.op = H5F_OP_UNKNOWN;
     } else {
-	ssize_t x = ftell (lf->u.stdio.f);
+	hssize_t x = ftell (lf->u.stdio.f);
 	assert (x>=0);
-	H5F_addr_inc(&(lf->eof), (size_t)x);
+	H5F_addr_inc(&(lf->eof), (hsize_t)x);
     }
 
     /* The unique key */
@@ -147,8 +146,7 @@ H5F_stdio_open(const char *name,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_close(H5F_low_t *lf,
-		const H5F_access_t *access_parms __attribute__((unused)))
+H5F_stdio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 {
     FUNC_ENTER(H5F_stdio_close, FAIL);
 
@@ -183,8 +181,7 @@ H5F_stdio_close(H5F_low_t *lf,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_read(H5F_low_t *lf,
-	       const H5F_access_t *access_parms __attribute__((unused)),
+H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	       const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     size_t		n;
@@ -292,10 +289,8 @@ H5F_stdio_read(H5F_low_t *lf,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_write(H5F_low_t *lf,
-		const H5F_access_t *access_parms __attribute__((unused)),
-		const haddr_t *addr, size_t size,
-		const uint8 *buf)
+H5F_stdio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
+		const haddr_t *addr, size_t size, const uint8 *buf)
 {
     uint64		mask;
 #ifdef HAVE_FSEEK64
@@ -380,8 +375,7 @@ H5F_stdio_write(H5F_low_t *lf,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_flush(H5F_low_t *lf,
-		const H5F_access_t *access_parms __attribute__((unused)))
+H5F_stdio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 {
     FUNC_ENTER(H5F_stdio_flush, FAIL);
 

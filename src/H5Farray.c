@@ -46,7 +46,7 @@ herr_t
 H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
 {
     intn		i;
-    size_t	nbytes;
+    hsize_t		nbytes;
    
     FUNC_ENTER (H5F_arr_create, FAIL);
 
@@ -113,17 +113,18 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
 herr_t
 H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	      const struct H5O_efl_t *efl,
-	      const size_t _hslab_size[], const size_t mem_size[],
-	      const size_t mem_offset[], const size_t file_offset[],
+	      const hsize_t _hslab_size[], const hsize_t mem_size[],
+	      const hssize_t mem_offset[], const hssize_t file_offset[],
 	      void *_buf/*out*/)
 {
     uint8	*buf = (uint8 *)_buf;		/*cast for arithmetic	*/
-    ssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
-    ssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
-    size_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
-    size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
-    size_t	mem_start, file_start;		/*byte offsets to start	*/
-    size_t	elmt_size = 1;			/*bytes per element	*/
+    hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
+    hssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
+    hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
+    hsize_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
+    size_t	mem_start;			/*byte offset to start	*/
+    hsize_t	file_start;			/*byte offset to start	*/
+    hsize_t	elmt_size = 1;			/*bytes per element	*/
     size_t	nelmts, z;			/*number of elements	*/
     intn	ndims;				/*stride dimensionality	*/
     haddr_t	addr;				/*address in file	*/
@@ -146,12 +147,22 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch (layout->type) {
     case H5D_CONTIGUOUS:
+	ndims = layout->ndims;
+	/*
+	 * Offsets must not be negative for this type of storage.
+	 */
+	for (i=0; i<ndims; i++) {
+	    if (mem_offset[i]<0 || file_offset[i]<0) {
+		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+			       "negative offsets are not valid");
+	    }
+	}
+	
 	/*
 	 * Calculate the strides needed to walk through the array on disk
 	 * and memory. Optimize the strides to result in the fewest number of
 	 * I/O requests.
 	 */
-	ndims = layout->ndims;
 	mem_start = H5V_hyper_stride (ndims, hslab_size, mem_size,
 				      mem_offset, mem_stride/*out*/);
 	file_start = H5V_hyper_stride (ndims, hslab_size, layout->dim,
@@ -263,17 +274,18 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
-	       const struct H5O_efl_t *efl, const size_t _hslab_size[],
-	       const size_t mem_size[], const size_t mem_offset[],
-	       const size_t file_offset[], const void *_buf)
+	       const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
+	       const hsize_t mem_size[], const hssize_t mem_offset[],
+	       const hssize_t file_offset[], const void *_buf)
 {
     const uint8	*buf = (const uint8 *)_buf;	/*cast for arithmetic	*/
-    ssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
-    ssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
-    size_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
-    size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
-    size_t	mem_start, file_start;		/*byte offsets to start	*/
-    size_t	elmt_size = 1;			/*bytes per element	*/
+    hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
+    hssize_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
+    hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
+    hsize_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
+    hsize_t	mem_start;			/*byte offset to start	*/
+    hsize_t	file_start;			/*byte offset to start	*/
+    hsize_t	elmt_size = 1;			/*bytes per element	*/
     size_t	nelmts, z;			/*number of elements	*/
     intn	ndims;				/*dimensionality	*/
     haddr_t	addr;				/*address in file	*/
@@ -297,12 +309,22 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch (layout->type) {
     case H5D_CONTIGUOUS:
+	ndims = layout->ndims;
+	/*
+	 * Offsets must not be negative for this type of storage.
+	 */
+	for (i=0; i<ndims; i++) {
+	    if (mem_offset[i]<0 || file_offset[i]<0) {
+		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+			       "negative offsets are not valid");
+	    }
+	}
+	
 	/*
 	 * Calculate the strides needed to walk through the array on disk.
 	 * Optimize the strides to result in the fewest number of I/O
 	 * requests.
 	 */
-	ndims = layout->ndims;
 	mem_start = H5V_hyper_stride (ndims, hslab_size, mem_size,
 				      mem_offset, mem_stride/*out*/);
 	file_start = H5V_hyper_stride (ndims, hslab_size, layout->dim,

@@ -447,9 +447,9 @@ H5Pget_version(hid_t tid, int *boot/*out*/, int *freelist/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_userblock(hid_t tid, size_t size)
+H5Pset_userblock(hid_t tid, hsize_t size)
 {
-    intn		    i;
+    uintn		    i;
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_userblock, FAIL);
@@ -460,11 +460,11 @@ H5Pset_userblock(hid_t tid, size_t size)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation template");
     }
-    for (i=8; i<8*(intn)sizeof(int); i++) {
-	uintn p2 = 8 == i ? 0 : 1 << i;
+    for (i=8; i<8*sizeof(hsize_t); i++) {
+	hsize_t p2 = 8==i ? 0 : ((hsize_t)1<<i);
 	if (size == p2) break;
     }
-    if (i>=8*(intn)sizeof(int)) {
+    if (i>=8*sizeof(hsize_t)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "userblock size is not valid");
     }
@@ -491,9 +491,9 @@ H5Pset_userblock(hid_t tid, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_userblock(hid_t tid, size_t *size)
+H5Pget_userblock(hid_t tid, hsize_t *size)
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	*tmpl = NULL;
 
     FUNC_ENTER(H5Pget_userblock, FAIL);
 
@@ -504,8 +504,7 @@ H5Pget_userblock(hid_t tid, size_t *size)
 		      "not a file creation template");
     }
     /* Get value */
-    if (size)
-	*size = tmpl->userblock_size;
+    if (size) *size = tmpl->userblock_size;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -870,7 +869,7 @@ H5Pget_layout(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
+H5Pset_chunk(hid_t tid, int ndims, const hsize_t dim[])
 {
     int			    i;
     H5D_create_t	   *tmpl = NULL;
@@ -887,7 +886,7 @@ H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality must be positive");
     }
-    if (ndims > (intn)NELMTS(tmpl->chunk_size)) {
+    if ((size_t)ndims > NELMTS(tmpl->chunk_size)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality is too large");
     }
@@ -895,7 +894,7 @@ H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "no chunk dimensions specified");
     }
-    for (i = 0; i < ndims; i++) {
+    for (i=0; i<ndims; i++) {
 	if (dim[i] <= 0) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 			  "all chunk dimensions must be positive");
@@ -905,8 +904,9 @@ H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
     /* Set value */
     tmpl->layout = H5D_CHUNKED;
     tmpl->chunk_ndims = ndims;
-    for (i = 0; i < ndims; i++)
+    for (i = 0; i < ndims; i++) {
 	tmpl->chunk_size[i] = dim[i];
+    }
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -931,10 +931,10 @@ H5Pset_chunk(hid_t tid, int ndims, const size_t dim[])
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
+H5Pget_chunk(hid_t tid, int max_ndims, hsize_t dim[]/*out*/)
 {
-    int			    i;
-    H5D_create_t	   *tmpl = NULL;
+    int			i;
+    H5D_create_t	*tmpl = NULL;
 
     FUNC_ENTER(H5Pget_chunk, FAIL);
 
@@ -948,7 +948,7 @@ H5Pget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "not a chunked storage layout");
     }
-    for (i = 0; i < tmpl->chunk_ndims && i < max_ndims && dim; i++) {
+    for (i=0; i<tmpl->chunk_ndims && i<max_ndims && dim; i++) {
 	dim[i] = tmpl->chunk_size[i];
     }
 
@@ -984,7 +984,7 @@ H5Pget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_external (hid_t plist_id, const char *name, size_t offset, size_t size)
+H5Pset_external (hid_t plist_id, const char *name, off_t offset, hsize_t size)
 {
     int			idx;
     size_t		total, tmp;
@@ -1001,6 +1001,10 @@ H5Pset_external (hid_t plist_id, const char *name, size_t offset, size_t size)
     if (!name || !*name) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "no name given");
+    }
+    if (offset<0) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "negative external file offset");
     }
     if (size<=0) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1104,7 +1108,7 @@ H5Pget_external_count (hid_t plist_id)
  */
 herr_t
 H5Pget_external (hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
-		 size_t *offset/*out*/, size_t *size/*out*/)
+		 off_t *offset/*out*/, hsize_t *size/*out*/)
 {
     H5D_create_t	*plist = NULL;
     
@@ -1590,7 +1594,7 @@ H5Pset_family (hid_t tid, hid_t memb_tid)
 {
     
     H5F_access_t	*tmpl = NULL;
-    H5F_access_t	*memb_tmpl = NULL;
+    H5F_access_t	*memb_tmpl = &H5F_access_dflt;
     
     FUNC_ENTER (H5Pset_family, FAIL);
 

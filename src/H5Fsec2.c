@@ -69,8 +69,7 @@ const H5F_low_class_t	H5F_LOW_SEC2_g[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_sec2_open(const char *name,
-	      const H5F_access_t *access_parms __attribute__((unused)),
+H5F_sec2_open(const char *name, const H5F_access_t __unused__ *access_parms,
 	      uintn flags, H5F_search_t *key/*out*/)
 {
     intn		    oflags;
@@ -122,8 +121,7 @@ H5F_sec2_open(const char *name,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sec2_close(H5F_low_t *lf,
-	       const H5F_access_t *access_parms __attribute__((unused)))
+H5F_sec2_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 {
     FUNC_ENTER(H5F_sec2_close, FAIL);
 
@@ -158,8 +156,7 @@ H5F_sec2_close(H5F_low_t *lf,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sec2_read(H5F_low_t *lf,
-	      const H5F_access_t *access_parms __attribute__((unused)),
+H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	      const haddr_t *addr, size_t size, uint8 *buf)
 {
     ssize_t		n;
@@ -263,8 +260,7 @@ H5F_sec2_read(H5F_low_t *lf,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sec2_write(H5F_low_t *lf,
-	       const H5F_access_t *access_parms __attribute__((unused)),
+H5F_sec2_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	       const haddr_t *addr, size_t size, const uint8 *buf)
 {
     uint64	mask;

@@ -479,7 +479,7 @@ H5O_dtype_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_dtype_encode(H5F_t *f, uint8 *p, const void *mesg)
+H5O_dtype_encode(H5F_t __unused__ *f, uint8 *p, const void *mesg)
 {
     const H5T_t            *dt = (const H5T_t *) mesg;
 

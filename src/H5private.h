@@ -57,7 +57,10 @@
 
 /* Does the compiler support the __attribute__(()) syntax? */
 #ifndef HAVE_ATTRIBUTE
-#   define __attribute__(X)      /*void */
+#   define __attribute__(X)	/*void*/
+#   define __unused__		/*void*/
+#else
+#   define __unused__		__attribute__((unused))
 #endif
 
 /* Does the compiler expand __FUNCTION__? */
@@ -94,6 +97,12 @@
 #ifndef MAX3
 #   define MAX3(a,b,c)   MAX(MAX(a,b),c)
 #endif
+
+/* maximum value of various types */
+#define MAX_SIZET	((hsize_t)(size_t)(ssize_t)(-1))
+#define MAX_SSIZET	((hsize_t)(ssize_t)((size_t)1<<(8*sizeof(ssize_t)-1)))
+#define MAX_HSIZET	((hsize_t)(hssize_t)(-1))
+#define MAX_HSSIZET	((hsize_t)1<<(8*sizeof(hssize_t)-1))
 
 /*
  * HDF Boolean type.

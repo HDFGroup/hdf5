@@ -108,7 +108,7 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static size_t
-H5G_node_sizeof_rkey(H5F_t *f, const void *udata __attribute__((unused)))
+H5G_node_sizeof_rkey(H5F_t *f, const void __unused__ *udata)
 {
     return H5F_SIZEOF_SIZE(f);	/*the name offset */
 }
@@ -132,8 +132,7 @@ H5G_node_sizeof_rkey(H5F_t *f, const void *udata __attribute__((unused)))
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_decode_key(H5F_t *f, H5B_t *bt __attribute__((unused)), uint8 *raw,
-		    void *_key)
+H5G_node_decode_key(H5F_t *f, H5B_t __unused__ *bt, uint8 *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -167,8 +166,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t *bt __attribute__((unused)), uint8 *raw,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_encode_key(H5F_t *f, H5B_t *bt __attribute__((unused)),
-		    uint8 *raw, void *_key)
+H5G_node_encode_key(H5F_t *f, H5B_t __unused__ *bt, uint8 *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -231,15 +229,13 @@ H5G_node_size(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_create(H5F_t *f, H5B_ins_t op,
-		void *_lt_key, void *_udata __attribute__((unused)),
-		void *_rt_key,
-		haddr_t *addr/*out*/)
+H5G_node_create(H5F_t *f, H5B_ins_t __unused__ op, void *_lt_key,
+		void __unused__ *_udata, void *_rt_key, haddr_t *addr/*out*/)
 {
     H5G_node_key_t	   *lt_key = (H5G_node_key_t *) _lt_key;
     H5G_node_key_t	   *rt_key = (H5G_node_key_t *) _rt_key;
     H5G_node_t		   *sym = NULL;
-    size_t		    size = 0;
+    hsize_t		    size = 0;
 
     FUNC_ENTER(H5G_node_create, FAIL);
 
@@ -315,9 +311,8 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
     /*
      * Look for dirty entries and set the node dirty flag.
      */
-    for (i = 0; i < sym->nsyms; i++) {
-	if (sym->entry[i].dirty)
-	    sym->dirty = TRUE;
+    for (i=0; i<sym->nsyms; i++) {
+	if (sym->entry[i].dirty) sym->dirty = TRUE;
     }
 
     /*
@@ -344,7 +339,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
 	H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
 	HDmemset(p, 0, size - (p - buf));
 
-	status = H5F_block_write(f, addr, size, buf);
+	status = H5F_block_write(f, addr, (hsize_t)size, buf);
 	buf = H5MM_xfree(buf);
 	if (status < 0)
 	    HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
@@ -381,8 +376,8 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load(H5F_t *f, const haddr_t *addr, const void *_udata1,
-	      void *_udata2)
+H5G_node_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
+	      void __unused__ *_udata2)
 {
     H5G_node_t		   *sym = NULL;
     size_t		    size = 0;
@@ -408,7 +403,7 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void *_udata1,
     sym = H5MM_xcalloc(1, sizeof(H5G_node_t));
     sym->entry = H5MM_xcalloc((intn)(2*H5G_NODE_K(f)), sizeof(H5G_entry_t));
 
-    if (H5F_block_read(f, addr, size, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, buf) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL,
 		    "unabel to read symbol table node");
     }
@@ -589,9 +584,8 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_found(H5F_t *f, const haddr_t *addr,
-	       const void *_lt_key __attribute__((unused)),
-	       void *_udata, const void *_rt_key __attribute__((unused)))
+H5G_node_found(H5F_t *f, const haddr_t *addr, const void __unused__ *_lt_key,
+	       void *_udata, const void __unused__ *_rt_key)
 {
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
     H5G_node_t		*sn = NULL;
@@ -699,12 +693,10 @@ H5G_node_found(H5F_t *f, const haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G_node_insert(H5F_t *f, const haddr_t *addr,
-		void *_lt_key __attribute__((unused)),
-		hbool_t *lt_key_changed __attribute__((unused)),
-		void *_md_key, void *_udata,
-		void *_rt_key, hbool_t *rt_key_changed __attribute__((unused)),
-		haddr_t *new_node)
+H5G_node_insert(H5F_t *f, const haddr_t *addr, void __unused__ *_lt_key,
+		hbool_t __unused__ *lt_key_changed, void *_md_key,
+		void *_udata, void *_rt_key,
+		hbool_t __unused__ *rt_key_changed, haddr_t *new_node)
 {
     H5G_node_key_t	*md_key = (H5G_node_key_t *) _md_key;
     H5G_node_key_t	*rt_key = (H5G_node_key_t *) _rt_key;

@@ -133,7 +133,7 @@ synchronize (void)
 int
 main (void)
 {
-    static size_t	size[2] = {REQUEST_SIZE_X, REQUEST_SIZE_Y};
+    static hsize_t	size[2] = {REQUEST_SIZE_X, REQUEST_SIZE_Y};
     static int		nread=NREAD_REQUESTS, nwrite=NWRITE_REQUESTS;
 
     unsigned char	*the_data = NULL;
@@ -142,10 +142,10 @@ main (void)
     struct rusage	r_start, r_stop;
     struct timeval	t_start, t_stop;
     int			i, fd;
-    ssize_t		n;
+    hssize_t		n;
     off_t		offset;
-    int			start[2];
-    size_t		count[2];
+    hssize_t		start[2];
+    hsize_t		count[2];
     
     printf ("I/O request size is %1.1fMB\n",
 	    ((double)(size[0])*(double)(size[1]))/(1024.0*1024));
@@ -162,8 +162,9 @@ main (void)
     assert (file_space>=0);
     dset = H5Dcreate (file, "dset", H5T_NATIVE_UCHAR, file_space, H5P_DEFAULT);
     assert (dset>=0);
-    the_data = malloc (size[0]*size[1]);
-    memset (the_data, 0xAA, size[0]*size[1]); /*initial fill for lazy malloc*/
+    the_data = malloc ((size_t)(size[0]*size[1]));
+    /*initial fill for lazy malloc*/
+    memset (the_data, 0xAA, (size_t)(size[0]*size[1]));
 
     /* Fill raw */
     synchronize ();
@@ -173,14 +174,14 @@ main (void)
     for (i=0; i<nwrite; i++) {
 	putc (PROGRESS, stderr);
 	fflush (stderr);
-	memset (the_data, 0xAA, size[0]*size[1]);
+	memset (the_data, 0xAA, (size_t)(size[0]*size[1]));
     }
     getrusage (RUSAGE_SELF, &r_stop);
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("fill raw",
 		 &r_start, &r_stop, &t_start, &t_stop,
-		 nread*size[0]*size[1]);
+		 (size_t)(nread*size[0]*size[1]));
     
 
     /* Fill hdf5 */
@@ -200,7 +201,7 @@ main (void)
     putc ('\n', stderr);
     print_stats ("fill hdf5",
 		 &r_start, &r_stop, &t_start, &t_stop,
-		 nread*size[0]*size[1]);
+		 (size_t)(nread*size[0]*size[1]));
     
     /* Write the raw dataset */
     synchronize ();
@@ -212,7 +213,7 @@ main (void)
 	fflush (stderr);
 	offset = lseek (fd, 0, SEEK_SET);
 	assert (0==offset);
-	n = write (fd, the_data, size[0]*size[1]);
+	n = write (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
     getrusage (RUSAGE_SELF, &r_stop);
@@ -220,7 +221,7 @@ main (void)
     putc ('\n', stderr);
     print_stats ("out raw",
 		 &r_start, &r_stop, &t_start, &t_stop,
-		 nread*size[0]*size[1]);
+		 (size_t)(nread*size[0]*size[1]));
 
     /* Write the hdf5 dataset */
     synchronize ();
@@ -239,7 +240,7 @@ main (void)
     putc ('\n', stderr);
     print_stats ("out hdf5",
 		 &r_start, &r_stop, &t_start, &t_stop,
-		 nread*size[0]*size[1]);
+		 (size_t)(nread*size[0]*size[1]));
 
     /* Read the raw dataset */
     synchronize ();
@@ -251,7 +252,7 @@ main (void)
 	fflush (stderr);
 	offset = lseek (fd, 0, SEEK_SET);
 	assert (0==offset);
-	n = read (fd, the_data, size[0]*size[1]);
+	n = read (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
     getrusage (RUSAGE_SELF, &r_stop);
@@ -259,7 +260,7 @@ main (void)
     putc ('\n', stderr);
     print_stats ("in raw",
 		 &r_start, &r_stop, &t_start, &t_stop,
-		 nread*size[0]*size[1]);
+		 (size_t)(nread*size[0]*size[1]));
     
 
     /* Read the hdf5 dataset */
@@ -279,7 +280,7 @@ main (void)
     putc ('\n', stderr);
     print_stats ("in hdf5",
 		 &r_start, &r_stop, &t_start, &t_stop,
-		 nread*size[0]*size[1]);
+		 (size_t)(nread*size[0]*size[1]));
 
     /* Read hyperslab */
     assert (size[0]>20 && size[1]>20);
@@ -303,7 +304,7 @@ main (void)
     putc ('\n', stderr);
     print_stats ("in hdf5 partial",
 		 &r_start, &r_stop, &t_start, &t_stop,
-		 nread*count[0]*count[1]);
+		 (size_t)(nread*count[0]*count[1]));
     
 
     

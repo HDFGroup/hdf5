@@ -68,21 +68,21 @@ const H5F_create_t	H5F_create_dflt = {
     0,				/* Default user-block size */
     4,				/* Default 1/2 rank for symtab leaf nodes */
     {				/* Default 1/2 rank for btree intern nodes */
-	16,			/* Symbol table internal nodes		*/
-	32,			/* Indexed storage internal nodes	*/
-	0,			/* unused				*/
-	0,			/* unused				*/
-	0,			/* unused				*/
-	0,			/* unused				*/
-	0,			/* unused				*/
-	0,			/* unused				*/
+	16,			/* Symbol table internal nodes		   */
+	32,			/* Indexed storage internal nodes	   */
+	0,			/* unused				   */
+	0,			/* unused				   */
+	0,			/* unused				   */
+	0,			/* unused				   */
+	0,			/* unused				   */
+	0,			/* unused				   */
     },
-    sizeof(size_t),		   /* Default offset size */
-    sizeof(size_t),		   /* Default length size */
-    HDF5_BOOTBLOCK_VERSION,	/* Current Boot-Block version # */
-    HDF5_FREESPACE_VERSION,	/* Current Free-Space info version # */
+    sizeof(hsize_t),		/* Default offset size 			   */
+    sizeof(hsize_t),		/* Default length size 			   */
+    HDF5_BOOTBLOCK_VERSION,	/* Current Boot-Block version #		   */
+    HDF5_FREESPACE_VERSION,	/* Current Free-Space info version #	   */
     HDF5_OBJECTDIR_VERSION,	/* Current Object Directory info version # */
-    HDF5_SHAREDHEADER_VERSION,	/* Current Shared-Header format version # */
+    HDF5_SHAREDHEADER_VERSION,	/* Current Shared-Header format version #  */
 };
 
 /*
@@ -923,7 +923,7 @@ H5F_open(const char *name, uintn flags,
 			H5G_SIZEOF_ENTRY(f);
 	assert(variable_size <= sizeof buf);
 	addr1 = f->shared->boot_addr;
-	H5F_addr_inc(&addr1, fixed_size);
+	H5F_addr_inc(&addr1, (hsize_t)fixed_size);
 	if (H5F_low_read(f->shared->lf, access_parms, &addr1, variable_size,
 			 buf) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
@@ -1275,7 +1275,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     /* update file length if necessary */
     if (!H5F_addr_defined(&(f->shared->hdf5_eof))) {
 	H5F_addr_reset(&(f->shared->hdf5_eof));
-	H5F_addr_inc(&(f->shared->hdf5_eof), (size_t)(p-buf));
+	H5F_addr_inc(&(f->shared->hdf5_eof), (hsize_t)(p-buf));
 	H5F_low_seteof(f->shared->lf, &(f->shared->hdf5_eof));
     }
     
@@ -1454,14 +1454,14 @@ H5Fclose(hid_t fid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_read(H5F_t *f, const haddr_t *addr, size_t size, void *buf)
+H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf)
 {
     haddr_t		    abs_addr;
 
     FUNC_ENTER(H5F_block_read, FAIL);
 
-    if (0 == size)
-	return 0;
+    if (0==size) return 0;
+    assert (size < MAX_SIZET);
 
     /* convert the relative address to an absolute address */
     abs_addr = f->shared->base_addr;
@@ -1469,7 +1469,7 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, size_t size, void *buf)
 
     /* Read the data */
     if (H5F_low_read(f->shared->lf, &(f->shared->access_parms),
-		     &abs_addr, size, buf) < 0) {
+		     &abs_addr, (size_t)size, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "low-level read failed");
     }
     FUNC_LEAVE(SUCCEED);
@@ -1499,14 +1499,14 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, size_t size, void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_write(H5F_t *f, const haddr_t *addr, size_t size, const void *buf)
+H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size, const void *buf)
 {
     haddr_t		    abs_addr;
 
     FUNC_ENTER(H5F_block_write, FAIL);
 
-    if (0 == size)
-	return 0;
+    if (0==size) return 0;
+    assert (size < MAX_SIZET);
 
     if (0 == (f->intent & H5F_ACC_RDWR)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "no write intent");
@@ -1518,7 +1518,7 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, size_t size, const void *buf)
 
     /* Write the data */
     if (H5F_low_write(f->shared->lf, &(f->shared->access_parms),
-		      &abs_addr, size, buf)) {
+		      &abs_addr, (size_t)size, buf)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low-level write failed");
     }
 
@@ -1547,8 +1547,8 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, size_t size, const void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
-	  intn fwidth)
+H5F_debug(H5F_t *f, const haddr_t __unused__ *addr, FILE * stream,
+	  intn indent, intn fwidth)
 {
     FUNC_ENTER(H5F_debug, FAIL);
 

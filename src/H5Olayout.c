@@ -59,7 +59,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
+H5O_layout_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
 {
     H5O_layout_t           *mesg = NULL;
     intn                    i;
@@ -234,8 +234,8 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_debug(H5F_t *f, const void *_mesg, FILE * stream, intn indent,
-                 intn fwidth)
+H5O_layout_debug(H5F_t __unused__ *f, const void *_mesg, FILE * stream,
+		 intn indent, intn fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     intn                    i;

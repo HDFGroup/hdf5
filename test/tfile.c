@@ -1,24 +1,24 @@
 /****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
+ * NCSA HDF								    *
+ * Software Development Group						    *
+ * National Center for Supercomputing Applications			    *
+ * University of Illinois at Urbana-Champaign				    *
+ * 605 E. Springfield, Champaign IL 61820				    *
+ *									    *
+ * For conditions of distribution and use, see the accompanying		    *
+ * hdf/COPYING file.							    *
+ *									    *
  ****************************************************************************/
 
 #ifdef RCSID
-static char             RcsId[] = "$Revision$";
+static char		RcsId[] = "$Revision$";
 #endif
 
 /* $Id$ */
 
 /***********************************************************
 *
-* Test program:  tfile
+* Test program:	 tfile
 *
 * Test the low-level file I/O features.
 *
@@ -30,26 +30,26 @@ static char             RcsId[] = "$Revision$";
 #include <H5Bprivate.h>
 #include <H5Pprivate.h>
 
-#define F1_USERBLOCK_SIZE  0
-#define F1_OFFSET_SIZE     sizeof(size_t)
-#define F1_LENGTH_SIZE     sizeof(size_t)
-#define F1_SYM_LEAF_K      4
-#define F1_SYM_INTERN_K    16
-#define FILE1   "tfile1.h5"
+#define F1_USERBLOCK_SIZE  (hsize_t)0
+#define F1_OFFSET_SIZE	   sizeof(hsize_t)
+#define F1_LENGTH_SIZE	   sizeof(hsize_t)
+#define F1_SYM_LEAF_K	   4
+#define F1_SYM_INTERN_K	   16
+#define FILE1	"tfile1.h5"
 
-#define F2_USERBLOCK_SIZE  512
-#define F2_OFFSET_SIZE     8
-#define F2_LENGTH_SIZE     8
-#define F2_SYM_LEAF_K      8
-#define F2_SYM_INTERN_K    32
-#define FILE2   "tfile2.h5"
+#define F2_USERBLOCK_SIZE  (hsize_t)512
+#define F2_OFFSET_SIZE	   8
+#define F2_LENGTH_SIZE	   8
+#define F2_SYM_LEAF_K	   8
+#define F2_SYM_INTERN_K	   32
+#define FILE2	"tfile2.h5"
 
-#define F3_USERBLOCK_SIZE  0
-#define F3_OFFSET_SIZE     F2_OFFSET_SIZE
-#define F3_LENGTH_SIZE     F2_LENGTH_SIZE
-#define F3_SYM_LEAF_K      F2_SYM_LEAF_K
-#define F3_SYM_INTERN_K    F2_SYM_INTERN_K
-#define FILE3   "tfile3.h5"
+#define F3_USERBLOCK_SIZE  (hsize_t)0
+#define F3_OFFSET_SIZE	   F2_OFFSET_SIZE
+#define F3_LENGTH_SIZE	   F2_LENGTH_SIZE
+#define F3_SYM_LEAF_K	   F2_SYM_LEAF_K
+#define F3_SYM_INTERN_K	   F2_SYM_INTERN_K
+#define FILE3	"tfile3.h5"
 
 /****************************************************************
 **
@@ -59,12 +59,13 @@ static char             RcsId[] = "$Revision$";
 static void 
 test_file_create(void)
 {
-    hid_t                   fid1, fid2, fid3;   /* HDF5 File IDs */
-    hid_t                   tmpl1, tmpl2;       /* File creation templates */
-    size_t                  parm;       /* File-creation parameters */
-    size_t                  parm2;      /* File-creation parameters */
-    int                     iparm, iparm2;
-    herr_t                  ret;        /* Generic return value */
+    hid_t		fid1, fid2, fid3; /* HDF5 File IDs		*/
+    hid_t		tmpl1, tmpl2;	/*file creation templates	*/
+    hsize_t		ublock;		/*sizeof userblock		*/
+    size_t		parm;		/*file-creation parameters	*/
+    size_t		parm2;		/*file-creation parameters	*/
+    int			iparm, iparm2;
+    herr_t		ret;		/*generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
@@ -82,9 +83,9 @@ test_file_create(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Pget_userblock(tmpl1, &parm);
+    ret = H5Pget_userblock(tmpl1, &ublock);
     CHECK(ret, FAIL, "H5Pget_userblock");
-    VERIFY(parm, F1_USERBLOCK_SIZE, "H5Pget_userblock");
+    VERIFY(ublock, F1_USERBLOCK_SIZE, "H5Pget_userblock");
 
     ret = H5Pget_sizes(tmpl1, &parm, &parm2);
     CHECK(ret, FAIL, "H5Pget_sizes");
@@ -136,9 +137,9 @@ test_file_create(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Pget_userblock(tmpl1, &parm);
+    ret = H5Pget_userblock(tmpl1, &ublock);
     CHECK(ret, FAIL, "H5Pget_userblock");
-    VERIFY(parm, F2_USERBLOCK_SIZE, "H5Pget_userblock");
+    VERIFY(ublock, F2_USERBLOCK_SIZE, "H5Pget_userblock");
 
     ret = H5Pget_sizes(tmpl1, &parm, &parm2);
     CHECK(ret, FAIL, "H5Pget_sizes");
@@ -178,9 +179,9 @@ test_file_create(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Pget_userblock(tmpl1, &parm);
+    ret = H5Pget_userblock(tmpl1, &ublock);
     CHECK(ret, FAIL, "H5Pget_userblock");
-    VERIFY(parm, F3_USERBLOCK_SIZE, "H5Pget_userblock");
+    VERIFY(ublock, F3_USERBLOCK_SIZE, "H5Pget_userblock");
 
     ret = H5Pget_sizes(tmpl1, &parm, &parm2);
     CHECK(ret, FAIL, "H5Pget_sizes");
@@ -207,7 +208,7 @@ test_file_create(void)
     /* Close third file */
     ret = H5Fclose(fid3);
     CHECK(ret, FAIL, "H5Fclose");
-}                               /* test_file_create() */
+}				/* test_file_create() */
 
 /****************************************************************
 **
@@ -217,12 +218,13 @@ test_file_create(void)
 static void 
 test_file_open(void)
 {
-    hid_t                   fid1;       /* HDF5 File IDs */
-    hid_t                   tmpl1;      /* File creation templates */
-    size_t                  parm;       /* File-creation parameters */
-    size_t                  parm2;      /* File-creation parameters */
-    int                     iparm, iparm2;
-    herr_t                  ret;        /* Generic return value */
+    hid_t		fid1;		/*HDF5 File IDs			*/
+    hid_t		tmpl1;		/*file creation templates	*/
+    hsize_t		ublock;		/*sizeof user block		*/
+    size_t		parm;		/*file-creation parameters	*/
+    size_t		parm2;		/*file-creation parameters	*/
+    int			iparm, iparm2;
+    herr_t		ret;		/*generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Opening I/O\n"));
@@ -236,9 +238,9 @@ test_file_open(void)
     CHECK(tmpl1, FAIL, "H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret = H5Pget_userblock(tmpl1, &parm);
+    ret = H5Pget_userblock(tmpl1, &ublock);
     CHECK(ret, FAIL, "H5Pget_userblock");
-    VERIFY(parm, F2_USERBLOCK_SIZE, "H5Pget_userblock");
+    VERIFY(ublock, F2_USERBLOCK_SIZE, "H5Pget_userblock");
 
     ret = H5Pget_sizes(tmpl1, &parm, &parm2);
     CHECK(ret, FAIL, "H5Pget_sizes");
@@ -257,7 +259,7 @@ test_file_open(void)
     /* Close first file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-}                               /* test_file_open() */
+}				/* test_file_open() */
 
 /****************************************************************
 **
@@ -270,6 +272,6 @@ test_file(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
-    test_file_create();         /* Test file creation (also creation templates) */
-    test_file_open();           /* Test file opening */
-}                               /* test_file() */
+    test_file_create();		/* Test file creation (also creation templates) */
+    test_file_open();		/* Test file opening */
+}				/* test_file() */

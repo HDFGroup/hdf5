@@ -25,10 +25,11 @@
 #include <H5Epublic.h>      /* Errors */
 #include <H5Fpublic.h>      /* Files */
 #include <H5Gpublic.h>      /* Groups */
-#include <H5HLpublic.h>
+#include <H5HGpublic.h>	    /* Global heaps */
+#include <H5HLpublic.h>	    /* Local heaps */
 #include <H5Ipublic.h>      /* IDs */
-#include <H5MFpublic.h>
-#include <H5MMpublic.h>
+#include <H5MFpublic.h>     /* File memory management */
+#include <H5MMpublic.h>     /* Core memory management */
 #include <H5Opublic.h>      /* Object headers */
 #include <H5Ppublic.h>      /* Property lists */
 #include <H5Spublic.h>      /* Dataspaces */

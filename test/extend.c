@@ -33,16 +33,16 @@
 int
 main (void)
 {
-    hid_t		file, dataset, mem_space, file_space, cparms;
-    herr_t		status;
-    int			i, j, k, m;
-    static int		buf1[NY][NX], buf2[NX/2][NY/2];
-    static const size_t	dims[2] = {NX, NY};
-    static const size_t half_dims[2] = {NX/2, NY/2};
-    static const size_t chunk_dims[2] = {NX/2, NY/2};
-    static size_t	maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    static size_t	size[2];
-    int			offset[2];
+    hid_t			file, dataset, mem_space, file_space, cparms;
+    herr_t			status;
+    int				i, j, k, m;
+    static int			buf1[NY][NX], buf2[NX/2][NY/2];
+    static const hsize_t	dims[2] = {NX, NY};
+    static const hsize_t 	half_dims[2] = {NX/2, NY/2};
+    static const hsize_t 	chunk_dims[2] = {NX/2, NY/2};
+    static hsize_t		maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    static hsize_t		size[2];
+    hssize_t			offset[2];
 
     /* Initialize buffer and space */
     for (i=0; i<NX; i++) {

@@ -9,11 +9,15 @@
 #include <hdf5.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <H5config.h>
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
+#   define __unused__ /*void*/
+#else
+#   define __unused__ __attribute__((unused))
 #endif
 
 
@@ -34,7 +38,7 @@
  *-------------------------------------------------------------------------
  */
 static herr_t
-list (hid_t group, const char *name, void *op_data __attribute__((unused)))
+list (hid_t group, const char *name, void __unused__ *op_data)
 {
     hid_t	obj;
     hid_t	(*func)(void*);
@@ -48,7 +52,7 @@ list (hid_t group, const char *name, void *op_data __attribute__((unused)))
     /* Print info about each name */
     printf ("%-30s", name);
     if ((obj=H5Dopen (group, name))>=0) {
-	size_t size[64];
+	hsize_t size[64];
 	hid_t space = H5Dget_space (obj);
 	int ndims = H5Sget_dims (space, size);
 	printf (" Dataset {");
@@ -91,15 +95,27 @@ list (hid_t group, const char *name, void *op_data __attribute__((unused)))
 int
 main (int argc, char *argv[])
 {
-    hid_t	file;
+    hid_t	file, plist=H5P_DEFAULT;
     herr_t	status;
+    const char	*fname = NULL;
+    const char	*gname = "/";
     
-    assert (3==argc);
+    assert (argc>=2 && argc<=3);
+    fname = argv[1];
+    if (argc>=3) gname = argv[2];
 
-    file = H5Fopen (argv[1], H5F_ACC_RDONLY, H5P_DEFAULT);
+    /*
+     * Open the file.  If the file name contains a `%' then assume that a
+     * file family is being opened.
+     */
+    if (strchr (fname, '%')) {
+	plist = H5Pcreate (H5P_FILE_ACCESS);
+	H5Pset_family (plist, H5P_DEFAULT);
+    }
+    file = H5Fopen (fname, H5F_ACC_RDONLY, plist);
     assert (file>=0);
 
-    status = H5Giterate (file, argv[2], NULL, list, NULL);
+    status = H5Giterate (file, gname, NULL, list, NULL);
     assert (status>=0);
 
     H5Fclose (file);

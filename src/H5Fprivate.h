@@ -223,7 +223,7 @@
  * File-creation property list.
  */
 typedef struct H5F_create_t {
-    size_t	userblock_size;	/* Size of the file user block in bytes */
+    hsize_t	userblock_size;	/* Size of the file user block in bytes */
     intn	sym_leaf_k;	/* 1/2 rank for symbol table leaf nodes */
     intn	btree_k[8];	/* 1/2 rank for btree internal nodes	*/
     size_t	sizeof_addr;	/* Number of bytes in an address	*/
@@ -307,7 +307,7 @@ typedef struct H5F_low_class_t {
 			 const H5F_access_t *access_parms);
     herr_t	(*extend)(struct H5F_low_t *lf,
 			  const H5F_access_t *access_parms,
-			  intn op, size_t size, haddr_t *addr);
+			  intn op, hsize_t size, haddr_t *addr);
 } H5F_low_class_t;
 
 typedef struct H5F_low_t {
@@ -479,32 +479,32 @@ herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 /* Functions that operate on array storage */
 herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
-		     const struct H5O_efl_t *efl, const size_t _hslab_size[],
-		     const size_t mem_size[], const size_t mem_offset[],
-		     const size_t file_offset[], void *_buf/*out*/);
+		     const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
+		     const hsize_t mem_size[], const hssize_t mem_offset[],
+		     const hssize_t file_offset[], void *_buf/*out*/);
 herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
-		      const struct H5O_efl_t *efl, const size_t _hslab_size[],
-		      const size_t mem_size[], const size_t mem_offset[],
-		      const size_t file_offset[], const void *_buf);
+		      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
+		      const hsize_t mem_size[], const hssize_t mem_offset[],
+		      const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on indexed storage */
 herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_istore_read(H5F_t *f, const struct H5O_layout_t *layout,
-		       const size_t offset[], const size_t size[],
+		       const hssize_t offset[], const hsize_t size[],
 		       void *buf /*out */ );
 herr_t H5F_istore_write(H5F_t *f, const struct H5O_layout_t *layout,
-			const size_t offset[], const size_t size[],
+			const hssize_t offset[], const hsize_t size[],
 			const void *buf);
 
 /* Functions that operate on contiguous storage wrt boot block */
-herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, size_t size, void *buf);
-herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, size_t size,
+herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf);
+herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
 		       const void *buf);
 
 /* Functions that operate directly on low-level files */
 const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
 herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
-		      intn op, size_t size, haddr_t *addr);
+		      intn op, hsize_t size, haddr_t *addr);
 herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
 hbool_t H5F_low_access(const H5F_low_class_t *type, const char *name,
 		       const H5F_access_t *access_parms, int mode,
@@ -513,7 +513,7 @@ H5F_low_t *H5F_low_open(const H5F_low_class_t *type, const char *name,
 			const H5F_access_t *access_parms, uintn flags,
 			H5F_search_t *key);
 H5F_low_t *H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms);
-size_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
+hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
 herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 		    const haddr_t *addr, size_t size, uint8 *buf);
 herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
@@ -537,8 +537,8 @@ void H5F_addr_encode(H5F_t *, uint8 **, const haddr_t *);
 void H5F_addr_decode(H5F_t *, const uint8 **, haddr_t *);
 void H5F_addr_print(FILE *, const haddr_t *);
 void H5F_addr_pow2(uintn, haddr_t *);
-void H5F_addr_inc(haddr_t *addr/*in,out*/, size_t inc);
-void H5F_addr_adj(haddr_t *addr/*in,out*/, ssize_t adj);
+void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);
+void H5F_addr_adj(haddr_t *addr/*in,out*/, hssize_t adj);
 void H5F_addr_add(haddr_t *, const haddr_t *);
 uintn H5F_addr_hash(const haddr_t *, uintn mod);
 

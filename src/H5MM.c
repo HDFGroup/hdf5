@@ -168,7 +168,7 @@ H5MM_xstrdup(const char *s)
  *
  *-------------------------------------------------------------------------
  */
-void                   *
+void *
 H5MM_xfree(const void *mem)
 {
     /*

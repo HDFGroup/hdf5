@@ -51,7 +51,7 @@ static intn             interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_alloc(H5F_t *f, intn op, size_t size, haddr_t *addr /*out */ )
+H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 {
     haddr_t                 tmp_addr;
 
@@ -111,7 +111,7 @@ H5MF_alloc(H5F_t *f, intn op, size_t size, haddr_t *addr /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_free(H5F_t *f, const haddr_t *addr, size_t size)
+H5MF_free(H5F_t __unused__ *f, const haddr_t *addr, hsize_t size)
 {
     FUNC_ENTER(H5MF_free, FAIL);
 

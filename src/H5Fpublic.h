@@ -59,7 +59,7 @@ typedef enum H5F_driver_t {
 } H5F_driver_t;
 
 /* Unlimited file size for H5Pset_external() */
-#define H5F_UNLIMITED	((size_t)(-1L))
+#define H5F_UNLIMITED	((hsize_t)(-1L))
 
 /* Parallel styles passed to H5Pset_mpi() */
 #ifdef HAVE_PARALLEL

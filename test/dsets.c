@@ -18,6 +18,9 @@
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
+#   define __unused__ /*void*/
+#else
+#   define __unused__ __attribute__((unused))
 #endif
 
 #ifndef HAVE_FUNCTION
@@ -51,7 +54,7 @@
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void *client_data __attribute__((unused)))
+display_error_cb (void __unused__ *client_data)
 {
     puts ("*FAILED*");
     H5Eprint (stdout);
@@ -79,9 +82,9 @@ static herr_t
 test_create(hid_t file)
 {
     hid_t	dataset, space, create_parms;
-    size_t	dims[2];
+    hsize_t	dims[2];
     herr_t	status;
-    size_t	csize[2];
+    hsize_t	csize[2];
     herr_t	(*func)(void*) = NULL;
     void	*client_data = NULL;
 
@@ -195,7 +198,7 @@ test_simple_io(hid_t file)
     herr_t		status;
     int			points[100][200], check[100][200];
     int			i, j, n;
-    size_t		dims[2];
+    hsize_t		dims[2];
     void		*tconv_buf = NULL;
 
     printf("%-70s", "Testing simple I/O");
@@ -277,7 +280,7 @@ test_tconv(hid_t file)
 {
     char	*out=NULL, *in=NULL;
     int		i;
-    size_t	dims[1];
+    hsize_t	dims[1];
     hid_t	space, dataset, type;
     herr_t	status;
 

@@ -99,46 +99,45 @@
 #define BOUND(MIN,X,MAX) ((X)<(MIN)?(MIN):((X)>(MAX)?(MAX):(X)))
 
 /* PRIVATE PROTOTYPES */
-static H5B_ins_t	H5B_insert_helper(H5F_t *f, const haddr_t *addr,
-					  const H5B_class_t *type,
-					  uint8 *lt_key,
-					  hbool_t *lt_key_changed,
-					  uint8 *md_key, void *udata,
-					  uint8 *rt_key,
-					  hbool_t *rt_key_changed,
-					  haddr_t *retval);
-static herr_t		H5B_insert_child(H5F_t *f, const H5B_class_t *type,
-					 H5B_t *bt, intn idx,
-					 const haddr_t *child,
-					 H5B_ins_t anchor, void *md_key);
-static herr_t		H5B_flush(H5F_t *f, hbool_t destroy,
-				  const haddr_t *addr, H5B_t *b);
-static H5B_t	       *H5B_load(H5F_t *f, const haddr_t *addr,
-				 const void *_type, void *udata);
-static herr_t		H5B_decode_key(H5F_t *f, H5B_t *bt, intn idx);
-static herr_t		H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx);
-static size_t		H5B_nodesize(H5F_t *f, const H5B_class_t *type,
-			       size_t *total_nkey_size, size_t sizeof_rkey);
-static herr_t		H5B_split(H5F_t *f, const H5B_class_t *type,
-				  H5B_t *old_bt, const haddr_t *old_addr,
-				  void *udata, haddr_t *new_addr /*out*/ );
+static H5B_ins_t H5B_insert_helper(H5F_t *f, const haddr_t *addr,
+				   const H5B_class_t *type,
+				   uint8 *lt_key,
+				   hbool_t *lt_key_changed,
+				   uint8 *md_key, void *udata,
+				   uint8 *rt_key,
+				   hbool_t *rt_key_changed,
+				   haddr_t *retval);
+static herr_t H5B_insert_child(H5F_t *f, const H5B_class_t *type,
+			       H5B_t *bt, intn idx,
+			       const haddr_t *child,
+			       H5B_ins_t anchor, void *md_key);
+static herr_t H5B_flush(H5F_t *f, hbool_t destroy,
+			const haddr_t *addr, H5B_t *b);
+static H5B_t *H5B_load(H5F_t *f, const haddr_t *addr,
+		       const void *_type, void *udata);
+static herr_t H5B_decode_key(H5F_t *f, H5B_t *bt, intn idx);
+static herr_t H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx);
+static size_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
+			   size_t *total_nkey_size, size_t sizeof_rkey);
+static herr_t H5B_split(H5F_t *f, const H5B_class_t *type,
+			H5B_t *old_bt, const haddr_t *old_addr,
+			void *udata, haddr_t *new_addr /*out*/ );
 #ifdef H5B_DEBUG
-static herr_t		H5B_assert(H5F_t *f, const haddr_t *addr,
-				   const H5B_class_t *type, void *udata);
+static herr_t H5B_assert(H5F_t *f, const haddr_t *addr,
+			 const H5B_class_t *type, void *udata);
 #endif
 
 /* H5B inherits cache-like properties from H5AC */
-static const H5AC_class_t H5AC_BT[1] = {
-    {
-	H5AC_BT_ID,
-	(void *(*)(H5F_t *, const haddr_t *, const void *, void *)) H5B_load,
-	(herr_t (*)(H5F_t *, hbool_t, const haddr_t *, void *)) H5B_flush,
-    }
-};
+static const H5AC_class_t H5AC_BT[1] = {{
+    H5AC_BT_ID,
+    (void *(*)(H5F_t*, const haddr_t*, const void*, void*))H5B_load,
+    (herr_t (*)(H5F_t*, hbool_t, const haddr_t*, void*))H5B_flush,
+}};
 
 /* Interface initialization? */
 #define INTERFACE_INIT NULL
 static hbool_t interface_initialize_g = FALSE;
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_create
@@ -183,7 +182,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *retval)
      */
     sizeof_rkey = (type->get_sizeof_rkey) (f, udata);
     size = H5B_nodesize(f, type, &total_native_keysize, sizeof_rkey);
-    if (H5MF_alloc(f, H5MF_META, size, retval) < 0) {
+    if (H5MF_alloc(f, H5MF_META, (hsize_t)size, retval) < 0) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "can't allocate file space for B-tree root node");
     }
@@ -254,7 +253,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *retval)
  *
  *-------------------------------------------------------------------------
  */
-static H5B_t	       *
+static H5B_t *
 H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
 {
     const H5B_class_t	   *type = (const H5B_class_t *) _type;
@@ -282,7 +281,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
     bt->native = H5MM_xmalloc(total_nkey_size);
     bt->key = H5MM_xmalloc((2 * H5B_K(f, type) + 1) * sizeof(H5B_key_t));
     bt->child = H5MM_xmalloc(2 * H5B_K(f, type) * sizeof(haddr_t));
-    if (H5F_block_read(f, addr, size, bt->page) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, bt->page) < 0) {
 	HRETURN_ERROR(H5E_BTREE, H5E_READERROR, NULL,
 		      "can't read B-tree node");
     }
@@ -425,7 +424,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 	 * bother writing data for the child entries that don't exist or
 	 * for the final unchanged children.
 	 */
-	if (H5F_block_write(f, addr, size, bt->page) < 0) {
+	if (H5F_block_write(f, addr, (hsize_t)size, bt->page) < 0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 			  "unable to save B-tree node to disk");
 	}
@@ -821,7 +820,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
      */
     size = H5B_nodesize(f, type, NULL, bt->sizeof_rkey);
     buf = H5MM_xmalloc(size);
-    if (H5MF_alloc(f, H5MF_META, size, &old_root /*out */ ) < 0) {
+    if (H5MF_alloc(f, H5MF_META, (hsize_t)size, &old_root/*out*/) < 0) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "unable to allocate file space to move root");
     }
@@ -829,11 +828,11 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 		      "unable to flush B-tree root node");
     }
-    if (H5F_block_read(f, addr, size, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, buf) < 0) {
 	HRETURN_ERROR(H5E_BTREE, H5E_READERROR, FAIL,
 		      "unable to read B-tree root node");
     }
-    if (H5F_block_write(f, &old_root, size, buf) < 0) {
+    if (H5F_block_write(f, &old_root, (hsize_t)size, buf) < 0) {
 	HRETURN_ERROR(H5E_BTREE, H5E_WRITEERROR, FAIL,
 		      "unable to move B-tree root node");
     }

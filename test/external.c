@@ -19,6 +19,9 @@
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
+#   define __unused__ /*void*/
+#else
+#   define __unused__ __attribute__((unused))
 #endif
 
 static int nerrors_g = 0;
@@ -41,7 +44,7 @@ static int nerrors_g = 0;
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void *client_data __attribute__((unused)))
+display_error_cb (void __unused__ *client_data)
 {
     puts ("*FAILED*");
     H5Eprint (stdout);
@@ -117,7 +120,7 @@ test_1 (void)
 {
     hid_t	file, plist, space, dset, grp;
     herr_t	status;
-    size_t	size[2], max_size[2];
+    hsize_t	size[2], max_size[2];
     herr_t	(*func)(void*) = NULL;
     void	*client_data = NULL;
     int		n;
@@ -141,7 +144,7 @@ test_1 (void)
 	fflush (stdout);
 	plist = H5Pcreate (H5P_DATASET_CREATE);
 	assert (plist>=0);
-	status = H5Pset_external (plist, "ext1.data", 0, 400);
+	status = H5Pset_external (plist, "ext1.data", 0, (hsize_t)400);
 	assert (status>=0);
 
 	size[0] = max_size[0] = 100;
@@ -165,7 +168,7 @@ test_1 (void)
 	fflush (stdout);
 	plist = H5Pcreate (H5P_DATASET_CREATE);
 	assert (plist>=0);
-	status = H5Pset_external (plist, "ext1.data", 0, 399);
+	status = H5Pset_external (plist, "ext1.data", 0, (hsize_t)399);
 	assert (status>=0);
 
 	size[0] = max_size[0] = 100;
@@ -198,7 +201,7 @@ test_1 (void)
 	fflush (stdout);
 	plist = H5Pcreate (H5P_DATASET_CREATE);
 	assert (plist>=0);
-	status = H5Pset_external (plist, "ext1.data", 0, 800);
+	status = H5Pset_external (plist, "ext1.data", 0, (hsize_t)800);
 	assert (status>=0);
 
 	size[0] = 100;
@@ -225,7 +228,7 @@ test_1 (void)
 	fflush (stdout);
 	plist = H5Pcreate (H5P_DATASET_CREATE);
 	assert (plist>=0);
-	status = H5Pset_external (plist, "ext1.data", 0, 799);
+	status = H5Pset_external (plist, "ext1.data", 0, (hsize_t)799);
 	assert (status>=0);
 
 	size[0] = 100;
@@ -281,8 +284,8 @@ test_1 (void)
      */
     do {
 	char	name[256];
-	size_t	file_offset;
-	size_t	file_size;
+	off_t	file_offset;
+	hsize_t	file_size;
 	
 	printf ("%-70s", "...opening a dataset and reading the storage info");
 	fflush (stdout);
@@ -328,8 +331,8 @@ test_1 (void)
      */
     do {
 	char	name[256];
-	size_t	file_offset;
-	size_t	file_size;
+	off_t	file_offset;
+	hsize_t	file_size;
 	
 	printf ("%-70s", "...opening an unlimited dataset and reading the "
 		"storage info");
@@ -378,13 +381,13 @@ test_1 (void)
 	fflush (stdout);
 	plist = H5Pcreate (H5P_DATASET_CREATE);
 	assert (plist>=0);
-	status = H5Pset_external (plist, "ext1.data", 0, 100);
+	status = H5Pset_external (plist, "ext1.data", 0, (hsize_t)100);
 	assert (status>=0);
-	status = H5Pset_external (plist, "ext2.data", 0, 100);
+	status = H5Pset_external (plist, "ext2.data", 0, (hsize_t)100);
 	assert (status>=0);
-	status = H5Pset_external (plist, "ext3.data", 0, 100);
+	status = H5Pset_external (plist, "ext3.data", 0, (hsize_t)100);
 	assert (status>=0);
-	status = H5Pset_external (plist, "ext4.data", 0, 100);
+	status = H5Pset_external (plist, "ext4.data", 0, (hsize_t)100);
 	assert (status>=0);
 
 	size[0] = max_size[0] = 100;
@@ -414,7 +417,7 @@ test_1 (void)
 	/* Next function should fail */
 	H5Eget_auto (&func, &client_data);
 	H5Eset_auto (NULL, NULL);
-	status = H5Pset_external (plist, "ext2.data", 0, 100);
+	status = H5Pset_external (plist, "ext2.data", 0, (hsize_t)100);
 	H5Eset_auto (func, client_data);
 	if (status>=0) {
 	    puts ("*FAILED*");
@@ -451,7 +454,7 @@ test_1 (void)
 	/* Next function should fail */
 	H5Eget_auto (&func, &client_data);
 	H5Eset_auto (NULL, NULL);
-	status = H5Pset_external (plist, "ext2.data", 0, 100);
+	status = H5Pset_external (plist, "ext2.data", 0, (hsize_t)100);
 	H5Eset_auto (func, client_data);
 	if (status>=0) {
 	    puts ("*FAILED*");
@@ -490,22 +493,22 @@ test_2 (void)
     hid_t	file, plist, space, dset, grp;
     herr_t	status;
     int		fd;
-    unsigned	i, j;
-    ssize_t	n;
+    hsize_t	i, j;
+    hssize_t	n;
     char	fname[64];
     int		part[25], whole[100];
-    size_t	size;
+    hsize_t	size;
 
     /* Write the data to external files */
     for (i=0; i<4; i++) {
 	for (j=0; j<25; j++) {
-	    part[j] = i*25+j;
+	    part[j] = (int)(i*25+j);
 	}
 	
-	sprintf (fname, "extern_%d.raw", i+1);
+	sprintf (fname, "extern_%lu.raw", (unsigned long)i+1);
 	fd = open (fname, O_RDWR|O_CREAT|O_TRUNC, 0666);
 	assert (fd>=0);
-	n = lseek (fd, (ssize_t)(i*10), SEEK_SET);
+	n = lseek (fd, (off_t)(i*10), SEEK_SET);
 	assert (n>=0 && (size_t)n==i*10);
 	n = write (fd, part, sizeof(part));
 	assert (n==sizeof(part));
@@ -525,13 +528,17 @@ test_2 (void)
     /* Create the external file list */
     plist = H5Pcreate (H5P_DATASET_CREATE);
     assert (plist>=0);
-    status = H5Pset_external (plist, "extern_1.raw", 0, sizeof(part));
+    status = H5Pset_external (plist, "extern_1.raw", 0,
+			      (hsize_t)sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_2.raw", 10, sizeof(part));
+    status = H5Pset_external (plist, "extern_2.raw", 10,
+			      (hsize_t)sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_3.raw", 20, sizeof(part));
+    status = H5Pset_external (plist, "extern_3.raw", 20,
+			      (hsize_t)sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_4.raw", 30, sizeof(part));
+    status = H5Pset_external (plist, "extern_4.raw", 30,
+			      (hsize_t)sizeof(part));
     assert (status>=0);
 
     /* Create the data space */
@@ -577,8 +584,8 @@ test_2 (void)
      */
     do {
 	hid_t hs_space;
-	int hs_start = 30;
-	size_t hs_count = 25;
+	hssize_t hs_start = 30;
+	hsize_t hs_count = 25;
 
 	/* Read from the dataset */
 	printf ("%-70s", "...reading partial dataset");
@@ -644,8 +651,9 @@ test_3 (void)
     herr_t	status;
     unsigned	i;
     int		fd;
-    int		part[25], whole[100], hs_start=100;
-    size_t	size=100, max_size=200, hs_count=100;
+    int		part[25], whole[100];
+    hssize_t	hs_start=100;
+    hsize_t	size=100, max_size=200, hs_count=100;
 
     /*
      * Create another file
@@ -656,13 +664,17 @@ test_3 (void)
     /* Create the external file list */
     plist = H5Pcreate (H5P_DATASET_CREATE);
     assert (plist>=0);
-    status = H5Pset_external (plist, "extern_1b.raw", 0, sizeof(part));
+    status = H5Pset_external (plist, "extern_1b.raw", 0,
+			      (hsize_t)sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_2b.raw", 10, sizeof(part));
+    status = H5Pset_external (plist, "extern_2b.raw", 10,
+			      (hsize_t)sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_3b.raw", 20, sizeof(part));
+    status = H5Pset_external (plist, "extern_3b.raw", 20,
+			      (hsize_t)sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_4b.raw", 30, H5F_UNLIMITED);
+    status = H5Pset_external (plist, "extern_4b.raw", 30,
+			      H5F_UNLIMITED);
     assert (status>=0);
 
     /* Make sure the output files are fresh*/

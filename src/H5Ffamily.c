@@ -42,7 +42,7 @@ static hbool_t		interface_initialize_g = FALSE;
 
 #define H5F_FAM_MASK(N)		(((uint64)1<<(N))-1)
 #define H5F_FAM_OFFSET(ADDR,N)	((off_t)((ADDR)->offset & H5F_FAM_MASK(N)))
-#define H5F_FAM_MEMBNO(ADDR,N)	((intn)((ADDR)->offset >> N))
+#define H5F_FAM_MEMBNO(ADDR,N)	((intn)((ADDR)->offset >> (N)))
 
 static hbool_t H5F_fam_access(const char *name,
 			      const H5F_access_t *access_parms, int mode,
@@ -300,7 +300,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     haddr_t		    cur_addr;
     intn		    membno;
     off_t		    offset;
-    size_t		    member_size;
+    hsize_t		    member_size;
 
     FUNC_ENTER(H5F_fam_read, FAIL);
 
@@ -308,7 +308,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(addr && H5F_addr_defined(addr));
     assert(buf);
 
-    member_size = (size_t) 1 << lf->u.fam.offset_bits;
+    member_size = (hsize_t) 1 << lf->u.fam.offset_bits;
     membno = H5F_FAM_MEMBNO(addr, lf->u.fam.offset_bits);
     offset = H5F_FAM_OFFSET(addr, lf->u.fam.offset_bits);
     cur_addr = *addr;
@@ -318,7 +318,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	    HDmemset(buf, 0, size);
 	    break;
 	} else {
-	    nbytes = MIN(size, member_size - offset);
+	    nbytes = MIN(size, member_size-offset);
 	    cur_addr.offset = offset;
 	    if (H5F_low_read(lf->u.fam.memb[membno],
 			     access_parms->u.fam.memb_access,
@@ -335,6 +335,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_fam_write
@@ -366,7 +367,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     H5F_low_t		   	*member = NULL;
     char		    	member_name[4096];
     intn		    	i;
-    size_t		    	member_size;
+    hsize_t		    	member_size;
     const H5F_low_class_t	*memb_type = NULL;
     
     FUNC_ENTER(H5F_fam_write, FAIL);
@@ -385,7 +386,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	memb_type = H5F_low_class (H5F_LOW_DFLT);
     }
     
-    member_size = (size_t) 1 << lf->u.fam.offset_bits;
+    member_size = (hsize_t) 1 << lf->u.fam.offset_bits;
     membno = H5F_FAM_MEMBNO(addr, lf->u.fam.offset_bits);
     offset = H5F_FAM_OFFSET(addr, lf->u.fam.offset_bits);
     cur_addr = *addr;
@@ -431,7 +432,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	 * Make sure the logical eof is large enough to handle the request.
 	 */
 	max_addr = cur_addr;
-	H5F_addr_inc(&max_addr, nbytes);
+	H5F_addr_inc(&max_addr, (hsize_t)nbytes);
 	H5F_low_seteof(lf->u.fam.memb[membno], &max_addr);
 
 	/* Write the data to the member */
@@ -475,7 +476,7 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     int			    membno, nerrors = 0;
     uint8		    buf[1];
     haddr_t		    addr1, addr2, addr3;
-    size_t		    max_offset;
+    hsize_t		    max_offset;
 
     FUNC_ENTER(H5F_fam_flush, FAIL);
 
@@ -491,7 +492,7 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     H5F_addr_inc(&addr1, max_offset);
     H5F_low_size(lf->u.fam.memb[0], &addr2);	/*remember logical eof */
     addr3 = addr1;
-    H5F_addr_inc(&addr3, (size_t) 1);
+    H5F_addr_inc(&addr3, (hsize_t)1);
     H5F_low_seteof(lf->u.fam.memb[0], &addr3);	/*prevent a warning */
     if (H5F_low_read(lf->u.fam.memb[0], access_parms->u.fam.memb_access,
 		     &addr1, 1, buf) < 0) {

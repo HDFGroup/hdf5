@@ -456,7 +456,8 @@ H5Dget_create_plist (hid_t dataset_id)
     }
 
     /* Create an atom */
-    if ((ret_value=H5I_register ((H5I_group_t)(H5_TEMPLATE_0+H5P_DATASET_CREATE),
+    if ((ret_value=H5I_register ((H5I_group_t)(H5_TEMPLATE_0+
+					       H5P_DATASET_CREATE),
 				 copied_parms))<0) {
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register creation property list");
@@ -667,7 +668,7 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dextend (hid_t dataset_id, const size_t *size)
+H5Dextend (hid_t dataset_id, const hsize_t *size)
 {
     H5D_t	*dataset = NULL;
     
@@ -724,7 +725,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     H5D_t		*new_dset = NULL;
     H5D_t		*ret_value = NULL;
     intn		i, ndims;
-    size_t		max_dim[H5O_LAYOUT_NDIMS];
+    hsize_t		max_dim[H5O_LAYOUT_NDIMS];
     H5O_efl_t		*efl = NULL;
     H5F_t		*f = H5G_fileof (loc);
 
@@ -750,7 +751,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     new_dset->layout.type = new_dset->create_parms->layout;
     new_dset->layout.ndims = H5S_get_ndims(space) + 1;
     assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
-    new_dset->layout.dim[new_dset->layout.ndims - 1] = H5T_get_size(type);
+    new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size(type);
 
     switch (new_dset->create_parms->layout) {
     case H5D_CONTIGUOUS:
@@ -770,8 +771,8 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 	    }
 	}
 	if (efl->nused>0) {
-	    size_t max_points = H5S_get_npoints_max (space);
-	    size_t max_storage = H5O_efl_total_size (efl);
+	    hsize_t max_points = H5S_get_npoints_max (space);
+	    hsize_t max_storage = H5O_efl_total_size (efl);
 
 	    if (H5S_UNLIMITED==max_points) {
 		if (H5O_EFL_UNLIMITED!=max_storage) {
@@ -804,7 +805,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 	    HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
 			 "external storage not supported with chunked layout");
 	}
-	for (i = 0; i < new_dset->layout.ndims - 1; i++) {
+	for (i=0; i<new_dset->layout.ndims-1; i++) {
 	    new_dset->layout.dim[i] = new_dset->create_parms->chunk_size[i];
 	}
 	break;
@@ -974,7 +975,6 @@ H5D_open(H5G_t *loc, const char *name)
 	break;
 
     default:
-	assert("not implemented yet" && 0);
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
     }
 
@@ -1091,7 +1091,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	 void *buf/*out*/)
 {
-    size_t		nelmts;			/*number of elements	*/
+    hsize_t		nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		smine_nelmts;		/*elements per strip	*/
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
@@ -1319,7 +1319,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	  const void *buf)
 {
-    size_t		nelmts;			/*total number of elmts	*/
+    hsize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		smine_nelmts;		/*elements per strip	*/
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
@@ -1543,7 +1543,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_extend (H5D_t *dataset, const size_t *size)
+H5D_extend (H5D_t *dataset, const hsize_t *size)
 {
     herr_t	changed;
 

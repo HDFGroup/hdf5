@@ -59,7 +59,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
+H5O_efl_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
 {
     H5O_efl_t		*mesg = NULL;
     int			i;
@@ -324,11 +324,11 @@ H5O_efl_reset(void *_mesg)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+hsize_t
 H5O_efl_total_size (H5O_efl_t *efl)
 {
     int		i;
-    size_t	ret_value = 0, tmp;
+    hsize_t	ret_value = 0, tmp;
     
     FUNC_ENTER (H5O_efl_total_size, 0);
 
@@ -369,8 +369,8 @@ H5O_efl_total_size (H5O_efl_t *efl)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_read (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
-	      haddr_t *addr, size_t size, uint8 *buf)
+H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
+	      hsize_t size, uint8 *buf)
 {
     int		i, fd=-1;
     size_t	to_read, cur, skip=0;
@@ -382,6 +382,7 @@ H5O_efl_read (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
     /* Check args */
     assert (efl && efl->nused>0);
     assert (addr && H5F_addr_defined (addr));
+    assert (size < MAX_SIZET);
     assert (buf || 0==size);
 
     /* Find the first efl member from which to read */
@@ -454,8 +455,8 @@ H5O_efl_read (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_write (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
-	       haddr_t *addr, size_t size, const uint8 *buf)
+H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
+	       hsize_t size, const uint8 *buf)
 {
     int		i, fd=-1;
     size_t	to_write, cur, skip=0;
@@ -466,6 +467,7 @@ H5O_efl_write (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
     /* Check args */
     assert (efl && efl->nused>0);
     assert (addr && H5F_addr_defined (addr));
+    assert (size < MAX_SIZET);
     assert (buf || 0==size);
 
     /* Find the first efl member in which to write */
@@ -538,8 +540,8 @@ H5O_efl_write (H5F_t *f __attribute__((unused)), const H5O_efl_t *efl,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_efl_debug(H5F_t *f, const void *_mesg, FILE * stream, intn indent,
-	      intn fwidth)
+H5O_efl_debug(H5F_t __unused__ *f, const void *_mesg, FILE * stream,
+	      intn indent, intn fwidth)
 {
     const H5O_efl_t	   *mesg = (const H5O_efl_t *) _mesg;
     char		    buf[64];

@@ -14,6 +14,9 @@
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
+#   define __unused__ /*void*/
+#else
+#   define __unused__ __attribute__((unused))
 #endif
 
 
@@ -34,7 +37,7 @@
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void *client_data __attribute__((unused)))
+display_error_cb (void __unused__ *client_data)
 {
     puts ("*FAILED*");
     H5Eprint (stdout);
@@ -64,7 +67,7 @@ static int
 test_1 (void)
 {
     hid_t	f, d1, d2, s1, t1, t2;
-    size_t	size[1] = {1};
+    hsize_t	size[1] = {1};
 
     printf ("%-70s", "...creating/quering datasets with shared type");
     fflush (stdout);
@@ -121,7 +124,7 @@ static int
 test_2 (void)
 {
     hid_t	f1, f2, t1, t2, s1, d1, d2;
-    size_t	size[1] = {1};
+    hsize_t	size[1] = {1};
     char	buf[32];
     int		i;
 
@@ -192,7 +195,7 @@ static int
 test_3 (void)
 {
     hid_t	f1, s1, t1, d1;
-    size_t	size[1] = {1};
+    hsize_t	size[1] = {1};
     herr_t	status, (*ef)(void*)=NULL;
     void	*ed = NULL;
 

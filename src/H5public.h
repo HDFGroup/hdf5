@@ -41,6 +41,19 @@ typedef int herr_t;
  */
 typedef int hbool_t;
 
+/*
+ * The sizes of file-objects in hdf5 have there own types defined here.  On
+ * most systems, these are the same as size_t and ssize_t, but on systems
+ * with small address spaces these are defined to be larger.
+ */
+#if 1
+typedef size_t hsize_t;
+typedef ssize_t hssize_t;
+#else
+typedef unsigned long long hsize_t;
+typedef signed long long hssize_t;
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -69,7 +69,8 @@ static hbool_t interface_initialize_g = FALSE;
     within this function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
+H5O_sdspace_decode(H5F_t __unused__ *f, const uint8 *p,
+		   H5HG_t __unused__ *hobj)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     intn                u;  		/* local counting variable */
@@ -87,16 +88,16 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
         UINT32DECODE(p, sdim->rank);
         UINT32DECODE(p, flags);
         if (sdim->rank > 0) {
-            sdim->size = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
+            sdim->size = H5MM_xmalloc(sizeof(sdim->size[0]) * sdim->rank);
             for (u = 0; u < sdim->rank; u++)
                 UINT32DECODE(p, sdim->size[u]);
             if (flags & 0x01) {
-                sdim->max = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
+                sdim->max = H5MM_xmalloc(sizeof(sdim->max[0]) * sdim->rank);
                 for (u = 0; u < sdim->rank; u++)
                     UINT32DECODE(p, sdim->max[u]);
             }
             if (flags & 0x02) {
-                sdim->perm = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
+                sdim->perm = H5MM_xmalloc(sizeof(sdim->perm[0]) * sdim->rank);
                 for (u = 0; u < sdim->rank; u++)
                     UINT32DECODE(p, sdim->perm[u]);
             }
@@ -131,7 +132,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
     dimensionality message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *mesg)
+H5O_sdspace_encode(H5F_t __unused__ *f, uint8 *p, const void *mesg)
 {
     const H5S_simple_t  *sdim = (const H5S_simple_t *) mesg;
     intn                u;  /* Local counting variable */
@@ -230,7 +231,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sdspace_size(H5F_t *f __attribute__((unused)), const void *mesg)
+H5O_sdspace_size(H5F_t __unused__ *f, const void *mesg)
 {
     const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
     size_t                  ret_value = 8;      /* all dimensionality messages are at least 8 bytes long (rank and flags) */
@@ -263,8 +264,8 @@ H5O_sdspace_size(H5F_t *f __attribute__((unused)), const void *mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_debug(H5F_t *f, const void *mesg, FILE * stream,
-                  intn indent, intn fwidth)
+H5O_sdspace_debug(H5F_t __unused__ *f, const void *mesg,
+		  FILE * stream, intn indent, intn fwidth)
 {
     const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
     intn                    u;  /* local counting variable */

@@ -1,24 +1,24 @@
 /****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
+ * NCSA HDF								    *
+ * Software Development Group						    *
+ * National Center for Supercomputing Applications			    *
+ * University of Illinois at Urbana-Champaign				    *
+ * 605 E. Springfield, Champaign IL 61820				    *
+ *									    *
+ * For conditions of distribution and use, see the accompanying		    *
+ * hdf/COPYING file.							    *
+ *									    *
  ****************************************************************************/
 
 #ifdef RCSID
-static char             RcsId[] = "$Revision$";
+static char		RcsId[] = "$Revision$";
 #endif
 
 /* $Id$ */
 
 /***********************************************************
 *
-* Test program:  th5p
+* Test program:	 th5p
 *
 * Test the dataspace functionality
 *
@@ -35,18 +35,18 @@ static char             RcsId[] = "$Revision$";
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
-#define SPACE1_RANK     3
-#define SPACE1_DIM1     3
-#define SPACE1_DIM2     15
-#define SPACE1_DIM3     13
+#define SPACE1_RANK	3
+#define SPACE1_DIM1	3
+#define SPACE1_DIM2	15
+#define SPACE1_DIM3	13
 
 /* 4-D dataset with one unlimited dimension */
 #define SPACE2_NAME  "Space2"
-#define SPACE2_RANK     4
-#define SPACE2_DIM1     0
-#define SPACE2_DIM2     15
-#define SPACE2_DIM3     13
-#define SPACE2_DIM4     23
+#define SPACE2_RANK	4
+#define SPACE2_DIM1	0
+#define SPACE2_DIM2	15
+#define SPACE2_DIM3	13
+#define SPACE2_DIM4	23
 
 /****************************************************************
 **
@@ -56,15 +56,15 @@ static char             RcsId[] = "$Revision$";
 static void 
 test_h5p_basic(void)
 {
-    hid_t                   fid1;       /* HDF5 File IDs */
-    hid_t                   sid1, sid2;         /* Dataspace ID */
-    uint32                  rank;       /* Logical rank of dataspace */
-    size_t                  dims1[] =
-    {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3},    /* dataspace dim sizes */
-                            dims2[] =
-    {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3, SPACE2_DIM4}, tdims[4];     /* Dimension array to test with */
-    size_t                   n;  /* number of dataspace elements */
-    herr_t                  ret;        /* Generic return value */
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		sid1, sid2;	/* Dataspace ID			*/
+    uint32		rank;		/* Logical rank of dataspace	*/
+    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3,
+				   SPACE2_DIM4};
+    hsize_t		tdims[4];	/* Dimension array to test with */
+    size_t		n;	 	/* Number of dataspace elements */
+    herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Datatype Manipulation\n"));
@@ -112,7 +112,7 @@ test_h5p_basic(void)
     /* Close first file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-}                               /* test_h5p_basic() */
+}				/* test_h5p_basic() */
 
 /****************************************************************
 **
@@ -125,5 +125,5 @@ test_h5p(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspaces\n"));
 
-    test_h5p_basic();           /* Test basic H5S code */
-}                               /* test_h5p() */
+    test_h5p_basic();		/* Test basic H5S code */
+}				/* test_h5p() */

@@ -513,9 +513,8 @@ H5Giterate (hid_t loc_id, const char *name, int *idx,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gmove (hid_t loc_id __attribute__((unused)),
-	 const char *src __attribute__((unused)),
-	 const char *dst __attribute__((unused)))
+H5Gmove (hid_t __unused__ loc_id, const char __unused__ *src,
+	 const char __unused__ *dst)
 {
     FUNC_ENTER (H5Gmove, FAIL);
 
@@ -606,8 +605,7 @@ H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gunlink (hid_t loc_id __attribute__((unused)),
-	   const char *name __attribute__((unused)))
+H5Gunlink (hid_t __unused__ loc_id, const char __unused__ *name)
 {
     FUNC_ENTER (H5Gunlink, FAIL);
 

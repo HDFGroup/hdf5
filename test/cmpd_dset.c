@@ -125,11 +125,10 @@ main (void)
     int			ndims;
     hid_t		file, dataset, space, PRESERVE;
     herr_t		status;
-    static size_t	dim[] = {NX, NY};
-    size_t 		f_offset[2];	/*offset of hyperslab in file	*/
-    int			f_temp_offset[2];
-    size_t 		h_size[2];	/*size of hyperslab		*/
-    size_t 		h_sample[2];	/*hyperslab sampling		*/
+    static hsize_t	dim[] = {NX, NY};
+    hssize_t 		f_offset[2];	/*offset of hyperslab in file	*/
+    hsize_t 		h_size[2];	/*size of hyperslab		*/
+    hsize_t 		h_sample[2];	/*hyperslab sampling		*/
 
     /* Create the file */
     file = H5Fcreate ("cmpd_dset.h5", H5F_ACC_TRUNC,
@@ -398,9 +397,7 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     h_size[1] = 2*NY/3 - f_offset[1];
     h_sample[0] = 1;
     h_sample[1] = 1;
-    f_temp_offset[0] = (int)(f_offset[0]);
-    f_temp_offset[1] = (int)(f_offset[1]);
-    status = H5Sset_hyperslab (s8_f_sid, f_temp_offset, h_size, h_sample);
+    status = H5Sset_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
     assert (status>=0);
 
     /* Create memory data space */
@@ -408,7 +405,7 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     assert (s8_m_sid>=0);
 
     /* Read the dataset */
-    s8 = calloc (h_size[0]*h_size[1], sizeof(s1_t));
+    s8 = calloc ((size_t)(h_size[0]*h_size[1]), sizeof(s1_t));
     assert (s8);
     status = H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8);
     assert (status>=0);
@@ -454,8 +451,10 @@ STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
 	for (j=0; j<NY; j++) {
 	    s1_t *ps1 = s1 + i*NY + j;
 	    s2_t *ps2 = s2 + i*NY + j;
-	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
-		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
+	    if ((hssize_t)i>=f_offset[0] &&
+		(hsize_t)i<f_offset[0]+h_size[0] &&
+		(hssize_t)j>=f_offset[1] &&
+		(hsize_t)j<f_offset[1]+h_size[1]) {
 		assert (ps2->a == ps1->a);
 		assert (ps2->b == ps1->b);
 		assert (ps2->c == ps1->c);
@@ -496,8 +495,10 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 	for (j=0; j<NY; j++) {
 	    s1_t *ps1 = s1 + i*NY + j;
 	    s5_t *ps5 = s5 + i*NY + j;
-	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
-		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
+	    if ((hssize_t)i>=f_offset[0] &&
+		(hsize_t)i<f_offset[0]+h_size[0] &&
+		(hssize_t)j>=f_offset[1] &&
+		(hsize_t)j<f_offset[1]+h_size[1]) {
 		assert (ps5->pre == (unsigned)(-1));
 		assert (ps5->a == ps1->a);
 		assert (ps5->b == ps1->b);
@@ -532,11 +533,9 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     fflush (stdout);
     
     /* Create the memory array and initialize all fields to zero */
-    f_temp_offset[0] = (int)(f_offset[0]);
-    f_temp_offset[1] = (int)(f_offset[1]);
-    ndims = H5Sget_hyperslab (s8_f_sid, f_temp_offset, h_size, h_sample);
+    ndims = H5Sget_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
     assert (ndims==2);
-    s11 = malloc (h_size[0]*h_size[1]*sizeof(s4_t));
+    s11 = malloc ((size_t)h_size[0]*(size_t)h_size[1]*sizeof(s4_t));
     assert (s11);
 
     /* Initialize */
@@ -560,8 +559,10 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
 	    assert (ps1->a == 5*(i*NY+j)+0);
 	    assert (ps1->c == 5*(i*NY+j)+2);
 	    assert (ps1->e == 5*(i*NY+j)+4);
-	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
-		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
+	    if ((hssize_t)i>=f_offset[0] &&
+		(hsize_t)i<f_offset[0]+h_size[0] &&
+		(hssize_t)j>=f_offset[1] &&
+		(hsize_t)j<f_offset[1]+h_size[1]) {
 		assert (ps1->b == (unsigned)(-1));
 		assert (ps1->d == (unsigned)(-1));
 	    } else {

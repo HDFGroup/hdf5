@@ -140,8 +140,8 @@ extern const H5O_class_t H5O_EFL[1];	/*external file list class	     */
 typedef struct H5O_efl_entry_t {
     size_t	name_offset;		/*offset of name within heap	     */
     char	*name;			/*malloc'd name			     */
-    size_t	offset;			/*offset of data within file	     */
-    size_t	size;			/*size allocated within file	     */
+    off_t	offset;			/*offset of data within file	     */
+    hsize_t	size;			/*size allocated within file	     */
 } H5O_efl_entry_t;
 
 typedef struct H5O_efl_t {
@@ -162,7 +162,7 @@ typedef struct H5O_layout_t {
     int		type;			/*type of layout, H5D_layout_t	     */
     haddr_t	addr;			/*file address of data or B-tree     */
     intn	ndims;			/*num dimensions in stored data	     */
-    size_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		     */
+    hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		     */
 } H5O_layout_t;
 
 /*
@@ -230,10 +230,10 @@ herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		  intn fwidth);
 
 /* EFL operators */
-size_t H5O_efl_total_size (H5O_efl_t *efl);
+hsize_t H5O_efl_total_size (H5O_efl_t *efl);
 herr_t H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
-		     size_t size, uint8 *buf);
+		     hsize_t size, uint8 *buf);
 herr_t H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
-		      size_t size, const uint8 *buf);
+		      hsize_t size, const uint8 *buf);
 
 #endif

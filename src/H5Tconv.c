@@ -45,12 +45,9 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_noop(hid_t src_id __attribute__((unused)),
-	      hid_t dst_id __attribute__((unused)),
-	      H5T_cdata_t *cdata,
-	      size_t nelmts __attribute__((unused)),
-              void *buf __attribute__((unused)),
-	      void *background __attribute__((unused)))
+H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+	      H5T_cdata_t *cdata, size_t __unused__ nelmts,
+              void __unused__ *buf, void __unused__ *background)
 {
     FUNC_ENTER(H5T_conv_noop, FAIL);
 
@@ -102,7 +99,7 @@ H5T_conv_noop(hid_t src_id __attribute__((unused)),
  */
 herr_t
 H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-               void *_buf, void *background __attribute__((unused)))
+               void *_buf, void __unused__ *background)
 {
     uint8       *buf = (uint8 *) _buf;
     uint8       tmp;

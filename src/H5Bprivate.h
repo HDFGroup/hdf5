@@ -68,24 +68,24 @@ struct H5B_t;                           /*forward decl                       */
 typedef struct H5B_class_t {
     H5B_subid_t id; 				        /*id as found in file*/
     size_t      sizeof_nkey; 			/*size of native (memory) key*/
-    size_t      (*get_sizeof_rkey) (H5F_t *, const void *); /*raw key size   */
+    size_t      (*get_sizeof_rkey) (H5F_t*, const void*);   /*raw key size   */
     herr_t      (*new_node) (H5F_t*, H5B_ins_t, void*, void*, void*, haddr_t*);
-    intn        (*cmp2) (H5F_t *, void *, void *, void *);  /*compare 2 keys */
-    intn        (*cmp3) (H5F_t *, void *, void *, void *);  /*compare 3 keys */
-    herr_t      (*found) (H5F_t *, const haddr_t *, const void *, void *,
-			  const void *);
+    intn        (*cmp2) (H5F_t*, void*, void*, void*);      /*compare 2 keys */
+    intn        (*cmp3) (H5F_t*, void*, void*, void*);      /*compare 3 keys */
+    herr_t      (*found) (H5F_t*, const haddr_t*, const void*, void*,
+			  const void*);
     
     /* insert new data   */
-    H5B_ins_t   (*insert) (H5F_t *, const haddr_t *, void *, hbool_t *,
-			   void *, void *, void *, hbool_t *, haddr_t *);
+    H5B_ins_t   (*insert) (H5F_t*, const haddr_t*, void*, hbool_t*,
+			   void*, void*, void*, hbool_t*, haddr_t*);
     
     /* min insert uses min leaf, not new(), similarily for max insert */
     hbool_t     follow_min;
     hbool_t     follow_max;
     
-    herr_t      (*list) (H5F_t *, const haddr_t *, void *); /*walk leaf nodes*/
-    herr_t      (*decode) (H5F_t *, struct H5B_t *, uint8 *, void *);
-    herr_t      (*encode) (H5F_t *, struct H5B_t *, uint8 *, void *);
+    herr_t      (*list) (H5F_t*, const haddr_t*, void*); /*walk leaf nodes*/
+    herr_t      (*decode) (H5F_t*, struct H5B_t*, uint8*, void*);
+    herr_t      (*encode) (H5F_t*, struct H5B_t*, uint8*, void*);
 } H5B_class_t;
 
 /*

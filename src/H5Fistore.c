@@ -49,10 +49,11 @@ static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
 static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
 				    void *_key);
 static herr_t H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout,
-					H5F_isop_t op, const size_t offset_f[],
-					const size_t size[],
-					const size_t offset_m[],
-					const size_t size_m[],
+					H5F_isop_t op,
+					const hssize_t offset_f[],
+					const hsize_t size[],
+					const hssize_t offset_m[],
+					const hsize_t size_m[],
 					void *buf);
 
 /*
@@ -71,8 +72,8 @@ static herr_t H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout,
  */
 typedef struct H5F_istore_key_t {
     uintn	file_number;			/*external file number	*/
-    size_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
-    size_t	size[H5O_LAYOUT_NDIMS];		/*logical chunk size	*/
+    hssize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    hsize_t	size[H5O_LAYOUT_NDIMS];		/*logical chunk size	*/
 } H5F_istore_key_t;
 
 typedef struct H5F_istore_ud1_t {
@@ -119,7 +120,7 @@ H5B_class_t H5B_ISTORE[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-H5F_istore_sizeof_rkey(H5F_t *f __attribute__((unused)), const void *_udata)
+H5F_istore_sizeof_rkey(H5F_t __unused__ *f, const void *_udata)
 {
     const H5F_istore_ud1_t *udata = (const H5F_istore_ud1_t *) _udata;
     size_t		    nbytes;
@@ -152,7 +153,7 @@ H5F_istore_sizeof_rkey(H5F_t *f __attribute__((unused)), const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
+H5F_istore_decode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
     intn		i;
@@ -196,7 +197,7 @@ H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
+H5F_istore_encode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
     intn		ndims = (intn)(bt->sizeof_rkey / 8);
@@ -245,8 +246,8 @@ H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static intn
-H5F_istore_cmp2(H5F_t *f __attribute__((unused)), void *_lt_key,
-		void *_udata, void *_rt_key)
+H5F_istore_cmp2(H5F_t __unused__ *f, void *_lt_key, void *_udata,
+		void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
@@ -261,7 +262,7 @@ H5F_istore_cmp2(H5F_t *f __attribute__((unused)), void *_lt_key,
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
-    cmp = H5V_vector_cmp(udata->mesg.ndims, lt_key->offset, rt_key->offset);
+    cmp = H5V_vector_cmp_s(udata->mesg.ndims, lt_key->offset, rt_key->offset);
 
     FUNC_LEAVE(cmp);
 }
@@ -297,8 +298,8 @@ H5F_istore_cmp2(H5F_t *f __attribute__((unused)), void *_lt_key,
  *-------------------------------------------------------------------------
  */
 static intn
-H5F_istore_cmp3(H5F_t *f __attribute__((unused)),
-		void *_lt_key, void *_udata, void *_rt_key)
+H5F_istore_cmp3(H5F_t __unused__ *f, void *_lt_key, void *_udata,
+		void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
@@ -312,9 +313,10 @@ H5F_istore_cmp3(H5F_t *f __attribute__((unused)),
     assert(udata);
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims <= H5O_LAYOUT_NDIMS);
 
-    if (H5V_vector_lt(udata->mesg.ndims, udata->key.offset, lt_key->offset)) {
+    if (H5V_vector_lt_s(udata->mesg.ndims, udata->key.offset,
+			lt_key->offset)) {
 	cmp = -1;
-    } else if (H5V_vector_ge(udata->mesg.ndims, udata->key.offset,
+    } else if (H5V_vector_ge_s(udata->mesg.ndims, udata->key.offset,
 			     rt_key->offset)) {
 	cmp = 1;
     }
@@ -350,7 +352,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    size_t		nbytes;
+    hsize_t		nbytes;
     intn		i;
 
     FUNC_ENTER(H5F_istore_new_node, FAIL);
@@ -391,7 +393,9 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
 	 * a zero-width chunk.
 	 */
 	if (H5B_INS_LEFT != op) {
-	    rt_key->offset[i] = udata->key.offset[i] + udata->key.size[i];
+	    assert (udata->key.size[i] < MAX_HSSIZET);
+	    rt_key->offset[i] = udata->key.offset[i] +
+				(hssize_t)udata->key.size[i];
 	    rt_key->size[i] = 0;
 	}
     }
@@ -423,8 +427,9 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
-		 void *_udata, const void *_rt_key __attribute__((unused)))
+H5F_istore_found(H5F_t __unused__ *f, const haddr_t *addr,
+		 const void *_lt_key, void *_udata,
+		 const void __unused__ *_rt_key)
 {
     H5F_istore_ud1_t	   *udata = (H5F_istore_ud1_t *) _udata;
     const H5F_istore_key_t *lt_key = (const H5F_istore_key_t *) _lt_key;
@@ -483,10 +488,10 @@ H5F_istore_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5F_istore_insert(H5F_t *f, const haddr_t *addr,
-		  void *_lt_key, hbool_t *lt_key_changed,
-		  void *_md_key, void *_udata,
-		  void *_rt_key, hbool_t *rt_key_changed,
+H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
+		  hbool_t __unused__ *lt_key_changed,
+		  void *_md_key, void *_udata, void *_rt_key,
+		  hbool_t __unused__ *rt_key_changed,
 		  haddr_t *new_node/*out*/)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
@@ -495,7 +500,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr,
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
     intn		i, cmp;
     H5B_ins_t		ret_value = H5B_INS_ERROR;
-    size_t		nbytes;
+    hsize_t		nbytes;
 
     FUNC_ENTER(H5F_istore_insert, H5B_INS_ERROR);
 
@@ -541,7 +546,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr,
 	 * current node.  The MD_KEY is where the split occurs.
 	 */
 	md_key->file_number = udata->key.file_number;
-	for (i = 0, nbytes = 1; i < udata->mesg.ndims; i++) {
+	for (i=0, nbytes=1; i<udata->mesg.ndims; i++) {
 	    assert(0 == udata->key.offset[i] % udata->mesg.dim[i]);
 	    assert(udata->key.size[i] == udata->mesg.dim[i]);
 	    md_key->offset[i] = udata->key.offset[i];
@@ -604,18 +609,19 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr,
  */
 static herr_t
 H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
-			  const size_t offset_f[], const size_t size[],
-			  const size_t offset_m[], const size_t size_m[],
+			  const hssize_t offset_f[], const hsize_t size[],
+			  const hssize_t offset_m[], const hsize_t size_m[],
 			  void *buf/*in or out*/)
 {
     intn		i, carry;
-    size_t		idx_cur[H5O_LAYOUT_NDIMS];
-    size_t		idx_min[H5O_LAYOUT_NDIMS];
-    size_t		idx_max[H5O_LAYOUT_NDIMS];
-    size_t		sub_size[H5O_LAYOUT_NDIMS];
-    size_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
-    size_t		sub_offset_m[H5O_LAYOUT_NDIMS];
+    hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
+    hsize_t		idx_min[H5O_LAYOUT_NDIMS];
+    hsize_t		idx_max[H5O_LAYOUT_NDIMS];
+    hsize_t		sub_size[H5O_LAYOUT_NDIMS];
+    hssize_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
+    hssize_t		sub_offset_m[H5O_LAYOUT_NDIMS];
     size_t		chunk_size;
+    hsize_t		acc;
     uint8		*chunk = NULL;
     H5F_istore_ud1_t	udata;
     herr_t		status;
@@ -649,14 +655,16 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
      * destination.
      */
     if (H5F_ISTORE_READ==op) {
-	for (i=0, chunk_size=1; i<layout->ndims; i++) {
+	for (i=0, acc=1; i<layout->ndims; i++) {
 	    if (offset_f[i] % layout->dim[i]) break; /*src not aligned*/
 	    if (size[i]!=layout->dim[i]) break; /*src not a chunk*/
 	    if (size_m[i]!=layout->dim[i]) break; /*dst not a chunk*/
 	    udata.key.offset[i] = offset_f[i];
 	    udata.key.size[i] = layout->dim[i];
-	    chunk_size *= layout->dim[i];
+	    acc *= layout->dim[i];
 	}
+	chunk_size = acc;
+	assert ((hsize_t)chunk_size==acc);
 
 	if (i==layout->ndims) {
 	    udata.mesg = *layout;
@@ -665,7 +673,8 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
 	    status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
 	    if (status>=0 && H5F_addr_defined (&(udata.addr))) {
 		assert (0==udata.key.file_number);
-		if (H5F_block_read (f, &(udata.addr), chunk_size, buf)<0) {
+		if (H5F_block_read (f, &(udata.addr), (hsize_t)chunk_size,
+				    buf)<0) {
 		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
 				 "unable to read raw storage chunk");
 		}
@@ -708,11 +717,12 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
 	for (i=0; i<layout->ndims; i++) {
 
 	    /* The location and size of the chunk being accessed */
-	    udata.key.offset[i] = idx_cur[i] * layout->dim[i];
+	    assert (layout->dim[i] < MAX_HSSIZET);
+	    udata.key.offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
 	    udata.key.size[i] = layout->dim[i];
 
 	    /* The offset and size wrt the chunk */
-	    offset_wrt_chunk[i] = MAX((offset_f ? offset_f[i] : 0),
+	    offset_wrt_chunk[i] = MAX((offset_f?offset_f[i]:0),
 				      udata.key.offset[i]) -
 				  udata.key.offset[i];
 	    sub_size[i] = MIN((idx_cur[i] + 1) * layout->dim[i],
@@ -737,11 +747,12 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
 	 * partial chunk then load the chunk from disk. 
 	 */
 	if (H5F_ISTORE_READ == op ||
-	    !H5V_vector_zerop(layout->ndims, offset_wrt_chunk) ||
-	    !H5V_vector_eq(layout->ndims, sub_size, udata.key.size)) {
+	    !H5V_vector_zerop_s(layout->ndims, offset_wrt_chunk) ||
+	    !H5V_vector_eq_u(layout->ndims, sub_size, udata.key.size)) {
 	    if (status>=0 && H5F_addr_defined(&(udata.addr))) {
 		assert(0==udata.key.file_number);
-		if (H5F_block_read(f, &(udata.addr), chunk_size, chunk) < 0) {
+		if (H5F_block_read(f, &(udata.addr), (hsize_t)chunk_size,
+				   chunk) < 0) {
 		    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
 				"unable to read raw storage chunk");
 		}
@@ -755,7 +766,8 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
 			   udata.key.size, offset_wrt_chunk, chunk,
 			   size_m, sub_offset_m, buf);
 	    assert(0 == udata.key.file_number);
-	    if (H5F_block_write(f, &(udata.addr), chunk_size, chunk) < 0) {
+	    if (H5F_block_write(f, &(udata.addr), (hsize_t)chunk_size,
+				chunk) < 0) {
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			    "unable to write raw storage chunk");
 	    }
@@ -799,7 +811,7 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
  */
 herr_t
 H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
-		const size_t offset[], const size_t size[], void *buf)
+		const hssize_t offset[], const hsize_t size[], void *buf)
 {
     FUNC_ENTER(H5F_istore_read, FAIL);
 
@@ -838,7 +850,7 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
-		 const size_t offset[], const size_t size[],
+		 const hssize_t offset[], const hsize_t size[],
 		 const void *buf)
 {
     FUNC_ENTER(H5F_istore_write, FAIL);

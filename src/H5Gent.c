@@ -349,8 +349,8 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t *f __attribute__((unused)), H5G_entry_t *ent,
-	      FILE * stream, intn indent, intn fwidth)
+H5G_ent_debug(H5F_t __unused__ *f, H5G_entry_t *ent, FILE * stream,
+	      intn indent, intn fwidth)
 {
     FUNC_ENTER(H5G_ent_debug, FAIL);
 

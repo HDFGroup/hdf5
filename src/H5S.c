@@ -108,7 +108,7 @@ H5S_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Screate_simple(int rank, const size_t *dims, const size_t *maxdims)
+H5Screate_simple(int rank, const hsize_t *dims, const hsize_t *maxdims)
 {
     H5S_t	*ds = NULL;
     hid_t	ret_value = FAIL;
@@ -146,12 +146,12 @@ H5Screate_simple(int rank, const size_t *dims, const size_t *maxdims)
 	/* Initialize rank and dimensions */
 	ds->u.simple.rank = rank;
 
-	ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(size_t));
-	HDmemcpy(ds->u.simple.size, dims, rank*sizeof(size_t));
+	ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(hsize_t));
+	HDmemcpy(ds->u.simple.size, dims, rank*sizeof(hsize_t));
 
 	if (maxdims) {
-	    ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(size_t));
-	    HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(size_t));
+	    ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(hsize_t));
+	    HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(hsize_t));
 	}
 #ifdef LATER /* QAK */
       } /* end if */
@@ -392,11 +392,11 @@ H5S_copy(const H5S_t *src)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+hsize_t
 H5Sget_npoints(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
-    size_t		    ret_value = 0;
+    hsize_t		    ret_value = 0;
 
     FUNC_ENTER(H5Sget_npoints, 0);
 
@@ -427,10 +427,10 @@ H5Sget_npoints(hid_t space_id)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+hsize_t
 H5S_get_npoints(const H5S_t *ds)
 {
-    size_t		    ret_value = 0;
+    hsize_t		    ret_value = 0;
     intn		    i;
 
     FUNC_ENTER(H5S_get_npoints, 0);
@@ -493,10 +493,10 @@ H5S_get_npoints(const H5S_t *ds)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+hsize_t
 H5S_get_npoints_max(const H5S_t *ds)
 {
-    size_t		    ret_value = 0;
+    hsize_t		    ret_value = 0;
     intn		    i;
 
     FUNC_ENTER(H5S_get_npoints_max, 0);
@@ -513,7 +513,7 @@ H5S_get_npoints_max(const H5S_t *ds)
 	if (ds->u.simple.max) {
 	    for (ret_value=1, i=0; i<ds->u.simple.rank; i++) {
 		if (H5S_UNLIMITED==ds->u.simple.max[i]) {
-		    ret_value = (size_t)(-1L);
+		    ret_value = MAX_HSIZET;
 		    break;
 		} else {
 		    ret_value *= ds->u.simple.max[i];
@@ -642,9 +642,8 @@ H5S_get_ndims(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_dims(hid_t space_id, size_t dims[]/*out*/)
+H5Sget_dims(hid_t space_id, hsize_t dims[]/*out*/)
 {
-
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
 
@@ -681,10 +680,10 @@ H5Sget_dims(hid_t space_id, size_t dims[]/*out*/)
  *-------------------------------------------------------------------------
  */
 intn
-H5S_get_dims(const H5S_t *ds, size_t dims[], size_t max_dims[])
+H5S_get_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
-    intn		ret_value = FAIL;
-    intn		i;
+    intn	ret_value = FAIL;
+    intn	i;
 
     FUNC_ENTER(H5S_get_dims, FAIL);
 
@@ -790,7 +789,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_read(H5F_t *f, H5G_entry_t *ent)
+H5S_read(H5F_t __unused__ *f, H5G_entry_t *ent)
 {
     H5S_t		   *ds = NULL;
 
@@ -991,7 +990,7 @@ H5Sis_simple(hid_t sid)
     be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_space(hid_t sid, int rank, const size_t *dims)
+H5Sset_space(hid_t sid, int rank, const hsize_t *dims)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     intn		    u;	/* local counting variable */
@@ -1000,12 +999,15 @@ H5Sset_space(hid_t sid, int rank, const size_t *dims)
     FUNC_ENTER(H5Sset_space, FAIL);
 
     /* Check args */
-    if ((space = H5I_object(sid)) == NULL)
+    if ((space = H5I_object(sid)) == NULL) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
-    if (rank > 0 && dims == NULL)
+    }
+    if (rank > 0 && dims == NULL) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
-    if (rank<0)
+    }
+    if (rank<0) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
+    }
     if (dims) {
 	for (u=0; u<rank; u++) {
 	    if (dims[u]<=0) {
@@ -1063,8 +1065,8 @@ H5Sset_space(hid_t sid, int rank, const size_t *dims)
 
 	/* Set the rank and copy the dims */
 	space->u.simple.rank = rank;
-	space->u.simple.size = H5MM_xcalloc(rank, sizeof(size_t));
-	HDmemcpy(space->u.simple.size, dims, sizeof(size_t) * rank);
+	space->u.simple.size = H5MM_xcalloc(rank, sizeof(hsize_t));
+	HDmemcpy(space->u.simple.size, dims, sizeof(hsize_t) * rank);
 
     }
     FUNC_LEAVE(ret_value);
@@ -1093,26 +1095,30 @@ H5Sset_space(hid_t sid, int rank, const size_t *dims)
     datasets which extend in arbitrary directions.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t *stride)
+H5Sset_hyperslab(hid_t sid, const hssize_t *start, const hsize_t *count,
+		 const hsize_t *stride)
 {
-    H5S_t		   *space = NULL;	/* dataspace to modify */
-    size_t		   *tmp_stride=NULL;	/* temp. copy of stride */
-    intn		    u;	/* local counting variable */
-    herr_t		    ret_value = SUCCEED;
+    H5S_t	*space = NULL;		/* dataspace to modify */
+    hsize_t	*tmp_stride=NULL;	/* temp. copy of stride */
+    intn	u;			/* local counting variable */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER(H5Sset_hyperslab, FAIL);
 
     /* Get the object */
-    if (H5_DATASPACE != H5I_group(sid) || (space = H5I_object(sid)) == NULL)
+    if (H5_DATASPACE != H5I_group(sid) || (space = H5I_object(sid)) == NULL) {
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
-    if (start == NULL || count==NULL)
+    }
+    if (start == NULL || count==NULL) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		    "invalid hyperslab selected");
+    }
 
     /* We can't modify other types of dataspaces currently, so error out */
-    if (space->type!=H5S_SIMPLE)
+    if (space->type!=H5S_SIMPLE) {
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
 		    "unknown dataspace type");
+    }
 
     /* Set up stride values for later use */
     tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(tmp_stride[0]));
@@ -1122,7 +1128,7 @@ H5Sset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t 
 
     /* Range check arguments */
     for (u=0; u<space->u.simple.rank; u++) {
-	if (start[u]<0 || (size_t)(start[u])>=space->u.simple.size[u]) {
+	if (start[u]<0 || (hsize_t)(start[u])>=space->u.simple.size[u]) {
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			"hyperslab bounds out of range");
 	}
@@ -1135,9 +1141,9 @@ H5Sset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t 
 
     /* Allocate space for the hyperslab information */
     if (NULL==space->h.start) {
-	space->h.start= H5MM_xcalloc(space->u.simple.rank, sizeof(intn));
-	space->h.count= H5MM_xcalloc(space->u.simple.rank, sizeof(size_t));
-	space->h.stride= H5MM_xcalloc(space->u.simple.rank, sizeof(size_t));
+	space->h.start= H5MM_xcalloc(space->u.simple.rank, sizeof(hsize_t));
+	space->h.count= H5MM_xcalloc(space->u.simple.rank, sizeof(hsize_t));
+	space->h.stride= H5MM_xcalloc(space->u.simple.rank, sizeof(hsize_t));
     }
 
     /* Build hyperslab */
@@ -1177,8 +1183,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
-		  size_t stride[]/*out*/)
+H5Sget_hyperslab (hid_t sid, hssize_t offset[]/*out*/, hsize_t size[]/*out*/,
+		  hsize_t stride[]/*out*/)
 {
     const H5S_t	*ds = NULL;
     intn	ret_value = FAIL;
@@ -1218,11 +1224,11 @@ H5Sget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
  *-------------------------------------------------------------------------
  */
 intn
-H5S_get_hyperslab (const H5S_t *ds, int offset[]/*out*/,
-		   size_t size[]/*out*/, size_t stride[]/*out*/)
+H5S_get_hyperslab (const H5S_t *ds, hssize_t offset[]/*out*/,
+		   hsize_t size[]/*out*/, hsize_t stride[]/*out*/)
 {
-    intn		i;
-    intn		ret_value = FAIL;
+    intn	i;
+    intn	ret_value = FAIL;
     
     FUNC_ENTER (H5S_get_hyperslab, FAIL);
 
@@ -1336,7 +1342,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
  *-------------------------------------------------------------------------
  */
 intn
-H5S_extend (H5S_t *space, const size_t *size)
+H5S_extend (H5S_t *space, const hsize_t *size)
 {
     intn		i, ret_value=0;
     

@@ -40,11 +40,9 @@ static hbool_t		interface_initialize_g = TRUE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_optimize1(intn *np/*in,out*/, size_t *_elmt_size/*in,out*/,
-		     size_t *size, ssize_t *stride1)
+H5V_stride_optimize1(intn *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
+		     hsize_t *size, hssize_t *stride1)
 {
-    ssize_t	*elmt_size = (ssize_t *)_elmt_size;
-    
     FUNC_ENTER(H5V_stride_optimize1, FAIL);
 
     /*
@@ -52,12 +50,13 @@ H5V_stride_optimize1(intn *np/*in,out*/, size_t *_elmt_size/*in,out*/,
      * zero we still must make one reference.
      */
     assert(1 == H5V_vector_reduce_product(0, NULL));
-    assert (*elmt_size>0);
 
     /*
      * Combine adjacent memory accesses
      */
-    while (*np && stride1[*np-1] == *elmt_size) {
+    while (*np &&
+	   stride1[*np-1]>0 &&
+	   (hsize_t)(stride1[*np-1])==*elmt_size) {
 	*elmt_size *= size[*np-1];
 	if (--*np) {
 	    stride1[*np-1] += size[*np] * stride1[*np];
@@ -90,11 +89,9 @@ H5V_stride_optimize1(intn *np/*in,out*/, size_t *_elmt_size/*in,out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_optimize2(intn *np/*in,out*/, size_t *_elmt_size/*in,out*/,
-		     size_t *size, ssize_t *stride1, ssize_t *stride2)
+H5V_stride_optimize2(intn *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
+		     hsize_t *size, hssize_t *stride1, hssize_t *stride2)
 {
-    ssize_t	*elmt_size = (ssize_t *)_elmt_size;
-    
     FUNC_ENTER(H5V_stride_optimize2, FAIL);
 
     /*
@@ -107,8 +104,11 @@ H5V_stride_optimize2(intn *np/*in,out*/, size_t *_elmt_size/*in,out*/,
     /*
      * Combine adjacent memory accesses
      */
-    while (*np && stride1[*np-1] == *elmt_size &&
-	   stride2[*np-1] == *elmt_size) {
+    while (*np &&
+	   stride1[*np-1] > 0 &&
+	   (hsize_t)(stride1[*np-1]) == *elmt_size &&
+	   stride2[*np-1] > 0 &&
+	   (hsize_t)(stride2[*np-1]) == *elmt_size) {
 	*elmt_size *= size[*np-1];
 	if (--*np) {
 	    stride1[*np-1] += size[*np] * stride1[*np];
@@ -148,13 +148,13 @@ H5V_stride_optimize2(intn *np/*in,out*/, size_t *_elmt_size/*in,out*/,
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5V_hyper_stride(intn n, const size_t *size,
-		 const size_t *total_size, const size_t *offset,
-		 ssize_t *stride/*out*/)
+hsize_t
+H5V_hyper_stride(intn n, const hsize_t *size,
+		 const hsize_t *total_size, const hssize_t *offset,
+		 hssize_t *stride/*out*/)
 {
-    size_t	    skip;	/*starting point byte offset		*/
-    size_t	    acc;	/*accumulator				*/
+    hsize_t	    skip;	/*starting point byte offset		*/
+    hsize_t	    acc;	/*accumulator				*/
     int		    i;		/*counter				*/
 
     FUNC_ENTER(H5V_hyper_stride, (abort(), 0));
@@ -165,20 +165,21 @@ H5V_hyper_stride(intn n, const size_t *size,
     assert(stride);
 
     /* init */
-    stride[n - 1] = 1;
-    skip = offset ? offset[n - 1] : 0;
+    stride[n-1] = 1;
+    skip = offset ? offset[n-1] : 0;
 
     /* others */
-    for (i = n - 2, acc = 1; i >= 0; --i) {
-	size_t tmp = acc * (total_size[i+1] - size[i+1]);
-	assert (tmp<((size_t)1<<(8*sizeof(ssize_t)-1)));
-	stride[i] = (ssize_t)tmp; /*overflow checked*/
+    for (i=n-2, acc=1; i>=0; --i) {
+	hsize_t tmp = acc * (total_size[i+1] - size[i+1]);
+	assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+	stride[i] = (hssize_t)tmp; /*overflow checked*/
 	acc *= total_size[i+1];
 	skip += acc * (offset ? offset[i] : 0);
     }
 
     FUNC_LEAVE(skip);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5V_hyper_eq
@@ -205,16 +206,15 @@ H5V_hyper_stride(intn n, const size_t *size,
  */
 hbool_t
 H5V_hyper_eq(intn n,
-	     const size_t *offset1, const size_t *size1,
-	     const size_t *offset2, const size_t *size2)
+	     const hssize_t *offset1, const hsize_t *size1,
+	     const hssize_t *offset2, const hsize_t *size2)
 {
-    size_t	nelmts1 = 1, nelmts2 = 1;
+    hsize_t	nelmts1 = 1, nelmts2 = 1;
     intn	i;
 
-    if (n <= 0)
-	return TRUE;
+    if (n <= 0) return TRUE;
 
-    for (i = 0; i < n; i++) {
+    for (i=0; i<n; i++) {
 	if ((offset1 ? offset1[i] : 0) != (offset2 ? offset2[i] : 0)) {
 	    return FALSE;
 	}
@@ -247,19 +247,24 @@ H5V_hyper_eq(intn n,
  */
 hbool_t
 H5V_hyper_disjointp(intn n,
-		    const size_t *offset1, const size_t *size1,
-		    const size_t *offset2, const size_t *size2)
+		    const hssize_t *offset1, const hsize_t *size1,
+		    const hssize_t *offset2, const hsize_t *size2)
 {
     intn	i;
 
     if (!n || !size1 || !size2)	return TRUE;
 
-    for (i = 0; i < n; i++) {
-	if (0 == size1[i] || 0 == size2[i]) return TRUE;
+    for (i=0; i<n; i++) {
+	assert (size1[i]<MAX_HSSIZET);
+	assert (size2[i]<MAX_HSSIZET);
+
+	if (0==size1[i] || 0==size2[i]) return TRUE;
 	if (((offset1?offset1[i]:0) < (offset2?offset2[i]:0) &&
-	     (offset1?offset1[i]:0) + size1[i] <= (offset2?offset2[i]:0)) ||
+	     ((offset1?offset1[i]:0) + (hssize_t)size1[i] <=
+	      (offset2?offset2[i]:0))) ||
 	    ((offset2?offset2[i]:0) < (offset1?offset1[i]:0) &&
-	     (offset2?offset2[i]:0) + size2[i] <= (offset1?offset1[i]:0))) {
+	     ((offset2?offset2[i]:0) + (hssize_t)size2[i] <=
+	      (offset1?offset1[i]:0)))) {
 	    return TRUE;
 	}
     }
@@ -290,15 +295,15 @@ H5V_hyper_disjointp(intn n,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_hyper_fill(intn n, const size_t *_size,
-	       const size_t *total_size, const size_t *offset, void *_dst,
+H5V_hyper_fill(intn n, const hsize_t *_size,
+	       const hsize_t *total_size, const hssize_t *offset, void *_dst,
 	       uintn fill_value)
 {
     uint8	*dst = (uint8 *) _dst;	/*cast for ptr arithmetic	*/
-    size_t	size[H5V_HYPER_NDIMS];	/*a modifiable copy of _size	*/
-    ssize_t	dst_stride[H5V_HYPER_NDIMS]; /*destination stride info  */
-    size_t	dst_start;		/*byte offset to start of stride*/
-    size_t	elmt_size = 1;		/*bytes per element		*/
+    hsize_t	size[H5V_HYPER_NDIMS];	/*a modifiable copy of _size	*/
+    hssize_t	dst_stride[H5V_HYPER_NDIMS]; /*destination stride info  */
+    hsize_t	dst_start;		/*byte offset to start of stride*/
+    hsize_t	elmt_size = 1;		/*bytes per element		*/
     herr_t	status;			/*function return status	*/
 #ifndef NDEBUG
     int		i;
@@ -326,11 +331,12 @@ H5V_hyper_fill(intn n, const size_t *_size,
     H5V_stride_optimize1(&n, &elmt_size, size, dst_stride);
 
     /* Copy */
-    status = H5V_stride_fill(n, elmt_size, size, dst_stride, dst + dst_start,
+    status = H5V_stride_fill(n, elmt_size, size, dst_stride, dst+dst_start,
 			     fill_value);
 
     FUNC_LEAVE(status);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5V_hyper_copy
@@ -366,23 +372,23 @@ H5V_hyper_fill(intn n, const size_t *_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_hyper_copy(intn n, const size_t *_size,
+H5V_hyper_copy(intn n, const hsize_t *_size,
 
 	       /*destination*/
-	       const size_t *dst_size, const size_t *dst_offset,
+	       const hsize_t *dst_size, const hssize_t *dst_offset,
 	       void *_dst,
 
 	       /*source*/
-	       const size_t *src_size, const size_t *src_offset,
+	       const hsize_t *src_size, const hssize_t *src_offset,
 	       const void *_src)
 {
     const uint8	*src = (const uint8 *)_src;	/*cast for ptr arithmtc */
     uint8	*dst = (uint8 *) _dst;		/*cast for ptr arithmtc */
-    size_t	size[H5V_HYPER_NDIMS];		/*a modifiable _size	*/
-    ssize_t	src_stride[H5V_HYPER_NDIMS];	/*source stride info	*/
-    ssize_t	dst_stride[H5V_HYPER_NDIMS];	/*dest stride info	*/
-    size_t	dst_start, src_start;		/*offset to start at	*/
-    size_t	elmt_size = 1;			/*element size in bytes */
+    hsize_t	size[H5V_HYPER_NDIMS];		/*a modifiable _size	*/
+    hssize_t	src_stride[H5V_HYPER_NDIMS];	/*source stride info	*/
+    hssize_t	dst_stride[H5V_HYPER_NDIMS];	/*dest stride info	*/
+    hsize_t	dst_start, src_start;		/*offset to start at	*/
+    hsize_t	elmt_size = 1;			/*element size in bytes */
     herr_t	status;				/*return status		*/
 #ifndef NDEBUG		
     intn	i;
@@ -417,8 +423,8 @@ H5V_hyper_copy(intn n, const size_t *_size,
 
     /* Perform the copy in terms of stride */
     status = H5V_stride_copy(n, elmt_size, size,
-			     dst_stride, dst + dst_start,
-			     src_stride, src + src_start);
+			     dst_stride, dst+dst_start,
+			     src_stride, src+src_start);
 
     FUNC_LEAVE(status);
 }
@@ -441,24 +447,25 @@ H5V_hyper_copy(intn n, const size_t *_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_fill(intn n, size_t elmt_size, const size_t *size,
-		const ssize_t *stride, void *_dst, uintn fill_value)
+H5V_stride_fill(intn n, hsize_t elmt_size, const hsize_t *size,
+		const hssize_t *stride, void *_dst, uintn fill_value)
 {
     uint8	*dst = (uint8 *) _dst; 	/*cast for ptr arithmetic	*/
-    size_t	idx[H5V_HYPER_NDIMS]; 	/*1-origin indices		*/
-    size_t	nelmts;			/*number of elements to fill	*/
-    uintn	i;			/*counter			*/
+    hsize_t	idx[H5V_HYPER_NDIMS]; 	/*1-origin indices		*/
+    hsize_t	nelmts;			/*number of elements to fill	*/
+    hsize_t	i;			/*counter			*/
     intn	j;			/*counter			*/
     hbool_t	carry;			/*subtraction carray value	*/
 
     FUNC_ENTER(H5V_stride_fill, FAIL);
+    assert (elmt_size < MAX_SIZET);
 
     H5V_vector_cpy(n, idx, size);
     nelmts = H5V_vector_reduce_product(n, size);
     for (i=0; i<nelmts; i++) {
 
 	/* Copy an element */
-	HDmemset(dst, (signed)fill_value, elmt_size);
+	HDmemset(dst, (signed)fill_value, (size_t)elmt_size);
 
 	/* Decrement indices and advance pointer */
 	for (j=n-1, carry=TRUE; j>=0 && carry; --j) {
@@ -496,20 +503,20 @@ H5V_stride_fill(intn n, size_t elmt_size, const size_t *size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_copy(intn n, size_t elmt_size, const size_t *size,
-		const ssize_t *dst_stride, void *_dst,
-		const ssize_t *src_stride, const void *_src)
+H5V_stride_copy(int n, hsize_t elmt_size, const hsize_t *size,
+		const hssize_t *dst_stride, void *_dst,
+		const hssize_t *src_stride, const void *_src)
 {
     uint8	*dst = (uint8 *) _dst;		/*cast for ptr arithmetic*/
     const uint8	*src = (const uint8 *) _src;	/*cast for ptr arithmetic*/
-    size_t	idx[H5V_HYPER_NDIMS];		/*1-origin indices	*/
-    size_t	nelmts;				/*num elements to copy	*/
-    uintn	i;				/*counter		*/
+    hsize_t	idx[H5V_HYPER_NDIMS];		/*1-origin indices	*/
+    hsize_t	nelmts;				/*num elements to copy	*/
+    hsize_t	i;				/*counter		*/
     intn	j;				/*counters		*/
     hbool_t	carry;				/*carray for subtraction*/
 
     FUNC_ENTER(H5V_stride_copy, FAIL);
-
+    assert (elmt_size<MAX_SIZET);
 
     if (n) {
 	H5V_vector_cpy(n, idx, size);
@@ -517,7 +524,7 @@ H5V_stride_copy(intn n, size_t elmt_size, const size_t *size,
 	for (i=0; i<nelmts; i++) {
 
 	    /* Copy an element */
-	    HDmemcpy(dst, src, elmt_size);
+	    HDmemcpy(dst, src, (size_t)elmt_size);
 
 	    /* Decrement indices and advance pointers */
 	    for (j=n-1, carry=TRUE; j>=0 && carry; --j) {
@@ -529,7 +536,7 @@ H5V_stride_copy(intn n, size_t elmt_size, const size_t *size,
 	    }
 	}
     } else {
-	HDmemcpy (dst, src, elmt_size);
+	HDmemcpy (dst, src, (size_t)elmt_size);
 	HRETURN (SUCCEED);
     }
 
@@ -557,25 +564,28 @@ H5V_stride_copy(intn n, size_t elmt_size, const size_t *size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_copy2(size_t nelmts, size_t elmt_size,
+H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 
 		 /* destination */
-		 intn dst_n, const size_t *dst_size, const ssize_t *dst_stride,
+		 intn dst_n, const hsize_t *dst_size,
+		 const hssize_t *dst_stride,
 		 void *_dst,
 
 		 /* source */
-		 intn src_n, const size_t *src_size, const ssize_t *src_stride,
+		 intn src_n, const hsize_t *src_size,
+		 const hssize_t *src_stride,
 		 const void *_src)
 {
     uint8	*dst = (uint8 *) _dst;
     const uint8	*src = (const uint8 *) _src;
-    size_t	dst_idx[H5V_HYPER_NDIMS];
-    size_t	src_idx[H5V_HYPER_NDIMS];
-    uintn	i;
+    hsize_t	dst_idx[H5V_HYPER_NDIMS];
+    hsize_t	src_idx[H5V_HYPER_NDIMS];
+    hsize_t	i;
     intn	j;
     hbool_t	carry;
 
     FUNC_ENTER(H5V_stride_copy2, FAIL);
+    assert (elmt_size < MAX_SIZET);
 
     H5V_vector_cpy(dst_n, dst_idx, dst_size);
     H5V_vector_cpy(src_n, src_idx, src_size);
@@ -583,7 +593,7 @@ H5V_stride_copy2(size_t nelmts, size_t elmt_size,
     for (i=0; i<nelmts; i++) {
 
 	/* Copy an element */
-	HDmemcpy(dst, src, elmt_size);
+	HDmemcpy(dst, src, (size_t)elmt_size);
 
 	/* Decrement indices and advance pointers */
 	for (j=dst_n-1, carry=TRUE; j>=0 && carry; --j) {

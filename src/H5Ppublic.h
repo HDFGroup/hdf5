@@ -48,8 +48,8 @@ hid_t H5Pcopy (hid_t tid);
 H5P_class_t H5Pget_class (hid_t tid);
 herr_t H5Pget_version (hid_t tid, int *boot/*out*/, int *freelist/*out*/,
 		       int *stab/*out*/, int *shhdr/*out*/);
-herr_t H5Pset_userblock (hid_t tid, size_t size);
-herr_t H5Pget_userblock (hid_t tid, size_t *size);
+herr_t H5Pset_userblock (hid_t tid, hsize_t size);
+herr_t H5Pget_userblock (hid_t tid, hsize_t *size);
 herr_t H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size);
 herr_t H5Pget_sizes (hid_t tid, size_t *sizeof_addr/*out*/,
                      size_t *sizeof_size/*out*/);
@@ -59,14 +59,14 @@ herr_t H5Pset_istore_k (hid_t tid, int ik);
 herr_t H5Pget_istore_k (hid_t tid, int *ik/*out*/);
 herr_t H5Pset_layout (hid_t tid, H5D_layout_t layout);
 H5D_layout_t H5Pget_layout (hid_t tid);
-herr_t H5Pset_chunk (hid_t tid, int ndims, const size_t dim[]);
-int H5Pget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
-herr_t H5Pset_external (hid_t plist_id, const char *name, size_t offset,
-			size_t size);
+herr_t H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[]);
+int H5Pget_chunk (hid_t tid, int max_ndims, hsize_t dim[]/*out*/);
+herr_t H5Pset_external (hid_t plist_id, const char *name, off_t offset,
+			hsize_t size);
 int H5Pget_external_count (hid_t plist_id);
 herr_t H5Pget_external (hid_t plist_id, int idx, size_t name_size,
-			char *name/*out*/, size_t *offset/*out*/,
-			size_t *size/*out*/);
+			char *name/*out*/, off_t *offset/*out*/,
+			hsize_t *size/*out*/);
 H5F_driver_t H5Pget_driver (hid_t tid);
 herr_t H5Pset_stdio (hid_t tid);
 herr_t H5Pget_stdio (hid_t tid);

@@ -47,7 +47,7 @@
 int
 main(int argc, char *argv[])
 {
-    hid_t                   fid;
+    hid_t                   fid, plist=H5P_DEFAULT;
     H5F_t                  *f;
     haddr_t                 addr;
     uint8                   sig[16];
@@ -58,7 +58,11 @@ main(int argc, char *argv[])
     /*
      * Open the file and get the file descriptor.
      */
-    if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
+    if (strchr (argv[1], '%')) {
+	plist = H5Pcreate (H5P_FILE_ACCESS);
+	H5Pset_family (plist, H5P_DEFAULT);
+    }
+    if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, plist)) < 0) {
         fprintf(stderr, "cannot open file\n");
         HDexit(1);
     }
@@ -66,6 +70,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     }
+    
     /*
      * Parse command arguments.
      */
@@ -84,7 +89,7 @@ main(int argc, char *argv[])
     printf("Reading signature at address ");
     H5F_addr_print(stdout, &addr);
     printf(" (rel)\n");
-    if (H5F_block_read(f, &addr, sizeof(sig), sig) < 0) {
+    if (H5F_block_read(f, &addr, (hsize_t)sizeof(sig), sig) < 0) {
         fprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }

@@ -104,7 +104,7 @@ H5HG_create (H5F_t *f, size_t size)
     if (size<H5HG_MINSIZE) size = H5HG_MINSIZE;
 
     /* Create it */
-    if (H5MF_alloc (f, H5MF_META, size, &addr/*out*/)<0) {
+    if (H5MF_alloc (f, H5MF_META, (hsize_t)size, &addr/*out*/)<0) {
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, NULL,
 		     "unable to allocate file space for global heap");
     }
@@ -180,7 +180,8 @@ H5HG_create (H5F_t *f, size_t size)
  *-------------------------------------------------------------------------
  */
 static H5HG_heap_t *
-H5HG_load (H5F_t *f, const haddr_t *addr, const void *udata1, void *udata2)
+H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
+	   void __unused__ *udata2)
 {
     H5HG_heap_t	*heap = NULL;
     H5HG_heap_t	*ret_value = NULL;
@@ -199,7 +200,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void *udata1, void *udata2)
     heap = H5MM_xcalloc (1, sizeof(H5HG_heap_t));
     heap->addr = *addr;
     heap->chunk = H5MM_xmalloc (H5HG_MINSIZE);
-    if (H5F_block_read (f, addr, H5HG_MINSIZE, heap->chunk)<0) {
+    if (H5F_block_read (f, addr, (hsize_t)H5HG_MINSIZE, heap->chunk)<0) {
 	HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
 		     "unable to read global heap collection");
     }
@@ -230,9 +231,9 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void *udata1, void *udata2)
      */
     if (heap->size > H5HG_MINSIZE) {
 	haddr_t next_addr = *addr;
-	H5F_addr_inc (&next_addr, H5HG_MINSIZE);
+	H5F_addr_inc (&next_addr, (hsize_t)H5HG_MINSIZE);
 	heap->chunk = H5MM_xrealloc (heap->chunk, heap->size);
-	if (H5F_block_read (f, &next_addr, heap->size-H5HG_MINSIZE,
+	if (H5F_block_read (f, &next_addr, (hsize_t)(heap->size-H5HG_MINSIZE),
 			    heap->chunk+H5HG_MINSIZE)<0) {
 	    HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
 			 "unable to read global heap collection");
@@ -337,7 +338,7 @@ H5HG_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5HG_heap_t *heap)
     assert (heap);
 
     if (heap->dirty) {
-	if (H5F_block_write (f, addr, heap->size, heap->chunk)<0) {
+	if (H5F_block_write (f, addr, (hsize_t)(heap->size), heap->chunk)<0) {
 	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
 			   "unable to write global heap collection to file");
 	}
@@ -796,7 +797,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
 	 * to the file free list.
 	 */
 	heap->dirty = FALSE;
-	H5MF_free (f, &(heap->addr), heap->size);
+	H5MF_free (f, &(heap->addr), (hsize_t)(heap->size));
 	H5AC_flush (f, H5AC_GHEAP, &(heap->addr), TRUE);
 	heap = NULL;
     } else {

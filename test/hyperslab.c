@@ -149,9 +149,9 @@ test_fill(size_t nx, size_t ny, size_t nz,
 	  size_t ddx, size_t ddy, size_t ddz)
 {
     uint8	*dst = NULL;		/*destination array		*/
-    size_t	hs_size[3];	    	/*hyperslab size		*/
-    size_t	dst_size[3];	    	/*destination total size	*/
-    size_t	dst_offset[3];	    	/*offset of hyperslab in dest   */
+    hsize_t	hs_size[3];	    	/*hyperslab size		*/
+    hsize_t	dst_size[3];	    	/*destination total size	*/
+    hssize_t	dst_offset[3];	    	/*offset of hyperslab in dest   */
     uintn	ref_value;  		/*reference value		*/
     uintn	acc;	    		/*accumulator		    	*/
     size_t	i, j, k, dx, dy, dz;	/*counters		   	*/
@@ -197,9 +197,9 @@ test_fill(size_t nx, size_t ny, size_t nz,
 			    dst_size[0] = nx;
 			    dst_size[1] = ny;
 			    dst_size[2] = nz;
-			    dst_offset[0] = i;
-			    dst_offset[1] = j;
-			    dst_offset[2] = k;
+			    dst_offset[0] = (hssize_t)i;
+			    dst_offset[1] = (hssize_t)j;
+			    dst_offset[2] = (hssize_t)k;
 			    hs_size[0] = dx;
 			    hs_size[1] = dy;
 			    hs_size[2] = dz;
@@ -314,15 +314,15 @@ test_copy(int mode,
 {
     uint8	*src = NULL;		/*source array			*/
     uint8	*dst = NULL;		/*destination array		*/
-    size_t	hs_size[3];		/*hyperslab size		*/
-    size_t	dst_size[3];		/*destination total size	*/
-    size_t	src_size[3];		/*source total size		*/
-    size_t	dst_offset[3];		/*offset of hyperslab in dest	*/
-    size_t	src_offset[3];		/*offset of hyperslab in source */
+    hsize_t	hs_size[3];		/*hyperslab size		*/
+    hsize_t	dst_size[3];		/*destination total size	*/
+    hsize_t	src_size[3];		/*source total size		*/
+    hssize_t	dst_offset[3];		/*offset of hyperslab in dest	*/
+    hssize_t	src_offset[3];		/*offset of hyperslab in source */
     uintn	ref_value;		/*reference value		*/
     uintn	acc;			/*accumulator			*/
-    size_t	i, j, k, dx, dy, dz;	/*counters		     	*/
-    size_t	u, v, w;
+    hsize_t	i, j, k, dx, dy, dz;	/*counters		     	*/
+    hsize_t	u, v, w;
     int		ndims;			/*hyperslab dimensionality	*/
     char	dim[64], s[256];	/*temp string			*/
     const char	*sub;
@@ -406,25 +406,25 @@ test_copy(int mode,
 				dst_offset[0] = 0;
 				dst_offset[1] = 0;
 				dst_offset[2] = 0;
-				src_offset[0] = i;
-				src_offset[1] = j;
-				src_offset[2] = k;
+				src_offset[0] = (hssize_t)i;
+				src_offset[1] = (hssize_t)j;
+				src_offset[2] = (hssize_t)k;
 				break;
 			    case VARIABLE_DST:
-				dst_offset[0] = i;
-				dst_offset[1] = j;
-				dst_offset[2] = k;
+				dst_offset[0] = (hssize_t)i;
+				dst_offset[1] = (hssize_t)j;
+				dst_offset[2] = (hssize_t)k;
 				src_offset[0] = 0;
 				src_offset[1] = 0;
 				src_offset[2] = 0;
 				break;
 			    case VARIABLE_BOTH:
-				dst_offset[0] = i;
-				dst_offset[1] = j;
-				dst_offset[2] = k;
-				src_offset[0] = i;
-				src_offset[1] = j;
-				src_offset[2] = k;
+				dst_offset[0] = (hssize_t)i;
+				dst_offset[1] = (hssize_t)j;
+				dst_offset[2] = (hssize_t)k;
+				src_offset[0] = (hssize_t)i;
+				src_offset[1] = (hssize_t)j;
+				src_offset[2] = (hssize_t)k;
 				break;
 			    default:
 				abort();
@@ -492,9 +492,14 @@ test_copy(int mode,
 				     */
 				    AT();
 				    printf("   acc != ref_value\n");
-				    printf("   i=%d, j=%d, k=%d, "
-					   "dx=%d, dy=%d, dz=%d\n",
-					   i, j, k, dx, dy, dz);
+				    printf("   i=%lu, j=%lu, k=%lu, "
+					   "dx=%lu, dy=%lu, dz=%lu\n",
+					   (unsigned long)i,
+					   (unsigned long)j,
+					   (unsigned long)k,
+					   (unsigned long)dx,
+					   (unsigned long)dy,
+					   (unsigned long)dz);
 				    print_ref(nx, ny, nz);
 				    printf("\n	 Destination array is:\n");
 				    print_array(dst, nx, ny, nz);
@@ -524,9 +529,14 @@ test_copy(int mode,
 				    AT();
 				    printf("   acc != ref_value + nx*ny*nz - "
 					   "dx*dy*dz\n");
-				    printf("   i=%d, j=%d, k=%d, "
-					   "dx=%d, dy=%d, dz=%d\n",
-					   i, j, k, dx, dy, dz);
+				    printf("   i=%lu, j=%lu, k=%lu, "
+					   "dx=%lu, dy=%lu, dz=%lu\n",
+					   (unsigned long)i,
+					   (unsigned long)j,
+					   (unsigned long)k,
+					   (unsigned long)dx,
+					   (unsigned long)dy,
+					   (unsigned long)dz);
 				    print_ref(nx, ny, nz);
 				    printf("\n	 Destination array is:\n");
 				    print_array(dst, nx, ny, nz);
@@ -573,10 +583,10 @@ test_copy(int mode,
 static herr_t
 test_multifill(size_t nx)
 {
-    size_t		    i, j;
-    size_t		    size;
-    ssize_t		    src_stride;
-    ssize_t		    dst_stride;
+    hsize_t		    i, j;
+    hsize_t		    size;
+    hssize_t		    src_stride;
+    hssize_t		    dst_stride;
     char		    s[64];
 
     struct a_struct {
@@ -618,7 +628,7 @@ test_multifill(size_t nx)
      * Copy the fill value into each element
      */
     size = nx;
-    H5V_stride_copy(1, sizeof(double), &size,
+    H5V_stride_copy(1, (hsize_t)sizeof(double), &size,
 		    &dst_stride, &(dst[0].mid), &src_stride, &(fill.mid));
 
     /*
@@ -627,11 +637,11 @@ test_multifill(size_t nx)
     s[0] = '\0';
     for (i = 0; i < nx; i++) {
 	if (dst[i].left != 3333333) {
-	    sprintf(s, "bad dst[%d].left", i);
+	    sprintf(s, "bad dst[%lu].left", (unsigned long)i);
 	} else if (dst[i].mid != fill.mid) {
-	    sprintf(s, "bad dst[%d].mid", i);
+	    sprintf(s, "bad dst[%lu].mid", (unsigned long)i);
 	} else if (dst[i].right != 4444444) {
-	    sprintf(s, "bad dst[%d].right", i);
+	    sprintf(s, "bad dst[%lu].right", (unsigned long)i);
 	}
 	if (s[0]) {
 	    puts("*FAILED*");
@@ -642,8 +652,9 @@ test_multifill(size_t nx)
 		for (j = 0; j < sizeof(fill); j++) {
 		    printf(" %02x", ((uint8 *) &fill)[j]);
 		}
-		printf("\n   dst[%d]={%d,%g,%d}\n   ",
-		       i, dst[i].left, dst[i].mid, dst[i].right);
+		printf("\n   dst[%lu]={%d,%g,%d}\n   ",
+		       (unsigned long)i,
+		       dst[i].left, dst[i].mid, dst[i].right);
 		for (j = 0; j < sizeof(dst[i]); j++) {
 		    printf(" %02x", ((uint8 *) (dst + i))[j]);
 		}
@@ -687,10 +698,10 @@ test_endian(size_t nx)
 {
     uint8	*src = NULL;		/*source array			*/
     uint8	*dst = NULL;		/*destination array		*/
-    ssize_t	src_stride[2];		/*source strides		*/
-    ssize_t	dst_stride[2];		/*destination strides		*/
-    size_t	size[2];		/*size vector			*/
-    size_t	i, j;
+    hssize_t	src_stride[2];		/*source strides		*/
+    hssize_t	dst_stride[2];		/*destination strides		*/
+    hsize_t	size[2];		/*size vector			*/
+    hsize_t	i, j;
 
     printf("%-70s", "Testing endian conversion by stride");
     fflush(stdout);
@@ -709,7 +720,7 @@ test_endian(size_t nx)
     size[1] = 4;
 
     /* Copy the array */
-    H5V_stride_copy(2, 1, size, dst_stride, dst + 3, src_stride, src);
+    H5V_stride_copy(2, (hsize_t)1, size, dst_stride, dst + 3, src_stride, src);
 
     /* Compare */
     for (i = 0; i < nx; i++) {
@@ -722,7 +733,8 @@ test_endian(size_t nx)
 		     * to a terminal.
 		     */
 		    AT();
-		    printf("   i=%d, j=%d\n", i, j);
+		    printf("   i=%lu, j=%lu\n",
+			   (unsigned long)i, (unsigned long)j);
 		    printf("   Source array is:\n");
 		    print_array(src, nx, 4, 1);
 		    printf("\n	 Result is:\n");
@@ -766,9 +778,9 @@ test_transpose(size_t nx, size_t ny)
 {
     intn	*src = NULL;
     intn	*dst = NULL;
-    size_t	i, j;
-    ssize_t	src_stride[2], dst_stride[2];
-    size_t	size[2];
+    hsize_t	i, j;
+    hssize_t	src_stride[2], dst_stride[2];
+    hsize_t	size[2];
     char	s[256];
 
     sprintf(s, "Testing 2d transpose by stride %4lux%-lud",
@@ -795,11 +807,11 @@ test_transpose(size_t nx, size_t ny)
 
     /* Copy and transpose */
     if (nx == ny) {
-	H5V_stride_copy(2, sizeof(*src), size,
+	H5V_stride_copy(2, (hsize_t)sizeof(*src), size,
 			dst_stride, dst,
 			src_stride, src);
     } else {
-	H5V_stride_copy(2, sizeof(*src), size,
+	H5V_stride_copy(2, (hsize_t)sizeof(*src), size,
 			dst_stride, dst,
 			src_stride, src);
     }
@@ -811,10 +823,11 @@ test_transpose(size_t nx, size_t ny)
 		puts("*FAILED*");
 		if (!isatty(1)) {
 		    AT();
-		    printf("   diff at i=%d, j=%d\n", i, j);
+		    printf("   diff at i=%lu, j=%lu\n",
+			   (unsigned long)i, (unsigned long)j);
 		    printf("   Source is:\n");
 		    for (i = 0; i < nx; i++) {
-			printf("%3d:", i);
+			printf("%3lu:", (unsigned long)i);
 			for (j = 0; j < ny; j++) {
 			    printf(" %6d", src[i * ny + j]);
 			}
@@ -822,7 +835,7 @@ test_transpose(size_t nx, size_t ny)
 		    }
 		    printf("\n	 Destination is:\n");
 		    for (i = 0; i < ny; i++) {
-			printf("%3d:", i);
+			printf("%3lu:", (unsigned long)i);
 			for (j = 0; j < nx; j++) {
 			    printf(" %6d", dst[i * nx + j]);
 			}
@@ -870,10 +883,10 @@ test_sub_super(size_t nx, size_t ny)
     uint8	*full = NULL;	/*original image		*/
     uint8	*half = NULL;	/*image at 1/2 resolution	*/
     uint8	*twice = NULL;	/*2x2 pixels			*/
-    ssize_t	src_stride[4];	/*source stride info		*/
-    ssize_t	dst_stride[4];	/*destination stride info	*/
-    size_t	size[4];	/*number of sample points	*/
-    size_t	i, j;
+    hssize_t	src_stride[4];	/*source stride info		*/
+    hssize_t	dst_stride[4];	/*destination stride info	*/
+    hsize_t	size[4];	/*number of sample points	*/
+    hsize_t	i, j;
     char	s[256];
 
     sprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
@@ -897,7 +910,7 @@ test_sub_super(size_t nx, size_t ny)
     dst_stride[1] = 1;
 
     /* Copy */
-    H5V_stride_copy(2, sizeof(uint8), size,
+    H5V_stride_copy(2, (hsize_t)sizeof(uint8), size,
 		    dst_stride, half, src_stride, full);
 
     /* Check */
@@ -907,8 +920,11 @@ test_sub_super(size_t nx, size_t ny)
 		puts("*FAILED*");
 		if (!isatty(1)) {
 		    AT();
-		    printf("   full[%d][%d] != half[%d][%d]\n",
-			   i*2, j*2, i, j);
+		    printf("   full[%lu][%lu] != half[%lu][%lu]\n",
+			   (unsigned long)i*2,
+			   (unsigned long)j*2,
+			   (unsigned long)i,
+			   (unsigned long)j);
 		    printf("   full is:\n");
 		    print_array(full, 2 * nx, 2 * ny, 1);
 		    printf("\n	 half is:\n");
@@ -945,7 +961,7 @@ test_sub_super(size_t nx, size_t ny)
     dst_stride[3] = sizeof(uint8);
 
     /* Copy */
-    H5V_stride_copy(4, sizeof(uint8), size,
+    H5V_stride_copy(4, (hsize_t)sizeof(uint8), size,
 		    dst_stride, twice, src_stride, half);
 
     /* Check */
@@ -953,17 +969,29 @@ test_sub_super(size_t nx, size_t ny)
     for (i = 0; i < nx; i++) {
 	for (j = 0; j < ny; j++) {
 	    if (half[i*ny+j] != twice[4*i*ny + 2*j]) {
-		sprintf(s, "half[%d][%d] != twice[%d][%d]",
-			i, j, 2 * i, 2 * j);
+		sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+			(unsigned long)i,
+			(unsigned long)j,
+			(unsigned long)i*2,
+			(unsigned long)j*2);
 	    } else if (half[i*ny + j] != twice[4*i*ny + 2*j + 1]) {
-		sprintf(s, "half[%d][%d] != twice[%d][%d]",
-			i, j, 2 * i, 2 * j + 1);
+		sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+			(unsigned long)i,
+			(unsigned long)j,
+			(unsigned long)i*2,
+			(unsigned long)j*2+1);
 	    } else if (half[i*ny + j] != twice[(2*i +1)*2*ny + 2*j]) {
-		sprintf(s, "half[%d][%d] != twice[%d][%d]",
-			i, j, 2 * i + 1, 2 * j);
+		sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+			(unsigned long)i,
+			(unsigned long)j,
+			(unsigned long)i*2+1,
+			(unsigned long)j*2);
 	    } else if (half[i*ny + j] != twice[(2*i+1)*2*ny + 2*j+1]) {
-		sprintf(s, "half[%d][%d] != twice[%d][%d]",
-			i, j, 2 * i + 1, 2 * j + 1);
+		sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+			(unsigned long)i,
+			(unsigned long)j,
+			(unsigned long)i*2+1,
+			(unsigned long)j*2+1);
 	    }
 	    if (s[0]) {
 		puts("*FAILED*");

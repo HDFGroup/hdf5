@@ -60,7 +60,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_decode (H5F_t *f, const uint8 *buf, H5HG_t *hobj)
+H5O_shared_decode (H5F_t *f, const uint8 *buf, H5HG_t __unused__ *hobj)
 {
     H5O_shared_t	*mesg;
     
@@ -133,7 +133,7 @@ H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shared_size (H5F_t *f, const void *_mesg __attribute__((unused)))
+H5O_shared_size (H5F_t *f, const void __unused__ *_mesg)
 {
     FUNC_ENTER (H5O_shared_size, 0);
     FUNC_LEAVE (H5F_SIZEOF_ADDR(f)+4);
@@ -157,8 +157,8 @@ H5O_shared_size (H5F_t *f, const void *_mesg __attribute__((unused)))
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shared_debug (H5F_t *f, const void *_mesg, FILE *stream, intn indent,
-		  intn fwidth)
+H5O_shared_debug (H5F_t __unused__ *f, const void *_mesg,
+		  FILE *stream, intn indent, intn fwidth)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
 

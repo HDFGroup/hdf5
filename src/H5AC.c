@@ -172,7 +172,7 @@ H5AC_dest(H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-void                   *
+void *
 H5AC_find_f(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
             const void *udata1, void *udata2)
 {

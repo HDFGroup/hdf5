@@ -36,14 +36,14 @@ static intn             interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 size_t
-H5S_simp_init (const struct H5O_layout_t *layout, const H5S_t *mem_space,
-	       const H5S_t *file_space, size_t desired_nelmts,
-	       H5S_number_t *numbering/*out*/)
+H5S_simp_init (const struct H5O_layout_t __unused__ *layout,
+	       const H5S_t *mem_space, const H5S_t *file_space,
+	       size_t desired_nelmts, H5S_number_t *numbering/*out*/)
 {
-    size_t	nelmts;
+    hsize_t	nelmts;
     int		m_ndims, f_ndims;	/*mem, file dimensionality	*/
-    size_t	size[H5O_LAYOUT_NDIMS];	/*size of selected hyperslab	*/
-    size_t	acc;
+    hsize_t	size[H5O_LAYOUT_NDIMS];	/*size of selected hyperslab	*/
+    hsize_t	acc;
     int		i;
     
     FUNC_ENTER (H5S_simp_init, 0);
@@ -92,7 +92,8 @@ H5S_simp_init (const struct H5O_layout_t *layout, const H5S_t *mem_space,
 	}
     }
     
-    FUNC_LEAVE (nelmts);
+    assert (nelmts < MAX_SIZET);
+    FUNC_LEAVE ((size_t)nelmts);
 }
 
 /*-------------------------------------------------------------------------
@@ -125,17 +126,14 @@ size_t
 H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
-		const H5S_number_t *numbering, size_t start, size_t nelmts,
-		void *buf/*out*/)
+		const H5S_number_t __unused__ *numbering,
+		size_t start, size_t nelmts, void *buf/*out*/)
 {
-    size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
-    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
-    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
-    size_t	acc;				/*accumulator		*/
-#ifndef LATER
-    intn	file_offset_signed[H5O_LAYOUT_NDIMS];
-#endif
+    hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
+    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
+    hsize_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    hsize_t	acc;				/*accumulator		*/
     intn	space_ndims;			/*dimensionality of space*/
     intn	i;				/*counters		*/
 
@@ -157,24 +155,11 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      * currently pass sample information into H5F_arr_read() much less
      * H5F_istore_read().
      */
-#ifdef LATER
     if ((space_ndims=H5S_get_hyperslab (file_space, file_offset,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
-#else
-    /* Argument type problems to be fixed later..... -RPM */
-    if ((space_ndims=H5S_get_hyperslab (file_space, file_offset_signed,
-					hsize, sample))<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-		       "unable to retrieve hyperslab parameters");
-    }
-    for (i=0; i<space_ndims; i++) {
-	assert (file_offset_signed[i]>=0);
-	file_offset[i] = file_offset_signed[i];
-    }
-#endif
 
     /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
@@ -194,7 +179,7 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /* The fastest varying dimension is for the data point itself */
     file_offset[space_ndims] = 0;
     hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, layout->ndims*sizeof(size_t));
+    HDmemset (zero, 0, layout->ndims*sizeof(*zero));
 
     /*
      * Gather from file.
@@ -230,18 +215,16 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
-		const H5S_t *mem_space, const H5S_number_t *numbering,
+		const H5S_t *mem_space,
+		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts, void *buf/*out*/)
 {
-    size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
-    size_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
-    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
-    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
-    size_t	acc;				/*accumulator		*/
-#ifndef LATER
-    intn	mem_offset_signed[H5O_LAYOUT_NDIMS];
-#endif
+    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
+    hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
+    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
+    hsize_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    hsize_t	acc;				/*accumulator		*/
     intn	space_ndims;			/*dimensionality of space*/
     intn	i;				/*counters		*/
 
@@ -261,24 +244,11 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
      * only handle hyperslabs with unit sample because there's currently no
      * way to pass sample information to H5V_hyper_copy().
      */
-#ifdef LATER
     if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset, hsize,
 					sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
-#else
-    /* Argument type problems to be fixed later..... -RPM */
-    if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset_signed,
-					hsize, sample))<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to retrieve hyperslab parameters");
-    }
-    for (i=0; i<space_ndims; i++) {
-	assert (mem_offset_signed[i]>=0);
-	mem_offset[i] = mem_offset_signed[i];
-    }
-#endif
 
     /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
@@ -303,7 +273,7 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
     mem_offset[space_ndims] = 0;
     mem_size[space_ndims] = elmt_size;
     hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, (space_ndims+1)*sizeof(size_t));
+    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
 
     /*
      * Scatter from conversion buffer to application memory.
@@ -342,18 +312,16 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
  */
 size_t
 H5S_simp_mgath (const void *buf, size_t elmt_size,
-		const H5S_t *mem_space, const H5S_number_t *numbering,
+		const H5S_t *mem_space,
+		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts, void *tconv_buf/*out*/)
 {
-    size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
-    size_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
-    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
-    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
-    size_t	acc;				/*accumulator		*/
-#ifndef LATER
-    intn	mem_offset_signed[H5O_LAYOUT_NDIMS];
-#endif
+    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
+    hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
+    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
+    hsize_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    hsize_t	acc;				/*accumulator		*/
     intn	space_ndims;			/*dimensionality of space*/
     intn	i;				/*counters		*/
 
@@ -373,24 +341,11 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
      * only handle hyperslabs with unit sample because there's currently no
      * way to pass sample information to H5V_hyper_copy().
      */
-#ifdef LATER
     if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset, hsize,
 					sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
-#else
-    /* Argument type problems to be fixed later..... -RPM */
-    if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset_signed,
-					hsize, sample))<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-		       "unable to retrieve hyperslab parameters");
-    }
-    for (i=0; i<space_ndims; i++) {
-	assert (mem_offset_signed[i]>=0);
-	mem_offset[i] = mem_offset_signed[i];
-    }
-#endif
 
     /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
@@ -415,7 +370,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
     mem_offset[space_ndims] = 0;
     mem_size[space_ndims] = elmt_size;
     hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, (space_ndims+1)*sizeof(size_t));
+    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
 
     /*
      * Scatter from conversion buffer to application memory.
@@ -455,17 +410,14 @@ herr_t
 H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
-		const H5S_number_t *numbering, size_t start, size_t nelmts,
-		const void *buf)
+		const H5S_number_t __unused__ *numbering,
+		size_t start, size_t nelmts, const void *buf)
 {
-    size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
-    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
-    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
-    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
-    size_t	acc;				/*accumulator		*/
-#ifndef LATER
-    intn	file_offset_signed[H5O_LAYOUT_NDIMS];
-#endif
+    hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
+    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
+    hsize_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    hsize_t	acc;				/*accumulator		*/
     intn	space_ndims;			/*space dimensionality	*/
     intn	i;				/*counters		*/
 
@@ -487,24 +439,11 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      * currently pass sample information into H5F_arr_read() much less
      * H5F_istore_read().
      */
-#ifdef LATER
     if ((space_ndims=H5S_get_hyperslab (file_space, file_offset, hsize,
 					sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
-#else
-    /* Argument type problems to be fixed later..... -RPM */
-    if ((space_ndims=H5S_get_hyperslab (file_space, file_offset_signed,
-					hsize, sample))<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to retrieve hyperslab parameters");
-    }
-    for (i=0; i<space_ndims; i++) {
-	assert (file_offset_signed[i]>=0);
-	file_offset[i] = file_offset_signed[i];
-    }
-#endif
 
     /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
@@ -524,7 +463,7 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     /* The fastest varying dimension is for the data point itself */
     file_offset[space_ndims] = 0;
     hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, layout->ndims*sizeof(size_t));
+    HDmemset (zero, 0, layout->ndims*sizeof(*zero));
 
     /*
      * Scatter to file.
@@ -564,10 +503,10 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
 	       const H5S_t *file_space, const H5S_t *mem_space,
 	       void *buf/*out*/)
 {
-    size_t	hslab_size[H5O_LAYOUT_NDIMS];
-    size_t	file_offset[H5O_LAYOUT_NDIMS];
-    size_t	mem_size[H5O_LAYOUT_NDIMS];
-    size_t	mem_offset[H5O_LAYOUT_NDIMS];
+    hssize_t	file_offset[H5O_LAYOUT_NDIMS];
+    hsize_t	hslab_size[H5O_LAYOUT_NDIMS];
+    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
+    hsize_t	mem_size[H5O_LAYOUT_NDIMS];
     int		i;
 
     FUNC_ENTER (H5S_simp_read, FAIL);
@@ -669,10 +608,10 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
 		const H5S_t *file_space, const H5S_t *mem_space,
 		const void *buf)
 {
-    size_t	hslab_size[H5O_LAYOUT_NDIMS];
-    size_t	file_offset[H5O_LAYOUT_NDIMS];
-    size_t	mem_size[H5O_LAYOUT_NDIMS];
-    size_t	mem_offset[H5O_LAYOUT_NDIMS];
+    hssize_t	file_offset[H5O_LAYOUT_NDIMS];
+    hsize_t	hslab_size[H5O_LAYOUT_NDIMS];
+    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
+    hsize_t	mem_size[H5O_LAYOUT_NDIMS];
     int		i;
 
     FUNC_ENTER (H5S_simp_write, FAIL);
