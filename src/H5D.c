@@ -13,7 +13,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#ifdef H5_HAVE_FPHDF5
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#endif  /* H5_HAVE_FPHDF5 */
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
@@ -22,8 +24,9 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"         /* Files                                */
+#ifdef H5_HAVE_FPHDF5
 #include "H5Fpkg.h"             /* Files access                         */
+#endif  /* H5_HAVE_FPHDF5 */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
@@ -1653,6 +1656,23 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point")
 
 #ifdef H5_HAVE_FPHDF5
+#error "This is not the right place for this code, see comment in code - QAK"
+/* This code ought to be somewhere in H5G_insert (or one of the functions that
+ * it calls), not here.  All the routines which create objects in the file
+ * (H5Dcreate, H5Gcreate, H5Tcommit, H5Glink, etc.) all prepare an object in
+ * memory and then call H5G_insert to actually insert the object into the group
+ * that contains it.
+ *
+ * Looking through the H5G_insert code, it calls H5G_namei which calls
+ * H5G_stab_insert to actually insert the object into the symbol table, so 
+ * H5G_stab_insert would probably be the best place to do this sort of locking.
+ * (I think it would be better to do it there than in H5G_insert because the
+ * H5Glink code doesn't end up calling H5G_insert for creating soft links, but
+ * it does end up calling H5G_stab_insert).
+ *
+ * Otherwise, you are going to have to duplicate this chunk of code into far
+ * too many places in the library...  - QAK
+ */
     if (H5FD_is_fphdf5_driver(file->shared->lf)) {
         unsigned file_id = H5FD_fphdf5_file_id(file->shared->lf);
         char *tmp_name = H5MM_xstrdup(name);
