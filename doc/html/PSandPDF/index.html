@@ -1,0 +1,198 @@
+<html>
+  <head>
+    <title>
+      HDF5 - PDF and PostScript Documents
+    </title>
+  </head>
+
+<BODY BGCOLOR="#ffffff">
+
+
+
+<hr>
+<center>
+<table cellspacing=0 cellpadding=0 border=0 width=98%>
+<tr><td valign=top align=left>
+<a href="../index.html">HDF5 Document Index and HDF Links</a>&nbsp;<br>
+<a href="../H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+<a href="../Tutor/index.html">HDF5 Tutorial</a>&nbsp;<br>
+</td>
+<td valign=top align=right>
+<a href="../H5.user.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="../RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+<a href="../Glossary.html">HDF5 Glossary</a><br>
+</td></tr>
+</table>
+</center>
+<hr>
+
+
+<center>
+<br>
+<h1><img src="../hdf2.jpg" alt="HDF Logo" align=left>HDF5 Release 1.2 Documentation<br>
+PDF and PostScript Versions</H1>
+</center>
+
+
+<hr>
+<font color=blue>
+This page provides links to PDF and PostScript versions of the 
+HDF documentation set.  These versions, derived from the 
+original HTML documnents, are intended to provide the following 
+features: 
+<ul>
+    <li>A copy that can be reasonably printed in a single print operation. 
+    <li>An easily searchable copy.  (The PDF files can be searched  using
+        the Adobe Acrobat Reader with Search, Version 3.1 or later.  See
+        <a href="http://www.adobe.com/products/acrobat/readstep.html"
+        target="ADOBE">Adobe's website</a>.)
+</ul>
+<p>
+Note that these versions were created in response to user feedback; 
+the HDF Group is eager to hear from HDF and HDF5 users so that we 
+can better meet our users' needs. Send comments, requests, and 
+bug reports to the HDF Help Desk at 
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">hdfhelp@ncsa.uiuc.edu.</a>
+</font>
+
+<hr>
+<CENTER>
+<table border=0 bgcolor="#BBFFFF" width=80%>
+<tr valign=top align=left>
+
+<tr><td>
+Introduction to HDF5
+</td><td>
+<a href="H5-R12.Intro.pdf">PDF</a>
+</td><td>
+<a href="H5-R12.Intro.ps">PS</a>
+</td></tr>
+
+<tr><td>
+HDF5 Tutorial
+</td><td>
+<a href="H5-R12.Tutor.pdf">PDF</a>
+</td><td>
+<a href="H5-R12.Tutor.ps">PS</a>
+</td></tr>
+
+<tr><td>
+A User's Guide for HDF5
+</td><td>
+<a href="H5-R12.UG.pdf">PDF</a>
+</td><td>
+<a href="H5-R12.UG.ps">PS</a>
+</td></tr>
+
+<tr><td>
+HDF5 Reference Manual
+</td><td>
+<a href="H5-R12.RM.pdf">PDF</a>
+</td><td>
+<a href="H5-R12.RM.ps">PS</a>
+</td></tr>
+
+<tr><td>
+<i>All of the above in a single file</i> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</td><td>
+<a href="H5-R12.DocSet.pdf">PDF</a> &nbsp;&nbsp;
+</td><td>
+<a href="H5-R12.DocSet.ps">PS</a> &nbsp;&nbsp;
+</td></tr>
+    
+<tr><td colspan=3 align=right>
+<font size=-1>
+<i>(Last update of linked documents: 15 November 1999)</i>
+</font>
+</td></tr>
+
+</table>
+</CENTER>   
+
+<hr>
+The PS and PDF formatted documents presented here are from Release 1.2.  
+Several small but important changes (see below) were made for Release 1.2.1 
+and are reflected in the HTML version of the documents that are available 
+from the <a href="../index.html">HDF5 documents index</a>.
+
+<p>
+<h3>Significant Changes in Release 1.2.1 Document Set</h3>
+
+This section lists the changes in the HDF5 documents, from release 1.2 
+to Release 1.2.1, that affect technical understanding.  
+Minor grammatical and formatting changes are not included.
+None of these changes are reflected in the PS and PDF versions of the
+documents referenced above.
+
+<dl>
+<dt><b>In the <cite>HDF5 Reference Manual</cite></b>:
+<dt>H5A -- Attributes Interface
+    <dd><code>H5Acreate</code>: 
+        Restructured and expanded the Description section, 
+        with particular attention to the fact that the attribute name
+        specified in <code>H5Acreate</code> must be unique.
+<dt>H5D -- Dataset Interface
+    <dd><code>H5Dcreate</code>: 
+        Added paragraph explaining that <em>name</em> must be unique.
+<dt>H5F -- File Interface
+    <dd><code>H5Fcreate</code> and <code> H5Fopen</code>: 
+        Clarified description of file access flags in <b>Parameters</b>
+        section and removed reference to <code>H5Fpublic.h</code>.
+<dt>H5G -- Group Interface
+    <dd><code>H5Giterate</code>: Corrected <em>operator</em> parameter 
+        datatype to read <code>H5G_iterate_t</code>.
+	Made minor corrections to <code>H5G_iterate_t</code> prototype syntax.
+	Added note that <code>H5Giterate</code>'s behavior is undefined 
+        if the group structure or membership changes.
+<dt>H5P -- Property List Interface
+    <dd><code>H5Pset/get_cache</code>: 
+        Added missing <em>rdcc_nelmts</em> parameter.
+	Corrected inconsistent references to <em>rdcc_wo</em> parameter.
+	Clarified <b>Purpose</b> and <b>Description</b> sections.
+    <dd><code>H5Pget_sec2</code>:
+        Corrected return type from <code>returntype</code> to 
+        <code>herr_t</code>.
+<dt>H5S -- Dataspace Interface
+    <dd><code>H5Sget_simple_extent_dims</code>:  
+        Added statement that either or both of <em>dims</em> 
+        and <em>maxdims</em> may be NULL.
+<dt>H5T-- Datatype Interface
+    <dd><code>H5Tget/set_fields</code>:  
+        Added missing <em>spos</em> parameter. 
+    <dd><code>H5Tconvert</code>:  
+        Added missing <em>plist_id</em> parameter.
+<dt>HDF5 Tools
+    <dd><code>h5dump</code>:
+        Added <code>-V</code> option, which displays version information.
+
+<br><br>
+<dt><b>In the <cite>HDF5 User's Guide</cite></b>:
+<dt>The Datatype Interface (H5T)
+    <dd><code>H5Tconvert</code>: 
+	Added <em>plist_id</em> parameter where this function is used in 
+        code examples.  
+<dt>Filters in HDF5
+    <dd>Added reference in section 4 to the <code>zlib</code> website.
+</dl>
+
+
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/">
+     <img border=0 src="../NCSAfooterlogo.gif" width=78 height=27 alt="NCSA Logo"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a>
+
+<p>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+<!-- hhmts start -->
+Last modified: 17 December 1999
+<!-- hhmts end -->
+
+</font>
+
+</body>
+</html>

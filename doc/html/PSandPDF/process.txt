@@ -1,0 +1,130 @@
+
+========================================================================
+Process for Creating PDF/PS Versions of HDF5 docs from HTML Source Files
+========================================================================
+
+                                              Last modified: 19 Nov 1999
+
+The PDF/PS versions of the HDF5 docs are created from scratch at each 
+release from the primary version of the documentation which is 
+maintained in HTML.  (Assuming, of course, that we continue to produce 
+PDF/PS versions.)
+
+
+1  Using MS Word (Framemaker might work even better, but I have not 
+   tried it yet), open a master file that will serve as the repository 
+   for gathering the document set.  This file will contain all of the 
+   documents to be converted to PDF/PS.
+
+2  Start the file off with the DocSet frontmatter.
+
+3  Open each HTML file and copy it, placing it in proper order, into the 
+   repository file.
+
+   3a Insert Glossary.  (For R1.2, it was appended to UG and to RM.
+      Alternatively, it could be inserted as a separate document.)
+
+   3b Insert Copyright page after each title page, including after 
+      DocSet title page.
+
+4  Adjust the Styles so that type faces and font sizes are appropriate.
+   (I used 10 pt New Times Roman with 9 and 10 pt supplementary fonts
+   in Release 1.2.  I am considering Garamond or New Century Schoolbook
+   for the next release.)
+
+5  Create a trial PDF to make sure all of the images have been imported.
+
+   4a Print the compiled document, selecting "Print to file".
+
+   4b Change the .prn suffix on the output file to .ps.
+
+   4c Convert that PostScript file to PDF with Distiller.
+
+6  Scan the output PDF file for images.  (A visual test of the compiled 
+   MS Word file online is insufficient as an image's presence on the 
+   screen does not guarantee its presence in the PDF file.)
+
+7  If any images are missing, open the appropriate HTML file in Internet
+   Explorer (Netscape at the time of R1.2, did not provide this 'copy' 
+   capability), right click on the image, select copy, select the 
+   offending image or its placeholder in the MS Word file, and paste
+   the image in.
+
+8  Repeat 4 and 5, with variations on 6, as necessary.
+
+9  Add headers, footers, and page numbers in the consolidated file.
+   (NCSA and UIUC on inside of facing footers with page numbers on the 
+   outside, release # and doc title place holder on outside of facing 
+   headers.  "Different first page" so that title page can be header 
+   and footer free.  
+
+10 Once you are sure that
+   -- all of the images are securely showing up in the PDF and
+   -- all of the styles are as you want them,
+   separate the consolidated file into separate files for each document 
+   and for the DocSet frontmatter.
+
+11 Add section break at the title page and the first page of text for 
+   each document.
+
+12 Set page numbering and finalize headers and footers (h/f).
+
+   12a Unset "Different first page" on text section h/f.
+
+   12b Set text section page numbering to start at 1.
+
+   12c Set frontmatter page numbering to start at i.  (R1.2 did not
+       set page numbering in frontmatter.)
+
+13 Reset headers and footers for each document (from the initial generic 
+   setting).
+
+14 Check hyperlinks.
+
+   14a Where reasonable (e.g., not appropriate to leave as internal link 
+       for user instalation), set link as external with full DNS address.
+
+   14b Remove internal links; reword as necessary, giving user sufficient
+       clues to find info in printed docs.  (The links themselves do not
+       survive the Word->PDF translation, so removing a link is generally
+       as simple as removing the color/underline properties.)
+
+15 Check and adjust pagination throughout.
+
+   15a Each chapter (and, in some cases, major sections) begins on an 
+       odd page.
+
+   15b Watch for widows and orphans, examples and sections that start
+       embarrassingly close to the bottom of the page, etc.
+
+   15c Add enough blank pages (with no h/f) so that each document is
+       printed with one completely blank sheet of paper at the back.
+
+16 Insert a TOC into each document as appropriate.  (R1.2 went 3 or 4 
+   levels deep, depending on the document.) 
+
+17 Change Tutorial "Indes of Examples" to point to directory of Tutorial 
+   examples (instead of individual links).  Keep list?
+
+18 Do a visual scan of all docs to ensure that "everything is as it 
+   should be."  (Something has probably been left out of this process 
+   description!)
+
+19 Create PDFs of each document and the DocSet frontmatter.  
+   (See above.)
+
+20 Do a visual scan of all PDFs to ensure that "everything is as it
+   should be." 
+
+21 Create a consolidated DocSet file for those who want a single file 
+   containing all of the doucuments.
+
+22 Correct errors and repeat steps as necessary.  ;>
+
+23 Create distributable PS files by printing the PDFs "to a file"
+   from Adobe Acrobat Exchange.  (This results in mush smaller PS 
+   files than those generated in the above MS Word -> PS process.)
+
+24 Post and distribute PS and PDF copies of
+   -- each document and
+   -- the consolidated set.
