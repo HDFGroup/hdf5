@@ -487,7 +487,19 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 
     if (type->access) {
 	ret_value = (type->access) (name, access_parms, mode, key /*out*/);
+#ifdef WIN32
+		/*
+			this extra block is needed because windows sets the st_dev member of sb
+			to be 0 if it is a file which makes the comparison below wrong
+		*/
+		int fid;
 
+		fid=open(name,mode|_O_BINARY);
+		HDfstat(fid,&sb);
+		close(fid);
+#else
+	    HDstat(name, &sb);
+#endif
     } else {
 	ret_value = (0 == HDaccess(name, mode) ? TRUE : FALSE);
 	if (key) {
