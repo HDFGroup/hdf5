@@ -329,7 +329,8 @@ test_userblock_offset(hid_t fapl)
     hid_t		file, fcpl, dataset, space;
     int			i, j, n;
     hsize_t		dims[2];
-    FILE                *f;
+/*    FILE                *f;*/
+    int                   f;
     haddr_t             offset;
     int                 rdata[100][200];
     
@@ -369,9 +370,9 @@ test_userblock_offset(hid_t fapl)
      * compare it with the data written in.*/
     if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
-    f = fopen(filename, "r");
-    fseek(f, (long int)offset, SEEK_SET);
-    fread(rdata, sizeof(int), 100*200, f);
+    f = HDopen(filename, O_RDONLY, 0);
+    HDlseek(f, (off_t)offset, SEEK_SET);
+    HDread(f, rdata, sizeof(int)*100*200);
     
     /* Check that the values read are the same as the values written */
     for (i = 0; i < 100; i++) {
@@ -385,7 +386,7 @@ test_userblock_offset(hid_t fapl)
 	}
     }   
 
-    fclose(f);
+    HDclose(f);
 
     H5Dclose(dataset);
     H5Fclose(file);
