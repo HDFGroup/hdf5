@@ -1,0 +1,26 @@
+#! /bin/sh
+#
+# Copyright (C) 2001
+#    National Center for Supercomputing Applications
+#    All rights reserved.
+#
+# This is a small program which will create directories n-levels deep.
+# You just call it with something like:
+#
+#       mkdirs /tmp/foo/bar/baz
+#
+# and it will create all the directories from /tmp down to baz which
+# don't exist.
+#
+chmodprog="${CHMODPROG-chmod}"
+mkdirprog="${MKDIRPROG-mkdir}"
+
+make_dir () {
+  if ! test -d $1; then
+    make_dir `echo $1 | sed -e 's#/[^/]*$##'`
+    $mkdirprog $1
+    $chmodprog 755 $1
+  fi
+}
+
+make_dir `echo $1 | sed -e 's#/$##'`

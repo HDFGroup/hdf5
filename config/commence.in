@@ -59,6 +59,7 @@ LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
 ## defined. The main makefile is free to redefine these to something else.
 DOCDIR=$(docdir)
 SUBDOCDIR=
+EXAMPLEDIR=$(docdir)
 LIB=
 LIB_SRC=
 LIB_OBJ=

@@ -1,13 +1,16 @@
 ## HDF5-Fortran test/Makefile(.in)
 ##
-## Copyright (C) 2000 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2000, 2001
+##    National Center for Supercomputing Applications
+##    All rights reserved.
 ##
 ##
 top_srcdir=@top_srcdir@/..
 top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
+
+EXAMPLEDIR=$(docdir)/hdf5/examples/fortran
 
 hdf5_builddir=$(top_builddir)/src
 
@@ -37,6 +40,8 @@ TEST_SRC=dsetexample.f90 fileexample.f90 rwdsetexample.f90 attrexample.f90	\
 	 selectele.f90 grpit.f90 refobjexample.f90 refregexample.f90		\
 	 mountexample.f90 compound.f90
 TEST_OBJ=$(TEST_SRC:.f90=.lo)
+
+EXAMPLE_PROGS=$(TEST_SRC)
 
 ## How to build the programs... they all depend on the Fortran & C hdf5 libraries
 $(TEST_PROGS): $(FLIB) $(HDF5LIB)

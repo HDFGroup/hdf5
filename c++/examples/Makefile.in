@@ -1,13 +1,17 @@
 ## HDF5-C++ examples/Makefile(.in)
 ##
-## Copyright (C) 2000 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2000, 2001
+##    National Center for Supercomputing Applications
+##    All rights reserved.
 ##
 ##
 top_srcdir=@top_srcdir@/..
 top_builddir=../..
 srcdir=@srcdir@
+
 @COMMENCE@
+
+EXAMPLEDIR=$(docdir)/hdf5/examples/c++
 
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
@@ -24,6 +28,9 @@ LIBHDF5=$(hdf5_builddir)/libhdf5.la
 TEST_SRC=compound.cpp h5group.cpp create.cpp readdata.cpp chunks.cpp	\
          extend_ds.cpp writedata.cpp
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
+
+H5_FILES=Attributes.h5 SDScompound.h5 Select.h5 SDSextendible.h5 Group.h5 SDS.h5
+EXAMPLE_PROGS=$(TEST_SRC) $(H5_FILES)
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.

@@ -1,7 +1,8 @@
 ## Top-level HDF5-Fortran Makefile(.in)
 ##
-## Copyright (C) 2000 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2000, 2001
+##    National Center for Supercomputing Applications
+##    All rights reserved.
 ##
 ## 
 ## This makefile mostly just reinvokes make in the various subdirectories
@@ -75,11 +76,15 @@ tests TAGS dep depend:
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
-install:
+install-all install:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
-	@$(LT) --mode=finish $(libdir);
+	@$(MAKE) install-examples
+	@$(LT) --mode=finish $(libdir)
+
+install-examples:
+	(cd examples && $(MAKE) $@) || exit 1;
 
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean

@@ -84,13 +84,19 @@ check test _test: tests
 ## Make installation directories directories if they don't exist.
 ##
 $(libdir):
-	mkdir $@ && chmod 755 $@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(includedir):
-	mkdir $@ && chmod 755 $@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(bindir):
-	mkdir $@ && chmod 755 $@
+	$(top_srcdir)/bin/mkdirs $@
+
+$(DOCDIR):
+	$(top_srcdir)/bin/mkdirs $@
+
+$(EXAMPLEDIR):
+	$(top_srcdir)/bin/mkdirs $@
 
 ## Install the library, the public header files, and public programs.
 ##
@@ -124,9 +130,21 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	    fi;                                                               \
 	done
 
+install-examples: $(EXAMPLE_PROGS) $(EXAMPLEDIR)
+	@for f in X $(EXAMPLE_PROGS); do				      \
+	  if test $$f != X; then					      \
+	    (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;								      \
+	done
+
+uninstall-examples:
+	@if test -n "$(EXAMPLE_PROGS)"; then 				      \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
+	fi
+
 ## Install the documents.
 ##
-install-doc: $(PUB_DOCS)
+install-doc: $(PUB_DOCS) $(DOCDIR)
 	@if test -n "$(DOCDIR)"; then                                         \
 	    if test -d "$(DOCDIR)"; then                                      \
 	       :;                                                             \

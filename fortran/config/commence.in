@@ -68,6 +68,7 @@ LT_LINK_FEXE=$(LT) --mode=link $(F9X) $(LT_STATIC_EXEC) $(DYNAMIC_DIRS)
 ## complains if it sees a reference to a variable which has never been
 ## defined. The main makefile is free to redefine these to something else.
 DOCDIR=$(docdir)
+EXAMPLEDIR=$(docdir)
 LIB=
 LIB_SRC=
 LIB_OBJ=

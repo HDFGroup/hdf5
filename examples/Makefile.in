@@ -1,12 +1,15 @@
 ## HDF5 Library Examples Makefile(.in)
 ##
-## Copyright (C) 1997 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 1997, 1998, 1999, 2000, 2001
+##    National Center for Supercomputing Applications
+##    All rights reserved.
 ##
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
 @COMMENCE@
+
+EXAMPLEDIR=$(docdir)/hdf5/examples/c
 
 ## Add include directory to the C preprocessor flags and the hdf5 library
 ## to the library list.
@@ -16,9 +19,9 @@ LIBHDF5=../src/libhdf5.la
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS_PARA=ph5example
-TEST_PROGS=h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
-	h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
-	$(TEST_PROGS_PARA)
+TEST_PROGS=h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
+           h5_group h5_select h5_attribute h5_mount h5_reference        \
+	   h5_drivers $(TEST_PROGS_PARA)
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
@@ -28,11 +31,12 @@ CLEAN=*.h5 *.raw *.meta
 ## created by replacing the `.c' with a `.o'.  This list is necessary
 ## for building automatic dependencies.
 TEST_SRC_PARA=ph5example.c
-TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
-	 h5_read.c h5_write.c h5_select.c h5_attribute.c h5_mount.c \
-	 h5_reference.c h5_drivers.c \
-	 $(TEST_SRC_PARA)
+TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c     \
+	 h5_read.c h5_write.c h5_select.c h5_attribute.c h5_mount.c     \
+	 h5_reference.c h5_drivers.c $(TEST_SRC_PARA)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
+
+EXAMPLE_PROGS=$(TEST_SRC)
 
 ## How to build the programs... they all depend on the hdf5 library
 $(TEST_PROGS): $(LIBHDF5)

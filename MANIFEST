@@ -32,6 +32,7 @@
 ./bin/locate_hdf4
 ./bin/ltconfig
 ./bin/ltmain.sh
+./bin/mkdirs
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot

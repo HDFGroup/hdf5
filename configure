@@ -10316,14 +10316,6 @@ cat >> src/H5config.h <<EOF
 #endif
 EOF
 
-PRINT() {
-  SPACES="                                  "
-  msg="$SPACES $1:  "
-  msg_len="`echo \"$msg\" | wc -c | sed -e 's/ //g'`" 
-  let "begin_msg=$msg_len-34"
-  echo "$msg" | cut -c$begin_msg- | tr -d '\012'
-}
-
 IF_YES_NO() {
   if test "$1" = "yes"; then
     echo "Yes"
@@ -10343,7 +10335,7 @@ IF_ENABLED_DISABLED() {
 echo ""
 echo "Compiling Options:"
 
-PRINT "Compilation Mode"
+echo -n "               Compilation Mode:  "
 case "X-$enable_production" in
    X-yes)           echo "Production" ;;
    X-|X-no)         echo "Development" ;;
@@ -10351,7 +10343,7 @@ case "X-$enable_production" in
    *)               echo "$enable_production" ;;
 esac
 
-PRINT "Debug Mode"
+echo -n "                     Debug Mode:  "
 case "X-$DEBUG_PKG" in
   X-|X-yes)     echo "Default" ;;
   X-all)        echo "All" ;;
@@ -10359,16 +10351,16 @@ case "X-$DEBUG_PKG" in
   *)            echo "$DEBUG_PKG" ;;
 esac
 
-PRINT "Shared Libraries"
+echo -n "               Shared Libraries:  "
 IF_YES_NO "$enable_shared"
 
-PRINT "Static Libraries"
+echo -n "               Static Libraries:  "
 IF_YES_NO "$enable_static"
 
-PRINT "Statically Linked Executables"
+echo -n "  Statically Linked Executables:  "
 IF_YES_NO "$STATIC_EXEC"
 
-PRINT "Tracing"
+echo -n "                        Tracing:  "
 if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
   echo "Yes"
 else
@@ -10378,48 +10370,48 @@ fi
 echo ""
 echo "Features:"
 
-PRINT "C++"
+echo -n "                            C++:  "
 IF_YES_NO "$HDF_CXX"
 
-PRINT "Fortran"
+echo -n "                        Fortran:  "
 IF_YES_NO "$HDF_FORTRAN"
 
-PRINT "GASS"
+echo -n "                           GASS:  "
 IF_YES_NO "$GASS"
 
-PRINT "GridStorage"
+echo -n "                    GridStorage:  "
 IF_YES_NO "$GRIDSTORAGE"
 
-PRINT "HDF4"
+echo -n "                           HDF4:  "
 IF_YES_NO "$HAVE_HDF4"
 
-PRINT "HDF5 v1.4 Compatibility"
+echo -n "        HDF5 v1.4 Compatibility:  "
 IF_YES_NO "$HDF5_V1_4_COMPAT"
 
-PRINT "hsize_t"
+echo -n "                        hsize_t:  "
 case "$HSIZET" in
   no|small)  echo "Small" ;;
   *)         echo "Large" ;;
 esac
 
-PRINT "Linux Large File Support (LFS)"
+echo -n " Linux Large File Support (LFS):  "
 IF_ENABLED_DISABLED "$LINUX_LFS"
 
-PRINT "Parallel HDF5"
+echo -n "                  Parallel HDF5:  "
 if test "$PARALLEL" != "no"; then
   echo "Yes"
 else
   echo "No"
 fi
 
-PRINT "SRB"
+echo -n "                            SRB:  "
 IF_YES_NO "$SRB"
 
-PRINT "Stream VFD"
+echo -n "                     Stream VFD:  "
 IF_ENABLED_DISABLED "$STREAM_VFD"
 
-PRINT "Threadsafety"
+echo -n "                   Threadsafety:  "
 IF_ENABLED_DISABLED "$THREADSAFE"
 
-PRINT "Zlib-compression"
+echo -n "               Zlib-compression:  "
 IF_YES_NO "$HAVE_ZLIB"
