@@ -12,7 +12,6 @@
 *****************************************************************************/
 
 #include <stdio.h>
-#include <sys/fcntl.h>
 #include <errno.h>
 #include <string.h>
 
