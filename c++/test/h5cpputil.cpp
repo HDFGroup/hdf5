@@ -31,8 +31,8 @@
 using namespace std;
 #endif
 
-#include "h5cpputil.h"
 #include "h5test.h"
+#include "h5cpputil.h"
 
 /*-------------------------------------------------------------------------
  * Function:	test_report
@@ -70,21 +70,5 @@ int test_report( int nerrors, const string& testname )
       cout << "All" << testname << " tests passed." << endl;
       return 0;
    }
-}
-
-template <class Type1, class Type2>
-    void verify_val1(Type1 x, Type2 value, const char* message)
-{
-    if (GetTestVerbosity()>=VERBO_HI) 
-    {                                     
-        print_func("   Call to routine: %15s at line %4d in %s had value \
-                   %ld \n", (where), (int)__LINE__, __FILE__, (long)(x));
-    }                                                                    
-    if (x != value) 
-    {
-        TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s \
-		at line %4d in %s\n", where, val, x, (int)__LINE__, __FILE__); 
-        H5Eprint (stdout);                                            
-    }                                                                
 }
 

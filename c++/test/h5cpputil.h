@@ -25,6 +25,8 @@
 
 #ifndef H5_NO_STD
 int test_report (int, const std::string&);
+using std::cerr;
+using std::endl;
 #else
 int test_report (int, const string&);
 #endif
@@ -34,12 +36,12 @@ template <class Type>
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {
-        cout << "   Call to routine: " << where << " at line " << line
+        cerr << "   Call to routine: " << where << " at line " << line
 	     << " in " << file_name <<  " had value " << x << endl;
     }
     if (x != value)
     {
-        cout << "*** UNEXPECTED VALUE from " << where << " should be "
+        cerr << "*** UNEXPECTED VALUE from " << where << " should be "
 	     << value << ", but is " << x << " at line " << line
 	     << " in " << file_name << endl;
         H5Eprint (stdout);
