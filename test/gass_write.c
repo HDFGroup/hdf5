@@ -25,6 +25,8 @@ int main(void)
 }
 #else
 
+#ifdef hide
+
 #define URL    "ftp://gass:gass12@which/tmp/gass/junk.w"   
 
 #define DATASETNAME "IntArray"
@@ -153,5 +155,13 @@ int main (void)
     H5Pclose(fapl);
     
     return 0;
-}     
+}
+
+#else
+int main(void)
+{
+    printf("Test skipped because GASS driver does not support writing yet\n");
+    return 0;
+}
+#endif     
 #endif

@@ -25,6 +25,8 @@ int main(void)
 }
 #else
 
+#ifdef hide
+
 #define URL    "ftp://gass:gass12@which/tmp/gass/junk.w"
 #define DATASETNAME "Int1Array"
 #define NX     5                      /* dataset dimensions */
@@ -145,4 +147,12 @@ int main (void)
     
     return 0;
 }     
+
+#else
+int main(void)
+{
+    printf("Test skipped because GASS driver does not support append yet\n");
+    return 0;
+}
+#endif   
 #endif
