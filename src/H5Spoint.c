@@ -126,10 +126,9 @@ H5S_point_init (const struct H5O_layout_t UNUSED *layout,
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t **_coord)
+herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t **coord)
 {
     H5S_pnt_node_t *top, *curr, *new; /* Point selection nodes */
-    const hssize_t *coord=(const hssize_t *)_coord;     /* Pointer to the actual coordinates */
     uintn i;                 /* Counter */
     herr_t ret_value=FAIL;  /* return value */
 
@@ -162,7 +161,7 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 #endif /* QAK */
 
         /* Copy over the coordinates */
-        HDmemcpy(new->pnt,coord+(i*space->extent.u.simple.rank),(space->extent.u.simple.rank*sizeof(hssize_t)));
+        HDmemcpy(new->pnt,*coord+(i*space->extent.u.simple.rank),(space->extent.u.simple.rank*sizeof(hssize_t)));
 #ifdef QAK
 	printf("%s: check 1.3\n",FUNC);
 	{
@@ -172,7 +171,7 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 		printf("%s: pnt[%d]=%d\n",FUNC,(int)j,(int)new->pnt[j]);
 		printf("%s: coord[%d][%d]=%d\n",
 		       FUNC, (int)i, (int)j,
-		       (int)*(coord+(i*space->extent.u.simple.rank)+j));
+		       (int)**(coord+(i*space->extent.u.simple.rank)+j));
 	    }
 	}
 #endif /* QAK */
