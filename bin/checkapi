@@ -22,7 +22,7 @@ while (<>) {
   # Disregard the following hits
   next if /^H5/;
   next if /^\#/;
-  next if /FUNC_ENTER/;
+  next if /FUNC_ENTER(_NOINIT)*/;
 
   next unless /(H5[A-Z]{1,2}[a-z]\w*)/;
   print "$ARGV:$.: $1\n";
