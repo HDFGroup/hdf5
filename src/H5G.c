@@ -1961,6 +1961,7 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
     const char		*s = NULL;
     H5D_t		*temp_dset = NULL;
     H5G_t		*temp_grp = NULL;
+    H5T_t		*temp_type = NULL;
     
     FUNC_ENTER (H5G_stat, FAIL);
 
@@ -1980,7 +1981,22 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
      * length is specific to symbolic links.
      */
     if (statbuf) {
-	if (H5G_CACHED_SLINK!=obj_ent.type) {
+	if (H5G_CACHED_SLINK==obj_ent.type) {
+	    /* Named object is a symbolic link */
+	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg) ||
+		NULL==(s=H5HL_peek (grp_ent.file, &(stab_mesg.heap_addr), 
+				    obj_ent.cache.slink.lval_offset))) {
+		HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+			       "unable to read symbolic link value");
+	    }
+	    statbuf->linklen = strlen(s)+1; /*count the null terminator*/
+	    statbuf->objno[0] = statbuf->objno[1] = 0;
+	    statbuf->nlink = 0;
+	    statbuf->type = H5G_LINK;
+	    statbuf->mtime = 0;
+	    
+	} else {
+	    /* Some other type of object */
 	    statbuf->objno[0] = (unsigned long)(obj_ent.header.offset);
 	    if (sizeof(obj_ent.header.offset)>sizeof(long)) {
 		statbuf->objno[1] = (unsigned long)(obj_ent.header.offset >>
@@ -1992,14 +2008,6 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
 		H5E_clear();
 		statbuf->mtime = 0;
 	    }
-	} else {
-	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg) ||
-		NULL==(s=H5HL_peek (grp_ent.file, &(stab_mesg.heap_addr), 
-				    obj_ent.cache.slink.lval_offset))) {
-		HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-			       "unable to read symbolic link value");
-	    }
-	    statbuf->linklen = strlen(s)+1; /*count the null terminator*/
 
 	    /*
 	     * Determining the type of an object is a rather expensive
@@ -2012,6 +2020,9 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
 	    } else if (NULL!=(temp_grp=H5G_open (loc, name))) {
 		statbuf->type = H5G_GROUP;
 		H5G_close (temp_grp);
+	    } else if (NULL!=(temp_type=H5T_open(loc, name))) {
+		statbuf->type = H5G_TYPE;
+		H5T_close(temp_type);
 	    } else {
 		statbuf->type = H5G_UNKNOWN;
 	    }

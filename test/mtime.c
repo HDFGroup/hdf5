@@ -142,6 +142,7 @@ main(void)
     
     /* All looks good */
     puts(" PASSED");
+    printf("All modification time tests passed.\n");
     cleanup();
     return 0;
 }

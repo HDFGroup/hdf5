@@ -39,6 +39,7 @@ typedef enum H5G_link_t {
 #define H5G_LINK	0		/* Object is a symbolic link	*/
 #define H5G_GROUP	1		/* Object is a group		*/
 #define H5G_DATASET	2		/* Object is a dataset		*/
+#define H5G_TYPE	3		/* Object is a named data type	*/
 
 /* Information about an object */
 typedef struct H5G_stat_t {

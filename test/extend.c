@@ -150,7 +150,7 @@ main (void)
 
     H5Dclose (dataset);
     H5Fclose (file);
-    
+    printf("All extend tests passed.\n");
     cleanup();
     return 0;
 }

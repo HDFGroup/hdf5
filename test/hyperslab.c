@@ -1201,7 +1201,8 @@ main(int argc, char *argv[])
 	status = test_sub_super(480, 640);
 	nerrors += status < 0 ? 1 : 0;
     }
-/*--- END OF TESTS ---*/
+
+    /*--- END OF TESTS ---*/
 
     if (nerrors) {
 	printf("***** %d HYPERSLAB TEST%s FAILED! *****\n",
