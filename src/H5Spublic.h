@@ -48,7 +48,7 @@ hid_t H5Screate_simple (int rank, const hsize_t dims[], const hsize_t maxdims[])
 herr_t H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims, const hsize_t *max);
 hid_t H5Scopy (hid_t space_id);
 herr_t H5Sclose (hid_t space_id);
-hsize_t H5Sget_npoints (hid_t space_id);
+hsize_t H5Sextent_npoints (hid_t space_id);
 int H5Sget_ndims (hid_t space_id);
 int H5Sget_dims (hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
 hbool_t H5Sis_simple (hid_t space_id);

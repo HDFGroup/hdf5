@@ -204,7 +204,7 @@ H5S_t *H5S_create (H5S_class_t type);
 H5S_t *H5S_copy (const H5S_t *src);
 herr_t H5S_close_simple (H5S_simple_t *simple);
 herr_t H5S_close (H5S_t *ds);
-hsize_t H5S_get_npoints (const H5S_t *ds);
+hsize_t H5S_extent_npoints (const H5S_t *ds);
 hsize_t H5S_get_npoints_max(const H5S_t *ds);
 intn H5S_get_ndims (const H5S_t *ds);
 intn H5S_get_dims (const H5S_t *ds, hsize_t dims[]/*out*/,
@@ -221,6 +221,7 @@ herr_t H5S_release_simple(H5S_simple_t *simple);
 herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 herr_t H5S_select_copy (H5S_t *dst, const H5S_t *src);
 herr_t H5S_select_release (H5S_t *space);
+herr_t H5S_sel_iter_release (const H5S_t *space,H5S_sel_iter_t *sel_iter);
 hsize_t H5S_select_npoints (const H5S_t *space);
 intn H5S_extend (H5S_t *space, const hsize_t *size);
 
@@ -328,6 +329,7 @@ herr_t H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 		size_t nelmts, void *_buf/*out*/);
 herr_t H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size);
 herr_t H5S_hyper_release (H5S_t *space);
+herr_t H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter);
 hsize_t H5S_hyper_npoints (const H5S_t *space);
 
 #endif

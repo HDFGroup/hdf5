@@ -536,7 +536,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                 }
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->src=((uint8 *)fhyper_info->src)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
+                fhyper_info->src=((const uint8 *)fhyper_info->src)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
                 num_written+=(regions[i].end-regions[i].start)+1;
@@ -816,7 +816,10 @@ H5S_hyper_mgath (const void *_buf, size_t elmt_size,
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
     H5S_hyper_bound_t **hi_bounds;    /* Upper (farthest from the origin) bound array for each dimension */
     H5S_hyper_fhyper_info_t fhyper_info;  /* Block of parameters to pass into recursive calls */
-    intn	i,j;            /* Counters		*/
+    intn	i;
+#ifdef QAK
+    intn    j;            /* Counters		*/
+#endif /* QAK */
     size_t  num_read;       /* number of elements read into buffer */
 
     FUNC_ENTER (H5S_hyper_mgath, 0);
@@ -977,7 +980,7 @@ printf("%s: check 3.0\n",FUNC);
                 }
 
                 /* Advance the pointer in the buffer */
-                fhyper_info->src=((uint8 *)fhyper_info->src)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
+                fhyper_info->src=((const uint8 *)fhyper_info->src)+((regions[i].end-regions[i].start)+1)*fhyper_info->elmt_size;
 
                 /* Increment the number of elements read */
                 num_read+=(regions[i].end-regions[i].start)+1;
@@ -1176,7 +1179,9 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
     size_t elem_count;          /* Number of elements in hyperslab selection */
     intn i;     /* Counters */
     herr_t ret_value=FAIL;
+#ifdef QAK
 extern int qak_debug;
+#endif /* QAK */
 
     FUNC_ENTER (H5S_hyper_add, FAIL);
 
@@ -1185,7 +1190,9 @@ extern int qak_debug;
     assert (start);
     assert (size);
 
+#ifdef QAK
 qak_debug=1;
+#endif /* QAK */
 
 #ifdef QAK
 printf("%s: check 1.0\n",FUNC);
@@ -1395,3 +1402,35 @@ H5S_point_npoints (const H5S_t *space)
 
     FUNC_LEAVE (space->select.num_elem);
 }   /* H5S_point_npoints() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_sel_iter_release
+ PURPOSE
+    Release hyperslab selection iterator information for a dataspace
+ USAGE
+    herr_t H5S_hyper_sel_iter_release(sel_iter)
+        H5S_t *space;                   IN: Pointer to dataspace iterator is for
+        H5S_sel_iter_t *sel_iter;       IN: Pointer to selection iterator
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Releases all information for a dataspace hyperslab selection iterator
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter)
+{
+    FUNC_ENTER (H5S_hyper_sel_iter_release, FAIL);
+
+    /* Check args */
+    assert (sel_iter);
+
+    if(sel_iter->hyp.pos!=NULL)
+        H5MM_xfree(sel_iter->hyp.pos);
+
+    FUNC_LEAVE (SUCCEED);
+}   /* H5S_hyper_sel_iter_release() */

@@ -123,7 +123,7 @@ herr_t H5S_select_copy (H5S_t *dst, const H5S_t *src)
 herr_t
 H5S_select_release (H5S_t *space)
 {
-    herr_t ret_value;     /* Counters */
+    herr_t ret_value;     /* return value */
 
     FUNC_ENTER (H5S_select_release, FAIL);
 
@@ -147,7 +147,7 @@ H5S_select_release (H5S_t *space)
             break;
     } /* end switch() */
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }   /* H5S_select_release() */
 
 /*--------------------------------------------------------------------------
@@ -386,3 +386,49 @@ hsize_t H5S_select_npoints (const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sselect_npoints() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_sel_iter_release
+ PURPOSE
+    Release selection iterator information for a dataspace
+ USAGE
+    herr_t H5S_sel_iter_release(sel_iter)
+        const H5S_t *space;             IN: Pointer to dataspace iterator is for
+        H5S_sel_iter_t *sel_iter;       IN: Pointer to selection iterator
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Releases all information for a dataspace selection iterator
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
+{
+    herr_t ret_value;     /* Return value */
+
+    FUNC_ENTER (H5S_sel_iter_release, FAIL);
+
+    /* Check args */
+    assert (sel_iter);
+
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            /* no action needed */
+            ret_value=SUCCEED;
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_sel_iter_release(sel_iter);
+            break;
+
+        case H5S_SEL_NONE:           /* Nothing selected */
+            break;
+    } /* end switch() */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_sel_iter_release() */
