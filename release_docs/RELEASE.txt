@@ -481,13 +481,6 @@ Known Problems
 * Datasets or attributes which have a variable-length string datatype are not
   printing correctly with h5dump and h5ls.
 
-* DLLs do not work on Windows 98 
-
-* RELEASE DLLs will fail on some tests on Windows 2000 with Microsoft visual 
-  studio 6.0 due to memory allocation problems caused by compiler.  
-  Users are encouraged to go to microsoft site  to find and install
-  visual studio 6.0 service pack 5. After that, release dlls will work.
-
 * The stream-vfd test uses ip port 10007 for testing. If another
   application is already using that port address, the test will hang
   indefinitely and has to be terminated by the kill command. To try the
