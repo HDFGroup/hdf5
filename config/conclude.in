@@ -31,13 +31,16 @@ test: $(PROGS)
 # Install the library, the public header files, and programs.
 install: $(LIB) $(PUB_HDR) $(PROGS)
 	@if test -n "$(LIB)"; then					      \
-	   (set -x; $(INSTALL_DATA) $(LIB) $(libdir) || exit 1);	      \
+	   test -d $(libdir) || mkdir $(libdir) || exit 1;		      \
+	   (set -x; $(INSTALL_DATA) $(LIB) $(libdir)/. || exit 1);	      \
 	fi
 	@if test -n "$(PUB_HDR)"; then					      \
-	   (set -x; $(INSTALL_DATA) $(PUB_HDR) $(includedir) || exit 1);      \
+	   test -d $(includedir) || mkdir $(includedir) || exit 1;	      \
+	   (set -x; $(INSTALL_DATA) $(PUB_HDR) $(includedir)/. || exit 1);    \
         fi
 	@if test -n "$(PROGS)"; then					      \
-	   (set -x; $(INSTALL_PROGRAM) $(PROGS) $(bindir) || exit 1);	      \
+	   test -d $(bindir) || mkdir $(bindir) || exit 1;		      \
+	   (set -x; $(INSTALL_PROGRAM) $(PROGS) $(bindir)/. || exit 1);	      \
 	fi
 
 # Removes those things that `make install' (would have) installed.
