@@ -14,11 +14,12 @@ TRACE=perl ../bin/trace
 ## For Pablo instrumenation of parallel code, remove the # from in front of
 ## PABLO_MPIO_FLAGS.
 ## Set PABLO_INC equal to the path of the include directory for the Pablo
-## TraceLibrary
+## TraceLibrary.  This can be done by setting the environment variable
+## PABLO_TRACELIB to the path where the Pablo Trace Library ins installed.
 ###############################################################################
-#PABLO_MPIO_FLAGS = -DHAVE_PARALLEL -DHAVE_MPIOTRACE	
-PABLO_INC = 
-PABLO_FLAGS = -I. -I../src -I$(PABLO_INC) -DHAVE_PABLO $(PABLO_MPIO_FLAGS)
+#PABLO_MPIO_FLAGS = -DH5_HAVE_PARALLEL -DH5_HAVE_MPIOTRACE	
+PABLO_INC = $(PABLO_TRACELIB)/include
+PABLO_FLAGS = -I. -I../src -I$(PABLO_INC) -DH5_HAVE_PABLO $(PABLO_MPIO_FLAGS)
 
 ## This is our main target:
 LIB=libhdf5-inst.a
@@ -29,17 +30,22 @@ SRCDIRS = ./. ../src/.
 #  should be make to the SRCFILES macro also and the LIB_SRC variable now has
 #  directory paths included in it (which may cause problems somewhere). - QAK
 LIB_SRC= \
-    H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcontig.c \
-    H5Fistore.c H5Fseq.c H5FD.c H5FDsec2.c H5FDfamily.c H5FDmpio.c H5FDcore.c \
-    H5FDdpss.c H5FDmulti.c H5FDgass.c H5FDlog.c H5FDsrb.c H5FDstdio.c \
-    H5FDstream.c H5FL.c H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c \
-    H5MF.c H5MM.c H5O.c H5Oattr.c H5Ocomp.c H5Ocont.c H5Odtype.c H5Oefl.c \
-    H5Ofill.c H5Olayout.c H5Omtime.c H5Oname.c H5Onull.c H5Osdspace.c \
-    H5Oshared.c H5Ostab.c H5P.c H5R.c H5S.c H5Sall.c H5Shyper.c \
-    H5Smpio.c H5Snone.c H5Spoint.c H5Sselect.c H5T.c H5Tbit.c H5Tconv.c \
-    H5Tinit.c H5Tvlen.c H5TB.c H5TS.c H5V.c H5Z.c H5Zdeflate.c 
+    H5.c H5FDmulti.c H5HG.c H5Oname.c H5T.c \
+    H5A.c H5FDsec2.c H5HL.c H5Onull.c H5TB.c \
+    H5AC.c H5FDsrb.c H5I.c H5Osdspace.c H5TS.c \
+    H5B.c H5FDstdio.c H5MF.c H5Oshared.c H5Tbit.c \
+    H5D.c H5FDstream.c H5MM.c H5Ostab.c H5Tconv.c \
+    H5E.c H5FL.c H5O.c H5P.c H5Tinit.c \
+    H5F.c H5Farray.c H5Oattr.c H5R.c H5Tvlen.c \
+    H5FD.c H5Fcontig.c H5Ocomp.c H5S.c H5V.c \
+    H5FDcore.c H5Fistore.c H5Ocont.c H5Sall.c H5Z.c \
+    H5FDdpss.c H5Fseq.c H5Odtype.c H5Shyper.c H5Zdeflate.c \
+    H5FDfamily.c H5G.c H5Oefl.c H5Smpio.c H5detect.c \
+    H5FDgass.c H5Gent.c H5Ofill.c H5Snone.c \
+    H5FDlog.c H5Gnode.c H5Olayout.c H5Spoint.c \
+    H5FDmpio.c H5Gstab.c H5Omtime.c H5Sselect.c
 
-PABLO_OBJ = PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o PabloHDFff.o
+PABLO_OBJ = PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o 
 
 LIB_COBJ = $(LIB_SRC:.c=.o)
 LIB_OBJ  = $(PABLO_OBJ) $(LIB_COBJ)
@@ -47,6 +53,8 @@ lib_obj: $(LIB_OBJ)
 
 copy_src: 
 	cp ../src/*.c .
+	touch ../src/*.c
+	touch *.c
 	touch copy_src
 
 # 'vpath' directive is only supported in gmake, take out - QAK
@@ -67,7 +75,7 @@ PABLO_HDR = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
 ##
 lib: $(LIB)
 $(LIB): $(LIB_OBJ) 
-	$(AR) -rc $@ $(LIB_OBJ)
+	$(AR) -rc $@ *.o
 	$(RANLIB) $@
 ##
 ## Dummy this out so that there is no redundant make of the library
@@ -144,11 +152,12 @@ maintainer-clean: distclean
 PABLO_INCLUDES = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
                  ProcTrace.inc
 
-PABLO_CLEAN = HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt
+PABLO_CLEAN = HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt \
+	      ProcTrace.inc
 
 HDFentries.txt: ../src/*.c
-	grep "FUNC_ENTER.*(H5" ../src/*.c | \
-	sed "s/.*(H5/H5/;s/[,)].*//" | sort -u > $@
+	grep "FUNC_ENTER[_INIT ]*(" ../src/*.c | \
+	sed "s/.*FUNC_ENTER[_INIT ]*(//;s/[,)].*//" | sort -u > $@
 
 HDFentryNames.h: HDFentries.txt
 	sed "s/.*/\"&\",/" $? > $@
@@ -180,7 +189,7 @@ ProcTrace.inc: HDFidList.h
 
 
 PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES) copy_src
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
+	$(CC) -g $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
 PabloHDF_RT.o: PabloHDF_RT.c $(PABLO_INCLUDES) copy_src
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
@@ -189,4 +198,4 @@ PabloHDF_SDDF.o: PabloHDF_SDDF.c $(PABLO_INCLUDES) copy_src
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
 PabloHDFff.o: PabloHDFff.f $(PABLO_INCLUDES) copy_src 
-	$(F77) -O -c PabloHDFff.f
+	$(F77) $(FFLAGS) -O -c PabloHDFff.f

@@ -126,9 +126,10 @@ extern void preInitIOTrace( void );
 #define	ID_timeStamp		9999
 #define	DUMMY_HDF		10000
 
-#ifdef HAVE_PARALLEL
-#include "mpio.h"
-#endif /* HAVE_PARALLEL*/
+#ifdef H5_HAVE_PARALLEL
+#include "mpi.h"
+int HDF_get_Bytes( MPI_Datatype datatype, int count );
+#endif /* H5_HAVE_PARALLEL*/
 
 void HDFinitTrace_RT ( const char *, int );
 void HDFinitTrace_SDDF ( const char *, int );
@@ -207,7 +208,7 @@ void hinittracex_( char *file, int *len, int flags[], int *nflags,
 	// procedures.							*
 	//==============================================================*/
 	if ( *nflags == 0 || procTrace[ID_ALLHDF] ) {
-	   for ( i = ID_HDF_Last_Entry + 1; i < NUM_HDF_IDS; ++i ) {
+	   for ( i = 0; i < NUM_HDF_IDS; ++i ) {
 	      procTrace[i] = 1;      
 	   }
    	}
@@ -270,7 +271,7 @@ void HDFinitTrace( const char *traceFileName, int id_flag, ... )
 	// procedures.							*
 	//==============================================================*/
 	if ( nIDs == 0 || procTrace[ID_ALLHDF] ) {
-	   for ( i = ID_HDF_Last_Entry + 1; i < NUM_HDF_IDS; ++i ) {
+	   for ( i = 0; i < NUM_HDF_IDS; ++i ) {
 	      procTrace[i] = 1;      
 	   }
    	}
@@ -1059,7 +1060,7 @@ void PabloHDFTrace( int ID )
            exit (-1);
 	}
 }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 /*======================================================================* 
 // Pass call through to regular MPIO entry except in case of Real Time	* 
 // tracing.  								* 
@@ -1068,22 +1069,26 @@ void PabloHDFTrace( int ID )
 int HDF_MPI_File_open( MPI_Comm comm, char *filename, int amode, 
                                     MPI_Info info, MPI_File *fh )
 {
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
+   int returnVal;
+   HDFsetInfo dataPtr;
+   int dataLen;
    
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-           returnVal = MPI_File_open( comm, filename, amode, info, fh );
-        } else {
-	   dataLen = sizeof( HDFsetInfo );
-	   dataPtr.setID = (long)fh;
-	   dataPtr.setName = (char *)malloc( strlen(filename) + 1);
-	   strcpy( dataPtr.setName , filename );
-           HDFtraceEvent_RT( HDFmpiOpenID, &dataPtr, dataLen );
-           returnVal = PMPI_File_open( comm, filename, amode, info, fh );
-           HDFtraceEvent_RT( -HDFmpiOpenID, &dataPtr, dataLen );
-        }
-   	return returnVal;
+   if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) 
+   {
+      returnVal = PabloMPI_File_open( comm, filename, amode, info, fh );
+   } 
+   else 
+   {
+      dataLen = sizeof( HDFsetInfo );
+      dataPtr.setID = 0;
+      dataPtr.setName = (char *)malloc( strlen(filename) + 1);
+      strcpy( dataPtr.setName , filename );
+      HDFtraceEvent_RT( HDFmpiOpenID, &dataPtr, dataLen );
+      returnVal = PMPI_File_open( comm, filename, amode, info, fh );
+      dataPtr.setID = (long)fh;
+      HDFtraceEvent_RT( -HDFmpiOpenID, &dataPtr, dataLen );
+   }
+   return returnVal;
 }
 
    
@@ -1099,18 +1104,21 @@ int HDF_MPI_File_close( MPI_File *fh )
    	HDFsetInfo dataPtr;
    	int dataLen;
    
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-           returnVal = MPI_File_close( fh );
-        } else {
-	   dataLen = sizeof( HDFsetInfo );
-	   dataPtr.setID = (long)fh;
-	   dataPtr.setName = NULL;
-           HDFtraceEvent_RT( HDFmpiCloseID, &dataPtr, dataLen );
-           returnVal = PMPI_File_close( fh );
-           HDFtraceEvent_RT( -HDFmpiCloseID, &dataPtr, dataLen );
-	   free( dataPtr.setName );
-        }
-   	return returnVal;
+   if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) 
+   {
+      returnVal = PabloMPI_File_close( fh );
+   } 
+   else 
+   {
+      dataLen = sizeof( HDFsetInfo );
+      dataPtr.setID = (long)fh;
+      dataPtr.setName = NULL;
+      HDFtraceEvent_RT( HDFmpiCloseID, &dataPtr, dataLen );
+      returnVal = PMPI_File_close( fh );
+      HDFtraceEvent_RT( -HDFmpiCloseID, &dataPtr, dataLen );
+      free( dataPtr.setName );
+   }
+   return returnVal;
 }
 
 /*======================================================================* 
@@ -1120,23 +1128,26 @@ int HDF_MPI_File_close( MPI_File *fh )
 //======================================================================*/
 int HDF_MPI_File_delete( char *filename, MPI_Info info )
 {
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
+   int returnVal;
+   HDFsetInfo dataPtr;
+   int dataLen;
    
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_delete( filename, info );
-        } else {
-	   dataLen = sizeof( HDFsetInfo );
-	   dataPtr.setID = 0;
-	   dataPtr.setName = (char *)malloc( sizeof(filename) );
-	   strcpy( dataPtr.setName , filename );
-           HDFtraceEvent_RT( HDFmpiDeleteID, &dataPtr, dataLen );
-   	   returnVal = PMPI_File_delete( filename, info );
-           HDFtraceEvent_RT( -HDFmpiDeleteID, &dataPtr, dataLen );
-	   free( dataPtr.setName );
-        }
-   	return returnVal;
+   if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) 
+   {
+      returnVal = PabloMPI_File_delete( filename, info );
+   } 
+   else 
+   {
+      dataLen = sizeof( HDFsetInfo );
+      dataPtr.setID = 0;
+      dataPtr.setName = (char *)malloc( sizeof(filename) );
+      strcpy( dataPtr.setName , filename );
+      HDFtraceEvent_RT( HDFmpiDeleteID, &dataPtr, dataLen );
+      returnVal = PMPI_File_delete( filename, info );
+      HDFtraceEvent_RT( -HDFmpiDeleteID, &dataPtr, dataLen );
+      free( dataPtr.setName );
+   }
+   return returnVal;
 }
 
 /*======================================================================* 
@@ -1146,43 +1157,23 @@ int HDF_MPI_File_delete( char *filename, MPI_Info info )
 //======================================================================*/
 int HDF_MPI_File_set_size( MPI_File fh, MPI_Offset size )
 {
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
+   int returnVal;
+   HDFsetInfo dataPtr;
+   int dataLen;
    
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_set_size( fh, size );
-        } else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiSetSizeID,&dataPtr,dataLen );
-   	   returnVal = PMPI_File_set_size( fh, size );
-           HDFtraceEvent_RT( -HDFmpiSetSizeID, &dataPtr, dataLen );
-        }
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_preallocate( MPI_File fh, MPI_Offset size)
-{
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-   
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_preallocate( fh, size);
-        } else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiPreallocateID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_preallocate( fh, size);
-           HDFtraceEvent_RT( -HDFmpiPreallocateID, 
-                             &dataPtr, dataLen );
-        }
-   	return returnVal;
+   if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) 
+   {
+      returnVal = PabloMPI_File_set_size( fh, size );
+   } 
+   else 
+   {
+      dataLen = 1;
+      dataPtr.setID = (long)fh;
+      HDFtraceEvent_RT( HDFmpiSetSizeID,&dataPtr,dataLen );
+      returnVal = PMPI_File_set_size( fh, size );
+      HDFtraceEvent_RT( -HDFmpiSetSizeID, &dataPtr, dataLen );
+   }
+   return returnVal;
 }
 
 /*======================================================================* 
@@ -1197,9 +1188,10 @@ int HDF_MPI_File_get_size( MPI_File fh, MPI_Offset *size )
    	int dataLen;
 
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-           returnVal = MPI_File_get_size( fh, size);
+           returnVal = PabloMPI_File_get_size( fh, size);
 	} else {
-	   dataLen = 0;
+	   dataLen = 1;
+           dataPtr.setID = (long)fh;
            HDFtraceEvent_RT( HDFmpiGetSizeID,
                              &dataPtr,dataLen );
            returnVal = PMPI_File_get_size( fh, size);
@@ -1221,9 +1213,10 @@ int HDF_MPI_File_get_group( MPI_File fh, MPI_Group *group )
    	int dataLen;
    
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_get_group( fh, group);
+   	   returnVal = PabloMPI_File_get_group( fh, group);
 	} else {
-	   dataLen = 0;
+	   dataLen = 1;
+           dataPtr.setID = (long)fh;
            HDFtraceEvent_RT( HDFmpiGetGroupID,
                              &dataPtr,dataLen );
    	   returnVal = PMPI_File_get_group( fh, group);
@@ -1245,9 +1238,10 @@ int HDF_MPI_File_get_amode( MPI_File fh, int *amode )
    	int dataLen;
 
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_get_amode( fh, amode);
+   	   returnVal = PabloMPI_File_get_amode( fh, amode);
 	} else {
-	   dataLen = 0;
+	   dataLen = 1;
+           dataPtr.setID = (long)fh;
            HDFtraceEvent_RT( HDFmpiGetAmodeID,
                              &dataPtr,dataLen );
    	   returnVal = PMPI_File_get_amode( fh, amode);
@@ -1270,10 +1264,11 @@ int HDF_MPI_File_set_view( MPI_File fh, MPI_Offset disp, MPI_Datatype etype,
    	int dataLen;
 
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_set_view( fh, disp, etype, filetype, 
+   	   returnVal = PabloMPI_File_set_view( fh, disp, etype, filetype, 
                                                       datarep, info );
 	} else {
-	   dataLen = 0;
+	   dataLen = 1;
+           dataPtr.setID = (long)fh;
            HDFtraceEvent_RT( HDFmpiSetViewID,
                              &dataPtr,dataLen );
    	   returnVal = PMPI_File_set_view( fh, disp, etype, filetype, 
@@ -1292,23 +1287,26 @@ int HDF_MPI_File_set_view( MPI_File fh, MPI_Offset disp, MPI_Datatype etype,
 int HDF_MPI_File_get_view( MPI_File fh, MPI_Offset *disp, MPI_Datatype *etype, 
                            MPI_Datatype *filetype, char *datarep )
 {
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
+   int returnVal;
+   HDFsetInfo dataPtr;
+   int dataLen;
 
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_get_view(fh, disp, etype, filetype, datarep);
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiSetViewID,
+   if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) 
+   {
+      returnVal = PabloMPI_File_get_view(fh, disp, etype, filetype, datarep);
+   } 
+   else 
+   {
+      dataLen = 1;
+      dataPtr.setID = (long)fh;
+      HDFtraceEvent_RT( HDFmpiSetViewID,
                              &dataPtr,dataLen );
-   	   returnVal = PMPI_File_get_view(fh, disp, etype, filetype, datarep);
-           HDFtraceEvent_RT( -HDFmpiSetViewID,
-                             &dataPtr,dataLen );
-     	   returnVal = PMPI_File_get_view(fh, disp, etype, filetype, datarep);
+      returnVal = PMPI_File_get_view(fh, disp, etype, filetype, datarep);
+      HDFtraceEvent_RT( -HDFmpiSetViewID, &dataPtr,dataLen );
+      returnVal = PMPI_File_get_view(fh, disp, etype, filetype, datarep);
 
-	}
-   	return returnVal;
+   }
+   return returnVal;
 }
 
 /*======================================================================* 
@@ -1322,16 +1320,28 @@ int HDF_MPI_File_read_at( MPI_File fh, MPI_Offset offset, void *buf,
    	int returnVal;
    	HDFsetInfo dataPtr;
    	int dataLen;
+        int rCount;
 
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_read_at( fh, offset, buf, count, datatype, 
+   	   returnVal = PabloMPI_File_read_at( fh, offset, buf, count, datatype, 
 	                                                            status );
 	} else {
-	   dataLen = 0;
+	   dataLen = sizeof(dataPtr);
+           dataPtr.setID = (long)fh;
+           dataPtr.numBytes = HDF_get_Bytes( datatype, count );
            HDFtraceEvent_RT( HDFmpiReadAtID,
                              &dataPtr,dataLen );
    	   returnVal = PMPI_File_read_at( fh, offset, buf, count, datatype, 
 	                                                            status );
+           MPI_Get_count(status,datatype,&rCount);
+           if ( rCount < 0 || rCount > count ) 
+           {
+              dataPtr.numBytes = -1;
+           }
+           else
+           {
+              dataPtr.numBytes = HDF_get_Bytes( datatype, rCount );
+           }
            HDFtraceEvent_RT( -HDFmpiReadAtID,
                              &dataPtr,dataLen );
 	}
@@ -1350,16 +1360,28 @@ int HDF_MPI_File_read_at_all( MPI_File fh, MPI_Offset offset, void *buf,
    	int returnVal;
    	HDFsetInfo dataPtr;
    	int dataLen;
+        int rCount;
 
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_read_at_all( fh, offset, buf, 
+   	   returnVal = PabloMPI_File_read_at_all( fh, offset, buf, 
 				      count, datatype, status );
 	} else {
-	   dataLen = 0;
+	   dataLen = sizeof(dataPtr);
+           dataPtr.setID = (long)fh;
+           dataPtr.numBytes = HDF_get_Bytes( datatype, count );
            HDFtraceEvent_RT( HDFmpiReadAtAllID,
                              &dataPtr,dataLen );
    	   returnVal = PMPI_File_read_at_all( fh, offset, buf, 
 				      count, datatype, status );
+           MPI_Get_count(status,datatype,&rCount);
+           if ( rCount < 0 || rCount > count ) 
+           {
+              dataPtr.numBytes = -1;
+           }
+           else
+           {
+              dataPtr.numBytes = HDF_get_Bytes( datatype, rCount );
+           }
            HDFtraceEvent_RT( -HDFmpiReadAtAllID,
                              &dataPtr,dataLen );
 	}
@@ -1375,23 +1397,36 @@ int HDF_MPI_File_write_at( MPI_File fh, MPI_Offset offset, void *buf,
                       int count, MPI_Datatype datatype, MPI_Status *status )
 {
    
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
+   int returnVal;
+   HDFsetInfo dataPtr;
+   int dataLen;
+   int rCount;
 
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_write_at( fh, offset, buf, count, datatype, 
-	                                                           status );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiWriteAtID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_write_at( fh, offset, buf, count, datatype, 
-	                                                            status );
-           HDFtraceEvent_RT( -HDFmpiWriteAtID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
+   if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) 
+   {
+      returnVal = PabloMPI_File_write_at( fh, offset, buf, count, datatype, 
+                                                              status );
+   } 
+   else 
+   {
+      dataLen = sizeof(dataPtr);
+      dataPtr.setID = (long)fh;
+      dataPtr.numBytes = HDF_get_Bytes( datatype, count );
+      HDFtraceEvent_RT( HDFmpiWriteAtID, &dataPtr,dataLen );
+      returnVal = PMPI_File_write_at( fh, offset, buf, count, datatype, 
+                                                               status );
+      MPI_Get_count(status,datatype,&rCount);
+      if ( rCount < 0 || rCount > count ) 
+      {
+         dataPtr.numBytes = -1;
+      }
+      else
+      {
+         dataPtr.numBytes = HDF_get_Bytes( datatype, rCount );
+      }
+      HDFtraceEvent_RT( -HDFmpiWriteAtID, &dataPtr,dataLen );
+   }
+   return returnVal;
 }
 
 /*======================================================================* 
@@ -1405,311 +1440,29 @@ int HDF_MPI_File_write_at_all( MPI_File fh, MPI_Offset offset, void *buf,
    	int returnVal;
    	HDFsetInfo dataPtr;
    	int dataLen;
+        int rCount;
 
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_write_at_all( fh, offset, buf, 
+   	   returnVal = PabloMPI_File_write_at_all( fh, offset, buf, 
 	 	 	       		count, datatype, status );
 	} else {
-	   dataLen = 0;
+	   dataLen = sizeof(dataPtr);
+           dataPtr.setID = (long)fh;
+           dataPtr.numBytes = HDF_get_Bytes( datatype, count );
            HDFtraceEvent_RT( HDFmpiWriteAtAllID,
                              &dataPtr,dataLen );
    	   returnVal = PMPI_File_write_at_all( fh, offset, buf, 
 	 			       count, datatype, status );
+           MPI_Get_count(status,datatype,&rCount);
+           if ( rCount < 0 || rCount > count ) 
+           {
+              dataPtr.numBytes = -1;
+           }
+           else
+           {
+              dataPtr.numBytes = HDF_get_Bytes( datatype, rCount );
+           }
            HDFtraceEvent_RT( -HDFmpiWriteAtAllID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_iread_at( MPI_File fh, MPI_Offset offset, void *buf,
-   int count, MPI_Datatype datatype, MPIO_Request *request )
-{
-   return MPI_File_iread_at( fh, offset, buf, count, datatype, request );
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_iwrite_at( MPI_File fh, MPI_Offset offset, void *buf, 
-		int count, MPI_Datatype datatype, MPIO_Request *request)
-{
-   return MPI_File_iwrite_at( fh, offset, buf, count, datatype, request );
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_read( MPI_File fh, void *buf, int count, 
-                       MPI_Datatype datatype, MPI_Status *status)
-{
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_read( fh, buf, count, datatype, status );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiReadID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_read( fh, buf, count, datatype, status );
-           HDFtraceEvent_RT( -HDFmpiReadID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_read_all( MPI_File fh, void *buf, int count, 
-                           MPI_Datatype datatype, MPI_Status *status)
-{
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_read_all( fh, buf, count, datatype, status );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiReadAllID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_read_all( fh, buf, count, datatype, status );
-           HDFtraceEvent_RT( -HDFmpiReadAllID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_write( MPI_File fh, void *buf, int count, 
-                        MPI_Datatype datatype, MPI_Status *status )
-{
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-           returnVal = MPI_File_write( fh, buf, count, datatype, status );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiWriteID,
-                             &dataPtr,dataLen );
-           returnVal = PMPI_File_write( fh, buf, count, datatype, status );
-           HDFtraceEvent_RT( -HDFmpiWriteID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_write_all( MPI_File fh, void *buf, int count, 
-                            MPI_Datatype datatype, MPI_Status *status )
-{
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal =MPI_File_write_all( fh, buf, count, datatype, status );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiWriteAllID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_write_all( fh, buf, count, datatype, status );
-           HDFtraceEvent_RT( -HDFmpiWriteAllID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_iread( MPI_File fh, void *buf, int count, 
-                        MPI_Datatype datatype, MPIO_Request *request )
-{
-	return MPI_File_iread( fh, buf, count, datatype, request );
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_iwrite( MPI_File fh, void *buf, int count, 
-	                 MPI_Datatype datatype, MPIO_Request *request )
-{
-   return MPI_File_iwrite( fh, buf, count, datatype, request );
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_seek( MPI_File fh, MPI_Offset offset, int whence )
-{
-   
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_seek( fh, offset, whence );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiSeekID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_seek( fh, offset, whence );
-           HDFtraceEvent_RT( -HDFmpiSeekID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_get_position( MPI_File fh, MPI_Offset *offset )
-{
-   
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_get_position( fh, offset );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiGetPositionID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_get_position( fh, offset );
-           HDFtraceEvent_RT( -HDFmpiGetPositionID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_get_byte_offset( MPI_File fh, MPI_Offset offset, 
-                                             MPI_Offset *disp )
-{
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_get_byte_offset( fh, offset, disp );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiGetByteOffsetID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_get_byte_offset( fh, offset, disp );
-           HDFtraceEvent_RT( -HDFmpiGetByteOffsetID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_get_type_extent( MPI_File fh, MPI_Datatype datatype, 
-                                               MPI_Aint *extent )
-{
-   
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_get_type_extent( fh, datatype, extent );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiGetTypeExtentID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_get_type_extent( fh, datatype, extent );
-           HDFtraceEvent_RT( -HDFmpiGetTypeExtentID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_set_atomicity( MPI_File fh, int flag )
-{
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_set_atomicity( fh, flag );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiSetAtomicityID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_set_atomicity( fh, flag );
-           HDFtraceEvent_RT( -HDFmpiSetAtomicityID,
-                             &dataPtr,dataLen );
-	}
-   	return returnVal;
-}
-
-/*======================================================================* 
-// Pass call through to regular MPIO entry except in case of Real Time	* 
-// tracing.  								* 
-// Note: The regular MPIO entry may or may not be instrumented.		*
-//======================================================================*/
-int HDF_MPI_File_get_atomicity( MPI_File fh, int *flag )
-{
-   
-   	int returnVal;
-   	HDFsetInfo dataPtr;
-   	int dataLen;
-
-        if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) {
-   	   returnVal = MPI_File_get_atomicity( fh, flag );
-	} else {
-	   dataLen = 0;
-           HDFtraceEvent_RT( HDFmpiGetAtomicityID,
-                             &dataPtr,dataLen );
-   	   returnVal = PMPI_File_get_atomicity( fh, flag );
-           HDFtraceEvent_RT( -HDFmpiGetAtomicityID,
                              &dataPtr,dataLen );
 	}
    	return returnVal;
@@ -1727,9 +1480,10 @@ int HDF_MPI_File_sync( MPI_File fh )
    	int dataLen;
 
         if ( OUTPUT_SWITCH != MPI_SUMMARY_TRACE ) { 
-   	   returnVal = MPI_File_sync ( fh );
+   	   returnVal = PabloMPI_File_sync ( fh );
 	} else {
-	   dataLen = 0;
+	   dataLen = 1;
+           dataPtr.setID = (long)fh;
            HDFtraceEvent_RT( HDFmpiSyncID,
                              &dataPtr,dataLen );
    	   returnVal = PMPI_File_sync ( fh );
@@ -1739,4 +1493,12 @@ int HDF_MPI_File_sync( MPI_File fh )
    	return returnVal;
 }
 
-#endif /* HAVE_PARALLEL */
+int HDF_get_Bytes( MPI_Datatype datatype, int count )
+{
+   int nm_bytes;
+   
+   MPI_Type_size( datatype, &nm_bytes );
+   return( nm_bytes * count );
+}
+
+#endif /* H5_HAVE_PARALLEL */
