@@ -33,6 +33,10 @@ if test "X-" = "X-$F9X"; then
             F9X=ifort
             F9X_BASENAME=ifort
             ;;
+        mpicc*)
+            F9X=mpif90
+            F9X_BASENAME=mpif90
+            ;;
     esac
 else
     # Figure out which compiler we are using: pgf90 or Absoft f95
