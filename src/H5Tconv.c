@@ -193,7 +193,7 @@ static intn interface_initialize_g = 0;
 		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
 		*((DT*)d) = 0;						      \
 	    }								      \
-	} else if (sizeof(ST)>sizeof(DT) && *((ST*)s)>(D_MAX)) {	      \
+	} else if (sizeof(ST)>sizeof(DT) && *((ST*)s)>(ST)(D_MAX)) {	      \
 	    /*sign vs. unsign ok in previous line*/			      \
 	    if (!H5T_overflow_g ||					      \
 		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
@@ -214,7 +214,7 @@ static intn interface_initialize_g = 0;
 		*((DT*)d) = (D_MAX);					      \
 	    }								      \
 	} else {							      \
-	    *((DT*)d) = (DT)(*s);					      \
+	    *((DT*)d) = (DT)(*((ST*)s));				      \
 	}								      \
     } CI_END;								      \
 }

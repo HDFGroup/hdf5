@@ -14,14 +14,10 @@ VPATH=.:@srcdir@
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 LIBHDF5=../src/libhdf5.la
 
-# These are the programs that `make all' will build, `make install'
-# will copy to the binaries directory, and `make uninstall' will
-# remove from that directory.
-PROGS=h5_chunk_read h5_compound h5_extend_write h5_group h5_read h5_write \
-	h5_select h5_attribute
-
-# These are the programs that `make test' will run
-TESTS=
+# These are the programs that `make all' or `make tests' will build and which
+# `make check' will run. List them in the order they should be run.
+TEST_PROGS=h5_chunk_read h5_compound h5_extend_write h5_group h5_write \
+	h5_read h5_select h5_attribute
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
@@ -30,13 +26,13 @@ CLEAN=*.h5
 # List all source files here.  The list of object files will be
 # created by replacing the `.c' with a `.o'.  This list is necessary
 # for building automatic dependencies.
-PROG_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
+TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
 	 h5_read.c h5_write.c h5_select.c h5_attribute.c
-PROG_OBJ=$(PROG_SRC:.c=.lo)
+TEST_OBJ=$(PROG_SRC:.c=.lo)
 
 
 # How to build the programs... they all depend on the hdf5 library
-$(PROGS): $(LIBHDF5)
+$(TEST_PROGS): $(LIBHDF5)
 h5_chunk_read: h5_chunk_read.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_chunk_read.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
