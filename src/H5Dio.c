@@ -62,6 +62,11 @@ typedef struct fm_map {
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL 
 
+#ifdef H5_HAVE_PARALLEL
+/* Global vars whose value can be set from environment variable also */
+extern hbool_t H5S_mpi_opt_types_g;
+#endif /* H5_HAVE_PARALLEL */
+
 /* Local functions */
 static herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
 			const H5S_t *mem_space, const H5S_t *file_space,
