@@ -1,0 +1,8 @@
+#############################
+Expected output for 'h5diff file4.h5 file4.h5 enum'
+#############################
+$h5diff file4.h5 file4.h5 enum
+Comparison not supported
+</enum> is of class H5T_ENUM and </enum> is of class H5T_ENUM
+
+

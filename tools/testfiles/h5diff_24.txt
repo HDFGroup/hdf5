@@ -1,0 +1,8 @@
+#############################
+Expected output for 'h5diff file3.h5 file3.h5 type type'
+#############################
+$h5diff file3.h5 file3.h5 type type
+Comparison not supported
+</type> is of type H5G_TYPE and </type> is of type H5G_TYPE
+
+

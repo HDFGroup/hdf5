@@ -1,0 +1,12 @@
+#############################
+Expected output for 'h5diff file1.h5 file2.h5 -p 0.21 g1/dset3 g1/dset4'
+#############################
+$h5diff file1.h5 file2.h5 -p 0.21 g1/dset3 g1/dset4
+Comparing </g1/dset3> with </g1/dset4>
+position        dset3           dset4           difference      relative       
+------------------------------------------------------------------------
+[ 2 0 ]          100             140             40              0.4           
+[ 2 1 ]          100             200             100             1             
+2 differences found
+
+
