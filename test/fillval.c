@@ -89,7 +89,7 @@ test_getset(void)
 	status = H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    H5Pget_fill_value() should have been negative");
 	goto error;
     }
@@ -106,7 +106,7 @@ test_getset(void)
      */
     if (H5Pget_fill_value(dcpl, type_ss, &fill_ss_rd)<0) goto error;
     if (fill_ss.v1!=fill_ss_rd.v1 || fill_ss.v2!=fill_ss_rd.v2) {
-	FAILED();
+	H5_FAILED();
 	puts("    Failed to get fill value using same data type that was ");
 	puts("    used to set the fill value.");
 	goto error;
@@ -117,7 +117,7 @@ test_getset(void)
      */
     if (H5Pget_fill_value(dcpl, type_si, &fill_si)<0) goto error;
     if (fill_ss.v1!=fill_si.v1 || fill_ss.v2!=fill_si.v2) {
-	FAILED();
+	H5_FAILED();
 	puts("    Failed to get fill value using a data type other than what");
 	puts("    was used to set the fill value.");
 	goto error;
@@ -129,7 +129,7 @@ test_getset(void)
     if (H5Pset_fill_value(dcpl, type_si, &fill_si)<0) goto error;
     if (H5Pget_fill_value(dcpl, type_ss, &fill_ss)<0) goto error;
     if (fill_si.v1!=fill_ss.v1 || fill_si.v2!=fill_ss.v2) {
-	FAILED();
+	H5_FAILED();
 	puts("    Resetting the fill value was unsuccessful.");
 	goto error;
     }
@@ -237,7 +237,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 #ifndef NO_FILLING
     if (H5Pget_fill_value(dcpl, H5T_NATIVE_SHORT, &rd_s)<0) goto error;
     if (rd_s!=fill_s) {
-	FAILED();
+	H5_FAILED();
 	puts("    Got a different fill value than what was set.");
 	printf("    Got %d, set %d\n", rd_s, fill_s);
 	goto error;
@@ -252,7 +252,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 #ifndef NO_FILLING
     if (H5Pget_fill_value(dcpl, H5T_NATIVE_LONG, &rd_l)<0) goto error;
     if (rd_l!=fill_l) {
-	FAILED();
+	H5_FAILED();
 	puts("    Got a different fill value than what was set.");
 	printf("    Got %ld, set %ld\n", rd_l, fill_l);
 	goto error;
@@ -267,7 +267,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 #ifndef NO_FILLING
     if (H5Pget_fill_value(dcpl, H5T_NATIVE_LONG, &rd_l)<0) goto error;
     if (rd_l!=fill_l) {
-	FAILED();
+	H5_FAILED();
 	puts("    Got a different fill value than what was set.");
 	printf("    Got %ld, set %ld\n", rd_l, fill_l);
 	goto error;
@@ -360,7 +360,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	if (H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
 		    &val_rd)<0) goto error;
 	if (val_rd!=fillval) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Value read was not a fill value.");
 	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "Fill value: %u\n",
@@ -405,7 +405,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 		    &val_rd)<0) goto error;
 
 	if (val_rd!=should_be) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Value read was not correct.");
 	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "should be: %u\n",
@@ -558,7 +558,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	if (H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
 		    &val_rd)<0) goto error;
 	if (val_rd!=fillval) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Value read was not a fill value.");
 	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "Fill value: %u\n",
@@ -603,7 +603,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 		    &val_rd)<0) goto error;
 
 	if (val_rd!=should_be) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Value read was not correct.");
 	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "should be: %u\n",
@@ -639,7 +639,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 		    &val_rd)<0) goto error;
 
 	if (val_rd!=should_be) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Value read was not correct.");
 	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		   "should be: %u\n",

@@ -69,7 +69,7 @@ main(void)
 	     */
 	    error = fabs(the_data[i][j]-(double)(hssize_t)i/((hssize_t)j+1));
 	    if (error>0.0001) {
-		FAILED();
+		H5_FAILED();
 		printf("    dset[%lu][%lu] = %g\n",
 		       (unsigned long)i, (unsigned long)j, the_data[i][j]);
 		printf("    should be %g\n",

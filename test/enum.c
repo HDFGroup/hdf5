@@ -141,7 +141,7 @@ test_noconv(hid_t file)
 
     for (i=0; i<ds_size[0]; i++) {
 	if (data1[i]!=data2[i]) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
 		   (unsigned long)i, (int)(data2[i]));
@@ -223,7 +223,7 @@ test_tr1(hid_t file)
 
     for (i=0; i<ds_size[0]; i++) {
 	if (data1[i]!=data2[i]) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
 		   (unsigned long)i, (int)(data2[i]));
@@ -303,7 +303,7 @@ test_tr2(hid_t file)
 
     for (i=0; i<ds_size[0]; i++) {
 	if (data1[i]!=data2[i]) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
 		   (unsigned long)i, (int)(data2[i]));

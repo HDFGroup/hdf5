@@ -122,12 +122,12 @@ cklinks(hid_t fapl)
     if (H5Gget_objinfo(file, "d1", TRUE, &sb1)<0) goto error;
     if (H5Gget_objinfo(file, "grp1/hard", TRUE, &sb2)<0) goto error;
     if (H5G_DATASET!=sb2.type) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unexpected object type should have been a dataset");
 	goto error;
     }
     if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
-	FAILED();
+	H5_FAILED();
 	puts("    Hard link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
 	goto error;
@@ -136,12 +136,12 @@ cklinks(hid_t fapl)
     /* Symbolic link */
     if (H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2)<0) goto error;
     if (H5G_DATASET!=sb2.type) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unexpected object type should have been a dataset");
 	goto error;
     }
     if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
-	FAILED();
+	H5_FAILED();
 	puts("    Soft link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
 	goto error;
@@ -150,7 +150,7 @@ cklinks(hid_t fapl)
 	goto error;
     }
     if (strcmp(linkval, "/d1")) {
-	FAILED();
+	H5_FAILED();
 	puts("    Soft link test failed. Wrong link value");
 	goto error;
     }
@@ -160,13 +160,13 @@ cklinks(hid_t fapl)
 	status = H5Gget_objinfo(file, "grp1/dangle", TRUE, &sb2);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    H5Gget_objinfo() should have failed for a dangling link.");
 	goto error;
     }
     if (H5Gget_objinfo(file, "grp1/dangle", FALSE, &sb2)<0) goto error;
     if (H5G_LINK!=sb2.type) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unexpected object type should have been a symbolic link");
 	goto error;
     }
@@ -174,7 +174,7 @@ cklinks(hid_t fapl)
 	goto error;
     }
     if (strcmp(linkval, "foobar")) {
-	FAILED();
+	H5_FAILED();
 	puts("    Dangling link test failed. Wrong link value");
 	goto error;
     }
@@ -184,13 +184,13 @@ cklinks(hid_t fapl)
 	status = H5Gget_objinfo(file, "grp1/recursive", TRUE, &sb2);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    H5Gget_objinfo() should have failed for a recursive link.");
 	goto error;
     }
     if (H5Gget_objinfo(file, "grp1/recursive", FALSE, &sb2)<0) goto error;
     if (H5G_LINK!=sb2.type) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unexpected object type should have been a symbolic link");
 	goto error;
     }
@@ -198,7 +198,7 @@ cklinks(hid_t fapl)
 	goto error;
     }
     if (strcmp(linkval, "/grp1/recursive")) {
-	FAILED();
+	H5_FAILED();
 	puts("   Recursive link test failed. Wrong link value");
 	goto error;
     }

@@ -99,7 +99,7 @@ new_object(H5F_t *f, const char *name, uintn ndims, H5G_entry_t *ent/*out*/)
 
     /* Create the object header */
     if (H5O_create(f, 64, ent)) {
-	FAILED();
+	H5_FAILED();
 	puts("    H5O_create() = NULL");
 	goto error;
     }
@@ -116,14 +116,14 @@ new_object(H5F_t *f, const char *name, uintn ndims, H5G_entry_t *ent/*out*/)
     }
     H5F_arr_create(f, &layout/*in,out*/);
     if (H5O_modify(ent, H5O_LAYOUT, H5O_NEW_MESG, 0, &layout) < 0) {
-	FAILED();
+	H5_FAILED();
 	puts("    H5O_modify istore message failure.");
 	goto error;
     }
 
     /* Give the object header a name */
     if (H5G_insert(H5G_entof(H5G_rootof(f)), name, ent) < 0) {
-	FAILED();
+	H5_FAILED();
 	printf("    H5G_insert(f, name=\"%s\", ent) failed\n", name);
 	goto error;
     }
@@ -237,12 +237,12 @@ test_extend(H5F_t *f, const char *prefix,
 	goto error;
     }
     if (NULL == H5O_read(&handle, H5O_LAYOUT, 0, &layout)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unable to read istore message.");
 	goto error;
     }
     if (ndims != layout.ndims) {
-	FAILED();
+	H5_FAILED();
 	printf("    Header read error: istore.ndims != %d\n", ndims);
 	goto error;
     }
@@ -301,7 +301,7 @@ test_extend(H5F_t *f, const char *prefix,
 	/* Write to disk */
 	if (H5F_arr_write(f, H5P_DEFAULT, &layout, NULL, NULL, NULL, size,
 			  size, zero, offset, buf)<0) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
 	    goto error;
 	}
@@ -310,12 +310,12 @@ test_extend(H5F_t *f, const char *prefix,
 	memset(check, 0xff, (size_t)nelmts);
 	if (H5F_arr_read(f, H5P_DEFAULT, &layout, NULL, NULL, NULL, size,
 			 size, zero, offset, check)<0) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    Read failed: ctr=%lu\n", (unsigned long)ctr);
 	    goto error;
 	}
 	if (memcmp(buf, check, (size_t)nelmts)) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    Read check failed: ctr=%lu\n", (unsigned long)ctr);
 	    printf("    Wrote:\n");
 	    print_array(buf, (size_t)size[0], (size_t)size[1],
@@ -341,7 +341,7 @@ test_extend(H5F_t *f, const char *prefix,
     memset(buf, 0xff, nx * ny * nz);
     if (H5F_arr_read(f, H5P_DEFAULT, &layout, NULL, NULL, NULL, whole_size,
 		     whole_size, zero, zero, buf)<0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Read failed for whole array.");
 	goto error;
     }
@@ -349,7 +349,7 @@ test_extend(H5F_t *f, const char *prefix,
 	for (j=0; j<ny; j++) {
 	    for (k=0; k<nz; k++) {
 		if (whole[i*ny*nz + j*nz + k] != buf[i*ny*nz + j*nz + k]) {
-		    FAILED();
+		    H5_FAILED();
 		    printf("    Check failed at i=%lu", (unsigned long)i);
 		    if (ndims > 1) {
 			printf(", j=%lu", (unsigned long)j);
@@ -438,7 +438,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 	goto error;
     }
     if (NULL == H5O_read(&handle, H5O_LAYOUT, 0, &layout)) {
-	FAILED();
+	H5_FAILED();
 	printf("    Unable to read istore message\n");
 	goto error;
     }
@@ -454,7 +454,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 	/* write to disk */
 	if (H5F_arr_write(f, H5P_DEFAULT, &layout, NULL, NULL, NULL, size,
 			  size, zero, offset, buf)<0) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
 	    printf("    offset=(%lu", (unsigned long) (offset[0]));
 	    if (ndims > 1)

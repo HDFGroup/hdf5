@@ -82,7 +82,7 @@ test_create(hid_t file)
 			    H5P_DEFAULT);
     } H5E_END_TRY;
     if (dataset >= 0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Library allowed overwrite of existing dataset.");
 	goto error;
     }
@@ -103,7 +103,7 @@ test_create(hid_t file)
 	dataset = H5Dopen(file, "does_not_exist");
     } H5E_END_TRY;
     if (dataset >= 0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Opened a non-existent dataset.");
 	goto error;
     }
@@ -125,7 +125,7 @@ test_create(hid_t file)
 			create_parms);
     } H5E_END_TRY;
     if (dataset >= 0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Opened a dataset with incorrect chunking parameters.");
 	goto error;
     }
@@ -216,7 +216,7 @@ test_simple_io(hid_t file)
     for (i = 0; i < 100; i++) {
 	for (j = 0; j < 200; j++) {
 	    if (points[i][j] != check[i][j]) {
-		FAILED();
+		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %d,%d\n", i, j);
 		goto error;
@@ -295,7 +295,7 @@ test_tconv(hid_t file)
 	    in[4*i+1]!=out[4*i+2] ||
 	    in[4*i+2]!=out[4*i+1] ||
 	    in[4*i+3]!=out[4*i+0]) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Read with byte order conversion failed.");
 	    goto error;
 	}
@@ -413,7 +413,7 @@ test_compression(hid_t file)
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]; j++) {
 	    if (0!=check[i][j]) {
-		FAILED();
+		H5_FAILED();
 		printf("    Read a non-zero value.\n");
 		printf("    At index %lu,%lu\n",
 		       (unsigned long)i, (unsigned long)j);
@@ -464,7 +464,7 @@ test_compression(hid_t file)
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
-		FAILED();
+		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %lu,%lu\n",
 		       (unsigned long)i, (unsigned long)j);
@@ -504,7 +504,7 @@ test_compression(hid_t file)
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
-		FAILED();
+		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %lu,%lu\n",
 		       (unsigned long)i, (unsigned long)j);
@@ -536,7 +536,7 @@ test_compression(hid_t file)
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
-		FAILED();
+		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %lu,%lu\n",
 		       (unsigned long)i, (unsigned long)j);
@@ -577,7 +577,7 @@ test_compression(hid_t file)
 	for (j=0; j<hs_size[1]; j++) {
 	    if (points[hs_offset[0]+i][hs_offset[1]+j] !=
 		check[hs_offset[0]+i][hs_offset[1]+j]) {
-		FAILED();
+		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %lu,%lu\n",
 		       (unsigned long)(hs_offset[0]+i),
@@ -620,7 +620,7 @@ test_compression(hid_t file)
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
-		FAILED();
+		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %lu,%lu\n",
 		       (unsigned long)i, (unsigned long)j);
@@ -693,7 +693,7 @@ test_multiopen (hid_t file)
     if ((space = H5Dget_space (dset2))<0) goto error;
     if (H5Sget_simple_extent_dims (space, tmp_size, NULL)<0) goto error;
     if (cur_size[0]!=tmp_size[0]) {
-	FAILED();
+	H5_FAILED();
 	printf ("    Got %d instead of %d!\n",
 		(int)tmp_size[0], (int)cur_size[0]);
 	goto error;

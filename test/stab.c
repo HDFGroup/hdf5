@@ -66,7 +66,7 @@ test_misc(hid_t fapl)
     if ((g3=H5Gopen(file, "/test_1b"))<0) goto error;
     if (H5Gget_comment(g3, "././.", sizeof comment, comment)<0) goto error;
     if (strcmp(comment, "hello world")) {
-	FAILED();
+	H5_FAILED();
 	puts("    Read the wrong comment string from the group.");
 	printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
 	goto error;

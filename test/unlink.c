@@ -64,7 +64,7 @@ test_one(hid_t file)
 	status = H5Gunlink(grp, ".");
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unlinking object w/o a name should have failed.");
 	goto error;
     }

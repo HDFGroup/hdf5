@@ -311,7 +311,7 @@ reader (hid_t fapl)
 	    else if (buf[j]!=i+1) wrong++;
 	}
 	if (zero) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    %d zero%s\n", zero, 1==zero?"":"s");
 	} else if (wrong) {
 	    SKIPPED();

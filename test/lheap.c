@@ -62,12 +62,12 @@ main(void)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     if (NULL==(f=H5I_object(file))) {
-	FAILED();
+	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
     if (H5HL_create(f, 0, &heap_addr/*out*/)<0) {
-	FAILED();
+	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
@@ -78,7 +78,7 @@ main(void)
 
         if ((size_t)(-1)==(obj[i]=H5HL_insert(f, heap_addr, strlen(buf)+1,
 					      buf))) {
-	    FAILED();
+	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
 	}
@@ -93,7 +93,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) goto error;
     if (NULL==(f=H5I_object(file))) {
-	FAILED();
+	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
@@ -102,12 +102,12 @@ main(void)
         for (j=4; j<i; j++) buf[j] = '0' + j%10;
         if (j>4) buf[j] = '\0';
         if (NULL==(s=H5HL_peek(f, heap_addr, obj[i]))) {
-	    FAILED();
+	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
 	}
 	if (strcmp(s, buf)) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
 	    printf("    got: \"%s\"\n", s);
 	    printf("    ans: \"%s\"\n", buf);

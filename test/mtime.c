@@ -78,7 +78,7 @@ main(void)
     /* Compare times from the two ways of calling H5Gget_objinfo() */
     if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1] ||
 	sb1.mtime!=sb2.mtime) {
-	FAILED();
+	H5_FAILED();
 	puts("    Calling H5Gget_objinfo() with the dataset ID returned");
 	puts("    different values than calling it with a file and dataset");
 	puts("    name.");
@@ -93,7 +93,7 @@ main(void)
 	puts("    cannot be queried on this system.  See H5O_mtime_decode().");
 	return 0;
     } else if (fabs(HDdifftime(now, sb1.mtime))>60.0) {
-	FAILED();
+	H5_FAILED();
 	tm = localtime(&(sb1.mtime));
 	strftime((char*)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
 	tm = localtime(&now);

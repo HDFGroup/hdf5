@@ -112,7 +112,7 @@ test_1a(hid_t file)
     if ((dcpl = H5Dget_create_plist (dset))<0) goto error;
     if ((n=H5Pget_external_count (dcpl))<0) goto error;
     if (1!=n) {
-	FAILED();
+	H5_FAILED();
 	puts("    Returned external count is wrong.");
 	printf("   got: %d\n    ans: 1\n", n);
 	goto error;
@@ -121,13 +121,13 @@ test_1a(hid_t file)
     if (H5Pget_external (dcpl, 0, sizeof(name)-4, name, &file_offset,
 			 &file_size)<0) goto error;
     if (file_offset!=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Wrong file offset.");
 	printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
 	goto error;
     }
     if (file_size!=(max_size[0]*sizeof(int))) {
-	FAILED();
+	H5_FAILED();
 	puts("    Wrong file size.");
 	printf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size,
 		(unsigned long)max_size[0]*sizeof(int));
@@ -184,7 +184,7 @@ test_1b(hid_t file)
 	dset = H5Dcreate (file, "dset2", H5T_NATIVE_INT, space, dcpl);
     } H5E_END_TRY;
     if (dset>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Small external file succeeded instead of failing.");
 	goto error;
     }
@@ -292,7 +292,7 @@ test_1d(hid_t file)
 	dset = H5Dcreate (file, "dset4", H5T_NATIVE_INT, space, dcpl);
     } H5E_END_TRY;
     if (dset>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Small external file succeeded instead of failing.");
 	goto error;
     }
@@ -360,7 +360,7 @@ test_1e(hid_t file)
     if ((dcpl = H5Dget_create_plist (dset))<0) goto error;
     if ((n = H5Pget_external_count (dcpl))<0) goto error;
     if (1!=n) {
-	FAILED();
+	H5_FAILED();
 	puts("    Returned external count is wrong.");
 	printf("    got: %d\n    ans: 1\n", n);
 	goto error;
@@ -369,13 +369,13 @@ test_1e(hid_t file)
     if (H5Pget_external (dcpl, 0, sizeof(name)-4, name, &file_offset,
 			 &file_size)<0) goto error;
     if (file_offset!=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Wrong file offset.");
 	printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
 	goto error;
     }
     if (H5F_UNLIMITED!=file_size) {
-	FAILED();
+	H5_FAILED();
 	puts("    Wrong file size.");
 	printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
 	goto error;
@@ -481,13 +481,13 @@ test_1g(void)
 	status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    H5Pset_external() succeeded when it should have failed.");
 	goto error;
     }
     if ((n = H5Pget_external_count(dcpl))<0) goto error;
     if (1!=n) {
-	FAILED();
+	H5_FAILED();
 	puts("    Wrong external file count returned.");
 	goto error;
     }
@@ -533,7 +533,7 @@ test_1h(void)
 	status = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)100);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    H5Pset_external() succeeded when it should have failed.");
 	goto error;
     }
@@ -635,7 +635,7 @@ test_2 (hid_t fapl)
 	goto error;
     for (i=0; i<100; i++) {
 	if (whole[i]!=(signed)i) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Incorrect value(s) read.");
 	    goto error;
 	}
@@ -653,7 +653,7 @@ test_2 (hid_t fapl)
     if (H5Sclose (hs_space)<0) goto error;
     for (i=hs_start; i<hs_start+hs_count; i++) {
 	if (whole[i]!=(signed)i) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Incorrect value(s) read.");
 	    goto error;
 	}
@@ -731,7 +731,7 @@ test_3 (hid_t fapl)
     for (i=1; i<=4; i++) {
 	sprintf(filename, "extern_%db.raw", i);
 	if ((fd= open(filename, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    cannot open %s: %s\n", filename, strerror(errno));
 	    goto error;
 	}
@@ -755,7 +755,7 @@ test_3 (hid_t fapl)
 	sprintf (name1, "extern_%da.raw", i+1);
 	sprintf (name2, "extern_%db.raw", i+1);
 	if (!same_contents (name1, name2)) {
-	    FAILED();
+	    H5_FAILED();
 	    puts ("   Output differs from expected value.");
 	    goto error;
 	}

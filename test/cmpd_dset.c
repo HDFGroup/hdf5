@@ -236,7 +236,7 @@ main (int argc, char *argv[])
 	    s1[i].c[3]!=s2[i].c[3] ||
 	    s1[i].d!=s2[i].d ||
 	    s1[i].e!=s2[i].e) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Incorrect values read from the file");
 	    goto error;
 	}
@@ -278,7 +278,7 @@ main (int argc, char *argv[])
 	    s1[i].c[3]!=s3[i].c[3] ||
 	    s1[i].d!=s3[i].d ||
 	    s1[i].e!=s3[i].e) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Incorrect values read from the file");
 	    goto error;
 	}
@@ -306,7 +306,7 @@ main (int argc, char *argv[])
     for (i=0; i<NX*NY; i++) {
 	if (s1[i].b!=s4[i].b ||
 	    s1[i].d!=s4[i].d) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Incorrect values read from the file");
 	    goto error;
 	}
@@ -355,7 +355,7 @@ main (int argc, char *argv[])
 	    s1[i].c[3]!=s5[i].c[3] ||
 	    s1[i].d!=s5[i].d ||
 	    s1[i].e!=s5[i].e) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Incorrect values read from the file");
 	    goto error;
 	}
@@ -367,7 +367,7 @@ main (int argc, char *argv[])
 	    s5[i].mid1 != 1001+4*i ||
 	    s5[i].mid2 != 1002+4*i ||
 	    s5[i].post != 1003+4*i) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Memory values were clobbered");
 	    goto error;
 	}
@@ -408,7 +408,7 @@ main (int argc, char *argv[])
 	    s1[i].c[3] != 8*i+5 ||
 	    s1[i].d != 8*i+6 ||
 	    s1[i].e != 8*i+7) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    i==%u, row=%u, col=%u\n", i, i/NY, i%NY);
 	    printf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n",
 		   s1[i].a, s1[i].b, s1[i].c[0], s1[i].c[1], s1[i].c[2],
@@ -446,7 +446,7 @@ main (int argc, char *argv[])
 	    s2[i].c[3] != s1[i].c[3] ||
 	    s2[i].d != s1[i].d ||
 	    s2[i].e != s1[i].e) {
-	    FAILED();
+	    H5_FAILED();
 	    puts("    Incorrect values read from file");
 	    goto error;
 	}
@@ -494,7 +494,7 @@ main (int argc, char *argv[])
 		ps8->c[3] != ps1->c[3] ||
 		ps8->d != ps1->d ||
 		ps8->e != ps1->e) {
-		FAILED();
+		H5_FAILED();
 		puts("    Incorrect values read from file");
 		goto error;
 	    }
@@ -541,7 +541,7 @@ main (int argc, char *argv[])
 		    ps2->c[3] != ps1->c[3] ||
 		    ps2->d != ps1->d ||
 		    ps2->e != ps1->e) {
-		    FAILED();
+		    H5_FAILED();
 		    puts("    Memory values clobbered");
 		    goto error;
 		}
@@ -554,7 +554,7 @@ main (int argc, char *argv[])
 		    ps2->c[3] != (unsigned)(-1) ||
 		    ps2->d != (unsigned)(-1) ||
 		    ps2->e != (unsigned)(-1)) {
-		    FAILED();
+		    H5_FAILED();
 		    puts("    Incorrect values read from file");
 		    goto error;
 		}
@@ -603,7 +603,7 @@ main (int argc, char *argv[])
 		    ps5->d != ps1->d ||
 		    ps5->e != ps1->e ||
 		    ps5->post != (unsigned)(-1)) {
-		    FAILED();
+		    H5_FAILED();
 		    puts("    Memory values clobbered");
 		    goto error;
 		}
@@ -620,7 +620,7 @@ main (int argc, char *argv[])
 		    ps5->d != (unsigned)(-1) ||
 		    ps5->e != (unsigned)(-1) ||
 		    ps5->post != (unsigned)(-1)) {
-		    FAILED();
+		    H5_FAILED();
 		    puts("    Incorrect values read from file");
 		    goto error;
 		}
@@ -672,7 +672,7 @@ main (int argc, char *argv[])
 		ps1->c[2] != 8*(i*NY+j)+4 ||
 		ps1->c[3] != 8*(i*NY+j)+5 ||
 		ps1->e != 8*(i*NY+j)+7) {
-		FAILED();
+		H5_FAILED();
 		puts("    Write clobbered values");
 		goto error;
 	    }
@@ -683,14 +683,14 @@ main (int argc, char *argv[])
 		(hsize_t)j<f_offset[1]+h_size[1]) {
 		if (ps1->b != (unsigned)(-1) ||
 		    ps1->d != (unsigned)(-1)) {
-		    FAILED();
+		    H5_FAILED();
 		    puts("    Wrong values written or read");
 		    goto error;
 		}
 	    } else {
 		if (ps1->b != 8*(i*NY+j)+1 ||
 		    ps1->d != 8*(i*NY+j)+6) {
-		    FAILED();
+		    H5_FAILED();
 		    puts("    Write clobbered values");
 		    goto error;
 		}

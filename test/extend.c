@@ -119,7 +119,7 @@ main (void)
 	    for (k=0; k<NX/2; k++) {
 		for (m=0; m<NY/2; m++) {
 		    if (buf2[k][m]!=buf1[(i%2)*NX/2+k][(j%2)*NY/2+m]) {
-			FAILED();
+			H5_FAILED();
 			printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
 			goto error;
 		    }

@@ -167,7 +167,7 @@ test_illegal(hid_t fapl)
 	status = H5Fmount(file1, "/mnt1", file1, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Mounting a file on itself should have failed.");
 	goto error;
     }
@@ -183,7 +183,7 @@ test_illegal(hid_t fapl)
 	status = H5Fmount(mnt, ".", file3, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Mounting two files at one mount point should have failed.");
 	goto error;
     }
@@ -253,7 +253,7 @@ test_hide(hid_t fapl)
 	grp = H5Gopen(file1, "/mnt1/file1");
     } H5E_END_TRY;
     if (grp>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Name is still accessible under mount point.");
 	goto error;
     }
@@ -265,7 +265,7 @@ test_hide(hid_t fapl)
     if (H5Gget_objinfo(file1, "/file1", TRUE, &sb2)<0) goto error;
     if (sb1.fileno[0]!=sb2.fileno[0] || sb1.fileno[1]!=sb2.fileno[1] ||
 	sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
-	FAILED();
+	H5_FAILED();
 	puts("    Hard link failed for hidden object.");
 	goto error;
     }
@@ -333,7 +333,7 @@ test_assoc(hid_t fapl)
     if (H5Gget_objinfo(file1, "/mnt1", TRUE, &sb2)<0) goto error;
     if (sb1.fileno[0]!=sb2.fileno[0] || sb1.fileno[1]!=sb2.fileno[1] ||
 	sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1]) {
-	FAILED();
+	H5_FAILED();
 	puts("    Association failed.");
 	goto error;
     }
@@ -456,7 +456,7 @@ test_move(hid_t fapl)
 	status = H5Gmove(file1, "/mnt1/rename_b/y",  "/y");
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Moving an object across files should't have been possible");
 	goto error;
     }
@@ -656,7 +656,7 @@ test_unlink(hid_t fapl)
 	status = H5Gget_objinfo(mnt, "file2", TRUE, NULL);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Incorrect traversal from mount point!");
 	goto error;
     }
@@ -673,7 +673,7 @@ test_unlink(hid_t fapl)
 	status = H5Gget_objinfo(mnt, "file2", TRUE, NULL);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Traversal through mount point should not have worked!");
 	goto error;
     }
@@ -681,7 +681,7 @@ test_unlink(hid_t fapl)
 	status = H5Gget_objinfo(file2, "/mnt_unlink/file2", TRUE, NULL);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Traversal through mount point should not have worked!");
 	goto error;
     }
@@ -695,7 +695,7 @@ test_unlink(hid_t fapl)
 	status = H5Funmount(file1, "/mnt_unlink");
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unmount by name should not have been allowed!");
 	goto error;
     }
@@ -703,7 +703,7 @@ test_unlink(hid_t fapl)
 	status = H5Funmount(file2, "/");
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Unmount by name should not have been allowed!");
 	goto error;
     }
@@ -821,7 +821,7 @@ test_interlink(hid_t fapl)
 	status = H5Glink(file1, H5G_LINK_HARD, "/mnt1/file2",  "/file2");
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Interfile hard link should not have been allowed!");
 	goto error;
     }
@@ -831,7 +831,7 @@ test_interlink(hid_t fapl)
 	status = H5Gmove(file1, "/mnt1/file2", "/file2");
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Interfile renaming should not have been allowed!");
 	goto error;
     }
@@ -844,7 +844,7 @@ test_interlink(hid_t fapl)
 	dset = H5Dcreate(file1, "/mnt1/file2/dset", type, space, H5P_DEFAULT);
     } H5E_END_TRY;
     if (dset>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    Dataset and shared type must be in the same file!");
 	goto error;
     }
@@ -976,7 +976,7 @@ test_close(hid_t fapl)
 	status = H5Gget_objinfo(file2, "/mnt1", TRUE, NULL);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts("    File1 contents are still accessible!");
 	goto error;
     }

@@ -306,13 +306,13 @@ test_classes(void)
 
     if ((tcls=H5Tget_class(H5T_NATIVE_INT))<0) goto error;
     if (H5T_INTEGER!=tcls) {
-	FAILED();
+	H5_FAILED();
         puts("    Invalid type class for H5T_NATIVE_INT");
         goto error;
     }
     if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE))<0) goto error;
     if (H5T_FLOAT!=tcls) {
-	FAILED();
+	H5_FAILED();
 	puts("    Invalid type class for H5T_NATIVE_DOUBLE");
         goto error;
     }
@@ -356,7 +356,7 @@ test_copy(void)
 	status = H5Tclose (H5T_NATIVE_SCHAR);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Should not be able to close a predefined type!");
 	goto error;
     }
@@ -501,7 +501,7 @@ test_compound_2(void)
 	    s_ptr->c[3] != d_ptr->c[3] ||
 	    s_ptr->d    != d_ptr->d    ||
 	    s_ptr->e    != d_ptr->e) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    i=%d\n", i);
 	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
 		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
@@ -615,7 +615,7 @@ test_compound_3(void)
 	    s_ptr->c[2] != d_ptr->c[2] ||
 	    s_ptr->c[3] != d_ptr->c[3] ||
 	    s_ptr->e    != d_ptr->e) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    i=%d\n", i);
 	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
 		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
@@ -737,7 +737,7 @@ test_compound_4(void)
 	    s_ptr->c[3] != d_ptr->c[3] ||
 	    s_ptr->d    != d_ptr->d    ||
 	    s_ptr->e    != d_ptr->e) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    i=%d\n", i);
 	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
 		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
@@ -862,7 +862,7 @@ test_compound_5(void)
         src[1].coll_ids[1]!=dst[1].coll_ids[1] ||
         src[1].coll_ids[2]!=dst[1].coll_ids[2] ||
         src[1].coll_ids[3]!=dst[1].coll_ids[3]) {
-        FAILED();
+        H5_FAILED();
         return 1;
     }
 
@@ -944,7 +944,7 @@ test_compound_6(void)
 	d_ptr = ((struct dt*)buf)  + i;
 	if (s_ptr->b    != d_ptr->b    ||
 	    s_ptr->d    != d_ptr->d) {
-	    FAILED();
+	    H5_FAILED();
 	    printf("    i=%d\n", i);
 	    printf("    src={b=%d, d=%d\n",
            (int)s_ptr->b, (int)s_ptr->d);
@@ -1006,7 +1006,7 @@ test_transient (hid_t fapl)
 	status = H5Tset_precision (H5T_NATIVE_INT, 256);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Predefined types should not be modifiable!");
 	goto error;
     }
@@ -1014,7 +1014,7 @@ test_transient (hid_t fapl)
 	status = H5Tclose (H5T_NATIVE_INT);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Predefined types should not be closable!");
 	goto error;
     }
@@ -1028,7 +1028,7 @@ test_transient (hid_t fapl)
 	status = H5Acreate (type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Attributes should not be allowed for transient types!");
 	goto error;
     }
@@ -1045,7 +1045,7 @@ test_transient (hid_t fapl)
 	status = H5Tset_precision (t2, 256);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Dataset data types should not be modifiable!");
 	goto error;
     }
@@ -1062,7 +1062,7 @@ test_transient (hid_t fapl)
 	status = H5Tset_precision (t2, 256);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Dataset data types should not be modifiable!");
 	goto error;
     }
@@ -1136,7 +1136,7 @@ test_named (hid_t fapl)
 			    H5T_NATIVE_INT);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Predefined types should not be committable!");
 	goto error;
     }
@@ -1146,7 +1146,7 @@ test_named (hid_t fapl)
     if (H5Tcommit (file, "native-int", type)<0) goto error;
     if ((status=H5Tcommitted (type))<0) goto error;
     if (0==status) {
-	FAILED();
+	H5_FAILED();
 	puts ("    H5Tcommitted() returned false!");
 	goto error;
     }
@@ -1156,7 +1156,7 @@ test_named (hid_t fapl)
 	status = H5Tset_precision (type, 256);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Committed type is not constant!");
 	goto error;
     }
@@ -1166,7 +1166,7 @@ test_named (hid_t fapl)
 	status = H5Tcommit(file, "test_named_2 (should not exist)", type);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Committed types should not be recommitted!");
 	goto error;
     }
@@ -1185,7 +1185,7 @@ test_named (hid_t fapl)
     if ((t2 = H5Tcopy (type))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (status) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Copying a named type should result in a transient type!");
 	goto error;
     }
@@ -1199,7 +1199,7 @@ test_named (hid_t fapl)
     if ((type=H5Topen (file, "native-int"))<0) goto error;
     if ((status=H5Tcommitted (type))<0) goto error;
     if (!status) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Opened named types should be named types!");
 	goto error;
     }
@@ -1213,7 +1213,7 @@ test_named (hid_t fapl)
     if ((t2 = H5Dget_type (dset))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (!status) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Dataset type should be a named type!");
 	goto error;
     }
@@ -1227,7 +1227,7 @@ test_named (hid_t fapl)
     if ((t2 = H5Dget_type (dset))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (!status) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Dataset type should be a named type!");
 	goto error;
     }
@@ -1248,7 +1248,7 @@ test_named (hid_t fapl)
     if ((t2 = H5Dget_type (dset))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (!status) {
-	FAILED();
+	H5_FAILED();
 	puts ("    Dataset type should be a named type!");
 	goto error;
     }
@@ -1344,13 +1344,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghi\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Truncated C-string test failed");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Extended C-string test failed");
 	goto error;
     }
@@ -1367,13 +1367,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Truncated C buffer test failed");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Extended C buffer test failed");
 	goto error;
     }
@@ -1390,13 +1390,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Truncated Fortran-string test failed");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcde     abcde     ", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Extended Fortran-string test failed");
 	goto error;
     }
@@ -1416,7 +1416,7 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Non-terminated string test 1");
 	goto error;
     }
@@ -1425,14 +1425,14 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghij", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Non-terminated string test 2");
 	goto error;
     }
     memcpy(buf, "abcdeabcdexxxxxxxxxx", 20);
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Non-terminated string test 2");
 	goto error;
     }
@@ -1449,13 +1449,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdefghi abcdefghi ", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    C string to Fortran test 1");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdefghi\0abcdefghi\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Fortran to C string test 1");
 	goto error;
     }
@@ -1464,13 +1464,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    C string to Fortran test 2");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Fortran to C string test 2");
 	goto error;
     }
@@ -1481,13 +1481,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcd      abcd      ", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    C string to Fortran test 3");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Fortran to C string test 3");
 	goto error;
     }
@@ -1504,13 +1504,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    C buffer to Fortran test 1");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Fortran to C buffer test 1");
 	goto error;
     }
@@ -1519,13 +1519,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    C buffer to Fortran test 2");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Fortran to C buffer test 2");
 	goto error;
     }
@@ -1536,13 +1536,13 @@ test_conv_str_1(void)
     memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
     if (H5Tconvert(src_type, dst_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcd      abcd      ", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    C buffer to Fortran test 3");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, (hsize_t)2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
-	FAILED();
+	H5_FAILED();
 	puts("    Fortran to C buffer test 3");
 	goto error;
     }
@@ -1733,7 +1733,7 @@ test_conv_bitfield(void)
     buf[2] = buf[3] = 0x55; /*irrelevant*/
     if (H5Tconvert(st, dt, (hsize_t)1, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (buf[0]!=0xAA || buf[1]!=0xAA || buf[2]!=0 || buf[3]!=0) {
-	FAILED();
+	H5_FAILED();
 	printf("    s=0xaaaa, d=0x%02x%02x%02x%02x (test 1)\n",
 	       buf[3], buf[2], buf[1], buf[0]);
 	goto error;
@@ -1752,7 +1752,7 @@ test_conv_bitfield(void)
     buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
     if (H5Tconvert(st, dt, (hsize_t)1, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (buf[0]!=0 || buf[1]!=0xA8 || buf[2]!=0x2A || buf[3]!=0) {
-	FAILED();
+	H5_FAILED();
 	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 2)\n",
 	       buf[3], buf[2], buf[1], buf[0]);
 	goto error;
@@ -1766,7 +1766,7 @@ test_conv_bitfield(void)
     buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
     if (H5Tconvert(st, dt, (hsize_t)1, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (buf[0]!=0xff || buf[1]!=0xAB || buf[2]!=0xEA || buf[3]!=0xff) {
-	FAILED();
+	H5_FAILED();
 	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 3)\n",
 	       buf[3], buf[2], buf[1], buf[0]);
 	goto error;
@@ -1851,7 +1851,7 @@ test_opaque(void)
 	status = H5Tconvert(st, dt, (hsize_t)OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
-	FAILED();
+	H5_FAILED();
 	printf("    opaque conversion should have failed but succeeded\n");
 	goto error;
     }
@@ -1863,7 +1863,7 @@ test_opaque(void)
     /* Try the conversion again, this time it should work */
     if (H5Tconvert(st, dt, (hsize_t)OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (saved+1 != num_opaque_conversions_g) {
-	FAILED();
+	H5_FAILED();
 	printf("    unexpected number of opaque conversions\n");
 	goto error;
     }
@@ -1876,7 +1876,7 @@ test_opaque(void)
  error:
     if (st>0) H5Tclose(st);
     if (dt>0) H5Tclose(dt);
-    FAILED();
+    H5_FAILED();
     return 1;
 }
 
@@ -1915,7 +1915,7 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
-	FAILED();
+	H5_FAILED();
 	printf("    src: 0x80000000 unsigned\n");
 	printf("    dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
 	printf("    ans: 0xffff     unsigned\n");
@@ -1928,7 +1928,7 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
-	FAILED();
+	H5_FAILED();
 	printf("    src: 0xffffffff unsigned\n");
 	printf("    dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
 	printf("    ans: 0x7fff     signed\n");
@@ -1941,7 +1941,7 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x00) {
-	FAILED();
+	H5_FAILED();
 	printf("    src: 0xffffffff signed\n");
 	printf("    dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
 	printf("    ans: 0x0000     unsigned\n");
@@ -1955,7 +1955,7 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
-	FAILED();
+	H5_FAILED();
 	printf("    src: 0x7fffffff signed\n");
 	printf("    dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
 	printf("    ans: 0xffff     unsigned\n");
@@ -1969,7 +1969,7 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
-	FAILED();
+	H5_FAILED();
 	printf("    src: 0x7fffffff signed\n");
 	printf("    dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
 	printf("    ans: 0x7fff     signed\n");
@@ -1983,7 +1983,7 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x80) {
-	FAILED();
+	H5_FAILED();
 	printf("    src: 0xbfffffff signed\n");
 	printf("    dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
 	printf("    ans: 0x8000     signed\n");
@@ -2135,7 +2135,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	sprintf(str, "Testing random %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);
 	printf("%-70s", str);
-	FAILED();
+	H5_FAILED();
 	puts("    Unknown data type.");
 	goto error;
     }
@@ -2851,7 +2851,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    }
 
 	    /* Print errors */
-	    if (0==fails_this_test++) FAILED();
+	    if (0==fails_this_test++) H5_FAILED();
 	    printf("    test %u elmt %u\n", (unsigned)i+1, (unsigned)j);
 
 	    printf("        src = ");
@@ -3273,7 +3273,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	sprintf(str, "Testing random %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);
 	printf("%-70s", str);
-	FAILED();
+	H5_FAILED();
 	puts("    Unknown data type.");
 	goto error;
     }
@@ -3476,7 +3476,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    }
 #endif
 
-	    if (0==fails_this_test++) FAILED();
+	    if (0==fails_this_test++) H5_FAILED();
 	    printf("    test %u, elmt %u\n", (unsigned)i+1, (unsigned)j);
 	    
 	    printf("        src =");

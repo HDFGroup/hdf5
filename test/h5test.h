@@ -31,15 +31,15 @@ extern char *paraprefix;
 /*
  * The name of the test is printed by saying TESTING("something") which will
  * result in the string `Testing something' being flushed to standard output.
- * If a test passes, fails, or is skipped then the PASSED(), FAILED(), or
- * SKIPPED() macro should be called.  After FAILED() or SKIPPED() the caller
+ * If a test passes, fails, or is skipped then the PASSED(), H5_FAILED(), or
+ * SKIPPED() macro should be called.  After H5_FAILED() or SKIPPED() the caller
  * should print additional information to stdout indented by at least four
  * spaces.  If the h5_errors() is used for automatic error handling then
- * the FAILED() macro is invoked automatically when an API function fails.
+ * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)	{printf("%-70s", "Testing " WHAT); fflush(stdout);}
 #define PASSED()	{puts(" PASSED");fflush(stdout);}
-#define FAILED()	{puts("*FAILED*");fflush(stdout);}
+#define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
 
 /*
