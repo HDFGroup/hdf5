@@ -19,7 +19,7 @@
 /* Due to alignment issue in Alpha clusters, options must be declared here
  * not as a local variable in main().
  */
-options_t  options = {0,0,0,0,0,0,0,1};
+diff_opt_t  options = {0,0,0,0,0,0,0,1};
 
 static void usage(void);
 static int check_n_input( const char* );
