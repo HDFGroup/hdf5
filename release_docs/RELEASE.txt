@@ -200,6 +200,9 @@ Configuration
     * Basic port to Compaq (nee DEC) Alpha OSF 5.
     * Changed the default value of $NPROCS from 2 to 3 since 3 processes
       have a much bigger chance catching parallel errors than just 2.
+    * Fixed minor problem with configuration when users specified /usr/include
+      and /usr/lib for the --with-* options that some compilers can't handle.
+      BW - 2003/01/23
 
 
 Tools
@@ -658,4 +661,8 @@ Known Problems
 
       # How to pass a linker flag through the compiler.
       wl="-Wl,"
+
+  UPDATE: This is now done automatically by the configure script. However, if
+  you still experience a problem, you may want to check this line in the
+  libtool file and make sure that it has the correct value.
 
