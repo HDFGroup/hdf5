@@ -24,7 +24,11 @@
 #include <H5private.h>
 #include <H5Cprivate.h>		/*for hobjtype_t defn*/
 
-typedef struct {
+/* Flags to indicate special dataspace features are active */
+#define H5P_VALID_MAX   0x01
+#define H5P_VALID_PERM  0x02
+
+typedef struct H5P_sdim_t {
     uint32 rank;        /* Number of dimensions */
     uint32 dim_flags;   /* Dimension flags */
     uint32 *size;       /* Dimension sizes */

@@ -26,9 +26,14 @@
 /* Define atomic datatypes */
 #define H5P_SCALAR  MAKE_ATOM(H5_DATASPACE,0)
 
+/* Different types of dataspaces */
+#define H5P_TYPE_UNKNOWN    0 /* Dataspace is not unitialized */
+#define H5P_TYPE_SIMPLE     1 /* Dataspace is simple */
+#define H5P_TYPE_COMPLEX    2 /* Dataspace is complex */
+
 typedef struct {
-    uintn rank;
-    uint32 *dims;
+    uintn type;     /* Type of dimensionality object */
+    struct H5P_sdim_t *s;  /* Pointer to simple dimensionality information */
   } H5P_dim_t;
 
 #ifdef __cplusplus
@@ -37,6 +42,7 @@ extern "C" {
 
 /* Functions in H5P.c */
 uintn H5Pnelem(hatom_t dim_id);
+herr_t H5Pset_space(hatom_t sid, uint32 rank, uint32 *dims);
 
 #ifdef __cplusplus
 }

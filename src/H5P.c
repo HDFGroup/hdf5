@@ -35,6 +35,7 @@ static char RcsId[] = "@(#)$Revision$";
 #include <H5private.h>  /* Generic Functions */
 #include <H5Aprivate.h> /* Atom Functions */
 #include <H5Eprivate.h> /* Error handling */
+#include <H5MMprivate.h> /* Memory Management functions */
 #include <H5Pprivate.h> /* Data-space functions */
 
 #define PABLO_MASK	H5P_mask
@@ -97,8 +98,8 @@ hatom_t H5P_create(hatom_t owner_id, hobjtype_t type, const char *name)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     
     /* Initialize the dimensionality object */
-    new_dim->rank=0;
-    new_dim->dims=NULL;
+    new_dim->type=H5P_TYPE_UNKNOWN;
+    new_dim->s=NULL;
 
     /* Register the new datatype and get an ID for it */
     if((ret_value=H5Aregister_atom(H5_DATASPACE, (const VOIDP)new_dim))==FAIL)
@@ -197,6 +198,120 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Pset_space
+ PURPOSE
+    Determine the size of a dataspace
+ USAGE
+    herr_t H5Pset_space(sid, rank, dims)
+        hatom_t sid;            IN: Dataspace object to query
+        uint32 rank;            IN: # of dimensions for the dataspace
+        uint32 *dims;           IN: Size of each dimension for the dataspace
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function sets the number and size of each dimension in the
+    dataspace.  Setting RANK to a value of zero allows scalar objects to be
+    created.  Dimensions are specified from slowest to fastest changing in the
+    DIMS array (i.e. 'C' order).  Setting the size of a dimension to zero
+    indicates that the dimension is of unlimited size and should be allowed to
+    expand.  Currently, only the first dimension in the array (the slowest) may
+    be unlimited in size.
+--------------------------------------------------------------------------*/
+herr_t H5Pset_space(hatom_t sid, uint32 rank, uint32 *dims)
+{
+    H5P_dim_t *space=NULL;      /* dataspace to modify */
+    uintn u;                    /* local counting variable */
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER(H5Pset_space, H5P_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    /* Get the object */
+    if((space=H5Aatom_object(sid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    if(rank>0 && dims==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
+
+    /* shift out of the previous state to a "simple" dataspace */
+    switch(space->type)
+      {
+        case H5P_TYPE_UNKNOWN:
+            if((space->s=HDcalloc(sizeof(H5P_sdim_t),1))==NULL)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+            break;
+
+        case H5P_TYPE_SIMPLE:
+            /* do nothing */
+            break;
+
+        case H5P_TYPE_COMPLEX:
+            /* eventually this will destroy whatever "complex" dataspace info is retained, right now it's an error */
+            /* Fall through to report error */
+
+        default:
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL);
+      } /* end switch */
+    space->type=H5P_TYPE_SIMPLE;
+
+    if(rank==0)
+      { /* scalar variable */
+        space->s->rank=0;      /* set to scalar rank */
+        space->s->dim_flags=0; /* no maximum dimensions or dimension permutations */
+        if(space->s->size!=NULL)
+            space->s->size=H5MM_xfree(space->s->size);
+        if(space->s->max!=NULL)
+            space->s->max=H5MM_xfree(space->s->max);
+        if(space->s->perm!=NULL)
+            space->s->max=H5MM_xfree(space->s->perm);
+      } /* end if */
+    else 
+      {
+        /* Reset the dataspace flags */
+        space->s->dim_flags=0;
+
+        /* Free the old space for now */
+        if(space->s->size!=NULL)
+            space->s->size=H5MM_xfree(space->s->size);
+        if(space->s->max!=NULL)
+            space->s->max=H5MM_xfree(space->s->max);
+        if(space->s->perm!=NULL)
+            space->s->perm=H5MM_xfree(space->s->perm);
+
+        /* Set the rank and copy the dims */
+        space->s->rank=rank;
+        if((space->s->size=HDmalloc(sizeof(uint32)*rank))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+        HDmemcpy(space->s->size,dims,sizeof(uint32)*rank);
+
+        /* check if there are unlimited dimensions and create the maximum dims array */
+        for(u=0; u<(uintn)rank; u++)
+            if(dims[u]==0)
+              {
+                if(u>0) /* sanity check for unlimited dimensions not in the lowest dimensionality */
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+                if((space->s->max=HDmalloc(sizeof(uint32)*rank))==NULL)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+                HDmemcpy(space->s->max,dims,sizeof(uint32)*rank);
+                space->s->dim_flags|=H5P_VALID_MAX;
+                break;
+              } /* end if */
+      } /* end else */
+
+done:
+  if(ret_value == FAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Pset_space() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Pnelem
  PURPOSE
     Return the number of elements in a dataspace
@@ -213,6 +328,8 @@ done:
 --------------------------------------------------------------------------*/
 uintn H5Pnelem(hatom_t sid)
 {
+    H5P_dim_t *space=NULL;      /* dataspace to modify */
+    uintn u;                    /* local counting variable */
     uintn        ret_value = UFAIL;
 
     FUNC_ENTER(H5Pnelem, H5P_init_interface, UFAIL);
@@ -220,15 +337,28 @@ uintn H5Pnelem(hatom_t sid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
-#ifdef FINISH_THIS
-#else /* FINISH_THIS */
     if(sid==H5P_SCALAR)
         ret_value=1;
-#endif /* FINISH_THIS */
+    else
+     {
+        if((space=H5Aatom_object(sid))==NULL)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
-#ifdef LATER
+        /* Check for anything but simple dataspaces for now */
+        if(space->type!=H5P_TYPE_SIMPLE)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+        
+        /* Check for other form of scalar dataspaces */
+        if(space->s->rank==0)
+            ret_value=1;
+        else
+          {
+            for(ret_value=1, u=0; u<(uintn)space->s->rank; u++)
+                ret_value*=space->s->size[u];
+          } /* end else */
+     } /* end else */
+
 done:
-#endif /* LATER */
   if(ret_value == UFAIL)
     { /* Error condition cleanup */
 
@@ -265,8 +395,19 @@ herr_t H5P_release(hatom_t oid)
     /* Chuck the object! :-) */
     if((dim=H5Aremove_atom(oid))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-    if(dim->rank>0)
-        HDfree(dim->dims);
+    if(dim->type==H5P_TYPE_SIMPLE)
+      {
+        if(dim->s!=NULL)
+          {
+            if(dim->s->size!=NULL)
+                HDfree(dim->s->size);
+            if(dim->s->max!=NULL)
+                HDfree(dim->s->max);
+            if(dim->s->perm!=NULL)
+                HDfree(dim->s->perm);
+            HDfree(dim->s);
+          } /* end if */
+      } /* end if */
     HDfree(dim);
 
 done:
