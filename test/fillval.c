@@ -436,21 +436,12 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         /* 4. late space allocation and never write fill value */
         if ((dset4=H5Dopen(file, "dset4"))<0) goto error;
         if (H5Dget_space_status(dset4, &allocation)<0) goto error;
-#ifndef H5_HAVE_PARALLEL
         if (layout == H5D_CONTIGUOUS && allocation != H5D_SPACE_STATUS_NOT_ALLOCATED) {
             H5_FAILED();
             puts("    Got allocated space instead of unallocated.");
             printf("    Got %d\n", allocation);
             goto error;
         }
-#else
-        if (layout == H5D_CONTIGUOUS && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED) {
-            H5_FAILED();
-            printf("    %d: Got unallocated space instead of allocated.\n",__LINE__);
-            printf("    Got %d\n", allocation);
-            goto error;
-        }
-#endif
         if ((dcpl=H5Dget_create_plist(dset4))<0) goto error;
         if(H5Pget_space_time(dcpl, &alloc_time)<0) goto error;
         if(H5Pget_fill_time(dcpl, &fill_time)<0) goto error;
@@ -604,7 +595,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     hsize_t	one[5] = {1, 1, 1, 1, 1};
     hsize_t	hs_size[5], hs_stride[5];
     hssize_t	hs_offset[5], nelmts;
-    int		fillval, val_rd, should_be;
+    int		fillval=(-1), val_rd, should_be;
     int		i, j, *buf=NULL, odd;
     comp_datatype       rd_c, fill_c, should_be_c;
     comp_datatype	*buf_c=NULL;
@@ -617,6 +608,9 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
         fill_c.x=((comp_datatype*)_fillval)->x;
         fill_c.y=((comp_datatype*)_fillval)->y;
         fill_c.z=((comp_datatype*)_fillval)->z;
+    } else {
+        puts("Invalid type for test");
+        goto error;
     }
         
     /* Create dataset */

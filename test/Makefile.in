@@ -37,12 +37,12 @@ PUB_LIB=
 ## specifying a file prefix or low-level driver.  Changing the file
 ## prefix or low-level driver with environment variables will influence 
 ## the temporary file name in ways that the makefile is not aware of.
-MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
-            tfile3.h5 th5s1.h5 lheap.h5 ohdr.h5 stab1.h5 stab2.h5            \
-            extern_1.h5 extern_2.h5 extern_3.h5 extern_1a.raw extern_1b.raw  \
-            extern_2a.raw extern_2b.raw extern_3a.raw extern_3b.raw          \
-            extern_4a.raw extern_4b.raw gheap0.h5 gheap1.h5 gheap2.h5        \
-            gheap3.h5 gheap4.h5 links.h5 big.data                            \
+MOSTLYCLEAN=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5   \
+            tfile1.h5 tfile2.h5 tfile3.h5 th5s1.h5 lheap.h5 ohdr.h5 stab1.h5 \
+            stab2.h5 extern_1.h5 extern_2.h5 extern_3.h5 extern_1a.raw       \
+            extern_1b.raw extern_2a.raw extern_2b.raw extern_3a.raw          \
+            extern_3b.raw extern_4a.raw extern_4b.raw gheap0.h5 gheap1.h5    \
+            gheap2.h5 gheap3.h5 gheap4.h5 links.h5 big.data                  \
             big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5 tattr.h5   \
             tselect.h5 mtime.h5 unlink.h5 fillval_[0-9].h5 fillval.raw       \
             mount_[0-9].h5 testmeta.h5 ttime.h5 trefer[12].h5 tvltypes.h5    \

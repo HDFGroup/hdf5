@@ -128,6 +128,9 @@ typedef struct
 #define MISC8_DSETNAME5         "Dataset5"
 #define MISC8_DSETNAME6         "Dataset6"
 #define MISC8_DSETNAME7         "Dataset7"
+#define MISC8_DSETNAME8         "Dataset8"
+#define MISC8_DSETNAME9         "Dataset9"
+#define MISC8_DSETNAME10        "Dataset10"
 #define MISC8_RANK              2
 #define MISC8_DIM0              100
 #define MISC8_DIM1              100
@@ -1162,18 +1165,61 @@ test_misc8(void)
     /* Close dataset ID */
     ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
+
+    /* Set the space allocation time to incremental */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a contiguous dataset, with space allocation late */
+    did = H5Dcreate(fid, MISC8_DSETNAME3, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size before data is written */
+    storage_size=H5Dget_storage_size(did);
+    VERIFY(storage_size, 0, "H5Dget_storage_size");
+
+    /* Write data */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
 #endif /* H5_HAVE_PARALLEL */
 
     /*          II.     compact dataset tests           */
     ret = H5Pset_layout(dcpl, H5D_COMPACT);
     CHECK(ret, FAIL, "H5Pset_layout");   
 
+    /* Set the space allocation time to late */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a contiguous dataset, with space allocation late */
+    /* Should fail */
+    did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
+    VERIFY(did, FAIL, "H5Dcreate");
+
+    /* Set the space allocation time to incremental */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a contiguous dataset, with space allocation incremental */
+    /* Should fail */
+    did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
+    VERIFY(did, FAIL, "H5Dcreate");
+
     /* Set the space allocation time to early */
     ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
     CHECK(ret, FAIL, "H5Pset_space_time"); 
 
     /* Create a contiguous dataset, with space allocation early */
-    did = H5Dcreate(fid, MISC8_DSETNAME7, H5T_NATIVE_INT, sid, dcpl);
+    did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Check the storage size */
@@ -1200,7 +1246,7 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Pset_chunk"); 
 
     /* Create a chunked dataset, with space allocation early */
-    did = H5Dcreate(fid, MISC8_DSETNAME3, H5T_NATIVE_INT, sid, dcpl);
+    did = H5Dcreate(fid, MISC8_DSETNAME5, H5T_NATIVE_INT, sid, dcpl);
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Check the storage size after data is written */
@@ -1217,8 +1263,37 @@ test_misc8(void)
     ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
     CHECK(ret, FAIL, "H5Pset_space_time"); 
 
+    /* Use chunked storage for this dataset */
+    ret = H5Pset_chunk(dcpl,rank,chunk_dims);
+    CHECK(ret, FAIL, "H5Pset_chunk"); 
+
     /* Create a chunked dataset, with space allocation late */
-    did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
+    did = H5Dcreate(fid, MISC8_DSETNAME6, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size after dataset is created */
+    storage_size=H5Dget_storage_size(did);
+    VERIFY(storage_size, 0, "H5Dget_storage_size");
+
+    /* Write part of the dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Set the space allocation time to incremental */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a chunked dataset, with space allocation incremental */
+    did = H5Dcreate(fid, MISC8_DSETNAME7, H5T_NATIVE_INT, sid, dcpl);
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Check the storage size before data is written */
@@ -1274,7 +1349,7 @@ test_misc8(void)
 #endif /* end H5_HAVE_COMPRESSION */
 
     /* Create a chunked dataset, with space allocation early */
-    did = H5Dcreate(fid, MISC8_DSETNAME5, H5T_NATIVE_INT, sid, dcpl);
+    did = H5Dcreate(fid, MISC8_DSETNAME8, H5T_NATIVE_INT, sid, dcpl);
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Write part of the dataset */
@@ -1289,12 +1364,12 @@ test_misc8(void)
         num_errs++;
         printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     } 
-#else
+#else /* Compression is not configured */
     if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;                                          
-        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+        num_errs++;
+        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     }
-#endif /* end H5_HAVE_COMPRESSION */
+#endif /* H5_HAVE_COMPRESSION */
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1306,7 +1381,77 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Pset_space_time"); 
 
     /* Create a chunked dataset, with space allocation late */
-    did = H5Dcreate(fid, MISC8_DSETNAME6, H5T_NATIVE_INT, sid, dcpl);
+    did = H5Dcreate(fid, MISC8_DSETNAME9, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size before data is written */
+    storage_size=H5Dget_storage_size(did);
+    VERIFY(storage_size, 0, "H5Dget_storage_size");
+
+    /* Write part of the dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check the storage size after only four chunks are written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+#ifdef H5_HAVE_COMPRESSION
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;
+        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    } 
+#else /* Compression is not configured */
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;
+        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    }
+#endif /* H5_HAVE_COMPRESSION */
+
+    /* Write entire dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+#ifdef VERIFY_DATA
+    /* Read data */
+    ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check values written */
+    tdata=wdata;
+    tdata2=rdata;
+    for(u=0; u<MISC8_DIM0; u++)
+        for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
+            if(*tdata!=*tdata2) {
+                num_errs++;
+                printf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
+            } 
+#endif /* VERIFY_DATA */
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+#ifdef H5_HAVE_COMPRESSION
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;
+        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    } 
+#else
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;
+        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    }
+#endif /*H5_HAVE_COMPRESSION*/
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Set the space allocation time to incremental */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a chunked dataset, with space allocation incremental */
+    did = H5Dcreate(fid, MISC8_DSETNAME10, H5T_NATIVE_INT, sid, dcpl);
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Check the storage size before data is written */

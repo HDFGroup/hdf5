@@ -986,6 +986,7 @@ main(void)
 #endif
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
