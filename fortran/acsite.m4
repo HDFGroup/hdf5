@@ -61,8 +61,8 @@ if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
     [$3]=yes
   fi
 else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
+  echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD
+  cat conftest.$ac_ext >&AS_MESSAGE_LOG_FD
   [$2]=no
 fi
 rm -fr conftest*
@@ -75,8 +75,8 @@ dnl	Generic macro to setup the Fortran 9X specific env variables.
 dnl
 m4_define([AC_LANG(FORTRAN9X)],
 [ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&AC_FD_CC'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&AC_FD_CC'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&AS_MESSAGE_LOG_FD'
 cross_compiling=$ac_cv_prog_f9x_cross
 ])
 
@@ -160,7 +160,7 @@ for flags in "-fast" "-O3" "-O" "";do
       program main
       end
 EOF
-  ac_compile='${F9X-f90} -c $flag $FFLAGS conftest.$ac_ext 1>&AC_FD_CC'
+  ac_compile='${F9X-f90} -c $flag $FFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
   if AC_TRY_EVAL(ac_compile); then
     if grep 'passed to ld' conftest.out > /dev/null 2>&1; then :; else
       FFLAGS="$FFLAGS $flags"
@@ -242,7 +242,7 @@ for flag in "-I" "-M" "-p"; do
       end program conftest
 EOF
 
-  ac_compile='${F9X-f90} $FFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&AC_FD_CC'
+  ac_compile='${F9X-f90} $FFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
 
   if AC_TRY_EVAL(ac_compile); then
     F9XMODFLAG=$flag
