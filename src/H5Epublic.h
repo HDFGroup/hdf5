@@ -1,14 +1,16 @@
-/****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
- ****************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  * This file contains public declarations for the H5E module.
@@ -98,7 +100,8 @@ typedef enum H5E_major_t {
     H5E_EFL,                    /*External file list                         */
     H5E_REFERENCE,              /*References                                 */
     H5E_VFL,			/*Virtual File Layer			     */
-    H5E_TBBT 		        /*Threaded, Balanced, Binary Trees           */
+    H5E_TBBT, 		        /*Threaded, Balanced, Binary Trees           */
+    H5E_FPHDF5		        /*Flexible Parallel HDF5                     */
 } H5E_major_t;
 
 /* Declare an enumerated type which holds all the valid minor HDF error codes */
@@ -179,21 +182,26 @@ typedef enum H5E_minor_t {
     H5E_SLINK,			/*symbolic link error			     */
 
     /* Datatype conversion errors */
-    H5E_CANTCONVERT,            /*Can't convert datatypes */
-    H5E_BADSIZE,                /*Bad size for object */
+    H5E_CANTCONVERT,            /*Can't convert datatypes                    */
+    H5E_BADSIZE,                /*Bad size for object                        */
 
     /* Dataspace errors */
-    H5E_CANTCLIP,               /*Can't clip hyperslab region */
-    H5E_CANTCOUNT,              /*Can't count elements */
+    H5E_CANTCLIP,               /*Can't clip hyperslab region                */
+    H5E_CANTCOUNT,              /*Can't count elements                       */
 
     /* Property list errors */
-    H5E_CANTGET,                /*Can't get value */
-    H5E_CANTSET,                /*Can't set value */
+    H5E_CANTGET,                /*Can't get value                            */
+    H5E_CANTSET,                /*Can't set value                            */
     H5E_DUPCLASS,               /*Duplicate class name in parent class */
 
     /* Parallel errors */
     H5E_MPI,			/*some MPI function failed		     */
-    H5E_MPIERRSTR		/*MPI Error String 			     */
+    H5E_MPIERRSTR,		/*MPI Error String 			     */
+
+    /* FPHDF5 errors */
+    H5E_CANTMAKETREE,           /*can't make a TBBT tree                     */
+    H5E_CANTRECV,               /*can't receive messages from processes      */
+    H5E_CANTSENDMDATA           /*can't send metadata message                */
 } H5E_minor_t;
 
 /* Information about an error */

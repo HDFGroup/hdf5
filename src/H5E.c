@@ -1,7 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
- * Copyright (C) 1998-2001 NCSA HDF
- * 		      All rights reserved.
- *		      
  * Purpose:	Provides error handling in the form of a stack.  The
  *		FUNC_ENTER() macro clears the error stack whenever an API
  *		function is entered.  When an error is detected, an entry is
@@ -60,6 +71,7 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_REFERENCE,	"References layer"},
     {H5E_VFL,		"Virtual File Layer"},
     {H5E_TBBT,		"Threaded, Balanced, Binary Trees"},
+    {H5E_FPHDF5,	"Flexible Parallel HDF5"},
 };
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
@@ -153,7 +165,12 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 
     /* Parallel MPI errors */
     {H5E_MPI,		"Some MPI function failed"},
-    {H5E_MPIERRSTR,     "MPI Error String"}
+    {H5E_MPIERRSTR,     "MPI Error String"},
+
+    /* FPHDF5 errors */
+    {H5E_CANTMAKETREE,  "Can't create a binary tree node"},
+    {H5E_CANTRECV,      "Can't receive messages from processes"},
+    {H5E_CANTSENDMDATA, "Can't send metadata message"}
 };
 
 /* Interface initialization? */
