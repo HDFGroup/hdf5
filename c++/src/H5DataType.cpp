@@ -25,6 +25,7 @@
 #include "H5IdComponent.h"
 #include "H5Idtemplates.h"
 #include "H5PropList.h"
+#include "H5DataSpace.h"
 #include "H5Object.h"
 #include "H5DataType.h"
 #include "H5AtomType.h"
@@ -35,14 +36,31 @@
 namespace H5 {
 #endif
 
-// Constructor creates a copy of an existing DataType using its id.
-// 'predefined' is default to false; when a default datatype is 
-// created, this argument is set to true so H5Tclose will not be 
-// called on it later.
-DataType::DataType( const hid_t existing_id, bool predefined ) : H5Object( existing_id ), is_predtype( predefined ) {
-}
+//--------------------------------------------------------------------------
+// Function:    DataType overloaded constructor
+///\brief       Creates a datatype using an existing datatype's id
+///\param       existing_id - IN: Id of the existing datatype
+///\param       predefined  - IN: Indicates whether or not this datatype is
+///             a predefined datatype; default to \c false
+// Description
+//              Constructor creates a copy of an existing DataType using
+//              its id.  The argument "predefined" is default to false;
+//              when a default datatype is created, this argument is set
+//              to true so H5Tclose will not be called on it later. - need
+//              a reassessment after changing to the new ref counting mech.
+//              - BMR 5/2004
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DataType::DataType(const hid_t existing_id, bool predefined) : H5Object(existing_id), is_predtype(predefined) {}
 
-// Creates a datatype given its class and size
+//--------------------------------------------------------------------------
+// Function:    DataType overloaded constructor
+///\brief       Creates a object given its class and size
+///\param       type_class - IN: Class of datatype to create
+///\param       size       - IN: Number of bytes in the datatype to create
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object(), is_predtype( false )
 {
    // Call C routine to create the new datatype
@@ -53,18 +71,30 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object(), is
    }
 }
 
-// Default constructor
-DataType::DataType() : H5Object(), is_predtype( false )
-{
-}
+//--------------------------------------------------------------------------
+// Function:    DataType default constructor
+///\brief       Default constructor: Creates a stub datatype
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DataType::DataType() : H5Object(), is_predtype( false ) {}
 
-// Copy constructor: makes a copy of this DataType object.
-DataType::DataType( const DataType& original ) : H5Object( original  )
+//--------------------------------------------------------------------------
+// Function:    DataType copy constructor
+///\brief       Copy constructor: makes a copy of the original DataType object.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DataType::DataType(const DataType& original) : H5Object(original)
 {
    is_predtype = original.is_predtype; // copy data member from original
 }
 
-// Copies an existing datatype to this datatype object
+//--------------------------------------------------------------------------
+// Function:    DataType::copy
+///\brief       Copies an existing datatype to this datatype object
+///\param       like_type - IN: Datatype to be copied
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
    // reset the identifier of this instance, H5Tclose will be called 
@@ -87,15 +117,32 @@ void DataType::copy( const DataType& like_type )
    }
 }
 
-// Makes a copy of the type on the right hand side and stores the new
-// id in the left hand side object.  
+//--------------------------------------------------------------------------
+// Function:    DataType::operator=
+///\brief       Assignment operator
+///\param       rhs - IN: Reference to the existing datatype
+///\return      Reference to DataType instance
+///\exception   H5::DataTypeIException
+// Description
+//              Makes a copy of the type on the right hand side and stores
+//              the new id in the left hand side object.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DataType& DataType::operator=( const DataType& rhs )
 {
    copy(rhs);
    return(*this);
 }
 
-// Determines whether two datatypes refer to the same actual datatype.
+//--------------------------------------------------------------------------
+// Function:    DataType::operator==
+///\brief       Compares this DataType against the given one to determines
+///             whether the two objects refer to the same actual datatype.
+///\param       compared_type - IN: Reference to the datatype to compare
+///\return      true if the datatypes are equal, and false, otherwise.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 bool DataType::operator==(const DataType& compared_type ) const
 {
    // Call C routine H5Tequal to determines whether two datatype 
@@ -112,24 +159,16 @@ bool DataType::operator==(const DataType& compared_type ) const
    }
 }
 
-// Operates a user's function on each attribute of an object - commented
-// out because it should use the one from H5Object; need to check 
-// the parameter list???  - work in progress
-//int DataType::iterate( unsigned * idx, H5A_operator_t op, void *op_data )
-//{
-//}
-
-// Creates a new variable-length datatype - Note: should use inheritance -
-// work in progress
-//DataType DataType::vlenCreate( const DataType& base_type )
-//{
-//}
-
+//--------------------------------------------------------------------------
+// Function:    DataType::commit
+///\brief       Commits a transient datatype to a file, creating a new
+///             named datatype
+///\param       loc - IN: Either a file or a group
+///\param       name - IN: Name of the datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 // Commits a transient datatype to a file, creating a new named datatype
-void DataType::commit( H5Object& loc, const string& name ) const
-{
-   commit( loc, name.c_str() );
-}
 void DataType::commit( H5Object& loc, const char* name ) const
 {
    hid_t loc_id = loc.getId(); // get location id for C API
@@ -141,8 +180,26 @@ void DataType::commit( H5Object& loc, const char* name ) const
       throw DataTypeIException("DataType::commit", "H5Tcommit failed");
    }
 }
+//--------------------------------------------------------------------------
+// Function:    DataType::commit
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function only in the type of the
+///             argument \a name.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataType::commit( H5Object& loc, const string& name ) const
+{
+   commit( loc, name.c_str() );
+}
 
-// Determines whether a datatype is a named type or a transient type. 
+//--------------------------------------------------------------------------
+// Function:    DataType::committed
+///\brief       Determines whether a datatype is a named type or a
+///             transient type.
+///\return      true if the datatype is a named type, and false, otherwise.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 bool DataType::committed() const
 {
    // Call C function to determine if a datatype is a named one
@@ -157,7 +214,16 @@ bool DataType::committed() const
    }
 }
 
-// Finds a conversion function.
+//--------------------------------------------------------------------------
+// Function:    DataType::find
+///\brief       Finds a conversion function that can handle a conversion
+///             from this datatype to the specified datatype, \a dest.
+///\param       dest   - IN: Destination datatype
+///\param       pcdata - IN: Pointer to type conversion data
+///\return      Pointer to a suitable conversion function
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5T_conv_t DataType::find( const DataType& dest, H5T_cdata_t **pcdata ) const
 {
    // Call C routine to find the conversion function
@@ -169,7 +235,19 @@ H5T_conv_t DataType::find( const DataType& dest, H5T_cdata_t **pcdata ) const
    return( func );
 }
 
-// Converts data from between specified datatypes. 
+//--------------------------------------------------------------------------
+// Function:    DataType::convert
+///\brief       Converts data from this datatype to the specified datatypes.
+///\param       dest       - IN: Destination datatype
+///\param       nelmts     - IN: Size of array \a buf
+///\param       buf        - IN/OUT: Array containing pre- and post-conversion
+///                             values
+///\param       background - IN: Optional backgroud buffer
+///\param       plist      - IN: Dataset transfer property list
+///\return      Pointer to a suitable conversion function
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataType::convert( const DataType& dest, hsize_t nelmts, void *buf, void *background, PropList& plist ) const
 {
    // Get identifiers for C API
@@ -203,7 +281,19 @@ H5T_overflow_t DataType::getOverflow(void) const
    // NULL can be returned as well
 }
 
-// Locks a datatype. 
+//--------------------------------------------------------------------------
+// Function:    DataType::lock
+///\brief       Locks a datatype, making it read-only and non-destructible.
+///\exception   H5::DataTypeIException
+///\par Descrition
+///             This is normally done by the library for predefined data
+///             types so the application doesn't inadvertently change or
+///             delete a predefined type.
+///
+///             Once a data type is locked it can never be unlocked unless
+///             the entire library is closed.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataType::lock() const
 {
    // Call C routine to lock the datatype
@@ -214,7 +304,13 @@ void DataType::lock() const
    }
 }
 
-// Returns the datatype class identifier. 
+//--------------------------------------------------------------------------
+// Function:    DataType::getClass
+///\brief       Returns the datatype class identifier.
+///\return      Datatype class identifier
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5T_class_t DataType::getClass() const
 {
    H5T_class_t type_class = H5Tget_class( id );
@@ -228,7 +324,13 @@ H5T_class_t DataType::getClass() const
    return( type_class );
 }
 
-// Returns the size of a datatype. 
+//--------------------------------------------------------------------------
+// Function:    DataType::getSize
+///\brief       Returns the size of a datatype.
+///\return      Datatype size in bytes
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 size_t DataType::getSize() const
 {
    // Call C routine to get the datatype size
@@ -241,8 +343,13 @@ size_t DataType::getSize() const
    return( type_size );
 }
 
-// Returns the base datatype from which a datatype is derived. 
-// - just for DataType?
+//--------------------------------------------------------------------------
+// Function:    DataType::getSuper
+///\brief       Returns the base datatype from which a datatype is derived.
+///\return      DataType object
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DataType DataType::getSuper() const
 {
    // Call C routine to get the base datatype from which the specified
@@ -262,11 +369,22 @@ DataType DataType::getSuper() const
    }
 }
 
-// Registers the specified conversion function. 
-void DataType::registerFunc( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const
-{
-   registerFunc( pers, name.c_str(), dest, func );
-}
+//--------------------------------------------------------------------------
+// Function:    DataType::registerFunc
+///\brief       Registers the specified conversion function.
+///\param       pers - IN: Conversion option
+///                     \li \c H5T_PERS_HARD for hard conversion functions
+///                     \li \c H5T_PERS_SOFT for soft conversion functions.
+///\param       name - IN: Name displayed in diagnostic output.
+///\param       dest - IN: Destination datatype.
+///\param       func - IN: Function to convert between source and
+///             destination datatypes.
+///\exception   H5::DataTypeIException
+///\par Description
+///             For more information, please see:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-Register
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataType::registerFunc( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const
 {
    hid_t dest_id = dest.getId();  // get id of the destination datatype
@@ -278,12 +396,31 @@ void DataType::registerFunc( H5T_pers_t pers, const char* name, const DataType& 
       throw DataTypeIException("DataType::registerFunc", "H5Tregister failed");
    }
 }
-
-// Removes a conversion function from all conversion paths. 
-void DataType::unregister( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const
+//--------------------------------------------------------------------------
+// Function:    DataType::registerFunc
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function only in the type of the
+///             argument \a name.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataType::registerFunc( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const
 {
-   unregister( pers, name.c_str(), dest, func );
+   registerFunc( pers, name.c_str(), dest, func );
 }
+
+//--------------------------------------------------------------------------
+// Function:    DataType::unregister
+///\brief       Removes a conversion function from all conversion paths.
+///\param       pers - IN: Conversion option
+///                     \li \c H5T_PERS_HARD for hard conversion functions
+///                     \li \c H5T_PERS_SOFT for soft conversion functions.
+///\param       name - IN: Name displayed in diagnostic output.
+///\param       dest - IN: Destination datatype.
+///\param       func - IN: Function to convert between source and
+///             destination datatypes.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataType::unregister( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const
 {
    hid_t dest_id = dest.getId();  // get id of the dest datatype for C API
@@ -295,12 +432,26 @@ void DataType::unregister( H5T_pers_t pers, const char* name, const DataType& de
       throw DataTypeIException("DataType::unregister", "H5Tunregister failed");
    }
 }
-
-// Tags an opaque datatype. 
-void DataType::setTag( const string& tag ) const
+//--------------------------------------------------------------------------
+// Function:    DataType::unregister
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function only in the type of the
+///             argument \a name.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataType::unregister( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const
 {
-   setTag( tag.c_str());
+   unregister( pers, name.c_str(), dest, func );
 }
+
+//--------------------------------------------------------------------------
+// Function:    DataType::setTag
+///\brief       Tags an opaque datatype.
+///\param       tag - IN: Descriptive ASCII string with which the opaque
+///             datatype is to be tagged.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataType::setTag( const char* tag ) const
 {
    // Call C routine H5Tset_tag to tag an opaque datatype. 
@@ -310,8 +461,25 @@ void DataType::setTag( const char* tag ) const
       throw DataTypeIException("DataType::setTag", "H5Tset_tag failed");
    }
 }
+//--------------------------------------------------------------------------
+// Function:    DataType::setTag
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function only in the type of the
+///             argument \a name.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataType::setTag( const string& tag ) const
+{
+   setTag( tag.c_str());
+}
 
-// Gets the tag associated with an opaque datatype. 
+//--------------------------------------------------------------------------
+// Function:    DataType::getTag
+///\brief       Gets the tag associated with an opaque datatype.
+///\return      Tag associated with the opaque datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 string DataType::getTag() const
 {
    char* tag_Cstr = H5Tget_tag( id );
@@ -331,6 +499,118 @@ string DataType::getTag() const
    }
 }
 
+//--------------------------------------------------------------------------
+// Function:	DataType::detectClass
+///\brief	Checks whether a datatype contains (or is) a certain type of
+///		datatype.
+///\return	true if this datatype contains or is the specified type, 
+///		and false, otherwise.
+///\exception   H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+bool DataType::detectClass(H5T_class_t cls) const
+{
+   htri_t ret_value = H5Tdetect_class(id, cls);
+   if( ret_value > 0 )
+      return true;
+   else if( ret_value == 0 )
+      return false;
+   else
+   {
+      throw DataTypeIException("DataType::detectClass", 
+		"H5Tdetect_class returns negative value");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::isVariableStr
+///\brief	Check whether this datatype is a variable-length string.
+///\return	true if this datatype is a variable-length string, and 
+///		false, otherwise.
+///\exception   H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+bool DataType::isVariableStr() const
+{
+   htri_t is_varlen_str = H5Tis_variable_str(id);
+   if( is_varlen_str == 1 )
+      return true;
+   else if( is_varlen_str == 0 )
+      return false;
+   else
+   {
+      throw DataTypeIException("DataType::isVariableStr",
+                "H5Tis_variable_str returns negative value");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::Reference
+///\brief	Creates a reference to an HDF5 object or a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\param	dataspace - IN: Dataspace with selection
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\return	A reference
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   return(p_reference(name, dataspace.getId(), ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it only creates
+///		a reference to an HDF5 object, not to a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\return	A reference
+///\exception	H5::ReferenceIException
+///\par Description
+//		This function passes H5R_OBJECT and -1 to the protected 
+//		function for it to pass to the C API H5Rcreate
+//		to create a reference to the named object.
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* DataType::Reference(const char* name) const
+{
+   return(p_reference(name, -1, H5R_OBJECT));
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::getObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param		ref      - IN: Reference to query
+///\param		ref_type - IN: Type of reference to query
+///\return	Object type, which can be one of the following:
+///			\li \c H5G_LINK Object is a symbolic link.  
+///			\li \c H5G_GROUP Object is a group.  
+///			\li \c H5G_DATASET   Object is a dataset.  
+///			\li \c H5G_TYPE Object is a named datatype 
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
+{
+   return(p_get_obj_type(ref, ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::getRegion
+///\brief	Retrieves a dataspace with the region pointed to selected.
+///\param	ref      - IN: Reference to get region of
+///\param	ref_type - IN: Type of reference to get region of - default
+///\return	DataSpace instance
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
+{
+   DataSpace dataspace(p_get_region(ref, ref_type));
+   return(dataspace);
+}
+
 // This private function calls the C API H5Tclose to close this datatype.
 // Used by H5Object::p_reset.
 void DataType::p_close() const
@@ -346,11 +626,11 @@ void DataType::p_close() const
    }
 }
 
-// The destructor of this instance calls IdComponent::reset to
-// reset its identifier - no longer true
-// Older compilers (baldric) don't support template member functions
-// and IdComponent::reset is one; so at this time, the resetId is not
-// a member function so it can be template to work around that problem.
+//--------------------------------------------------------------------------
+// Function:    DataType destructor
+///\brief       Properly terminates access to this datatype.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DataType::~DataType()
 {  
    // The datatype id will be closed properly

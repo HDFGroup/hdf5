@@ -43,12 +43,45 @@ class H5_DLLCPP PropList : public IdComponent {
 	PropList& operator=( const PropList& rhs );
 
 	// Copies a property from one property list or property class to another
-	void copyProp( PropList& dest, PropList& src, const string& name);
-	void copyProp( PropList& dest, PropList& src, const char* name);
+	void copyProp( PropList& dest, PropList& src, const string& name) const;
+	void copyProp( PropList& dest, PropList& src, const char* name) const;
 
 	// Gets the class of this property list, i.e. H5P_FILE_CREATE,
 	// H5P_FILE_ACCESS, ...
 	hid_t getClass() const;
+
+	/// Query the existance of a property in a property object.
+	bool propExist(const char* name) const;
+	bool propExist(const string& name) const;
+
+	void closeClass() const;
+
+	void getProperty(const char* name, void* value) const;
+	string getProperty(const char* name) const;
+	void getProperty(const string& name, void* value) const;
+	string getProperty(const string& name) const;
+
+	size_t getPropSize(const char *name) const;
+	size_t getPropSize(const string& name) const;
+
+	string getClassName() const;
+
+	size_t getNumProps() const;
+
+	void setProperty(const char* name, void* charptr) const;
+	void setProperty(const char* name, const char* value) const;
+	void setProperty(const char* name, string& strg) const;
+	void setProperty(const string& name, void* value) const;
+	void setProperty(const string& name, string& strg) const;
+
+	bool isAClass(const PropList& prop_class) const;
+
+	void removeProp(const char *name) const;
+	void removeProp(const string& name) const;
+
+	bool operator==(const PropList& rhs) const;
+
+	PropList getClassParent() const;
 
 	// Used by the API to close the property list
 	void p_close() const;

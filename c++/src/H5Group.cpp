@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   * Copyright by the Board of Trustees of the University of Illinois.         *
-  * All rights reserved.                                                      *
-  *                                                                           *
+  * All rights reserved.				                           *
+  *				                                                *
   * This file is part of HDF5.  The full HDF5 copyright notice, including     *
   * terms governing use, modification, and redistribution, is contained in    *
   * the files COPYING and Copyright.html.  COPYING can be found at the root   *
@@ -42,23 +42,46 @@
 namespace H5 {
 #endif
 
-// Default constructor
+//--------------------------------------------------------------------------
+// Function:	Group default constructor
+///\brief	Default constructor: Creates a stub group
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::Group() : H5Object() {}
 
-// Copy constructor: makes a copy of the original Group object 
+//--------------------------------------------------------------------------
+// Function:	Group copy constructor
+///\brief	Copy constructor: makes a copy of the original Group object.
+///\param	original - IN: Original group to copy
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::Group( const Group& original ) : H5Object( original ) {}
 
-// Get id of the location, which id the group id here; used by CommonFG
-// member functions
+//--------------------------------------------------------------------------
+// Function:	Group::getLocId
+///\brief	Returns the id of this group.
+///\return	Id of this group
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hid_t Group::getLocId() const
 {
    return( getId() );
 }
 
-// Creates a copy of an existing Group using its id
+//--------------------------------------------------------------------------
+// Function:	Group overloaded constructor
+///\brief	Creates a Group object using the id of an existing group.
+///\param	group_id - IN: Id of an existing group
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 
-// Returns the number of objects in the group.
+//--------------------------------------------------------------------------
+// Function:	Group::getNumObjs
+///\brief	Returns the number of objects in this group.
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hsize_t Group::getNumObjs() const
 {
    hsize_t num_objs;
@@ -70,7 +93,14 @@ hsize_t Group::getNumObjs() const
    return (num_objs);
 }
 
-// Retrieves the name of an object in a given group by giving index
+//--------------------------------------------------------------------------
+// Function:	Group::getObjnameByIdx
+///\brief	Retrieves the name of an object in this group by giving the
+///		object's index.
+///\return	Object name
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 ssize_t Group::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
 {
    char* name_C = new char[size];
@@ -84,7 +114,14 @@ ssize_t Group::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
    return (name_len);
 }
 
-// Returns the type of an object in a given group by giving index
+//--------------------------------------------------------------------------
+// Function:	Group::getObjTypeByIdx
+///\brief	Returns the type of an object in this group by giving the
+///		object's index.
+///\return	Object type
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int Group::getObjTypeByIdx(hsize_t idx) const
 {
    int obj_type = H5Gget_objtype_by_idx(id, idx);
@@ -94,6 +131,18 @@ int Group::getObjTypeByIdx(hsize_t idx) const
    }
    return (obj_type);
 }
+
+//--------------------------------------------------------------------------
+// Function:	Group::getObjTypeByIdx
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function because it also provides
+///		the returned object type in text.
+///\param	idx - IN: Index of the object
+///\param	type_name - IN: Object type in text
+///\return	Object type
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int Group::getObjTypeByIdx(hsize_t idx, string& type_name) const
 {
    int obj_type = H5Gget_objtype_by_idx(id, idx);
@@ -111,22 +160,72 @@ int Group::getObjTypeByIdx(hsize_t idx, string& type_name) const
    return (obj_type);
 }
 
-// Iterates a user's function over the entries of a group.
-//int Group::iterateElems( const string& name, int *idx, H5G_iterate_t op , void *op_data )
-//{
-   //return( iterateElems( name.c_str(), idx, op, op_data ));
-//}
-//int Group::iterateElems( const char* name, int *idx, H5G_iterate_t op , void *op_data )
-//{
-   //int ret_value = H5Giterate( id, name, idx, op, op_data );
-   //if( ret_value >= 0 )
-      //return( ret_value );
-   //else  // raise exception when H5Aiterate returns a negative value
-   //{
-      //throw GroupIException("Group::iterateElems", "H5Giterate failed");
-   //}
-//}
+//--------------------------------------------------------------------------
+// Function:	Group::Reference
+///\brief	Creates a reference to an HDF5 object or a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\param	dataspace - IN: Dataspace with selection
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\return	A reference
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   return(p_reference(name, dataspace.getId(), ref_type));
+}
 
+//--------------------------------------------------------------------------
+// Function:	Group::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it only creates
+///		a reference to an HDF5 object, not to a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\return	A reference
+///\exception	H5::ReferenceIException
+///\par Description
+//		This function passes H5R_OBJECT and -1 to the protected 
+//		function for it to pass to the C API H5Rcreate
+//		to create a reference to the named object.
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* Group::Reference(const char* name) const
+{
+   return(p_reference(name, -1, H5R_OBJECT));
+}
+
+//--------------------------------------------------------------------------
+// Function:	Group::getObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param		ref      - IN: Reference to query
+///\param		ref_type - IN: Type of reference to query
+// Return	An object type, which can be one of the following:
+//			H5G_LINK Object is a symbolic link.  
+//			H5G_GROUP Object is a group.  
+//			H5G_DATASET   Object is a dataset.  
+//			H5G_TYPE Object is a named datatype 
+// Exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
+{
+   return(p_get_obj_type(ref, ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	Group::getRegion
+///\brief	Retrieves a dataspace with the region pointed to selected.
+///\param	ref      - IN: Reference to get region of
+///\param	ref_type - IN: Type of reference to get region of - default
+///\return	DataSpace instance
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
+{
+   DataSpace dataspace(p_get_region(ref, ref_type));
+   return(dataspace);
+}
 // Calls the C API H5Gclose to close this group.  Used by IdComponent::reset
 void Group::p_close() const
 {
@@ -137,7 +236,20 @@ void Group::p_close() const
    }
 }
 
-// Throw file exception
+//--------------------------------------------------------------------------
+// Function:	Group::throwException
+///\brief	Throws group exception - initially implemented for CommonFG
+///\param	func_name - Name of the function where failure occurs
+///\param	msg       - Message describing the failure
+///\exception	H5::GroupIException
+// Description
+//		This function is used in CommonFG implementation so that
+//		proper exception can be thrown for file or group.  The
+//		argument func_name is a member of CommonFG and "Group::"
+//		will be inserted to indicate the function called is an
+//		implementation of Group.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void Group::throwException(const string func_name, const string msg) const
 {
    string full_name = func_name;
@@ -145,11 +257,11 @@ void Group::throwException(const string func_name, const string msg) const
    throw GroupIException(full_name, msg);
 }
 
-// The destructor of this instance calls IdComponent::reset to
-// reset its identifier - no longer true
-// Older compilers (baldric) don't support template member functions
-// and IdComponent::reset is one; so at this time, the resetId is not
-// a member function so it can be template to work around that problem.
+//--------------------------------------------------------------------------
+// Function:	Group destructor
+///\brief	Properly terminates access to this group.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::~Group()
 {  
    // The group id will be closed properly

@@ -25,145 +25,447 @@
 namespace H5 {
 #endif
 
+//--------------------------------------------------------------------------
+///\brief	Constant for default property
+//--------------------------------------------------------------------------
 const FileAccPropList FileAccPropList::DEFAULT( H5P_DEFAULT );
 
-// Creates a file access property list
+//--------------------------------------------------------------------------
+// Function:    Default Constructor
+///\brief       Default constructor: Creates a file access property list
+//--------------------------------------------------------------------------
 FileAccPropList::FileAccPropList() : PropList( H5P_FILE_ACCESS ) {}
 
-// Copy constructor: makes a copy of the original FileAccPropList object;
-FileAccPropList::FileAccPropList( const FileAccPropList& orig ) : PropList( orig ) {}
+//--------------------------------------------------------------------------
+// Function:    Copy Constructor
+///\brief       Copy Constructor: Makes a copy of the original
+///             FileAccPropList object
+//--------------------------------------------------------------------------
+FileAccPropList::FileAccPropList(const FileAccPropList& orig) : PropList(orig) {}
 
-/* commented out for 1.3.x, only in 1.2.x
+//--------------------------------------------------------------------------
+// Function:    FileAccPropList::setStdio
+///\brief       Modifies this property list to use the \c H5FD_STDIO driver
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
 void FileAccPropList::setStdio() const
 {
-   herr_t ret_value = H5Pset_stdio( id );
+   herr_t ret_value = H5Pset_fapl_stdio(id);
    if( ret_value < 0 )
    {
-      throw PropListIException("FileAccPropList::setStdio", "H5Pset_stdio failed");
+      throw PropListIException("FileAccPropList::setStdio", "H5Pset_fapl_stdio failed");
    }
 }
 
-bool FileAccPropList::getStdio() const
+//--------------------------------------------------------------------------
+// Function:    FileAccPropList::getDriver
+///\brief       Return the ID of the low-level file driver.
+///\return      A low-level driver ID which is the same ID used when the
+///             driver was set for the property list.  The driver ID is
+///             only valid as long as the file driver remains registered.
+///             Valid driver identifiers can be found at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-GetDriver
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+hid_t FileAccPropList::getDriver() const
 {
-   herr_t ret_value = H5Pget_stdio( id );
-   if( ret_value < 0 )
-      return( false );
-   else
-      return( true );
-}
-
-H5F_driver_t FileAccPropList::getDriver() const
-{
-   H5F_driver_t driver = H5Pget_driver( id );
-   if( driver == H5F_LOW_ERROR )
+   hid_t driver = H5Pget_driver( id );
+   if (driver < 0)
    {
       throw PropListIException("FileAccPropList::getDriver", "H5Pget_driver failed");
    }
    return( driver );
 }
 
-void FileAccPropList::setSec2() const
+//--------------------------------------------------------------------------
+// Function:    FileAccPropList::setDriver
+///\brief	Set file driver for this property list
+///\param       new_driver_id   - IN: File driver
+///\param       new_driver_info - IN: Struct containing the driver-specific properites
+///\exception   H5::PropListIException
+///\par Description
+///		For a list of valid driver identifiers, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-GetDriver
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setDriver(hid_t new_driver_id, const void *new_driver_info) const
 {
-   herr_t ret_value = H5Pset_sec2( id );
-   if( ret_value < 0 )
+   herr_t ret_value = H5Pset_driver(id, new_driver_id, new_driver_info);
+   if (ret_value < 0)
    {
-      throw PropListIException("FileAccPropList::setSec2", "H5Pset_sec2 failed");
+      throw PropListIException("FileAccPropList::setDriver", "H5Pset_driver failed");
    }
 }
 
-bool FileAccPropList::getSec2() const
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setFamilyOffset
+///\brief	Sets offset for family driver.
+///\param	offset - IN: offset value
+///\exception	H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setFamilyOffset(hsize_t offset) const
 {
-   herr_t ret_value = H5Pget_sec2( id );
-   if( ret_value < 0 )
-      return( false );
-   else
-      return( true );
-}
-
-void FileAccPropList::setCore( size_t increment ) const
-{
-   herr_t ret_value = H5Pset_core( id, increment );
-   if( ret_value < 0 )
+   herr_t ret_value = H5Pset_family_offset(id, offset);
+   if (ret_value < 0)
    {
-      throw PropListIException("FileAccPropList::setCore", "H5Pset_core failed");
+      throw PropListIException("FileAccPropList::setFamilyOffset", "H5Pset_family_offset failed");
    }
 }
 
-bool FileAccPropList::getCore( size_t& increment) const
+//--------------------------------------------------------------------------
+// Function:    FileAccPropList::getFamilyOffset
+///\brief	Get offset for family driver.
+///\return      Offset for family driver
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+hsize_t FileAccPropList::getFamilyOffset() const
 {
-   herr_t ret_value = H5Pget_core( id, &increment );
-   if( ret_value < 0 )
-      return( false );
-   else
-      return( true );
+   hsize_t offset;
+   herr_t ret_value = H5Pget_family_offset(id, &offset);
+   if (ret_value < 0)
+   {
+      throw PropListIException("FileAccPropList::getFamilyOffset", "H5Pget_family_offset failed");
+   }
+   return(offset);
 }
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setCore
+///\brief	Modifies this file access property list to use the \c H5FD_CORE
+///		driver.
+///\param	increment - IN: Specifies how much memory to increase each 
+///				time more memory is needed, in bytes
+///\param	backing_store - IN: Indicating whether to write the file 
+///				contents to disk when the file is closed
+///\exception   H5::PropListIException
+///\par Description
+///		For more details on the use of \c H5FD_CORE driver, please 
+///		refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplCore
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setCore (size_t increment, hbool_t backing_store) const
+{
+   herr_t ret_value = H5Pset_fapl_core (id, increment, backing_store);
+   if (ret_value < 0)
+   {
+      throw PropListIException ("FileAccPropList::setCore", "H5Pset_fapl_core failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getCore
+///\brief	Queries core file driver properties.
+///\param	increment - OUT: Size of memory increment, in bytes
+///\param	backing_store - OUT: Indicating whether to write the file 
+///				contents to disk when the file is closed
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::getCore (size_t& increment, hbool_t& backing_store) const
+{
+   herr_t ret_value = H5Pget_fapl_core(id, &increment, &backing_store);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::getCore", "H5Pget_fapl_core failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setFamily
+///\brief	Sets this file access property list to use the family driver.
+///\param	memb_size  - IN: Size in bytes of each file member
+///\param	memb_plist - IN: File access property list to be used for
+///					each family member
+///\exception   H5::PropListIException
+///\par Description
+///		Note that \a memb_size is used only when creating a new file.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
 void FileAccPropList::setFamily( hsize_t memb_size, const FileAccPropList& memb_plist ) const
 {
-   herr_t ret_value = H5Pset_family( id, memb_size, memb_plist.getId() );
+   herr_t ret_value = H5Pset_fapl_family (id, memb_size, memb_plist.getId() );
    if( ret_value < 0 )
    {
-      throw PropListIException("FileAccPropList::setFamily", "H5Pset_family failed");
+      throw PropListIException("FileAccPropList::setFamily", "H5Pset_fapl_family failed");
    }
 }
 
-//Note: working on this return value here.  added copy constructor
-//that uses PropList copy const. but din't work
-// Determines whether the file access property list is set to the family
-// driver then retrieves the family member's property list and returns
-// true or false
-bool FileAccPropList::getFamily( hsize_t& memb_size, FileAccPropList& memb_plist ) const
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getFamily
+///\brief	Returns information about the family file access property
+///		list.
+///\param	memb_size  - OUT: Size in bytes of each file member
+///\param	memb_plist - OUT: Retrieved file access property list for each
+///				  file member
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::getFamily(hsize_t& memb_size, FileAccPropList& memb_plist) const
 {
    hid_t memb_plist_id;
-   herr_t ret_value = H5Pget_family( id, &memb_size, &memb_plist_id );
+   herr_t ret_value = H5Pget_fapl_family( id, &memb_size, &memb_plist_id );
    if( ret_value < 0 )
    {
-      memb_plist.setId( 0 );
-      return( false );
+      throw PropListIException("FileAccPropList::getFamily", "H5Pget_fapl_family failed");
    }
-   else
-   {
-      memb_plist.setId( memb_plist_id );
-      return( true );
-   }
+   memb_plist.setId(memb_plist_id);
 }
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getFamily
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function only in what arguments it
+///             accepts and its return value.
+///\param	memb_size  - OUT: Size in bytes of each file member
+///\return	The file access property list for each file member
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+FileAccPropList FileAccPropList::getFamily(hsize_t& memb_size) const
+{
+   hid_t memb_plist_id;
+   herr_t ret_value = H5Pget_fapl_family( id, &memb_size, &memb_plist_id );
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::getFamily", "H5Pget_fapl_family failed");
+   }
+   FileAccPropList memb_plist(memb_plist_id);
+   return(memb_plist);
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setSplit
+///\brief	Emulates the old split file driver, which stored meta data 
+///		in one file and raw data in another file.
+///\param	meta_plist  - IN: File access plist for the metadata file
+///\param	raw_plist   - IN: File access plist for the raw data file
+///\param	meta_ext    - IN: Metadata filename extension as \c char*
+///\param	raw_ext     - IN: Raw data filename extension as \c char*
+///\exception   H5::PropListIException
+///\par Description
+///		Temporary - For information, please refer to:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplSplit
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
 void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, const char* meta_ext, const char* raw_ext ) const
 {
    hid_t meta_pid = meta_plist.getId();
    hid_t raw_pid = raw_plist.getId();
-   herr_t ret_value = H5Pset_split( id, meta_ext, meta_pid, raw_ext, raw_pid );
+   herr_t ret_value = H5Pset_fapl_split( id, meta_ext, meta_pid, raw_ext, raw_pid );
    if( ret_value < 0 )
-   {
-      throw PropListIException("FileAccPropList::setSplit", "H5Pset_split failed");
+{
+      throw PropListIException("FileAccPropList::setSplit", "H5Pset_fapl_split failed");
    }
 }
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setSplit
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function only in what arguments it
+///             accepts.
+///\param	meta_plist  - IN: File access plist for the metadata file
+///\param	raw_plist   - IN: File access plist for the raw data file
+///\param	meta_ext    - IN: Metadata filename extension as \c string
+///\param	raw_ext     - IN: Raw data filename extension as \c string
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
 void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, const string& meta_ext, const string& raw_ext ) const
 {
    setSplit( meta_plist, raw_plist, meta_ext.c_str(), raw_ext.c_str() );
 }
 
-void FileAccPropList::getSplit( size_t meta_ext_size, string& meta_ext, FileAccPropList& meta_plist, size_t raw_ext_size, string& raw_ext, FileAccPropList& raw_plist ) const
+#ifdef H5_HAVE_STREAM // for Stream Virtual File Driver
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getStream
+///\brief	Retrieves the streaming I/O driver settings
+///\return	The streaming I/O file access property list structure
+///		For detail on this structure, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+H5FD_stream_fapl_t FileAccPropList::getStream() const
 {
-   hid_t meta_plist_id, raw_plist_id;	// meta-data and raw-data plist ids
-   char* meta_ext_C = new char[meta_ext_size];	// meta-data extension in C
-   char* raw_ext_C = new char[raw_ext_size];	// raw-data extension in C
-   herr_t ret_value = H5Pget_split( id, meta_ext_size, meta_ext_C, 
-		&meta_plist_id, raw_ext_size, raw_ext_C, &raw_plist_id );
+   H5FD_stream_fapl_t fapl;
+   herr_t ret_value = H5Pget_fapl_stream(id, &fapl);
    if( ret_value < 0 )
    {
-      throw PropListIException("FileAccPropList::getSplit", "H5Pget_split failed");
+      throw PropListIException("FileAccPropList::getStream", "H5Pget_fapl_stream failed");
    }
-   meta_plist.setId( meta_plist_id );
-   raw_plist.setId( raw_plist_id );
-   raw_ext = string( raw_ext_C );
-   meta_ext = string( raw_ext_C );
-   delete [] raw_ext_C;
-   delete [] meta_ext_C;
+   return(fapl);
 }
-*/
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setStream
+///\brief	Modifies this file access property list to use the Stream
+///		driver.
+///\param	fapl - IN: The streaming I/O file access property list
+///\exception   H5::PropListIException
+///\par Description
+///		For detail on \a fapl, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setStream(H5FD_stream_fapl_t &fapl) const
+{
+   herr_t ret_value = H5Pset_fapl_stream (id, &fapl);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::setStream", "H5Pset_fapl_stream failed");
+   }
+}
+#endif // Stream Virtual File Driver
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getSieveBufSize
+///\brief	Returns the current settings for the data sieve buffer size
+///		property from this property list.
+///\return	Data sieve buffer size, in bytes
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+size_t FileAccPropList::getSieveBufSize() const
+{
+   size_t bufsize;
+   herr_t ret_value = H5Pget_sieve_buf_size(id, &bufsize);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::getSieveBufSize", "H5Pget_sieve_buf_size failed");
+   }
+   return(bufsize);
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setSieveBufSize
+///\brief	Sets the maximum size of the data sieve buffer.
+///\param	bufsize - IN: Maximum size, in bytes, of data sieve buffer
+///\exception   H5::PropListIException
+///\par Description
+///		For detail on data sieving, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetSieveBufSize
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setSieveBufSize(size_t bufsize) const
+{
+   herr_t ret_value = H5Pset_sieve_buf_size(id, bufsize);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::getSieveBufSize", "H5Pget_sieve_buf_size failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setMetaBlockSize
+///\brief	Sets the minimum size of metadata block allocations.
+///\param	block_size - IN: Minimum size, in bytes, of metadata 
+///		block allocations
+///\exception   H5::PropListIException
+///\par Description
+///		For more detail, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetMetaBlockSize
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setMetaBlockSize(hsize_t &block_size) const
+{
+   herr_t ret_value = H5Pset_meta_block_size(id, block_size);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::setMetaBlockSize", "H5Pset_meta_block_size failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getMetaBlockSize
+///\brief	Returns the current metadata block size setting.
+///\return	Metadata block size
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+hsize_t FileAccPropList::getMetaBlockSize() const
+{
+   hsize_t block_size;
+   herr_t ret_value = H5Pget_meta_block_size(id, &block_size);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::getMetaBlockSize", "H5Pget_meta_block_size failed");
+   }
+   return(block_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setLog
+///\brief	Modifies this file access property list to use the logging
+///		driver.
+///\param	logfile  - IN: Name of the log file
+///\param	flags    - IN: Flags specifying the types of logging activity
+///\param	buf_size - IN: Size of the logging buffer
+///\exception   H5::PropListIException
+///\par Description
+///		For detail on \a flags, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setLog(const char *logfile, unsigned flags, size_t buf_size) const
+{
+   herr_t ret_value = H5Pset_fapl_log(id, logfile, flags, buf_size);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::setLog", "H5Pset_fapl_log failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setLog
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function only in what arguments it
+///		accepts.
+///\param	logfile  - IN: Name of the log file - string
+///\param	flags    - IN: Flags specifying the types of logging activity
+///\param	buf_size - IN: Size of the logging buffer
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setLog(const string& logfile, unsigned flags, size_t buf_size) const
+{
+   setLog(logfile.c_str(), flags, buf_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setSec2
+///\brief	Modifies this file access property list to use the sec2
+///		driver.
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setSec2() const
+{
+   herr_t ret_value = H5Pset_fapl_sec2(id);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::setSec2", "H5Pset_fapl_sec2 failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setAlignment
+///\brief	Sets the alignment properties of this property list.
+///\param	threshold - IN: Threshold value for file object size
+///\param	alignment - IN: Alignment value
+///\exception   H5::PropListIException
+///\par Description
+///		The parameter \a threshold must have a non-negative value.  
+///		Note that setting the threshold value to 0 (zero) has the 
+///		effect of a special case, forcing everything to be aligned.  
+///		The parameter \a alignment must have a positive value.
+///
+///		For detail on \a setting alignment, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetAlignment
+//--------------------------------------------------------------------------
 void FileAccPropList::setAlignment( hsize_t threshold, hsize_t alignment ) const
 {
    herr_t ret_value = H5Pset_alignment( id, threshold, alignment );
@@ -173,7 +475,15 @@ void FileAccPropList::setAlignment( hsize_t threshold, hsize_t alignment ) const
    }
 }
 
-void FileAccPropList::getAlignment( hsize_t& threshold, hsize_t& alignment ) const
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getAlignment
+///\brief	Returns the current settings for alignment properties from 
+///		this property list.
+///\param	threshold - OUT: Retrieved threshold value for file object size
+///\param	alignment - OUT: Retrieved alignment value
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
+void FileAccPropList::getAlignment( hsize_t &threshold, hsize_t &alignment ) const
 {
    herr_t ret_value = H5Pget_alignment( id, &threshold, &alignment );
    if( ret_value < 0 )
@@ -182,27 +492,62 @@ void FileAccPropList::getAlignment( hsize_t& threshold, hsize_t& alignment ) con
    }
 }
 
-/* MPI_Comm and MPI_Info not declared in serial mode so leave these
-routines out until C++ API needs to deal with parallel
-void FileAccPropList::setMpi( MPI_Comm comm, MPI_Info info ) const
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setMultiType
+///\brief	Sets data type for \c MULTI driver.
+///\param	dtype - IN: Type of data
+///\exception   H5::PropListIException
+///\par Description
+///		More details and valid values for \a dtype can be found at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetMultiType
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setMultiType(H5FD_mem_t dtype) const
 {
-   herr_t ret_value = H5Pset_mpi( id, comm, info );
+   herr_t ret_value = H5Pset_multi_type(id, dtype);
    if( ret_value < 0 )
    {
-      throw PropListIException("FileAccPropList::setMpi", "H5Pset_mpi failed");
+      throw PropListIException("FileAccPropList::setMultiType", "H5Pset_multi_type failed");
    }
 }
 
-void FileAccPropList::getMpi( MPI_Comm& comm, MPI_Info& info ) const
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getMultiType
+///\brief	Returns the data type property for \c MULTI driver.
+///\return	The data type property
+///\exception   H5::PropListIException
+///\par Description
+///		More details and possible returned values can be found at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-GetMultiType
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+H5FD_mem_t FileAccPropList::getMultiType() const
 {
-   herr_t ret_value = H5Pget_mpi( id, &comm, &info );
+   H5FD_mem_t dtype;
+   herr_t ret_value = H5Pget_multi_type(id, &dtype);
    if( ret_value < 0 )
-      return( false );
-   else
-      return( true );
+   {
+      throw PropListIException("FileAccPropList::getMultiType", "H5Pget_multi_type failed");
+   }
+   return(dtype);
 }
-*/
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setCache
+///\brief	Sets the meta data cache and raw data chunk cache parameters.
+///\param	mdc_nelmts - IN: Number of elements in the meta data cache
+///\param	rdcc_nelmts - IN: Number of elements in the raw data chunk cache
+///\param	rdcc_nbytes - IN: Total size of the raw data chunk cache, in bytes
+///\param	rdcc_w0 - IN: Preemption policy
+///\exception   H5::PropListIException
+///\par Description
+///		The argument \a rdcc_w0 should hold a value between 0 and 1 
+///		inclusive.  This value indicates how much chunks that have 
+///		been fully read are favored for preemption. A value of zero 
+///		means fully read chunks are treated no differently than other 
+///		chunks (the preemption is strictly LRU) while a value of one 
+///		means fully read chunks are always preempted before other chunks. 
+//--------------------------------------------------------------------------
 #ifdef H5_WANT_H5_V1_4_COMPAT
 void FileAccPropList::setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const
 {
@@ -213,6 +558,15 @@ void FileAccPropList::setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nby
    }
 }
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getCache
+///\brief	Queries the meta data cache and raw data chunk cache parameters.
+///\param	mdc_nelmts  - OUT: Number of elements in the meta data cache
+///\param	rdcc_nelmts - OUT: Number of elements in the raw data chunk cache
+///\param	rdcc_nbytes - OUT: Total size of the raw data chunk cache, in bytes
+///\param	rdcc_w0 - OUT: Preemption policy
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
 void FileAccPropList::getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const
 {
    herr_t ret_value = H5Pget_cache( id, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0 );
@@ -222,6 +576,22 @@ void FileAccPropList::getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_
    }
 }
 #else /* H5_WANT_H5_V1_4_COMPAT */
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setCache
+///\brief	Sets the meta data cache and raw data chunk cache parameters.
+///\param	mdc_nelmts - IN: Number of elements in the meta data cache
+///\param	rdcc_nelmts - IN: Number of elements in the raw data chunk cache
+///\param	rdcc_nbytes - IN: Total size of the raw data chunk cache, in bytes
+///\param	rdcc_w0 - IN: Preemption policy
+///\exception   H5::PropListIException
+///\par Description
+///		The argument \a rdcc_w0 should hold a value between 0 and 1 
+///		inclusive.  This value indicates how much chunks that have 
+///		been fully read are favored for preemption. A value of zero 
+///		means fully read chunks are treated no differently than other 
+///		chunks (the preemption is strictly LRU) while a value of one 
+///		means fully read chunks are always preempted before other chunks. 
+//--------------------------------------------------------------------------
 void FileAccPropList::setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const
 {
    herr_t ret_value = H5Pset_cache( id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0 );
@@ -231,6 +601,15 @@ void FileAccPropList::setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_
    }
 }
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getCache
+///\brief	Queries the meta data cache and raw data chunk cache parameters.
+///\param	mdc_nelmts  - OUT: Number of elements in the meta data cache
+///\param	rdcc_nelmts - OUT: Number of elements in the raw data chunk cache
+///\param	rdcc_nbytes - OUT: Total size of the raw data chunk cache, in bytes
+///\param	rdcc_w0 - OUT: Preemption policy
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
 void FileAccPropList::getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const
 {
    herr_t ret_value = H5Pget_cache( id, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0 );
@@ -241,6 +620,50 @@ void FileAccPropList::getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rd
 }
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setFcloseDegree
+///\brief	Sets the degree for the file close behavior.
+///\param	degree - IN: 
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void FileAccPropList::setFcloseDegree(H5F_close_degree_t degree)
+{
+   herr_t ret_value = H5Pset_fclose_degree(id, degree);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::setFcloseDegree", "H5Pset_fclose_degree failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getFcloseDegree
+///\brief	Returns the degree for the file close behavior.
+///\return	The degree for the file close behavior
+///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+H5F_close_degree_t FileAccPropList::getFcloseDegree()
+{
+   H5F_close_degree_t degree;
+   herr_t ret_value = H5Pget_fclose_degree(id, &degree);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::getFcloseDegree", "H5Pget_fclose_degree failed");
+   }
+   return(degree);
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setGcReferences
+///\brief	Sets garbage collecting references flag.
+///\param	gc_ref - IN: Flag setting reference garbage collection to 
+///				on (1) or off (0). 
+///\exception   H5::PropListIException
+///\par Description
+///		For detail on \a fapl, please refer to
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
+//--------------------------------------------------------------------------
 void FileAccPropList::setGcReferences( unsigned gc_ref ) const
 {
    herr_t ret_value = H5Pset_gc_references( id, gc_ref );
@@ -250,6 +673,12 @@ void FileAccPropList::setGcReferences( unsigned gc_ref ) const
    }
 }
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getGcReferences
+///\brief	Returns the garbage collecting references setting.
+///\return	Garbage collecting references setting, 0 (off) or 1 (on)
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
 unsigned FileAccPropList::getGcReferences() const
 {
    unsigned gc_ref;
@@ -263,6 +692,11 @@ unsigned FileAccPropList::getGcReferences() const
    return( gc_ref );
 }
 
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList destructor
+///\brief	Noop destructor
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 FileAccPropList::~FileAccPropList() {}
 
 #ifndef H5_NO_NAMESPACE

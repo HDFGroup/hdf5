@@ -30,23 +30,39 @@
 namespace H5 {
 #endif
 
+//--------------------------------------------------------------------------
+///\brief	Constant for default property
+//--------------------------------------------------------------------------
 const PropList PropList::DEFAULT( H5P_DEFAULT );
 
-// Default constructor - set id to 0 by default here but may be set
-// to a valid one, if any, by a subclass constructor.
+//--------------------------------------------------------------------------
+// Function     Default constructor
+///\brief       Default constructor - Creates a stub property list object.
+///\par Description
+///             The id of this property list is set to 0.
+//--------------------------------------------------------------------------
 PropList::PropList() : IdComponent( 0 ) {}
 
-// Copy constructor: makes a copy of the original object
+//--------------------------------------------------------------------------
+// Function:    PropList copy constructor
+///\brief       Copy constructor
+///\param       original - IN: The original property list to copy
+//--------------------------------------------------------------------------
 PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 
-/* Constructor that takes an existing property list id.
-Description:
-	Uses an HDF5 id to create a PropList identifier object.  This id
-	can be either an existing property list id or a default property
-	list id.  Design note: in the case of default property list,
-	the identifier still has reference counter; the p_close function
-	will take care of not to call H5Pclose on the default id.
-*/
+//--------------------------------------------------------------------------
+// Function:    PropList overloaded constructor
+///\brief       Creates a property list using the id of an existing property.
+///\param       plist_id - IN: Id of the existing property list
+///\exception   H5::PropListIException
+// Description
+//              This function calls H5Pcreate to create a new property list
+//              if the given id, plist_id, is that of a property class.  If
+//              the given id is equal to H5P_NO_CLASS, then set this
+//              property's id to H5P_DEFAULT, otherwise, to the given id.
+//              Note: someone else added this code without comments and this
+//              description was what I came up with from reading the code.
+//--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 {
     if (H5I_GENPROP_CLS == H5Iget_type(plist_id)) {
@@ -65,7 +81,12 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
     }
 }
 
-// Makes a copy of an existing property list 
+//--------------------------------------------------------------------------
+// Function:    PropList::copy
+///\brief       Makes a copy of an existing property list
+///\param       like_plist - IN: Reference to the existing property list
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
 {
    // reset the identifier of this PropList - send 'this' in so that
@@ -88,22 +109,29 @@ void PropList::copy( const PropList& like_plist )
    }
 }
 
-// Makes a copy of the property list on the right hand side and stores 
-// the new id in the left hand side object.
+//--------------------------------------------------------------------------
+// Function:    PropList::operator=
+///\brief       Assignment operator
+///\param       rhs - IN: Reference to the existing property list
+///
+// Description
+//              Makes a copy of the property list on the right hand side
+//              and stores the new id in the left hand side object.
+//--------------------------------------------------------------------------
 PropList& PropList::operator=( const PropList& rhs )
 {
    copy(rhs);
    return(*this);
 }
 
-// Copies a property from one list or class to another
-void PropList::copyProp( PropList& dest, PropList& src, const string& name )
-{
-   copyProp( dest, src, name.c_str());
-}
-
-// Copies a property from one list or class to another
-void PropList::copyProp( PropList& dest, PropList& src, const char *name )
+//--------------------------------------------------------------------------
+// Function:    PropList::copyProp
+///\brief       Copies a property from one list or class to another
+///\param       dest - IN: Destination property list or class
+///\param       src  - IN: Source property list or class
+///\param       name - IN: Name of the property to copy - \c char pointer
+//--------------------------------------------------------------------------
+void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
 {
    hid_t dst_id = dest.getId();
    hid_t src_id = src.getId();
@@ -112,7 +140,19 @@ void PropList::copyProp( PropList& dest, PropList& src, const char *name )
    {
       throw PropListIException("PropList::copyProp", "H5Pcopy_prop failed");
    }
-
+}
+//--------------------------------------------------------------------------
+// Function:    PropList::copyProp
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function only in what arguments it
+///             accepts.
+///\param       dest - IN: Destination property list or class
+///\param       src  - IN: Source property list or class
+///\param       name - IN: Name of the property to copy - \c std::string
+//--------------------------------------------------------------------------
+void PropList::copyProp( PropList& dest, PropList& src, const string& name ) const
+{
+   copyProp( dest, src, name.c_str());
 }
 
 // Closes the property list if it is not a default one
@@ -128,7 +168,12 @@ void PropList::p_close() const
    }
 }
 
-// Returns the class of this property list, i.e. H5P_FILE_CREATE...
+//--------------------------------------------------------------------------
+// Function:    PropList::getClass
+///\brief       Returns the class of this property list, i.e. \c H5P_FILE_CREATE...
+///\return      The property list class if it is not equal to \c H5P_NO_CLASS
+///\exception   H5::PropListIException
+//--------------------------------------------------------------------------
 hid_t PropList::getClass() const
 {
    hid_t plist_class = H5Pget_class( id );
@@ -140,8 +185,384 @@ hid_t PropList::getClass() const
    return( plist_class );
 }
 
-// The destructor of this instance calls the template resetIdComponent to
-// reset its identifier
+//--------------------------------------------------------------------------
+// Function:	PropList::propExist
+///\brief	Query the existance of a property in a property object.
+///\param	name - IN: Name of property to check for - \c char pointer
+///\return	true if the property exists in the property object, and
+///		false, otherwise.
+///\exception	H5::PropListIException
+///\par Description
+///		This routine checks if a property exists within a property 
+///		list or class.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+bool PropList::propExist(const char* name ) const
+{
+   // Calls C routine H5Pexist to determine whether a property exists 
+   // within a property list or class.  It returns a positive value, 0, 
+   // or a negative value
+   htri_t ret_value = H5Pexist(id, name);
+   if( ret_value > 0 )
+      return true;
+   else if( ret_value == 0 )
+      return false;
+   else // Raise exception when H5Pexist returns a negative value
+   {
+      throw PropListIException("PropList::propExist", "H5Pexist failed");
+   }
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::propExist
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name - IN: Name of property to check for - \c std::string
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+bool PropList::propExist(const string& name ) const
+{
+   return( propExist( name.c_str()) );
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::closeClass
+///\brief	Close a property list class.
+///\exception	H5::PropListIException
+///\par Description
+///		Releases memory and de-attaches a class from the property 
+///		list class hierarchy.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::closeClass() const
+{
+   herr_t ret_value = H5Pclose_class(id);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("PropList::closeClass", "H5Pclose_class failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::getProperty
+///\brief	Query the value of a property in a property list.
+///\param	name -   IN: Name of property to query - \c char pointer
+///\param	value - OUT: Pointer to the buffer for the property value
+///\exception	H5::PropListIException
+///\par Description
+///   Retrieves a copy of the value for a property in a property list.  The
+///   property name must exist or this routine will throw an exception.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::getProperty(const char* name, void* value) const
+{
+   herr_t ret_value = H5Pget(id, name, value);
+   if (ret_value < 0)
+   {
+      throw PropListIException("PropList::getProperty", "H5Pget failed");
+   }
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::getProperty
+///\brief	This is an overloaded member function, provided for convenience.
+///   		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name -  IN: Name of property to query - \c char pointer
+///\return	The property that is a \c std::string.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+string PropList::getProperty(const char* name) const
+{
+   size_t size = getPropSize(name);
+   char* prop_strg_C = new char[size+1];  // temporary C-string for C API
+   herr_t ret_value = H5Pget(id, name, prop_strg_C); // call C API
+
+   // Throw exception if H5Pget returns failure
+   if (ret_value < 0)
+   {
+      throw PropListIException("PropList::getProperty", "H5Pget failed");
+   }
+
+   // Return propety value as a string after deleting temp C-string
+   string prop_strg = string(prop_strg_C);
+   delete prop_strg_C;
+   return (prop_strg);
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::getProperty
+///\brief	This is an overloaded member function, provided for convenience.
+///   		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name -   IN: Name of property to query - \c str::string
+///\param	value - OUT: Pointer to the buffer for the property value
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::getProperty(const string& name, void* value) const
+{
+   getProperty(name.c_str(), value);
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::getProperty
+///\brief	This is an overloaded member function, provided for convenience.
+///   		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name -  IN: Name of property to query - \c std::string
+///\return	The property that is a \c std::string.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+string PropList::getProperty(const string& name) const
+{
+   return (getProperty(name.c_str()));
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::getPropSize
+///\brief	Query the size of a property in a property list or class.
+///\param	name - IN: Name of property to query
+///\return	Size of the property
+///\exception	H5::PropListIException
+///\par Description
+///		This routine retrieves the size of a property's value 
+///		in bytes.  Zero-sized properties are allowed and the return 
+///		value will be of 0.  This function works for both property 
+///		lists and classes.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+size_t PropList::getPropSize(const char *name) const
+{
+   size_t prop_size;
+   herr_t ret_value = H5Pget_size(id, name, &prop_size);
+   if (prop_size < 0)
+   {
+      throw PropListIException("PropList::getPropSize", "H5Pget_size failed");
+   }
+   return(prop_size);
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::getPropSize
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name - IN: Name of property to query - \c std::string
+///
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+size_t PropList::getPropSize(const string& name) const
+{
+   return (getPropSize(name.c_str()));
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::getClassName
+///\brief	Return the name of a generic property list class
+///\return	A string containing the class name, if success, otherwise,
+///		a NULL string.
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+string PropList::getClassName() const
+{
+   char* temp_str;
+   temp_str = H5Pget_class_name(id);
+
+   if (temp_str != NULL)
+   {
+      string class_name = string(temp_str);
+      free(temp_str);
+      return(class_name);
+   }
+   else
+      return 0;
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::getNumProps
+///\brief	Returns the number of properties in this property list or class.
+///\return	Size of the property.
+///\exception	H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+size_t PropList::getNumProps() const
+{
+   size_t nprops;
+   herr_t ret_value = H5Pget_nprops (id, &nprops);
+   if( nprops < 0 )
+   {
+      throw PropListIException("PropList::getNumProps", "H5Pget_nprops failed");
+   }
+   return (nprops);
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::setProperty
+///\brief	Set a property's value in a property list.
+///\param	name  - IN: Name of property to set - \c char pointer
+///\param	value - IN: Void pointer to the value for the property
+///\exception	H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const char* name, void* value) const
+{
+   herr_t ret_value = H5Pset(id, name, value);
+   if (ret_value < 0)
+   {
+      throw PropListIException("PropList::setProperty", "H5Pset failed");
+   }
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::setProperty
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name    - IN: Name of property to set - \c char pointer
+///\param	charptr - IN: Char pointer to the value for the property
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const char* name, const char* charptr) const
+{
+   herr_t ret_value = H5Pset(id, name, (void*) charptr);
+   if (ret_value < 0)
+   {
+      throw PropListIException("PropList::setProperty", "H5Pset failed");
+   }
+}
+//--------------------------------------------------------------------------
+// Function:	PropList::setProperty
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name - IN: Name of property to set - \c char pointer
+///\param	strg - IN: Value for the property is a \c std::string
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const char* name, string& strg) const
+{
+   setProperty(name, strg.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::setProperty
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name  - IN: Name of property to set - \c std::string
+///\param	value - IN: Void pointer to the value for the property
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const string& name, void* value) const
+{
+   setProperty(name.c_str(), value);
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::setProperty
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name - IN: Name of property to set - \c std::string
+///\param	strg - IN: Value for the property is a \c std::string
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const string& name, string& strg) const
+{
+   setProperty(name.c_str(), strg.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::isAClass
+///\brief	Determines whether a property list is a certain class
+///\param	prop_class - IN: Property class to query
+///\return	true if the property list is a member of the property list 
+///		class, and false, otherwise.
+///\exception	H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+bool PropList::isAClass(const PropList& prop_class) const
+{
+   htri_t ret_value = H5Pisa_class(id, prop_class.getId());
+   if( ret_value > 0 )
+      return true;
+   else if( ret_value == 0 )
+      return false;
+   else // Raise exception when H5Pisa_class returns a negative value
+   {
+      throw PropListIException("PropList::isAClass", "H5Pisa_class failed");
+   }
+
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::removeProp
+///\brief	Removes a property from a property list
+///\param	name - IN: Name of property to remove - \c char pointer
+///\exception	H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::removeProp(const char *name) const
+{
+   herr_t ret_value = H5Premove(id, name);
+   if (ret_value < 0)
+   {
+      throw PropListIException("PropList::removeProp", "H5Premove failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::removeProp
+///\brief	This is an overloaded member function, provided for convenience.
+/// 		It differs from the above function only in what arguments it 
+///		accepts.
+///\param	name - IN: Name of property to remove - \c std::string
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::removeProp(const string& name) const
+{
+   removeProp(name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::operator==
+///\brief	Compares this property list or class against the given list or class.
+///\param	rhs - IN: Reference to the property list to compare
+///\return	true if the property lists or classes are equal, and 
+///		false, otherwise.
+///\exception	H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+bool PropList::operator==(const PropList& rhs) const
+{
+   htri_t ret_value = H5Pequal(id, rhs.getId());
+   if( ret_value > 0 )
+      return true;
+   else if( ret_value == 0 )
+      return false;
+   else // Raise exception when H5Pequal returns a negative value
+   {
+      throw PropListIException("PropList::operator==", "H5Pequal failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList::getClassParent
+///\brief	Returns the parent class of a generic property class
+///\return	The parent class of a property class
+///\exception	H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+PropList PropList::getClassParent() const
+{
+   hid_t class_id = H5Pget_class_parent(id);
+   if (class_id <= 0)
+   {
+      throw PropListIException("PropList::getClassParent", "H5Pget_class_parent failed");
+   }
+   PropList pclass(class_id);
+   return(pclass);
+}
+
+//--------------------------------------------------------------------------
+// Function:	PropList destructor
+///\brief	Properly terminates access to this property list.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 PropList::~PropList()
 {  
    // The property list id will be closed properly
