@@ -243,11 +243,11 @@
 
 #if SIZEOF_INT16_T>=2
 #elif SIZEOF_SHORT==2
-    typedef short int16_t
+    typedef short int16_t;
 #   undef SIZEOF_INT16_T
 #   define SIZEOF_INT16_T SIZEOF_SHORT
 #elif SIZEOF_INT>=2
-    typedef int int16_t
+    typedef int int16_t;
 #   undef SIZEOF_INT16_T
 #   define SIZEOF_INT16_T SIZEOF_INT
 #else
