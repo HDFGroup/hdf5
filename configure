@@ -1688,7 +1688,7 @@ exec 5>>./config.log
 
 
 case "$INSTALL" in
-   ../bin/install-sh)
+   ..*install-sh)
       INSTALL='\${top_srcdir}'/bin/install-sh
       ;;
 esac
