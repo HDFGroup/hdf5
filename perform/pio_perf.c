@@ -385,11 +385,13 @@ run_test(FILE *output, iotype iot, parameters parms)
     long            raw_size;
     minmax          total_mm;
     minmax         *write_mm_table;
+    minmax         *write_gross_mm_table;
     minmax         *read_mm_table;
-    minmax         *openclose_mm_table;
+    minmax         *read_gross_mm_table;
     minmax          write_mm = {0.0, 0.0, 0.0, 0};
+    minmax          write_gross_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_mm = {0.0, 0.0, 0.0, 0};
-    minmax          openclose_mm = {0.0, 0.0, 0.0, 0};
+    minmax          read_gross_mm = {0.0, 0.0, 0.0, 0};
 
     raw_size = parms.num_dsets * parms.num_elmts * sizeof(int);
     parms.io_type = iot;
@@ -411,8 +413,9 @@ run_test(FILE *output, iotype iot, parameters parms)
     MPI_Comm_size(pio_comm_g, &comm_size);
 
     write_mm_table = malloc(parms.num_iters * sizeof(minmax));
+    write_gross_mm_table = malloc(parms.num_iters * sizeof(minmax));
     read_mm_table = malloc(parms.num_iters * sizeof(minmax));
-    openclose_mm_table = malloc(parms.num_iters * sizeof(minmax));
+    read_gross_mm_table = malloc(parms.num_iters * sizeof(minmax));
 
     for (i = 0; i < parms.num_iters; ++i) {
         write_mm_table[i].min = 0.0;
@@ -420,15 +423,20 @@ run_test(FILE *output, iotype iot, parameters parms)
         write_mm_table[i].sum = 0.0;
         write_mm_table[i].num = 0;
 
+        write_gross_mm_table[i].min = 0.0;
+        write_gross_mm_table[i].max = 0.0;
+        write_gross_mm_table[i].sum = 0.0;
+        write_gross_mm_table[i].num = 0;
+
         read_mm_table[i].min = 0.0;
         read_mm_table[i].max = 0.0;
         read_mm_table[i].sum = 0.0;
         read_mm_table[i].num = 0;
 
-        openclose_mm_table[i].min = 0.0;
-        openclose_mm_table[i].max = 0.0;
-        openclose_mm_table[i].sum = 0.0;
-        openclose_mm_table[i].num = 0;
+        read_gross_mm_table[i].min = 0.0;
+        read_gross_mm_table[i].max = 0.0;
+        read_gross_mm_table[i].sum = 0.0;
+        read_gross_mm_table[i].num = 0;
     }
 
     /* call Albert's testing here */
@@ -440,7 +448,7 @@ run_test(FILE *output, iotype iot, parameters parms)
         res = do_pio(parms);
 
         /* gather all of the "write" times */
-        t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
+        t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
         MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
 
         for (j = 0; j < comm_size; ++j)
@@ -448,8 +456,17 @@ run_test(FILE *output, iotype iot, parameters parms)
 
         write_mm_table[i] = write_mm;
 
+        /* gather all of the "write" times from open to close */
+        t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
+        MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
+
+        for (j = 0; j < comm_size; ++j)
+            get_minmax(&write_gross_mm);
+
+        write_gross_mm_table[i] = write_gross_mm;
+
         /* gather all of the "read" times */
-        t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
+        t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
         MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
 
         for (j = 0; j < comm_size; ++j)
@@ -457,14 +474,14 @@ run_test(FILE *output, iotype iot, parameters parms)
 
         read_mm_table[i] = read_mm;
 
-        /* gather all of the "file open to close" times */
-        t = get_time(res.timers, HDF5_FILE_OPENCLOSE);
+        /* gather all of the "read" times from open to close */
+        t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
         MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
 
         for (j = 0; j < comm_size; ++j)
-            get_minmax(&openclose_mm);
+            get_minmax(&read_gross_mm);
 
-        openclose_mm_table[i] = openclose_mm;
+        read_gross_mm_table[i] = read_gross_mm;
     }
 
     /* accumulate and output the max, min, and average "write" times */
@@ -477,7 +494,24 @@ run_test(FILE *output, iotype iot, parameters parms)
     output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
                   total_mm.min,
                   MB_PER_SEC(raw_size, total_mm.min));
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.sum / total_mm.num,
+                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
 
+    /* accumulate and output the max, min, and average "gross write" times */
+    total_mm = accumulate_minmax_stuff(write_gross_mm_table, parms.num_iters);
+
+    print_indent(output, TAB_SPACE * 3);
+    output_report(output, "Write Open-Close (%d iteration(s)):\n", parms.num_iters);
+
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.min,
+                  MB_PER_SEC(raw_size, total_mm.min));
     print_indent(output, TAB_SPACE * 4);
     output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
                   total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
@@ -503,22 +537,27 @@ run_test(FILE *output, iotype iot, parameters parms)
                   total_mm.sum / total_mm.num,
                   MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
 
-    /* accumulate and output the max, min, and average "file open to close" times */
-    total_mm = accumulate_minmax_stuff(openclose_mm_table, parms.num_iters);
+    /* accumulate and output the max, min, and average "gross read" times */
+    total_mm = accumulate_minmax_stuff(read_gross_mm_table, parms.num_iters);
 
     print_indent(output, TAB_SPACE * 3);
-    output_report(output, "Open to Close (%d iteration(s)):\n", parms.num_iters);
+    output_report(output, "Read Open-Close (%d iteration(s)):\n", parms.num_iters);
 
     print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Minimum Time: %.2fs\n", total_mm.min);
+    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.min,
+                  MB_PER_SEC(raw_size, total_mm.min));
     print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Maximum Time: %.2fs\n", total_mm.max);
+    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
+
     print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Average Time: %.2fs\n", total_mm.sum / total_mm.num);
+    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.sum / total_mm.num,
+                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
 
     free(write_mm_table);
     free(read_mm_table);
-    free(openclose_mm_table);
     pio_time_destroy(res.timers);
     return ret_value;
 }

@@ -252,14 +252,14 @@ buf_size=MIN(1024*1024, buf_size);
         GOTOERROR(FAIL);
     }
 
-    set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
-
     for (nf = 1; nf <= nfiles; nf++) {
 	/*
 	 * Write performance measurement
 	 */
         /* Open file for write */
         char base_name[256];
+
+        MPI_Barrier(pio_comm_g);
 
         sprintf(base_name, "#pio_tmp_%u", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
@@ -286,6 +286,8 @@ fprintf(stderr, "filename=%s\n", fname);
 
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
+        MPI_Barrier(pio_comm_g);
+
 	/*
 	 * Read performance measurement
 	 */
@@ -309,10 +311,10 @@ fprintf(stderr, "filename=%s\n", fname);
 
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
+        MPI_Barrier(pio_comm_g);
+
         do_cleanupfile(iot, fname);
     }
-
-    set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
 done:
     /* clean up */

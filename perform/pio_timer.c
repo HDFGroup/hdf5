@@ -39,6 +39,10 @@ pio_time *
 pio_time_new(unsigned int type)
 {
     pio_time *pt = (pio_time *)calloc(1, sizeof(struct pio_time_));
+    register int i;
+
+    for (i = 0; i < NUM_TIMERS; ++i)
+        pt->total_time[i] = 0.0;
 
     pt->type = type;
     return pt;
