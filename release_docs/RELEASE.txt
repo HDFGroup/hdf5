@@ -1,12 +1,12 @@
-HDF5 version 1.6.2 released on Thu Feb 12 13:53:52 CST 2004
+HDF5 version 1.6.2 released on Thu Feb 12 14:18:13 CST 2004
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.1 and
-HDF5-1.6.1-post*, and contains information on the platforms tested and
-known problems in HDF5-1.6.1-post*. For more details check the HISTORY.txt
+HDF5-1.6.2, and contains information on the platforms tested and
+known problems in HDF5-1.6.2. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -394,13 +394,12 @@ Known Problems
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
+  ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
 
 * On some platforms that use Intel compilers to build HDF5 fortran library,
   compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
   complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
-
-  ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
 
 * On IA32 and IA64 systems, if you use a compiler other than GCC (such as
   Intel's ecc or icc compilers), you will need to modify the generated
