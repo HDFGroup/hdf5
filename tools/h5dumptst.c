@@ -321,43 +321,44 @@ int i, dset[5];
 
 */
 static void test_compound_dt(void) {       /* test compound data type */
-hid_t fid, group, dataset, space, space3, type, type2;
-typedef struct {
-  int a;
-  float b;
-  double c;
-} dset1_t;
-dset1_t dset1[5];
+    hid_t fid, group, dataset, space, space3, type, type2;
+    hid_t array_dt;
+    typedef struct {
+      int a;
+      float b;
+      double c;
+    } dset1_t;
+    dset1_t dset1[5];
 
-typedef struct {
-  int a;
-  float b;
-} dset2_t;
-dset2_t dset2[5];
+    typedef struct {
+      int a;
+      float b;
+    } dset2_t;
+    dset2_t dset2[5];
 
-typedef struct {
-  int a[4];
-  float b[5][6];
-} dset3_t;
-dset3_t dset3[3][6];
+    typedef struct {
+      int a[4];
+      float b[5][6];
+    } dset3_t;
+    dset3_t dset3[3][6];
 
-typedef struct {
-  int a;
-  float b;
-} dset4_t;
-dset4_t dset4[5];
+    typedef struct {
+      int a;
+      float b;
+    } dset4_t;
+    dset4_t dset4[5];
 
-typedef struct {
-  int a;
-  float b;
-} dset5_t;
-dset5_t dset5[5];
+    typedef struct {
+      int a;
+      float b;
+    } dset5_t;
+    dset5_t dset5[5];
 
-int i, j, k, l, ndims;
-size_t dim[2];
+    int i, j, k, l, ndims;
+    hsize_t dim[2];
 
-hsize_t sdim = 5;
-hsize_t dset3_dim[2];
+    hsize_t sdim = 5;
+    hsize_t dset3_dim[2];
 
   
   for (i = 0; i < (int)sdim; i++) {
@@ -414,13 +415,27 @@ hsize_t dset3_dim[2];
   /* shared data type 2 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
   type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
-  ndims = 1; dim[0] = 4;
-  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_STD_I32BE);
-  H5Tinsert_array(type2, "int_array", HOFFSET(dset3_t, a), ndims, dim, NULL, H5T_NATIVE_INT); 
-  ndims = 2; dim[0] = 5; dim[1] = 6;
-  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_IEEE_F32BE);
 
-  H5Tinsert_array(type2, "float_array", HOFFSET(dset3_t, b), ndims, dim, NULL, H5T_NATIVE_FLOAT); 
+  ndims = 1; dim[0] = 4;
+
+  array_dt=H5Tarray_create(H5T_STD_I32BE,ndims,dim,NULL);
+  H5Tinsert(type, "int_array", HOFFSET(dset3_t, a), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(H5T_NATIVE_INT,ndims,dim,NULL);
+  H5Tinsert(type2, "int_array", HOFFSET(dset3_t, a), array_dt);
+  H5Tclose(array_dt);
+
+  ndims = 2; dim[0] = 5; dim[1] = 6;
+
+  array_dt=H5Tarray_create(H5T_IEEE_F32BE,ndims,dim,NULL);
+  H5Tinsert(type, "float_array", HOFFSET(dset3_t, b), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,ndims,dim,NULL);
+  H5Tinsert(type2, "float_array", HOFFSET(dset3_t, b), array_dt);
+  H5Tclose(array_dt);
+
   H5Tcommit(fid, "type2", type);
 
 
@@ -493,42 +508,44 @@ hsize_t dset3_dim[2];
 
 */
 static void test_compound_dt2(void) {       /* test compound data type */
-hid_t fid, group, dataset, space, type, create_plist, type2;
-typedef struct {
-  int a;
-  float b;
-  double c;
-} dset1_t;
-dset1_t dset1[10];
+    hid_t fid, group, dataset, space, type, create_plist, type2;
+    hid_t array_dt;
 
-typedef struct {
-  int a;
-  float b;
-} dset2_t;
-dset2_t dset2[10];
+    typedef struct {
+      int a;
+      float b;
+      double c;
+    } dset1_t;
+    dset1_t dset1[10];
 
-typedef struct {
-  int a[4];
-  float b[5][6];
-} dset3_t;
+    typedef struct {
+      int a;
+      float b;
+    } dset2_t;
+    dset2_t dset2[10];
 
-typedef struct {
-  int a;
-  float b;
-} dset4_t;
-dset4_t dset4[10];
+    typedef struct {
+      int a[4];
+      float b[5][6];
+    } dset3_t;
 
-typedef struct {
-  int a;
-  float b;
-} dset5_t;
-dset5_t dset5[10];
+    typedef struct {
+      int a;
+      float b;
+    } dset4_t;
+    dset4_t dset4[10];
 
-int i, ndims;
-const int perm[2]={0,1};
-size_t dim[2];
+    typedef struct {
+      int a;
+      float b;
+    } dset5_t;
+    dset5_t dset5[10];
 
-hsize_t sdim, maxdim;
+    int i, ndims;
+    const int perm[2]={0,1};
+    hsize_t dim[2];
+
+    hsize_t sdim, maxdim;
 
   sdim = 10;
   for (i = 0; i < (int)sdim; i++) {
@@ -606,10 +623,17 @@ hsize_t sdim, maxdim;
 
   /* shared data type 2 */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
+
   ndims = 1; dim[0] = 4;
-  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, perm, H5T_STD_I32BE);
+  array_dt=H5Tarray_create(H5T_STD_I32BE,ndims,dim,perm);
+  H5Tinsert(type, "int_array", HOFFSET(dset3_t, a), array_dt);
+  H5Tclose(array_dt);
+
   ndims = 2; dim[0] = 5; dim[1] = 6;
-  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, perm, H5T_IEEE_F32BE);
+  array_dt=H5Tarray_create(H5T_IEEE_F32BE,ndims,dim,perm);
+  H5Tinsert(type, "float_array", HOFFSET(dset3_t, b), array_dt);
+  H5Tclose(array_dt);
+
   H5Tcommit(fid, "type2", type);
   H5Tclose(type);
 
@@ -855,26 +879,27 @@ hid_t fid, group;
 */
 
 static void test_many(void) {
-hid_t fid, group, attr, dataset, space, space2, type, create_plist, type2;
-hsize_t dims[2];
-int data[2][2], dset2[10][10], dset3[10][10];
-double d[10];
+    hid_t fid, group, attr, dataset, space, space2, type, create_plist, type2;
+    hid_t array_dt;
+    hsize_t dims[2];
+    int data[2][2], dset2[10][10], dset3[10][10];
+    double d[10];
 
-char buf[60];
-int i, j;
-int i0, i1, i2, i3;
-hsize_t sdim, maxdim;
+    char buf[60];
+    int i, j;
+    int i0, i1, i2, i3;
+    hsize_t sdim, maxdim;
 
-typedef struct {	/* compound type has members with rank > 1	*/
-  int a[2][2][2][2];	/* arrays are 2x2x2x2				*/
-  double b[2][2][2][2];
-  double c[2][2][2][2];
-} dset1_t;
-dset1_t dset1[6];
+    typedef struct {	/* compound type has members with rank > 1	*/
+      int a[2][2][2][2];	/* arrays are 2x2x2x2				*/
+      double b[2][2][2][2];
+      double c[2][2][2][2];
+    } dset1_t;
+    dset1_t dset1[6];
 
-size_t dim[4];
-int index[4] = {0,1,2,3};  /* normal indicies */
-const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
+    hsize_t dim[4];
+    int index[4] = {0,1,2,3};  /* normal indicies */
+    const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 
   fid = H5Fcreate(FILE12, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -891,15 +916,32 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
   type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
 
   dim[0] = dim[1] = dim[2] = dim[3] = 2;
-  H5Tinsert_array(type, "a_array", HOFFSET(dset1_t, a), 4, dim, perm, H5T_STD_I32BE);
-  H5Tinsert_array(type, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_IEEE_F64BE);
-  H5Tinsert_array(type, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_IEEE_F64BE);
+  array_dt=H5Tarray_create(H5T_STD_I32BE,4,dim,perm);
+  H5Tinsert(type, "a_array", HOFFSET(dset1_t, a), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(H5T_IEEE_F64BE,4,dim,perm);
+  H5Tinsert(type, "b_array", HOFFSET(dset1_t, b), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(H5T_IEEE_F64BE,4,dim,perm);
+  H5Tinsert(type, "c_array", HOFFSET(dset1_t, c), array_dt);
+  H5Tclose(array_dt);
 
   type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
 
-  H5Tinsert_array(type2, "a_array", HOFFSET(dset1_t, a), 4, dim, perm, H5T_NATIVE_INT);
-  H5Tinsert_array(type2, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_NATIVE_DOUBLE);
-  H5Tinsert_array(type2, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_NATIVE_DOUBLE);
+  array_dt=H5Tarray_create(H5T_NATIVE_INT,4,dim,perm);
+  H5Tinsert(type2, "a_array", HOFFSET(dset1_t, a), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(H5T_NATIVE_DOUBLE,4,dim,perm);
+  H5Tinsert(type2, "b_array", HOFFSET(dset1_t, b), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(H5T_NATIVE_DOUBLE,4,dim,perm);
+  H5Tinsert(type2, "c_array", HOFFSET(dset1_t, c), array_dt);
+  H5Tclose(array_dt);
+
 
   /* dset1 */
   sdim = 6;
@@ -1033,41 +1075,42 @@ hid_t type;
 }
 
 static void test_str(void) {
-hid_t fid, dataset, space, f_type, m_type, str_type, f_type2;
+    hid_t fid, dataset, space, f_type, m_type, str_type, f_type2;
+    hid_t array_dt;
 
-hsize_t dims1[] = { 3, 4};
-char string1[12][2] = {"s1","s2","s3","s4","s5","s6","s7","s8","s9",
-                       "s0","s1","s2"};
+    hsize_t dims1[] = { 3, 4};
+    char string1[12][2] = {"s1","s2","s3","s4","s5","s6","s7","s8","s9",
+                           "s0","s1","s2"};
 
-hsize_t dims2[]={20};
-char string2[20][9] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
-                    "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8", 
-                    "ab cd ef9", "ab cd ef0", "ab cd ef1", "ab cd ef2", 
-                    "ab cd ef3", "ab cd ef4", "ab cd ef5", "ab cd ef6", 
-                    "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+    hsize_t dims2[]={20};
+    char string2[20][9] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
+                        "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8", 
+                        "ab cd ef9", "ab cd ef0", "ab cd ef1", "ab cd ef2", 
+                        "ab cd ef3", "ab cd ef4", "ab cd ef5", "ab cd ef6", 
+                        "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
 
-hsize_t dims3[] = { 27};
-char string3[27][5] = {"abcd0", "abcd1", "abcd2", "abcd3", 
-                   "abcd4", "abcd5", "abcd6", "abcd7", 
-                   "abcd8", "abcd9", "abcd0", "abcd1", 
-                   "abcd2", "abcd3", "abcd4", "abcd5", 
-                   "abcd6", "abcd7", "abcd8", "abcd9", 
-                   "abcd0", "abcd1", "abcd2", "abcd3", 
-                   "abcd4", "abcd5", "abcd6"};
+    hsize_t dims3[] = { 27};
+    char string3[27][5] = {"abcd0", "abcd1", "abcd2", "abcd3", 
+                       "abcd4", "abcd5", "abcd6", "abcd7", 
+                       "abcd8", "abcd9", "abcd0", "abcd1", 
+                       "abcd2", "abcd3", "abcd4", "abcd5", 
+                       "abcd6", "abcd7", "abcd8", "abcd9", 
+                       "abcd0", "abcd1", "abcd2", "abcd3", 
+                       "abcd4", "abcd5", "abcd6"};
 
-int i, j, k, l;
+    int i, j, k, l;
 
-hsize_t dims4[] = { 3 };
-char string4[3][20] = { "s1234567890123456789", "s1234567890123456789",
-                        "s1234567890123456789"};
+    hsize_t dims4[] = { 3 };
+    char string4[3][20] = { "s1234567890123456789", "s1234567890123456789",
+                            "s1234567890123456789"};
 
-hsize_t dims5[] = { 3, 6};
-typedef struct {
-  int a[8][10];
-  char s[12][32];
-} compound_t;
-compound_t comp1[3][6];
-size_t mdims[2];
+    hsize_t dims5[] = { 3, 6};
+    typedef struct {
+      int a[8][10];
+      char s[12][32];
+    } compound_t;
+    compound_t comp1[3][6];
+    hsize_t mdims[2];
 
   fid = H5Fcreate(FILE13, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -1119,17 +1162,27 @@ size_t mdims[2];
   space = H5Screate_simple(2, dims5, NULL);
   f_type = H5Tcreate (H5T_COMPOUND, sizeof(compound_t));
   f_type2 = H5Tcreate (H5T_COMPOUND, sizeof(compound_t));
+
   mdims[0] = 8; mdims[1] = 10;
-  H5Tinsert_array(f_type, "int_array", HOFFSET(compound_t, a), 2, mdims,
-                  NULL, H5T_STD_I32BE);
-  H5Tinsert_array(f_type2, "int_array", HOFFSET(compound_t, a), 2, mdims,
-                  NULL, H5T_NATIVE_INT);
+
+  array_dt=H5Tarray_create(H5T_STD_I32BE,2,mdims,NULL);
+  H5Tinsert(f_type, "int_array", HOFFSET(compound_t, a), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(H5T_NATIVE_INT,2,mdims,NULL);
+  H5Tinsert(f_type2, "int_array", HOFFSET(compound_t, a), array_dt);
+  H5Tclose(array_dt);
+
   str_type = mkstr(32, H5T_STR_SPACEPAD);
   mdims[0] = 3; mdims[1] = 4;
-  H5Tinsert_array(f_type, "string", HOFFSET(compound_t, s), 2, mdims, 
-                  NULL, str_type);
-  H5Tinsert_array(f_type2, "string", HOFFSET(compound_t, s), 2, mdims, 
-                  NULL, str_type);
+
+  array_dt=H5Tarray_create(str_type,2,mdims,NULL);
+  H5Tinsert(f_type, "string", HOFFSET(compound_t, s), array_dt);
+  H5Tclose(array_dt);
+
+  array_dt=H5Tarray_create(str_type,2,mdims,NULL);
+  H5Tinsert(f_type2, "string", HOFFSET(compound_t, s), array_dt);
+  H5Tclose(array_dt);
 
   for (i = 0; i < 3; i++)
       for (j = 0; j < 6; j++) {
@@ -1574,14 +1627,16 @@ void test_datareg(void){
     free(drbuf);
 
 }
-void test_nestcomp(void){
+
 /*taken from Elena's compound test file*/
+void test_nestcomp(void) {
 
    /* Compound memeber of the compound datatype*/
     typedef struct cmp_t {
-	char   a;
-	float  b[2];
+        char   a;
+        float  b[2];
     } cmp_t;
+
     /* First structure  and dataset*/
     typedef struct s1_t {
 	int    a;
@@ -1589,11 +1644,11 @@ void test_nestcomp(void){
 	double c; 
         cmp_t  d; 
     } s1_t;
-  hid_t      cmp_tid;    /* Handle for the compound datatype */
-  hid_t      char_id;    /* Handle for the string datatype */
-  size_t     array_dims[] = {2};    /* Dataspace dimensions */
-  int        ndims = 1;    /* Number of dimensions in the array field */
-
+    hid_t      cmp_tid;    /* Handle for the compound datatype */
+    hid_t      char_id;    /* Handle for the string datatype */
+    hid_t      array_dt;
+    hsize_t     array_dims[] = {2};    /* Dataspace dimensions */
+    int        ndims = 1;    /* Number of dimensions in the array field */
 
     s1_t       s1[10];
     hid_t      s1_tid;     /* File datatype identifier */
@@ -1604,6 +1659,8 @@ void test_nestcomp(void){
     hsize_t    dim[] = {10};   /* Dataspace dimensions */
 
 	char datasetname[] = "ArrayOfStructures";
+
+
     /*
      * Initialize the data
      */
@@ -1637,8 +1694,10 @@ void test_nestcomp(void){
     char_id = H5Tcopy(H5T_C_S1);
     H5Tset_strpad(char_id, H5T_STR_NULLTERM);       
     H5Tinsert(cmp_tid, "char_name", HOFFSET(cmp_t, a), char_id);
-    H5Tinsert_array(cmp_tid, "array_name", HOFFSET(cmp_t, b), ndims, 
-                    array_dims, NULL, H5T_NATIVE_FLOAT);
+
+    array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,ndims,array_dims,NULL);
+    H5Tinsert(cmp_tid, "array_name", HOFFSET(cmp_t, b), array_dt);
+    H5Tclose(array_dt);
 
     s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
     H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
@@ -1666,9 +1725,6 @@ void test_nestcomp(void){
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(file);
-
-
-
 }
 
 void test_opaque(void) {

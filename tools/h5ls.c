@@ -718,9 +718,9 @@ display_cmpd_type(hid_t type, int ind)
 {
     char	*name=NULL;	/*member name				*/
     int		ndims;		/*dimensionality			*/
-    size_t	dims[8];	/*dimensions				*/
+    hsize_t	dims[H5S_MAX_RANK];	/*dimensions				*/
     size_t	size;		/*total size of type in bytes		*/
-    int		perm[8];	/*index permutation			*/
+    int		perm[H5S_MAX_RANK];	/*index permutation			*/
     hid_t	subtype;	/*member data type			*/
     int		i, j, n;	/*miscellaneous counters		*/
     
@@ -729,39 +729,47 @@ display_cmpd_type(hid_t type, int ind)
     printf("struct {");
     for (i=0; i<H5Tget_nmembers(type); i++) {
 
-	/* Name and offset */
-	name = H5Tget_member_name(type, i);
-	printf("\n%*s\"", ind+4, "");
-	n = display_string(stdout, name, FALSE);
-	printf("\"%*s +%-4lu ", MAX(0, 16-n), "",
-	       (unsigned long)H5Tget_member_offset(type, i));
-	free(name);
+        /* Name and offset */
+        name = H5Tget_member_name(type, i);
+        printf("\n%*s\"", ind+4, "");
+        n = display_string(stdout, name, FALSE);
+        printf("\"%*s +%-4lu ", MAX(0, 16-n), "",
+               (unsigned long)H5Tget_member_offset(type, i));
+        free(name);
 
-	/* Dimensions and permutation */
-	ndims = H5Tget_member_dims(type, i, dims, perm);
-	if (ndims>0) {
-	    printf("[");
-	    for (j=0; j<ndims; j++) {
-		printf("%s%lu", j?",":"", (unsigned long)(dims[j]));
-	    }
-	    printf("]");
-	    for (j=0; j<ndims; j++) {
-		if (perm[j]!=j) break;
-	    }
-	    if (j<ndims) {
-		printf("x[");
-		for (j=0; j<ndims; j++) {
-		    printf("%s%d", j?",":"", perm[j]);
-		}
-		printf("]");
-	    }
-	    printf(" ");
-	}
-	
-	/* Data type */
-	subtype = H5Tget_member_type(type, i);
-	display_type(subtype, ind+4);
-	H5Tclose(subtype);
+        /* Grab member's type */
+        subtype = H5Tget_member_type(type, i);
+
+        /* Dimensions and permutation */
+        if(H5Tget_class(subtype)==H5T_ARRAY) {
+            ndims = H5Tget_array_ndims(subtype);
+            H5Tget_array_dims(subtype, dims, perm);
+        } /* end if */
+        else
+            ndims=0;
+
+        if (ndims>0) {
+            printf("[");
+            for (j=0; j<ndims; j++)
+                printf("%s%lu", j?",":"", (unsigned long)(dims[j]));
+            printf("]");
+
+            for (j=0; j<ndims; j++)
+                if (perm[j]!=j)
+                    break;
+
+            if (j<ndims) {
+                printf("x[");
+                for (j=0; j<ndims; j++)
+                    printf("%s%d", j?",":"", perm[j]);
+                printf("]");
+            }
+            printf(" ");
+        }
+        
+        /* Data type */
+        display_type(subtype, ind+4);
+        H5Tclose(subtype);
     }
     size = H5Tget_size(type);
     printf("\n%*s} %lu byte%s",

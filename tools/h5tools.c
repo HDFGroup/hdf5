@@ -670,7 +670,8 @@ static char *
 h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	      hid_t container, hid_t type, void *vp, h5dump_context_t *ctx)
 {
-    size_t	n, offset, size, dims[H5S_MAX_RANK], nelmts, start;
+    size_t	n, offset, size, nelmts, start;
+    hsize_t	dims[H5S_MAX_RANK];
     char	*name, quote='\0';
     unsigned char *ucp_vp = (unsigned char *)vp;
     char 	*cp_vp = (char *)vp;
@@ -927,12 +928,9 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	h5dump_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
 
 	for (j = 0; j < nmembs; j++) {
-	    unsigned int i;
-	    int k;
-
-	    if (j) h5dump_str_append(str, "%s",
-				     OPT(info->cmpd_sep,
-					 ", " OPTIONAL_LINE_BREAK));
+	    if (j)
+            h5dump_str_append(str, "%s",
+				     OPT(info->cmpd_sep, ", " OPTIONAL_LINE_BREAK));
 
             /* RPM 2000-10-31
              * If the previous character is a line-feed (which is true when
@@ -956,40 +954,10 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    /* The value */
 	    offset = H5Tget_member_offset(type, j);
 	    memb = H5Tget_member_type(type, j);
-	    size = H5Tget_size(memb);
-	    ndims = H5Tget_member_dims(type, j, dims, NULL);
-	    assert(ndims>=0 && ndims<=H5S_MAX_RANK);
 
-	    for (k = 0, nelmts = 1; k < ndims; k++)
-		nelmts *= dims[k];
-			
-	    if (nelmts > 1)
-		h5dump_str_append(str, "%s", OPT(info->arr_pre, "["));
-
-	    for (i = 0; i < nelmts; i++) {
-		if (i)
-		    h5dump_str_append(str, "%s",
-				      OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
-
-		if (ndims > 0 && info->arr_linebreak && i && 0 == i % dims[ndims - 1]) {
-                    h5dump_str_append(str, "%s", "\n");
-
-                    /*need to indent some more here*/
-                    if (ctx->indent_level >= 0)
-			h5dump_str_append(str, "%s", OPT(info->line_pre, ""));
-
-                    for (x = 0; x < ctx->indent_level + 1; x++)
-                        h5dump_str_append(str,"%s",OPT(info->line_indent,""));
-		}
-
-		ctx->indent_level++;
-		h5dump_sprint(str, info, container, memb,
-			      cp_vp + offset + i * size, ctx);
-		ctx->indent_level--;
-	    }
-
-	    if (nelmts > 1)
- 		h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
+        ctx->indent_level++;
+        h5dump_sprint(str, info, container, memb, cp_vp + offset , ctx);
+        ctx->indent_level--;
 
 	    H5Tclose(memb);
 	}
@@ -1092,15 +1060,63 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
                                   sb.objno[1], sb.objno[0]);
             }
 	}
+    } else if (H5T_ARRAY==H5Tget_class(type)) {
+        int x;
+	    unsigned int i;
+	    int k;
+
+        /* Get the array's base datatype for each element */
+        memb=H5Tget_super(type);
+
+	    size = H5Tget_size(memb);
+        ndims = H5Tget_array_ndims(type);
+        H5Tget_array_dims(type, dims, NULL);
+	    assert(ndims>=1 && ndims<=H5S_MAX_RANK);
+
+        /* Calculate the number of array elements */
+	    for (k = 0, nelmts = 1; k < ndims; k++)
+            nelmts *= dims[k];
+			
+        /* Print the opening bracket */
+        h5dump_str_append(str, "%s", OPT(info->arr_pre, "["));
+
+	    for (i = 0; i < nelmts; i++) {
+            if (i)
+                h5dump_str_append(str, "%s",
+                          OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
+
+            if (info->arr_linebreak && i && 0 == i % dims[ndims - 1]) {
+                h5dump_str_append(str, "%s", "\n");
+
+                /*need to indent some more here*/
+                if (ctx->indent_level >= 0)
+                    h5dump_str_append(str, "%s", OPT(info->line_pre, ""));
+
+                for (x = 0; x < ctx->indent_level + 1; x++)
+                    h5dump_str_append(str,"%s",OPT(info->line_indent,""));
+            } /* end if */
+
+            ctx->indent_level++;
+
+            /* Dump the array element */
+            h5dump_sprint(str, info, container, memb, cp_vp + i * size, ctx);
+
+            ctx->indent_level--;
+	    } /* end for */
+
+        /* Print the closing bracket */
+ 		h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
+
+	    H5Tclose(memb);
     } else {
-	/* All other types get printed as hexadecimal */
-	unsigned int i;
+        /* All other types get printed as hexadecimal */
+        unsigned int i;
 
-	h5dump_str_append(str, "0x");
-	n = H5Tget_size(type);
+        h5dump_str_append(str, "0x");
+        n = H5Tget_size(type);
 
-	for (i = 0; i < n; i++)
-	    h5dump_str_append(str, "%02x", ((unsigned char *)vp)[i]);
+        for (i = 0; i < n; i++)
+            h5dump_str_append(str, "%02x", ((unsigned char *)vp)[i]);
     }
 	
     return h5dump_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
@@ -1642,8 +1658,11 @@ h5dump_fixtype(hid_t f_type)
     hid_t	m_type = FAIL, f_memb;
     hid_t	*memb = NULL;
     char	**name = NULL;
-    int		nmembs = 0, i, *ndims = NULL;
-    size_t	size, offset, *dims = NULL, nelmts;
+    int		nmembs = 0, i;
+    int     ndims;
+    hsize_t  dim[H5S_MAX_RANK];
+    size_t	size, offset;
+    hid_t   array_base;
     /* H5T_str_t strpad; */
 
     size = H5Tget_size(f_type);
@@ -1708,11 +1727,8 @@ h5dump_fixtype(hid_t f_type)
 	nmembs = H5Tget_nmembers(f_type);
 	memb = calloc(nmembs, sizeof(hid_t));
 	name = calloc(nmembs, sizeof(char *));
-	ndims = calloc(nmembs, sizeof(int));
-	dims = calloc(nmembs * 4, sizeof(size_t));
 	
 	for (i = 0, size = 0; i < nmembs; i++) {
-	    int j;
 
 	    /* Get the member type and fix it */
 	    f_memb = H5Tget_member_type(f_type, i);
@@ -1720,47 +1736,51 @@ h5dump_fixtype(hid_t f_type)
 	    H5Tclose(f_memb);
 
 	    if (memb[i] < 0)
-		goto done;
-
-	    /* Get the member dimensions */
-	    ndims[i] = H5Tget_member_dims(f_type, i, dims + i * 4, NULL);
-	    assert(ndims[i] >= 0 && ndims[i] <= 4);
-
-	    for (j = 0, nelmts = 1; j < ndims[i]; j++)
-		nelmts *= dims[i * 4 + j];
+            goto done;
 
 	    /* Get the member name */
 	    name[i] = H5Tget_member_name(f_type, i);
 
 	    if (name[i] == NULL)
-		goto done;
+            goto done;
 
 	    /*
 	     * Compute the new offset so each member is aligned on a byte
 	     * boundary which is the same as the member size.
 	     */
-	    size = ALIGN(size, H5Tget_size(memb[i])) +
-                         nelmts * H5Tget_size(memb[i]);
+	    size = ALIGN(size, H5Tget_size(memb[i])) + H5Tget_size(memb[i]);
 	}
 
 	m_type = H5Tcreate(H5T_COMPOUND, size);
 
 	for (i = 0, offset = 0; i < nmembs; i++) {
-	    int j;
 
-            if (offset)
-                offset = ALIGN(offset, H5Tget_size(memb[i]));
+        if (offset)
+            offset = ALIGN(offset, H5Tget_size(memb[i]));
 
-	    H5Tinsert_array(m_type, name[i], offset, ndims[i], dims + i * 4,
-			    NULL, memb[i]);
+	    H5Tinsert(m_type, name[i], offset, memb[i]);
 
-	    for (j = 0, nelmts = 1; j < ndims[i]; j++)
-		    nelmts *= dims[i * 4 + j];
-
-	    offset += nelmts * H5Tget_size(memb[i]);
+	    offset += H5Tget_size(memb[i]);
 	}
 
 	break;
+
+    case H5T_ARRAY:
+        /* Get the array information */
+        ndims=H5Tget_array_ndims(f_type);
+        H5Tget_array_dims(f_type,dim,NULL);
+
+        /* Get the array's base type and convert it to the printable version */
+        f_memb=H5Tget_super(f_type);
+	    array_base = h5dump_fixtype(f_memb);
+
+        /* Copy the array */
+        m_type=H5Tarray_create(array_base,ndims,dim,NULL);
+
+        /* Close the temporary datatypes */
+	    H5Tclose(array_base);
+	    H5Tclose(f_memb);
+        break;
 
     case H5T_ENUM:
     case H5T_REFERENCE:
@@ -1793,21 +1813,19 @@ h5dump_fixtype(hid_t f_type)
 
  done:
     /* Clean up temp buffers */
-    if (memb && name && ndims && dims) {
-	int j;
+    if (memb && name) {
+        int j;
 
-	for (j = 0; j < nmembs; j++) {
-	    if (memb[j] >= 0)
-		H5Tclose(memb[j]);
+        for (j = 0; j < nmembs; j++) {
+            if (memb[j] >= 0)
+                H5Tclose(memb[j]);
 
-	    if (name[j])
-		free(name[j]);
-	}
+            if (name[j])
+                free(name[j]);
+        }
 
-	free(memb);
-	free(name);
-	free(ndims);
-	free(dims);
+        free(memb);
+        free(name);
     }
     
     return m_type;
@@ -1895,6 +1913,22 @@ done:
 	H5Tclose(p_type);
 
     return status;
+}
+
+static
+void *vlcustom_alloc(size_t size, void *info)
+{
+    void *ret_value = NULL;
+    int *mem_used = (int *)info;
+    size_t extra = MAX(sizeof(void *), sizeof(size_t));
+
+    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+        *(size_t *)ret_value = size;
+        *mem_used += size;
+    }
+
+    ret_value = ((unsigned char *)ret_value) + extra;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -1991,6 +2025,9 @@ recheck:
     case H5T_TIME:
 	if (!bad_type)
 	    bad_type = "H5T_TIME";
+    case H5T_ARRAY:
+	if (!bad_type)
+	    bad_type = "H5T_ARRAY";
     default:
 	fprintf(stream,
 		"Dumper doesn't support %s variable length datatype at this time.\n",

@@ -26,9 +26,10 @@ int main(void)
 	hid_t cs6, cmp, fix;
 	hid_t cmp1, cmp2, cmp3;
 	hid_t plist;
+	hid_t array_dt;
 
 	hsize_t dim[2];
-	size_t cdim[4];
+	hsize_t cdim[4];
 
 	char string5[5];
 	float fok[2] = {1234., 2341.};
@@ -61,25 +62,35 @@ int main(void)
 
 	cmp = H5Tcreate(H5T_COMPOUND, sizeof(fok) + sizeof(string5) + sizeof(fnok));
 	H5Tinsert(cmp, "Awkward length", 0, cs6);
+
 	cdim[0] = sizeof(fok) / sizeof(float);
-	H5Tinsert_array(cmp, "Ok", sizeof(string5), 1, cdim, NULL, H5T_NATIVE_FLOAT);
+    array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,1,cdim,NULL);
+	H5Tinsert(cmp, "Ok", sizeof(string5), array_dt);
+    H5Tclose(array_dt);
+
 	cdim[0] = sizeof(fnok) / sizeof(float);
-	H5Tinsert_array(cmp, "Not Ok", sizeof(fok) + sizeof(string5),
-			1, cdim, NULL, H5T_NATIVE_FLOAT);
+    array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,1,cdim,NULL);
+	H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
+    H5Tclose(array_dt);
 
 	fix = h5dump_fixtype(cmp);
 
-	cdim[0] = sizeof(fok) / sizeof(float);
 	cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
-	H5Tinsert_array(cmp1, "Ok", 0, 1, cdim, NULL, H5T_NATIVE_FLOAT);
+
+	cdim[0] = sizeof(fok) / sizeof(float);
+    array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,1,cdim,NULL);
+	H5Tinsert(cmp1, "Ok", 0, array_dt);
+    H5Tclose(array_dt);
 
 	cmp2 = H5Tcreate(H5T_COMPOUND, sizeof(string5));
 	H5Tinsert(cmp2, "Awkward length", 0, cs6);
 
-	cdim[0] = sizeof(fnok) / sizeof(float);
 	cmp3 = H5Tcreate(H5T_COMPOUND, sizeof(fnok));
-	H5Tinsert_array(cmp3, "Not Ok", 0, 1, cdim, NULL,
-			H5T_NATIVE_FLOAT);
+
+	cdim[0] = sizeof(fnok) / sizeof(float);
+    array_dt=H5Tarray_create(H5T_NATIVE_FLOAT,1,cdim,NULL);
+	H5Tinsert(cmp3, "Not Ok", 0, array_dt);
+    H5Tclose(array_dt);
 
 	plist = H5Pcreate(H5P_DATASET_XFER);
 	H5Pset_preserve(plist, 1);
