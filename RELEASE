@@ -1,5 +1,8 @@
 Release information for hdf5-1.0.23a
 ------------------------------------
+		    CHANGES SINCE THE SECOND ALPHA
+
+* Strided hyperslab selections in dataspaces now working.
 
 		    CHANGES SINCE THE FIRST ALPHA
 
