@@ -65,7 +65,7 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 /*
  * Definitions for the InitTest().
  */
-#define MAXNUMOFTESTS 50
+#define MAXNUMOFTESTS 30
 extern int Index;
 typedef struct TestStruct {
 	int    NumErrors;

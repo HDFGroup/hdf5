@@ -812,7 +812,8 @@ void
 InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr)
 {
     if (Index >= MAXNUMOFTESTS) {
-        printf("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
+        printf("Too many tests added, increase MAXNUMOFTEST(%d).\n",
+		MAXNUMOFTESTS);
         exit(-1);
     }                           /* end if */
     HDstrcpy(Test[Index].Description, TheDescr);

@@ -40,7 +40,6 @@
 #include <stdarg.h>
 #include "h5test.h"
 
-#define MAXNUMOFTESTS 30
 #define HDF5_TEST_MASTER
 
 
