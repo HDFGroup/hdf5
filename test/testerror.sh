@@ -51,6 +51,7 @@ TEST() {
    expect2="$srcdir/testfiles/$1_2"
    actual="./testfiles/`basename $1`.out"
    actual_err="./testfiles/`basename $1`.err"
+   actual_ext="./testfiles/`basename $1`.ext"
    shift
 
    # Run test.
@@ -62,7 +63,9 @@ TEST() {
       cd $srcdir/testfiles
       $RUNSERIAL $TEST_ERR_BIN 
    ) >$actual 2>$actual_err
-   cat $actual_err >> $actual
+   # Extract file name, line number, version and thread IDs because they may be different
+   sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' -e 's/line [0-9]*/line (number)/' -e 's/[1-9].[0-9].[0-9]/version (number)/' $actual_err > $actual_ext
+   cat $actual_ext >> $actual
     
    if $CMP $expect1 $actual; then
       echo " PASSED"
@@ -77,7 +80,7 @@ TEST() {
 
    # Clean up output file
    if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_err
+      rm -f $actual $actual_err $actual_ext
    fi
 }
 
