@@ -246,7 +246,7 @@ int EnumType::getNmembers() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	EnumType::getMemberIndex
+// Function:	EnumType::getMemberValue
 ///\brief	Retrieves the value of a member in this enumeration datatype, 
 ///		given the member's index.
 ///\param	memb_no - IN: Index of the queried member

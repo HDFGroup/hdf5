@@ -31,19 +31,49 @@
 namespace H5 {
 #endif
 
-// Creates a new compound datatype
-CompType::CompType( size_t size ) : DataType( H5T_COMPOUND, size ) {}
-
-// Creates a compound datatype using an existing id
-CompType::CompType( const hid_t existing_id ) : DataType( existing_id ) {}
-
-// Default constructor
+//--------------------------------------------------------------------------
+// Function:	CompType default constructor
+///\brief	Default constructor: Creates a stub compound datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 CompType::CompType() : DataType() {}
 
-// Copy constructor: makes copy of the original CompType object
+//--------------------------------------------------------------------------
+// Function:	CompType copy constructor
+///\brief	Copy constructor: makes copy of the original CompType object
+///\param	original - IN: Original CompType instance
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 CompType::CompType( const CompType& original ) : DataType( original ) {}
 
-// Gets the compound datatype of the specified dataset - reimplement this
+//--------------------------------------------------------------------------
+// Function:	CompType overloaded constructor
+///\brief	Creates a CompType object using the id of an existing datatype.
+///\param	existing_id - IN: Id of an existing compound datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+CompType::CompType( const hid_t existing_id ) : DataType( existing_id ) {}
+
+//--------------------------------------------------------------------------
+// Function:	CompType overloaded constructor
+///\brief	Creates an empty compound datatype given a size, in bytes.
+///\param	size - IN: Number of bytes in the datatype to create
+///\exception	H5::DataTypeIException
+// Description
+// 		The DataType constructor calls the C API H5Tcreate to create
+// 		the compound datatype.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+CompType::CompType( size_t size ) : DataType( H5T_COMPOUND, size ) {}
+
+//--------------------------------------------------------------------------
+// Function:	CompType overloaded constructor
+///\brief	Gets the compound datatype of the specified dataset.
+///\param	dataset - IN: Dataset that this enum datatype associates with
+///\return	CompType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 CompType::CompType( const DataSet& dataset ) : DataType()
 {
    // Calls C function H5Dget_type to get the id of the datatype
@@ -56,7 +86,13 @@ CompType::CompType( const DataSet& dataset ) : DataType()
    }
 }
 
-// Retrieves the number of members in this compound datatype. 
+//--------------------------------------------------------------------------
+// Function:	CompType::getNmembers
+///\brief	Returns the number of members in this compound datatype. 
+///\return	Number of members
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int CompType::getNmembers() const
 {
    int num_members = H5Tget_nmembers( id );
@@ -68,7 +104,14 @@ int CompType::getNmembers() const
    return( num_members );
 }
 
-// Retrieves the name of a member of this compound datatype. 
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberName
+///\brief	Returns the name of a member in this compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	Name of member
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 string CompType::getMemberName( int member_num ) const
 {
     char* member_name_C = H5Tget_member_name( id, member_num );
@@ -82,20 +125,18 @@ string CompType::getMemberName( int member_num ) const
     return( member_name ); // return the member name string
 }
 
-/*-------------------------------------------------------------------------
- * Function:    getMemberIndex
- *
- * Purpose:     Returns the index of a member in a compound data type.  
- *              Members are stored in no particular order with numbers 0 
- *              through N-1, where N is the value returned by the member 
- *              function getNmembers.
- *
- * Return:      Success:	index of the member if exists.
- *              Failure:	DataTypeIException
- *
- * BMR - May 16, 2002
- *-------------------------------------------------------------------------
- */
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberIndex
+///\brief	Returns the index of a member in this compound datatype. 
+///\param	name - IN: Name of the member
+///\return	Index of member
+///\exception	H5::DataTypeIException
+///\par Description
+///		Members are stored in no particular order with numbers 0 
+///		through N-1, where N is the value returned by the member 
+///		function \c CompType::getNmembers.
+// Programmer	Binh-Minh Ribler - May 16, 2002
+//--------------------------------------------------------------------------
 int CompType::getMemberIndex(const char* name) const
 {
    int member_index = H5Tget_member_index(id, name);
@@ -111,29 +152,25 @@ int CompType::getMemberIndex(const string& name) const
    return(getMemberIndex(name.c_str()));
 }
 
-/*-------------------------------------------------------------------------
- * Function:    getMemberOffset
- *
- * Purpose:     Returns the byte offset of the beginning of a member with
- *              respect to the beginning of the compound data type datum.
- *              Members are stored in no particular order with numbers 0 
- *              through N-1, where N is the value returned by the member 
- *              function getNmembers.
- *
- * Return:      Success:        Byte offset.
- *              Failure:        Quincey: for now, 0 is not a failure
- *
- * BMR - 2000
- *-------------------------------------------------------------------------
- */
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberOffset
+///\brief	Returns the byte offset of the beginning of a member with
+///		respect to the beginning of the compound data type datum.
+///\param	member_num - IN: Zero-based index of the member
+///\return	Byte offset
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+// Description
+///		Members are stored in no particular order with numbers 0 
+///		through N-1, where N is the value returned by the member 
+///		function \c CompType::getNmembers.
+//
+//		Note that byte offset being returned as 0 doesn't indicate
+//		a failure. (According to Quincey)
+//--------------------------------------------------------------------------
 size_t CompType::getMemberOffset( int member_num ) const
 {
    size_t offset = H5Tget_member_offset( id, member_num );
-   //if( offset == 0 )
-   //{
-      //throw DataTypeIException("CompType::getMemberOffset",
-		//"H5Tget_member_offset failed");
-   //}
    return( offset );
 }
 
@@ -145,7 +182,14 @@ int CompType::getMemberDims( int member_num, size_t* dims, int* perm ) const
 		// will complain
 }
 
-// Gets the type class of the specified member.
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberClass
+///\brief	Gets the type class of the specified member.
+///\param	member_num - IN: Zero-based index of the member
+///\return	Type class of the member
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5T_class_t CompType::getMemberClass( int member_num ) const
 {
    // get the member datatype first
@@ -184,37 +228,90 @@ hid_t CompType::p_getMemberType( int member_num ) const
    }
 }
 
-// Returns the datatype of the specified member in this compound datatype. 
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberDataType
+///\brief	Returns the generic datatype of the specified member in this 
+///		compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	DataType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DataType CompType::getMemberDataType( int member_num ) const
 {
    DataType datatype( p_getMemberType( member_num )); 
    return( datatype );
 }
 
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberDataType
+///\brief	Returns the enumeration datatype of the specified member in 
+///		this compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	EnumType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 EnumType CompType::getMemberEnumType( int member_num ) const
 {
    EnumType enumtype( p_getMemberType( member_num )); 
    return( enumtype );
 }
 
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberDataType
+///\brief	Returns the compound datatype of the specified member in this 
+///		compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	CompType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 CompType CompType::getMemberCompType( int member_num ) const
 {
    CompType comptype( p_getMemberType( member_num )); 
    return( comptype );
 }
 
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberDataType
+///\brief	Returns the integer datatype of the specified member in this 
+///		compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	IntType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IntType CompType::getMemberIntType( int member_num ) const
 {
    IntType inttype( p_getMemberType( member_num )); 
    return( inttype );
 }
 
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberDataType
+///\brief	Returns the floating-point datatype of the specified member 
+///		in this compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	FloatType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 FloatType CompType::getMemberFloatType( int member_num ) const
 {
    FloatType floatype( p_getMemberType( member_num )); 
    return( floatype );
 }
 
+//--------------------------------------------------------------------------
+// Function:	CompType::getMemberDataType
+///\brief	Returns the string datatype of the specified member in this 
+///		compound datatype. 
+///\param	member_num - IN: Zero-based index of the member
+///\return	StrType instance
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 StrType CompType::getMemberStrType( int member_num ) const
 {
    StrType strtype( p_getMemberType( member_num )); 
@@ -224,6 +321,7 @@ StrType CompType::getMemberStrType( int member_num ) const
 /* old style of getMemberType - using overloads; new style above 
    returns the appropriate datatypes but has different named functions.
    In the old style, a datatype must be passed into the function.
+   May, 2004: These should be reconsidered to provide more convenience.
 // Returns the datatype of the specified member in this compound datatype. 
 // Several overloading of getMemberType are for different datatypes
 void CompType::getMemberType( int member_num, EnumType& enumtype ) const
@@ -253,7 +351,15 @@ void CompType::getMemberType( int member_num, StrType& strtype ) const
 // end of overloading of getMemberType
 */
 
-// Adds a new member to a compound datatype
+//--------------------------------------------------------------------------
+// Function:	CompType::insertMember
+///\brief	Inserts a new member to this compound datatype.
+///\param	name - IN: Name of the new member
+///\param	offset - IN: Offset in memory structure of the field to insert
+///\param	new_member - IN: New member to be inserted
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void CompType::insertMember( const string& name, size_t offset, const DataType& new_member ) const
 {
    // Convert string to C-string
@@ -270,7 +376,12 @@ void CompType::insertMember( const string& name, size_t offset, const DataType& 
    }
 }
 
-// Recursively removes padding from within a compound datatype. 
+//--------------------------------------------------------------------------
+// Function:	CompType::pack
+///\brief	Recursively removes padding from within a compound datatype. 
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void CompType::pack() const
 {
    // Calls C routine H5Tpack to remove padding
@@ -281,7 +392,11 @@ void CompType::pack() const
    }
 }
 
-// This destructor just invokes the base-class' destructor
+//--------------------------------------------------------------------------
+// Function:    CompType destructor
+///\brief       Properly terminates access to this compound datatype.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 CompType::~CompType() {}
 
 #ifndef H5_NO_NAMESPACE

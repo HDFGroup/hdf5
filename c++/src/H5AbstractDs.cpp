@@ -94,7 +94,6 @@ DataType AbstractDs::getDataType() const
    return( datatype );
 }
 
-// can be a dataset or an attribute.
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getEnumType
 ///\brief	Returns the enumeration datatype of this abstract dataset which 

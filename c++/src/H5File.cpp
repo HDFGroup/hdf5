@@ -138,6 +138,7 @@ void H5File::getFile( const char* name, unsigned int flags, const FileCreatPropL
 // Function:	Copy Constructor
 ///\brief	Copy Constructor: Makes a copy of the original
 ///		H5File object
+///\param	original - IN: H5File instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File( const H5File& original ) : IdComponent( original ) {}

@@ -32,7 +32,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	FileCreatPropList( const FileCreatPropList& orig );
 
 	// Retrieves version information for various parts of a file.
-	void getVersion( unsigned& boot, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const;
+	void getVersion( unsigned& super, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const;
 
 	// Sets the userblock size field of a file creation property list.
 	void setUserblock( hsize_t size ) const;
