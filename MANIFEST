@@ -639,4 +639,3 @@
 ./tools/testfiles/Expected/tstr.hdf
 ./tools/testfiles/Expected/tstr2.hdf
 
-./xml_dtd/HDF5-File.dtd
