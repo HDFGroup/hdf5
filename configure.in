@@ -404,7 +404,12 @@ dnl ----------------------------------------------------------------------
 dnl Check for system libraries.
 dnl
 AC_CHECK_LIB(m,ceil)
-AC_CHECK_LIB(nsl,xdr_int)	dnl ...for Solaris and hdf4
+
+if test `uname` = "SunOS"; then
+   dnl ...for Solaris and hdf4
+   AC_CHECK_LIB(nsl, xdr_int)
+fi
+
 dnl AC_CHECK_LIB(coug,main)		dnl ...for ASCI/Red
 
 dnl ----------------------------------------------------------------------
@@ -1450,8 +1455,8 @@ dnl Set some variables for general configuration information to be saved
 dnl and installed with the libraries.
 dnl
 
-dnl HDF5 version from the first line of the README file.
-H5_VERSION=`cut -d' ' -f3 $srcdir/README |head -1`
+dnl HDF5 version from the first line of the README.txt file.
+H5_VERSION=`cut -d' ' -f3 $srcdir/README.txt | head -1`
 AC_SUBST(H5_VERSION)
 
 dnl Configuration date
