@@ -86,7 +86,8 @@ static int test_simple(void)
  char    s1_label[16];                                     /* read label for DS 1 */
  char    s2_label[16];                                     /* read label for DS 2 */
  unsigned int dim;                                         /* dataset dimension index */
- int     scale_idx;     
+ int     scale_idx;                                        /* scale index */
+ int     nscales;                                          /* number of scales in DIM */
  
   
  printf("Testing API functions\n");
@@ -277,11 +278,11 @@ static int test_simple(void)
 
 
 /*-------------------------------------------------------------------------
- * test 2: has scales
+ * test 2: get number of scales
  *-------------------------------------------------------------------------
  */  
 
- TESTING2("has scales");
+ TESTING2("get number of scales");
 
 /*-------------------------------------------------------------------------
  * verify that "dset_a" has dimension scales
@@ -292,8 +293,18 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_a"))<0)
   goto out;
 
- /* verify that "dset_a" has dimension scales   */
- if ((H5DShas_scale(did))==0)
+ /* verify that "dset_a" has 1 dimension scale at DIM 0   */
+ dim=0;
+ if (H5DSget_nscales(did,dim,&nscales)<0)
+  goto out;
+ if (nscales!=1)
+  goto out;
+
+ /* verify that "dset_a" has 3 dimension scales at DIM 1   */
+ dim=1;
+ if (H5DSget_nscales(did,dim,&nscales)<0)
+  goto out;
+ if (nscales!=3)
   goto out;
 
  /* close dataset ID of "dset_a" */
@@ -310,8 +321,18 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_b"))<0)
   goto out;
 
- /* verify that "dset_b" does not have a complete definition of dimension scales   */
- if ((H5DShas_scale(did))==1)
+ /* verify that "dset_b" has 1 dimension scale at DIM 0   */
+ dim=0;
+ if (H5DSget_nscales(did,dim,&nscales)<0)
+  goto out;
+ if (nscales!=1)
+  goto out;
+
+ /* verify that "dset_b" has 0 dimension scales at DIM 1   */
+ dim=1;
+ if (H5DSget_nscales(did,dim,&nscales)<0)
+  goto out;
+ if (nscales!=0)
   goto out;
 
  /* close dataset ID of "dset_b" */
@@ -376,7 +397,17 @@ static int test_simple(void)
 
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
- if ((H5DShas_scale(did))==0)
+ /* verify that "dset_c" has 1 dimension scale at DIM 0   */
+ dim=0;
+ if (H5DSget_nscales(did,dim,&nscales)<0)
+  goto out;
+ if (nscales!=1)
+  goto out;
+ /* verify that "dset_c" has 1 dimension scale at DIM 1   */
+ dim=1;
+ if (H5DSget_nscales(did,dim,&nscales)<0)
+  goto out;
+ if (nscales!=1)
   goto out;
  if (H5Dclose(did)<0)
   goto out;
@@ -413,7 +444,11 @@ static int test_simple(void)
 
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
- if ((H5DShas_scale(did))==1)
+  /* verify that "dset_c" has 0 dimension scale at DIM 0   */
+ dim=0;
+ if (H5DSget_nscales(did,dim,&nscales)<0)
+  goto out;
+ if (nscales!=0)
   goto out;
  if (H5Dclose(did)<0)
   goto out;

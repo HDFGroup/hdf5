@@ -15,8 +15,6 @@
 #include "H5LT.h"
 #include <stdlib.h>
 
-
-
 /*-------------------------------------------------------------------------
  * Function: H5DSset_scale
  *
@@ -739,6 +737,127 @@ out:
  
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5DSget_nscales
+ *
+ * Purpose: get the number of scales linked to the IDX dimension of DNAME 
+ *
+ * Return:  
+ *   Success: SUCCESS: both the DS and the dataset exist
+ *   Failure: FAIL: if either one of them does not exist
+ *
+ * Programmer: pvn@ncsa.uiuc.edu
+ *
+ * Date: January 13, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5DSget_nscales(hid_t did,
+                       unsigned int dim,
+                       int *nscales) 
+{ 
+ int        has_dimlist;
+ hid_t      sid;          /* space ID */
+ hid_t      tid;          /* attribute type ID */
+ hid_t      aid;          /* attribute ID */
+ int        rank;         /* rank of dataset */
+ hvl_t      *buf;         /* VL buffer to store in the attribute */
+ hobj_ref_t ref;          /* reference to the DS */
+ int        i, n;
+ 
+/*-------------------------------------------------------------------------
+ * the attribute "DIMENSION_LIST" on the >>data<< dataset must exist 
+ *-------------------------------------------------------------------------
+ */
+ /* get dataset space */
+ if ((sid = H5Dget_space(did))<0)
+  goto out;
+ 
+ /* get rank */
+ if ((rank=H5Sget_simple_extent_ndims(sid))<0)
+  goto out;
+
+ /* close dataset space */
+ if (H5Sclose(sid)<0)
+  goto out;
+
+ /* DIM range checking */
+ if (dim>=(unsigned int )rank)
+  goto out;
+
+ /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
+ if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
+  return FAIL;
+
+ /* it does not exist */
+ if (has_dimlist == 0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * the attribute exists, open it 
+ *-------------------------------------------------------------------------
+ */
+ 
+ else if ( has_dimlist == 1 )
+ {
+  if ((aid = H5Aopen_name(did,DIMENSION_LIST))<0)
+   goto out;
+  if ((tid = H5Aget_type(aid))<0)
+   goto out;
+  if ((sid = H5Aget_space(aid))<0)
+   goto out;
+ 
+  /* allocate and initialize the VL */
+  buf = (hvl_t*)malloc((size_t)rank * sizeof(hvl_t));
+
+  if (buf == NULL)
+   goto out;
+  
+  /* read */
+  if (H5Aread(aid,tid,buf)<0)
+   goto out;
+
+  for(i=0,n=0; i<(int)buf[dim].len; i++)
+  {
+   ref = ((hobj_ref_t *)buf[dim].p)[i]; 
+   if (ref) n++;
+  }
+  /* return value */
+  *nscales =n;
+
+  /* close */
+  if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf)<0)
+   goto out;
+  if (H5Sclose(sid)<0)
+   goto out;
+  if (H5Tclose(tid)<0) 
+   goto out;
+  if (H5Aclose(aid)<0)
+   goto out;
+  if (buf)
+   free(buf);
+   
+ } /* has_dimlist */ 
+
+ return SUCCESS;
+ 
+/* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Dclose(did);
+  H5Sclose(sid);
+  H5Aclose(aid);
+  H5Tclose(tid);
+ } H5E_END_TRY;
+ return FAIL;
+ 
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: H5DSset_label
@@ -1134,293 +1253,6 @@ out:
 
 }
 
-
-
-
-/*-------------------------------------------------------------------------
- * Function: H5DShas_scale
- *
- * Purpose: check if the dataset DID has associated 
- *  valid dimension scales; valid means the dimension scales exist and they
- *  are as many as the dataset rank
- *
- * Return: 1, has, 0, not, FAIL, error
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: January 04, 2005
- *
- * Comments:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5DShas_scale(hid_t did) 
-{  
- int       has_dimlist;          /* do we have the "DIMENSION_LIST" attribute */
- hid_t     sid;                  /* space ID */
- hid_t     dsid;                 /* DS dataset ID */
- hid_t     dssid;                /* DS space ID */
- hid_t     tid;                  /* attribute type ID */
- hid_t     aid;                  /* attribute ID */
- hssize_t  dsnelmts;             /* size of a dimension scale array */
- herr_t    has_ds;               /* boolean return value */
- int       rank;                 /* rank of dataset */
- hsize_t   dims[H5S_MAX_RANK];   /* dimensions of dataset */
- hvl_t     *buf;                 /* VL buffer stored in the attribute */
- hobj_ref_t ref;                 /* reference to the DS */
- int       i;
-
- has_ds = 1;
-
- /* get dataset space */
- if ((sid = H5Dget_space(did))<0)
-  goto out;
- 
- /* get rank */
- if ((rank=H5Sget_simple_extent_ndims(sid))<0)
-  goto out;
-
- /* get dimensions of dataset */
- if (H5Sget_simple_extent_dims(sid,dims,NULL)<0)
-  goto out;
-
- /* close the dataspace id */
- if (H5Sclose(sid)<0)
-  goto out;
-
- /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
- if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
-  goto out;
-
- if (has_dimlist == 0)
-  has_ds = 0;
-
- else if (has_dimlist == 1 )
- {
-  if ((aid = H5Aopen_name(did,DIMENSION_LIST))<0)
-   goto out;
-  
-  if ((tid = H5Aget_type(aid))<0)
-   goto out;
-  
-  if ((sid = H5Aget_space(aid))<0)
-   goto out;
-   
-  /* allocate and initialize the VL */
-  buf = (hvl_t*)malloc((size_t)rank * sizeof(hvl_t));
-
-  if (buf == NULL)
-   goto out;
-  
-  /* read */
-  if (H5Aread(aid,tid,buf)<0)
-   goto out;
-
-/*-------------------------------------------------------------------------
- * check if we have at least one entry for each dimension
- *-------------------------------------------------------------------------
- */
-  for(i=0; i<rank; i++)
-  {
-   if (buf[i].len == 0)
-    has_ds = 0;
-  }
-
-/*-------------------------------------------------------------------------
- * check if the DSs are valid
- *-------------------------------------------------------------------------
- */
- 
-  for(i=0; i<rank; i++)
-  {
-   if (buf[i].len)
-   {
-    /* get the reference */
-    ref = ((hobj_ref_t *)buf[i].p)[0];
-
-    if (ref==0)
-     has_ds = 0;
-
-    if (ref)
-    {
-     /* get the DS id */
-     if ((dsid = H5Rdereference(did,H5R_OBJECT,&ref))<0)
-      goto out;
-     
-     /* check information in referenced dataset */
-     if ((dssid = H5Dget_space(dsid))<0)
-      goto out;
-     
-     /* get size of the DS array */
-     if ((dsnelmts = H5Sget_simple_extent_npoints(dssid))<0)
-      goto out;
-     
-     /* the size of the DS array must match the dimension of the dataset */
-     if (dsnelmts != (hssize_t)dims[i])
-      has_ds = 0;
-     
-     /* close the dereferenced dataset */
-     if (H5Dclose(dsid)<0)
-      goto out;
-     if (H5Sclose(dssid)<0)
-      goto out;
-    }
-   }
-  }
- 
-   /* close */
-  if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf)<0)
-   goto out;
-  if (H5Sclose(sid)<0)
-   goto out;
-  if (H5Tclose(tid)<0) 
-   goto out;
-  if (H5Aclose(aid)<0)
-   goto out;
-  /* free the VL buffer */
-  if (buf)
-   free(buf);
-  
- } /* has_dimlist */ 
-
- return has_ds;
- 
-/* error zone, gracefully close */
-out:
- H5E_BEGIN_TRY {
-  H5Sclose(sid);
-  H5Tclose(tid);
-  H5Aclose(aid);
- } H5E_END_TRY;
- return FAIL;
-
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: H5DSget_nscales
- *
- * Purpose: get the number of scales linked to the IDX dimension of DNAME 
- *
- * Return:  
- *   Success: SUCCESS: both the DS and the dataset exist
- *   Failure: FAIL: if either one of them does not exist
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: January 13, 2005
- *
- * Comments:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5DSget_nscales(hid_t did,
-                       unsigned int dim,
-                       int *nscales) 
-{ 
- int        has_dimlist;
- hid_t      sid;          /* space ID */
- hid_t      tid;          /* attribute type ID */
- hid_t      aid;          /* attribute ID */
- int        rank;         /* rank of dataset */
- hvl_t      *buf;         /* VL buffer to store in the attribute */
- hobj_ref_t ref;          /* reference to the DS */
- int        i, n;
- 
-/*-------------------------------------------------------------------------
- * the attribute "DIMENSION_LIST" on the >>data<< dataset must exist 
- *-------------------------------------------------------------------------
- */
- /* get dataset space */
- if ((sid = H5Dget_space(did))<0)
-  goto out;
- 
- /* get rank */
- if ((rank=H5Sget_simple_extent_ndims(sid))<0)
-  goto out;
-
- /* close dataset space */
- if (H5Sclose(sid)<0)
-  goto out;
-
- /* DIM range checking */
- if (dim>=(unsigned int )rank)
-  goto out;
-
- /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
- if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
-  return FAIL;
-
- /* it does not exist */
- if (has_dimlist == 0)
-  goto out;
-
-/*-------------------------------------------------------------------------
- * the attribute exists, open it 
- *-------------------------------------------------------------------------
- */
- 
- else if ( has_dimlist == 1 )
- {
-  if ((aid = H5Aopen_name(did,DIMENSION_LIST))<0)
-   goto out;
-  if ((tid = H5Aget_type(aid))<0)
-   goto out;
-  if ((sid = H5Aget_space(aid))<0)
-   goto out;
- 
-  /* allocate and initialize the VL */
-  buf = (hvl_t*)malloc((size_t)rank * sizeof(hvl_t));
-
-  if (buf == NULL)
-   goto out;
-  
-  /* read */
-  if (H5Aread(aid,tid,buf)<0)
-   goto out;
-
-  for(i=0,n=0; i<(int)buf[dim].len; i++)
-  {
-   ref = ((hobj_ref_t *)buf[dim].p)[i]; 
-   if (ref) n++;
-  }
-  /* return value */
-  *nscales =n;
-
-  /* close */
-  if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf)<0)
-   goto out;
-  if (H5Sclose(sid)<0)
-   goto out;
-  if (H5Tclose(tid)<0) 
-   goto out;
-  if (H5Aclose(aid)<0)
-   goto out;
-  if (buf)
-   free(buf);
-   
- } /* has_dimlist */ 
-
- return SUCCESS;
- 
-/* error zone, gracefully close */
-out:
- H5E_BEGIN_TRY {
-  H5Dclose(did);
-  H5Sclose(sid);
-  H5Aclose(aid);
-  H5Tclose(tid);
- } H5E_END_TRY;
- return FAIL;
- 
-}
 
 /*-------------------------------------------------------------------------
  * Function: H5DSiterate_scales
