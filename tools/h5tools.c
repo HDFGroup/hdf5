@@ -456,6 +456,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     int		nmembs, j, k, ndims;
     const int	repeat_threshold = 8;
     static char	fmt_llong[8], fmt_ullong[8];
+	H5T_str_t pad;
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
@@ -509,15 +510,17 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	} else if (H5T_STRING==H5Tget_class(type)) {
 		size = H5Tget_size(type);
 		quote = '\0';
-		if (*(str->s) == '"') {
-			quote = 'a';
-		}
-		for (i=0; i<size && ((char*)vp)[i] != '\0'; i++) {
+		pad = H5Tget_strpad(type);
+		
+		for (i=0; i<size && ((pad == H5T_STR_NULLPAD)?1:(((char*)vp)[i] != '\0')); i++) {
 			
 			/* Count how many times the next character repeats */
-			j=1;
-			while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
-			
+	/*		if (repeat_threshold >= 0){*/
+				j=1;
+				while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
+	/*		}
+			else j = -2;
+	*/
 			/*
 			* Print the opening quote.  If the repeat count is high enough
 			* to warrant printing the number of repeats instead of
@@ -1463,7 +1466,7 @@ struct h5dump_str_t tempstr;
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
 		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes);
-         if ((int)(strlen(out_buf)+strlen(tempstr.s)+1) > (NCOLS-indent-COL)) {
+         if ((int)(strlen(out_buf)+tempstr.len+1) > (NCOLS-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
                  printf("%s\n", out_buf);
@@ -1545,7 +1548,7 @@ static void display_string
 	int free_space, long_string = 0;
 	char out_buf[NCOLS];
 	struct h5dump_str_t tempstr;
-	/******************************************************************************************/
+/******************************************************************************************/
     h5dump_t		info;
 
     /* Set to all default values and then override */
@@ -1577,10 +1580,10 @@ static void display_string
 
          if ((elmtno+i+1) == p_nelmts) { /* last element */
             /* 2 for double quotes */
-            if (((int)strlen(tempstr.s) + 2) > free_space) long_string = 1;
+            if (((int)tempstr.len + 2) > free_space) long_string = 1;
          } else 
             /* 3 for double quotes and one comma */
-            if (((int)strlen(tempstr.s) + 3) > free_space) long_string = 1;
+            if (((int)tempstr.len + 3) > free_space) long_string = 1;
 
          if (long_string) {
 
@@ -1598,33 +1601,38 @@ static void display_string
              } else {
                  x = free_space - 5;
                  if (compound_data && first_row) {
-                     printf("%s\"", out_buf);
+                  /*   printf("%s\"", out_buf);*/
+					 printf("%s", out_buf);
                      strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
-                     printf("%s\" //\n", out_buf);
+                     /*printf("%s\" //\n", out_buf);*/
+					 printf("%s //\n", out_buf);
                      first_row = 0;
                  } else {
                      indentation(indent+COL); 
-                     printf("%s\"", out_buf);
+                   /*  printf("%s\"", out_buf);*/
+                     printf("%s", out_buf);
                      strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
-                     printf("%s\" //\n", out_buf);
+                     /*printf("%s //\n", out_buf);*/
+					 printf("%s\" //\n", out_buf);
                  }
                  out_buf[0] = '\0';
              }
 
              y = NCOLS - indent -COL - 5;
 
-             m = (strlen(tempstr.s) - x)/y;
+             m = (tempstr.len - x)/y;
 
-             z = (strlen(tempstr.s) - x) % y;
+             z = (tempstr.len - x) % y;
 
 
              for (j = 0; j < m - 1 ; j++) {
                   indentation(indent+COL);
                   strncpy(out_buf, tempstr.s+x+j*y, y);
                   out_buf[y] = '\0';
-                  printf("\"%s\" //\n", out_buf);
+                  /*printf("\"%s\" //\n", out_buf);*/
+                  printf("%s //\n", out_buf);
              }
 
              if ((elmtno+i+1) == p_nelmts) { /* last element */
@@ -1632,9 +1640,11 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" //\n", out_buf);
+                     /*printf("\"%s\" //\n", out_buf);*/
+                     printf("%s //\n", out_buf);
                      indentation(indent+COL);
-                     printf("\"%s\"", tempstr.s+x+m*y);
+                     /*printf("\"%s\"", tempstr.s+x+m*y);*/
+					 printf("%s", tempstr.s+x+m*y);
                      if (compound_data) {
                          if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
@@ -1645,7 +1655,9 @@ static void display_string
 
                   } else {
                      indentation(indent+COL);
-                     printf("\"%s\"", tempstr.s+x+j*y);
+                     /*printf("\"%s\"", tempstr.s+x+j*y);*/
+
+					 printf("%s", tempstr.s+x+j*y);
                      if (compound_data) {
                          if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
@@ -1661,12 +1673,16 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" //\n", out_buf);
+                     /*printf("\"%s\" //\n", out_buf);*/
+					 printf("%s //\n", out_buf);
                      indentation(indent+COL);
-                     printf("\"%s\",\n", tempstr.s+x+m*y);
+                     /*printf("\"%s\",\n", tempstr.s+x+m*y);*/
+					 printf("%s,\n", tempstr.s+x+m*y);
                   } else {
                      indentation(indent+COL);
-                     printf("\"%s\",\n", tempstr.s+x+j*y);
+                     /*printf("\"%s\",\n", tempstr.s+x+j*y);*/
+					 printf("%s,\n", tempstr.s+x+j*y);
+
                   }
                   out_buf[0] = '\0';
                   row_size = 0;
@@ -1676,15 +1692,19 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" //\n", out_buf);
-                     strcpy(out_buf, "\"");
+                     /*printf("\"%s\" //\n", out_buf);*/
+					 printf("%s //\n", out_buf);
+
+   /*                  strcpy(out_buf, "\"");*/
                      strcat(out_buf, tempstr.s+x+m*y);
-                     strcat(out_buf, "\",");
+                     /*strcat(out_buf, "\",");*/
+					 strcat(out_buf, ",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   } else {
-                     strcpy(out_buf, "\"");
+                    /* strcpy(out_buf, "\"");*/
                      strcat (out_buf, tempstr.s+x+j*y);
-                     strcat(out_buf, "\",");
+                     /*strcat(out_buf, "\",");*/
+					 strcat(out_buf, ",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   }
              }
@@ -1711,7 +1731,7 @@ static void display_string
                if ((elmtno+i+1) != p_nelmts) 
                    printf(",\n");
                else if (compound_data) {
-                       if ((NCOLS-strlen(out_buf)-strlen(tempstr.s)-indent-COL) < 2) {
+                       if ((NCOLS-strlen(out_buf)-tempstr.len-indent-COL) < 2) {
                            /* 2 for space and ] */
                            printf("\n");
                            indentation(indent+COL-3);
@@ -1722,9 +1742,11 @@ static void display_string
                out_buf[0] = '\0';
                row_size = 0;
             } else {
-                 strcat(out_buf, "\"");
+               /*  strcat(out_buf, "\"");
                  strcat(out_buf, tempstr.s);
                  strcat(out_buf, "\",");
+				 */
+                 strcat(out_buf, tempstr.s);
                  if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " ");
             }
 
