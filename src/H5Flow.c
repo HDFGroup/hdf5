@@ -271,6 +271,9 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *
  *		rky 980816
  *		Accommodate fancy MPI derived datatype writes.
+ *
+ *		rky 980902
+ *		For non-block parallel writes, don't change value of lf->eof.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -280,10 +283,6 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 {
     herr_t		ret_value = FAIL;
     haddr_t		tmp_addr;
-
-#ifdef HAVE_PARALLEL
-    int			use_types=0;
-#endif
 
     FUNC_ENTER(H5F_low_write, FAIL);
 
@@ -295,14 +294,20 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 #ifdef HAVE_PARALLEL
     if (H5F_LOW_MPIO==access_parms->driver &&
 	access_parms->u.mpio.use_types) {
-	/* In the case of fancy use of MPI datatypes, the addr and size
+	/* rky 090902 KLUGE
+	 * In the case of fancy use of MPI datatypes, the addr and size
 	 * parameters have a very peculiar interpretation.
 	 * It is logically possible, but quite complex, to calculate
 	 * the physical offset that the last byte to be written will have
 	 * (assuming the write doesn't fail partway thru, which it may).
-	 * Instead, we fix up the eof _after_ the write
-	 * (I really don't know if that's OK or not... rky 980816) */
-	use_types = access_parms->u.mpio.use_types;  /* check after write */
+	 * I don't yet fully understand the relationship between
+	 * the lf->eof processor-local variable and the file's true eof.
+	 * But presumably lf->eof has the correct value at this point,
+	 * and we should _not_ change it,
+	 * even if the file's true eof differs from the value of lf->eof.
+	 * So for now we DO NOTHING!
+	 * (Eventually, perhaps we should at least calculate the address
+	 * of the last byte of this write, and compare it to lf->eof.) */
     } else {
 #endif /* HAVE_PARALLEL */
 	/* writing a simple block of bytes; can check for writing beyond eof */
@@ -329,19 +334,6 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     } else {
 	HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "no write method");
     }
-
-#ifdef HAVE_PARALLEL
-    /* fix up eof for MPI use_type writes */
-    if (H5F_LOW_MPIO==access_parms->driver && use_types) {
-	/* set logical eof to current physical eof
-	 * (ephemeral though it may be...) */
-	MPI_Offset mpi_offset_size;
-	if (MPI_SUCCESS != MPI_File_get_size(lf->u.mpio.f,&mpi_offset_size)) {
-	    HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "couldn't get file size" );
-	}
-	lf->eof.offset = mpi_offset_size;
-    }
-#endif
 
     FUNC_LEAVE(ret_value);
 }
