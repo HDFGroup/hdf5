@@ -132,7 +132,7 @@ done
 if [ "$cmd" = help ]; then
     set -
     cat <<EOF
-Usage: $0 [all] [checkout] [test] [srcdir] [release] [help]
+Usage: $0 [all] [checkout] [diff] [test] [srcdir] [release] [help]
           [hdf4 <hdf4lib_path>] [archive <arch_path>] [dir <dir>]
 	  [op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
