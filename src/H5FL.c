@@ -680,7 +680,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear)
+H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, uintn clear)
 {
     H5FL_blk_node_t *free_list;  /* The free list of nodes of correct size */
     H5FL_blk_list_t *temp;  /* Temp. ptr to the new native list allocated */
@@ -839,7 +839,7 @@ printf("%s: head->name=%s, garbage collecting all block lists\n",FUNC,head->name
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
+H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, hsize_t new_size)
 {
     H5FL_blk_list_t *temp;          /* Temp. ptr to the new block node allocated */
     void *ret_value=NULL;       /* Return value */
@@ -1192,7 +1192,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, uintn clear)
+H5FL_arr_alloc(H5FL_arr_head_t *head, hsize_t elem, uintn clear)
 {
     H5FL_arr_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
@@ -1280,7 +1280,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, uintn clear)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
+H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, hsize_t new_elem)
 {
     H5FL_arr_node_t *temp;  /* Temp. ptr to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */

@@ -600,7 +600,7 @@ H5F_locate_signature(H5FD_t *file)
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF,
 			  "unable to set EOA value for file signature");
 	}
-	if (H5FD_read(file, H5FD_MEM_SUPER, H5P_DEFAULT, addr, H5F_SIGNATURE_LEN, buf)<0) {
+	if (H5FD_read(file, H5FD_MEM_SUPER, H5P_DEFAULT, addr, (hsize_t)H5F_SIGNATURE_LEN, buf)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF,
 			  "unable to read file signature");
 	}
@@ -960,9 +960,9 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
     H5FD_t		*lf=NULL;	/*file driver part of `shared'	*/
     uint8_t		buf[256];	/*temporary I/O buffer		*/
     const uint8_t	*p;		/*ptr into temp I/O buffer	*/
-    size_t		fixed_size=24;	/*fixed sizeof superblock	*/
-    size_t		variable_size;	/*variable sizeof superblock	*/
-    size_t		driver_size;	/*size of driver info block	*/
+    hsize_t		fixed_size=24;	/*fixed sizeof superblock	*/
+    hsize_t		variable_size;	/*variable sizeof superblock	*/
+    hsize_t		driver_size;	/*size of driver info block	*/
     H5G_entry_t		root_ent;	/*root symbol table entry	*/
     haddr_t		eof;		/*end of file address		*/
     haddr_t		stored_eoa;	/*relative end-of-addr in file	*/
@@ -1192,7 +1192,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 
 	/* File consistency flags. Not really used yet */
 	UINT32DECODE(p, shared->consist_flags);
-	assert((size_t)(p-buf) == fixed_size);
+	assert((hsize_t)(p-buf) == fixed_size);
 
 	/* Decode the variable-length part of the superblock... */
 	variable_size = H5F_SIZEOF_ADDR(file) +		/*base addr*/
@@ -1200,7 +1200,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 			H5F_SIZEOF_ADDR(file) +		/*end-of-address*/
 			H5F_SIZEOF_ADDR(file) +		/*reserved address*/
 			H5G_SIZEOF_ENTRY(file);		/*root group ptr*/
-	assert(variable_size<=sizeof buf);
+	assert(variable_size<=sizeof(buf));
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size+variable_size)<0 ||
 	    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, shared->boot_addr+fixed_size,
 		      variable_size, buf)<0) {
@@ -1221,7 +1221,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	if (H5F_addr_defined(shared->driver_addr)) {
 	    haddr_t drv_addr = shared->base_addr + shared->driver_addr;
 	    if (H5FD_set_eoa(lf, drv_addr+16)<0 ||
-		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, drv_addr, 16, buf)<0) {
+		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, drv_addr, (hsize_t)16, buf)<0) {
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			    "unable to read driver information block");
 	    }
@@ -1714,7 +1714,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
      */
     if ((driver_size=H5FD_sb_size(f->shared->lf))) {
 	driver_size += 16; /*driver block header */
-	assert(driver_size<=sizeof dbuf);
+	assert(driver_size<=sizeof(dbuf));
 	p = dbuf;
 
 	/* Version */

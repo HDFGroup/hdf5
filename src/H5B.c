@@ -123,7 +123,7 @@ static herr_t H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *b);
 static H5B_t *H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata);
 static herr_t H5B_decode_key(H5F_t *f, H5B_t *bt, intn idx);
 static herr_t H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx);
-static size_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
+static hsize_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 			   size_t *total_nkey_size, size_t sizeof_rkey);
 static herr_t H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
 			haddr_t old_addr, intn idx,
@@ -190,7 +190,8 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
 	   haddr_t *addr_p/*out*/)
 {
     H5B_t		*bt = NULL;
-    size_t		size, sizeof_rkey;
+    size_t		sizeof_rkey;
+    hsize_t		size;
     size_t		total_native_keysize;
     size_t		offset;
     intn		i;
@@ -306,7 +307,8 @@ static H5B_t *
 H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
 {
     const H5B_class_t	*type = (const H5B_class_t *) _type;
-    size_t		size, total_nkey_size;
+    size_t		total_nkey_size;
+    hsize_t		size;
     H5B_t		*bt = NULL;
     intn		i;
     uint8_t		*p;
@@ -418,7 +420,7 @@ static herr_t
 H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 {
     intn	i;
-    size_t	size = 0;
+    hsize_t	size = 0;
     uint8_t	*p = bt->page;
 
     FUNC_ENTER(H5B_flush, FAIL);
@@ -882,7 +884,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     haddr_t	child, old_root;
     intn	level;
     H5B_t	*bt;
-    size_t	size;
+    hsize_t	size;
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     herr_t	ret_value = FAIL;
 
@@ -1651,7 +1653,8 @@ H5B_remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
     H5B_t	*bt = NULL, *sibling = NULL;
     H5B_ins_t	ret_value = H5B_INS_ERROR;
     intn	idx=-1, lt=0, rt, cmp=1, i;
-    size_t	sizeof_rkey, sizeof_node, sizeof_rec;
+    size_t	sizeof_rkey, sizeof_rec;
+    hsize_t	sizeof_node;
     
     FUNC_ENTER(H5B_remove_helper, H5B_INS_ERROR);
     assert(f);
@@ -1995,11 +1998,11 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
  *
  *-------------------------------------------------------------------------
  */
-static size_t
+static hsize_t
 H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
 {
-    size_t	size;
+    hsize_t	size;
 
     FUNC_ENTER(H5B_nodesize, (size_t) 0);
 
@@ -2049,7 +2052,8 @@ static H5B_t *
 H5B_copy(H5F_t *f, const H5B_t *old_bt)
 {
     H5B_t		*ret_value = NULL;
-    size_t		size, total_native_keysize;
+    size_t		total_native_keysize;
+    hsize_t		size;
     uintn       nkeys;
     uintn		u;
 
@@ -2087,7 +2091,8 @@ H5B_copy(H5F_t *f, const H5B_t *old_bt)
     }
 
     /* Copy the other structures */
-    HDmemcpy(ret_value->page,old_bt->page,size);
+    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+    HDmemcpy(ret_value->page,old_bt->page,(size_t)size);
     HDmemcpy(ret_value->native,old_bt->native,total_native_keysize);
     HDmemcpy(ret_value->child,old_bt->child,sizeof(haddr_t)*nkeys);
     HDmemcpy(ret_value->key,old_bt->key,sizeof(H5B_key_t)*(nkeys+1));

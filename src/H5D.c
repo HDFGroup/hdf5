@@ -1826,7 +1826,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 #endif
     
     /* Start strip mining... */
-    assert(nelmts==(hssize_t)(size_t)nelmts); /*check for overflow*/
+    assert(nelmts==(hssize_t)((size_t)nelmts)); /*check for overflow*/
     for (smine_start=0;
 	 smine_start<(size_t)nelmts;
 	 smine_start+=smine_nelmts) {
@@ -2294,7 +2294,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
 
     /* Start strip mining... */
-    assert(nelmts==(hssize_t)(size_t)nelmts); /*check for overflow*/
+    assert(nelmts==(hssize_t)((size_t)nelmts)); /*check for overflow*/
     for (smine_start=0;
 	 smine_start<(size_t)nelmts;
 	 smine_start+=smine_nelmts) {
@@ -2772,9 +2772,8 @@ H5Dget_storage_size(hid_t dset_id)
     H5TRACE1("h","i",dset_id);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type(dset_id) ||
-	NULL==(dset=H5I_object(dset_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (H5I_DATASET!=H5I_get_type(dset_id) || NULL==(dset=H5I_object(dset_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset");
     }
 
     size = H5D_get_storage_size(dset);

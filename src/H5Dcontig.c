@@ -72,7 +72,8 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
             /* If entire read is within the sieve buffer, read it from the buffer */
             if(addr>=sieve_start && contig_end<sieve_end) {
                 /* Grab the data out of the buffer */
-                HDmemcpy(buf,f->shared->sieve_buf+(addr-sieve_start),size);
+                assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                HDmemcpy(buf,f->shared->sieve_buf+(addr-sieve_start),(size_t)size);
             } /* end if */
             /* Entire request is not within this data sieve buffer */
             else {
@@ -134,7 +135,8 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
                     f->shared->sieve_dirty=0;
 
                     /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-                    HDmemcpy(buf,f->shared->sieve_buf,size);
+                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                    HDmemcpy(buf,f->shared->sieve_buf,(size_t)size);
                 } /* end else */
             } /* end else */
         } /* end if */
@@ -174,7 +176,8 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
                 f->shared->sieve_dirty=0;
 
                 /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-                HDmemcpy(buf,f->shared->sieve_buf,size);
+                assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                HDmemcpy(buf,f->shared->sieve_buf,(size_t)size);
             } /* end else */
         } /* end else */
     } /* end if */
@@ -234,7 +237,8 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
             /* If entire write is within the sieve buffer, write it to the buffer */
             if(addr>=sieve_start && contig_end<sieve_end) {
                 /* Grab the data out of the buffer */
-                HDmemcpy(f->shared->sieve_buf+(addr-sieve_start),buf,size);
+                assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                HDmemcpy(f->shared->sieve_buf+(addr-sieve_start),buf,(size_t)size);
 
                 /* Set sieve buffer dirty flag */
                 f->shared->sieve_dirty=1;
@@ -301,7 +305,8 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                     }
 
                     /* Grab the data out of the buffer (must be first piece of data in buffer) */
-                    HDmemcpy(f->shared->sieve_buf,buf,size);
+                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                    HDmemcpy(f->shared->sieve_buf,buf,(size_t)size);
 
                     /* Set sieve buffer dirty flag */
                     f->shared->sieve_dirty=1;
@@ -342,7 +347,8 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                 }
 
                 /* Grab the data out of the buffer (must be first piece of data in buffer) */
-                HDmemcpy(f->shared->sieve_buf,buf,size);
+                assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                HDmemcpy(f->shared->sieve_buf,buf,(size_t)size);
 
                 /* Set sieve buffer dirty flag */
                 f->shared->sieve_dirty=1;

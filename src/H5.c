@@ -1295,7 +1295,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     va_list		ap;
     char		buf[64], *rest;
     const char		*argname;
-    intn		argno=0, ptr, n, asize_idx;
+    intn		argno=0, ptr, asize_idx;
     hssize_t		asize[16];
     hssize_t		i;
     void		*vp = NULL;
@@ -1341,7 +1341,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	 */
 	argname = va_arg (ap, char*);
 	if (argname) {
-	    n = MAX (0, (int)HDstrlen(argname)-3);
+	    unsigned n = MAX (0, (int)HDstrlen(argname)-3);
 	    if (!HDstrcmp (argname+n, "_id")) {
 		HDstrncpy (buf, argname, MIN ((int)sizeof(buf)-1, n));
 		buf[MIN((int)sizeof(buf)-1, n)] = '\0';
@@ -1517,8 +1517,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5E_major_t n = va_arg(ap, H5E_major_t);
-		    fprintf(out, "%d", (int)n);
+		    H5E_major_t emaj = va_arg(ap, H5E_major_t);
+		    fprintf(out, "%d", (int)emaj);
 		}
 		break;
 
@@ -1530,8 +1530,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5E_minor_t n = va_arg(ap, H5E_minor_t);
-		    fprintf(out, "%d", (int)n);
+		    H5E_minor_t emin = va_arg(ap, H5E_minor_t);
+		    fprintf(out, "%d", (int)emin);
 		}
 		break;
 		
