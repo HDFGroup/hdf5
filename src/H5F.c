@@ -4200,18 +4200,16 @@ void
 H5F_addr_encode(H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
 {
     unsigned		    i;
-    haddr_t		    tmp;
 
     assert(f);
     assert(pp && *pp);
 
     if (H5F_addr_defined(addr)) {
-	tmp = addr;
 	for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
-	    *(*pp)++ = (uint8_t)(tmp & 0xff);
-	    tmp >>= 8;
+	    *(*pp)++ = (uint8_t)(addr & 0xff);
+	    addr >>= 8;
 	}
-	assert("overflow" && 0 == tmp);
+	assert("overflow" && 0 == addr);
 
     } else {
 	for (i=0; i<H5F_SIZEOF_ADDR(f); i++)
