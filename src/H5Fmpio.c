@@ -300,13 +300,18 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 #ifdef H5Fmpio_DEBUG
     /* Check for debug commands in the info parameter */
     {   char debug_str[128];
-        int infoerr, str_len, flag, i;
+        int infoerr, flag, i;
         if (access_parms->u.mpio.info) {
             infoerr = MPI_Info_get( access_parms->u.mpio.info,
                                     H5F_MPIO_DEBUG_KEY, 127, debug_str, &flag );
-            fprintf(stdout, "H5Fmpio debug flags=%s\n", debug_str );
-            for (i=0; i<str_len; ++i)
-                H5F_mpio_Debug[(int)debug_str[i]] = 1;
+            if (flag) {
+                fprintf(stdout, "H5Fmpio debug flags=%s\n", debug_str );
+                for (i=0;
+                     debug_str[i]/*end of string*/ && i<128/*just in case*/;
+                     ++i) {
+                    H5F_mpio_Debug[(int)debug_str[i]] = 1;
+                }
+            }
         }
     }
 #endif
