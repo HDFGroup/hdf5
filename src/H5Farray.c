@@ -140,6 +140,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     size_t	mem_start;			/*byte offset to start	*/
     hsize_t	file_start;			/*byte offset to start	*/
+    hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
     size_t	nelmts, z;			/*number of elements	*/
     uintn	ndims;				/*stride dimensionality	*/
@@ -247,6 +248,13 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 addr = 0;
             } else {
                 addr = layout->addr;
+
+                /* Compute the size of the dataset in bytes */
+                for(u=0, max_data=1; u<layout->ndims; u++)
+                    max_data *= layout->dim[u];
+
+                /* Adjust the maximum size of the data by the offset into it */
+                max_data -= file_start;
             }
             addr += file_start;
             buf += mem_start;
@@ -313,7 +321,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                               "external data read failed");
                     }
                 } else {
-                    if (H5F_contig_read(f, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
+                    if (H5F_contig_read(f, max_data, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
                         HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                                   "block read failed");
                     }
@@ -323,6 +331,9 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 for (j=ndims-1, carray=TRUE; j>=0 && carray; --j) {
                     addr += file_stride[j];
                     buf += mem_stride[j];
+
+                    /* Adjust the maximum size of the data by the offset into it */
+                    max_data -= file_stride[j];
 
                     if (--idx[j])
                         carray = FALSE;
@@ -411,6 +422,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     hsize_t	mem_start;			/*byte offset to start	*/
     hsize_t	file_start;			/*byte offset to start	*/
+    hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
     size_t	nelmts, z;			/*number of elements	*/
     uintn	ndims;				/*dimensionality	*/
@@ -518,6 +530,13 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 addr = 0;
             } else {
                 addr = layout->addr;
+
+                /* Compute the size of the dataset in bytes */
+                for(u=0, max_data=1; u<layout->ndims; u++)
+                    max_data *= layout->dim[u];
+
+                /* Adjust the maximum size of the data by the offset into it */
+                max_data -= file_start;
             }
             addr += file_start;
             buf += mem_start;
@@ -561,7 +580,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                               "external data write failed");
                     }
                 } else {
-                    if (H5F_contig_write(f, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
+                    if (H5F_contig_write(f, max_data, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
                         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                                   "block write failed");
                     }
@@ -572,6 +591,9 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                     addr += file_stride[j];
                     buf += mem_stride[j];
                     
+                    /* Adjust the maximum size of the data by the offset into it */
+                    max_data -= file_stride[j];
+
                     if (--idx[j])
                         carray = FALSE;
                     else

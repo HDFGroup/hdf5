@@ -30,7 +30,7 @@
 #endif /* MAX */
 
 /* The size of the buffer to track allocation requests */
-#define TRACK_BUFFER    5000000
+#define TRACK_BUFFER    15000000
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_LOG_g = 0;
@@ -677,8 +677,8 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size)
 
     FUNC_ENTER(H5FD_log_alloc, HADDR_UNDEF);
 
-	addr = file->eoa;
-	file->eoa += size;
+    addr = file->eoa;
+    file->eoa += size;
 
 #ifdef QAK
 printf("%s: flavor=%s, size=%lu\n",FUNC,flavors[type],(unsigned long)size);
@@ -912,10 +912,12 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     FUNC_ENTER(H5FD_log_write, FAIL);
 
     assert(file && file->pub.cls);
+    assert(size>0);
     assert(buf);
 
     /* Verify that we are writing out the type of data we allocated in this location */
-    assert(type==file->flavor[addr]);
+    assert(type==H5FD_MEM_DEFAULT || type==file->flavor[addr] || file->flavor[addr]==H5FD_MEM_DEFAULT);
+    assert(type==H5FD_MEM_DEFAULT || type==file->flavor[(addr+size)-1] || file->flavor[(addr+size)-1]==H5FD_MEM_DEFAULT);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr) 
@@ -939,8 +941,12 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
             HDfprintf(file->logfp,"Seek: From %10a To %10a\n",file->pos,addr);
 
         /* Log information about the write */
-        if(file->fa.verbosity>0)
+        if(file->fa.verbosity>0) {
+            /* Check if this is the first write into a "default" section, grabbed by the metadata agregation algorithm */
+            if(file->flavor[addr]==H5FD_MEM_DEFAULT)
+                HDmemset(&file->flavor[addr],type,(size_t)size);
             HDfprintf(file->logfp,"%10a-%10a (%10lu bytes) Written, flavor=%s\n",addr,addr+size-1,(unsigned long)size,flavors[file->flavor[addr]]);
+        } /* end if */
     }
 
     /* Seek to the correct location */

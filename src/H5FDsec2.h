@@ -14,7 +14,15 @@
 
 #define H5FD_SEC2	(H5FD_sec2_init())
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 __DLL__ hid_t H5FD_sec2_init(void);
 __DLL__ herr_t H5Pset_fapl_sec2(hid_t fapl_id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
