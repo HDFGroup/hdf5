@@ -810,8 +810,8 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     size_t elem_size, size_t UNUSED maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
     hsize_t *off, size_t *len)
 {
-    hsize_t bytes_left;         /* The number of bytes left in the selection */
-    hsize_t elem_used;          /* The number of bytes used */
+    size_t max_elem;            /* Maximum number of elements to use */
+    size_t elem_used;           /* The number of elements used */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_NOAPI (H5S_all_get_seq_list, FAIL);
@@ -827,16 +827,16 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     assert(off);
     assert(len);
 
-    /* Calculate the number of bytes left in the selection */
-    bytes_left=iter->elmt_left*elem_size;
+    /* Detemine the maximum # of elements to use for this operation */
+    max_elem=maxbytes/elem_size;
 
-    /* "round" off the maxbytes allowed to a multiple of the element size */
-    maxbytes=(maxbytes/elem_size)*elem_size;
+    /* Determine the actual number of elements to use */
+    H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
+    elem_used=MIN(max_elem,(size_t)iter->elmt_left);
 
     /* Compute the offset in the dataset */
     off[0]=iter->u.all.offset*elem_size;
-    H5_CHECK_OVERFLOW(bytes_left,hsize_t,size_t);
-    len[0]=MIN(maxbytes,(size_t)bytes_left);
+    len[0]=elem_used*elem_size;
 
     /* Should only need one sequence for 'all' selections */
     *nseq=1;
@@ -845,7 +845,6 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     *nbytes=len[0];
 
     /* Update the iterator */
-    elem_used=len[0]/elem_size;
     iter->elmt_left-=elem_used;
     iter->u.all.offset+=elem_used;
 
