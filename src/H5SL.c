@@ -114,7 +114,7 @@ struct H5SL_node_t {
     void *key;                          /* Pointer to node's key */
     void *item;                         /* Pointer to node's item */
     size_t level;                       /* The level of this node */
-    struct H5SL_node_t *forward[1];     /* Array of forward pointers from this node */
+    struct H5SL_node_t **forward;       /* Array of forward pointers from this node */
 };
 
 /* Main skip list data structure */
@@ -245,13 +245,14 @@ H5SL_new_node(size_t lvl, void *item, void *key)
     FUNC_ENTER_NOAPI_NOINIT(H5SL_new_node);
 
     /* Allocate the node */
-    if((ret_value=H5MM_malloc(sizeof(H5SL_node_t)+(sizeof(H5SL_node_t *)*lvl)))==NULL)
+    if((ret_value=H5MM_malloc(sizeof(H5SL_node_t)+(sizeof(H5SL_node_t *)*(lvl+1))))==NULL)
         HGOTO_ERROR(H5E_SLIST,H5E_NOSPACE,NULL,"memory allocation failed");
 
     /* Initialize node */
     ret_value->key=key;
     ret_value->item=item;
     ret_value->level=lvl;
+    ret_value->forward=(H5SL_node_t **)((unsigned char *)ret_value+sizeof(H5SL_node_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
