@@ -1,7 +1,7 @@
 
  
-                       HDF5 Release 1.2.1
-                        December 21, 1999
+                       HDF5 Release 1.2.2-pre0
+    			Under Development
 
 
 INTRODUCTION
@@ -30,6 +30,16 @@ CONTENTS
 - Bug fixes since HDF5-1.2.0 
 - Platforms Tested
 - Known Problems
+
+
+Bug fixes since HDF5-1.2.1
+==========================
+   * h5dump correctly displays compound datatypes.
+   * Corrected an error in h5toh4 which did not convert the 32bits
+     int from HDF5 to HDF4 corectly for the T3E platform.
+   * Corrected a floating point number conversion error for the
+     Cray J90 platform.  The error did not convert the value 0.0
+     correctly.
 
 
 Bug fixes since HDF5-1.2.0
@@ -102,7 +112,4 @@ o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will
   fail if library is compiled using optimization of any level.
 
 o h5dump does not display correctly committed copy of predefined types.
-
-o h5dump has problems displaying compound datatypes.
-
 
