@@ -390,8 +390,11 @@ H5Dclose
 H5Dcreate
 H5Dextend
 H5Dget_create_plist
+H5D_get_file
 H5Dget_space
 H5Dget_type
+H5D_new
+H5D_open_oid
 H5Dopen
 H5Dread
 H5Dwrite
@@ -497,6 +500,7 @@ H5Fget_create_plist
 H5Fis_hdf5
 H5Fmount
 H5Fopen
+H5Freopen
 H5Funmount
 H5G_basename
 H5G_close
@@ -514,6 +518,7 @@ H5G_get_objinfo
 H5G_getcwg
 H5G_init_interface
 H5G_insert
+H5G_insertion_file
 H5G_link
 H5G_linkval
 H5G_loc
@@ -536,6 +541,7 @@ H5G_open
 H5G_pop
 H5G_push
 H5G_reopen
+H5G_rootof
 H5G_set
 H5G_set_comment
 H5G_stab_create
@@ -750,13 +756,17 @@ H5Pset_userblock
 H5Pset_xfer
 H5R_close
 H5R_create
+H5R_dereference
 H5R_fix_overflow
+H5R_get_region
 H5R_init_interface
 H5R_open
 H5R_read
 H5R_write
 H5Rclose
 H5Rcreate
+H5Rdereference
+H5Rget_region
 H5Ropen
 H5Rread
 H5Rwrite
@@ -868,6 +878,7 @@ H5Sset_extent_none
 H5Sset_extent_simple
 H5TB_buf_ptr
 H5TB_close
+H5T_cmp
 H5TB_garbage_coll
 H5TB_get_buf
 H5TB_init_interface
