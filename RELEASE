@@ -84,7 +84,9 @@ o J90: tools fail to dispay data for the datasets with compound datatype
 Platforms tested
 =================
 
-  AIX 4.3.2 (IBM SP)            3.6.6
+  AIX 4.3.3 (IBM SP)            3.6.6                               | binaries
+                                mpicc using mpich 1.1.2             | are not
+                                mpicc_r using IBM MPI-IO prototype  | available
   AIX 4.3			xlc 4.3.0.1
   Cray T3E 2.0.5.29             cc 6.3.0.2
                                 mpt.1.3
@@ -108,6 +110,7 @@ Platforms tested
                                 mpich-1.1.2 with local changes
   Windows NT4.0 sp5             MSVC++ 6.0
   Windows 98                    MSVC++ 6.0
+  Windows 2000                  MSVC++ 6.0
 
 
 
