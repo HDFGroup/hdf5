@@ -617,7 +617,7 @@ H5O_efl_readvv(const H5O_efl_t *efl,
 
     /* Check args */
     assert (efl && efl->nused>0);
-    assert (buf);
+    assert (_buf);
 
     /* Work through all the sequences */
     for(u=*dset_curr_seq, v=*mem_curr_seq; u<dset_max_nseq && v<mem_max_nseq; ) {
@@ -696,7 +696,7 @@ H5O_efl_writevv(const H5O_efl_t *efl,
 
     /* Check args */
     assert (efl && efl->nused>0);
-    assert (buf);
+    assert (_buf);
 
     /* Work through all the sequences */
     for(u=*dset_curr_seq, v=*mem_curr_seq; u<dset_max_nseq && v<mem_max_nseq; ) {
