@@ -60,11 +60,6 @@ if test "X-ifort" = "X-$f9x_vendor"; then
     FFLAGS="$FFLAGS"
 
     # Production
-
-    # Omit frame pointer for optimized code?
-    #NOFP=${NOFP:=-Mnoframe}
-
-    #PROD_FFLAGS="-O3 $NOFP"
     PROD_FFLAGS="-O3"
 
     # Debug

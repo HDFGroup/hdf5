@@ -59,11 +59,7 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     FFLAGS="$FFLAGS -Mdclchk -Mstandard -Minform,warn"
 
     # Production
-
-    # Omit frame pointer for optimized code?
-    NOFP=${NOFP:=-Mnoframe}
-
-    PROD_FFLAGS="-fast -s $NOFP"
+    PROD_FFLAGS="-fast -s -Mnoframe"
 
     # Debug
     DEBUG_FFLAGS="-g -Mbounds -Mchkfpstk -Mchkptr"

@@ -56,11 +56,7 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     CFLAGS="$CFLAGS $arch -Minform,warn"
 
     # Production
-
-    # Omit frame pointer for optimized code?
-    NOFP=${NOFP:=-Mnoframe}
-
-    PROD_CFLAGS="-fast -s $NOFP"
+    PROD_CFLAGS="-fast -s -Mnoframe"
     PROD_CPPFLAGS=
 
     # Debug
