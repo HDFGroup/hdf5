@@ -1,40 +1,6 @@
 #!/bin/sh
 # Site configuration -- do not distribute this file.
 
-
-# Based on the setting of environment variable `HDF5_MODE' we set the
-# compiler flags unless they're already set.  Its value can be one or
-# more of the following words (be sure to use single quotes when
-# setting its value or the dollar signs will be expanded as variables
-# too soon):
-#
-#	$warn	    -- Generates compiler warnings.  You should always
-#	               include this since it has no effect on the speed of
-#	               the code produced.
-#
-#	$debug      -- Compiles in code to check for invariant conditions
-#	               and turns on the `-g' flag for interactive
-#	               debugging.  It also turns off seek optimizations in
-#                      the low-level file driver.  This version of the
-#                      library can be significantly slower than a production
-#                      version.
-#
-#       $production -- Compiles an optimized version of the library
-#       	       and disables code that checks for invariant
-#       	       conditions.
-#
-#       $profile    -- Compiles code with the `-pg' flag which
-#       	       produces a `gmon.out' file when the library
-#       	       runs. The gprof(1) command can read that file
-#       	       and produce detailed run-time statistics.
-#
-# If HDF5_MODE is undefined then we use the value 
-#
-#	$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2
-#
-
-# Unconditionally set the compiler to gcc since the following flags
-# only apply to that compiler.
 CC="cc -ansi -64"
 
 # -woff 1174	about function declared but not used
@@ -48,7 +14,7 @@ profile="-pg"
 
 debug="-g -DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0"
 
-production="-O -DNDEBUG"
+#production="-O -DNDEBUG"
 
 default_mode='$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2'
 
@@ -57,6 +23,5 @@ RANLIB=:		# SGI needs not ranlib
 # Don't set CFLAGS if the user already did.
 if test -z "$CFLAGS"; then
    CFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
-   CFLAGS="$CFLAGS $PHDFFLAGS"
    export CFLAGS
 fi
