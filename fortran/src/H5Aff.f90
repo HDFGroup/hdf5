@@ -2606,11 +2606,6 @@
 
             hdferr = h5areadc_c(attr_id, memtype_id,  buf, dims)
           END SUBROUTINE h5aread_char_7
-!
-!END OVERLOADING
-!
-!DEC$ ENDIF
-!
 
 !----------------------------------------------------------------------
 ! Name:		h5aget_space_f 
