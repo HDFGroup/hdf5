@@ -25,109 +25,38 @@ If you have any questions or comments, please send them to:
 CONTENTS
 
 - New Features
-- Bug Fixes since HDF5-1.4.0
 - Support for new platforms and languages
+- Bug Fixes since HDF5-1.4.0
 - Platforms Tested
 - Known Problems
-
-Bug Fixes since HDF5-1.4.0 release
-==================================
-
-Library
--------
-    * The library now correctly reuses space when objects are deleted in the
-      file.  This should be handled correctly for every situation, except
-      datasets with variable-length datatypes are not returning the space they
-      use in the global heap currently. QAK - 2003/04/13
-    * Fixed error in B-tree deletion routine which could cause groups to be
-      corrupted when objects are removed from them.
-      QAK - 2003/04/11
-    * Fixed error in file space freeing code which could cause metadata to
-      fail to be written to the file.
-      QAK - 2003/04/11
-    * -O caused errors in AIX 5.x platforms.  Removed it from
-      --enable-production mode.  AKC - 2003/03/31
-    * Corrected memory/resource leaks in per-thread key information when
-      thread-safe operation was enabled.  QAK - 2003/02/07
-    * Improved error assertion for nil VL strings, making it fails with error
-      stack instead of just assertion failure.  SLU - 2002/12/16
-    * Added two new API functions: H5Zunregister & H5Zfilter_avail.
-      QAK - 2002/11/16
-    * Add data shuffle filter(source code H5Zshuffle.c), the combination of the
-      shuffling and compression can make data compression better without suffering
-      much encoding and decoding CPU time for many application datasets(especially
-      for floating point data). This adds a new API function: H5Pset_shuffle.
-      KY - 2002/11/13
-    * Allow scalar dataspaces to be used for parallel I/O.  QAK - 2002/11/05
-    * New functions H5Gget_comment(modification), H5Aget_storage_size, 
-      H5Arename.  SLU - 2002/10/29
-    * Fixed an assertion of H5S_select_iterate that did not account for scalar
-      type that has no dimension sizes.   AKC - 2002/10/15
-    * Partially fixed space allocation inefficiencies in the file by
-      improving our algorithms for re-using freed space.  QAK - 2002/08/27
-    * Fixed data corruption problem which could occur when fill values were
-      written to a contiguously stored dataset in parallel.  QAK - 2002/08/27
-    * Fixed VL memory leak when data is overwritten.  The heap objects holding
-      old data are freed.  If the fill value writting time is set to 
-      H5D_FILL_TIME_NEVER, the library prohibits user to create VL type dataset.
-      The library free all the heap objects storing VL type if there is nested 
-      VL type(a VL type contains another VL type).  SLU - 2002/07/10 
-    * Tweaked a few API functions to use 'size_t' instead of 'unsigned' or
-      'hsize_t', which may cause errors in some cases.
-
-
-Configuration
--------------
-
-    * Included the both the examples of fortran and c++ "make check-install"
-      testing. This tests the correctness of the h5fc command. AKC - 2003/04/22
-    * When using gcc 3.x, we use -std=c99 instead of -ansi for compiling.
-      QAK - 2003/04/11
-    * IA64 platform has its own configure setting and use Intel Compilers as
-      the default compilers (were gcc and pgf90 before.)  This also eliminated
-      the segmentation fault in the fortran test.  The missing reference of
-      "exit" is fixed too.  AKC - 2003/04/02
-
-
-Tools
------
-
-    * Added a -force option to h5redeploy.  AKC - 2003/03/04 
-    * The VL string bug(data and datatype cannot be shown) in h5dump is fixed.
-      -SLU - 2002/11/18
-    * Fixed segfault if h5dump was invoked with some options but no file (e.g.,
-      h5dump -H). -AKC, 2002/10/15
-    * Fixed limitation in h5dumper with object names which reached over 1024
-      characters in length. We can now handle arbitrarily larger sizes for
-      object names. BW - 2002/02/27
-    * Fixed so that the "-i" flag works correctly with the h5dumper.
-    * Fixed segfault when "-v" flag was used with the h5dumper.
-
-
-Documentation ( this section is messed up, we need to find place where
-                 to put it)
--------------
-  o Library
-  =========
-    o General
-    --------- 
-
- 
-    o APIs
-    ------
-      o Fortran APIs
-      --------------
-          * Added support for generic properties.
-          * Added support for time allocation properties.
- 
-    o Performance
-    -------------
-      * Improved dataset creation time by about 30% (relative to the 1.4.x
-        branch).
 
 
 New Features
 ============
+
+Configuration:
+--------------
+The following flags have been added to the configuration script:
+--enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface
+--enable-mpe            Enable MPE instrumentation [default=no]
+--enable-filters=all    Turn on all internal I/O filters. One may also
+                        specify a comma-separated list of filters or the
+                        word no. The default is all internal I/O filters.
+--with-szlib=DIR        Use szlib library for external szlib I/O filter
+                        [default=no]
+
+Library:
+--------
+    Summary: This release has the following new features that are not
+             available in 1.4.* releases
+    1. Generic properties to give application more control on I/O pipeline
+    2. Time allocation and fill value properties
+    3. New  filters: external compression filter szip
+                     internal shuffling and checksum filters
+    4. Compact storage layout for datasets
+    5. Redesigned I/O pipeline for better performance.
+    
+    Complete list of changes:
 
     * Changed raw data I/O to only access each chunk once, improving performance
       in many situations with hyperslabs and large chunks or chunks with
@@ -242,22 +171,8 @@ New Features
     * Modified the Pablo build procedure to permit building of the instrumented
       library to link either with the Trace libraries as before or with the
       Pablo Performance Caputure Facility.
-    * Added new F90 APIs:
-              H5F APIs:
-                      h5fget_obj_count_f  h5fget_obj_ids_f
-                                                              EIP - 2002/10/01
-              H5G APIs:
-                      h5glink2_f and h5gmove2_f
-                                                              EIP - 2002/09/25
-              H5P APIs:
-                      h5pequal_f 
-                      h5pget(set)_fclose_degree_f
-                      h5pget(set)_buffer_f
-
-              H5T APIs:
-                      h5tget_member_index_f
-                                                              EIP - 2002/10/01
-                      
+    * Added new F90 APIs for generic properties, new filters, and
+      time/space allocation properties.
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
           Exception::getCFuncName() to provide the name of the member
@@ -268,9 +183,99 @@ New Features
           H5Scopy, and H5Pcopy to make a copy of a datatype, dataspace,
           and property list, respectively.
 
+Parallel Library:
+-----------------
+
+Tools:
+------
+    * h5diff to compare two HDF5 files was added
+    * h5import to import ascii and binary data to an HDF5 file was added.
+      Old h5import tool in the tools/misc directory was renamed to 
+      h5createU8 to reflect its purpose. h5createU8 will be deleted in 
+      1.6.1 release. 
+
 Support for new platforms and languages
 =======================================
     * Added C++ API support on HPUX11.00.  BMR - 2003/03/19
+
+Bug Fixes since HDF5-1.4.0 release
+==================================
+
+Library
+-------
+    * The library now correctly reuses space when objects are deleted in the
+      file.  This should be handled correctly for every situation, except
+      datasets with variable-length datatypes are not returning the space they
+      use in the global heap currently. QAK - 2003/04/13
+    * Fixed error in B-tree deletion routine which could cause groups to be
+      corrupted when objects are removed from them.
+      QAK - 2003/04/11
+    * Fixed error in file space freeing code which could cause metadata to
+      fail to be written to the file.
+      QAK - 2003/04/11
+    * -O caused errors in AIX 5.x platforms.  Removed it from
+      --enable-production mode.  AKC - 2003/03/31
+    * Corrected memory/resource leaks in per-thread key information when
+      thread-safe operation was enabled.  QAK - 2003/02/07
+    * Improved error assertion for nil VL strings, making it fails with error
+      stack instead of just assertion failure.  SLU - 2002/12/16
+    * Added two new API functions: H5Zunregister & H5Zfilter_avail.
+      QAK - 2002/11/16
+    * Add data shuffle filter(source code H5Zshuffle.c), the combination of the
+      shuffling and compression can make data compression better without suffering
+      much encoding and decoding CPU time for many application datasets(especially
+      for floating point data). This adds a new API function: H5Pset_shuffle.
+      KY - 2002/11/13
+    * Allow scalar dataspaces to be used for parallel I/O.  QAK - 2002/11/05
+    * New functions H5Gget_comment(modification), H5Aget_storage_size, 
+      H5Arename.  SLU - 2002/10/29
+    * Fixed an assertion of H5S_select_iterate that did not account for scalar
+      type that has no dimension sizes.   AKC - 2002/10/15
+    * Partially fixed space allocation inefficiencies in the file by
+      improving our algorithms for re-using freed space.  QAK - 2002/08/27
+    * Fixed data corruption problem which could occur when fill values were
+      written to a contiguously stored dataset in parallel.  QAK - 2002/08/27
+    * Fixed VL memory leak when data is overwritten.  The heap objects holding
+      old data are freed.  If the fill value writting time is set to 
+      H5D_FILL_TIME_NEVER, the library prohibits user to create VL type dataset.
+      The library free all the heap objects storing VL type if there is nested 
+      VL type(a VL type contains another VL type).  SLU - 2002/07/10 
+    * Tweaked a few API functions to use 'size_t' instead of 'unsigned' or
+      'hsize_t', which may cause errors in some cases.
+
+
+Configuration
+-------------
+    * Included the both the examples of fortran and c++ "make check-install"
+      testing. This tests the correctness of the h5fc command. AKC - 2003/04/22
+    * When using gcc 3.x, we use -std=c99 instead of -ansi for compiling.
+      QAK - 2003/04/11
+    * IA64 platform has its own configure setting and use Intel Compilers as
+      the default compilers (were gcc and pgf90 before.)  This also eliminated
+      the segmentation fault in the fortran test.  The missing reference of
+      "exit" is fixed too.  AKC - 2003/04/02
+
+Performance
+-------------
+    * Improved dataset creation time by about 30% (relative to the 1.4.x
+      branch).
+
+Tools
+-----
+
+    * Added a -force option to h5redeploy.  AKC - 2003/03/04 
+    * The VL string bug(data and datatype cannot be shown) in h5dump is fixed.
+      -SLU - 2002/11/18
+    * Fixed segfault if h5dump was invoked with some options but no file 
+      (e.g., h5dump -H). -AKC, 2002/10/15
+    * Fixed so that the "-i" flag works correctly with the h5dumper.
+    * Fixed segfault when "-v" flag was used with the h5dumper.
+
+
+Documentation 
+------------- 
+
+
 
 
 
@@ -464,7 +469,7 @@ Known Problems
   compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
   program to fail.
 
-*Certain platforms give false negatives when testing h5ls:
+* Certain platforms give false negatives when testing h5ls:
     - Cray J90 (and Cray T3E?) give errors during testing when displaying
       some floating-point values. These are benign differences due to
       the different precision in the values displayed and h5ls appears to
@@ -474,6 +479,11 @@ Known Problems
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
+
+* On some platforms that use Intel compilers to build HDF5 fortran library,
+  compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
+  complaining about exit subroutine. Comment out the line 
+  IF (total_error .ne. 0) CALL exit (total_error)
 
   ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
 
