@@ -1,3 +1,6 @@
+#############################
+Expected output for 'h5dump topaque.h5'
+#############################
 HDF5 "topaque.h5" {
 GROUP "/" {
    DATASET "opaque test" {
