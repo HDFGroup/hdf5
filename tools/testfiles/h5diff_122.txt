@@ -1,0 +1,4 @@
+#############################
+Expected output for 'h5diff enum h5diff_test1.h5 h5diff_test2.h5'
+#############################
+<enum> and <enum> are of type H5G_TYPE
