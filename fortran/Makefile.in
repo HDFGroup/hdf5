@@ -89,6 +89,9 @@ install:
 install-examples:
 	(cd examples && $(MAKE) $@) || exit 1;
 
+uninstall-examples:
+	(cd examples && $(MAKE) $@) || exit 1;
+
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
