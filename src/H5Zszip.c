@@ -312,21 +312,8 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
         /* Compress the buffer */
         size_out = nbytes;
-        if(SZ_OK!= SZ_BufftoBuffCompress(outbuf+4, &size_out, *buf, nbytes, &sz_param)) {
-            /* In the event that an error occurs, assume that the buffer
-             * could not be compressed and just copy the input buffer to the
-             * proper location in the output buffer */
-            /* (This is necessary for the szip filter due to the uncompressed
-             * size needing to be encoded for the decompression side of things)
-             */
-            HDmemcpy((void*)(outbuf+4), (void*)(*buf), nbytes);
-
-            /* Set correct output size (again) */
-            size_out=nbytes;
-
-            /* Reset the "nbytes" to encode, so that the decompression side knows that the buffer is uncompressed */
-            nbytes=0;
-        } /* end if */
+        if(SZ_OK!= SZ_BufftoBuffCompress(outbuf+4, &size_out, *buf, nbytes, &sz_param))
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "overflow");
 
         /* Encode the uncompressed length */
         H5_CHECK_OVERFLOW(nbytes,size_t,uint32_t);
