@@ -957,6 +957,28 @@ EOF
   rm makeinc maketest
 fi
 
+dnl ----------------------------------------------------------------------
+dnl Checking to see if GPFS is available on this filesystem
+dnl
+
+dnl Change to the C language
+AC_LANG_C
+
+AC_CHECK_HEADERS([gpfs.h],
+                 AC_MSG_CHECKING([for GPFS support])
+                 AC_TRY_COMPILE([#include <gpfs.h>],
+                                [int fd = 0; gpfs_fcntl(fd, (void *)0);],
+                                AC_DEFINE(HAVE_GPFS, 1,
+                                          [Define if we have GPFS support])
+                                AC_MSG_RESULT(yes)
+                                LIBS="$LIBS -lgpfs"
+                                GPFS="yes",
+                                AC_MSG_RESULT(no)
+                                GPFS="no"))
+
+dnl Change back to the Fortran 90 language
+AC_LANG_FORTRAN9X
+
 dnl Some cleanup stuff
 rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
 
