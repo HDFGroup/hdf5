@@ -151,7 +151,7 @@ for arg in $@ ; do
       allargs="$allargs $arg"
       compile_args="$compile_args $arg"
       dash_c="yes"
-      dash_o="no"
+      do_link="no"
       ;;
     -l*)
       link_args="$link_args $arg"
