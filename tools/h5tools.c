@@ -909,8 +909,10 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
                         h5dump_str_append(str,"%s",OPT(info->line_indent,""));
                     }
 		}
-		h5dump_sprint(str, info, container, memb,
+	        ctx->indent_level++;	
+                h5dump_sprint(str, info, container, memb,
 			      (char*)vp+offset+i*size, ctx);
+                ctx->indent_level--;
 	    }
 	    if (nelmts>1) {
 		h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
