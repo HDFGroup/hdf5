@@ -3108,6 +3108,7 @@ test_filter_delete(hid_t file)
 
     TESTING("filter deletion");
 
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 
     /* create the data space */
     if ((sid = H5Screate_simple(2, dims, NULL))<0) goto error;
 
@@ -3115,17 +3116,9 @@ test_filter_delete(hid_t file)
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) goto error;
 
-#if defined H5_HAVE_FILTER_FLETCHER32 
     if (H5Pset_fletcher32 (dcpl)<0) goto error;
-#endif
-
-#if defined H5_HAVE_FILTER_DEFLATE
     if (H5Pset_deflate (dcpl, 6)<0) goto error;
-#endif
-
-#if defined H5_HAVE_FILTER_SHUFFLE 
     if (H5Pset_shuffle (dcpl)<0) goto error;
-#endif
 
     /* create a dataset */
     if ((dsid = H5Dcreate(file,"dsetdel", H5T_NATIVE_INT, sid, dcpl)) <0) goto error;
@@ -3137,7 +3130,6 @@ test_filter_delete(hid_t file)
     * delete the deflate filter
     *---------------------------------------------------------------------- 
     */
-#if defined H5_HAVE_FILTER_DEFLATE
     /* delete the deflate filter */
     if (H5Premove_filter(dcpl1,H5Z_FILTER_DEFLATE)<0) goto error;
 
@@ -3160,8 +3152,6 @@ test_filter_delete(hid_t file)
         printf("    Line %d: Shouldn't have deleted filter!\n",__LINE__);
         goto error;
     } /* end if */
-
-#endif /*H5_HAVE_FILTER_DEFLATE*/
 
    /*----------------------------------------------------------------------
     * delete all filters
@@ -3188,6 +3178,9 @@ test_filter_delete(hid_t file)
     if (H5Sclose (sid)<0) goto error;
 
     PASSED();
+#else
+    SKIPPED();
+#endif
     return 0;
 
 error:
@@ -3325,6 +3318,7 @@ test_filters_endianess(void)
     
     TESTING("filters with big-endian/little-endian data");
 
+#if defined H5_HAVE_FILTER_FLETCHER32 
    /*-------------------------------------------------------------------------
     * step1: create a file 
     *-------------------------------------------------------------------------
@@ -3339,9 +3333,7 @@ test_filters_endianess(void)
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if(H5Pset_chunk(dcpl,rank,chunk_dims)<0) goto error;
 
-#if defined H5_HAVE_FILTER_FLETCHER32 
     if (H5Pset_fletcher32 (dcpl)<0) goto error;
-#endif
 
     /* create a dataset */
     if ((dsid = H5Dcreate(fid,"dset",H5T_NATIVE_INT,sid,dcpl)) <0) goto error;
@@ -3402,6 +3394,9 @@ test_filters_endianess(void)
     if (H5Fclose(fid)<0) goto error;
  
     PASSED();
+#else
+    SKIPPED();
+#endif
     return 0;
 
 error:
