@@ -1,4 +1,4 @@
-HDF5 version 1.4.2-post0 released on Sat Aug 11 03:46:29 CDT 2001
+HDF5 version 1.4.3-snap0 released on Sat Sep 15 04:23:12 CDT 2001
 ==============================================================================
 
 
@@ -35,6 +35,18 @@ CONTENTS
 
 New Features
 ============
+
+    * A helper script called ``h5cc'', which helps compilation of HDF5
+      programs, is now distributed with HDF5. See the reference manual
+      for information on how to use this feature.
+    * Added perform programs to test the HDF5 library performance.  Programs
+      are installed in directory perform/.
+    * Improved performance of byte-swapping during data conversions.
+    * Changed prototype for H5Awrite from:
+        H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
+      to:
+        H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
+
 
          
 Bug Fixes since HDF5-1.4.2 Release
@@ -200,12 +212,6 @@ Known Problems
 
     * IRIX 6.5 fails to compile if configured with --enable-static-exec.
     
-    * For 24-bit image conversion from H4->H5, the current conversion is
-      not consistent with HDF5 image specification. 
-
-    * In some cases, and SDS with an UNLIMITED dimension that has not
-      been written (current size = 0) is not converted correctly.
-
     * After "make install" or "make install-doc" one may need to reload
       the source from the tar file before doing another build.
 
