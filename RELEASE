@@ -132,16 +132,17 @@ Release information for parallel HDF5
    I/O are done via MPI_COMM_WORLD.  Access_mode for H5Cset_mpi can be
    H5ACC_INDEPENDENT only.
 
-+) This release of parallel HDF5 has been tested on SP2 and Origin 2000
-   systems.  It uses the ROMIO version of MPIO interface for parallel
-   I/O supports.
++) This release of parallel HDF5 has been tested on IBM SP2 and SGI
+   Origin 2000 systems.  It uses the ROMIO version of MPIO interface
+   for parallel I/O supports.
 
 +) Useful URL's.
    Parallel HDF webpage: "http://hdf.ncsa.uiuc.edu/Parallel_HDF/"
    ROMIO webpage: "http://www.mcs.anl.gov/home/thakur/romio/"
 
-+) Future plan for parallel HDF5
-   1) support for Intel Teraflop platform.
-   2) support for unlimited dimension datasets.
-   3) support for collective access to datasets.
-   4) support for independent create/open of datasets.
++) Some to-do items for future releases
+      support for Intel Teraflop platform.
+      support for unlimited dimension datasets.
+      support for file access via a communicator besides MPI_COMM_WORLD.
+      support for collective access to datasets.
+      support for independent create/open of datasets.
