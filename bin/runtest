@@ -54,6 +54,7 @@ SNAPCMD="$SRCDIR test clean"
 # Default Standard snaptest command options
 STANDARD_OPT=""
 ENABLE_PARALLEL="--enable-parallel"
+CONFIGNAME=$HOSTNAME	# Name used in the SNAPTESTCFG file
 
 # test host default as local host.
 TESTHOST=""
@@ -403,7 +404,7 @@ SNAPTEST_CONFIG_PARSE()
 		#standard configuration
 		STANDARD_OPT="$y"
 		;;
-	    all: | ${HOSTNAME}:)
+	    all: | ${CONFIGNAME}:)
 		# types of test for all hosts or this host
 		if [ -n "$TEST_TYPES" ]; then
 		    TEST_TYPES="$TEST_TYPES ; $y"
@@ -462,6 +463,8 @@ Usage: runtest [-h] [-debug] [-r<version>] [-all] [-nocvs] [-nodiff] [<host> ...
 	do not do cvs commands
     -nodiff
 	do not do diff commands
+    -configname <name>
+	use <name> as hostname in the parsing of the snaptest configure file
     <host>
 	launch tests for <host>
     
@@ -516,6 +519,11 @@ while [ $# -gt 0 ]; do
 	-nodiff)
 	    # do not do diff commands
 	    NODIFF=nodiff
+	    ;;
+	-configname)
+	    # use <name> as hostname in the parsing of the snaptest configure file
+	    shift
+	    CONFIGNAME=$1
 	    ;;
 	-*) # Unknow option
 	    PRINT "Unknown option ($1)"
@@ -671,16 +679,17 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	# run the remote shell command with output to $TMP_OUTPUT
 	case "$RSH" in
 	    rsh|ssh)
-		PRINT $RSH $h -n $PROGNAME
+		CMD="$RSH $h -n $PROGNAME -configname $h"
+		PRINT $CMD
 		# kludge: some how eirene and houdin can not have
                 # rsh connections too close.  wait a few seconds
 		test $h = houdin && echo "wait 10 sec for houdin" && sleep 10
 
 		# launch concurrent tests only if srcdir is used
 		if [ -n "$SRCDIR" ]; then
-		    $RSH $h -n $PROGNAME &
+		    $CMD &
 		else
-		    $RSH $h -n $PROGNAME
+		    $CMD
 		fi
 		;;
 	    NoRemoteCommand)
