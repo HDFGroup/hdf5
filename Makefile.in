@@ -62,6 +62,10 @@ lib progs test _test install uninstall TAGS dep depend:
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
+# Number format detection
+H5Tinit.c: 
+	(cd src && $(MAKE) $@)
+
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
