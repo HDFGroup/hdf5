@@ -51,7 +51,7 @@ $(srcdir)/Dependencies: .depend
 	        ;;								\
 	    esac;								\
 	  fi;									\
-	done;
+	done;                                                                   \
         $(PERL) -w $(top_srcdir)/bin/dependencies --top_srcdir=$(top_srcdir) --top_builddir=$(top_builddir) $@;
 
 -include .depend
