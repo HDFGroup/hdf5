@@ -506,6 +506,7 @@ __DLL__ void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDatof(S)		atof(S)
 #define HDatoi(S)		atoi(S)
 #define HDatol(S)		atol(S)
+#define HDBSDgettimeofday(S,P)	BSDgettimeofday(S,P)
 #define HDbsearch(K,B,N,Z,F)	bsearch(K,B,N,Z,F)
 #define HDcalloc(N,Z)		calloc(N,Z)
 #define HDceil(X)		ceil(X)

@@ -902,7 +902,7 @@ H5G_basename(const char *name, size_t *size_p)
     FUNC_ENTER(H5G_basename, NULL);
 
     /* Find the end of the base name */
-    i = strlen(name);
+    i = HDstrlen(name);
     while (i>0 && '/'==name[i-1]) --i;
 
     /* Skip backward over base name */

@@ -162,7 +162,7 @@ printf("%s: size=%d\n",FUNC,(int)size);
      * align the pointer, but this might not be the case.
      */
     n = H5HG_ALIGN(p-heap->chunk) - (p-heap->chunk);
-    memset(p, 0, n);
+    HDmemset(p, 0, n);
     p += n;
 
     /* The freespace object */

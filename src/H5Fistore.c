@@ -873,7 +873,7 @@ H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
         for (u=0; u<bt_udata->mesg.ndims; u++) {
             HDfprintf(bt_udata->stream, "%s%Hd", u?", ":"", lt_key->offset[u]);
         }
-        fputs("]\n", bt_udata->stream);
+        HDfputs("]\n", bt_udata->stream);
     }
 
     bt_udata->total_storage += lt_key->nbytes;
@@ -1175,8 +1175,8 @@ H5F_istore_dest (H5F_t *f)
 
     for (ent=rdcc->head; ent; ent=next) {
 #ifdef H5F_ISTORE_DEBUG
-	fputc('c', stderr);
-	fflush(stderr);
+	HDfputc('c', stderr);
+	HDfflush(stderr);
 #endif
 	next = ent->next;
 	if (H5F_istore_preempt(f, ent)<0) {
@@ -1258,8 +1258,8 @@ H5F_istore_prune (H5F_t *f, size_t size)
 		 */
 		cur = p[0];
 #ifdef H5F_ISTORE_DEBUG
-		putc('.', stderr);
-		fflush(stderr);
+		HDputc('.', stderr);
+		HDfflush(stderr);
 #endif
 		
 	    } else if (1==i && p[1] && !p[1]->locked) {
@@ -1270,8 +1270,8 @@ H5F_istore_prune (H5F_t *f, size_t size)
 		 */
 		cur = p[1];
 #ifdef H5F_ISTORE_DEBUG
-		putc(':', stderr);
-		fflush(stderr);
+		HDputc(':', stderr);
+		HDfflush(stderr);
 #endif
 		
 	    } else {
@@ -1387,8 +1387,8 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
          * miss because we saved ourselves lots of work.
          */
 #ifdef H5F_ISTORE_DEBUG
-        putc('w', stderr);
-        fflush(stderr);
+        HDputc('w', stderr);
+        HDfflush(stderr);
 #endif
         rdcc->nhits++;
         for (u=0, chunk_size=1; u<layout->ndims; u++) {
@@ -1461,8 +1461,8 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
          */
         if (ent) {
 #ifdef H5F_ISTORE_DEBUG
-            putc('#', stderr);
-            fflush(stderr);
+            HDputc('#', stderr);
+            HDfflush(stderr);
 #endif
 #if 0
             HDfprintf(stderr, "\ncollision %3d %10a {",

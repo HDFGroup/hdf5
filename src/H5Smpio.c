@@ -108,7 +108,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
     *is_derived_type = 0;
 
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
+    HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
 #endif
     FUNC_LEAVE (SUCCEED);
 }
@@ -185,8 +185,8 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 	HDfprintf(stdout, "hyper_type: start=%Hd  stride=%Hu  count=%Hu  "
 		"block=%Hu  xtent=%Hu",
 		d[i].start, d[i].strid, d[i].count, d[i].block, d[i].xtent );
-	if (i==0) fprintf(stdout, "  rank=%d\n", rank );
-	else	  fprintf(stdout, "\n" );
+	if (i==0) HDfprintf(stdout, "  rank=%d\n", rank );
+	else	  HDfprintf(stdout, "\n" );
 #endif
 	if (0==d[i].block) goto empty;
 	if (0==d[i].count) goto empty;
@@ -201,14 +201,14 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     max_xtent[rank-1] = d[rank-1].xtent;
 #ifdef H5Smpi_DEBUG
           i=rank-1;
-	  fprintf(stdout, " offset[%2d]=%d; max_xtent[%2d]=%d\n",
+	  HDfprintf(stdout, " offset[%2d]=%d; max_xtent[%2d]=%d\n",
                           i, offset[i], i, max_xtent[i]);
 #endif
     for (i=rank-2; i>=0; --i) {
         offset[i] = offset[i+1]*d[i+1].xtent;
         max_xtent[i] = max_xtent[i+1]*d[i].xtent;
 #ifdef H5Smpi_DEBUG
-	  fprintf(stdout, " offset[%2d]=%d; max_xtent[%2d]=%d\n",
+	  HDfprintf(stdout, " offset[%2d]=%d; max_xtent[%2d]=%d\n",
                           i, offset[i], i, max_xtent[i]);
 #endif
     }
@@ -252,8 +252,8 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     assert(0<=num_to_collapse && num_to_collapse<rank);
     new_rank = rank - num_to_collapse;
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "num_to_collapse=%d\n", num_to_collapse);
-    fprintf(stdout, "hyper_type: new_rank=%d\n", new_rank );
+    HDfprintf(stdout, "num_to_collapse=%d\n", num_to_collapse);
+    HDfprintf(stdout, "hyper_type: new_rank=%d\n", new_rank );
 #endif
 
     /* To collapse dims, just transform dimension info (from inner to outer) */
@@ -280,7 +280,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 *  Construct contig type for inner contig dims:
 *******************************************************/
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "hyper_type: Making contig type %d MPI_BYTEs\n", elmt_size );
+    HDfprintf(stdout, "hyper_type: Making contig type %d MPI_BYTEs\n", elmt_size );
     for (i=new_rank-1; i>=0; --i) {
       HDfprintf(stdout, "d[%d].xtent=%Hu \n", i, d[i].xtent);
     }
@@ -582,7 +582,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     if (layout->type != H5D_CONTIGUOUS) {
 #ifdef H5S_DEBUG
 	if (H5DEBUG(S)) {
-            fprintf (H5DEBUG(S), "H5S: can only create MPI datatype for hyperslab when layout is contiguous.\n" );
+            HDfprintf (H5DEBUG(S), "H5S: can only create MPI datatype for hyperslab when layout is contiguous.\n" );
 	}
 #endif
 	*must_convert = 1;      /* can't do optimized xfer; do the old way */

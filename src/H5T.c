@@ -6221,7 +6221,7 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
     }
 
     /* Save result name */
-    if (!name && NULL==(name=H5MM_malloc(strlen(dt->u.enumer.name[md])+1))) {
+    if (!name && NULL==(name=H5MM_malloc(HDstrlen(dt->u.enumer.name[md])+1))) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 		      "memory allocation failed");
     }
@@ -6805,10 +6805,10 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 			"memory allocation failed for type conversion path");
 	}
 	if (name && *name) {
-	    strncpy(path->name, name, H5T_NAMELEN);
+	    HDstrncpy(path->name, name, H5T_NAMELEN);
 	    path->name[H5T_NAMELEN-1] = '\0';
 	} else {
-	    strcpy(path->name, "NONAME");
+	    HDstrcpy(path->name, "NONAME");
 	}
 	if ((src && NULL==(path->src=H5T_copy(src, H5T_COPY_ALL))) ||
 	    (dst && NULL==(path->dst=H5T_copy(dst, H5T_COPY_ALL)))) {

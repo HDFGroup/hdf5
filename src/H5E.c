@@ -193,19 +193,19 @@ void *H5E_auto_data_g = NULL;
  *
  *-------------------------------------------------------------------------
  */
-H5E_t *H5E_get_stack() {
-  H5E_t *estack;
+H5E_t *H5E_get_stack(void)
+{
+    H5E_t *estack = pthread_getspecific(H5TS_errstk_key_g);
 
-  if ((estack = pthread_getspecific(H5TS_errstk_key_g))!=NULL) {
+    if (!estack) {
+        /* no associated value with current thread - create one */
+        estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
+        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
+    }
+
     return estack;
-  } else {
-    /* no associated value with current thread - create one */
-    estack = (H5E_t *)malloc(sizeof(H5E_t));
-    pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
-    return estack;
-  }
 }
-#endif
+#endif  /* H5_HAVE_THREADSAFE */
 
 
 /*-------------------------------------------------------------------------

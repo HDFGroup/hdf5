@@ -1236,7 +1236,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	    UINT32DECODE(p, driver_size);
 
 	    /* Driver name and/or version */
-	    strncpy(driver_name, (const char *)p, 8);
+	    HDstrncpy(driver_name, (const char *)p, 8);
 	    driver_name[8] = '\0';
 
 	    /* Read driver information and decode */
