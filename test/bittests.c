@@ -270,6 +270,398 @@ test_copy (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_shift
+ *
+ * Purpose:	Test bit shifting operations.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              Monday, April 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_shift (void)
+{
+    uint8_t	vector[8];
+    size_t	offset, size;
+    int	        i, j;
+    ssize_t	shift_dist, n;
+    
+    TESTING("bit shift operations");
+
+    for (i=0; i<NTESTS; i++) {
+	offset = rand() % (8*sizeof vector);
+	size = (unsigned)rand() % (8*sizeof(vector)-offset);
+        /* Don't want size to be 0 */
+        if(size == 0) continue;
+        shift_dist = rand() % size;
+
+	/*-------- LEFT-shift some bits and make sure something was shifted --------*/
+	memset (vector, 0x00, sizeof vector);
+        H5T_bit_set (vector, offset, size, 1);
+
+        H5T_bit_shift (vector, shift_dist, offset, size);
+
+	/* Look for the ones */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	if (n!=offset+shift_dist) {
+	    H5_FAILED();
+	    printf ("    Unable to find first bit in destination "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+	/*
+	 * Look for zeros and ones in reverse order.  This is only to test
+	 * that reverse searches work as expected.
+	 */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	if (n!=(ssize_t)(offset+size-1)) {
+	    H5_FAILED();
+	    printf ("    Unable to find last bit in destination "
+		    "(reverse, n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+	/*-------- RIGHT-shift some bits and make sure something was shifted --------*/
+	memset (vector, 0x00, sizeof vector);
+        H5T_bit_set (vector, offset, size, 1);
+
+        H5T_bit_shift (vector, -shift_dist, offset, size);
+
+	/* Look for the ones */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	if (n!=offset) {
+	    H5_FAILED();
+	    printf ("    Unable to find first bit in destination "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+	/*
+	 * Look for zeros and ones in reverse order.  This is only to test
+	 * that reverse searches work as expected.
+	 */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	if (n!=(ssize_t)(offset+size-shift_dist-1)) {
+	    H5_FAILED();
+	    printf ("    Unable to find last bit in destination "
+		    "(reverse, n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+        /*-------- Shift the bits out of sight --------*/
+        /* A sequence 111111 will be 000000 if shift_dist=6 */
+
+        /* Randomly decide shift direction */ 
+        if(size % 2 == 0)
+            shift_dist = size;
+        else 
+            shift_dist = -size;
+
+	memset (vector, 0x00, sizeof vector);
+        H5T_bit_set (vector, offset, size, 1);
+
+        H5T_bit_shift (vector, shift_dist, offset, size);
+
+	/* Supposed to fail to find any ones */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	if (n >= 0) {
+	    H5_FAILED();
+	    printf ("    Unable to verify all bits are zero in destination(LSB) "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+    
+        /* Look from the other direction */    
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	if (n >= 0) {
+	    H5_FAILED();
+	    printf ("    Unable to verify all bits are zero in destination(MSB) "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+    }
+
+    PASSED();
+    return 0;
+
+ failed:
+    printf ("    i=%d, offset=%lu, size=%lu, shift_dist=%lu\n",
+	    i, (unsigned long)offset, (unsigned long)size,
+	    (unsigned long)shift_dist);
+    for (j=sizeof(vector)-1; j>=0; --j) printf ("%02x", vector[j]);
+    printf ("\n");
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_increment
+ *
+ * Purpose:	Test operation to increment bit vector by 1.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              Monday, April 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_increment (void)
+{
+    uint8_t	vector[8];
+    size_t	offset, size;
+    int	        i, j;
+    ssize_t	n;
+    
+    TESTING("bit increment operations");
+
+    for (i=0; i<NTESTS; i++) {
+	offset = rand() % (8*sizeof vector);
+	size = (unsigned)rand() % (8*sizeof(vector)-offset);
+        /* Don't want size to be 0 */
+        if(size == 0) continue;
+
+	memset (vector, 0x00, sizeof vector);
+        if(size>1)  /* if size=6, make a sequence like 011111 */
+            H5T_bit_set (vector, offset, size-1, 1);
+        else  /* if size=1, just set this one bit to 1 */
+            H5T_bit_set (vector, offset, size, 1);
+
+	/* Increment the sequence by one */
+        H5T_bit_inc (vector, offset, size);
+
+	/* Look for the one */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	if (size!=1 && n!=offset+size-1) {
+	    H5_FAILED();
+	    printf ("    Unable to find first bit in destination "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+        if(size==1 && n>=0) {
+	    H5_FAILED();
+	    printf ("    Unable to verify all-zero bit in destination "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+	/*
+	 * Look for one in reverse order.  This is only to test
+	 * that reverse searches work as expected.
+	 */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	if (size!=1 && n!=(ssize_t)(offset+size-1)) {
+	    H5_FAILED();
+	    printf ("    Unable to find last bit in destination "
+		    "(reverse, n=%d)\n", (int)n);
+	    goto failed;
+	}
+        if(size==1 && n>=0) {
+	    H5_FAILED();
+	    printf ("    Unable to verify all-zero bit in destination "
+		    "(reverse, n=%d)\n", (int)n);
+	    goto failed;
+	}
+    }
+
+    PASSED();
+    return 0;
+
+ failed:
+    printf ("    i=%d, offset=%lu, size=%lu\n",
+	    i, (unsigned long)offset, (unsigned long)size);
+    for (j=sizeof(vector)-1; j>=0; --j) printf ("%02x", vector[j]);
+    printf ("\n");
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_decrement
+ *
+ * Purpose:	Test operation to decrement bit vector by 1.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              Monday, April 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_decrement (void)
+{
+    uint8_t	vector[8];
+    size_t	offset, size;
+    int	        i, j;
+    ssize_t	n;
+    
+    TESTING("bit decrement operations");
+
+    for (i=0; i<NTESTS; i++) {
+	offset = rand() % (8*sizeof vector);
+	size = (unsigned)rand() % (8*sizeof(vector)-offset);
+        /* Don't want size to be 0 */
+        if(size == 0) continue;
+
+        /* All-zero sequence will become 111111(size=6) after decrement */
+	memset (vector, 0x00, sizeof vector);
+
+	/* decrement the sequence by one */
+        H5T_bit_dec (vector, offset, size);
+
+	/* Look for the ones */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	if (n!=offset) {
+	    H5_FAILED();
+	    printf ("    Unable to find first bit in destination "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+	/*
+	 * Look for zeros and ones in reverse order.  This is only to test
+	 * that reverse searches work as expected.
+	 */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	if (n!=(ssize_t)(offset+size-1)) {
+	    H5_FAILED();
+	    printf ("    Unable to find last bit in destination "
+		    "(reverse, n=%d)\n", (int)n);
+	    goto failed;
+	}
+    }
+
+    PASSED();
+    return 0;
+
+ failed:
+    printf ("    i=%d, offset=%lu, size=%lu\n",
+	    i, (unsigned long)offset, (unsigned long)size);
+    for (j=sizeof(vector)-1; j>=0; --j) printf ("%02x", vector[j]);
+    printf ("\n");
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_negate
+ *
+ * Purpose:	Test operation to negate bit vector.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              Monday, April 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_negate (void)
+{
+    uint8_t	vector[8];
+    size_t	offset, size;
+    int	        i, j;
+    ssize_t	n;
+    
+    TESTING("bit negate operations");
+
+    for (i=0; i<NTESTS; i++) {
+	offset = rand() % (8*sizeof vector);
+	size = (unsigned)rand() % (8*sizeof(vector)-offset);
+        /* Don't want size to be 0 */
+        if(size == 0) continue;
+
+        /* All-zero sequence will become 111111(size=6) after negating */
+	memset (vector, 0x00, sizeof vector);
+        
+	/* negate the sequence */
+        H5T_bit_neg (vector, offset, size);
+
+	/* Look for the ones */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	if (n!=offset) {
+	    H5_FAILED();
+	    printf ("    Unable to find first bit in destination "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+	/*
+	 * Look for zeros and ones in reverse order.  This is only to test
+	 * that reverse searches work as expected.
+	 */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	if (n!=(ssize_t)(offset+size-1)) {
+	    H5_FAILED();
+	    printf ("    Unable to find last bit in destination "
+		    "(reverse, n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+        /* All-one sequence will become 000000(size=6) after negating */
+	memset (vector, 0x00, sizeof vector);
+        H5T_bit_set (vector, offset, size, 1);
+
+	/* negate the sequence */
+        H5T_bit_neg (vector, offset, size);
+
+	/* Look for the ones */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
+	if (n>=0) {
+	    H5_FAILED();
+	    printf ("    Unable to verify all-zero bits in destination "
+		    "(n=%d)\n", (int)n);
+	    goto failed;
+	}
+
+	/*
+	 * Look for ones in reverse order.  This is only to test
+	 * that reverse searches work as expected.
+	 */
+	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_MSB, 1);
+	if (n>=0) {
+	    H5_FAILED();
+	    printf ("    Unable to verify all-zero bits in destination "
+		    "(reverse, n=%d)\n", (int)n);
+	    goto failed;
+	}
+    }
+
+    PASSED();
+    return 0;
+
+ failed:
+    printf ("    i=%d, offset=%lu, size=%lu\n",
+	    i, (unsigned long)offset, (unsigned long)size);
+    for (j=sizeof(vector)-1; j>=0; --j) printf ("%02x", vector[j]);
+    printf ("\n");
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_set
  *
  * Purpose:	Test bit set operations
@@ -536,6 +928,10 @@ main (void)
     nerrors += test_set  ()<0?1:0;
     nerrors += test_clear()<0?1:0;
     nerrors += test_copy ()<0?1:0;
+    nerrors += test_shift()<0?1:0;
+    nerrors += test_increment  ()<0?1:0;
+    nerrors += test_decrement  ()<0?1:0;
+    nerrors += test_negate  ()<0?1:0;
 
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",
