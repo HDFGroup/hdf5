@@ -3667,6 +3667,7 @@ print_enum(hid_t type)
 {
     char           **name = NULL;   /*member names                   */
     unsigned char   *value = NULL;  /*value array                    */
+    unsigned char   *copy = NULL;   /*a pointer to value array       */
     unsigned         nmembs;        /*number of members              */
     int              nchars;        /*number of output characters    */
     hid_t            super;         /*enum base integer type         */
@@ -3729,11 +3730,17 @@ print_enum(hid_t type)
 	    for (j = 0; j < dst_size; j++)
 		printf("%02x", value[i * dst_size + j]);
 	} else if (H5T_SGN_NONE == H5Tget_sign(native)) {
+	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+	     *strangely, unless use another pointer "copy".*/
+	    copy = value+i*dst_size;
 	    HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "u", *((unsigned long_long *)
-					      ((void *) (value + i * dst_size))));
+					      ((void *)copy)));
 	} else {
+	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+	     *strangely, unless use another pointer "copy".*/
+	    copy = value+i*dst_size;
 	    HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "d",
-		   *((long_long *) ((void *) (value + i * dst_size))));
+		   *((long_long *) ((void *)copy)));
 	}
 
 	printf(";\n");
