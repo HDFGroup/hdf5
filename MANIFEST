@@ -1837,3 +1837,7 @@
 ./windows/copy_hdf.bat
 ./windows/installhdf5lib.bat
 ./windows/installhdf5lib_fort.bat
+
+./windows/fortran/examples/allf90examples/allf90examples.dsp
+./windows/fortran/examples/allf90examples/allf90examples.dsw
+
