@@ -5,8 +5,8 @@ HDF5 version 1.4.4-pre6 currently under development
 INTRODUCTION
 
 This document describes the differences between HDF5-1.4.3 and
-HDF5-1.4.3_post0, and contains information on the platforms tested and
-known problems in HDF5-1.4.3. For more details check the HISTORY.txt
+HDF5-1.4.4, and contains information on the platforms tested and
+known problems in HDF5-1.4.4. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -40,9 +40,8 @@ New Features
   ================
     * The H4 to H5 tools were removed from the main source and placed in a
       separate package. You can get these tools from the HDF ftp site
-	  (ftp://hdf.ncsa.uiuc.edu/). The "--with-hdf4" command-line option during
+     (ftp://hdf.ncsa.uiuc.edu/). The "--with-hdf4" command-line option during
       configure is no longer valid.  BW - 2002/06/25
-
 
   o Library
   =========
@@ -109,7 +108,8 @@ New Features
 
   o Tools
   =======
-
+    * h5redeploy utility was added. It updates HDF5 compiler tools
+      after the HDF5 software has been installed in a new location.
 
   o Support for new platforms and languages
   =========================================
@@ -122,7 +122,8 @@ New Features
   o Misc.
   =========================================
    * zlib is moved out of windows source release. Users should go to
-     HDF homepage(URL: http://???) to download the corresponding zlib library.
+     ZLIB homepage(URL: http://www.zlib.org) to download the corresponding 
+     zlib library.
    * Windows binary release is built with the old version of zlib library.
      We expect users to use zlib 1.1.4 to build with source release.  
    * In windows-specified install document, we specify how to test backward
