@@ -858,9 +858,8 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
     obj_start = heap->obj[hobj->idx].begin;
-    need = H5HG_ALIGN(heap->obj[hobj->idx].size); /* should this include the
-						   * object header size? -rpm
-						   */
+    /* Include object header size */
+    need = H5HG_ALIGN(heap->obj[hobj->idx].size)+H5HG_SIZEOF_OBJHDR(f);
     
     /* Move the new free space to the end of the heap */
     for (u=0; u<heap->nalloc; u++) {
