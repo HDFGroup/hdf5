@@ -139,7 +139,7 @@
           INTEGER(SIZE_T) :: filter_name_len = 4
           INTEGER, DIMENSION(4) :: cd_values 
 
-          options_mask = H5_SZIP_RAWORNN_OM_F
+          options_mask = H5_SZIP_NN_OM_F + H5_SZIP_CHIP_OM_F
           pix_per_block = 32
           !
           ! Initialize the dset_data array.
