@@ -857,7 +857,7 @@ create or access function.
 <dl>
 <dt><strong>Name:</strong> <a name="Group-GetObjNameByIdx">H5Gget_objname_by_idx</a>
 <dt><strong>Signature:</strong>
-  <dd><em>ssize_t</em> <code>H5Gget_objname_by_idx</code>(<em>hid_t</em> <code>group_id</code>, 
+  <dd><em>ssize_t</em> <code>H5Gget_objname_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
                       <em>hsize_t</em> <code>idx</code>, 
                       <em>char *</em><code>name</code>, 
                       <em>size_t*</em> <code>size</code> )
@@ -865,10 +865,10 @@ create or access function.
   <dd>Returns a name of an object specified by an index.
 <dt><strong>Description:</strong>
   <dd><code>H5Gget_objname_by_idx</code> returns a name of the object 
-      specified by the index <code>idx</code> in the group <code>group_id</code>.
+      specified by the index <code>idx</code> in the group <code>loc_id</code>.
       <p>
-      The group is specified by a group identifier <code>group_id</code>. 
-      If preferred, a file identifier may be passed in <code>group_id</code>; 
+      The group is specified by a group identifier <code>loc_id</code>. 
+      If preferred, a file identifier may be passed in <code>loc_id</code>; 
       that file's root group will be assumed. 
       <p>
       <code>idx</code> is the transient index used to iterate through 
@@ -886,12 +886,13 @@ create or access function.
       the object name is truncated to <code>max_size - 1</code> characters.
       <p>
       Note that if the size of the object's name is unkown, a 
-      preliminary call to <code>H5Gget_objname_by_idx</code> will return
-      that value.  A second call to <code>H5Gget_objname_by_idx</code> 
+      preliminary call to <code>H5Gget_objname_by_idx</code> with <code>name</code>
+      set to NULL will return the length of the object's name.
+      A second call to <code>H5Gget_objname_by_idx</code> 
       can then be used to retrieve the actual name.
 <dt><strong>Parameters:</strong>
   <dl>
-    <dt><em>hid_t</em> <code>group_id</code>
+    <dt><em>hid_t</em> <code>loc_id</code>
         <dd>IN: Group or file identifier.
     <dt><em>hsize_t</em> <code>idx</code>
         <dd>IN: Transient index identifying object.
@@ -911,16 +912,16 @@ create or access function.
 <dl>
 <dt><strong>Name:</strong> <a name="Group-GetObjTypeByIdx">H5Gget_objtype_by_idx</a>
 <dt><strong>Signature:</strong>
-  <dd><em>int</em> <code>H5Gget_objtype_by_idx</code>(<em>hid_t</em> <code>group_id</code>, 
+  <dd><em>int</em> <code>H5Gget_objtype_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
                       <em>hsize_t</em> <code>idx</code> )
 <dt><strong>Purpose:</strong>
   <dd>Returns the type of an object specified by an index.
 <dt><strong>Description:</strong>
   <dd><code>H5Gget_objtype_by_idx</code> returns the type of the object 
-      specified by the index <code>idx</code> in the group <code>group_id</code>.
+      specified by the index <code>idx</code> in the group <code>loc_id</code>.
       <p>
-      The group is specified by a group identifier <code>group_id</code>. 
-      If preferred, a file identifier may be passed in <code>group_id</code>; 
+      The group is specified by a group identifier <code>loc_id</code>. 
+      If preferred, a file identifier may be passed in <code>loc_id</code>; 
       that file's root group will be assumed. 
       <p>
       <code>idx</code> is the transient index used to iterate through 
@@ -978,7 +979,7 @@ create or access function.
 
 <dt><strong>Parameters:</strong>
   <dl>
-    <dt><em>hid_t</em> <code>group_id</code>
+    <dt><em>hid_t</em> <code>loc_id</code>
         <dd>IN: Group or file identifier.
     <dt><em>hsize_t</em> <code>idx</code>
         <dd>IN: Transient index identifying object.

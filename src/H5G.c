@@ -520,8 +520,6 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
     if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
-    if (!name)   
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "nil pointer for name");
         
     if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
@@ -2669,12 +2667,15 @@ H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, h
               H5G_node_name, loc->cache.stab.btree_addr, &udata))<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
     
+    /* Get the length of the name */
     ret_value = (ssize_t)HDstrlen(udata.name);
-    if(name && size>0) {
-        HDstrncpy(name, udata.name, MIN((size_t)(ret_value+1),size-1));
+
+    /* Copy the name into the user's buffer, if given */
+    if(name) {
+        HDstrncpy(name, udata.name, MIN((size_t)(ret_value+1),size));
         if((size_t)ret_value >= size)
             name[size-1]='\0';
-    }
+    } /* end if */
 
 done:
     /* Free the duplicated name */

@@ -56,6 +56,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Corrected bug in H5Gget_objname_by_idx which was not allowing NULL
+            for the name when just querying for the object name's length.
+            QAK - 2003/08/25
         - Corrected bug in variable-length string handling which could
             generate a core dump on writing variable-length strings as part
             of a compound datatype on certain architectures.  QAK - 2003/08/25
