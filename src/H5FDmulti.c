@@ -14,9 +14,6 @@
 #include <stdlib.h>
 
 #include "hdf5.h"
-#ifdef QAK
-#include "H5private.h"          /* library function  */
-#endif /* QAK */
 
 /*
  * Define H5FD_MULTI_DEBUG if you want the ability to print debugging

@@ -16,6 +16,7 @@
 #include "H5FDdpss.h"
 #include "H5Iprivate.h"		/*object IDs	     */
 #include "H5MMprivate.h"        /* memory management */
+#include "H5Pprivate.h"         /* property lists */
 
 #ifdef COALESCE_READS
 /* Packages needed by this file.*/
@@ -235,18 +236,17 @@ H5FD_dpss_init (void)
 herr_t
 H5Pset_fapl_dpss(hid_t fapl_id)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
 
     FUNC_ENTER (H5Pset_fapl_dpss, FAIL);
     H5TRACE1("e","i",fapl_id);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
-    ret_value = H5Pset_driver (fapl_id, H5FD_DPSS, NULL);
+    ret_value = H5P_set_driver (plist, H5FD_DPSS, NULL);
 
     FUNC_LEAVE (ret_value);
 }
@@ -550,6 +550,7 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
                 size_t size, void *buf/*out*/)
 {
     H5FD_dpss_t *file = (H5FD_dpss_t *) _file;
+    H5P_genplist_t *plist;      /* Property list pointer */
     globus_result_t  globus_result;
 #ifdef COALESCE_READS
     static int count = 0;                 /* counter for single reads */
@@ -580,11 +581,10 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
+    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get gather read");
 
-    if(!count || H5P_get(dxpl_id, H5D_XFER_GATHER_READS_NAME, &count) < 0)
+    if(!count || H5P_get(plist, H5D_XFER_GATHER_READS_NAME, &count) < 0)
         HRETURN_ERROR(H5E_S, H5E_BADTYPE, FAIL, "not xfer parms");
 
 #ifdef DEBUG

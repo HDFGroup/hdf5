@@ -12,8 +12,8 @@
 
 /* $Id$ */
 
-#define H5A_PACKAGE         /*prevent warning from including H5Tpkg.h */
-#define H5S_PACKAGE		    /*suppress error about including H5Spkg	  */
+#define H5A_PACKAGE         /*prevent warning from including H5Apkg.h */
+#define H5S_PACKAGE	    /*suppress error about including H5Spkg	  */
 
 #include "H5private.h"
 #include "H5Eprivate.h"

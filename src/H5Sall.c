@@ -11,11 +11,12 @@
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
 #include "H5private.h"
+#include "H5Dprivate.h"
 #include "H5Eprivate.h"
 #include "H5Iprivate.h"
 #include "H5Spkg.h"
+#include "H5Tprivate.h"         /* Datatypes */
 #include "H5Vprivate.h"
-#include "H5Dprivate.h"
 
 /* Interface initialization */
 #define PABLO_MASK      H5Sall_mask
@@ -1201,9 +1202,10 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     hsize_t offset;             /* offset of region in buffer */
     hsize_t nelemts;            /* Number of elements to iterate through */
     void *tmp_buf;              /* temporary location of the element in the buffer */
-    unsigned rank;             /* Dataspace rank */
-    int indx;              /* Index to increment */
-    herr_t ret_value=0;     /* return value */
+    unsigned rank;              /* Dataspace rank */
+    int indx;                   /* Index to increment */
+    H5T_t *dt;                  /* Datatype structure */
+    herr_t ret_value=0;         /* return value */
 
     FUNC_ENTER (H5S_all_select_iterate, 0);
 
@@ -1217,7 +1219,11 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
 
     /* Set up the size of the memory space */
     HDmemcpy(mem_size, space->extent.u.simple.size, rank*sizeof(hsize_t));
-    mem_size[rank]=H5Tget_size(type_id);
+
+    /* Set the size of the datatype */
+    if (NULL==(dt=H5I_object(type_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+    mem_size[rank]=H5T_get_size(dt);
 
     /* Set the coordinates to zero */
     HDmemset(mem_offset, 0, (rank+1)*sizeof(hsize_t));

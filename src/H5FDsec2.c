@@ -231,17 +231,16 @@ H5FD_sec2_init(void)
 herr_t
 H5Pset_fapl_sec2(hid_t fapl_id)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Pset_fapl_sec2, FAIL);
     H5TRACE1("e","i",fapl_id);
     
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
-    ret_value= H5Pset_driver(fapl_id, H5FD_SEC2, NULL);
+    ret_value= H5P_set_driver(plist, H5FD_SEC2, NULL);
 
     FUNC_LEAVE(ret_value);
 }

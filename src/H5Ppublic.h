@@ -39,7 +39,6 @@ typedef long off_t;
 #ifdef H5_WANT_H5_V1_4_COMPAT
 /* Backward compatibility typedef... */
 typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 /* H5P_DATASET_XFER was the name from the beginning through 1.2.  It was
  * changed to H5P_DATA_XFER on v1.3.0.  Then it was changed back to
@@ -48,6 +47,7 @@ typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
  * Should be removed in later version.
  */
 #define H5P_DATA_XFER H5P_DATASET_XFER
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 /* Define property list class callback function pointer types */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
@@ -91,6 +91,7 @@ __DLLVAR__ hid_t H5P_CLS_FILE_ACCESS_g;
 __DLLVAR__ hid_t H5P_CLS_DATASET_CREATE_g;
 __DLLVAR__ hid_t H5P_CLS_DATASET_XFER_g;
 __DLLVAR__ hid_t H5P_CLS_MOUNT_g;
+
 /*
  * The library created default property lists
  */

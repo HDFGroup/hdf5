@@ -96,6 +96,7 @@
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fpkg.h"		/*file access				*/
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"		/*IDs					*/
 #include "H5MFprivate.h"	/*file memory management		*/
 #include "H5MMprivate.h"	/*core memory management		*/
 #include "H5Pprivate.h"		/*property lists				*/
@@ -310,15 +311,19 @@ int
 H5B_Kvalue(H5F_t *f, const H5B_class_t *type)
 {
     int btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;
 
     FUNC_ENTER(H5B_Kvalue, FAIL);
 
     assert(f);
     assert(type);
 
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "unable to get rank for btree internal nodes");
+    /* Check arguments */
+    if (NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
+
+    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for btree internal nodes");
 
     FUNC_LEAVE(btree_k[type->id]);
 } /* end H5B_Kvalue() */

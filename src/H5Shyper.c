@@ -17,8 +17,9 @@
 #include "H5FLprivate.h"	/*Free Lists	  */
 #include "H5Iprivate.h"
 #include "H5MMprivate.h"
-#include "H5Pprivate.h"
+#include "H5Pprivate.h"         /* Property Lists */
 #include "H5Spkg.h"
+#include "H5Tprivate.h"         /* Datatypes */
 #include "H5Vprivate.h"
 
 /* Interface initialization */
@@ -417,6 +418,7 @@ H5S_hyper_fread (H5F_t *f, const struct H5O_layout_t *layout,
     size_t last_io_bytes_left=0;    /* Last I/O bytes left before readv() called */
     size_t nseq=0;              /* Number of sequence/offsets stored in the arrays */
     size_t vector_size;         /* Value for vector size */
+    H5P_genplist_t *plist;      /* Property list */
     hssize_t ret_value=FAIL;
 
     FUNC_ENTER (H5S_hyper_fread, 0);
@@ -462,7 +464,9 @@ printf("%s: Called!\n",FUNC);
         loc_off+=(abs_arr[i]+space->select.offset[i])*slab[i];
 
     /* Get the hyperslab vector size */
-    if (H5P_get(dxpl_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
+    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5P_get(plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
 
     /* Allocate the vector I/O arrays */
@@ -885,6 +889,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
     size_t duffs_index;         /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
     size_t vector_size;         /* Value for vector size */
+    H5P_genplist_t *plist;      /* Property list */
     hsize_t ret_value=0;        /* Return value */
 
     FUNC_ENTER (H5S_hyper_fread_opt, 0);
@@ -904,8 +909,10 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
 #endif /* QAK */
 
     /* Get the hyperslab vector size */
-    if (H5P_get(dxpl_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
+    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a file access property list");
+    if (H5P_get(plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
 
     /* Allocate the vector I/O arrays */
     if((seq_len_arr = H5FL_ARR_ALLOC(size_t,vector_size,0))==NULL)
@@ -1513,6 +1520,7 @@ H5S_hyper_fwrite (H5F_t *f, const struct H5O_layout_t *layout,
     size_t last_io_bytes_left=0;    /* Last I/O bytes left before readv() called */
     size_t nseq=0;              /* Number of sequence/offsets stored in the arrays */
     size_t vector_size;         /* Value for vector size */
+    H5P_genplist_t *plist;      /* Property list */
     hssize_t ret_value=FAIL;
 
     FUNC_ENTER (H5S_hyper_fwrite, 0);
@@ -1561,7 +1569,9 @@ printf("%s: Called!\n",FUNC);
     assert(io_bytes_left<=(iter->hyp.elmt_left*elmt_size));
 
     /* Get the hyperslab vector size */
-    if (H5P_get(dxpl_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
+    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a file access property list");
+    if (H5P_get(plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
 
     /* Allocate the vector I/O arrays */
@@ -1981,6 +1991,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
     size_t duffs_index;         /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
     size_t vector_size;         /* Value for vector size */
+    H5P_genplist_t *plist;      /* Property list */
     hsize_t ret_value=0;        /* Return value */
 
     FUNC_ENTER (H5S_hyper_fwrite_opt, 0);
@@ -2000,8 +2011,10 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
 #endif /* QAK */
 
     /* Get the hyperslab vector size */
-    if (H5P_get(dxpl_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
+    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a file access property list");
+    if (H5P_get(plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
 
     /* Allocate the vector I/O arrays */
     if((seq_len_arr = H5FL_ARR_ALLOC(size_t,vector_size,0))==NULL)
@@ -6098,6 +6111,7 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t * UNUSED iter, void *buf, hid_t 
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
     int temp_dim;      /* Temporary rank holder */
     unsigned ndims;        /* Rank of the dataspace */
+    H5T_t *dt;                  /* Datatype structure */
     herr_t user_ret=0;          /* User's return value */
 
     FUNC_ENTER (H5S_hyper_select_iterate_mem_opt, FAIL);
@@ -6108,7 +6122,9 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t * UNUSED iter, void *buf, hid_t 
     diminfo=space->select.sel_info.hslab.diminfo;
 
     /* Get the data element size */
-    elem_size=H5Tget_size(type_id);
+    if (NULL==(dt=H5I_object(type_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+    elem_size=H5T_get_size(dt);
 
     /* Elements in the fastest dimension are 'elem_size' */
     slab[ndims-1]=elem_size;
@@ -6260,6 +6276,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     H5S_hyper_iter_info_t iter_info;  /* Block of parameters to pass into recursive calls */
     H5S_sel_iter_t	iter;   /* selection iteration info*/
     size_t elmt_size;           /* Datatype size */
+    H5T_t *dt;                  /* Datatype structure */
     herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER (H5S_hyper_select_iterate, FAIL);
@@ -6273,7 +6290,9 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     HDmemset(&iter,0,sizeof(H5S_sel_iter_t));
 
     /* Get the datatype size */
-    elmt_size=H5Tget_size(type_id);
+    if (NULL==(dt=H5I_object(type_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+    elem_size=H5T_get_size(dt);
 
     /* Construct iterator for hyperslab selection */
     if (H5S_hyper_init(space, elmt_size, &iter)<0)

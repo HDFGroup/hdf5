@@ -9,7 +9,7 @@
  *		with the least-significant bits in the first byte.  That is,
  *		the bytes are in little-endian order.
  */
-#define H5T_PACKAGE
+#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 #include "H5private.h"
 #include "H5Eprivate.h"

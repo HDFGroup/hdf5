@@ -16,6 +16,7 @@
 
 /* Packages needed by this file */
 #include "H5private.h"		/*library functions			*/
+#include "H5Dprivate.h"		/*datasets      			*/
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fpkg.h"		/*files					*/
 #include "H5FDprivate.h"	/*virtual file driver			*/
@@ -287,6 +288,7 @@ H5FDunregister(hid_t driver_id)
 H5FD_class_t *
 H5FD_get_class(hid_t id)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
     H5FD_class_t	*ret_value=NULL;
     hid_t               driver_id = -1;
 
@@ -294,19 +296,24 @@ H5FD_get_class(hid_t id)
 
     if (H5I_VFL==H5I_get_type(id)) {
 	ret_value = H5I_object(id);
-    } else if (H5I_GENPROP_LST == H5I_get_type(id) &&
-        TRUE==H5Pisa_class(id,H5P_FILE_ACCESS)) {
-        if(H5P_get(id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
-        ret_value = H5FD_get_class(driver_id);
-    } else if (H5I_GENPROP_LST == H5I_get_type(id) &&
-        TRUE==H5Pisa_class(id,H5P_DATASET_XFER)) {
-        ret_value = H5FD_get_class(H5P_peek_hid_t(id,H5D_XFER_VFL_ID_NAME));
     } else {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-	      "not a driver id, file access property list or "
-                              "data transfer property list");
-    }
+        /* Get the plist structure */
+        if(NULL == (plist = H5I_object(id)))
+            HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
+        if (TRUE==H5P_isa_class(id,H5P_FILE_ACCESS)) {
+            if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+                HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+            ret_value = H5FD_get_class(driver_id);
+        } else if (TRUE==H5P_isa_class(id,H5P_DATASET_XFER)) {
+            if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
+                HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+            ret_value = H5FD_get_class(driver_id);
+        } else {
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id, file access property list or data transfer property list");
+        }
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -744,41 +751,33 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t		*file=NULL;
     hid_t               driver_id = -1;
     size_t              meta_block_size=0;    
+    H5P_genplist_t *plist;      /* Property list pointer */
     
     FUNC_ENTER(H5FD_open, NULL);
 
     /* Check arguments */
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, 
-                      "not a file access property list"); 
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list"); 
  
-    if (0==maxaddr) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-		      "zero format address range");
-    }
+    if (0==maxaddr)
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range");
 
-    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
 
     /* Get driver info */
-    if (H5I_VFL!=H5I_get_type(driver_id) ||
-	NULL==(driver=H5I_object(driver_id))) {
-	HRETURN_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
-		      "invalid driver ID in file access property list");
-    }
-    if (NULL==driver->open) {
-	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL,
-		      "file driver has no `open' method");
-    }
+    if (H5I_VFL!=H5I_get_type(driver_id) || NULL==(driver=H5I_object(driver_id)))
+	HRETURN_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
+    if (NULL==driver->open)
+	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method");
     
     /* Dispatch to file driver */
-    if (HADDR_UNDEF==maxaddr) maxaddr = driver->maxaddr;
-    if (NULL==(file=(driver->open)(name, flags, fapl_id, maxaddr))) {
+    if (HADDR_UNDEF==maxaddr)
+        maxaddr = driver->maxaddr;
+    if (NULL==(file=(driver->open)(name, flags, fapl_id, maxaddr)))
 	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed");
-    }
 
     /*
      * Fill in public fields. We must increment the reference count on the
@@ -789,17 +788,15 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->cls = driver;
     file->maxaddr = maxaddr;
     HDmemset(file->fl, 0, sizeof(file->fl));
-    if(H5P_get(fapl_id, H5F_ACS_META_BLOCK_SIZE_NAME, 
-               &(meta_block_size)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
-                      "can't get meta data block size");
+    if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(meta_block_size)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get meta data block size");
     file->def_meta_block_size = meta_block_size;
     file->accum_loc = HADDR_UNDEF;
-    if(H5P_get(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, &(file->threshold)) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL,
-                      "can't get alignment threshold");
-    if(H5P_get(fapl_id, H5F_ACS_ALIGN_NAME, &(file->alignment)) < 0)
+    if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(file->threshold)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold");
+    if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(file->alignment)) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");    
+
     /* Retrieve the VFL driver feature flags */
     if (H5FD_query(file, &(file->feature_flags))<0)
         HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
@@ -1980,7 +1977,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
     if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
-            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
+            TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer");
@@ -2020,7 +2017,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     FUNC_ENTER(H5FD_read, FAIL);
     assert(file && file->cls);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     assert(buf);
 
 #ifndef H5_HAVE_PARALLEL
@@ -2133,7 +2130,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
     if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
-            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
+            TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer");
@@ -2176,7 +2173,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     FUNC_ENTER(H5FD_write, FAIL);
     assert(file && file->cls);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     assert(buf);
     
 #ifndef H5_HAVE_PARALLEL

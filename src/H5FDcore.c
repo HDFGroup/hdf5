@@ -178,22 +178,21 @@ H5FD_core_init(void)
 herr_t
 H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 {
-    herr_t ret_value=FAIL;
     H5FD_core_fapl_t	fa;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5FD_set_fapl_core, FAIL);
     H5TRACE3("e","izb",fapl_id,increment,backing_store);
 
     /* Check argument */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     fa.increment = increment;
     fa.backing_store = backing_store;
 
-    ret_value= H5Pset_driver(fapl_id, H5FD_CORE, &fa);
+    ret_value= H5P_set_driver(plist, H5FD_CORE, &fa);
 
     FUNC_LEAVE(ret_value);
 }
@@ -226,21 +225,23 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
 		 hbool_t *backing_store/*out*/)
 {
     H5FD_core_fapl_t	*fa;
+    H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5Pget_fapl_core, FAIL);
     H5TRACE3("e","ixx",fapl_id,increment,backing_store);
 
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
                       "not a file access property list");
-    if (H5FD_CORE!=H5P_get_driver(fapl_id))
+    if (H5FD_CORE!=H5P_get_driver(plist))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
-    if (NULL==(fa=H5Pget_driver_info(fapl_id)))
+    if (NULL==(fa=H5P_get_driver_info(plist)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
     
-    if (increment) *increment = fa->increment;
-    if (backing_store) *backing_store = fa->backing_store;
+    if (increment)
+        *increment = fa->increment;
+    if (backing_store)
+        *backing_store = fa->backing_store;
     
     FUNC_LEAVE(SUCCEED);
 }
@@ -306,6 +307,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
 {
     H5FD_core_t		*file=NULL;
     H5FD_core_fapl_t	*fa=NULL;
+    H5P_genplist_t *plist;      /* Property list pointer */
     int			fd=-1;
 
     FUNC_ENTER(H5FD_init_interface, NULL);
@@ -315,31 +317,30 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
         HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
     if (ADDR_OVERFLOW(maxaddr))
         HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow");
-    if (H5P_DEFAULT!=fapl_id) fa = H5Pget_driver_info(fapl_id);
+    if (H5P_DEFAULT!=fapl_id) {
+        if(NULL == (plist = H5I_object(fapl_id)))
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        fa = H5P_get_driver_info(plist);
+    } /* end if */
 
     /* Open backing store */
     if (fa && fa->backing_store && name &&
-            (fd=HDopen(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0) {
-        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-		      "unable to open backing store");
-    }
+            (fd=HDopen(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0)
+        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open backing store");
 
     /* Create the new file struct */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_core_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		      "unable to allocate file struct");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
     file->fd = fd;
-    if (name && *name) {
+    if (name && *name)
         file->name = HDstrdup(name);
-    }
 
     /*
      * The increment comes from either the file access property list or the
      * default value. But if the file access property list was zero then use
      * the default value instead.
      */
-    file->increment = (fa && fa->increment>0) ?
-		      fa->increment : H5FD_CORE_INCREMENT;
+    file->increment = (fa && fa->increment>0) ?  fa->increment : H5FD_CORE_INCREMENT;
 
     FUNC_LEAVE((H5FD_t*)file);
 }

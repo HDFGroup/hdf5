@@ -280,19 +280,18 @@ herr_t
 H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity)
 {
     H5FD_log_fapl_t	fa;     /* File access property list information */
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Pset_fapl_log, FAIL);
     H5TRACE3("e","isIs",fapl_id,logfile,verbosity);
     
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     fa.logfile = logfile;
     fa.verbosity=verbosity;
-    ret_value= H5Pset_driver(fapl_id, H5FD_LOG, &fa);
+    ret_value= H5P_set_driver(plist, H5FD_LOG, &fa);
 
     FUNC_LEAVE(ret_value);
 }
@@ -427,10 +426,11 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_log_t	*file=NULL;
     H5FD_log_fapl_t	*fa;     /* File access property list information */
 #ifdef WIN32
-	HFILE filehandle;
-	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
-	int results;   
+    HFILE filehandle;
+    struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+    int results;   
 #endif
+    H5P_genplist_t *plist;      /* Property list */
 
     FUNC_ENTER(H5FD_log_open, NULL);
 
@@ -458,11 +458,12 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Create the new file struct */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_log_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		      "unable to allocate file struct");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
 
     /* Get the driver specific information */
-    fa = H5Pget_driver_info(fapl_id);
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+    fa = H5P_get_driver_info(plist);
 
     file->fd = fd;
     file->eof = sb.st_size;

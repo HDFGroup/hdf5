@@ -238,15 +238,15 @@ H5FD_mpio_init(void)
 herr_t
 H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
 {
-    herr_t ret_value=FAIL;
     H5FD_mpio_fapl_t	fa;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;
     
     FUNC_ENTER(H5Pset_fapl_mpio, FAIL);
     H5TRACE3("e","iMcMi",fapl_id,comm,info);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
 
 
@@ -258,7 +258,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     fa.comm = comm;
     fa.info = info;
 
-    ret_value= H5Pset_driver(fapl_id, H5FD_MPIO, &fa);
+    ret_value= H5P_set_driver(plist, H5FD_MPIO, &fa);
 
     FUNC_LEAVE(ret_value);
 }
@@ -301,20 +301,22 @@ herr_t
 H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
 {
     H5FD_mpio_fapl_t	*fa;
+    H5P_genplist_t *plist;      /* Property list pointer */
     
     FUNC_ENTER(H5Pget_fapl_mpio, FAIL);
     H5TRACE3("e","ixx",fapl_id,comm,info);
 
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIO!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
-    if (NULL==(fa=H5Pget_driver_info(fapl_id)))
+    if (NULL==(fa=H5P_get_driver_info(plist)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
-    if (comm) *comm = fa->comm;
-    if (info) *info = fa->info;
+    if (comm)
+        *comm = fa->comm;
+    if (info)
+        *info = fa->info;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -349,24 +351,23 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
 herr_t
 H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
 {
-    herr_t ret_value=FAIL;
     H5FD_mpio_dxpl_t	dx;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Pset_dxpl_mpio, FAIL);
     H5TRACE2("e","iDt",dxpl_id,xfer_mode);
     
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
-            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
+    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
-    if (H5FD_MPIO_INDEPENDENT!=xfer_mode &&
-            H5FD_MPIO_COLLECTIVE!=xfer_mode)
+    if (H5FD_MPIO_INDEPENDENT!=xfer_mode && H5FD_MPIO_COLLECTIVE!=xfer_mode)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode");
 
     /* Initialize driver-specific properties */
     dx.xfer_mode = xfer_mode;
 
-    ret_value= H5Pset_driver(dxpl_id, H5FD_MPIO, &dx);
+    ret_value= H5P_set_driver(plist, H5FD_MPIO, &dx);
 
     FUNC_LEAVE(ret_value);
 }
@@ -396,16 +397,16 @@ herr_t
 H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
 {
     H5FD_mpio_dxpl_t	*dx;
+    H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5Pget_dxpl_mpio, FAIL);
     H5TRACE2("e","ix",dxpl_id,xfer_mode);
 
-    if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
-            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
+    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
-    if (H5FD_MPIO!=H5P_get_driver(dxpl_id))
+    if (H5FD_MPIO!=H5P_get_driver(plist))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
-    if (NULL==(dx=H5Pget_driver_info(dxpl_id)))
+    if (NULL==(dx=H5P_get_driver_info(plist)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     if (xfer_mode)
@@ -720,7 +721,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     MPI_Offset			size;
     const H5FD_mpio_fapl_t	*fa=NULL;
     H5FD_mpio_fapl_t		_fa;
-
+    H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5FD_mpio_open, NULL);
 
@@ -732,12 +733,14 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /* Obtain a pointer to mpio-specific file access properties */
-    if (H5P_DEFAULT==fapl_id || H5FD_MPIO!=H5P_get_driver(fapl_id)) {
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5P_DEFAULT==fapl_id || H5FD_MPIO!=H5P_get_driver(plist)) {
 	_fa.comm = MPI_COMM_SELF; /*default*/
 	_fa.info = MPI_INFO_NULL; /*default*/
 	fa = &_fa;
     } else {
-	fa = H5Pget_driver_info(fapl_id);
+	fa = H5P_get_driver_info(plist);
 	assert(fa);
     }
 
@@ -1091,6 +1094,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
     int				use_types_this_time, used_types_last_time;
+    H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5FD_mpio_read, FAIL);
 
@@ -1102,7 +1106,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     assert(H5FD_MPIO==file->pub.driver_id);
     /* Make certain we have the correct type of property list */
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
@@ -1118,11 +1122,13 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 #endif
 
     /* Obtain the data transfer properties */
-    if (H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
+    if(NULL == (plist = H5I_object(dxpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_MPIO!=H5P_get_driver(plist)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
         dx = &_dx;
     } else {
-        dx = H5Pget_driver_info(dxpl_id);
+        dx = H5P_get_driver_info(plist);
         assert(dx);
     }
     
@@ -1346,6 +1352,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     int				mpi_rank=-1;
     int				use_types_this_time, used_types_last_time;
     hbool_t     		allsame;
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_write, FAIL);
@@ -1358,7 +1365,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     assert(H5FD_MPIO==file->pub.driver_id);
     /* Make certain we have the correct type of property list */
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off)<0)
@@ -1376,11 +1383,13 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
 #endif
 
     /* Obtain the data transfer properties */
-    if (H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
+    if(NULL == (plist = H5I_object(dxpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_MPIO!=H5P_get_driver(plist)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
         dx = &_dx;
     } else {
-        dx = H5Pget_driver_info(dxpl_id);
+        dx = H5P_get_driver_info(plist);
         assert(dx);
     }
     

@@ -1765,15 +1765,6 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 
-    case H5I_TEMPLATE_0:
-    case H5I_TEMPLATE_1:
-    case H5I_TEMPLATE_2:
-    case H5I_TEMPLATE_3:
-    case H5I_TEMPLATE_4:
-    case H5I_TEMPLATE_5:
-    case H5I_TEMPLATE_6:
-    case H5I_TEMPLATE_7:
-    case H5I_TEMPLATE_MAX:
     case H5I_GENPROP_CLS:
     case H5I_GENPROP_LST:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,

@@ -209,6 +209,7 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     void *alloc_info;               /* Vlen allocation information */
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     size_t len=seq_len*base_size;
+    H5P_genplist_t *plist;      /* Property list */
 
     FUNC_ENTER (H5T_vlen_seq_mem_write, FAIL);
 
@@ -221,9 +222,11 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
         assert((seq_len*base_size)==(hsize_t)((size_t)(seq_len*base_size))); /*check for overflow*/
 
         /* Get the allocation function & info */
-        if (H5P_get(plist_id,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
+        if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
             HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-        if (H5P_get(plist_id,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
+        if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
             HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
         if(alloc_func!=NULL) {
@@ -329,6 +332,7 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     void *alloc_info;               /* Vlen allocation information */
     char **s=(char **)vl_addr;   /* Pointer to the user's hvl_t information */
     size_t len=seq_len*base_size;
+    H5P_genplist_t *plist;      /* Property list */
 
     FUNC_ENTER (H5T_vlen_str_mem_write, FAIL);
 
@@ -339,9 +343,11 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     assert(((seq_len+1)*base_size)==(hsize_t)((size_t)((seq_len+1)*base_size))); /*check for overflow*/
 
     /* Get the allocation function & info */
-    if (H5P_get(plist_id,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
+    if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    if (H5P_get(plist_id,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
+    if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     if(alloc_func!=NULL) {
@@ -623,6 +629,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
     H5MM_free_t free_func;      /* Vlen free function */
     void *free_info=NULL;       /* Vlen free information */
     H5T_t	*dt = NULL;
+    H5P_genplist_t *plist;      /* Property list */
     herr_t ret_value = FAIL;
 
     FUNC_ENTER(H5T_vlen_reclaim, FAIL);
@@ -635,9 +642,11 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Get the free func & information */
-    if (H5P_get(plist_id,H5D_XFER_VLEN_FREE_NAME,&free_func)<0)
+    if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5P_get(plist,H5D_XFER_VLEN_FREE_NAME,&free_func)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    if (H5P_get(plist_id,H5D_XFER_VLEN_FREE_INFO_NAME,&free_info)<0)
+    if (H5P_get(plist,H5D_XFER_VLEN_FREE_INFO_NAME,&free_info)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     /* Pull the free function and free info pointer out of the op_data and call the recurse datatype free function */

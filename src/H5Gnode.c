@@ -29,6 +29,7 @@
 #include "H5FLprivate.h"	/*Free Lists	  */
 #include "H5Gpkg.h"		/*me					*/
 #include "H5HLprivate.h"	/*local heap				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/*file memory management		*/
 #include "H5MMprivate.h"	/*core memory management		*/
 #include "H5Oprivate.h"		/*header messages			*/
@@ -1238,14 +1239,16 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
 unsigned H5G_node_k(const H5F_t *f)
 {
     unsigned sym_leaf_k;
+    H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5G_node_k, UFAIL);
 
     assert(f);
 
-    if(H5P_get(f->shared->fcpl_id, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, 
-                      "can't get rank for symbol table leaf node"); 
+    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, UFAIL, "not a file access property list");
+    if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, "can't get rank for symbol table leaf node"); 
     
     FUNC_LEAVE(sym_leaf_k);
 }

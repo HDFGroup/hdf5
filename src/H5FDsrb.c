@@ -195,29 +195,28 @@ H5FD_srb_init(void)
 herr_t
 H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
 {
-    herr_t ret_value = FAIL;
     H5FD_srb_fapl_t fa;
     int srb_status;   
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = FAIL;
 
     FUNC_ENTER(H5Pset_fapl_srb, FAIL);
 
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     /*connect to SRB server */
     fa.srb_conn = clConnect(info.srbHost, info.srbPort, info.srbAuth);
     if((srb_status = clStatus(fa.srb_conn)) != CLI_CONNECTION_OK) {
         fprintf(stderr,"%s",clErrorMessage(fa.srb_conn));
         clFinish(fa.srb_conn);
+
         /*not sure about first 2 parameters. */
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, 
-                      "Connection to srbMaster failed."); 
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "Connection to srbMaster failed."); 
     }
 
     fa.info = info;
-    ret_value = H5Pset_driver(fapl_id, H5FD_SRB, &fa);
+    ret_value = H5P_set_driver(plist, H5FD_SRB, &fa);
  
     FUNC_LEAVE(ret_value);
 }
@@ -245,18 +244,17 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
 herr_t
 H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
     H5FD_srb_fapl_t *fa;
 
     FUNC_ENTER(H5Pget_fapl_srb, FAIL);
     H5TRACE2("e","ix",fapl_id,info);
 
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
-    if(H5FD_SRB != H5P_get_driver(fapl_id))
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if(H5FD_SRB != H5P_get_driver(plist))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
-    if(NULL==(fa=H5Pget_driver_info(fapl_id)))
+    if(NULL==(fa=H5P_get_driver_info(plist)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     if(info)
@@ -292,6 +290,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_srb_fapl_t       _fa;
     H5FD_srb_t            *file;
     int srb_fid;
+    H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5FD_srb_open, FAIL);
 
@@ -303,12 +302,14 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (ADDR_OVERFLOW(maxaddr))
         HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
 
-    if(H5P_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(fapl_id)) {
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if(H5P_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(plist)) {
         memset((void*)&_fa, 0, sizeof(H5FD_srb_fapl_t));        
         fa = &_fa;
     }
     else {
-        fa = H5Pget_driver_info(fapl_id);
+        fa = H5P_get_driver_info(plist);
         assert(fa);
     }
 

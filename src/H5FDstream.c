@@ -21,18 +21,17 @@
  *
  */
 
-#include "H5public.h"                 /* H5_HAVE_STREAM                      */
 #include "H5private.h"                /* library function  */
 
 /* Only build this driver if it was configured with --with-Stream-VFD */
 #ifdef H5_HAVE_STREAM
 
 #include "H5Eprivate.h"               /* error handling                      */
-#include "H5FDpublic.h"               /* VFD structures                      */
-#include "H5MMprivate.h"              /* memory allocation                   */
-#include "H5Ppublic.h"                /* files                               */
-#include "H5Pprivate.h"               /* VFD prototypes                      */
+#include "H5FDpublic.h"               /* Public VFD header                   */
 #include "H5FDstream.h"               /* Stream VFD header                   */
+#include "H5Iprivate.h"               /* IDs                                 */
+#include "H5MMprivate.h"              /* memory allocation                   */
+#include "H5Pprivate.h"               /* property prototypes                 */
 
 #ifdef H5FD_STREAM_HAVE_UNIX_SOCKETS
 #ifdef H5_HAVE_SYS_TYPES_H
@@ -262,17 +261,15 @@ hid_t H5FD_stream_init (void)
  */
 herr_t H5Pset_fapl_stream (hid_t fapl_id, H5FD_stream_fapl_t *fapl)
 {
-  herr_t             result;
   H5FD_stream_fapl_t user_fapl;
-
+  H5P_genplist_t *plist;      /* Property list pointer */
+  herr_t             result;
 
   FUNC_ENTER (H5Pset_fapl_stream, FAIL);
   H5TRACE2 ("e", "ix", fapl_id, fapl);
 
-  if ( TRUE!=H5Pisa_class(fapl_id, H5P_FILE_ACCESS) )
-  {
+  if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
     HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
-  }
 
   if (fapl)
   {
@@ -288,11 +285,11 @@ herr_t H5Pset_fapl_stream (hid_t fapl_id, H5FD_stream_fapl_t *fapl)
       user_fapl.increment = H5FD_STREAM_INCREMENT;
     }
     user_fapl.port = 0;
-    result = H5Pset_driver (fapl_id, H5FD_STREAM, &user_fapl);
+    result = H5P_set_driver (plist, H5FD_STREAM, &user_fapl);
   }
   else
   {
-    result = H5Pset_driver (fapl_id, H5FD_STREAM, &default_fapl);
+    result = H5P_set_driver (plist, H5FD_STREAM, &default_fapl);
   }
 
   FUNC_LEAVE (result);
@@ -317,20 +314,20 @@ herr_t H5Pset_fapl_stream (hid_t fapl_id, H5FD_stream_fapl_t *fapl)
 herr_t H5Pget_fapl_stream(hid_t fapl_id, H5FD_stream_fapl_t *fapl /* out */)
 {
   H5FD_stream_fapl_t *this_fapl;
-
+  H5P_genplist_t *plist;      /* Property list pointer */
 
   FUNC_ENTER (H5Pget_fapl_stream, FAIL);
   H5TRACE2("e","ix",fapl_id,fapl);
 
-  if (TRUE!=H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+  if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
   {
     HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
   }
-  if (H5FD_STREAM != H5P_get_driver (fapl_id))
+  if (H5FD_STREAM != H5P_get_driver (plist))
   {
     HRETURN_ERROR (H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
   }
-  if (NULL == (this_fapl = H5Pget_driver_info (fapl_id)))
+  if (NULL == (this_fapl = H5P_get_driver_info (plist)))
   {
     HRETURN_ERROR (H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
   }
@@ -636,6 +633,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
 #ifdef WIN32
   WSADATA wsadata;
 #endif
+  H5P_genplist_t *plist;      /* Property list pointer */
 
 
   FUNC_ENTER (H5FD_stream_open, NULL);
@@ -677,7 +675,9 @@ static H5FD_t *H5FD_stream_open (const char *filename,
   fapl = NULL;
   if (H5P_DEFAULT != fapl_id)
   {
-    fapl = H5Pget_driver_info (fapl_id);
+    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    fapl = H5P_get_driver_info (plist);
   }
   if (fapl == NULL)
   {
@@ -709,7 +709,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
       {
         /* update the port ID in the file access property
            so that it can be queried via H5P_get_fapl_stream() later on */
-        H5Pset_driver (fapl_id, H5FD_STREAM, &_stream.fapl);
+        H5P_set_driver (plist, H5FD_STREAM, &_stream.fapl);
       }
     }
   }

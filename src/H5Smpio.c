@@ -564,6 +564,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     MPI_Datatype mpi_buf_type, mpi_file_type;
     hbool_t	 mbt_is_derived=0,
 		 mft_is_derived=0;
+    H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER (H5S_mpio_spaces_xfer, FAIL);
 
@@ -578,7 +579,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     assert (IS_H5FD_MPIO(f));
     /* Make certain we have the correct type of property list */
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* INCOMPLETE!!!  rky 980816 */
     /* Currently can only handle H5D_CONTIGUOUS layout */
@@ -610,12 +611,15 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 	H5FD_mpio_dxpl_t *dx;
         hid_t driver_id;            /* VFL driver ID */
 
+        if(NULL == (plist = H5I_object(dxpl_id)))
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
         /* Get the driver ID */
-        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
         /* Get the driver information */
-        if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
         /* Check if we are using the MPIO driver */
