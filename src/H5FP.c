@@ -150,32 +150,32 @@ done:
         /* we've encountered an error...clean up */
         if (H5FP_request != MPI_DATATYPE_NULL)
             if (MPI_Type_free(&H5FP_request) != MPI_SUCCESS)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+                HDONE_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
         if (H5FP_reply != MPI_DATATYPE_NULL)
             if (MPI_Type_free(&H5FP_reply) != MPI_SUCCESS)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+                HDONE_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
         if (H5FP_read != MPI_DATATYPE_NULL)
             if (MPI_Type_free(&H5FP_read) != MPI_SUCCESS)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+                HDONE_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
         if (H5FP_alloc != MPI_DATATYPE_NULL)
             if (MPI_Type_free(&H5FP_alloc) != MPI_SUCCESS)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+                HDONE_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
         if (H5FP_super != MPI_DATATYPE_NULL)
             if (MPI_Type_free(&H5FP_super) != MPI_SUCCESS)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+                HDONE_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
         if (H5FP_SAP_BARRIER_COMM != MPI_COMM_NULL)
             /* this comm will be NULL for the SAP */
             if (MPI_Comm_free(&H5FP_SAP_BARRIER_COMM) != MPI_SUCCESS)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
+                HDONE_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
 
         if (H5FP_SAP_COMM != MPI_COMM_NULL)
             if (MPI_Comm_free(&H5FP_SAP_COMM) != MPI_SUCCESS)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
+                HDONE_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
     }
 
     if (sap_group != MPI_GROUP_NULL)
