@@ -30,7 +30,7 @@
      CHARACTER*8 :: failure = '*FAILED*'
      CHARACTER*4 :: e_format ='(8a)'
 
-     CALL h5init_fortran_f(error) 
+     CALL h5open_f(error) 
      write(*,*) '                       ==========================                            '
      write(*,*) '                              FORTRAN tests '
      write(*,*) '                       ==========================                            '
@@ -223,7 +223,7 @@
      write(*, fmt = '(12a)' ) ' error(s) ! '
      write(*,*) '                  ============================================  '
 
-     CALL h5close_fortran_f(error)
+     CALL h5close_f(error)
 
     END PROGRAM fortranlibtest
 
