@@ -5,11 +5,11 @@
 #endif
 
 #include "H5Include.h"
-#include <string>
 #include "H5Exception.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
+	using namespace std;
 #endif
 
 // Default constructor

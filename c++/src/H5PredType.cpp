@@ -27,6 +27,13 @@ PredType::PredType( const hid_t predtype_id ) : AtomType( predtype_id )
 // Copy constructor: makes a copy of this PredType object.
 PredType::PredType( const PredType& original ) : AtomType( original ) {}
 
+// Makes a copy of the predefined type and stores the new
+// id in the left hand side object.  
+DataType& PredType::operator=( const PredType& rhs )
+{
+	return(DataType::operator=(rhs));
+}
+
 const PredType PredType::NotAtexit;	// only for atexit/global dest. problem
 
 // Definition of pre-defined types
@@ -461,7 +468,7 @@ void PredType::commit( H5Object& loc, const string& name )
 bool PredType::committed()
 {
    throw DataTypeIException("PredType::committed", "Error: Attempting to check for commit status on a predefined datatype." );
-   return (-1);
+   return (0);
 }  
 
 // Default destructor

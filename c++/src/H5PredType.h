@@ -19,8 +19,7 @@ class PredType : public AtomType {
 	// Copy constructor - makes copy of the original object
 	PredType( const PredType& original );
 
-virtual hid_t getId() const;
-hid_t getenum() const { return id; }  // remove when done
+	virtual hid_t getId() const;
 
 	// Declaration of predefined types; their definition is in Predtype.C
 	static const PredType STD_I8BE;
@@ -225,6 +224,10 @@ hid_t getenum() const { return id; }  // remove when done
 
 	// Creates a pre-defined type using an HDF5 pre-defined constant
 	PredType( const hid_t predtype_id );  // used by the library only
+
+	// Makes a copy of the predefined type and stores the new
+	// id in the left hand side object.  
+	DataType& operator=( const PredType& rhs );
 };
 #ifndef H5_NO_NAMESPACE
 }
