@@ -105,13 +105,13 @@ h4toh5 Utility
 
        * For the data of an HDF4 SDS, image, and palette, if the data is
 	 declared 'DFNT_CHAR8' it will be assumed to be integer and
-	 will be an H5T_INTEGER type.
+	 will be an H5T_STD_I8E under H5T_INTEGER class.
        * For attributes of any HDF4 object, data of type 'DFNT_CHAR8'
-	 will be converted to an HDF5 'H5T_STRING' type.
+	 will be converted to an HDF5 string under HDF5 'H5T_STRING' class.
        * For an HDF4 Vdata, it is difficult to determine whether data 
 	 of type 'DFNT_CHAR8' is intended to be bytes or characters.
 	 The h4toh5 utility will consider them to be C characters, and
-	 will convert them to an HDF5 'H5T_STRING' type.
+	 will convert them to an HDF5 string under HDF5 'H5T_STRING' class.
 
 
     3. Compression, Chunking and External Storage
