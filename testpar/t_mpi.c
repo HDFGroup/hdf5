@@ -56,7 +56,7 @@ test_mpio_overlap_writes(char *filename)
     int vrfyerrs;
     char  buf[4093];		/* use some prime number for size */
     int bufsize = sizeof(buf);
-    int stride;
+    MPI_Offset  stride;
     MPI_Offset  mpi_off;
     MPI_Status  mpi_stat;
 
@@ -93,12 +93,12 @@ test_mpio_overlap_writes(char *filename)
 	while (mpi_off < MPIO_TEST_WRITE_SIZE){
 	    /* make sure the write does not exceed the TEST_WRITE_SIZE */
 	    if (mpi_off+stride > MPIO_TEST_WRITE_SIZE)
-		stride = MPIO_TEST_WRITE_SIZE - (int)mpi_off;
+		stride = MPIO_TEST_WRITE_SIZE - mpi_off;
 
 	    /* set data to some trivial pattern for easy verification */
 	    for (i=0; i<stride; i++)
-		buf[i] = (char)(mpi_off+i) & 0x7f;
-	    mrc = MPI_File_write_at(fh, mpi_off, buf, stride, MPI_BYTE,
+		buf[i] = (char)(mpi_off+i);
+	    mrc = MPI_File_write_at(fh, mpi_off, buf, (int)stride, MPI_BYTE,
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
 	    
@@ -137,14 +137,14 @@ test_mpio_overlap_writes(char *filename)
 	for (mpi_off=0; mpi_off < MPIO_TEST_WRITE_SIZE; mpi_off += bufsize){
 	    /* make sure it does not read beyond end of data */
 	    if (mpi_off+stride > MPIO_TEST_WRITE_SIZE)
-		stride = MPIO_TEST_WRITE_SIZE - (int)mpi_off;
-	    mrc = MPI_File_read_at(fh, mpi_off, buf, stride, MPI_BYTE,
+		stride = MPIO_TEST_WRITE_SIZE - mpi_off;
+	    mrc = MPI_File_read_at(fh, mpi_off, buf, (int)stride, MPI_BYTE,
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
 	    vrfyerrs=0;
 	    for (i=0; i<stride; i++){
 		char expected;
-		expected = (char)(mpi_off+i) & 0x7f;
+		expected = (char)(mpi_off+i);
 		if ((buf[i] != expected) &&
 		    (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED))
 			printf("proc %d: found data error at [%ld], expect %d, got %d\n",
@@ -489,7 +489,7 @@ if (special_request & USEATOM){
     /* Only one process writes */
     if (mpi_rank==irank){
 	if (VERBOSE_HI){
-	    PRINTID; printf("wrote %d bytes at %d\n", DIMSIZE, (int)mpi_off);
+	    PRINTID; printf("wrote %d bytes at %ld\n", DIMSIZE, (long)mpi_off);
 	}
 	if ((mpi_err = MPI_File_write_at(fh, mpi_off, writedata, DIMSIZE,
 			MPI_BYTE, &mpi_stat))
@@ -497,7 +497,7 @@ if (special_request & USEATOM){
 	    MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
 	    PRINTID;
 	    printf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n",
-		    (long) mpi_off, (int) DIMSIZE, mpi_err_str);
+		    (long) mpi_off, DIMSIZE, mpi_err_str);
 	    return 1;
 	};
     };
@@ -551,7 +551,7 @@ if (special_request & USEFSYNC){
 	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
 	PRINTID;
 	printf("MPI_File_read_at offset(%ld), bytes (%d), failed (%s)\n",
-		(long) mpi_off, (int) DIMSIZE, mpi_err_str);
+		(long) mpi_off, DIMSIZE, mpi_err_str);
 	return 1;
     };
     for (i=0; i < DIMSIZE; i++){
@@ -692,15 +692,19 @@ main(int argc, char **argv)
     if (mpi_rank==0 && ret_code > 0)
 	printf("***FAILED with %d total errors\n", ret_code);
 
-    MPI_BANNER("MPIO 1 write Many read test with atomicity...");
-    ret_code = test_mpio_1wMr(filenames[0], USEATOM);
-    if (mpi_rank==0 && ret_code > 0)
-	printf("***FAILED with %d total errors\n", ret_code);
+    /* test atomicity and file sync in high verbose mode only         */
+    /* since they often hang when broken and PHDF5 does not use them. */
+	if (VERBOSE_HI){
+	MPI_BANNER("MPIO 1 write Many read test with atomicity...");
+	ret_code = test_mpio_1wMr(filenames[0], USEATOM);
+	if (mpi_rank==0 && ret_code > 0)
+	    printf("***FAILED with %d total errors\n", ret_code);
 
-    MPI_BANNER("MPIO 1 write Many read test with file sync...");
-    ret_code = test_mpio_1wMr(filenames[0], USEFSYNC);
-    if (mpi_rank==0 && ret_code > 0)
-	printf("***FAILED with %d total errors\n", ret_code);
+	MPI_BANNER("MPIO 1 write Many read test with file sync...");
+	ret_code = test_mpio_1wMr(filenames[0], USEFSYNC);
+	if (mpi_rank==0 && ret_code > 0)
+	    printf("***FAILED with %d total errors\n", ret_code);
+    }
 
     MPI_BANNER("MPIO File size range test...");
     test_mpio_gb_file(filenames[0]);
