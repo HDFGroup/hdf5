@@ -1447,7 +1447,7 @@ printf("%s: check 6.0\n",FUNC);
 printf("%s: check 6.5\n",FUNC);
     {
         int i;
-        uint8 *b;
+        uint16 *b;
 
         if(qak_debug) {
             b=tconv_buf;
@@ -1612,6 +1612,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
+#ifdef QAK
+printf("%s: check 0.5, nelmts=%d\n",FUNC,(int)nelmts);
+#endif /* QAK */
     if (nelmts!=H5S_select_npoints (file_space)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
@@ -1766,19 +1769,13 @@ printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)n
 #ifdef QAK
     {
         int i;
-        int *b;
+        uint16 *b;
 
         if(qak_debug) {
-            b=buf;
-            b+=1430;
-            printf("buf:");
-            for (i=0; i<smine_nelmts; i++,b++) {
-                printf("(%d)%d ",i,*b);
-            }
             b=tconv_buf;
             printf("\ntconv_buf:");
             for (i=0; i<smine_nelmts; i++,b++) {
-                printf("(%d)%d ",i,*b);
+                printf("(%d)%d ",i,(int)*b);
             }
             printf("\n");
         }

@@ -334,5 +334,6 @@ herr_t H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size);
 herr_t H5S_hyper_release (H5S_t *space);
 herr_t H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter);
 hsize_t H5S_hyper_npoints (const H5S_t *space);
+int H5S_hyper_compare_regions (const void *r1, const void *r2);
 
 #endif

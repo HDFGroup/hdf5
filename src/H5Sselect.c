@@ -187,8 +187,11 @@ H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     hsize_t *stride,        /* Stride array */
         *block=NULL;        /* Block size array */
+    hssize_t slab[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
+    size_t slice[H5O_LAYOUT_NDIMS];	 /* Size of preceding dimension's slice */
+    uintn acc;              /* Accumulator for building slices */
     uintn contig;           /* whether selection is contiguous or not */
-    int i;                  /* Counters */
+    int i,j;                /* Counters */
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5Sselect_hyperslab, FAIL);
@@ -278,19 +281,44 @@ printf("%s: check 2.0\n",FUNC);
                 "can't allocate hyperslab lo bound information");
     } /* end if */
 
+/* Generate list of blocks to add/remove based on selection operation */
+
 #ifdef QAK
 printf("%s: check 3.0\n",FUNC);
 #endif /* QAK */
     /* Add hyperslab to selection */
     if(contig) { /* Check for trivial case */
-        if(H5S_hyper_add(space,start,count)<0) {
+
+        /* Account for strides & blocks being equal, but larger than one */
+        /* (Why someone would torture us this way, I don't know... -QAK :-) */
+        for(i=0; i<space->extent.u.simple.rank; i++)
+            slab[i]=count[i]*stride[i];
+
+        /* Add the contiguous hyperslab to the selection */
+        if(H5S_hyper_add(space,start,(const hsize_t *)slab)<0) {
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
                 "can't insert hyperslab");
         }
     } else {
-/* Generate list of blocks to add/remove based on selection operation */
-/* Add/Remove blocks to/from selection */
-        assert("complex hyperslabs not supported yet" && 0);
+        /* Build the slice sizes for each dimension */
+        for(i=0, acc=1; i<space->extent.u.simple.rank; i++) {
+            slice[i]=acc;
+            acc*=count[i];
+        } /* end for */
+
+        /* Step through all the blocks to add */
+        /* (reuse the count in ACC above) */
+        for(i=0; i<(int)acc; i++) {
+            /* Build the location of the block */
+            for(j=0; j<space->extent.u.simple.rank; j++)
+                slab[j]=start[j]+((i/slice[j])%count[j])*stride[j];
+            
+            /* Add the block to the list of hyperslab selections */
+            if(H5S_hyper_add(space,(const hssize_t *)slab,(const hsize_t *)block)<0) {
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
+                    "can't insert hyperslab");
+            } /* end if */
+        } /* end for */
     } /* end if */
 
     /* Set selection type */
