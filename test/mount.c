@@ -1077,9 +1077,9 @@ main(void)
     if (nerrors) goto error;
     puts("All mount tests passed.");
     cleanup();
-    exit(0);
+    return(0);
     
  error:
     puts("***** MOUNT ERRORS *****");
-    exit(1);
+    return(1);
 }
