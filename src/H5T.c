@@ -5075,7 +5075,7 @@ H5T_pack(H5T_t *dt)
 	}
 
 	/* Remove padding between members */
-	H5T_sort_value(dt);
+	H5T_sort_value(dt, NULL);
 	for (i=0, offset=0; i<dt->u.compnd.nmembs; i++) {
 	    dt->u.compnd.memb[i].offset = offset;
 	    offset += dt->u.compnd.memb[i].size;
@@ -5095,7 +5095,8 @@ H5T_pack(H5T_t *dt)
  * Purpose:	Sorts the members of a compound data type by their offsets;
  *		sorts the members of an enum type by their values. This even
  *		works for locked data types since it doesn't change the value
- *		of the type.
+ *		of the type.  MAP is an optional parallel integer array which
+ *		is also swapped along with members of DT.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -5107,7 +5108,7 @@ H5T_pack(H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_value(H5T_t *dt)
+H5T_sort_value(H5T_t *dt, int *map)
 {
     int		i, j, nmembs;
     size_t	size;
@@ -5132,6 +5133,11 @@ H5T_sort_value(H5T_t *dt)
 			H5T_cmemb_t tmp = dt->u.compnd.memb[j];
 			dt->u.compnd.memb[j] = dt->u.compnd.memb[j+1];
 			dt->u.compnd.memb[j+1] = tmp;
+			if (map) {
+			    int x = map[j];
+			    map[j] = map[j+1];
+			    map[j+1] = x;
+			}
 			swapped = TRUE;
 		    }
 		}
@@ -5166,6 +5172,13 @@ H5T_sort_value(H5T_t *dt)
 				 dt->u.enumer.value+(j+1)*size, size);
 			HDmemcpy(dt->u.enumer.value+(j+1)*size, tbuf, size);
 			
+			/* Swap map */
+			if (map) {
+			    int x = map[j];
+			    map[j] = map[j+1];
+			    map[j+1] = x;
+			}
+
 			swapped = TRUE;
 		    }
 		}
@@ -5204,7 +5217,7 @@ H5T_sort_value(H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_name(H5T_t *dt)
+H5T_sort_name(H5T_t *dt, int *map)
 {
     int		i, j, nmembs;
     size_t	size;
@@ -5230,6 +5243,11 @@ H5T_sort_name(H5T_t *dt)
 			dt->u.compnd.memb[j] = dt->u.compnd.memb[j+1];
 			dt->u.compnd.memb[j+1] = tmp;
 			swapped = TRUE;
+			if (map) {
+			    int x = map[j];
+			    map[j] = map[j+1];
+			    map[j+1] = x;
+			}
 		    }
 		}
 	    }
@@ -5261,7 +5279,14 @@ H5T_sort_name(H5T_t *dt)
 			HDmemcpy(dt->u.enumer.value+j*size,
 				 dt->u.enumer.value+(j+1)*size, size);
 			HDmemcpy(dt->u.enumer.value+(j+1)*size, tbuf, size);
-			
+
+			/* Swap map */
+			if (map) {
+			    int x = map[j];
+			    map[j] = map[j+1];
+			    map[j+1] = x;
+			}
+
 			swapped = TRUE;
 		    }
 		}
@@ -5390,7 +5415,7 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
     if (name && size>0) *name = '\0';
 
     /* Do a binary search over the values to find the correct one */
-    H5T_sort_value(dt);
+    H5T_sort_value(dt, NULL);
     lt = 0;
     rt = dt->u.enumer.nmembs;
     md = -1;
@@ -5458,7 +5483,7 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
     assert(value);
 
     /* Do a binary search over the names to find the correct one */
-    H5T_sort_name(dt);
+    H5T_sort_name(dt, NULL);
     lt = 0;
     rt = dt->u.enumer.nmembs;
     md = -1;

@@ -96,6 +96,7 @@ H5HG_create (H5F_t *f, size_t size)
     H5HG_heap_t	*ret_value = NULL;
     uint8_t	*p = NULL;
     haddr_t	addr;
+    size_t	n;
     
     FUNC_ENTER (H5HG_create, NULL);
 
@@ -135,8 +136,18 @@ H5HG_create (H5F_t *f, size_t size)
     *p++ = 0; /*reserved*/
     H5F_encode_length (f, p, size);
 
+    /*
+     * Padding so free space object is aligned. If malloc returned memory
+     * which was always at least H5HG_ALIGNMENT aligned then we could just
+     * align the pointer, but this might not be the case.
+     */
+    n = H5HG_ALIGN(p-heap->chunk) - (p-heap->chunk);
+    memset(p, 0, n);
+    p += n;
+
     /* The freespace object */
     heap->obj[0].size = size - H5HG_SIZEOF_HDR(f);
+    assert(H5HG_ISALIGNED(heap->obj[0].size));
     heap->obj[0].begin = p;
     UINT16ENCODE(p, 0);	/*object ID*/
     UINT16ENCODE(p, 0);	/*reference count*/
@@ -301,7 +312,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	     * size is never padded and already includes the object header.
 	     */
 	    if (idx>0) {
-		need = H5HG_ALIGN(H5HG_SIZEOF_OBJHDR(f) + heap->obj[idx].size);
+		need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(heap->obj[idx].size);
 	    } else {
 		need = heap->obj[idx].size;
 	    }
@@ -309,7 +320,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	}
     }
     assert(p==heap->chunk+heap->size);
-    assert(heap->obj[0].size==H5HG_ALIGN(heap->obj[0].size));
+    assert(H5HG_ISALIGNED(heap->obj[0].size));
 
     /*
      * Add the new heap to the CWFS list, removing some other entry if
@@ -434,7 +445,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 {
     int		idx;
     uint8_t	*p = NULL;
-    size_t	need = H5HG_ALIGN(H5HG_SIZEOF_OBJHDR(f) + size);
+    size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
 
     FUNC_ENTER (H5HG_alloc, FAIL);
 
@@ -487,6 +498,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 	UINT16ENCODE(p, 0);	/*nrefs*/
 	UINT32ENCODE(p, 0);	/*reserved*/
 	H5F_encode_length (f, p, heap->obj[0].size);
+	assert(H5HG_ISALIGNED(heap->obj[0].size));
 		
     } else {
 	/*
@@ -495,6 +507,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 	 */
 	heap->obj[0].size -= need;
 	heap->obj[0].begin += need;
+	assert(H5HG_ISALIGNED(heap->obj[0].size));
     }
 
     heap->dirty = 1;
@@ -546,7 +559,7 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
     }
 
     /* Find a large enough collection on the CWFS list */
-    need = H5HG_ALIGN(size + H5HG_SIZEOF_OBJHDR(f));
+    need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
     for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
 	if (f->shared->cwfs[cwfsno]->obj[0].size>=need) {
 	    /*
@@ -819,8 +832,11 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
     obj_start = heap->obj[hobj->idx].begin;
-    need = H5HG_ALIGN(heap->obj[hobj->idx].size);
-
+    need = H5HG_ALIGN(heap->obj[hobj->idx].size); /*
+						   * should this include the
+						   * object header size? -rpm
+						   */
+    
     /* Move the new free space to the end of the heap */
     for (i=0; i<heap->nalloc; i++) {
 	if (heap->obj[i].begin > heap->obj[hobj->idx].begin) {

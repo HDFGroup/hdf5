@@ -50,6 +50,9 @@
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #undef HAVE_TM_GMTOFF
 
+/* Define if `__tm_gmtoff' is a member of `struct tm' */
+#undef HAVE___TM_GMTOFF
+
 /* Define if `timezone' is a global variable */
 #undef HAVE_TIMEZONE
 
@@ -190,6 +193,9 @@
 
 /* Define if you have the <mfhdf.h> header file.  */
 #undef HAVE_MFHDF_H
+
+/* Define if you have the <stddef.h> header file.  */
+#undef HAVE_STDDEF_H
 
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H

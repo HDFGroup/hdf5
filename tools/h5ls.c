@@ -926,7 +926,7 @@ display_reference_type(hid_t type, int __unused__ indent)
 static void
 display_type(hid_t type, int indent)
 {
-    H5T_class_t		data_class;
+    H5T_class_t		data_class = H5Tget_class(type);
     
     /* Bad data type */
     if (type<0) {
@@ -1801,16 +1801,19 @@ main (int argc, char *argv[])
      * If there are no arguments then list `/'.
      */
     if (argno>=argc) {
+	H5Gget_objinfo(file, "/", TRUE, &sb);
+	sym_insert(&sb, "/");
 	iter.container = "/";
 	H5Giterate(file, "/", NULL, list, &iter);
     } else {
 	for (/*void*/; argno<argc; argno++) {
 	    if (H5Gget_objinfo(file, argv[argno], TRUE, &sb)>=0 &&
+		H5G_GROUP==sb.type) {
 		/*
 		 * Specified name is a group. List the complete contents of
 		 * the group.
 		 */
-		H5G_GROUP==sb.type) {
+		sym_insert(&sb, argv[argno]);
 		iter.container = container = fix_name("", argv[argno]);
 		H5Giterate(file, argv[argno], NULL, list, &iter);
 		free(container);

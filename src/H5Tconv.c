@@ -550,8 +550,8 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	/*
 	 * Insure that members are sorted.
 	 */
-	H5T_sort_value(src);
-	H5T_sort_value(dst);
+	H5T_sort_value(src, NULL);
+	H5T_sort_value(dst, NULL);
 
 	/*
 	 * Build a mapping from source member number to destination member
@@ -761,8 +761,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	/*
 	 * Insure that members are sorted.
 	 */
-	H5T_sort_value(src);
-	H5T_sort_value(dst);
+	H5T_sort_value(src, NULL);
+	H5T_sort_value(dst, NULL);
 	src2dst = priv->src2dst;
 
 	/*
@@ -910,8 +910,8 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * symbol names and build a map from source member index to destination
      * member index.
      */
-    H5T_sort_name(src);
-    H5T_sort_name(dst);
+    H5T_sort_name(src, NULL);
+    H5T_sort_name(dst, NULL);
     if (NULL==(priv->src2dst=H5MM_malloc(src->u.enumer.nmembs*sizeof(int)))) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "memory allocation failed");;
@@ -994,6 +994,9 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	    H5MM_xfree(priv->src2dst);
 	    priv->src2dst = map;
 	    HGOTO_DONE(SUCCEED);
+	} else {
+	    /* Sort source type by value and adjust src2dst[] appropriately */
+	    H5T_sort_value(src, priv->src2dst);
 	}
     }
     ret_value = SUCCEED;
@@ -1082,9 +1085,17 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	}
 	assert (H5T_ENUM==src->type);
 	assert (H5T_ENUM==dst->type);
-	H5T_sort_name(src);
-	H5T_sort_name(dst);
 
+	if (priv->length) {
+	    /* Use O(1) lookup */
+	    H5T_sort_name(src, NULL);
+	    H5T_sort_name(dst, NULL);
+	} else {
+	    /* Use O(log N) lookup */
+	    H5T_sort_value(src, NULL); /*yes, by value*/
+	    H5T_sort_name(dst, NULL); /*yes, by name*/
+	}
+	
 	/*
 	 * Direction of conversion.
 	 */
@@ -1109,6 +1120,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		} else {
 		    n = *((int*)s);
 		}
+		n -= priv->base;
 		if (n<0 || n>=priv->length || priv->src2dst[n]<0) {
 		    if (!H5T_overflow_g ||
 			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {

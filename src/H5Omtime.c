@@ -109,8 +109,11 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8_t *p,
 #if defined(HAVE_TM_GMTOFF)
     /* FreeBSD, OSF 4.0 */
     the_time += tm.tm_gmtoff;
+#elif defined(HAVE___TM_GMTOFF)
+    /* Linux libc-4 */
+    the_time += tm.__tm_gmtoff;
 #elif defined(HAVE_TIMEZONE)
-    /* Linux */
+    /* Linux libc-5 */
     the_time -= timezone - (tm.tm_isdst?3600:0);
 #elif defined(HAVE_BSDGETTIMEOFDAY) && defined(HAVE_STRUCT_TIMEZONE)
     /* Irix5.3 */

@@ -143,6 +143,17 @@ H5_term_library(void)
      * interface later.
      */
 
+    /*
+     * Cycles: The H5F layer participates in quite a few dependency cycles
+     *	       because it's cache depends on almost all other meta object
+     *	       packages and those packages depend on H5O which depends on H5F
+     *	       (because H5F_close() can delay until all object headers are
+     *	       closed). We handle this cycle by closing the H5F interface,
+     *	       which flushes the cache of all files, breaking any cycles.
+     */
+    H5F_term_interface(-1);
+    H5F_term_interface(0);
+
     /* Function			   What depends on it?			*/
     /*-------------------------   -------------------------------	*/
     H5D_term_interface(-1);	/*					*/
@@ -150,12 +161,12 @@ H5_term_library(void)
     H5Z_term_interface(-1);	/*					*/
     H5A_term_interface(-1);	/*					*/
     H5RA_term_interface(-1);	/*					*/
-    H5F_term_interface(-1); 	/* T					*/
     H5G_term_interface(-1);	/*					*/
     H5R_term_interface(-1);	/*					*/
     H5S_term_interface(-1);	/*					*/
     H5T_native_close(-1);	/* D RA					*/
     H5T_term_interface(-1);	/* D RA					*/
+    H5F_term_interface(-1); 	/* G T					*/
     H5P_term_interface(-1);	/* D					*/
     H5I_term_interface(-1);	/* A D F G P RA S T TB Z		*/
     /*------------------------- ---------------------------------	*/

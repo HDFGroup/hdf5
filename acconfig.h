@@ -16,6 +16,9 @@
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #undef HAVE_TM_GMTOFF
 
+/* Define if `__tm_gmtoff' is a member of `struct tm' */
+#undef HAVE___TM_GMTOFF
+
 /* Define if `timezone' is a global variable */
 #undef HAVE_TIMEZONE
 

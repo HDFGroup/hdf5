@@ -6,4 +6,3 @@
 # See BlankForm in this directory for details.
 
 . config/linux
-CPP=/usr/bin/cpp

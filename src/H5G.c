@@ -1263,9 +1263,10 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     rest = H5G_component(rest, &nchars);
     assert(rest && *rest);
     if (rest[nchars]) {
-	if (H5G_component(rest + nchars, NULL)) {
+	const char *t = H5G_component(rest+nchars, NULL);
+	if (t && *t) {
 	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "missing component");
-	} else if (nchars + 1 > sizeof _comp) {
+	} else if (nchars+1 > sizeof _comp) {
 	    HRETURN_ERROR(H5E_SYM, H5E_COMPLEN, NULL, "component is too long");
 	} else {
 	    /* null terminate */

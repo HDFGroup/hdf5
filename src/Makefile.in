@@ -50,4 +50,9 @@ H5Tinit.c: H5detect
 H5detect: H5detect.o
 	$(CC) $(CFLAGS) -o $@ H5detect.o $(LDFLAGS) $(LIBS)
 
+# dynamic library with gcc. This needs more work to support other systems.
+shared: libhdf5.so.1.2.0
+libhdf5.so.1.2.0: $(LIB_OBJ)
+	$(CC) $(CFLAGS) -o $@ -shared -fPIC $^
+
 @CONCLUDE@

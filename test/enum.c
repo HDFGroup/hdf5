@@ -219,7 +219,7 @@ test_tr1(hid_t file)
     if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1)<0) goto error;
     if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2)<0) goto error;
 
-    for (i=0; i<ds_size[1]; i++) {
+    for (i=0; i<ds_size[0]; i++) {
 	if (data1[i]!=data2[i]) {
 	    FAILED();
 	    printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
@@ -299,7 +299,7 @@ test_tr2(hid_t file)
     if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1)<0) goto error;
     if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2)<0) goto error;
 
-    for (i=0; i<ds_size[1]; i++) {
+    for (i=0; i<ds_size[0]; i++) {
 	if (data1[i]!=data2[i]) {
 	    FAILED();
 	    printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",

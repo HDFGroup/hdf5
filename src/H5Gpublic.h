@@ -67,7 +67,7 @@ typedef struct H5G_stat_t {
 } H5G_stat_t;
     
 
-typedef herr_t (*H5G_iterate_t)(hid_t group, const char *group_name,
+typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name,
 				void *op_data);
 
 __DLL__ hid_t H5Gcreate (hid_t loc_id, const char *name, size_t size_hint);

@@ -29,10 +29,12 @@ static char             RcsId[] = "@(#)$Revision$";
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
 #endif
 
-#include <stddef.h>
+#ifdef HAVE_STDDEF_H
+#   include <stddef.h>
+#endif
 #ifdef HAVE_PARALLEL
-#  include <mpi.h>
-#  include <mpio.h>
+#   include <mpi.h>
+#   include <mpio.h>
 #endif
 #include <H5api_adpt.h>
 

@@ -43,7 +43,7 @@
 ./config/commence.in
 ./config/conclude.in
 ./config/depend.in
-./config/freebsd2.2.7
+./config/freebsd
 ./config/hpux10.20
 ./config/hpux9.03
 ./config/intel-osf1
