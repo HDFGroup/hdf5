@@ -17,15 +17,20 @@
 /*
  *  This program tests the functionality of the Stream Virtual File Driver.
  *    1. It spawns two new processes, a sender and a receiver.
- *    2. The sender opens an HDF5 file for writing and writes
- *       a sample dataset to it.
+ *    2. The sender opens an HDF5 file for writing using the Stream driver.
+ *       It will use a reserved port which should fail to be bound.
+ *       Then it will try a couple of successive ports until bind succeeds.
+ *       This final "hostname:port" information is written into a temporary
+ *       file as a single line of text.
+ *       The sender then writes a sample dataset to the HDF5 file.
  *       On closing the file the Stream VFD would send the file
  *       contents to any connected client.
  *    3. The receiver serves as a client attempting to open an
  *       HDF5 file for reading. On opening the file the Stream VFD
  *       would establish a socket connection to the sender process,
- *       identified by its hostname (which is localhost in this example)
- *       and a port number, and read the file contents via this socket.
+ *       identified by its hostname and a port number (which is obtained
+ *       from the temporary text file the sender should have created),
+ *       and read the file contents via this socket.
  *       Aftwerwards the dataset is read from the file into memory
  *       and verified.
  *    4. The main program waits for termination of its two child
@@ -60,11 +65,15 @@ int main (void)
 #include <sys/wait.h>
 
 
-#define DELAY         10                /* sleeping time in seconds  */
-#define RANK          2                 /* sample dataset rank       */
-#define DIMS          50                /* sample dataset dimensions */
-#define DATASETNAME   "IntArray"        /* sample dataset name       */
-#define FILENAME      "localhost:10007"  /* filename argument         */
+#define SLEEPTIME     10                  /* sleeping time in seconds    */
+#define RANK          2                   /* sample dataset rank         */
+#define DIMS          50                  /* sample dataset dimensions   */
+#define DATASETNAME   "IntArray"          /* sample dataset name         */
+#define HOSTNAME      "localhost"         /* hostname of this machine    */
+#define PORT          "5678"              /* default port to use         */
+#define MAXHUNT       500                 /* max number of ports to hunt */
+#define HDF5_FILENAME HOSTNAME ":" PORT   /* name of the streamed file   */
+#define TEMPFILENAME  "stream_test.tmp"   /* temporary filename          */
 
 
 static int sender (void)
@@ -75,6 +84,8 @@ static int sender (void)
   herr_t  status;
   hid_t   fapl, file;
   hid_t   dataspace, dataset;
+  H5FD_stream_fapl_t stream_fapl;
+  FILE    *tempfile;
 
 
   /*
@@ -87,7 +98,26 @@ static int sender (void)
     return (-1);
   }
 
-  status = H5Pset_fapl_stream (fapl, NULL);
+  /*
+   * Setup file access property list and select Stream VFD.
+   *
+   *   - block increment for realloc() should be chosen by the driver
+   *   - no external socket is provided (should be created internally)
+   *   - do I/O on this processor on this socket
+   *   - only one client is allowed to connect at a time
+   *   - no READ broadcast function is provided (since we only send data)
+   *   - if bind to default port (given in the filename argument) fails
+   *     do port hunting on the following MAXHUNT ports
+   */
+  stream_fapl.increment = 0;
+  stream_fapl.socket = H5FD_STREAM_INVALID_SOCKET;
+  stream_fapl.do_socket_io = 1;
+  stream_fapl.backlog = 1;
+  stream_fapl.broadcast_fn  = NULL;
+  stream_fapl.broadcast_arg = NULL;
+  stream_fapl.maxhunt = MAXHUNT;
+
+  status = H5Pset_fapl_stream (fapl, &stream_fapl);
   if (status < 0)
   {
     fprintf (stderr, "sender: couldn't set file access property list "
@@ -134,16 +164,50 @@ static int sender (void)
    * default file creation properties, and STREAM file
    * access properties.
    */
-  printf ("  sender: opening file '%s' for writing...\n", FILENAME);
-  file = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+  printf ("  sender: opening file on host '%s' port %s for writing...\n",
+          HOSTNAME, PORT);
+  file = H5Fcreate (HDF5_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
   if (file < 0)
   {
-    fprintf (stderr, "sender: couldn't create file for '%s'\n", FILENAME);
+    fprintf (stderr, "sender: couldn't create file on '%s' using port %s and "
+            "following %d\n", HOSTNAME, PORT, MAXHUNT);
     free (data);
     H5Sclose (dataspace);
     H5Pclose (fapl);
     return (-5);
   }
+
+  /*
+   * Get the file access property list to find out what port is actually used.
+   */
+  status = H5Pget_fapl_stream (fapl, &stream_fapl);
+  if (status < 0)
+  {
+    fprintf (stderr, "sender: couldn't get file access property list "
+                     "for Stream VFD\n");
+    free (data);
+    H5Sclose (dataspace);
+    H5Pclose (fapl);
+    return (-6);
+  }
+  printf ("  sender: using port %d...\n", (int) stream_fapl.port);
+
+  /*
+   * Write the "hostname:port" information to a temporary file
+   * which can be read by the receiver process.
+   */
+  tempfile = fopen (TEMPFILENAME, "w");
+  if (tempfile == NULL)
+  {
+    fprintf (stderr, "sender: couldn't open temporary file to write "
+                     "\"hostname:port\" information\n");
+    free (data);
+    H5Sclose (dataspace);
+    H5Pclose (fapl);
+    return (-7);
+  }
+  fprintf (tempfile, "%s:%d", HOSTNAME, (int) stream_fapl.port);
+  fclose (tempfile);
 
   /*
    * Create a new dataset within the file using defined dataspace and
@@ -158,14 +222,14 @@ static int sender (void)
     H5Fclose (file);
     H5Sclose (dataspace);
     H5Pclose (fapl);
-    return (-6);
+    return (-8);
   }
 
   /*
    * Write the data to the dataset using default transfer properties.
    */
-  printf ("  sender: writing dataset '%s' of type INTEGER to file '%s'...\n",
-          DATASETNAME, FILENAME);
+  printf ("  sender: writing dataset '%s' of type INTEGER to file '%s:%d'...\n",
+          DATASETNAME, HOSTNAME, (int) stream_fapl.port);
   status = H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                      data);
   if (status < 0)
@@ -176,16 +240,16 @@ static int sender (void)
     H5Sclose (dataspace);
     H5Pclose (fapl);
     fprintf (stderr, "sender: couldn't write dataset\n");
-    return (-7);
+    return (-9);
   }
 
   /*
    * Now give the receiver some time to connect before closing the file
    * and releasing resources.
    */
-  printf ("  sender: sleeping for %d seconds...\n", DELAY);
-  sleep (DELAY);
-  printf ("  sender: closing file '%s'\n", FILENAME);
+  printf ("  sender: sleeping for %d seconds...\n", SLEEPTIME);
+  sleep (SLEEPTIME);
+  printf ("  sender: closing file '%s:%d'\n", HOSTNAME, (int) stream_fapl.port);
   H5Sclose (dataspace);
   H5Dclose (dataset);
   H5Fclose (file);
@@ -210,6 +274,8 @@ static int receiver (void)
   int *data;                  /* read buffer */
   int nerrors;                /* total number of errors during verify */
   int status;                 /* return code of HDF5 routines */
+  char filename[50];          /* filename of the streamed HDF5 file */
+  FILE    *tempfile;          /* descriptor for temporary file */
 
 
   /*
@@ -227,21 +293,42 @@ static int receiver (void)
   {
     fprintf (stderr, "receiver: couldn't set file access property list "
                      "for Stream VFD\n");
+    H5Pclose (fapl);
     return (-2);
   }
 
   /*
    * Now give the sender some time to open the file and accepting connections.
    */
-  printf ("  receiver: sleeping for %d seconds...\n", DELAY / 2);
-  sleep (DELAY / 2);
-  printf ("  receiver: opening file '%s' for reading...\n", FILENAME);
-  file = H5Fopen (FILENAME, H5F_ACC_RDONLY, fapl);
+  printf ("  receiver: sleeping for %d seconds...\n", SLEEPTIME / 2);
+  sleep (SLEEPTIME / 2);
+
+  /*
+   * Read the "hostname:port" information from the temporary file
+   * the sender should have created.
+   */
+  tempfile = fopen (TEMPFILENAME, "r");
+  if (tempfile == NULL)
+  {
+    fprintf (stderr, "receiver: couldn't open temporary file to read "
+                     "\"hostname:port\" information\n");
+    H5Pclose (fapl);
+    return (-3);
+  }
+  fgets (filename, sizeof (filename) - 1, tempfile);
+  fclose (tempfile);
+  unlink (TEMPFILENAME);
+
+  /*
+   * Open the streamed HDF5 file for reading.
+   */
+  printf ("  receiver: opening file '%s' for reading...\n", filename);
+  file = H5Fopen (filename, H5F_ACC_RDONLY, fapl);
   H5Pclose (fapl);
   if (file < 0)
   {
-    fprintf (stderr, "receiver: couldn't open file from '%s'\n", FILENAME);
-    return (-3);
+    fprintf (stderr, "receiver: couldn't open file from '%s'\n", filename);
+    return (-4);
   }
 
   /*
@@ -252,7 +339,7 @@ static int receiver (void)
   if (dataset < 0)
   {
     fprintf (stderr, "receiver: couldn't open dataset '%s'\n", DATASETNAME);
-    return (-4);
+    return (-5);
   }
 
   /*
@@ -291,7 +378,7 @@ static int receiver (void)
   /*
    * Read dataset from file into memory.
    */
-  data = (int *) malloc ((size_t)(nelems * sizeof (int)));
+  data = (int *) malloc ((size_t) nelems * sizeof (int));
   status = H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                     data);
   H5Dclose (dataset);
@@ -299,7 +386,7 @@ static int receiver (void)
   /*
    * Close the file.
    */
-  printf ("  receiver: closing file '%s'...\n", FILENAME);
+  printf ("  receiver: closing file '%s'...\n", filename);
   H5Fclose (file);
 
   /*
