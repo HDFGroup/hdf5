@@ -84,6 +84,7 @@
 #define FACC_MPIO	0x1	/* MPIO */
 #define FACC_SPLIT	0x2	/* Split File */
 #define FACC_MULTI	0x4	/* Multi File */
+#define FACC_MPIPOSIX   0x8	/* MPIPOSIX */
 
 /* dataset data type.  Int's can be easily octo dumped. */
 typedef int DATATYPE;

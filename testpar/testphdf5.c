@@ -107,6 +107,7 @@ usage(void)
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-s\t\tuse Split-file together with MPIO\n");
+    printf("\t-p\t\tuse combo MPI-POSIX driver\n");
     printf("\t-d <dim0> <dim1>\tdataset dimensions\n");
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions\n");
     printf("\tDefault: do write then read with dimensions %dx%d\n",
@@ -162,6 +163,9 @@ parse_options(int argc, char **argv)
 				return(1);
 			    }
 			    paraprefix = *argv;
+			    break;
+		case 'p':   /* Use the MPI-POSIX driver access */
+			    facc_type = FACC_MPIPOSIX;
 			    break;
 		case 's':   /* Use the split-file driver with MPIO access */
 			    /* Can use $HDF5_METAPREFIX to define the */
@@ -285,6 +289,13 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type )
 	return(ret_pl);
     }
 
+    if (l_facc_type == FACC_MPIPOSIX) {
+	/* set Parallel access with communicator */
+	ret = H5Pset_fapl_mpiposix(ret_pl, comm);
+	VRFY((ret >= 0), "");
+	return(ret_pl);
+    }
+
     /* unknown file access types */
     return (ret_pl);
 }
@@ -293,6 +304,10 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type )
 int main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
+
+    /* Un-buffer the stdout and stderr */
+    setbuf(stderr, NULL);
+    setbuf(stdout, NULL);
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
