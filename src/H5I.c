@@ -99,9 +99,8 @@ static herr_t H5I_init_interface(void);
 			     ((hid_t)(i)&ID_MASK))
 
 #ifdef IDS_ARE_CACHED
-/* Array of pointers to ID groups */
-static hid_t H5I_id_cache_g[ID_CACHE_SIZE] = {-1, -1, -1, -1};
-static void *H5I_obj_cache_g[ID_CACHE_SIZE];
+/* ID Cache */
+static H5I_id_info_t *H5I_cache_g[ID_CACHE_SIZE];
 #endif
 
 /* Array of pointers to atomic groups */
@@ -395,9 +394,8 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
      * Remove atoms from the global atom cache.
      */
     for (i=0; i<ID_CACHE_SIZE; i++) {
-	if (H5I_GROUP(H5I_id_cache_g[i]) == grp) {
-	    H5I_id_cache_g[i] = (-1);
-	    H5I_obj_cache_g[i] = NULL;
+	if (H5I_cache_g[i] && H5I_GROUP(H5I_cache_g[i]->id) == grp) {
+	    H5I_cache_g[i] = NULL;
 	}
     }
 #endif /* IDS_ARE_CACHED */
@@ -637,38 +635,8 @@ H5I_object(hid_t id)
 {
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
     void		*ret_value = NULL;	/*return value		*/
-#ifdef IDS_ARE_CACHED
-    uintn		i;			/*local counter		*/
-#endif /* IDS_ARE_CACHED */
 
     FUNC_ENTER(H5I_object, NULL);
-
-#ifdef IDS_ARE_CACHED
-    /*
-     * Look for the ID in the cache first. Implement a simple "move
-     * forward" caching scheme by swapping the found cache item with the
-     * previous cache item.  This gradually migrates used cache items toward
-     * the front of the cache and unused items toward the end.	For instance,
-     * finding `e' in the cache results in:
-     *
-     * Before: a b c d e f g h i j
-     *	       | | |  X	 | | | | |
-     * After:  a b c e d f g h i j
-     */
-    for (i=0; i<ID_CACHE_SIZE; i++)
-	if (H5I_id_cache_g[i] == id) {
-	    ret_value = H5I_obj_cache_g[i];
-	    if (i > 0) {
-		hid_t t_id = H5I_id_cache_g[i-1];
-		void *t_obj = H5I_obj_cache_g[i-1];
-		H5I_id_cache_g[i-1] = H5I_id_cache_g[i];
-		H5I_obj_cache_g[i-1] = H5I_obj_cache_g[i];
-		H5I_id_cache_g[i] = t_id;
-		H5I_obj_cache_g[i] = t_obj;
-	    }
-	    HGOTO_DONE(ret_value);
-	}
-#endif /* IDS_ARE_CACHED */
 
     /* General lookup of the ID */
     if (NULL==(id_ptr = H5I_find_id(id))) HGOTO_DONE(NULL);
@@ -817,9 +785,8 @@ H5I_remove(hid_t id)
 #ifdef IDS_ARE_CACHED
     /* Delete object from cache */
     for (i = 0; i < ID_CACHE_SIZE; i++)
-	if (H5I_id_cache_g[i] == id) {
-	    H5I_id_cache_g[i] = (-1);
-	    H5I_obj_cache_g[i] = NULL;
+	if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
+	    H5I_cache_g[i] = NULL;
 	    break; /* we assume there is only one instance in the cache */
 	}
 #endif /* IDS_ARE_CACHED */
@@ -993,6 +960,9 @@ H5I_find_id(hid_t id)
     H5I_type_t		grp;			/*ID's group		*/
     uintn		hash_loc;		/*bucket pointer	*/
     H5I_id_info_t	*ret_value = NULL;	/*return value		*/
+#ifdef IDS_ARE_CACHED
+    intn		i;
+#endif
 
     FUNC_ENTER(H5I_find_id, NULL);
 
@@ -1005,6 +975,30 @@ H5I_find_id(hid_t id)
     if (grp_ptr == NULL || grp_ptr->count <= 0) {
 	HGOTO_DONE(NULL);
     }
+
+#ifdef IDS_ARE_CACHED
+    /*
+     * Look for the ID in the cache first. Implement a simple "move
+     * forward" caching scheme by swapping the found cache item with the
+     * previous cache item.  This gradually migrates used cache items toward
+     * the front of the cache and unused items toward the end.	For instance,
+     * finding `e' in the cache results in:
+     *
+     * Before: a b c d e f g h i j
+     *	       | | |  X	 | | | | |
+     * After:  a b c e d f g h i j
+     */
+    for (i=0; i<ID_CACHE_SIZE; i++)
+	if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
+	    ret_value = H5I_cache_g[i];
+	    if (i > 0) {
+		H5I_id_info_t *tmp = H5I_cache_g[i-1];
+		H5I_cache_g[i-1] = H5I_cache_g[i];
+		H5I_cache_g[i] = tmp;
+	    }
+	    HGOTO_DONE(ret_value);
+	}
+#endif /* IDS_ARE_CACHED */
 
     /* Get the bucket in which the ID is located */
     hash_loc = (uintn)H5I_LOC(id, grp_ptr->hash_size);
@@ -1022,8 +1016,7 @@ H5I_find_id(hid_t id)
 
 #ifdef IDS_ARE_CACHED
     /* Add id to the end of the cache */
-    H5I_id_cache_g[ID_CACHE_SIZE-1] = id;
-    H5I_obj_cache_g[ID_CACHE_SIZE-1] = id_ptr->obj_ptr;
+    H5I_cache_g[ID_CACHE_SIZE-1] = id_ptr;
 #endif /* IDS_ARE_CACHED */
 
   done:
@@ -1135,9 +1128,9 @@ H5I_debug(H5I_type_t grp)
     /* Cache */
     fprintf(stderr, "	 Cache:\n");
     for (is=0; is<ID_CACHE_SIZE; is++) {
-	if (H5I_GROUP(H5I_id_cache_g[is])==grp) {
+	if (H5I_cache_g[is] && H5I_GROUP(H5I_cache_g[is]->id)==grp) {
 	    fprintf(stderr, "	     Entry-%d, ID=%lu\n",
-		    is, (unsigned long)(H5I_id_cache_g[is]));
+		    is, (unsigned long)(H5I_cache_g[is]->id));
 	}
     }
 
