@@ -96,6 +96,19 @@ TOOLTEST h5diff_1.txt h5diff_test1.h5
 # test2: Check for invalid options
 TOOLTEST h5diff_2.txt -x h5diff_test1.h5 h5diff_test2.h5
 
+# test3: Check for -h option
+TOOLTEST h5diff_3.txt -h h5diff_test1.h5 h5diff_test2.h5
+
+# test4: Check for invalid -d options
+TOOLTEST h5diff_4.txt -d  h5diff_test1.h5 h5diff_test2.h5
+
+# test5: Check for invalid -d options
+TOOLTEST h5diff_5.txt -d -4  h5diff_test1.h5 h5diff_test2.h5
+
+
+
+
+
 if test $nerrors -eq 0 ; then
    echo "All $H5DIFF tests passed."
 fi
