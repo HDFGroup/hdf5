@@ -830,9 +830,11 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_mpio_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* These should both be copied. --rpm, 1999-08-13 */
-    fa->comm = file->comm;
-    fa->info = file->info;
+    /* Duplicate communicator and Info object. */
+    if (FAIL==H5FD_mpio_comm_info_dup(file->comm, file->info,
+					&fa->comm, &fa->info))
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL,
+		"Communicator/Info duplicate failed");
 
     /* Set return value */
     ret_value=fa;
