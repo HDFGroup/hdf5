@@ -194,6 +194,20 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 /* Definitions for misc. test #15 */
 #define MISC15_FILE             "tmisc15.h5"
 
+/* Definitions for misc. test #16 */
+#define MISC16_FILE             "tmisc16.h5"
+#define MISC16_SPACE_DIM        4 
+#define MISC16_SPACE_RANK       1
+#define MISC16_STR_SIZE         8
+#define MISC16_DSET_NAME        "Dataset"
+
+/* Definitions for misc. test #17 */
+#define MISC17_FILE             "tmisc17.h5"
+#define MISC17_SPACE_RANK       2
+#define MISC17_SPACE_DIM1       4 
+#define MISC17_SPACE_DIM2       8 
+#define MISC17_DSET_NAME        "Dataset"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -2618,6 +2632,166 @@ test_misc15(void)
 
 /****************************************************************
 **
+**  test_misc16(): Test array of NULL-terminated 
+**  fixed-length string.  It creates a dataset of fixed-length 
+**  strings.  Each string is MISC16_STR_SIZE long.  There are
+**  totally MISC16_SPACE_DIM by MISC16_SPACE_RANK strings.
+**
+****************************************************************/
+static void
+test_misc16(void)
+{
+    hid_t file;         /* File ID */
+    herr_t ret;         /* Generic return value */
+    const char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE] = 
+                        {"1234567", "1234567\0", "12345678", NULL};
+    char rdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];  /* Information read in */
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid;       /* Dataspace ID			*/
+    hid_t		tid;       /* Datatype ID			*/
+    hsize_t		dims[] = {MISC16_SPACE_DIM};
+    int                 i;
+
+    /* Create the file */
+    file = H5Fcreate(MISC16_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid = H5Screate_simple(MISC16_SPACE_RANK, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create a datatype to refer to */
+    tid = H5Tcopy (H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcopy");
+
+    ret = H5Tset_size (tid,MISC16_STR_SIZE);
+    CHECK(ret, FAIL, "H5Tset_size");
+    
+    /*ret = H5Tset_strpad (tid,H5T_STR_NULLPAD);
+    CHECK(ret, FAIL, "H5Tset_strpad");*/
+
+    /* Create a dataset */
+    dataset=H5Dcreate(file,MISC16_DSET_NAME,tid,sid,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write dataset to disk */
+    ret=H5Dwrite(dataset,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read dataset from disk */
+    ret=H5Dread(dataset,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<MISC16_SPACE_DIM; i++) {
+        if(strlen(wdata[i])!=strlen(rdata[i])) {
+            num_errs++;
+            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            continue;
+        } /* end if */
+        if( strcmp(wdata[i],rdata[i]) != 0 ) {
+            num_errs++;
+            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            continue;
+        } /* end if */
+    } /* end for */
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc16() */
+
+/****************************************************************
+**
+**  test_misc17(): Test array of characters.  It creates a dataset 
+**  of ASCII characters, with dimensionality of MISC17_SPACE_DIM1 
+**  by MISC17_SPACE_DIM2.
+**
+****************************************************************/
+static void
+test_misc17(void)
+{
+    hid_t file;         /* File ID */
+    herr_t ret;         /* Generic return value */
+    const char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2] = 
+                        {"1234567", "1234567\0", "12345678", NULL};
+    char rdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];  /* Information read in */
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid;       /* Dataspace ID			*/
+    hid_t		tid;       /* Datatype ID			*/
+    hsize_t		dims[] = {MISC17_SPACE_DIM1, MISC17_SPACE_DIM2};
+    int                 i;
+
+    /* Create the file */
+    file = H5Fcreate(MISC17_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid = H5Screate_simple(MISC17_SPACE_RANK, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create a datatype to refer to */
+    tid = H5Tcopy (H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcopy");
+
+    ret = H5Tset_strpad (tid,H5T_STR_NULLPAD);
+    CHECK(ret, FAIL, "H5Tset_strpad");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(file,MISC17_DSET_NAME,tid,sid,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write dataset to disk */
+    ret=H5Dwrite(dataset,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read dataset from disk */
+    ret=H5Dread(dataset,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data in the way of strings. */
+    for(i=0; i<MISC17_SPACE_DIM1; i++) {
+        if(strlen(wdata[i])!=strlen(rdata[i])) {
+            num_errs++;
+            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            continue;
+        } /* end if */
+        if( strcmp(wdata[i],rdata[i]) != 0 ) {
+            num_errs++;
+            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            continue;
+        } /* end if */
+    } /* end for */
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc17() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -2642,7 +2816,8 @@ test_misc(void)
     test_misc13();      /* Test that a user block can be insert in front of file contents */
     test_misc14();      /* Test that deleted dataset's data is removed from sieve buffer correctly */
     test_misc15();      /* Test that checking a file's access property list more than once works */
-
+    test_misc16();      /* Test array of fixed-length string */
+    test_misc17();      /* Test array of ASCII character */
 } /* test_misc() */
 
 
@@ -2681,4 +2856,6 @@ cleanup_misc(void)
     HDremove(MISC13_FILE_2);
     HDremove(MISC14_FILE);
     HDremove(MISC15_FILE);
+    HDremove(MISC16_FILE);
+    HDremove(MISC17_FILE);
 }
