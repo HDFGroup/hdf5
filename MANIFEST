@@ -84,12 +84,14 @@
 ./doc/Makefile.in
 
 ./doc/html/ADGuide.html
+./doc/html/ADGuide/Changes.html
 ./doc/html/ADGuide/H4toH5Mapping.pdf
 ./doc/html/ADGuide/H4toH5Mapping.doc    _DO_NOT_DISTRIBUTE_
+./doc/html/ADGuide/HISTORY.txt
 ./doc/html/ADGuide/ImageSpec.html
 ./doc/html/ADGuide/PaletteExample1.gif
 ./doc/html/ADGuide/Palettes.fm.anc.gif
-./doc/html/ADGuide/Changes.html
+./doc/html/ADGuide/RELEASE.txt
 
 ./doc/html/Attributes.html
 ./doc/html/Big.html
