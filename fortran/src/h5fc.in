@@ -168,42 +168,47 @@ for arg in $@ ; do
       qarg='\"'"$arg"'\"'
       allargs="$allargs $qarg"
       ;;
-    *)
-      allargs="$allargs $qarg"
 
-      if test -s "$arg"; then
-        ext=`expr "$arg" : '.*\(\..*\)'`
-
-        if test "x$ext" = "x.c"; then
-          do_compile="yes"
-          compile_args="$compile_args $arg"
-          fname=`basename $arg .c`
-          link_objs="$link_objs $fname.o"
-        elif test "x$ext" = "x.o"; then
-          if test "x$dash_c" = "xyes"; then
+        *) allargs="$allargs $arg"
+	if [ -s "$arg" ] ; then
+	    ext=`expr "$arg" : '.*\(\..*\)'`
+	    if [ "$ext" = ".f" -o "$ext" = ".F" -o "$ext" = ".f90" -o \
+		 "$ext" = ".for" -o "$ext" = ".FOR" -o "$ext" = ".F90" ] ; then
+	        do_compile="yes"
+	        compile_args="$compile_args $arg"
+	        fname=`basename $arg $ext`
+	        link_objs="$link_objs $fname.o"
+	    elif [ "$ext" = ".o" ] ; then
+		if test "x$dash_c" = "xyes"  ; then
+	            compile_args="$compile_args $arg"
+                else
+	            do_link="yes"
+	            link_objs="$link_objs $arg"
+                fi
+	    else
+	        compile_args="$compile_args $arg"
+	        link_args="$link_args $arg"
+	    fi
+	else
             compile_args="$compile_args $arg"
-          else
-            do_link="yes"
-            link_objs="$link_objs $arg"
-          fi
-        else
-          compile_args="$compile_args $arg"
-          link_args="$link_args $arg"
-        fi
-      else
-        compile_args="$compile_args $arg"
-        link_args="$link_args $arg"
-      fi
-      ;;
+	    link_args="$link_args $arg"
+	fi
+	;;
   esac
 done
+
+# It's possible that there isn't a modules flag...
+  fmodules=""
+  if test -n "$F9XMODFLAG"; then
+    fmodules="${F9XMODFLAG}${libdir}"
+  fi
 
 if test "x$do_compile" = "xyes"; then
   if test "x$dash_c" != "xyes"; then
     compile_args="-c $compile_args"
   fi
 
-  $SHOW $FC $FFLAGS ${F9XSUFFIXFLAG} $compile_args
+  $SHOW $FC $FFLAGS ${F9XSUFFIXFLAG} ${fmodules} $compile_args
   status=$?
 
   if test "$status" != "0"; then
@@ -212,11 +217,6 @@ if test "x$do_compile" = "xyes"; then
 fi
 
 if test "x$do_link" = "xyes"; then
-  # It's possible that there isn't a modules flag...
-  fmodules=""
-  if test -n "$F9XMODFLAG"; then
-    fmodules="${F9XMODFLAG}${libdir}"
-  fi
 
   link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a"
 
