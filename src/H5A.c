@@ -130,7 +130,8 @@ static herr_t H5A_init_interface(void)
 *******************************************************************************/
 intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
     intn hash_size,                 /* IN: Minimum hash table size to use for group */
-    uintn reserved                  /* IN: Number of hash table entries to reserve */
+    uintn reserved,                 /* IN: Number of hash table entries to reserve */
+    void (*free_func)(void *)            /* IN: Function to call when releasing ref counted objects */
 )
 {
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
@@ -172,6 +173,7 @@ intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
         grp_ptr->wrapped=0;
         grp_ptr->atoms=0;
         grp_ptr->nextid=reserved;
+        grp_ptr->free_func=free;
         if((grp_ptr->atom_list=(atom_info_t **)HDcalloc(hash_size,sizeof(atom_info_t *)))==NULL)
             HGOTO_DONE(FAIL);
       } /* end if */
@@ -298,6 +300,7 @@ hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in *
     /* Create the atom & it's ID */
     atm_id=MAKE_ATOM(grp,grp_ptr->nextid);
     atm_ptr->id=atm_id;
+    atm_ptr->count=1;   /* reference count all objects (even if no 'free' function defined */
     atm_ptr->obj_ptr=object;
     atm_ptr->next=NULL;
 
@@ -356,6 +359,49 @@ done:
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 }   /* end H5Aregister_atom() */
+
+/******************************************************************************
+ NAME
+     H5Ainc_ref - Adds a reference to a reference counted atom.
+
+ DESCRIPTION
+    Increments the number of references outstanding for an atom.  This will
+    fail if the group is not a reference counted group.
+
+ RETURNS
+    SUCCEED/FAIL
+
+*******************************************************************************/
+intn H5Ainc_ref(hid_t atm   /* IN: Atom to increment reference count for */
+)
+{
+    group_t grp=ATOM_TO_GROUP(atm); /* Group the object is in */
+    atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
+    atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
+    intn ret_value=FAIL;
+
+    FUNC_ENTER (H5Ainc_ref, H5A_init_interface, FAIL);
+
+    grp_ptr=atom_group_list[grp];
+    if(grp_ptr==NULL || grp_ptr->count<=0 || grp_ptr->free_func==NULL)
+        HGOTO_DONE(FAIL);
+
+    /* General lookup of the atom */
+    if((atm_ptr=H5A_find_atom(atm))!=NULL)
+      {
+        atm_ptr->count++;
+        ret_value=SUCCEED;
+      } /* end if */
+
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+    FUNC_LEAVE(ret_value);
+}   /* end H5Ainc_ref() */
 
 /******************************************************************************
  NAME
@@ -533,6 +579,57 @@ done:
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 }   /* end H5Aremove_atom() */
+
+/******************************************************************************
+ NAME
+     H5Adec_ref - Decrements a reference to a reference counted atom.
+
+ DESCRIPTION
+    Decrements the number of references outstanding for an atom.  This will
+    fail if the group is not a reference counted group.  The atom group's
+    'free' function will be called for the atom if the reference count for the
+    atom reaches 0.
+
+ RETURNS
+    SUCCEED/FAIL
+
+*******************************************************************************/
+intn H5Adec_ref(hid_t atm   /* IN: Atom to decrement reference count for */
+)
+{
+    group_t grp=ATOM_TO_GROUP(atm); /* Group the object is in */
+    atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
+    atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
+    VOIDP obj;                      /* object to call 'free' function with */
+    intn ret_value=FAIL;
+
+    FUNC_ENTER (H5Adec_ref, H5A_init_interface, FAIL);
+
+    grp_ptr=atom_group_list[grp];
+    if(grp_ptr==NULL || grp_ptr->count<=0 || grp_ptr->free_func==NULL)
+        HGOTO_DONE(FAIL);
+
+    /* General lookup of the atom */
+    if((atm_ptr=H5A_find_atom(atm))!=NULL)
+      {
+        /* Decrement the reference count */
+        atm_ptr->count--;
+
+        /* If the reference count is zero, remove the object from the group */
+        if(atm_ptr->count==0 && (obj=H5Aremove_atom(atm))!=NULL)
+            grp_ptr->free_func(obj); /* call the user's 'free' function for the atom's information */
+        ret_value=SUCCEED;
+      } /* end if */
+
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+    FUNC_LEAVE(ret_value);
+}   /* end H5Adec_ref() */
 
 /******************************************************************************
  NAME

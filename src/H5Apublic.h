@@ -70,9 +70,10 @@ extern "C" {
     Returns SUCCEED if successful and FAIL otherwise
 
 *******************************************************************************/
-intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
+intn H5Ainit_group(group_t grp,     /* IN: Group to initialize */
     intn hash_size,                 /* IN: Minimum hash table size to use for group */
-    uintn reserved                  /* IN: Number of hash table entries to reserve */
+    uintn reserved,                 /* IN: Number of hash table entries to reserve */
+    void (*free_func)(void *)       /* IN: Function to call when releasing ref counted objects */
 );
 
 /******************************************************************************
@@ -110,6 +111,21 @@ intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
 *******************************************************************************/
 hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
     const VOIDP object                    /* IN: Object to attach to atom */
+);
+
+/******************************************************************************
+ NAME
+     H5Ainc_ref - Adds a reference to a reference counted atom.
+
+ DESCRIPTION
+    Increments the number of references outstanding for an atom.  This will
+    fail if the group is not a reference counted group.
+
+ RETURNS
+    SUCCEED/FAIL
+
+*******************************************************************************/
+intn H5Ainc_ref(hid_t atm   /* IN: Atom to increment reference count for */
 );
 
 /******************************************************************************
@@ -152,6 +168,23 @@ group_t H5Aatom_group(hid_t atm   /* IN: Atom to retrieve group for */
 
 *******************************************************************************/
 VOIDP H5Aremove_atom(hid_t atm   /* IN: Atom to remove */
+);
+
+/******************************************************************************
+ NAME
+     H5Adec_ref - Decrements a reference to a reference counted atom.
+
+ DESCRIPTION
+    Decrements the number of references outstanding for an atom.  This will
+    fail if the group is not a reference counted group.  The atom group's
+    'free' function will be called for the atom if the reference count for the
+    atom reaches 0.
+
+ RETURNS
+    SUCCEED/FAIL
+
+*******************************************************************************/
+intn H5Adec_ref(hid_t atm   /* IN: Atom to decrement reference count for */
 );
 
 /******************************************************************************

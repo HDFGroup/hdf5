@@ -67,7 +67,8 @@
 
 /* Atom information structure used */
 typedef struct atom_info_struct_tag {
-    hid_t id;              /* atom ID for this info */
+    hid_t id;               /* atom ID for this info */
+    uintn count;            /* ref. count for this atom */
     VOIDP *obj_ptr;         /* pointer associated with the atom */
     struct atom_info_struct_tag *next;   /* link to next atom (in case of hash-clash) */
   }atom_info_t;
@@ -80,9 +81,9 @@ typedef struct atom_group_struct_tag {
     intn hash_size;         /* size of the hash table to store the atoms in */
     uintn atoms;            /* current number of atoms held */
     uintn nextid;           /* atom ID to use for the next atom */
+    void (*free_func)(void *);   /* Pointer to function to call when releasing ref counted object */
     atom_info_t **atom_list;/* pointer to an array of ptrs to atoms */
   }atom_group_t;
-
 
 #endif
 
