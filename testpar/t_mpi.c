@@ -592,6 +592,163 @@ if (special_request & USEFSYNC){
 }
 
 
+static int test_mpio_derived_dtype(char *filename) {
+
+    MPI_File fh;
+    char mpi_err_str[MPI_MAX_ERROR_STRING];
+    int  mpi_err_strlen;
+    int  mpi_err;
+    int  i; 
+    int  nerrors = 0;		/* number of errors */
+    MPI_Datatype  etype,filetype;
+    MPI_Datatype  adv_filetype,bas_filetype[2];
+    MPI_Datatype  etypenew, filetypenew;
+    MPI_Offset    disp,dispnew;
+    MPI_Aint      adv_disp[2];
+    MPI_Aint      offsets[1],adv_offsets[2];
+    int           blocklens[1],adv_blocklens[2];
+    int           count,outcount;
+    int           ret;
+
+    int mpi_rank,mpi_size;
+
+    char          buf[2],outbuf[2];
+
+
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    ret = 0;
+    for(i=0;i<2;i++)
+      buf[i] = i+1;
+
+  
+    if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename,
+				 MPI_MODE_RDWR | MPI_MODE_CREATE, 
+				 MPI_INFO_NULL, &fh))
+	    != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_open failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    disp  = 0;
+    etype = MPI_BYTE;
+
+    count = 1;
+    blocklens[0] = 1;
+    offsets[0]   = 0;
+
+    if((mpi_err= MPI_Type_hindexed(count,blocklens,offsets,MPI_BYTE,&filetype))
+       != MPI_SUCCESS){
+      	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    if((mpi_err=MPI_Type_commit(&filetype))!=MPI_SUCCESS){
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    count = 1;
+    blocklens[0]=1;
+    offsets[0] = 1;
+    if((mpi_err= MPI_Type_hindexed(count,blocklens,offsets,MPI_BYTE,&filetypenew))
+       != MPI_SUCCESS){
+      	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    if((mpi_err=MPI_Type_commit(&filetypenew))!=MPI_SUCCESS){
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    outcount         = 2;
+    adv_blocklens[0] = 1;
+    adv_blocklens[1] = 1;
+    adv_disp[0]      = 0;
+    adv_disp[1]      = 1;
+    bas_filetype[0]  = filetype;
+    bas_filetype[1]  = filetypenew;
+
+    if((mpi_err= MPI_Type_struct(outcount,adv_blocklens,adv_disp,bas_filetype,&adv_filetype))
+       != MPI_SUCCESS){
+      	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_struct failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+    if((mpi_err=MPI_Type_commit(&adv_filetype))!=MPI_SUCCESS){
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+
+    if((mpi_err = MPI_File_set_view(fh,disp,etype,adv_filetype,"native",MPI_INFO_NULL))!= MPI_SUCCESS){
+      MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    if((mpi_err = MPI_File_write(fh,buf,2,MPI_BYTE,MPI_STATUS_IGNORE))!= MPI_SUCCESS){
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_write failed (%s)\n", mpi_err_str);
+	return 1;
+      ;
+    }
+
+
+    if((mpi_err = MPI_File_close(&fh)) != MPI_SUCCESS){
+       MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_close failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+
+    if((mpi_err = MPI_File_open(MPI_COMM_WORLD,filename,MPI_MODE_RDONLY,MPI_INFO_NULL,&fh)) != MPI_SUCCESS){
+       MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_open failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+    
+    if((mpi_err = MPI_File_set_view(fh,0,MPI_BYTE,MPI_BYTE,"native",MPI_INFO_NULL))!= MPI_SUCCESS){
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+    if((mpi_err = MPI_File_read(fh,outbuf,2,MPI_BYTE,MPI_STATUS_IGNORE))!=MPI_SUCCESS){
+      MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+      printf("MPI_File_read failed (%s)\n", mpi_err_str);
+      return 1;
+    }
+
+    if(outbuf[1]==0) {
+       ret = 0;
+    }
+    if(outbuf[1]==2) {
+/*      if(mpi_rank == 0) {
+       printf("complicated derived datatype is NOT working at this platform\n");
+       printf("go back to hdf5/config and find the corresponding\n");
+       printf("configure-specific file and change ?????\n");
+      }
+*/
+       ret = -1;
+   }
+
+    if((mpi_err = MPI_File_close(&fh)) != MPI_SUCCESS){
+       MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	printf("MPI_File_close failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    
+    mpi_err = MPI_Barrier(MPI_COMM_WORLD);
+    return ret;
+}
 /*
  * parse the command line options
  */
@@ -706,6 +863,38 @@ main(int argc, char **argv)
 
     fapl = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    MPI_BANNER("MPIO complicated derived datatype test...");
+    ret_code = test_mpio_derived_dtype(filenames[0]);
+#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS 
+    if(ret_code == -1) {
+      if(mpi_rank == 0) {
+        printf("Complicated derived datatype is NOT working at this platform\n"); 
+        printf("Go back to hdf5/config and find the corresponding\n");  
+        printf("configure-specific file and change ?????\n");
+        printf(" Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
+      }
+        ret_code = 1;
+    }
+#else
+    if(ret_code == 0) {
+      if(mpi_rank == 0) {
+        printf(" This is NOT an error, What it really says is\n");
+        printf("Complicated derived datatype is WORKING at this platform\n");
+        printf(" Go back to hdf5/config and find the corresponding\n");
+        printf(" configure-specific file and change ?????\n");
+        printf("Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
+      }
+      ret_code = 1;
+    }
+    if(ret_code == -1) ret_code = 0;
+
+    ret_code = errors_sum(ret_code);
+    if (mpi_rank==0 && ret_code > 0){
+	printf("***FAILED with %d total errors\n", ret_code);
+	nerrors += ret_code;
+    }
+#endif
 
     MPI_BANNER("MPIO 1 write Many read test...");
     ret_code = test_mpio_1wMr(filenames[0], USENONE);
