@@ -23,9 +23,6 @@
 #include <H5MMprivate.h>    /* Memory allocation */
 #include <H5Pprivate.h>		/*property lists			*/
 
-#ifdef WIN32
-#include <windows.h>
-#endif
 
 #ifdef MAX
 #undef MAX
