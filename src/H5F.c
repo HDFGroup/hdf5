@@ -81,6 +81,9 @@ static herr_t H5F_flush_all(hbool_t invalidate);
 static int H5F_flush_all_cb(void *f, hid_t fid, void *_invalidate);
 #endif /* NOT_YET */
 
+static herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf);
+static herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id, unsigned alloc, uint8_t *buf);
+
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
@@ -1782,68 +1785,50 @@ done:
 static H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
-    H5F_t		*file=NULL;	/*the success return value	*/
-    H5F_t		*ret_value;     /*actual return value		*/
-    H5F_file_t		*shared=NULL;	/*shared part of `file'		*/
-    H5FD_t		*lf=NULL;	/*file driver part of `shared'	*/
-    uint8_t		buf[256];	/*temporary I/O buffer		*/
-    const uint8_t	*p;		/*ptr into temp I/O buffer	*/
-    uint8_t	        *q;		/*ptr into temp I/O buffer	*/
-    size_t		fixed_size=24;	/*fixed sizeof superblock	*/
-    size_t		variable_size;	/*variable sizeof superblock	*/
-    size_t		driver_size;	/*size of driver info block	*/
-    H5G_entry_t		root_ent;	/*root symbol table entry	*/
-    haddr_t		eof;		/*end of file address		*/
-    haddr_t		stored_eoa;	/*relative end-of-addr in file	*/
-    unsigned		tent_flags;	/*tentative flags		*/
-    char		driver_name[9];	/*file driver name/version	*/
-    H5FD_class_t       *drvr;           /* File driver class info */
-    hbool_t		driver_has_cmp;	/*`cmp' callback defined?	*/
+    H5F_t              *file = NULL;        /*the success return value      */
+    H5F_file_t         *shared = NULL;      /*shared part of `file'         */
+    H5FD_t             *lf = NULL;          /*file driver part of `shared'  */
+    H5G_entry_t         root_ent;           /*root symbol table entry       */
+    unsigned            tent_flags;         /*tentative flags               */
+    H5FD_class_t       *drvr;               /*file driver class info        */
+    hbool_t             driver_has_cmp;     /*`cmp' callback defined?       */
     hsize_t             userblock_size = 0;
-    unsigned            super_vers;     /* Superblock version # */
-    unsigned            freespace_vers; /* File freespace version # */
-    unsigned            obj_dir_vers;
-    unsigned            share_head_vers;
-    size_t              sizeof_addr = 0;
-    size_t              sizeof_size = 0;
-    unsigned            sym_leaf_k = 0;
-    unsigned            btree_k[H5B_NUM_BTREE_ID];  /* B-tree internal node 'K' values */
-    H5P_genplist_t      *c_plist;       /* File creation property list */
-    H5P_genplist_t      *a_plist;       /* File access property list */
-    H5F_close_degree_t  fc_degree;      /* File close degree */
-    unsigned		chksum;         /* Checksum temporary variable */
-    unsigned		i;              /* Index variable */
+    H5P_genplist_t     *c_plist;            /*file creation property list   */
+    H5P_genplist_t     *a_plist;            /*file access property list     */
+    H5F_close_degree_t  fc_degree;          /*file close degree             */
+    H5F_t              *ret_value = NULL;   /*actual return value           */
 
     FUNC_ENTER_NOAPI(H5F_open, NULL)
 
     /*
      * If the driver has a `cmp' method then the driver is capable of
      * determining when two file handles refer to the same file and the
-     * library can insure that when the application opens a file twice that
-     * the two handles coordinate their operations appropriately. Otherwise
-     * it is the application's responsibility to never open the same file
-     * more than once at a time.
+     * library can insure that when the application opens a file twice
+     * that the two handles coordinate their operations appropriately.
+     * Otherwise it is the application's responsibility to never open the
+     * same file more than once at a time.
      */
     if((drvr=H5FD_get_class(fapl_id))==NULL)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
     driver_has_cmp = (NULL!=drvr->cmp);
 
     /*
-     * Opening a file is a two step process. First we try to open the file in
-     * a way which doesn't affect its state (like not truncating or creating
-     * it) so we can compare it with files that are already open. If that
-     * fails then we try again with the full set of flags (only if they're
-     * different than the original failed attempt). However, if the file
-     * driver can't distinquish between files then there's no reason to open
-     * the file tentatively because it's the application's responsibility to
-     * prevent this situation (there's no way for us to detect it here
-     * anyway).
+     * Opening a file is a two step process. First we try to open the
+     * file in a way which doesn't affect its state (like not truncating
+     * or creating it) so we can compare it with files that are already
+     * open. If that fails then we try again with the full set of flags
+     * (only if they're different than the original failed attempt).
+     * However, if the file driver can't distinquish between files then
+     * there's no reason to open the file tentatively because it's the
+     * application's responsibility to prevent this situation (there's no
+     * way for us to detect it here anyway).
      */
     if (driver_has_cmp) {
 	tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL);
     } else {
 	tent_flags = flags;
     }
+
     if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
 	if (tent_flags == flags)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
@@ -1941,34 +1926,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to write the superblock.
-         */
-#ifdef H5_HAVE_FPHDF5
-        /*
-         * If this is an FPHDF5 driver, then we want to set a property
-         * which says so and that only the captain process will be able
-         * to allocate things for the duration. That is, only the captain
-         * process should allocate the superblock of a file.
-         */
-        if (H5FD_is_fphdf5_driver(lf)) {
-            unsigned value = 1;
-            H5P_genplist_t *d_plist;
-
-            /* Get the data xfer property list */
-            if ((d_plist = H5I_object(dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a dataset transfer list")
-
-            /* Set that only captain should allocate */
-            if (H5P_insert(d_plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY,
-                           H5FD_FPHDF5_CAPTN_ALLOC_SIZE, &value,
-                           NULL, NULL, NULL, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't insert FPHDF5 property")
-        }
-#endif  /* H5_HAVE_FPHDF5 */
-
-	/*
-	 * The superblock starts immediately after the user-defined header,
-	 * which we have already insured is a proper size.  The base address
-	 * is set to the same thing as the superblock for now.
+         *
+         * The superblock starts immediately after the user-defined
+         * header, which we have already insured is a proper size. The
+         * base address is set to the same thing as the superblock for
+         * now.
 	 */
         if(H5P_get(c_plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get user block size")
@@ -1976,247 +1938,34 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	shared->base_addr = shared->super_addr;
 	shared->consist_flags = 0x03;
 
-	if (H5F_flush(file, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_ALLOC_ONLY) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
+#ifdef H5_HAVE_FPHDF5
+        /* Non-captn procs get bcast from capt. Call read_superblock with
+         * that buffer. Then call mkroot with root_ent pointer. Capt does
+         * just the mkroot call with NULL. Capt should do the mkroot
+         * first. Then bcast, then the rest can call it. */
+#endif  /* H5_HAVE_FPHDF5 */
+
+        if (H5F_write_superblock(file, dxpl_id, TRUE, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
 
         /* Create and open the root group */
         if (H5G_mkroot(file, dxpl_id, NULL)<0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
-
-#ifdef H5_HAVE_FPHDF5
-        /*
-         * If this is an FPHDF5 driver, then remove the property which
-         * says so since we're allocating the superblock.
-         */
-        if (H5FD_is_fphdf5_driver(lf)) {
-            H5P_genplist_t *d_plist;
-
-            /* Wait for all processes to catch up */
-            /* XXX: Calls which end up here are already required to be
-             * collective, is this barrier really necessary? -QAK
-             */
-            MPI_Barrier(H5FP_SAP_BARRIER_COMM);
-
-            /* Get the data xfer property list */
-            if ((d_plist = H5I_object(dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a dataset transfer list")
-
-            if (H5P_remove(dxpl_id, d_plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, NULL,
-                            "can't remove FPHDF5 property")
-        }
-#endif  /* H5_HAVE_FPHDF5 */
-    } else if (1==shared->nrefs) {
+    } else if (1 == shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
-	if (HADDR_UNDEF==(shared->super_addr=H5F_locate_signature(lf,dxpl_id)))
+	if (HADDR_UNDEF == (shared->super_addr = H5F_locate_signature(lf,dxpl_id)))
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "unable to find file signature")
-	if (H5FD_set_eoa(lf, shared->super_addr+fixed_size)<0 ||
-                H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr, fixed_size, buf)<0)
+
+        if (H5F_read_superblock(file, dxpl_id, &root_ent, shared->super_addr, NULL) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
-	/* Signature, already checked */
-	p = buf + H5F_SIGNATURE_LEN;
-
-	/* Superblock version */
-        super_vers = *p++;
-        if(super_vers>HDF5_SUPERBLOCK_VERSION_MAX) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad superblock version number")
-        if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set superblock version")
-
-	/* Freespace version */
-        freespace_vers = *p++;
-        if(HDF5_FREESPACE_VERSION != freespace_vers) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad free space version number")
-        if(H5P_set(c_plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to free space version")
-
-	/* Root group version number */
-        obj_dir_vers = *p++;
-        if(HDF5_OBJECTDIR_VERSION != obj_dir_vers) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad object directory version number")
-        if(H5P_set(c_plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set object directory version")
-
-	/* Skip over reserved byte */
-	p++;
-
-	/* Shared header version number */
-        share_head_vers = *p++;
-        if(HDF5_SHAREDHEADER_VERSION != share_head_vers) 
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad shared-header format version number")
-        if(H5P_set(c_plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set shared-header format version")
-
-	/* Size of file addresses */
-        sizeof_addr = *p++;
-	if (sizeof_addr != 2 && sizeof_addr != 4 &&
-                sizeof_addr != 8 && sizeof_addr != 16 && sizeof_addr != 32)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad byte number in an address")
-        if(H5P_set(c_plist, H5F_CRT_ADDR_BYTE_NUM_NAME,&sizeof_addr)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number in an address")
-        shared->sizeof_addr=sizeof_addr;        /* Keep a local copy also */
-
-	/* Size of file sizes */
-        sizeof_size = *p++;
-	if (sizeof_size != 2 && sizeof_size != 4 &&
-                sizeof_size != 8 && sizeof_size != 16 && sizeof_size != 32)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad byte number for object size")
-        if(H5P_set(c_plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number for object size")
-        shared->sizeof_size=sizeof_size;        /* Keep a local copy also */
-	
-	/* Skip over reserved byte */
-	p++;
-
-	/* Various B-tree sizes */
-	UINT16DECODE(p, sym_leaf_k);
-	if(sym_leaf_k < 1)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "bad symbol table leaf node 1/2 rank")
-        if(H5P_set(c_plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for symbol table leaf nodes")
-        shared->sym_leaf_k=sym_leaf_k;        /* Keep a local copy also */
-
-	/* Need 'get' call to set other array values */
-        if(H5P_get(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes")
-	UINT16DECODE(p, btree_k[H5B_SNODE_ID]);
-	if(btree_k[H5B_SNODE_ID] < 1)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "bad 1/2 rank for btree internal nodes")
-        /* Delay setting the value in the property list until we've checked for
-         * the indexed storage B-tree internal 'K' value later.
-         */
-
-	/* File consistency flags. Not really used yet */
-	UINT32DECODE(p, shared->consist_flags);
-	assert(((size_t)(p-buf)) == fixed_size);
-
-	/* Decode the variable-length part of the superblock... */
-	variable_size = (super_vers>0 ? 4 : 0) +        /* Potential indexed storage B-tree internal 'K' value */
-                        H5F_SIZEOF_ADDR(file) +		/*base addr*/
-			H5F_SIZEOF_ADDR(file) +		/*global free list*/
-			H5F_SIZEOF_ADDR(file) +		/*end-of-address*/
-			H5F_SIZEOF_ADDR(file) +		/*reserved address*/
-			H5G_SIZEOF_ENTRY(file);		/*root group ptr*/
-	assert((fixed_size+variable_size)<=sizeof(buf));
-	if (H5FD_set_eoa(lf, shared->super_addr+fixed_size+variable_size)<0 ||
-                H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr+fixed_size, variable_size, &buf[fixed_size])<0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read superblock")
-
-        /* If the superblock version # is greater than 0, read in the indexed storage B-tree internal 'K' value */
-        if(super_vers>0) {
-            UINT16DECODE(p, btree_k[H5B_ISTORE_ID]);
-
-            /* Skip over reserved bytes */
-            p+=2;
-        } /* end if */
-        else
-            btree_k[H5B_ISTORE_ID]=HDF5_BTREE_ISTORE_IK_DEF;
-
-        /* Set the B-tree internal node values, etc */
-        if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for btree internal nodes")
-        HDmemcpy(shared->btree_k,btree_k,sizeof(unsigned)*H5B_NUM_BTREE_ID); /* Keep a local copy also */
-
-	H5F_addr_decode(file, &p, &(shared->base_addr)/*out*/);
-	H5F_addr_decode(file, &p, &(shared->freespace_addr)/*out*/);
-	H5F_addr_decode(file, &p, &stored_eoa/*out*/);
-	H5F_addr_decode(file, &p, &(shared->driver_addr)/*out*/);
-	if (H5G_ent_decode(file, &p, &root_ent/*out*/)<0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root symbol entry")
-
-        /* Check if superblock address is different from base address and
-         * adjust base address and "end of address" address if so.
-         */
-        if(!H5F_addr_eq(shared->super_addr,shared->base_addr)) {
-            /* Check if the superblock moved earlier in the file */
-            if(H5F_addr_lt(shared->super_addr,shared->base_addr))
-                stored_eoa -= (shared->base_addr-shared->super_addr);
-            /* The superblock moved later in the file */
-            else
-                stored_eoa += (shared->super_addr-shared->base_addr);
-            shared->base_addr = shared->super_addr;
-        } /* end if */
-
-        /* Compute super block checksum */
-        assert(sizeof(chksum)==sizeof(shared->super_chksum));
-        for(q=(uint8_t *)&chksum, chksum=0, i=0; i<(fixed_size+variable_size); i++)
-            q[i%sizeof(shared->super_chksum)] ^= buf[i];
-
-        /* Set the super block checksum */
-        shared->super_chksum=chksum;
-
-	/* Decode the optional driver information block */
-	if (H5F_addr_defined(shared->driver_addr)) {
-	    haddr_t drv_addr = shared->base_addr + shared->driver_addr;
-
-	    if (H5FD_set_eoa(lf, drv_addr+16)<0 ||
-                    H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr, 16, buf)<0)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read driver information block")
-	    p = buf;
-
-	    /* Version number */
-	    if (HDF5_DRIVERINFO_VERSION!=*p++)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "bad driver information block version number")
-
-	    /* Reserved */
-	    p += 3;
-
-	    /* Driver info size */
-	    UINT32DECODE(p, driver_size);
-
-	    /* Driver name and/or version */
-	    HDstrncpy(driver_name, (const char *)p, 8);
-	    driver_name[8] = '\0';
-
-	    /* Read driver information and decode */
-            assert((driver_size+16)<=sizeof(buf));
-	    if (H5FD_set_eoa(lf, drv_addr+16+driver_size)<0 ||
-                    H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr+16, driver_size, &buf[16])<0)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file driver information")
-	    if (H5FD_sb_decode(lf, driver_name, &buf[16])<0)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information")
-
-            /* Compute driver info block checksum */
-            assert(sizeof(chksum)==sizeof(shared->drvr_chksum));
-            for(q=(uint8_t *)&chksum, chksum=0, i=0; i<(driver_size+16); i++)
-                q[i%sizeof(shared->drvr_chksum)] ^= buf[i];
-
-            /* Set the driver info block checksum */
-            shared->drvr_chksum=chksum;
-
-	} /* end if */
-	
 	/* Make sure we can open the root group */
-	if (H5G_mkroot(file, dxpl_id, &root_ent)<0)
+	if (H5G_mkroot(file, dxpl_id, &root_ent) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
-
-	/*
-	 * The user-defined data is the area of the file before the base
-	 * address.
-	 */
-        if(H5P_set(c_plist, H5F_CRT_USER_BLOCK_NAME, &(shared->base_addr)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set usr block size")
-
-	/*
-	 * Make sure that the data is not truncated. One case where this is
-	 * possible is if the first file of a family of files was opened
-	 * individually.
-	 */
-        if (HADDR_UNDEF==(eof=H5FD_get_eof(lf)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine file size")
-        if (eof<stored_eoa)
-            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file")
-        
-	/*
-	 * Tell the file driver how much address space has already been
-	 * allocated so that it knows how to allocate additional memory.
-	 */
-	if (H5FD_set_eoa(lf, stored_eoa)<0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to set end-of-address marker for file")
     }
 
-    /* Decide the file close degree.  If it's the first time to open the
+    /*
+     * Decide the file close degree.  If it's the first time to open the
      * file, set the degree to access property list value; if it's the 
      * second time or later, verify the access property list value matches
      * the degree in shared file structure.
@@ -2527,6 +2276,515 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_read_superblock
+ *
+ * Purpose:     Reads the superblock from the file or from the BUF. If
+ *              ADDR is a valid address, then it reads it from the file.
+ *              If not, then BUF must be non-NULL for it to read from the
+ *              BUF.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Bill Wendling
+ *              wendling@ncsa.uiuc.edu
+ *              Sept 12, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf)
+{
+    haddr_t             stored_eoa;         /*relative end-of-addr in file  */
+    haddr_t             eof;                /*end of file address           */
+    uint8_t            *q;                  /*ptr into temp I/O buffer      */
+    size_t              sizeof_addr = 0;
+    size_t              sizeof_size = 0;
+    size_t              fixed_size = 24;    /*fixed sizeof superblock       */
+    unsigned            sym_leaf_k = 0;
+    size_t              variable_size;      /*variable sizeof superblock    */
+    unsigned            btree_k[H5B_NUM_BTREE_ID];  /* B-tree internal node 'K' values */
+    H5F_file_t         *shared = NULL;      /* shared part of `file'        */
+    H5FD_t             *lf = NULL;          /* file driver part of `shared' */
+    const uint8_t      *p = NULL;           /* Temporary pointer into encoding buffers */
+    unsigned            i;                  /* Index variable               */
+    unsigned            chksum;             /* Checksum temporary variable  */
+    size_t              driver_size;        /* Size of driver info block, in bytes */
+    char                driver_name[9];     /* Name of driver, for driver info block */
+    unsigned            super_vers;         /* Super block version          */
+    unsigned            freespace_vers;     /* Freespace info version       */
+    unsigned            obj_dir_vers;       /* Object header info version   */
+    unsigned            share_head_vers;    /* Shared header info version   */
+    uint8_t             local_buf[256];     /* Local buffer                 */
+    H5P_genplist_t     *c_plist;            /* File creation property list  */
+    herr_t              ret_value = SUCCEED;
+
+    /* Decoding */
+    FUNC_ENTER_NOAPI(H5F_read_superblock, FAIL)
+
+    /* Short cuts */
+    shared = f->shared;
+    lf = shared->lf;
+
+    /* Get the shared file creation property list */
+    if (NULL == (c_plist = H5I_object(shared->fcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
+    /* Read the superblock if it hasn't been read before. */
+    if (addr == HADDR_UNDEF) {
+        if (HADDR_UNDEF == (shared->super_addr=H5F_locate_signature(lf,dxpl_id)))
+            HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to find file signature")
+    } else {
+        shared->super_addr = addr;
+    }
+
+    if (!buf) {
+        buf = local_buf;
+
+        if (H5FD_set_eoa(lf, shared->super_addr + fixed_size) < 0 ||
+                H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr, fixed_size, buf) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
+    }
+
+    /* Signature, already checked */
+    p = buf + H5F_SIGNATURE_LEN;
+
+    /* Superblock version */
+    super_vers = *p++;
+
+    if (super_vers > HDF5_SUPERBLOCK_VERSION_MAX) 
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad superblock version number")
+
+    if (H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set superblock version")
+
+    /* Freespace version */
+    freespace_vers = *p++;
+
+    if (HDF5_FREESPACE_VERSION != freespace_vers) 
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad free space version number")
+
+    if (H5P_set(c_plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to free space version")
+
+    /* Root group version number */
+    obj_dir_vers = *p++;
+
+    if (HDF5_OBJECTDIR_VERSION != obj_dir_vers) 
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad object directory version number")
+    if (H5P_set(c_plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set object directory version")
+
+    /* Skip over reserved byte */
+    p++;
+
+    /* Shared header version number */
+    share_head_vers = *p++;
+
+    if (HDF5_SHAREDHEADER_VERSION != share_head_vers) 
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad shared-header format version number")
+
+    if (H5P_set(c_plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set shared-header format version")
+
+    /* Size of file addresses */
+    sizeof_addr = *p++;
+
+    if (sizeof_addr != 2 && sizeof_addr != 4 &&
+            sizeof_addr != 8 && sizeof_addr != 16 && sizeof_addr != 32)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad byte number in an address")
+
+    if (H5P_set(c_plist, H5F_CRT_ADDR_BYTE_NUM_NAME,&sizeof_addr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set byte number in an address")
+
+    shared->sizeof_addr = sizeof_addr;  /* Keep a local copy also */
+
+    /* Size of file sizes */
+    sizeof_size = *p++;
+
+    if (sizeof_size != 2 && sizeof_size != 4 &&
+            sizeof_size != 8 && sizeof_size != 16 && sizeof_size != 32)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad byte number for object size")
+
+    if (H5P_set(c_plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set byte number for object size")
+
+    shared->sizeof_size = sizeof_size;  /* Keep a local copy also */
+    
+    /* Skip over reserved byte */
+    p++;
+
+    /* Various B-tree sizes */
+    UINT16DECODE(p, sym_leaf_k);
+
+    if (sym_leaf_k < 1)
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "bad symbol table leaf node 1/2 rank")
+
+    if (H5P_set(c_plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set rank for symbol table leaf nodes")
+
+    shared->sym_leaf_k = sym_leaf_k;    /* Keep a local copy also */
+
+    /* Need 'get' call to set other array values */
+    if (H5P_get(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for btree internal nodes")
+
+    UINT16DECODE(p, btree_k[H5B_SNODE_ID]);
+
+    if (btree_k[H5B_SNODE_ID] < 1)
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "bad 1/2 rank for btree internal nodes")
+
+    /*
+     * Delay setting the value in the property list until we've checked
+     * for the indexed storage B-tree internal 'K' value later.
+     */
+
+    /* File consistency flags. Not really used yet */
+    UINT32DECODE(p, shared->consist_flags);
+    assert(((size_t)(p - buf)) == fixed_size);
+
+    /* Decode the variable-length part of the superblock... */
+    variable_size = (super_vers>0 ? 4 : 0) +    /* Potential indexed storage B-tree internal 'K' value */
+                    H5F_SIZEOF_ADDR(f) +        /*base addr*/
+                    H5F_SIZEOF_ADDR(f) +        /*global free list*/
+                    H5F_SIZEOF_ADDR(f) +        /*end-of-address*/
+                    H5F_SIZEOF_ADDR(f) +        /*reserved address*/
+                    H5G_SIZEOF_ENTRY(f);        /*root group ptr*/
+    assert(fixed_size + variable_size <= sizeof(local_buf));
+
+    /* The buffer (buf) is either passed in or the "local_buf" variable now */
+    if (H5FD_set_eoa(lf, shared->super_addr + fixed_size+variable_size) < 0 ||
+            H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr + fixed_size,
+                      variable_size, &buf[fixed_size]) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read superblock")
+
+    /*
+     * If the superblock version # is greater than 0, read in the indexed
+     * storage B-tree internal 'K' value
+     */
+    if (super_vers > 0) {
+        UINT16DECODE(p, btree_k[H5B_ISTORE_ID]);
+        p += 2;   /* reserved */
+    } else {
+        btree_k[H5B_ISTORE_ID] = HDF5_BTREE_ISTORE_IK_DEF;
+    }
+
+    /* Set the B-tree internal node values, etc */
+    if (H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set rank for btree internal nodes")
+
+    HDmemcpy(shared->btree_k, btree_k, sizeof(unsigned) * H5B_NUM_BTREE_ID);    /* Keep a local copy also */
+
+    H5F_addr_decode(f, &p, &shared->base_addr/*out*/);
+    H5F_addr_decode(f, &p, &shared->freespace_addr/*out*/);
+    H5F_addr_decode(f, &p, &stored_eoa/*out*/);
+    H5F_addr_decode(f, &p, &shared->driver_addr/*out*/);
+
+    if (H5G_ent_decode(f, &p, root_ent/*out*/) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read root symbol entry")
+
+    /*
+     * Check if superblock address is different from base address and
+     * adjust base address and "end of address" address if so.
+     */
+    if (!H5F_addr_eq(shared->super_addr,shared->base_addr)) {
+        /* Check if the superblock moved earlier in the file */
+        if (H5F_addr_lt(shared->super_addr, shared->base_addr))
+            stored_eoa -= (shared->base_addr - shared->super_addr);
+        else
+            /* The superblock moved later in the file */
+            stored_eoa += (shared->super_addr - shared->base_addr);
+
+        shared->base_addr = shared->super_addr;
+    } /* end if */
+
+    /* Compute super block checksum */
+    assert(sizeof(chksum) == sizeof(shared->super_chksum));
+
+    for (q = (uint8_t *)&chksum, chksum = 0, i = 0; i < fixed_size + variable_size; ++i)
+        q[i % sizeof(shared->super_chksum)] ^= buf[i];
+
+    /* Set the super block checksum */
+    shared->super_chksum = chksum;
+
+    /* Decode the optional driver information block */
+    if (H5F_addr_defined(shared->driver_addr)) {
+        haddr_t drv_addr = shared->base_addr + shared->driver_addr;
+
+        if (H5FD_set_eoa(lf, drv_addr + 16) < 0 ||
+                H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr, 16, buf) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read driver information block")
+
+        p = buf;
+
+        /* Version number */
+        if (HDF5_DRIVERINFO_VERSION != *p++)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "bad driver information block version number")
+
+        p += 3; /* reserved */
+
+        /* Driver info size */
+        UINT32DECODE(p, driver_size);
+
+        /* Driver name and/or version */
+        HDstrncpy(driver_name, (const char *)p, 8);
+        driver_name[8] = '\0';
+
+        /* Read driver information and decode */
+        assert((driver_size + 16) <= sizeof(local_buf));
+
+        if (H5FD_set_eoa(lf, drv_addr + 16 + driver_size) < 0 ||
+                H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr+16, driver_size, &buf[16]) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read file driver information")
+
+        if (H5FD_sb_decode(lf, driver_name, &buf[16]) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to decode driver information")
+
+        /* Compute driver info block checksum */
+        assert(sizeof(chksum) == sizeof(shared->drvr_chksum));
+
+        for (q = (uint8_t *)&chksum, chksum = 0, i = 0; i < (driver_size + 16); ++i)
+            q[i % sizeof(shared->drvr_chksum)] ^= buf[i];
+
+        /* Set the driver info block checksum */
+        shared->drvr_chksum = chksum;
+    } /* end if */
+    
+    /*
+     * The user-defined data is the area of the file before the base
+     * address.
+     */
+    if (H5P_set(c_plist, H5F_CRT_USER_BLOCK_NAME, &shared->base_addr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set usr block size")
+
+    /*
+     * Make sure that the data is not truncated. One case where this is
+     * possible is if the first file of a family of files was opened
+     * individually.
+     */
+    if (HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size")
+
+    if (eof < stored_eoa)
+        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file")
+    
+    /*
+     * Tell the file driver how much address space has already been
+     * allocated so that it knows how to allocate additional memory.
+     */
+    if (H5FD_set_eoa(lf, stored_eoa) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to set end-of-address marker for file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_write_superblock
+ *
+ * Purpose:     Writes (and optionally allocates) the superblock for the
+ *              file. If ALLOC is TRUE, then it allocates the superblock.
+ *              If BUF is non-NULL, then write the serialized superblock
+ *              information into it. It should be a buffer of size
+ *              H5F_SUPERBLOCK_SIZE + H5F_DRVINFOBLOCK_SIZE or larger.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Bill Wendling
+ *              wendling@ncsa.uiuc.edu
+ *              Sept 12, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_write_superblock(H5F_t *f, hid_t dxpl_id, unsigned alloc, uint8_t *buf)
+{
+    uint8_t         sbuf[H5F_SUPERBLOCK_SIZE];  /* Superblock encoding buffer       */
+    uint8_t         dbuf[H5F_DRVINFOBLOCK_SIZE];/* Driver info block encoding buffer*/
+    uint8_t        *p = NULL;                   /* Ptr into encoding buffers        */
+    unsigned        i;                          /* Index variable                   */
+    unsigned        chksum;                     /* Checksum temporary variable      */
+    size_t          superblock_size;            /* Size of superblock, in bytes     */
+    size_t          driver_size;                /* Size of driver info block (bytes)*/
+    char            driver_name[9];             /* Name of driver, for driver info block */
+    unsigned        super_vers;                 /* Super block version              */
+    unsigned        freespace_vers;             /* Freespace info version           */
+    unsigned        obj_dir_vers;               /* Object header info version       */
+    unsigned        share_head_vers;            /* Shared header info version       */
+    H5P_genplist_t *plist;                      /* Property list                    */
+    herr_t          ret_value = SUCCEED;
+
+    /* Encoding */
+    FUNC_ENTER_NOAPI(H5F_write_superblock, FAIL)
+
+    /* Get the shared file creation property list */
+    if (NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Grab values from property list */
+    if (H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get super block version")
+    if (H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get free space version")
+    if (H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get object directory version")
+    if (H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get shared-header format version")
+
+    /* Encode the file super block */
+    p = sbuf;
+    HDmemcpy(p, H5F_SIGNATURE, H5F_SIGNATURE_LEN);
+    p += H5F_SIGNATURE_LEN;
+    *p++ = (uint8_t)super_vers;
+    *p++ = (uint8_t)freespace_vers;
+    *p++ = (uint8_t)obj_dir_vers;
+    *p++ = 0;   /* reserved*/
+    *p++ = (uint8_t)share_head_vers;
+    assert (H5F_SIZEOF_ADDR(f) <= 255);
+    *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
+    assert (H5F_SIZEOF_SIZE(f) <= 255);
+    *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
+    *p++ = 0;   /* reserved */
+    UINT16ENCODE(p, f->shared->sym_leaf_k);
+    UINT16ENCODE(p, f->shared->btree_k[H5B_SNODE_ID]);
+    UINT32ENCODE(p, f->shared->consist_flags);    
+
+    /*
+     * Versions of the superblock >0 have the indexed storage B-tree
+     * internal 'K' value stored
+     */
+    if (super_vers > 0) {
+        UINT16ENCODE(p, f->shared->btree_k[H5B_ISTORE_ID]);
+        *p++ = 0;   /*reserved */
+        *p++ = 0;   /*reserved */
+    }
+
+    H5F_addr_encode(f, &p, f->shared->base_addr);
+    H5F_addr_encode(f, &p, f->shared->freespace_addr);
+    H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf));
+    H5F_addr_encode(f, &p, f->shared->driver_addr);
+
+    if(H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp))<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode root group information")
+
+    H5_ASSIGN_OVERFLOW(superblock_size, p - sbuf, int, size_t);
+
+    /* Double check we didn't overrun the block (unlikely) */
+    assert(superblock_size <= sizeof(sbuf));
+
+    /* Encode the driver information block. */
+    H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
+
+    if (driver_size > 0) {
+	driver_size += 16; /* Driver block header */
+
+        /* Double check we didn't overrun the block (unlikely) */
+	assert(driver_size <= sizeof(dbuf));
+
+        /* Encode the driver information block */
+	p = dbuf;
+
+	*p++ = HDF5_DRIVERINFO_VERSION; /* Version */
+	*p++ = 0; /* reserved */
+	*p++ = 0; /* reserved */
+	*p++ = 0; /* reserved */
+
+	/* Driver info size, excluding header */
+	UINT32ENCODE(p, driver_size - 16);
+
+	/* Encode driver-specific data */
+	if (H5FD_sb_encode(f->shared->lf, driver_name, dbuf + 16) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
+
+	/* Driver name */
+	HDmemcpy(dbuf + 8, driver_name, 8);
+    } /* end if */
+
+    if (alloc) {
+        /*
+         * Allocate space for the userblock, superblock, and driver info
+         * block. We do it with one allocation request because the
+         * userblock and superblock need to be at the beginning of the
+         * file and only the first allocation request is required to
+         * return memory at format address zero.
+         */
+        haddr_t addr;
+
+        H5_CHECK_OVERFLOW(f->shared->base_addr, haddr_t, hsize_t);
+        addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                          ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
+
+        if (HADDR_UNDEF == addr)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                        "unable to allocate file space for userblock and/or superblock")
+
+        if (0 != addr)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                        "file driver failed to allocate userblock and/or superblock at address zero")
+
+        /*
+         * The file driver information block begins immediately after the
+         * superblock.
+         */
+        if (driver_size > 0)
+            f->shared->driver_addr = superblock_size;
+    }
+
+    /* Compute super block checksum */
+    assert(sizeof(chksum) == sizeof(f->shared->super_chksum));
+
+    for (p = (uint8_t *)&chksum, chksum = 0, i = 0; i < superblock_size; ++i)
+        p[i % sizeof(f->shared->super_chksum)] ^= sbuf[i];
+
+    /* Compare with current checksums */
+    if (chksum != f->shared->super_chksum) {
+        /* Write superblock */
+        if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                       f->shared->super_addr, superblock_size, sbuf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock")
+
+        /* Update checksum information if different */
+        f->shared->super_chksum = chksum;
+    }
+
+    /* Check for driver info block */
+    if (HADDR_UNDEF != f->shared->driver_addr) {
+        /* Compute driver info block checksum */
+        assert(sizeof(chksum) == sizeof(f->shared->drvr_chksum));
+
+        for (p = (uint8_t *)&chksum, chksum = 0, i = 0; i < driver_size; ++i)
+            p[i % sizeof(f->shared->drvr_chksum)] ^= dbuf[i];
+
+        /* Compare with current checksums */
+        if (chksum != f->shared->drvr_chksum) {
+            /* Write driver information block */
+            if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                           f->shared->base_addr + f->shared->driver_addr, driver_size, dbuf) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write driver information block")
+
+            /* Update checksum information if different */
+            f->shared->drvr_chksum = chksum;
+        } /* end if */
+    } /* end if */
+
+    /* Update the user's buffer, if given */
+    if (buf) {
+        HDmemcpy(buf, sbuf, superblock_size);
+        HDmemcpy(&buf[superblock_size], dbuf, driver_size);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_flush
  *
  * Purpose:	Flushes (and optionally invalidates) cached data plus the
@@ -2583,20 +2841,8 @@ done:
 static herr_t
 H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 {
-    uint8_t		sbuf[H5F_SUPERBLOCK_SIZE];     /* Superblock encoding buffer */
-    uint8_t		dbuf[H5F_DRVINFOBLOCK_SIZE];     /* Driver info block encoding buffer */
-    uint8_t		*p=NULL;        /* Temporary pointer into encoding buffers */
-    unsigned		nerrors=0;      /* Errors from nested flushes */
+    unsigned		nerrors = 0;    /* Errors from nested flushes */
     unsigned		i;              /* Index variable */
-    unsigned		chksum;         /* Checksum temporary variable */
-    size_t		superblock_size;/* Size of superblock, in bytes */
-    size_t		driver_size;    /* Size of driver info block, in bytes */
-    char		driver_name[9]; /* Name of driver, for driver info block */
-    unsigned            super_vers;     /* Super block version */
-    unsigned            freespace_vers; /* Freespace info version */
-    unsigned            obj_dir_vers;   /* Object header info version */
-    unsigned            share_head_vers;/* Shared header info version */
-    H5P_genplist_t      *plist;         /* Property list */
     herr_t              ret_value;      /* Return value */
 
     FUNC_ENTER_NOINIT(H5F_flush)
@@ -2624,256 +2870,101 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 
     if (H5F_SCOPE_DOWN == scope)
         for (i = 0; i < f->mtab.nmounts; i++)
-            /* Flush but don't pass down the ALLOC_ONLY flag if there */
-            if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope,
-                          flags & ~H5F_FLUSH_ALLOC_ONLY) < 0)
+            if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope, flags) < 0)
                 nerrors++;
 
-    /* Avoid flushing buffers & caches when alloc_only set */
-    if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0) {
-        /* flush any cached compact storage raw data */
-        if (H5D_flush(f, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
-
-        /*
-         * If we are invalidating everything (which only happens just
-         * before the file closes), release the unused portion of the
-         * metadata and "small data" blocks back to the free lists in the
-         * file.
-         */
-        if (flags & H5F_FLUSH_INVALIDATE) {
-#ifdef H5_HAVE_FPHDF5
-            /*
-             * If this is not the SAP, then we want to send a "free"
-             * command to the SAP to free up the EOMA and EOSDA
-             * information. This might also update the EOA information on
-             * the clients...
-             */
-            if (H5FD_is_fphdf5_driver(f->shared->lf) && !H5FD_fphdf5_is_sap(f->shared->lf)) {
-                unsigned        req_id = 0;
-                H5FP_status_t   status = H5FP_STATUS_OK;
-
-                /* Send the request to the SAP */
-                if (H5FP_request_update_eoma_eosda(f->shared->lf,
-                                                   &req_id, &status) != SUCCEED)
-                    /* FIXME: Should we check the "status" variable here? */
-                    HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL,
-                                "server couldn't free from file")
-            } else {
-#endif  /* H5_HAVE_FPHDF5 */
-
-                if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
-                    /* Return the unused portion of the metadata block to a free list */
-                    if (f->shared->lf->eoma != 0)
-                        if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
-                                f->shared->lf->eoma, f->shared->lf->cur_meta_block_size) < 0)
-                            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block")
-
-                    /* Reset metadata block information, just in case */
-                    f->shared->lf->eoma=0;
-                    f->shared->lf->cur_meta_block_size=0;
-                } /* end if */
-
-                if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
-                    /* Return the unused portion of the "small data" block to a free list */
-                    if (f->shared->lf->eosda != 0)
-                        if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
-                                f->shared->lf->eosda, f->shared->lf->cur_sdata_block_size) < 0)
-                            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block")
-
-                    /* Reset "small data" block information, just in case */
-                    f->shared->lf->eosda=0;
-                    f->shared->lf->cur_sdata_block_size=0;
-                } /* end if */
-
-#ifdef H5_HAVE_FPHDF5
-            }
-#endif  /* H5_HAVE_FPHDF5 */
-        } /* end if */
-
-        /* flush the data sieve buffer, if we have a dirty one */
-        if (f->shared->sieve_buf && f->shared->sieve_dirty) {
-            /* Write dirty data sieve buffer to file */
-            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc,
-                    f->shared->sieve_size, dxpl_id, f->shared->sieve_buf) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
-
-            /* Reset sieve buffer dirty flag */
-            f->shared->sieve_dirty=0;
-        } /* end if */
-
-        /* flush the entire raw data cache */
-        if (H5F_istore_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
-        
-        /* flush (and invalidate) the entire meta data cache */
-        /*
-         * FIXME: This should be CLEAR_ONLY for non-captain processes.
-         * Need to fix the H5G_mkroot() call so that only the captain
-         * allocates object headers (calls the H5O_init function...via a
-         * lot of other functions first)....
-         */
-        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
-    } /* end if */
-
-    /* Get the shared file creation property list */
-    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-    if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get super block version")
-    if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get free space version")
-    if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get object directory version")
-    if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get shared-header format version")
-
-    /* encode the file super block */
-    p = sbuf;
-    HDmemcpy(p, H5F_SIGNATURE, H5F_SIGNATURE_LEN);
-    p += H5F_SIGNATURE_LEN;
-    *p++ = (uint8_t)super_vers;
-    *p++ = (uint8_t)freespace_vers;
-    *p++ = (uint8_t)obj_dir_vers;
-    *p++ = 0;			/*reserved*/
-    *p++ = (uint8_t)share_head_vers;
-    assert (H5F_SIZEOF_ADDR(f)<=255);
-    *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
-    assert (H5F_SIZEOF_SIZE(f)<=255);
-    *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
-    *p++ = 0;			/*reserved */
-    UINT16ENCODE(p, f->shared->sym_leaf_k);
-    UINT16ENCODE(p, f->shared->btree_k[H5B_SNODE_ID]);
-    UINT32ENCODE(p, f->shared->consist_flags);    
-
-    /* Versions of the superblock >0 have the indexed storage B-tree internal 'K' value stored */
-    if(super_vers>0) {
-        UINT16ENCODE(p, f->shared->btree_k[H5B_ISTORE_ID]);
-        *p++ = 0;			/*reserved */
-        *p++ = 0;			/*reserved */
-    } /* end if */
-
-    H5F_addr_encode(f, &p, f->shared->base_addr);
-    H5F_addr_encode(f, &p, f->shared->freespace_addr);
-    H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf));
-    H5F_addr_encode(f, &p, f->shared->driver_addr);
-    if(H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp))<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode root group information")
-    H5_ASSIGN_OVERFLOW(superblock_size,p-sbuf,int,size_t);
-
-    /* Double check we didn't overrun the block (unlikely) */
-    assert(superblock_size<=sizeof(sbuf));
+    /* flush any cached compact storage raw data */
+    if (H5D_flush(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
     /*
-     * Encode the driver information block.
+     * If we are invalidating everything (which only happens just before
+     * the file closes), release the unused portion of the metadata and
+     * "small data" blocks back to the free lists in the file.
      */
-    H5_ASSIGN_OVERFLOW(driver_size,H5FD_sb_size(f->shared->lf),hsize_t,size_t);
+    if (flags & H5F_FLUSH_INVALIDATE) {
+#ifdef H5_HAVE_FPHDF5
+        /*
+         * If this is not the SAP, then we want to send a "free"
+         * command to the SAP to free up the EOMA and EOSDA
+         * information. This might also update the EOA information on
+         * the clients...
+         */
+        if (H5FD_is_fphdf5_driver(f->shared->lf) && !H5FD_fphdf5_is_sap(f->shared->lf)) {
+            unsigned        req_id = 0;
+            H5FP_status_t   status = H5FP_STATUS_OK;
 
-    if (driver_size > 0) {
-	driver_size += 16; /*driver block header */
+            /* Send the request to the SAP */
+            if (H5FP_request_update_eoma_eosda(f->shared->lf,
+                                               &req_id, &status) != SUCCEED)
+                /* FIXME: Should we check the "status" variable here? */
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL,
+                            "server couldn't free from file")
+        } else {
+#endif  /* H5_HAVE_FPHDF5 */
 
-        /* Double check we didn't overrun the block (unlikely) */
-	assert(driver_size<=sizeof(dbuf));
+            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
+                /* Return the unused portion of the metadata block to a free list */
+                if (f->shared->lf->eoma != 0)
+                    if (H5FD_free(f->shared->lf, H5FD_MEM_DEFAULT, dxpl_id,
+                            f->shared->lf->eoma, f->shared->lf->cur_meta_block_size) < 0)
+                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block")
 
-        /* Encode the driver information block */
-	p = dbuf;
+                /* Reset metadata block information, just in case */
+                f->shared->lf->eoma=0;
+                f->shared->lf->cur_meta_block_size=0;
+            } /* end if */
 
-	/* Version */
-	*p++ = HDF5_DRIVERINFO_VERSION;
+            if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
+                /* Return the unused portion of the "small data" block to a free list */
+                if (f->shared->lf->eosda != 0)
+                    if (H5FD_free(f->shared->lf, H5FD_MEM_DRAW, dxpl_id,
+                            f->shared->lf->eosda, f->shared->lf->cur_sdata_block_size) < 0)
+                        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block")
 
-	/* Reserved*/
-	p += 3;
+                /* Reset "small data" block information, just in case */
+                f->shared->lf->eosda=0;
+                f->shared->lf->cur_sdata_block_size=0;
+            } /* end if */
 
-	/* Driver info size, excluding header */
-	UINT32ENCODE(p, driver_size-16);
-
-	/* Encode driver-specific data */
-	if (H5FD_sb_encode(f->shared->lf, driver_name, dbuf+16)<0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
-
-	/* Driver name */
-	HDmemcpy(dbuf+8, driver_name, 8);
+#ifdef H5_HAVE_FPHDF5
+        }
+#endif  /* H5_HAVE_FPHDF5 */
     } /* end if */
 
-    if (flags & H5F_FLUSH_ALLOC_ONLY) {
-	haddr_t addr;
+    /* flush the data sieve buffer, if we have a dirty one */
+    if (f->shared->sieve_buf && f->shared->sieve_dirty) {
+        /* Write dirty data sieve buffer to file */
+        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc,
+                f->shared->sieve_size, dxpl_id, f->shared->sieve_buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
 
-        /*
-         * Allocate space for the userblock, superblock, and driver info
-         * block. We do it with one allocation request because the
-         * userblock and superblock need to be at the beginning of the
-         * file and only the first allocation request is required to
-         * return memory at format address zero.
-         *
-         * Note: This is safe for FPHDF5. We only set H5F_FLUSH_ALLOC_ONLY
-         * from the H5F_open function. That function sets it so that only
-         * the captain process will actually perform any allocations,
-         * which is what we want here. In the H5FD_alloc function, the
-         * allocated address is broadcast to the other processes.
-         */
-        H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
+        /* Reset sieve buffer dirty flag */
+        f->shared->sieve_dirty=0;
+    } /* end if */
 
-        addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-                          ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
+    /* flush the entire raw data cache */
+    if (H5F_istore_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
+    
+    /* flush (and invalidate) the entire meta data cache */
+    /*
+     * FIXME: This should be CLEAR_ONLY for non-captain processes.
+     * Need to fix the H5G_mkroot() call so that only the captain
+     * allocates object headers (calls the H5O_init function...via a
+     * lot of other functions first)....
+     */
+    if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
 
-        if (HADDR_UNDEF == addr)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate file space for userblock and/or superblock")
-        if (0 != addr)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file driver failed to allocate userblock and/or superblock at address zero")
+    /* Write the superblock to disk */
+    if (H5F_write_superblock(f, dxpl_id, FALSE, NULL) != SUCCEED)
+        HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to superblock to file")
 
-        /*
-         * The file driver information block begins immediately after
-         * the superblock.
-         */
-        if (driver_size > 0)
-            f->shared->driver_addr = superblock_size;
-    } else {
-        /* Compute super block checksum */
-        assert(sizeof(chksum)==sizeof(f->shared->super_chksum));
-
-        for (p=(uint8_t *)&chksum, chksum=0, i=0; i<superblock_size; i++)
-            p[i%sizeof(f->shared->super_chksum)] ^= sbuf[i];
-
-        /* Compare with current checksums */
-        if (chksum!=f->shared->super_chksum) {
-            /* Write superblock */
-            if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-                           f->shared->super_addr, superblock_size, sbuf) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock")
-
-            /* Update checksum information if different */
-            f->shared->super_chksum=chksum;
-        } /* end if */
-
-	/* Check for driver info block */
-	if (HADDR_UNDEF!=f->shared->driver_addr) {
-            /* Compute driver info block checksum */
-            assert(sizeof(chksum)==sizeof(f->shared->drvr_chksum));
-
-            for(p=(uint8_t *)&chksum, chksum=0, i=0; i<driver_size; i++)
-                p[i%sizeof(f->shared->drvr_chksum)] ^= dbuf[i];
-
-            /* Compare with current checksums */
-            if(chksum!=f->shared->drvr_chksum) {
-                /* Write driver information block */
-                if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-                        f->shared->base_addr + f->shared->driver_addr, driver_size, dbuf) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write driver information block")
-
-                /* Update checksum information if different */
-                f->shared->drvr_chksum=chksum;
-            } /* end if */
-	} /* end if */
-    } /* end else */
-
-    /* If we're not just allocating... */
-    if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0)
-        /* ...flush file buffers to disk. */
-        if (H5FD_flush(f->shared->lf, dxpl_id,
-                       (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
+    /* Flush file buffers to disk. */
+    if (H5FD_flush(f->shared->lf, dxpl_id,
+                   (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
     /* Check flush errors for children - errors are already on the stack */
     ret_value = (nerrors ? FAIL : SUCCEED);
