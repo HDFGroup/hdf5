@@ -754,6 +754,24 @@ if test -n "$GRIDSTORAGE"; then
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Should the Stream Virtual File Driver be compiled in ?
+dnl
+AC_MSG_CHECKING(for Stream Virtual File Driver support)
+AC_ARG_WITH(Stream-VFD,
+  [  --with-Stream-VFD       Build the Stream Virtual File Driver [default=no]],
+  ,withval=no)
+
+case $withval in
+    yes)
+       AC_MSG_RESULT(yes)
+       AC_DEFINE(HAVE_STREAM)
+    ;;
+    *)
+       AC_MSG_RESULT(not configured)
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
 dnl translator.
 AC_SUBST(PDB2HDF)
