@@ -55,6 +55,10 @@ class __DLLCPP__ EnumType : public DataType {
 	void valueOf( const string& name, void *value ) const;
 	void valueOf( const char* name, void *value ) const;
 
+	// Returns the index of a member in this enumeration data type.
+	int getMemberIndex(const char* name) const;
+	int getMemberIndex(const string& name) const;
+
 	// Returns the value of an enumeration datatype member
 	void getMemberValue( int memb_no, void *value ) const;
 

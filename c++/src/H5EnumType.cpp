@@ -122,6 +122,35 @@ void EnumType::valueOf( const char* name, void *value ) const
    }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    getMemberIndex
+ *
+ * Purpose:     Returns the index of a member in an enumeration data type.
+ *              Members are stored in no particular order with numbers 0
+ *              through N-1, where N is the value returned by the member
+ *              function getNmembers.
+ *
+ * Return:      Success:	index of the member if exists.
+ *              Failure:	DataTypeIException
+ *
+ * BMR - June 10, 2002
+ *-------------------------------------------------------------------------
+ */
+int EnumType::getMemberIndex(const char *name) const
+{
+   int member_index = H5Tget_member_index(id, name);
+   if( member_index < 0 )
+   {
+      throw DataTypeIException("EnumType::getMemberIndex",
+                "H5Tget_member_index returns negative value");
+   }
+   return( member_index );
+}
+int EnumType::getMemberIndex(const string& name) const
+{
+    return(EnumType::getMemberIndex(name.c_str()));
+}
+
 // Retrieves the value of a member in this enumeration datatype, given the 
 // member's index.
 void EnumType::getMemberValue( int memb_no, void *value ) const
