@@ -98,7 +98,8 @@ Platforms Tested
                                   xlf 7.1.0.2
                                   poe 2.4.0.14 (includes mpi)
     Cray T3E sn6711 2.0.5.49a     Cray Standard C Version 6.5.0.1
-    Cray SV1 10.0.0.2             Cray Standard C Version 6.5.0.0  
+    Cray SV1 10.0.0.2             Cray Standard C Version 6.5.0.1  
+                                  Cray Fortran Version 3.5.0.1
     FreeBSD 4.3                   gcc 2.95.3
                                   g++ 2.95.3
     HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
