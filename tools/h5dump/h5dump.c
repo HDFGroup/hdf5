@@ -609,8 +609,8 @@ usage: %s [OPTIONS] file\n\
  each dimension.\n\
 \n\
       -s L, --start=L     Offset of start of subsetting selection\n\
-      -c L, --count=L     Number of blocks to include in selection\n\
       -S L, --stride=L    Hyperslab stride\n\
+      -c L, --count=L     Number of blocks to include in selection\n\
       -k L, --block=L     Size of block in hyperslab\n\
 \n\
   P - is the full path from the root group to the object.\n\
@@ -629,7 +629,7 @@ usage: %s [OPTIONS] file\n\
 \n\
   2) Selecting a subset from dataset /foo in file quux.h5\n\
 \n\
-        h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n\
+      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n\
 \n", prog);
 }
 
@@ -2104,19 +2104,11 @@ handle_datasets(hid_t fid, char *dset, void *data)
     }
 
     if (sset) {
-        /* check that all of the subsetting parameters are okay */
-        if (!sset->count) {
-            error_msg(progname, "`count' argument missing for subsetting\n");
-            exit(EXIT_FAILURE);
-        }
-
-        if (!sset->start || !sset->stride || !sset->block) {
+        if (!sset->start || !sset->stride || !sset->count || !sset->block) {
             /* they didn't specify a ``stride'' or ``block''. default to 1 in all
              * dimensions */
             hid_t sid = H5Dget_space(dsetid);
             unsigned int ndims = H5Sget_simple_extent_ndims(sid);
-
-            H5Sclose(sid);
 
             if (!sset->start)
                 /* default to (0, 0, ...) for the start coord */
@@ -2131,6 +2123,24 @@ handle_datasets(hid_t fid, char *dset, void *data)
                     sset->stride[i] = 1;
             }
 
+            if (!sset->count) {
+                hsize_t dims[H5S_MAX_RANK];
+                herr_t status = H5Sget_simple_extent_dims(sid, dims, NULL);
+                unsigned int i;
+
+                if (status == FAIL) {
+                    error_msg(progname, "unable to get dataset dimensions\n");
+                    d_status = EXIT_FAILURE;
+                    H5Sclose(sid);
+                    return;
+                }
+
+                sset->count = calloc(ndims, sizeof(hsize_t));
+
+                for (i = 0; i < ndims; i++)
+                    sset->count[i] = dims[i] - sset->start[i];
+            }
+
             if (!sset->block) {
                 unsigned int i;
 
@@ -2139,6 +2149,8 @@ handle_datasets(hid_t fid, char *dset, void *data)
                 for (i = 0; i < ndims; i++)
                     sset->block[i] = 1;
             }
+
+            H5Sclose(sid);
         }
     }
 
