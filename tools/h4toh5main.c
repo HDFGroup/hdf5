@@ -139,7 +139,7 @@ int main(int argc, char ** argv) {
 		  break;
 		}
 		if (h5_filename != NULL) {
-		   free(h5_filename);
+		   HDfree(h5_filename);
 		}
 
 		break;
