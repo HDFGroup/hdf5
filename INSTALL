@@ -1,8 +1,7 @@
 -*- outline -*-
 
 This file contains instructions for the installation of HDF5 on
-Unix-like systems. Users of the Intel TFLOPS machine should see the
-INSTALL.ascired for instructions.
+Unix-like systems.
 
 * Obtaining HDF5
 	The latest supported public release of HDF5 is available from
@@ -45,6 +44,10 @@ INSTALL.ascired for instructions.
 	The Mongoose 7.00 compiler has serious optimization bugs and
 	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
 	from SGI.
+
+** TFLOPS
+	Users of the Intel TFLOPS machine, after reading this file,
+	should see the INSTALL.ascired for more instructions.
 
 ** Windows/NT
 	The MicroSoft Win32 5.0 compiler is unable to cast unsigned
@@ -145,7 +148,7 @@ INSTALL.ascired for instructions.
 
 	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-	On Irix64 the default compiler is `cc -64'. To use an
+	On Irix64 the default compiler is `cc'. To use an
 	alternate compiler specify it with the CC variable:
 
 	    $ CC='cc -o32' ./configure
