@@ -5,7 +5,7 @@
 
 static int display_oid = 0;
 static int display_data = 1;
-static int status = 0;
+static int d_status = 0;
 static int unamedtype = 0;  /* shared data type with no name */
 
 static int prefix_len = 1024;
@@ -314,7 +314,7 @@ H5G_stat_t statbuf;
             printf( "H5T_NATIVE_ULLONG");
         else {
             printf( "undefined integer");
-            status = 1;
+            d_status = 1;
         }
         break;
 
@@ -335,7 +335,7 @@ H5G_stat_t statbuf;
             printf( "H5T_NATIVE_LDOUBLE");
         else {
             printf( "undefined float");
-            status = 1;
+            d_status = 1;
         }
         break;
 
@@ -397,7 +397,7 @@ H5G_stat_t statbuf;
               printf( "H5T_FORTRAN_S1;\n");
           else {
             printf("unknown_one_character_type;\n ");
-            status = 1;
+            d_status = 1;
           }
           H5Tclose(str_type);
         }
@@ -426,7 +426,7 @@ H5G_stat_t statbuf;
             printf( "H5T_STD_B64LE");
         else {
             printf( "undefined bitfield");
-            status = 1;
+            d_status = 1;
         }
         break;
 
@@ -450,7 +450,7 @@ H5G_stat_t statbuf;
                     printf("\"%s\"\n", type_table->objs[i].objname);
             } else {
                 printf("h5dump error: unknown committed type.\n");
-                status = 1;
+                d_status = 1;
             }
 
         } else {
@@ -507,7 +507,7 @@ H5G_stat_t statbuf;
 		break;
     default:
         printf( "unknown data type");
-        status = 1;
+        d_status = 1;
         break;
     }
 
@@ -674,7 +674,7 @@ hid_t  attr_id, type, space;
         printf("h5dump error: unable to open attribute.\n");
         indentation (indent);
         end_obj(dump_header_format->attributeend,dump_header_format->attributeblockend);
-        status = 1;
+        d_status = 1;
         return FAIL;
     }
 
@@ -728,7 +728,7 @@ H5G_stat_t statbuf;
              indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
              end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
-             status = 1;
+             d_status = 1;
              return FAIL;
          }
          break;
@@ -737,7 +737,7 @@ H5G_stat_t statbuf;
              indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
              end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
-             status = 1;
+             d_status = 1;
              return FAIL;
          }
          break;
@@ -746,7 +746,7 @@ H5G_stat_t statbuf;
              indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
              end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
-             status = 1;
+             d_status = 1;
              return FAIL;
          } 
          break;
@@ -754,7 +754,7 @@ H5G_stat_t statbuf;
          indentation (COL);
          fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
          end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
-         status = 1;
+         d_status = 1;
          return FAIL;
     }
 
@@ -777,32 +777,32 @@ H5G_stat_t statbuf;
         indentation (COL);
         printf("h5dump error: unable to open attribute.\n");
         end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
-        status = 1;
+        d_status = 1;
     }
 
     switch (statbuf.type) {
     case H5G_GROUP:
          if (H5Gclose (oid) < 0) {
-         status = 1;
+         d_status = 1;
          return FAIL;
          } 
          break;
           
     case H5G_DATASET:
          if (H5Dclose (oid) < 0 ) {
-             status = 1;
+             d_status = 1;
              return FAIL;
          } 
          break;
 
     case H5G_TYPE:
          if (H5Tclose(oid) < 0 ) {
-             status = 1;
+             d_status = 1;
              return FAIL;
          } 
          break;
     default:
-         status = 1;
+         d_status = 1;
          return FAIL;
     }
 
@@ -851,7 +851,7 @@ int i;
             printf ("LINKTARGET \"%s\"\n", buf);
         else {
             printf ("h5dump error: unable to get link value.\n");
-            status = 1;
+            d_status = 1;
         }
 
         indentation (indent);
@@ -867,7 +867,7 @@ int i;
              H5Gclose (obj);
          } else {
              printf ("h5dump error: unable to dump group %s\n",name);
-             status = 1;
+             d_status = 1;
          }
 
          break;
@@ -887,7 +887,7 @@ int i;
                      printf("h5dump error: internal error\n");
                      indentation (indent);
                      end_obj(dump_header_format->datasetend, dump_header_format->datasetblockend);
-                     status = 1;
+                     d_status = 1;
                      goto done;
                  } else if (dset_table->objs[i].displayed) {
                      indentation (indent);
@@ -908,7 +908,7 @@ int i;
              H5Dclose (obj);
          } else {
              printf ("h5dump error: unable to dump dataset %s\n",name);
-             status = 1;
+             d_status = 1;
          }
 
          break;
@@ -919,13 +919,13 @@ int i;
 			H5Tclose(obj);
 		} else {
 			printf ("h5dump error: unable to dump data type %s\n",name);
-			status = 1;
+			d_status = 1;
 		}
 		break;
 
     default:
          printf ("h5dump error: unknown object %s\n", name);
-         status = 1; 
+         d_status = 1; 
          return FAIL;
 
     }
@@ -1036,7 +1036,7 @@ int i;
 
             indentation (indent);
             printf("h5dump error: internal error\n");
-            status = 1;
+            d_status = 1;
 
         } else if (group_table->objs[i].displayed) {
 
@@ -1214,7 +1214,7 @@ int i;
 static void
 dump_data (hid_t obj_id, int obj_data) {
 	h5dump_t *outputformat = &dataformat;
-	int status = -1;
+	int d_status = -1;
 	void *buf;
 	char *attr_name = malloc(sizeof(char)*80);
 	hid_t space, type, p_type;
@@ -1239,22 +1239,22 @@ dump_data (hid_t obj_id, int obj_data) {
 
     /* Print all the values. */
 	if (obj_data == DATASET_DATA){
-		status = h5dump_dset(stdout, outputformat, obj_id, -1,depth);
+		d_status = h5dump_dset(stdout, outputformat, obj_id, -1,depth);
 	}
 	else { /* need to call h5dump_mem for the attribute data */	
 
 		type = H5Aget_type(obj_id);
 	/*	if (type < 0) {
-			return (status);
+			return (d_status);
 		}*/
 		p_type = h5dump_fixtype(type);
 		H5Tclose(type);
 
-	/*	if (p_type < 0) return status;*/
+	/*	if (p_type < 0) return d_status;*/
 
 		space = H5Aget_space(obj_id);
 
-/*		if (space < 0) return status;
+/*		if (space < 0) return d_status;
 */
 
 
@@ -1267,7 +1267,7 @@ dump_data (hid_t obj_id, int obj_data) {
 		buf = malloc(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type)));
 	   	assert(buf);
 	    if (H5Aread(obj_id, p_type, buf)>=0) {
-			status = h5dump_mem(stdout, outputformat, p_type, space, buf, depth);
+			d_status = h5dump_mem(stdout, outputformat, p_type, space, buf, depth);
 	    }
 	    free(buf);
 	    H5Tclose(p_type); 
@@ -1276,10 +1276,10 @@ dump_data (hid_t obj_id, int obj_data) {
 	}
 
 	
-    if (status < 0) {
+    if (d_status < 0) {
         indentation(indent+COL);
         printf("Unable to print data.\n");
-        status = 1;
+        d_status = 1;
     }
     indentation(indent);
   /*  printf("%s\n", END);*/
@@ -1450,7 +1450,7 @@ main(int argc, char *argv[])
 	info->group_table = group_table;
 	info->type_table = type_table;
 	info->dset_table = dset_table;
-	info->status = status;
+	info->status = d_status;
 
 
 
@@ -1487,13 +1487,13 @@ main(int argc, char *argv[])
 
         if ((gid = H5Gopen (fid, "/")) < 0 ) {
              fprintf(stdout, "h5dump error: unable to open root group\n");
-             status = 1;
+             d_status = 1;
         } else 
              dump_group(gid, "/");
 
         if (H5Gclose (gid) < 0) {
             fprintf(stdout, "h5dump error: unable to close root group\n");
-            status = 1;
+            d_status = 1;
         }
 
     } else
@@ -1517,7 +1517,7 @@ main(int argc, char *argv[])
                          fprintf (stdout, "h5dump error: unable to open %s\n", 
                                   argv[curr_arg]);
                          end_obj(dump_header_format->datasetend, dump_header_format->datasetblockend);
-                         status = 1;
+                         d_status = 1;
                      } else {
                          H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
                          if (statbuf.nlink > 1) {
@@ -1535,10 +1535,10 @@ main(int argc, char *argv[])
                                      dset_table->objs[index].displayed = 1;
                                      dump_dataset(dsetid, argv[curr_arg]);
                                  }
-                             } else status = 1;
+                             } else d_status = 1;
                          } else
                              dump_dataset(dsetid, argv[curr_arg]);
-                         if (H5Dclose(dsetid)<1) status = 1;
+                         if (H5Dclose(dsetid)<1) d_status = 1;
                      }
           
                 }
@@ -1556,12 +1556,12 @@ main(int argc, char *argv[])
                          fprintf (stdout, "h5dump error: unable to open %s\n", 
                                   argv[curr_arg]);
                          end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
-                         status = 1;
+                         d_status = 1;
                      } else {
                          H5Gget_objinfo(gid, ".", TRUE, &statbuf);
                          strcpy(prefix, argv[curr_arg]);
                          dump_group(gid, argv[curr_arg]);
-                         if (H5Gclose (gid) < 0) status = 1;
+                         if (H5Gclose (gid) < 0) d_status = 1;
                      }
                 }
 
@@ -1577,7 +1577,7 @@ main(int argc, char *argv[])
                          indentation (COL);
                          fprintf(stdout, "h5dump error: unable to get obj info from %s\n", argv[curr_arg]);
                          end_obj(dump_header_format->softlinkend, dump_header_format->softlinkblockend);
-                         status = 1;
+                         d_status = 1;
 
                      } else if (statbuf.type == H5G_LINK) {
 
@@ -1588,7 +1588,7 @@ main(int argc, char *argv[])
                              printf ("LINKTARGET \"%s\"\n", buf);
                          else {
                              fprintf (stdout, "h5dump error: unable to get link value\n");
-                             status = 1;
+                             d_status = 1;
                          }
                          end_obj(dump_header_format->softlinkend, dump_header_format->softlinkblockend);
                          free(buf);
@@ -1598,7 +1598,7 @@ main(int argc, char *argv[])
                          indentation (COL);
                          fprintf(stdout, "h5dump error: %s is not a link\n", argv[curr_arg]);
                          end_obj(dump_header_format->softlinkend, dump_header_format->softlinkblockend);
-                         status = 1;
+                         d_status = 1;
                      }
 
                  }
@@ -1633,7 +1633,7 @@ main(int argc, char *argv[])
                               fprintf (stdout, "h5dump error: unable to open %s\n", 
                                        argv[curr_arg]);
                               end_obj(dump_header_format->datatypeend, dump_header_format->datatypeblockend);
-                              status = 1;
+                              d_status = 1;
                          } else {
                               dsetid = H5Dopen (fid, type_table->objs[index].objname) ;
                               typeid = H5Dget_type (dsetid);
@@ -1644,7 +1644,7 @@ main(int argc, char *argv[])
 
                      } else {
                          dump_named_datatype (typeid, argv[curr_arg]);
-                         if (H5Tclose(typeid) < 0) status = 1;
+                         if (H5Tclose(typeid) < 0) d_status = 1;
                      }
                 }
            } 
@@ -1656,7 +1656,7 @@ done:
 
     H5Eset_auto (func, edata);
     free(opts);
-    if (H5Fclose (fid) < 0) status = 1;
+    if (H5Fclose (fid) < 0) d_status = 1;
 
     free (group_table->objs);
     free (dset_table->objs);
@@ -1664,7 +1664,7 @@ done:
     free (prefix);
 	free (info->prefix);
 	free (info);
-    return status;
+    return d_status;
 
 }
 
