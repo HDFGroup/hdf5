@@ -82,6 +82,8 @@ TEST_SRC=big.c bittests.c cmpd_dset.c dsets.c dtypes.c extend.c              \
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
+VFD_LIST=sec2 stdio core split multi family
+
 ## Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h ttsafe.h
 
