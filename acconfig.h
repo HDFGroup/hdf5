@@ -54,3 +54,6 @@
 
 /* Define if the stream virtual file driver should be compiled */
 #undef HAVE_STREAM
+
+/* Define if `socklen_t' is defined */
+#undef HAVE_SOCKLEN_T
