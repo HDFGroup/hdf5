@@ -368,7 +368,7 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
       } /* end else */
 
-    len=(size_t)seq_len*base_size;
+    len=(size_t)seq_len*(size_t)base_size;
     HDmemcpy(*s,buf,len);
     (*s)[len]='\0';
 

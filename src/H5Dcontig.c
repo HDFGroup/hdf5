@@ -432,7 +432,7 @@ H5F_contig_readv(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
 
                             /* Compute the size of the sieve buffer */
                             /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
-                            f->shared->sieve_size=MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
+                            f->shared->sieve_size=(size_t)MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
 
                             /* Update local copies of sieve information */
                             sieve_start=f->shared->sieve_loc;
@@ -494,7 +494,7 @@ H5F_contig_readv(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
                     rel_eoa=abs_eoa-f->shared->base_addr;
 
                     /* Compute the size of the sieve buffer */
-                    f->shared->sieve_size=MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
+                    f->shared->sieve_size=(size_t)MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
 
                     /* Read the new sieve buffer */
                     if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
@@ -912,7 +912,7 @@ H5F_contig_writev(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
 
                                 /* Compute the size of the sieve buffer */
                                 /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
-                                f->shared->sieve_size=MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
+                                f->shared->sieve_size=(size_t)MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
 
                                 /* Update local copies of sieve information */
                                 sieve_start=f->shared->sieve_loc;
@@ -979,7 +979,7 @@ H5F_contig_writev(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
                     rel_eoa=abs_eoa-f->shared->base_addr;
 
                     /* Compute the size of the sieve buffer */
-                    f->shared->sieve_size=MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
+                    f->shared->sieve_size=(size_t)MIN(rel_eoa-f->shared->sieve_loc,MIN(max_data,f->shared->sieve_buf_size));
 
                     /* Check if there is any point in reading the data from the file */
                     if(f->shared->sieve_size>size) {

@@ -909,7 +909,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
             leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't read too many */
-        actual_read=MIN(leftover,io_left);
+        actual_read=(size_t)MIN(leftover,io_left);
         actual_bytes=actual_read*elmt_size;
 
         /* Copy the location of the point to get */
@@ -992,7 +992,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
         fast_dim_offset=fast_dim_start+file_space->select.offset[fast_dim];
 
         /* Compute the number of blocks which would fit into the buffer */
-        tot_blk_count=io_left/fast_dim_block;
+        tot_blk_count=(size_t)io_left/(size_t)fast_dim_block;
 
         /* Compute the amount to wrap at the end of each row */
         for(i=0; i<ndims; i++)
@@ -1933,7 +1933,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
             leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
-        actual_write=MIN(leftover,io_left);
+        actual_write=(size_t)MIN(leftover,io_left);
         actual_bytes=actual_write*elmt_size;
 
         /* Copy the location of the point to get */
@@ -2016,7 +2016,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
         fast_dim_offset=fast_dim_start+file_space->select.offset[fast_dim];
 
         /* Compute the number of blocks which would fit into the buffer */
-        tot_blk_count=io_left/fast_dim_block;
+        tot_blk_count=(size_t)io_left/(size_t)fast_dim_block;
 
         /* Compute the amount to wrap at the end of each row */
         for(i=0; i<ndims; i++)
@@ -2859,9 +2859,11 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
 
         /* Calculate the number of elements left in the sequence */
         if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
+            leftover=(size_t)mem_space->select.sel_info.hslab.diminfo[fast_dim].block
+												-(size_t)(mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
         else
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+            leftover=(size_t)mem_space->select.sel_info.hslab.diminfo[fast_dim].block
+												-(size_t)((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
         actual_read=MIN(leftover,io_left);
@@ -2945,7 +2947,7 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
         fast_dim_offset=fast_dim_start+mem_space->select.offset[fast_dim];
 
         /* Compute the number of blocks which would fit into the buffer */
-        tot_blk_count=io_left/fast_dim_block;
+        tot_blk_count=(size_t)io_left/(size_t)fast_dim_block;
 
         /* Compute the amount to wrap at the end of each row */
         for(i=0; i<ndims; i++)
@@ -3687,9 +3689,11 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
 
         /* Calculate the number of elements left in the sequence */
         if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
+            leftover=(size_t)mem_space->select.sel_info.hslab.diminfo[fast_dim].block
+												-(size_t)(mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
         else
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+            leftover=(size_t)mem_space->select.sel_info.hslab.diminfo[fast_dim].block
+												-(size_t)((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
         actual_write=MIN(leftover,io_left);
@@ -3773,7 +3777,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
         fast_dim_offset=fast_dim_start+mem_space->select.offset[fast_dim];
 
         /* Compute the number of blocks which would fit into the buffer */
-        tot_blk_count=io_left/fast_dim_block;
+        tot_blk_count=(size_t)io_left/(size_t)fast_dim_block;
 
         /* Compute the amount to wrap at the end of each row */
         for(i=0; i<ndims; i++)
@@ -5164,7 +5168,7 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8_t *buf)
         len+=4;
 
         /* Add 8 bytes times the rank for each hyperslab selected */
-        len+=8*space->extent.u.simple.rank*block_count;
+        len+=(size_t)8*space->extent.u.simple.rank*(size_t)block_count;
 
         /* Encode each hyperslab in selection */
         H5S_hyper_select_serialize_helper(space->select.sel_info.hslab.span_lst,start,end,(hsize_t)0,&buf);

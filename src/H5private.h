@@ -607,7 +607,14 @@ typedef struct stat		h5_stat_t;
  */
 #define HDmemcpy(X,Y,Z)		memcpy((char*)(X),(const char*)(Y),Z)
 #define HDmemmove(X,Y,Z)	memmove((char*)(X),(const char*)(Y),Z)
+/*
+ * The (void*) cast just avoids a compiler warning in WIN32
+ */
+#ifdef WIN32
+#define HDmemset(X,C,Z)		memset((void*)(X),C,Z)
+#else /* WIN32 */
 #define HDmemset(X,C,Z)		memset(X,C,Z)
+#endif /* WIN32 */
 #ifdef WIN32
 #define HDmkdir(S,M)		_mkdir(S)
 #else /* WIN32 */

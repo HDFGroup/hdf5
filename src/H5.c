@@ -907,7 +907,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'g':
 	    case 'G':
 		if (!HDstrcmp (modifier, "h")) {
-		    float x = va_arg (ap, double);
+		    float x = (float) va_arg (ap, double);
 		    n = fprintf (stream, format_templ, x);
 		} else if (!*modifier || !HDstrcmp (modifier, "l")) {
 		    double x = va_arg (ap, double);
