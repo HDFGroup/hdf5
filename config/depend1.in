@@ -41,7 +41,6 @@ $(srcdir)/Dependencies: .depend
 	        sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;		\
 	        $(TRACE) $$dep;							\
 	        $(CC) -MM -MG $(CPPFLAGS) $$dep 2>/dev/null >>$@;		\
-	        $(PERL) -w $(top_srcdir)/bin/dependencies --top_srcdir=$(top_srcdir) --top_builddir=$(top_builddir) $@; \
 	        ;;								\
 	      *.cpp)								\
 	        echo Building dependencies for $$dep;				\
@@ -49,11 +48,11 @@ $(srcdir)/Dependencies: .depend
 	        sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;		\
 	        $(TRACE) $$dep;							\
 	        $(CXX) -MM -MG $(CPPFLAGS) $$dep 2>/dev/null >>$@;		\
-	        $(PERL) -w $(top_srcdir)/bin/dependencies --top_srcdir=$(top_srcdir) --top_builddir=$(top_builddir) $@; \
 	        ;;								\
 	    esac;								\
 	  fi;									\
-	done
+	done;
+        $(PERL) -w $(top_srcdir)/bin/dependencies --top_srcdir=$(top_srcdir) --top_builddir=$(top_builddir) $@;
 
 -include .depend
 
