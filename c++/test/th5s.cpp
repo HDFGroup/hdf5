@@ -27,15 +27,15 @@
 #include <iostream>
 #endif
 
-#include "H5Cpp.h"
 #include "testhdf5.h"
+#include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
 #endif  /* !H5_NO_NAMESPACE */
 
-#define TESTFILE   "th5s.h5"
-#define DATAFILE   "th5s1.h5"
+const char*    TESTFILE("th5s.h5");
+const char*    DATAFILE("th5s1.h5");
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -203,7 +203,7 @@ test_h5s_basic(void)
     // catch exception thrown by H5File constructor
     catch( FileIException error ) {
     	CHECK_I(FAIL, error.getCFuncName());
-	cout << "***cannot open the pre-created H5S_MAX_RANK test file" <<
+	cerr << "***cannot open the pre-created H5S_MAX_RANK test file" <<
 	    testfile << endl;
     }
 
@@ -468,11 +468,11 @@ test_h5s_compound_scalar_read(void)
 	// Verify read data
 	if(HDmemcmp(&space4_data,&rdata,sizeof(struct space4_struct)))
 	{
-            cout << "scalar data different: space4_data.c1=" 
+            cerr << "scalar data different: space4_data.c1=" 
 		<< space4_data.c1 << ", read_data4.c1=" << rdata.c1 << endl;
-            cout << "scalar data different: space4_data.u="
+            cerr << "scalar data different: space4_data.u="
 		<< space4_data.u << ", read_data4.u=" << rdata.u << endl;
-            cout << "scalar data different: space4_data.f="
+            cerr << "scalar data different: space4_data.f="
 		<< space4_data.f << ", read_data4.f=" << rdata.f << endl;
             TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",
 		space4_data.c1, rdata.c2);

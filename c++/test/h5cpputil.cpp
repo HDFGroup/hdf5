@@ -58,16 +58,16 @@ int test_report( int nerrors, const string& testname )
    {
       nerrors = MAX(1, nerrors);
 	if (1 == nerrors)
-	    cout << "***** " << nerrors << testname
+	    cerr << "***** " << nerrors << testname
 					<< " TEST FAILED! *****" << endl;
 	else
-	    cout << "***** " << nerrors << testname
+	    cerr << "***** " << nerrors << testname
 					<< " TESTS FAILED! *****" << endl;
       return 1;
    }
    else 
    {
-      cout << "All" << testname << " tests passed." << endl;
+      cerr << "All" << testname << " tests passed." << endl;
       return 0;
    }
 }

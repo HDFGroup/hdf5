@@ -31,8 +31,8 @@ using std::endl;
 int test_report (int, const string&);
 #endif
 
-template <class Type>
-    void verify_val(Type x, Type value, const char* where, int line, const char* file_name)
+template <class Type1, class Type2>
+    void verify_val(Type1 x, Type2 value, const char* where, int line, const char* file_name)
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {

@@ -18,9 +18,7 @@
 
    EXTERNAL ROUTINES/VARIABLES:
      These routines are in the test directory of the C library:
-        h5_reset() -- in h5test.c, resets the library by closing it
         h5_fileaccess() -- in h5test.c, returns a file access template
-        h5_cleanup() -- in h5test.c, cleanup temporary test files
 
  ***************************************************************************/
 
@@ -45,33 +43,24 @@ using namespace H5;
 #define F1_LENGTH_SIZE          sizeof(hsize_t)
 #define F1_SYM_LEAF_K           4
 #define F1_SYM_INTERN_K         16
-const string    FILE1("tfile1.h5");
+const char*    FILE1("tfile1.h5");
 
 #define F2_USERBLOCK_SIZE       (hsize_t)512
 #define F2_OFFSET_SIZE          8
 #define F2_LENGTH_SIZE          8
 #define F2_SYM_LEAF_K           8
 #define F2_SYM_INTERN_K         32
-const string    FILE2("tfile2.h5");
+const char*    FILE2("tfile2.h5");
 
 #define F3_USERBLOCK_SIZE       (hsize_t)0
 #define F3_OFFSET_SIZE          F2_OFFSET_SIZE
 #define F3_LENGTH_SIZE          F2_LENGTH_SIZE
 #define F3_SYM_LEAF_K           F2_SYM_LEAF_K
 #define F3_SYM_INTERN_K         F2_SYM_INTERN_K
-const string    FILE3("tfile3.h5");
+const char*    FILE3("tfile3.h5");
 
 #define KB                      1024
-//#define FILE4                   "tfile4.h5"
-const string    FILE4("tfile4.h5");
-
-const char *FILENAME[] = {
-	    "tfile1.h5",
-	    "tfile2.h5",
-	    "tfile3.h5",
-	    "tfile4.h5",
-	        NULL
-};
+const char*    FILE4("tfile4.h5");
 
 
 /*-------------------------------------------------------------------------
@@ -99,7 +88,7 @@ test_file_create(void)
 
     /* Create with H5F_ACC_EXCL */
     /* First ensure the file does not exist */
-    remove(FILE1.c_str());
+    remove(FILE1);
 
     try {
 	H5File* file1 = new H5File (FILE1, H5F_ACC_EXCL);
@@ -492,10 +481,6 @@ test_file(void)
     test_file_open();	/* Test file opening */
     test_file_size();	/* Test file size */
     test_file_name();	/* Test getting file's name */
-
-    /* use C test utility routine to clean up data files */
- //   h5_cleanup(FILENAME, fapl_id); already called by AddTest
-
 } /* test_file() */
 
 
@@ -515,8 +500,8 @@ test_file(void)
 void
 cleanup_file(void)
 {
-    remove(FILE1.c_str());
-    remove(FILE2.c_str());
-    remove(FILE3.c_str());
-    remove(FILE4.c_str());
+    remove(FILE1);
+    remove(FILE2);
+    remove(FILE3);
+    remove(FILE4);
 } /* cleanup_file */
