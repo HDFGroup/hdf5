@@ -422,9 +422,13 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 
     for (i = 0; i < indentlevel; i++){
         /*we already made the indent for the array indices case */
-        if (!info->pindex)
-         fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+     if (!info->pindex) {
+        fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
         templength += h5tools_str_len(&prefix);
+     }
+     else {
+      templength += h5tools_str_len(&str);
+     }
     }
 
     ctx->cur_column = ctx->prev_prefix_len = templength;
