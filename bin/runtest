@@ -26,7 +26,7 @@ PROGNAME="bin/runtest $DEBUGMODE"
 
 # Setup
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
-H5DIR=$HOME/HDF5/v_1_3/hdf5
+H5DIR=$HOME/HDF5/v_1_5/hdf5
 TODAY=`date +%y%m%d`
 H5VER=			# default to current CVS version
 H5VERSTR=		# default to current CVS version
