@@ -122,9 +122,9 @@ Supported Configuration Features Summary
 ========================================
     In the tables below
           y  = tested and supported
-          n  = not supported or not testing in this release
+          n  = not supported or not tested in this release
           x  = not working in this release
-         ( ) = footnote appears below table
+         ( ) = footnote appears below second table
 
 
     Platform       C  C         F90  F90       C++  Shared     zlib  Tools
