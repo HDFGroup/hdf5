@@ -1,3 +1,54 @@
+/*
+ * Copyright (C) 2000 NCSA
+ *                    All rights reserved.
+ *
+ * Programmer: Raymond Lu <slu@ncsa.uiuc.edu>
+ *             April 14, 2000
+ *
+ * Purpose:    Test HDF-SRB if it is configured and compiled.  Write an HDF5 
+ *             file with an integer array to SRB server.  
+ *
+ * Usage:      The HDF5 is built on the top of SRB.  So you just need to 
+ *             activate a connection to SRB server by calling function
+ *             H5Pset_fapl_srb()(after creating file property list by calling 
+ *             H5Pcreate()).  All server information is passed in through its
+ *             parameter SRB_Info(a structure).  Its fields are 
+ *                 char *srbHost: SRB host address of server.  If the input is
+ *                     NULL, it will use the environment varible "srbHost" if 
+ *                     it is defined.  If it is not defined, the 
+ *                     ~/.srb/.MdasEnd file will be checked next.  If not, it 
+ *                     will use the hostname of the client machine.           
+ *                 char *srbPort: SRB host port number of server.  If the 
+ *                     input value is NULL, it will use the env variable 
+ *                     "srbPort" if it is defined.  If not, it defaults to 
+ *                     5558.  
+ *                 char *srbAuth: SRB Authentication-password.  It is used to
+ *                     define password for MDAS or SEA authentication.  
+ *                     For SEA authentication, this is the password used by 
+ *                     the SEA library to decrypt the encrypted private key 
+ *                     stored in the file ~/.SEAuuuuu@ddddd(where uuuuu is 
+ *                     the user ID and ddddd is the user domain name).  This 
+ *                     input is not needed if an unencrypted private key is 
+ *                     available in the /tmp directory(generated using the 
+ *                     'seaauth auto' command).  To provide additional 
+ *                     flexibility, a client may also use the environment 
+ *                     variable "srbAuth" to specify the password.  A client 
+ *                     may also supply the password in the ~/.srb/.MdasAuth 
+ *                     file.  If a client uses more than one method to specfy 
+ *                     the password, the value given in this function call 
+ *                     will take precedent, then the environment variable 
+ *                     "srbAuth", and lastly, the ~/.srb/.MdasAuth file. 
+ *                 int  storSysType: Storage system type on SRB server. 
+ *                     0=Unix, 1=UniTree, 2=HPSS, 3=FTP, 4=HTTP               
+ *                 int  mode: File access mode, same definition with Unix.
+ *                 int  size: File Size, only valid for HPSS, -1 is default
+ *
+ *             Then you can create an HDF5 file by calling H5Fcreate().  When
+ *             you pass in the file name, it has to be file name with an 
+ *             absolute path.  It you use SDSC server(ghidorah.sdsc.edu), your 
+ *             home directory is possibly in /projects/mdas/srb/SRBVault/. 
+ */
+
 #include <h5test.h>
 
 #ifndef H5_HAVE_SRB
@@ -8,11 +59,12 @@ int main(void)
 }
 #else
 
-#define fileName "/projects/mdas/srb/SRBVault/slu.ncsa/a.h5"
+#define fileName "/projects/mdas/srb/SRBVault/slu.ncsa/a.h5"  
 #define DATASETNAME "IntArray"
 #define NX     5                      /* dataset dimensions */
 #define NY     6
 #define RANK   2
+
 
 int main(void)
 {
@@ -22,17 +74,16 @@ int main(void)
     herr_t        status = 0;
     int           data[NX][NY];          /* data to write */
     int           i, j;
-    SRB_Info srb_info={ "ghidorah.sdsc.edu",  /* SRB host address of server  */
+    SRB_Info srb_info={ "ghidorah.sdsc.edu",  /* Using SDSC SRB server,
+                                               * don't append port number.   */
                         "5557",               /* SRB host port number        */
-                        NULL,                 /* SRB Authentication-password */
-                        0,                    /* Storage Type: 0=Unix, 
-                                               *                1=UniTree,
-                                               *                2=HPSS,
-                                               *                3=FTP,
-                                               *                4=HTTP       */
-                        0600,                 /* File mode-Unix access mode  */
-                        -1                    /* File Size-Only valid for HPSS,
-                                               *  -1 is default.             */
+                        NULL,                 /* SRB Authentication-password,
+                                               * using the one in 
+                                               * ~/.srb/.MdasAuth            */
+                        0,                    /* Unix storage system.        */
+                        0600,                 /* Read and write only for 
+                                               * owner                       */
+                        -1                    /* -1 is default.              */
                       };
 
     /* 
