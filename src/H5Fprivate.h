@@ -569,7 +569,8 @@ herr_t H5F_istore_allocate (H5F_t *f,
 			    const struct H5O_layout_t *layout,
 			    const hsize_t *space_dim,
 			    const double split_ratios[], 
-			    const struct H5O_pline_t *pline);
+			    const struct H5O_pline_t *pline,
+			    const struct H5O_fill_t *fill);
 
 /* Functions that operate on contiguous storage wrt boot block */
 herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,

@@ -960,7 +960,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to convert fill value to dataset type");
     }
-    if (H5O_modify(&(new_dset->ent), H5O_FILL, 0, H5O_FLAG_CONSTANT,
+    if (new_dset->create_parms->fill.buf &&
+	H5O_modify(&(new_dset->ent), H5O_FILL, 0, H5O_FLAG_CONSTANT,
 		   &(new_dset->create_parms->fill))<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to update fill value header message");
@@ -2224,7 +2225,8 @@ H5D_allocate (H5D_t *dataset, const H5D_xfer_t *xfer)
 
 	if (H5F_istore_allocate(dataset->ent.file,
 				(layout), space_dim, xfer->split_ratios,
-				&(dataset->create_parms->pline))<0) {
+				&(dataset->create_parms->pline),
+				&(dataset->create_parms->fill))<0) {
 	    HRETURN(FAIL);
 	}
 	break;

@@ -1625,7 +1625,7 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 		l.dim[i] = layout->dim[i];
 	    l.addr = udata.addr;
 	    tmp_xfer.xfer_mode = H5D_XFER_DFLT;
-	    if (H5F_arr_read(f, &tmp_xfer, &l, pline, NULL/*no efl*/,
+	    if (H5F_arr_read(f, &tmp_xfer, &l, pline, fill, NULL/*no efl*/,
 			     sub_size, size_m, sub_offset_m, offset_wrt_chunk,
 			     buf)==FAIL){
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
@@ -1802,7 +1802,7 @@ H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 		l.dim[i] = layout->dim[i];
 	    l.addr = udata.addr;
 	    tmp_xfer.xfer_mode = H5D_XFER_DFLT;
-	    if (H5F_arr_write(f, &tmp_xfer, &l, pline, NULL/*no efl*/,
+	    if (H5F_arr_write(f, &tmp_xfer, &l, pline, fill, NULL/*no efl*/,
 			      sub_size, size_m, sub_offset_m, offset_wrt_chunk,
 			      buf)==FAIL){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
@@ -2080,7 +2080,7 @@ H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
 herr_t
 H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 		     const hsize_t *space_dim, const double split_ratios[],
-		     const H5O_pline_t *pline)
+		     const H5O_pline_t *pline, const H5O_fill_t *fill)
 {
 
     intn		i, carry;
@@ -2140,7 +2140,7 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 	     * chunk.
 	     */
 	    if (NULL==(chunk=H5F_istore_lock (f, layout, split_ratios, pline,
-					      chunk_offset, FALSE,
+					      fill, chunk_offset, FALSE,
 					      &idx_hint))) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "unable to read raw data chunk");

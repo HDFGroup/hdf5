@@ -75,11 +75,14 @@ H5O_fill_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh)
 		    "memory allocation failed for fill value message");
     }
     UINT32DECODE(p, mesg->size);
-    if (NULL==(mesg->buf=H5MM_malloc(mesg->size))) {
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-		    "memory allocation failed for fill value");
+    if (mesg->size>0) {
+	if (NULL==(mesg->buf=H5MM_malloc(mesg->size))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+			"memory allocation failed for fill value");
+	}
+	HDmemcpy(mesg->buf, p, mesg->size);
     }
-    HDmemcpy(mesg->buf, p, mesg->size);
+    
     ret_value = (void*)mesg;
     
  done:

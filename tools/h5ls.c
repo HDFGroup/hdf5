@@ -354,7 +354,7 @@ list (hid_t group, const char *name, void __unused__ *cd)
 	puts("**NOT FOUND**");
 	return 0;
     } else if (sb.type<0 || sb.type>=H5G_NTYPES) {
-	printf("Unknown type=%d", sb.type);
+	printf("Unknown type(%d)\n", sb.type);
 	return 0;
     }
     if (dispatch_g[sb.type].name) fputs(dispatch_g[sb.type].name, stdout);

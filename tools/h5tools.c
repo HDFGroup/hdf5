@@ -56,30 +56,35 @@ h5dump_prefix(char *s/*out*/, const h5dump_t *info, hsize_t elmtno, int ndims,
     hsize_t	n, i;
     char	temp[1024];
 
-    /*
-     * Calculate the number of elements represented by a unit change in a
-     * certain index position.
-     */
-    for (i=ndims-1, p_prod[ndims-1]=1; i>0; --i) {
-	p_prod[i-1] = (max_idx[i]-min_idx[i]) * p_prod[i];
-    }
+    if (ndims>0) {
+	/*
+	 * Calculate the number of elements represented by a unit change in a
+	 * certain index position.
+	 */
+	for (i=ndims-1, p_prod[ndims-1]=1; i>0; --i) {
+	    p_prod[i-1] = (max_idx[i]-min_idx[i]) * p_prod[i];
+	}
 
-    /*
-     * Calculate the index values from the element number.
-     */
-    for (i=0, n=elmtno; i<(hsize_t)ndims; i++) {
-	p_idx[i] = n / p_prod[i] + min_idx[i];
-	n %= p_prod[i];
-    }
+	/*
+	 * Calculate the index values from the element number.
+	 */
+	for (i=0, n=elmtno; i<(hsize_t)ndims; i++) {
+	    p_idx[i] = n / p_prod[i] + min_idx[i];
+	    n %= p_prod[i];
+	}
 
-    /*
-     * Print the index values.
-     */
-    *temp = '\0';
-    for (i=0; i<(hsize_t)ndims; i++) {
-	if (i) strcat(temp, OPT(info->idx_sep, ","));
-	sprintf(temp+strlen(temp), OPT(info->idx_n_fmt, "%lu"),
-		(unsigned long)p_idx[i]);
+	/*
+	 * Print the index values.
+	 */
+	*temp = '\0';
+	for (i=0; i<(hsize_t)ndims; i++) {
+	    if (i) strcat(temp, OPT(info->idx_sep, ","));
+	    sprintf(temp+strlen(temp), OPT(info->idx_n_fmt, "%lu"),
+		    (unsigned long)p_idx[i]);
+	}
+    } else {
+	/* Scalar */
+	sprintf(temp, OPT(info->idx_n_fmt, "%lu"), (unsigned long)0);
     }
 
     /*
@@ -397,16 +402,22 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
     for (elmtno=0; elmtno<p_nelmts; elmtno+=hs_nelmts) {
 
 	/* Calculate the hyperslab size */
-	for (i=0, hs_nelmts=1; i<(hsize_t)ndims; i++) {
-	    hs_size[i] = MIN(sm_size[i], p_max_idx[i]-hs_offset[i]);
-	    hs_nelmts *= hs_size[i];
+	if (ndims>0) {
+	    for (i=0, hs_nelmts=1; i<(hsize_t)ndims; i++) {
+		hs_size[i] = MIN(sm_size[i], p_max_idx[i]-hs_offset[i]);
+		hs_nelmts *= hs_size[i];
+	    }
+	    H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL,
+				hs_size, NULL);
+	    H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
+				&hs_nelmts, NULL);
+	} else {
+	    H5Sselect_all(f_space);
+	    H5Sselect_all(sm_space);
+	    hs_nelmts = 1;
 	}
 	
 	/* Read the data */
-	H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL,
-			    hs_size, NULL);
-	H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
-			    &hs_nelmts, NULL);
 	if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf)<0) {
 	    return -1;
 	}
