@@ -63,6 +63,9 @@ New Features
 
   o Parallel Library
   ==================
+    * Allow the metadata writes to be shared among all processes, easing the
+      burden on process 0.
+
 
   o Tools
   =======
