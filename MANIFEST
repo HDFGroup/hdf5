@@ -108,8 +108,12 @@
 ./doc/html/IH_mapHead.gif
 ./doc/html/IOPipe.html
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
+./doc/html/MountingFiles.html
 ./doc/html/NCSAfooterlogo.gif
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
+./doc/html/PaletteExample1.gif
+./doc/html/Palettes.fm.anc.gif
+./doc/html/Palettes.html
 ./doc/html/Properties.html
 ./doc/html/Ragged.html
 ./doc/html/References.html
@@ -128,6 +132,7 @@
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
 ./doc/html/Tools.html
+./doc/html/VLdatatypes.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
