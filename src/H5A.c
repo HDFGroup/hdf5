@@ -613,7 +613,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     uint8_t		*tconv_buf = NULL;	/* data type conv buffer */
     uint8_t		*bkg_buf = NULL;	/* temp conversion buffer */
     hssize_t		snelmts;		/* elements in attribute */
-    hsize_t		nelmts;		    	/* elements in attribute */
+    size_t		nelmts;		    	/* elements in attribute */
     H5T_path_t		*tpath = NULL;		/* conversion information*/
     hid_t		src_id = -1, dst_id = -1;/* temporary type atoms */
     size_t		src_type_size;		/* size of source type	*/
@@ -631,20 +631,19 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     /* Create buffer for data to store on disk */
     if((snelmts=H5S_GET_EXTENT_NPOINTS(attr->ds))<0)
         HGOTO_ERROR (H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    nelmts=(hsize_t)snelmts;
+    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,size_t);
 
     /* Get the memory and file datatype sizes */
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(attr->dt);
 
     /* Get the maximum buffer size needed and allocate it */
-    H5_ASSIGN_OVERFLOW(buf_size,nelmts*MAX(src_type_size,dst_type_size),hsize_t,size_t);
+    buf_size=nelmts*MAX(src_type_size,dst_type_size);
     if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Copy the user's data into the buffer for conversion */
-    H5_CHECK_OVERFLOW((src_type_size*nelmts),hsize_t,size_t);
-    HDmemcpy(tconv_buf,buf,(size_t)(src_type_size*nelmts));
+    HDmemcpy(tconv_buf,buf,(src_type_size*nelmts));
 
     /* Convert memory buffer into disk buffer */
     /* Set up type conversion function */
@@ -760,7 +759,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     uint8_t		*tconv_buf = NULL;	/* data type conv buffer*/
     uint8_t		*bkg_buf = NULL;	/* background buffer */
     hssize_t		snelmts;		/* elements in attribute */
-    hsize_t		nelmts;			/* elements in attribute*/
+    size_t		nelmts;			/* elements in attribute*/
     H5T_path_t		*tpath = NULL;		/* type conversion info	*/
     hid_t		src_id = -1, dst_id = -1;/* temporary type atoms*/
     size_t		src_type_size;		/* size of source type 	*/
@@ -777,26 +776,24 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     /* Create buffer for data to store on disk */
     if((snelmts=H5S_GET_EXTENT_NPOINTS(attr->ds))<0)
         HGOTO_ERROR (H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    nelmts=(hsize_t)snelmts;
+    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,size_t);
 
     /* Get the memory and file datatype sizes */
     src_type_size = H5T_get_size(attr->dt);
     dst_type_size = H5T_get_size(mem_type);
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
-    H5_CHECK_OVERFLOW((dst_type_size*nelmts),hsize_t,size_t);
     if(attr->ent_opened && !attr->initialized) {
-        HDmemset(buf,0,(size_t)(dst_type_size*nelmts));
+        HDmemset(buf,0,(dst_type_size*nelmts));
     }   /* end if */
     else {  /* Attribute exists and has a value */
         /* Get the maximum buffer size needed and allocate it */
-        H5_ASSIGN_OVERFLOW(buf_size,(nelmts*MAX(src_type_size,dst_type_size)),hsize_t,size_t);
+        buf_size=nelmts*MAX(src_type_size,dst_type_size);
         if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Copy the attribute data into the buffer for conversion */
-        H5_CHECK_OVERFLOW((src_type_size*nelmts),hsize_t,size_t);
-        HDmemcpy(tconv_buf,attr->data,(size_t)(src_type_size*nelmts));
+        HDmemcpy(tconv_buf,attr->data,(src_type_size*nelmts));
 
         /* Convert memory buffer into disk buffer */
         /* Set up type conversion function */
@@ -813,7 +810,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed")
 
         /* Copy the converted data into the user's buffer */
-        HDmemcpy(buf,tconv_buf,(size_t)(dst_type_size*nelmts));
+        HDmemcpy(buf,tconv_buf,(dst_type_size*nelmts));
     } /* end else */
 
     ret_value=SUCCEED;

@@ -235,17 +235,17 @@ H5_DLL herr_t H5S_select_fill(void *fill, size_t fill_size,
                                 const H5S_t *space, void *buf);
 H5_DLL herr_t H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     H5D_t *dset, const H5D_storage_t *store,
-    const H5S_t *file_space, H5S_sel_iter_t *file_iter, hsize_t nelmts,
+    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
     const void *_buf);
-H5_DLL hsize_t H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5_DLL size_t H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     H5D_t *dset, const H5D_storage_t *store,
-    const H5S_t *file_space, H5S_sel_iter_t *file_iter, hsize_t nelmts,
+    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
     void *buf);
 H5_DLL herr_t H5S_select_mscat (const void *_tscat_buf,
-        const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
+        const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
         const H5D_dxpl_cache_t *dxpl_cache, void *_buf/*out*/);
-H5_DLL hsize_t H5S_select_mgath (const void *_buf,
-        const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
+H5_DLL size_t H5S_select_mgath (const void *_buf,
+        const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
         const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf/*out*/);
 H5_DLL herr_t H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         H5D_t *dset, const H5D_storage_t *store,
