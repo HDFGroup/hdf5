@@ -74,14 +74,14 @@ main(void)
     /* Create the file, create a dataset, then close the file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	return 1;
-    if ((space=H5Screate_simple(1, size, NULL))<0) return 1;
+	TEST_ERROR;
+    if ((space=H5Screate_simple(1, size, NULL))<0) TEST_ERROR;
     if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_SCHAR, space, H5P_DEFAULT))<0)
-	return 1;
+	TEST_ERROR;
     now = time(NULL);
-    if (H5Dclose(dset)<0) return 1;
-    if (H5Sclose(space)<0) return 1;
-    if (H5Fclose(file)<0) return 1;
+    if (H5Dclose(dset)<0) TEST_ERROR;
+    if (H5Sclose(space)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR;
 
     /*
      * Open the file and get the modification time. We'll test the new
@@ -89,20 +89,20 @@ main(void)
      * knowing its name.
      */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) return 1;
-    if (H5Gget_objinfo(file, "dset", TRUE, &sb1)<0) return 1;
-    if ((dset=H5Dopen(file, "dset"))<0) return 1;
-    if (H5Gget_objinfo(dset, ".", TRUE, &sb2)<0) return 1;
-    if (H5Dclose(dset)<0) return 1;
-    if (H5Fclose(file)<0) return 1;
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) TEST_ERROR;
+    if (H5Gget_objinfo(file, "dset", TRUE, &sb1)<0) TEST_ERROR;
+    if ((dset=H5Dopen(file, "dset"))<0) TEST_ERROR;
+    if (H5Gget_objinfo(dset, ".", TRUE, &sb2)<0) TEST_ERROR;
+    if (H5Dclose(dset)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR;
 
     /* Compare times from the two ways of calling H5Gget_objinfo() */
     if (sb1.objno!=sb2.objno || sb1.mtime!=sb2.mtime) {
-	H5_FAILED();
+        H5_FAILED();
 	puts("    Calling H5Gget_objinfo() with the dataset ID returned");
 	puts("    different values than calling it with a file and dataset");
 	puts("    name.");
-	return 1;
+	goto error;
     }
     
     /* Compare times -- they must be within 60 seconds of one another */
@@ -113,13 +113,13 @@ main(void)
 	puts("    cannot be queried on this system.  See H5O_mtime_decode().");
 	return 0;
     } else if (fabs(HDdifftime(now, sb1.mtime))>60.0) {
-	H5_FAILED();
+        H5_FAILED();
 	tm = localtime(&(sb1.mtime));
 	strftime((char*)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
 	tm = localtime(&now);
 	strftime((char*)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
 	printf("    got: %s\n    ans: %s\n", buf1, buf2);
-	return 1;
+	goto error;
     }
     PASSED();
     
@@ -139,14 +139,21 @@ main(void)
     file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file >= 0){
         if(H5Gget_objinfo(file, "/Dataset1", TRUE, &sb1)<0)
-            return 1;
-        if(sb1.mtime!=MTIME1) return 1;
-        if (H5Fclose(file)<0) return 1;
+            TEST_ERROR;
+        if(sb1.mtime!=MTIME1) {
+            H5_FAILED();
+               /* If this fails, examine H5Omtime.c.  Modification time is very
+                * system dependant (e.g., on Windows DST must be hardcoded). */
+            puts("    Old modification time incorrect");
+            goto error;
+        }
+        if (H5Fclose(file)<0) TEST_ERROR;
     }
     else {
+        H5_FAILED();
 	printf("***cannot open the pre-created old modification test file (%s)\n",
 	    testfile);
-	return 1;
+	goto error;
     } /* end else */
     }
     PASSED();
@@ -167,14 +174,19 @@ main(void)
     file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file >= 0){
         if(H5Gget_objinfo(file, "/Dataset1", TRUE, &sb2)<0)
-            return 1;
-        if(sb2.mtime!=MTIME2) return 1;
-        if (H5Fclose(file)<0) return 1;
+            TEST_ERROR;
+        if(sb2.mtime!=MTIME2) {
+           H5_FAILED();
+           puts("    Modification time incorrect.");
+           goto error;
+        }
+        if (H5Fclose(file)<0) TEST_ERROR;
     }
     else {
+        H5_FAILED();
 	printf("***cannot open the pre-created old modification test file (%s)\n",
 	    testfile);
-	return 1;
+	goto error;
     } /* end else */
     }
     PASSED();
@@ -183,6 +195,11 @@ main(void)
     puts("All modification time tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
+
+    /* Something broke */
+    error:
+    return 1;
 }
+
 
     

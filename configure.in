@@ -673,7 +673,8 @@ dnl ----------------------------------------------------------------------
 dnl Check for these two functions before <sys/time.h> is checked for, otherwise
 dnl they are not detected correctly on Solaris [2.6].
 dnl
-AC_CHECK_FUNCS(difftime gettimeofday)
+AC_CHECK_FUNCS(difftime)
+AC_CHECK_FUNCS(gettimeofday, [have_gettime="yes"], [have_gettime="no"])
 
 dnl Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
@@ -1626,8 +1627,38 @@ AC_TRY_COMPILE([
 #include <time.h>], [struct timezone tz; tz.tz_minuteswest=0;],
 AC_DEFINE([HAVE_STRUCT_TIMEZONE], [1],
           [Define if \`struct timezone' is defined])
+have_struct_tz="yes"
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
+
+dnl If gettimeofday() is going to be used, make sure it uses the timezone struct
+
+if test "$have_gettime" = "yes" -a "$have_struct_tz" = "yes"; then
+   AC_MSG_CHECKING(whether gettimeofday() gives timezone)
+   AC_TRY_RUN([
+      #include <time.h>
+      #include <sys/time.h>
+      int main(void)
+      {
+         struct timeval tv;
+         struct timezone tz;
+         tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
+         tz.tz_dsttime = 7;
+         gettimeofday(&tv, &tz);
+            /* Check whether the function returned any value at all */
+         if(tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
+            exit(1);
+         else exit (0);
+      }], [hdf5_use_tz="yes"], [hdf5_use_tz="no"],)
+
+   if test "$hdf5_use_tz" = "yes"; then
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([GETTIMEOFDAY_GIVES_TZ], [1],
+                [Define if gettimeofday() populates the tz pointer passed in])
+   else
+      AC_MSG_RESULT([no])
+   fi
+fi 
 
 dnl ----------------------------------------------------------------------
 dnl Does the struct stat have the st_blocks field?  This field is not Posix.
