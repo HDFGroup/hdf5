@@ -13,7 +13,9 @@
  */
 
 #define DATASETNAME "ShrinkArray" 
-#define RANK         2
+#define RANK         1
+#define DIM          4
+
 
 
 int main( void )
@@ -23,18 +25,20 @@ int main( void )
   hid_t   dataset_id;
   hid_t   space_id;  
   hid_t   plist_id;
-  hsize_t dims[2] = { 3, 3};
-  hsize_t dims_new[2] = { 2, 2};
-  hsize_t dims_chunk[2] = { 3, 3};
-  hsize_t dims_out[2];
-  hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-  int     data1[3][3] = { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} }; 
-#if 0
-  int     buf1[3][3];
-#endif
-  int     buf2[2][2];
+  hsize_t dims[RANK] = { DIM };
+  hsize_t dims_new[RANK] = { 2 };
+  hsize_t dims_chunk[RANK] = { 1 };
+  hsize_t dims_out[RANK];
+  hsize_t maxdims[RANK] = { H5S_UNLIMITED };
+		int     data[ DIM ];
+  int     buf1[ DIM ];
+  int     buf2[ 3 ];
   herr_t  status; 
-  hsize_t i, j;
+  int     i;
+
+		for( i = 0; i < DIM; i++ )
+			data[ i ] = i;
+		
 
   TESTING("extend dataset");
   
@@ -52,10 +56,10 @@ int main( void )
   dataset_id = H5Dcreate( file_id , DATASETNAME, H5T_NATIVE_INT, space_id, plist_id );
 
   /* Write the data. */
-  status = H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data1 );
+  status = H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data );
 
 /*-------------------------------------------------------------------------
- * Set new dimensions for the array; shrink it to (2,2)
+ * Set new dimensions for the array; shrink it to (3)
  *-------------------------------------------------------------------------
  */
   
@@ -68,11 +72,8 @@ int main( void )
   /* Get dimensions. */
   status = H5Sget_simple_extent_dims( space_id, dims_out, NULL);
 
-  for( i = 0; i < 2; i++ ) 
-  {
-   if (  dims_out[i] != dims_new[i] ) 
-    goto out;
-  }
+  if ( dims_out[0] != dims_new[0] ) 
+   goto out;
 
 
 /*-------------------------------------------------------------------------
@@ -84,10 +85,9 @@ int main( void )
   status = H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2 );
 
   /* Compare the read array with the original array */
-  for( i = 0; i < dims_out[0]; i++ ) 
-   for( j = 0; j < dims_out[1]; j++ )
-   {
-    if (  buf2[i][j] != data1[i][j] ) {
+  for( i = 0; i < dims_out[0]; i++ )
+		{
+   if (  buf2[i] != data[i] ) {
      goto out;
     }
    }
@@ -96,7 +96,7 @@ int main( void )
 #if 0
 
 /*-------------------------------------------------------------------------
- * Set new dimensions for the array; expand it again to (3,3)
+ * Set new dimensions for the array; expand it again to (6)
  *-------------------------------------------------------------------------
  */
   
@@ -109,11 +109,8 @@ int main( void )
   /* Get dimensions. */
   status = H5Sget_simple_extent_dims( space_id, dims_out, NULL);
 
-  for( i = 0; i < 2; i++ ) 
-  {
-   if (  dims_out[i] != dims[i] ) 
-    goto out;
-  }
+  if ( dims_out[0] != dims[0] ) 
+   goto out;
 
 
 /*-------------------------------------------------------------------------
@@ -126,16 +123,15 @@ int main( void )
 
   /* Compare the read array with the original array */
   for( i = 0; i < dims_out[0]; i++ ) 
-   for( j = 0; j < dims_out[1]; j++ )
    {
-    if ( i > 1 || j > 1 )
-	{
-     if (  buf1[i][j] != 0 ) 
+    if ( i > 2 )
+				{
+     if (  buf1[i] != 0 ) 
       goto out;
-	}
-	else
-	{
-     if (  buf1[i][j] != data1[i][j] ) 
+				}
+	   else
+				{
+     if (  buf1[i] != data[i] ) 
       goto out;
     }
    }
