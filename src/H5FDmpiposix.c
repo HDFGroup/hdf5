@@ -166,6 +166,8 @@ typedef struct H5FD_mpiposix_t {
 
 /* Callbacks */
 static void *H5FD_mpiposix_fapl_get(H5FD_t *_file);
+static void *H5FD_mpiposix_fapl_copy(const void *_old_fa);
+static herr_t H5FD_mpiposix_fapl_free(void *_fa);
 static H5FD_t *H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_mpiposix_close(H5FD_t *_file);
@@ -196,8 +198,8 @@ static const H5FD_class_t H5FD_mpiposix_g = {
     NULL,					/*sb_decode		*/
     sizeof(H5FD_mpiposix_fapl_t),		/*fapl_size		*/
     H5FD_mpiposix_fapl_get,			/*fapl_get		*/
-    NULL,					/*fapl_copy		*/
-    NULL, 					/*fapl_free		*/
+    H5FD_mpiposix_fapl_copy,			/*fapl_copy		*/
+    H5FD_mpiposix_fapl_free, 			/*fapl_free		*/
     0,						/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
     NULL,					/*dxpl_free		*/
@@ -277,12 +279,13 @@ done:
  *		to create and/or open the file.  This function is available
  *		only in the parallel HDF5 library and is not collective.
  *
- *		COMM is the MPI communicator to be used for file open as
- *		defined in MPI_FILE_OPEN of MPI-2. This function does not
- *		make a duplicated communicator. Any modification to COMM
- *		after this function call returns may have undetermined effect
- *		on the access property list. Users should not modify the
- *		communicator while it is defined in a property list.
+ *		comm is the MPI communicator to be used for file open as
+ *		defined in MPI_FILE_OPEN of MPI-2. This function makes a
+ *		duplicate of comm. Any modification to comm after this function
+ *		call returns has no effect on the access property list.
+ *
+ *              If fapl_id has previously set comm value, it will be replaced
+ *              and the old communicator is freed.
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
@@ -291,6 +294,10 @@ done:
  *		Thursday, July 11, 2002
  *
  * Modifications:
+ *		Albert Cheng, 2003-04-24
+ *		Modified the description of the function that it now stores
+ *		a duplicate of the communicator.  Free the old duplicate if
+ *		previously set.  (Work is actually done by H5P_set_driver.)
  *
  *-------------------------------------------------------------------------
  */
@@ -307,13 +314,13 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm)
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
-#ifdef LATER
-#warning "We need to verify that COMM contains sensible information."
-#endif
+    if (MPI_COMM_NULL == comm)
+	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator");
 
     /* Initialize driver specific properties */
     fa.comm = comm;
 
+    /* duplication is done during driver setting. */
     ret_value= H5P_set_driver(plist, H5FD_MPIPOSIX, &fa);
 
 done:
@@ -325,15 +332,17 @@ done:
  * Function:	H5Pget_fapl_mpiposix
  *
  * Purpose:	If the file access property list is set to the H5FD_MPIPOSIX
- *		driver then this function returns the MPI communicator and
- *		information through the COMM pointer.
+ *		driver then this function returns a duplicate of the MPI
+ *		communicator through the comm pointer. It is the responsibility
+ *		of the application to free the returned communicator.
  *
  * Return:	Success:	Non-negative with the communicator and
  *				information returned through the COMM 
- *				argument if non-null. This piece of
- *				information is copied and is therefore
- *				valid only until the file access property
- *				list is modified or closed.
+ *				argument if non-null.  Since it is a duplicate
+ *				of the stored object, future modifications to
+ *				the access property list do not affect it and
+ *				it is the responsibility of the application to
+ *				free it.
  *
  * 		Failure:	Negative
  *
@@ -341,6 +350,8 @@ done:
  *		Thursday, July 11, 2002
  *
  * Modifications:
+ *		Albert Cheng, 2003-04-24
+ *		Return duplicate of the stored communicator.
  *
  *-------------------------------------------------------------------------
  */
@@ -349,7 +360,8 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/)
 {
     H5FD_mpiposix_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    int		mpi_code;		/* mpi return code */
+    herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL);
     H5TRACE2("e","ix",fapl_id,comm);
@@ -362,8 +374,10 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
     /* Get MPI Communicator */
-    if (comm)
-        *comm = fa->comm;
+    if (comm){
+	if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, comm)))
+	    HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
+    }
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -488,6 +502,9 @@ done:
  *              Thursday, July 11, 2002
  *
  * Modifications:
+ * 		Albert Cheng, 2003-04-24
+ * 		Duplicate the communicator object so that the new
+ * 		property list is insulated from the old one.
  *
  *-------------------------------------------------------------------------
  */
@@ -496,7 +513,8 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
 {
     H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
     H5FD_mpiposix_fapl_t *fa = NULL;
-    void      *ret_value;       /* Return value */
+    int		mpi_code;	/* MPI return code */
+    void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_get, NULL);
 
@@ -506,8 +524,9 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_mpiposix_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* These should be copied. --QAK, 2002-07-11 */
-    fa->comm = file->comm;
+    /* Duplicate the communicator. */
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(file->comm, &fa->comm)))
+	HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code);
     
     /* Set return value */
     ret_value=fa;
@@ -515,6 +534,105 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_fapl_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpiposix_fapl_copy
+ *
+ * Purpose:	Copies the mpiposix-specific file access properties.
+ *
+ * Return:	Success:	Ptr to a new property list
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Albert Cheng
+ *              Apr 24, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5FD_mpiposix_fapl_copy(const void *_old_fa)
+{
+    void		*ret_value = NULL;
+    const H5FD_mpiposix_fapl_t *old_fa = (const H5FD_mpiposix_fapl_t*)_old_fa;
+    H5FD_mpiposix_fapl_t	*new_fa = NULL;
+    int		mpi_code;	/* MPI return code */
+    
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_copy, NULL);
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stderr, "enter H5FD_mpiposix_fapl_copy\n");
+#endif
+
+    if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_mpiposix_fapl_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* Copy the general information */
+    HDmemcpy(new_fa, old_fa, sizeof(H5FD_mpiposix_fapl_t));
+
+    /* Duplicate communicator. */
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(old_fa->comm, &new_fa->comm)))
+	HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code);
+    ret_value = new_fa;
+
+done:
+    if (NULL == ret_value){
+	/* cleanup */
+	if (new_fa)
+	    H5MM_xfree(new_fa);
+    }
+
+#ifdef H5FDmpiposix_DEBUG
+if (H5FD_mpiposix_Debug[(int)'t'])
+fprintf(stderr, "leaving H5FD_mpiposix_fapl_copy\n");
+#endif
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FD_mpiposix_fapl_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpiposix_fapl_free
+ *
+ * Purpose:	Frees the mpiposix-specific file access properties.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Albert Cheng
+ *              Apr 24, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_mpiposix_fapl_free(void *_fa)
+{
+    herr_t		ret_value = SUCCEED;
+    H5FD_mpiposix_fapl_t	*fa = (H5FD_mpiposix_fapl_t*)_fa;
+
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_free, FAIL);
+#ifdef H5FDmpiposix_DEBUG
+if (H5FD_mpiposix_Debug[(int)'t'])
+fprintf(stderr, "in H5FD_mpiposix_fapl_free\n");
+#endif
+    assert(fa);
+
+    /* Free the internal communicator */
+    assert(MPI_COMM_NULL!=fa->comm);
+    MPI_Comm_free(&fa->comm);
+    H5MM_xfree(fa);
+
+done:
+#ifdef H5FDmpiposix_DEBUG
+if (H5FD_mpiposix_Debug[(int)'t'])
+fprintf(stderr, "leaving H5FD_mpiposix_fapl_free\n");
+#endif
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FD_mpiposix_fapl_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -534,6 +652,9 @@ done:
  *              Thursday, July 11, 2002
  *
  * Modifications:
+ * 		Albert Cheng, 2003-04-24
+ * 		Duplicate the communicator so that file is insulated from the
+ * 		old one.
  *
  *-------------------------------------------------------------------------
  */
@@ -557,6 +678,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     int results;   
 #endif
     H5FD_t                     *ret_value=NULL; /* Return value */
+    MPI_Comm                    comm_dup=MPI_COMM_NULL;
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_open, NULL);
 
@@ -580,10 +702,14 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
 	assert(fa);
     } /* end else */
 
+    /* Duplicate the communicator for use by this file. */
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, &comm_dup)))
+	HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code);
+
     /* Get the MPI rank of this process and the total number of processes */
-    if (MPI_SUCCESS != (mpi_code=MPI_Comm_rank (fa->comm, &mpi_rank)))
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_rank (comm_dup, &mpi_rank)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_rank failed", mpi_code);
-    if (MPI_SUCCESS != (mpi_code=MPI_Comm_size (fa->comm, &mpi_size)))
+    if (MPI_SUCCESS != (mpi_code=MPI_Comm_size (comm_dup, &mpi_size)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_size failed", mpi_code);
 
     /* Build the open flags */
@@ -618,7 +744,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
      * other process's file opens would succeed, so allow the other processes
      * to check for that situation and bail out now also. - QAK
      */
-    if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&fd, sizeof(int), MPI_BYTE, 0, fa->comm)))
+    if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&fd, sizeof(int), MPI_BYTE, 0, comm_dup)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
 
     /* If the file open on process 0 failed, bail out on all processes now */
@@ -640,7 +766,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     } /* end if */
 
     /* Broadcast the results of the fstat() from process 0 */
-    if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&sb, sizeof(h5_stat_t), MPI_BYTE, 0, fa->comm)))
+    if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&sb, sizeof(h5_stat_t), MPI_BYTE, 0, comm_dup)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
 
 #ifdef USE_GPFS_HINTS
@@ -683,7 +809,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     file->blksize = sb.st_blksize;
 
     /* Set the MPI information */
-    file->comm = fa->comm;
+    file->comm = comm_dup;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
     file->mpi_round = 0;        /* Start metadata writes with process 0 */
@@ -712,6 +838,8 @@ done:
         /* Close the file if it was left open */
         if(fd!=(-1))
             HDclose(fd);
+	if (MPI_COMM_NULL != comm_dup)
+	    MPI_Comm_free(&comm_dup);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -730,7 +858,8 @@ done:
  *              Thursday, July 11, 2002
  *
  * Modifications:
- *
+ * 		Albert Cheng, 2003-04-24
+ *		Free the communicator stored.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -748,6 +877,8 @@ H5FD_mpiposix_close(H5FD_t *_file)
     if (HDclose(file->fd)<0)
         HGOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
+    /* Clean up other stuff */
+    MPI_Comm_free(&file->comm);
     H5MM_xfree(file);
 
 done:
