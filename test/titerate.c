@@ -33,7 +33,7 @@
 #define NATTR 50
 
 /* Number of groups for second group iteration test */
-#define NGROUPS 150
+#define ITER_NGROUPS 150
 
 /* General maximum length of names used */
 #define NAMELEN     80
@@ -427,7 +427,7 @@ static void test_iter_group_large(void)
     hsize_t		dims[] = {SPACE1_DIM1};
     herr_t		ret;		/* Generic return value		*/
     char gname[20];         /* Temporary group name */
-    iter_info names[NGROUPS+2]; /* Names of objects in the root group */
+    iter_info names[ITER_NGROUPS+2]; /* Names of objects in the root group */
     iter_info *curr_name;        /* Pointer to the current name in the root group */
     int                 i;
 
@@ -452,7 +452,7 @@ static void test_iter_group_large(void)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create a bunch of groups */
-    for (i=0; i<NGROUPS; i++) {
+    for (i=0; i<ITER_NGROUPS; i++) {
         sprintf(gname, "Group_%d", i); 
 
         /* Add the name to the list of objects in the root group */
@@ -473,8 +473,8 @@ static void test_iter_group_large(void)
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Add the name to the list of objects in the root group */
-    strcpy(names[NGROUPS].name,"Dataset1");
-    names[NGROUPS].type=H5G_DATASET;
+    strcpy(names[ITER_NGROUPS].name,"Dataset1");
+    names[ITER_NGROUPS].type=H5G_DATASET;
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -503,15 +503,15 @@ static void test_iter_group_large(void)
     CHECK(ret, FAIL, "H5Tcommit");
 
     /* Add the name to the list of objects in the root group */
-    strcpy(names[NGROUPS+1].name,"Datatype1");
-    names[NGROUPS+1].type=H5G_TYPE;
+    strcpy(names[ITER_NGROUPS+1].name,"Datatype1");
+    names[ITER_NGROUPS+1].type=H5G_TYPE;
 
     /* Close datatype */
     ret = H5Tclose(tid);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Need to sort the names in the root group, cause that's what the library does */
-    qsort(names,NGROUPS+2,sizeof(iter_info),iter_strcmp2);
+    qsort(names,ITER_NGROUPS+2,sizeof(iter_info),iter_strcmp2);
 
     /* Iterate through the file to see members of the root group */
     curr_name=&names[0];

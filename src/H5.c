@@ -1394,7 +1394,7 @@ H5_trace (double *returning, const char *func, const char *type, ...)
             if (H5_debug_g.ttimes) {
                 char tmp[128];
                 sprintf(tmp, "%.6f", event_time.etime-first_time.etime);
-                fprintf(out, " %*s ", strlen(tmp), "");
+                fprintf(out, " %*s ", (int)strlen(tmp), "");
             }
             for (i=0; i<current_depth; i++)
                 fputc('+', out);
