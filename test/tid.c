@@ -216,7 +216,7 @@ int id_predefined_test()
 		goto out;
 
 	H5E_BEGIN_TRY
-		testErr = H5Inmembers(H5I_ERROR_STACK, &testInt);
+		testErr = H5Inmembers(H5I_ERROR_STACK, NULL);
 	H5E_END_TRY
 
 	VERIFY(testErr, -1, "H5Inmembers");
