@@ -71,12 +71,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
     assert(H5MF_META == op || H5MF_RAW == op);
     assert(size > 0);
     assert(addr);
-
-#if 0
-    HDfprintf (stderr, "A %Hu\n", size);
-#endif
     
-
     /* Fail if we don't have write access */
     if (0==(f->intent & H5F_ACC_RDWR)) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "file is read-only");
@@ -226,8 +221,11 @@ H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
 	for (i=0; i<H5MF_NFREE; i++) {
 	    if (f->shared->fl_free[i].size<size) {
 #ifdef H5MF_DEBUG
-		fprintf(stderr, "H5MF_free: lost %lu bytes of file storage\n",
-			(unsigned long) f->shared->fl_free[i].size);
+		if (H5DEBUG(MF)) {
+		    fprintf(H5DEBUG(MF),
+			    "H5MF_free: lost %lu bytes of file storage\n",
+			    (unsigned long) f->shared->fl_free[i].size);
+		}
 #endif
 		f->shared->fl_free[i].addr = *addr;
 		f->shared->fl_free[i].size = size;
@@ -315,8 +313,8 @@ H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, const haddr_t *orig_addr,
     } else {
 	/* New size is not larger */
 #ifdef H5MF_DEBUG
-	if (new_size<orig_size) {
-	    HDfprintf (stderr, "H5MF: realloc lost %Hd bytes\n",
+	if (H5DEBUG(MF) && new_size<orig_size) {
+	    HDfprintf (H5DEBUG(MF), "H5MF: realloc lost %Hd bytes\n",
 		       orig_size-new_size);
 	}
 #endif

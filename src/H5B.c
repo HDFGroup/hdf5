@@ -1680,7 +1680,7 @@ H5B_assert(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
     FUNC_ENTER(H5B_assert, FAIL);
-    if (0 == ncalls++) {
+    if (0==ncalls++) {
 	fprintf(stderr, "H5B: debugging B-trees (expensive)\n");
     }
     /* Initialize the queue */

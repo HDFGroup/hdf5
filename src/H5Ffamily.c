@@ -177,9 +177,11 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	 * the same as the actual member size, but at least 1kB
 	 */
 #ifdef H5F_DEBUG
-	HDfprintf (stderr, "H5F: family member size has been increased "
-		   "from %a to %a\n", &(access_parms->u.fam.memb_size),
-		   &tmp_addr);
+	if (H5DEBUG(F)) {
+	    HDfprintf (H5DEBUG(F), "H5F: family member size has been "
+		       "increased from %a to %a\n",
+		       &(access_parms->u.fam.memb_size), &tmp_addr);
+	}
 #endif
 	if (tmp_addr.offset<1024) tmp_addr.offset = 1024;
 	lf->u.fam.memb_size = tmp_addr;
@@ -198,8 +200,11 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	 * member as the member size.
 	 */
 #ifdef H5F_DEBUG
-	HDfprintf (stderr, "H5F: family member size adjusted from %a to %a\n",
-		   &(access_parms->u.fam.memb_size), &tmp_addr);
+	if (H5DEBUG(F)) {
+	    HDfprintf (H5DEBUG(F), "H5F: family member size adjusted from "
+		       "%a to %a\n", &(access_parms->u.fam.memb_size),
+		       &tmp_addr);
+	}
 #endif
 	lf->u.fam.memb_size = tmp_addr;
 	for (membno=1; membno<lf->u.fam.nmemb; membno++) {
@@ -221,9 +226,10 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
      * member size but on a 32-bit machine this isn't possible.  The largest
      * file on a 32-bit machine is 2^32-1.
      */
-    if (lf->u.fam.memb_size.offset == ((size_t)1<<(sizeof(off_t)-1))) {
-	HDfprintf (stderr, "H5F: family member size may be too large: %a\n",
-		   &(lf->u.fam.memb_size));
+    if (H5DEBUG(F) &&
+	lf->u.fam.memb_size.offset == ((size_t)1<<(sizeof(off_t)-1))) {
+	HDfprintf(H5DEBUG(F), "H5F: family member size may be too large: %a\n",
+		  &(lf->u.fam.memb_size));
     }
 #endif
 	

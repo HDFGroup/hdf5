@@ -238,9 +238,9 @@ H5O_open(H5G_entry_t *obj_ent)
     assert(obj_ent->file);
 
 #ifdef H5O_DEBUG
-    fprintf(stderr, ">");
-    H5F_addr_print(stderr, &(obj_ent->header));
-    fprintf(stderr, "\n");
+    if (H5DEBUG(O)) {
+	HDfprintf(H5DEBUG(O), "> %a\n", &(obj_ent->header));
+    }
 #endif
 
     /* Increment open-lock counters */
@@ -286,9 +286,9 @@ H5O_close(H5G_entry_t *obj_ent)
 	H5F_close(obj_ent->file);
     }
 #ifdef H5O_DEBUG
-    fprintf(stderr, "<");
-    H5F_addr_print(stderr, &(obj_ent->header));
-    fprintf(stderr, "\n");
+    if (H5DEBUG(O)) {
+	HDfprintf(H5DEBUG(O), "< %a\n", &(obj_ent->header));
+    }
 #endif
 
     FUNC_LEAVE(SUCCEED);

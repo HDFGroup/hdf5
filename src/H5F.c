@@ -1062,11 +1062,10 @@ H5F_open(const char *name, uintn flags,
 	 * hdf5 data.
 	 */
 #ifdef H5F_DEBUG
-	fprintf(stderr, "H5F: resetting EOF from ");
-	H5F_addr_print(stderr, &addr1);
-	fprintf(stderr, " to ");
-	H5F_addr_print(stderr, &addr2);
-	fprintf(stderr, " (abs)\n");
+	if (H5DEBUG(F)) {
+	    HDfprintf(H5DEBUG(F), "H5F: resetting EOF from %a to %a (abs)\n",
+		      &addr1, &addr2);
+	}
 #endif
 	H5F_low_seteof(f->shared->lf, &addr2);
     }
@@ -1531,19 +1530,23 @@ H5F_close(H5F_t *f)
      * forgetting to close everything is not a major problem.
      */
     if (f->nopen>0) {
-#ifndef NDEBUG
-	fprintf(stderr, "H5F: H5F_close(%s): %u object header%s still "
-		"open (file close will complete when %s closed)\n",
-		f->name,
-		f->nopen,
-		1 == f->nopen ? " is" : "s are",
-		1 == f->nopen ? "that header is" : "those headers are");
+#ifdef H5F_DEBUG
+	if (H5DEBUG(F)) {
+	    fprintf(H5DEBUG(F), "H5F: H5F_close(%s): %u object header%s still "
+		    "open (file close will complete when %s closed)\n",
+		    f->name,
+		    f->nopen,
+		    1 == f->nopen ? " is" : "s are",
+		    1 == f->nopen ? "that header is" : "those headers are");
+	}
 #endif
 	f->close_pending = TRUE;
 	HRETURN(SUCCEED);
     } else if (f->close_pending) {
-#ifndef NDEBUG
-	fprintf(stderr, "H5F: H5F_close: operation completed\n");
+#ifdef H5F_DEBUG
+	if (H5DEBUG(F)) {
+	    fprintf(H5DEBUG(F), "H5F: H5F_close: operation completed\n");
+	}
 #endif
     }
 

@@ -1699,7 +1699,7 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
 /*-------------------------------------------------------------------------
  * Function:	H5F_istore_stats
  *
- * Purpose:	Print raw data cache statistics to the stderr stream.  If
+ * Purpose:	Print raw data cache statistics to the debug stream.  If
  *		HEADERS is non-zero then print table column headers,
  *		otherwise assume that the H5AC layer has already printed them.
  *
@@ -1722,23 +1722,22 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
     char	ascii[32];
     
     FUNC_ENTER (H5F_istore_stats, FAIL);
+    if (!H5DEBUG(AC)) HRETURN(SUCCEED);
 
     if (headers) {
-	fprintf(stderr, "H5F: raw data cache statistics for file %s\n",
+	fprintf(H5DEBUG(AC), "H5F: raw data cache statistics for file %s\n",
 		f->name);
-	fprintf(stderr, "   %-18s %8s %8s %8s %8s+%-8s\n",
+	fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n",
 		"Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
-	fprintf(stderr, "   %-18s %8s %8s %8s %8s-%-8s\n",
+	fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n",
 		"-----", "----", "------", "--------", "-----", "-------");
     }
 
-#ifndef H5AC_DEBUG
-    /*
-     * If we're not debugging the H5AC layer then print these statistics only
-     * if we printed the headers that go with them.
-     */
-    if (headers) {
+#ifdef H5AC_DEBUG
+    if (H5DEBUG(AC)) headers = TRUE;
 #endif
+
+    if (headers) {
 	if (rdcc->nhits>0 || rdcc->nmisses>0) {
 	    miss_rate = 100.0 * rdcc->nmisses /
 			    (rdcc->nhits + rdcc->nmisses);
@@ -1751,12 +1750,10 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
 	    sprintf(ascii, "%7.2f%%", miss_rate);
 	}
 
-	fprintf(stderr, "   %-18s %8u %8u %7s %8d+%-9ld\n",
+	fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n",
 		"raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
 		rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
-#ifndef H5AC_DEBUG
     }
-#endif
 
     FUNC_LEAVE (SUCCEED);
 }

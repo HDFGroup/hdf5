@@ -65,7 +65,9 @@ Step 2. Configure.
 
     * This version of HDF5 is normally built with various debugging
       code enabled.  To turn it off add the `--disable-debug' switch
-      to the configure command.
+      to the configure command. Even if debugging support is compiled
+      into the library one must still enable the code at runtime with
+      the HDF5_DEBUG environment variable (see Debugging.html).
 
     * This version of HDF5 is normally built with support for symbolic 
       debugging with dbx or gdb and without compiler optimization
@@ -73,10 +75,10 @@ Step 2. Configure.
       optimizations add `--enable-production' to the configure
       command.
 
-    * This version of HDF5 is normally built with the ability to print 
+    * This version of HDF5 is normally built with the ability to print
       the names, arguments, and return values of all API functions
       when they're called.  For more information refer to the
-      doc/html/tracing.html file.  To disable tracing support add
+      Debugging.html file.  To disable tracing support add
       `--disable-trace' to the configure command.
 
     * Old versions of gcc (<2.8.0) may experience register allocation

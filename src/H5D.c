@@ -1370,8 +1370,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		    "collective read failed");
 #endif
 #ifdef H5D_DEBUG
-        fprintf (stderr, "H5D: data space conversion could not be optimized "
-		 "for this case (using general method instead)\n");
+	if (H5DEBUG(D)) {
+	    fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
+		     "optimized for this case (using general method "
+		     "instead)\n");
+	}
 #endif
         H5E_clear ();
     }
@@ -1715,8 +1718,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		    "collective write failed");
 #endif
 #ifdef H5D_DEBUG
-	fprintf (stderr, "H5D: data space conversion could not be optimized "
-		 "for this case (using general method instead)\n");
+	if (H5DEBUG(D)) {
+	    fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
+		     "optimized for this case (using general method "
+		     "instead)\n");
+	}
 #endif
 	H5E_clear ();
     }

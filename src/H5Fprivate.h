@@ -36,7 +36,7 @@
 
 /*
  * Feature: Define this constant on the compiler command-line if you want to
- *	    see some debugging messages on stderr.
+ *	    see some debugging messages on the debug stream.
  */
 #ifdef NDEBUG
 #  undef H5F_DEBUG

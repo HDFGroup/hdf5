@@ -123,7 +123,6 @@ H5E_t		H5E_stack_g[1];
  * Automatic error stack traversal occurs if the traversal callback function
  * is non null and an API function is about to return an error.  These should
  * probably be part of the error stack so they're local to a thread.
- * 
  */
 herr_t (*H5E_auto_g)(void*) = (herr_t(*)(void*))H5Eprint;
 void *H5E_auto_data_g = stderr;

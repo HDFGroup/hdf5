@@ -105,73 +105,77 @@ H5S_term_interface(void)
     /*
      * Print statistics about each conversion path.
      */
-    for (i=0; i<H5S_nconv_g; i++) {
-	path = H5S_conv_g[i];
-	for (j=0; j<2; j++) {
-	    if (0==path->stats[j].gath_ncalls &&
-		0==path->stats[j].scat_ncalls &&
-		0==path->stats[j].bkg_ncalls) {
-		continue;
-	    }
-	    if (0==nprints++) {
-		fprintf(stderr, "H5S: data space conversion statistics "
-			"accumulated over life of library:\n");
-		fprintf(stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			"Memory <> File", "Bytes", "Calls",
-			"User", "System", "Elapsed", "Bandwidth");
-		fprintf(stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			"--------------", "-----", "-----",
-			"----", "------", "-------", "---------");
-	    }
-	    
-	    /* Summary */
-	    sprintf(buf, "%s %c %s",
-		    path->m->name, 0==j?'>':'<', path->f->name);
-	    fprintf(stderr, "   %-16s\n", buf);
-	    
-	    /* Gather */
-	    if (path->stats[j].gath_ncalls) {
-		H5_bandwidth(buf, (double)(path->stats[j].gath_nbytes),
-			     path->stats[j].gath_timer.etime);
-		HDfprintf(stderr,
-			  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
-			  "gather",
-			  path->stats[j].gath_nbytes,
-			  path->stats[j].gath_ncalls,
-			  path->stats[j].gath_timer.utime, 
-			  path->stats[j].gath_timer.stime, 
-			  path->stats[j].gath_timer.etime,
-			  buf);
-	    }
+    if (H5DEBUG(S)) {
+	for (i=0; i<H5S_nconv_g; i++) {
+	    path = H5S_conv_g[i];
+	    for (j=0; j<2; j++) {
+		if (0==path->stats[j].gath_ncalls &&
+		    0==path->stats[j].scat_ncalls &&
+		    0==path->stats[j].bkg_ncalls) {
+		    continue;
+		}
+		if (0==nprints++) {
+		    fprintf(H5DEBUG(S), "H5S: data space conversion "
+			    "statistics accumulated over life of library:\n");
+		    fprintf(H5DEBUG(S),
+			    "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			    "Memory <> File", "Bytes", "Calls",
+			    "User", "System", "Elapsed", "Bandwidth");
+		    fprintf(H5DEBUG(S),
+			    "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			    "--------------", "-----", "-----",
+			    "----", "------", "-------", "---------");
+		}
 
-	    /* Scatter */
-	    if (path->stats[j].scat_ncalls) {
-		H5_bandwidth(buf, (double)(path->stats[j].scat_nbytes),
-			     path->stats[j].scat_timer.etime);
-		HDfprintf(stderr,
-			  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
-			  "scatter",
-			  path->stats[j].scat_nbytes,
-			  path->stats[j].scat_ncalls,
-			  path->stats[j].scat_timer.utime, 
-			  path->stats[j].scat_timer.stime, 
-			  path->stats[j].scat_timer.etime,
-			  buf);
-	    }
+		/* Summary */
+		sprintf(buf, "%s %c %s",
+			path->m->name, 0==j?'>':'<', path->f->name);
+		fprintf(H5DEBUG(S), "   %-16s\n", buf);
 
-	    /* Background */
-	    if (path->stats[j].bkg_ncalls) {
-		H5_bandwidth(buf, (double)(path->stats[j].bkg_nbytes),
-			     path->stats[j].bkg_timer.etime);
-		HDfprintf(stderr,
-			  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
-			  "background",
-			  path->stats[j].bkg_nbytes,
-			  path->stats[j].bkg_ncalls,
-			  path->stats[j].bkg_timer.utime, 
-			  path->stats[j].bkg_timer.stime, 
-			  path->stats[j].bkg_timer.etime,
-			  buf);
+		/* Gather */
+		if (path->stats[j].gath_ncalls) {
+		    H5_bandwidth(buf, (double)(path->stats[j].gath_nbytes),
+				 path->stats[j].gath_timer.etime);
+		    HDfprintf(H5DEBUG(S),
+			      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
+			      "gather",
+			      path->stats[j].gath_nbytes,
+			      path->stats[j].gath_ncalls,
+			      path->stats[j].gath_timer.utime, 
+			      path->stats[j].gath_timer.stime, 
+			      path->stats[j].gath_timer.etime,
+			      buf);
+		}
+
+		/* Scatter */
+		if (path->stats[j].scat_ncalls) {
+		    H5_bandwidth(buf, (double)(path->stats[j].scat_nbytes),
+				 path->stats[j].scat_timer.etime);
+		    HDfprintf(H5DEBUG(S),
+			      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
+			      "scatter",
+			      path->stats[j].scat_nbytes,
+			      path->stats[j].scat_ncalls,
+			      path->stats[j].scat_timer.utime, 
+			      path->stats[j].scat_timer.stime, 
+			      path->stats[j].scat_timer.etime,
+			      buf);
+		}
+
+		/* Background */
+		if (path->stats[j].bkg_ncalls) {
+		    H5_bandwidth(buf, (double)(path->stats[j].bkg_nbytes),
+				 path->stats[j].bkg_timer.etime);
+		    HDfprintf(H5DEBUG(S),
+			      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
+			      "background",
+			      path->stats[j].bkg_nbytes,
+			      path->stats[j].bkg_ncalls,
+			      path->stats[j].bkg_timer.utime, 
+			      path->stats[j].bkg_timer.stime, 
+			      path->stats[j].bkg_timer.etime,
+			      buf);
+		}
 	    }
 	}
     }

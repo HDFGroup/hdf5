@@ -472,6 +472,49 @@ int64 HDstrtoll (const char *s, const char **rest, int base);
 extern char *strdup(const char *s);
 #define HDstrdup(S)             strdup(S)
 
+/*
+ * These macros check whether debugging has been requested for a certain
+ * package at run-time.  Code for debugging is conditionally compiled by
+ * defining constants like `H5X_DEBUG'.  In order to see the output though
+ * the code must be enabled at run-time with an environment variable
+ * HDF5_DEBUG which is a list of packages to debug.
+ *
+ * Note:  If you add/remove items from this enum then be sure to update the
+ *	  information about the package in H5_init_library().
+ */
+typedef enum {
+    H5_PKG_A,				/*Attributes			*/
+    H5_PKG_AC,				/*Meta data cache		*/
+    H5_PKG_B,				/*B-trees			*/
+    H5_PKG_D,				/*Datasets			*/
+    H5_PKG_E,				/*Error handling		*/
+    H5_PKG_F,				/*Files				*/
+    H5_PKG_G,				/*Groups			*/
+    H5_PKG_HG,				/*Global heap			*/
+    H5_PKG_HL,				/*Local heap			*/
+    H5_PKG_I,				/*Interface			*/
+    H5_PKG_MF,				/*File memory management	*/
+    H5_PKG_MM, 				/*Core memory management	*/
+    H5_PKG_O,				/*Object headers		*/
+    H5_PKG_P,				/*Property lists		*/
+    H5_PKG_S,				/*Data spaces			*/
+    H5_PKG_T,				/*Data types			*/
+    H5_PKG_V,				/*Vector functions		*/
+    H5_PKG_Z,				/*Raw data filters		*/
+    H5_NPKGS				/*Must be last			*/
+} H5_pkg_t;
+
+typedef struct H5_debug_t {
+    FILE		*trace;		/*API trace output stream	*/
+    struct {
+	const char	*name;		/*package name			*/
+	FILE		*stream;	/*output stream	or NULL		*/
+    } pkg[H5_NPKGS];
+} H5_debug_t;
+
+extern H5_debug_t		H5_debug_g;
+#define H5DEBUG(X)		(H5_debug_g.pkg[H5_PKG_##X].stream)
+
 /*-------------------------------------------------------------------------
  * Purpose:	These macros are inserted automatically just after the
  *		FUNC_ENTER() macro of API functions and are used to trace

@@ -649,9 +649,9 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
     H5AC_slot_t            *slot = NULL;
 
 #ifdef H5AC_DEBUG
-    static int		    ncalls = 0;
+    static int ncalls = 0;
     if (0 == ncalls++) {
-        fprintf(stderr, "H5AC: debugging cache (expensive)\n");
+	fprintf(stderr, "H5AC: debugging cache (expensive)\n");
     }
 #endif
 
@@ -857,55 +857,58 @@ H5AC_debug(H5F_t __unused__ *f)
     FUNC_ENTER(H5AC_debug, FAIL);
 
 #ifdef H5AC_DEBUG
-    fprintf(stderr, "H5AC: meta data cache statistics for file %s\n", f->name);
-    fprintf(stderr, "   %-18s %8s %8s %8s %8s+%-8s\n",
-            "Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
-    fprintf(stderr, "   %-18s %8s %8s %8s %8s-%-8s\n",
-            "-----", "----", "------", "--------", "-----", "-------");
+    if (H5DEBUG(AC)) {
+	fprintf(H5DEBUG(AC), "H5AC: meta data cache statistics for file %s\n",
+		f->name);
+	fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n",
+		"Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
+	fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n",
+		"-----", "----", "------", "--------", "-----", "-------");
 
-    for (i = H5AC_BT_ID; i < H5AC_NTYPES; i++) {
+	for (i = H5AC_BT_ID; i < H5AC_NTYPES; i++) {
 
-        switch (i) {
-        case H5AC_BT_ID:
-            strcpy(s, "B-tree nodes");
-            break;
-        case H5AC_SNODE_ID:
-            strcpy(s, "symbol table nodes");
-            break;
-        case H5AC_LHEAP_ID:
-            strcpy (s, "local heaps");
-            break;
-	case H5AC_GHEAP_ID:
-	    strcpy (s, "global heaps");
-	    break;
-        case H5AC_OHDR_ID:
-            strcpy(s, "object headers");
-            break;
-        default:
-            sprintf(s, "unknown id %d", i);
-        }
+	    switch (i) {
+	    case H5AC_BT_ID:
+		strcpy(s, "B-tree nodes");
+		break;
+	    case H5AC_SNODE_ID:
+		strcpy(s, "symbol table nodes");
+		break;
+	    case H5AC_LHEAP_ID:
+		strcpy (s, "local heaps");
+		break;
+	    case H5AC_GHEAP_ID:
+		strcpy (s, "global heaps");
+		break;
+	    case H5AC_OHDR_ID:
+		strcpy(s, "object headers");
+		break;
+	    default:
+		sprintf(s, "unknown id %d", i);
+	    }
 
-        if (cache->diagnostics[i].nhits>0 ||
-	    cache->diagnostics[i].nmisses>0) {
-            miss_rate = 100.0 * cache->diagnostics[i].nmisses /
-			(cache->diagnostics[i].nhits+
-			 cache->diagnostics[i].nmisses);
-	} else {
-            miss_rate = 0.0;
-        }
+	    if (cache->diagnostics[i].nhits>0 ||
+		cache->diagnostics[i].nmisses>0) {
+		miss_rate = 100.0 * cache->diagnostics[i].nmisses /
+			    (cache->diagnostics[i].nhits+
+			     cache->diagnostics[i].nmisses);
+	    } else {
+		miss_rate = 0.0;
+	    }
 
-        if (miss_rate > 100) {
-            sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
-        } else {
-            sprintf(ascii, "%7.2f%%", miss_rate);
-        }
-        fprintf(stderr, "   %-18s %8u %8u %7s %8u%+-9ld\n", s,
-                cache->diagnostics[i].nhits,
-                cache->diagnostics[i].nmisses,
-                ascii,
-                cache->diagnostics[i].ninits,
-		((long)(cache->diagnostics[i].nflushes) -
-		 (long)(cache->diagnostics[i].ninits)));
+	    if (miss_rate > 100) {
+		sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
+	    } else {
+		sprintf(ascii, "%7.2f%%", miss_rate);
+	    }
+	    fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8u%+-9ld\n", s,
+		    cache->diagnostics[i].nhits,
+		    cache->diagnostics[i].nmisses,
+		    ascii,
+		    cache->diagnostics[i].ninits,
+		    ((long)(cache->diagnostics[i].nflushes) -
+		     (long)(cache->diagnostics[i].ninits)));
+	}
     }
 #endif
 

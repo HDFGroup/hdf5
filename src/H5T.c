@@ -727,20 +727,24 @@ H5T_term_interface(void)
 	    path->cdata.command = H5T_CONV_FREE;
 	    if ((path->func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		fprintf (stderr, "H5T: conversion function failed "
-			 "to free private data\n");
+		if (H5DEBUG(T)) {
+		    fprintf (H5DEBUG(T), "H5T: conversion function failed "
+			     "to free private data\n");
+		}
 #endif
 		H5E_clear(); /*ignore the error*/
 	    }
 #ifdef H5T_DEBUG
-	    if (path->cdata.stats->ncalls>0) {
+	    if (H5DEBUG(T) && path->cdata.stats->ncalls>0) {
 		if (0==nprint++) {
-		    HDfprintf (stderr, "H5T: type conversion statistics "
+		    HDfprintf (H5DEBUG(T), "H5T: type conversion statistics "
 			       "accumulated over life of library:\n");
-		    HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+		    HDfprintf (H5DEBUG(T),
+			       "   %-16s %10s %10s %8s %8s %8s %10s\n",
 			       "Conversion", "Elmts", "Calls", "User",
 			       "System", "Elapsed", "Bandwidth");
-		    HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+		    HDfprintf (H5DEBUG(T),
+			       "   %-16s %10s %10s %8s %8s %8s %10s\n",
 			       "----------", "-----", "-----", "----",
 			       "------", "-------", "---------");
 		}
@@ -749,7 +753,7 @@ H5T_term_interface(void)
 		nbytes *= path->cdata.stats->nelmts;
 		H5_bandwidth(bandwidth, (double)nbytes,
 			     path->cdata.stats->timer.etime);
-		HDfprintf (stderr,
+		HDfprintf (H5DEBUG(T),
 			   "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
 			   path->name,
 			   path->cdata.stats->nelmts,
@@ -770,21 +774,22 @@ H5T_term_interface(void)
 
 #ifdef H5T_DEBUG
     /* Print debugging infor for the `noop' conversion */
-    if (H5T_conv_noop==H5T_find(NULL, NULL, H5T_BKG_NO, &cdata)) {
+    if (H5DEBUG(T) &&
+	H5T_conv_noop==H5T_find(NULL, NULL, H5T_BKG_NO, &cdata)) {
 	if (cdata->stats->ncalls>0) {
 	    if (0==nprint++) {
-		HDfprintf (stderr, "H5T: type conversion statistics "
+		HDfprintf (H5DEBUG(T), "H5T: type conversion statistics "
 			   "accumulated over life of library:\n");
-		HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+		HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
 			   "Conversion", "Elmts", "Calls", "User",
 			   "System", "Elapsed", "Bandwidth");
-		HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+		HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
 			   "----------", "-----", "-----", "----",
 			   "------", "-------", "---------");
 	    }
 	    nbytes = cdata->stats->nelmts;
 	    H5_bandwidth(bandwidth, (double)nbytes, cdata->stats->timer.etime);
-	    HDfprintf (stderr,
+	    HDfprintf (H5DEBUG(T),
 		       "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
 		       "no-op",
 		       cdata->stats->nelmts,
@@ -3091,8 +3096,10 @@ H5Tregister_soft (const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
 		if ((path->func)(src_id, dst_id, &(path->cdata),
 				 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		    fprintf (stderr, "H5T: conversion function failed "
-			     "to free private data.\n");
+		    if (H5DEBUG(T)) {
+			fprintf (H5DEBUG(T), "H5T: conversion function failed "
+				 "to free private data.\n");
+		    }
 #endif
 		    H5E_clear();
 		}
@@ -3170,8 +3177,10 @@ H5Tunregister (H5T_conv_t func)
 	    path->cdata.command = H5T_CONV_FREE;
 	    if ((func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		fprintf (stderr, "H5T: conversion function failed to "
+		if (H5DEBUG(T)) {
+		fprintf (H5DEBUG(T), "H5T: conversion function failed to "
 			 "free private data.\n");
+		}
 #endif
 		H5E_clear();
 	    }
@@ -4486,8 +4495,10 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 	    }
 	    if ((func)(src_id, dst_id, &(path->cdata), 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		fprintf (stderr, "H5T: conversion function init "
-			 "failed\n");
+		if (H5DEBUG(T)) {
+		    fprintf (H5DEBUG(T), "H5T: conversion function init "
+			     "failed\n");
+		}
 #endif
 		H5E_clear(); /*ignore the failure*/
 	    }

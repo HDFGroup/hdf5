@@ -643,8 +643,8 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
 
 	    if (max_fl->size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
-		if (max_fl->size) {
-		    fprintf(stderr, "H5HL: lost %lu bytes at line %d\n",
+		if (H5DEBUG(HL) && max_fl->size) {
+		    fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes at line %d\n",
 			    (unsigned long)(max_fl->size), __LINE__);
 		}
 #endif
@@ -670,17 +670,21 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
 		if (heap->freelist) heap->freelist->prev = fl;
 		heap->freelist = fl;
 #ifdef H5HL_DEBUG
-	    } else if (need_more > need_size) {
-		fprintf(stderr, "H5HL_insert: lost %lu bytes at line %d\n",
+	    } else if (H5DEBUG(HL) && need_more > need_size) {
+		fprintf(H5DEBUG(HL),
+			"H5HL_insert: lost %lu bytes at line %d\n",
 			(unsigned long)(need_more - need_size), __LINE__);
 #endif
 	    }
 	}
 
 #ifdef H5HL_DEBUG
-	fprintf(stderr, "H5HL: resize mem buf from %lu to %lu bytes\n",
-		(unsigned long)(heap->mem_alloc),
-		(unsigned long)(heap->mem_alloc + need_more));
+	if (H5DEBUG(HL)) {
+	    fprintf(H5DEBUG(HL),
+		    "H5HL: resize mem buf from %lu to %lu bytes\n",
+		    (unsigned long)(heap->mem_alloc),
+		    (unsigned long)(heap->mem_alloc + need_more));
+	}
 #endif
 	old_size = heap->mem_alloc;
 	heap->mem_alloc += need_more;
@@ -859,7 +863,10 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
      */
     if (size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
-	fprintf(stderr, "H5HL: lost %lu bytes\n", (unsigned long) size);
+	if (H5DEBUG(HL)) {
+	    fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes\n",
+		    (unsigned long) size);
+	}
 #endif
 	HRETURN(SUCCEED);
     }

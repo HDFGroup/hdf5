@@ -520,5 +520,11 @@ main (void)
     nerrors += test_clear()<0?1:0;
     nerrors += test_copy ()<0?1:0;
 
-    return nerrors?1:0;
+    if (nerrors) {
+        printf("***** %lu FAILURE%s! *****\n",
+               nerrors, 1==nerrors?"":"S");
+        exit(1);
+    }
+    printf("All bit tests passed.\n");
+    return 0;
 }

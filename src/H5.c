@@ -62,7 +62,8 @@ FILE *fdopen(int fd, const char *mode);
 hbool_t                 library_initialize_g = FALSE;
 hbool_t                 thread_initialize_g = FALSE;
 hbool_t                 install_atexit_g = TRUE;
-static FILE		*H5_trace_g = NULL;
+H5_debug_t		H5_debug_g;		/*debugging info	*/
+static void		H5_debug_mask(const char*);
 
 typedef struct H5_exit {
     void                    (*func) (void);     /* Interface function to call during exit */
@@ -91,14 +92,40 @@ DESCRIPTION
 herr_t 
 H5_init_library(void)
 {
+    const char	*s = NULL;
+   
     FUNC_ENTER_INIT(H5_init_library, NULL, FAIL);
 
-    /* Install atexit() library cleanup routine */
-    if (install_atexit_g == TRUE)
-        if (HDatexit(&H5_term_library) != 0)
-            HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                          "unable to register atexit function");
+    /*
+     * Make sure the package information is updated.
+     */
+    HDmemset(&H5_debug_g, 0, sizeof H5_debug_g);
+    H5_debug_g.pkg[H5_PKG_A].name = "a";
+    H5_debug_g.pkg[H5_PKG_AC].name = "ac";
+    H5_debug_g.pkg[H5_PKG_B].name = "b";
+    H5_debug_g.pkg[H5_PKG_D].name = "d";
+    H5_debug_g.pkg[H5_PKG_E].name = "e";
+    H5_debug_g.pkg[H5_PKG_F].name = "f";
+    H5_debug_g.pkg[H5_PKG_G].name = "g";
+    H5_debug_g.pkg[H5_PKG_HG].name = "hg";
+    H5_debug_g.pkg[H5_PKG_HL].name = "hl";
+    H5_debug_g.pkg[H5_PKG_I].name = "i";
+    H5_debug_g.pkg[H5_PKG_MF].name = "mf";
+    H5_debug_g.pkg[H5_PKG_MM].name = "mm";
+    H5_debug_g.pkg[H5_PKG_O].name = "o";
+    H5_debug_g.pkg[H5_PKG_P].name = "p";
+    H5_debug_g.pkg[H5_PKG_S].name = "s";
+    H5_debug_g.pkg[H5_PKG_T].name = "t";
+    H5_debug_g.pkg[H5_PKG_V].name = "v";
+    H5_debug_g.pkg[H5_PKG_Z].name = "z";
 
+    /* Install atexit() library cleanup routine */
+    if (install_atexit_g == TRUE &&
+        HDatexit(&H5_term_library) != 0) {
+        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+		      "unable to register atexit function");
+    }
+    
     /*
      * Initialize interfaces that might not be able to initialize themselves
      * soon enough.
@@ -108,16 +135,9 @@ H5_init_library(void)
                       "unable to initialize type interface");
     }
 
-#ifdef H5_DEBUG_API
-    {
-	/* Turn on tracing? */
-	const char *s = getenv ("HDF5_TRACE");
-	if (s && isdigit(*s)) {
-	    int fd = (int)HDstrtol (s, NULL, 0);
-	    H5_trace_g = HDfdopen (fd, "w");
-	}
-    }
-#endif
+    /* Debugging? */
+    H5_debug_mask("-all");
+    H5_debug_mask(getenv("HDF5_DEBUG"));
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -297,8 +317,89 @@ H5dont_atexit(void)
         install_atexit_g = FALSE;
 
     FUNC_LEAVE(SUCCEED);
-}                               /* end H5dont_atexit() */
+}
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_debug_mask
+ *
+ * Purpose:	Set runtime debugging flags according to the string S.  The
+ *		string should contain file numbers and package names
+ *		separated by other characters. A file number applies to all
+ *		following package names up to the next file number. The
+ *		initial file number is `2' (the standard error stream). Each
+ *		package name can be preceded by a `+' or `-' to add or remove
+ *		the package from the debugging list (`+' is the default). The
+ *		special name `all' means all packages.
+ *
+ *		The name `trace' indicates that API tracing is to be turned
+ *		on or off.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, August 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5_debug_mask(const char *s)
+{
+    FILE	*stream = stderr;
+    char	pkg_name[32], *rest;
+    int		i, clear;
+	
+    while (s && *s) {
+	if (isalpha(*s) || '-'==*s || '+'==*s) {
+	    /* Enable or Disable debugging? */
+	    if ('-'==*s) {
+		clear = TRUE;
+		s++;
+	    } else if ('+'==*s) {
+		clear = FALSE;
+		s++;
+	    } else {
+		clear = FALSE;
+	    }
+
+	    /* Get the name */
+	    for (i=0; isalpha(*s); i++, s++) {
+		if (i<sizeof pkg_name) pkg_name[i] = *s;
+	    }
+	    pkg_name[MIN(sizeof(pkg_name)-1, i)] = '\0';
+
+	    /* Trace, all, or one? */
+	    if (!strcmp(pkg_name, "trace")) {
+		H5_debug_g.trace = clear?NULL:stream;
+	    } else if (!strcmp(pkg_name, "all")) {
+		for (i=0; i<H5_NPKGS; i++) {
+		    H5_debug_g.pkg[i].stream = clear?NULL:stream;
+		}
+	    } else {
+		for (i=0; i<H5_NPKGS; i++) {
+		    if (!strcmp(H5_debug_g.pkg[i].name, pkg_name)) {
+			H5_debug_g.pkg[i].stream = clear?NULL:stream;
+			break;
+		    }
+		}
+		if (i>=H5_NPKGS) {
+		    fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
+		}
+	    }
+
+	} else if (isdigit(*s)) {
+	    int fd = (int)HDstrtol (s, &rest, 0);
+	    stream = HDfdopen (fd, "w");
+	    setvbuf (stream, NULL, _IOLBF, 0);
+	    s = rest;
+	} else {
+	    s++;
+	}
+    }
+}
+    
 
 /*-------------------------------------------------------------------------
  * Function:	H5version
@@ -1058,7 +1159,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     hssize_t		asize[16];
     hssize_t		i;
     void		*vp = NULL;
-    FILE		*out = H5_trace_g;
+    FILE		*out = H5_debug_g.trace;
 
     if (!out) return;	/*tracing is off*/
     va_start (ap, type);

@@ -51,6 +51,7 @@
 ./doc/html/Datasets.html
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
+./doc/html/Debugging.html
 ./doc/html/Errors.html
 ./doc/html/ExternalFiles.html
 ./doc/html/Files.html
@@ -123,7 +124,6 @@
 ./doc/html/study_p1.gif
 ./doc/html/study_p1.obj
 ./doc/html/symtab
-./doc/html/tracing.html
 ./doc/html/version.gif
 ./doc/html/version.obj
 ./doc/src/Glossary.html

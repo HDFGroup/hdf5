@@ -312,7 +312,11 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	tmp_addr = *addr;
 	H5F_addr_inc(&tmp_addr, (hsize_t)size);
 	if (H5F_addr_gt(&tmp_addr, &(lf->eof))) {
-	    fprintf(stderr, "H5F: extending file w/o allocation\n");
+#ifdef H5F_DEBUG
+	    if (H5DEBUG(F)) {
+		fprintf(H5DEBUG(F), "H5F: extending file w/o allocation\n");
+	    }
+#endif
 	    lf->eof = tmp_addr;
 	}
 #ifdef HAVE_PARALLEL
