@@ -15,13 +15,15 @@ CC="cc"
 RANLIB=:
 
 # What must *always* be present for things to compile correctly?
-# Always turn off these warnings:
+# Always turn off these compiler warnings:
 #    1174:  function declared but not used
 #    1429:  the `long long' type is not standard
 #    1209:  constant expressions
 #    1196:  __vfork() (this is an SGI config problem)
+# Always turn off these loader warnings:
+#      84:  a library is not used
 #
-CFLAGS="$CFLAGS -fullwarn -ansi -64 -woff 1174,1429,1209,1196"
+CFLAGS="$CFLAGS -fullwarn -ansi -64 -woff 1174,1429,1209,1196 -Wl,-woff,84"
 #CPPFLAGS="$CPPFLAGS -I."
 
 # What compiler flags should be used for code development?
