@@ -104,6 +104,7 @@ TABLE.list TD { border:none; }
 	      <li><a href="#NILMessage">Name: NIL</a>                                                       <!-- 0x0000 -->
 	      <li><a href="#SimpleDataSpace">Name: Simple Dataspace</a>                                     <!-- 0x0001 -->
 <!--          <li><a href="#DataSpaceMessage">Name: Complex Dataspace</a>  -->                              <!-- 0x0002 -->
+	      <li><a href="#ReservedMessage_0002">Name: Reserved - not assigned yet</a>                     <!-- 0x0002 -->
 	      <li><a href="#DataTypeMessage">Name: Datatype</a>                                             <!-- 0x0003 -->
 	      <li><a href="#OldFillValueMessage">Name: Data Storage - Fill Value (Old)</a>                  <!-- 0x0004 -->
 	      <li><a href="#FillValueMessage">Name: Data Storage - Fill Value</a>                           <!-- 0x0005 -->
@@ -120,6 +121,7 @@ TABLE.list TD { border:none; }
 	  <li><a href="#ObjectHeader">Disk Format Level 2a - Data Object Headers</a><i>(Continued)</i>
 	    <ol type=1 start=6>
 <!--          <li><a href="#CompactDataStorageMessage">Name: Data Storage - Compact</a>  -->                <!-- 0x0006 -->
+	      <li><a href="#ReservedMessage_0006">Name: Reserved - not assigned yet</a>                     <!-- 0x0006 -->
 	      <li><a href="#ExternalFileListMessage">Name: Data Storage - External Data Files</a>           <!-- 0x0007 -->
 	      <li><a href="#LayoutMessage">Name: Data Storage - Layout</a>                                  <!-- 0x0008 -->
 	      <li><a href="#ReservedMessage_0009">Name: Reserved - not assigned yet</a>                     <!-- 0x0009 -->
@@ -129,6 +131,7 @@ TABLE.list TD { border:none; }
 	      <li><a href="#CommentMessage">Name: Object Comment</a>                                              <!-- 0x000d -->
 	      <li><a href="#OldModifiedMessage">Name: Object Modification Date and Time (Old)</a>           <!-- 0x000e -->
 <!--	      <li><a href="#SharedMessage">Name: Shared Object Message</a> -->                              <!-- 0x000f -->
+	      <li><a href="#ReservedMessage_000F">Name: Reserved - not assigned yet</a>                     <!-- 0x000f -->
 	      <li><a href="#ContinuationMessage">Name: Object Header Continuation</a>                       <!-- 0x0010 -->
 	      <li><a href="#SymbolTableMessage">Name: Group Message</a>                                     <!-- 0x0011 -->
 	      <li><a href="#ModifiedMessage">Name: Object Modification Date and Time</a>                    <!-- 0x0012 -->
@@ -2723,6 +2726,17 @@ TABLE.list TD { border:none; }
     </center>
 -->
 
+    <hr>
+    <h4><a name="ReservedMessage_0002">Name: Reserved - Not Assigned Yet</a></h4>
+    <b>Header Message Type:</b> 0x0002<BR>
+    <b>Length:</b> N/A<BR>
+    <b>Status:</b> N/A<BR>
+    <b>Format of Data:</b> N/A<BR>
+
+    <p><b>Purpose and Description:</b> This message type was skipped during
+      the initial specification of the file format and may be used in a
+      future expansion to the format.
+
 
     <hr>
     <h4><a name="DataTypeMessage">Name: Datatype</a></h4>
@@ -4496,6 +4510,17 @@ TABLE.list TD { border:none; }
 -->
 
     <hr>
+    <h4><a name="ReservedMessage_0006">Name: Reserved - Not Assigned Yet</a></h4>
+    <b>Header Message Type:</b> 0x0006<BR>
+    <b>Length:</b> N/A<BR>
+    <b>Status:</b> N/A<BR>
+    <b>Format of Data:</b> N/A<BR>
+
+    <p><b>Purpose and Description:</b> This message type was skipped during
+      the initial specification of the file format and may be used in a
+      future expansion to the format.
+
+    <hr>
     <h4><a name="ExternalFileListMessage">Name: Data Storage -
 	External Data Files</a></h4>
     <b>Header Message Type:</b> 0x0007<BR>
@@ -5228,6 +5253,12 @@ TABLE.list TD { border:none; }
       updated when any object header message changes according to the
       system clock where the change was posted.
 
+    <p>This modification time message is deprecated in favor of the "new"
+        modification time message (Message Type 0x0012) and is no longer written
+        to the file in versions of the HDF5 library after the 1.6.0 version.
+    </p>
+
+
     <p>
     <center>
       <table border align=center cellpadding=4 width="80%">
@@ -5415,6 +5446,17 @@ TABLE.list TD { border:none; }
     </center>
 -->
 
+
+    <hr>
+    <h4><a name="ReservedMessage_000F">Name: Reserved - Not Assigned Yet</a></h4>
+    <b>Header Message Type:</b> 0x000F<BR>
+    <b>Length:</b> N/A<BR>
+    <b>Status:</b> N/A<BR>
+    <b>Format of Data:</b> N/A<BR>
+
+    <p><b>Purpose and Description:</b> This message type was skipped during
+      the initial specification of the file format and may be used in a
+      future expansion to the format.
 
 <hr>
 <h4><a name="ContinuationMessage">Name: Object Header Continuation</a></h4>
