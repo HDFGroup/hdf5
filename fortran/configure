@@ -2697,7 +2697,7 @@ else
     SETX="set -x"
 fi
 
-rm -rf conftest* confdefs* core core.* *.core dummy.o
+rm -f conftest conftest.o conftest.c core core.* *.core dummy.o
 
 
 mkdir ./config >/dev/null 2>&1
