@@ -1,4 +1,4 @@
-HDF5 version 1.7.6 released on Sun Oct 12 07:16:49 CDT 2003
+HDF5 version 1.7.7 released on Sun Oct 19 07:08:04 CDT 2003
 ================================================================================
 
 
@@ -81,7 +81,8 @@ Bug Fixes since HDF5-1.6.0 release
     Library
     -------
         - Fixed incorrect datatype of the third parameter to the Fortran90
-          h5pget_cache_f function (INTEGER(SIZE_T) to INTEGER) EIP - 2003/10/10
+          h5pset(get)_cache_f subroutine (INTEGER to INTEGER(SIZE_T)) 
+                                                          EIP - 2003/10/13
         - Fixed problems with accessing variable-length data datatypes on
             Crays.  QAK - 2003/10/10
         - Fixed potential file corruption bug when too many object header
