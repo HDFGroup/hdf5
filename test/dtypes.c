@@ -2244,6 +2244,7 @@ test_query(void)
     char        filename[1024];
     char        compnd_type[]="Compound_type", enum_type[]="Enum_type";
     short       enum_val;
+    char        enum_name[16];
 
     TESTING("query functions of compound and enumeration types");
 
@@ -2285,27 +2286,27 @@ test_query(void)
         printf("Can't create enumerate type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "RED", (enum_val=0,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "RED", (enum_val=10,&enum_val))<0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "GREEN", (enum_val=1,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "GREEN", (enum_val=11,&enum_val))<0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "BLUE", (enum_val=2,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "BLUE", (enum_val=12,&enum_val))<0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=3,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=13,&enum_val))<0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=4,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=14,&enum_val))<0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
@@ -2383,7 +2384,7 @@ test_query(void)
         goto error;
     } /* end if */
 
-    /* Query member number and member index by name, for enumeration type */
+    /* Query member number and member index by member name, for enumeration type */
     if(H5Tget_nmembers(tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
@@ -2392,6 +2393,43 @@ test_query(void)
     if(H5Tget_member_index(tid2, "ORANGE")!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+    /* Query member value by member name, for enumeration type */
+    if(H5Tenum_valueof (tid2, "ORANGE", &enum_val)<0) {
+        H5_FAILED();
+        printf("Can't get value for enumerate member\n");
+        goto error;
+    } /* end if */
+    if(enum_val!=13) {
+        H5_FAILED();
+        printf("Incorrect value for enum member\n");
+        goto error;
+    } /* end if */
+       
+    /* Query member value by member index, for enumeration type */
+    if(H5Tget_member_value (tid2, 2, &enum_val)<0) {
+        H5_FAILED();
+        printf("Can't get value for enum member\n");
+        goto error;
+    } /* end if */
+    if(enum_val!=12) {
+        H5_FAILED();
+        printf("Incorrect value for enum member\n");
+        goto error;
+    } /* end if */
+      
+    /* Query member name by member value, for enumeration type */
+    enum_val = 14;
+    if(H5Tenum_nameof(tid2, &enum_val, enum_name, 16)<0) {
+        H5_FAILED();
+        printf("Can't get name for enum member\n");
+        goto error;
+    } /* end if */
+    if(strcmp("YELLOW", enum_name)) {
+        H5_FAILED();
+        printf("Incorrect name for enum member\n");
         goto error;
     } /* end if */
 
