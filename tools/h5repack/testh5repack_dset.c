@@ -17,10 +17,6 @@
 #include "h5repack.h"
 
 static void make_dset_reg_ref(hid_t loc_id);
-#ifdef LATER
-static void read_dset_reg_ref(hid_t loc_id);
-#endif /* LATER */
-
 
 
 /*-------------------------------------------------------------------------
@@ -194,7 +190,7 @@ void write_dset_in(hid_t loc_id,
  if (dset_name)
  {
   status=H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,-1);
-  write_dset(loc_id,1,dims1r,"reference to object ",H5T_STD_REF_OBJ,buf4);
+  write_dset(loc_id,1,dims1r,"refobj",H5T_STD_REF_OBJ,buf4);
  }
 
  /* Dataset region reference ( H5R_DATASET_REGION  )  */
@@ -353,7 +349,7 @@ void write_dset_in(hid_t loc_id,
     status=H5Rcreate(&buf42[i][j],file_id,dset_name,H5R_OBJECT,-1);
    }
   }
-  write_dset(loc_id,2,dims2r,"reference to object 2D",H5T_STD_REF_OBJ,buf42);
+  write_dset(loc_id,2,dims2r,"refobj2D",H5T_STD_REF_OBJ,buf42);
  }
 
 /*-------------------------------------------------------------------------
@@ -531,7 +527,7 @@ void write_dset_in(hid_t loc_id,
      status=H5Rcreate(&buf43[i][j][k],file_id,dset_name,H5R_OBJECT,-1);
    }
   }
- write_dset(loc_id,3,dims3r,"reference to object 3D",H5T_STD_REF_OBJ,buf43);
+ write_dset(loc_id,3,dims3r,"refobj3D",H5T_STD_REF_OBJ,buf43);
  }
 
 /*-------------------------------------------------------------------------
@@ -659,7 +655,7 @@ static void make_dset_reg_ref(hid_t loc_id)
  sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
  
  /* Create a dataset */
- dset2=H5Dcreate(loc_id,"dset referenced region",H5T_STD_U8LE,sid2,H5P_DEFAULT);
+ dset2=H5Dcreate(loc_id,"dsetreg",H5T_STD_U8LE,sid2,H5P_DEFAULT);
  
  for(i=0; i<SPACE2_DIM1*SPACE2_DIM2; i++)
   dwbuf[i]=i*3; 
@@ -674,7 +670,7 @@ static void make_dset_reg_ref(hid_t loc_id)
  sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
  
  /* Create a dataset */
- dset1=H5Dcreate(loc_id,"region reference",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT);
+ dset1=H5Dcreate(loc_id,"refreg",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT);
  
  /* Create references */
  
@@ -686,7 +682,7 @@ static void make_dset_reg_ref(hid_t loc_id)
  ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
  
  /* Store dataset region */
- ret = H5Rcreate(&wbuf[0],loc_id,"dset referenced region",H5R_DATASET_REGION,sid2);
+ ret = H5Rcreate(&wbuf[0],loc_id,"dsetreg",H5R_DATASET_REGION,sid2);
   
  /* Write selection to disk */
  ret=H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
@@ -699,111 +695,3 @@ static void make_dset_reg_ref(hid_t loc_id)
  free(wbuf);
  free(dwbuf);
 }   
-
-/*-------------------------------------------------------------------------
- * Function: read_dset_reg_ref
- *
- * Purpose: read dataset region references 
- *
- *-------------------------------------------------------------------------
- */
-
-#ifdef LATER
-static void read_dset_reg_ref(hid_t loc_id)
-{
- hid_t           dset1;    /* Dataset ID   */
- hid_t           dset2;    /* Dereferenced dataset ID */
- hid_t           sid1;     /* Dataspace ID #1  */
- hid_t           sid2;     /* Dataspace ID #2  */
- hsize_t         *coords;  /* Coordinate buffer */
- hssize_t		      low[SPACE2_RANK];   /* Selection bounds */
- hssize_t		      high[SPACE2_RANK];  /* Selection bounds */
- hdset_reg_ref_t *rbuf;              /* buffer to read from disk */
- int             *drbuf;             /* Buffer for reading numeric data from disk */
- int             i, j;               /* counting variables */
- herr_t		        ret;		              /* Generic return value		*/
- 
- /* Allocate write & read buffers */
- rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
- drbuf=calloc(sizeof(int),SPACE2_DIM1*SPACE2_DIM2);
- 
- /* Open the dataset */
- dset1=H5Dopen(loc_id,"region reference");
- 
- /* Read selection from disk */
- ret=H5Dread(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
- 
- /* Try to open objects */
- dset2 = H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf[0]);
- 
- /* Check information in referenced dataset */
- sid1 = H5Dget_space(dset2);
- 
- ret=(herr_t)H5Sget_simple_extent_npoints(sid1);
- printf(" Number of elements in the dataset is : %d\n",ret);
- 
- /* Read from disk */
- ret=H5Dread(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,drbuf);
- 
- for(i=0; i<SPACE2_DIM1; i++) {
-  for (j=0; j<SPACE2_DIM2; j++) printf (" %d ", drbuf[i*SPACE2_DIM2+j]);
-  printf("\n"); }
- 
- /* Get the hyperslab selection */
- sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[0]);
- 
- /* Verify correct hyperslab selected */
- ret = (herr_t)H5Sget_select_npoints(sid2);
- printf(" Number of elements in the hyperslab is : %d \n", ret);
- ret = (herr_t)H5Sget_select_hyper_nblocks(sid2);
- /* allocate space for the hyperslab blocks */
- coords=malloc((size_t)ret*SPACE2_RANK*sizeof(hsize_t)*2); 
- ret = H5Sget_select_hyper_blocklist(sid2,0,ret,coords);
- printf(" Hyperslab coordinates are : \n");
- printf (" ( %lu , %lu ) ( %lu , %lu ) \n", 
-  (unsigned long)coords[0],
-  (unsigned long)coords[1],
-  (unsigned long)coords[2],
-  (unsigned long)coords[3]); 
- free(coords);
- ret = H5Sget_select_bounds(sid2,low,high);
- 
- /* Close region space */
- ret = H5Sclose(sid2);
- 
- /* Get the element selection */
- sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[1]);
- 
- /* Verify correct elements selected */
- ret = (herr_t)H5Sget_select_elem_npoints(sid2);
- printf(" Number of selected elements is : %d\n", ret);
- 
- /* Allocate space for the element points */
- coords= malloc(ret*SPACE2_RANK*sizeof(hsize_t)); 
- ret = H5Sget_select_elem_pointlist(sid2,0,ret,coords);
- printf(" Coordinates of selected elements are : \n");
- for (i=0; i<2*NPOINTS; i=i+2) 
-  printf(" ( %lu , %lu ) \n", 
-  (unsigned long)coords[i],
-  (unsigned long)coords[i+1]); 
- 
- free(coords);
- ret = H5Sget_select_bounds(sid2,low,high);
- 
- /* Close region space */
- ret = H5Sclose(sid2);
- 
- /* Close first space */
- ret = H5Sclose(sid1);
- 
- /* Close dereferenced Dataset */
- ret = H5Dclose(dset2);
- 
- /* Close Dataset */
- ret = H5Dclose(dset1);
- 
- /* Free memory buffers */
- free(rbuf);
- free(drbuf);
-}   
-#endif /* LATER */
