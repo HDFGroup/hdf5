@@ -2610,6 +2610,46 @@ convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	test_opaque
  *
+ * Purpose:	Driver function to test opaque datatypes
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *              June 2, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_opaque(void)
+{
+    int num_errors = 0;
+    
+    TESTING("opaque datatypes");
+
+    /* Test opaque types with tags */
+    num_errors += opaque_check(0);
+    /* Test opaque types without tag */
+    num_errors += opaque_check(1);
+
+    if(num_errors)
+        goto error;
+
+    PASSED();
+    return 0;
+
+ error:
+    H5_FAILED();
+    return num_errors;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	opaque_check
+ *
  * Purpose:	Test opaque datatypes
  *
  * Return:	Success:	0
@@ -2620,25 +2660,32 @@ convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
  *              Thursday, May 20, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              June 2, 2004
+ *              Made tag for one opaque type optional.
  *
  *-------------------------------------------------------------------------
  */
 static int
-test_opaque(void)
+opaque_check(int tag_it)
 {
 #define OPAQUE_NELMTS 1000
     hid_t	st=-1, dt=-1;
     herr_t	status;
     char	buf[1]; /*not really used*/
-    int		saved = num_opaque_conversions_g;
+    int		saved;
 
-    TESTING("opaque datatypes");
+    saved = num_opaque_conversions_g = 0;
 
     /* Build source and destination types */
     if ((st=H5Tcreate(H5T_OPAQUE, 4))<0) goto error;
     if (H5Tset_tag(st, "opaque source type")<0) goto error;
+    
     if ((dt=H5Tcreate(H5T_OPAQUE, 4))<0) goto error;
-    if (H5Tset_tag(dt, "opaque destination type")<0) goto error;
+    if (tag_it) {
+        if (H5Tset_tag(dt, "opaque destination type")<0) 
+            goto error;
+    }
 
     /* Make sure that we can't convert between the types yet */
     H5E_BEGIN_TRY {
@@ -2664,7 +2711,6 @@ test_opaque(void)
     
     H5Tclose(st);
     H5Tclose(dt);
-    PASSED();
     return 0;
 
  error:
