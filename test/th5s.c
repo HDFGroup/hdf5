@@ -158,12 +158,12 @@ test_h5s_basic(void)
      */
     {
     char testfile[512]="";
-    char *srcdir = getenv("srcdir");
-    if (srcdir && ((strlen(srcdir) + strlen(TESTFILE) + 1) < sizeof(testfile))){
-	strcpy(testfile, srcdir);
-	strcat(testfile, "/");
+    char *srcdir = HDgetenv("srcdir");
+    if (srcdir && ((HDstrlen(srcdir) + strlen(TESTFILE) + 1) < sizeof(testfile))){
+	HDstrcpy(testfile, srcdir);
+	HDstrcat(testfile, "/");
     }
-    strcat(testfile, TESTFILE);
+    HDstrcat(testfile, TESTFILE);
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
     if (fid1 >= 0){
