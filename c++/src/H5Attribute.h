@@ -24,9 +24,11 @@ class H5_DLLCPP Attribute : public AbstractDs {
    public:
 	// Writes data to this attribute.
 	void write(const DataType& mem_type, const void *buf ) const;
+	void write(const DataType& mem_type, const string& strg ) const;
 
 	// Reads data from this attribute.
 	void read( const DataType& mem_type, void *buf ) const;
+	void read( const DataType& mem_type, string& strg ) const;
 
 	// Gets a copy of the dataspace for this attribute.
 	virtual DataSpace getSpace() const;

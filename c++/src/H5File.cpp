@@ -203,7 +203,7 @@ H5File::~H5File()
     try {
         resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-        cerr << "H5File::~H5File" << close_error.getDetailMsg() << endl;
+        cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
     }
 }  
 

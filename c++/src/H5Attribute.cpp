@@ -52,6 +52,33 @@ void Attribute::write( const DataType& mem_type, const void *buf ) const
    }
 }
 
+void Attribute::write( const DataType& mem_type, const string& strg ) const
+{
+   // Convert string to C-string
+   const char* strg_C;
+   strg_C = strg.c_str();  // strg_C refers to the contents of strg as a C-str
+
+   herr_t ret_value = H5Awrite( id, mem_type.getId(), strg_C );
+   if( ret_value < 0 )
+   {
+      throw AttributeIException("Attribute::write", "H5Awrite failed");
+   }
+}
+
+// Reads data from this attribute.
+void Attribute::read( const DataType& mem_type, string& strg ) const
+{
+   size_t size = mem_type.getSize();
+   char* strg_C = new char[size+1];  // temporary C-string for C API
+   herr_t ret_value = H5Aread( id, mem_type.getId(), strg_C );
+   if( ret_value < 0 )
+   {
+      throw AttributeIException("Attribute::read", "H5Aread failed");
+   }
+   strg = strg_C;
+   delete strg_C;
+}
+
 // Reads data from this attribute.
 void Attribute::read( const DataType& mem_type, void *buf ) const
 {
@@ -109,7 +136,7 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
       throw AttributeIException("Attribute::getName", "H5Aget_name failed");
    }
    // otherwise, convert the C string attribute name and return 
-   attr_name = string( name_C );
+   attr_name = name_C;
    delete name_C;
    return( name_size );
 }
@@ -145,7 +172,7 @@ Attribute::~Attribute()
     try {
         resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-        cerr << "Attribute::~Attribute" << close_error.getDetailMsg() << endl;
+        cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
     }
 }
 

@@ -156,6 +156,20 @@ void DataSet::read( void* buf, const DataType& mem_type, const DataSpace& mem_sp
    }
 }
 
+void DataSet::read( string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
+{
+   // Allocate C character string for reading
+   size_t size = mem_type.getSize();
+   char* strg_C = new char[size+1];  // temporary C-string for C API
+
+   // Use the overloaded member to read
+   read(strg_C, mem_type, mem_space, file_space, xfer_plist);
+
+   // Get the String and clean up
+   strg = strg_C;
+   delete strg_C;
+}
+
 // Writes raw data from an application buffer buffer to a dataset, 
 // converting from memory datatype and dataspace to file datatype 
 // and dataspace.
@@ -172,6 +186,16 @@ void DataSet::write( const void* buf, const DataType& mem_type, const DataSpace&
    {
       throw DataSetIException("DataSet::write", "H5Dwrite failed");
    }
+}
+
+void DataSet::write( const string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
+{
+   // Convert string to C-string
+   const char* strg_C;
+   strg_C = strg.c_str();  // strg_C refers to the contents of strg as a C-str
+
+   // Use the overloaded member
+   write(strg_C, mem_type, mem_space, file_space, xfer_plist);
 }
 
 // Iterates over all selected elements in a dataspace. 
@@ -262,7 +286,7 @@ DataSet::~DataSet()
     try {
 	resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-        cerr << "DataSet::~DataSet" << close_error.getDetailMsg() << endl;
+        cerr << "DataSet::~DataSet - " << close_error.getDetailMsg() << endl;
     }
 }
 

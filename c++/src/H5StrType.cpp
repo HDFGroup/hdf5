@@ -43,6 +43,17 @@ StrType::StrType( const PredType& pred_type ) : AtomType()
    copy( pred_type );
 }
 
+// Creates a string type with a specified length - 1st argument could
+// have been skipped, but this constructor will collide with the one
+// that takes an existing id below
+StrType::StrType( const PredType& pred_type, const size_t size ) : AtomType()
+{
+   // use DataType::copy to make a copy of the string predefined type
+   // then set its length
+   copy(pred_type);
+   setSize(size);
+}
+
 // Creates a string datatype using an existing id
 StrType::StrType( const hid_t existing_id ) : AtomType( existing_id ) {}
 

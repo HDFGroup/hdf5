@@ -18,7 +18,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifndef H5_NO_STD
-	using namespace std;
+    using namespace std;
 #endif  // H5_NO_STD
 #endif
 
@@ -205,14 +205,6 @@ IdComponentException::IdComponentException(): Exception() {}
 IdComponentException::IdComponentException(const string& func_name, const string& message) : Exception(func_name, message) {}
 IdComponentException::IdComponentException(const char* func_name, const char* message) : Exception(func_name, message) {}
 IdComponentException::~IdComponentException() {}
-
-// The following are from Java API but not done here:
-// AtomException, BtreeException, DataFiltersException, 
-// ExternalFileListException, FunctionEntryExitException, 
-// HeapException, InternalErrorException, LowLevelIOException, 
-// MetaDataCacheException, ResourceUnavailableException, 
-// SymbolTableException, ObjectHeaderException, FunctionArgumentException,
-// DataStorageException
 
 #ifndef H5_NO_NAMESPACE
 } // end namespace

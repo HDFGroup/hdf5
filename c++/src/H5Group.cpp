@@ -156,7 +156,7 @@ Group::~Group()
     try {
         resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-        cerr << "Group::~Group" << close_error.getDetailMsg() << endl;
+        cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 
 }  

@@ -357,7 +357,7 @@ DataType::~DataType()
     try {
         resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-        cerr << "DataType::~DataType" << close_error.getDetailMsg() << endl;
+        cerr << "DataType::~DataType - " << close_error.getDetailMsg() << endl;
     }
 }  
 

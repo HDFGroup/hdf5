@@ -57,7 +57,11 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 
 /* Constructor that takes an existing dataspace id
 Description:
-	Uses an HDF5 id to create a DataSpace identifier instance.  This id can be either an existing dataspace id or a default dataspace id.  Design note: in the case of default dataspace, the identifier still has reference counter; the p_close function will take care of not to call H5Sclose on the default id.
+	Uses an HDF5 id to create a DataSpace identifier instance.
+	This id can be either an existing dataspace id or a default
+	dataspace id.  Design note: in the case of default dataspace,
+	the identifier still has reference counter; the p_close function
+	will take care of not to call H5Sclose on the default id.
 */
 DataSpace::DataSpace( const hid_t space_id ) : IdComponent( space_id ) {}
 
@@ -361,7 +365,7 @@ DataSpace::~DataSpace()
     try {
         resetIdComponent( this ); }
     catch (Exception close_error) { // thrown by p_close
-        cerr << "DataSpace::~DataSpace" << close_error.getDetailMsg() << endl;
+        cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
     }
 }  
 
