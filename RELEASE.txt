@@ -84,6 +84,26 @@ Bug Fixes since HDF5-1.4.0 Release
 Documentation
 =============
 
+    PDF and Postscript versions of the following documents are available 
+    for this release:
+        Document                                 Filename
+        --------                                 --------
+        Introduction to HDF5                     H5-R141-Introduction.pdf
+        HDF5 Reference Manual                    H5-R141-RefManual.pdf 
+        C++ APIs to HDF5 documents               H5-R141-Cplusplus.pdf
+        Fortran90 APIs to HDF5 documents         H5-R141-Fortran90.pdf
+
+        PDF and Postscript files containing      H5-R141-DocSet.pdf
+            all of the above                     H5-R141-DocSet.ps
+
+    These files are not included in this distribution, but are available 
+    via the Web or FTP at the following locations:
+        http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/
+        ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/docs/
+
+    While these documents are labeled Release 1.4.1, they describe 
+    Release 1.4.0 as well.  
+
 
 Platforms Tested
 ================
