@@ -2100,8 +2100,9 @@ EOF
       PARALLEL_SRC='$(PARALLEL_SRC)'
       CPPFLAGS="$CPPFLAGS $MPI_INC"
       CFLAGS="$CFLAGS $MPI_LIB"
+      RUNTEST="$RUNTEST"
       echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:2105: checking for main in -lmpi" >&5
+echo "configure:2106: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2109,14 +2110,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2113 "configure"
+#line 2114 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2120: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2121: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2143,7 +2144,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
         echo $ac_n "checking for main in -lmpio""... $ac_c" 1>&6
-echo "configure:2147: checking for main in -lmpio" >&5
+echo "configure:2148: checking for main in -lmpio" >&5
 ac_lib_var=`echo mpio'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2151,14 +2152,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2155 "configure"
+#line 2156 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2162: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2163: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2184,8 +2185,7 @@ EOF
 else
   echo "$ac_t""no" 1>&6
 fi
-       RUNTEST='mpirun -np 1'
-      ;;
+       ;;
 
    *)
       { echo "configure: error: unknown parallel support: $PARALLEL" 1>&2; exit 1; }

@@ -265,9 +265,9 @@ case "X-$PARALLEL" in
       PARALLEL_SRC='$(PARALLEL_SRC)'
       CPPFLAGS="$CPPFLAGS $MPI_INC"
       CFLAGS="$CFLAGS $MPI_LIB"
+      RUNTEST="$RUNTEST"
       AC_CHECK_LIB(mpi,main)  dnl Replace `main' with some function
       AC_CHECK_LIB(mpio,main) dnl Replace `main' with some function
-      RUNTEST='mpirun -np 1'
       ;;
 
    *)
