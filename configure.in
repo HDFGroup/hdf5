@@ -648,38 +648,68 @@ dnl `--with-pthread' command-line switch.  The value is an include path
 dnl and/or a library path.  If the library path is specified then it must
 dnl be preceded by a comma.
 dnl
+AC_SUBST(PTHREAD)
+PTHREAD=yes
 
 AC_ARG_WITH(pthread,[  --with-pthread=INC,LIB  Use the Pthreads library],
             ,withval=no)
 case $withval in
     yes)
 	AC_CHECK_HEADERS(pthread.h)
-	AC_CHECK_LIB(pthread, pthread_create)
+	AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
 	;;
     no)
 	AC_MSG_CHECKING(for pthread)
 	AC_MSG_RESULT(suppressed)
+	unset PTHREAD
 	;;
     *)
 	pthread_inc="`echo $withval |cut -f1 -d,`"
 	if test "X" != "$pthread_inc"; then
 	    saved_CPPFLAGS="$CPPFLAGS"
 	    CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-	    AC_CHECK_HEADERS(pthread.h,,CPPFLAGS="$saved_CPPFLAGS")
+	    AC_CHECK_HEADERS(pthread.h,,CPPFLAGS="$saved_CPPFLAGS"; unset PTHREAD)
         else
-	    AC_CHECK_HEADERS(pthread.h)
+	    AC_CHECK_HEADERS(pthread.h,,unset PTHREAD)
 	fi
 
 	pthread_lib="`echo $withval |cut -f2 -d, -s`"
 	if test "X" != "$pthread_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
 	    LDFLAGS="$LDFLAGS -L$pthread_lib"
-	    AC_CHECK_LIB(pthread, pthread_create,,LDFLAGS="$saved_LDFLAGS")
+	    AC_CHECK_LIB(pthread, pthread_create,,LDFLAGS="$saved_LDFLAGS"; unset PTHREAD)
 	else
-	    AC_CHECK_LIB(pthread, pthread_create)
+	    AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
 	fi
 	;;
 esac
+dnl ----------------------------------------------------------------------
+dnl Enable thread-safe version of library.  It requires pthread on.
+dnl
+AC_MSG_CHECKING(for thread safe support);
+AC_ARG_ENABLE(threadsafe,
+  [  --enable-threadsafe  Enable thread safe capability])
+case X-$enableval in
+    X-|X-no)
+	AC_MSG_RESULT(no)
+	;;
+    X-yes)
+	if test X- = X-$PTHREAD; then
+	    AC_MSG_RESULT(error)
+	    AC_MSG_ERROR(needed pthread library not available)
+	else
+	    AC_MSG_RESULT(yes)
+	    THREADSAFE=yes
+	fi
+	;;
+    *)
+	AC_MSG_RESULT(error)
+	AC_MSG_ERROR(\"$enableval\" is not a valid threadsafe type)
+	;;
+esac
+if test X- != X-$THREADSAFE; then
+    AC_DEFINE(HAVE_THREADSAFE)
+fi
 
 dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
