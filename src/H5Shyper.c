@@ -2845,6 +2845,10 @@ H5S_hyper_select_deserialize (H5S_t *space, const uint8_t *buf)
     } /* end for */
 
 done:
+    /* Free temporary buffers */
+    H5MM_xfree(start);
+    H5MM_xfree(count);
+
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_select_deserialize() */
 
@@ -3176,6 +3180,9 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     /* Release the memory we allocated */
     H5MM_xfree(lo_bounds);
     H5MM_xfree(hi_bounds);
+
+    /* Release selection iterator */
+    H5S_sel_iter_release(space,&iter);
 
 done:
     FUNC_LEAVE (ret_value);

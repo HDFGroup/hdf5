@@ -1709,20 +1709,25 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 	
 #ifdef QAK
 	printf("%s: check 6.0\n",FUNC);
-	printf("%s: check 6.5\n",FUNC);
-	{
-	    int i;
-	    uint16_t *b;
+{
+    char *p=tconv_buf;
+    intn i;
 
-	    if(qak_debug) {
-		b=tconv_buf;
-		printf("\ntconv_buf:");
-		for (i=0; i<smine_nelmts; i++,b++) {
-		    printf("(%d)%u ",i,(unsigned)*b);
-		}
-		printf("\n");
-	    }
-	}
+    for(i=0; i<4; i++) {
+        printf("%s: element[%d]={%d, ",FUNC,i,(int)*(int *)p);
+        p+=sizeof(int);
+        printf("%f, ",(float)*(float *)p);
+        p+=sizeof(float);
+        printf(" {%x, ",(unsigned)*(unsigned *)p);
+        p+=sizeof(int);
+        printf("%x-",(unsigned)*(unsigned *)p);
+        p+=sizeof(int);
+        printf("%x, ",(unsigned)*(unsigned *)p);
+        p+=sizeof(int);
+        printf("%d}}\n",(int)*(int *)p);
+        p+=sizeof(int);
+    }
+}
 #endif
 	
         if (H5T_BKG_YES==need_bkg) {
@@ -1757,6 +1762,21 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         }
 
 #ifdef QAK
+{
+    char *p=tconv_buf;
+    intn i;
+
+    for(i=0; i<4; i++) {
+        printf("%s: element[%d]={%d, ",FUNC,i,(int)*(int *)p);
+        p+=sizeof(int);
+        printf("%f, ",(float)*(float *)p);
+        p+=sizeof(float);
+        printf(" {%d, ",(int)*(int *)p);
+        p+=sizeof(int);
+        printf("%p}}\n",(char *)*(char **)p);
+        p+=sizeof(char *);
+    }
+}
 	printf("%s: check 8.0\n",FUNC);
 #endif
 	
@@ -2038,6 +2058,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
+#ifdef QAK
+    printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d\n",FUNC,(int)src_type_size,(int)dst_type_size);
+#endif
     target_size = xfer_parms->buf_size;
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
 
@@ -2120,19 +2143,21 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         }
 
 #ifdef QAK
-	{
-	    int i;
-	    uint16_t *b;
+{
+    char *p=tconv_buf;
+    intn i;
 
-	    if(qak_debug) {
-		b=tconv_buf;
-		printf("\ntconv_buf:");
-		for (i=0; i<smine_nelmts; i++,b++) {
-		    printf("(%d)%d ",i,(int)*b);
-		}
-		printf("\n");
-	    }
-	}
+    for(i=0; i<4; i++) {
+        printf("%s: element[%d]={%d, ",FUNC,i,(int)*(int *)p);
+        p+=sizeof(int);
+        printf("%f, ",(float)*(float *)p);
+        p+=sizeof(float);
+        printf(" {%d, ",(int)*(int *)p);
+        p+=sizeof(int);
+        printf("%p}}\n",(char *)*(char **)p);
+        p+=sizeof(char *);
+    }
+}
 	printf("%s: check 6.0\n",FUNC);
 #endif
 
@@ -2169,6 +2194,25 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         }
 #ifdef QAK
 	printf("%s: check 6.3\n",FUNC);
+{
+    char *p=tconv_buf;
+    intn i;
+
+    for(i=0; i<4; i++) {
+        printf("%s: element[%d]={%d, ",FUNC,i,(int)*(int *)p);
+        p+=sizeof(int);
+        printf("%f, ",(float)*(float *)p);
+        p+=sizeof(float);
+        printf(" {%x, ",(unsigned)*(unsigned *)p);
+        p+=sizeof(int);
+        printf("%x-",(unsigned)*(unsigned *)p);
+        p+=sizeof(int);
+        printf("%x, ",(unsigned)*(unsigned *)p);
+        p+=sizeof(int);
+        printf("%d}}\n",(int)*(int *)p);
+        p+=sizeof(int);
+    }
+}
 #endif
 
         /*
