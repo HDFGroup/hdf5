@@ -165,7 +165,7 @@ main(int argc, char *argv[])
     InitTest("heap", test_heap, "Object and Name Heaps");
     InitTest("ohdr", test_ohdr, "Object Headers");
     InitTest("stab", test_stab, "Symbol Tables");
-    InitTest("h5p", test_h5p, "Dataspaces");
+    InitTest("h5s", test_h5s, "Dataspaces");
     InitTest("attr", test_attr, "Attributes");
 
     Verbosity = 4;              /* Default Verbosity is Low */

@@ -78,6 +78,10 @@ struct attr4_struct {
  } attr_data4[ATTR4_DIM1][ATTR4_DIM2]={{{3,-26.1,'d'},{-100000, 0.123,'3'}},
     {{-23,981724.2,'Q'},{0,2.0,'\n'}}}; /* Test data for 4th attribute */
 
+#define ATTR5_NAME  "Attr5"
+#define ATTR5_RANK	0
+float attr_data5=-5.123;        /* Test data for 5th attribute */
+
 int attr_op1(hid_t loc_id, const char *name, void *op_data);
 
 /****************************************************************
@@ -100,7 +104,7 @@ test_attr_basic_write(void)
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Basic Attribute Functions\n"));
+    MESSAGE(5, ("Testing Basic Scalar Attribute Writing Functions\n"));
 
     /* Create file */
     fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -209,6 +213,7 @@ test_attr_basic_read(void)
 
     /* Open the dataset */
     dataset=H5Dopen(fid1,"Dataset1");
+    CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
     ret=H5Anum_attrs(dataset);
@@ -274,12 +279,12 @@ test_attr_basic_read(void)
 
 /****************************************************************
 **
-**  test_attr_complex_write(): Test H5A (attribute) code.
-**      Tests complex datatype attributes
+**  test_attr_compound_write(): Test H5A (attribute) code.
+**      Tests compound datatype attributes
 ** 
 ****************************************************************/
 static void 
-test_attr_complex_write(void)
+test_attr_compound_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -356,15 +361,15 @@ test_attr_complex_write(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-}   /* test_attr_complex_write() */
+}   /* test_attr_compound_write() */
 
 /****************************************************************
 **
-**  test_attr_complex_read(): Test basic H5A (attribute) code.
+**  test_attr_compound_read(): Test basic H5A (attribute) code.
 ** 
 ****************************************************************/
 static void 
-test_attr_complex_read(void)
+test_attr_compound_read(void)
 {
     hid_t   fid1;		/* HDF5 File IDs		*/
     hid_t   dataset;	/* Dataset ID			*/
@@ -511,7 +516,120 @@ test_attr_complex_read(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-}   /* test_attr_complex_read() */
+}   /* test_attr_compound_read() */
+
+/****************************************************************
+**
+**  test_attr_scalar_write(): Test scalar H5A (attribute) writing code.
+** 
+****************************************************************/
+static void 
+test_attr_scalar_write(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hid_t		attr;	    /* Attribute ID			*/
+    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    herr_t		ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Attribute Functions\n"));
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UINT8,sid1,H5P_DEFAULT);
+
+    /* Create dataspace for attribute */
+    sid2 = H5Screate_simple(ATTR5_RANK, NULL, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Create an attribute for the dataset */
+    attr=H5Acreate(dataset,ATTR5_NAME,H5T_NATIVE_FLOAT,sid2,H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Try to create the same attribute again (should fail) */
+    ret=H5Acreate(dataset,ATTR5_NAME,H5T_NATIVE_FLOAT,sid2,H5P_DEFAULT);
+    VERIFY(ret, FAIL, "H5Acreate");
+
+    /* Write attribute information */
+    ret=H5Awrite(attr,H5T_NATIVE_FLOAT,&attr_data5);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Close attribute */
+    ret=H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_scalar_write() */
+
+/****************************************************************
+**
+**  test_attr_scalar_read(): Test scalar H5A (attribute) reading code.
+** 
+****************************************************************/
+static void 
+test_attr_scalar_read(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		attr;	    /* Attribute ID			*/
+    float       rdata=0.0;  /* Buffer for reading 1st attribute */
+    herr_t		ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Scalar Attribute Reading Functions\n"));
+
+    /* Create file */
+    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset=H5Dopen(fid1,"Dataset1");
+    CHECK(dataset, FAIL, "H5Dopen");
+
+    /* Verify the correct number of attributes */
+    ret=H5Anum_attrs(dataset);
+    VERIFY(ret, 1, "H5Anum_attrs");
+
+    /* Open an attribute for the dataset */
+    attr=H5Aopen_name(dataset,ATTR5_NAME);
+    CHECK(attr, FAIL, "H5Aopen_name");
+
+    /* Read attribute information */
+    ret=H5Aread(attr,H5T_NATIVE_FLOAT,&rdata);
+    CHECK(ret, FAIL, "H5Aread");
+    VERIFY(rdata, attr_data5, "H5Aread");
+
+    /* Close attribute */
+    ret=H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_scalar_read() */
 
 /****************************************************************
 **
@@ -1099,8 +1217,12 @@ test_attr(void)
     test_attr_basic_read();     /* Test basic H5A reading code */
 
     /* These next two tests use the same file information */
-    test_attr_complex_write();  /* Test complex datatype H5A writing code */
-    test_attr_complex_read();   /* Test complex datatype H5A reading code */
+    test_attr_compound_write();  /* Test complex datatype H5A writing code */
+    test_attr_compound_read();   /* Test complex datatype H5A reading code */
+
+    /* These next two tests use the same file information */
+    test_attr_scalar_write();  /* Test scalar dataspace H5A writing code */
+    test_attr_scalar_read();   /* Test scalar dataspace H5A reading code */
 
     /* These next four tests use the same file information */
     test_attr_mult_write();     /* Test H5A writing code for multiple attributes */
