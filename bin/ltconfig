@@ -777,7 +777,7 @@ else
     ;;
 
   # FreeBSD 3, at last, uses gcc -shared to do shared libraries.
-  freebsd3*)
+  freebsd3* | freebsd4*)
     archive_cmds='$CC -shared -o $lib$libobjs'
     hardcode_libdir_flag_spec='-R$libdir'
     hardcode_direct=yes
@@ -1123,7 +1123,7 @@ amigaos*)
   finish_eval='for lib in `ls $libdir/*.ixlibrary 2>/dev/null`; do libname=`$echo "X$lib" | $Xsed -e '\''s%^.*/\([^/]*\)\.ixlibrary$%\1%'\''`; test $rm /sys/libs/${libname}_ixlibrary.a; $show "(cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a)"; (cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a) || exit 1; done'
   ;;
 
-freebsd2* | freebsd3*)
+freebsd2* | freebsd3* | freebsd4*)
   version_type=sunos
   library_names_spec='${libname}${release}.so.$versuffix $libname.so'
   finish_cmds='PATH="$PATH:/sbin" ldconfig -m $libdir'
