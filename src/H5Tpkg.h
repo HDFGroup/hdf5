@@ -37,9 +37,11 @@
 /* Get package's private header */
 #include "H5Tprivate.h"
 
-#include "H5Dprivate.h"		/* Datasets				*/
+/* Other private headers needed by this file */
 #include "H5Fprivate.h"		/* Files				*/
-#include "H5HGprivate.h"	/* Global heaps				*/
+
+/* Other public headers needed by this file */
+#include "H5Spublic.h"		/* Dataspace functions			*/
 
 /* Number of reserved IDs in ID group */
 #define H5T_RESERVED_ATOMS 	8
@@ -845,7 +847,7 @@ H5_DLL ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
-H5_DLL H5T_t * H5T_vlen_create(H5T_t *base);
+H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);
 H5_DLL hssize_t H5T_vlen_seq_mem_getlen(H5F_t *f, void *vl_addr);
 H5_DLL herr_t H5T_vlen_seq_mem_read(H5F_t *f, hid_t dxpl_id, void *vl_addr, void *_buf, size_t len);
 H5_DLL herr_t H5T_vlen_seq_mem_write(H5F_t *f, hid_t dxpl_id, void *vl_addr, void *_buf, void *bg_addr, hsize_t seq_len, hsize_t base_size);
