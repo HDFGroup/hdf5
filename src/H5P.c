@@ -1850,6 +1850,7 @@ H5Pget_preserve (hid_t plist_id)
     
 
 
+#ifdef HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_mpi
  *
@@ -1903,7 +1904,6 @@ H5Pget_preserve (hid_t plist_id)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef HAVE_PARALLEL
 herr_t
 H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
 {
@@ -1964,6 +1964,7 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
 #endif /*HAVE_PARALLEL*/
 
 
+#ifdef HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_mpi
  *
@@ -1983,7 +1984,6 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, unsigned access_mode)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef HAVE_PARALLEL
 herr_t
 H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, unsigned *access_mode)
 {
@@ -2006,6 +2006,107 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, unsigned *access_mode)
     HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
 		   "not implemented yet");
 #endif
+
+    FUNC_LEAVE (SUCCEED);
+}
+#endif /*HAVE_PARALLEL*/
+
+
+#ifdef HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_xfer
+ *
+ * Signature:	herr_t H5Pset_xfer(hid_t tid, H5D_transfer_t data_xfer_mode)
+ *
+ * Purpose:	Set the transfer mode of the dataset transfer property list.
+ *		The list can then be used to control the I/O transfer mode
+ *		during dataset accesses.  This function is available only
+ *		in the parallel HDF5 library and is not a collective function.
+ *
+ * Parameters:
+ *		hid_t tid 
+ *		    ID of a dataset transfer property list
+ *		H5D_transfer_t data_xfer_mode
+ *		    data transfer modes: 
+ *			H5ACC_INDEPENDENT 
+ *			    Use independent I/O access. 
+ *			H5ACC_COLLECTIVE 
+ *			    Use MPI collective I/O access. 
+ *	     
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Albert Cheng
+ *		April 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_xfer (hid_t tid, H5D_transfer_t data_xfer_mode)
+{
+    H5D_xfer_t		*plist = NULL;
+
+    FUNC_ENTER(H5Pset_xfer, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5Pget_class(tid) ||
+	NULL == (plist = H5I_object(tid))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset transfer property list");
+    }
+    
+    switch (data_xfer_mode){
+    case H5D_XFER_INDEPENDENT:
+    case H5D_XFER_COLLECTIVE:
+	plist->xfer_mode = data_xfer_mode;
+	break;
+    default:
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "invalid dataset transfer mode");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+#endif /*HAVE_PARALLEL*/
+
+
+#ifdef HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_xfer
+ *
+ * Purpose:	Reads the transfer mode current set in the property list.
+ *		This function is available only in the parallel HDF5 library
+ *		and is not a collective function.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Albert Cheng
+ *		April 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode)
+{
+    H5D_xfer_t		*plist = NULL;
+
+    FUNC_ENTER (H5Pget_xfer, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5Pget_class(tid) ||
+	NULL == (plist = H5I_object(tid))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset transfer property list");
+    }
+
+    *data_xfer_mode = plist->xfer_mode;
 
     FUNC_LEAVE (SUCCEED);
 }

@@ -130,6 +130,9 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
+#ifdef HAVE_PARALLEL
+    intn	is_collective;			/*collective access flag*/
+#endif
    
     FUNC_ENTER (H5F_arr_read, FAIL);
 
@@ -144,6 +147,19 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 
     /* Make a local copy of size so we can modify it */
     H5V_vector_cpy (layout->ndims, hslab_size, _hslab_size);
+
+#ifdef HAVE_PARALLEL
+    is_collective = (f->shared->access_parms.driver==H5F_LOW_MPIO
+	&& f->shared->access_parms.u.mpio.access_mode==H5ACC_COLLECTIVE);
+    if (is_collective){
+#ifdef AKC
+    printf("%s: collective read requested\n", FUNC);
+#endif
+	if (layout->type != H5D_CONTIGUOUS)
+	    HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
+		"collective access on non-contiguous datasets not supported yet");
+    }
+#endif
 
     switch (layout->type) {
     case H5D_CONTIGUOUS:
@@ -190,6 +206,29 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	 * Now begin to walk through the array, copying data from disk to
 	 * memory.
 	 */
+#ifdef HAVE_PARALLEL
+	if (is_collective){
+	    /* Currently supports same number of collective access.
+	     * Need to be changed LATER to combine all reads into one
+	     * collective MPIO call.
+	     */
+	    long max, min, temp;
+
+	    temp = nelmts;
+	    assert(temp==nelmts);	/* verify no overflow */
+	    MPI_Allreduce(&temp, &max, 1, MPI_LONG, MPI_MAX,
+		f->shared->access_parms.u.mpio.comm);
+	    MPI_Allreduce(&temp, &min, 1, MPI_LONG, MPI_MIN,
+		f->shared->access_parms.u.mpio.comm);
+#ifdef AKC
+printf("nelmnts=%ld, min=%ld, max=%ld\n", temp, min, max);
+#endif
+	    if (max != min)
+		HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+		    "collective access with unequal number of blocks not supported yet");
+	}
+#endif
+
 	for (z=0; z<nelmts; z++) {
 
 	    /* Read from file */
@@ -291,6 +330,9 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
+#ifdef HAVE_PARALLEL
+    intn	is_collective;			/*collective access flag*/
+#endif
    
     FUNC_ENTER (H5F_arr_write, FAIL);
 
@@ -306,6 +348,18 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
     /* Make a local copy of _size so we can modify it */
     H5V_vector_cpy (layout->ndims, hslab_size, _hslab_size);
 
+#ifdef HAVE_PARALLEL
+    is_collective = (f->shared->access_parms.driver==H5F_LOW_MPIO
+	&& f->shared->access_parms.u.mpio.access_mode==H5ACC_COLLECTIVE);
+    if (is_collective){
+#ifdef AKC
+    printf("%s: collective write requested\n", FUNC);
+#endif
+	if (layout->type != H5D_CONTIGUOUS)
+	    HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
+		"collective access on non-contiguous datasets not supported yet");
+    }
+#endif
 
     switch (layout->type) {
     case H5D_CONTIGUOUS:
@@ -352,6 +406,29 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	 * Now begin to walk through the array, copying data from memory to
 	 * disk.
 	 */
+#ifdef HAVE_PARALLEL
+	if (is_collective){
+	    /* Currently supports same number of collective access.
+	     * Need to be changed LATER to combine all writes into one
+	     * collective MPIO call.
+	     */
+	    long max, min, temp;
+
+	    temp = nelmts;
+	    assert(temp==nelmts);	/* verify no overflow */
+	    MPI_Allreduce(&temp, &max, 1, MPI_LONG, MPI_MAX,
+		f->shared->access_parms.u.mpio.comm);
+	    MPI_Allreduce(&temp, &min, 1, MPI_LONG, MPI_MIN,
+		f->shared->access_parms.u.mpio.comm);
+#ifdef AKC
+printf("nelmnts=%ld, min=%ld, max=%ld\n", temp, min, max);
+#endif
+	    if (max != min)
+		HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
+		    "collective access with unequal number of blocks not supported yet");
+	}
+#endif
+
 	for (z=0; z<nelmts; z++) {
 
 	    /* Write to file */

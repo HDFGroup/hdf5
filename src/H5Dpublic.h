@@ -31,6 +31,14 @@ typedef enum H5D_layout_t {
     H5D_NLAYOUTS         = 3    /*this one must be last!                     */
 } H5D_layout_t;
 
+#ifdef HAVE_PARALLEL
+/* Values for the data transfer property */
+typedef enum H5D_transfer_t {
+    H5D_XFER_INDEPENDENT, 	/*Independent data transfer	*/
+    H5D_XFER_COLLECTIVE  	/*Collective data transfer	*/
+} H5D_transfer_t;
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

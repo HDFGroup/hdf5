@@ -93,6 +93,8 @@ herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info,
 		   unsigned access_mode);
 herr_t H5Pget_mpi (hid_t tid, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/,
 		   unsigned *access_mode/*out*/);
+herr_t H5Pset_xfer (hid_t tid, H5D_transfer_t data_xfer_mode);
+herr_t H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode/*out*/);
 #endif
 
 #ifdef __cplusplus
