@@ -61,18 +61,19 @@ an application synchronized with the HDF5 library or related software.
 This section lists the API-level changes that have been made in the 
 transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 
-<font size="+1" color="red">
-<p>
-<i>Note to developers:</i>   This is primarily an outline of topics.
-Where no formatting template appears, get it from the last prior release section
-in which the topic appears.
-If you need a section that does not appear, feel free to add it.
-Last thing before the release, unused sections should be commented out.
-</font>
 
     <h3>New Functions and Tools</h3>
 	<dl>
+
+<!--
 	  <dt>C functions:
+-->
+	  <dt>C functions and
+	  <dt>Fortran subroutines:
+          <dd>HDF5 Release 1.6.4 is primarily a "Bugfix Release"; 
+              there are no public API changes in the HDF5 C library
+              or in the Fortran interfaces.
+<!--
           <dd>The following C functions are new for Release 1.6.4 and 
               are documented in the
               <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
@@ -86,7 +87,25 @@ Last thing before the release, unused sections should be commented out.
               </tr>
 
               </table>    
+-->
 	      
+          <dd>&nbsp;
+	  <dt>High Level C APIs:
+          <dd>The High Level C APIs (HL), including the HDF5 Image, 
+              HDF5 Table, and HDF5 Lite interfaces 
+              (H5IM, H5TB, and H5LT, respectively) , 
+              have been brought into the main HDF5 source code distribution.
+              A link to the HL documentation appears on the opening
+              page of the HDF5 document set or can be accessed directly at
+              <a href="http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html">
+              <code>http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html</code></a>
+
+              <br><br>
+              The HL library, <code>libhdf5_hl.a(so)</code>, 
+              is built and installed by default but can be disabled with 
+              the <code>--disable-hl</code> configure flag.
+
+<!--
           <dd>&nbsp;
 	  <dt>Fortran subroutines:
           <dd>The following Fortran90 subroutines are new for Release 1.6.3 
@@ -115,27 +134,46 @@ Last thing before the release, unused sections should be commented out.
                 <td align="left" valign="top">New Fortran90 subroutines 
                     corresponding to C functions from prior releases:<br>
                     &nbsp;&nbsp;&nbsp;&nbsp;None<br>
-<!--
+--><!--
                     &nbsp;&nbsp;&nbsp;&nbsp;<code>new_fortran_here</code><br>
                     &nbsp;&nbsp;&nbsp;&nbsp;<code>last_new_fortran_here</code>
--->
+--><!--
                     </td>
                 <td align="left" valign="top"> 
                     &nbsp;&nbsp;&nbsp;&nbsp;</td>
               </tr>
               </table>    
+-->
 	  
+<!--
           <dd>&nbsp;
 	  <dt>C++ wrappers:
-	  <dd>
+	  <dd> 
+-->
 	  
           <dd>&nbsp;
 	  <dt>Tools:
-          <dd>
+          <dd>A new pair of tools, <code>h5jam</code> and <code>h5unjam</code>,
+              is available to manage user blocks in HDF5 files.
+              See <a href="../Tools.html#Tools-Jam">their entry</a>
+              in the <cite>HDF5 Reference Manual</cite>.
+
+
         </dl>
 
 
     <h3>Deleted Functions</h3>
+
+	The following functions have been removed in this release.
+
+        <dl>
+          <dd>&nbsp;
+	  <dt>C++ wrappers:
+	  <dd> The C++ wrappers now rely on the C library's reference 
+               counting in place of the class <code>RefCounter</code>, 
+               which existed before the C mechanism was available.  
+	       <code>RefCounter</code> has therefore been removed.
+        </dl>
 
 	<!--
         None.
@@ -178,7 +216,7 @@ Last thing before the release, unused sections should be commented out.
         distribution and from the <cite>HDF5 Reference Manual</cite>.
 	-->
 
-
+<!--
 	The following functions have been removed in this release.
 
         <dl>
@@ -186,8 +224,17 @@ Last thing before the release, unused sections should be commented out.
 	  <dt>Category
 	  <dd><code>function_name</code>
         </dl>
+-->
 
 
+    <h3>Changed Library Configuration</h3>
+	<dl>
+	  <dt>HDF5 Library configuration has been upgraded from 
+              GNU autoconf 2.53 to autoconf 2.59.  
+	</dl>
+
+
+<!--
     <h3>Functions with Changed Syntax</h3>
 
         The following functions have changed as noted.
@@ -222,8 +269,10 @@ Last thing before the release, unused sections should be commented out.
           <dd>Change...
 	  
         </dl>
+-->
 
 
+<!--
     <h3>Constants with Changed Values</h3>
     
         The following library structures have changed as noted.
@@ -243,6 +292,7 @@ Last thing before the release, unused sections should be commented out.
                 <li>new definition<br>
                 </ul>
             <p>
+-->
 
 
 
@@ -1887,7 +1937,7 @@ Describes HDF5 Release 1.6.4, February 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 10 February 2005 
+Last modified: 15 March 2005 
 <!-- hhmts end -->
 
 </body>
