@@ -531,13 +531,18 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *		directly between app buffer and file.
  *
  * Return:	non-negative on success, negative on failure.
+ *		If MPI-IO is indeed used, must_convert is set to 0;
+ *		otherwise it is set to 1 with return code succeed (so that the
+ *		calling routine may try other means.)
  *
  * Programmer:	rky 980813
  *
  * Modifications:
- *
- * rky 980918
- * Added must_convert parameter to let caller know we can't optimize the xfer.
+ *	rky 980918
+ *	Added must_convert parameter to let caller know we can't optimize
+ *	the xfer.
+ *	Albert Cheng, 001123
+ *	Include the MPI_type freeing as part of cleanup code.
  *
  *-------------------------------------------------------------------------
  */
@@ -556,7 +561,8 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	 mpi_count;
     hsize_t	 mpi_buf_count, mpi_unused_count;
     MPI_Datatype mpi_buf_type, mpi_file_type;
-    hbool_t	 mbt_is_derived, mft_is_derived;
+    hbool_t	 mbt_is_derived=0,
+		 mft_is_derived=0;
 
     FUNC_ENTER (H5S_mpio_spaces_xfer, FAIL);
 
@@ -579,8 +585,9 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 	}
 #endif
 	*must_convert = 1;      /* can't do optimized xfer; do the old way */
-	goto done;
+	HGOTO_DONE(SUCCEED);
     }
+    
 
     /* create the MPI buffer type */
     err = H5S_mpio_space_type( mem_space, elmt_size,
@@ -589,7 +596,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 			       &mpi_buf_count,
 			       &mbt_is_derived );
     if (MPI_SUCCESS != err)
-    	HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI buf type");
+    	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI buf type");
 
     /* create the MPI file type */
     err = H5S_mpio_space_type( file_space, elmt_size,
@@ -598,7 +605,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 			       &mpi_unused_count,
 			       &mft_is_derived );
     if (MPI_SUCCESS != err)
-    	HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
+    	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
 
     /* calculate the absolute base addr (i.e., the file view disp) */
     disp = f->shared->base_addr + layout->addr;
@@ -619,7 +626,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     /* transfer the data */
     mpi_count = (size_t)mpi_buf_count;
     if (mpi_count != mpi_buf_count) {
-    	HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
+    	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
 		      "transfer size overflows size_t");
     }
     if (do_write) {
@@ -634,6 +641,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 	}
     }
 
+done:
     /* free the MPI buf and file types */
     if (mbt_is_derived) {
 	err = MPI_Type_free( &mpi_buf_type );
@@ -650,7 +658,6 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 	}
     }
 
-    done:
     FUNC_LEAVE (ret_value);
 }
 
