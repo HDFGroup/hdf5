@@ -1736,7 +1736,7 @@ dump_oid(hid_t oid){
     indent += COL;
     indentation (indent);
 
-    printf ("%s %s ", OBJECTID, BEGIN);
+    printf ("%s %s ", OBJID, BEGIN);
 	printf("%d", oid);
     printf (" %s\n", END);  
 	indent -= COL;
