@@ -146,8 +146,14 @@ test_config_ctypes(void)
     vrfy_cint_type(int64_t, uint64_t, H5_SIZEOF_INT64_T);
 #endif
 
+    /* Some vendors have different sizes for the signed and unsigned */
+    /* fast8_t.  Need to check them individually. */
 #if H5_SIZEOF_INT_FAST8_T > 0
-    vrfy_cint_type(int_fast8_t, uint_fast8_t, H5_SIZEOF_INT_FAST8_T);
+    vrfy_ctype(int_fast8_t, H5_SIZEOF_INT_FAST8_T);
+#endif
+
+#if H5_SIZEOF_UINT_FAST8_T > 0
+    vrfy_ctype(uint_fast8_t, H5_SIZEOF_UINT_FAST8_T);
 #endif
 
 #if H5_SIZEOF_INT_FAST16_T > 0
