@@ -19,7 +19,8 @@
 #define FILE12 "tmany.h5"
 #define FILE13 "tstr.h5"
 #define FILE14 "tstr2.h5"
-
+#define LENSTR 50
+#define LENSTR2 11
 static void test_group(void) {
 hid_t fid, group;
 
@@ -858,7 +859,11 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 		
 		dset1[j].a[index[3]][index[2]][index[1]][index[0]] = i0+j;
 		dset1[j].b[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j);
+#if WIN32
+		dset1[j].c[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j+(signed __int64)sdim);
+#else
 		dset1[j].c[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j+sdim);
+#endif
 	}
 	}
 	}
@@ -1069,23 +1074,22 @@ hid_t fid, group, attr, dataset, space, space2, mem_space, hyper_space, type;
 hid_t fxdlenstr, fxdlenstr2, memtype;
 hsize_t dims[1], size[1], start[1], stride[1], count[1], block[1];
 
-int lenstr = 50;
-int lenstr2 = 11;
+
 int i, j;
 int i0, i1, i2, i3;
-char buf[lenstr+10];
-char buf2[3*lenstr2];
+char buf[LENSTR+10];
+char buf2[3*LENSTR2];
 hsize_t sdim, maxdim;
 
   fid = H5Fcreate(FILE14, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   fxdlenstr = H5Tcopy(H5T_C_S1);
-  H5Tset_size(fxdlenstr, lenstr);
+  H5Tset_size(fxdlenstr, LENSTR);
   H5Tset_cset(fxdlenstr, H5T_CSET_ASCII);
   H5Tset_strpad(fxdlenstr, H5T_STR_NULLTERM);
 
   memtype = H5Tcopy(H5T_C_S1);
-  H5Tset_size(memtype, lenstr);
+  H5Tset_size(memtype, LENSTR);
   H5Tset_cset(memtype, H5T_CSET_ASCII);
   H5Tset_strpad(memtype, H5T_STR_NULLTERM);
 
@@ -1104,16 +1108,16 @@ hsize_t sdim, maxdim;
   /* add attributes to dset1 */
 
   fxdlenstr2 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(fxdlenstr2, lenstr2);
+  H5Tset_size(fxdlenstr2, LENSTR2);
   H5Tset_cset(fxdlenstr2, H5T_CSET_ASCII);
   H5Tset_strpad(fxdlenstr2, H5T_STR_NULLTERM);
 
   dims[0] = 3;
   space2 = H5Screate_simple(1, dims, NULL);
   attr = H5Acreate (dataset, "attr1", fxdlenstr2, space2, H5P_DEFAULT);
-  sprintf(&(buf2[0*lenstr2]), "0123456789");
-  sprintf(&(buf2[1*lenstr2]), "abcdefghij");
-  sprintf(&(buf2[2*lenstr2]), "ABCDEFGHIJ");
+  sprintf(&(buf2[0*LENSTR2]), "0123456789");
+  sprintf(&(buf2[1*LENSTR2]), "abcdefghij");
+  sprintf(&(buf2[2*LENSTR2]), "ABCDEFGHIJ");
   H5Awrite(attr, fxdlenstr2, buf2);
   H5Sclose(space2);
   H5Tclose(fxdlenstr2);
@@ -1149,7 +1153,7 @@ hsize_t sdim, maxdim;
 
   H5Tclose(fxdlenstr);
   fxdlenstr = H5Tcopy(H5T_C_S1);
-  H5Tset_size(fxdlenstr, lenstr);
+  H5Tset_size(fxdlenstr, LENSTR);
   H5Tset_cset(fxdlenstr, H5T_CSET_ASCII);
   H5Tset_strpad(fxdlenstr, H5T_STR_NULLPAD);
 
@@ -1182,7 +1186,7 @@ hsize_t sdim, maxdim;
 
   H5Tclose(fxdlenstr);
   fxdlenstr = H5Tcopy(H5T_C_S1);
-  H5Tset_size(fxdlenstr, lenstr);
+  H5Tset_size(fxdlenstr, LENSTR);
   H5Tset_cset(fxdlenstr, H5T_CSET_ASCII);
   H5Tset_strpad(fxdlenstr, H5T_STR_SPACEPAD);
 
