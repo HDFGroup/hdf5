@@ -116,9 +116,14 @@ H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, int membno);
 H5_DLL size_t H5T_get_member_offset(H5T_t *dt, int membno);
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
 H5_DLL htri_t H5T_is_variable_str(H5T_t *dt);
-H5_DLL H5T_t *H5T_get_native_type(H5T_t *dt, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size);
-H5_DLL H5T_t *H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size);
-H5_DLL H5T_t *H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size);
+H5_DLL H5T_t *H5T_get_native_type(H5T_t *dt, H5T_direction_t direction, 
+                                  size_t *struct_align, size_t *offset, size_t *comp_size);
+H5_DLL H5T_t *H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction, 
+                                     size_t *struct_align, size_t *offset, size_t *comp_size);
+H5_DLL H5T_t *H5T_get_native_float(size_t size, H5T_direction_t direction, 
+                                   size_t *struct_align, size_t *offset, size_t *comp_size);
+H5_DLL herr_t H5T_cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, 
+                             size_t nelems, size_t align, size_t *struct_align);
 H5_DLL int    H5T_cmp(const H5T_t *dt1, const H5T_t *dt2);
 H5_DLL htri_t H5T_is_atomic(const H5T_t *dt);
 H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,

@@ -31,6 +31,8 @@ static const char *FileHeader = "\n\
  */
 #undef NDEBUG
 #include "H5private.h"
+#include "H5Tpublic.h"
+#include "H5Rpublic.h"
 
 #define MAXDETECT 64
 /*
@@ -51,7 +53,14 @@ typedef struct detected_t {
     size_t		comp_align;	/*alignment for structure       */
 } detected_t;
 
-static void print_results(int nd, detected_t *d);
+/* This structure holds structure alignment for pointers, hvl_t, hobj_ref_t, 
+ * hdset_reg_ref_t */
+typedef struct malign_t {
+    const char          *name;      
+    size_t              comp_align;         /*alignment for structure   */
+} malign_t;
+   
+static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
 static int byte_cmp(int, void *, void *);
 static int bit_cmp(int, int *, void *, void *);
@@ -163,6 +172,11 @@ precision (detected_t *d)
    }									      \
    INFO.sign = ('U'!=*(#VAR));						      \
    ALIGNMENT(TYPE, INFO.align);						      \
+   if(!strcmp(INFO.varname, "SCHAR")  || !strcmp(INFO.varname, "SHORT") ||    \
+      !strcmp(INFO.varname, "INT")   || !strcmp(INFO.varname, "LONG")  ||     \
+      !strcmp(INFO.varname, "LLONG")) {                                       \
+      COMP_ALIGNMENT(TYPE,INFO.comp_align);                                   \
+   }                                                                          \
    precision (&(INFO));							      \
 }
 
@@ -246,7 +260,34 @@ precision (detected_t *d)
    _v1 = 1.0;								      \
    INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.perm, &_v1);	      \
    ALIGNMENT(TYPE, INFO.align);						      \
+   if(!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||    \
+      !strcmp(INFO.varname, "LDOUBLE")) {                                     \
+      COMP_ALIGNMENT(TYPE,INFO.comp_align);                                   \
+   }                                                                          \
    precision (&(INFO));							      \
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	DETECT_M
+ *
+ * Purpose:	This macro takes only miscellaneous structures or pointer
+ *              (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It  
+ *		constructs the names and decides the alignment in structure.
+ *
+ * Return:	void
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		Dec 9, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+#define DETECT_M(TYPE,VAR,INFO) {					      \
+   INFO.name = #VAR;							      \
+   COMP_ALIGNMENT(TYPE, INFO.comp_align);				      \
 }
 
 /* Detect alignment for C structure */
@@ -399,10 +440,10 @@ sigbus_handler(int UNUSED signo)
  *-------------------------------------------------------------------------
  */
 static void
-print_results(int nd, detected_t *d)
+print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 {
 
-    int		i;
+    int		i, j;
 
     /* Include files */
     printf("\
@@ -514,6 +555,11 @@ H5TN_init_interface(void)\n\
         }
     }
 
+    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
+    printf("\n    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */\n");
+    for(j=0; j<na; j++)
+        printf("    H5T_%s_COMP_ALIGN_g = %lu;\n", misc_align[j].name, (unsigned long)(misc_align[j].comp_align));
+        
     printf("\
 \n\
 done:\n\
@@ -1011,8 +1057,9 @@ int
 main(void)
 {
     detected_t		d[MAXDETECT];
-    volatile int	nd = 0;
-
+    malign_t            m[MAXDETECT];
+    volatile int	nd = 0, na = 0;
+    
 #if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
 #if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
     /*
@@ -1032,24 +1079,13 @@ main(void)
     print_header();
 
     /* C89 integer types */
-    DETECT_I(signed char,	  SCHAR,        d[nd]); 
-    COMP_ALIGNMENT(signed char,   d[nd].comp_align);    nd++;
-    
+    DETECT_I(signed char,	  SCHAR,        d[nd]); nd++;
     DETECT_I(unsigned char,	  UCHAR,        d[nd]); nd++;
-    
-    DETECT_I(short,		  SHORT,        d[nd]); 
-    COMP_ALIGNMENT(short,         d[nd].comp_align);    nd++;
-    
+    DETECT_I(short,		  SHORT,        d[nd]); nd++; 
     DETECT_I(unsigned short,	  USHORT,       d[nd]); nd++;
-    
-    DETECT_I(int,		  INT,	        d[nd]);
-    COMP_ALIGNMENT(int,           d[nd].comp_align);    nd++;
-    
+    DETECT_I(int,		  INT,	        d[nd]); nd++;
     DETECT_I(unsigned int,	  UINT,	        d[nd]); nd++;
-    
-    DETECT_I(long,		  LONG,	        d[nd]);
-    COMP_ALIGNMENT(long,          d[nd].comp_align);    nd++;
-    
+    DETECT_I(long,		  LONG,	        d[nd]); nd++;
     DETECT_I(unsigned long,	  ULONG,        d[nd]); nd++;
 
     /*
@@ -1129,9 +1165,7 @@ main(void)
 #endif
     
 #if H5_SIZEOF_LONG_LONG>0
-    DETECT_I(long_long,		  LLONG,        d[nd]);
-    COMP_ALIGNMENT(long_long,     d[nd].comp_align);    nd++;
-    
+    DETECT_I(long_long,		  LLONG,        d[nd]); nd++;
     DETECT_I(unsigned long_long,  ULLONG,       d[nd]); nd++;
 #else
     /*
@@ -1139,17 +1173,12 @@ main(void)
      * so we'll just make H5T_NATIVE_LLONG the same as H5T_NATIVE_LONG since
      * `long long' is probably equivalent to `long' here anyway.
      */
-    DETECT_I(long,		  LLONG,        d[nd]);
-    COMP_ALIGNMENT(long,          d[nd].comp_align);    nd++;
-    
+    DETECT_I(long,		  LLONG,        d[nd]); nd++;
     DETECT_I(unsigned long,	  ULLONG,       d[nd]); nd++;
 #endif
 
-    DETECT_F(float,		  FLOAT,        d[nd]);
-    COMP_ALIGNMENT(float,         d[nd].comp_align);    nd++;
-    
-    DETECT_F(double,		  DOUBLE,       d[nd]);
-    COMP_ALIGNMENT(double,        d[nd].comp_align);    nd++;
+    DETECT_F(float,		  FLOAT,        d[nd]); nd++;
+    DETECT_F(double,		  DOUBLE,       d[nd]); nd++;
 
 #if H5_SIZEOF_DOUBLE == H5_SIZEOF_LONG_DOUBLE
     /*
@@ -1158,14 +1187,18 @@ main(void)
      * some systems and `long double' is probably the same as `double' here
      * anyway.
      */
-    DETECT_F(double,		  LDOUBLE,      d[nd]);
-    COMP_ALIGNMENT(double,        d[nd].comp_align);    nd++;
+    DETECT_F(double,		  LDOUBLE,      d[nd]); nd++;
 #else
-    DETECT_F(long double,	  LDOUBLE,      d[nd]);
-    COMP_ALIGNMENT(long double, d[nd].comp_align);    nd++;
+    DETECT_F(long double,	  LDOUBLE,      d[nd]); nd++;
 #endif
 
-    print_results (nd, d);
+    /* Detect structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
+    DETECT_M(void *,              POINTER,      m[na]); na++;
+    DETECT_M(hvl_t,               HVL,          m[na]); na++;
+    DETECT_M(hobj_ref_t,          HOBJREF,      m[na]); na++;
+    DETECT_M(hdset_reg_ref_t,     HDSETREGREF,  m[na]); na++;
+    
+    print_results (nd, d, na, m);
     
     return 0;
 }

@@ -187,6 +187,11 @@ H5_DLLVAR size_t	H5T_NATIVE_FLOAT_COMP_ALIGN_g;
 H5_DLLVAR size_t	H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
 H5_DLLVAR size_t	H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
 
+H5_DLLVAR size_t H5T_POINTER_COMP_ALIGN_g;
+H5_DLLVAR size_t H5T_HVL_COMP_ALIGN_g;
+H5_DLLVAR size_t H5T_HOBJREF_COMP_ALIGN_g;
+H5_DLLVAR size_t H5T_HDSETREGREF_COMP_ALIGN_g;
+
 /*
  * Alignment information for native types. A value of N indicates that the
  * data must be aligned on an address ADDR such that 0 == ADDR mod N. When
