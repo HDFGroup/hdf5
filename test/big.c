@@ -29,6 +29,8 @@ const char *FILENAME[] = {
 #define WRT_SIZE	4*1024
 #define FAMILY_SIZE	1024*1024*1024
 
+#define MAX_TRIES	100
+
 #if H5_SIZEOF_LONG_LONG >= 8
 #   define GB8LL	((unsigned long_long)8*1024*1024*1024)
 #else
@@ -38,15 +40,20 @@ const char *FILENAME[] = {
 /* Protocols */
 static void usage(void);
 
+/* Array used to record all addresses at which data has been written */
+/* so far.  Used to prevent overlapping writes. */
+static hsize_t values_used[WRT_N];
 
 /*-------------------------------------------------------------------------
  * Function:	randll
  *
  * Purpose:	Create a random long_long value.
+ * 		Ensures that a write at this value doesn't overlap any
+ *		previous write.
  *
  * Return:	Success:	Random value
  *
- *		Failure:	never fails
+ *		Failure:	Random value which overlaps another write
  *
  * Programmer:	Robb Matzke
  *              Tuesday, November 24, 1998
@@ -56,13 +63,35 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static hsize_t
-randll(hsize_t limit)
+randll(hsize_t limit, int current_index)
 {
-    
-    hsize_t	acc = rand ();
-    acc *= rand ();
+    hsize_t	acc;
+    int 	overlap = 1;
+    int 	i;
+    int 	tries = 0;
 
-    return acc % limit;
+    /* Generate up to MAX_TRIES random numbers until one of them */
+    /* does not overlap with any previous writes */
+    while(overlap != 0 && tries < MAX_TRIES)
+    {
+        acc = rand ();
+        acc *= rand ();
+        acc = acc % limit;
+        overlap = 0;
+
+        for(i = 0; i < current_index; i++)
+        {
+            if((acc >= values_used[i]) && (acc < values_used[i]+WRT_SIZE))
+                overlap = 1; 
+            if((acc+WRT_SIZE >= values_used[i]) && (acc+WRT_SIZE < values_used[i]+WRT_SIZE))
+                overlap = 1; 
+        }
+        tries++;
+    }
+
+    values_used[current_index]=acc;
+    
+    return acc;
 }
 
 
@@ -240,7 +269,7 @@ writer (hid_t fapl, int wrt_n)
     hs_size[0] = WRT_SIZE;
     if ((mem_space = H5Screate_simple (1, hs_size, hs_size))<0) goto error;
     for (i=0; i<wrt_n; i++) {
-	hs_start[0] = randll (size2[0]);
+	hs_start[0] = randll (size2[0], i);
 	HDfprintf (out, "#%03d 0x%016Hx\n", i, hs_start[0]);
 	if (H5Sselect_hyperslab (space2, H5S_SELECT_SET, hs_start, NULL,
 				 hs_size, NULL)<0) goto error;
