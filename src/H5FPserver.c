@@ -313,7 +313,7 @@ H5FP_object_lock_cmp(H5FP_object_lock *o1,
     FUNC_ENTER_NOINIT(H5FP_object_lock_cmp);
     assert(o1);
     assert(o2);
-    FUNC_LEAVE_NOAPI(o1->oid == o2->oid);
+    FUNC_LEAVE_NOAPI(o1->oid - o2->oid);
 }
 
 /*
