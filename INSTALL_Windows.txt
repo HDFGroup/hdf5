@@ -1,0 +1,239 @@
+HDF5 Install Instructions for Windows NT/95/98.
+-------------------------------------------------------------------------
+
+The instructions which follow assume that you will be using the the source
+code release 'zip' file (hdf5-1_2_0.zip).
+
+The following sections discuss in detail installation procedures. 
+
+Building from Source Code Release (hdf5-1_2_0.zip)
+===============================================
+
+STEP I:  Preconditions
+
+To build the HDF5 and tests, it is assumed that you have done the following:
+
+      1. Installed MicroSoft Developer Studio, and Visual C++ 5.0 or 6.0.         
+
+      2. Set up a directory structure to unpack the library. For 
+      example: 
+	    c:\					(any drive)
+           MyHDFstuff\				(any folder name)
+
+      3. Copied the source distribution archive to that directory 
+      and unpacked it using the appropriate archiver options to
+      create a directory hierarchy.
+        
+      Run WinZip on hdf5-1_2_0.zip (the entire source tree).
+      This creates a directory called 'hdf5' which 
+      contains several files and directories.
+
+
+STEP II: Building the Libraries and tests.
+
+        1. Unpack all.zip in 'hdf5'. 
+
+        2. Invoke Microsoft Visual C++, go to "File" and select
+           the "Open Workspace" option. 
+
+           Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw workspace. 
+
+        3. Select "Build", then Select "Set Active Configuration".
+
+           On Windows platform select as the active configuration
+
+           "all -- Win32 Debug" to build debug versions of single-threaded
+                                static libraries, and tests. 
+            or
+
+           "all -- Win32 Release" to build release versions of single-threaded
+                                static libraries, and tests.
+
+           Select "Build" and "Build all.exe" to
+           build the corresponding version of the HDF5 library.
+
+           NOTE: "all" is a dummy target. You will get a link error when   
+           "all.exe." is built : 
+                 LINK: error LNK2001: unresolved external symbol
+			_mainCRTStartup.....
+                 all.exe - 2 error(s), ....
+
+           Warning messages can be ignored. The "all.exe" is never created, 
+           so it is OK.
+
+           When the debug or release build is done the directories listed 
+           below will contain the following files :
+
+            c:\MyHDFstuff\hdf5\proj\hdf5\debug - 
+            c:\MyHDFstuff\hdf5\proj\hdf5\release - 
+
+			hdf5.lib- the hdf5 library
+
+           	c:\MyHDFstuff\hdf5\test\"test directory"-
+            where test directory is one of the following:
+
+
+			big
+
+			bittests
+
+			chunk
+
+			cmpd_dset
+
+			dsets
+
+			dtypes
+
+			extend
+
+			external
+
+			fillval
+
+			flush1
+
+			flush2
+
+			gheap
+
+			hyperslab
+
+			iopipe
+
+			istore
+
+			links
+
+			mount (not supported in this release)
+
+			mtime
+
+			overhead
+
+			ragged 
+
+			shtype 
+
+			testhdf5 
+
+			unlink 
+
+Each test directory contains debug and release subdirectories with the 
+corresponding tests.
+		
+
+STEP III:   TESTING THE BUILD
+
+
+
+In a command prompt window run the test batch file which 
+resides in the hdf5 directory to make sure that the library
+was built correctly.
+
+The hdf5testDBG.bat file tests the debug version of the library and 
+hdf5testREL.bat tests the release version of the library.
+ 
+
+        
+STEP IV: BUILDING THE EXAMPLES
+
+     1. Invoke Microsoft Visual C++, go to "File" and select
+        the "Open Workspace" option. 
+        Then open the c:\myHDFstuff\hdf5\examples\allexamples.dsw
+        workspace. 
+
+      2. Select "Build", then Select "Set Active Configuration".
+
+         On Windows platform select as the active configuration
+           "allexamples -- Win32 Debug" to build debug versions of the         					examples. 
+            
+		or
+	
+           "allexamples -- Win32 Release" to build release versions the            		examples.
+
+           Select "Build" and "Build allexamples.exe" to
+           build the corresponding version of the examples.
+
+           When the debug build or release build is done there should be the 
+           following subdirectories in C:\myHDFstuff\hdf5\examples\
+
+			attributetest
+ 
+			chunkread
+
+			compoundtest 
+
+			extendwritetest 
+
+			grouptest 
+
+			readtest 
+
+			selecttest 
+
+			writetest 
+
+
+
+	3. Run the batch file "InstallExamples.bat" which resides in the top 	   level directory.  This file creates 2 new directories, examplesREL and         examplesDEB, in the examples directory and places all the executables in       it.  Both the release and debug versions of the examples should be built before this step is done.  The examples should be tested in these 2 new directories 
+due to some dependencies between the examples.
+
+			
+
+STEP V:  
+
+BUILDING AN APPLICATION USING THE HDF5 LIBRARY - SOME HELPFUL POINTERS
+=====================================================================
+
+If you are building an application that uses the HDF5 library 
+the following locations will need to be specified for locating
+header files and linking in the HDF libraries:
+
+            <top-level HDF5 directory>\src
+
+where <top-level HDF5 directory> may be 
+    C:\MyHDFstuff\hdf5\
+
+
+
+MORE HELPFUL POINTERS
+=====================
+
+
+Here are some notes that may be of help if you are not familiar
+with using the Visual C++ Development Environment.
+
+Project name and location issues: 
+       
+    The files in all.zip must end up in the hdf5\ directory
+    installed by hdf5-1_2_0.zip
+
+    If you must install all.dsw and all.dsp in another directory, relative 
+    to hdf5\ , you will be asked to locate the sub-project files, 
+    when you open the project all.dsw.
+
+    If you want to rename all (the entire project), you will need to modify 
+    two files all.dsw and all.dsp as text (contrary to the explicit warnings 
+    in the files).
+
+    You can also modify all.dsw and all.dsp as text, to allow these 2 files 
+    to be installed in another directory.
+
+  
+Settings... details:
+
+  	If you create your own project, the necessary settings can be
+	read from the all.dsp file(as text), or from the Project Settings in 
+	the Developer Studio project settings dialog.
+
+    Project
+	  Settings
+	      C/C++
+		  Category
+		     PreProcessor
+			 Code Generation
+			    Use run-time Library
+				   These are all set to use 
+                                      Single-Threaded
+

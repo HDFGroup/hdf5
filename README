@@ -28,8 +28,10 @@ library.
 		  not a discussion list.
 
 To subscribe to a list, send mail to "majordomo@ncsa.uiuc.edu",
-with "subscribe <your e-mail address> in the _body_ of the message.  Messages
-to be sent to the list should be sent to "<list>@ncsa.uiuc.edu".
+with "subscribe <list>" in the _body_, not the Subject, of the message.
+E.g., subscribe hdf5 
+
+Messages to be sent to the list should be sent to "<list>@ncsa.uiuc.edu".
 
 Nearly daily code snapshots are now being provided at the following URL:
     ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots
