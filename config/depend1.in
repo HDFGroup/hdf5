@@ -37,8 +37,8 @@ $(srcdir)/Dependencies: .depend
 	@for dep in $? dummy; do					      \
 	   if [ $$dep != "dummy" ]; then				      \
 	      echo Building dependencies for $$dep;			      \
-	      obj=`echo $$dep | sed 's/\.c/\\\\.lo/'`;			      \
-	      sed '\%$$obj%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;		      \
+	      obj=`basename $$dep .c`.lo;				      \
+	      sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;	      \
 	      $(TRACE) $$dep;						      \
 	      $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |		      \
                   sed 's% $(srcdir)/% $$(srcdir)/%g' |                        \
