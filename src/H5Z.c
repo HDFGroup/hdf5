@@ -86,7 +86,7 @@ H5Z_term_interface (void)
     int		dir, nprint=0;
     char	comment[16], bandwidth[32];
 
-    for (i=0; i<=H5Z_table_used_g; i++) {
+    for (i=0; i<H5Z_table_used_g; i++) {
 	for (dir=0; dir<2; dir++) {
 	    if (0==H5Z_table_g[i].stats[dir].total) continue;
 
