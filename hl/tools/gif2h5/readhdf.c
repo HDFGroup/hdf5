@@ -98,7 +98,6 @@ int ReadHDF(BYTE** data ,
 
 	if (pal_exist) {
 		hsize_t pal_size[2];
-		hsize_t max_pal_dims[2];
 		hsize_t pal_datasize;
 		CHAR *pal_path;
 
@@ -120,7 +119,7 @@ int ReadHDF(BYTE** data ,
 		}
 		
 		/* get the dimension size of the palette. */
-		if (H5Sget_simple_extent_dims(pal_space , pal_size , &max_pal_dims) !=2 ) {
+		if (H5Sget_simple_extent_dims(pal_space , pal_size , NULL) !=2 ) {
 			fprintf(stderr , "Unable to get dimension info\n");
 			pal_exist = 0;
 			return -1;
