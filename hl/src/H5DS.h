@@ -40,9 +40,6 @@ typedef struct ds_list_t {
 extern "C" {
 #endif
 
-herr_t H5DSset_scale(hid_t did, 
-                     char *dimname);
-
 herr_t H5DSattach_scale(hid_t did,
                         hid_t dsid,
                         unsigned int idx);
@@ -50,6 +47,9 @@ herr_t H5DSattach_scale(hid_t did,
 herr_t H5DSdetach_scale(hid_t did,
                         hid_t dsid,
                         unsigned int idx);
+
+herr_t H5DSset_scale(hid_t did, 
+                     char *dimname);
 
 herr_t H5DSget_nscales(hid_t did,
                        unsigned int dim,
@@ -66,9 +66,7 @@ herr_t H5DSget_label(hid_t did,
 herr_t H5DSget_scale_name(hid_t did, 
                           char *buf);
 
-
 herr_t H5DSis_scale(hid_t did);
-
 
 herr_t H5DSiterate_scales(hid_t did, 
                           unsigned int dim, 

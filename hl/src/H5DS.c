@@ -38,6 +38,18 @@ herr_t H5DSset_scale(hid_t did,
                      char *dimname) 
 {  
  int has_dimlist;
+ H5I_type_t it;
+
+/*-------------------------------------------------------------------------
+ * parameter checking
+ *-------------------------------------------------------------------------
+ */
+ /* get ID type */
+ if ((it = H5Iget_type(did))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it)
+  return FAIL;
 
 /*-------------------------------------------------------------------------
  * check if the dataset is a dataset wich has references to dimension scales
@@ -508,13 +520,37 @@ herr_t H5DSdetach_scale(hid_t did,
  unsigned   i, j, jj;
  H5G_stat_t sb1, sb2, sb3, sb4;
  int        found_dset=0, found_ds=0;
+ H5I_type_t it1, it2;
  
 /*-------------------------------------------------------------------------
- * check if the dataset is a DS dataset 
+ * parameter checking
  *-------------------------------------------------------------------------
  */
+ /* the dataset cannot be a DS dataset */
  if ((H5DSis_scale(did))==1) 
   return FAIL;
+ 
+ /* get info for the dataset in the parameter list */
+ if (H5Gget_objinfo(did,".",TRUE,&sb1)<0)
+  return FAIL;
+
+ /* get info for the scale in the parameter list */
+ if (H5Gget_objinfo(dsid,".",TRUE,&sb2)<0)
+  return FAIL;
+
+ /* same object, not valid */
+ if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno) 
+  return FAIL;
+
+ /* get ID type */
+ if ((it1 = H5Iget_type(did))<0)
+  return FAIL;
+ if ((it2 = H5Iget_type(dsid))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
+  return FAIL;
+
 
 /*-------------------------------------------------------------------------
  * Find "DIMENSION_LIST"
@@ -748,6 +784,18 @@ herr_t H5DSget_nscales(hid_t did,
  hid_t      aid;          /* attribute ID */
  int        rank;         /* rank of dataset */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
+ H5I_type_t it;           /* ID type */
+
+/*-------------------------------------------------------------------------
+ * parameter checking
+ *-------------------------------------------------------------------------
+ */
+ /* get ID type */
+ if ((it = H5Iget_type(did))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it)
+  return FAIL;
  
 /*-------------------------------------------------------------------------
  * the attribute "DIMENSION_LIST" on the >>data<< dataset must exist 
@@ -860,7 +908,24 @@ herr_t H5DSset_label(hid_t did,
  int           rank;               /* rank of dataset */
  hsize_t       dims[1];            /* dimensions of dataset */
  char          **buf=NULL;         /* buffer to store in the attribute */
+ H5I_type_t    it;                 /* ID type */
  unsigned int  i;
+
+/*-------------------------------------------------------------------------
+ * parameter checking
+ *-------------------------------------------------------------------------
+ */
+ /* get ID type */
+ if ((it = H5Iget_type(did))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it)
+  return FAIL;
+
+/*-------------------------------------------------------------------------
+ * attribute "DIMENSION_LABELS"
+ *-------------------------------------------------------------------------
+ */
 
  /* try to find the attribute "DIMENSION_LABELS" on the >>data<< dataset */
  if ((has_labels = H5LT_find_attribute(did,DIMENSION_LABELS))<0)
@@ -1017,7 +1082,24 @@ herr_t H5DSget_label(hid_t did,
  hid_t           aid;                /* attribute ID */
  int             rank;               /* rank of dataset */
  char            **buf=NULL;         /* buffer to store in the attribute */
+ H5I_type_t      it;                 /* ID type */
  unsigned int    i;
+
+/*-------------------------------------------------------------------------
+ * parameter checking
+ *-------------------------------------------------------------------------
+ */
+ /* get ID type */
+ if ((it = H5Iget_type(did))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it)
+  return FAIL;
+
+/*-------------------------------------------------------------------------
+ * attribute "DIMENSION_LABELS"
+ *-------------------------------------------------------------------------
+ */
 
  /* try to find the attribute "DIMENSION_LABELS" on the >>data<< dataset */
  if ((has_labels = H5LT_find_attribute(did,DIMENSION_LABELS))<0)
@@ -1120,12 +1202,20 @@ out:
 herr_t H5DSget_scale_name(hid_t did, 
                           char *buf) 
 {  
+ H5I_type_t it;           /* ID type */
  int has_name;
 
 /*-------------------------------------------------------------------------
- * check if the dataset is a DS dataset 
+ * parameter checking
  *-------------------------------------------------------------------------
  */
+ /* get ID type */
+ if ((it = H5Iget_type(did))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it)
+  return FAIL;
+
  if ((H5DSis_scale(did))<=0) 
   return FAIL;
  
@@ -1171,11 +1261,24 @@ herr_t H5DSget_scale_name(hid_t did,
 
 herr_t H5DSis_scale(hid_t did) 
 {  
- hid_t  tid;        /* attribute type ID */
- hid_t  aid;        /* attribute ID */
- herr_t has_class;  /* has the "CLASS" attribute */
- herr_t is_ds;      /* boolean return value */
- char   buf[20];
+ hid_t      tid;        /* attribute type ID */
+ hid_t      aid;        /* attribute ID */
+ herr_t     has_class;  /* has the "CLASS" attribute */
+ herr_t     is_ds;      /* boolean return value */
+ H5I_type_t it;           /* ID type */
+ char       buf[20];
+
+/*-------------------------------------------------------------------------
+ * parameter checking
+ *-------------------------------------------------------------------------
+ */
+ /* get ID type */
+ if ((it = H5Iget_type(did))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it)
+  return FAIL;
+
 
  /* try to find the attribute "CLASS" on the dataset */
  if ((has_class = H5LT_find_attribute(did,"CLASS"))<0)
@@ -1276,11 +1379,23 @@ herr_t H5DSiterate_scales(hid_t did,
  hid_t        tid;          /* attribute type ID */
  hid_t        aid;          /* attribute ID */
  hvl_t        *buf=NULL;    /* VL buffer to store in the attribute */
+ H5I_type_t   it;           /* ID type */
  herr_t       ret_value=0;
  int          j_idx;
  int          nscales;
  int          has_dimlist;
  int          i;
+
+/*-------------------------------------------------------------------------
+ * parameter checking
+ *-------------------------------------------------------------------------
+ */
+ /* get ID type */
+ if ((it = H5Iget_type(did))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it)
+  return FAIL;
 
  /* get the number of scales assotiated with this DIM */
  if (H5DSget_nscales(did,dim,&nscales)<0)
@@ -1371,5 +1486,4 @@ herr_t H5DSiterate_scales(hid_t did,
 out:
  return FAIL;
 } 
-
 

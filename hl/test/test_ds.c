@@ -849,6 +849,7 @@ static int test_simple(void)
 
  PASSED();
 
+
 /*-------------------------------------------------------------------------
  * end
  *-------------------------------------------------------------------------
@@ -882,8 +883,9 @@ static int test_errors(void)
  int     rankds   = 1;                                     /* rank of DS dataset */
  hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
  hsize_t s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
- hid_t   dset;                                             /* dataset ID */
- hid_t   scale;                                            /* scale ID */
+ hsize_t s2_dim[1]  = {DIM2_SIZE};                         /* size of DS 2 dataset */
+ hid_t   did;                                              /* dataset ID */
+ hid_t   dsid;                                             /* scale ID */
  hid_t   gid;                                              /* group ID */
  hid_t   sid;                                              /* space ID */
  hid_t   sidds; 
@@ -907,21 +909,21 @@ static int test_errors(void)
  /* create the data space for the scale */
  if ((sidds=H5Screate_simple(rankds,s1_dim,NULL))<0)
   goto out;
- /* create a dataset */
- if ((dset=H5Dcreate(fid,"dset_1",H5T_NATIVE_INT,sid,H5P_DEFAULT))<0)
+  /* create a dataset */
+ if ((did=H5Dcreate(fid,"dset_a",H5T_NATIVE_INT,sid,H5P_DEFAULT))<0)
   goto out;
  /* create a dataset for the scale */
- if ((scale=H5Dcreate(fid,"scale_1",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
+ if ((dsid=H5Dcreate(fid,"ds_a",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
   goto out;
-
 
 /*-------------------------------------------------------------------------
  * attempt to attach a dataset to itself, it should fail
  *-------------------------------------------------------------------------
  */ 
+
  TESTING2("attach a dataset to itself");
 
- if (H5DSattach_scale(dset,dset,0)==SUCCESS)
+ if (H5DSattach_scale(did,did,0)==SUCCESS)
   goto out;
 
  PASSED();
@@ -932,7 +934,7 @@ static int test_errors(void)
  */ 
  TESTING2("attach a group with a dataset");
 
- if (H5DSattach_scale(gid,scale,0)==SUCCESS)
+ if (H5DSattach_scale(gid,dsid,0)==SUCCESS)
   goto out;
 
  PASSED();
@@ -943,22 +945,31 @@ static int test_errors(void)
  */ 
  TESTING2("attach a dataset with a group");
 
- if (H5DSattach_scale(dset,gid,0)==SUCCESS)
+ if (H5DSattach_scale(did,gid,0)==SUCCESS)
   goto out;
 
  PASSED();
 
+/*-------------------------------------------------------------------------
+ * attempt to set scale for a group, it should fail
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("set scale for a group");
 
+ if (H5DSset_scale(gid,"scale 1")==SUCCESS)
+  goto out;
+
+ PASSED();
 
 /*-------------------------------------------------------------------------
- * end
+ * close IDs for this set
  *-------------------------------------------------------------------------
- */  
+ */ 
 
  /* close */
- if (H5Dclose(scale)<0)
+ if (H5Dclose(dsid)<0)
   goto out;
- if (H5Dclose(dset)<0)
+ if (H5Dclose(did)<0)
   goto out;
  if (H5Sclose(sid)<0)
   goto out;
@@ -966,6 +977,105 @@ static int test_errors(void)
   goto out;
  if (H5Gclose(gid)<0)
   goto out;
+
+ 
+/*-------------------------------------------------------------------------
+ * test 10: attach/detach scales
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("attach/detach scales");
+
+/*-------------------------------------------------------------------------
+ * create 3 datasets: 1 "data" dataset and 2 dimension scales 
+ *-------------------------------------------------------------------------
+ */  
+ if (H5LTmake_dataset_int(fid,"dset_b",rank,dims,NULL)<0)
+  goto out;
+ if (H5LTmake_dataset_int(fid,"ds_b_1",rankds,s1_dim,NULL)<0)
+  goto out;
+ if (H5LTmake_dataset_int(fid,"ds_b_2",rankds,s2_dim,NULL)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * attach them
+ *-------------------------------------------------------------------------
+ */  
+ if ((did = H5Dopen(fid,"dset_b"))<0)
+  goto out;
+
+ if ((dsid = H5Dopen(fid,"ds_b_1"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,0)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if ((dsid = H5Dopen(fid,"ds_b_2"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,1)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * attach/attach
+ *-------------------------------------------------------------------------
+ */  
+  
+ /* get the dataset id for "dset_b" */
+ if ((did = H5Dopen(fid,"dset_b"))<0)
+  goto out;
+
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"ds_b_1"))<0)
+  goto out;
+
+ /* attach "ds_b_1" again in DIM 0  */
+ if (H5DSattach_scale(did,dsid,0)<0) 
+  goto out;
+
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ /* close dataset ID of "dset_b" */
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * detach/detach
+ *-------------------------------------------------------------------------
+ */  
+  
+ /* get the dataset id for "dset_b" */
+ if ((did = H5Dopen(fid,"dset_b"))<0)
+  goto out;
+
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"ds_b_2"))<0)
+  goto out;
+
+ /* detach the "ds_b_2" dimension scale to "dset_b" in DIM 1  */
+ if (H5DSdetach_scale(did,dsid,1)<0) 
+  goto out;
+
+ /* detach again, it should fail */
+ if (H5DSdetach_scale(did,dsid,1)==SUCCESS) 
+  goto out;
+
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ /* close dataset ID of "dset_b" */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+ /* close */
  if (H5Fclose(fid)<0)
   goto out;
 
@@ -976,8 +1086,8 @@ out:
  H5E_BEGIN_TRY {
   H5Sclose(sid);
   H5Sclose(sidds);
-  H5Dclose(dset);
-  H5Dclose(scale);
+  H5Dclose(did);
+  H5Dclose(dsid);
   H5Gclose(gid);
   H5Fclose(fid);
  } H5E_END_TRY;
