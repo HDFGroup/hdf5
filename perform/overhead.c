@@ -199,7 +199,7 @@ test(fill_t fill_style, const double splits[],
     }
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk(dcpl, 1, ch_size)<0) goto error;
-    if ((xfer=H5Pcreate_list(H5P_DATASET_XFER_NEW))<0) goto error;
+    if ((xfer=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
     if (H5Pset_btree_ratios(xfer, splits[0], splits[1], splits[2])<0) {
 	goto error;
     }
@@ -208,14 +208,13 @@ test(fill_t fill_style, const double splits[],
     if ((dset=H5Dcreate(file, "chunked", H5T_NATIVE_INT,
 			fspace, dcpl))<0) goto error;
 
-#if !defined( __MWERKS__)	
-
+#if !defined( __MWERKS__)
  /* 
   workaround for a bug in the Metrowerks open function
   pvn
   */		
     if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;
-#endif  
+#endif
 
     for (i=1; i<=cur_size[0]; i++) {
 
@@ -250,32 +249,23 @@ test(fill_t fill_style, const double splits[],
 	    goto error;
 	}
 
-
-#if !defined( __MWERKS__)			
-
 	/* Determine overhead */
+#if !defined( __MWERKS__)
 	if (verbose) {
 	    if (H5Fflush(file, H5F_SCOPE_LOCAL)<0) goto error;
 	    if (fstat(fd, &sb)<0) goto error;
-	    /*
-	     * The extra cast in the following statement is a bug workaround
-	     * for the Win32 version 5.0 compiler.
-	     * 1998-11-06 ptl
-	     */
+	  
 	    printf("%4lu %8.3f ***\n",
 		   (unsigned long)i,
 		   (double)(hssize_t)(sb.st_size-i*sizeof(int))/(hssize_t)i);
 	}
-#endif    
-	
-	
+#endif
     }
 
     H5Dclose(dset);
     H5Sclose(mspace);
     H5Sclose(fspace);
     H5Pclose(dcpl);
-    H5Pclose_list(xfer);
     H5Fclose(file);
 
     if (!verbose) {
@@ -298,17 +288,16 @@ test(fill_t fill_style, const double splits[],
 	case FILL_ALL:
 	    abort();
 	}
-	
+
 #if !defined( __MWERKS__)
-	
 	if (fstat(fd, &sb)<0) goto error;
-		printf("%-7s %8.3f\n", sname,
+
+	printf("%-7s %8.3f\n", sname,
 	       (double)(hssize_t)(sb.st_size-cur_size[0]*sizeof(int))/
 	           (hssize_t)cur_size[0]);
 #endif
-	          
-    }
 
+    }
 
 #if !defined( __MWERKS__)
     close(fd);
@@ -321,10 +310,13 @@ test(fill_t fill_style, const double splits[],
     H5Sclose(mspace);
     H5Sclose(fspace);
     H5Pclose(dcpl);
-    H5Pclose_list(xfer);
     H5Fclose(file);
     free(had);
+   
+#if !defined( __MWERKS__)
     close(fd);
+#endif   
+   
     return 1;
 }
 
@@ -356,11 +348,11 @@ main(int argc, char *argv[])
 
     /* Default split ratios */
     H5Eset_auto(display_error_cb, NULL);
-    if ((xfer=H5Pcreate_list(H5P_DATASET_XFER_NEW))<0) goto error;
+    if ((xfer=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
     if (H5Pget_btree_ratios(xfer, splits+0, splits+1, splits+2)<0) {
 	goto error;
     }
-    if (H5Pclose_list(xfer)<0) goto error;
+    if (H5Pclose(xfer)<0) goto error;
     
     /* Parse command-line options */
     for (i=1, j=0; i<argc; i++) {

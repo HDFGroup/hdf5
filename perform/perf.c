@@ -7,6 +7,7 @@
  * So if it doesn't work on some platform, that might be why.
  */
 
+#include "hdf5.h"
 #ifdef H5_HAVE_PARALLEL
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +22,6 @@
 #endif
 
 
-#include "hdf5.h"
 /* Macro definitions */
 /* Verify:
  * if val is false (0), print mesg and if fatal is true (non-zero), die.

@@ -10019,6 +10019,7 @@ trap 'rm -fr `echo "src/libhdf5.settings
           pablo/Makefile
           test/Makefile
           $PARALLEL_MAKE
+	  perform/Makefile
           tools/Makefile
           tools/h5dump/Makefile
           tools/h5ls/Makefile
@@ -10187,6 +10188,7 @@ CONFIG_FILES=\${CONFIG_FILES-"src/libhdf5.settings
           pablo/Makefile
           test/Makefile
           $PARALLEL_MAKE
+	  perform/Makefile
           tools/Makefile
           tools/h5dump/Makefile
           tools/h5ls/Makefile

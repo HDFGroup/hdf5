@@ -1636,6 +1636,7 @@ AC_OUTPUT(src/libhdf5.settings
           pablo/Makefile
           test/Makefile
           $PARALLEL_MAKE
+	  perform/Makefile
           tools/Makefile
           tools/h5dump/Makefile
           tools/h5ls/Makefile

@@ -7,6 +7,7 @@
  * and was called mpi-io-test.c
  */
 
+#include "hdf5.h"
 #ifdef H5_HAVE_PARALLEL
 /* mpi-perf.c
  *
