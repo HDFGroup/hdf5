@@ -105,7 +105,7 @@ install-doc: $(PUB_DOCS)
 	@if test -d $(DOCDIR) ; then                                          \
 	    :;                                                                \
 	else                                                                  \
-	   $(INSTALL_DIR) $(DOCDIR);
+	   $(INSTALL_DIR) $(DOCDIR);                                          \
 	fi
 	@for d in X $(SUBDIRS); do                                            \
 	    if test $$d != X; then                                            \
