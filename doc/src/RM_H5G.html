@@ -5,6 +5,23 @@ HDF5/H5G Draft API Specification
 
 <body>
 
+<hr>
+<center>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+H5G&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Glossary.html">Glossary</a>
+</center>
+<hr>
+
 <center>
 <h1>H5G: Group Interface</h1>
 </center>
@@ -596,287 +613,27 @@ then be trivial.
 
 
 <hr>
-<hr>
-</b>UNUSED PORTIONS OF EMAIL NOTES.</b>  
-<br>
-<code>....</code> in left margin indicates where material was pulled out for use.
-<HR>
-<HR>
-<pre>
-
-Hi Elena, here's a hodgepodge of stuff from html documents and
-previous e-mails to answer your questions. Let me know if you need
-further clarification.
-
-....
-....  [H5Gmove and H5Gunlink "NYI" comments were here]
-....
-
-Elena> We need little bit more user-friendly description of the H5Gstat and
-Elena> H5Giterate functions.
-
->From a Mar 31 e-mail...
-
-Robb>
-....
-....  [H5Giterate was here]
-....
-Robb> 
-Robb> 
-Robb> Group Information Functions:
-....
-....  [H5Gstat was here]
-....
-Robb> 
-Robb> herr_t H5Gname(hid_t group_id, char *name, size_t max_name_len);
-Robb>
-Robb> This function retrieves the name of the group for a group ID.  The
-Robb> name is returned in 'name' up to the length specified in 'max_name_len'.
-Robb>
-....
-....  [H5Gget_linkval was here]
-....
-Robb> 
-Robb> H5Giterate example #1: The operator just looks at the member name and if it has an
-Robb>     `X' in it then it returns 1, otherwise return zero.  Returning 1 (or any
-Robb>     positive value) causes the iterator to immediately return that value.  If
-Robb>     none of the operators return 1 then the iterator eventually returns zero.
-Robb> 
-Robb> 1  herr_t
-Robb> 2  any_X (hid_t group_id/*unused*/,
-Robb> 4         const char *member_name,
-Robb> 5         void *op_data/*unused*/)
-Robb> 6  {
-Robb> 7      return strchr(member_name,'X') ? 1 : 0;
-Robb> 8  }
-Robb> 
-Robb> The iterator is invoked as:
-Robb> 
-Robb> 9  int elmt=0;
-Robb> 10  herr_t found = H5Giterate(file_id, "/foo", &elmt, any_X, NULL);
-Robb> 11  
-Robb> 12  if (found<0) {
-Robb> 13     printf ("Error iterating through group, at member %d\n", elmt);
-Robb> 14  } else if (found) {
-Robb> 15     printf ("Yes, member %d has an `X' in the name\n", elmt);
-Robb> 16  } else {
-Robb> 17     printf ("No member name contains an `X'\n");
-Robb> 18  }
-Robb> 
-Robb> H5Giterate example #2: An iterator to find an object whose name contains an `X'
-Robb>     This is the same as Example 1 except the operator also returns the name
-Robb>     that contains the `X'.  We do this by passing a pointer to a `char*' as the
-Robb>     operator data and the operator will initialize that `char*' by strdup'ing
-Robb>     the object name.
-Robb> 
-Robb> 1  herr_t
-Robb> 2  find_X (hid_t group_id/*unused*/,
-Robb> 4          const char *member_name,
-Robb> 5          void *op_data/*out*/)
-Robb> 6  {
-Robb> 7      if (strchr(member_name,'X')) {
-Robb> 8          *((char**)op_data) = strdup(member_name);
-Robb> 9          return 1;
-Robb> 10      }
-Robb> 11      return 0;
-Robb> 12  }
-Robb> 
-Robb> To print all the names with an `X' the iterator is invoked
-Robb> repeatedly until it returns zero.
-Robb> 
-Robb> 13  int elmt = 0;
-Robb> 14  char *name;
-Robb> 15  while (H5Giterate(file_id, "/foo", &elmt, find_X, &name)) {
-Robb> 16      puts (name);
-Robb> 17      free (name);
-Robb> 18  }
-Robb> 
-Robb> H5Giterate example #3: Print all names that contain the specified character.
-Robb>     This is the same as Example 2 except we have to pass data into the operator
-Robb>     as well as get data out.  We create a struct that contains the input data
-Robb>     (character to look for) and a slot for the output data (the name) and pass
-Robb>     that as the operator data.
-Robb> 
-Robb> 1  typedef struct {
-Robb> 2      char look_for;
-Robb> 3      char *name;
-Robb> 4  } find_char_t;
-Robb> 5  
-Robb> 6  herr_t
-Robb> 7  find_char (hid_t group_id/*unused*/,
-Robb> 9             const char *member_name,
-Robb> 10             find_char_t *op_data/*in,out*/)
-Robb> 11  {
-Robb> 13      if (strchr(member_name, op_data->look_for)) {
-Robb> 14          op_data->name = strdup (member_name);
-Robb> 15          return 1;
-Robb> 16      }
-Robb> 17      return 0;
-Robb> 18  }
-Robb> 
-Robb> To print all names that have a `Y' one would say
-Robb> 
-Robb> 19  find_char_t op_data;
-Robb> 20  int elmt = 0;
-Robb> 21  op_data->look_for = 'Y';
-Robb> 22  while (H5Giterate(file_id, "/foo", &elmt, find_X, &op_data)) {
-Robb> 23      puts (op_data->name);
-Robb> 24      free (op_data->name);
-Robb> 25  }
-Robb> 
-Robb> H5Giterate example #4: Efficient version of Example 3.
-Robb>     Examples 2 and 3 weren't too efficient because we kept interrupting the
-Robb> iterator and it had to start over, albeit from the middle of the search. If
-Robb> we could allow the iterator to go further then we wouldn't end up scanning
-Robb> through the leaf nodes of the symbol table so often (searching for a
-Robb> particular index, n, in a B-tree is an O(n) operation).
-Robb>     The H5Glist() function defined earlier returns the names of all the group
-Robb> members which belong to a certain class, H5G_ALL, H5G_DATASET, or H5G_GROUP.
-Robb> This example shows how to implement that functionality.
-Robb>     First we need a struct to describe the operator data and it's return
-Robb> value(s).  These correspond to the arguments presented for H5Glist, whose
-Robb> definition is at the end of this example. (Since most of the work is done by
-Robb> the operator we have to pass all this stuff back and forth through the
-Robb> iterator).
-Robb> 
-Robb> 1  typedef struct {
-Robb> 2      size_t     name_heap_size;
-Robb> 3      char       *name_heap;
-Robb> 4      unsigned   max_entries;
-Robb> 5      char       *names[];
-Robb> 6      int        type;
-Robb> 7      unsigned   cur_entries; /* How many names read so far */
-Robb> 8      size_t     cur_heap_size; /* How large is the heap */
-Robb> 9  } H5G_list_t;
-Robb> 
-Robb> The operator checks if an object is the right type, and if so adds it to
-Robb> the return value arrays in the op_data struct.  If the arrays become full
-Robb> then the operator returns 1 to stop the iterator. The H5*isa() functions
-Robb> return true iff the named object is of the * type (sans error handling).
-Robb> 
-Robb> 10  herr_t
-Robb> 11  H5G_list_op (hid_t grp_id, const char *memb_name,
-Robb> 12               H5G_list_t *op_data)
-Robb> 13  {
-Robb> 14      char *out_name;
-Robb> 15  
-Robb> 16      if (H5G_ALL==op_data->type ||
-Robb> 17          (H5G_DATASET==op_data->type && H5Disa(grp_id,memb_name)) ||
-Robb> 18          (H5G_GROUP==op_data->type && H5Gisa(grp_id, memb_name))) {
-Robb> 19  
-Robb> 20          /* Is there enough room for the name in the heap? */
-Robb> 21          if (op_data->cur_heap_size + strlen(memb_name) + 1 >
-Robb> 22              op_data->name_heap_size) {
-Robb> 23              return 2; /*try again later, see lines 59-62*/
-Robb> 24          }
-Robb> 25  
-Robb> 26          /* Add name to op_data return value arrays */
-Robb> 27          out_name = op_data->name_heap + op_data->cur_heap_size;
-Robb> 28          strcpy (out_name, memb_name);
-Robb> 29          op_data->names[op_data->cur_entries] = out_name;
-Robb> 30          op_data->cur_heap_size += strlen(memb_name) + 1;
-Robb> 31  
-Robb> 32          /* Is the output full? */
-Robb> 33          if (op_data->cur_entries >= op_data->max_entries) {
-Robb> 34              return 1;
-Robb> 35          }
-Robb> 36      }           
-Robb> 37      return 0;
-Robb> 38  }
-Robb> 
-Robb> And finally, the definition of H5Glist():
-Robb> 
-Robb> 39  int
-Robb> 40  H5Glist (hid_t group_id, size_t name_heap_size, char *name_heap,
-Robb> 41           int *start_idx, unsigned max_entries, char *names[],
-Robb> 42           int type)
-Robb> 43  {
-Robb> 44      H5G_list_t op_data;
-Robb> 45      herr_t status;
-Robb> 46  
-Robb> 47      op_data->name_heap_size = name_heap_size;
-Robb> 48      op_data->name_heap = name_heap;
-Robb> 49      op_data->max_entries = max_entries;
-Robb> 50      op_data->names = names;
-Robb> 51      op_data->type = type;
-Robb> 52      op_data->cur_entries = 0;
-Robb> 53      op_data->cur_heap_size = 0;
-Robb> 54  
-Robb> 55      if (0==cur_entries) return 0;
-Robb> 56      status = H5Giterate (group_id, ".", start_idx, H5G_list_op,
-Robb> 57                           &op_data);
-Robb> 58  
-Robb> 59      if (2==status && 0==op_data->cur_entries) {
-Robb> 60          return -1; /*heap not large enough for even one name*/
-Robb> 61      } else if (2==status) {
-Robb> 62          --*start_idx; /*heap overflow, try again later*/
-Robb> 63      } else if (status<0) {
-Robb> 64          return status; /*iterator or operator error*/
-Robb> 65      }
-Robb> 66      return op_data->cur_entries;
-Robb> 67  }
-Robb> 
-Robb>     The only other really interesting thing in this example are lines 23, 61,
-Robb> and 62.  We don't know if the name heap will overflow until we find a name to
-Robb> put there.  And then if it does, we need to be able to restart the iterator at
-Robb> the entry that failed instead of the following entry.
-Robb> 
-Robb> H5Giterate example #5: Print all the names of objects in a group, without any
-Robb>                         buffers.
-Robb> ---------------------
-Robb> 
-Robb> herr_t print_names (hid_t grp_id, const char *name, void *opdata)
-Robb> {
-Robb>     puts (name);
-Robb>     return 0;
-Robb> }
-Robb> 
-Robb> {
-Robb>     H5Giterate (file_id, "/foo/bar", NULL, print_names, NULL);
-Robb> }
-
-Elena> I believe there is a typo in the H5Pget_layout function in the source
-Elena> code. Second argument ( H5D_layout_t *layout is missing....)  
-
-It's returned by value, not reference.  It returns only the class of
-layout and then, based on the class, you must call some other H5Pget
-function like H5Pget_chunk() like this:
-
-	hid_t dcpl; /*dataset creation property list*/
-	hsize_t dims[32]; /*chunk dimensions*/
-	...
-	switch (H5Pget_layout(dcpl)) {
-	case H5D_CHUNKED:
-	    H5Pget_chunk(dcpl, NELMTS(dims), dims);
-	    break;
-	...
-	case H5D_LAYOUT_ERROR:
-	    ...
-	...
-	}
-
-
-Quincy and html> 
-Quincy and html> 
-....
-....  [Datatype material move to H5T.html]
-....
-Quincy and html> 
-Quincy and html> 
-
-
-</pre>
-<hr>
+<center>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+H5G&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Glossary.html">Glossary</a>
+</center>
 <hr>
 
-<hr>
 <address>
-<a href="mailto:fbaker@ncsa.uiuc.edu">Frank Baker</a>
-<br>
-<a href="mailto:h5docs@ncsa.uiuc.edu">HDF5 Documentation</a>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  8 July 1998
+Last modified:  14 July 1998
 
 </body>
 </html>

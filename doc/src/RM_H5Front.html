@@ -4,6 +4,23 @@ HDF5 Draft API Specification
 </title></head>
 <body>
 
+<hr>
+<center>
+HDF5 Reference Manual&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Glossary.html">Glossary</a>
+</center>
+<hr>
+
 <center>
 <h1>HDF5: API Specification<br>Reference Manual</h1>
 </center>
@@ -13,246 +30,43 @@ tools required to meet specific aspects of the HDF5 data-handling requirements.
 
 <ul>
 
-<!--
-<li><a href="#Library">Library</a> - H5&lt;name&gt; - API for global library HDF information/modification.
-<ol type=A>
-    <li><a href="#Library-DontAtExit">H5dont_atexit</a>
-    <li><a href="#Library-Close">H5close</a>
-    <li><a href="#Library-Version">H5version</a>
-</ol>
--->
-
+<li><a href="RM_H5.html">Library Functions</a> -- The general-purpose <strong>H5</strong> functions.
 <li><a href="RM_H5F.html">File Interface</a> -- The <strong>H5F</strong> API for accessing HDF files.
-<!--
-<ul type=A>
-    <li><font size=-2>
-    ( <a href="RM_H5F.html#File-Open">H5Fopen</a> &nbsp;&nbsp;
-    <a href="RM_H5F.html#File-Create">H5Fcreate</a> &nbsp;&nbsp;
-    <a href="RM_H5F.html#File-IsHDF5">H5Fis_hdf5</a> &nbsp;&nbsp;
-    <a href="RM_H5F.html#File-GetCreateTemplate">H5Fget_create_template</a> &nbsp;
-    <a href="RM_H5F.html#File-Close">H5Fclose</a> )
-    </font>
-</ul>
--->
-
 <li><a href="RM_H5P.html">Property List Interface</a> -- The <strong>H5P</strong> API for manipulating object templates.
-<!--
-<ul type=A>
-    <li><font size=-2>
-    ( <a href="RM_H5P.html#Template-Create">H5Pcreate</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetClass">H5Pget_class</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-Copy">H5Pcopy</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-Close">H5Pclose</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetVersion">H5Pget_version</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetUserblock">H5Pset_userblock</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetUserblock">H5Pget_userblock</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetSizes">H5Pset_sizes</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetSizes">H5Pget_sizes</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetMPI">H5Pset_mpi</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetMPI">H5Pget_mpi</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetXfer">H5Pset_xfer</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetXfer">H5Pget_xfer</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetSymK">H5Pset_sym_k</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetSymK">H5Pget_sym_k</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetIstoreK">H5Pset_istore_k</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetIstoreK">H5Pget_istore_k</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetLayout">H5Pset_layout</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetLayout">H5Pget_layout</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-SetChunk">H5Pset_chunk</a> &nbsp;&nbsp;
-    <a href="RM_H5P.html#Template-GetChunk">H5Pget_chunk</a> )
-    </font>
-</ul>
--->
-
-<!--
-<li><a href="#Error">Error</a> - H5E&lt;name&gt; - API for error reporting
-<ol type=A>
-    <li><a href="#Error-SetPush">H5Eset_push</a>
-</ol>
--->
-
-<!--
-<li><a href="#Relationships">Relationships</a> - H5R&lt;name&gt; - API for logically linking objects together (ie. attributes).
-<ol type=A>
-    <li><a href="#Relationships-GetNumRelations">H5Rget_num_relations</a>
-    <li><a href="#Relationships-GetMemberOfOIDs">H5Rget_memberof_oids</a>
-    <li><a href="#Relationships-GetAttachedOIDs">H5Rget_attached_oids</a> 
-    <li><a href="#Relationships-Attach">H5Rattach_oid</a>
-</ol>
--->
-
 <li><a href="RM_H5D.html">Dataset Interface</a> -- The <strong>H5D</strong> API for manipulating scientific datasets. 
-<!--
-<table border=0 width=100>
-    <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td width=200>
-    <a href="RM_H5D.html#Dataset-Create"><font size=-2>H5Dcreate</font></a>
-    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td width=200>
-    <a href="RM_H5D.html#Dataset-Open"><font size=-2>H5Dopen</font></a>
-    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td width=200>
-    <a href="RM_H5D.html#Dataset-GetSpace"><font size=-2>H5Dget_space</font></a>
-    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td width=200>
-    <a href="RM_H5D.html#Dataset-GetType"><font size=-2>H5Dget_type</font></a>
-    </td></tr><tr><td></td><td>
-    <a href="RM_H5D.html#Dataset-GetCreateParms"><font size=-2>H5Dget_create_parms</font></a>
-    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
-    <a href="RM_H5D.html#Dataset-Read"><font size=-2>H5Dread</font></a>
-    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
-    <a href="RM_H5D.html#Dataset-Write"><font size=-2>H5Dwrite</font></a>
-    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
-    <a href="RM_H5D.html#Dataset-Extend"><font size=-2>H5Dextend</font></a>
-    </td></tr><tr><td></td><td>
-    <a href="RM_H5D.html#Dataset-Close"><font size=-2>H5Dclose</font></a>
-</table>
--->
-
 <li><a href="RM_H5T.html">Datatype Interface</a> -- The <strong>H5T</strong> API for defining dataset element information.
-<!--
-<table border=0>
-<tr><td valign=top>
-<font size=-2>
-<ul>
-    <li><a href="RM_H5T.html#Datatype-Create">H5Tcreate</a>
-    <li><a href="RM_H5T.html#Datatype-Copy">H5Tcopy</a>
-    <li><a href="RM_H5T.html#Datatype-Equal">H5Tequal</a>
-    <li><a href="RM_H5T.html#Datatype-Lock">H5Tlock</a>
-    <li><a href="RM_H5T.html#Datatype-GetClass">H5Tget_class</a>
-    <li><a href="RM_H5T.html#Datatype-GetSize">H5Tget_size</a>
-    <li><a href="RM_H5T.html#Datatype-SetSize">H5Tset_size</a>
-    <li><a href="RM_H5T.html#Datatype-GetOrder">H5Tget_order</a>
-    <li><a href="RM_H5T.html#Datatype-SetOrder">H5Tset_order</a>
-    <li><a href="RM_H5T.html#Datatype-GetPrecision">H5Tget_precision</a>
-</ul>
-</font>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<font size=-2>
-<ul>
-    <li><a href="RM_H5T.html#Datatype-SetPrecision">H5Tset_precision</a>
-    <li><a href="RM_H5T.html#Datatype-GetOffset">H5Tget_offset</a>
-    <li><a href="RM_H5T.html#Datatype-SetOffset">H5Tset_offset</a>
-    <li><a href="RM_H5T.html#Datatype-GetPad">H5Tget_pad</a>
-    <li><a href="RM_H5T.html#Datatype-SetPad">H5Tset_pad</a>
-    <li><a href="RM_H5T.html#Datatype-GetSign">H5Tget_sign</a>
-    <li><a href="RM_H5T.html#Datatype-SetSign">H5Tset_sign</a>
-    <li><a href="RM_H5T.html#Datatype-GetFields">H5Tget_fields</a>
-    <li><a href="RM_H5T.html#Datatype-SetFields">H5Tset_fields</a>
-    <li><a href="RM_H5T.html#Datatype-GetEbias">H5Tget_ebias</a>
-</ul>
-</font>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<font size=-2>
-<ul>
-    <li><a href="RM_H5T.html#Datatype-SetEbias">H5Tset_ebias</a>
-    <li><a href="RM_H5T.html#Datatype-GetNorm">H5Tget_norm</a>
-    <li><a href="RM_H5T.html#Datatype-SetNorm">H5Tset_norm</a>
-    <li><a href="RM_H5T.html#Datatype-GetInpad">H5Tget_inpad</a>
-    <li><a href="RM_H5T.html#Datatype-SetInpad">H5Tset_inpad</a>
-    <li><a href="RM_H5T.html#Datatype-GetCset">H5Tget_cset</a>
-    <li><a href="RM_H5T.html#Datatype-SetCset">H5Tset_cset</a>
-    <li><a href="RM_H5T.html#Datatype-GetStrpad">H5Tget_strpad</a>
-    <li><a href="RM_H5T.html#Datatype-SetStrpad">H5Tset_strpad</a>
-    <li><a href="RM_H5T.html#Datatype-GetNmembers">H5Tget_nmembers</a>
-</ul>
-</font>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<font size=-2>
-<ul>
-    <li><a href="RM_H5T.html#Datatype-GetMemberName">H5Tget_member_name</a>
-    <li><a href="RM_H5T.html#Datatype-GetMemberOffset">H5Tget_member_offset</a>
-    <li><a href="RM_H5T.html#Datatype-GetMemberDims">H5Tget_member_dims</a>
-    <li><a href="RM_H5T.html#Datatype-GetMemberType">H5Tget_member_type</a>
-    <li><a href="RM_H5T.html#Datatype-Insert">H5Tinsert</a>
-    <li><a href="RM_H5T.html#Datatype-Pack">H5Tpack</a>
-    <li><a href="RM_H5T.html#Datatype-RegisterHard">H5Tregister_hard</a>
-    <li><a href="RM_H5T.html#Datatype-RegisterSoft">H5Tregister_soft</a>
-    <li><a href="RM_H5T.html#Datatype-Unregister">H5Tunregister</a>
-    <li><a href="RM_H5T.html#Datatype-Close">H5Tclose</a>
-</ul>
-</td></tr>
-</table>
--->
-
 <li><a href="RM_H5S.html">Dataspace Interface</a> -- The <strong>H5S</strong> API for defining dataset dataspace.
-<!--
-<table border=0>
-<tr></td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<font size=-2>
-    <a href="RM_H5S.html#Dataspace-CreateSimple">H5Screate_simple</a> <br>
-    <a href="RM_H5S.html#Dataspace-Copy">H5Scopy</a> <br>
-    <a href="RM_H5S.html#Dataspace-GetNpoints">H5Sget_npoints</a> <br>
-</ul>
-</font>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<font size=-2>
-    <a href="RM_H5S.html#Dataspace-GetNdims">H5Sget_ndims</a> <br>
-    <a href="RM_H5S.html#Dataspace-GetDims">H5Sget_dims</a> <br>
-    <a href="RM_H5S.html#Dataspace-IsSimple">H5Sis_simple</a> <br>
-</ul>
-</font>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<font size=-2>
-    <a href="RM_H5S.html#Dataspace-SetSpace">H5Sset_space</a> <br>
-    <a href="RM_H5S.html#Dataspace-SetHyperslab">H5Sset_hyperslab</a> <br>
-    <a href="RM_H5S.html#Dataspace-GetHyperslab">H5Sget_hyperslab</a> <br>
-</ul>
-</font>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<font size=-2>
-    <a href="RM_H5S.html#Dataspace-Close">H5Sclose</a> <br>
-</ul>
-</td></tr>
-</table>
--->
-
 <li><a href="RM_H5G.html">Group Interface</a> -- The <strong>H5G</strong> API for creating physical groups of objects on disk.
-<!--
-<ol type=A>
-    <li><a href="RM_H5G.html#Group-Create">H5Gcreate</a>
-    <li><a href="RM_H5G.html#Group-Open">H5Gopen</a>
-    <li><a href="RM_H5G.html#Group-Set">H5Gset</a>
-    <li><a href="RM_H5G.html#Group-Push">H5Gpush</a>
-    <li><a href="RM_H5G.html#Group-Pop">H5Gpop</a>
-    <li><a href="RM_H5G.html#Group-Close">H5Gclose</a>
-sub-commented--------
-    <li><a href="RM_H5G.html#Group-GetNumContents">get_num_contents</a>
-    <li><a href="RM_H5G.html#Group-GetContentInfo">get_content_info</a>
-    <li><a href="RM_H5G.html#Group-GetContentInfoMult">get_content_info_mult</a>
-    <li><a href="RM_H5G.html#Group-GetOIDByName">get_oid_by_name</a>
-    <li><a href="RM_H5G.html#Group-GetOIDByIndex">get_oid_by_index</a>
-    <li><a href="RM_H5G.html#Group-GetNameByOID">get_name_by_oid</a>
-    <li><a href="RM_H5G.html#Group-GetNameByIndex">get_name_by_index</a>
-    <li><a href="RM_H5G.html#Group-InsertItem">insert_item</a>
-    <li><a href="RM_H5G.html#Group-InsertItemMult">insert_item_mult</a>
-    <li><a href="RM_H5G.html#Group-RemoveItem">remove_item</a>
-    <li><a href="RM_H5G.html#Group-RemoveItemMult">remove_item_mult</a>
---------sub-commented
-</ol>
--->
-
 <li><a href="RM_H5E.html">Error Interface</a> -- The <strong>H5E</strong> API for error handling.
 <li><a href="RM_H5Z.html">Compression Interface</a> -- The <strong>H5Z</strong> API for compression.
 <li><a href="RM_H5A.html">Annotation Interface</a> -- The <strong>H5A</strong> API for annotations.
-
 <li><a href="Glossary.html">Glossary</a> -- A glossary of data-types used in the APIs.
-<!--
-<ol type=A>
-    <li><a href="Glossary.html#Glossary-Basic">Basic Types</a>
-    <li><a href="Glossary.html#Glossary-Complex">Complex Types</a>
-    <li><a href="Glossary.html#Glossary-DiskIO">Disk I/O Types</a>
-</ol>
--->
 
 
 </ul>
 
 <hr>
+<center>
+HDF5 Reference Manual&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Glossary.html">Glossary</a>
+</center>
+<hr>
 
 <address>
-<a href="mailto:fbaker@ncsa.uiuc.edu">Frank Baker</a>
-<br>
-<a href="mailto:h5docs@ncsa.uiuc.edu">HDF5 Documentation</a>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  29 June 1998
+Last modified:  14 July 1998
 
 </body>
 </html>
