@@ -36,16 +36,12 @@ typedef struct H5FD_class_mpi_t {
     int  (*get_size)(const H5FD_t *file);     /* Get the MPI size of a communicator */
     MPI_Comm (*get_comm)(const H5FD_t *file); /* Get the communicator for a file */
 } H5FD_class_mpi_t;
+#endif /* H5_HAVE_PARALLEL */
 
 /* Include all the MPI VFL headers */
 #include "H5FDfphdf5.h"		/* Flexible PHDF5 file driver		*/
 #include "H5FDmpio.h"           /* MPI I/O file driver			*/
 #include "H5FDmpiposix.h"       /* MPI/posix I/O file driver            */
-
-/*
- * The view is set to this value
- */
-extern char H5FD_mpi_native_g[];
 
 /* Macros */
 
@@ -53,6 +49,7 @@ extern char H5FD_mpi_native_g[];
 #define IS_H5FD_MPI(file)  \
         (IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file) || IS_H5FD_FPHDF5(file))
 
+#ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
 /* Definitions for memory MPI type property */
 #define H5FD_MPI_XFER_MEM_MPI_TYPE_NAME        "H5FD_mpi_mem_mpi_type"
@@ -60,6 +57,11 @@ extern char H5FD_mpi_native_g[];
 /* Definitions for file MPI type property */
 #define H5FD_MPI_XFER_FILE_MPI_TYPE_NAME       "H5FD_mpi_file_mpi_type"
 #define H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
+
+/*
+ * The view is set to this value
+ */
+extern char H5FD_mpi_native_g[];
 
 /* Function prototypes */
 #ifdef __cplusplus

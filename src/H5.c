@@ -1749,6 +1749,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		}
 		break;
 		
+#ifdef H5_HAVE_PARALLEL
 	    case 't':
 		if (ptr) {
 		    if (vp) {
@@ -1771,6 +1772,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		}
 		break;
+#endif /* H5_HAVE_PARALLEL */
 		
 	    default:
 		fprintf (out, "BADTYPE(D%c)", type[1]);
