@@ -142,6 +142,11 @@ typedef struct
 /* Definitions for misc. test #9 */
 #define MISC9_FILE              "tmisc9.h5"
 
+/* Definitions for misc. test #10 */
+#define MISC10_FILE_OLD         "tmtimeo.h5"
+#define MISC10_FILE_NEW         "tmisc10.h5"
+#define MISC10_DSETNAME         "Dataset1"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -1575,6 +1580,85 @@ test_misc9(void)
 
 /****************************************************************
 **
+**  test_misc10(): Test opening a dataset created with an older
+**      version of the library (shares the tmtimeo.h5 file with the mtime.c
+**      test - see notes in gen_old_mtime.c for notes on generating this
+**      data file) and using the dataset creation property list from
+**      that dataset to create a dataset with the current version of
+**      the library.  Also tests using file creation property in same way.
+**
+****************************************************************/
+static void
+test_misc10(void)
+{
+    hid_t       file, file_new; /* File IDs for old & new files */
+    hid_t       fcpl;           /* File creation property list */
+    hid_t       dataset, dataset_new;   /* Dataset IDs for old & new datasets */
+    hid_t       dcpl;           /* Dataset creation property list */
+    hid_t       space, type;    /* Old dataset's dataspace & datatype */
+    char testfile[512]="";          /* Character buffer for corrected test file name */
+    char *srcdir = getenv("srcdir");    /* Pointer to the directory the source code is located within */
+    herr_t      ret;                             
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing using old dataset creation property list\n"));
+
+    /* Generate the correct name for the test file, by prepending the source path */
+    if (srcdir && ((strlen(srcdir) + strlen(MISC10_FILE_OLD) + 1) < sizeof(testfile))) {
+        strcpy(testfile, srcdir);
+        strcat(testfile, "/");
+    }
+    strcat(testfile, MISC10_FILE_OLD);
+
+    /*
+     * Open the old file and the dataset and get old settings.
+     */
+    file =    H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
+    fcpl =  H5Fget_create_plist(file);
+    CHECK(fcpl, FAIL, "H5Fget_create_plist");
+
+    dataset = H5Dopen(file, MISC10_DSETNAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+    dcpl =  H5Dget_create_plist(dataset);
+    CHECK(dcpl, FAIL, "H5Dget_create_plist");
+    space =   H5Dget_space(dataset);
+    CHECK(space, FAIL, "H5Dget_space");
+    type =    H5Dget_type(dataset);
+    CHECK(type, FAIL, "H5Dget_type");
+
+    /* Create new file & dataset */
+    file_new = H5Fcreate(MISC10_FILE_NEW, H5F_ACC_TRUNC , fcpl, H5P_DEFAULT);
+    CHECK(file_new, FAIL, "H5Fcreate");
+
+    dataset_new = H5Dcreate(file_new, MISC10_DSETNAME, type, space, dcpl);
+    CHECK(dataset_new, FAIL, "H5Dcreate");
+
+    /* Close new dataset & file */
+    ret=H5Dclose(dataset_new);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret=H5Fclose(file_new);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close old dataset information */
+    ret=H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret=H5Sclose(space);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret=H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret=H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close old file information */
+    ret=H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret=H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+} /* end test_misc10() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -1592,7 +1676,8 @@ test_misc(void)
     test_misc6();       /* Test object header continuation code */
     test_misc7();       /* Test for sensible datatypes stored on disk */
     test_misc8();       /* Test storage sizes of various types of dataset storage */
-    test_misc9();   /* Test for opening (not creating) core files */
+    test_misc9();       /* Test for opening (not creating) core files */
+    test_misc10();      /* Test for using dataset creation property lists from old files */
 
 } /* test_misc() */
 
@@ -1625,4 +1710,5 @@ cleanup_misc(void)
     remove(MISC7_FILE);
     remove(MISC8_FILE);
     remove(MISC9_FILE);
+    remove(MISC10_FILE_NEW);
 }
