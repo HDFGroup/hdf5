@@ -137,6 +137,9 @@ typedef struct
 #define MISC8_CHUNK_DIM0        10
 #define MISC8_CHUNK_DIM1        10
 
+/* Definitions for misc. test #9 */
+#define MISC9_FILE              "tmisc9.h5"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -1538,6 +1541,34 @@ test_misc8(void)
 
 /****************************************************************
 **
+**  test_misc9(): Test that H5Fopen() does not succeed for core
+**      files, H5Fcreate() must be used to open them.
+**
+****************************************************************/
+static void
+test_misc9(void)
+{
+    hid_t fapl, fid;
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing core file opening\n"));
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    ret=H5Pset_fapl_core(fapl, 1024, 0);
+    CHECK(ret, FAIL, "H5Pset_fapl_core");
+
+    fid = H5Fopen(MISC9_FILE, H5F_ACC_RDWR, fapl);
+    VERIFY(fid,FAIL,"H5Fopen");
+
+    ret=H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pset_fapl_core");
+} /* end test_misc9() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -1555,6 +1586,7 @@ test_misc(void)
     test_misc6();       /* Test object header continuation code */
     test_misc7();       /* Test for sensible datatypes stored on disk */
     test_misc8();       /* Test storage sizes of various types of dataset storage */
+    test_misc9();   /* Test for opening (not creating) core files */
 
 } /* test_misc() */
 
@@ -1586,4 +1618,5 @@ cleanup_misc(void)
     remove(MISC6_FILE);
     remove(MISC7_FILE);
     remove(MISC8_FILE);
+    remove(MISC9_FILE);
 }

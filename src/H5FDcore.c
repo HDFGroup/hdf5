@@ -330,6 +330,8 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     FUNC_ENTER_NOAPI(H5FD_core_open, NULL);
     
     /* Check arguments */
+    if (!(H5F_ACC_CREAT & flags))
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "must create core files, not open them");
     if (0==maxaddr || HADDR_UNDEF==maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
     if (ADDR_OVERFLOW(maxaddr))

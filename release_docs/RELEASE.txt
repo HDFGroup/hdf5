@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * H5Fopen without the H5F_ACC_CREAT flag should not succeed in creating
+      a new file with the 'core' VFL driver.  QAK - 2003/01/24
     * Allow opening objects with unknown object header messages.
       QAK - 2003/01/21
     * Improved error assertion for nil VL strings, making it fails with error
