@@ -507,6 +507,28 @@ bool DataType::detectClass(H5T_class_t cls) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataType::isVariableStr
+///\brief	Check whether this datatype is a variable-length string.
+///\return	true if this datatype is a variable-length string, and 
+///		false, otherwise.
+///\exception   H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+bool DataType::isVariableStr() const
+{
+   htri_t is_varlen_str = H5Tis_variable_str(id);
+   if( is_varlen_str == 1 )
+      return true;
+   else if( is_varlen_str == 0 )
+      return false;
+   else
+   {
+      throw DataTypeIException("DataType::isVariableStr",
+                "H5Tis_variable_str returns negative value");
+   }
+}
+
+//--------------------------------------------------------------------------
 // This private function calls the C API H5Tclose to close this datatype.
 // Used by H5Object::p_reset.
 // Programmer	Binh-Minh Ribler - 2000
