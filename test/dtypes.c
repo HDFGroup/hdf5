@@ -118,7 +118,7 @@ static int num_opaque_conversions_g = 0;
 #define aligned_malloc(Z)	((void*)((char*)HDmalloc(ALIGNMENT+Z)+ALIGNMENT))
 #define aligned_free(M)		HDfree((char*)(M)-ALIGNMENT)
 
-/* Initialize source buffer of integer for integer->integer and integer->floating-point conversion test.
+/* Initialize source buffer of integer for integer->integer conversion test.
  * This algorithm is mainly to avoid any casting and comparison between source and destination types
  * for compiler, because we're testing conversions. */
 #define INIT_INTEGER(TYPE, SRC_MAX, SRC_MIN, SRC_SIZE, DST_SIZE, SRC_PREC, BUF, SAVED, NELMTS)  \
@@ -167,129 +167,6 @@ static int num_opaque_conversions_g = 0;
         }                                                                                       \
         value2 <<= 1;                                                                           \
     }                                                                                           \
-}
-
-/* Change a buffer's byte order from big endian to little endian.  It's mainly for library's 
- * bit operations which handle only little endian order.
- */ 
-#define CHANGE_ORDER(EBUF, EORDER, ESIZE)                                                       \
-{                                                                                               \
-    if (H5T_ORDER_BE==EORDER) {                                                                 \
-        int m;                                                                                  \
-        unsigned char mediator;                                                                 \
-        size_t half_size = ESIZE/2;                                                             \
-        for (m=0; m<half_size; m++) {                                                           \
-            mediator = EBUF[ESIZE-(m+1)];                                                       \
-            EBUF[ESIZE-(m+1)] = EBUF[m];                                                        \
-            EBUF[m] = mediator;                                                                 \
-        }                                                                                       \
-    }                                                                                           \
-}
-
-/* Allocate buffer and initialize it with floating-point normalized and denormalized values. 
- * It's for conversion test of floating-point as the source.
- */
-#define INIT_FP(TYPE, SRC_MAX, SRC_MIN, SRC_MAX_10_EXP, SRC_MIN_10_EXP, SRC_MANT_DIG, SRC_SIZE, \
-                SRC_PREC, SRC_ORDR, DST_SIZE, BUF, SAVED, NELMTS)                               \
-{                                                                                               \
-    unsigned char *buf_p, *saved_p;                                                             \
-    unsigned char *tmp1, *tmp2;                                                                 \
-    size_t num_norm, factor, n;                                                                 \
-    TYPE value1, value2;                                                                        \
-    TYPE multiply;                                                                              \
-                                                                                                \
-    /*Determine the number of normalized values and increment pace.  The values start from      \
-     *minimal normalized value and are multiplied by MULTIPLY each step until reach to maximal  \
-     *normalized value.*/                                                                       \
-    if(SRC_MAX_10_EXP<100) { /*for float*/                                                      \
-        factor = 0;                                                                             \
-        multiply = 10;                                                                          \
-    } else if(SRC_MAX_10_EXP>=100 && SRC_MAX_10_EXP<400) { /*for double*/                       \
-        factor = 2;                                                                             \
-        multiply = 10000;                                                                       \
-    } else { /*for long double*/                                                                \
-        factor = 3;                                                                             \
-        multiply = 100000000;                                                                   \
-    }                                                                                           \
-                                                                                                \
-    /*The number of values if multiplied by 10 for each step.*/                                 \
-    num_norm =  (SRC_MAX_10_EXP - SRC_MIN_10_EXP);                                              \
-    /*Reduce the number of values by 2^factor. MULTIPLY=10^(2^factor). Using this algorithm     \
-     *instead of arithmatic operation to avoid any conversion*/                                 \
-    num_norm >>= factor;                                                                        \
-                                                                                                \
-    /*Total number of values*/                                                                  \
-    NELMTS  = 2 *                      /*both positive and negative*/                           \
-                (num_norm +            /*number of normalized values*/                          \
-                 1 +                   /*maximal normalized value*/                             \
-                 SRC_MANT_DIG - 1);    /*number of denormalized values*/                        \
-                                                                                                \
-    /* Allocate buffers */                                                                      \
-    BUF = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                       \
-    SAVED = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                     \
-    tmp1 = (unsigned char*)malloc(SRC_SIZE);                                                    \
-    tmp2 = (unsigned char*)malloc(SRC_SIZE);                                                    \
-                                                                                                \
-    buf_p = BUF;                                                                                \
-    saved_p = SAVED;                                                                            \
-                                                                                                \
-    /*Normalized values*/                                                                       \
-    value1 = SRC_MIN;                                                                           \
-    value2 = -SRC_MIN;                                                                          \
-    for(n=0; n<num_norm; n++) {                                                                 \
-        if(value1<SRC_MAX) { /*positive*/                                                       \
-            memcpy(buf_p, &value1, SRC_SIZE);                                                   \
-            memcpy(saved_p, &value1, SRC_SIZE);                                                 \
-            value1 *= multiply;                                                                 \
-            buf_p += SRC_SIZE;                                                                  \
-            saved_p += SRC_SIZE;                                                                \
-        }                                                                                       \
-        if(value2>-SRC_MAX) { /*negative*/                                                      \
-            memcpy(buf_p, &value2, SRC_SIZE);                                                   \
-            memcpy(saved_p, &value2, SRC_SIZE);                                                 \
-            value2 *= multiply;                                                                 \
-            buf_p += SRC_SIZE;                                                                  \
-            saved_p += SRC_SIZE;                                                                \
-        }                                                                                       \
-    }                                                                                           \
-                                                                                                \
-    value1 = SRC_MAX;                              /*maximal value*/                            \
-    memcpy(buf_p, &value1, SRC_SIZE);                                                           \
-    memcpy(saved_p, &value1, SRC_SIZE);                                                         \
-    buf_p += SRC_SIZE;                                                                          \
-    saved_p += SRC_SIZE;                                                                        \
-                                                                                                \
-    value2 = -SRC_MAX;                             /*negative value*/                           \
-    memcpy(buf_p, &value2, SRC_SIZE);                                                           \
-    memcpy(saved_p, &value2, SRC_SIZE);                                                         \
-    buf_p += SRC_SIZE;                                                                          \
-    saved_p += SRC_SIZE;                                                                        \
-                                                                                                \
-    /*Denormalized values. Exponent is 0. Let mantissa starts from 00000001, 00000011,          \
-     *00000111,..., until 11111111.*/                                                           \
-    memset(tmp1, 0, SRC_SIZE);                                                                  \
-    memset(tmp2, 0, SRC_SIZE);                                                                  \
-    H5T_bit_set (tmp2, SRC_PREC-1, 1, TRUE);       /*the negative value*/                       \
-    for(n=0; n<SRC_MANT_DIG-1; n++) {                                                           \
-        H5T_bit_set (tmp1, n, 1, TRUE);            /*turn on 1 bit each time*/                  \
-        CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/              \
-        memcpy(buf_p, tmp1, SRC_SIZE);                                                          \
-        memcpy(saved_p, tmp1, SRC_SIZE);                                                        \
-        CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/  \
-        buf_p += SRC_SIZE;                                                                      \
-        saved_p += SRC_SIZE;                                                                    \
-                                                                                                \
-        /*negative values*/                                                                     \
-        H5T_bit_set (tmp2, n, 1, TRUE);                                                         \
-        CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                 \
-        memcpy(buf_p, tmp2, SRC_SIZE);                                                          \
-        memcpy(saved_p, tmp2, SRC_SIZE);                                                        \
-        CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                 \
-        buf_p += SRC_SIZE;                                                                      \
-        saved_p += SRC_SIZE;                                                                    \
-    }                                                                                           \
-    free(tmp1);                                                                                 \
-    free(tmp2);                                                                                 \
 }
 
 void some_dummy_func(float x);
@@ -4776,9 +4653,9 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     } else if(src_type == INT_ULONG) {
         INIT_INTEGER(unsigned long, ULONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
     } else if(src_type == INT_LLONG) {
-        INIT_INTEGER(long_long, LLONG_MAX, LLONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+        INIT_INTEGER(long long, LLONG_MAX, LLONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
     } else if(src_type == INT_ULLONG) {
-        INIT_INTEGER(unsigned long_long, ULLONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+        INIT_INTEGER(unsigned long long, ULLONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
     } else
         goto error;
 
@@ -6418,9 +6295,9 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
             goto error;
     } 
 
-    /* Allocate and initialize the source buffer through macro INIT_INTEGER if the source is integer, 
-     * INIT_FP if floating-point.  The BUF will be used for the conversion while the SAVED buffer 
-     * will be used for the comparison later.
+    /* Allocate and initialize the source buffer through macro INIT_INTEGER if the source is integer.  
+     * The BUF will be used for the conversion while the SAVED buffer will be
+     * used for the comparison later.
      */
     if(src_type == INT_SCHAR) {
         INIT_INTEGER(signed char, SCHAR_MAX, SCHAR_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
@@ -6439,20 +6316,50 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     } else if(src_type == INT_ULONG) {
         INIT_INTEGER(unsigned long, ULONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
     } else if(src_type == INT_LLONG) {
-        INIT_INTEGER(long_long, LLONG_MAX, LLONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+        INIT_INTEGER(long long, LLONG_MAX, LLONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
     } else if(src_type == INT_ULLONG) {
-        INIT_INTEGER(unsigned long_long, ULLONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
-    } else if(src_type == FLT_FLOAT) {
-        INIT_FP(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP, FLT_MANT_DIG, 
-                src_size, src_nbits, endian, dst_size, buf, saved, nelmts);
-    } else if(src_type == FLT_DOUBLE) {
-        INIT_FP(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP, DBL_MANT_DIG, 
-                src_size, src_nbits, endian, dst_size, buf, saved, nelmts);
-    } else if(src_type == FLT_LDOUBLE) {
-        INIT_FP(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP, LDBL_MANT_DIG, 
-                src_size, src_nbits, endian, dst_size, buf, saved, nelmts);
-    } else
-        goto error;
+        INIT_INTEGER(unsigned long long, ULLONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else { /* source is floating number.  Use the old way to fill in random values. */
+        /* Reduce the number of elements if the source is "long double" 
+         * because it takes too long.
+         */
+        if(src_type == FLT_LDOUBLE)
+            nelmts = NTESTELEM / 10;
+        else
+            nelmts = NTESTELEM;
+
+        /* Allocate buffers */
+        buf = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
+        saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
+
+        /*
+         * Initialize the source buffers to random bits.  The `buf' buffer
+         * will be used for the conversion while the `saved' buffer will be
+         * used for the comparison later.
+         */
+        for (j=0; j<nelmts*src_size; j++) {
+            buf[j] = saved[j] = HDrand();
+
+            /* For Intel machines, the size of "long double" is 12 byte, precision
+             * is 80 bits, mantissa size is 64 bits, and no normalization.  So the
+             * most significant bit of mantissa is always 1 unless the floating number
+             * has special value.  This step tries to compensate this case by turning
+             * on the most significant bit of mantissa if the mantissa bits aren't 
+             * all 0s.  It also tries to decrease exponent by one if the exponent 
+             * happens to be set all 1s(NaN).  
+             */   
+            if(endian==H5T_ORDER_LE && src_type==FLT_LDOUBLE && src_size==12) { 
+                if(j%12==7) {
+                    buf[j] |= 0x80;
+                    saved[j] |= 0x80;
+                }
+                if(j%12==9 && (buf[j]==0xff || buf[j]==0x7f) && buf[j-1]==0xff) {
+                    buf[j] -= 1;
+                    saved[j] -= 1;
+                }
+            }
+        }
+    }
 
     /* The tests */
     for (i=0; i<ntests; i++) {
@@ -7558,7 +7465,7 @@ run_float_int_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
     
-    nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_UCHAR); 
+    nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_UCHAR);
 
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_SHORT);
