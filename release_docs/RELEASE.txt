@@ -5,8 +5,8 @@ HDF5 version 1.4.3-snap12 currently under development
 INTRODUCTION
 
 This document describes the differences between HDF5-1.4.2 and
-HDF5-1.4.2-post0, and contains information on the platforms tested and
-known problems in HDF5-1.4.2-post0. For more details check the HISTORY.txt
+HDF5-1.4.3, and contains information on the platforms tested and
+known problems in HDF5-1.4.2. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -35,32 +35,57 @@ CONTENTS
 
 New Features
 ============
+  o Configuration
+  ================
+    * Can use just enable-threadsafe if the C compiler has builtin pthreads
+      support.
 
-    * A helper script called ``h5cc'', which helps compilation of HDF5
-      programs, is now distributed with HDF5. See the reference manual
-      for information on how to use this feature.
-    * Added perform programs to test the HDF5 library performance.  Programs
-      are installed in directory perform/.
-    * Improved performance of byte-swapping during data conversions.
+  o Library
+  =========
+   o General
+   --------- 
+    * Added a new test to verify the information provided by the configure
+      command.
+    * Changed internal error handling macros to reduce code size of library by
+      about 10%.
+
+   o APIs
+   ------
     * Changed prototype for H5Awrite from:
         H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
       to:
         H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
     * The H5Pset_fapl_split() accepts raw and meta file names similar to the
       syntax of H5Pset_fapl_multi() in addition to what it used to accept.
-    * Added a new test to verify the information provided by the configure
-      command.
+
+   o Performance
+   -------------
+    * Added perform programs to test the HDF5 library performance.  Programs
+      are installed in directory perform/.
+    * Improved performance of byte-swapping during data conversions.
     * Improved performance of single, contiguous hyperslabs when reading or
       writing.
-    * Changed internal error handling macros to reduce code size of library by
-      about 10%.
-    * Parallel HDF5 now works on HP-UX platforms.
-    * Can use just enable-threadsafe if the C compiler has builtin pthreads
-      support.
-    * The H5Dumper can now dump comments associated with groups. -WCW 01-05-02
     * Added support to read/write portions of chunks directly, if they are
       uncompressed and too large to cache.  This should speed up I/O on chunked
       datasets for a few more cases.  -QAK, 1/31/02
+
+  o Parallel Library
+  ==================
+    * Parallel C HDF5 now works on HP-UX platforms.
+
+  o Tools
+  =======
+    * A helper script called ``h5cc'', which helps compilation of HDF5
+      programs, is now distributed with HDF5. See the reference manual
+      for information on how to use this feature.
+    * The H5Dumper can now dump comments associated with groups. -WCW 01-05-02
+
+  o Support for new platforms and languages
+  =========================================
+    * HDF5 C++ Library is supported on Windows platforms.
+    * HDF5 F90 shared library is supported on Windows platforms.
+    * HDF5 C Library is supported on IA32 and IA64 platforms.
+
 
 
 Bug Fixes since HDF5-1.4.2 Release
@@ -100,7 +125,8 @@ Bug Fixes since HDF5-1.4.2 Release
 
 Documentation
 =============
-
+    * Documentation was updated for the hdf5-1.4.3 release.
+    * Parallel Tutorial is available at http://hdf.ncsa.uiuc.edu/HDF5/doc/Tutor/
 
 
 Platforms Tested
@@ -152,6 +178,8 @@ Platforms Tested
                                         109508-04 2001/07/11
     TFLOPS r1.0.4 v4.0.7 i386     pgcc Rel 3.1-4i with mpich-1.2.1 with
                                           local modifications
+    IA-32 Linux 2.2.10smpx        cc Intel 5.0.1
+                                  egcs-2.91.66
     IA-64 Linux 2.4.16 ia64       gcc version 2.96 20000731
                                   Intel(R) C++ Itanium(TM) Compiler 
                                   for the Itanium(TM)-based applications,
@@ -194,9 +222,9 @@ Supported Configuration Features Summary
     TFLOPS         y  y (1)     n    n         n    n          y     y (4)
     AIX-4.3 SP2    y  y         y    y         n    n          y     n
     AIX-4.3 SP3    y  y         y    y         y    n          y     n
-    Win2000        y  n         n    n         n    y          y     y
-    Win98          y  n         y    n         n    y          y     y
-    WinNT          y  n         y    n         n    y          y     y
+    Win2000        y  n         y    n         y    y          y     y
+    Win98          y  n         y    n         y    y          y     y
+    WinNT          y  n         y    n         y    y          y     y
     WinNT CW       y  n         n    n         n    n          y     y
     FreeBSD        y  n         n    n         y    y          y     y
     Linux 2.2      y  y (1)     y    n         y    y          y     y
@@ -227,8 +255,8 @@ Supported Configuration Features Summary
     WinNT          n              y         n        n    n     n
     WinNT CW       n              n         n        n    n     n
     FreeBSD        n              y         y        n    n     y
-    Linux 2.2      y              y         y        n    n     y
-    Linux 2.4      y              y         y        n    n     y
+    Linux 2.2      n              y         y        n    n     y
+    Linux 2.4      n              y         y        n    n     y
 
 
     Footnotes:  (1) Using mpich.
@@ -252,10 +280,6 @@ Known Problems
     * On the SV1, the h5ls test fails due to a difference between the 
       SV1 printf precision and the printf precision on other platforms.
 
-    * On IA64 systems one has to use -DIA64 compilation flag to compile
-      h4toh5 and h5toh4 utilites. After configuration step manually modify
-      Makefile in the tools/h4toh4 and tools/h5toh4 directories to add 
-      -DIA64 to the compilation flags.
 
     * The h5dump tests may fail to match the expected output in some
       platforms (e.g. SP2 parallel, Windows) where the error messages
@@ -278,10 +302,15 @@ Known Problems
       be off by default.  One may turn it on by setting environment variable
       HDF5_MPI_OPT_TYPES to a non-zero value such as 1.
 
-    * On IA64 systems, if you use a compiler other than GCC (such as Intel's
-      ecc compiler), you will need to modify the generated "libtool" program
-      after configuration is finished. On or around line 102 of the libtool
-      file, there are lines which look like:
+    * On IA64 systems one has to use -DIA64 compilation flag to compile
+      h4toh5 and h5toh4 utilites. After configuration step manually modify
+      Makefile in the tools/h4toh4 and tools/h5toh4 directories to add 
+      -DIA64 to the compilation flags.
+
+    * On IA32 ansd IA64 systems, if you use a compiler other than GCC 
+      (such as Intel's ecc compiler), you will need to modify the generated
+      "libtool" program after configuration is finished. On or around line 102 
+      of the libtool file, there are lines which look like:
 
           # How to pass a linker flag through the compiler.
           wl=""
