@@ -152,7 +152,7 @@ struct H5HG_heap_t {
     size_t		size;		/*total size of collection	*/
     uint8_t		*chunk;		/*the collection, incl. header	*/
     size_t		nalloc;		/*numb object slots allocated	*/
-    size_t              next_idx;       /* Object index to use next     */
+    size_t		nused;		/*number of slots used		*/
                                         /* If this value is >65535 then all indices */
                                         /* have been used at some time and the */
                                         /* correct new index should be searched for */
@@ -247,8 +247,11 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
     heap->cache_info.dirty = TRUE;
     if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+#ifdef H5_USING_PURIFY
+HDmemset(heap->chunk,0,size);
+#endif /* H5_USING_PURIFY */
     heap->nalloc = H5HG_NOBJS (f, size);
-    heap->next_idx = 1; /* skip index 0, which is used for the free object */
+    heap->nused = 1; /* account for index 0, which is used for the free object */
     if (NULL==(heap->obj = H5FL_SEQ_MALLOC (H5HG_obj_t,heap->nalloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
@@ -462,9 +465,9 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 
     /* Set the next index value to use */
     if(max_idx>0)
-        heap->next_idx=max_idx+1;
+        heap->nused=max_idx+1;
     else
-        heap->next_idx=1;
+        heap->nused=1;
 
     /*
      * Add the new heap to the CWFS list, removing some other entry if
@@ -662,11 +665,10 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
      * Find an ID for the new object. ID zero is reserved for the free space
      * object.
      */
-    if(heap->next_idx<H5HG_MAXIDX) {
-        idx=heap->next_idx++;
-    } /* end if */
+    if(heap->nused<H5HG_MAXIDX)
+        idx=heap->nused++;
     else {
-        for (idx=1; idx<heap->nalloc; idx++)
+        for (idx=1; idx<heap->nused; idx++)
             if (NULL==heap->obj[idx].begin)
                 break;
     } /* end else */
@@ -687,7 +689,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
         /* Update heap information */
         heap->nalloc=new_alloc;
         heap->obj=new_obj;
-        assert(heap->nalloc>heap->next_idx);
+        assert(heap->nalloc>heap->nused);
     } /* end if */
 
     /* Initialize the new object */
@@ -795,6 +797,9 @@ H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size)
     /* Re-allocate the heap information in memory */
     if (NULL==(new_chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, heap->size+need)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "new heap allocation failed");
+#ifdef H5_USING_PURIFY
+HDmemset(new_chunk+heap->size,0,need);
+#endif /* H5_USING_PURIFY */
 
     /* Adjust the size of the heap */
     old_size=heap->size;
@@ -805,7 +810,7 @@ H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size)
     H5F_ENCODE_LENGTH (f, p, heap->size);
 
     /* Move the pointers to the existing objects to their new locations */
-    for (u=0; u<heap->nalloc; u++)
+    for (u=0; u<heap->nused; u++)
         if(heap->obj[u].begin)
             heap->obj[u].begin = new_chunk + (heap->obj[u].begin - heap->chunk);
 
@@ -993,7 +998,7 @@ H5HG_peek (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     if (NULL==(heap=H5AC_find(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
 
-    assert (hobj->idx>0 && hobj->idx<heap->nalloc);
+    assert (hobj->idx>0 && hobj->idx<heap->nused);
     ret_value = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
     assert (ret_value);
 
@@ -1057,7 +1062,7 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
     if (NULL==(heap=H5AC_find(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
 
-    assert (hobj->idx>0 && hobj->idx<heap->nalloc);
+    assert (hobj->idx>0 && hobj->idx<heap->nused);
     assert (heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size;
     p = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
@@ -1126,7 +1131,7 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     /* Load the heap */
     if (NULL==(heap=H5AC_find(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
-    assert (hobj->idx>0 && hobj->idx<heap->nalloc);
+    assert (hobj->idx>0 && hobj->idx<heap->nused);
     assert (heap->obj[hobj->idx].begin);
     if (heap->obj[hobj->idx].nrefs+adjust<0)
 	HGOTO_ERROR (H5E_HEAP, H5E_BADRANGE, FAIL, "new link count would be out of range");
@@ -1179,14 +1184,14 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     /* Load the heap */
     if (NULL==(heap=H5AC_find(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
         HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
-    assert (hobj->idx>0 && hobj->idx<heap->nalloc);
+    assert (hobj->idx>0 && hobj->idx<heap->nused);
     assert (heap->obj[hobj->idx].begin);
     obj_start = heap->obj[hobj->idx].begin;
     /* Include object header size */
     need = H5HG_ALIGN(heap->obj[hobj->idx].size)+H5HG_SIZEOF_OBJHDR(f);
     
     /* Move the new free space to the end of the heap */
-    for (u=0; u<heap->nalloc; u++) {
+    for (u=0; u<heap->nused; u++) {
         if (heap->obj[u].begin > heap->obj[hobj->idx].begin)
             heap->obj[u].begin -= need;
     }
