@@ -51,6 +51,7 @@ PUB_PROGS=h5c++
 ARFLAGS=rs
 
 ## h5c++ is generated during configure time.  Remove it only when distclean.
-DISTCLEAN=h5c++
+## libhdf5.settings is generated during configure. Remove it when distclean.
+DISTCLEAN=h5c++ libhdf5.settings
 
 @CONCLUDE@
