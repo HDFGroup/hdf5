@@ -108,6 +108,26 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-CloseClass">H5Pclose_class</a> 
     </ul>
 
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;
+  <i>Indicates functions <br> 
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  available only in <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  the parallel HDF5 <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  library.</i>
+
+
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+
     <p><i>File Creation Properties</i>
     <ul>
     <li><a href="#Property-GetVersion">H5Pget_version</a>
@@ -121,18 +141,10 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
     </ul>
 
-    <i>File Close Properties</i>
+    <p></p><i>File Access Properties</i>
     <ul>
     <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
     <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
-	</ul>
-
-
-
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-
-    <p></p><i>File Access Properties</i>
-    <ul>
     <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
     <li><a href="#Property-GetFaplCore">H5Pget_fapl_core</a>
     <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
@@ -182,19 +194,6 @@ which require many different parameters to be easily manipulated.
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     </ul>
 
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;
-  <i>Indicates functions <br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  available only in the <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  parallel HDF5 library.</i>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -314,6 +313,8 @@ which require many different parameters to be easily manipulated.
 <td valign="top" width="32%">
   <i>File Access Properties</i>
   <ul>
+    <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
+    <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
     <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
     <li><a href="#Property-GetFaplCore">H5Pget_fapl_core</a>
     <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
@@ -378,11 +379,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
   </ul>
 
-  <i>File Close Properties</i>
-  <ul>
-    <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
-    <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
-  </ul>
 	<br><br>
 &nbsp;&nbsp;&nbsp;|| <i>Indicates functions<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available only in the<br>
@@ -3206,7 +3202,7 @@ SUBROUTINE
   <dt><strong>Name:</strong> <a name="Property-GetFcloseDegree">H5Pget_fclose_degree</a> 
   <dt><strong>Signature:</strong> 
   <dd><em>herr_t</em> <code>H5Pget_fclose_degree</code>(<em>hid_t</em> <code>fapl_id</code>, 
-    <em>H5F_close_degree_t</em> <code>fc_degree</code>) 
+    <em>H5F_close_degree_t *</em><code>fc_degree</code>) 
   <dt><strong>Purpose:</strong> 
   <dd>Returns the file close degree. 
   <dt><strong>Description:</strong> 
@@ -3223,7 +3219,7 @@ SUBROUTINE
 	      <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
           <td valign="top">IN: File access property list identifier.</td></tr>
       <tr>
-	      <td valign="top"><em>H5F_close_degree_t</em>&nbsp;<code>fc_degree&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
+	      <td valign="top"><em>H5F_close_degree_t&nbsp;*</em><code>fc_degree&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
           <td valign="top">OUT: Pointer to a location to which to return the file close degree 
             property, the value of <code>fc_degree</code>.</td></tr>
     </table></ul>
@@ -8031,7 +8027,7 @@ END SUBROUTINE h5pset_fill_value_f
         </center>
 	<p>
 	The <code>filter</code> parameter specifies the filter to be set.  
-	Valid values are as follows:
+	Valid filter identifiers are as follows:
 
         <center>
         <table width=75%>
@@ -8075,7 +8071,8 @@ END SUBROUTINE h5pset_fill_value_f
             <td valign="top">IN: Property list identifier.</td></tr>
         <tr>
 		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
-            <td valign="top">IN: Filter to be added to the pipeline.</td></tr>
+            <td valign="top">IN: Filter identifier for the filter  
+                             to be added to the pipeline.</td></tr>
         <tr>
 		    <td valign="top"><em>unsigned int</em> <code>flags</code></td>
             <td valign="top">IN:  Bit vector specifying certain general properties
@@ -9708,7 +9705,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 26 August 2004");
+document.writeln("Last modified: 13 September 2004");
 -->
 </SCRIPT>
  
