@@ -1,4 +1,5 @@
 ./INSTALL
+./INSTALL.ascired
 ./INSTALL.ibm.sp.parallel
 ./INSTALL_MAINT
 ./INSTALL_parallel
@@ -38,6 +39,7 @@
 ./examples/h5_group.c
 ./examples/h5_read.c
 ./examples/h5_write.c
+./html/Big.html
 ./html/CodeReview.html
 ./html/Coding.html
 ./html/Datasets.html

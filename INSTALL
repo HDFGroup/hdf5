@@ -35,15 +35,27 @@ Step 2. Configure makefiles.
       Note: you may need to say `sh configure'.
 
     * By default libraries, include files, programs, and documentation
-      are installed under /usr/local/lib, /usr/local/include,
-      /usr/local/bin, and /usr/local/man.  However, if you want them
-      in some other location you can specify a prefix to use instead
-      of /usr/local.  For instance, to install in /usr/lib,
-      /usr/include, /usr/bin, and /usr/man one would say
+      are installed (when one says `make install') under
+      /usr/local/lib, /usr/local/include, /usr/local/bin, and
+      /usr/local/man.  However, if you want them in some other
+      location you can specify a prefix to use instead of /usr/local.
+      For instance, to install in /usr/lib, /usr/include, /usr/bin,
+      and /usr/man one would say
 
 	$ ./configure --prefix=/usr
 
       Note: HDF5 can be used without installing it.
+
+    * Early releases of the library will be compiled with some
+      debugging features enabled (see output from configure).  The
+      debugging can be turned off by specifying `--disable-debug' as a
+      configure switch.  Also, to compile an optimized version of the
+      library one can say `--enable-production'.
+
+    * Old versions of gcc (<2.8.0) may experience register allocation
+      problems on some architectures.  If this happens then the
+      `--disable-hsizet' can be given but the resulting library will
+      be unable to handle datasets larger than 4GB.
 
     * You can also override detection of certain things with
       environment variables:
@@ -59,33 +71,10 @@ Step 2. Configure makefiles.
 
         $ CC=gcc CPPFLAGS=-DNDEBUG CFLAGS="-Wall -O3" ./configure
 
-    * The HDF team recommends the following C flags for this prototype
-      release of the library.
-
-	o Full warnings, usually `-fullwarn' or `-Wall' depending on
-	  the compiler.  With GCC you may optionally add:
-	  -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
-	  -Wmissing-prototypes -Wmissing-declarations -Wnested-externs
-
-	o Symbol table, usually with `-g'
-
-	o Turn on debugging code in the various packages.  Some
-	  packages just produce extra output while others traverse
-	  data structures looking for things that seem to be wrong.
-	
-	  -DH5AC_DEBUG	- cache debugging
-	  -DH5B_DEBUG	- B-link-tree debugging
-	  -DH5F_DEBUG	- File debugging
-	  -DH5G_DEBUG	- Group debugging
-	  -UH5O_DEBUG	- Open/Close debugging (produces lots of output)
-	  -DH5T_DEBUG	- Data type conversion statistics
-	  
-	o The default low level driver can be chosen with
-
-	  -DH5F_LOW_DFLT=H5F_LOW_STDIO	- Use libc stdio.h functions
-	  -DH5F_LOW_DFLT=H5F_LOW_SEC2	- Use system calls directly
-
-	  the default is to use stdio functions.
+    * Settings for compiler flags (and a few other things) can also be
+      specified in config files located in the config directory.  The
+      name of the file is the result of running ./bin/config.guess.
+      Use config/BlankForm as a template.
 
     * You can see a list of other configuration options by saying
 
@@ -109,8 +98,9 @@ Step 3. Compile library, tests, and programs.
       information yet.
 
       Note: When using GNU make you can add `-j -l6' to the make
-      command to compile in parallel on SMP machines.
-
+      command to compile in parallel on SMP machines.  Do not give a
+      number after the `-j' since GNU make will turn it off for
+      recursive invocations of make.
 
 Step 4. Run confidence tests.
 
@@ -134,7 +124,9 @@ Step 5. Install public files.
      This step will fail unless you have permission to write to the
      installation directories.  Of course, you can use the header
      files, library, and programs directly out of the source tree if
-     you like, skipping this step.
+     you like, skipping this step.  The directory specified for the
+     --prefix switch (or "/usr/local") must exist, but the directories
+     under it are created automatically by make.
 
 Step 6. Subscribe to mailing lists.
 

@@ -463,7 +463,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    /* Field width */
 	    if (isdigit (*s)) {
 		zerofill = ('0'==*s);
-		fwidth = strtol (s, &rest, 10);
+		fwidth = (int)strtol (s, &rest, 10);
 		s = rest;
 	    } else if ('*'==*s) {
 		fwidth = va_arg (ap, int);
@@ -478,7 +478,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    if ('.'==*s) {
 		s++;
 		if (isdigit (*s)) {
-		    prec = strtol (s+1, &rest, 10);
+		    prec = (int)strtol (s+1, &rest, 10);
 		    s = rest;
 		} else if ('*'==*s) {
 		    prec = va_arg (ap, int);
@@ -609,7 +609,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 
 	    default:
 		fputs (template, stream);
-		n = strlen (template);
+		n = (int)strlen (template);
 		break;
 	    }
 	    nout += n;
@@ -689,8 +689,8 @@ HDstrtoll (const char *s, const char **rest, int base)
 	s++;
     } else if ('-'==*s) {
 	sign = -1;
-	s++;
-    }
+	s++; 
+   }
 
     /* Zero base prefix */
     if (0==base && '0'==*s && ('x'==s[1] || 'X'==s[1])) {
