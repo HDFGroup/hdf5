@@ -8072,10 +8072,10 @@ ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $L
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
- PARALLEL=""
- RUNSERIAL=""
- RUNPARALLEL=""
- TESTPARALLEL=""
+
+
+
+
 
 case "$F9X" in
   mpif90)
