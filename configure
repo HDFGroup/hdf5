@@ -1806,13 +1806,13 @@ fi
 
 
 case "X-$enable_production" in
-   X-|X-yes)
+   X-yes)
       echo "$ac_t"""production"" 1>&6
       CONFIG_MODE=production
       CFLAGS="$CFLAGS $PROD_CFLAGS"
       CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
       ;;
-   X-no)
+   X-|X-no)
       echo "$ac_t"""development"" 1>&6
       CONFIG_MODE=development
       CFLAGS="$CFLAGS $DEBUG_CFLAGS"
@@ -9152,7 +9152,7 @@ fi
 
 all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
-   X-yes)
+   X-|X-yes)
       DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
       CPPFLAGS="$CPPFLAGS -UNDEBUG"
       echo "$ac_t""default ($DEBUG_PKG)" 1>&6
@@ -9162,7 +9162,7 @@ case "X-$DEBUG_PKG" in
       CPPFLAGS="$CPPFLAGS -UNDEBUG"
       echo "$ac_t""all ($DEBUG_PKG)" 1>&6
       ;;
-   X-|X-no|X-none)
+   X-no|X-none)
       echo "$ac_t""none" 1>&6
       DEBUG_PKG=
       CPPFLAGS="$CPPFLAGS -DNDEBUG"
