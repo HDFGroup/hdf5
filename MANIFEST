@@ -910,6 +910,7 @@
 ./test/extend.c
 ./test/external.c
 ./test/fillval.c
+./test/fill_new.h5
 ./test/flush1.c
 ./test/flush2.c
 ./test/gass_append.c
@@ -927,6 +928,7 @@
 ./test/ohdr.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_fill.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/srb_append.c
 ./test/srb_read.c
