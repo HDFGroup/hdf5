@@ -60,6 +60,7 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
 static herr_t
 H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
                      const struct H5O_pline_t UNUSED *pline,
+                     const struct H5O_fill_t UNUSED *fill,
                      const struct H5O_efl_t UNUSED *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      hid_t dxpl_id, void *buf/*out*/,
