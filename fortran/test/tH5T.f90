@@ -68,6 +68,8 @@
      INTEGER(HSIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)
      INTEGER :: elements = 24 ! number of elements in the array_dims array.
      INTEGER(SIZE_T) :: sizechar
+     INTEGER, DIMENSION(7) :: data_dims
+     data_dims(1) = dimsize
      !
      ! Initialize data buffer.
      !
@@ -193,13 +195,13 @@
      !
      ! Write data by fields in the datatype. Fields order is not important.
      !
-     CALL h5dwrite_f(dset_id, dt4_id, real_member, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt4_id, real_member, data_dims, error, xfer_prp = plist_id)
          CALL check("h5dwrite_f", error, total_error)
-     CALL h5dwrite_f(dset_id, dt1_id, char_member, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt1_id, char_member, data_dims, error, xfer_prp = plist_id)
          CALL check("h5dwrite_f", error, total_error)
-     CALL h5dwrite_f(dset_id, dt3_id, double_member, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt3_id, double_member, data_dims, error, xfer_prp = plist_id)
          CALL check("h5dwrite_f", error, total_error)
-     CALL h5dwrite_f(dset_id, dt2_id, int_member, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt2_id, int_member, data_dims, error, xfer_prp = plist_id)
          CALL check("h5dwrite_f", error, total_error)
 
      !   
@@ -372,7 +374,7 @@
      !
      ! Read part of the dataset
      !
-     CALL h5dread_f(dset_id, dt1_id, char_member_out, error)
+     CALL h5dread_f(dset_id, dt1_id, char_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (char_member_out(i) .ne. char_member(i)) then
@@ -389,7 +391,7 @@
      !
      ! Read part of the dataset
      !
-     CALL h5dread_f(dset_id, dt5_id, int_member_out, error)
+     CALL h5dread_f(dset_id, dt5_id, int_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (int_member_out(i) .ne. int_member(i)) then
@@ -407,7 +409,7 @@
      !
      ! Read part of the dataset
      !
-     CALL h5dread_f(dset_id, dt3_id, double_member_out, error)
+     CALL h5dread_f(dset_id, dt3_id, double_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (double_member_out(i) .ne. double_member(i)) then
@@ -425,7 +427,7 @@
      !
      ! Read part of the dataset
      !
-     CALL h5dread_f(dset_id, dt4_id, real_member_out, error)
+     CALL h5dread_f(dset_id, dt4_id, real_member_out, data_dims, error)
          CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (real_member_out(i) .ne. real_member(i)) then

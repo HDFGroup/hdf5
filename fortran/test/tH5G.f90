@@ -41,6 +41,7 @@
      CHARACTER*100 :: commentout !comment to the file
      INTEGER     ::   nmembers
      INTEGER     :: obj_type
+     INTEGER, DIMENSION(7) :: data_dims 
      !
      ! Create the file.
      !
@@ -74,7 +75,8 @@
      !
      ! Write data_in to dataset1
      !
-     CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, dset1_data, error)
+     data_dims(1) = 1
+     CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, dset1_data, data_dims, error)
      CALL check("h5dwrite_f",error,total_error)
 
      !
@@ -87,7 +89,7 @@
      !
      ! Write data_in to dataset2
      !
-     CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, dset2_data, error)
+     CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, dset2_data, data_dims, error)
      CALL check("h5dwrite_f",error,total_error)
 
      !

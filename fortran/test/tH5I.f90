@@ -34,6 +34,7 @@
 
      INTEGER     ::   type !object identifier
      INTEGER     ::   error ! Error flag
+     INTEGER, DIMENSION(7) :: data_dims
 
 
      !
@@ -64,7 +65,8 @@
      !
      ! Write data_in to the dataset
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, error)
+     data_dims(1) = 1
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims, error)
      CALL check("h5dwrite_f",error,total_error)
 
      !
@@ -89,7 +91,7 @@
      !
      ! Write the Integer attribute data.
      !
-     CALL h5awrite_f(attr_id, atype_id, attr_data, error)
+     CALL h5awrite_f(attr_id, atype_id, attr_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
 
      !

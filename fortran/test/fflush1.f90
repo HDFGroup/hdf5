@@ -67,6 +67,9 @@
      !data buffers 
      !         
      INTEGER, DIMENSION(NX,NY) :: data_in, data_out
+     INTEGER, DIMENSION(7) :: data_dims
+     data_dims(1) = NX
+     data_dims(2) = NY
 
      !
      !Initialize FORTRAN predifined datatypes
@@ -111,7 +114,7 @@
      !
      ! Write data_in to the dataset
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, error)
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, data_dims, error)
           CALL check("h5dwrite_f",error,total_error)
   
      !

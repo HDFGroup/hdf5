@@ -81,6 +81,7 @@
           !         
           INTEGER, DIMENSION(NX,NY) :: data_in, data_out
 
+          INTEGER, DIMENSION(7) :: data_dims
           !
           !Initialize FORTRAN predifined datatypes
           !
@@ -90,8 +91,8 @@
           !
           !Initialize data_in buffer
           !
-          do i = 1, NX
-             do j = 1, NY
+          do j = 1, NY
+             do i = 1, NX
                 data_in(i,j) =  (i-1) + (j-1)
              end do
           end do
@@ -139,7 +140,9 @@
           !
           ! Write data_in to the dataset
           !
-          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, error)
+          data_dims(1) = NX
+          data_dims(2) = NY
+          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, data_dims, error)
                CALL check("h5dwrite_f",error,total_error)
 
           !
@@ -199,7 +202,7 @@
           !
           !Read the dataset.
           ! 
-          CALL h5dread_f(dset_id, dtype_id, data_out, error)
+          CALL h5dread_f(dset_id, dtype_id, data_out, data_dims, error)
               CALL check("h5dread_f",error,total_error)
 
           !
@@ -304,12 +307,13 @@
           !array to store data 
           !
           INTEGER, DIMENSION(4,6) :: dset_data, data_out
+          INTEGER, DIMENSION(7) :: data_dims
      
           !
           !initialize the dset_data array which will be written to the "/dset"
           !
-          do i = 1, NX
-               do j = 1, NY
+          do j = 1, NY
+               do i = 1, NX
                     dset_data(i,j) = (i-1)*6 + j;
                end do
           end do
@@ -343,7 +347,9 @@
          !
          !Write the dataset.
          !
-         CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, error)
+         data_dims(1) = NX
+         data_dims(2) = NY
+         CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims, error)
               CALL check("h5dwrite_f",error,total_error)
 
          !
@@ -373,7 +379,7 @@
          !
          !Read the dataset.
          !
-         CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error)
+         CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error)
               CALL check("h5dread_f",error,total_error)
 
           !
