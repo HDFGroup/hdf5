@@ -44,12 +44,6 @@
 #define H5B2_ITER_CONT   (0)
 #define H5B2_ITER_STOP   (1)
 
-/* Define the operator callback function pointer for H5B2_iterate() */
-typedef int (*H5B2_operator_t)(const void *record, void *op_data);
-
-/* Define the 'found' callback function pointer for H5B2_find() */
-typedef herr_t (*H5B2_found_t)(const void *record, void *op_data);
-
      
 /****************************/
 /* Library Private Typedefs */
@@ -61,6 +55,12 @@ typedef enum H5B2_subid_t {
     H5B2_GRP_NAME_ID,		/* B-tree is for group links, ordered by name	*/
     H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)   */
 } H5B2_subid_t;
+
+/* Define the operator callback function pointer for H5B2_iterate() */
+typedef int (*H5B2_operator_t)(const void *record, void *op_data);
+
+/* Define the 'found' callback function pointer for H5B2_find() */
+typedef herr_t (*H5B2_found_t)(const void *record, void *op_data);
 
 /* Comparisons for H5B2_neighbor() call */
 typedef enum H5B2_compare_t {
