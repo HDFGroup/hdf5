@@ -849,7 +849,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     hsize_t     ch_size[5] = {1, 16, 8, 4, 2};
     int		nerrors=0;
     int         fillval = 0x4c70f1cd;
-    comp_datatype       fill_ctype;
+    comp_datatype       fill_ctype={0,0,0,0};
  
     if (H5D_CHUNKED==layout) {
         TESTING("chunked dataset I/O");
