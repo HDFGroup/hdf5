@@ -54,7 +54,7 @@ MOSTLYCLEAN=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
 ## Public header files (to be installed)...
 PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h           \
         H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDfamily.h          \
-        H5FDgass.h H5FDlog.h H5FDmpio.h H5FDmpiposix.h                        \
+        H5FDgass.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h H5FDsrb.h H5FDstdio.h H5FDstream.h             \
         H5Gpublic.h H5HGpublic.h H5HLpublic.h H5Ipublic.h                     \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h          \
