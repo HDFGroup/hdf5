@@ -585,7 +585,7 @@ dataset_writeAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate_list (H5P_DATASET_XFER_NEW);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
@@ -617,7 +617,7 @@ dataset_writeAll(char *filename)
     /* to create them again.*/
     H5Sclose(file_dataspace);
     H5Sclose(mem_dataspace);
-    H5Pclose_list(xfer_plist);
+    H5Pclose(xfer_plist);
 
     /* Dataset2: each process takes a block of columns. */
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
@@ -649,7 +649,7 @@ dataset_writeAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate_list (H5P_DATASET_XFER_NEW);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
@@ -678,7 +678,7 @@ dataset_writeAll(char *filename)
     /* release all temporary handles. */
     H5Sclose(file_dataspace);
     H5Sclose(mem_dataspace);
-    H5Pclose_list(xfer_plist);
+    H5Pclose(xfer_plist);
 
 
     /*
@@ -800,7 +800,7 @@ dataset_readAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate_list (H5P_DATASET_XFER_NEW);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
@@ -839,7 +839,7 @@ dataset_readAll(char *filename)
     /* to create them again.*/
     H5Sclose(file_dataspace);
     H5Sclose(mem_dataspace);
-    H5Pclose_list(xfer_plist);
+    H5Pclose(xfer_plist);
 
     /* Dataset2: each process takes a block of rows. */
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
@@ -863,7 +863,7 @@ dataset_readAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate_list (H5P_DATASET_XFER_NEW);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
@@ -900,7 +900,7 @@ dataset_readAll(char *filename)
     /* release all temporary handles. */
     H5Sclose(file_dataspace);
     H5Sclose(mem_dataspace);
-    H5Pclose_list(xfer_plist);
+    H5Pclose(xfer_plist);
 
 
     /*
