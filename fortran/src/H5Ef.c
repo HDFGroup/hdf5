@@ -121,7 +121,7 @@ int_f
 nh5eget_major_c(int_f* error_no, _fcd name)
 {
   int ret_val = -1;
-  const char c_name[H5E_LEN];
+  char c_name[H5E_LEN];
   hid_t c_error_no;
   c_error_no = (hid_t)*error_no;
 
@@ -151,7 +151,7 @@ int_f
 nh5eget_minor_c(int_f* error_no, _fcd name)
 {
   int ret_val = -1;
-  const char c_name[H5E_LEN];
+  char c_name[H5E_LEN];
   hid_t c_error_no;
   c_error_no = (hid_t)*error_no;
 

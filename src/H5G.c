@@ -563,9 +563,9 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 
     /* Check args */
     if (NULL==(loc=H5G_loc (loc_id)))
-	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID");
     if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a group");
         
     if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "unable to retrieve number of members");
@@ -2692,7 +2692,7 @@ H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
     H5G_bt_ud3_t    udata;              /* User data for B-tree callback */
     H5G_obj_t	    ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, FAIL);
+    FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, H5G_UNKNOWN);
     
     /* Sanity check */
     assert(loc);
@@ -2706,7 +2706,7 @@ H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
     /* Iterate over the group members */
     if (H5B_iterate (loc->file, dxpl_id, H5B_SNODE,
               H5G_node_type, loc->cache.stab.btree_addr, &udata)<0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "iteration operator failed");
     
     ret_value = udata.type;
 
