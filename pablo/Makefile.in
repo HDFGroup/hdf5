@@ -23,7 +23,7 @@ PABLO_MPIO_FLAGS=${PARALLEL_PABLO:yes=-DH5_HAVE_PARALLEL -DH5_HAVE_MPIOTRACE}
 PABLO_FLAGS=-I$(top_srcdir)/src -DH5_HAVE_PABLO $(PABLO_MPIO_FLAGS)
 
 CPPFLAGS=-I. -I$(top_srcdir)/src -DH5_DEBUG_API -DNDEBUG $(PABLO_FLAGS)  \
-         -D$(PABLO_BLD)_BUILD
+         -D$(PABLO_BLD)_BUILD @CPPFLAGS@
 
 ## This is our main target:
 LIB=libhdf5-inst.a
@@ -175,7 +175,7 @@ ProcMasks.h: $(top_srcdir)/src/*.c
 ProcIDs.h: HDFidList.h ProcMasks.h
 
 ProcTrace.inc: HDFidList.h
-	sed "=" $? | sed -f PabloSedscr > $@
+	sed "=" $? | sed -f $(top_srcdir)/PabloSedscr > $@
 
 PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES) 
 	$(CC) -g $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
