@@ -78,6 +78,9 @@ sub setvers {
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_MINOR\s+)\d+/$1$vers[1]/m;
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_RELEASE\s+)\d+/$1$vers[2]/m;
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_SUBRELEASE\s+\")[^\"]*/$1$vers[3]/m;
+  $_[0] =~ s/^(\#\s*define\s+H5_VERS_INFO\s+\")[^\"]*/
+    sprintf("%shdf5 version: %d.%d.%d%s%s", $1, @vers[0,1,2],
+	    $vers[3]?"-":"", $vers[3])/me;
 }
 
 sub usage {
