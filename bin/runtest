@@ -647,6 +647,7 @@ DIFFLOG=${LOGDIR}/DIFF_LOG_${TODAY}
 # Snap Test hosts and Configuration files
 ALLHOSTSFILE=${SNAPYARD}/allhostfile
 SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
+TMPFILE="/tmp/#runtest.${TODAY}.$$"
 
 # more processing of setup option if requested
 if test x-$CMD = x-setup; then
@@ -716,12 +717,25 @@ if [ -z "$NOCVS" ]; then
 	exit $errcode
     fi
     PRINT Checking MAINFEST file ...
-    (cd $SNAPYARD/current; bin/chkmanifest)
+    (cd $SNAPYARD/current; bin/chkmanifest) > $TMPFILE 2>&1
     errcode=$?
-    if [ $errcode -ne 0 ]; then
+    if [ $errcode -eq 0 ]; then
+	# test passed.
+	cat $TMPFILE
+    else
 	# test failed.
 	REPORT_ERR "****FAILED ${HOSTNAME}: MANIFEST check****"
+        (   echo =========================
+	    echo "MANIFEST checking failed output"
+	    echo =========================
+	    cat $TMPFILE
+            echo =========================
+	    echo "MANIFEST checking failed output done"
+            echo =========================
+	    echo ""
+	) >> $FAILEDDETAIL
     fi
+    rm $TMPFILE
     PRINT_BLANK
 else
     # make sure the cvs update, if done by another host, has completed.
