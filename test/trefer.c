@@ -148,7 +148,7 @@ test_reference_obj(void)
 
     /* Try to open objects */
     dset2 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[0]);
-    CHECK(dataset, FAIL, "H5Rdereference");
+    CHECK(dset2, FAIL, "H5Rdereference");
 
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
