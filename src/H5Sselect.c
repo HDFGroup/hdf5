@@ -534,7 +534,7 @@ H5Sget_select_bounds(hid_t spaceid, hssize_t *start, hssize_t *end)
     herr_t ret_value;        /* return value */
 
     FUNC_ENTER_API(H5Sget_select_bounds, FAIL);
-    H5TRACE3("e","i*h*h",spaceid,start,end);
+    H5TRACE3("e","i*Hs*Hs",spaceid,start,end);
 
     /* Check args */
     if(start==NULL || end==NULL)
