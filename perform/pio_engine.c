@@ -1455,7 +1455,8 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 {
     int ret_code = SUCCESS, mrc;
     herr_t hrc;
-    hid_t acc_tpl = -1;     /* file access templates */
+    hid_t acc_tpl = -1;         /* file access templates */
+    hbool_t use_gpfs = FALSE;   /* use GPFS hints        */
 
     switch (param->io_type) {
     case POSIXIO:
@@ -1523,7 +1524,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         /* Use the appropriate VFL driver */
         if(param->h5_use_mpi_posix) {
             /* Set the file driver to the MPI-posix driver */
-            hrc = H5Pset_fapl_mpiposix(acc_tpl, pio_comm_g);     
+            hrc = H5Pset_fapl_mpiposix(acc_tpl, pio_comm_g, use_gpfs);
             if (hrc < 0) {
                 fprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);

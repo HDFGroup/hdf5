@@ -76,8 +76,9 @@ static hid_t create_fcpl(void)
 /* Create & initialize file access property list with appropriate properties */
 static hid_t create_fapl(MPI_Comm comm, MPI_Info info, int acc_type )
 {
-    hid_t fapl;         /* File access property list */
-    herr_t ret;         /* Generic return value */
+    hid_t fapl;                 /* File access property list    */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints               */
+    herr_t ret;                 /* Generic return value         */
 
     fapl = H5Pcreate (H5P_FILE_ACCESS);
     assert(fapl>0);
@@ -90,7 +91,7 @@ static hid_t create_fapl(MPI_Comm comm, MPI_Info info, int acc_type )
 
     /* set parallel access with communicator, using MPI-posix driver */
     if (acc_type == FACC_MPIPOSIX) {
-	ret = H5Pset_fapl_mpiposix(fapl, comm);
+	ret = H5Pset_fapl_mpiposix(fapl, comm, use_gpfs);
         assert(ret>=0);
     } /* end if */
 
