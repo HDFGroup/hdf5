@@ -56,7 +56,7 @@ char	*meta_ext, *raw_ext;	/* holds the meta and raw file extension if */
 
 
 /* DEFAULT VALUES FOR OPTIONS */
-int64_t opt_block     = 1048576*16;
+long    opt_block     = 1048576*16;
 int     opt_iter      = 1;
 int     opt_stripe    = -1;
 int     opt_correct   = 0;
@@ -87,8 +87,8 @@ int main(int argc, char **argv)
 	double max_read_tim, max_write_tim;
 	double min_read_tim, min_write_tim;
 	double ave_read_tim, ave_write_tim;
-	int64_t iter_jump = 0;
-	int64_t seek_position = 0;
+	long iter_jump = 0;
+	long seek_position = 0;
 	MPI_File fh;
 	MPI_Status status;
 	int nchars;
@@ -324,8 +324,8 @@ int main(int argc, char **argv)
 	
 	/* print out the results on one node */
 	if (mynod == 0) {
-	   read_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
-	   write_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
+	   read_bw = ((long)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
+	   write_bw = ((long)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
 		
 			printf("nr_procs = %d, nr_iter = %d, blk_sz = %ld\n", nprocs,
 		opt_iter, (long)opt_block);
