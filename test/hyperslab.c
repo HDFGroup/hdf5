@@ -1,8 +1,18 @@
-/*
- * Copyright (C) 1997 NCSA
- *		      All rights reserved.
- *
- * Programmer:	Robb Matzke <matzke@llnl.gov>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Programmer:	Robb Matzke <matzke@llnl.gov>
  *		Friday, October 10, 1997
  *
  * Purpose:	Hyperslab operations are rather complex, so this file
@@ -16,10 +26,6 @@
 #include "H5MMprivate.h"
 #include "H5Vprivate.h"
 
-#ifndef H5_HAVE_FUNCTION
-#undef __FUNCTION__
-#define __FUNCTION__ ""
-#endif
 #define AT() printf ("	 at %s:%d in %s()\n",__FILE__,__LINE__,__FUNCTION__);
 
 #define TEST_SMALL	0x0001
