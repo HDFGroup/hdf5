@@ -47,7 +47,11 @@ const char *FILENAME[] = {
 #define TEST_DATATYPE   H5T_NATIVE_UCHAR
 
 #define TEST_CHUNK_SIZE 50
+#ifdef H5_HAVE_LARGE_HSIZET
 #define TEST_SPARSE_SIZE 1000000
+#else /* H5_HAVE_LARGE_HSIZET */
+#define TEST_SPARSE_SIZE 1200
+#endif /* H5_HAVE_LARGE_HSIZET */
 
 hsize_t chunk_dims[H5O_LAYOUT_NDIMS];
 hssize_t zero[H5O_LAYOUT_NDIMS];
