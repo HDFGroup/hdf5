@@ -797,7 +797,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    }
 
 	    /* Type modifier */
-	    if (HDstrchr ("ZHhlqL", *s)) {
+	    if (HDstrchr ("ZHhlqLI", *s)) {
 		switch (*s) {
 		case 'H':
 		    if (sizeof(hsize_t)<sizeof(long)) {
@@ -818,16 +818,26 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    }
 		    break;
 		default:
-                    /* Handle 'll' for long long types */
-                    if(*s=='l' && *(s+1)=='l') {
+                    /* Handle 'I64' modifier for Microsoft's "__int64" type */
+                    if(*s=='I' && *(s+1)=='6' && *(s+2)=='4') {
                         modifier[0] = *s;
-                        modifier[1] = *s;
-                        modifier[2] = '\0';
-                        s++; /* Increment over first 'l', second is taken care of below */
+                        modifier[1] = *(s+1);
+                        modifier[2] = *(s+2);
+                        modifier[3] = '\0';
+                        s+=2; /* Increment over 'I6', the '4' is taken care of below */
                     } /* end if */
                     else {
-                        modifier[0] = *s;
-                        modifier[1] = '\0';
+                        /* Handle 'll' for long long types */
+                        if(*s=='l' && *(s+1)=='l') {
+                            modifier[0] = *s;
+                            modifier[1] = *s;
+                            modifier[2] = '\0';
+                            s++; /* Increment over first 'l', second is taken care of below */
+                        } /* end if */
+                        else {
+                            modifier[0] = *s;
+                            modifier[1] = '\0';
+                        } /* end else */
                     } /* end else */
 		    break;
 		}
