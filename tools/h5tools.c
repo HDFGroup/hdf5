@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <H5private.h>
 /*
  * The output functions need a temporary buffer to hold a piece of the
  * dataset while it's being printed.  This constant sets the limit on the
@@ -257,7 +257,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    strcpy(fmt, "%");
 	    strcat(fmt, PRINTF_LL_WIDTH);
 	    strcat(fmt, "d");
-	    sprintf(temp, fmt, *((long long*)vp));
+	    sprintf(temp, fmt, *((int64*)vp));
 	}
 	
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
@@ -268,7 +268,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    strcpy(fmt, "%");
 	    strcat(fmt, PRINTF_LL_WIDTH);
 	    strcat(fmt, "u");
-	    sprintf(temp, fmt, *((unsigned long long*)vp));
+	    sprintf(temp, fmt, *((uint64*)vp));
 	}
 	
     } else if (H5T_COMPOUND==H5Tget_class(type)) {
