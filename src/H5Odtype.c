@@ -352,6 +352,10 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
         case H5T_VLEN:  /* Variable length datatypes...  */
             /* Set the type of VL information, either sequence or string */
             dt->u.vlen.type = (H5T_vlen_type_t)(flags & 0x0f);
+            if(dt->u.vlen.type == H5T_VLEN_STRING) {
+		dt->u.vlen.pad  = (H5T_str_t)((flags>>4) & 0x0f);
+		dt->u.vlen.cset = (H5T_cset_t)((flags>>8) & 0x0f);
+            } /* end if */
 
             /* Decode base type of VL information */
             if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1)))
@@ -438,7 +442,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
     unsigned		flags = 0;
     char		*hdr = (char *)*pp;
-    int		i, j;
+    int			i, j;
     size_t		n, z, aligned;
 
     FUNC_ENTER(H5O_dtype_encode_helper, FAIL);
@@ -729,7 +733,11 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             break;
 
         case H5T_VLEN:  /* Variable length datatypes...  */
-            flags |= (dt->u.vlen.type & 0x0f);
+	    flags |= (dt->u.vlen.type  & 0x0f);
+            if(dt->u.vlen.type == H5T_VLEN_STRING) {
+	        flags |= (dt->u.vlen.pad   & 0x0f) << 4;
+	        flags |= (dt->u.vlen.cset  & 0x0f) << 8;
+            } /* end if */
 
             /* Encode base type of VL information */
             if (H5O_dtype_encode_helper(pp, dt->parent)<0) {

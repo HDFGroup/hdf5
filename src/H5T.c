@@ -3084,14 +3084,24 @@ H5Tget_cset(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR,
 		      "not a data type");
     }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_STRING != dt->type) {
+    /* Don't see any reason for this.  Causes problem for variable-length
+     *  string. -SLU (& QAK) */
+    /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
+    /* Both string and VL string have character set */
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
+	dt->u.vlen.type))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_CSET_ERROR,
 		      "operation not defined for data type class");
     }
     
     /* result */
-    cset = dt->u.atomic.u.s.cset;
+    if(H5T_STRING == dt->type)
+        cset = dt->u.atomic.u.s.cset;
+    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
+	cset = dt->u.vlen.cset;
+    else
+	HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_CSET_ERROR,
+		      "can't get cset info");
 
     FUNC_LEAVE(cset);
 }
@@ -3135,14 +3145,25 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "illegal character set type");
     }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_STRING != dt->type) {
+    /* Don't see any reason for this.  Causes problem for variable-length
+     *  string. -SLU (& QAK) */
+    /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
+    /* Both string and VL string have character set */
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
+        dt->u.vlen.type))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "operation not defined for data type class");
     }
     
     /* Commit */
-    dt->u.atomic.u.s.cset = cset;
+    if(H5T_STRING == dt->type)
+        dt->u.atomic.u.s.cset = cset;
+    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
+	dt->u.vlen.cset = cset;
+    else
+	HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL,
+		      "can't set cset info");
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3182,14 +3203,24 @@ H5Tget_strpad(hid_t type_id)
 	NULL == (dt = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a data type");
     }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_STRING != dt->type) {
+    /* Don't see any reason for this.  Causes problem for variable-length
+     *  string. -SLU (& QAK) */
+    /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
+    /* Both string and VL string have character set */
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
+        dt->u.vlen.type))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_STR_ERROR,
 		      "operation not defined for data type class");
     }
     
     /* result */
-    strpad = dt->u.atomic.u.s.pad;
+    if(H5T_STRING == dt->type)
+        strpad = dt->u.atomic.u.s.pad;
+    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
+        strpad = dt->u.vlen.pad;
+    else
+	HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR,
+		      "can't get strpad info");
 
     FUNC_LEAVE(strpad);
 }
@@ -3243,14 +3274,25 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     if (strpad < 0 || strpad >= H5T_NSTR) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type");
     }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
-    if (H5T_STRING != dt->type) {
+    /* Don't see any reason for this.  Causes problem for variable-length
+     *  string. -SLU (& QAK) */
+    /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
+    /* Both string and VL string have character set */
+    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING ==
+        dt->u.vlen.type))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "operation not defined for data type class");
     }
     
     /* Commit */
-    dt->u.atomic.u.s.pad = strpad;
+    if(H5T_STRING == dt->type)
+        dt->u.atomic.u.s.pad = strpad;
+    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
+        dt->u.vlen.pad = strpad;
+    else
+	HRETURN_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR,
+		      "can't set strpad info");
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -5490,6 +5532,8 @@ H5T_set_size(H5T_t *dt, size_t size)
                 /* Convert string to variable-length datatype */
                 if(size==H5T_VARIABLE) {
                     H5T_t	*base = NULL;		/* base data type */
+                    H5T_cset_t  tmp_cset;		/* Temp. cset info */
+                    H5T_str_t   tmp_strpad;		/* Temp. strpad info */
 
                     /* Get a copy of unsigned char type as the base/parent type */
                     if (NULL==(base=H5I_object(H5T_NATIVE_UCHAR)))
@@ -5505,8 +5549,16 @@ H5T_set_size(H5T_t *dt, size_t size)
                      */
                     dt->force_conv = TRUE;
 
+                    /* Before we mess with the info in the union, extract the values we need */
+                    tmp_cset=dt->u.atomic.u.s.cset;
+                    tmp_strpad=dt->u.atomic.u.s.pad;
+
                     /* This is a string, not a sequence */
                     dt->u.vlen.type = H5T_VLEN_STRING;
+
+		    /* Set character set and padding information */
+		    dt->u.vlen.cset = tmp_cset;
+ 		    dt->u.vlen.pad  = tmp_strpad;
 
                     /* Set up VL information */
                     if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
