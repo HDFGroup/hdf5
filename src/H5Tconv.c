@@ -2829,7 +2829,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(tpath->cdata.need_bkg) {
                 /* Allocate background buffer */
                 bkg_buf_size=src->u.array.nelem*MAX(src->size,dst->size);
-                if ((bkg_buf=H5FL_BLK_MALLOC(array_seq,bkg_buf_size))==NULL)
+                if ((bkg_buf=H5FL_BLK_CALLOC(array_seq,bkg_buf_size))==NULL)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
             } /* end if */
 
