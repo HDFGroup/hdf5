@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-snap6 released on Sun Feb  6 18:54:49 CST 2005
+HDF5 version 1.6.4-snap7 released on Sun Feb 13 18:15:48 CST 2005
 ================================================================================
 
 
@@ -70,6 +70,16 @@ Bug Fixes since HDF5-1.6.3 release
 
     Library
     -------
+        - H5Tget_member_value calls for enum datatype didn't return correct 
+            value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
+            2005/02/08
+        - For variable-length string, H5Tget_class returned H5T_STRING as its
+            class.  But H5Tdetect_class and H5Tget_member_class considered it
+            as H5T_VLEN.  This is fixed to let all these 3 functions treat it
+            as H5T_STRING.  SLU - 2005/02/08
+        - The byte order of all 1-byte integer types was fixed as
+            little-endian even on a big-endian machine.  It's corrected.
+            SLU - 2005/02/07
         - Fix segmentation fault when calling H5Fflush with an attribute that
             hasn't had a value written to it open.  QAK - 2004/10/18
         - Back up supporting bitfield and time types in H5Tget_native_type.  
