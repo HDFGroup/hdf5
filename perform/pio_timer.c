@@ -111,8 +111,11 @@ set_time(pio_time *pt, timer_type t, int start_stop)
                 struct timeval sys_t;
 
                 gettimeofday(&sys_t, NULL);
-                pt->total_time[t] += (double)pt->sys_timer[t].tv_sec +
-                            ((double)pt->sys_timer[t].tv_usec) / MILLISECOND;
+                pt->total_time[t] =
+                    ((double)sys_t.tv_sec +
+                                ((double)sys_t.tv_usec) / MILLISECOND) -
+                    ((double)pt->sys_timer[t].tv_sec +
+                            ((double)pt->sys_timer[t].tv_usec) / MILLISECOND);
             }
         }
     }
