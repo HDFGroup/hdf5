@@ -89,7 +89,7 @@ case "$host_os-$host_cpu" in
             *Pro*|*II*)
                 # This check should be kept in sync with the *-i686 check below
                 case "$cc_vendor-$cc_version" in
-                    gcc-2.95*)
+                    gcc-2.95*|gcc-3*)
                         ARCH=${ARCH:="-march=i686"}
                         ;;
                     gcc-*|egcs-*|pgcc-*)
@@ -102,7 +102,7 @@ case "$host_os-$host_cpu" in
 
     *-i686)
         case "$cc_vendor-$cc_version" in
-            gcc-2.9[56]*)
+            gcc-2.9[56]*|gcc-3*)
                 ARCH=${ARCH:="-march=i686"}
                 ;;
             gcc-*|egcs-*|pgcc-*)
@@ -172,6 +172,13 @@ case "$cc_vendor-$cc_version" in
 
     gcc-2.95.[12])
         # No changes from default GCC flags...
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-3.*)
+	CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
 	# Flags are set
 	cc_flags_set=yes
