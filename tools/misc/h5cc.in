@@ -40,6 +40,7 @@ prog_name="`basename $0`"
 
 allargs=""
 compile_args=""
+libraries=""
 link_args=""
 link_objs=""
 clibpath=""
@@ -154,7 +155,7 @@ for arg in $@ ; do
       do_link="no"
       ;;
     -l*)
-      link_args="$link_args $arg"
+      libraries="$libraries $arg"
       allargs="$allargs $arg"
       ;;
     -prefix=*)
@@ -243,7 +244,18 @@ if test "x$do_link" = "xyes"; then
       shared_link="${flag}${libdir}"
     fi
 
-    link_args="$link_args -L${libdir} -lhdf5"
+    libraries="-lhdf5 $libraries"
+    link_args="$link_args -L${libdir}"
+
+    for l in $libraries; do
+      case "$link_args" in
+        *$l*)
+          ;;
+        *)
+          link_args="$link_args $l"
+          ;;
+      esac
+    done
   else
     link_args="$link_args ${libdir}/libhdf5.a"
   fi
