@@ -85,6 +85,11 @@
 #  define ABS(a)    (((a)>=0) ? (a) : -(a))
 #endif
 
+/* sign of argument */
+#ifndef SIGN
+#  define SIGN(a)    ((a)>0 ? 1 : (a)<0 ? -1 : 0)
+#endif
+
 /* maximum of three values */
 #ifndef MAX3
 #  define MAX3(a,b,c)   MAX(MAX(a,b),c)
