@@ -112,14 +112,14 @@ precision (detected_t *d)
 	     */
 	    for (n=0; n<d->size && d->perm[n]<0; n++) /*void*/;
 	    d->precision = 8*(d->size-n);
-	    d->offset = 8*n;
+	    d->offset = 0;
 	} else if (d->perm[d->size - 1] < 0) {
 	    /*
 	     * Higher addresses are padded.
 	     */
 	    for (n=0; n<d->size && d->perm[d->size-(n+1)]; n++) /*void*/;
 	    d->precision = 8*(d->size-n);
-	    d->offset = 0;
+	    d->offset = 8*n;
 	} else {
 	    /*
 	     * No padding.
@@ -311,7 +311,7 @@ precision (detected_t *d)
 #if defined(H5_HAVE_LONGJMP) && defined(H5_HAVE_SIGNAL)
 #define ALIGNMENT(TYPE,INFO) {						      \
     char		*volatile _buf=NULL;				      \
-    volatile TYPE	_val=0;						      \
+    volatile TYPE	_val=1;						      \
     volatile TYPE	_val2;						      \
     volatile size_t	_ano=0;						      \
     void		(*_handler)(int) = signal(SIGBUS, sigbus_handler);    \
@@ -322,17 +322,20 @@ precision (detected_t *d)
     if (_ano<NELMTS(align_g)) {						      \
 	*((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS or SEGSEGV*/	\
 	_val2 = *((TYPE*)(_buf+align_g[_ano]));	/*possible SIGBUS or SEGSEGV*/	\
-        /* Cray Check: This section helps detect alignment on Cray's */	      \
+	/* Cray Check: This section helps detect alignment on Cray's */	      \
         /*              vector machines (like the SV1) which mask off */      \
-        /*              pointer values when pointing to non-word aligned */   \
-        /*              locations with pointers that are supposed to be */    \
-        /*              word aligned. -QAK */                                 \
-        memset(_buf, 0xff, sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
-        memcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(INFO.precision/8)); \
-        _val2 = *((TYPE*)(_buf+align_g[_ano]));				      \
+	/*              pointer values when pointing to non-word aligned */   \
+	/*              locations with pointers that are supposed to be */    \
+	/*              word aligned. -QAK */                                 \
+	memset(_buf, 0xff, sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
+	if(INFO.perm[0]) /* Big-Endian */				      \
+	    memcpy(_buf+align_g[_ano]+(INFO.size-((INFO.offset+INFO.precision)/8)),((char *)&_val)+(INFO.size-((INFO.offset+INFO.precision)/8)),(INFO.precision/8)); \
+	else /* Little-Endian */					      \
+	    memcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(INFO.precision/8)); \
+	_val2 = *((TYPE*)(_buf+align_g[_ano]));				      \
 	if(_val!=_val2)							      \
 	    longjmp(jbuf_g, 1);						      \
-        /* End Cray Check */						      \
+	/* End Cray Check */						      \
 	(INFO.align)=align_g[_ano];					      \
     } else {								      \
 	(INFO.align)=0;							      \
