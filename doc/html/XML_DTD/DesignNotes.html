@@ -6,18 +6,24 @@
 </head>
 <body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink="#551A8B" alink="#FF0000">
 
+	<p align=right>
+	<font size=-1>
+	Standard HDF5 file XML DTD: 
+	</font>
+	<a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd"><font size=-1 face=courier>HDF5-File.dtd</font></a>
+
 <h2>
 The XML DTD for HDF5:&nbsp; Design Notes</h2>
 April 28, 2000
 <h3>
 <b>1.&nbsp; Introduction</b></h3>
-The XML "Document Type Definition" (DTD) for HDF5 is a markup language
+The XML "Document Type Definition" (DTD) [17] for HDF5 is a markup language
 to describe the contents of an HDF5 file.[<a href="#R1">1</a>]&nbsp; This
 DTD specifies a standard for using XML to describe the structure and contents
 of a <i>single</i> HDF5 file.&nbsp; The DTD can be used in a variety of
 ways, by standard software and by application specific software that builds
 on standard XML features.&nbsp; The DTD will enable descriptions of HDF5
-files to be used with and trasnslated to other similar XML markup languages.
+files to be used with and translated to other similar XML markup languages.
 <p>This document discusses some of the key features of the HDF5 DTD, and
 some of the design decisions that were considered during its development.
 <p>The HDF5 data model is somewhat complex, with a great deal of flexibility
@@ -38,7 +44,7 @@ of XML will guarantee that the description is syntactically correct and
 follows the grammar defined in the DTD.&nbsp; However, XML cannot assure
 that a particular XML description is a correct description of the HDF5
 file, or even that it follows all the semantic rules of HDF5.&nbsp; For
-example, the XML descritpion can assure that every Dataset element belongs
+example, the XML description can assure that every Dataset element belongs
 to at least one enclosing Group element, but can't assure that the Dataset
 is in the correct Group, or that the Dataset has the correct name, type,
 etc.&nbsp; The overall correctness of the XML description must be assured
@@ -113,8 +119,8 @@ of HDF-5</b>
 <p>A third case for using XML is as a tool for validating, comparing, or
 generating HDF-5 files.&nbsp; We have proposed tools for checking, correcting,
 and diff-ing HDF-5 files, which might use XML as a canonical description
-of the file.&nbsp; Similarly, an 'h5gen' utility might well use XML as
-the template to create HDF-5 files.
+of the file.&nbsp; Similarly, an 'h5gen' utility might use XML as the template
+to create HDF-5 files.
 <p>These applications need to be able to represent essentially everything
 about the HDF-5 file.&nbsp; In the case of a validator or diff-er, even
 boot block information is important.
@@ -126,18 +132,18 @@ files have the same contents.
 be in the XML, it is not necessary that the XML representation itself follows
 all of the rules of HDF-5.&nbsp; For instance, it is not required that
 the XML objects are in the same order as the HDF-5 objects (if such can
-even be determined), or that storage offsets in th eHDF5 file are faithfully
+even be determined), or that storage offsets in the HDF5 file are faithfully
 represented in the XML.
 <p><b>2.5&nbsp; Case 5:&nbsp; XML as Intermediate to Other Formal Languages
 and File Formats</b>
 <p>XML is ideally suited for automatic transformation into various formal
 languages, either directly or via additional XML languages.&nbsp; For example,
-an XML description of an HDF5 file could be transformed into ODL.[citataion?]&nbsp;
-Similarly, XML can be transformed to other XML languages, such as XDF[7].
+an XML description of an HDF5 file could be transformed into ODL.[<a href="#R13">13</a>]&nbsp;
+Similarly, XML can be transformed to other XML languages, such as XDF[<a href="#R7">7</a>].
 <p>XML may also be a good intermediate language for translating between
 file formats.&nbsp; For example, the XML description of HDF5 could be transformed
 into the XML description for netCDF, and then the data could be written
-as netCDF.
+as netCDF[ <a href="#R8">8</a>].
 <p>It is likely that there will be "hub" languages, such as XDF, that are
 very general languages for data.&nbsp; Translating from HDF5-XML to XDF
 will lose information, but will then make the data translatable to any
@@ -148,11 +154,11 @@ with some loss of information.
 to transform or translate individual objects from a file.&nbsp; For example,
 an HDF5 file might contain several datasets, one of which can be mapped
 to an OGIS gridded map.&nbsp; In this case, software could read the XML,
-locate the datasets that can be handled, and translate them to OGIS XML
-or other OGIS representations.&nbsp; In this way, similar kinds of data
-can be made to work together regardless of storage format, and without
-requiring that the entire file be limited to a particular kind or format
-of data.&nbsp; This would be a very powerful tool for sharing data.
+locate the datasets that can be handled, and translate them to OGIS GML.[<a href="#R16">16</a>]&nbsp;
+In this way, similar kinds of data can be made to work together regardless
+of storage format, and without requiring that the entire file be limited
+to a particular kind or format of data.&nbsp; This would be a very powerful
+tool for sharing data.
 <p><b>2.6&nbsp; Case 6:&nbsp; Store XML in Archive or in Dataset as Machine
 Readable Documentation</b>
 <p>The XML description of an HDF5 file is a promising candidate to be a&nbsp;
@@ -170,7 +176,7 @@ of contents.
 HDF5 files.&nbsp; For example, the skeleton of a data product could be
 defined in XML, and read by software to produce the file and then fill
 in the specific values.&nbsp; This is a very useful tool for standardization.&nbsp;
-This is very similar to how the HCR tools for HDF-EOS worked.[citation]
+This is very similar to how the HCR tools for HDF-EOS worked.[<a href="#R12">12</a>]
 <p>It might also be possible to have XML templates for parts of HDF5 files,
 which can be composed to form datasets.&nbsp; For instance, there could
 be a library of XML templates for storing gridded data of various kinds,
@@ -179,7 +185,7 @@ the data.&nbsp; A user could compose a data product by selecting appropriate
 templates to construct the dataset.&nbsp; This could also provide code
 modules to create and read the dataset.
 <p><b>2.8&nbsp; Implications</b>
-<p>These different use cases for XML require different (and sometmes conflicting)
+<p>These different use cases for XML require different (and sometimes conflicting)
 information in the XML.&nbsp; For instance, an XML catalog record is intended
 to be a description of the dataset and its location.&nbsp; This record
 should be compact, and should have all the attributes, and a pointer to
@@ -194,10 +200,10 @@ the data values themselves--or both.
 <b>3.&nbsp; Main Components of the HDF5 DTD</b></h3>
 The HDF5 DTD is intended to describe the structure and contents of an HDF5
 file.&nbsp; For the most part, the DTD closely follows the HDF5 data model,
-as described in [<a href="#R4">4</a>] and [2].&nbsp; THe HDF5 data model
-defines the shape and data types of datasets and attributes.&nbsp; These
-descriptions are similar to other general descriptions of scientific data
-[ <a href="#R5">5</a>, <a href="#R6">6</a>, <a href="#R7">7</a>, <a href="#R8">8</a>,
+as described in [<a href="#R2">2</a>, <a href="#R3">3</a>, <a href="#R4">4</a>].&nbsp;
+THe HDF5 data model defines the shape and data types of datasets and attributes.&nbsp;
+These descriptions are similar to other general descriptions of scientific
+data [ <a href="#R5">5</a>, <a href="#R6">6</a>, <a href="#R7">7</a>, <a href="#R8">8</a>,
 <a href="#R11">11</a>],
 although HDF5 is more general than some these.&nbsp; The description of
 the HDF5 objects is discussed in Section 3.1.
@@ -218,7 +224,7 @@ there is no current standard to follow, so we were guided by the best practices
 we could find.&nbsp; Still, this is an area where our DTD must evolve in
 the future.&nbsp; These issues are discussed in Section 3.4.
 <p>Finally, the DTD needs to support the ability to describe an HDF5 file
-in detail.&nbsp; This desribe must be able to include storage properties,
+in detail.&nbsp; This description must be able to include storage properties,
 compression properties, and the like.&nbsp; The DTD defines optional elements
 for this information.&nbsp; These are described in Section 3.4.
 <p><b>3.1&nbsp; Description of Datasets (Dataspace and Datatypes, and Attributes)</b>
@@ -235,6 +241,10 @@ this in XML was easy, if somewhat elaborate.&nbsp; It should be noted that
 we made some seemingly arbitrary decisions about how to express the attributes
 of a datatype:&nbsp; sometimes an XML element is used and sometimes an
 XML attribute is used.
+<p>One point ot note is that the XML describes the structure and properties
+of the HDF5 objects, not XML elements.&nbsp; The <tt>&lt;Datatype></tt>
+and <tt>&lt;Dataspace> </tt>elements describe the data in the HDF5 file,
+not the layout of the data in the XML file.
 <p><b>3.2&nbsp; Description of the Structure (Groups)</b>
 <p>An HDF5 file is a rooted directed graph, with at least one Group, "/".&nbsp;
 Some files are very simple, containing a few datasets, all in the root
@@ -253,22 +263,22 @@ HDF5 objects and XML elements/objects.&nbsp; It is clear that XML is general
 enough to describe almost any structure.&nbsp; For example, the "Resource
 Description Framework" (RDF) can represent complex semantic networks.[<a href="#R10">10</a>]&nbsp;
 So the issue is not a lack of expressive power in XML.
-<p>The issue here is that standard XML software, e.g., SAX parsers and
-the DOM, naturally create objects (data structures) which correspond to
-the elements of the XML description.&nbsp; To the degree that the objects
-of HDF5 can be mapped to elements of XML, then general purpose XML-based
-software will be presented with an approximation of the semantics of the
-HDF5 objects, simply from the XML itself.&nbsp; In other words, the HDF5
-objects are mapped naturally to XML elements, and general purpose XML tools
-will approximately understand the structure of the HDF5.
+<p>The issue here is that standard XML software, e.g., SAX parsers [<a href="#R14">14</a>]
+and the DOM [<a href="#R15">15</a>], naturally create objects (data structures)
+which correspond to the elements of the XML description.&nbsp; To the degree
+that the objects of HDF5 can be mapped to elements of XML, then general
+purpose XML-based software will be presented with an approximation of the
+semantics of the HDF5 objects, simply from the XML itself.&nbsp; In other
+words, the HDF5 objects are mapped naturally to XML elements, and general
+purpose XML tools will approximately understand the structure of the HDF5.
 <p>In this approach, the difficult problem is how to represent group membership.&nbsp;
 For a simple HDF5 file in which the objects are structured as a tree, then
-the objects can be represetned as elements, and members of a group can
+the objects can be represented as elements, and members of a group can
 be nested in a <tt>&lt;Group></tt> element.&nbsp; The XML nesting directly
 expresses the HDF5 membership in a natural way.&nbsp; But what should be
 done to represent a more general graph, e.g., where a dataset is a member
-of two dfferent groups?
-<p>One possibility is to represent the struture of the file in a general
+of two different groups?
+<p>One possibility is to represent the structure of the file in a general
 set notation, with a set of nodes (vertices) and a set of arcs (edges).&nbsp;
 Each dataset and group is a "node", and the membership is represented as
 "arcs".&nbsp; There are many variants of this basic approach, and it is
@@ -284,9 +294,11 @@ the same object.&nbsp; This hybrid approach has the advantage that in simple
 cases the structure of the XML closely follows the structure of the HDF5
 file, while capturing the complex cases when needed.
 <p>After considering each alternative in detail, a hybrid approach was
-chosen.&nbsp;&nbsp; For HDF5 objects that may be shared (Groups, Datasets,
-Named Datatypes) the XML element is defined to be either a description
-of the object or a "pointer" to an element that describes the object.&nbsp;
+chosen.&nbsp;&nbsp; For HDF5 objects that may be shared (<i>Groups</i>,
+<i>Datasets</i>,
+<i>Named
+Datatypes</i>) the XML element is defined to be either a description of
+the object or a "pointer" to an element that describes the object.&nbsp;
 A shared object should be described in exactly one element, and all other
 instances should point to that element.
 <p>It should be noted that the XML parser can verify that the "pointer"
@@ -350,7 +362,7 @@ specified.
 file for the first release.&nbsp; The initial version of the DTD has a
 limited <tt>&lt;Data> </tt>element, which does not support all the desired
 features.&nbsp; This will be revised in a future release.
-<p>3.4&nbsp; File Format Details
+<p><b>3.4&nbsp; File Format Details</b>
 <p>The DTD must be able to support applications that need to fully describe
 the details of a specific HDF5 file.&nbsp; For example, in order to verify
 the correctness of a specific dataset in an archive, it may be necessary
@@ -360,7 +372,7 @@ well as the structure, attributes, and data values.
 <ul>
 <li>
 <tt>&lt;UserBlock></tt> and <tt>&lt;BootBlock> </tt>(sic), which are described
-in the HDF5 specification [citation]</li>
+in the HDF5 specification [<a href="#R3">3</a>]</li>
 
 <li>
 <tt>&lt;StorageLayout></tt>, which describes the organization of a dataset
@@ -383,6 +395,9 @@ These elements are only partly defined in the first release of the DTD.
 <a NAME="R2"></a>DDL in BNF for HDF5</li>
 
 <br><a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/ddl.html">http://hdf.ncsa.uiuc.edu/HDF5/doc/ddl.html</a>
+<li>
+<a NAME="R3"></a>HDF5 File Format Specification,&nbsp; <a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/H5format.html">http://hdf.ncsa.uiuc.edu/HDF5/doc/H5format.html</a></li>
+
 <li>
 <a NAME="R4"></a>HDF5 Abstract Data Model</li>
 
@@ -413,7 +428,27 @@ These elements are only partly defined in the first release of the DTD.
 <li>
 <a NAME="R11"></a>Scientific Data Management (SDM)</li>
 
-<br><a href="http://www-xdiv.lanl.gov/XCI/PROJECTS/SDM">http://www-xdiv.lanl.gov/XCI/PROJECTS/SDM</a></ol>
+<br><a href="http://www-xdiv.lanl.gov/XCI/PROJECTS/SDM">http://www-xdiv.lanl.gov/XCI/PROJECTS/SDM</a>
+<li>
+<a NAME="R12"></a>HCR:&nbsp; HDF Configuration Record, <a href="http://ulabibm.gsfc.nasa.gov/hdfeos/hcr.html">http://ulabibm.gsfc.nasa.gov/hdfeos/hcr.html</a></li>
+
+<li>
+<a NAME="R13"></a>Planetary Data System, "StdRef Chapter 12:&nbsp; Object
+Definition Language (ODL) Specification and Usage", <a href="http://pds.jpl.nasa.gov/stdref/chap12.htm">http://pds.jpl.nasa.gov/stdref/chap12.htm</a></li>
+
+<li>
+<a NAME="R14"></a>SAX 1.0:&nbsp; The Simple API for XML, 
+<a href="http://www.megginson.com/sAX/index.html">http://www.megginson.com/sAX/index.html</a></li>
+
+<li>
+<a NAME="R15"></a> Document Object Model (DOM), <a href="http://www.w3.org/DOM/">http://www.w3.org/DOM/</a></li>
+
+<li>
+<a NAME="R16"></a> OpenGIS, <a href="http://opengis.org/">http://opengis.org/</a></li>
+
+<li>
+<a NAME="R17"></a>XML, <a href="http://www.w3.org/XML">http://www.w3.org/XML</a></li>
+</ol>
 
 </body>
 </html>
