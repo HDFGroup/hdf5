@@ -18,6 +18,11 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#define TEST_FILE_BE "test_table_be.hdf5"
+#define TEST_FILE_LE "test_table_le.hdf5"
+#define TEST_FILE_CRAY "test_table_cray.hdf5"
+
+
 /*-------------------------------------------------------------------------
  * Table API test
  *
@@ -1446,11 +1451,7 @@ int main(void)
 {
  hid_t    fid;  /* identifier for the file */
  unsigned flags=H5F_ACC_RDONLY;
-	char     *srcdir = getenv("srcdir"); /* the source directory */
-	char     data_file[512]="";          /* buffer to hold name of existing data file */
-
-
-
+	
 /*-------------------------------------------------------------------------
  * test1: create a file for the write/read test
  *-------------------------------------------------------------------------
@@ -1474,15 +1475,7 @@ int main(void)
  */  
  puts("Testing table with file open mode (read big-endian data):");
 
-	/* compose the name of the file to open, using the srcdir, if appropriate */
-	if ( srcdir )
-	{
-	 strcpy(data_file, srcdir);
-	 strcat(data_file, "/");
- }
-	strcat( data_file, "test_table_be.hdf5");
-
- fid=h5file_open(data_file,flags);
+ fid=h5file_open(TEST_FILE_BE,flags);
 
  /* test, do not write */
  if (test_table(fid,0)<0)
@@ -1497,15 +1490,7 @@ int main(void)
  */
  puts("Testing table with file open mode (read little-endian data):");
 
-	/* compose the name of the file to open, using the srcdir, if appropriate */
-	if ( srcdir )
-	{
-	 strcpy(data_file, srcdir);
-	 strcat(data_file, "/");
- }
-	strcat( data_file, "test_table_le.hdf5");
-
- fid=h5file_open(data_file,flags);
+ fid=h5file_open(TEST_FILE_LE,flags);
 
  /* test, do not write */
  if (test_table(fid,0)<0)
@@ -1520,15 +1505,7 @@ int main(void)
  */
  puts("Testing table with file open mode (read Cray data):");
 
-	/* compose the name of the file to open, using the srcdir, if appropriate */
-	if ( srcdir )
-	{
-	 strcpy(data_file, srcdir);
-	 strcat(data_file, "/");
- }
-	strcat( data_file, "test_table_cray.hdf5");
-
- fid=h5file_open(data_file,flags);
+ fid=h5file_open(TEST_FILE_CRAY,flags);
 
  /* test, do not write */
  if (test_table(fid,0)<0)
