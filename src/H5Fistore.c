@@ -150,10 +150,10 @@ typedef struct H5F_istore_key_t {
 } H5F_istore_key_t;
 
 typedef struct H5F_istore_ud1_t {
-    H5F_istore_key_t	key;	/*key values		*/
+    H5F_istore_key_t	key;	                /*key values		*/
     haddr_t		addr;			/*file address of chunk */
-    H5O_layout_t	mesg;		/*layout message	*/
-    hsize_t		total_storage;	/*output from iterator	*/
+    H5O_layout_t	mesg;		        /*layout message	*/
+    hsize_t		total_storage;	        /*output from iterator	*/
     FILE		*stream;		/*debug output stream	*/
 } H5F_istore_ud1_t;
 
