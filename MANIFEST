@@ -28,6 +28,7 @@
 ./bin/config_para_ibm_sp.sh 
 ./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/dependencies
+./bin/deploy
 ./bin/distdep
 ./bin/errors			        _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
