@@ -68,6 +68,7 @@ New Features
         - Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
             respectively if library is built in parallel mode.
             WCW - 2003/11/04
+        - Added metadata benchmark (perform/perf_meta).  SLU - 2003/10/03
         - Changed output of "OID"s from h5dump from "<number>-<number>" to
             "<number".  This affects both the "regular" and XML output.
             QAK - 2003/08/08
