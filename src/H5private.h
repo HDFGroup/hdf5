@@ -921,6 +921,9 @@ __DLL__ void H5_trace(hbool_t returning, const char *func, const char *type,
 /* Is `S' the name of an API function? */
 #define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
 
+/* global library version information string */
+extern char	H5_lib_vers_info_g[];
+
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
 
