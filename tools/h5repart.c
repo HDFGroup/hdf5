@@ -19,8 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-
+#endif
 #define FALSE	0
 #define TRUE	1
 #define NAMELEN	4096
