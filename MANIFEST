@@ -952,8 +952,6 @@
 ./src/H5Tpublic.h
 ./src/H5Tstrpad.c
 ./src/H5Tvlen.c
-./src/H5TB.c
-./src/H5TBprivate.h
 ./src/H5TS.c
 ./src/H5TSprivate.h
 ./src/H5V.c
@@ -1058,7 +1056,6 @@
 ./test/trefstr.c
 ./test/tselect.c
 ./test/tskiplist.c
-./test/ttbbt.c
 ./test/ttst.c
 ./test/ttsafe.c
 ./test/ttsafe.h

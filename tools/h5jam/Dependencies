@@ -40,6 +40,9 @@ h5jam.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/tools/lib/h5tools_utils.h
 h5unjam.lo: \
    $(top_srcdir)/tools/h5jam/h5unjam.c \
@@ -80,4 +83,7 @@ h5unjam.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/tools/lib/h5tools_utils.h

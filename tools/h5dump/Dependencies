@@ -89,4 +89,5 @@ h5dumpgentest.lo: \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
-   $(top_srcdir)/src/H5FSprivate.h
+   $(top_srcdir)/src/H5FSprivate.h \
+   $(top_srcdir)/tools/lib/h5tools.h

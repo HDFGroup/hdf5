@@ -1,14 +1,14 @@
 ## This file is machine generated on GNU systems.
 ## Only temporary changes may be made here.
 
-H5IM.lo: \
-   $(srcdir)/H5IM.c \
-   $(srcdir)/H5IM.h \
-   $(srcdir)/H5LT.h
 H5LT.lo: \
-   $(srcdir)/H5LT.c \
-   $(srcdir)/H5LT.h
-H5TB.lo: \
-   $(srcdir)/H5TB.c \
-   $(srcdir)/H5TB.h \
-   $(srcdir)/H5LT.h
+   $(top_srcdir)/hl/src/H5LT.c \
+   $(top_srcdir)/hl/src/H5LT.h
+H5TA.lo: \
+   $(top_srcdir)/hl/src/H5TA.c \
+   $(top_srcdir)/hl/src/H5TA.h \
+   $(top_srcdir)/hl/src/H5LT.h
+H5IM.lo: \
+   $(top_srcdir)/hl/src/H5IM.c \
+   $(top_srcdir)/hl/src/H5IM.h \
+   $(top_srcdir)/hl/src/H5LT.h

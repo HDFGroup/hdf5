@@ -46,7 +46,7 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dcontig.c H5Dcompact.c H5Defl.c \
         H5Tbit.c                                                              \
         H5Tcommit.c H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c   \
         H5Tfixed.c H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Topaque.c   \
-        H5Torder.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TB.c H5TS.c   \
+        H5Torder.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c          \
         H5V.c H5Z.c H5Zdeflate.c H5Zfletcher32.c H5Zshuffle.c H5Zszip.c       \
         H5Znbit.c H5Ztrans.c
 
@@ -73,7 +73,7 @@ PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h      \
         H5HGpkg.h H5HLprivate.h H5HLpkg.h H5HPprivate.h H5Iprivate.h          \
         H5MFprivate.h H5MMprivate.h H5Oprivate.h H5Opkg.h H5Pprivate.h        \
         H5Ppkg.h H5Rprivate.h H5RCprivate.h H5RSprivate.h H5Sprivate.h        \
-        H5SLprivate.h H5STprivate.h H5Tprivate.h H5TBprivate.h H5Tpkg.h       \
+        H5SLprivate.h H5STprivate.h H5Tprivate.h H5Tpkg.h                     \
 	H5TSprivate.h H5Vprivate.h H5Zprivate.h H5Zpkg.h H5config.h
 
 ## Error header generation

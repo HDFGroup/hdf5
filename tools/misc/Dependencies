@@ -44,7 +44,7 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Fpkg.h \
    $(top_srcdir)/src/H5FOprivate.h \
-   $(top_srcdir)/src/H5TBprivate.h \
+   $(top_srcdir)/src/H5SLprivate.h \
    $(top_srcdir)/src/H5HLprivate.h \
    $(top_srcdir)/src/H5HLpublic.h \
    $(top_srcdir)/src/H5Iprivate.h \
