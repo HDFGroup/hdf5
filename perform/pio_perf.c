@@ -67,10 +67,14 @@
 /* useful macros */
 #define TAB_SPACE           4
 
-#define ONE_GB              1073741824UL
+#define ONE_KB              1024
+#define ONE_MB              (ONE_KB * ONE_KB)
+#define ONE_GB              (ONE_MB * ONE_KB)
 
-#define MIN_HDF5_BUF_SIZE   (1024 * 1024 * 8)
-#define MAX_HDF5_BUF_SIZE   (MIN_HDF5_BUF_SIZE * 4)
+#define MB_PER_SEC(bytes,t) (((bytes) / ONE_MB) / t)
+
+#define MIN_HDF5_BUF_SIZE   (ONE_MB >> 1)
+#define MAX_HDF5_BUF_SIZE   (ONE_GB / 2)
 
 /* local variables */
 static const char  *progname = "pio_perf";
@@ -241,13 +245,9 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
 
                 print_indent(output, TAB_SPACE * 3);
                 fprintf(output, "Write Results = %f MB/s\n",
-                        /* WRONG */
-                        (parms.num_dsets * parms.num_elmts * sizeof(int)) /
-                        get_time(res.timers, HDF5_WRITE_FIXED_DIMS));
+                        MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
+                                   get_time(res.timers, HDF5_WRITE_FIXED_DIMS)));
 
-                /* get back ``result'' object and report */
-                /* (res.ret_code == SUCCESS); */
-                /* (res.timers); */
                 pio_time_destroy(res.timers);
             }
         }
@@ -325,8 +325,9 @@ parse_command_line(int argc, char *argv[])
             exit(EXIT_SUCCESS);
         case '?':
         default:
-            usage(progname);
-            exit(EXIT_FAILURE);
+            /* there could be other command line options, such as MPI stuff 
+             * that gets passed to our program, for some reason */
+            break;
         }
     }
 

@@ -125,7 +125,7 @@ static char  *pio_create_filename(iotype iot, const char *base_name,
                                   char *fullname, size_t size);
 static herr_t do_write(file_descr fd, iotype iot, long ndsets,
                        long nelmts, hid_t h5dset_space_id, char *buffer);
-static herr_t do_fopen(iotype iot, char *fname, file_descr fd /*out*/,
+static herr_t do_fopen(iotype iot, char *fname, file_descr *fd /*out*/,
                        int flags, MPI_Comm comm);
 static herr_t do_fclose(iotype iot, file_descr fd);
 
@@ -260,7 +260,7 @@ do_pio(parameters param)
         pio_create_filename(iot, base_name, fname, sizeof(fname));
 
         set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
-        rc = do_fopen(iot, fname, fd, PIO_CREATE | PIO_WRITE, comm);
+        rc = do_fopen(iot, fname, &fd, PIO_CREATE | PIO_WRITE, comm);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
         VRFY((rc == SUCCESS), "do_fopen failed");
@@ -278,8 +278,9 @@ do_pio(parameters param)
 
         VRFY((rc == SUCCESS), "do_fclose failed");
 
+#if 0
         /* Open file for read */
-        hrc = do_fopen(iot, fname, fd, PIO_READ, comm);
+        hrc = do_fopen(iot, fname, &fd, PIO_READ, comm);
         VRFY((rc == SUCCESS), "do_fopen failed");
 
         /* Calculate dataset offset within a file */
@@ -299,6 +300,7 @@ do_pio(parameters param)
         /* Close file for read */
         rc = do_fclose(iot, fd);
         VRFY((rc == SUCCESS), "do_fclose failed");
+#endif  /* 0 */
         remove(fname);
     }
 
@@ -326,9 +328,6 @@ done:
             h5mem_space_id = -1;
         }
     }
-
-    /* close any opened files */
-    rc = do_fclose(iot, fd);
 
     /* release generic resources */
     free(buffer);
@@ -559,8 +558,8 @@ done:
  * Modifications:
  */
 static herr_t
-do_fopen(iotype iot, char *fname, file_descr fd /*out*/, int flags,
-    MPI_Comm comm)
+do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags,
+         MPI_Comm comm)
 {
     int ret_code = SUCCESS, mrc;
     herr_t hrc;
@@ -569,12 +568,12 @@ do_fopen(iotype iot, char *fname, file_descr fd /*out*/, int flags,
     switch (iot) {
     case RAW:
         if ((flags | PIO_CREATE) || (flags | PIO_WRITE)) {
-            fd.rawfd = RAWCREATE(fname);
+            fd->rawfd = RAWCREATE(fname);
         } else {
-            fd.rawfd = RAWOPEN(fname, O_RDONLY);
+            fd->rawfd = RAWOPEN(fname, O_RDONLY);
         }
 
-        if (fd.rawfd < 0 ) {
+        if (fd->rawfd < 0 ) {
             fprintf(stderr, "Raw File Open failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
@@ -584,10 +583,10 @@ do_fopen(iotype iot, char *fname, file_descr fd /*out*/, int flags,
     case MPIO:
         if ((flags | PIO_CREATE) || (flags | PIO_WRITE)) {
             mrc = MPI_File_open(comm, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
-                                MPI_INFO_NULL, &fd.mpifd);
+                                MPI_INFO_NULL, &fd->mpifd);
         } else {
             mrc = MPI_File_open(comm, fname, MPI_MODE_RDONLY,
-                                MPI_INFO_NULL, &fd.mpifd);
+                                MPI_INFO_NULL, &fd->mpifd);
         }
 
         if (mrc != MPI_SUCCESS) {
@@ -614,14 +613,14 @@ do_fopen(iotype iot, char *fname, file_descr fd /*out*/, int flags,
 
         /* create the parallel file */
         if ((flags | PIO_CREATE) || (flags | PIO_WRITE)) {
-            fd.h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
+            fd->h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
         } else {
-            fd.h5fd = H5Fopen(fname, H5P_DEFAULT, acc_tpl);
+            fd->h5fd = H5Fopen(fname, H5P_DEFAULT, acc_tpl);
         }
 
         hrc = H5Pclose(acc_tpl);
 
-        if (fd.h5fd < 0) {
+        if (fd->h5fd < 0) {
             fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
